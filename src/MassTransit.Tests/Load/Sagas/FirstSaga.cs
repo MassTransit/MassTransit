@@ -52,12 +52,12 @@ namespace MassTransit.Tests.Load.Sagas
 
 			Initially(
 				When(CommandReceived)
-					.Publish((saga, message) => new FirstPending(saga.CorrelationId))
+					.RespondWith((saga, message) => new FirstPending(saga.CorrelationId))
 					.TransitionTo(Pending));
 
 			During(Pending,
 				When(PendingReceived)
-					.Publish((saga, message) => new FirstResponse(saga.CorrelationId))
+					.RespondWith((saga, message) => new FirstResponse(saga.CorrelationId))
 					.Complete());
 		}
 	}

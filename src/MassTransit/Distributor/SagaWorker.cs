@@ -163,7 +163,7 @@ namespace MassTransit.Distributor
 			if (message.PendingLimit >= 0)
 				_pendingLimit = message.PendingLimit;
 
-			PublishWorkerAvailability();
+			ScheduleUpdate();
 		}
 
 		private void ScheduleUpdate()

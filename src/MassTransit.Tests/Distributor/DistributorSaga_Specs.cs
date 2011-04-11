@@ -12,13 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Distributor
 {
-	using System.Diagnostics;
+	using System.Linq;
 	using Load;
 	using Load.Messages;
-	using Load.Sagas;
+	using Magnum.Extensions;
 	using MassTransit.Distributor.Messages;
 	using MassTransit.Pipeline.Inspectors;
 	using NUnit.Framework;
+	using Stact;
 	using TestFramework;
 	using MassTransit.Distributor;
 
@@ -73,7 +74,7 @@ namespace MassTransit.Tests.Distributor
 		{
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
 
-			generator.Run(RemoteBus, 100, x => new FirstCommand(x));
+			generator.Run(RemoteBus, RemoteBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
 		}
 
 		[Test, Explicit]
@@ -82,7 +83,51 @@ namespace MassTransit.Tests.Distributor
 			PipelineViewer.Trace(LocalBus.InboundPipeline);
 			PipelineViewer.Trace(LocalBus.ControlBus.InboundPipeline);
 			PipelineViewer.Trace(RemoteBus.InboundPipeline);
+			PipelineViewer.Trace(RemoteBus.OutboundPipeline);
 			PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);
+		}
+	}
+
+	[TestFixture]
+	public class Using_multiple_distributors_with_the_same_worker_pool :
+		LoopbackMultipleDistributorSagaTestFixture
+	{
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
+
+			AddInstance("A", "loopback://localhost/a", 
+				builder => builder.Add(FirstSagaRepository),
+				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
+			
+			AddInstance("B", "loopback://localhost/b", 
+				builder => builder.Add(FirstSagaRepository),
+				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
+			
+			AddInstance("C", "loopback://localhost/c", 
+				builder => builder.Add(FirstSagaRepository),
+				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
+		}
+
+		[Test, Explicit]
+		public void Using_the_load_generator_should_share_the_load()
+		{
+			Fiber thread1 = new ThreadFiber();
+			thread1.Add(() =>
+				{
+					var generator1 = new LoadGenerator<FirstCommand, FirstResponse>();
+					generator1.Run(RemoteBus, RemoteBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
+				});
+
+			Fiber thread2 = new ThreadFiber();
+			thread2.Add(() =>
+				{
+					var generator2 = new LoadGenerator<FirstCommand, FirstResponse>();
+					generator2.Run(LocalBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
+				});
+
+			thread1.Shutdown(3.Minutes());
+			thread2.Shutdown(3.Minutes());
 		}
 	}
 }

@@ -170,7 +170,7 @@ namespace MassTransit.Distributor
 			if (message.PendingLimit >= 0)
 				_pendingLimit = message.PendingLimit;
 
-			PublishWorkerAvailability();
+			ScheduleUpdate();
 		}
 
 		private void ScheduleWakeUp()
@@ -196,7 +196,13 @@ namespace MassTransit.Distributor
 			if (!_updatePending)
 			{
 				_updatePending = true;
-				_fiber.Add(PublishWorkerAvailability);
+				try
+				{
+					_fiber.Add(PublishWorkerAvailability);
+				}
+				catch
+				{
+				}
 			}
 		}
 
@@ -204,9 +210,11 @@ namespace MassTransit.Distributor
 		{
 			try
 			{
+				var message = new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit,
+					_pendingMessages.PendingMessageCount(), _pendingLimit);
 				_updatePending = false;
 
-				_bus.Publish(new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pendingMessages.PendingMessageCount(), _pendingLimit));
+				_bus.Publish(message);
 			}
 			catch
 			{

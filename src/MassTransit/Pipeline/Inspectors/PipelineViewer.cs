@@ -60,7 +60,7 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage, TBatchId>(BatchMessageRouter<TMessage, TBatchId> element)
 			where TMessage : class, BatchedBy<TBatchId>
 		{
-			Append(string.Format("Batch Routed ({0})", typeof (TMessage).Name));
+			Append(string.Format("Batch Routed ({0})", typeof (TMessage).ToFriendlyName()));
 
 			return true;
 		}
@@ -68,14 +68,14 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage, TBatchId>(BatchCombiner<TMessage, TBatchId> element)
 			where TMessage : class, BatchedBy<TBatchId>
 		{
-			Append(string.Format("Batch Combiner ({0}) [{1}]", typeof (TMessage).Name, element.BatchId));
+			Append(string.Format("Batch Combiner ({0}) [{1}]", typeof (TMessage).ToFriendlyName(), element.BatchId));
 
 			return true;
 		}
 
 		public bool Inspect<TMessage>(MessageFilter<TMessage> element) where TMessage : class
 		{
-			Append(string.Format("Filtered '{0}' ({1})", element.Description, typeof (TMessage).Name));
+			Append(string.Format("Filtered '{0}' ({1})", element.Description, typeof (TMessage).ToFriendlyName()));
 
 			return true;
 		}
@@ -89,14 +89,14 @@ namespace MassTransit.Pipeline.Inspectors
 
 		public bool Inspect<TMessage>(InstanceMessageSink<TMessage> sink) where TMessage : class
 		{
-			Append(string.Format("Consumed by Instance ({0})", typeof (TMessage).Name));
+			Append(string.Format("Consumed by Instance ({0})", typeof (TMessage).ToFriendlyName()));
 
 			return true;
 		}
 
 		public bool Inspect<TMessage>(DistributorMessageSink<TMessage> sink) where TMessage : class
 		{
-			Append(string.Format("Distributor ({0})", typeof (TMessage).Name));
+			Append(string.Format("Distributor ({0})", typeof (TMessage).ToFriendlyName()));
 
 			return true;
 		}
@@ -104,7 +104,7 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TSaga, TMessage>(SagaWorkerMessageSink<TSaga, TMessage> sink) where TMessage : class
 			where TSaga : SagaStateMachine<TSaga>, ISaga
 		{
-			Append(string.Format("Saga Distributor Worker ({0} - {1})", typeof(TSaga).Name, typeof (TMessage).Name));
+			Append(string.Format("Saga Distributor Worker ({0} - {1})", typeof(TSaga).ToFriendlyName(), typeof (TMessage).ToFriendlyName()));
 
 			return true;
 		}
@@ -113,21 +113,21 @@ namespace MassTransit.Pipeline.Inspectors
 		{
 			Type messageType = typeof (TMessage).GetGenericArguments().First();
 
-			Append(string.Format("Distributor Worker ({0})", messageType.Name));
+			Append(string.Format("Distributor Worker ({0})", messageType.ToFriendlyName()));
 
 			return true;
 		}
 
 		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink) where TMessage : class
 		{
-			Append(string.Format("Send {0} to Endpoint {1}", typeof (TMessage).Name, sink.Address));
+			Append(string.Format("Send {0} to Endpoint {1}", typeof (TMessage).ToFriendlyName(), sink.Address));
 
 			return true;
 		}
 
 		public bool Inspect<TMessage>(IPipelineSink<TMessage> sink) where TMessage : class
 		{
-			Append(string.Format("Unknown Message Sink {0} ({1})", sink.GetType(), typeof (TMessage).Name));
+			Append(string.Format("Unknown Message Sink {0} ({1})", sink.GetType().ToFriendlyName(), typeof (TMessage).ToFriendlyName()));
 
 			return true;
 		}
@@ -135,7 +135,7 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage, TKey>(CorrelatedMessageRouter<TMessage, TKey> sink)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
-			Append(string.Format("Correlated by {1} ({0})", typeof (TMessage).Name, typeof (TKey).Name));
+			Append(string.Format("Correlated by {1} ({0})", typeof (TMessage).ToFriendlyName(), typeof (TKey).ToFriendlyName()));
 
 			return true;
 		}
@@ -155,9 +155,9 @@ namespace MassTransit.Pipeline.Inspectors
 		{
 			Type componentType = typeof (TComponent);
 
-			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
+			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().ToFriendlyName() : componentType.ToFriendlyName();
 
-			Append(string.Format("Consumed by Component {0} ({1})", componentName, typeof (TMessage).Name));
+			Append(string.Format("Consumed by Component {0} ({1})", componentName, typeof (TMessage).ToFriendlyName()));
 
 			return true;
 		}
@@ -172,7 +172,7 @@ namespace MassTransit.Pipeline.Inspectors
 
 			string policyDescription = GetPolicy(sink.Policy);
 
-			Append(string.Format("{0} Saga {1} ({2})", policyDescription, componentName, typeof (TMessage).Name));
+			Append(string.Format("{0} Saga {1} ({2})", policyDescription, componentName, typeof (TMessage).ToFriendlyName()));
 
 			return true;
 		}
@@ -189,7 +189,7 @@ namespace MassTransit.Pipeline.Inspectors
 			else if (policyType == typeof (CreateOrUseExistingSagaPolicy<,>))
 				description = "Initiates New Or Orchestrates Existing";
 			else
-				description = policyType.Name;
+				description = policyType.ToFriendlyName();
 			return description;
 		}
 
@@ -199,12 +199,12 @@ namespace MassTransit.Pipeline.Inspectors
 		{
 			Type componentType = typeof (TComponent);
 
-			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
+			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().ToFriendlyName() : componentType.ToFriendlyName();
 
 			string policyDescription = GetPolicy(sink.Policy);
 			string expression = sink.Selector.ToString();
 
-			Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, componentName, typeof (TMessage).Name, expression));
+			Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, componentName, typeof (TMessage).ToFriendlyName(), expression));
 
 			return true;
 		}
@@ -215,12 +215,12 @@ namespace MassTransit.Pipeline.Inspectors
 		{
 			Type componentType = typeof (TComponent);
 
-			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
+			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().ToFriendlyName() : componentType.ToFriendlyName();
 
 			string policyDescription = GetPolicy(sink.Policy);
 			string expression = sink.Selector.ToString();
 
-			Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, componentName, typeof (TMessage).Name, expression));
+			Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, componentName, typeof (TMessage).ToFriendlyName(), expression));
 
 			return true;
 		}
@@ -231,11 +231,11 @@ namespace MassTransit.Pipeline.Inspectors
 		{
 			Type componentType = typeof (TComponent);
 
-			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
+			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().ToFriendlyName() : componentType.ToFriendlyName();
 
 			string policyDescription = GetPolicy(sink.Policy);
 
-			Append(string.Format("{0} SagaStateMachine {1} ({2})", policyDescription, componentName, typeof (TMessage).Name));
+			Append(string.Format("{0} SagaStateMachine {1} ({2})", policyDescription, componentName, typeof (TMessage).ToFriendlyName()));
 
 			return true;
 		}
@@ -244,14 +244,14 @@ namespace MassTransit.Pipeline.Inspectors
 			where TMessage : class
 			where TComponent : class, Consumes<TMessage>.Selected
 		{
-			Append(string.Format("Conditionally Consumed by Component {0} ({1})", typeof (TComponent).FullName, typeof (TMessage).Name));
+			Append(string.Format("Conditionally Consumed by Component {0} ({1})", typeof (TComponent).ToFriendlyName(), typeof (TMessage).ToFriendlyName()));
 
 			return true;
 		}
 
 		public bool Inspect<TInput, TOutput>(MessageTranslator<TInput, TOutput> translator) where TInput : class where TOutput : class, TInput
 		{
-			Append(string.Format("Translated from {0} to {1}", typeof (TInput).FullName, typeof (TOutput).FullName));
+			Append(string.Format("Translated from {0} to {1}", typeof (TInput).ToFriendlyName(), typeof (TOutput).ToFriendlyName()));
 
 			return true;
 		}

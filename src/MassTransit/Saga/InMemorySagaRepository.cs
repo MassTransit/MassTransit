@@ -29,7 +29,9 @@ namespace MassTransit.Saga
 		public void Send<TMessage>(Expression<Func<TSaga, bool>> filter, ISagaPolicy<TSaga, TMessage> policy, TMessage message, Action<TSaga> consumerAction)
 			where TMessage : class
 		{
-			IEnumerable<TSaga> existingSagas = _collection.Where(filter).ToList();
+			IEnumerable<TSaga> existingSagas;
+			lock (_collection)
+				existingSagas = _collection.Where(filter).ToList();
 
 			if (SendMessageToExistingSagas(existingSagas, policy, consumerAction, message, RemoveSaga))
 				return;
@@ -46,9 +48,7 @@ namespace MassTransit.Saga
 		public IEnumerable<TSaga> Where(Expression<Func<TSaga, bool>> filter)
 		{
 			lock (_collection)
-			{
 				return _collection.Where(filter).ToList();
-			}
 		}
 
 		public void Dispose()
