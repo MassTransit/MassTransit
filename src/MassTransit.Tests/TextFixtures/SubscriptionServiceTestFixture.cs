@@ -58,16 +58,18 @@ namespace MassTransit.Tests.TextFixtures
 
 			SetupSubscriptionService(ObjectBuilder);
 
+			SetupLocalBus();
+
+			SetupRemoteBus();
+
+			Instances = new Dictionary<string, ServiceInstance>();
+		}
+
+		protected void SetupLocalBus()
+		{
 			LocalControlBus = ControlBusConfigurator.New(x =>
 				{
 					x.ReceiveFrom(ClientControlUri);
-
-					x.PurgeBeforeStarting();
-				});
-
-			RemoteControlBus = ControlBusConfigurator.New(x =>
-				{
-					x.ReceiveFrom(ServerControlUri);
 
 					x.PurgeBeforeStarting();
 				});
@@ -85,6 +87,16 @@ namespace MassTransit.Tests.TextFixtures
 
 					ConfigureLocalBus(x);
 				});
+		}
+
+		protected void SetupRemoteBus()
+		{
+			RemoteControlBus = ControlBusConfigurator.New(x =>
+				{
+					x.ReceiveFrom(ServerControlUri);
+
+					x.PurgeBeforeStarting();
+				});
 
 			RemoteBus = ServiceBusConfigurator.New(x =>
 				{
@@ -98,8 +110,6 @@ namespace MassTransit.Tests.TextFixtures
 
 					ConfigureRemoteBus(x);
 				});
-
-			Instances = new Dictionary<string, ServiceInstance>();
 		}
 
 		protected Dictionary<string, ServiceInstance> Instances { get; private set; }
