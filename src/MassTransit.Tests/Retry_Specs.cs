@@ -19,6 +19,7 @@ namespace MassTransit.Tests
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using TextFixtures;
+    using TestFramework;
 
 	[TestFixture]
 	public class When_a_message_consumer_specifies_that_it_should_retry_a_message :
@@ -48,6 +49,8 @@ namespace MassTransit.Tests
 						future.Set(message);
 					}
 				});
+
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			LocalBus.Publish(new PingMessage());
 

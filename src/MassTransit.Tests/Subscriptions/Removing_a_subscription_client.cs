@@ -1,7 +1,7 @@
 namespace MassTransit.Tests.Subscriptions
 {
 	using Magnum;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using TestFramework;
@@ -9,7 +9,7 @@ namespace MassTransit.Tests.Subscriptions
 
 	[TestFixture]
 	public class Removing_a_subscription_client :
-		SubscriptionServiceTestFixture<LoopbackEndpoint>
+		SubscriptionServiceTestFixture<LoopbackTransportFactory>
 	{
 		[Test]
 		public void Should_not_remove_any_existing_subscriptions()
@@ -29,7 +29,7 @@ namespace MassTransit.Tests.Subscriptions
 
 	[TestFixture]
 	public class Removing_a_subscription_client_and_readding_it :
-		SubscriptionServiceTestFixture<LoopbackEndpoint>
+		SubscriptionServiceTestFixture<LoopbackTransportFactory>
 	{
 		[Test]
 		public void Should_remove_any_previous_subscriptions()

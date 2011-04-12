@@ -72,9 +72,13 @@ namespace MassTransit.Tests.Distributor
 		[Test, Explicit]
 		public void Using_the_load_generator_should_share_the_load()
 		{
-			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
+			Fiber thread1 = new ThreadFiber();
+			thread1.Add(() => {
+					var generator1 = new LoadGenerator<FirstCommand, FirstResponse>();
+					generator1.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
+				});
 
-			generator.Run(RemoteBus, RemoteBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
+			thread1.Shutdown(3.Minutes());
 		}
 
 		[Test, Explicit]
@@ -123,7 +127,7 @@ namespace MassTransit.Tests.Distributor
 			thread2.Add(() =>
 				{
 					var generator2 = new LoadGenerator<FirstCommand, FirstResponse>();
-					generator2.Run(LocalBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
+					generator2.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
 				});
 
 			thread1.Shutdown(3.Minutes());

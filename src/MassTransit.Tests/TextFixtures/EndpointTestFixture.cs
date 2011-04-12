@@ -47,7 +47,7 @@ namespace MassTransit.Tests.TextFixtures
 				{
                     x.SetEndpointFactory(EndpointResolver);
 					x.SetObjectBuilder(ObjectBuilder);
-					x.SetReceiveTimeout(200.Milliseconds());
+					x.SetReceiveTimeout(50.Milliseconds());
 					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
 				});
 

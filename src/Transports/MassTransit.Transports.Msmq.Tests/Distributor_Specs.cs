@@ -35,7 +35,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
 
-			generator.Run(RemoteBus, RemoteBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
+			generator.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
 		}
 	}
 }
