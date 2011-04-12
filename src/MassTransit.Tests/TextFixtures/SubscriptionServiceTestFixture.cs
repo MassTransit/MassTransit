@@ -20,12 +20,10 @@ namespace MassTransit.Tests.TextFixtures
 	using MassTransit.Saga;
 	using MassTransit.Services.Subscriptions.Client;
 	using MassTransit.Services.Subscriptions.Configuration;
-	using MassTransit.Services.Subscriptions.Messages;
 	using MassTransit.Services.Subscriptions.Server;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
-	using TestFramework;
 
 	[TestFixture]
 	public class SubscriptionServiceTestFixture<TTransportFactory> :
