@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -31,12 +31,14 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -46,11 +48,11 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\bin\MassTransit.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\MassTransit.XML</DocumentationFile>
     <NoWarn>1587,1591,3008,3001</NoWarn>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -58,19 +60,25 @@
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\log4net.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Magnum, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Magnum\Magnum.dll</HintPath>
+      <HintPath>..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\lib\Newtonsoft.Json\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Stact">
+      <HintPath>..\..\lib\Stact\net-3.5\Stact.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -80,9 +88,19 @@
     <Compile Include="AllowMessageTypeAttribute.cs" />
     <Compile Include="Batch\BatchedBy.cs" />
     <Compile Include="Batch\BatchTimeout.cs" />
+    <Compile Include="Bus.cs" />
+    <Compile Include="Configuration\AdvancedConfiguration.cs" />
+    <Compile Include="Configuration\BusConfiguration.cs" />
+    <Compile Include="Configuration\CrazyAdvancedShit.cs" />
+    <Compile Include="Configuration\MassTransitConfiguration.cs" />
+    <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
+    <Compile Include="Configuration\Xml\SettingsOptions.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
+    <Compile Include="IInboundTransport.cs" />
+    <Compile Include="IOutboundTransport.cs" />
+    <Compile Include="ITransport.cs" />
     <Compile Include="Parallel\DistributedTaskController.cs" />
     <Compile Include="Parallel\IDistributedTask.cs" />
     <Compile Include="Parallel\ISubTaskWorker.cs" />
@@ -91,6 +109,9 @@
     <Compile Include="Parallel\Messages\SubTaskComplete.cs" />
     <Compile Include="Parallel\Messages\SubTaskWorkerAvailable.cs" />
     <Compile Include="Parallel\SubTaskWorker.cs" />
+    <Compile Include="Serialization\CustomXmlMessageSerializer.cs" />
+    <Compile Include="Serialization\JsonMessageEnvelope.cs" />
+    <Compile Include="Serialization\JsonMessageSerializer.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthInformation.cs" />
     <Compile Include="Internal\IdempotentHashtable.cs" />
     <Compile Include="Internal\IdempotentList.cs" />
@@ -113,7 +134,15 @@
     <Compile Include="Services\Timeout\Messages\ScheduleTimeout.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
-    <Compile Include="Transports\LoopbackEndpoint.cs" />
+    <Compile Include="StreamExtensions.cs" />
+    <Compile Include="Transports\CreateTransportSettings.cs" />
+    <Compile Include="Transports\EndpointFactory.cs" />
+    <Compile Include="Transports\EndpointSettings.cs" />
+    <Compile Include="Transports\IEndpointDefaults.cs" />
+    <Compile Include="Transports\IEndpointFactory.cs" />
+    <Compile Include="Transports\IReceiveContext.cs" />
+    <Compile Include="Transports\ISendContext.cs" />
+    <Compile Include="Transports\ITransportFactory.cs" />
     <Compile Include="Internal\SpecialLoggers.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
@@ -131,10 +160,8 @@
     <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="MessageFilter.cs" />
-    <Compile Include="Services\Subscriptions\Server\InMemorySubscriptionRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
-    <Compile Include="Services\Subscriptions\Server\ISubscriptionRepository.cs" />
     <Compile Include="Services\Subscriptions\Messages\AddSubscription.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionRefresh.cs" />
     <Compile Include="Services\Subscriptions\Messages\AddSubscriptionClient.cs" />
@@ -145,7 +172,14 @@
     <Compile Include="Services\Subscriptions\Client\SubscriptionClient.cs" />
     <Compile Include="Services\Subscriptions\Server\SubscriptionService.cs" />
     <Compile Include="TimeoutAttribute.cs" />
-    <Compile Include="Transports\MulticastUdpEndpoint.cs" />
+    <Compile Include="Transports\Loopback\LoopbackMessage.cs" />
+    <Compile Include="Transports\Loopback\LoopbackReceiveContext.cs" />
+    <Compile Include="Transports\Loopback\LoopbackSendContext.cs" />
+    <Compile Include="Transports\Loopback\LoopbackTransportFactory.cs" />
+    <Compile Include="Transports\EndpointDefaults.cs" />
+    <Compile Include="Transports\MulticastUdp\MulticastUdpReceiveContext.cs" />
+    <Compile Include="Transports\MulticastUdp\MulticastUdpSendContext.cs" />
+    <Compile Include="Transports\MulticastUdp\MulticastUdpTransportFactory.cs" />
     <Compile Include="Util\CheckConvention.cs" />
     <Compile Include="Util\Tuple.cs" />
   </ItemGroup>
@@ -186,7 +220,7 @@
     <Compile Include="Exceptions\TransportException.cs" />
     <Compile Include="FutureMessage.cs" />
     <Compile Include="IEndpointAddress.cs" />
-    <Compile Include="Internal\AbstractEndpoint.cs" />
+    <Compile Include="Internal\Endpoint.cs" />
     <Compile Include="Events\ConsumeCompleted.cs" />
     <Compile Include="Events\ReceiveCompleted.cs" />
     <Compile Include="Internal\ConsumerThread.cs" />
@@ -196,7 +230,7 @@
     <Compile Include="Events\MessageReceived.cs" />
     <Compile Include="Internal\ServiceBusReceiveContext.cs" />
     <Compile Include="Internal\ThreadPoolConsumerPool.cs" />
-    <Compile Include="ITransport.cs" />
+    <Compile Include="ILoopbackTransport.cs" />
     <Compile Include="Monitoring\InstancePerformanceCounter.cs" />
     <Compile Include="Monitoring\IPerformanceCounter.cs" />
     <Compile Include="Monitoring\NullPerformanceCounter.cs" />
@@ -210,7 +244,7 @@
     <Compile Include="Internal\IInboundMessageHeaders.cs" />
     <Compile Include="Internal\IMessageHeaders.cs" />
     <Compile Include="Internal\InboundMessage.cs" />
-    <Compile Include="Configuration\EndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\EndpointResolverConfigurator.cs" />
     <Compile Include="Internal\IBusService.cs" />
     <Compile Include="Configuration\IEndpointConfigurator.cs" />
     <Compile Include="Internal\IOutboundMessage.cs" />
@@ -323,19 +357,17 @@
     <Compile Include="Services\HealthMonitoring\Messages\EndpointMessageBase.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\EndpointNotificationBase.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionClientMessageBase.cs" />
+    <Compile Include="Services\Subscriptions\Server\Messages\DuplicateSubscriptionClientRemoved.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutCancelled.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutMessageBase.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutRescheduled.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutScheduled.cs" />
     <Compile Include="Services\Timeout\Server\TimeoutSaga.cs" />
     <Compile Include="Transports\CreateEndpointSettings.cs" />
-    <Compile Include="Transports\LoopbackEndpointFactory.cs" />
-    <Compile Include="Transports\LoopbackTransport.cs" />
+    <Compile Include="Transports\Loopback\LoopbackTransport.cs" />
     <Compile Include="Transports\MessageRetryTracker.cs" />
-    <Compile Include="Transports\MulticastUdpEndpointFactory.cs" />
-    <Compile Include="Transports\MulticastUdpTransport.cs" />
+    <Compile Include="Transports\MulticastUdp\MulticastUdpTransport.cs" />
     <Compile Include="Transports\NullTransport.cs" />
-    <Compile Include="Transports\StreamEndpoint.cs" />
     <Compile Include="Transports\TransportBase.cs" />
     <Compile Include="Util\BranchEvaluator.cs" />
     <Compile Include="Util\EvaluationCandidateSelector.cs" />
@@ -376,8 +408,8 @@
     <Compile Include="Services\Subscriptions\SubscriptionPublisher.cs" />
     <Compile Include="Internal\MessageHeadersBase.cs" />
     <Compile Include="Internal\OutboundMessage.cs" />
-    <Compile Include="IEndpointFactory.cs" />
-    <Compile Include="Configuration\IEndpointFactoryConfigurator.cs" />
+    <Compile Include="IEndpointResolver.cs" />
+    <Compile Include="Configuration\IEndpointResolverConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusConfiguratorDefaults.cs" />
     <Compile Include="Configuration\IServiceConfigurator.cs" />
@@ -388,7 +420,7 @@
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfigurator.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="Internal\IMessageSelector.cs" />
-    <Compile Include="Internal\EndpointFactory.cs" />
+    <Compile Include="Internal\EndpointResolver.cs" />
     <Compile Include="Internal\RequestResponse\ConditionalResponseAction.cs" />
     <Compile Include="Internal\RequestResponse\ConditionalResponseActionBuilder.cs" />
     <Compile Include="Internal\RequestResponse\CorrelatedResponseAction.cs" />
@@ -428,8 +460,6 @@
     <Compile Include="Services\Subscriptions\LocalSubscriptionService.cs" />
     <Compile Include="Services\Timeout\ScheduledTimeout.cs" />
     <Compile Include="Transports\EndpointConfiguratorBase.cs" />
-    <Compile Include="Transports\LoopbackEndpointConfigurator.cs" />
-    <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />
     <Compile Include="Internal\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />
     <Compile Include="Saga\InMemorySagaRepository.cs" />

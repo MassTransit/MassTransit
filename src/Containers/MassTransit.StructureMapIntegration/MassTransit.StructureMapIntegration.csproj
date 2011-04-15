@@ -37,30 +37,30 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\bin\StructureMap\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>3009,3001</NoWarn>
+    <NoWarn>3009,3001,1591</NoWarn>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\bin\StructureMap\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\bin\MassTransit.StructureMapIntegration.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\MassTransit.StructureMapIntegration.XML</DocumentationFile>
     <NoWarn>1591,1587,3009,3001</NoWarn>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Magnum">
-      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.ForNHibernate">
-      <HintPath>..\..\..\lib\Magnum\Magnum.ForNHibernate.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\NHibernate\Magnum.ForNHibernate.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap, Version=2.4.9.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

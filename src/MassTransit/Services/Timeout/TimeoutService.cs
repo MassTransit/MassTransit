@@ -16,10 +16,13 @@ namespace MassTransit.Services.Timeout
 	using System.Linq;
 	using Exceptions;
 	using log4net;
-	using Magnum.Fibers;
+	using Magnum;
+	using Magnum.Extensions;
 	using Messages;
 	using Saga;
 	using Server;
+	using Stact;
+	using Stact.Internal;
 
 	public class TimeoutService :
 		IDisposable,
@@ -27,12 +30,12 @@ namespace MassTransit.Services.Timeout
 		Consumes<TimeoutRescheduled>.All
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (TimeoutService));
-		private readonly Fiber _queue = new ThreadPoolFiber();
-		private readonly Scheduler _scheduler = new TimerScheduler(new ThreadPoolFiber());
+		private readonly Fiber _fiber = new PoolFiber();
+		private readonly Scheduler _scheduler = new TimerScheduler(new PoolFiber());
 		private IServiceBus _bus;
 		private UnsubscribeAction _unsubscribeToken;
 		private readonly ISagaRepository<TimeoutSaga> _repository;
-		private ScheduledAction _unschedule;
+		private ScheduledOperation _unschedule;
 
 		public TimeoutService(IServiceBus bus, ISagaRepository<TimeoutSaga> repository)
 		{
@@ -44,8 +47,8 @@ namespace MassTransit.Services.Timeout
 		{
 			try
 			{
-				_scheduler.Stop();
-				_queue.Stop();
+				_scheduler.Stop(60.Seconds());
+				_fiber.Shutdown(60.Seconds());
 
 				_bus.Dispose();
 				_bus = null;
@@ -67,7 +70,7 @@ namespace MassTransit.Services.Timeout
 			_unsubscribeToken = _bus.Subscribe(this);
 			_unsubscribeToken += _bus.Subscribe<TimeoutSaga>();
 
-			_queue.Add(CheckExistingTimeouts);
+			_fiber.Add(CheckExistingTimeouts);
 
 			if (_log.IsInfoEnabled)
 				_log.Info("Timeout Service Started");
@@ -78,8 +81,6 @@ namespace MassTransit.Services.Timeout
 			if (_log.IsInfoEnabled)
 				_log.Info("Timeout Service Stopping");
 
-			_queue.Stop();
-
 			_unsubscribeToken();
 
 			if (_log.IsInfoEnabled)
@@ -88,9 +89,9 @@ namespace MassTransit.Services.Timeout
 
 		private void CheckExistingTimeouts()
 		{
-			DateTime now = DateTime.UtcNow;
-
+			DateTime now = SystemUtil.UtcNow;
 			_log.DebugFormat("TimeoutService Checking For Existing Timeouts: {0}", now.ToLocalTime());
+
 			try
 			{
 				var sagas = _repository.Where(x => x.TimeoutAt < now && x.CurrentState == TimeoutSaga.WaitingForTime).ToArray();
@@ -98,7 +99,7 @@ namespace MassTransit.Services.Timeout
 				{
 					TimeoutSaga instance = saga;
 
-					_queue.Add(() => _bus.Publish(new TimeoutExpired { CorrelationId = instance.CorrelationId, Tag = instance.Tag }));
+					_fiber.Add(() => PublishTimeoutExpired(instance.CorrelationId, instance.Tag));
 				}
 			}
 			catch (Exception ex)
@@ -111,18 +112,31 @@ namespace MassTransit.Services.Timeout
 					_unschedule.Cancel();
 
 				_log.DebugFormat("Scheduling next check at " + DateTime.Now);
-				_unschedule = _scheduler.Schedule(1000, new ThreadPoolFiber(), ()=> _queue.Add(CheckExistingTimeouts));
+				_unschedule = _scheduler.Schedule(1000, _fiber, CheckExistingTimeouts);
 			}
 		}
 
+		void PublishTimeoutExpired(Guid id, int tag)
+		{
+			try
+			{
+				_bus.Publish(new TimeoutExpired {CorrelationId = id, Tag = tag});
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Failed to publish timeout expiration for {0}:{1}".FormatWith(id, tag), ex);
+			}
+		}
+
+
 		public void Consume(TimeoutScheduled message)
 		{
-			_queue.Add(CheckExistingTimeouts);
+			_fiber.Add(CheckExistingTimeouts);
 		}
 
 		public void Consume(TimeoutRescheduled message)
 		{
-			_queue.Add(CheckExistingTimeouts);
+			_fiber.Add(CheckExistingTimeouts);
 		}
 	}
 }

@@ -13,8 +13,7 @@
 namespace MassTransit.RuntimeServices.Model
 {
     using FluentNHibernate.Mapping;
-    using Magnum.ForNHibernate;
-    using Magnum.ForNHibernate.StateMachine;
+    using Infrastructure;
     using Services.HealthMonitoring.Server;
 
     public class HealthSagaMap :

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,18 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using System.IO;
+	using System;
 
-    public interface ITransport :
-        IDisposable
-    {
+	public interface ITransport :
+		IDisposable
+	{
 		IEndpointAddress Address { get; }
-
-        void Send(Action<Stream> sender);
-
-        void Receive(Func<Stream, Action<Stream>> receiver);
-
-        void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout);
-    }
+	}
 }

@@ -27,7 +27,7 @@ namespace MassTransit.TestFramework
 
 		static ExtensionMethodsForSagas()
 		{
-			Timeout = 2.Seconds();
+			Timeout = 20.Seconds();
 		}
 
 		public static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>(this IObjectBuilder builder)
@@ -43,7 +43,13 @@ namespace MassTransit.TestFramework
 		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId)
 			where TSaga : class, ISaga
 		{
-			DateTime giveUpAt = DateTime.Now + Timeout;
+			return ShouldContainSaga(repository, sagaId, Timeout);
+		}
+
+		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
+			where TSaga : class, ISaga
+		{
+			DateTime giveUpAt = DateTime.Now + timeout;
 
 			while (DateTime.Now < giveUpAt)
 			{
@@ -53,7 +59,7 @@ namespace MassTransit.TestFramework
 					return saga;
 				}
 
-				Thread.Sleep(10);
+				Thread.Sleep(30);
 			}
 
 			return null;
@@ -62,14 +68,20 @@ namespace MassTransit.TestFramework
 		public static void ShouldBeInState<TSaga>(this TSaga saga, State state)
 			where TSaga : SagaStateMachine<TSaga>
 		{
-			DateTime giveUpAt = DateTime.Now + Timeout;
+			ShouldBeInState(saga, state, Timeout);
+		}
+
+		public static void ShouldBeInState<TSaga>(this TSaga saga, State state, TimeSpan timeout)
+			where TSaga : SagaStateMachine<TSaga>
+		{
+			DateTime giveUpAt = DateTime.Now + timeout;
 
 			while (DateTime.Now < giveUpAt)
 			{
 				if (saga.CurrentState == state)
 					return;
 
-				Thread.Sleep(10);
+				Thread.Sleep(30);
 			}
 
 			Assert.Fail("The saga was not in the expected state: " + state.Name + " (" + saga.CurrentState.Name + ")");

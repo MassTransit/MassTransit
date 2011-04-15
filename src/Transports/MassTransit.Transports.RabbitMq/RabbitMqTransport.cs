@@ -1,5 +1,5 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 The Apache Software Foundation.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,91 +12,85 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-    using System;
-    using System.IO;
-    using Internal;
-    using log4net;
-    using RabbitMQ.Client;
+	using System;
+	using Internal;
+	using log4net;
+	using RabbitMQ.Client;
 
-    public class RabbitMqTransport :
-        TransportBase
-    {
-        static readonly ILog _log = LogManager.GetLogger(typeof(RabbitMqTransport));
+	public class RabbitMqTransport :
+		TransportBase
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqTransport));
 
-        readonly IConnection _connection;
+		private static string _directSendMessageExchange = "";
+		private readonly IConnection _connection;
+		private RabbitMqAddress _address;
 
-        static string _directSendMessageExchange = "";
+		public RabbitMqTransport(IEndpointAddress address, IConnection connection)
+			: base(address)
+		{
+			_connection = connection;
+			_address = new RabbitMqAddress(address.Uri);
+		}
 
-        public RabbitMqTransport(IEndpointAddress address, IConnection connection) : base(address)
-        {
-            _connection = connection;
-        }
 
-        public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
-        {
-            EnsureNotDisposed();
+		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+		{
+			GuardAgainstDisposed();
 
-            using(var channel = _connection.CreateModel())
-            {
-                var result = channel.BasicGet(Address.Uri.PathAndQuery.Replace("/",""), true);
-
-                using(var body = new MemoryStream(result.Body))
-                {
-                    Action<Stream> receive = receiver(body);
-                    if(receive==null)
-                    {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
-
-                        if (SpecialLoggers.Messages.IsInfoEnabled)
-                            SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
-                    }
-                    else
-                    {
-                        receive(body);
-                    }
-                }
-
-                channel.BasicAck(result.DeliveryTag, false);
-                channel.Close(200,"ok");
-            }
-        }
-
-        public override void Send(Action<Stream> sender)
-        {
-            EnsureNotDisposed();
-
-            using (var channel = _connection.CreateModel())
-            {
-                var properties = channel.CreateBasicProperties();
-                SetMessageExpiration(properties);
-                using (var bodyStream = new MemoryStream())
-                {
-                    sender(bodyStream);
-
-                    channel.BasicPublish(_directSendMessageExchange, Address.Path, properties, bodyStream.ToArray());
-
-                }
-                channel.Close(200, "ok");
-
-                if (SpecialLoggers.Messages.IsInfoEnabled)
-                    SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, properties.MessageId);
-
-            }
-        }
-
-        private static void SetMessageExpiration(IBasicProperties properties)
-        {
-            if (OutboundMessage.Headers.ExpirationTime.HasValue)
+			using (IModel channel = _connection.CreateModel())
 			{
-			    var expirationAsString = (OutboundMessage.Headers.ExpirationTime.Value - DateTime.UtcNow).ToString();
-				properties.Expiration = expirationAsString;
-			}
-        }
+				channel.QueueDeclare(_address.Queue, true);
+				BasicGetResult result = channel.BasicGet(_address.Queue, true);
 
-        public override void OnDisposing()
-        {
-            //no-op
-        }
-    }
+				using (var context = new RabbitMqReceiveContext(result))
+				{
+					Action<IReceiveContext> receive = callback(context);
+					if (receive == null)
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
+
+						if (SpecialLoggers.Messages.IsInfoEnabled)
+							SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
+					}
+					else
+					{
+						receive(context);
+					}
+				}
+
+				channel.BasicAck(result.DeliveryTag, false);
+				channel.Close(200, "ok");
+			}
+		}
+
+		public override void Send(Action<ISendContext> callback)
+		{
+			GuardAgainstDisposed();
+
+			using (IModel channel = _connection.CreateModel())
+			{
+				channel.ExchangeDeclare(_address.Queue, "fanout", true);
+
+				using (var context = new RabbitMqSendContext(channel))
+				{
+					callback(context);
+
+					channel.BasicPublish(_address.Queue, "msg", context.Properties, context.GetBytes());
+
+					if (SpecialLoggers.Messages.IsInfoEnabled)
+						SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, context.Properties.MessageId);
+				}
+
+				channel.Close(200, "ok");
+			}
+		}
+
+
+		public override void OnDisposing()
+		{
+			//no-op
+		}
+	}
 }

@@ -15,6 +15,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System;
     using System.IO;
     using System.Text;
+    using Internal;
     using NUnit.Framework;
     using RabbitMQ.Client;
     using Serialization;
@@ -22,31 +23,54 @@ namespace MassTransit.Transports.RabbitMq.Tests
     [TestFixture]
     public class RabbitMqAddressSpecs
     {
-        Uri _address = new Uri("rabbitmq://localhost/dru");
-        Uri _rabbitAddress = new Uri("amqp-0-8://localhost:5672/dru");
+        Uri _address = new Uri("rabbitmq://10.0.1.19/dru");
+        Uri _rabbitAddress = new Uri("amqp-0-8://10.0.1.19:5672");
         ConnectionFactory _factory = new ConnectionFactory();
 
-		[Test, Category("Integration")]
-        public void Send()
+        [SetUp]
+        public void Setup()
         {
-            var t = new RabbitMqTransport(new EndpointAddress(_address), _factory.CreateConnection(_rabbitAddress));
+		    _factory.UserName = "guest";
+		    _factory.Password = "guest";
+		    _factory.VirtualHost = @"/";
+            _factory.HostName = "10.0.1.19";
+        }
+
+        [Test, Explicit]
+        public void Bob()
+        {
+
+            using (var conn = _factory.CreateConnection())
+            {
+                using (var m = conn.CreateModel())
+                {
+                    m.QueueDeclare("igby", true);
+                }
+            }
+
+        }
+
+		[Test, Explicit]
+        public void Send()
+		{
+            var t = new RabbitMqTransport(new EndpointAddress(_address), _factory.CreateConnection());
             t.Send((s)=>
             {
                 var b = Encoding.UTF8.GetBytes("dru");
-                s.Write(b, 0,b.Length);
+                s.Body.Write(b, 0,b.Length);
             });
         }
 
-		[Test, Category("Integration")]
+		[Test, Explicit]
 		public void Receive()
         {
-            var t = new RabbitMqTransport(new EndpointAddress(new Uri("rabbitmq://localhost/dru")), _factory.CreateConnection(_rabbitAddress));
+            var t = new RabbitMqTransport(new EndpointAddress(new Uri("rabbitmq://10.0.1.19/bob")), _factory.CreateConnection());
             t.Receive(s=>
             {
                 return ss =>
                 {
                     var buff = new byte[3];
-                    ss.Read(buff, 0, buff.Length);
+                    ss.Body.Read(buff, 0, buff.Length);
                     var name = Encoding.UTF8.GetString(buff);
                     Assert.AreEqual("dru", name);
                     Console.WriteLine(name);
@@ -54,7 +78,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             });
         }
 
-		[Test, Category("Integration")]
+		[Test,Explicit]
         public void EndpointSend()
         {
             var addr = new EndpointAddress(_address);
@@ -67,11 +91,11 @@ namespace MassTransit.Transports.RabbitMq.Tests
             {
                 ser.Serialize(stream, msg);
             }
-            var e = new RabbitMqEndpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection(_rabbitAddress)), null);
+            var e = new Endpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection()), null);
             e.Send(new BugsBunny() {Food = "Carrot"});
         }
 
-		[Test, Category("Integration")]
+		[Test, Explicit]
         public void EndpointReceive()
         {
             var addr = new EndpointAddress(_address);
@@ -79,7 +103,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             IMessageSerializer ser = new XmlMessageSerializer();
 
 
-            var e = new RabbitMqEndpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection(_rabbitAddress)), null);
+            var e = new Endpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection()), null);
             e.Receive(o=>
             {
                 return b =>
@@ -87,7 +111,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                     var bb = (BugsBunny) b;
                     Console.WriteLine(bb.Food);
                 };
-            });
+            }, TimeSpan.Zero);
         }
     }
 

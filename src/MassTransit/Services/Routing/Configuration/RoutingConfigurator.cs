@@ -10,7 +10,7 @@ namespace MassTransit.Services.Routing.Configuration
     public class RoutingConfigurator :
         IServiceConfigurator
     {
-        readonly IList<Func<IServiceBus, IEndpointFactory, UnsubscribeAction>> _routes = new List<Func<IServiceBus, IEndpointFactory, UnsubscribeAction>>();
+        readonly IList<Func<IServiceBus, IEndpointResolver, UnsubscribeAction>> _routes = new List<Func<IServiceBus, IEndpointResolver, UnsubscribeAction>>();
         public Type ServiceType
         {
             get { return typeof (RoutingService); }
@@ -18,7 +18,7 @@ namespace MassTransit.Services.Routing.Configuration
 
         public IBusService Create(IServiceBus bus, IObjectBuilder builder)
         {
-            var ef = builder.GetInstance<IEndpointFactory>();
+            var ef = builder.GetInstance<IEndpointResolver>();
             return new RoutingService(_routes, ef);
         }
 

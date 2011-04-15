@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,8 +14,6 @@ namespace MassTransit.Transports.Nms
 {
 	using System;
 	using System.Diagnostics;
-	using System.IO;
-	using System.Text;
 	using Apache.NMS;
 	using Apache.NMS.ActiveMQ;
 	using Exceptions;
@@ -24,7 +22,7 @@ namespace MassTransit.Transports.Nms
 
 	[DebuggerDisplay("{Address}")]
 	public class NmsTransport :
-		ITransport
+		ILoopbackTransport
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (NmsTransport));
 
@@ -45,14 +43,7 @@ namespace MassTransit.Transports.Nms
 			get { return _address; }
 		}
 
-		public virtual void Receive(Func<Stream, Action<Stream>> receiver)
-		{
-			if (_disposed) throw NewDisposedException();
-
-			Receive(receiver, TimeSpan.Zero);
-		}
-
-		public virtual void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
+		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
 		{
 			if (_disposed) throw NewDisposedException();
 
@@ -86,9 +77,9 @@ namespace MassTransit.Transports.Nms
 							}
 							else
 							{
-								using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(textMessage.Text), false))
+								using (var context = new NmsReceiveContext(textMessage))
 								{
-									Action<Stream> receive = receiver(bodyStream);
+									Action<IReceiveContext> receive = callback(context);
 									if (receive == null)
 									{
 										if (_log.IsDebugEnabled)
@@ -99,7 +90,7 @@ namespace MassTransit.Transports.Nms
 									}
 									else
 									{
-										receive(bodyStream);
+										receive(context);
 									}
 								}
 							}
@@ -118,7 +109,8 @@ namespace MassTransit.Transports.Nms
 			}
 		}
 
-		public virtual void Send(Action<Stream> sender)
+
+		public virtual void Send(Action<ISendContext> callback)
 		{
 			if (_disposed) throw NewDisposedException();
 
@@ -130,23 +122,16 @@ namespace MassTransit.Transports.Nms
 
 					using (IMessageProducer producer = session.CreateProducer(destination))
 					{
-						using (var bodyStream = new MemoryStream())
+						using (var context = new NmsSendContext(producer))
 						{
-							sender(bodyStream);
+							callback(context);
 
-							string text = Encoding.UTF8.GetString(bodyStream.ToArray());
-
-							ITextMessage textMessage = session.CreateTextMessage(text);
-
-							SetMessageExpiration(textMessage);
-
-							producer.DeliveryMode = MsgDeliveryMode.Persistent;
-							producer.Send(textMessage);
+							context.Send();
 
 							session.Commit();
 
 							if (SpecialLoggers.Messages.IsInfoEnabled)
-								SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, textMessage.NMSMessageId);
+								SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, context.Message.NMSMessageId);
 						}
 					}
 				}
@@ -160,13 +145,6 @@ namespace MassTransit.Transports.Nms
 			}
 		}
 
-		private static void SetMessageExpiration(IMessage outbound)
-		{
-			if (OutboundMessage.Headers.ExpirationTime.HasValue)
-			{
-				outbound.NMSTimeToLive = OutboundMessage.Headers.ExpirationTime.Value - DateTime.UtcNow;
-			}
-		}
 
 		public void Dispose()
 		{

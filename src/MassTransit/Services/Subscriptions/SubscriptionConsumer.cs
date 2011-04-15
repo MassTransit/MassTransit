@@ -21,15 +21,15 @@ namespace MassTransit.Services.Subscriptions
 		IBusService
 	{
 		private IServiceBus _bus;
-		private IEndpointFactory _endpointFactory;
+		private IEndpointResolver _endpointResolver;
 		private IMessagePipeline _pipeline;
 		private ISubscriptionService _service;
 		private UnregisterAction _unregisterAction;
 
-		public SubscriptionConsumer(ISubscriptionService service, IEndpointFactory endpointFactory)
+		public SubscriptionConsumer(ISubscriptionService service, IEndpointResolver endpointResolver)
 		{
 			_service = service;
-			_endpointFactory = endpointFactory;
+			_endpointResolver = endpointResolver;
 		}
 
 		public void Dispose()
@@ -37,7 +37,7 @@ namespace MassTransit.Services.Subscriptions
 			_pipeline = null;
 			_bus = null;
 			_service = null;
-			_endpointFactory = null;
+			_endpointResolver = null;
 		}
 
 		public void Start(IServiceBus bus)
@@ -58,7 +58,7 @@ namespace MassTransit.Services.Subscriptions
 			if (endpointUri == _bus.Endpoint.Uri)
 				return () => true;
 
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(endpointUri);
+			IEndpoint endpoint = _endpointResolver.GetEndpoint(endpointUri);
 
 			return _pipeline.Subscribe<T>(endpoint);
 		}
@@ -69,7 +69,7 @@ namespace MassTransit.Services.Subscriptions
 			if (endpointUri == _bus.Endpoint.Uri)
 				return () => true;
 
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(endpointUri);
+			IEndpoint endpoint = _endpointResolver.GetEndpoint(endpointUri);
 
 			return _pipeline.Subscribe<T, K>(correlationId, endpoint);
 		}

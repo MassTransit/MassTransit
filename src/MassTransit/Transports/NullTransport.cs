@@ -27,14 +27,15 @@ namespace MassTransit.Transports
             //no-op
         }
 
-        public override void Send(Action<Stream> sender)
+        public override void Send(Action<ISendContext> callback)
         {
             //no-op
         }
 
-        public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
+        public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
         {
             //no-op
         }
+
     }
 }

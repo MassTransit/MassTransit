@@ -20,7 +20,7 @@ namespace MassTransit.Transports.Nms.Tests.TestFixtures
     using Services.Subscriptions;
 
     public class NmsEndpointTestFixture :
-        EndpointTestFixture<NmsEndpoint>
+        EndpointTestFixture<NmsTransportFactory>
     {
         protected ISubscriptionService SubscriptionService { get; set; }
         protected IServiceBus LocalBus { get; set; }
@@ -73,7 +73,7 @@ namespace MassTransit.Transports.Nms.Tests.TestFixtures
                 .WhenCalled(invocation =>
                     {
                         // Return a unique instance of this class
-                        invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointFactory);
+                        invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointResolver);
                     });
         }
 

@@ -12,28 +12,28 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Services.HealthMonitoring
 {
-	using System.Collections.Generic;
 	using System.Threading;
 	using Configuration;
 	using MassTransit.Saga;
 	using MassTransit.Services.HealthMonitoring;
+	using MassTransit.Services.HealthMonitoring.Messages;
 	using MassTransit.Services.HealthMonitoring.Server;
-	using MassTransit.Services.Subscriptions;
 	using MassTransit.Services.Subscriptions.Client;
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Services.Subscriptions.Server;
+	using MassTransit.Services.Timeout.Messages;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using TextFixtures;
+	using TestFramework;
 
 	[TestFixture]
 	public class HealthServiceTestFixture :
-		EndpointTestFixture<LoopbackEndpoint>
+		EndpointTestFixture<LoopbackTransportFactory>
 	{
 		private ISagaRepository<HealthSaga> _healthSagaRepository;
 		private ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;
-		public ISubscriptionRepository SubscriptionRepository { get; private set; }
 		private ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
 		public IServiceBus SubscriptionBus { get; private set; }
 		public SubscriptionService SubscriptionService { get; private set; }
@@ -73,28 +73,22 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			SetupHealthService();
 
-			Thread.Sleep(1000);
+			Thread.Sleep(500);
 		}
 
 		private void SetupSubscriptionService()
 		{
-			//SubscriptionRepository = new InMemorySubscriptionRepository();
-			SubscriptionRepository = MockRepository.GenerateMock<ISubscriptionRepository>();
-			SubscriptionRepository.Expect(x => x.List()).Return(new List<Subscription>());
-			ObjectBuilder.Stub(x => x.GetInstance<ISubscriptionRepository>())
-				.Return(SubscriptionRepository);
-
 			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>(ObjectBuilder);
 
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(ObjectBuilder);
 
-			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
+			SubscriptionService = new SubscriptionService(SubscriptionBus, EndpointResolver, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
 			SubscriptionService.Start();
 
 			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionClient>())
 				.Return(null)
-				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(EndpointFactory); });
+				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(EndpointResolver); });
 		}
 
 		private void SetupHealthService()
@@ -104,6 +98,12 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			HealthService = new HealthService(RemoteBus, _healthSagaRepository);
 
 			HealthService.Start();
+
+			LocalBus.ShouldHaveSubscriptionFor<EndpointCameOnline>();
+			LocalBus.ShouldHaveSubscriptionFor<Heartbeat>();
+			LocalBus.ShouldHaveSubscriptionFor<EndpointWentOffline>();
+			LocalBus.ShouldHaveSubscriptionFor<TimeoutExpired>();
+			LocalBus.ShouldHaveSubscriptionFor<PingEndpointResponse>();
 		}
 
 		public ISagaRepository<HealthSaga> Repository

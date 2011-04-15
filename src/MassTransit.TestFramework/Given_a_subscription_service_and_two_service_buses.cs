@@ -15,11 +15,11 @@ namespace MassTransit.TestFramework
 	using System;
 	using Fixtures;
 	using Magnum.TestFramework;
-	using Transports;
+	using MassTransit.Transports;
 
 	[Scenario]
 	public class Given_a_subscription_service_and_two_service_buses :
-		SubscriptionServiceTestFixture<LoopbackEndpoint>
+		SubscriptionServiceTestFixture<LoopbackTransportFactory>
 	{
 		protected Given_a_subscription_service_and_two_service_buses()
 		{

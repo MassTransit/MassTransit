@@ -21,6 +21,7 @@ namespace MassTransit.Tests.Load
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using Messages;
+	using TestFramework;
 
 	public class LoadGenerator<TRequest, TResponse> :
 		Consumes<TResponse>.All
@@ -51,11 +52,11 @@ namespace MassTransit.Tests.Load
 			_received.Set();
 		}
 
-		public void Run(IServiceBus bus, int iterations, Func<Guid, TRequest> generateRequest)
+		public void Run(IServiceBus bus, IEndpoint sendTo, IEnumerable<IServiceBus> instances, int iterations, Func<Guid, TRequest> generateRequest)
 		{
 			using (bus.Subscribe(this).Disposable())
 			{
-				ThreadUtil.Sleep(2.Seconds());
+				instances.Each(x => x.ShouldHaveSubscriptionFor<TResponse>());
 
 				for (int i = 0; i < iterations; i++)
 				{
@@ -67,14 +68,13 @@ namespace MassTransit.Tests.Load
 
 					ThreadUtil.Sleep(5.Milliseconds());
 
-					bus.Publish(command, x =>
+					sendTo.Send(command, x =>
 						{
 							x.SendResponseTo(bus.Endpoint);
-
-							x.IfNoSubscribers<FirstCommand>(message => { throw new InvalidOperationException("No subscriptions were found (timing error?)"); });
 						});
 				}
 
+				_received.WaitOne(10.Seconds(), true);
 				while (_received.WaitOne(5.Seconds(), true))
 				{
 				}

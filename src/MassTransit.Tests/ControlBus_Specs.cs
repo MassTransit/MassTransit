@@ -10,7 +10,7 @@ namespace MassTransit.Tests
 
 	[TestFixture]
 	public class When_creating_a_bus_with_a_separate_control_bus :
-		EndpointTestFixture<LoopbackEndpoint>
+		EndpointTestFixture<LoopbackTransportFactory>
 	{
 		public ISubscriptionService SubscriptionService { get; private set; }
 		public IServiceBus LocalBus { get; private set; }
@@ -93,7 +93,7 @@ namespace MassTransit.Tests
 				.WhenCalled(invocation =>
 				{
 					// Return a unique instance of this class
-					invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointFactory);
+					invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointResolver);
 				});
 		}
 

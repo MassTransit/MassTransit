@@ -30,8 +30,10 @@ namespace MassTransit.Configuration
 		private Uri _receiveFromUri;
 	    private Action _beforeConsume;
 	    private Action _afterConsume;
+        IEndpointResolver _endpointResolver;
 
-	    protected ServiceBusConfigurator()
+        //CHANGED TO SUPPORT THE MOVE TO THE NEXT CONFIG MODEL
+	    internal ServiceBusConfigurator()
 		{
 			_services = new List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>>();
 
@@ -57,8 +59,7 @@ namespace MassTransit.Configuration
 			_receiveFromUri = uri;
 		}
 
-		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure)
-			where TServiceConfigurator : IServiceConfigurator, new()
+		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure) where TServiceConfigurator : IServiceConfigurator, new()
 		{
 			_services.Add((bus, builder, add) =>
 				{
@@ -167,20 +168,24 @@ namespace MassTransit.Configuration
 		{
 			if (ErrorUri != null)
 			{
-				bus.PoisonEndpoint = bus.EndpointFactory.GetEndpoint(ErrorUri);
+				bus.PoisonEndpoint = bus.EndpointResolver.GetEndpoint(ErrorUri);
 			}
 		}
 
-		private ServiceBus CreateServiceBus()
-		{
-			var endpointFactory = ObjectBuilder.GetInstance<IEndpointFactory>();
+        //TO SUPPORT THE NEW MODEL
+        internal ServiceBus CreateServiceBus()
+        {
+            if (_endpointResolver == null)
+                throw new ConfigurationException("You must call 'SetEndpointFactory(IEndpointFactory)' on the ServiceBusConfiguration class");
 
-			var endpoint = endpointFactory.GetEndpoint(_receiveFromUri);
+            var endpoint = _endpointResolver.GetEndpoint(_receiveFromUri);
 
-			return new ServiceBus(endpoint, ObjectBuilder, endpointFactory);
-		}
+            var serviceBus = new ServiceBus(endpoint, ObjectBuilder, _endpointResolver);
+            
+            return serviceBus;
+        }
 
-		private void ConfigureThreadLimits(ServiceBus bus)
+        private void ConfigureThreadLimits(ServiceBus bus)
 		{
 			if (ConcurrentConsumerLimit > 0)
 				bus.MaximumConsumerThreads = ConcurrentConsumerLimit;
@@ -212,6 +217,11 @@ namespace MassTransit.Configuration
 		{
 			action(_defaults);
 		}
+
+        public void SetEndpointFactory(IEndpointResolver epf)
+        {
+            _endpointResolver = epf;
+        }
 	}
 
 	public class ControlBusConfigurator :

@@ -18,6 +18,27 @@ namespace MassTransit.Services.Subscriptions.Configuration
 	using Internal;
 	using MassTransit.Configuration;
 
+    public static class SubscriptionClientConfiguratorExtensions
+    {
+        public static void UseSubscriptionService(this IServiceBusConfigurator bc, string subscriptionServiceUri)
+        {
+            UseSubscriptionService(bc, new Uri(subscriptionServiceUri));
+        }
+        public static void UseSubscriptionService(this IServiceBusConfigurator bc, Uri subscriptionServiceUri)
+        {
+            bc.ConfigureService<SubscriptionClientConfigurator>(subCfg => subCfg.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
+        }
+
+        public static void UseSubscriptionService(this BusConfiguration cfg, string subscriptionServiceUri)
+        {
+            UseSubscriptionService(cfg, new Uri(subscriptionServiceUri));
+        }
+
+        public static void UseSubscriptionService(this BusConfiguration cfg, Uri subscriptionServiceUri)
+        {
+            cfg.ConfigureService<SubscriptionClientConfigurator>(subCfg => subCfg.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
+        }
+    }
 	public class SubscriptionClientConfigurator :
 		IServiceConfigurator
 	{
@@ -30,7 +51,7 @@ namespace MassTransit.Services.Subscriptions.Configuration
 
 		public IBusService Create(IServiceBus bus, IObjectBuilder builder)
 		{
-			var endpointFactory = builder.GetInstance<IEndpointFactory>();
+			var endpointFactory = builder.GetInstance<IEndpointResolver>();
 
 			var service = new SubscriptionClient(endpointFactory)
 				{

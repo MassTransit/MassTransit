@@ -16,8 +16,9 @@ namespace MassTransit.Distributor
 	using System.Threading;
 	using Internal;
 	using Magnum.Extensions;
-	using Magnum.Fibers;
 	using Messages;
+	using Stact;
+	using Stact.Internal;
 
 	public class Worker<T> :
 		IWorker<T>,
@@ -35,11 +36,12 @@ namespace MassTransit.Distributor
 		private int _inProgress;
 		private int _inProgressLimit = 4;
 		private int _pendingLimit = 16;
-		private readonly Fiber _queue = new ThreadPoolFiber();
+		private readonly Fiber _fiber = new PoolFiber();
 		private UnsubscribeAction _unsubscribeAction = () => false;
 		private bool _updatePending;
 		private bool _wakeUpPending;
-	    private Scheduler _threadPoolScheduler;
+	    private Scheduler _scheduler;
+		private ScheduledOperation _scheduled;
 
 		public Worker(Func<T, Action<T>> getConsumer)
 			: this(getConsumer, new WorkerSettings())
@@ -106,6 +108,9 @@ namespace MassTransit.Distributor
 
 		public void Dispose()
 		{
+			Stop();
+			_fiber.Stop();
+
 			_controlBus = null;
 			_getConsumer = null;
 		}
@@ -122,17 +127,34 @@ namespace MassTransit.Distributor
 			_unsubscribeAction += bus.ControlBus.Subscribe<PingWorker>(Consume);
 			_unsubscribeAction += bus.Subscribe(this);
 
-
-            _threadPoolScheduler = new TimerScheduler(new ThreadPoolFiber());
-
-		    _threadPoolScheduler.Schedule(3.Seconds(), 1.Minutes(), new ThreadPoolFiber(), PublishWorkerAvailability);
+            _scheduler = new TimerScheduler(new PoolFiber());
+			_scheduled = _scheduler.Schedule(3.Seconds(), 1.Minutes(), _fiber, PublishWorkerAvailability);
 		}
 
-	    public void Stop()
+		public void Stop()
 		{
-	        _threadPoolScheduler.Stop();
+			if (_scheduled != null)
+			{
+				_scheduled.Cancel();
+				_scheduled = null;
+			}
 
-			_unsubscribeAction();
+			if (_scheduler != null)
+			{
+				_scheduler.Stop(60.Seconds());
+				_scheduler = null;
+			}
+
+			if (_fiber != null)
+			{
+				_fiber.Shutdown(60.Seconds());
+			}
+
+			if (_unsubscribeAction != null)
+			{
+				_unsubscribeAction();
+				_unsubscribeAction = null;
+			}
 		}
 
         private bool Accept(ConfigureWorker message)
@@ -148,7 +170,7 @@ namespace MassTransit.Distributor
 			if (message.PendingLimit >= 0)
 				_pendingLimit = message.PendingLimit;
 
-			PublishWorkerAvailability();
+			ScheduleUpdate();
 		}
 
 		private void ScheduleWakeUp()
@@ -156,7 +178,16 @@ namespace MassTransit.Distributor
 			if (!_wakeUpPending)
 			{
 				_wakeUpPending = true;
-				_queue.Add(() => _bus.Endpoint.Send(new WakeUpWorker()));
+				_fiber.Add(() =>
+					{
+						try
+						{
+							_bus.Endpoint.Send(new WakeUpWorker());
+						}
+						catch
+						{
+						}
+					});
 			}
 		}
 
@@ -165,15 +196,29 @@ namespace MassTransit.Distributor
 			if (!_updatePending)
 			{
 				_updatePending = true;
-				_queue.Add(PublishWorkerAvailability);
+				try
+				{
+					_fiber.Add(PublishWorkerAvailability);
+				}
+				catch
+				{
+				}
 			}
 		}
 
 		private void PublishWorkerAvailability()
 		{
-			_updatePending = false;
+			try
+			{
+				var message = new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit,
+					_pendingMessages.PendingMessageCount(), _pendingLimit);
+				_updatePending = false;
 
-			_bus.Publish(new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pendingMessages.PendingMessageCount(), _pendingLimit));
+				_bus.Publish(message);
+			}
+			catch
+			{
+			}
 		}
 
 		private static void RewriteResponseAddress(Uri responseAddress)

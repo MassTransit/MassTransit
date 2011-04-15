@@ -27,11 +27,11 @@ namespace MassTransit.Distributor
         /// </summary>
         /// <typeparam name="T">The type of message to use the distributor</typeparam>
         /// <param name="configurator">Service bus to implement the distributor</param>
-        /// <param name="endpointFactory">Factory to generate endpoints from a given URL</param>
-		public static void UseDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
+        /// <param name="endpointResolver">Factory to generate endpoints from a given URL</param>
+		public static void UseDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointResolver endpointResolver)
 			where T : class
 		{
-			configurator.AddService(() => new Distributor<T>(endpointFactory));
+			configurator.AddService(() => new Distributor<T>(endpointResolver));
 
 			configurator.SetReceiveTimeout(50.Milliseconds());
 		}
@@ -43,12 +43,12 @@ namespace MassTransit.Distributor
         /// <typeparam name="K">The <code>IWorkerSelectionStrategy</code> used to pick 
         /// which worker node to send a message</typeparam>
         /// <param name="configurator">Service bus to implement the distributor</param>
-        /// <param name="endpointFactory">Factory to generate endpoints from a given URL</param>
-        public static void UseDistributorFor<T, K>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
+        /// <param name="endpointResolver">Factory to generate endpoints from a given URL</param>
+        public static void UseDistributorFor<T, K>(this IServiceBusConfigurator configurator, IEndpointResolver endpointResolver)
             where T : class
             where K : class, IWorkerSelectionStrategy<T>, new()
         {
-            configurator.AddService(() => new Distributor<T>(endpointFactory, new K()));
+            configurator.AddService(() => new Distributor<T>(endpointResolver, new K()));
 
             configurator.SetReceiveTimeout(50.Milliseconds());
         }
@@ -58,14 +58,14 @@ namespace MassTransit.Distributor
         /// </summary>
         /// <typeparam name="T">The type of to use the distributor</typeparam>
         /// <param name="configurator">Service bus to implement the distributor</param>
-        /// <param name="endpointFactory">Factory to generate endpoints from a given URL</param>
+        /// <param name="endpointResolver">Factory to generate endpoints from a given URL</param>
         /// <param name="workerSelectionStrategy">The <code>IWorkerSelectionStrategy</code> 
         /// used to pick which worker node to send a message</param>
-        public static void UseDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory, 
+        public static void UseDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointResolver endpointResolver, 
                                                 IWorkerSelectionStrategy<T> workerSelectionStrategy)
             where T : class
         {
-            configurator.AddService(() => new Distributor<T>(endpointFactory, workerSelectionStrategy));
+            configurator.AddService(() => new Distributor<T>(endpointResolver, workerSelectionStrategy));
 
             configurator.SetReceiveTimeout(50.Milliseconds());
         }
@@ -76,12 +76,19 @@ namespace MassTransit.Distributor
 			configurator.AddService(() => new Worker<T>(getConsumer));
 		}
 
-		public static void UseSagaDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
+		public static void ImplementDistributorWorker<T>(this IServiceBusConfigurator configurator, Func<T, Action<T>> getConsumer, int inProgressLimit, int pendingLimit)
+			where T : class
+		{
+			var settings = new WorkerSettings {InProgressLimit = inProgressLimit, PendingLimit = pendingLimit};
+			configurator.AddService(() => new Worker<T>(getConsumer, settings));
+		}
+
+		public static void UseSagaDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointResolver endpointResolver)
 			where T : SagaStateMachine<T>, ISaga
 		{
 			var saga = FastActivator<T>.Create(CombGuid.Generate());
 
-			var serviceConfigurator = new SagaDistributorConfigurator(configurator, endpointFactory);
+			var serviceConfigurator = new SagaDistributorConfigurator(configurator, endpointResolver);
 
 			saga.EnumerateDataEvents(serviceConfigurator.AddService);
 		}

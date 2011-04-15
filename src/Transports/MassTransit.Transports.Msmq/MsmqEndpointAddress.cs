@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,8 +14,6 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Messaging;
-	using System.Net;
-	using Util;
 
 	public class MsmqEndpointAddress :
 		EndpointAddress,
@@ -26,25 +24,29 @@ namespace MassTransit.Transports.Msmq
 		{
 			PublicQueuesNotAllowed();
 
-			FormatName = BuildQueueFormatName();
+			FormatName = MsmqUriParser.GetFormatName(uri);
 
 			IsTransactional = CheckForTransactionalHint();
-		
+
 			if (IsLocal)
 			{
 				IsTransactional = IsLocalQueueTransactional();
 
-				LocalName = @".\private$\" + Path;
+				LocalName = MsmqUriParser.GetLocalName(uri);
 
 				Uri = SetUriHostToLocalMachineName();
 			}
 		}
 
+		public string FormatName { get; private set; }
+
+		public string LocalName { get; private set; }
+
 		private bool IsLocalQueueTransactional()
 		{
 			try
 			{
-				using(var queue = new MessageQueue(FormatName, QueueAccessMode.PeekAndAdmin))
+				using (var queue = new MessageQueue(FormatName, QueueAccessMode.PeekAndAdmin))
 				{
 					return queue.Transactional;
 				}
@@ -56,21 +58,6 @@ namespace MassTransit.Transports.Msmq
 			return IsTransactional;
 		}
 
-		public string FormatName { get; private set; }
-
-		public string LocalName { get; private set; }
-
-		public bool IsTransactional { get; private set; }
-
-		private string BuildQueueFormatName()
-		{
-			string hostName = Uri.Host;
-
-			if (IsIpAddress(hostName))
-				return string.Format(@"FormatName:DIRECT=TCP:{0}\private$\{1}", hostName, Path);
-
-			return string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, Path);
-		}
 
 		private void PublicQueuesNotAllowed()
 		{
@@ -87,16 +74,6 @@ namespace MassTransit.Transports.Msmq
 				"Bad: msmq://machinename/round_file/queue_name");
 		}
 
-		private static bool IsIpAddress(string hostName)
-		{
-			IPAddress address;
-			return IPAddress.TryParse(hostName, out address);
-		}
-
-		private bool CheckForTransactionalHint()
-		{
-			return Uri.Query.GetValueFromQueryString("tx", false);
-		}
 
 		private Uri SetUriHostToLocalMachineName()
 		{

@@ -13,20 +13,19 @@
 namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
-	using System.Collections.Generic;
 	using Configuration;
+	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using Saga;
-	using Services.Subscriptions;
 	using Services.Subscriptions.Client;
 	using Services.Subscriptions.Configuration;
 	using Services.Subscriptions.Server;
+	using Transports;
 
-	[TestFixture]
-	public class SubscriptionServiceTestFixture<TEndpoint> :
-		EndpointTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+    [TestFixture]
+	public class SubscriptionServiceTestFixture<TTransportFactory> :
+		EndpointTestFixture<TTransportFactory>
+		where TTransportFactory : ITransportFactory
 	{
 		[TestFixtureSetUp]
 		public void LocalAndRemoteTestFixtureSetup()
@@ -39,29 +38,19 @@ namespace MassTransit.TestFramework.Fixtures
 
 		private void SetupSubscriptionService()
 		{
-			SetupSubscriptionRepository();
-
 			ObjectBuilder.SetupSagaRepository<SubscriptionClientSaga>();
 			ObjectBuilder.SetupSagaRepository<SubscriptionSaga>();
 
 			SubscriptionBus = SetupServiceBus(SubscriptionUri, x => { x.SetConcurrentConsumerLimit(1); });
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus,
-				ObjectBuilder.GetInstance<ISubscriptionRepository>(),
-				EndpointFactory,
+				EndpointResolver,
 				ObjectBuilder.GetInstance<ISagaRepository<SubscriptionSaga>>(),
 				ObjectBuilder.GetInstance<ISagaRepository<SubscriptionClientSaga>>());
 
 			SubscriptionService.Start();
 
-			ObjectBuilder.Construct(() => new SubscriptionClient(EndpointFactory));
-		}
-
-		private void SetupSubscriptionRepository()
-		{
-			var subscriptionRepository = MockRepository.GenerateMock<ISubscriptionRepository>();
-			subscriptionRepository.Stub(x => x.List()).Return(new List<Subscription>());
-			ObjectBuilder.Add(subscriptionRepository);
+			ObjectBuilder.Construct(() => new SubscriptionClient(EndpointResolver));
 		}
 
 		[TestFixtureTearDown]

@@ -19,8 +19,7 @@ namespace MassTransit.Configuration
 	{
 		void SetSerializer<T>() where T : IMessageSerializer;
 		void SetSerializer(Type serializerType);
-
-		void SetObjectBuilder(IObjectBuilder objectBuilder);
+	    void SetSerializer(IMessageSerializer serializer);
 		void SetUri(Uri uri);
 	}
 }

@@ -16,7 +16,6 @@ namespace MassTransit.Transports.Msmq.Tests
 	using Configuration;
 	using Exceptions;
 	using MassTransit.Serialization;
-	using MassTransit.Tests;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
@@ -29,7 +28,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[SetUp]
 		public void Setup()
 		{
-			MsmqEndpointConfigurator.Defaults(x =>
+			EndpointConfigurator.Defaults(x =>
 				{
 					x.CreateMissingQueues = false;
 					x.PurgeOnStartup = false;
@@ -43,20 +42,22 @@ namespace MassTransit.Transports.Msmq.Tests
 		[ExpectedException(typeof (EndpointException))]
 		public void Should_throw_an_endpoint_exception_from_the_msmq_endpoint_factory()
 		{
-		    MsmqEndpointFactory.New(new CreateMsmqEndpointSettings(_uri)
-		        {
-		            Serializer = _serializer,
-		            CreateIfMissing = false,
-		        });
+		    var tfs = new[] {new MsmqTransportFactory()};
+		    var epf = new EndpointFactory(tfs);
+            
+		    epf.BuildEndpoint(_uri, cfg =>
+		    {
+		        cfg.SetSerializer(_serializer);
+		    });
 		}
 
 		[Test]
 		[ExpectedException(typeof (EndpointException))]
 		public void Should_throw_an_endpoint_exception_from_the_endpoint_factory()
 		{
-			IEndpointFactory ef = EndpointFactoryConfigurator.New(x =>
+			IEndpointResolver ef = EndpointResolverConfigurator.New(x =>
 			    {
-			        x.RegisterTransport<MsmqEndpoint>();
+			        x.AddTransportFactory<MsmqTransportFactory>();
 			    });
 
 			ef.GetEndpoint(_uri);

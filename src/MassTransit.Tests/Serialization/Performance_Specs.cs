@@ -20,11 +20,11 @@ namespace MassTransit.Tests.Serialization
 	using Messages;
 	using NUnit.Framework;
 
-	[TestFixture]
-	public class Performance_Specs
+
+	public abstract class Performance_Specs<TSerializer> where TSerializer : IMessageSerializer, new()
 	{
-		[Test, Explicit]
-		public void Just_how_fast_is_the_custom_xml_serializer()
+		[Test, Category("Integration")]
+		public void Just_how_fast_are_you()
 		{
 			var message = new SerializationTestMessage
 				{
@@ -40,24 +40,21 @@ namespace MassTransit.Tests.Serialization
 					DoubleValue = 1823.172,
 				};
 
-//			var message = new PingMessage
-//				{
-//					CorrelationId = CombGuid.Generate()
-//				};
 
-			var serializer = new XmlMessageSerializer();
+			var serializer = new TSerializer();
 
+            //warm it up
 			for (int i = 0; i < 10; i++)
 			{
 				byte[] data;
-				using (MemoryStream output = new MemoryStream())
+				using (var output = new MemoryStream())
 				{
 					serializer.Serialize(output, message);
 					data = output.ToArray();
 				}
-				using (MemoryStream input = new MemoryStream(data))
+				using (var input = new MemoryStream(data))
 				{
-					//		serializer.Deserialize(input);
+					serializer.Deserialize(input);
 				}
 			}
 
@@ -67,7 +64,7 @@ namespace MassTransit.Tests.Serialization
 
 			for (int i = 0; i < iterations; i++)
 			{
-				using (MemoryStream output = new MemoryStream())
+				using (var output = new MemoryStream())
 				{
 					serializer.Serialize(output, message);
 				}
@@ -81,7 +78,7 @@ namespace MassTransit.Tests.Serialization
 			Trace.WriteLine(msg);
 
 			byte[] sample;
-			using (MemoryStream output = new MemoryStream())
+			using (var output = new MemoryStream())
 			{
 				serializer.Serialize(output, message);
 				sample = output.ToArray();
@@ -91,7 +88,7 @@ namespace MassTransit.Tests.Serialization
 
 			for (int i = 0; i < 50000; i++)
 			{
-				using (MemoryStream input = new MemoryStream(sample))
+				using (var input = new MemoryStream(sample))
 				{
 					serializer.Deserialize(input);
 				}
@@ -105,4 +102,29 @@ namespace MassTransit.Tests.Serialization
 			Trace.WriteLine(msg);
 		}
 	}
+
+    [TestFixture]
+    public class WhenUsingCustomXmlInPerfTest:
+        Performance_Specs<CustomXmlMessageSerializer>
+    {
+    }
+
+    [TestFixture]
+    public class WhenUsingDotNotXmlInPerfTest :
+        Performance_Specs<DotNotXmlMessageSerializer>
+    {
+    }
+
+    [TestFixture]
+    public class WhenUsingBinaryInPerfTest :
+        Performance_Specs<BinaryMessageSerializer>
+    {
+    }
+
+    [TestFixture]
+    public class WhenUsingJsonInPerfTest :
+        Performance_Specs<JsonMessageSerializer>
+    {
+        
+    }
 }

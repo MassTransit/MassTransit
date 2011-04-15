@@ -13,6 +13,7 @@
 namespace Grid.Distributor.Shared
 {
     using System;
+    using MassTransit.Transports;
     using MassTransit.Transports.Msmq;
     using StructureMap;
     using Topshelf;
@@ -46,7 +47,7 @@ namespace Grid.Distributor.Shared
 
                 c.ConfigureService<T>( s =>
                 {
-                    MsmqEndpointConfigurator.Defaults(def => def.CreateMissingQueues = true);
+                    EndpointConfigurator.Defaults(def => def.CreateMissingQueues = true);
                     s.HowToBuildService(name =>
                     {
                         Container container = new Container(x =>

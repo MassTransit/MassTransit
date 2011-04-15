@@ -1,0 +1,7 @@
+﻿<NUnitProject>
+  <Settings activeconfig="Default" />
+  <Config name="Default" binpathtype="Auto">
+    <assembly path="Apache.NMS.Test.dll" />
+    <assembly path="Apache.NMS.ActiveMQ.Test.dll" />
+  </Config>
+</NUnitProject>

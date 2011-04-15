@@ -21,7 +21,7 @@ namespace MassTransit.Tests.TextFixtures
 
 	[TestFixture]
 	public class LoopbackLocalAndRemoteTestFixture :
-		EndpointTestFixture<LoopbackEndpoint>
+		EndpointTestFixture<LoopbackTransportFactory>
 	{
 		public ISubscriptionService SubscriptionService { get; private set; }
 		public IServiceBus LocalBus { get; private set; }
@@ -67,7 +67,7 @@ namespace MassTransit.Tests.TextFixtures
 				.WhenCalled(invocation =>
 					{
 						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointFactory);
+						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointResolver);
 					});
 		}
 

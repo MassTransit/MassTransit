@@ -14,12 +14,37 @@ namespace MassTransit.Tests.Serialization
 {
 	using System;
 	using System.Collections.Generic;
+	using MassTransit.Serialization;
 	using NUnit.Framework;
 
 	[TestFixture]
-	public class MoreSerialization_Specs :
-		SerializationSpecificationBase
+    public class MoreSerializationForCustomXml :
+        MoreSerialization_Specs<CustomXmlMessageSerializer>
 	{
+	}
+
+    [TestFixture]
+    public class MoreSerializationForJson :
+        MoreSerialization_Specs<JsonMessageSerializer>
+    {
+    }
+
+    [TestFixture][Ignore("Just can't keep up with the others")]
+    public class MoreSerializationForDotNotXml :
+        MoreSerialization_Specs<DotNotXmlMessageSerializer>
+    {
+    }
+
+    [TestFixture]
+    public class MoreSerializationForBinary :
+        MoreSerialization_Specs<BinaryMessageSerializer>
+    {
+    }
+
+	public abstract class MoreSerialization_Specs<TSerializer> :
+		SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
+	{
+        [Serializable]
 		public class ContainerClass
 		{
 			public IList<OuterClass> Elements { get; set; }
@@ -61,6 +86,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+        [Serializable]
 		public class DictionaryContainerClass
 		{
 			public IDictionary<string, OuterClass> Elements { get; set; }
@@ -105,6 +131,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+        [Serializable]
 		public class PrimitiveArrayClass
 		{
 			public int[] Values { get; set; }
@@ -146,6 +173,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+        [Serializable]
 		public class GenericArrayClass<T>
 		{
 			public T[] Values { get; set; }
@@ -187,6 +215,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+        [Serializable]
 		public class OuterClass
 		{
 			public InnerClass Inner { get; set; }
@@ -212,6 +241,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+        [Serializable]
 		public class InnerClass
 		{
 			public string Name { get; set; }
@@ -238,6 +268,7 @@ namespace MassTransit.Tests.Serialization
 		}
 
 
+        [Serializable]
 		public class EmptyClass
 		{
 			public bool Equals(EmptyClass other)
@@ -327,6 +358,7 @@ namespace MassTransit.Tests.Serialization
 		}
 
 
+        [Serializable]
 		public class EnumClass
 		{
 			public SomeEnum Setting { get; set; }
@@ -387,9 +419,6 @@ namespace MassTransit.Tests.Serialization
 			TestSerialization(message);
 		}
 
-
-
-
 		[Test]
 		public void A_nested_object_should_be_properly_serialized()
 		{
@@ -402,6 +431,7 @@ namespace MassTransit.Tests.Serialization
 		}
 	}
 
+        [Serializable]
 	public class PrivateSetter
 	{
 		public PrivateSetter(string name)

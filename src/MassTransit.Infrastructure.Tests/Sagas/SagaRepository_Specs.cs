@@ -14,7 +14,6 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 {
     using Magnum;
     using Magnum.Data;
-    using Magnum.ForNHibernate.Data;
     using MassTransit.Tests.Saga.StateMachine;
     using NHibernate;
     using NHibernate.Cfg;
@@ -22,7 +21,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
     using NUnit.Framework;
     using Saga;
 
-    [TestFixture, Category("Integration")]
+	[TestFixture, Category("Integration")]
     public class SagaRepository_Specs
     {
         [SetUp]
@@ -36,17 +35,13 @@ namespace MassTransit.Infrastructure.Tests.Sagas
             _cfg.SetProperty("dialect", "NHibernate.Dialect.MsSql2005Dialect");
             _cfg.SetProperty("default_schema", "bus");
 
-            _cfg.AddAssembly(typeof (NHibernateSagaRepository<>).Assembly);
+            _cfg.AddAssembly(typeof (NHibernateSagaRepositoryForContainers<>).Assembly);
             _cfg.AddAssembly(typeof (RegisterUserStateMachine).Assembly);
             _cfg.AddAssembly(typeof (SagaRepository_Specs).Assembly);
 
             ISessionFactory _sessionFactory = _cfg.BuildSessionFactory();
 
             LocalContext.Current.Store(_sessionFactory);
-
-            NHibernateUnitOfWork.SetSessionProvider(() => LocalContext.Current.Retrieve<ISessionFactory>().OpenSession());
-
-            UnitOfWork.SetUnitOfWorkProvider(NHibernateUnitOfWork.Create);
         }
 
         [Test, Explicit]

@@ -1,5 +1,5 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
+// Copyright 2007-2010 The Apache Software Foundation.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -21,14 +21,14 @@ namespace MassTransit.Serialization
     public class PreSharedKeyEncryptedMessageSerializer :
         IMessageSerializer
     {
-        private readonly string _key;
-        private static readonly ILog _log = LogManager.GetLogger(typeof (PreSharedKeyEncryptedMessageSerializer));
-        private readonly IMessageSerializer _xmlSerializer;
+        readonly string _key;
+        static readonly ILog _log = LogManager.GetLogger(typeof (PreSharedKeyEncryptedMessageSerializer));
+        readonly IMessageSerializer _wrappedSerializer;
 
-        public PreSharedKeyEncryptedMessageSerializer(string key)
+        public PreSharedKeyEncryptedMessageSerializer(string key, IMessageSerializer serializer)
         {
             _key = key;
-            _xmlSerializer = new XmlMessageSerializer();
+            _wrappedSerializer = serializer;
         }
 
         public void Serialize<T>(Stream output, T message)
@@ -37,7 +37,7 @@ namespace MassTransit.Serialization
             {
                 using (var clearStream = new MemoryStream())
                 {
-                    _xmlSerializer.Serialize(clearStream, message);
+                    _wrappedSerializer.Serialize(clearStream, message);
 
                     clearStream.Seek(0, SeekOrigin.Begin);
 
@@ -51,7 +51,7 @@ namespace MassTransit.Serialization
                                 Iv = Convert.ToBase64String(encryptedStream.Iv),
                             };
 
-                        _xmlSerializer.Serialize(output, encryptedMessage);
+                        _wrappedSerializer.Serialize(output, encryptedMessage);
                     }
                 }
             }
@@ -67,7 +67,7 @@ namespace MassTransit.Serialization
 
         public object Deserialize(Stream input)
         {
-            object message = _xmlSerializer.Deserialize(input);
+            object message = _wrappedSerializer.Deserialize(input);
             if (message == null)
                 throw new SerializationException("Could not deserialize message.");
 
@@ -83,7 +83,7 @@ namespace MassTransit.Serialization
                 {
                     var clearStream = cryptographyService.Decrypt(cipherStream);
 
-                    return _xmlSerializer.Deserialize(clearStream);
+                    return _wrappedSerializer.Deserialize(clearStream);
                 }
             }
             return message;

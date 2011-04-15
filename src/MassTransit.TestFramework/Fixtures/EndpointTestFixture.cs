@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,21 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Fixtures
+namespace MassTransit.TestFramework.Transports
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using Configuration;
+	using Fixtures;
 	using Magnum.Extensions;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using Serialization;
 
 	[TestFixture]
-	public class EndpointTestFixture<TEndpoint> :
+	public class EndpointTestFixture<TTransportFactory> :
 		AbstractTestFixture
-		where TEndpoint : IEndpoint
+		where TTransportFactory : ITransportFactory
 	{
 		[TestFixtureSetUp]
 		public void EndpointTestFixtureSetup()
@@ -43,8 +45,8 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			TeardownBuses();
 
-			EndpointFactory.Dispose();
-			EndpointFactory = null;
+			EndpointResolver.Dispose();
+			EndpointResolver = null;
 		}
 
 		protected EndpointTestFixture()
@@ -64,19 +66,19 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected virtual void SetupEndpointFactory()
 		{
-			EndpointFactory = EndpointFactoryConfigurator.New(x =>
+			EndpointResolver = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
-					x.RegisterTransport<TEndpoint>();
+					x.AddTransportFactory<TTransportFactory>();
 					x.SetDefaultSerializer<XmlMessageSerializer>();
 
 					ConfigureEndpointFactory(x);
 				});
 
-			ObjectBuilder.Add(EndpointFactory);
+			ObjectBuilder.Add(EndpointResolver);
 		}
 
-		protected virtual void ConfigureEndpointFactory(IEndpointFactoryConfigurator x)
+		protected virtual void ConfigureEndpointFactory(IEndpointResolverConfigurator x)
 		{
 		}
 
@@ -84,6 +86,7 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			ServiceBusConfigurator.Defaults(x =>
 				{
+					x.SetEndpointFactory(EndpointResolver);
 					x.SetObjectBuilder(ObjectBuilder);
 					x.SetReceiveTimeout(50.Milliseconds());
 					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
@@ -98,7 +101,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected IList<IServiceBus> Buses { get; private set; }
 
-		protected IEndpointFactory EndpointFactory { get; private set; }
+		protected IEndpointResolver EndpointResolver { get; private set; }
 
 		protected IObjectBuilder ObjectBuilder { get; private set; }
 

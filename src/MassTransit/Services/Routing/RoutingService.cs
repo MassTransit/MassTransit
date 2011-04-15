@@ -9,13 +9,13 @@ namespace MassTransit.Services.Routing
     {
         
         UnsubscribeAction _unsubscribe;
-        readonly IList<Func<IServiceBus, IEndpointFactory, UnsubscribeAction>> _routes;
-        readonly IEndpointFactory _factory;
+        readonly IList<Func<IServiceBus, IEndpointResolver, UnsubscribeAction>> _routes;
+        readonly IEndpointResolver _resolver;
 
-        public RoutingService(IList<Func<IServiceBus, IEndpointFactory, UnsubscribeAction>> routes, IEndpointFactory factory)
+        public RoutingService(IList<Func<IServiceBus, IEndpointResolver, UnsubscribeAction>> routes, IEndpointResolver resolver)
         {
             _routes = routes;
-            _factory = factory;
+            _resolver = resolver;
         }
 
         public void Dispose()
@@ -27,9 +27,9 @@ namespace MassTransit.Services.Routing
         {
             _unsubscribe = () => true;
 
-            foreach (Func<IServiceBus, IEndpointFactory, UnsubscribeAction> route in _routes)
+            foreach (Func<IServiceBus, IEndpointResolver, UnsubscribeAction> route in _routes)
             {
-                _unsubscribe += route(bus, _factory);
+                _unsubscribe += route(bus, _resolver);
             }
         }
 

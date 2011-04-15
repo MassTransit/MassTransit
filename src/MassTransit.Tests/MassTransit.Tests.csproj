@@ -36,7 +36,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\tests\</OutputPath>
+    <OutputPath>..\..\tests\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -45,7 +45,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\tests\</OutputPath>
+    <OutputPath>..\..\tests\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -66,33 +66,41 @@
     </Reference>
     <Reference Include="Magnum, Version=1.0.0.225, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Magnum\Magnum.dll</HintPath>
+      <HintPath>..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.TestFramework, Version=1.0.0.230, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Magnum\Magnum.TestFramework.dll</HintPath>
+      <HintPath>..\..\lib\Magnum\net-3.5\TestFramework\Magnum.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=2.5.2.9222, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\NUnit\nunit.framework.dll</HintPath>
+      <HintPath>..\..\lib\NUnit\net-2.0\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="Rhino.Mocks, Version=3.3.0.906, Culture=neutral, PublicKeyToken=0b3305902db7183f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Rhino.Mocks.dll</HintPath>
     </Reference>
+    <Reference Include="Stact, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Stact\net-3.5\Stact.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.CoreEx, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="System.CoreEx, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rx_Net35_SP1\System.CoreEx.dll</HintPath>
+      <HintPath>..\..\lib\Rx\Net35\System.CoreEx.dll</HintPath>
+    </Reference>
+    <Reference Include="System.CoreEx, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Rx\Net4\System.CoreEx.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Observable, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Rx\Net35\System.Observable.dll</HintPath>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Observable, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rx_Net35_SP1\System.Observable.dll</HintPath>
-    </Reference>
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -105,6 +113,8 @@
     <Compile Include="Distributor\DistributorSagaTestFixture.cs" />
     <Compile Include="Distributor\DistributorSaga_Specs.cs" />
     <Compile Include="Distributor\LoopbackDistributorSagaTestFixture.cs" />
+    <Compile Include="Distributor\LoopbackMultipleDistributorSagaTestFixture.cs" />
+    <Compile Include="Distributor\MultipleDistributorSagaTestFixture.cs" />
     <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message.cs" />
     <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message_on_a_remote_bus.cs" />
     <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message_on_the_remote_bus.cs" />
@@ -135,7 +145,6 @@
     <Compile Include="Load\Messages\FirstPending.cs" />
     <Compile Include="Load\Messages\FirstResponse.cs" />
     <Compile Include="Distributor\ServiceInstance.cs" />
-    <Compile Include="ExtensionsForTestingEndpoints.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="FutureMessage.cs" />
     <Compile Include="Groups\Group_Specs.cs" />
@@ -144,6 +153,8 @@
     <Compile Include="Load\Sagas\FirstSaga.cs" />
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="MessageInterceptor_Specs.cs" />
+    <Compile Include="MessageRetryTracker_Specs.cs" />
+    <Compile Include="Messages\PartialSerializationTestMessage.cs" />
     <Compile Include="Performance\EndpointLoadTest.cs" />
     <Compile Include="Performance\LoadedRequest.cs" />
     <Compile Include="Performance\LoadedResponse.cs" />
@@ -183,6 +194,8 @@
     <Compile Include="MessageGroup_Specs.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />
+    <Compile Include="Serialization\GivenAComplexMessage.cs" />
+    <Compile Include="Serialization\GivenASimpleMessage.cs" />
     <Compile Include="Serialization\Header_Specs.cs" />
     <Compile Include="Serialization\Interface_Specs.cs" />
     <Compile Include="Serialization\MoreSerialization_Specs.cs" />
@@ -197,10 +210,12 @@
     <Compile Include="Services\Routing\RoutingConfiguration_Specs.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionConsumer_Specs.cs" />
     <Compile Include="SubscribeConsumer_Specs.cs" />
+    <Compile Include="Subscriptions\Removing_a_subscription_client.cs" />
     <Compile Include="Subscriptions\SubscriptionService_Specs.cs" />
     <Compile Include="Subscriptions\CorrelatedSubscription_Specs.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TextFixtures\SubscriptionServiceTestFixture.cs" />
+    <Compile Include="Transports\LoopbackTransportContract.cs" />
     <Compile Include="Transports\Multicast_Specs.cs" />
     <Compile Include="Pipeline\BatchConsumer_Specs.cs" />
     <Compile Include="Saga\InitiateSaga_Specs.cs" />
@@ -231,7 +246,6 @@
     <Compile Include="Saga\RegisterUser_Specs.cs" />
     <Compile Include="Saga\StateMachine\RegisterUserStateMachine.cs" />
     <Compile Include="Saga\StateMachine\SagaStateMachine_Specs.cs" />
-    <Compile Include="Serialization\MessageSerialization_Specs.cs" />
     <Compile Include="Services\Metadata\MessageMetadataExtraction_spec.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
@@ -254,7 +268,6 @@
     <Compile Include="TextFixtures\MulticastUdpTestFixture.cs" />
     <Compile Include="Timeouts\DeferMessage_Specs.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />
-    <Compile Include="Transports\EndpointContract.cs" />
     <Compile Include="Transports\TransactionalEndpointContract.cs" />
     <Compile Include="Uri_Specs.cs" />
   </ItemGroup>
@@ -290,7 +303,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Formatters\" />
     <Folder Include="Services\LoadBalancer\" />
   </ItemGroup>
   <ItemGroup>

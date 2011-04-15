@@ -16,30 +16,36 @@ namespace MassTransit.Distributor
 	using System.Linq;
 	using Magnum;
 	using Magnum.Extensions;
-	using Magnum.Fibers;
 	using Magnum.Threading;
 	using Messages;
+	using Stact;
+	using Stact.Internal;
 
 	public class Distributor<T> :
 		IDistributor<T>,
 		Consumes<T>.Selected
 		where T : class
 	{
-		private readonly IEndpointFactory _endpointFactory;
+		private readonly IEndpointResolver _endpointResolver;
 		private readonly IWorkerSelectionStrategy<T> _selectionStrategy;
 		private readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers = new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
-		private Scheduler _threadPoolScheduler;
+		private Scheduler _scheduler;
+		private Fiber _fiber;
 		private UnsubscribeAction _unsubscribeAction = () => false;
         private readonly int _pingTimeout = (int)1.Minutes().TotalMilliseconds;
+		private ScheduledOperation _scheduled;
 
-		public Distributor(IEndpointFactory endpointFactory, IWorkerSelectionStrategy<T> workerSelectionStrategy)
+		public Distributor(IEndpointResolver endpointResolver, IWorkerSelectionStrategy<T> workerSelectionStrategy)
 		{
-			_endpointFactory = endpointFactory;
+			_endpointResolver = endpointResolver;
 			_selectionStrategy = workerSelectionStrategy;
+
+			_fiber = new PoolFiber();
+			_scheduler = new TimerScheduler(new PoolFiber());
 		}
 
-		public Distributor(IEndpointFactory endpointFactory) :
-				this(endpointFactory, new DefaultWorkerSelectionStrategy<T>())
+		public Distributor(IEndpointResolver endpointResolver) :
+				this(endpointResolver, new DefaultWorkerSelectionStrategy<T>())
 		{
 		}
 
@@ -54,7 +60,7 @@ namespace MassTransit.Distributor
 
 			worker.Add();
 
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(worker.DataUri);
+			IEndpoint endpoint = _endpointResolver.GetEndpoint(worker.DataUri);
 
 			var distributed = new Distributed<T>(message, CurrentMessage.Headers.ResponseAddress);
 
@@ -68,6 +74,11 @@ namespace MassTransit.Distributor
 
 		public void Dispose()
 		{
+			_scheduler.Stop(60.Seconds());
+			_scheduler = null;
+
+			_fiber.Shutdown(60.Seconds());
+			_fiber = null;
 		}
 
 		public void Start(IServiceBus bus)
@@ -77,14 +88,14 @@ namespace MassTransit.Distributor
 			// don't plan to unsubscribe this since it's an important thing
 			bus.Subscribe(this);
 
-			_threadPoolScheduler = new TimerScheduler(new ThreadPoolFiber() );
 
-			_threadPoolScheduler.Schedule(_pingTimeout, _pingTimeout, new ThreadPoolFiber(), PingWorkers);
+			_scheduled = _scheduler.Schedule(_pingTimeout, _pingTimeout, _fiber, PingWorkers);
 		}
 
 		public void Stop()
 		{
-			_threadPoolScheduler.Stop();
+			_scheduled.Cancel();
+			_scheduled = null;
 
 			_workers.Clear();
 
@@ -115,7 +126,7 @@ namespace MassTransit.Distributor
 			_workers.Values
 				.Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(_pingTimeout.Milliseconds()))
 				.ToList()
-				.ForEach(x => { _endpointFactory.GetEndpoint(x.ControlUri).Send(new PingWorker()); });
+				.ForEach(x => { _endpointResolver.GetEndpoint(x.ControlUri).Send(new PingWorker()); });
 		}
 	}
 }

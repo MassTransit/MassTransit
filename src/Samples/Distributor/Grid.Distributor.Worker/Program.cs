@@ -20,7 +20,7 @@ namespace Grid.Distributor.Worker
     {
         private static void Main(string[] args)
         {
-            XmlConfigurator.ConfigureAndWatch(new FileInfo(@"log4net.config"));
+            XmlConfigurator.ConfigureAndWatch(new FileInfo(@"worker.log4net.config"));
 
             var service = new WorkerServiceProvider
             {

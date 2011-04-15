@@ -30,7 +30,8 @@ namespace MassTransit.Distributor
 	    {
 	        return candidates
 	            .Where(x => x.InProgress + x.Pending < x.InProgressLimit + x.PendingLimit)
-	            .OrderByDescending(x => x.InProgress + x.Pending)
+	            .OrderBy(x => x.InProgress + x.Pending)
+				.ThenByDescending(x => x.LastUpdate)
 	            .FirstOrDefault();
         }
 	}

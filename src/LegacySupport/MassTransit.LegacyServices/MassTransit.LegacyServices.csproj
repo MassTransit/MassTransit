@@ -52,13 +52,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Antlr3.Runtime, Version=3.1.0.39271, Culture=neutral, PublicKeyToken=3a9cab8f8d22bfb7, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\Antlr3.Runtime.dll</HintPath>
-    </Reference>
     <Reference Include="Castle.Core, Version=1.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\Castle.Core.dll</HintPath>
+      <HintPath>..\..\..\lib\Castle.Core\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="FluentNHibernate, Version=1.0.0.593, Culture=neutral, PublicKeyToken=8aa435e3cb308880, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -66,31 +62,23 @@
     </Reference>
     <Reference Include="Iesi.Collections, Version=1.0.1.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\Iesi.Collections.dll</HintPath>
+      <HintPath>..\..\..\lib\NHibernate\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum, Version=0.8.0.446, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Magnum, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum.ForNHibernate">
-      <HintPath>..\..\..\lib\Magnum\Magnum.ForNHibernate.dll</HintPath>
-    </Reference>
-    <Reference Include="NHibernate, Version=2.1.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+    <Reference Include="NHibernate, Version=2.1.2.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\NHibernate.dll</HintPath>
+      <HintPath>..\..\..\lib\NHibernate\NHibernate.dll</HintPath>
     </Reference>
-    <Reference Include="NHibernate.ByteCode.Castle, Version=2.1.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+    <Reference Include="NHibernate.ByteCode.Castle, Version=2.1.2.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\NHibernate.ByteCode.Castle.dll</HintPath>
-    </Reference>
-    <Reference Include="NHibernate.Linq, Version=1.0.0.4000, Culture=neutral, PublicKeyToken=444cf6a87fdab271, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\NHibernate.Linq.dll</HintPath>
+      <HintPath>..\..\..\lib\NHibernate\NHibernate.ByteCode.Castle.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap, Version=2.5.4.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -103,9 +91,9 @@
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
-    <Reference Include="Topshelf, Version=0.8.0.89, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Topshelf, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Topshelf\Topshelf.dll</HintPath>
+      <HintPath>..\..\..\lib\Topshelf\net-3.5\Topshelf.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -118,31 +106,6 @@
     <Compile Include="Model\LegacySubscriptionClientSagaMap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj">
-      <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
-      <Name>MassTransit.StructureMapIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.LegacySupport\MassTransit.LegacySupport.csproj">
-      <Project>{EBC898FE-E3E4-4599-8DC3-D98A829424AC}</Project>
-      <Name>MassTransit.LegacySupport</Name>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
-      <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
-      <Name>MassTransit.Infrastructure</Name>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
-      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
-      <Name>MassTransit</Name>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj">
-      <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
-      <Name>MassTransit.Transports.Msmq</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -169,6 +132,28 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj">
+      <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
+      <Name>MassTransit.StructureMapIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
+      <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
+      <Name>MassTransit.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
+      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
+      <Name>MassTransit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj">
+      <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
+      <Name>MassTransit.Transports.Msmq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.LegacySupport\MassTransit.LegacySupport.csproj">
+      <Project>{EBC898FE-E3E4-4599-8DC3-D98A829424AC}</Project>
+      <Name>MassTransit.LegacySupport</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

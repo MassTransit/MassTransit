@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,14 +19,14 @@ namespace MassTransit.Transports
     public class CreateEndpointSettings
     {
         public CreateEndpointSettings(string uri)
-            : this()
         {
             Guard.AgainstNull(uri, "The URI cannot be null or empty");
             Guard.AgainstEmpty(uri, "The URI cannot be null or empty");
 
             try
             {
-                Address = new EndpointAddress(new Uri(uri));
+                var address = new EndpointAddress(new Uri(uri));
+                SetAddresses(address);
             }
             catch (UriFormatException ex)
             {
@@ -35,44 +35,45 @@ namespace MassTransit.Transports
         }
 
         public CreateEndpointSettings(Uri uri)
-            : this()
         {
             Guard.AgainstNull(uri, "The URI cannot be null");
 
-            Address = new EndpointAddress(uri);
-
-            SetDefaultErrorAddress();
+            var address = new EndpointAddress(uri);
+            SetAddresses(address);
         }
 
         public CreateEndpointSettings(IEndpointAddress address)
-            : this()
         {
             Guard.AgainstNull(address, "The address cannot be null");
 
-            Address = new EndpointAddress(address.Uri);
-
-            SetDefaultErrorAddress();
+            SetAddresses(address);
         }
 
         public CreateEndpointSettings(IEndpointAddress address, CreateEndpointSettings source)
-            : this()
         {
             Guard.AgainstNull(address, "The address cannot be null");
             Guard.AgainstNull(source, "The source settings cannot be null");
 
-            Address = new EndpointAddress(address.Uri);
-            SetDefaultErrorAddress();
-
             Serializer = source.Serializer;
+            Transactional = source.Transactional;
+            PurgeExistingMessages = source.PurgeExistingMessages;
+            CreateIfMissing = source.CreateIfMissing;
+
+
+            SetAddresses(address);
         }
 
-        public CreateEndpointSettings()
-        {
-        }
 
-        private void SetDefaultErrorAddress()
+        protected void SetAddresses(IEndpointAddress address)
         {
-            ErrorAddress = new EndpointAddress(new Uri(Address.Uri + "_error"));
+            if(address.IsTransactional)
+                Transactional = true;
+
+            Address = address;
+
+            var errorPath = Address.Uri.AbsolutePath + "_error";
+            var errorUri = new UriBuilder(Address.Uri.Scheme, Address.Uri.Host, Address.Uri.Port, errorPath).Uri;
+            ErrorAddress = new EndpointAddress(errorUri);
         }
 
         /// <summary>
@@ -90,5 +91,25 @@ namespace MassTransit.Transports
         /// The serializer to use for messages on the endpoint
         /// </summary>
         public IMessageSerializer Serializer { get; set; }
+
+        public bool Transactional { get; set; }
+
+        /// <summary>
+        /// True if any existing messages at the endpoint should be purged when the endpoint is created
+        /// </summary>
+        public bool PurgeExistingMessages { get; set; }
+
+        public bool CreateIfMissing { get; set; }
+
+        public CreateTransportSettings ToTransportSettings()
+        {
+            return new CreateTransportSettings(Address)
+                {
+                    CreateIfMissing = CreateIfMissing,
+                    RequireTransactional = Transactional,
+                    Transactional =  Transactional,
+                    PurgeExistingMessages = PurgeExistingMessages
+                };
+        }
     }
 }

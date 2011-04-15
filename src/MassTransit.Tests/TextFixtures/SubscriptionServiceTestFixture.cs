@@ -18,17 +18,17 @@ namespace MassTransit.Tests.TextFixtures
 	using Configuration;
 	using Distributor;
 	using MassTransit.Saga;
-	using MassTransit.Services.Subscriptions;
 	using MassTransit.Services.Subscriptions.Client;
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Services.Subscriptions.Server;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public class SubscriptionServiceTestFixture<TEndpoint> :
-		EndpointTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+	public class SubscriptionServiceTestFixture<TTransportFactory> :
+		EndpointTestFixture<TTransportFactory>
+		where TTransportFactory : ITransportFactory
 	{
 		private ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
 		private ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;
@@ -43,7 +43,6 @@ namespace MassTransit.Tests.TextFixtures
 		public IServiceBus RemoteBus { get; private set; }
 		public IControlBus RemoteControlBus { get; private set; }
 		public IServiceBus SubscriptionBus { get; private set; }
-		public ISubscriptionRepository SubscriptionRepository { get; private set; }
 
 		protected override void EstablishContext()
 		{
@@ -57,16 +56,18 @@ namespace MassTransit.Tests.TextFixtures
 
 			SetupSubscriptionService(ObjectBuilder);
 
+			SetupLocalBus();
+
+			SetupRemoteBus();
+
+			Instances = new Dictionary<string, ServiceInstance>();
+		}
+
+		protected void SetupLocalBus()
+		{
 			LocalControlBus = ControlBusConfigurator.New(x =>
 				{
 					x.ReceiveFrom(ClientControlUri);
-
-					x.PurgeBeforeStarting();
-				});
-
-			RemoteControlBus = ControlBusConfigurator.New(x =>
-				{
-					x.ReceiveFrom(ServerControlUri);
 
 					x.PurgeBeforeStarting();
 				});
@@ -84,6 +85,16 @@ namespace MassTransit.Tests.TextFixtures
 
 					ConfigureLocalBus(x);
 				});
+		}
+
+		protected void SetupRemoteBus()
+		{
+			RemoteControlBus = ControlBusConfigurator.New(x =>
+				{
+					x.ReceiveFrom(ServerControlUri);
+
+					x.PurgeBeforeStarting();
+				});
 
 			RemoteBus = ServiceBusConfigurator.New(x =>
 				{
@@ -94,16 +105,16 @@ namespace MassTransit.Tests.TextFixtures
 						});
 					x.ReceiveFrom(ServerUri);
 					x.UseControlBus(RemoteControlBus);
-				});
 
-			Instances = new Dictionary<string, ServiceInstance>();
+					ConfigureRemoteBus(x);
+				});
 		}
 
 		protected Dictionary<string, ServiceInstance> Instances { get; private set; }
 
 		protected ServiceInstance AddInstance(string instanceName, string queueName, Action<IObjectBuilder> configureBuilder, Action<IServiceBusConfigurator> configureBus)
 		{
-			var instance = new ServiceInstance(queueName, EndpointFactory, SubscriptionServiceUri, configureBuilder, configureBus);
+			var instance = new ServiceInstance(queueName, EndpointResolver, SubscriptionServiceUri, configureBuilder, configureBus);
 
 			Instances.Add(instanceName, instance);
 
@@ -114,25 +125,23 @@ namespace MassTransit.Tests.TextFixtures
 		{
 		}
 
+		protected virtual void ConfigureRemoteBus(IServiceBusConfigurator configurator)
+		{
+		}
+
 		private void SetupSubscriptionService(IObjectBuilder builder)
 		{
-			//SubscriptionRepository = new InMemorySubscriptionRepository();
-			SubscriptionRepository = MockRepository.GenerateMock<ISubscriptionRepository>();
-			SubscriptionRepository.Expect(x => x.List()).Return(new List<Subscription>());
-			builder.Stub(x => x.GetInstance<ISubscriptionRepository>())
-				.Return(SubscriptionRepository);
-
 			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>(builder);
 			
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(builder);
 			
-			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
+			SubscriptionService = new SubscriptionService(SubscriptionBus, EndpointResolver, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
 			SubscriptionService.Start();
 
 			builder.Stub(x => x.GetInstance<SubscriptionClient>())
 				.Return(null)
-				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(EndpointFactory); });
+				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(EndpointResolver); });
 		}
 
 

@@ -14,7 +14,6 @@ namespace MassTransit
 {
 	using System;
 	using Internal;
-	using Magnum.Reflection;
 
 	public static class CurrentMessage
 	{
@@ -106,15 +105,15 @@ namespace MassTransit
 			if (headers.FaultAddress == null)
 				throw new InvalidOperationException("No fault address was contained in the message");
 
-			return headers.ObjectBuilder.GetInstance<IEndpointFactory>().GetEndpoint(headers.FaultAddress);
+			return headers.ObjectBuilder.GetInstance<IEndpointResolver>().GetEndpoint(headers.FaultAddress);
 		}
 
 		private static IEndpoint GetResponseEndpoint(this IInboundMessageHeaders headers)
 		{
 			if (headers.ResponseAddress == null)
 				throw new InvalidOperationException("No response address was contained in the message");
-
-			return headers.ObjectBuilder.GetInstance<IEndpointFactory>().GetEndpoint(headers.ResponseAddress);
+            
+			return headers.ObjectBuilder.GetInstance<IEndpointResolver>().GetEndpoint(headers.ResponseAddress);
 		}
 	}
 }

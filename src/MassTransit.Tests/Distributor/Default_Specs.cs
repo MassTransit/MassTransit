@@ -117,7 +117,7 @@ namespace MassTransit.Tests.Distributor
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
 			const int count = 100;
 
-			generator.Run(RemoteBus, count, x => new FirstCommand(x));
+			generator.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), count, x => new FirstCommand(x));
 
 			Dictionary<Uri, int> results = generator.GetWorkerLoad();
 
@@ -166,7 +166,7 @@ namespace MassTransit.Tests.Distributor
 		        .IgnoreArguments()
 		        .Return(true);
 
-			configurator.UseDistributorFor(EndpointFactory, mock);
+			configurator.UseDistributorFor(EndpointResolver, mock);
 		}
 
 		[Test]
@@ -175,7 +175,7 @@ namespace MassTransit.Tests.Distributor
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
 			const int count = 100;
 
-			generator.Run(RemoteBus, count, x => new FirstCommand(x));
+			generator.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), count, x => new FirstCommand(x));
 
 			Dictionary<Uri, int> results = generator.GetWorkerLoad();
 

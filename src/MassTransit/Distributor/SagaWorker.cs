@@ -1,4 +1,4 @@
-// Copyright 2007-20010 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,10 +16,12 @@ namespace MassTransit.Distributor
 	using System.Collections.Generic;
 	using System.Threading;
 	using Magnum;
-	using Magnum.Fibers;
+	using Magnum.Extensions;
 	using Magnum.Reflection;
 	using Messages;
 	using Saga;
+	using Stact;
+	using Stact.Internal;
 
 	public class SagaWorker<TSaga> :
 		ISagaWorker<TSaga>,
@@ -28,7 +30,7 @@ namespace MassTransit.Distributor
 	{
 		private readonly IList<Type> _messageTypes = new List<Type>();
 		private readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
-		private readonly Fiber _queue = new ThreadPoolFiber();
+		private readonly Fiber _fiber = new PoolFiber();
 		private IServiceBus _bus;
 		private IServiceBus _controlBus;
 		private Uri _controlUri;
@@ -38,6 +40,8 @@ namespace MassTransit.Distributor
 		private int _pendingLimit = 16;
 		private UnsubscribeAction _unsubscribeAction = () => false;
 		private bool _updatePending;
+		private Scheduler _scheduler;
+		private ScheduledOperation _scheduled;
 
 		public SagaWorker()
 			: this(new WorkerSettings())
@@ -57,7 +61,10 @@ namespace MassTransit.Distributor
 
 		public void Dispose()
 		{
-		    _queue.Stop();
+			Stop();
+
+			_fiber.Stop();
+
 			_controlBus = null;
 		}
 
@@ -74,12 +81,34 @@ namespace MassTransit.Distributor
 
 			CacheMessageTypesForSaga();
 
-			PublishWorkerAvailability();
+			_scheduler = new TimerScheduler(new PoolFiber());
+			_scheduled = _scheduler.Schedule(3.Seconds(), 1.Minutes(), _fiber, PublishWorkerAvailability);
 		}
 
 		public void Stop()
 		{
-			_unsubscribeAction();
+			if (_scheduled != null)
+			{
+				_scheduled.Cancel();
+				_scheduled = null;
+			}
+
+			if (_scheduler != null)
+			{
+				_scheduler.Stop(60.Seconds());
+				_scheduler = null;
+			}
+
+			if (_fiber != null)
+			{
+				_fiber.Shutdown(60.Seconds());
+			}
+
+			if(_unsubscribeAction != null)
+			{
+				_unsubscribeAction();
+				_unsubscribeAction = null;
+			}
 		}
 
 		public bool CanAcceptMessage<TMessage>(Distributed<TMessage> message)
@@ -121,10 +150,10 @@ namespace MassTransit.Distributor
 			saga.EnumerateDataEvents(type => _messageTypes.Add(type));
 		}
 
-        private bool Accept(ConfigureWorker message)
-        {
-            return typeof(TSaga).GetType().FullName == message.MessageType;
-        }
+		private bool Accept(ConfigureWorker message)
+		{
+			return typeof (TSaga).GetType().FullName == message.MessageType;
+		}
 
 		private void Consume(ConfigureWorker message)
 		{
@@ -134,7 +163,7 @@ namespace MassTransit.Distributor
 			if (message.PendingLimit >= 0)
 				_pendingLimit = message.PendingLimit;
 
-			PublishWorkerAvailability();
+			ScheduleUpdate();
 		}
 
 		private void ScheduleUpdate()
@@ -142,15 +171,21 @@ namespace MassTransit.Distributor
 			if (!_updatePending)
 			{
 				_updatePending = true;
-				_queue.Add(PublishWorkerAvailability);
+				_fiber.Add(PublishWorkerAvailability);
 			}
 		}
 
 		private void PublishWorkerAvailability()
 		{
-			_updatePending = false;
+			try
+			{
+				_updatePending = false;
 
-			_messageTypes.Each(type => { this.FastInvoke(new[] {type}, "PublishWorkerAvailable"); });
+				_messageTypes.Each(type => { this.FastInvoke(new[] {type}, "PublishWorkerAvailable"); });
+			}
+			catch
+			{
+			}
 		}
 
 		private void PublishWorkerAvailable<TMessage>()

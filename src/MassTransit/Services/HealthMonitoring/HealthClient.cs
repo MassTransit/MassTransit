@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,8 +15,10 @@ namespace MassTransit.Services.HealthMonitoring
 	using System;
 	using Internal;
 	using Magnum;
-	using Magnum.Fibers;
+	using Magnum.Extensions;
 	using Messages;
+	using Stact;
+	using Stact.Internal;
 
 	public class HealthClient :
 		IBusService,
@@ -24,13 +26,14 @@ namespace MassTransit.Services.HealthMonitoring
 	{
 		private readonly int _heartbeatIntervalInMilliseconds;
 		private readonly int _heartbeatIntervalInSeconds;
-	    private IServiceBus _bus;
+		private IServiceBus _bus;
 		private Uri _controlUri;
 		private Uri _dataUri;
 		private volatile bool _disposed;
-		private Scheduler _scheduler = new TimerScheduler(new ThreadPoolFiber());
+		private Fiber _fiber;
+		private Scheduler _scheduler;
+		private ScheduledOperation _unschedule;
 		private UnsubscribeAction _unsubscribe;
-		private ScheduledAction _unschedule;
 
 		public HealthClient()
 			: this(3)
@@ -43,6 +46,9 @@ namespace MassTransit.Services.HealthMonitoring
 		/// <param name="intervalInSeconds">The heartbeat interval in seconds</param>
 		public HealthClient(int intervalInSeconds)
 		{
+			_fiber = new PoolFiber();
+			_scheduler = new TimerScheduler(new PoolFiber());
+
 			_heartbeatIntervalInSeconds = intervalInSeconds;
 			_heartbeatIntervalInMilliseconds = (int) TimeSpan.FromSeconds(_heartbeatIntervalInSeconds).TotalMilliseconds;
 
@@ -76,7 +82,7 @@ namespace MassTransit.Services.HealthMonitoring
 			var message = new EndpointCameOnline(SystemId, _controlUri, _dataUri, _heartbeatIntervalInSeconds);
 			_bus.ControlBus.Publish(message);
 
-            _unschedule = _scheduler.Schedule(_heartbeatIntervalInMilliseconds, _heartbeatIntervalInMilliseconds, new ThreadPoolFiber(), PublishHeartbeat);
+			_unschedule = _scheduler.Schedule(_heartbeatIntervalInMilliseconds, _heartbeatIntervalInMilliseconds, _fiber, PublishHeartbeat);
 		}
 
 		public void Stop()
@@ -90,8 +96,11 @@ namespace MassTransit.Services.HealthMonitoring
 		{
 			if (!disposing || _disposed) return;
 
-			_scheduler.Stop();
+			_scheduler.Stop(60.Seconds());
 			_scheduler = null;
+
+			_fiber.Shutdown(60.Seconds());
+			_fiber = null;
 
 			_disposed = true;
 		}

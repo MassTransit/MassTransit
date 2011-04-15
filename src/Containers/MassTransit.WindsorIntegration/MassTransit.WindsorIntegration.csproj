@@ -36,27 +36,28 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\bin\Castle\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\bin\Castle\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\bin\MassTransit.WindsorIntegration.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\MassTransit.WindsorIntegration.XML</DocumentationFile>
     <NoWarn>1591,1587</NoWarn>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Castle.Windsor\Castle.Core.dll</HintPath>
+      <HintPath>..\..\..\lib\Castle.Core\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="Castle.Windsor, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -64,10 +65,11 @@
     </Reference>
     <Reference Include="Magnum, Version=0.1.0.282, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -76,10 +78,8 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="DefaultMassTransitContainer.cs" />
-    <Compile Include="MassTransitFacility.cs" />
-    <Compile Include="MassTransitFacilityBase.cs" />
-    <Compile Include="WindsorContainerConfigurator.cs" />
+    <Compile Include="MassTransitInMemorySagaRepositoryInstaller.cs" />
+    <Compile Include="MassTransitInstaller.cs" />
     <Compile Include="WindsorObjectBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

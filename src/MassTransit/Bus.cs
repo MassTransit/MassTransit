@@ -13,44 +13,48 @@
 namespace MassTransit
 {
     using System;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
     using Configuration;
+    using Exceptions;
 
-    [Obsolete("Don't use yet")]
     public static class Bus
     {
-        public static void Initialize(Action<IEndpointFactoryConfigurator> cfg, Action<IServiceBusConfigurator> action)
+        static IServiceBus _instance;
+        static IEndpointResolver _resolver;
+
+        public static void Initialize(IObjectBuilder builder, Action<BusConfiguration, IEndpointResolver> cfg, params Type[] transports)
         {
-            cfg = c =>
+            if(_instance != null)
+                _instance.Dispose();
+
+            _instance = null;
+
+            _resolver = EndpointResolverConfigurator.New(e =>
             {
-                //add what we found in the dir
-                cfg(c);
-            };
+                foreach (var transport in transports)
+                    e.AddTransportFactory(transport);
 
-            //endpoints
-            Endpoints = EndpointFactoryConfigurator.New(cfg);
+            });
 
-            //get the factory rocking
-            Instance = ServiceBusConfigurator.New(action);
+            var busConfig = new MassTransitConfiguration(builder, _resolver);
+            cfg(busConfig, _resolver);
+
+            _instance = busConfig.CreateBus();
         }
 
-        public static IServiceBus Instance { get; private set; }
-        public static IEndpointFactory Endpoints { get; private set; }
-
-        private static void FindTransports()
+        public static IEndpointResolver Factory()
         {
-            string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var files = Directory.GetFiles(assemblyPath);
-            var transportFiles = files.Where(f=> f.StartsWith("MassTransit.Transport."));
+            if(_instance == null) 
+                throw new ConfigurationException("You must call initialize before trying to access the Factory instance.");
+            return _resolver;
+        }
 
+        public static IServiceBus Instance()
+        {
+            if(_instance == null) 
+                throw new ConfigurationException("You must call initialize before trying to access the Bus instance.");
+
+
+            return _instance;
         }
     }
-
-    //Use this so that we can track down where ever we are using factory stuff?
-    //also this should make more sense that Func<Type, object> ?
-    //
-    public delegate object BuilderFunc(Type typeToBuild);
-
 }

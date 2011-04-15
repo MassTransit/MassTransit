@@ -24,15 +24,19 @@ namespace MassTransit.Transports.Msmq
 		IEndpointManagement
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpointManagement));
-		private readonly IMsmqEndpointAddress _address;
-        
+		private readonly IEndpointAddress _address;
+	    readonly string _localName;
+	    readonly string _formatName;
+
         // WellKnowSidType.WorldSid == "Everyone"; whoda thunk (http://social.msdn.microsoft.com/forums/en-US/netfxbcl/thread/0737f978-a998-453d-9a6a-c348285d7ea3/)
         private static readonly string EveryoneAccountName = (new SecurityIdentifier(WellKnownSidType.WorldSid, null)).Translate(typeof(NTAccount)).ToString();
         private static readonly string AdministratorsGroupName = (new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null)).Translate(typeof(NTAccount)).ToString();
 
-		private MsmqEndpointManagement(IMsmqEndpointAddress address)
+		private MsmqEndpointManagement(IEndpointAddress address)
 		{
 			_address = address;
+		    _formatName = MsmqUriParser.GetFormatName(_address.Uri);
+		    _localName = MsmqUriParser.GetLocalName(_address.Uri);
 		}
 
 		public void Create(bool transactional)
@@ -43,7 +47,7 @@ namespace MassTransit.Transports.Msmq
 			if (CheckForExistingQueue(transactional))
 				return;
 
-			using (MessageQueue queue = MessageQueue.Create(_address.LocalName, transactional))
+			using (MessageQueue queue = MessageQueue.Create(_localName, transactional))
 			{
 				_log.Debug("A queue was created: " + _address + (transactional ? " (transactional)" : ""));
 
@@ -63,7 +67,7 @@ namespace MassTransit.Transports.Msmq
 		{
 			long count = 0;
 
-			using (var queue = new MessageQueue(_address.FormatName, QueueAccessMode.Receive))
+			using (var queue = new MessageQueue(_formatName, QueueAccessMode.Receive))
 			{
 				using (MessageEnumerator enumerator = queue.GetMessageEnumerator2())
 				{
@@ -80,7 +84,7 @@ namespace MassTransit.Transports.Msmq
 
 		public void Purge()
 		{
-			using (var queue = new MessageQueue(_address.LocalName, QueueAccessMode.ReceiveAndAdmin))
+			using (var queue = new MessageQueue(_localName, QueueAccessMode.ReceiveAndAdmin))
 			{
 				queue.Purge();
 			}
@@ -88,7 +92,7 @@ namespace MassTransit.Transports.Msmq
 
 		public bool Exists
 		{
-			get { return MessageQueue.Exists(_address.LocalName); }
+			get { return MessageQueue.Exists(_localName); }
 		}
 
 		public bool IsTransactional
@@ -98,7 +102,7 @@ namespace MassTransit.Transports.Msmq
 				if(!_address.IsLocal)
 					return true;
 
-				using (var queue = new MessageQueue(_address.FormatName, QueueAccessMode.ReceiveAndAdmin))
+				using (var queue = new MessageQueue(_formatName, QueueAccessMode.ReceiveAndAdmin))
 				{
 					return queue.Transactional;
 				}
@@ -107,7 +111,7 @@ namespace MassTransit.Transports.Msmq
 
 		private void VerifyQueueSendAndReceive()
 		{
-			using (var queue = new MessageQueue(_address.FormatName, QueueAccessMode.SendAndReceive))
+			using (var queue = new MessageQueue(_formatName, QueueAccessMode.SendAndReceive))
 			{
 				if (!queue.CanRead)
 					throw new InvalidOperationException("A queue was created but cannot be read: " + _address);
@@ -119,10 +123,10 @@ namespace MassTransit.Transports.Msmq
 
 		private bool CheckForExistingQueue(bool transactional)
 		{
-			if (!MessageQueue.Exists(_address.LocalName))
+			if (!MessageQueue.Exists(_localName))
 				return false;
 
-			using (var queue = new MessageQueue(_address.FormatName, QueueAccessMode.ReceiveAndAdmin))
+			using (var queue = new MessageQueue(_formatName, QueueAccessMode.ReceiveAndAdmin))
 			{
 				if (transactional && !queue.Transactional)
 				{
@@ -143,7 +147,7 @@ namespace MassTransit.Transports.Msmq
         {
             var dict = new Dictionary<string, int>();
 
-            using (var queue = new MessageQueue(_address.FormatName, QueueAccessMode.Receive))
+            using (var queue = new MessageQueue(_formatName, QueueAccessMode.Receive))
             {
                 using (MessageEnumerator enumerator = queue.GetMessageEnumerator2())
                 {
@@ -161,7 +165,7 @@ namespace MassTransit.Transports.Msmq
             return dict;
         }
 
-        public static void Manage(IMsmqEndpointAddress address, Action<IEndpointManagement> action)
+        public static void Manage(IEndpointAddress address, Action<IEndpointManagement> action)
         {
             try
             {
@@ -189,7 +193,7 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
-		public static IEndpointManagement New(IMsmqEndpointAddress address)
+		public static IEndpointManagement New(IEndpointAddress address)
 		{
 			return new MsmqEndpointManagement(address);
 		}

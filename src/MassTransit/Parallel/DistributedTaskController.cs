@@ -29,16 +29,16 @@ namespace MassTransit.Parallel
 
 		private readonly IServiceBus _bus;
 		private readonly TTask _distributedTask;
-		private readonly IEndpointFactory _endpointFactory;
+		private readonly IEndpointResolver _endpointResolver;
 		private readonly Guid _taskId;
 		private readonly Dictionary<string, Worker> _workers = new Dictionary<string, Worker>();
 		private int _nextSubTask;
 		private UnsubscribeAction _unsubscribeToken;
 
-		public DistributedTaskController(IServiceBus bus, IEndpointFactory endpointFactory, TTask distributedTask)
+		public DistributedTaskController(IServiceBus bus, IEndpointResolver endpointResolver, TTask distributedTask)
 		{
 			_bus = bus;
-			_endpointFactory = endpointFactory;
+			_endpointResolver = endpointResolver;
 			_distributedTask = distributedTask;
 
 			_taskId = Guid.NewGuid();
@@ -155,7 +155,7 @@ namespace MassTransit.Parallel
 					if (_nextSubTask >= _distributedTask.SubTaskCount)
 						return;
 
-					IEndpoint endpoint = _endpointFactory.GetEndpoint(new Uri(worker.Address));
+					IEndpoint endpoint = _endpointResolver.GetEndpoint(new Uri(worker.Address));
 					if (endpoint == null)
 						continue;
 

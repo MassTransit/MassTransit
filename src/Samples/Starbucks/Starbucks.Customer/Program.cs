@@ -13,12 +13,12 @@
 namespace Starbucks.Customer
 {
 	using System;
+	using System.IO;
 	using System.Windows.Forms;
-	using Castle.MicroKernel.Registration;
-	using Castle.Windsor;
+	using log4net.Config;
 	using MassTransit;
-	using MassTransit.Transports.Msmq;
-	using MassTransit.WindsorIntegration;
+	using MassTransit.Transports;
+	using StructureMap;
 
 	internal static class Program
 	{
@@ -28,21 +28,27 @@ namespace Starbucks.Customer
 		[STAThread]
 		private static void Main(string[] args)
 		{
-			MsmqEndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
+			XmlConfigurator.Configure(new FileInfo("customer.log4net.xml"));
+			
+			EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
-			var c = BootstrapContainer();
+			IContainer c = BootstrapContainer();
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new OrderDrinkForm(c.Resolve<IServiceBus>()));
+			Application.Run(new OrderDrinkForm(c.GetInstance<IServiceBus>()));
 		}
 
-		private static IWindsorContainer BootstrapContainer()
+		private static IContainer BootstrapContainer()
 		{
-			IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Customer.Castle.xml");
-		    container.Register(Component.For<CustomerService>().Named(typeof(CustomerService).Name));
-		    container.Register(Component.For<OrderDrinkForm>());
-		    return container;
+			var container = new Container(x =>
+				{
+					x.AddType(typeof (OrderDrinkForm));
+				});
+
+			container.Configure(x => x.AddRegistry(new CustomerRegistry(container)));
+
+			return container;
 		}
 	}
 }

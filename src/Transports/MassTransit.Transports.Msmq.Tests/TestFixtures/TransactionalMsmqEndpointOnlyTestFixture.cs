@@ -17,12 +17,9 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
     public class TransactionalMsmqEndpointOnlyTestFixture :
         MsmqEndpointOnlyTestFixture
     {
-        public TransactionalMsmqEndpointOnlyTestFixture()
+        public TransactionalMsmqEndpointOnlyTestFixture():
+            base(new CreateEndpointSettings(new Uri("msmq://localhost/mt_client_tx?tx=true")))
         {
-			var settings = new CreateMsmqEndpointSettings(new Uri("msmq://localhost/mt_client_tx"));
-            EndpointAddress = settings.Address;
-            ErrorEndpointAddress = settings.ErrorAddress;
-            Transactional = true;
         }
     }
 }

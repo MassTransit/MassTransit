@@ -14,7 +14,6 @@ namespace MassTransit.Tests
 {
     using System;
     using Configuration;
-    using MassTransit.Internal;
     using MassTransit.Serialization;
     using MassTransit.Services.Subscriptions;
     using MassTransit.Transports;
@@ -32,16 +31,16 @@ namespace MassTransit.Tests
         private readonly Uri queueUri = new Uri("loopback://localhost/test");
         private Subscription _subscription;
         private IObjectBuilder _builder;
-        private IEndpointFactory _endpointResolver;
+        private IEndpointResolver _endpointResolver;
 
     	protected override void Before_each()
         {
             _builder = MockRepository.GenerateMock<IObjectBuilder>();
         	_builder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(new XmlMessageSerializer());
-			_endpointResolver = EndpointFactoryConfigurator.New(x =>
+			_endpointResolver = EndpointResolverConfigurator.New(x =>
 			{
 				x.SetObjectBuilder(_builder);
-				x.RegisterTransport<LoopbackEndpoint>();
+				x.AddTransportFactory<LoopbackTransportFactory>();
 			});
 
             _mockEndpoint = _endpointResolver.GetEndpoint(queueUri);

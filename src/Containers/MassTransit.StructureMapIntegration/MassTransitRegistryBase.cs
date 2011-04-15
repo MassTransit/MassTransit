@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,261 +12,268 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.StructureMapIntegration
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Reflection;
-    using Configuration;
-    using Internal;
-    using Saga;
-    using Services.Subscriptions;
-    using Services.Subscriptions.Configuration;
-    using Services.Subscriptions.Server;
-    using StructureMap;
-    using StructureMap.Configuration.DSL;
-    using StructureMap.Graph;
-    using Transports;
+	using System;
+	using System.Collections;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Reflection;
+	using Configuration;
+	using Internal;
+	using Saga;
+	using Services.Subscriptions;
+	using Services.Subscriptions.Configuration;
+	using Services.Subscriptions.Server;
+	using StructureMap;
+	using StructureMap.Configuration.DSL;
+	using StructureMap.Graph;
+	using Transports;
 
-    /// <summary>
-    /// This is an extension of the StrutureMap registry exposing methods to make it easy to get Mass
-    /// Transit set up.
-    /// </summary>
-    public class MassTransitRegistryBase :
-        Registry
-    {
-        /// <summary>
-        /// Default constructor with not actual registration
-        /// </summary>
-        public MassTransitRegistryBase()
-            : this(x => { })
-        {
-        }
+	/// <summary>
+	/// This is an extension of the StrutureMap registry exposing methods to make it easy to get Mass
+	/// Transit set up.
+	/// </summary>
+	public class MassTransitRegistryBase :
+		Registry
+	{
+		/// <summary>
+		/// Default constructor with not actual registration
+		/// </summary>
+		public MassTransitRegistryBase()
+			: this(x => { })
+		{
+		}
 
-        /// <summary>
-        /// Scan the executing assemblies current directory for assemblies containing MassTransit transports.
-        /// </summary>
-        /// <param name="configurationAction"></param>
-        public MassTransitRegistryBase(Action<IEndpointFactoryConfigurator> configurationAction)
-            : this(configurationAction, localDirAssemblyScanner =>
-                {
-                    string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+		/// <summary>
+		/// Scan the executing assemblies current directory for assemblies containing MassTransit transports.
+		/// </summary>
+		/// <param name="configurationAction"></param>
+		public MassTransitRegistryBase(Action<IEndpointResolverConfigurator> configurationAction)
+			: this(configurationAction, DefaultTransportScanner)
+		{
+		}
 
-                    localDirAssemblyScanner.AssembliesFromPath(assemblyPath, assembly =>
-                        assembly.GetName().Name.StartsWith("MassTransit.Transports."));
-                })
-        {
-        }
+		/// <summary>
+		/// Overload to allow explicit assembly scanning specification.
+		/// 
+		/// EX: since Assembly.GetExecutingAssembly().Location could return null if the Assembly.GetExecutingAssembly() was dynamically loaded from a resource, this overload allows for explicit assemblies scanning strategies.
+		/// </summary>
+		/// <param name="configurationAction"></param>
+		/// <param name="transportAssemblyScanner"></param>
+		public MassTransitRegistryBase(Action<IEndpointResolverConfigurator> configurationAction, Action<IAssemblyScanner> transportAssemblyScanner)
+		{
+			RegisterBusDependencies();
 
-        /// <summary>
-        /// Overload to allow explicit assembly scanning specification.
-        /// 
-        /// EX: since Assembly.GetExecutingAssembly().Location could return null if the Assembly.GetExecutingAssembly() was dynamically loaded from a resource, this overload allows for explicit assemblies scanning strategies.
-        /// </summary>
-        /// <param name="configurationAction"></param>
-        /// <param name="transportAssemblyScanner"></param>
-        public MassTransitRegistryBase(Action<IEndpointFactoryConfigurator> configurationAction, Action<IAssemblyScanner> transportAssemblyScanner)
-        {
-            RegisterBusDependencies();
+			var transportFactoryConvention = new TransportFactoryConvention();
+			Scan(scanner =>
+				{
+					transportAssemblyScanner(scanner);
+					scanner.With(transportFactoryConvention);
+				});
 
-            var typeScanner = new EndpointTypeScanner();
+			RegisterEndpointFactory(x =>
+				{
+					foreach (Type transportType in transportFactoryConvention)
+					{
+						x.AddTransportFactory(transportType);
+					}
 
-            Scan(scanner =>
-                {
-                    transportAssemblyScanner(scanner);
+					configurationAction(x);
+				});
+		}
 
-                    scanner.With(typeScanner);
-                });
+		/// <summary>
+		/// Creates a registry for a service bus listening to an endpoint
+		/// </summary>
+		public MassTransitRegistryBase(params Type[] transportTypes)
+		{
+			RegisterBusDependencies();
 
-            RegisterEndpointFactory(x =>
-                {
-                    foreach (Type transportType in typeScanner.TransportTypes)
-                    {
-                        x.RegisterTransport(transportType);
-                    }
+			RegisterEndpointFactory(x =>
+				{
+					x.AddTransportFactory<LoopbackTransportFactory>();
+					x.AddTransportFactory<MulticastUdpTransportFactory>();
 
-                    configurationAction(x);
-                });
-        }
-
-        /// <summary>
-        /// Creates a registry for a service bus listening to an endpoint
-        /// </summary>
-        public MassTransitRegistryBase(params Type[] transportTypes)
-        {
-            RegisterBusDependencies();
-
-            RegisterEndpointFactory(x =>
-                {
-                    x.RegisterTransport<LoopbackEndpoint>();
-                    x.RegisterTransport<MulticastUdpEndpoint>();
-
-                    foreach (Type type in transportTypes)
-                    {
-                        x.RegisterTransport(type);
-                    }
-                });
-        }
+					foreach (Type type in transportTypes)
+					{
+						x.AddTransportFactory(type);
+					}
+				});
+		}
 
 
-        /// <summary>
-        /// Registers the in-memory subscription service so that all buses created in the same
-        /// process share subscriptions
-        /// </summary>
-        protected void RegisterInMemorySubscriptionService()
-        {
-            For<IEndpointSubscriptionEvent>()
-                .Singleton()
-                .Use<LocalSubscriptionService>();
+		/// <summary>
+		/// Registers the in-memory subscription service so that all buses created in the same
+		/// process share subscriptions
+		/// </summary>
+		protected void RegisterInMemorySubscriptionService()
+		{
+			For<IEndpointSubscriptionEvent>()
+				.Singleton()
+				.Use<LocalSubscriptionService>();
 
-            For<SubscriptionPublisher>()
-                .Use<SubscriptionPublisher>();
+			For<SubscriptionPublisher>()
+				.Use<SubscriptionPublisher>();
 
-            For<SubscriptionConsumer>()
-                .Use<SubscriptionConsumer>();
-        }
+			For<SubscriptionConsumer>()
+				.Use<SubscriptionConsumer>();
+		}
 
-        protected void RegisterInMemorySubscriptionRepository()
-        {
-            For<ISubscriptionRepository>()
-                .Singleton()
-                .Use<InMemorySubscriptionRepository>();
-        }
+		protected void RegisterInMemorySagaRepository()
+		{
+			For(typeof (ISagaRepository<>))
+				.Singleton()
+				.Use(typeof (InMemorySagaRepository<>));
+		}
 
-        protected void RegisterInMemorySagaRepository()
-        {
-            For(typeof(ISagaRepository<>))
-                .Singleton()
-                .Use(typeof(InMemorySagaRepository<>));
-        }
+		/// <summary>
+		/// Registers the types used by the service bus internally and as part of the container.
+		/// These are typically items that are not swapped based on the container implementation
+		/// </summary>
+		protected void RegisterBusDependencies()
+		{
+			For<IObjectBuilder>()
+				.Singleton()
+				.Use<StructureMapObjectBuilder>();
 
-        /// <summary>
-        /// Registers the types used by the service bus internally and as part of the container.
-        /// These are typically items that are not swapped based on the container implementation
-        /// </summary>
-        protected void RegisterBusDependencies()
-        {
-            For<IObjectBuilder>()
-                .Singleton()
-                .Use<StructureMapObjectBuilder>();
+			//we are expecting SM to auto-resolve
+			// SubscriptionClient
+			// InitiateSagaMessageSink<,>
+			// OrchestrateSagaMessageSink<,>)
+			// InitiateSagaStateMachineSink<,>)
+			// OrchestrateSagaStateMachineSink<,>)
+		}
 
-            //we are expecting SM to auto-resolve
-            // SubscriptionClient
-            // InitiateSagaMessageSink<,>
-            // OrchestrateSagaMessageSink<,>)
-            // InitiateSagaStateMachineSink<,>)
-            // OrchestrateSagaStateMachineSink<,>)
-        }
+		protected void RegisterEndpointFactory(Action<IEndpointResolverConfigurator> configAction)
+		{
+			For<IEndpointResolver>()
+				.Singleton()
+				.Use(context =>
+					{
+						return EndpointResolverConfigurator.New(x =>
+							{
+								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
+								configAction(x);
+							});
+					});
+		}
 
-        protected void RegisterEndpointFactory(Action<IEndpointFactoryConfigurator> configAction)
-        {
-            For<IEndpointFactory>()
-                .Singleton()
-                .Use(context =>
-                    {
-                        return EndpointFactoryConfigurator.New(x =>
-                            {
-                                x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
-                                configAction(x);
-                            });
-                    });
-        }
+		protected void RegisterServiceBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
+		{
+			RegisterServiceBus(new Uri(endpointUri), configAction);
+		}
 
-        protected void RegisterServiceBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
-        {
-            RegisterServiceBus(new Uri(endpointUri), configAction);
-        }
+		protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
+		{
+			For<IServiceBus>()
+				.Singleton()
+				.Use(context =>
+					{
+						return ServiceBusConfigurator.New(x =>
+							{
+								x.SetEndpointFactory(context.GetInstance<IEndpointResolver>());
+								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
+								x.ReceiveFrom(endpointUri);
 
-        protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
-        {
-            For<IServiceBus>()
-                .Singleton()
-                .Use(context =>
-                    {
-                        return ServiceBusConfigurator.New(x =>
-                            {
-                                x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
-                                x.ReceiveFrom(endpointUri);
+								configAction(x);
+							});
+					});
+		}
 
-                                configAction(x);
-                            });
-                    });
-        }
+		protected void RegisterServiceBus(string endpointUri, Action<IServiceBusConfigurator, IContext> configAction)
+		{
+			RegisterServiceBus(new Uri(endpointUri), configAction);
+		}
 
-        protected void RegisterServiceBus(string endpointUri, Action<IServiceBusConfigurator, IContext> configAction)
-        {
-            RegisterServiceBus(new Uri(endpointUri), configAction);
-        }
+		protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator, IContext> configAction)
+		{
+			For<IServiceBus>()
+				.Singleton()
+				.Use(context =>
+					{
+						return ServiceBusConfigurator.New(x =>
+							{
+								x.SetEndpointFactory(context.GetInstance<IEndpointResolver>());
+								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
+								x.ReceiveFrom(endpointUri);
 
-        protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator, IContext> configAction)
-        {
-            For<IServiceBus>()
-                .Singleton()
-                .Use(context =>
-                {
-                    return ServiceBusConfigurator.New(x =>
-                    {
-                        x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
-                        x.ReceiveFrom(endpointUri);
+								configAction(x, context);
+							});
+					});
+		}
 
-                        configAction(x, context);
-                    });
-                });
-        }
+		protected void RegisterControlBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
+		{
+			RegisterControlBus(new Uri(endpointUri), configAction);
+		}
 
-        protected void RegisterControlBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
-        {
-            RegisterControlBus(new Uri(endpointUri), configAction);
-        }
+		protected void RegisterControlBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
+		{
+			For<IControlBus>()
+				.Singleton()
+				.Use(context =>
+					{
+						return ControlBusConfigurator.New(x =>
+							{
+								x.SetEndpointFactory(context.GetInstance<IEndpointResolver>());
+								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
+								x.ReceiveFrom(endpointUri);
+								x.SetConcurrentConsumerLimit(1);
 
-        protected void RegisterControlBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
-        {
-            For<IControlBus>()
-                .Singleton()
-                .Use(context =>
-                    {
-                        return ControlBusConfigurator.New(x =>
-                            {
-                                x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
-                                x.ReceiveFrom(endpointUri);
-                                x.SetConcurrentConsumerLimit(1);
+								configAction(x);
+							});
+					});
+		}
 
-                                configAction(x);
-                            });
-                    });
-        }
+		private class TransportFactoryConvention :
+			IRegistrationConvention,
+			IEnumerable<Type>
+		{
+			private readonly IList<Type> _transportTypes;
 
-        protected static void ConfigureSubscriptionClient(string subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
-        {
-            ConfigureSubscriptionClient(new Uri(subscriptionServiceEndpointAddress), configurator);
-        }
+			public TransportFactoryConvention()
+			{
+				_transportTypes = new List<Type>();
+			}
 
-        protected static void ConfigureSubscriptionClient(Uri subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
-        {
-            configurator.ConfigureService<SubscriptionClientConfigurator>(y =>
-                {
-                    // this is fairly easy inline, but wanted to include the example for completeness
-                    y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
-                });
-        }
+			public IEnumerator<Type> GetEnumerator()
+			{
+				return _transportTypes.GetEnumerator();
+			}
 
-        internal class EndpointTypeScanner :
-            ITypeScanner
-        {
-            public EndpointTypeScanner()
-            {
-                TransportTypes = new List<Type>();
-            }
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return GetEnumerator();
+			}
 
-            public IList<Type> TransportTypes { get; private set; }
+			public void Process(Type type, Registry registry)
+			{
+				if (typeof (ITransportFactory).IsAssignableFrom(type))
+				{
+					_transportTypes.Add(type);
+				}
+			}
+		}
 
-            public void Process(Type type, PluginGraph graph)
-            {
-                if (typeof(IEndpoint).IsAssignableFrom(type))
-                {
-                    graph.AddType(type);
-                    TransportTypes.Add(type);
-                }
-            }
-        }
-    }
+		protected static void ConfigureSubscriptionClient(string subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
+		{
+			ConfigureSubscriptionClient(new Uri(subscriptionServiceEndpointAddress), configurator);
+		}
+
+		protected static void ConfigureSubscriptionClient(Uri subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
+		{
+			configurator.ConfigureService<SubscriptionClientConfigurator>(y =>
+				{
+					// this is fairly easy inline, but wanted to include the example for completeness
+					y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
+				});
+		}
+
+		private static void DefaultTransportScanner(IAssemblyScanner scanner)
+		{
+			string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+			scanner.AssembliesFromPath(assemblyPath, assembly =>
+			                                         assembly.GetName().Name.StartsWith("MassTransit.Transports."));
+		}
+	}
 }

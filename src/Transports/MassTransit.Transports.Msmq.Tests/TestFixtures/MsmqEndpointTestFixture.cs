@@ -20,7 +20,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 	using Services.Subscriptions;
 
 	public class MsmqEndpointTestFixture :
-		EndpointTestFixture<MsmqEndpoint>
+		EndpointTestFixture<MsmqTransportFactory>
 	{
 		protected Uri LocalEndpointUri { get; set; }
 		protected Uri LocalErrorUri { get; set; }
@@ -33,7 +33,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 	    public MsmqEndpointTestFixture()
 		{
-			MsmqEndpointConfigurator.Defaults(x =>
+			EndpointConfigurator.Defaults(x =>
 			{
 				x.CreateMissingQueues = true;
 				x.CreateTransactionalQueues = false;
@@ -49,9 +49,9 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		{
 			base.EstablishContext();
 
-			LocalEndpoint = EndpointFactory.GetEndpoint(LocalEndpointUri);
-			LocalErrorEndpoint = EndpointFactory.GetEndpoint(LocalErrorUri);
-			RemoteEndpoint = EndpointFactory.GetEndpoint(RemoteEndpointUri);
+			LocalEndpoint = EndpointResolver.GetEndpoint(LocalEndpointUri);
+			LocalErrorEndpoint = EndpointResolver.GetEndpoint(LocalErrorUri);
+			RemoteEndpoint = EndpointResolver.GetEndpoint(RemoteEndpointUri);
 
 			SetupSubscriptionService();
 
@@ -96,7 +96,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 				.WhenCalled(invocation =>
 					{
 						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointFactory);
+						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointResolver);
 					});
 		}
 

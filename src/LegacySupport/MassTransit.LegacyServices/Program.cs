@@ -18,13 +18,11 @@ namespace LegacyRuntime
     using log4net.Config;
     using Magnum.Reflection;
     using MassTransit.LegacySupport;
-    using MassTransit.StructureMapIntegration;
-    using MassTransit.Transports.Msmq;
+    using MassTransit.Transports;
     using StructureMap;
     using StructureMap.Configuration.DSL;
     using Topshelf;
-    using Topshelf.Configuration;
-	using Topshelf.Configuration.Dsl;
+    using Topshelf.Configuration.Dsl;
 
     class Program
     {
@@ -34,7 +32,7 @@ namespace LegacyRuntime
         {
             BootstrapLogger();
 
-            MsmqEndpointConfigurator.Defaults(x =>
+            EndpointConfigurator.Defaults(x =>
             {
                 x.CreateMissingQueues = true;
             });

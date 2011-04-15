@@ -15,13 +15,12 @@ namespace Starbucks.Barista
 	using System;
 	using System.Diagnostics;
 	using System.IO;
-	using Castle.Windsor;
 	using log4net.Config;
 	using Magnum;
 	using Magnum.StateMachine;
 	using MassTransit.Saga;
-	using MassTransit.Transports.Msmq;
-	using MassTransit.WindsorIntegration;
+	using MassTransit.Transports;
+	using StructureMap;
 	using Topshelf;
 	using Topshelf.Configuration;
 	using Topshelf.Configuration.Dsl;
@@ -45,15 +44,27 @@ namespace Starbucks.Barista
 					c.DependencyOnMsmq();
 					c.RunAsFromInteractive();
 
-					MsmqEndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
+					EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
-					IWindsorContainer container = BootstrapContainer();
+					var container = new Container(x =>
+						{
+							x.AddType(typeof (ISagaRepository<>), typeof (InMemorySagaRepository<>));
+
+							x.AddType(typeof (DrinkPreparationSaga));
+							x.AddType(typeof (BaristaService));
+
+							x.For<BaristaService>()
+								.Singleton()
+								.Use<BaristaService>();
+						});
+
+					container.Configure(x => x.AddRegistry(new BaristaRegistry(container)));
 
 					DisplayStateMachine();
 
 					c.ConfigureService<BaristaService>(s =>
 						{
-							s.HowToBuildService(builder => container.Resolve<BaristaService>());
+							s.HowToBuildService(builder => container.GetInstance<BaristaService>());
 							s.WhenStarted(o => o.Start());
 							s.WhenStopped(o => o.Stop());
 						});
@@ -66,16 +77,6 @@ namespace Starbucks.Barista
 			Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
 			StateMachineInspector.Trace(new DrinkPreparationSaga(CombGuid.Generate()));
-		}
-
-		private static IWindsorContainer BootstrapContainer()
-		{
-			IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Barista.Castle.xml");
-			container.AddComponent("sagaRepository", typeof (ISagaRepository<>), typeof (InMemorySagaRepository<>));
-
-			container.AddComponent<DrinkPreparationSaga>();
-			container.AddComponent<BaristaService>(typeof (BaristaService).Name);
-			return container;
 		}
 	}
 }

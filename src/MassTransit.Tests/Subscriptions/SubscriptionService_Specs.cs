@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Subscriptions
 
 	[TestFixture]
 	public class SubscriptionService_Specs :
-		SubscriptionServiceTestFixture<LoopbackEndpoint>
+		SubscriptionServiceTestFixture<LoopbackTransportFactory>
 	{
 		private void DumpPipelines()
 		{
@@ -68,26 +68,20 @@ namespace MassTransit.Tests.Subscriptions
 			PipelineViewer.Trace(LocalBus.OutboundPipeline);
 		}
 
-		[Test, Ignore]
-		public void The_initial_subscriptions_should_be_read_from_the_repository()
-		{
-			SubscriptionRepository.AssertWasCalled(x => x.List());
-		}
-
 		[Test]
 		public void The_system_should_be_ready_to_use_before_getting_underway()
 		{
 			var consumer = new TestMessageConsumer<PingMessage>();
 			var unsubscribeAction = RemoteBus.Subscribe(consumer);
 
-			Thread.Sleep(1000);
+			Thread.Sleep(3000);
 
 			DumpPipelines();
 
 			var message = new PingMessage();
 			LocalBus.Publish(message);
 
-			consumer.ShouldHaveReceivedMessage(message, 500.Milliseconds());
+			consumer.ShouldHaveReceivedMessage(message, 1500.Milliseconds());
 
 			unsubscribeAction();
 		}

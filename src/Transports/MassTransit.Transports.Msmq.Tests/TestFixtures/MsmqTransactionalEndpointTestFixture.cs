@@ -19,7 +19,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 	{
 		protected override void EstablishContext()
 		{
-			MsmqEndpointConfigurator.Defaults(x =>
+			EndpointConfigurator.Defaults(x =>
 				{
 					x.CreateTransactionalQueues = true;
 				});
@@ -30,7 +30,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 			base.EstablishContext();
 
-			MsmqEndpointConfigurator.Defaults(x =>
+			EndpointConfigurator.Defaults(x =>
 			{
 				x.PurgeOnStartup = false;
 			});

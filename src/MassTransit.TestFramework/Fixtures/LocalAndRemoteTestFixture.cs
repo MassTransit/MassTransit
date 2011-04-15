@@ -14,13 +14,15 @@ namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
 	using Configuration;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Services.Subscriptions;
+	using Transports;
 
-	[TestFixture]
-	public class LocalAndRemoteTestFixture<TEndpoint> :
-		EndpointTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+    [TestFixture]
+	public class LocalAndRemoteTestFixture<TTransportFactory> :
+		EndpointTestFixture<TTransportFactory>
+		where TTransportFactory : ITransportFactory
 	{
 		[TestFixtureSetUp]
 		public void LocalAndRemoteTestFixtureSetup()
@@ -60,7 +62,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 			ObjectBuilder.Add(SubscriptionService);
 			ObjectBuilder.Construct(() => new SubscriptionPublisher(SubscriptionService));
-			ObjectBuilder.Construct(() => new SubscriptionConsumer(SubscriptionService, EndpointFactory));
+			ObjectBuilder.Construct(() => new SubscriptionConsumer(SubscriptionService, EndpointResolver));
 		}
 	}
 }

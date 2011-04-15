@@ -3,12 +3,14 @@ namespace MassTransit.Tests.Transports
     using System;
     using System.Transactions;
     using Configuration;
+    using MassTransit.Transports;
     using NUnit.Framework;
 
-    public abstract class TransactionalEndpointContract<TEndpoint> where TEndpoint : IEndpoint
+    public abstract class TransactionalEndpointContract<TTransportFactory>
+        where TTransportFactory : ITransportFactory
     {
         private IEndpoint _ep;
-        private IEndpointFactory _endpointFactory;
+        private IEndpointResolver _endpointResolver;
         public IObjectBuilder ObjectBuilder { get; set; }
         public Uri Address { get; set; }
         public Action<Uri> VerifyMessageIsInQueue { get; set; }
@@ -17,12 +19,12 @@ namespace MassTransit.Tests.Transports
         [SetUp]
         public void SetUp()
         {
-            _endpointFactory = EndpointFactoryConfigurator.New(c =>
+            _endpointResolver = EndpointResolverConfigurator.New(c =>
                                                                    {
-                                                                       c.RegisterTransport<TEndpoint>();
+                                                                       c.AddTransportFactory<TTransportFactory>();
                                                                        c.SetObjectBuilder(ObjectBuilder);
                                                                    });
-            _ep = _endpointFactory.GetEndpoint(Address);
+            _ep = _endpointResolver.GetEndpoint(Address);
         }
 
         [TearDown]

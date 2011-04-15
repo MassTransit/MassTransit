@@ -36,7 +36,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\tests\</OutputPath>
+    <OutputPath>..\..\..\tests\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -47,7 +47,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\tests\</OutputPath>
+    <OutputPath>..\..\..\tests\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -56,17 +56,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Antlr3.Runtime, Version=3.1.0.39271, Culture=neutral, PublicKeyToken=3a9cab8f8d22bfb7, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\Antlr3.Runtime.dll</HintPath>
-    </Reference>
     <Reference Include="Castle.Core, Version=1.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\Castle.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Castle.DynamicProxy2, Version=2.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\Castle.DynamicProxy2.dll</HintPath>
+      <HintPath>..\..\..\lib\Castle.Core\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="FluentNHibernate, Version=0.1.0.0, Culture=neutral, PublicKeyToken=8aa435e3cb308880, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -74,7 +66,7 @@
     </Reference>
     <Reference Include="Iesi.Collections, Version=1.0.1.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\Iesi.Collections.dll</HintPath>
+      <HintPath>..\..\..\lib\NHibernate\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -82,27 +74,23 @@
     </Reference>
     <Reference Include="Magnum, Version=0.1.0.275, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.TestFramework, Version=1.0.0.230, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Magnum\Magnum.TestFramework.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\TestFramework\Magnum.TestFramework.dll</HintPath>
     </Reference>
-    <Reference Include="NHibernate, Version=2.1.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+    <Reference Include="NHibernate, Version=2.1.2.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\NHibernate.dll</HintPath>
+      <HintPath>..\..\..\lib\NHibernate\NHibernate.dll</HintPath>
     </Reference>
-    <Reference Include="NHibernate.ByteCode.Castle, Version=2.1.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+    <Reference Include="NHibernate.ByteCode.Castle, Version=2.1.2.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\NHibernate.ByteCode.Castle.dll</HintPath>
-    </Reference>
-    <Reference Include="NHibernate.Linq, Version=1.0.0.4000, Culture=neutral, PublicKeyToken=444cf6a87fdab271, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\FluentNHibernate\NHibernate.Linq.dll</HintPath>
+      <HintPath>..\..\..\lib\NHibernate\NHibernate.ByteCode.Castle.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=2.4.6.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\NUnit\nunit.framework.dll</HintPath>
+      <HintPath>..\..\..\lib\NUnit\net-2.0\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="Rhino.Mocks, Version=3.3.0.906, Culture=neutral, PublicKeyToken=0b3305902db7183f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -131,6 +119,8 @@
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="MsmqDistributorTestFixture.cs" />
+    <Compile Include="MsmqNonTransactionalSendingContract.cs" />
+    <Compile Include="MsmqTransportContract.cs" />
     <Compile Include="TestFixtures\MsmqConcurrencyTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqEndpointOnlyTestFixture.cs" />
     <Compile Include="NonTransactional_Specs.cs" />
@@ -154,6 +144,10 @@
     <ProjectReference Include="..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
       <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
       <Name>MassTransit.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
+      <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>
+      <Name>MassTransit.TestFramework</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj">
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>

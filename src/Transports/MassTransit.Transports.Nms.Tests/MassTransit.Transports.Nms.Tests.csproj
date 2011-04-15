@@ -36,7 +36,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\tests\</OutputPath>
+    <OutputPath>..\..\..\tests\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -45,7 +45,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\tests\</OutputPath>
+    <OutputPath>..\..\..\tests\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -59,14 +59,14 @@
     </Reference>
     <Reference Include="Magnum, Version=0.1.0.275, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.TestFramework">
-      <HintPath>..\..\..\lib\Magnum\Magnum.TestFramework.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\TestFramework\Magnum.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=2.4.6.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\NUnit\nunit.framework.dll</HintPath>
+      <HintPath>..\..\..\lib\NUnit\net-2.0\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="Rhino.Mocks, Version=3.3.0.906, Culture=neutral, PublicKeyToken=0b3305902db7183f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -86,6 +86,10 @@
     <Compile Include="TestFixtures\NmsEndpointTestFixture.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
+      <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>
+      <Name>MassTransit.TestFramework</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj">
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>
       <Name>MassTransit.Tests</Name>

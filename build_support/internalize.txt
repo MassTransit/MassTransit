@@ -1,0 +1,2 @@
+MassTransit.*
+log4net.dll

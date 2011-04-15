@@ -20,7 +20,7 @@ namespace Grid.Distributor.Activator
     {
         private static void Main(string[] args)
         {
-            XmlConfigurator.ConfigureAndWatch(new FileInfo(@"log4net.config"));
+            XmlConfigurator.ConfigureAndWatch(new FileInfo(@"activator.log4net.config"));
 
             var service = new ActivorServiceProvider
             {

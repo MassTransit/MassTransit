@@ -18,7 +18,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 	[TestFixture, Category("Integration")]
 	public class MsmqDistributorTestFixture :
-		DistributorTestFixture<MsmqEndpoint>
+		DistributorTestFixture<MsmqTransportFactory>
 	{
 		protected override void EstablishContext()
 		{
@@ -31,11 +31,11 @@ namespace MassTransit.Transports.Msmq.Tests
 			base.EstablishContext();
 		}
 
-		protected override void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
+		protected override void AdditionalEndpointFactoryConfiguration(IEndpointResolverConfigurator x)
 		{
 			base.AdditionalEndpointFactoryConfiguration(x);
 
-			MsmqEndpointConfigurator.Defaults(y =>
+			EndpointConfigurator.Defaults(y =>
 				{
 					y.CreateMissingQueues = true;
 					y.CreateTransactionalQueues = false;

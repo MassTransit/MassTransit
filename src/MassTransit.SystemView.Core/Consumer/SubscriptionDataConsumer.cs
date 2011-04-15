@@ -16,6 +16,7 @@ namespace MassTransit.SystemView.Core.Consumer
     using Distributor.Messages;
     using Magnum;
     using Services.Subscriptions.Messages;
+    using Transports;
     using Transports.Msmq;
     using ViewModel;
 
@@ -43,7 +44,7 @@ namespace MassTransit.SystemView.Core.Consumer
 
         private void ConnectToSubscriptionService()
         {
-            _subscriptionServiceEndpoint = _objectBuilder.GetInstance<IEndpointFactory>()
+            _subscriptionServiceEndpoint = _objectBuilder.GetInstance<IEndpointResolver>()
                 .GetEndpoint(_objectBuilder.GetInstance<IConfiguration>().SubscriptionServiceUri);
 
             _subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
@@ -51,7 +52,7 @@ namespace MassTransit.SystemView.Core.Consumer
 
         private void BootstrapServiceBus()
         {
-            MsmqEndpointConfigurator.Defaults(x =>
+            EndpointConfigurator.Defaults(x =>
                 {
                     x.CreateMissingQueues = true;
                 });
@@ -82,7 +83,7 @@ namespace MassTransit.SystemView.Core.Consumer
 
         public void UpdateWorker(Uri controlUri, string type, int pendingLimit, int inProgressLimit)
         {
-            var endpoint = _objectBuilder.GetInstance<IEndpointFactory>().GetEndpoint(controlUri);
+            var endpoint = _objectBuilder.GetInstance<IEndpointResolver>().GetEndpoint(controlUri);
 
             endpoint.Send(new ConfigureWorker() { InProgressLimit = inProgressLimit, MessageType = type, PendingLimit = pendingLimit });
         }

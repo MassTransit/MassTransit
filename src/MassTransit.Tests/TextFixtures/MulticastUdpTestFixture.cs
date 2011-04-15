@@ -18,7 +18,7 @@ namespace MassTransit.Tests.TextFixtures
 
 	[TestFixture]
 	public class MulticastUdpTestFixture :
-		EndpointTestFixture<MulticastUdpEndpoint>
+		EndpointTestFixture<MulticastUdpTransportFactory>
 	{
 		public IServiceBus LocalBus { get; private set; }
 		public IServiceBus RemoteBus { get; private set; }
