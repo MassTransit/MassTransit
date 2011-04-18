@@ -182,6 +182,7 @@ namespace MassTransit.NinjectIntegration
 					{
 						return ServiceBusConfigurator.New(x =>
 							{
+                                x.SetEndpointFactory(context.Kernel.Get<IEndpointResolver>());
 								x.SetObjectBuilder(context.Kernel.Get<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 
@@ -203,6 +204,7 @@ namespace MassTransit.NinjectIntegration
 					{
 						return ControlBusConfigurator.New(x =>
 							{
+                                x.SetEndpointFactory(context.Kernel.Get<IEndpointResolver>());
 								x.SetObjectBuilder(context.Kernel.Get<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 								x.SetConcurrentConsumerLimit(1);
