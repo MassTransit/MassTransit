@@ -60,8 +60,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
-    <Reference Include="StructureMap">
-      <HintPath>..\..\..\..\lib\StructureMap\StructureMap.dll</HintPath>
+    <Reference Include="Ninject">
+      <HintPath>..\..\..\..\lib\Ninject-2.0\net-3.5\Ninject.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -87,9 +87,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj">
-      <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
-      <Name>MassTransit.StructureMapIntegration</Name>
+    <ProjectReference Include="..\..\..\Containers\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj">
+      <Project>{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}</Project>
+      <Name>MassTransit.NinjectIntegration</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
