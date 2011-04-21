@@ -15,12 +15,14 @@ namespace Starbucks.Barista
 	using System;
 	using System.Diagnostics;
 	using System.IO;
+	using Castle.MicroKernel.Registration;
+	using Castle.Windsor;
 	using log4net.Config;
 	using Magnum;
 	using Magnum.StateMachine;
 	using MassTransit.Saga;
 	using MassTransit.Transports;
-	using StructureMap;
+	using MassTransit.WindsorIntegration;
 	using Topshelf;
 	using Topshelf.Configuration;
 	using Topshelf.Configuration.Dsl;
@@ -46,25 +48,17 @@ namespace Starbucks.Barista
 
 					EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
-					var container = new Container(x =>
-						{
-							x.AddType(typeof (ISagaRepository<>), typeof (InMemorySagaRepository<>));
-
-							x.AddType(typeof (DrinkPreparationSaga));
-							x.AddType(typeof (BaristaService));
-
-							x.For<BaristaService>()
-								.Singleton()
-								.Use<BaristaService>();
-						});
-
-					container.Configure(x => x.AddRegistry(new BaristaRegistry(container)));
+				    var cc = new WindsorContainer();
+				    cc.Install(new MassTransitInstaller());
+				    cc.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)));
+				    cc.Register(Component.For<DrinkPreparationSaga>(),
+				                Component.For<BaristaService>().LifeStyle.Singleton);
 
 					DisplayStateMachine();
 
 					c.ConfigureService<BaristaService>(s =>
 						{
-							s.HowToBuildService(builder => container.GetInstance<BaristaService>());
+							s.HowToBuildService(builder => cc.Resolve<BaristaService>());
 							s.WhenStarted(o => o.Start());
 							s.WhenStopped(o => o.Stop());
 						});

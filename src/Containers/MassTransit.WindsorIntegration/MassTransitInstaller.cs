@@ -28,6 +28,18 @@ namespace MassTransit.WindsorIntegration
     public class MassTransitInstaller :
         IWindsorInstaller
     {
+        readonly SettingsOptions _options;
+
+        public MassTransitInstaller(SettingsOptions options)
+        {
+            _options = options;
+        }
+
+        public MassTransitInstaller()
+        {
+            _options = ConfigurationSection.GetSettings();
+        }
+
         //we are expecting SM to auto-resolve
         // SubscriptionClient
         // InitiateSagaMessageSink<,>
@@ -42,7 +54,6 @@ namespace MassTransit.WindsorIntegration
                 Component.For<IObjectBuilder>().Named("objectBuilder").Instance(wob).LifeStyle.Singleton
                 );
 
-            var xmlCfg = ConfigurationSection.GetSettings();
             Bus.Initialize(wob, (cfg, ep) =>
             {
 
@@ -52,24 +63,24 @@ namespace MassTransit.WindsorIntegration
                                        .Instance(ep)
                                        .LifeStyle.Singleton);
 
-                cfg.ReceiveFrom(xmlCfg.ReceiveFrom);
+                cfg.ReceiveFrom(_options.ReceiveFrom);
 
 
                 //if subscription service
-                if (xmlCfg.Subscriptions != null)
+                if (_options.Subscriptions != null)
                 {
-                    cfg.UseSubscriptionService(xmlCfg.Subscriptions);
+                    cfg.UseSubscriptionService(_options.Subscriptions);
                 }
 
 
                 //if management service
-                if (xmlCfg.HealthServiceInterval != null)
+                if (_options.HealthServiceInterval != null)
                 {
-                    string mgmt = xmlCfg.HealthServiceInterval;
+                    string mgmt = _options.HealthServiceInterval;
                     int interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
                     cfg.UseHealthMonitoring(interval);
                 }
-            }, xmlCfg.Transports.Select<string, Type>(Type.GetType).ToArray());
+            }, _options.Transports.Select<string, Type>(Type.GetType).ToArray());
 
             container.Register(Component.For<IServiceBus>()
                                    .Named("serviceBus")
