@@ -13,32 +13,41 @@
 namespace Starbucks.Cashier
 {
 	using MassTransit;
+	using MassTransit.NinjectIntegration;
 	using MassTransit.Services.HealthMonitoring.Configuration;
-	using MassTransit.StructureMapIntegration;
-	using StructureMap;
+	using MassTransit.Transports.Msmq;
 
-	public class CashierRegistry :
-		MassTransitRegistryBase
+    public class CashierRegistry :
+        MassTransitModuleBase
 	{
-		private readonly IContainer _container;
-
-		public CashierRegistry(IContainer container)
+		public CashierRegistry(IObjectBuilder builder)
+            : base(builder, typeof(MsmqTransportFactory))
 		{
-			_container = container;
-
-			RegisterInMemorySagaRepository();
-
-			RegisterControlBus("msmq://localhost/starbucks_cashier_control", x => { x.SetConcurrentConsumerLimit(1); });
-
-			RegisterServiceBus("msmq://localhost/starbucks_cashier", x =>
-				{
-					x.UseControlBus(_container.GetInstance<IControlBus>());
-					x.SetConcurrentConsumerLimit(1); // a cashier cannot multi-task
-
-					ConfigureSubscriptionClient("msmq://localhost/mt_subscriptions", x);
-
-					x.ConfigureService<HealthClientConfigurator>(health => health.SetHeartbeatInterval(10));
-				});
 		}
+
+        public override void Load()
+        {
+            base.Load();
+
+            Bind<CashierSaga>()
+                    .To<CashierSaga>();
+            Bind<CashierService>()
+                .To<CashierService>()
+                .InSingletonScope();
+
+            RegisterInMemorySagaRepository();
+
+            RegisterControlBus("msmq://localhost/starbucks_cashier_control", x => { x.SetConcurrentConsumerLimit(1); });
+
+            RegisterServiceBus("msmq://localhost/starbucks_cashier", x =>
+            {
+                x.UseControlBus(Builder.GetInstance<IControlBus>());
+                x.SetConcurrentConsumerLimit(1); // a cashier cannot multi-task
+
+                ConfigureSubscriptionClient("msmq://localhost/mt_subscriptions", x);
+
+                x.ConfigureService<HealthClientConfigurator>(health => health.SetHeartbeatInterval(10));
+            });
+        }
 	}
 }

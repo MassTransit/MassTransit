@@ -18,9 +18,13 @@ namespace Starbucks.Cashier
 	using log4net.Config;
 	using Magnum;
 	using Magnum.StateMachine;
+
+	using MassTransit.NinjectIntegration;
 	using MassTransit.Saga;
 	using MassTransit.Transports;
-	using StructureMap;
+
+	using Ninject;
+
 	using Topshelf;
 	using Topshelf.Configuration;
 	using Topshelf.Configuration.Dsl;
@@ -46,17 +50,10 @@ namespace Starbucks.Cashier
 
 					EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
-					var container = new Container(x =>
-						{
-							x.AddType(typeof (CashierSaga));
-							x.AddType(typeof (CashierService));
-
-							x.For<CashierService>()
-								.Singleton()
-								.Use<CashierService>();
-						});
-
-					container.Configure(x => x.AddRegistry(new CashierRegistry(container)));
+                    StandardKernel kernel = new StandardKernel();
+                    NinjectObjectBuilder container = new NinjectObjectBuilder(kernel);
+                    CashierRegistry module = new CashierRegistry(container);
+                    kernel.Load(module);
 
 					DisplayStateMachine();
 
