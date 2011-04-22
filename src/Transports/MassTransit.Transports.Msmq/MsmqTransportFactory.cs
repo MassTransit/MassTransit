@@ -82,6 +82,11 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
+		public IOutboundTransport BuildError(ITransportSettings settings)
+		{
+			return BuildOutbound(settings);
+		}
+
 		private static void PurgeExistingMessagesIfRequested(ITransportSettings settings)
 		{
 			if (settings.Address.IsLocal && settings.PurgeExistingMessages)

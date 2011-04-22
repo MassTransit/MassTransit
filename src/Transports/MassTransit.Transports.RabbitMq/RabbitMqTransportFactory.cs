@@ -45,6 +45,11 @@ namespace MassTransit.Transports.RabbitMq
 			return BuildLoopback(settings);
 		}
 
+		public IOutboundTransport BuildError(ITransportSettings settings)
+		{
+			return BuildOutbound(settings);
+		}
+
 		public static void Connect()
 		{
 			_factory.UserName = "guest";

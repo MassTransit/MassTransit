@@ -41,7 +41,7 @@ namespace MassTransit.Transports
 						EndpointSettings endpointSettings = endpointConfigurator.New(configurator);
 
                         var transport = factory.BuildLoopback(endpointSettings.Normal);
-                        var errorTransport = factory.BuildOutbound(endpointSettings.Error);
+                        var errorTransport = factory.BuildError(endpointSettings.Error);
 
                         var endpoint = new Endpoint(transport.Address, endpointSettings.Normal.Serializer, transport, errorTransport);
 

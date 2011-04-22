@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Configuration
 {
-	public interface IPeerSubscriptionClientConfigurator
+	public interface IMulticastSubscriptionClientConfigurator
 	{
 		void SetMulticastAddress(string uriString);
 	}

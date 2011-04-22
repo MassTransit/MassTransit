@@ -20,7 +20,7 @@ namespace MassTransit.Transports.Msmq
 	{
 		public string Scheme
 		{
-			get { return "msmq"; }
+			get { return "msmq-pgm"; }
 		}
 
 		public ILoopbackTransport BuildLoopback(ITransportSettings settings)
@@ -73,6 +73,13 @@ namespace MassTransit.Transports.Msmq
 			{
 				throw new TransportException(settings.Address.Uri, "Failed to create MSMQ outbound transport", ex);
 			}
+		}
+
+		public IOutboundTransport BuildError(ITransportSettings settings)
+		{
+			ITransportSettings msmqSettings = new CreateTransportSettings(settings.Address.Uri.GetQueueAddress(), settings);
+
+			return BuildOutbound(msmqSettings);
 		}
 
 		private static void PurgeExistingMessagesIfRequested(ITransportSettings settings)

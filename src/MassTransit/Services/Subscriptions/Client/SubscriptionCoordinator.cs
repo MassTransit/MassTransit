@@ -75,25 +75,43 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		public void Consume(AddSubscription message)
 		{
+			if (CurrentMessage.Headers.SourceAddress == _bus.Endpoint.Address.Uri)
+				return;
+
 			Add(message.Subscription);
 		}
 
 		public void Consume(AddSubscriptionClient message)
 		{
-			_outboundEndpoint.Send(new SubscriptionRefresh(_subscriptions.Select(x => x.Value)));
+			if (CurrentMessage.Headers.SourceAddress == _bus.Endpoint.Address.Uri)
+				return;
+
+			_outboundEndpoint.Send(new SubscriptionRefresh(_subscriptions
+				.Select(x => new SubscriptionInformation(x.ClientId, x.SequenceNumber, x.MessageName, x.CorrelationId, x.EndpointUri)
+					{
+						SubscriptionId = x.SubscriptionId
+					})), context => context.SetSourceAddress(_bus.Endpoint.Address.Uri));
 		}
 
 		public void Consume(RemoveSubscription message)
 		{
+			if (CurrentMessage.Headers.SourceAddress == _bus.Endpoint.Address.Uri)
+				return;
+
 			Remove(message.Subscription);
 		}
 
 		public void Consume(RemoveSubscriptionClient message)
 		{
+			if (CurrentMessage.Headers.SourceAddress == _bus.Endpoint.Address.Uri)
+				return;
 		}
 
 		public void Consume(SubscriptionRefresh message)
 		{
+			if (CurrentMessage.Headers.SourceAddress == _bus.Endpoint.Address.Uri)
+				return;
+
 			foreach (SubscriptionInformation subscription in message.Subscriptions)
 			{
 				Add(subscription);
@@ -132,7 +150,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		public void Stop()
 		{
 			var message = new RemoveSubscriptionClient(_clientId, _bus.ControlBus.Endpoint.Uri, _bus.Endpoint.Uri);
-			_outboundEndpoint.Send(message);
+			_outboundEndpoint.Send(message, context => context.SetSourceAddress(_bus.Endpoint.Address.Uri));
 
 			_unsubscribeAction();
 		}
@@ -188,7 +206,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		private void SendAddSubscriptionClient(IServiceBus bus)
 		{
 			var message = new AddSubscriptionClient(_clientId, bus.ControlBus.Endpoint.Uri, bus.Endpoint.Uri);
-			_outboundEndpoint.Send(message);
+			_outboundEndpoint.Send(message, context => context.SetSourceAddress(_bus.Endpoint.Address.Uri));
 		}
 
 		private void Remove(SubscriptionInformation subscription)
@@ -322,12 +340,12 @@ namespace MassTransit.Services.Subscriptions.Client
 				_subscriptions.Add(clientInfo.SubscriptionId, clientInfo);
 			}
 
-			_outboundEndpoint.Send(add);
+			_outboundEndpoint.Send(add, context => context.SetSourceAddress(_bus.Endpoint.Address.Uri));
 			return () =>
 				{
 					var remove = new RemoveSubscription(info, _sequence.Next());
 
-					_outboundEndpoint.Send(remove);
+					_outboundEndpoint.Send(remove, context => context.SetSourceAddress(_bus.Endpoint.Address.Uri));
 
 					return true;
 				};

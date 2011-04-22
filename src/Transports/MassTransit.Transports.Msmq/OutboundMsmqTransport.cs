@@ -50,7 +50,7 @@ namespace MassTransit.Transports.Msmq
 						SendMessage(queue, context.Message);
 
 						if (_messageLog.IsDebugEnabled)
-							_messageLog.DebugFormat("SEND:{0}:{1}", Address, context.Message.Id);
+							_messageLog.DebugFormat("SEND:{0}:{1}:{2}", _address.OutboundFormatName, context.Message.Label, context.Message.Id);
 					}
 				}
 				catch (MessageQueueException ex)

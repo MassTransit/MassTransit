@@ -18,7 +18,7 @@ namespace MassTransit.Tests.Serialization
 
     [TestFixture]
     public class Serializing_a_property_of_type_char :
-        SerializationTest<CustomXmlMessageSerializer>
+        SerializationTest<XmlMessageSerializer>
     {
         public class PropertyOfChar
         {
@@ -74,7 +74,7 @@ namespace MassTransit.Tests.Serialization
 
     [TestFixture]
     public class Serializing_a_string_with_an_escaped_character :
-        SerializationTest<CustomXmlMessageSerializer>
+        SerializationTest<XmlMessageSerializer>
     {
         public class SimpleMessage
         {

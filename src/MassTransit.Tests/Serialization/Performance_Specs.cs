@@ -105,7 +105,7 @@ namespace MassTransit.Tests.Serialization
 
     [TestFixture]
     public class WhenUsingCustomXmlInPerfTest:
-        Performance_Specs<CustomXmlMessageSerializer>
+        Performance_Specs<XmlMessageSerializer>
     {
     }
 

@@ -26,7 +26,7 @@ namespace MassTransit.TestFramework.Transports
 		[SetUp]
 		public void SetUp()
 		{
-			_serializer = new CustomXmlMessageSerializer();
+			_serializer = new XmlMessageSerializer();
 			_transport = _factory.BuildOutbound(new CreateTransportSettings(new EndpointAddress(Address)));
 		}
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,31 +12,40 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests
 {
-	using System.Linq;
-	using MassTransit.Tests.Load;
-	using MassTransit.Tests.Load.Messages;
+	using System;
+	using Magnum.Extensions;
+	using Magnum.TestFramework;
+	using MassTransit.Tests.Messages;
 	using NUnit.Framework;
 	using TestFixtures;
+	using TestFramework;
 
-	[TestFixture, Category("Integration")]
-	public class Default_distributor_specifications :
-		MsmqDistributorTestFixture
+	[TestFixture, Integration]
+	public class Multicast_subscription_client_should_work :
+		MulticastMsmqEndpointTestFixture
 	{
+		private PingMessage _ping;
+		private FutureMessage<PingMessage, Guid> _future;
+
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
-			AddFirstCommandInstance("A", "msmq://localhost/worker_a");
-			AddFirstCommandInstance("B", "msmq://localhost/worker_b");
-			AddFirstCommandInstance("C", "msmq://localhost/worker_c");
+			_ping = new PingMessage();
+
+			_future = new FutureMessage<PingMessage, Guid>(_ping.CorrelationId);
+
+			RemoteBus.Subscribe<PingMessage>(message => { _future.Set(message); });
+
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+
+			LocalBus.Publish(_ping);
 		}
 
 		[Test]
-		public void Using_the_load_generator_should_share_the_load()
+		public void The_message_should_arrive()
 		{
-			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
-
-			generator.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
+			_future.WaitUntilAvailable(10.Seconds());
 		}
 	}
 }

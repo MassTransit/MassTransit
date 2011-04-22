@@ -60,7 +60,7 @@
 
     [TestFixture]
     public class WhenUsingTheCustomXmlOnComplexMessage :
-        GivenAComplexMessage<CustomXmlMessageSerializer>
+        GivenAComplexMessage<XmlMessageSerializer>
     {
 
     }

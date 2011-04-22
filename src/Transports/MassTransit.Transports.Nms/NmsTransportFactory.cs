@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Nms
 {
+	using System;
+
 	public class NmsTransportFactory :
 		ITransportFactory
 	{
@@ -33,6 +35,11 @@ namespace MassTransit.Transports.Nms
 		public IOutboundTransport BuildOutbound(ITransportSettings settings)
 		{
 			return new NmsTransport(settings.Address);
+		}
+
+		public IOutboundTransport BuildError(ITransportSettings settings)
+		{
+			return BuildOutbound(settings);
 		}
 	}
 }

@@ -14,16 +14,16 @@ namespace MassTransit.Configuration
 {
 	using System;
 
-	public static class ExtensionsForPeerSubscriptionClient
+	public static class MulticastSubscriptionClientExtensions
 	{
-		public static void UsePeerSubscriptionService(this IServiceBusConfigurator configurator)
+		public static void UseMulticastSubscriptionClient(this IServiceBusConfigurator configurator)
 		{
-			configurator.ConfigureService<PeerSubscriptionClientConfigurator>(x => { });
+			configurator.ConfigureService<MulticastSubscriptionClientConfigurator>(x => { });
 		}
 
-		public static void UsePeerSubscriptionService(this IServiceBusConfigurator configurator, Action<IPeerSubscriptionClientConfigurator> configureCallback)
+		public static void UseMulticastSubscriptionClient(this IServiceBusConfigurator configurator, Action<IMulticastSubscriptionClientConfigurator> configureCallback)
 		{
-			configurator.ConfigureService<PeerSubscriptionClientConfigurator>(configureCallback);
+			configurator.ConfigureService<MulticastSubscriptionClientConfigurator>(configureCallback);
 		}
 	}
 }

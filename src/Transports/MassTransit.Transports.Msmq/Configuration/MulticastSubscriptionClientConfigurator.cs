@@ -16,34 +16,46 @@ namespace MassTransit.Configuration
 	using System.Net;
 	using Exceptions;
 	using Internal;
+	using Magnum;
 	using Transports.Msmq;
 
-	public class PeerSubscriptionClientConfigurator :
-		IPeerSubscriptionClientConfigurator,
+	public class MulticastSubscriptionClientConfigurator :
+		IMulticastSubscriptionClientConfigurator,
 		IServiceConfigurator
 	{
 		private IPEndPoint _multicastAddress;
+		private string _networkKey;
 
-		public PeerSubscriptionClientConfigurator()
+		public MulticastSubscriptionClientConfigurator()
 		{
 			_multicastAddress = new IPEndPoint(IPAddress.Parse("235.109.116.115"), 7784);
+			_networkKey = Environment.MachineName.ToLowerInvariant();
 		}
 
 		public Type ServiceType
 		{
-			get { return typeof (PeerSubscriptionClient); }
+			get { return typeof (MulticastSubscriptionClient); }
 		}
 
 		public IBusService Create(IServiceBus bus, IObjectBuilder builder)
 		{
 			var endpointFactory = builder.GetInstance<IEndpointResolver>();
 
-			var service = new PeerSubscriptionClient(endpointFactory)
-				{
-					MulticastAddress = _multicastAddress
-				};
+			string path = bus.ControlBus.Endpoint.Address.Uri.AbsolutePath;
+
+			var uri = new UriBuilder("msmq-pgm", _multicastAddress.Address.ToString(), _multicastAddress.Port, path).Uri;
+			Uri clientUri = uri.AppendToPath("_subscriptions");
+
+			var service = new MulticastSubscriptionClient(clientUri, _networkKey, endpointFactory);
 
 			return service;
+		}
+
+		public void SetNetworkKey(string key)
+		{
+			Guard.AgainstEmpty(key, "key");
+
+			_networkKey = key;
 		}
 
 		public void SetMulticastAddress(string uriString)

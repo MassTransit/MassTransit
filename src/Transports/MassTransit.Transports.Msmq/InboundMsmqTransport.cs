@@ -93,8 +93,8 @@ namespace MassTransit.Transports.Msmq
 							if (_log.IsDebugEnabled)
 								_log.DebugFormat("SKIP:{0}:{1}", Address, context.MessageId);
 
-							if (SpecialLoggers.Messages.IsInfoEnabled)
-								SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, context.MessageId);
+							if (_messageLog.IsDebugEnabled)
+								_messageLog.DebugFormat("SKIP:{0}:{1}:{2}", _address.InboundFormatName, context.Message.Label, context.MessageId);
 
 							continue;
 						}
@@ -117,7 +117,7 @@ namespace MassTransit.Transports.Msmq
 											context.MessageId, acceptedMessageId));
 
 								if (_messageLog.IsDebugEnabled)
-									_messageLog.DebugFormat("RECV:{0}:{1}", Address, context.Message.Id);
+									_messageLog.DebugFormat("RECV:{0}:{1}:{2}", _address.InboundFormatName, context.Message.Label, context.Message.Id);
 
 								receive(context);
 

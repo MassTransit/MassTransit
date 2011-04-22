@@ -80,9 +80,9 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Configuration\IPeerSubscriptionClientConfigurator.cs" />
-    <Compile Include="Configuration\PeerSubscriptionClientConfigurator.cs" />
-    <Compile Include="Configuration\ExtensionsForPeerSubscriptionClient.cs" />
+    <Compile Include="Configuration\IMulticastSubscriptionClientConfigurator.cs" />
+    <Compile Include="Configuration\MulticastSubscriptionClientConfigurator.cs" />
+    <Compile Include="Configuration\MulticastSubscriptionClientExtensions.cs" />
     <Compile Include="IMsmqEndpointAddress.cs" />
     <Compile Include="InboundMsmqTransport.cs" />
     <Compile Include="InboundMulticastMsmqTransport.cs" />
@@ -100,7 +100,7 @@
     <Compile Include="MsmqTransportFactory.cs" />
     <Compile Include="MsmqUriExtensions.cs" />
     <Compile Include="NonTransactionalMsmqTransport.cs" />
-    <Compile Include="PeerSubscriptionClient.cs" />
+    <Compile Include="MulticastSubscriptionClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransactionalInboundMsmqTransport.cs" />
     <Compile Include="TransactionalOutboundMsmqTransport.cs" />

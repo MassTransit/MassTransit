@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.TextFixtures
 {
 	using System;
+	using System.Collections.Generic;
 	using Configuration;
 	using Magnum.Extensions;
 	using MassTransit.Saga;
@@ -25,18 +26,35 @@ namespace MassTransit.Tests.TextFixtures
 	public abstract class EndpointTestFixture<TTransportFactory>
 		where TTransportFactory : ITransportFactory
 	{
+		private List<Action<IEndpointResolverConfigurator>> _transportFactories;
+
+		protected EndpointTestFixture()
+		{
+			_transportFactories = new List<Action<IEndpointResolverConfigurator>>();
+
+			_transportFactories.Add(x => x.AddTransportFactory<TTransportFactory>());
+		}
+
+		protected void AddTransport<T>() 
+			where T : ITransportFactory
+		{
+			Action<IEndpointResolverConfigurator> adder = x => x.AddTransportFactory<T>();
+
+			_transportFactories.Add(adder);
+		}
+
 		[SetUp]
 		public void Setup()
 		{
 			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
 
-			XmlMessageSerializer serializer = new XmlMessageSerializer();
+			var serializer = new XmlMessageSerializer();
 			ObjectBuilder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(serializer);
 
 			EndpointResolver = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
-					x.AddTransportFactory<TTransportFactory>();
+					_transportFactories.Each(callback => callback(x));
 					x.SetDefaultSerializer<XmlMessageSerializer>();
 
 					AdditionalEndpointFactoryConfiguration(x);

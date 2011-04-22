@@ -119,10 +119,11 @@
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
-    <Compile Include="MsmqDistributorTestFixture.cs" />
     <Compile Include="MsmqNonTransactionalSendingContract.cs" />
     <Compile Include="MsmqTransportContract.cs" />
+    <Compile Include="Multicast_subscription_client_should_work.cs" />
     <Compile Include="TestFixtures\MsmqConcurrencyTestFixture.cs" />
+    <Compile Include="TestFixtures\MsmqDistributorTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqEndpointOnlyTestFixture.cs" />
     <Compile Include="NonTransactional_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -134,6 +135,7 @@
     <Compile Include="TestFixtures\MsmqEndpointTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqTransactionalEndpointTestFixture.cs" />
     <Compile Include="As_a_queue_address.cs" />
+    <Compile Include="TestFixtures\MulticastMsmqEndpointTestFixture.cs" />
     <Compile Include="TestFixtures\TransactionalMsmqEndpointOnlyTestFixture.cs" />
     <Compile Include="Transactional_Specs.cs" />
   </ItemGroup>

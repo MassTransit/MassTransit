@@ -65,7 +65,8 @@ namespace MassTransit.Internal
     		get { return _transport.OutboundTransport; }
     	}
 
-    	public void Send<T>(T message) where T : class
+    	public void Send<T>(T message) 
+			where T : class
 		{
 			if (_disposed) throw NewDisposedException();
 
@@ -196,7 +197,7 @@ namespace MassTransit.Internal
                             _log.DebugFormat("SKIP:{0}:{1}", Address, messageObj.GetType().Name);
 
                         if (SpecialLoggers.Messages.IsInfoEnabled)
-                            SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, messageObj.GetType().Name);
+                            SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}:{2}", Address, messageObj.GetType().Name, receivingContext.MessageId);
 
                         return null;
                     }
@@ -216,7 +217,7 @@ namespace MassTransit.Internal
                         _log.DebugFormat("RECV:{0}:{1}:{2}", Address, m.MessageId, messageObj.GetType().Name);
 
                     if (SpecialLoggers.Messages.IsInfoEnabled)
-                        SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", Address, messageObj.GetType().Name);
+                        SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}:{2}", Address, messageObj.GetType().Name, m.MessageId);
 
                     try
                     {

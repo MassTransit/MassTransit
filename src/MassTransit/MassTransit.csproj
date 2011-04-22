@@ -109,7 +109,6 @@
     <Compile Include="Parallel\Messages\SubTaskComplete.cs" />
     <Compile Include="Parallel\Messages\SubTaskWorkerAvailable.cs" />
     <Compile Include="Parallel\SubTaskWorker.cs" />
-    <Compile Include="Serialization\CustomXmlMessageSerializer.cs" />
     <Compile Include="Serialization\JsonMessageEnvelope.cs" />
     <Compile Include="Serialization\JsonMessageSerializer.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthInformation.cs" />
@@ -516,9 +515,6 @@
     <Compile Include="Services\MessageDeferral\Messages\NewDeferMessageReceived.cs" />
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
     <Compile Include="Util\SequenceNumberGenerator.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Transports\_readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\HealthMonitoring\Client\" />

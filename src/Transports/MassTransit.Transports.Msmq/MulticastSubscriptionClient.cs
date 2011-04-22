@@ -13,30 +13,29 @@
 namespace MassTransit.Transports.Msmq
 {
 	using System;
-	using System.Net;
 	using Configuration;
 	using Internal;
 	using log4net;
 	using Services.Subscriptions.Client;
 
-	public class PeerSubscriptionClient :
+	public class MulticastSubscriptionClient :
 		IBusService
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (PeerSubscriptionClient));
+		private static readonly ILog _log = LogManager.GetLogger(typeof (MulticastSubscriptionClient));
 		private SubscriptionCoordinator _coordinator;
+		private readonly Uri _uri;
 		private IEndpointResolver _endpointResolver;
 		private IServiceBus _subscriptionBus;
 
-		public PeerSubscriptionClient(IEndpointResolver endpointResolver)
+		public MulticastSubscriptionClient(Uri uri, string networkKey, IEndpointResolver endpointResolver)
 		{
-			MulticastAddress = new IPEndPoint(IPAddress.Parse("235.109.116.115"), 7784);
-			NetworkKey = Environment.MachineName;
+			_uri = uri;
+
+			NetworkKey = networkKey;
 			_endpointResolver = endpointResolver;
 		}
 
-		public IPEndPoint MulticastAddress { get; set; }
-
-		public string NetworkKey { get; set; }
+		public string NetworkKey { get; private set; }
 
 		public void Dispose()
 		{
@@ -45,16 +44,11 @@ namespace MassTransit.Transports.Msmq
 		public void Start(IServiceBus bus)
 		{
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Starting PeerSubscriptionClient on {0}", bus.Endpoint.Uri);
-
-			IEndpointAddress address = bus.ControlBus.Endpoint.Address;
-
-			var baseAddress = new Uri("multicast://" + MulticastAddress + "/");
-			var subscriptionAddress = new Uri(baseAddress, address.Uri.AbsolutePath);
+				_log.DebugFormat("Starting MulticastSubscriptionClient on {0}", _uri);
 
 			_subscriptionBus = ServiceBusConfigurator.New(x =>
 				{
-					x.ReceiveFrom(subscriptionAddress);
+					x.ReceiveFrom(_uri);
 					x.SetEndpointFactory(_endpointResolver);
 					x.SetConcurrentConsumerLimit(1);
 				});

@@ -79,7 +79,7 @@ namespace MassTransit.Tests.Serialization
 
     [TestFixture]
     public class WhenUsingCustomXml :
-        Deserializing_an_interface<CustomXmlMessageSerializer>
+        Deserializing_an_interface<XmlMessageSerializer>
     {
         
     }
