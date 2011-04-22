@@ -14,8 +14,6 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Messaging;
-	using System.Net;
-	using Magnum;
 
 	public class MsmqEndpointAddress :
 		EndpointAddress,
@@ -33,8 +31,12 @@ namespace MassTransit.Transports.Msmq
 			IsTransactional = CheckForTransactionalHint(uri);
 
 			MulticastAddress = uri.GetMulticastAddress();
-
-			if (IsLocal)
+			if(MulticastAddress != null)
+			{
+				IsTransactional = false;
+				LocalName = uri.GetLocalName();
+			}
+			else if (IsLocal)
 			{
 				IsTransactional = IsLocalQueueTransactional();
 
@@ -84,6 +86,13 @@ namespace MassTransit.Transports.Msmq
 				"Bad: msmq://machinename/round_file/queue_name");
 		}
 
+		protected override bool DetermineIfEndpointIsLocal(Uri uri)
+		{
+			if (uri.Scheme.ToLowerInvariant() == "msmq-pgm")
+				return true;
+
+			return base.DetermineIfEndpointIsLocal(uri);
+		}
 
 		private Uri SetUriHostToLocalMachineName()
 		{

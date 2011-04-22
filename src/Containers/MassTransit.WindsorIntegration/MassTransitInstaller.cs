@@ -72,8 +72,13 @@ namespace MassTransit.WindsorIntegration
                     cfg.UseSubscriptionService(_options.Subscriptions);
                 }
 
+				if (_options.Callback != null)
+				{
+					_options.Callback(cfg);
+				}
 
-                //if management service
+
+            	//if management service
                 if (_options.HealthServiceInterval != null)
                 {
                     string mgmt = _options.HealthServiceInterval;

@@ -340,12 +340,13 @@ namespace MassTransit.Services.Subscriptions.Client
 				_subscriptions.Add(clientInfo.SubscriptionId, clientInfo);
 			}
 
-			_outboundEndpoint.Send(add, context => context.SetSourceAddress(_bus.Endpoint.Address.Uri));
+			Uri sourceAddress = _bus.Endpoint.Address.Uri;
+			_outboundEndpoint.Send(add, context => context.SetSourceAddress(sourceAddress));
 			return () =>
 				{
 					var remove = new RemoveSubscription(info, _sequence.Next());
 
-					_outboundEndpoint.Send(remove, context => context.SetSourceAddress(_bus.Endpoint.Address.Uri));
+					_outboundEndpoint.Send(remove, context => context.SetSourceAddress(sourceAddress));
 
 					return true;
 				};

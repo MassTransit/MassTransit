@@ -93,7 +93,7 @@ namespace MassTransit
 			return uri.Query.GetValueFromQueryString("tx", false);
 		}
 
-		private bool DetermineIfEndpointIsLocal(Uri uri)
+		protected virtual bool DetermineIfEndpointIsLocal(Uri uri)
 		{
 			string hostName = uri.Host;
 			bool local = string.Compare(hostName, ".") == 0 ||
