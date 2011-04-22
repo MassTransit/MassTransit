@@ -45,5 +45,15 @@ namespace MassTransit.Configuration
         {
             _sbc.SetConcurrentReceiverLimit(concurrentReceiverLimit);
         }
+
+        public void BeforeConsumingMessage(Action beforeConsume)
+        {
+            _sbc.BeforeConsumingMessage(beforeConsume);
+        }
+
+        public void AfterConsumingMessage(Action afterConsume)
+        {
+            _sbc.AfterConsumingMessage(afterConsume);
+        }
     }
 }

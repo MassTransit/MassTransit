@@ -18,5 +18,6 @@ namespace MassTransit.Transports
     public interface IEndpointFactory
     {
         IEndpoint BuildEndpoint(Uri uri, Action<IEndpointConfigurator> configurator);
+        void AddTransportFactory(ITransportFactory factory);
     }
 }

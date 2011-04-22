@@ -10,6 +10,8 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+using MassTransit.Exceptions;
+
 namespace MassTransit.Configuration
 {
     using System;
@@ -21,8 +23,10 @@ namespace MassTransit.Configuration
     {
         readonly EndpointResolverConfigurator _epc;
         readonly ServiceBusConfigurator _sbc;
-        readonly IEndpointResolver _resolver;
-        public MassTransitConfiguration(IObjectBuilder builder, IEndpointResolver resolver)
+        private bool _serializerHasBeenSet;
+        private IEndpointResolver _resolver;
+
+        public MassTransitConfiguration(IObjectBuilder builder)
         {
             _epc = new EndpointResolverConfigurator();
             _sbc = new ServiceBusConfigurator();
@@ -32,22 +36,11 @@ namespace MassTransit.Configuration
 
             _epc.AddTransportFactory<LoopbackTransportFactory>();
             _epc.AddTransportFactory<MulticastUdpTransportFactory>();
-            _resolver = resolver;
         }
 
-        public void RegisterTransport(Type transportFactoryType)
+        public void AddTransportFactory(Type transportFactoryType)
         {
             _epc.AddTransportFactory(transportFactoryType);
-        }
-
-        public void RegisterTransport<TTransportFactory>() where TTransportFactory : ITransportFactory
-        {
-            _epc.AddTransportFactory<TTransportFactory>();
-        }
-
-        public void ReceiveFrom(string uriString)
-        {
-            _sbc.ReceiveFrom(uriString);
         }
 
         public void ReceiveFrom(Uri uri)
@@ -55,50 +48,39 @@ namespace MassTransit.Configuration
             _sbc.ReceiveFrom(uri);
         }
 
-        public void UseDotNetXmlSerilaizer()
-        {
-            UseCustomSerializer<DotNotXmlMessageSerializer>();
-        }
-
-        public void UseJsonSerializer()
-        {
-            UseCustomSerializer<JsonMessageSerializer>();
-        }
-
-        public void UseXmlSerializer()
-        {
-            UseCustomSerializer<XmlMessageSerializer>();
-        }
-
-        public void UseBinarySerializer()
-        {
-            UseCustomSerializer<BinaryMessageSerializer>();
-        }
-
-        public void UseCustomSerializer<TSerializer>() where TSerializer : IMessageSerializer
-        {
-            _epc.SetDefaultSerializer<TSerializer>();
-        }
-
-        public void SendErrorsTo(string uriString)
-        {
-            _sbc.SendErrorsTo(uriString);
-        }
-
         public void SendErrorsTo(Uri uri)
         {
             _sbc.SendErrorsTo(uri);
         }
 
+        public void UseCustomSerializer<TSerializer>() where TSerializer : IMessageSerializer
+        {
+            if(!_serializerHasBeenSet)
+                throw new ConfigurationException("You have already choosen a serializer beyond the default one.");
 
+            _serializerHasBeenSet = true;
+            _epc.SetDefaultSerializer<TSerializer>();
+        }
+
+
+        //effectively internal
         public IServiceBus CreateBus()
         {
             //need to pass the epf into the sbc
-            _sbc.SetEndpointFactory(_resolver);
+            _resolver = _epc.Create();
+            _sbc.SetEndpointFactory(_epc.Create());
 
             //TODO: Control Bus needs a concurrent receiver of 1
 
             return _sbc.Create();
+        }
+
+        public IEndpointResolver GetResolver()
+        {
+            if (_resolver != null)
+                return _resolver;
+
+            throw new ConfigurationException("You need to initialize MassTransit first 'Use Bus.Initialize' ");
         }
 
         public void ConfigureService<TService>(Action<TService> configure) where TService : IServiceConfigurator, new()

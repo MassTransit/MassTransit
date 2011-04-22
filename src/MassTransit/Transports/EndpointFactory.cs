@@ -21,12 +21,13 @@ namespace MassTransit.Transports
     public class EndpointFactory :
         IEndpointFactory
     {
-        readonly IEnumerable<ITransportFactory> _factories;
+        readonly IList<ITransportFactory> _factories;
 
-        public EndpointFactory(IEnumerable<ITransportFactory> factories)
+        public EndpointFactory(IList<ITransportFactory> factories)
         {
             _factories = factories;
         }
+
 
         public IEndpoint BuildEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
@@ -55,6 +56,11 @@ namespace MassTransit.Transports
             }
 
             throw new ConfigurationException("No transport could handle: '{0}'".FormatWith(uri));
+        }
+
+        public void AddTransportFactory(ITransportFactory factory)
+        {
+            _factories.Add(factory);
         }
     }
 }

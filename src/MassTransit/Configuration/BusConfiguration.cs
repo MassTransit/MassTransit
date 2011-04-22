@@ -14,26 +14,25 @@ namespace MassTransit.Configuration
 {
     using System;
     using Serialization;
-    using Transports;
 
     public interface BusConfiguration
     {
-        void ReceiveFrom(string uriString);
+        /// <summary>
+        /// Specify the endpoint from which messages should be read
+        /// </summary>
+        /// <param name="uri">The uri of the endpoint</param>
         void ReceiveFrom(Uri uri);
-        void SendErrorsTo(string uriString);
+
+
+        /// <summary>
+        /// Specify the endpoint to send errors to
+        /// </summary>
+        /// <param name="uri"></param>
         void SendErrorsTo(Uri uri);
 
-        //TODO: I may have to move these around
-        void RegisterTransport<TTransportFactory>() where TTransportFactory : ITransportFactory;
-        void RegisterTransport(Type transportFactoryType);
-
-        //serialization. should it be a sub thingy?
-        //this maynot be able to be here?
-        void UseDotNetXmlSerilaizer();
-        void UseJsonSerializer();
-        void UseXmlSerializer();
-        void UseBinarySerializer();
+        
         void UseCustomSerializer<TSerializer>() where TSerializer : IMessageSerializer;
+
 
         void ConfigureService<TService>(Action<TService> configure) where TService : IServiceConfigurator, new();
 
@@ -44,5 +43,8 @@ namespace MassTransit.Configuration
         ////// advanced settings
         // saga persistors?
         // subscription repo
+
+
+        void AddTransportFactory(Type transportFactory);
     }
 }
