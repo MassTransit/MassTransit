@@ -55,8 +55,8 @@ namespace MassTransit.Tests.Serialization
     }
  
     [TestFixture]
-    public class WhenUsingTheCustomXmlOnSimpleMessage :
-        GivenASimpleMessage<CustomXmlMessageSerializer>
+    public class WhenUsingTheXmlOnSimpleMessage :
+        GivenASimpleMessage<XmlMessageSerializer>
     {
         
     }

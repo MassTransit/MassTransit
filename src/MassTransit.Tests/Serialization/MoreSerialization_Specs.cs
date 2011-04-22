@@ -19,7 +19,7 @@ namespace MassTransit.Tests.Serialization
 
 	[TestFixture]
     public class MoreSerializationForCustomXml :
-        MoreSerialization_Specs<CustomXmlMessageSerializer>
+        MoreSerialization_Specs<XmlMessageSerializer>
 	{
 	}
 

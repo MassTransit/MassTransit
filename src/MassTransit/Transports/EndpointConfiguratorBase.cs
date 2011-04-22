@@ -38,7 +38,7 @@ namespace MassTransit.Transports
 			TransactionTimeout = _defaults.TransactionTimeout;
 			RequireTransactional = false;
 
-			_serializerFactory = () => new CustomXmlMessageSerializer();
+			_serializerFactory = () => new XmlMessageSerializer();
 		}
 
 		public void SetSerializer<T>()
@@ -109,10 +109,11 @@ namespace MassTransit.Transports
 				Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
 				Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
 
-				var endpointSettings = new EndpointSettings();
-
-				endpointSettings.Normal = settings;
-				endpointSettings.Error = new CreateEndpointSettings(settings.ErrorAddress, settings);
+				var endpointSettings = new EndpointSettings
+					{
+						Normal = settings, 
+						Error = new CreateEndpointSettings(settings.ErrorAddress, settings)
+					};
 
 				return endpointSettings;
 			}

@@ -72,7 +72,7 @@ namespace MassTransit.Tests.Serialization
 
     [TestFixture]
     public class WhenUsingCustomXmlWithEncryption : 
-        PreSharedKeyEncryptedSerialization_Specs<CustomXmlMessageSerializer>
+        PreSharedKeyEncryptedSerialization_Specs<XmlMessageSerializer>
     {
     }
     [TestFixture]

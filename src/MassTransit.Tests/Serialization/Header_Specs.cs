@@ -71,7 +71,7 @@ namespace MassTransit.Tests.Serialization
 
     [TestFixture]
     public class WhenUsingCustomXmlAndHeaders :
-        Setting_the_message_expiration<CustomXmlMessageSerializer>
+        Setting_the_message_expiration<XmlMessageSerializer>
     {
     }
     [TestFixture]

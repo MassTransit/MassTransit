@@ -38,13 +38,21 @@ namespace MassTransit.Transports.Msmq
 			return string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, uri.AbsolutePath.Substring(1));
 		}
 
-		private static string GetMsmqHostName(this Uri uri)
+		public static string GetMsmqHostName(this Uri uri)
 		{
 			if (IsMsmqMulticast(uri))
 				return Environment.MachineName.ToLowerInvariant();
 
 			return uri.Host;
 		}
+
+		public static IMsmqEndpointAddress GetQueueAddress(this Uri uri)
+		{
+			string hostName = GetMsmqHostName(uri);
+
+			return new MsmqEndpointAddress(new Uri(new UriBuilder("msmq", hostName).Uri, uri.AbsolutePath));
+		}	
+
 
 		public static string GetOutboundFormatName(this Uri uri)
 		{

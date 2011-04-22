@@ -14,7 +14,6 @@ namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
 	using System.Transactions;
-	using Magnum;
 	using Magnum.TestFramework;
 	using MassTransit.Tests;
 	using NUnit.Framework;
