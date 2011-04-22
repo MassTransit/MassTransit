@@ -19,17 +19,22 @@ namespace MassTransit.Transports.Msmq
 	using Internal;
 	using log4net;
 
+
 	public abstract class InboundMsmqTransport :
 		IInboundTransport
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (InboundMsmqTransport));
+		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");
+		
 		private readonly IMsmqEndpointAddress _address;
 		private bool _disposed;
-		private MessageQueue _queue;
+
+		private MessageQueueConnection _connection;
 
 		protected InboundMsmqTransport(IMsmqEndpointAddress address)
 		{
 			_address = address;
+			_connection = new MessageQueueConnection(address, QueueAccessMode.Receive);
 		}
 
 		public IEndpointAddress Address
@@ -41,8 +46,6 @@ namespace MassTransit.Transports.Msmq
 		{
 			try
 			{
-				Connect();
-
 				EnumerateQueue(callback, timeout);
 			}
 			catch (MessageQueueException ex)
@@ -65,7 +68,7 @@ namespace MassTransit.Transports.Msmq
 
 			bool received = false;
 
-			using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
+			using (MessageEnumerator enumerator = _connection.Queue.GetMessageEnumerator2())
 			{
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Address, timeout);
@@ -112,6 +115,10 @@ namespace MassTransit.Transports.Msmq
 										string.Format(
 											"Received message does not match current message: ({0} != {1})",
 											context.MessageId, acceptedMessageId));
+
+								if (_messageLog.IsDebugEnabled)
+									_messageLog.DebugFormat("RECV:{0}:{1}", Address, context.Message.Id);
+
 								receive(context);
 
 								received = true;
@@ -129,30 +136,6 @@ namespace MassTransit.Transports.Msmq
 			receiveAction(() => enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.None));
 		}
 
-
-		protected void Connect()
-		{
-			if (_queue != null)
-				return;
-
-			_queue = new MessageQueue(_address.FormatName, QueueAccessMode.Receive);
-		}
-
-		private void Disconnect()
-		{
-			if (_queue == null) 
-				return;
-
-			_queue.Dispose();
-			_queue = null;
-		}
-
-		private void Reconnect()
-		{
-			Disconnect();
-			Connect();
-		}
-
 		protected void HandleInboundMessageQueueException(MessageQueueException ex, TimeSpan timeout)
 		{
 			switch (ex.MessageQueueErrorCode)
@@ -165,27 +148,27 @@ namespace MassTransit.Transports.Msmq
 						_log.Error("The message queuing service is not available, pausing for timeout period", ex);
 
 					Thread.Sleep(timeout);
-					Reconnect();
+					_connection.Disconnect();
 					break;
 
 				case MessageQueueErrorCode.QueueNotAvailable:
 				case MessageQueueErrorCode.AccessDenied:
 				case MessageQueueErrorCode.QueueDeleted:
 					if (_log.IsErrorEnabled)
-						_log.Error("The message queue was not available: " + _address.FormatName, ex);
+						_log.Error("The message queue was not available: " + _address.InboundFormatName, ex);
 
 					Thread.Sleep(timeout);
-					Reconnect();
+					_connection.Disconnect();
 					break;
 
 				case MessageQueueErrorCode.QueueNotFound:
 				case MessageQueueErrorCode.IllegalFormatName:
 				case MessageQueueErrorCode.MachineNotFound:
 					if (_log.IsErrorEnabled)
-						_log.Error("The message queue was not found or is improperly named: " + _address.FormatName, ex);
+						_log.Error("The message queue was not found or is improperly named: " + _address.InboundFormatName, ex);
 
 					Thread.Sleep(timeout);
-					Reconnect();
+					_connection.Disconnect();
 					break;
 
 				case MessageQueueErrorCode.MessageAlreadyReceived:
@@ -201,16 +184,16 @@ namespace MassTransit.Transports.Msmq
 					if (_log.IsErrorEnabled)
 						_log.Error(
 							"The message queue handle is stale or no longer valid due to a restart of the message queuing service: " +
-							_address.FormatName, ex);
+							_address.InboundFormatName, ex);
 
 
 					Thread.Sleep(timeout);
-					Reconnect();
+					_connection.Disconnect();
 					break;
 
 				default:
 					if (_log.IsErrorEnabled)
-						_log.Error("There was a problem communicating with the message queue: " + _address.FormatName, ex);
+						_log.Error("There was a problem communicating with the message queue: " + _address.InboundFormatName, ex);
 					break;
 			}
 		}
@@ -220,7 +203,8 @@ namespace MassTransit.Transports.Msmq
 			if (_disposed) return;
 			if (disposing)
 			{
-				Disconnect();
+				_connection.Dispose();
+				_connection = null;
 			}
 
 			_disposed = true;

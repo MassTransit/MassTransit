@@ -12,104 +12,56 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
-    using Magnum;
-    using Serialization;
+	using System;
+	using Magnum;
+	using Serialization;
 
-    public class CreateEndpointSettings
-    {
-        public CreateEndpointSettings(string uri)
-        {
-            Guard.AgainstNull(uri, "The URI cannot be null or empty");
-            Guard.AgainstEmpty(uri, "The URI cannot be null or empty");
+	public class CreateEndpointSettings :
+		CreateTransportSettings,
+		IEndpointSettings
+	{
+		public CreateEndpointSettings(string uri)
+			: this(new EndpointAddress(uri))
+		{
+		}
 
-            try
-            {
-                var address = new EndpointAddress(new Uri(uri));
-                SetAddresses(address);
-            }
-            catch (UriFormatException ex)
-            {
-                throw new ArgumentException("The URI is invalid: " + uri, ex);
-            }
-        }
+		public CreateEndpointSettings(Uri uri)
+			: this(new EndpointAddress(uri))
+		{
+		}
 
-        public CreateEndpointSettings(Uri uri)
-        {
-            Guard.AgainstNull(uri, "The URI cannot be null");
+		private CreateEndpointSettings(IEndpointAddress address)
+			: base(address)
+		{
+			ErrorAddress = GetErrorEndpointAddress();
+		}
 
-            var address = new EndpointAddress(uri);
-            SetAddresses(address);
-        }
+		public CreateEndpointSettings(IEndpointAddress address, IEndpointSettings source)
+			: base(address, source)
+		{
+			Guard.AgainstNull(source, "source");
 
-        public CreateEndpointSettings(IEndpointAddress address)
-        {
-            Guard.AgainstNull(address, "The address cannot be null");
+			Serializer = source.Serializer;
+			if(source.ErrorAddress != address)
+				ErrorAddress = source.ErrorAddress;
+		}
 
-            SetAddresses(address);
-        }
+		public CreateEndpointSettings(IEndpointAddress address, IMessageSerializer serializer, ITransportSettings source)
+			: base(address, source)
+		{
+			Guard.AgainstNull(source, "source");
 
-        public CreateEndpointSettings(IEndpointAddress address, CreateEndpointSettings source)
-        {
-            Guard.AgainstNull(address, "The address cannot be null");
-            Guard.AgainstNull(source, "The source settings cannot be null");
+			Serializer = serializer;
+			ErrorAddress = GetErrorEndpointAddress();
+		}
 
-            Serializer = source.Serializer;
-            Transactional = source.Transactional;
-            PurgeExistingMessages = source.PurgeExistingMessages;
-            CreateIfMissing = source.CreateIfMissing;
+		public IEndpointAddress ErrorAddress { get; private set; }
 
+		public IMessageSerializer Serializer { get; private set; }
 
-            SetAddresses(address);
-        }
-
-
-        protected void SetAddresses(IEndpointAddress address)
-        {
-            if(address.IsTransactional)
-                Transactional = true;
-
-            Address = address;
-
-            var errorPath = Address.Uri.AbsolutePath + "_error";
-            var errorUri = new UriBuilder(Address.Uri.Scheme, Address.Uri.Host, Address.Uri.Port, errorPath).Uri;
-            ErrorAddress = new EndpointAddress(errorUri);
-        }
-
-        /// <summary>
-        /// The address of the endpoint
-        /// </summary>
-        public IEndpointAddress Address { get; set; }
-
-
-        /// <summary>
-        /// The address of the endpoint where invalid messages should be moved
-        /// </summary>
-        public IEndpointAddress ErrorAddress { get; set; }
-
-        /// <summary>
-        /// The serializer to use for messages on the endpoint
-        /// </summary>
-        public IMessageSerializer Serializer { get; set; }
-
-        public bool Transactional { get; set; }
-
-        /// <summary>
-        /// True if any existing messages at the endpoint should be purged when the endpoint is created
-        /// </summary>
-        public bool PurgeExistingMessages { get; set; }
-
-        public bool CreateIfMissing { get; set; }
-
-        public CreateTransportSettings ToTransportSettings()
-        {
-            return new CreateTransportSettings(Address)
-                {
-                    CreateIfMissing = CreateIfMissing,
-                    RequireTransactional = Transactional,
-                    Transactional =  Transactional,
-                    PurgeExistingMessages = PurgeExistingMessages
-                };
-        }
-    }
+		private EndpointAddress GetErrorEndpointAddress()
+		{
+			return new EndpointAddress(Address.Uri.AppendToPath("_error"));
+		}
+	}
 }

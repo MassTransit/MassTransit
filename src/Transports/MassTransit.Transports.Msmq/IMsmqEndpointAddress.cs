@@ -12,13 +12,25 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq
 {
+	using System.Net;
+
 	public interface IMsmqEndpointAddress :
 		IEndpointAddress
 	{
 		/// <summary>
-		/// The format name used to talk to MSMQ
+		/// The format name used to receive messages
 		/// </summary>
-		string FormatName { get; }
+		string InboundFormatName { get; }
+
+		/// <summary>
+		/// The format name used to send messages (may be different if multicast MSMQ is used)
+		/// </summary>
+		string OutboundFormatName { get; }
+
+		/// <summary>
+		/// If specified, the multicast address to bind to the queue
+		/// </summary>
+		string MulticastAddress { get; }
 
 		/// <summary>
 		/// The name of the queue in local format (.\private$\name)

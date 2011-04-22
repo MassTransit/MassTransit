@@ -34,7 +34,17 @@ namespace MassTransit.Internal
             get { return new Uri("null://middleof/nowhere"); }
         }
 
-        public void Send<T>(T message) where T : class
+    	public IInboundTransport InboundTransport
+    	{
+    		get { throw new NotImplementedException(); }
+    	}
+
+    	public IOutboundTransport OutboundTransport
+    	{
+    		get { throw new NotImplementedException(); }
+    	}
+
+    	public void Send<T>(T message) where T : class
         {
         }
 

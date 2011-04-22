@@ -14,6 +14,8 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Messaging;
+	using System.Net;
+	using Magnum;
 
 	public class MsmqEndpointAddress :
 		EndpointAddress,
@@ -24,29 +26,37 @@ namespace MassTransit.Transports.Msmq
 		{
 			PublicQueuesNotAllowed();
 
-			FormatName = MsmqUriParser.GetFormatName(uri);
+			InboundFormatName = uri.GetInboundFormatName();
 
-			IsTransactional = CheckForTransactionalHint();
+			OutboundFormatName = uri.GetOutboundFormatName();
+
+			IsTransactional = CheckForTransactionalHint(uri);
+
+			MulticastAddress = uri.GetMulticastAddress();
 
 			if (IsLocal)
 			{
 				IsTransactional = IsLocalQueueTransactional();
 
-				LocalName = MsmqUriParser.GetLocalName(uri);
+				LocalName = uri.GetLocalName();
 
 				Uri = SetUriHostToLocalMachineName();
 			}
 		}
 
-		public string FormatName { get; private set; }
+		public string InboundFormatName { get; private set; }
+
+		public string OutboundFormatName { get; private set; }
 
 		public string LocalName { get; private set; }
+
+		public string MulticastAddress { get; private set; }
 
 		private bool IsLocalQueueTransactional()
 		{
 			try
 			{
-				using (var queue = new MessageQueue(FormatName, QueueAccessMode.PeekAndAdmin))
+				using (var queue = new MessageQueue(InboundFormatName, QueueAccessMode.PeekAndAdmin))
 				{
 					return queue.Transactional;
 				}

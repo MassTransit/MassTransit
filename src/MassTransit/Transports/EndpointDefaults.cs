@@ -1,5 +1,5 @@
 ﻿// Copyright 2007-2011 The Apache Software Foundation.
-// 
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,11 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    public class EndpointDefaults:
-        IEndpointDefaults
-    {
-        public bool CreateMissingQueues { get; set; }
-        public bool PurgeOnStartup { get; set; }
-        public bool CreateTransactionalQueues { get; set; }
-    }
+	using System;
+	using Magnum.Extensions;
+
+	public class EndpointDefaults :
+		IEndpointDefaults
+	{
+		public EndpointDefaults()
+		{
+			TransactionTimeout = 30.Seconds();
+		}
+
+		public TimeSpan TransactionTimeout { get; set; }
+		public bool CreateMissingQueues { get; set; }
+		public bool PurgeOnStartup { get; set; }
+		public bool CreateTransactionalQueues { get; set; }
+	}
 }

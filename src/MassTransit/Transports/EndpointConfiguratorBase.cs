@@ -1,5 +1,5 @@
 // Copyright 2007-2011 The Apache Software Foundation.
-// 
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,112 +12,119 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
-    using System.Linq.Expressions;
-    using Configuration;
-    using Exceptions;
-    using Magnum;
-    using Serialization;
+	using System;
+	using Configuration;
+	using Exceptions;
+	using Magnum;
+	using Magnum.Reflection;
+	using Serialization;
 
-    public class EndpointConfigurator :
-        IEndpointConfigurator
-    {
-        protected Type SerializerType { get; private set; }
-        protected IMessageSerializer MessageSerializer { get; private set; }
-        protected Uri Uri { get; private set; }
+	public class EndpointConfigurator :
+		IEndpointConfigurator,
+		ITransportSettings
+	{
+		private static readonly EndpointDefaults _defaults = new EndpointDefaults();
+		private Func<IMessageSerializer> _serializerFactory;
 
-        static readonly EndpointDefaults _defaults = new EndpointDefaults();
+		public EndpointConfigurator(Uri uri)
+		{
+			Guard.AgainstNull(uri, "uri");
 
-        public EndpointSettings New(Action<IEndpointConfigurator> action)
-        {
-            var endpointSettings = new EndpointSettings();
+			Address = new EndpointAddress(uri);
 
-            action(this);
+			CreateIfMissing = _defaults.CreateMissingQueues;
+			PurgeExistingMessages = _defaults.PurgeOnStartup;
+			Transactional = _defaults.CreateTransactionalQueues;
+			TransactionTimeout = _defaults.TransactionTimeout;
+			RequireTransactional = false;
 
-            Guard.AgainstNull(Uri, "No Uri was specified for the endpoint");
-            if (MessageSerializer == null)
-                Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
+			_serializerFactory = () => new CustomXmlMessageSerializer();
+		}
 
-            var settings = new CreateEndpointSettings(Uri)
-                               {
-                                   Serializer = GetSerializer(),
-                                   CreateIfMissing = _defaults.CreateMissingQueues,
-                                   PurgeExistingMessages = _defaults.PurgeOnStartup,
-                                   Transactional = _defaults.CreateTransactionalQueues,
-                               };
+		public void SetSerializer<T>()
+			where T : IMessageSerializer
+		{
+			_serializerFactory = () =>
+				{
+					try
+					{
+						return FastActivator<T>.Create();
+					}
+					catch (Exception ex)
+					{
+						throw new ConfigurationException("Unable to create message serializer " + typeof (T).FullName, ex);
+					}
+				};
+		}
 
-            try
-            {
-                Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
-                Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
-                Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
+		public void SetSerializer(IMessageSerializer serializer)
+		{
+			_serializerFactory = () => serializer;
+		}
 
-                var errorEndpointSettings = new CreateEndpointSettings(settings.ErrorAddress, settings);
+		public void SetSerializer(Type serializerType)
+		{
+			_serializerFactory = () =>
+				{
+					try
+					{
+						return (IMessageSerializer) FastActivator.Create(serializerType);
+					}
+					catch (Exception ex)
+					{
+						throw new ConfigurationException("Unable to create message serializer " + serializerType.FullName, ex);
+					}
+				};
+		}
 
-                endpointSettings.Normal = settings.ToTransportSettings();
-                endpointSettings.Error = errorEndpointSettings.ToTransportSettings();
+		public void SetUri(Uri uri)
+		{
+			Address = new EndpointAddress(uri);
+		}
 
-                return endpointSettings;
-            }
-            catch (Exception ex)
-            {
-                throw new EndpointException(settings.Address.Uri,
-                                            "Failed to create '{0}' endpoint".FormatWith(Uri), ex);
-            }
-        }
+		public IEndpointAddress Address { get; private set; }
 
+		public bool Transactional { get; private set; }
 
-        public static void Defaults(Action<IEndpointDefaults> configureDefaults)
-        {
-            configureDefaults(_defaults);
-        }
+		public bool RequireTransactional { get; private set; }
 
+		public TimeSpan TransactionTimeout { get; private set; }
 
-        public void SetSerializer<T>()
-            where T : IMessageSerializer
-        {
-            SerializerType = typeof (T);
-        }
+		public bool CreateIfMissing { get; private set; }
 
-        public void SetSerializer(IMessageSerializer serializer)
-        {
-            MessageSerializer = serializer;
-        }
+		public bool PurgeExistingMessages { get; private set; }
 
-        public void SetSerializer(Type serializerType)
-        {
-            SerializerType = serializerType;
-        }
+		public EndpointSettings New(Action<IEndpointConfigurator> action)
+		{
+			try
+			{
+				action(this);
 
-        public void SetUri(Uri uri)
-        {
-            Uri = uri;
-        }
+				IMessageSerializer serializer = _serializerFactory();
+				Guard.AgainstNull(serializer, "The message serializer cannot be null");
 
-        public IMessageSerializer GetSerializer()
-        {
-            if (MessageSerializer != null) return MessageSerializer;
+				var settings = new CreateEndpointSettings(Address, serializer, this);
 
-            NewExpression newExpression = Expression.New(SerializerType);
-            Func<IMessageSerializer> maker = Expression.Lambda<Func<IMessageSerializer>>(newExpression).Compile();
+				Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
+				Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
+				Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
 
-            IMessageSerializer serializer = maker();
+				var endpointSettings = new EndpointSettings();
 
-            if (serializer == null)
-                throw new ConfigurationException("Unable to create message serializer " + SerializerType.FullName);
+				endpointSettings.Normal = settings;
+				endpointSettings.Error = new CreateEndpointSettings(settings.ErrorAddress, settings);
 
-            return serializer;
-        }
+				return endpointSettings;
+			}
+			catch (Exception ex)
+			{
+				throw new EndpointException(Address.Uri, "Failed to create endpoint", ex);
+			}
+		}
 
-        public CreateTransportSettings NormalSettings()
-        {
-            return null;
-        }
-
-        public CreateTransportSettings ErrorSettings()
-        {
-            return null;
-        }
-
-    }
+		public static void Defaults(Action<IEndpointDefaults> configureDefaults)
+		{
+			configureDefaults(_defaults);
+		}
+	}
 }

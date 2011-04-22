@@ -46,5 +46,15 @@ namespace MassTransit.Transports.Msmq
 		{
 			_inbound.Receive(callback, timeout);
 		}
+
+		public IOutboundTransport OutboundTransport
+		{
+			get { return _outbound; }
+		}
+
+		public IInboundTransport InboundTransport
+		{
+			get { return _inbound; }
+		}
 	}
 }

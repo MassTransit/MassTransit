@@ -44,7 +44,17 @@ namespace MassTransit.Internal
             get { return _wrappedEndpoint.Uri; }
         }
 
-        public void Send<T>(T message) where T : class
+    	public IInboundTransport InboundTransport
+    	{
+    		get { return _wrappedEndpoint.InboundTransport; }
+    	}
+
+    	public IOutboundTransport OutboundTransport
+    	{
+    		get { return _wrappedEndpoint.OutboundTransport; }
+    	}
+
+    	public void Send<T>(T message) where T : class
         {
             if (_log.IsWarnEnabled)
                 _log.WarnFormat("Saving Poison Message {0}", message.GetType());

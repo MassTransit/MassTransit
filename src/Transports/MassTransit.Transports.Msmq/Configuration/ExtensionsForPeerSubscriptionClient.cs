@@ -10,17 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq
+namespace MassTransit.Configuration
 {
-	using System.Diagnostics;
+	using System;
 
-	[DebuggerDisplay("IN:{Address}")]
-	public class NonTransactionalInboundMsmqTransport :
-		InboundMsmqTransport
+	public static class ExtensionsForPeerSubscriptionClient
 	{
-		public NonTransactionalInboundMsmqTransport(IMsmqEndpointAddress address)
-			: base(address)
+		public static void UsePeerSubscriptionService(this IServiceBusConfigurator configurator)
 		{
+			configurator.ConfigureService<PeerSubscriptionClientConfigurator>(x => { });
+		}
+
+		public static void UsePeerSubscriptionService(this IServiceBusConfigurator configurator, Action<IPeerSubscriptionClientConfigurator> configureCallback)
+		{
+			configurator.ConfigureService<PeerSubscriptionClientConfigurator>(configureCallback);
 		}
 	}
 }

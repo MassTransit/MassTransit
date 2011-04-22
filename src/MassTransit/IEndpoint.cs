@@ -30,7 +30,17 @@ namespace MassTransit
         /// </summary>
         Uri Uri { get; }
 
-        /// <summary>
+		/// <summary>
+		/// The inbound transport for the endpoint
+		/// </summary>
+    	IInboundTransport InboundTransport { get; }
+
+		/// <summary>
+		/// The outbound transport for the endpoint
+		/// </summary>
+		IOutboundTransport OutboundTransport { get; }
+
+		/// <summary>
         /// Send to the endpoint
         /// </summary>
         /// <typeparam name="T">The type of the message to send</typeparam>

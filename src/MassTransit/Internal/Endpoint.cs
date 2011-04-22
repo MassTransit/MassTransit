@@ -25,13 +25,13 @@ namespace MassTransit.Internal
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (Endpoint));
 		private readonly IEndpointAddress _address;
-        protected ILoopbackTransport _transport;
-        protected ILoopbackTransport _errorTransport;
-        protected bool _disposed;
+    	private ILoopbackTransport _transport;
+    	private IOutboundTransport _errorTransport;
+    	private bool _disposed;
 		private string _disposedMessage;
-        MessageRetryTracker _tracker;
+    	private readonly MessageRetryTracker _tracker;
 
-        public Endpoint(IEndpointAddress address, IMessageSerializer serializer, ILoopbackTransport transport, ILoopbackTransport errorTransport)
+        public Endpoint(IEndpointAddress address, IMessageSerializer serializer, ILoopbackTransport transport, IOutboundTransport errorTransport)
 		{
 			_address = address;
 		    _transport = transport;
@@ -43,7 +43,7 @@ namespace MassTransit.Internal
             SetDisposedMessage();
 		}
 
-		protected IMessageSerializer Serializer { get; set; }
+    	private IMessageSerializer Serializer { get; set; }
 
 		public IEndpointAddress Address
 		{
@@ -55,7 +55,17 @@ namespace MassTransit.Internal
 			get { return Address.Uri; }
 		}
 
-        public void Send<T>(T message) where T : class
+    	public IInboundTransport InboundTransport
+    	{
+			get { return _transport.InboundTransport; }
+    	}
+
+    	public IOutboundTransport OutboundTransport
+    	{
+    		get { return _transport.OutboundTransport; }
+    	}
+
+    	public void Send<T>(T message) where T : class
 		{
 			if (_disposed) throw NewDisposedException();
 
@@ -82,17 +92,17 @@ namespace MassTransit.Internal
 			GC.SuppressFinalize(this);
 		}
 
-		protected void SetDisposedMessage()
+    	private void SetDisposedMessage()
 		{
 			_disposedMessage = "The endpoint has already been disposed: " + _address;
 		}
 
-		protected ObjectDisposedException NewDisposedException()
+    	private ObjectDisposedException NewDisposedException()
 		{
 			return new ObjectDisposedException(_disposedMessage);
 		}
 
-		protected void SetOutboundMessageHeaders<T>()
+    	private void SetOutboundMessageHeaders<T>()
 		{
 			OutboundMessage.Set(headers =>
 				{
@@ -101,7 +111,7 @@ namespace MassTransit.Internal
 				});
 		}
 
-		protected virtual void Dispose(bool disposing)
+    	private void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
@@ -123,19 +133,7 @@ namespace MassTransit.Internal
 			Dispose(false);
 		}
 
-	    void PopulateTransportMessage<T>(ISendContext sendContext, T message)
-	    {
-	        Serializer.Serialize(sendContext.Body, message);
-
-
-	        sendContext.SetLabel(typeof(T).Name);
-	        sendContext.MarkRecoverable();
-
-	        if(OutboundMessage.Headers.ExpirationTime.HasValue)
-	            sendContext.SetMessageExpiration(OutboundMessage.Headers.ExpirationTime.Value);
-	    }
-
-        protected void MoveMessageToErrorTransport(IReceiveContext message)
+    	private void MoveMessageToErrorTransport(IReceiveContext message)
         {
             _errorTransport.Send(context=>
             {
