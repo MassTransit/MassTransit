@@ -55,51 +55,46 @@ namespace MassTransit.WindsorIntegration
                 );
 
             Bus.Initialize(wob, cfg =>
-            {
-
-                cfg.AddTransportFactory(_options.Transports.Select<string, Type>(Type.GetType).ToArray());
-
-
-                cfg.ReceiveFrom(_options.ReceiveFrom);
-
-
-                //if subscription service
-                if (_options.Subscriptions != null)
                 {
-                    cfg.UseSubscriptionService(_options.Subscriptions);
-                }
 
-				if (_options.Callback != null)
-				{
-					_options.Callback(cfg);
-				}
+                    cfg.AddTransportFactory(_options.Transports.Select<string, Type>(Type.GetType).ToArray());
 
 
-            	//if management service
-                if (_options.HealthServiceInterval != null)
-                {
-                    string mgmt = _options.HealthServiceInterval;
-                    int interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
-                    cfg.UseHealthMonitoring(interval);
-                }
-            });
+                    cfg.ReceiveFrom(_options.ReceiveFrom);
 
-            
+
+                    //if subscription service
+                    if (_options.Subscriptions != null)
+                    {
+                        cfg.UseSubscriptionService(_options.Subscriptions);
+                    }
+
+
+                    //if management service
+                    if (_options.HealthServiceInterval != null)
+                    {
+                        string mgmt = _options.HealthServiceInterval;
+                        int interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
+                        cfg.UseHealthMonitoring(interval);
+                    }
+                });
+
+
             container.Register(Component.For<IServiceBus>()
-                                   .Named("serviceBus")
-                                   .Instance(Bus.Instance())
-                                   .LifeStyle.Singleton);
+                .Named("serviceBus")
+                .Instance(Bus.Instance())
+                .LifeStyle.Singleton);
 
             container.Register(Component.For<IControlBus>()
-                                   .Named("controlBus")
-                                   .Instance((IControlBus) Bus.Instance().ControlBus)
-                                   .LifeStyle.Singleton); 
+                .Named("controlBus")
+                .Instance((IControlBus) Bus.Instance().ControlBus)
+                .LifeStyle.Singleton);
 
-            //this is because the init hasn't completed yet
-//                container.Register(Component.For<IEndpointResolver>()
-//                                       .Named("endpointFactory")
-//                                       .Instance(ep)
-//                                       .LifeStyle.Singleton);
-        }               
+
+            container.Register(Component.For<IEndpointResolver>()
+                .Named("endpointFactory")
+                .Instance(Bus.Factory())
+                .LifeStyle.Singleton);
+        }
     }
 }

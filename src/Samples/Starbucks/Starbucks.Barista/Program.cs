@@ -26,9 +26,6 @@ namespace Starbucks.Barista
 	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Topshelf;
-	using Topshelf.Configuration;
-	using Topshelf.Configuration.Dsl;
-	using MassTransit.Configuration;
 
 	internal static class Program
 	{
@@ -40,46 +37,39 @@ namespace Starbucks.Barista
 		{
 			XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
 
-			RunConfiguration cfg = RunnerConfigurator.New(c =>
+				    var container = new WindsorContainer();
+				    container.Install(new MassTransitInstaller());
+
+				    container.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)));
+				    container.Register(Component.For<DrinkPreparationSaga>(),
+				                Component.For<BaristaService>().LifeStyle.Singleton);
+
+			HostFactory.Run(c =>
 				{
 					c.SetServiceName("StarbucksBarista");
 					c.SetDisplayName("Starbucks Barista");
 					c.SetDescription("a Mass Transit sample service for making orders of coffee.");
 
-					c.DependencyOnMsmq();
-					c.RunAsFromInteractive();
+					c.DependsOnMsmq();
+					c.RunAsLocalService();
 
 					EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
-				    var cc = new WindsorContainer();
-
-					var settings = new SettingsOptions()
-						{
-							ReceiveFrom = "msmq://localhost/starbucks_barista",
-							Callback = xx =>
-								{
-									xx.ConfigureService<MulticastSubscriptionClientConfigurator>(kk => { });
-								},
-						};
-					settings.Transports.Add(typeof(MsmqTransportFactory).AssemblyQualifiedName);
-					settings.Transports.Add(typeof(MulticastMsmqTransportFactory).AssemblyQualifiedName);
-
-					cc.Install(new MassTransitInstaller(settings));
-
-				    cc.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)));
-				    cc.Register(Component.For<DrinkPreparationSaga>(),
-				                Component.For<BaristaService>().LifeStyle.Singleton);
 
 					DisplayStateMachine();
 
-					c.ConfigureService<BaristaService>(s =>
+					c.Service<BaristaService>(s =>
 						{
-							s.HowToBuildService(builder => cc.Resolve<BaristaService>());
+							s.ConstructUsing(builder => container.Resolve<BaristaService>());
 							s.WhenStarted(o => o.Start());
-							s.WhenStopped(o => o.Stop());
+                            s.WhenStopped(o =>
+                                {
+                                    o.Stop();
+                                    container.Dispose();
+                                });
 						});
 				});
-			Runner.Host(cfg, args);
+			
 		}
 
 		private static void DisplayStateMachine()

@@ -4,7 +4,7 @@ namespace Starbucks.Barista
 
     public class BaristaService
     {
-    	private IServiceBus _bus;
+    	private readonly IServiceBus _bus;
     	private UnsubscribeAction _unsubscribeAction;
 
         public BaristaService(IServiceBus bus)

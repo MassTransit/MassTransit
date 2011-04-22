@@ -36,8 +36,14 @@ namespace MassTransit
         }
 
 
-        public static IEndpointResolver Factory()        {            if(_instance == null)                 throw new ConfigurationException("You must call initialize before trying to access the Factory instance.");
-            return _resolver;        }
+        public static IEndpointResolver Factory()
+        {
+            if(_instance == null) 
+                throw new ConfigurationException("You must call initialize before trying to access the Factory instance.");
+
+            return _resolver;
+        }
+
 
         public static IServiceBus Instance()
         {
