@@ -91,8 +91,11 @@
     <Compile Include="Bus.cs" />
     <Compile Include="Configuration\AdvancedConfiguration.cs" />
     <Compile Include="Configuration\BusConfiguration.cs" />
+    <Compile Include="Configuration\BusConfigurationConvienceExtensions.cs" />
     <Compile Include="Configuration\CrazyAdvancedShit.cs" />
     <Compile Include="Configuration\MassTransitConfiguration.cs" />
+    <Compile Include="Configuration\MassTransitTransportFactoryOptionsExtensions.cs" />
+    <Compile Include="Configuration\MassTransitSerilizationOptionsExtensions.cs" />
     <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
     <Compile Include="Configuration\Xml\SettingsOptions.cs" />
     <Compile Include="Exceptions\SagaException.cs" />

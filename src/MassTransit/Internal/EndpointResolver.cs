@@ -28,11 +28,10 @@ namespace MassTransit.Internal
         volatile bool _disposed;
         ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>> _endpointConfigurators;
         ReaderWriterLockedDictionary<Uri, IEndpoint> _endpoints;
-        readonly IEnumerable<ITransportFactory> _factories;
         readonly IEndpointFactory _factory;
 
         public EndpointResolver(Type defaultSerializer,
-                                IEnumerable<ITransportFactory> transportFactories,
+                                IList<ITransportFactory> transportFactories,
                                 IEnumerable<KeyValuePair<Uri, Action<IEndpointConfigurator>>> endpointConfigurators)
         {
             _endpointConfigurators = new ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>>(endpointConfigurators);
@@ -40,8 +39,7 @@ namespace MassTransit.Internal
 
             _defaultSerializer = defaultSerializer;
 
-            _factories = transportFactories;
-            _factory = new EndpointFactory(_factories);
+            _factory = new EndpointFactory(transportFactories);
         }
 
         public static IEndpoint Null
@@ -135,6 +133,11 @@ namespace MassTransit.Internal
         ~EndpointResolver()
         {
             Dispose(false);
+        }
+
+        public void AddTransportFactory(ITransportFactory factory)
+        {
+            _factory.AddTransportFactory(factory);
         }
     }
 }

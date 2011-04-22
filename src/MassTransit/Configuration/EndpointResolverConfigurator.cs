@@ -10,6 +10,8 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+using System.Linq;
+
 namespace MassTransit.Configuration
 {
 	using System;
@@ -129,7 +131,7 @@ namespace MassTransit.Configuration
         //CHANGED TO SUPPORT THE MOVE TO THE NEW MODEL
 		internal IEndpointResolver Create()
 		{
-			IEndpointResolver endpointResolver = new EndpointResolver(_defaultSerializer, _transportTypes.ReadLock(x => x), _endpointConfigurators);
+			IEndpointResolver endpointResolver = new EndpointResolver(_defaultSerializer, _transportTypes.ReadLock(x => x).ToList(), _endpointConfigurators);
 
 			return endpointResolver;
 		}

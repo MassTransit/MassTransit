@@ -10,6 +10,8 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+using MassTransit.Transports;
+
 namespace MassTransit
 {
 	using System;
@@ -35,5 +37,13 @@ namespace MassTransit
 		/// <param name="uri">The Uri to resolve to an endpoint</param>
 		/// <returns>An IEndpoint instance</returns>
 		IEndpoint GetEndpoint(Uri uri);
+
+	    /// <summary>
+	    /// Adds a Transport Factory to the resolver. This will allow you to 
+	    /// add another transport type such as MSMQ, RabbitMQ, etc.
+	    /// Should only really be called at start up.
+	    /// </summary>
+	    /// <param name="factory"></param>
+	    void AddTransportFactory(ITransportFactory factory);
 	}
 }

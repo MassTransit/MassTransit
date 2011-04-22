@@ -19,7 +19,7 @@ namespace MassTransit.Transports.Msmq
     {
         public static void UseMsmq(this BusConfiguration config)
         {
-            config.RegisterTransport<MsmqTransportFactory>();
+            config.AddTransportFactory<MsmqTransportFactory>();
         }
         public static void UseMsmq(this BusConfiguration config, Action<IEndpointDefaults> defaults)
         {

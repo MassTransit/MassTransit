@@ -16,9 +16,34 @@ namespace MassTransit.Configuration
 
     public interface AdvancedConfiguration
     {
+        /// <summary>
+        /// Specifies a configuration action to perform on a particular endpoint when it is created.
+        /// </summary>
+        /// <param name="uriString">The Uri to be configured (matching is case insensitive)</param>
+        /// <param name="action">The action to perform when the transport for the endpoint is created.</param>
         void ConfigureEndpoint(string uriString, Action<IEndpointConfigurator> action);
+
+        /// <summary>
+        /// Specifies a configuration action to perform on a particular endpoint when it is created.
+        /// </summary>
+        /// <param name="uri">The Uri to be configured</param>
+        /// <param name="action">The action to perform when the transport for the endpoint is created.</param>
         void ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> action);
+
+
         void SetConcurrentConsumerLimit(int concurrentConsumerLimit);
         void SetConcurrentReceiverLimit(int concurrentReceiverLimit);
+
+        /// <summary>
+        /// Specifies an action to call before a message is consumed
+        /// </summary>
+        /// <param name="beforeConsume"></param>
+        void BeforeConsumingMessage(Action beforeConsume);
+
+        /// <summary>
+        /// Specifies an action to call after a message is consumed
+        /// </summary>
+        /// <param name="afterConsume"></param>
+        void AfterConsumingMessage(Action afterConsume);
     }
 }

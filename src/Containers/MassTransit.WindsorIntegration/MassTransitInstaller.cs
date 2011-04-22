@@ -54,14 +54,11 @@ namespace MassTransit.WindsorIntegration
                 Component.For<IObjectBuilder>().Named("objectBuilder").Instance(wob).LifeStyle.Singleton
                 );
 
-            Bus.Initialize(wob, (cfg, ep) =>
+            Bus.Initialize(wob, cfg =>
             {
 
-                //this is because the init hasn't completed yet
-                container.Register(Component.For<IEndpointResolver>()
-                                       .Named("endpointFactory")
-                                       .Instance(ep)
-                                       .LifeStyle.Singleton);
+                cfg.AddTransportFactory(_options.Transports.Select<string, Type>(Type.GetType).ToArray());
+
 
                 cfg.ReceiveFrom(_options.ReceiveFrom);
 
@@ -85,8 +82,9 @@ namespace MassTransit.WindsorIntegration
                     int interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
                     cfg.UseHealthMonitoring(interval);
                 }
-            }, _options.Transports.Select<string, Type>(Type.GetType).ToArray());
+            });
 
+            
             container.Register(Component.For<IServiceBus>()
                                    .Named("serviceBus")
                                    .Instance(Bus.Instance())
@@ -95,7 +93,13 @@ namespace MassTransit.WindsorIntegration
             container.Register(Component.For<IControlBus>()
                                    .Named("controlBus")
                                    .Instance((IControlBus) Bus.Instance().ControlBus)
-                                   .LifeStyle.Singleton);
-        }
+                                   .LifeStyle.Singleton); 
+
+            //this is because the init hasn't completed yet
+//                container.Register(Component.For<IEndpointResolver>()
+//                                       .Named("endpointFactory")
+//                                       .Instance(ep)
+//                                       .LifeStyle.Singleton);
+        }               
     }
 }
