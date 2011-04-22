@@ -46,7 +46,7 @@ namespace MassTransit.Configuration
 			var uri = new UriBuilder("msmq-pgm", _multicastAddress.Address.ToString(), _multicastAddress.Port, path).Uri;
 			Uri clientUri = uri.AppendToPath("_subscriptions");
 
-			var service = new MulticastSubscriptionClient(clientUri, _networkKey, endpointFactory);
+			var service = new MulticastSubscriptionClient(clientUri, _networkKey, builder, endpointFactory);
 
 			return service;
 		}

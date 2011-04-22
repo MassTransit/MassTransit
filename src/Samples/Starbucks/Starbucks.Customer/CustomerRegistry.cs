@@ -15,6 +15,7 @@ namespace Starbucks.Customer
 	using MassTransit;
 	using MassTransit.StructureMapIntegration;
 	using StructureMap;
+	using MassTransit.Configuration;
 
 	public class CustomerRegistry :
 		MassTransitRegistryBase
@@ -31,7 +32,9 @@ namespace Starbucks.Customer
 				{
 					x.UseControlBus(_container.GetInstance<IControlBus>());
 
-					ConfigureSubscriptionClient("msmq://localhost/mt_subscriptions", x);
+					x.UseMulticastSubscriptionClient();
+
+					//ConfigureSubscriptionClient("msmq://localhost/mt_subscriptions", x);
 				});
 		}
 	}

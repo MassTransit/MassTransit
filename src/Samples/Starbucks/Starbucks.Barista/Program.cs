@@ -20,12 +20,15 @@ namespace Starbucks.Barista
 	using log4net.Config;
 	using Magnum;
 	using Magnum.StateMachine;
+	using MassTransit.Configuration.Xml;
 	using MassTransit.Saga;
 	using MassTransit.Transports;
+	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Topshelf;
 	using Topshelf.Configuration;
 	using Topshelf.Configuration.Dsl;
+	using MassTransit.Configuration;
 
 	internal static class Program
 	{
@@ -49,7 +52,20 @@ namespace Starbucks.Barista
 					EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
 				    var cc = new WindsorContainer();
-				    cc.Install(new MassTransitInstaller());
+
+					var settings = new SettingsOptions()
+						{
+							ReceiveFrom = "msmq://localhost/starbucks_barista",
+							Callback = xx =>
+								{
+									xx.ConfigureService<MulticastSubscriptionClientConfigurator>(kk => { });
+								},
+						};
+					settings.Transports.Add(typeof(MsmqTransportFactory).AssemblyQualifiedName);
+					settings.Transports.Add(typeof(MulticastMsmqTransportFactory).AssemblyQualifiedName);
+
+					cc.Install(new MassTransitInstaller(settings));
+
 				    cc.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)));
 				    cc.Register(Component.For<DrinkPreparationSaga>(),
 				                Component.For<BaristaService>().LifeStyle.Singleton);

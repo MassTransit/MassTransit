@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Configuration.Xml
 {
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
 
     public class SettingsOptions
     {
@@ -25,5 +26,6 @@ namespace MassTransit.Configuration.Xml
         public List<string> Transports { get; private set; }
         public string Subscriptions { get; set; }
         public string HealthServiceInterval { get; set; }
-    }
+		public Action<BusConfiguration> Callback { get; set; }
+	}
 }
