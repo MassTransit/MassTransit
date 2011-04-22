@@ -25,14 +25,17 @@ namespace MassTransit.Configuration
         readonly ServiceBusConfigurator _sbc;
         private bool _serializerHasBeenSet;
         private IEndpointResolver _resolver;
+        private readonly ControlBusConfigurator _cbc;
 
         public MassTransitConfiguration(IObjectBuilder builder)
         {
             _epc = new EndpointResolverConfigurator();
             _sbc = new ServiceBusConfigurator();
+            _cbc = new ControlBusConfigurator();
 
             _epc.SetObjectBuilder(builder);
             _sbc.SetObjectBuilder(builder);
+            _cbc.SetObjectBuilder(builder);
 
             _epc.AddTransportFactory<LoopbackTransportFactory>();
             _epc.AddTransportFactory<MulticastUdpTransportFactory>();
@@ -46,11 +49,14 @@ namespace MassTransit.Configuration
         public void ReceiveFrom(Uri uri)
         {
             _sbc.ReceiveFrom(uri);
+            _cbc.ReceiveFrom(uri.AppendToPath("_control"));
         }
 
         public void SendErrorsTo(Uri uri)
         {
             _sbc.SendErrorsTo(uri);
+            _cbc.SendErrorsTo(uri);
+
         }
 
         public void UseCustomSerializer<TSerializer>() where TSerializer : IMessageSerializer
@@ -62,15 +68,15 @@ namespace MassTransit.Configuration
             _epc.SetDefaultSerializer<TSerializer>();
         }
 
-
         //effectively internal
         public IServiceBus CreateBus()
         {
             //need to pass the epf into the sbc
             _resolver = _epc.Create();
-            _sbc.SetEndpointFactory(_epc.Create());
+            _sbc.SetEndpointFactory(_resolver);
+            _cbc.SetEndpointFactory(_resolver);
 
-            //TODO: Control Bus needs a concurrent receiver of 1
+            _sbc.UseControlBus(_cbc.Create());
 
             return _sbc.Create();
         }
@@ -97,11 +103,13 @@ namespace MassTransit.Configuration
         public void DisableAutoStart()
         {
             _sbc.DisableAutoStart();
+            _cbc.DisableAutoStart();
         }
 
         public void EnableAutoSubscribe()
         {
             _sbc.EnableAutoSubscribe();
+            _cbc.EnableAutoSubscribe();
         }
     }
 }
