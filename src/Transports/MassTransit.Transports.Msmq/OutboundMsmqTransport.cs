@@ -23,16 +23,19 @@ namespace MassTransit.Transports.Msmq
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");
 		private readonly IMsmqEndpointAddress _address;
 
+		private MessageQueueConnection _connection;
+		private bool _disposed;
+
 		protected OutboundMsmqTransport(IMsmqEndpointAddress address)
 		{
 			_address = address;
+			_connection = new MessageQueueConnection(address, QueueAccessMode.Send);
 		}
 
 		public IEndpointAddress Address
 		{
 			get { return _address; }
 		}
-
 
 		public void Send(Action<ISendContext> callback)
 		{
@@ -42,7 +45,7 @@ namespace MassTransit.Transports.Msmq
 
 				try
 				{
-					using (var queue = new MessageQueue(_address.FormatName, QueueAccessMode.Send))
+					using (MessageQueue queue = _connection.Queue)
 					{
 						SendMessage(queue, context.Message);
 
@@ -59,6 +62,8 @@ namespace MassTransit.Transports.Msmq
 
 		public void Dispose()
 		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		protected virtual void SendMessage(MessageQueue queue, Message message)
@@ -66,8 +71,22 @@ namespace MassTransit.Transports.Msmq
 			queue.Send(message, MessageQueueTransactionType.None);
 		}
 
+		private void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_connection.Dispose();
+				_connection = null;
+			}
+
+			_disposed = true;
+		}
+
 		private void HandleOutboundMessageQueueException(MessageQueueException ex)
 		{
+			_connection.Disconnect();
+
 			switch (ex.MessageQueueErrorCode)
 			{
 				case MessageQueueErrorCode.IOTimeout:
@@ -82,14 +101,14 @@ namespace MassTransit.Transports.Msmq
 				case MessageQueueErrorCode.AccessDenied:
 				case MessageQueueErrorCode.QueueDeleted:
 					if (_log.IsErrorEnabled)
-						_log.Error("The message queue was not available: " + _address.FormatName, ex);
+						_log.Error("The message queue was not available: " + _connection.FormatName, ex);
 					break;
 
 				case MessageQueueErrorCode.QueueNotFound:
 				case MessageQueueErrorCode.IllegalFormatName:
 				case MessageQueueErrorCode.MachineNotFound:
 					if (_log.IsErrorEnabled)
-						_log.Error("The message queue was not found or is improperly named: " + _address.FormatName, ex);
+						_log.Error("The message queue was not found or is improperly named: " + _address.InboundFormatName, ex);
 					break;
 
 				case MessageQueueErrorCode.InvalidHandle:
@@ -97,14 +116,19 @@ namespace MassTransit.Transports.Msmq
 					if (_log.IsErrorEnabled)
 						_log.Error(
 							"The message queue handle is stale or no longer valid due to a restart of the message queuing service: " +
-							_address.FormatName, ex);
+							_address.InboundFormatName, ex);
 					break;
 
 				default:
 					if (_log.IsErrorEnabled)
-						_log.Error("There was a problem communicating with the message queue: " + _address.FormatName, ex);
+						_log.Error("There was a problem communicating with the message queue: " + _address.InboundFormatName, ex);
 					break;
 			}
+		}
+
+		~OutboundMsmqTransport()
+		{
+			Dispose(false);
 		}
 	}
 }

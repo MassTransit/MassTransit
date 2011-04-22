@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,72 +13,39 @@
 namespace MassTransit.Transports
 {
 	using System;
-	using Magnum;
-	using Magnum.Extensions;
 
-
-	public class CreateTransportSettings :
-		ITransportSettings
+	public interface ITransportSettings
 	{
-		public CreateTransportSettings(IEndpointAddress address)
-		{
-			Guard.AgainstNull(address, "address");
-
-			Address = address;
-
-			Transactional = Address.IsTransactional;
-			RequireTransactional = false;
-			TransactionTimeout = 30.Seconds();
-
-			CreateIfMissing = true;
-			PurgeExistingMessages = false;
-		}
-
-		public CreateTransportSettings(IEndpointAddress address, ITransportSettings source)
-		{
-			Guard.AgainstNull(address, "address");
-			Guard.AgainstNull(source, "source");
-
-			Address = address;
-
-			Transactional = source.Transactional;
-			RequireTransactional = source.RequireTransactional;
-			TransactionTimeout = source.TransactionTimeout;
-
-			CreateIfMissing = source.CreateIfMissing;
-			PurgeExistingMessages = source.PurgeExistingMessages;
-		}
-
 		/// <summary>
-		/// The address of the endpoint
+		/// The address of the endpoint/transport
 		/// </summary>
-		public IEndpointAddress Address { get; private set; }
+		IEndpointAddress Address { get; }
 
 		/// <summary>
 		/// True if the endpoint should be transactional. If Transactional is true and the endpoint already
 		/// exists and is not transactional, an exception will be thrown.
 		/// </summary>
-		public bool Transactional { private set; get; }
+		bool Transactional { get; }
 
 		/// <summary>
 		/// if the transactional queue is requested and required it will throw an exception if the queue 
 		/// exists and is not transactional
 		/// </summary>
-		public bool RequireTransactional { get; private set; }
+		bool RequireTransactional { get; }
 
 		/// <summary>
 		/// The timeout for the transaction if System.Transactions is supported
 		/// </summary>
-		public TimeSpan TransactionTimeout { get; private set; }
+		TimeSpan TransactionTimeout { get; }
 
 		/// <summary>
 		/// The transport should be created if it was not found
 		/// </summary>
-		public bool CreateIfMissing { get; private set; }
+		bool CreateIfMissing { get; }
 
 		/// <summary>
 		/// If the transport should purge any existing messages before reading from the queue
 		/// </summary>
-		public bool PurgeExistingMessages { get; private set; }
+		bool PurgeExistingMessages { get; }
 	}
 }

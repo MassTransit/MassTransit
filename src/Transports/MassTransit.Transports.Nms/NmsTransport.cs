@@ -242,5 +242,15 @@ namespace MassTransit.Transports.Nms
 		{
 			Dispose(false);
 		}
+
+		public IOutboundTransport OutboundTransport
+		{
+			get { return this; }
+		}
+
+		public IInboundTransport InboundTransport
+		{
+			get { return this; }
+		}
 	}
 }

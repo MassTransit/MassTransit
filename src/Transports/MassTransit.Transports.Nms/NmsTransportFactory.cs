@@ -1,5 +1,5 @@
 ﻿// Copyright 2007-2011 The Apache Software Foundation.
-// 
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,37 +12,27 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Nms
 {
-    using System;
+	public class NmsTransportFactory :
+		ITransportFactory
+	{
+		public string Scheme
+		{
+			get { return "activemq"; }
+		}
 
-    public class NmsTransportFactory :
-        ITransportFactory
-    {
-        public string Scheme
-        {
-            get { return "activemq"; }
-        }
+		public ILoopbackTransport BuildLoopback(ITransportSettings settings)
+		{
+			return new NmsTransport(settings.Address);
+		}
 
-        public ILoopbackTransport BuildLoopback(CreateTransportSettings settings)
-        {
-            return new NmsTransport(settings.Address);
-        }
+		public IInboundTransport BuildInbound(ITransportSettings settings)
+		{
+			return new NmsTransport(settings.Address);
+		}
 
-        public IInboundTransport BuildInbound(CreateTransportSettings settings)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IOutboundTransport BuildOutbound(CreateTransportSettings settings)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void PurgeExistingMessagesIfRequested(CreateTransportSettings settings)
-        {
-            if(settings.Address.IsLocal && settings.PurgeExistingMessages)
-            {
-                //purge queue
-            }
-        }
-    }
+		public IOutboundTransport BuildOutbound(ITransportSettings settings)
+		{
+			return new NmsTransport(settings.Address);
+		}
+	}
 }

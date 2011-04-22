@@ -34,18 +34,16 @@ namespace MassTransit.Transports
             {
                 try
                 {
-
                     if (uri.Scheme.ToLowerInvariant() == factory.Scheme)
                     {
-                        var epc = new EndpointConfigurator();
-                        epc.SetUri(uri);
-                        var s = epc.New(configurator);
+                    	var endpointConfigurator = new EndpointConfigurator(uri);
+                        
+						EndpointSettings endpointSettings = endpointConfigurator.New(configurator);
 
-                        var transport = factory.BuildLoopback(s.Normal);
-                        var errorTransport = factory.BuildLoopback(s.Error);
+                        var transport = factory.BuildLoopback(endpointSettings.Normal);
+                        var errorTransport = factory.BuildOutbound(endpointSettings.Error);
 
-                        var endpoint = new Endpoint(transport.Address, epc.GetSerializer(), transport,
-                                                    errorTransport);
+                        var endpoint = new Endpoint(transport.Address, endpointSettings.Normal.Serializer, transport, errorTransport);
 
                         return endpoint;
                     }

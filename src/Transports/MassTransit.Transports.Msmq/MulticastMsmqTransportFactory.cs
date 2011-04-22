@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,7 @@ namespace MassTransit.Transports.Msmq
 	using System;
 	using Exceptions;
 
-	public class MsmqTransportFactory :
+	public class MulticastMsmqTransportFactory :
 		ITransportFactory
 	{
 		public string Scheme
@@ -48,10 +48,6 @@ namespace MassTransit.Transports.Msmq
 					PurgeExistingMessagesIfRequested(msmqSettings);
 				}
 
-				if (msmqSettings.Transactional)
-					return new TransactionalInboundMsmqTransport(msmqSettings.MsmqAddress(),
-						msmqSettings.TransactionTimeout);
-
 				return new NonTransactionalInboundMsmqTransport(msmqSettings.MsmqAddress());
 			}
 			catch (Exception ex)
@@ -71,9 +67,6 @@ namespace MassTransit.Transports.Msmq
 					ValidateLocalTransport(msmqSettings);
 				}
 
-				if (msmqSettings.Transactional)
-					return new TransactionalOutboundMsmqTransport(msmqSettings.MsmqAddress());
-
 				return new NonTransactionalOutboundMsmqTransport(msmqSettings.MsmqAddress());
 			}
 			catch (Exception ex)
@@ -92,22 +85,14 @@ namespace MassTransit.Transports.Msmq
 
 		private static void ValidateLocalTransport(ITransportSettings settings)
 		{
-			MsmqEndpointManagement.Manage(settings.Address, q =>
-				{
+			MsmqEndpointManagement.Manage(settings.Address, q => {
 					if (!q.Exists)
 					{
 						if (!settings.CreateIfMissing)
 							throw new TransportException(settings.Address.Uri,
 								"The transport does not exist and automatic creation is not enabled");
 
-						q.Create(settings.Transactional || settings.Address.IsTransactional);
-					}
-
-					if (settings.RequireTransactional)
-					{
-						if (!q.IsTransactional && (settings.Transactional || settings.Address.IsTransactional))
-							throw new TransportException(settings.Address.Uri,
-								"The transport is non-transactional but a transactional transport was requested");
+						q.Create(false); // multicast queues cannot be transactional
 					}
 				});
 		}

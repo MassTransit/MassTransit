@@ -20,27 +20,19 @@ namespace MassTransit.Transports
 			get { return "loopback"; }
 		}
 
-		public ILoopbackTransport BuildLoopback(CreateTransportSettings settings)
+		public ILoopbackTransport BuildLoopback(ITransportSettings settings)
 		{
 			return new LoopbackTransport(settings.Address);
 		}
 
-		public IInboundTransport BuildInbound(CreateTransportSettings settings)
+		public IInboundTransport BuildInbound(ITransportSettings settings)
 		{
 			return new LoopbackTransport(settings.Address);
 		}
 
-		public IOutboundTransport BuildOutbound(CreateTransportSettings settings)
+		public IOutboundTransport BuildOutbound(ITransportSettings settings)
 		{
 			return new LoopbackTransport(settings.Address);
-		}
-
-		public void PurgeExistingMessagesIfRequested(CreateTransportSettings settings)
-		{
-			if (settings.Address.IsLocal && settings.PurgeExistingMessages)
-			{
-				//
-			}
 		}
 	}
 }

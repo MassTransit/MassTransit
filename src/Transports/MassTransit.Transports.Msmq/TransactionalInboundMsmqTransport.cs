@@ -24,22 +24,23 @@ namespace MassTransit.Transports.Msmq
 		InboundMsmqTransport
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (TransactionalInboundMsmqTransport));
+		private TimeSpan _transactionTimeout;
 
-		public TransactionalInboundMsmqTransport(IMsmqEndpointAddress address)
+		public TransactionalInboundMsmqTransport(IMsmqEndpointAddress address, TimeSpan transactionTimeout)
 			: base(address)
 		{
+			_transactionTimeout = transactionTimeout;
 		}
 
 		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
 		{
 			try
 			{
-				Connect();
-
+				_transactionTimeout = 30.Seconds();
 				var options = new TransactionOptions
 					{
 						IsolationLevel = IsolationLevel.Serializable,
-						Timeout = 30.Seconds(),
+						Timeout = _transactionTimeout,
 					};
 
 				using (var scope = new TransactionScope(TransactionScopeOption.Required, options))

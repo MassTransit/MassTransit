@@ -80,8 +80,15 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Configuration\IPeerSubscriptionClientConfigurator.cs" />
+    <Compile Include="Configuration\PeerSubscriptionClientConfigurator.cs" />
+    <Compile Include="Configuration\ExtensionsForPeerSubscriptionClient.cs" />
     <Compile Include="IMsmqEndpointAddress.cs" />
     <Compile Include="InboundMsmqTransport.cs" />
+    <Compile Include="InboundMulticastMsmqTransport.cs" />
+    <Compile Include="MessageQueueConnection.cs" />
+    <Compile Include="MsmqTransporSettingsExtensions.cs" />
+    <Compile Include="MulticastMsmqTransportFactory.cs" />
     <Compile Include="NonTransactionalOutboundMsmqTransport.cs" />
     <Compile Include="OutboundMsmqTransport.cs" />
     <Compile Include="NonTransactionalInboundMsmqTransport.cs" />
@@ -91,11 +98,11 @@
     <Compile Include="MsmqReceiveContext.cs" />
     <Compile Include="MsmqSendContext.cs" />
     <Compile Include="MsmqTransportFactory.cs" />
-    <Compile Include="MsmqUriParser.cs" />
+    <Compile Include="MsmqUriExtensions.cs" />
     <Compile Include="NonTransactionalMsmqTransport.cs" />
+    <Compile Include="PeerSubscriptionClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransactionalInboundMsmqTransport.cs" />
-    <Compile Include="TransactionalMsmqTransport.cs" />
     <Compile Include="TransactionalOutboundMsmqTransport.cs" />
   </ItemGroup>
   <ItemGroup>

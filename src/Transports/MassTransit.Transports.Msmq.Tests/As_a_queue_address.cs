@@ -36,7 +36,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		public void A_message_queue_address_should_convert_to_a_queue_path()
 		{
 			var address = new MsmqEndpointAddress(_uriAddress);
-			address.FormatName
+			address.InboundFormatName
 				.ShouldEqual(_expectedQueuePath);
 			address.Uri
 				.ShouldEqual(_expectedUri);
@@ -51,7 +51,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			var address = new MsmqEndpointAddress(uriAddress);
 
-			address.FormatName
+			address.InboundFormatName
 				.ShouldEqual(_expectedQueuePath);
 			address.IsTransactional	
 				.ShouldBeFalse();
@@ -66,7 +66,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			var address = new MsmqEndpointAddress(uriAddress);
 
-			address.FormatName
+			address.InboundFormatName
 				.ShouldEqual(_expectedQueuePath);
 			address.Uri
 				.ShouldEqual(new Uri("msmq://" + Environment.MachineName + "/mt_should_not_exist?tx=true"));
@@ -78,7 +78,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		public void A_message_queue_uri_should_convert_to_a_queue_path()
 		{
 			var address = new MsmqEndpointAddress(_uriAddress);
-			address.FormatName
+			address.InboundFormatName
 				.ShouldEqual(_expectedQueuePath);
 			address.Uri
 				.ShouldEqual(_expectedUri);
@@ -93,7 +93,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			const string remoteQueuePath = @"FormatName:DIRECT=OS:remote_server\private$\queue_name";
 
 			var address = new MsmqEndpointAddress(remoteUri);
-			address.FormatName
+			address.InboundFormatName
 				.ShouldEqual(remoteQueuePath);
 			address.Uri
 				.ShouldEqual(remoteUri);
@@ -123,7 +123,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			var address = new MsmqEndpointAddress(_uriAddress);
 
-			address.FormatName
+			address.InboundFormatName
 				.ShouldEqual(_expectedQueuePath);
 			address.Uri
 				.ShouldEqual(_expectedUri);
@@ -141,7 +141,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			var address = new MsmqEndpointAddress(remoteUri);
 
-			address.FormatName
+			address.InboundFormatName
 				.ShouldEqual(remoteQueuePath);
 			address.Uri
 				.ShouldEqual(remoteUri);
@@ -156,7 +156,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			var address = new MsmqEndpointAddress(new Uri(_address + "?tx=true"));
 
-			address.FormatName
+			address.InboundFormatName
 				.ShouldEqual(_expectedQueuePath);
 			address.Uri
 				.ShouldEqual(new Uri(_expectedUri.ToString().Replace("?tx=false", "?tx=true")));
@@ -176,7 +176,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			var address = new MsmqEndpointAddress(new Uri("msmq://localhost/mt_should_not_exist"));
 
 			Assert.That(address.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_should_not_exist?tx=false"));
-			Assert.That(address.FormatName, Is.EqualTo(@"FormatName:DIRECT=OS:localhost\private$\mt_should_not_exist"));
+			Assert.That(address.InboundFormatName, Is.EqualTo(@"FormatName:DIRECT=OS:localhost\private$\mt_should_not_exist"));
 		}
 
 		[Test]

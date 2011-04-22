@@ -14,7 +14,7 @@ namespace MassTransit.Transports
 {
 	public class EndpointSettings
 	{
-		public CreateTransportSettings Error;
-		public CreateTransportSettings Normal;
+		public IEndpointSettings Error;
+		public IEndpointSettings Normal;
 	}
 }

@@ -25,7 +25,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void An_undecipherable_blob_should_be_discarded()
 		{
-		    var formatName = MsmqUriParser.GetFormatName(Endpoint.Uri);
+			var formatName = Endpoint.Uri.GetInboundFormatName();
 			using (var queue = new MessageQueue(formatName, QueueAccessMode.Send))
 			{
 				queue.Send("This is just crap, it will cause pain");

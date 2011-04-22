@@ -16,5 +16,7 @@ namespace MassTransit
 		IInboundTransport,
 		IOutboundTransport
 	{
+		IOutboundTransport OutboundTransport { get; }
+		IInboundTransport InboundTransport { get; }
 	}
 }

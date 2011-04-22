@@ -39,6 +39,7 @@ namespace MassTransit.Services.Subscriptions.Configuration
             cfg.ConfigureService<SubscriptionClientConfigurator>(subCfg => subCfg.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
         }
     }
+
 	public class SubscriptionClientConfigurator :
 		IServiceConfigurator
 	{
