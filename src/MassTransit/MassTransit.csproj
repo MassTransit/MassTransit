@@ -92,7 +92,7 @@
     <Compile Include="Configuration\AdvancedConfiguration.cs" />
     <Compile Include="Configuration\BusConfiguration.cs" />
     <Compile Include="Configuration\BusConfigurationConvienceExtensions.cs" />
-    <Compile Include="Configuration\CrazyAdvancedShit.cs" />
+    <Compile Include="Configuration\AdvancedConfigurationOptions.cs" />
     <Compile Include="Configuration\MassTransitConfiguration.cs" />
     <Compile Include="Configuration\MassTransitTransportFactoryOptionsExtensions.cs" />
     <Compile Include="Configuration\MassTransitSerilizationOptionsExtensions.cs" />

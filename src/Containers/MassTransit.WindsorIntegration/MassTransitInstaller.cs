@@ -21,6 +21,7 @@ namespace MassTransit.WindsorIntegration
     using Configuration.Xml;
     using Services.HealthMonitoring.Configuration;
     using Services.Subscriptions.Configuration;
+    using Transports;
 
     //doesn't support configuration.
     //provide an XML config? 
@@ -49,13 +50,15 @@ namespace MassTransit.WindsorIntegration
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
             var wob = new WindsorObjectBuilder(container.Kernel);
-            ServiceBusConfigurator.Defaults(x => x.SetObjectBuilder(wob));
+
             container.Register(
                 Component.For<IObjectBuilder>().Named("objectBuilder").Instance(wob).LifeStyle.Singleton
                 );
 
             Bus.Initialize(wob, cfg =>
                 {
+
+                    cfg.CreateMissingQueues();
 
                     cfg.AddTransportFactory(_options.Transports.Select<string, Type>(Type.GetType).ToArray());
 

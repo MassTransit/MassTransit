@@ -107,6 +107,8 @@ namespace MassTransit
 		IMessagePipeline InboundPipeline { get; }
 
     	IServiceBus ControlBus { get; }
+
+        IEndpoint GetEndpoint(Uri address);
     }
 
 	public delegate Action<T> GetConsumerAction<T>(T message);

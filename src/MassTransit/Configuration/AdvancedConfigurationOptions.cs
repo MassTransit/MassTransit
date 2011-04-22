@@ -14,13 +14,13 @@ namespace MassTransit.Configuration
 {
     using System;
 
-    public class CrazyAdvancedShit :
+    public class AdvancedConfigurationOptions :
         AdvancedConfiguration
     {
         readonly EndpointResolverConfigurator _epc;
         readonly ServiceBusConfigurator _sbc;
 
-        public CrazyAdvancedShit(EndpointResolverConfigurator epc, ServiceBusConfigurator sbc)
+        public AdvancedConfigurationOptions(EndpointResolverConfigurator epc, ServiceBusConfigurator sbc)
         {
             _epc = epc;
             _sbc = sbc;

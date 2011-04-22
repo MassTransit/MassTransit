@@ -392,5 +392,10 @@ namespace MassTransit
 				_log.Warn("The performance counters could not be created", ex);
 			}
 		}
+
+	    public IEndpoint GetEndpoint(Uri address)
+	    {
+	        return EndpointResolver.GetEndpoint(address);
+	    }
 	}
 }

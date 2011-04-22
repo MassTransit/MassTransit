@@ -29,6 +29,7 @@ namespace MassTransit
             _instance = null;
 
             var busConfig = new MassTransitConfiguration(builder);
+
             cfg(busConfig);
 
             _instance = busConfig.CreateBus();
