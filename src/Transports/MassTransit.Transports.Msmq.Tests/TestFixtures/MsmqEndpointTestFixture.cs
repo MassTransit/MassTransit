@@ -96,7 +96,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 				.WhenCalled(invocation =>
 					{
 						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointResolver);
+						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService);
 					});
 		}
 
