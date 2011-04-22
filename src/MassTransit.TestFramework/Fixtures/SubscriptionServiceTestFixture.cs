@@ -50,7 +50,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 			SubscriptionService.Start();
 
-			ObjectBuilder.Construct(() => new SubscriptionClient(EndpointResolver));
+			ObjectBuilder.Construct(() => new SubscriptionClient());
 		}
 
 		[TestFixtureTearDown]

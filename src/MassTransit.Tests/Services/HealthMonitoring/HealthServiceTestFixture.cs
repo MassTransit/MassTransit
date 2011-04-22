@@ -88,7 +88,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionClient>())
 				.Return(null)
-				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(EndpointResolver); });
+				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(); });
 		}
 
 		private void SetupHealthService()

@@ -40,7 +40,7 @@ namespace MassTransit.Tests.Services.Subscriptions
 			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _bus);
 			_bus.Stub(x => x.OutboundPipeline).Return(_pipeline);
 
-			_consumer = new SubscriptionConsumer(_service, _endpointResolver);
+			_consumer = new SubscriptionConsumer(_service);
 			_consumer.Start(_bus);
 
 			_remoteEndpoint = MockRepository.GenerateMock<IEndpoint>();
