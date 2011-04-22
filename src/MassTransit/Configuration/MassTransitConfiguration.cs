@@ -46,6 +46,11 @@ namespace MassTransit.Configuration
             _epc.AddTransportFactory(transportFactoryType);
         }
 
+        public void CreateMissingQueues()
+        {
+            EndpointConfigurator.Defaults(x => x.CreateMissingQueues = true);
+        }
+
         public void ReceiveFrom(Uri uri)
         {
             _sbc.ReceiveFrom(uri);
@@ -73,6 +78,7 @@ namespace MassTransit.Configuration
         {
             //need to pass the epf into the sbc
             _resolver = _epc.Create();
+
             _sbc.SetEndpointFactory(_resolver);
             _cbc.SetEndpointFactory(_resolver);
 
@@ -96,7 +102,7 @@ namespace MassTransit.Configuration
 
         public void Advanced(Action<AdvancedConfiguration> advCfg)
         {
-            var adv = new CrazyAdvancedShit(_epc, _sbc);
+            var adv = new AdvancedConfigurationOptions(_epc, _sbc);
             advCfg(adv);
         }
 

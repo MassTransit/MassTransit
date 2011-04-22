@@ -46,5 +46,8 @@ namespace MassTransit.Configuration
 
 
         void AddTransportFactory(Type transportFactory);
+
+
+        void CreateMissingQueues();
     }
 }

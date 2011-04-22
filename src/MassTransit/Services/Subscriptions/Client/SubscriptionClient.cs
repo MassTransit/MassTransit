@@ -30,10 +30,8 @@ namespace MassTransit.Services.Subscriptions.Client
 		private IEndpoint _subscriptionServiceEndpoint;
 
 
-		public SubscriptionClient(IEndpointResolver endpointResolver)
+		public SubscriptionClient()
 		{
-			_endpointResolver = endpointResolver;
-
 			StartTimeout = 1.Minutes();
 		}
 
@@ -52,10 +50,12 @@ namespace MassTransit.Services.Subscriptions.Client
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Starting SubscriptionClient on {0}", bus.Endpoint.Uri);
 
+			_bus = bus;
+
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Getting endpoint for subscription service at {0}", SubscriptionServiceUri);
 
-			_subscriptionServiceEndpoint = _endpointResolver.GetEndpoint(SubscriptionServiceUri);
+			_subscriptionServiceEndpoint = _bus.GetEndpoint(SubscriptionServiceUri);
 
 			VerifyClientAndServiceNotOnSameEndpoint(bus);
 
