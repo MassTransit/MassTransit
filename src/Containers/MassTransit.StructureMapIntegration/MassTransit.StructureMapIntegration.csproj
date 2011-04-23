@@ -79,6 +79,7 @@
     </Compile>
     <Compile Include="MassTransitRegistryBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StructureMapBusExtensions.cs" />
     <Compile Include="StructureMapObjectBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
