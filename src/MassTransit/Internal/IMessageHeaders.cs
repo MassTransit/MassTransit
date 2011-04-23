@@ -40,6 +40,12 @@ namespace MassTransit.Internal
 		Uri SourceAddress { get; }
 
 		/// <summary>
+		/// Identifies a specific network to which this message belongs and is used to filter
+		/// out messages that mighte be from untrusted networks
+		/// </summary>
+		string Network { get; }
+
+		/// <summary>
 		/// The number of times this message has been delivered to the consumer
 		/// </summary>
 		int RetryCount { get; }

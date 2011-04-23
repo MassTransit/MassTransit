@@ -27,6 +27,7 @@ namespace MassTransit.Serialization
 		private const string MessageIdKey = "MessageId";
 		private const string MessageTypeKey = "MessageType";
 		private const string ResponseAddressKey = "ResponseAddress";
+		private const string NetworkKey = "Network";
 		private const string RetryCountKey = "RetryCount";
 		private const string ExpirationTimeKey = "ExpirationTime";
 		private const string SourceAddressKey = "SourceAddress";
@@ -66,6 +67,11 @@ namespace MassTransit.Serialization
 				headers.Add(new Header(MessageTypeKey, context.MessageType));
 			}
 
+			if (!string.IsNullOrEmpty(context.Network))
+			{
+				headers.Add(new Header(NetworkKey, context.Network));
+			}
+
 			if (context.RetryCount > 0)
 				headers.Add(new Header(RetryCountKey, context.RetryCount));
 
@@ -95,6 +101,10 @@ namespace MassTransit.Serialization
 					FaultAddress = ((Uri) value).ToStringOrNull();
 					break;
 
+				case NetworkKey:
+					Network = (string) value;
+					break;
+				
 				case RetryCountKey:
 					RetryCount = (int) value;
 					break;

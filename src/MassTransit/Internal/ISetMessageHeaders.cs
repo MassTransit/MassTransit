@@ -32,6 +32,8 @@ namespace MassTransit.Internal
 		void SetFaultAddress(Uri uri);
 		void SetFaultAddress(string uriString);
 
+		void SetNetwork(string network);
+
 		void SetRetryCount(int retryCount);
 
 		void SetExpirationTime(DateTime value);

@@ -33,6 +33,61 @@ namespace MassTransit.Tests.Serialization
 		}
 
 		[Test]
+		public void Should_pass_the_network_header()
+		{
+			string network = "Superman";
+
+			VerifyMessageHeaderIsPassed(x => x.SetNetwork(network), x =>
+				{
+					Assert.AreEqual(network, x.Network);
+				});
+		}
+
+		[Test]
+		public void Should_pass_the_destination_address()
+		{
+			Uri address = new Uri("loopback://localhost/queue_name");
+
+			VerifyMessageHeaderIsPassed(x => x.SetDestinationAddress(address), x =>
+				{
+					Assert.AreEqual(address, x.DestinationAddress);
+				});
+		}
+
+		[Test]
+		public void Should_pass_the_source_address()
+		{
+			Uri address = new Uri("loopback://localhost/queue_name");
+
+			VerifyMessageHeaderIsPassed(x => x.SetSourceAddress(address), x =>
+				{
+					Assert.AreEqual(address, x.SourceAddress);
+				});
+		}
+
+		[Test]
+		public void Should_pass_the_response_address()
+		{
+			Uri address = new Uri("loopback://localhost/queue_name");
+
+			VerifyMessageHeaderIsPassed(x => x.SetResponseAddress(address), x =>
+				{
+					Assert.AreEqual(address, x.ResponseAddress);
+				});
+		}
+
+		[Test]
+		public void Should_pass_the_fault_address()
+		{
+			Uri address = new Uri("loopback://localhost/queue_name");
+
+			VerifyMessageHeaderIsPassed(x => x.SetFaultAddress(address), x =>
+				{
+					Assert.AreEqual(address, x.FaultAddress);
+				});
+		}
+
+		[Test]
 		public void Should_carry_through_the_message_headers()
 		{
 			DateTime expiration = 5.Minutes().FromNow();
