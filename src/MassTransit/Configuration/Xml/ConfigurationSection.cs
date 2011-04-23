@@ -49,11 +49,20 @@ namespace MassTransit.Configuration.Xml
                 opts.Transports.Add(transport.InnerText.Trim());
             }
 
-            string sub = section.SelectSingleNode("SubscriptionService").InnerText.Trim();
-            opts.Subscriptions = sub;
+            var sub = section.SelectSingleNode("SubscriptionService");
+            if (sub != null)
+            {
+                var s = sub.InnerText.Trim();
+                opts.Subscriptions = s;
+            }
 
-            string health = section.SelectSingleNode("HealthService").InnerText.Trim();
-            opts.HealthServiceInterval = health;
+            var health = section.SelectSingleNode("HealthService");
+            if (health != null)
+            {
+                var h = health.InnerText.Trim();
+                opts.HealthServiceInterval = h;
+            }
+
 
             return opts;
         }

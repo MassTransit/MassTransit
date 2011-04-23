@@ -59,12 +59,13 @@ namespace MassTransit.WindsorIntegration
                 {
 
                     cfg.CreateMissingQueues();
-
+                    
                     cfg.AddTransportFactory(_options.Transports.Select<string, Type>(Type.GetType).ToArray());
 
 
                     cfg.ReceiveFrom(_options.ReceiveFrom);
 
+                    
 
                     //if subscription service
                     if (_options.Subscriptions != null)
