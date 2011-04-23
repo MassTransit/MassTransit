@@ -37,7 +37,6 @@ namespace MassTransit.Configuration
         void ConfigureService<TService>(Action<TService> configure) where TService : IServiceConfigurator, new();
 
         void DisableAutoStart();
-        void EnableAutoSubscribe();
 
         void Advanced(Action<AdvancedConfiguration> advCfg);
         ////// advanced settings

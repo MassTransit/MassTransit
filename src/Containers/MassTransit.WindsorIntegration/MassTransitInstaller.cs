@@ -21,11 +21,7 @@ namespace MassTransit.WindsorIntegration
     using Configuration.Xml;
     using Services.HealthMonitoring.Configuration;
     using Services.Subscriptions.Configuration;
-    using Transports;
 
-    //doesn't support configuration.
-    //provide an XML config? 
-    //it would be better to have one standard xml config
     public class MassTransitInstaller :
         IWindsorInstaller
     {
@@ -60,7 +56,7 @@ namespace MassTransit.WindsorIntegration
 
                     cfg.CreateMissingQueues();
                     
-                    cfg.AddTransportFactory(_options.Transports.Select<string, Type>(Type.GetType).ToArray());
+                    cfg.AddTransportFactory(_options.Transports.Select(Type.GetType).ToArray());
 
 
                     cfg.ReceiveFrom(_options.ReceiveFrom);
@@ -97,7 +93,7 @@ namespace MassTransit.WindsorIntegration
 
             container.Register(Component.For<IEndpointResolver>()
                 .Named("endpointFactory")
-                .Instance(Bus.Factory())
+                .Instance(Bus.Resolver())
                 .LifeStyle.Singleton);
         }
     }
