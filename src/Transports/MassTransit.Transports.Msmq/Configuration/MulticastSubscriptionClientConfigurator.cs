@@ -39,14 +39,12 @@ namespace MassTransit.Configuration
 
 		public IBusService Create(IServiceBus bus, IObjectBuilder builder)
 		{
-			var endpointFactory = builder.GetInstance<IEndpointResolver>();
-
 			string path = bus.ControlBus.Endpoint.Address.Uri.AbsolutePath;
 
 			var uri = new UriBuilder("msmq-pgm", _multicastAddress.Address.ToString(), _multicastAddress.Port, path).Uri;
 			Uri clientUri = uri.AppendToPath("_subscriptions");
 
-			var service = new MulticastSubscriptionClient(clientUri, _networkKey, builder, endpointFactory);
+			var service = new MulticastSubscriptionClient(clientUri, _networkKey, builder);
 
 			return service;
 		}

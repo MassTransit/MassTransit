@@ -49,7 +49,7 @@ namespace MassTransit
 
                 sbc.UseControlBus(cbc.Create());
 
-                _instance = sbc.CreateServiceBus();
+                _instance = sbc.Create();
             }
         }
 

@@ -69,7 +69,6 @@ namespace MassTransit.WindsorIntegration
                         cfg.UseSubscriptionService(_options.Subscriptions);
                     }
 
-
                     //if management service
                     if (_options.HealthServiceInterval != null)
                     {
@@ -77,6 +76,11 @@ namespace MassTransit.WindsorIntegration
                         int interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
                         cfg.UseHealthMonitoring(interval);
                     }
+
+					if (_options.Callback != null)
+					{
+						_options.Callback(cfg);
+					}
                 });
 
 

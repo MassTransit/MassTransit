@@ -20,6 +20,7 @@ namespace Starbucks.Barista
 	using log4net.Config;
 	using Magnum;
 	using Magnum.StateMachine;
+	using MassTransit.Configuration;
 	using MassTransit.Configuration.Xml;
 	using MassTransit.Saga;
 	using MassTransit.Transports;
@@ -38,7 +39,19 @@ namespace Starbucks.Barista
 		    XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
 
 		    var container = new WindsorContainer();
-		    container.Install(new MassTransitInstaller());
+			SettingsOptions options = new SettingsOptions()
+				{
+					ReceiveFrom = "msmq://localhost/starbucks_barista",
+				};
+
+			options.Transports.Add(typeof (MsmqTransportFactory).AssemblyQualifiedName);
+			options.Transports.Add(typeof (MulticastMsmqTransportFactory).AssemblyQualifiedName);
+			options.Callback = x =>
+				{
+					x.UseMulticastSubscriptionClient();
+				};
+
+			container.Install(new MassTransitInstaller(options));
 
 		    container.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)));
 		    container.Register(Component.For<DrinkPreparationSaga>(),
