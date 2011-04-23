@@ -21,9 +21,10 @@ namespace MassTransit.Internal
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MessageHeadersBase));
 
 		public Uri SourceAddress { get; private set; }
-		public Uri DestinationAddress { get; private set; }
+    	public Uri DestinationAddress { get; private set; }
 		public Uri ResponseAddress { get; private set; }
 		public Uri FaultAddress { get; private set; }
+		public string Network { get; private set; }
 		public int RetryCount { get; private set; }
 		public DateTime? ExpirationTime{get;private set;}
 		public string MessageType { get; private set; }
@@ -68,7 +69,12 @@ namespace MassTransit.Internal
 			FaultAddress = ConvertStringToUri(uriString);
 		}
 
-		public void SetRetryCount(int retryCount)
+		public void SetNetwork(string network)
+		{
+			Network = network;
+		}
+
+    	public void SetRetryCount(int retryCount)
 		{
 			RetryCount = retryCount;
 		}
@@ -94,6 +100,7 @@ namespace MassTransit.Internal
 			DestinationAddress = null;
 			ResponseAddress = null;
 			FaultAddress = null;
+			Network = null;
 			RetryCount = 0;
 			ExpirationTime = null;
 			MessageType = null;

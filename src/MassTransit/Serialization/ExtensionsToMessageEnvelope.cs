@@ -26,6 +26,7 @@ namespace MassTransit.Serialization
 					headers.SetDestinationAddress(envelope.DestinationAddress);
 					headers.SetResponseAddress(envelope.ResponseAddress);
 					headers.SetFaultAddress(envelope.FaultAddress);
+					headers.SetNetwork(envelope.Network);
 					headers.SetRetryCount(envelope.RetryCount);
 					headers.SetMessageType(envelope.MessageType);
 					if(envelope.ExpirationTime.HasValue)
@@ -39,6 +40,7 @@ namespace MassTransit.Serialization
 			envelope.DestinationAddress = headers.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
 			envelope.ResponseAddress = headers.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
 			envelope.FaultAddress = headers.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
+			envelope.Network = headers.Network;
 			envelope.RetryCount = headers.RetryCount;
 			envelope.MessageType = headers.MessageType ?? envelope.MessageType;
 			if(headers.ExpirationTime.HasValue)

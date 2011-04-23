@@ -59,6 +59,12 @@ namespace MassTransit.Serialization
         public string FaultAddress { get; set; }
 
 		/// <summary>
+		/// Identifies a specific network to which this message belongs and is used to filter
+		/// out messages that mighte be from untrusted networks
+		/// </summary>
+		public string Network { get; set; }
+
+		/// <summary>
 		/// The number of times the message has been retried by a consumer
 		/// Starts at zero and is incremented every time the message is scheduled for retry
 		/// </summary>
