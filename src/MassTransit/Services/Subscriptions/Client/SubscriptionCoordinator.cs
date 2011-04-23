@@ -223,7 +223,11 @@ namespace MassTransit.Services.Subscriptions.Client
 		private void Send<T>(T message)
 			where T : class
 		{
-			_outboundEndpoint.Send(message, context => { context.SetSourceAddress(_uri); });
+			_outboundEndpoint.Send(message, context =>
+				{
+					context.SetSourceAddress(_uri);
+					context.SetNetwork(_network);
+				});
 		}
 
 		private void SendAddSubscriptionClient(IServiceBus bus)
