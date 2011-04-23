@@ -50,12 +50,10 @@ namespace MassTransit.Services.Subscriptions.Client
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Starting SubscriptionClient on {0}", bus.Endpoint.Uri);
 
-			_bus = bus;
-
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Getting endpoint for subscription service at {0}", SubscriptionServiceUri);
 
-			_subscriptionServiceEndpoint = _bus.GetEndpoint(SubscriptionServiceUri);
+			_subscriptionServiceEndpoint = bus.GetEndpoint(SubscriptionServiceUri);
 
 			VerifyClientAndServiceNotOnSameEndpoint(bus);
 

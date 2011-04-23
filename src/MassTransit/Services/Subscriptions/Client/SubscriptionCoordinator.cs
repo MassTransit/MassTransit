@@ -190,7 +190,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			publisher.Start(bus);
 			_services.Add(publisher);
 
-			var consumer = new SubscriptionConsumer(this, _endpointResolver);
+			var consumer = new SubscriptionConsumer(this);
 			consumer.Start(bus);
 			_services.Add(consumer);
 		}

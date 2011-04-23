@@ -32,47 +32,50 @@ namespace Starbucks.Barista
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
-		[STAThread]
-		private static void Main(string[] args)
+        [STAThread]
+        private static void Main(string[] args)
 		{
-			XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
+		    XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
 
-				    var container = new WindsorContainer();
-				    container.Install(new MassTransitInstaller());
+		    var container = new WindsorContainer();
+		    container.Install(new MassTransitInstaller());
 
-				    container.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)));
-				    container.Register(Component.For<DrinkPreparationSaga>(),
-				                Component.For<BaristaService>().LifeStyle.Singleton);
+		    container.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)));
+		    container.Register(Component.For<DrinkPreparationSaga>(),
+		                       Component.For<BaristaService>().LifeStyle.Singleton);
 
-			HostFactory.Run(c =>
-				{
-					c.SetServiceName("StarbucksBarista");
-					c.SetDisplayName("Starbucks Barista");
-					c.SetDescription("a Mass Transit sample service for making orders of coffee.");
+		    HostFactory.Run(c =>
+		    {
+		        c.SetServiceName("StarbucksBarista");
+		        c.SetDisplayName("Starbucks Barista");
+		        c.SetDescription("a Mass Transit sample service for making orders of coffee.");
 
-					c.DependsOnMsmq();
-					c.RunAsLocalService();
+		        c.DependsOnMsmq();
+		        c.RunAsLocalService();
 
-					EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
+		        EndpointConfigurator.Defaults(x =>
+		        {
+		            x.CreateMissingQueues = true;
+		        });
 
 
-					DisplayStateMachine();
+		        DisplayStateMachine();
 
-					c.Service<BaristaService>(s =>
-						{
-							s.ConstructUsing(builder => container.Resolve<BaristaService>());
-							s.WhenStarted(o => o.Start());
-                            s.WhenStopped(o =>
-                                {
-                                    o.Stop();
-                                    container.Dispose();
-                                });
-						});
-				});
-			
+		        c.Service<BaristaService>(s =>
+		        {
+		            s.ConstructUsing(builder => container.Resolve<BaristaService>());
+		            s.WhenStarted(o => o.Start());
+		            s.WhenStopped(o =>
+		            {
+		                o.Stop();
+		                container.Dispose();
+		            });
+		        });
+		    });
+
 		}
 
-		private static void DisplayStateMachine()
+	    private static void DisplayStateMachine()
 		{
 			Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
