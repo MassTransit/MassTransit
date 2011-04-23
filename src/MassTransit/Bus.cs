@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using Configuration;
     using Exceptions;
+    using Transports;
 
     public static class Bus
     {
@@ -23,21 +24,49 @@ namespace MassTransit
 
         public static void Initialize(IObjectBuilder builder, Action<BusConfiguration> cfg)
         {
+            Reset();
+
+            using (var erc = new EndpointResolverConfigurator())
+            {
+                erc.AddTransportFactory<LoopbackTransportFactory>();
+                erc.AddTransportFactory<MulticastUdpTransportFactory>();
+
+                var sbc = new ServiceBusConfigurator();
+                var cbc = new ControlBusConfigurator();
+
+                erc.SetObjectBuilder(builder);
+                sbc.SetObjectBuilder(builder);
+                cbc.SetObjectBuilder(builder);
+
+                var joint = new JointConfiguration(builder, erc, sbc, cbc);
+
+                cfg(joint);
+
+                _resolver = erc.Create();
+
+                sbc.SetEndpointFactory(_resolver);
+                cbc.SetEndpointFactory(_resolver);
+
+                sbc.UseControlBus(cbc.Create());
+
+                _instance = sbc.CreateServiceBus();
+            }
+        }
+
+        static void Reset()
+        {
             if(_instance != null)
                 _instance.Dispose();
+            if (_resolver != null)
+                _resolver.Dispose();
+
 
             _instance = null;
-
-            var busConfig = new MassTransitConfiguration(builder);
-
-            cfg(busConfig);
-
-            _instance = busConfig.CreateBus();
-            _resolver = busConfig.GetResolver();
+            _resolver = null;
         }
 
 
-        public static IEndpointResolver Factory()
+        public static IEndpointResolver Resolver()
         {
             if(_instance == null) 
                 throw new ConfigurationException("You must call initialize before trying to access the Factory instance.");
