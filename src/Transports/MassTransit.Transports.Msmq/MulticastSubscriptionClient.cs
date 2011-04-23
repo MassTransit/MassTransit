@@ -24,18 +24,16 @@ namespace MassTransit.Transports.Msmq
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MulticastSubscriptionClient));
 		private readonly Uri _uri;
 		private SubscriptionCoordinator _coordinator;
-		private IEndpointResolver _endpointResolver;
 		private string _networkKey;
 		private IObjectBuilder _objectBuilder;
 		private IServiceBus _subscriptionBus;
 
-		public MulticastSubscriptionClient(Uri uri, string networkKey, IObjectBuilder objectBuilder, IEndpointResolver endpointResolver)
+		public MulticastSubscriptionClient(Uri uri, string networkKey, IObjectBuilder objectBuilder)
 		{
 			_uri = uri;
 			_objectBuilder = objectBuilder;
 
 			_networkKey = networkKey;
-			_endpointResolver = endpointResolver;
 		}
 
 
@@ -52,11 +50,11 @@ namespace MassTransit.Transports.Msmq
 				{
 					x.SetObjectBuilder(_objectBuilder);
 					x.ReceiveFrom(_uri);
-					x.SetEndpointFactory(_endpointResolver);
+					x.SetEndpointFactory(bus.EndpointResolver);
 					x.SetConcurrentConsumerLimit(1);
 				});
 
-			_coordinator = new SubscriptionCoordinator(_subscriptionBus, _subscriptionBus.Endpoint, _endpointResolver, _networkKey);
+			_coordinator = new SubscriptionCoordinator(_subscriptionBus, _subscriptionBus.Endpoint, _networkKey);
 			_coordinator.Start(bus);
 		}
 

@@ -37,7 +37,6 @@ namespace MassTransit.Services.Subscriptions.Client
 		private static readonly ClientSubscriptionInfoMapper _mapper = new ClientSubscriptionInfoMapper();
 		private readonly IServiceBus _bus;
 		private readonly RegistrationList<IEndpointSubscriptionEvent> _clients;
-		private readonly IEndpointResolver _endpointResolver;
 		private readonly HashSet<string> _ignoredSubscriptions;
 		private readonly EndpointList _localEndpoints;
 		private readonly string _network;
@@ -53,12 +52,11 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		private UnsubscribeAction _unsubscribeAction;
 
-		public SubscriptionCoordinator(IServiceBus bus, IEndpoint outboundEndpoint, IEndpointResolver endpointResolver, string network)
+		public SubscriptionCoordinator(IServiceBus bus, IEndpoint outboundEndpoint, string network)
 		{
 			_bus = bus;
 			_uri = _bus.Endpoint.Address.Uri;
 			_network = network;
-			_endpointResolver = endpointResolver;
 			_outboundEndpoint = outboundEndpoint;
 
 			_clients = new RegistrationList<IEndpointSubscriptionEvent>();

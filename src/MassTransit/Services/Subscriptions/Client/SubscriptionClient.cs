@@ -59,7 +59,7 @@ namespace MassTransit.Services.Subscriptions.Client
 
 			_ready.Reset();
 
-			_coordinator = new SubscriptionCoordinator(bus.ControlBus, _subscriptionServiceEndpoint, _endpointResolver, null);
+			_coordinator = new SubscriptionCoordinator(bus.ControlBus, _subscriptionServiceEndpoint, null);
 			_coordinator.OnRefresh += CoordinatorOnRefresh;
 			_coordinator.Start(bus);
 

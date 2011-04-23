@@ -108,6 +108,8 @@ namespace MassTransit
 
     	IServiceBus ControlBus { get; }
 
+		IEndpointResolver EndpointResolver { get; }
+
         IEndpoint GetEndpoint(Uri address);
     }
 

@@ -173,7 +173,7 @@ namespace MassTransit.Configuration
 		}
 
         //TO SUPPORT THE NEW MODEL
-        internal ServiceBus CreateServiceBus()
+    	private ServiceBus CreateServiceBus()
         {
             if (_endpointResolver == null)
                 throw new ConfigurationException("You must call 'SetEndpointFactory(IEndpointFactory)' on the ServiceBusConfiguration class");

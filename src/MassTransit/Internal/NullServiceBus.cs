@@ -86,7 +86,12 @@ namespace MassTransit.Internal
 			get { return this; }
 		}
 
-	    public IEndpoint GetEndpoint(Uri address)
+		public IEndpointResolver EndpointResolver
+		{
+			get { return null; }
+		}
+
+		public IEndpoint GetEndpoint(Uri address)
 	    {
 	        return new NullEndpoint();
 	    }

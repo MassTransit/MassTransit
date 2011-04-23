@@ -21,6 +21,11 @@ namespace MassTransit.Configuration
 			configurator.ConfigureService<MulticastSubscriptionClientConfigurator>(x => { });
 		}
 
+		public static void UseMulticastSubscriptionClient(this BusConfiguration configurator)
+		{
+			configurator.ConfigureService<MulticastSubscriptionClientConfigurator>(x => { });
+		}
+
 		public static void UseMulticastSubscriptionClient(this IServiceBusConfigurator configurator, Action<MulticastSubscriptionClientConfigurator> configureCallback)
 		{
 			configurator.ConfigureService(configureCallback);
