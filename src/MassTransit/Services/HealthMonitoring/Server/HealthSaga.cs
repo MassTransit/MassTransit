@@ -139,7 +139,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
 			Bus.Publish(new ScheduleTimeout(CorrelationId, HeartbeatIntervalInSeconds.Seconds(), (int) Timeouts.PingTimeout));
 
 			Builder
-				.GetInstance<IEndpointResolver>()
+				.GetInstance<IEndpointCache>()
 				.GetEndpoint(ControlUri)
 				.Send(new PingEndpoint(CorrelationId));
 		}

@@ -22,7 +22,7 @@ namespace MassTransit.Transports.Nms
 
 	[DebuggerDisplay("{Address}")]
 	public class NmsTransport :
-		ILoopbackTransport
+		IDuplexTransport
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (NmsTransport));
 

@@ -13,13 +13,15 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using System;
+	using Configurators;
+	using EndpointConfigurators;
 
 	public class MsmqTransactionalEndpointTestFixture :
 		MsmqEndpointTestFixture
 	{
 		protected override void EstablishContext()
 		{
-			EndpointConfigurator.Defaults(x =>
+			EndpointConfiguratorImpl.Defaults(x =>
 				{
 					x.CreateTransactionalQueues = true;
 				});
@@ -30,7 +32,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 			base.EstablishContext();
 
-			EndpointConfigurator.Defaults(x =>
+			EndpointConfiguratorImpl.Defaults(x =>
 			{
 				x.PurgeOnStartup = false;
 			});

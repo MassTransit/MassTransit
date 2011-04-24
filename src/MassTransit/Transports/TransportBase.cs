@@ -17,7 +17,7 @@ namespace MassTransit.Transports
 
 	[DebuggerDisplay("{Address}")]
 	public abstract class TransportBase :
-		ILoopbackTransport
+		IDuplexTransport
 	{
 		private bool _disposed;
 

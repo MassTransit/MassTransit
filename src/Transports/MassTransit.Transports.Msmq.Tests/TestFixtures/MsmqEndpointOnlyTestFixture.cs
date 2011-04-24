@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
-    using MassTransit.Tests.TextFixtures;
+	using Configurators;
+	using EndpointConfigurators;
+	using MassTransit.Tests.TextFixtures;
 
     public class MsmqEndpointOnlyTestFixture :
         EndpointTestFixture<MsmqTransportFactory>
@@ -33,15 +35,15 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
         {
             base.EstablishContext();
 
-            EndpointConfigurator.Defaults(x =>
+            EndpointConfiguratorImpl.Defaults(x =>
             {
                 x.CreateMissingQueues = true;
                 x.CreateTransactionalQueues = Transactional;
                 x.PurgeOnStartup = true;
             });
 
-            Endpoint = EndpointResolver.GetEndpoint(EndpointAddress.Uri);
-            ErrorEndpoint = EndpointResolver.GetEndpoint(ErrorEndpointAddress.Uri);
+            Endpoint = EndpointCache.GetEndpoint(EndpointAddress.Uri);
+            ErrorEndpoint = EndpointCache.GetEndpoint(ErrorEndpointAddress.Uri);
         }
 
         protected override void TeardownContext()

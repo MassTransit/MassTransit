@@ -27,7 +27,7 @@ namespace MassTransit.Tests.Distributor
 	{
 		protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
 		{
-			configurator.UseDistributorFor<FirstCommand>(EndpointResolver);
+			configurator.UseDistributorFor<FirstCommand>(EndpointCache);
 		}
 
 		protected void AddFirstCommandInstance(string instanceName, string queueName)

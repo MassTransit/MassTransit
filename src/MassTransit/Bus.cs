@@ -1,5 +1,5 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,76 +12,44 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using Configuration;
-    using Exceptions;
-    using Transports;
+	using System;
+	using BusConfigurators;
+	using Configurators;
+	using Exceptions;
 
-    public static class Bus
-    {
-        static IServiceBus _instance;
-        static IEndpointResolver _resolver;
+	public static class Bus
+	{
+		static IServiceBus _instance;
 
-        public static void Initialize(IObjectBuilder builder, Action<BusConfiguration> cfg)
-        {
-            Reset();
+		public static void Initialize(IObjectBuilder objectBuilder, Action<ServiceBusConfigurator> configure)
+		{
+			Shutdown();
 
-            using (var erc = new EndpointResolverConfigurator())
-            {
-                erc.AddTransportFactory<LoopbackTransportFactory>();
-                erc.AddTransportFactory<MulticastUdpTransportFactory>();
+			_instance = ServiceBusFactory.New(configurator =>
+				{
+					configurator.SetObjectBuilder(objectBuilder);
 
-                var sbc = new ServiceBusConfigurator();
-                var cbc = new ControlBusConfigurator();
+					configurator.UseControlBus();
 
-                erc.SetObjectBuilder(builder);
-                sbc.SetObjectBuilder(builder);
-                cbc.SetObjectBuilder(builder);
+					configure(configurator);
+				});
+		}
 
-                var joint = new JointConfiguration(builder, erc, sbc, cbc);
+		public static IServiceBus Instance()
+		{
+			if (_instance == null)
+				throw new ConfigurationException("You must call Initialize before accessing Bus.Instance.");
 
-                cfg(joint);
+			return _instance;
+		}
 
-                _resolver = erc.Create();
-
-                sbc.SetEndpointFactory(_resolver);
-                cbc.SetEndpointFactory(_resolver);
-
-                sbc.UseControlBus(cbc.Create());
-
-                _instance = sbc.Create();
-            }
-        }
-
-        static void Reset()
-        {
-            if(_instance != null)
-                _instance.Dispose();
-            if (_resolver != null)
-                _resolver.Dispose();
-
-
-            _instance = null;
-            _resolver = null;
-        }
-
-
-        public static IEndpointResolver Resolver()
-        {
-            if(_instance == null) 
-                throw new ConfigurationException("You must call initialize before trying to access the Factory instance.");
-
-            return _resolver;
-        }
-
-
-        public static IServiceBus Instance()
-        {
-            if(_instance == null) 
-                throw new ConfigurationException("You must call initialize before trying to access the Bus instance.");
-
-
-            return _instance;
-        }
-    }
+		public static void Shutdown()
+		{
+			if (_instance != null)
+			{
+				_instance.Dispose();
+				_instance = null;
+			}
+		}
+	}
 }

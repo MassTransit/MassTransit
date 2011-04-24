@@ -15,7 +15,7 @@ namespace MassTransit.Transports.Msmq
 	using System;
 
 	public class NonTransactionalMsmqTransport :
-		ILoopbackTransport
+		IDuplexTransport
 	{
 		private readonly IInboundTransport _inbound;
 		private readonly IOutboundTransport _outbound;

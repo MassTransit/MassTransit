@@ -22,7 +22,7 @@ namespace MassTransit.Transports.Nms
 			get { return "activemq"; }
 		}
 
-		public ILoopbackTransport BuildLoopback(ITransportSettings settings)
+		public IDuplexTransport BuildLoopback(ITransportSettings settings)
 		{
 			return new NmsTransport(settings.Address);
 		}

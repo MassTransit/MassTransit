@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView
 {
-    using Distributor.Messages;
+	using Distributor.Messages;
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
@@ -23,8 +23,6 @@ namespace MassTransit.SystemView
 	using Services.HealthMonitoring.Messages;
 	using Services.Subscriptions.Messages;
 	using Services.Timeout.Messages;
-    using Transports;
-    using Transports.Msmq;
 
 	public partial class MainForm :
 		Form,
@@ -88,19 +86,19 @@ namespace MassTransit.SystemView
 
 		public void Consume(HealthUpdate message)
 		{
-			Action<IEnumerable<HealthInformation>> method = x => RefreshHealthView(x);
+			Action<IEnumerable<HealthInformation>> method = RefreshHealthView;
 			BeginInvoke(method, new object[] {message.Information});
 		}
 
 		public void Consume(RemoveSubscription message)
 		{
-			Action<SubscriptionInformation> method = x => RemoveSubscriptionFromView(x);
+			Action<SubscriptionInformation> method = RemoveSubscriptionFromView;
 			BeginInvoke(method, new object[] {message.Subscription});
 		}
 
 		public void Consume(SubscriptionRefresh message)
 		{
-			Action<IEnumerable<SubscriptionInformation>> method = x => RefreshSubscriptions(x);
+			Action<IEnumerable<SubscriptionInformation>> method = RefreshSubscriptions;
 			BeginInvoke(method, new object[] {message.Subscriptions});
 		}
 
@@ -136,13 +134,9 @@ namespace MassTransit.SystemView
 
 	    private void RefreshHealthView(IEnumerable<HealthInformation> informations)
 		{
-			var existing = new List<ListViewItem>();
-			foreach (ListViewItem item in healthListView.Items)
-			{
-				existing.Add(item);
-			}
+			var existing = healthListView.Items.Cast<ListViewItem>().ToList();
 
-			foreach (HealthInformation entry in informations)
+	    	foreach (HealthInformation entry in informations)
 			{
 				ListViewItem item = AddOrUpdateHealthItem(entry.ControlUri, entry.LastHeartbeat, entry.State);
 
@@ -177,7 +171,7 @@ namespace MassTransit.SystemView
 			return item;
 		}
 
-		private void MainForm_Load(object sender, EventArgs e)
+		private void MainFormLoad(object sender, EventArgs e)
 		{
 			BootstrapContainer();
 
@@ -188,19 +182,13 @@ namespace MassTransit.SystemView
 
 		private void ConnectToSubscriptionService()
 		{
-			_subscriptionServiceEndpoint = _container.GetInstance<IEndpointResolver>()
-				.GetEndpoint(_container.GetInstance<IConfiguration>().SubscriptionServiceUri);
+			_subscriptionServiceEndpoint = _bus.GetEndpoint(_container.GetInstance<IConfiguration>().SubscriptionServiceUri);
 
 			_subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
 		}
 
 		private void BootstrapServiceBus()
 		{
-			EndpointConfigurator.Defaults(x =>
-			{
-				x.CreateMissingQueues = true;
-			});
-
 			_bus = _container.GetInstance<IServiceBus>();
 			_unsubscribe = _bus.Subscribe(this);
 		}
@@ -261,7 +249,7 @@ namespace MassTransit.SystemView
 			return messageNode;
 		}
 
-        private string GetDescription(SubscriptionInformation subscription)
+        private static string GetDescription(SubscriptionInformation subscription)
         {
             var parts = subscription.MessageName.Split(',');
             var d = parts.Length > 0 ? parts[0] : subscription.MessageName;
@@ -365,13 +353,13 @@ namespace MassTransit.SystemView
 			}
 		}
 
-        private void subscriptionView_AfterSelect(object sender, TreeViewEventArgs e)
+        private void SubscriptionViewAfterSelect(object sender, TreeViewEventArgs e)
         {
             subscriptionView.SelectedNode = e.Node;
             endpointInfo.Bind(e.Node.Tag as SubscriptionInformation);
         }
 
-		private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+		private void RemoveToolStripMenuItemClick(object sender, EventArgs e)
 		{
 			if (subscriptionView.SelectedNode != null)
 			{
@@ -379,7 +367,7 @@ namespace MassTransit.SystemView
 			}
 		}
 
-		private void subscriptionView_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+		private void SubscriptionViewPreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
 			if (e.KeyCode == Keys.Delete)
 			{
@@ -387,7 +375,7 @@ namespace MassTransit.SystemView
 			}
 		}
 
-		public void RemoveSubscriptions(TreeNode node)
+		void RemoveSubscriptions(TreeNode node)
 		{
 			var toRemove = new List<SubscriptionInformation>();
 			if (IsRemovable(node))
@@ -415,7 +403,7 @@ namespace MassTransit.SystemView
 			toRemove.ForEach(x => _subscriptionServiceEndpoint.Send(new RemoveSubscription(x)));
 		}
 
-		private bool IsRemovable(TreeNode node)
+		private static bool IsRemovable(TreeNode node)
 		{
 			return node.Tag is SubscriptionInformation &&
 				   !((SubscriptionInformation)node.Tag).MessageName.StartsWith("MassTransit.Services");

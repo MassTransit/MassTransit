@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,64 +14,22 @@ namespace MassTransit.Services.Subscriptions.Configuration
 {
 	using System;
 	using Client;
-	using Exceptions;
+	using Configurators;
 	using Internal;
-	using MassTransit.Configuration;
-
-    public static class SubscriptionClientConfiguratorExtensions
-    {
-        public static void UseSubscriptionService(this IServiceBusConfigurator bc, string subscriptionServiceUri)
-        {
-            UseSubscriptionService(bc, new Uri(subscriptionServiceUri));
-        }
-        public static void UseSubscriptionService(this IServiceBusConfigurator bc, Uri subscriptionServiceUri)
-        {
-            bc.ConfigureService<SubscriptionClientConfigurator>(subCfg => subCfg.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
-        }
-
-        public static void UseSubscriptionService(this BusConfiguration cfg, string subscriptionServiceUri)
-        {
-            UseSubscriptionService(cfg, new Uri(subscriptionServiceUri));
-        }
-
-        public static void UseSubscriptionService(this BusConfiguration cfg, Uri subscriptionServiceUri)
-        {
-            cfg.ConfigureService<SubscriptionClientConfigurator>(subCfg => subCfg.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
-        }
-    }
 
 	public class SubscriptionClientConfigurator :
-		IServiceConfigurator
+		IBusServiceConfigurator
 	{
-		private Uri _subscriptionServiceUri;
+		Uri _subscriptionServiceUri;
 
 		public Type ServiceType
 		{
 			get { return typeof (SubscriptionClient); }
 		}
 
-		public IBusService Create(IServiceBus bus, IObjectBuilder builder)
+		public IBusService Create(IServiceBus bus)
 		{
-			var service = new SubscriptionClient()
-				{
-					SubscriptionServiceUri = _subscriptionServiceUri
-				};
-
-			return service;
-		}
-
-		public void SetSubscriptionServiceEndpoint(string uriString)
-		{
-			try
-			{
-				Uri uri = new Uri(uriString.ToLowerInvariant());
-
-				_subscriptionServiceUri = uri;
-			}
-			catch (UriFormatException ex)
-			{
-				throw new ConfigurationException("The endpoint Uri is invalid: " + uriString, ex);
-			}
+			return new SubscriptionClient(_subscriptionServiceUri);
 		}
 
 		public void SetSubscriptionServiceEndpoint(Uri uri)

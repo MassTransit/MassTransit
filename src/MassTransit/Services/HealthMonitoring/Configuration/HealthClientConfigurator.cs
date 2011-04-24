@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,28 +13,20 @@
 namespace MassTransit.Services.HealthMonitoring.Configuration
 {
 	using System;
+	using Configurators;
 	using Internal;
-	using MassTransit.Configuration;
-
-    public static class HealthClientConfiguratorExtensions
-    {
-        public static void UseHealthMonitoring(this BusConfiguration cfg, int interval)
-        {
-            cfg.ConfigureService<HealthClientConfigurator>(s=>s.SetHeartbeatInterval(interval));
-        }
-    }
 
 	public class HealthClientConfigurator :
-		IServiceConfigurator
+		IBusServiceConfigurator
 	{
-		private int _intervalInSeconds;
+		int _intervalInSeconds;
 
 		public Type ServiceType
 		{
 			get { return typeof (HealthClient); }
 		}
 
-		public IBusService Create(IServiceBus bus, IObjectBuilder builder)
+		public IBusService Create(IServiceBus bus)
 		{
 			var service = new HealthClient(_intervalInSeconds);
 

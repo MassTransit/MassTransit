@@ -70,16 +70,16 @@ namespace MassTransit
 		/// </summary>
 		public ServiceBus(IEndpoint endpointToListenOn,
 		                  IObjectBuilder objectBuilder,
-		                  IEndpointResolver endpointResolver)
+		                  IEndpointCache endpointCache)
 		{
 			ReceiveTimeout = TimeSpan.FromSeconds(3);
 			Guard.AgainstNull(endpointToListenOn, "endpointToListenOn", "This parameter cannot be null");
 			Guard.AgainstNull(objectBuilder, "objectBuilder", "This parameter cannot be null");
-			Guard.AgainstNull(endpointResolver, "endpointFactory", "This parameter cannot be null");
+			Guard.AgainstNull(endpointCache, "endpointFactory", "This parameter cannot be null");
 
 			Endpoint = endpointToListenOn;
 			ObjectBuilder = objectBuilder;
-			EndpointResolver = endpointResolver;
+			EndpointCache = endpointCache;
 
 			_eventAggregator = PipeSegment.New();
 			_eventAggregatorScope = _eventAggregator.NewSubscriptionScope();
@@ -100,7 +100,7 @@ namespace MassTransit
 
 		public static IServiceBus Null { get; private set; }
 
-		public IEndpointResolver EndpointResolver { get; private set; }
+		public IEndpointCache EndpointCache { get; private set; }
 
 		public IObjectBuilder ObjectBuilder { get; private set; }
 
@@ -336,11 +336,6 @@ namespace MassTransit
 					_counters.Dispose();
 					_counters = null;
 				}
-
-				if (PoisonEndpoint != null)
-				{
-					PoisonEndpoint = null;
-				}
 			}
 			_disposed = true;
 		}
@@ -395,7 +390,7 @@ namespace MassTransit
 
 	    public IEndpoint GetEndpoint(Uri address)
 	    {
-	        return EndpointResolver.GetEndpoint(address);
+	        return EndpointCache.GetEndpoint(address);
 	    }
 	}
 }

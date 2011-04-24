@@ -25,13 +25,12 @@ namespace MassTransit.Transports.Msmq
 		private readonly Uri _uri;
 		private SubscriptionCoordinator _coordinator;
 		private string _networkKey;
-		private IObjectBuilder _objectBuilder;
 		private IServiceBus _subscriptionBus;
 
-		public MulticastSubscriptionClient(Uri uri, string networkKey, IObjectBuilder objectBuilder)
+		public MulticastSubscriptionClient(IServiceBus subscriptionBus, Uri uri, string networkKey)
 		{
+			_subscriptionBus = subscriptionBus;
 			_uri = uri;
-			_objectBuilder = objectBuilder;
 
 			_networkKey = networkKey;
 		}
@@ -48,9 +47,8 @@ namespace MassTransit.Transports.Msmq
 
 			_subscriptionBus = ServiceBusConfigurator.New(x =>
 				{
-					x.SetObjectBuilder(_objectBuilder);
 					x.ReceiveFrom(_uri);
-					x.SetEndpointFactory(bus.EndpointResolver);
+					x.SetEndpointFactory(bus.EndpointCache);
 					x.SetConcurrentConsumerLimit(1);
 				});
 

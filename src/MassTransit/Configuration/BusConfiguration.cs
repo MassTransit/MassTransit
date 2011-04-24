@@ -13,6 +13,7 @@
 namespace MassTransit.Configuration
 {
     using System;
+    using Configurators;
     using Serialization;
 
     public interface BusConfiguration
@@ -34,7 +35,7 @@ namespace MassTransit.Configuration
         void UseCustomSerializer<TSerializer>() where TSerializer : IMessageSerializer;
 
 
-        void ConfigureService<TService>(Action<TService> configure) where TService : IServiceConfigurator, new();
+        void ConfigureService<TService>(Action<TService> configure) where TService : IBusServiceConfigurator, new();
 
         void DisableAutoStart();
 

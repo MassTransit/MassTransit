@@ -166,7 +166,7 @@ namespace MassTransit.Tests.Distributor
 		        .IgnoreArguments()
 		        .Return(true);
 
-			configurator.UseDistributorFor(EndpointResolver, mock);
+			configurator.UseDistributorFor(EndpointCache, mock);
 		}
 
 		[Test]

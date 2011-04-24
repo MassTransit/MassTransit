@@ -22,7 +22,7 @@ namespace MassTransit.Transports
 			get { return "multicast"; }
 		}
 
-		public ILoopbackTransport BuildLoopback(ITransportSettings settings)
+		public IDuplexTransport BuildLoopback(ITransportSettings settings)
 		{
 			return new MulticastUdpTransport(settings.Address);
 		}

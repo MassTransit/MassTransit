@@ -82,7 +82,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(ObjectBuilder);
 
-			SubscriptionService = new SubscriptionService(SubscriptionBus, EndpointResolver, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
+			SubscriptionService = new SubscriptionService(SubscriptionBus, EndpointCache, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
 			SubscriptionService.Start();
 

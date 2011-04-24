@@ -14,6 +14,8 @@ namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
 	using Configuration;
+	using Configurators;
+	using EndpointConfigurators;
 	using Exceptions;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
@@ -28,7 +30,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[SetUp]
 		public void Setup()
 		{
-			EndpointConfigurator.Defaults(x =>
+			EndpointConfiguratorImpl.Defaults(x =>
 				{
 					x.CreateMissingQueues = false;
 					x.PurgeOnStartup = false;
@@ -55,7 +57,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[ExpectedException(typeof (EndpointException))]
 		public void Should_throw_an_endpoint_exception_from_the_endpoint_factory()
 		{
-			IEndpointResolver ef = EndpointResolverConfigurator.New(x =>
+			IEndpointCache ef = EndpointResolverConfiguratorImpl.New(x =>
 			    {
 			        x.AddTransportFactory<MsmqTransportFactory>();
 			    });

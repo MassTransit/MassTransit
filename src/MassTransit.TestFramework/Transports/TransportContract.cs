@@ -24,7 +24,7 @@ namespace MassTransit.TestFramework.Transports
         where TTransportFactory : ITransportFactory
     {
         IEndpoint _ep;
-        IEndpointResolver _endpointResolver;
+        IEndpointCache _endpointCache;
         public IObjectBuilder ObjectBuilder { get; set; }
         public Uri Address { get; set; }
         public Action<Uri> VerifyMessageIsNotInQueue { get; set; }
@@ -39,12 +39,12 @@ namespace MassTransit.TestFramework.Transports
         public void SetUp()
         {
             ObjectBuilder = MockRepository.GenerateStub<IObjectBuilder>();
-            _endpointResolver = EndpointResolverConfigurator.New(c =>
+            _endpointCache = EndpointResolverConfiguratorImpl.New(c =>
             {
                 c.AddTransportFactory<TTransportFactory>();
                 c.SetObjectBuilder(ObjectBuilder);
             });
-            _ep = _endpointResolver.GetEndpoint(Address);
+            _ep = _endpointCache.GetEndpoint(Address);
         }
 
         [TearDown]

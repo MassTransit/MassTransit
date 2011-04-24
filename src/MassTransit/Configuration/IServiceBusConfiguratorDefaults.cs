@@ -28,25 +28,8 @@ namespace MassTransit.Configuration
 	    /// <summary>
 	    /// Specify the IEndpointFactory to use
 	    /// </summary>
-	    /// <param name="endpointResolver"></param>
-        void SetEndpointFactory(IEndpointResolver endpointResolver);
-
-		/// <summary>
-		/// Specify the endpoint where errors should be sent
-		/// </summary>
-		/// <param name="uriString">The Uri of the endpoint</param>
-		void SendErrorsTo(string uriString);
-
-		/// <summary>
-		/// Specify the endpoint where errors should be sent
-		/// </summary>
-		/// <param name="uri">The Uri of the endpoint</param>
-		void SendErrorsTo(Uri uri);
-
-		/// <summary>
-		/// Enable the automatic subscription feature to subscribe all consumers found using the object builder
-		/// </summary>
-		void EnableAutoSubscribe();
+	    /// <param name="endpointCache"></param>
+        void SetEndpointFactory(IEndpointCache endpointCache);
 
 		/// <summary>
 		/// Do not start the ServiceBus when it is created

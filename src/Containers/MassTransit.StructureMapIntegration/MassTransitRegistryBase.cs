@@ -18,6 +18,8 @@ namespace MassTransit.StructureMapIntegration
 	using System.IO;
 	using System.Reflection;
 	using Configuration;
+	using Configurators;
+	using EndpointConfigurators;
 	using Internal;
 	using Saga;
 	using Services.Subscriptions;
@@ -47,7 +49,7 @@ namespace MassTransit.StructureMapIntegration
 		/// Scan the executing assemblies current directory for assemblies containing MassTransit transports.
 		/// </summary>
 		/// <param name="configurationAction"></param>
-		public MassTransitRegistryBase(Action<IEndpointResolverConfigurator> configurationAction)
+		public MassTransitRegistryBase(Action<EndpointFactoryConfigurator> configurationAction)
 			: this(configurationAction, DefaultTransportScanner)
 		{
 		}
@@ -59,7 +61,7 @@ namespace MassTransit.StructureMapIntegration
 		/// </summary>
 		/// <param name="configurationAction"></param>
 		/// <param name="transportAssemblyScanner"></param>
-		public MassTransitRegistryBase(Action<IEndpointResolverConfigurator> configurationAction, Action<IAssemblyScanner> transportAssemblyScanner)
+		public MassTransitRegistryBase(Action<EndpointFactoryConfigurator> configurationAction, Action<IAssemblyScanner> transportAssemblyScanner)
 		{
 			RegisterBusDependencies();
 
@@ -143,13 +145,13 @@ namespace MassTransit.StructureMapIntegration
 			// OrchestrateSagaStateMachineSink<,>)
 		}
 
-		protected void RegisterEndpointFactory(Action<IEndpointResolverConfigurator> configAction)
+		protected void RegisterEndpointFactory(Action<EndpointFactoryConfigurator> configAction)
 		{
-			For<IEndpointResolver>()
+			For<IEndpointCache>()
 				.Singleton()
 				.Use(context =>
 					{
-						return EndpointResolverConfigurator.New(x =>
+						return EndpointResolverConfiguratorImpl.New(x =>
 							{
 								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
 								configAction(x);
@@ -168,9 +170,9 @@ namespace MassTransit.StructureMapIntegration
 				.Singleton()
 				.Use(context =>
 					{
-						return ServiceBusConfigurator.New(x =>
+						return Configuration.ServiceBusConfigurator.New(x =>
 							{
-								x.SetEndpointFactory(context.GetInstance<IEndpointResolver>());
+								x.SetEndpointFactory(context.GetInstance<IEndpointCache>());
 								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 
@@ -190,9 +192,9 @@ namespace MassTransit.StructureMapIntegration
 				.Singleton()
 				.Use(context =>
 					{
-						return ServiceBusConfigurator.New(x =>
+						return Configuration.ServiceBusConfigurator.New(x =>
 							{
-								x.SetEndpointFactory(context.GetInstance<IEndpointResolver>());
+								x.SetEndpointFactory(context.GetInstance<IEndpointCache>());
 								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 
@@ -212,9 +214,9 @@ namespace MassTransit.StructureMapIntegration
 				.Singleton()
 				.Use(context =>
 					{
-						return ControlBusConfigurator.New(x =>
+						return Configuration.ControlBusConfigurator.New(x =>
 							{
-								x.SetEndpointFactory(context.GetInstance<IEndpointResolver>());
+								x.SetEndpointFactory(context.GetInstance<IEndpointCache>());
 								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 								x.SetConcurrentConsumerLimit(1);

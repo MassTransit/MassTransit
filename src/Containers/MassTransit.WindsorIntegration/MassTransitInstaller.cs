@@ -51,22 +51,17 @@ namespace MassTransit.WindsorIntegration
                 Component.For<IObjectBuilder>().Named("objectBuilder").Instance(wob).LifeStyle.Singleton
                 );
 
-            Bus.Initialize(wob, cfg =>
+            Bus.Initialize(wob, configurator =>
                 {
+					foreach (var transportType in _options.Transports.Select(Type.GetType))
+						configurator.AddTransportFactory(transportType);
 
-                    cfg.CreateMissingQueues();
-                    
-                    cfg.AddTransportFactory(_options.Transports.Select(Type.GetType).ToArray());
-
-
-                    cfg.ReceiveFrom(_options.ReceiveFrom);
-
-                    
+                    configurator.ReceiveFrom(_options.ReceiveFrom);
 
                     //if subscription service
                     if (_options.Subscriptions != null)
                     {
-                        cfg.UseSubscriptionService(_options.Subscriptions);
+                        configurator.UseSubscriptionService(_options.Subscriptions);
                     }
 
                     //if management service
@@ -74,12 +69,12 @@ namespace MassTransit.WindsorIntegration
                     {
                         string mgmt = _options.HealthServiceInterval;
                         int interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
-                        cfg.UseHealthMonitoring(interval);
+                        configurator.UseHealthMonitoring(interval);
                     }
 
 					if (_options.Callback != null)
 					{
-						_options.Callback(cfg);
+						_options.Callback(configurator);
 					}
                 });
 
@@ -93,12 +88,6 @@ namespace MassTransit.WindsorIntegration
                 .Named("controlBus")
                 .Instance((IControlBus) Bus.Instance().ControlBus)
                 .LifeStyle.Singleton);
-
-
-            container.Register(Component.For<IEndpointResolver>()
-                .Named("endpointFactory")
-                .Instance(Bus.Resolver())
-                .LifeStyle.Singleton);
-        }
+		}
     }
 }

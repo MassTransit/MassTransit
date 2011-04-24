@@ -27,23 +27,23 @@ namespace MassTransit.Tests
 	public class When_a_message_fault_occurs :
 		Specification
 	{
-		private IEndpointResolver _endpointResolver;
+		private IEndpointCache _endpointCache;
 		private IServiceBus _bus;
 		private IObjectBuilder _builder;
 
 		protected override void Before_each()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_endpointResolver = EndpointResolverConfigurator.New(x =>
+			_endpointCache = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(_builder);
 					x.SetDefaultSerializer<XmlMessageSerializer>();
 					x.AddTransportFactory<LoopbackTransportFactory>();
 				});
-			_builder.Stub(x => x.GetInstance<IEndpointResolver>()).Return(_endpointResolver);
+			_builder.Stub(x => x.GetInstance<IEndpointCache>()).Return(_endpointCache);
 			_bus = ServiceBusConfigurator.New(x =>
 				{
-                    x.SetEndpointFactory(_endpointResolver);
+                    x.SetEndpointFactory(_endpointCache);
 					x.SetObjectBuilder(_builder);
 					x.ReceiveFrom("loopback://localhost/servicebus");
 				});
@@ -52,7 +52,7 @@ namespace MassTransit.Tests
 		protected override void After_each()
 		{
 			_bus.Dispose();
-			_endpointResolver.Dispose();
+			_endpointCache.Dispose();
 		}
 
 		public class SmartConsumer :
@@ -123,7 +123,7 @@ namespace MassTransit.Tests
 		Specification
 	{
 
-		private IEndpointResolver _resolver;
+		private IEndpointCache _cache;
 		private IEndpoint _endpoint;
 		private ServiceBus _bus;
 		private IObjectBuilder _builder;
@@ -131,14 +131,14 @@ namespace MassTransit.Tests
 		protected override void Before_each()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_resolver = EndpointResolverConfigurator.New(x =>
+			_cache = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(_builder);
 					x.SetDefaultSerializer<XmlMessageSerializer>();
 					x.AddTransportFactory<LoopbackTransportFactory>();
 				});
-			_endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/servicebus"));
-			_bus = new ServiceBus(_endpoint, _builder, _resolver);
+			_endpoint = _cache.GetEndpoint(new Uri("loopback://localhost/servicebus"));
+			_bus = new ServiceBus(_endpoint, _builder, _cache);
 			_bus.Start();
 		}
 
@@ -147,7 +147,7 @@ namespace MassTransit.Tests
 		{
 			_bus.Dispose();
 			_endpoint.Dispose();
-			_resolver.Dispose();
+			_cache.Dispose();
 		}
 
 		public class SmartConsumer :

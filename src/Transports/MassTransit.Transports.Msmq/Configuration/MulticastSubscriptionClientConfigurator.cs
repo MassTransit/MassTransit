@@ -14,6 +14,7 @@ namespace MassTransit.Configuration
 {
 	using System;
 	using System.Net;
+	using Configurators;
 	using Exceptions;
 	using Internal;
 	using Magnum;
@@ -21,7 +22,7 @@ namespace MassTransit.Configuration
 
 	public class MulticastSubscriptionClientConfigurator :
 		IMulticastSubscriptionClientConfigurator,
-		IServiceConfigurator
+		IBusServiceConfigurator
 	{
 		private IPEndPoint _multicastAddress;
 		private string _networkKey;
@@ -37,14 +38,14 @@ namespace MassTransit.Configuration
 			get { return typeof (MulticastSubscriptionClient); }
 		}
 
-		public IBusService Create(IServiceBus bus, IObjectBuilder builder)
+		public IBusService Create(IServiceBus bus)
 		{
 			string path = bus.ControlBus.Endpoint.Address.Uri.AbsolutePath;
 
 			var uri = new UriBuilder("msmq-pgm", _multicastAddress.Address.ToString(), _multicastAddress.Port, path).Uri;
 			Uri clientUri = uri.AppendToPath("_subscriptions");
 
-			var service = new MulticastSubscriptionClient(clientUri, _networkKey, builder);
+			var service = new MulticastSubscriptionClient(clientUri, _networkKey);
 
 			return service;
 		}

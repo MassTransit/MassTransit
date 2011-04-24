@@ -16,7 +16,7 @@ namespace MassTransit.Transports
 	{
 		string Scheme { get; }
 
-		ILoopbackTransport BuildLoopback(ITransportSettings settings);
+		IDuplexTransport BuildLoopback(ITransportSettings settings);
 		IInboundTransport BuildInbound(ITransportSettings settings);
 		IOutboundTransport BuildOutbound(ITransportSettings settings);
 		IOutboundTransport BuildError(ITransportSettings settings);

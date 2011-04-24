@@ -1,5 +1,5 @@
-// Copyright 2007-2011 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,12 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
-    using Configuration;
+	using System;
 
-    public interface IEndpointFactory
-    {
-        IEndpoint BuildEndpoint(Uri uri, Action<IEndpointConfigurator> configurator);
-        void AddTransportFactory(ITransportFactory factory);
-    }
+	public interface IEndpointFactory
+	{
+		/// <summary>
+		/// Creates a new endpoint for the specified URI
+		/// </summary>
+		/// <param name="uri"></param>
+		/// <returns></returns>
+		IEndpoint CreateEndpoint(Uri uri);
+
+		/// <summary>
+		/// Adds a transport factory to the endpoint factory
+		/// </summary>
+		/// <param name="factory"></param>
+		void AddTransportFactory(ITransportFactory factory);
+	}
 }

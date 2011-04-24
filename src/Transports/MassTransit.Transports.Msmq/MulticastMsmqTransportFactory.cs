@@ -23,7 +23,7 @@ namespace MassTransit.Transports.Msmq
 			get { return "msmq-pgm"; }
 		}
 
-		public ILoopbackTransport BuildLoopback(ITransportSettings settings)
+		public IDuplexTransport BuildLoopback(ITransportSettings settings)
 		{
 			try
 			{

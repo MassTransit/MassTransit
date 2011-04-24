@@ -17,7 +17,7 @@ namespace MassTransit.LegacySupport
         private IEndpoint _subscriptionServiceEndpoint;
         static ILog _log = LogManager.GetLogger(typeof(LegacySubscriptionProxyService));
         private readonly ISagaRepository<LegacySubscriptionClientSaga> _subscriptionClientSagas;
-        IEndpointResolver _endpointResolver;
+        IEndpointCache _endpointCache;
         IServiceBus _bus;
         private UnsubscribeAction _unsubscribeToken = () => false;
 
@@ -26,10 +26,10 @@ namespace MassTransit.LegacySupport
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
         }
 
-        public LegacySubscriptionProxyService(ISagaRepository<LegacySubscriptionClientSaga> subscriptionClientSagas, IEndpointResolver endpointResolver, IServiceBus bus)
+        public LegacySubscriptionProxyService(ISagaRepository<LegacySubscriptionClientSaga> subscriptionClientSagas, IEndpointCache endpointCache, IServiceBus bus)
         {
             _subscriptionClientSagas = subscriptionClientSagas;
-            _endpointResolver = endpointResolver;
+            _endpointCache = endpointCache;
             _bus = bus;
         }
 
@@ -69,7 +69,7 @@ namespace MassTransit.LegacySupport
             var sagas = _subscriptionClientSagas.Where(x => x.CurrentState == LegacySubscriptionClientSaga.Active);
             sagas.Each(client =>
                            {
-                               IEndpoint endpoint = _endpointResolver.GetEndpoint(client.ControlUri);
+                               IEndpoint endpoint = _endpointCache.GetEndpoint(client.ControlUri);
 
                                endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
                            });
@@ -85,7 +85,7 @@ namespace MassTransit.LegacySupport
             _unsubscribeToken += _bus.Subscribe<LegacySubscriptionClientSaga>();
 
             //the new service
-            _subscriptionServiceEndpoint = _endpointResolver.GetEndpoint("msmq://localhost/mt_subscriptions");
+            _subscriptionServiceEndpoint = _endpointCache.GetEndpoint("msmq://localhost/mt_subscriptions");
 
             _log.Info("Legacy Subscription Service Started");
         }
