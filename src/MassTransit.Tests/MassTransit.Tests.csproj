@@ -112,6 +112,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MessageUrnSpecs.cs" />
+    <Compile Include="Batch_Specs.cs" />
     <Compile Include="BddExtensions.cs" />
     <Compile Include="Configuration\ChannelConfigurator_Specs.cs" />
     <Compile Include="Configuration\ConsumerSubscription_Specs.cs" />

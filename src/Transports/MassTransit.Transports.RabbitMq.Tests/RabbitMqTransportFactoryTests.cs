@@ -15,56 +15,49 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System;
     using System.IO;
     using System.Text;
+    using Magnum.TestFramework;
     using NUnit.Framework;
-    using RabbitMQ.Client;
     using Serialization;
+    using Magnum.Extensions;
 
     [TestFixture]
-    public class RabbitMqAddressSpecs
+    public class RabbitMqTransportFactoryTests
     {
-        Uri _address = new Uri("rabbitmq://10.0.1.19/dru");
-        Uri _rabbitAddress = new Uri("amqp-0-8://10.0.1.19:5672");
-        ConnectionFactory _factory = new ConnectionFactory();
+        Uri _address = new Uri("rabbitmq://localhost:5672/dru");
+        RabbitMqTransportFactory _factory;
 
         [SetUp]
         public void Setup()
         {
-		    _factory.UserName = "guest";
-		    _factory.Password = "guest";
-		    _factory.VirtualHost = @"/";
-            _factory.HostName = "10.0.1.19";
+            _factory = new RabbitMqTransportFactory();
         }
-
-        [Test, Explicit]
-        public void Bob()
+        [TearDown]
+        public void Teardown()
         {
-
-            using (var conn = _factory.CreateConnection())
-            {
-                using (var m = conn.CreateModel())
-                {
-                    m.QueueDeclare("igby", true);
-                }
-            }
+            _factory.Dispose();            
+            _factory = null;
+        }
+        [Test, Explicit]
+        public void CanConnect()
+        {
+            var t = _factory.BuildLoopback(new CreateTransportSettings(new RabbitMqAddress(_address)));
+            _factory.ConnectionsCount().ShouldEqual(1);
 
         }
 
 		[Test, Explicit]
-        public void Send()
+        public void TransportSendAndReceive()
 		{
-            var t = new RabbitMqTransport(new EndpointAddress(_address), _factory.CreateConnection());
+		    var t = _factory.BuildOutbound(new CreateTransportSettings(new RabbitMqAddress(_address)));
             t.Send((s)=>
             {
                 var b = Encoding.UTF8.GetBytes("dru");
                 s.Body.Write(b, 0,b.Length);
             });
-        }
 
-		[Test, Explicit]
-		public void Receive()
-        {
-            var t = new RabbitMqTransport(new EndpointAddress(new Uri("rabbitmq://10.0.1.19/bob")), _factory.CreateConnection());
-            t.Receive(s=>
+		    var i = _factory.BuildInbound(new CreateTransportSettings(new RabbitMqAddress(_address)));
+
+            i.Receive(s=>
             {
                 return ss =>
                 {
@@ -74,14 +67,16 @@ namespace MassTransit.Transports.RabbitMq.Tests
                     Assert.AreEqual("dru", name);
                     Console.WriteLine(name);
                 };
-            });
+            }, 1.Minutes());
         }
 
-		[Test,Explicit]
-        public void EndpointSend()
-        {
-            var addr = new EndpointAddress(_address);
 
+		[Test,Explicit]
+        public void EndpointSendAndReceive()
+		{
+		    var addr = new RabbitMqAddress(_address);
+		    var lb = _factory.BuildLoopback(new CreateTransportSettings(addr));
+            
             IMessageSerializer ser = new XmlMessageSerializer();
 
             var msg = new BugsBunny() {Food = "Carrot"};
@@ -90,19 +85,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
             {
                 ser.Serialize(stream, msg);
             }
-            var e = new Endpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection()), null);
-            e.Send(new BugsBunny() {Food = "Carrot"});
-        }
 
-		[Test, Explicit]
-        public void EndpointReceive()
-        {
-            var addr = new EndpointAddress(_address);
-
-            IMessageSerializer ser = new XmlMessageSerializer();
+            var oe = new Endpoint(addr, ser, lb, null);
+            oe.Send(msg);
 
 
-            var e = new Endpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection()), null);
+
+            var e = new Endpoint(addr, ser, lb, null);
             e.Receive(o=>
             {
                 return b =>
@@ -110,7 +99,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                     var bb = (BugsBunny) b;
                     Console.WriteLine(bb.Food);
                 };
-            }, TimeSpan.Zero);
+            }, TimeSpan.Zero);  
         }
     }
 

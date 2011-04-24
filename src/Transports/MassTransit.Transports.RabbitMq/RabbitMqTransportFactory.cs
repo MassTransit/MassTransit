@@ -14,64 +14,134 @@ namespace MassTransit.Transports.RabbitMq
 {
 	using System;
 	using Exceptions;
-	using Magnum.Extensions;
 	using RabbitMQ.Client;
+	using System.Linq;
 
-	public class RabbitMqTransportFactory :
-		ITransportFactory
-	{
-		private static readonly ConnectionFactory _factory = new ConnectionFactory();
-		private static readonly IProtocol _protocol = Protocols.AMQP_0_8;
+    public class RabbitMqTransportFactory :
+        ITransportFactory, IDisposable
+    {
+        static Cache<ServerKey, ConnectionFactory> _connectionFactoryCache = new Cache<ServerKey, ConnectionFactory>(a =>
+        {
+            return new ConnectionFactory
+                {
+                    HostName = a.Host,
+                    VirtualHost = a.VHost,
+                    Port = a.Port,
+                    UserName = a.Username,
+                    Password = a.Password,
+                };
+        });
 
-		public string Scheme
-		{
-			get { return "rabbitmq"; }
-		}
+        public string Scheme
+        {
+            get { return "rabbitmq"; }
+        }
 
 		public IDuplexTransport BuildLoopback(ITransportSettings settings)
-		{
-			EnsureProtocolIsCorrect(settings.Address.Uri);
+        {
+            EnsureProtocolIsCorrect(settings.Address.Uri);
 
-			var transport = new RabbitMqTransport(settings.Address, GetConnection(settings.Address.Uri));
-			return transport;
-		}
+            var address = (RabbitMqAddress)settings.Address;
 
-		public IInboundTransport BuildInbound(ITransportSettings settings)
-		{
-			return BuildLoopback(settings);
-		}
+            var factory = _connectionFactoryCache[ToKey(address)];
 
-		public IOutboundTransport BuildOutbound(ITransportSettings settings)
-		{
-			return BuildLoopback(settings);
-		}
+            var transport = new RabbitMqTransport(settings.Address, factory.CreateConnection());
+            return transport;
+        }
 
-		public IOutboundTransport BuildError(ITransportSettings settings)
-		{
-			return BuildOutbound(settings);
-		}
+        public IInboundTransport BuildInbound(ITransportSettings settings)
+        {
+            //must be a queue
+            //rabbitmq://server:port/queue/<queue>
+            return BuildLoopback(settings);
+        }
 
-		public static void Connect()
-		{
-			_factory.UserName = "guest";
-			_factory.Password = "guest";
-			_factory.VirtualHost = @"/";
-			_factory.HostName = "";
-		}
+        public IOutboundTransport BuildOutbound(ITransportSettings settings)
+        {
+            //must be an exchange
+            //rabbitmq://server:port/exchange/<message:urn>
 
-		private static IConnection GetConnection(Uri address)
-		{
-			Uri rabbitMqAddress = new UriBuilder("amqp-{0}-{1}"
-				.FormatWith(_protocol.MajorVersion, _protocol.MinorVersion), address.Host, _protocol.DefaultPort).Uri;
+            return BuildLoopback(settings);
+        }
 
-			return _factory.CreateConnection();
-		}
+        public IOutboundTransport BuildError(ITransportSettings settings)
+        {
+            return BuildOutbound(settings);
+        }
 
 
-		private static void EnsureProtocolIsCorrect(Uri address)
-		{
-			if (address.Scheme != "rabbitmq")
-				throw new EndpointException(address, "Address must start with 'rabbitmq' not '{0}'".FormatWith(address.Scheme));
-		}
-	}
+        private static void EnsureProtocolIsCorrect(Uri address)
+        {
+            if (address.Scheme != "rabbitmq")
+                throw new EndpointException(address, "Address must start with 'rabbitmq' not '{0}'".FormatWith(address.Scheme));
+        }
+
+        public void Dispose()
+        {
+            _connectionFactoryCache.ClearAll();
+            _connectionFactoryCache = null;
+        }
+
+        public int ConnectionsCount()
+        {
+            return _connectionFactoryCache.Count();
+        }
+
+        class ServerKey
+        {
+            public readonly string Host;
+            public readonly string VHost;
+            public readonly int Port;
+            public readonly string Username;
+            public readonly string Password;
+
+            public ServerKey(RabbitMqAddress address)
+            {
+                Host = address.Host;
+                VHost = address.VHost;
+                Port = address.Port;
+                Username = address.Username;
+                Password = address.Password;
+            }
+
+            #region equality
+
+            public bool Equals(ServerKey other)
+            {
+                if (ReferenceEquals(null, other)) return false;
+                if (ReferenceEquals(this, other)) return true;
+                return Equals(other.Host, Host) && Equals(other.VHost, VHost) && other.Port == Port && Equals(other.Username, Username) && Equals(other.Password, Password);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != typeof (ServerKey)) return false;
+                return Equals((ServerKey) obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    int result = (Host != null ? Host.GetHashCode() : 0);
+                    result = (result*397) ^ (VHost != null ? VHost.GetHashCode() : 0);
+                    result = (result*397) ^ Port;
+                    result = (result*397) ^ (Username != null ? Username.GetHashCode() : 0);
+                    result = (result*397) ^ (Password != null ? Password.GetHashCode() : 0);
+                    return result;
+                }
+            }
+
+            #endregion
+        }
+
+        static ServerKey ToKey(RabbitMqAddress addr)
+        {
+            return new ServerKey(addr);
+        }
+    }
+
+
 }

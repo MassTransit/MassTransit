@@ -1,12 +1,18 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
+    using System.Threading;
     using Magnum.Extensions;
+    using Util;
 
-    public class RabbitMqAddress
+    public class RabbitMqAddress :
+        IEndpointAddress
     {
+		protected static readonly string LocalMachineName = Environment.MachineName.ToLowerInvariant();
         readonly Uri _rawUri;
         readonly Uri _rebuiltUri;
+        readonly bool _isTransactional;
+        Func<bool> _isLocal;
 
         const int DEFAULT_PORT = 5432;
 
@@ -20,8 +26,9 @@ namespace MassTransit.Transports.RabbitMq
             Queue = ParseQueue(_rawUri);
             Port = ParsePort();
             Host = _rawUri.Host;
+            _isTransactional = CheckForTransactionalHint(_rawUri);
+            _isLocal = ()=>DetermineIfEndpointIsLocal(_rawUri);
 
-            
             var combine = "{0}/{1}".FormatWith(VHost, Queue);
             if (VHost == "/")
                 combine = Queue;
@@ -33,6 +40,23 @@ namespace MassTransit.Transports.RabbitMq
                 };
 
             _rebuiltUri = builder.Uri;
+        }
+
+        bool DetermineIfEndpointIsLocal(Uri uri)
+        {
+            string hostName = uri.Host;
+			bool local = string.Compare(hostName, ".") == 0 ||
+			             string.Compare(hostName, "localhost", true) == 0 ||
+			             string.Compare(uri.Host, LocalMachineName, true) == 0;
+
+			Interlocked.Exchange(ref _isLocal, () => local);
+
+			return local;
+        }
+
+        bool CheckForTransactionalHint(Uri rawUri)
+        {
+			return rawUri.Query.GetValueFromQueryString("tx", false);
         }
 
         public Uri GetConnectionUri()
@@ -112,5 +136,28 @@ namespace MassTransit.Transports.RabbitMq
             return (_rebuiltUri != null ? _rebuiltUri.GetHashCode() : 0);
         }
         #endregion
+
+        public Uri Uri
+        {
+            get { return _rebuiltUri; }
+        }
+
+        public bool IsLocal
+        {
+            get { return _isLocal(); }
+        }
+
+        public string Path
+        {
+            get { return _rebuiltUri.AbsolutePath.Substring(1); }
+        }
+
+        public bool IsTransactional
+        {
+            get { return _isTransactional; }
+        }
+
+        //change to enum
+        public bool IsExchange { get; set; }
     }
 }
