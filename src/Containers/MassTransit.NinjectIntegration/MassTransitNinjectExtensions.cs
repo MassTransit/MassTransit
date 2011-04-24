@@ -1,7 +1,6 @@
 namespace MassTransit.NinjectIntegration
 {
     using System;
-    using System.Linq;
     using Configuration;
     using Ninject;
 
@@ -9,10 +8,7 @@ namespace MassTransit.NinjectIntegration
     {
         public static UnsubscribeAction LoadConsumersFromContainer(this BusConfiguration cfg, IKernel kernel)
         {
-            throw new NotImplementedException("Ninject doesn't yet support this feature.");
-
-            var concrete = from b in kernel.GetBindings(typeof (IConsumer))
-                           select b.Target;
+            throw new NotImplementedException("Ninject doesn't support this feature. Github Issue https://github.com/ninject/ninject/issues/35");
 
             //cfg.AddSubscribersByType(concretes);
 
