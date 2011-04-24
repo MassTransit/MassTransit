@@ -182,10 +182,12 @@
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Fault.cs" />
     <Compile Include="IBusService.cs" />
     <Compile Include="IConsumer.cs" />
     <Compile Include="IConsumerFactory.cs" />
+    <Compile Include="MessageUrn.cs" />
     <Compile Include="IServiceContainer.cs" />
     <Compile Include="MessageHeaders\IInboundMessageHeaders.cs" />
     <Compile Include="MessageHeaders\IMessageHeaders.cs" />

@@ -82,7 +82,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="RabbitMqAddressSpecs.cs" />
+    <Compile Include="RabbitMqTransportFactoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMqAddress_Specs.cs" />
   </ItemGroup>

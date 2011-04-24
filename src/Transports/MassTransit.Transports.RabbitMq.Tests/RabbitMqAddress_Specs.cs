@@ -6,7 +6,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     [Scenario]
     public class GivenAVHostAddress
     {
-        public Uri Uri = new Uri("rabbitmq://some_server/thehost/the_queue");
+        public Uri Uri = new Uri("rabbitmq://some_server/thehost/queue/the_queue");
         RabbitMqAddress _addr;
 
         [When]
@@ -31,14 +31,20 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void Rebuilt()
         {
-            _addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://guest:guest@some_server:5432/thehost/the_queue"));
+            _addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://guest:guest@some_server:5432/thehost/queue/the_queue"));
+        }
+
+        [Then]
+        public void ShouldBeAQueue()
+        {
+            _addr.IsExchange.ShouldBeFalse();
         }
     }
 
     [Scenario]
     public class GivenANonVHostAddress
     {
-        public Uri Uri = new Uri("rabbitmq://some_server/the_queue");
+        public Uri Uri = new Uri("rabbitmq://some_server/queue/the_queue");
         RabbitMqAddress _addr;
 
         [When]
@@ -59,13 +65,18 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             _addr.Queue.ShouldEqual("the_queue");
         }
+        [Then]
+        public void ShouldBeAQueue()
+        {
+            _addr.IsExchange.ShouldBeFalse();
+        }
 
     }
 
     [Scenario]
     public class GivenAPortedAddress
     {
-        public Uri Uri = new Uri("rabbitmq://some_server:12/the_queue");
+        public Uri Uri = new Uri("rabbitmq://some_server:12/queue/the_queue");
         RabbitMqAddress _addr;
 
         [When]
@@ -92,12 +103,17 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             _addr.RebuiltUri.ShouldEqual(new Uri(@"rabbitmq://guest:guest@some_server:12/the_queue"));
         }
+        [Then]
+        public void ShouldBeAQueue()
+        {
+            _addr.IsExchange.ShouldBeFalse();
+        }
     }
 
     [Scenario]
     public class GivenANonPortedAddress
     {
-        public Uri Uri = new Uri("rabbitmq://some_server/the_queue");
+        public Uri Uri = new Uri("rabbitmq://some_server/queue/the_queue");
         RabbitMqAddress _addr;
 
         [When]
@@ -118,13 +134,18 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             _addr.Port.ShouldEqual(5432);
         }
+        [Then]
+        public void ShouldBeAQueue()
+        {
+            _addr.IsExchange.ShouldBeFalse();
+        }
     }
 
 
     [Scenario]
     public class GivenAEmptyUserNameUrl
     {
-        public Uri Uri = new Uri("rabbitmq://some_server/thehost/the_queue");
+        public Uri Uri = new Uri("rabbitmq://some_server/thehost/queue/the_queue");
         RabbitMqAddress _addr;
 
         [When]
@@ -144,13 +165,18 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             _addr.Password.ShouldEqual("guest");
         }
+        [Then]
+        public void ShouldBeAQueue()
+        {
+            _addr.IsExchange.ShouldBeFalse();
+        }
     }
     
 
     [Scenario]
     public class GivenAUserNameUrl
     {
-        public Uri Uri = new Uri("rabbitmq://dru:mt@some_server/thehost/the_queue");
+        public Uri Uri = new Uri("rabbitmq://dru:mt@some_server/thehost/queue/the_queue");
         RabbitMqAddress _addr;
 
         [When]
@@ -174,8 +200,32 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void Rebuilt()
         {
-            _addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://dru:mt@some_server:5432/thehost/the_queue"));
+            _addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://dru:mt@some_server:5432/thehost/queue/the_queue"));
         }
 
+        [Then]
+        public void ShouldBeAQueue()
+        {
+            _addr.IsExchange.ShouldBeFalse();
+        }
+    }
+
+    [Scenario]
+    public class GivenAnExchangeAddress
+    {
+        Uri uri  = new Uri("rabbitmq://dru:mt@some_server/exchange/urn:message:masstransit.ping");
+        RabbitMqAddress _addr;
+
+        [When]
+        public void WhenParsed()
+        {
+            _addr = new RabbitMqAddress(uri);
+        }
+
+        [Then]
+        public void ShouldBeAnExchange()
+        {
+            _addr.IsExchange.ShouldBeTrue();
+        }
     }
 }
