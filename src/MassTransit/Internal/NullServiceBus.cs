@@ -86,7 +86,7 @@ namespace MassTransit.Internal
 			get { return this; }
 		}
 
-		public IEndpointResolver EndpointResolver
+		public IEndpointCache EndpointCache
 		{
 			get { return null; }
 		}

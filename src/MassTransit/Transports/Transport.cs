@@ -15,7 +15,7 @@ namespace MassTransit.Transports
 	using System;
 
 	public class Transport :
-		ILoopbackTransport
+		IDuplexTransport
 	{
 		private bool _disposed;
 		private IInboundTransport _inbound;

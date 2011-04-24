@@ -19,9 +19,9 @@ namespace MassTransit.Tests.Services.Routing
             _builder = MockRepository.GenerateStub<IObjectBuilder>();
         	_bus = MockRepository.GenerateStub<IServiceBus>();
         	_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _bus);
-        	var ef = MockRepository.GenerateStub<IEndpointResolver>();
+        	var ef = MockRepository.GenerateStub<IEndpointCache>();
             _address = new Uri("msmq://localhost/dru");
-            _builder.Stub(x => x.GetInstance<IEndpointResolver>()).Return(ef);
+            _builder.Stub(x => x.GetInstance<IEndpointCache>()).Return(ef);
             ef.Stub(x => x.GetEndpoint(_address)).Return(new NullEndpoint());
 
             _bus.Stub(x => x.OutboundPipeline).Return(_pipeline);

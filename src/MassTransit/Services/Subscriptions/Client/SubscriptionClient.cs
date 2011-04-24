@@ -26,18 +26,18 @@ namespace MassTransit.Services.Subscriptions.Client
 		private readonly ManualResetEvent _ready = new ManualResetEvent(false);
 		private SubscriptionCoordinator _coordinator;
 		private volatile bool _disposed;
-		private IEndpointResolver _endpointResolver;
 		private IEndpoint _subscriptionServiceEndpoint;
 
 
-		public SubscriptionClient()
+		public SubscriptionClient(Uri subscriptionServiceUri)
 		{
+			SubscriptionServiceUri = subscriptionServiceUri;
 			StartTimeout = 1.Minutes();
 		}
 
 		public TimeSpan StartTimeout { get; set; }
 
-		public Uri SubscriptionServiceUri { get; set; }
+		public Uri SubscriptionServiceUri { get; private set; }
 
 		public void Dispose()
 		{
@@ -77,8 +77,6 @@ namespace MassTransit.Services.Subscriptions.Client
 		public virtual void Dispose(bool disposing)
 		{
 			if (!disposing || _disposed) return;
-
-			_endpointResolver = null;
 
 			_disposed = true;
 		}

@@ -108,6 +108,7 @@
   <ItemGroup>
     <Compile Include="Batch_Specs.cs" />
     <Compile Include="BddExtensions.cs" />
+    <Compile Include="Configuration\Creating_a_bus.cs" />
     <Compile Include="Configuration_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="ControlBus_Specs.cs" />

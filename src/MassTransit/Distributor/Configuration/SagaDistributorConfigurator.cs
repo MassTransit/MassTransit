@@ -19,12 +19,12 @@ namespace MassTransit.Distributor.Configuration
 	public class SagaDistributorConfigurator
 	{
 		private readonly IServiceBusConfigurator _configurator;
-		private readonly IEndpointResolver _endpointResolver;
+		private readonly IEndpointCache _endpointCache;
 
-		public SagaDistributorConfigurator(IServiceBusConfigurator configurator, IEndpointResolver endpointResolver)
+		public SagaDistributorConfigurator(IServiceBusConfigurator configurator, IEndpointCache endpointCache)
 		{
 			_configurator = configurator;
-			_endpointResolver = endpointResolver;
+			_endpointCache = endpointCache;
 		}
 
 		public void AddService(Type type)
@@ -37,7 +37,7 @@ namespace MassTransit.Distributor.Configuration
 // ReSharper restore UnusedMember.Local
 			where TMessage : class
 		{
-			_configurator.AddService(() => new Distributor<TMessage>(_endpointResolver));
+			_configurator.AddService(() => new Distributor<TMessage>(_endpointCache));
 		}
 	}
 }

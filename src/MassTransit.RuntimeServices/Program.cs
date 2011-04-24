@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,72 +23,66 @@ namespace MassTransit.RuntimeServices
 	using StructureMap;
 	using StructureMap.Configuration.DSL;
 	using Topshelf;
-	using Topshelf.Configuration;
-	using Topshelf.Configuration.Dsl;
-	using Transports;
-	using Transports.Msmq;
+	using Topshelf.ServiceConfigurators;
 
-	internal class Program
+	class Program
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
+		static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
-		private static void Main(string[] args)
+		static void Main()
 		{
 			BootstrapLogger();
 
-			EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
-
-			ObjectFactory.Initialize(x => { x.For<IConfiguration>().Use<Configuration>(); });
+			ObjectFactory.Initialize(x => x.For<IConfiguration>().Use<Configuration>());
 
 			var serviceConfiguration = ObjectFactory.GetInstance<IConfiguration>();
 
-			RunConfiguration configuration = RunnerConfigurator.New(config =>
+			HostFactory.Run(config =>
 				{
 					config.SetServiceName(typeof (Program).Namespace);
 					config.SetDisplayName(typeof (Program).Namespace);
 					config.SetDescription("MassTransit Runtime Services (Subscription, Timeout, Health Monitoring)");
 
-                    if (serviceConfiguration.UseServiceCredentials)
-                    {
-                        config.RunAs(serviceConfiguration.ServiceUsername, serviceConfiguration.ServicePassword);
-                    }
-                    else
-                        config.RunAsLocalSystem();
+					if (serviceConfiguration.UseServiceCredentials)
+					{
+						config.RunAs(serviceConfiguration.ServiceUsername, serviceConfiguration.ServicePassword);
+					}
+					else
+						config.RunAsLocalSystem();
 
-					config.DependencyOnMsmq();
-					
+					config.DependsOnMsmq();
+
 					if (serviceConfiguration.SubscriptionServiceEnabled)
 					{
-						config.ConfigureService<SubscriptionService>(service => { ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
+						config.Service<SubscriptionService>(service => ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop()));
 					}
 
 					if (serviceConfiguration.HealthServiceEnabled)
 					{
-						config.ConfigureService<HealthService>(service => { ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
+						config.Service<HealthService>(service => ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop()));
 					}
 
 					if (serviceConfiguration.TimeoutServiceEnabled)
 					{
-						config.ConfigureService<TimeoutService>(service => { ConfigureService<TimeoutService, TimeoutServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
+						config.Service<TimeoutService>(service => ConfigureService<TimeoutService, TimeoutServiceRegistry>(service, start => start.Start(), stop => stop.Stop()));
 					}
 
 					config.AfterStoppingServices(x => { _log.Info("MassTransit Runtime Services are exiting..."); });
 				});
-			Runner.Host(configuration, args);
 		}
 
-		private static void BootstrapLogger()
+		static void BootstrapLogger()
 		{
-			string configFileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + typeof (Program).Namespace + ".log4net.xml";
+			string configFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, typeof (Program).Namespace + ".log4net.xml");
 
 			XmlConfigurator.ConfigureAndWatch(new FileInfo(configFileName));
 
 			_log.Info("Loading " + typeof (Program).Namespace + " Services...");
 		}
 
-		private static void ConfigureService<TService, TRegistry>(IServiceConfigurator<TService> service, Action<TService> start, Action<TService> stop)
+		static void ConfigureService<TService, TRegistry>(ServiceConfigurator<TService> service, Action<TService> start, Action<TService> stop)
 			where TRegistry : Registry
-            where TService : class
+			where TService : class
 		{
 			var container = new Container(x =>
 				{
@@ -105,7 +99,7 @@ namespace MassTransit.RuntimeServices
 
 			container.Configure(x => x.AddRegistry(registry));
 
-			service.HowToBuildService(builder => container.GetInstance<TService>());
+			service.ConstructUsing(builder => container.GetInstance<TService>());
 			service.WhenStarted(start);
 			service.WhenStopped(stop);
 		}

@@ -13,6 +13,8 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
+	using Configurators;
+	using EndpointConfigurators;
 	using NUnit.Framework;
 	using TestFramework.Transports;
 
@@ -23,7 +25,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		public MsmqNonTransactionalSendingContract()
 			: base(new Uri("msmq://localhost/mt_client"), new MsmqTransportFactory())
 		{
-			EndpointConfigurator.Defaults(x =>
+			EndpointConfiguratorImpl.Defaults(x =>
 			{
 				x.CreateMissingQueues = true;
 				x.CreateTransactionalQueues = false;

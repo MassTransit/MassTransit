@@ -31,22 +31,22 @@ namespace MassTransit.Tests
         private readonly Uri queueUri = new Uri("loopback://localhost/test");
         private Subscription _subscription;
         private IObjectBuilder _builder;
-        private IEndpointResolver _endpointResolver;
+        private IEndpointCache _endpointCache;
 
     	protected override void Before_each()
         {
             _builder = MockRepository.GenerateMock<IObjectBuilder>();
         	_builder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(new XmlMessageSerializer());
-			_endpointResolver = EndpointResolverConfigurator.New(x =>
+			_endpointCache = EndpointResolverConfigurator.New(x =>
 			{
 				x.SetObjectBuilder(_builder);
 				x.AddTransportFactory<LoopbackTransportFactory>();
 			});
 
-            _mockEndpoint = _endpointResolver.GetEndpoint(queueUri);
+            _mockEndpoint = _endpointCache.GetEndpoint(queueUri);
 
             _subscription = new Subscription(typeof (PingMessage), queueUri);
-        	_serviceBus = new ServiceBus(_mockEndpoint, _builder, _endpointResolver);
+        	_serviceBus = new ServiceBus(_mockEndpoint, _builder, _endpointCache);
         }
 
         protected override void After_each()

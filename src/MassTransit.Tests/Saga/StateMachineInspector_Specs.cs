@@ -29,9 +29,9 @@ namespace MassTransit.Tests.Saga
 			configurator.Expect(x => x.AddService<Distributor<CompleteSimpleSaga>>(null)).IgnoreArguments();
 			configurator.Expect(x => x.AddService<Distributor<ObservableSagaMessage>>(null)).IgnoreArguments();
 
-			IEndpointResolver endpointResolver = MockRepository.GenerateMock<IEndpointResolver>();
+			IEndpointCache endpointCache = MockRepository.GenerateMock<IEndpointCache>();
 			;
-			configurator.UseSagaDistributorFor<TestSaga>(endpointResolver);
+			configurator.UseSagaDistributorFor<TestSaga>(endpointCache);
 
 			configurator.VerifyAllExpectations();
 		}

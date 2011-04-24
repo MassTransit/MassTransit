@@ -1,5 +1,5 @@
-// Copyright 2007-2011 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,55 +12,55 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
-    using System.Collections.Generic;
-    using Configuration;
-    using Exceptions;
-    using Internal;
+	using System;
+	using System.Collections.Generic;
+	using Builders;
+	using Configuration;
+	using EndpointConfigurators;
+	using Exceptions;
+	using Magnum.Extensions;
 
-    public class EndpointFactory :
-        IEndpointFactory
-    {
-        readonly IList<ITransportFactory> _factories;
+	public class EndpointFactory :
+		IEndpointFactory
+	{
+		readonly IEndpointDefaults _defaults;
+		readonly IDictionary<Uri, EndpointBuilder> _endpointBuilders;
+		readonly IDictionary<string, ITransportFactory> _transportFactories;
 
-        public EndpointFactory(IList<ITransportFactory> factories)
-        {
-            _factories = factories;
-        }
+		public EndpointFactory(IDictionary<string, ITransportFactory> transportFactories, IDictionary<Uri, EndpointBuilder> endpointBuilders, IEndpointDefaults defaults)
+		{
+			_transportFactories = transportFactories;
+			_defaults = defaults;
+			_endpointBuilders = endpointBuilders;
+		}
 
+		public IEndpoint CreateEndpoint(Uri uri)
+		{
+			string scheme = uri.Scheme.ToLowerInvariant();
 
-        public IEndpoint BuildEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
-        {
-            foreach (var factory in _factories)
-            {
-                try
-                {
-                    if (uri.Scheme.ToLowerInvariant() == factory.Scheme)
-                    {
-                    	var endpointConfigurator = new EndpointConfigurator(uri);
-                        
-						EndpointSettings endpointSettings = endpointConfigurator.New(configurator);
+			ITransportFactory transportFactory;
+			if (_transportFactories.TryGetValue(scheme, out transportFactory))
+			{
+				try
+				{
+					EndpointBuilder builder = _endpointBuilders.Retrieve(uri, () => new EndpointBuilderImpl(uri, _defaults));
 
-                        var transport = factory.BuildLoopback(endpointSettings.Normal);
-                        var errorTransport = factory.BuildError(endpointSettings.Error);
+					return builder.CreateEndpoint(transportFactory);
+				}
+				catch (Exception ex)
+				{
+					throw new EndpointException(uri, "Failed to create endpoint", ex);
+				}
+			}
 
-                        var endpoint = new Endpoint(transport.Address, endpointSettings.Normal.Serializer, transport, errorTransport);
+			throw new ConfigurationException("The {0} scheme was not handled by any registered transport.".FormatWith(uri.Scheme));
+		}
 
-                        return endpoint;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new EndpointException(uri, "Error", ex);
-                }
-            }
+		public void AddTransportFactory(ITransportFactory factory)
+		{
+			string scheme = factory.Scheme.ToLowerInvariant();
 
-            throw new ConfigurationException("No transport could handle: '{0}'".FormatWith(uri));
-        }
-
-        public void AddTransportFactory(ITransportFactory factory)
-        {
-            _factories.Add(factory);
-        }
-    }
+			_transportFactories[scheme] = factory;
+		}
+	}
 }

@@ -81,8 +81,8 @@
             this.subscriptionView.Name = "subscriptionView";
             this.subscriptionView.Size = new System.Drawing.Size(227, 508);
             this.subscriptionView.TabIndex = 0;
-            this.subscriptionView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.subscriptionView_AfterSelect);
-            this.subscriptionView.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.subscriptionView_PreviewKeyDown);
+            this.subscriptionView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.SubscriptionViewAfterSelect);
+            this.subscriptionView.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.SubscriptionViewPreviewKeyDown);
             // 
             // subscriptionsContextMenu
             // 
@@ -96,7 +96,7 @@
             this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
             this.removeToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.removeToolStripMenuItem.Text = "Remove";
-            this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
+            this.removeToolStripMenuItem.Click += new System.EventHandler(this.RemoveToolStripMenuItemClick);
             // 
             // horizontalSplit
             // 
@@ -208,7 +208,7 @@
             this.Controls.Add(this.verticalSplit);
             this.Name = "MainForm";
             this.Text = "MassTransit System View";
-            this.Load += new System.EventHandler(this.MainForm_Load);
+            this.Load += new System.EventHandler(this.MainFormLoad);
             this.verticalSplit.Panel1.ResumeLayout(false);
             this.verticalSplit.Panel2.ResumeLayout(false);
             this.verticalSplit.ResumeLayout(false);

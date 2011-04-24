@@ -108,7 +108,7 @@ namespace MassTransit
 
     	IServiceBus ControlBus { get; }
 
-		IEndpointResolver EndpointResolver { get; }
+		IEndpointCache EndpointCache { get; }
 
         IEndpoint GetEndpoint(Uri address);
     }

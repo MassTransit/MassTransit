@@ -13,6 +13,8 @@
 namespace MassTransit.Transports.Msmq.Tests.Serialization
 {
 	using Configuration;
+	using Configurators;
+	using EndpointConfigurators;
 	using Magnum.Extensions;
 	using MassTransit.Serialization;
 	using MassTransit.Tests;
@@ -25,7 +27,7 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 		MsmqEndpointTestFixture
 		where TSerializer : IMessageSerializer
 	{
-		protected override void AdditionalEndpointFactoryConfiguration(IEndpointResolverConfigurator x)
+		protected override void AdditionalEndpointFactoryConfiguration(EndpointFactoryConfigurator x)
 		{
 			x.SetDefaultSerializer<TSerializer>();
 		}

@@ -14,6 +14,8 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using System;
 	using Configuration;
+	using Configurators;
+	using EndpointConfigurators;
 	using Internal;
 	using MassTransit.Tests.TextFixtures;
 	using Services.Subscriptions;
@@ -32,7 +34,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 		public MulticastMsmqEndpointTestFixture()
 		{
-			EndpointConfigurator.Defaults(x =>
+			EndpointConfiguratorImpl.Defaults(x =>
 				{
 					x.CreateMissingQueues = true;
 					x.CreateTransactionalQueues = false;
@@ -50,18 +52,18 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		{
 			base.EstablishContext();
 
-			LocalEndpoint = EndpointResolver.GetEndpoint(LocalEndpointUri);
-			LocalErrorEndpoint = EndpointResolver.GetEndpoint(LocalErrorUri);
-			RemoteEndpoint = EndpointResolver.GetEndpoint(RemoteEndpointUri);
+			LocalEndpoint = EndpointCache.GetEndpoint(LocalEndpointUri);
+			LocalErrorEndpoint = EndpointCache.GetEndpoint(LocalErrorUri);
+			RemoteEndpoint = EndpointCache.GetEndpoint(RemoteEndpointUri);
 
-			LocalBus = ServiceBusConfigurator.New(x =>
+			LocalBus = Configuration.ServiceBusConfigurator.New(x =>
 				{
 					x.UseMulticastSubscriptionClient();
 					x.ReceiveFrom(LocalEndpointUri);
 					x.SendErrorsTo(LocalErrorUri);
 				});
 
-			RemoteBus = ServiceBusConfigurator.New(x =>
+			RemoteBus = Configuration.ServiceBusConfigurator.New(x =>
 				{
 					x.UseMulticastSubscriptionClient();
 					x.ReceiveFrom(RemoteEndpointUri);

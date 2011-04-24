@@ -27,7 +27,7 @@ namespace MassTransit.Transports.RabbitMq
 			get { return "rabbitmq"; }
 		}
 
-		public ILoopbackTransport BuildLoopback(ITransportSettings settings)
+		public IDuplexTransport BuildLoopback(ITransportSettings settings)
 		{
 			EnsureProtocolIsCorrect(settings.Address.Uri);
 

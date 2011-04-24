@@ -30,7 +30,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		IDisposable
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
-		private readonly IEndpointResolver _endpointResolver;
+		private readonly IEndpointCache _endpointCache;
 		private readonly ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagas;
 		private readonly ISagaRepository<SubscriptionSaga> _subscriptionSagas;
 		private IServiceBus _bus;
@@ -38,12 +38,12 @@ namespace MassTransit.Services.Subscriptions.Server
 		private readonly Fiber _fiber = new PoolFiber();
 
 		public SubscriptionService(IServiceBus bus,
-		                           IEndpointResolver endpointResolver,
+		                           IEndpointCache endpointCache,
 		                           ISagaRepository<SubscriptionSaga> subscriptionSagas,
 		                           ISagaRepository<SubscriptionClientSaga> subscriptionClientSagas)
 		{
 			_bus = bus;
-			_endpointResolver = endpointResolver;
+			_endpointCache = endpointCache;
 			_subscriptionSagas = subscriptionSagas;
 			_subscriptionClientSagas = subscriptionClientSagas;
 		}
@@ -128,7 +128,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			_subscriptionClientSagas.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
 				.Each(client =>
 					{
-						IEndpoint endpoint = _endpointResolver.GetEndpoint(client.ControlUri);
+						IEndpoint endpoint = _endpointCache.GetEndpoint(client.ControlUri);
 
 						endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
 					});
@@ -141,7 +141,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var response = new SubscriptionRefresh(subscriptions);
 
-			IEndpoint endpoint = _endpointResolver.GetEndpoint(uri);
+			IEndpoint endpoint = _endpointCache.GetEndpoint(uri);
 
 			endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Uri));
 		}

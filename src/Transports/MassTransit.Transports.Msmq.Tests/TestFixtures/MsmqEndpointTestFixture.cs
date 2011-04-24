@@ -13,7 +13,8 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using System;
-	using Configuration;
+	using Configurators;
+	using EndpointConfigurators;
 	using Internal;
 	using MassTransit.Tests.TextFixtures;
 	using Rhino.Mocks;
@@ -33,7 +34,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 	    public MsmqEndpointTestFixture()
 		{
-			EndpointConfigurator.Defaults(x =>
+			EndpointConfiguratorImpl.Defaults(x =>
 			{
 				x.CreateMissingQueues = true;
 				x.CreateTransactionalQueues = false;
@@ -49,13 +50,13 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		{
 			base.EstablishContext();
 
-			LocalEndpoint = EndpointResolver.GetEndpoint(LocalEndpointUri);
-			LocalErrorEndpoint = EndpointResolver.GetEndpoint(LocalErrorUri);
-			RemoteEndpoint = EndpointResolver.GetEndpoint(RemoteEndpointUri);
+			LocalEndpoint = EndpointCache.GetEndpoint(LocalEndpointUri);
+			LocalErrorEndpoint = EndpointCache.GetEndpoint(LocalErrorUri);
+			RemoteEndpoint = EndpointCache.GetEndpoint(RemoteEndpointUri);
 
 			SetupSubscriptionService();
 
-			LocalBus = ServiceBusConfigurator.New(x =>
+			LocalBus = Configuration.ServiceBusConfigurator.New(x =>
 				{
 					x.AddService<SubscriptionPublisher>();
 					x.AddService<SubscriptionConsumer>();
@@ -63,7 +64,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 					x.SendErrorsTo(LocalErrorUri);
 				});
 
-			RemoteBus = ServiceBusConfigurator.New(x =>
+			RemoteBus = Configuration.ServiceBusConfigurator.New(x =>
 				{
 					x.AddService<SubscriptionPublisher>();
 					x.AddService<SubscriptionConsumer>();

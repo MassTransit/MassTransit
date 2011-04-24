@@ -13,6 +13,7 @@
 namespace MassTransit.Configuration
 {
 	using System;
+	using Configurators;
 	using Internal;
 
 	/// <summary>
@@ -37,7 +38,7 @@ namespace MassTransit.Configuration
 		/// Configure a service for use by the service bus
 		/// </summary>
 		void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure)
-			where TServiceConfigurator : IServiceConfigurator, new();
+			where TServiceConfigurator : IBusServiceConfigurator, new();
 
 		void AddService<TService>(Func<TService> getService)
 			where TService : IBusService;

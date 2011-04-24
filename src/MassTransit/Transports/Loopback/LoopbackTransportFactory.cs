@@ -22,7 +22,7 @@ namespace MassTransit.Transports
 			get { return "loopback"; }
 		}
 
-		public ILoopbackTransport BuildLoopback(ITransportSettings settings)
+		public IDuplexTransport BuildLoopback(ITransportSettings settings)
 		{
 			return new LoopbackTransport(settings.Address);
 		}

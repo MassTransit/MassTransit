@@ -10,7 +10,7 @@ namespace MassTransit.Tests.Transports
         where TTransportFactory : ITransportFactory
     {
         private IEndpoint _ep;
-        private IEndpointResolver _endpointResolver;
+        private IEndpointCache _endpointCache;
         public IObjectBuilder ObjectBuilder { get; set; }
         public Uri Address { get; set; }
         public Action<Uri> VerifyMessageIsInQueue { get; set; }
@@ -19,12 +19,12 @@ namespace MassTransit.Tests.Transports
         [SetUp]
         public void SetUp()
         {
-            _endpointResolver = EndpointResolverConfigurator.New(c =>
+            _endpointCache = EndpointResolverConfigurator.New(c =>
                                                                    {
                                                                        c.AddTransportFactory<TTransportFactory>();
                                                                        c.SetObjectBuilder(ObjectBuilder);
                                                                    });
-            _ep = _endpointResolver.GetEndpoint(Address);
+            _ep = _endpointCache.GetEndpoint(Address);
         }
 
         [TearDown]

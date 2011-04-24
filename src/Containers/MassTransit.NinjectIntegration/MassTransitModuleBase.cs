@@ -14,6 +14,8 @@ namespace MassTransit.NinjectIntegration
 {
 	using System;
 	using Configuration;
+	using Configurators;
+	using EndpointConfigurators;
 	using Internal;
 	using Ninject;
 	using Ninject.Modules;
@@ -30,7 +32,7 @@ namespace MassTransit.NinjectIntegration
 		NinjectModule
 	{
 		private readonly IObjectBuilder _builder;
-		private readonly Action<IEndpointResolverConfigurator> _configurationAction;
+		private readonly Action<EndpointFactoryConfigurator> _configurationAction;
 		private readonly Type[] _transportTypes;
 
 		public MassTransitModuleBase(IObjectBuilder builder)
@@ -39,7 +41,7 @@ namespace MassTransit.NinjectIntegration
 		}
 
 		public MassTransitModuleBase(IObjectBuilder builder,
-		                             Action<IEndpointResolverConfigurator> configurationAction)
+		                             Action<EndpointFactoryConfigurator> configurationAction)
 			: this(builder, configurationAction, null)
 		{
 		}
@@ -72,7 +74,7 @@ namespace MassTransit.NinjectIntegration
 		/// The transport types to configure.
 		/// </param>
 		public MassTransitModuleBase(IObjectBuilder builder,
-		                             Action<IEndpointResolverConfigurator> configurationAction,
+		                             Action<EndpointFactoryConfigurator> configurationAction,
 		                             params Type[] transportTypes)
 		{
 			_builder = builder;
@@ -104,7 +106,7 @@ namespace MassTransit.NinjectIntegration
 			}
 		}
 
-		protected void DefaultEndpointResolverConfigurator(IEndpointResolverConfigurator endpointFactoryConfigurator)
+		protected void DefaultEndpointResolverConfigurator(EndpointFactoryConfigurator endpointFactoryConfigurator)
 		{
 			endpointFactoryConfigurator.AddTransportFactory<LoopbackTransportFactory>();
 			endpointFactoryConfigurator.AddTransportFactory<MulticastUdpTransportFactory>();
@@ -157,12 +159,12 @@ namespace MassTransit.NinjectIntegration
 			// OrchestrateSagaStateMachineSink<,>)
 		}
 
-		protected void RegisterEndpointFactory(Action<IEndpointResolverConfigurator> configAction)
+		protected void RegisterEndpointFactory(Action<EndpointFactoryConfigurator> configAction)
 		{
-			Bind<IEndpointResolver>()
+			Bind<IEndpointCache>()
 				.ToMethod(cxt =>
 					{
-						return EndpointResolverConfigurator.New(x =>
+						return EndpointResolverConfiguratorImpl.New(x =>
 							{
 								x.SetObjectBuilder(cxt.Kernel.Get<IObjectBuilder>());
 								configAction(x);
@@ -180,9 +182,9 @@ namespace MassTransit.NinjectIntegration
 			Bind<IServiceBus>()
 				.ToMethod(context =>
 					{
-						return ServiceBusConfigurator.New(x =>
+						return Configuration.ServiceBusConfigurator.New(x =>
 							{
-                                x.SetEndpointFactory(context.Kernel.Get<IEndpointResolver>());
+                                x.SetEndpointFactory(context.Kernel.Get<IEndpointCache>());
 								x.SetObjectBuilder(context.Kernel.Get<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 
@@ -202,9 +204,9 @@ namespace MassTransit.NinjectIntegration
 			Bind<IControlBus>()
 				.ToMethod(context =>
 					{
-						return ControlBusConfigurator.New(x =>
+						return Configuration.ControlBusConfigurator.New(x =>
 							{
-                                x.SetEndpointFactory(context.Kernel.Get<IEndpointResolver>());
+                                x.SetEndpointFactory(context.Kernel.Get<IEndpointCache>());
 								x.SetObjectBuilder(context.Kernel.Get<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 								x.SetConcurrentConsumerLimit(1);

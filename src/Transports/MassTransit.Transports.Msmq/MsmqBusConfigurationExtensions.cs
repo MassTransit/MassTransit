@@ -14,8 +14,10 @@ namespace MassTransit.Transports.Msmq
 {
     using System;
     using Configuration;
+    using Configurators;
+    using EndpointConfigurators;
 
-    public static class MsmqBusConfigurationExtensions
+	public static class MsmqBusConfigurationExtensions
     {
         public static void UseMsmq(this BusConfiguration config)
         {
@@ -23,7 +25,7 @@ namespace MassTransit.Transports.Msmq
         }
         public static void UseMsmq(this BusConfiguration config, Action<IEndpointDefaults> defaults)
         {
-            EndpointConfigurator.Defaults(defaults);
+            EndpointConfiguratorImpl.Defaults(defaults);
             UseMsmq(config);
         }
     }

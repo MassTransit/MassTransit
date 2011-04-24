@@ -16,6 +16,8 @@ namespace MassTransit.TestFramework.Transports
 	using System.Collections.Generic;
 	using System.Linq;
 	using Configuration;
+	using Configurators;
+	using EndpointConfigurators;
 	using Fixtures;
 	using Magnum.Extensions;
 	using MassTransit.Transports;
@@ -45,8 +47,8 @@ namespace MassTransit.TestFramework.Transports
 		{
 			TeardownBuses();
 
-			EndpointResolver.Dispose();
-			EndpointResolver = null;
+			EndpointCache.Dispose();
+			EndpointCache = null;
 		}
 
 		protected EndpointTestFixture()
@@ -66,7 +68,7 @@ namespace MassTransit.TestFramework.Transports
 
 		protected virtual void SetupEndpointFactory()
 		{
-			EndpointResolver = EndpointResolverConfigurator.New(x =>
+			EndpointCache = EndpointResolverConfiguratorImpl.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
 					x.AddTransportFactory<TTransportFactory>();
@@ -75,18 +77,18 @@ namespace MassTransit.TestFramework.Transports
 					ConfigureEndpointFactory(x);
 				});
 
-			ObjectBuilder.Add(EndpointResolver);
+			ObjectBuilder.Add(EndpointCache);
 		}
 
-		protected virtual void ConfigureEndpointFactory(IEndpointResolverConfigurator x)
+		protected virtual void ConfigureEndpointFactory(EndpointFactoryConfigurator x)
 		{
 		}
 
 		protected virtual void SetupServiceBusDefaults()
 		{
-			ServiceBusConfigurator.Defaults(x =>
+			Configuration.ServiceBusConfigurator.Defaults(x =>
 				{
-					x.SetEndpointFactory(EndpointResolver);
+					x.SetEndpointFactory(EndpointCache);
 					x.SetObjectBuilder(ObjectBuilder);
 					x.SetReceiveTimeout(50.Milliseconds());
 					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
@@ -101,13 +103,13 @@ namespace MassTransit.TestFramework.Transports
 
 		protected IList<IServiceBus> Buses { get; private set; }
 
-		protected IEndpointResolver EndpointResolver { get; private set; }
+		protected IEndpointCache EndpointCache { get; private set; }
 
 		protected IObjectBuilder ObjectBuilder { get; private set; }
 
 		protected virtual IServiceBus SetupServiceBus(Uri uri, Action<IServiceBusConfigurator> configure)
 		{
-			IServiceBus bus = ServiceBusConfigurator.New(x =>
+			IServiceBus bus = Configuration.ServiceBusConfigurator.New(x =>
 				{
 					x.ReceiveFrom(uri);
 

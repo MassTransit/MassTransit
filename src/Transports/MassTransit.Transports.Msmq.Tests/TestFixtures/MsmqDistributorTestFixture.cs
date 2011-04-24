@@ -13,6 +13,8 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using Configuration;
+	using Configurators;
+	using EndpointConfigurators;
 	using MassTransit.Tests.Distributor;
 	using NUnit.Framework;
 
@@ -31,11 +33,11 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			base.EstablishContext();
 		}
 
-		protected override void AdditionalEndpointFactoryConfiguration(IEndpointResolverConfigurator x)
+		protected override void AdditionalEndpointFactoryConfiguration(EndpointFactoryConfigurator x)
 		{
 			base.AdditionalEndpointFactoryConfiguration(x);
 
-			EndpointConfigurator.Defaults(y =>
+			EndpointConfiguratorImpl.Defaults(y =>
 				{
 					y.CreateMissingQueues = true;
 					y.CreateTransactionalQueues = false;

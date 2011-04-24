@@ -14,52 +14,32 @@ namespace MassTransit.Configuration
 {
 	using System;
 	using System.Collections.Generic;
+	using BusConfigurators;
+	using Configurators;
 	using Exceptions;
 	using Internal;
 	using log4net;
 	using Pipeline.Configuration;
 
-    public class ServiceBusConfigurator :
-		ServiceBusConfiguratorDefaults,
-		IServiceBusConfigurator
-	{
+    public class ServiceBusConfiguratorxx : IServiceBusConfiguratorDefaults
+    {
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusConfigurator));
 
-		private static readonly ServiceBusConfiguratorDefaults _defaults = new ServiceBusConfiguratorDefaults();
 		private readonly List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>> _services;
 		private Uri _receiveFromUri;
 	    private Action _beforeConsume;
 	    private Action _afterConsume;
-        IEndpointResolver _endpointResolver;
+        IEndpointCache _endpointCache;
 
         //CHANGED TO SUPPORT THE MOVE TO THE NEXT CONFIG MODEL
 	    internal ServiceBusConfigurator()
 		{
 			_services = new List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>>();
-
-			_defaults.ApplyTo(this);
 		}
 
 		protected IControlBus ControlBus { get; set; }
 
-		public void ReceiveFrom(string uriString)
-		{
-			try
-			{
-				_receiveFromUri = new Uri(uriString);
-			}
-			catch (UriFormatException ex)
-			{
-				throw new ConfigurationException("The Uri for the receive endpoint is invalid: " + uriString, ex);
-			}
-		}
-
-		public void ReceiveFrom(Uri uri)
-		{
-			_receiveFromUri = uri;
-		}
-
-		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure) where TServiceConfigurator : IServiceConfigurator, new()
+		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure) where TServiceConfigurator : IBusServiceConfigurator, new()
 		{
 			_services.Add((bus, builder, add) =>
 				{
@@ -97,27 +77,7 @@ namespace MassTransit.Configuration
 				});
 		}
 
-		public void UseControlBus(IControlBus bus)
-		{
-			ControlBus = bus;
-		}
-
-	    public void BeforeConsumingMessage(Action beforeConsume)
-	    {
-	        if (_beforeConsume == null)
-	            _beforeConsume = beforeConsume;
-	        else
-	            _beforeConsume += beforeConsume;
-	    }
-
-	    public void AfterConsumingMessage(Action afterConsume)
-	    {
-            if (_afterConsume == null)
-                _afterConsume = afterConsume;
-            else
-                _afterConsume += afterConsume;
-	    }
-
+		
 	    internal IControlBus Create()
 		{
 			ServiceBus bus = CreateServiceBus();
@@ -164,38 +124,6 @@ namespace MassTransit.Configuration
 			bus.ControlBus = ControlBus;
 		}
 
-		private void ConfigurePoisonEndpoint(ServiceBus bus)
-		{
-			if (ErrorUri != null)
-			{
-				bus.PoisonEndpoint = bus.EndpointResolver.GetEndpoint(ErrorUri);
-			}
-		}
-
-        //TO SUPPORT THE NEW MODEL
-    	private ServiceBus CreateServiceBus()
-        {
-            if (_endpointResolver == null)
-                throw new ConfigurationException("You must call 'SetEndpointFactory(IEndpointFactory)' on the ServiceBusConfiguration class");
-
-            var endpoint = _endpointResolver.GetEndpoint(_receiveFromUri);
-
-            var serviceBus = new ServiceBus(endpoint, ObjectBuilder, _endpointResolver);
-            
-            return serviceBus;
-        }
-
-        private void ConfigureThreadLimits(ServiceBus bus)
-		{
-			if (ConcurrentConsumerLimit > 0)
-				bus.MaximumConsumerThreads = ConcurrentConsumerLimit;
-
-			if (ConcurrentReceiverLimit > 0)
-				bus.ConcurrentReceiveThreads = ConcurrentReceiverLimit;
-
-			bus.ReceiveTimeout = ReceiveTimeout;
-		}
-
 		private void ConfigureBusServices(ServiceBus bus)
 		{
 			foreach (var serviceConfigurator in _services)
@@ -204,37 +132,15 @@ namespace MassTransit.Configuration
 			}
 		}
 
-		public static IServiceBus New(Action<IServiceBusConfigurator> action)
+		public static IServiceBus New(Action<ServiceBusConfigurator> action)
 		{
-			var configurator = new ServiceBusConfigurator();
+			var configurator = new ServiceBusConfiguratorImpl(TODO);
 
 			action(configurator);
 
-			return configurator.Create();
+			return configurator.CreateServiceBus();
 		}
 
-		public static void Defaults(Action<IServiceBusConfiguratorDefaults> action)
-		{
-			action(_defaults);
-		}
-
-        public void SetEndpointFactory(IEndpointResolver epf)
-        {
-            _endpointResolver = epf;
-        }
 	}
 
-	public class ControlBusConfigurator :
-		ServiceBusConfigurator
-	{
-		public new static IControlBus New(Action<IServiceBusConfigurator> action)
-		{
-			var configurator = new ControlBusConfigurator();
-			configurator.SetConcurrentConsumerLimit(1);
-
-			action(configurator);
-
-			return configurator.Create();
-		}
-	}
 }
