@@ -15,24 +15,30 @@ namespace MassTransit.Container.Tests
     using System;
     using System.Linq;
     using Ninject;
+    using Ninject.Activation;
     using NUnit.Framework;
 
     [TestFixture]
     public class NinjectTests
     {
-        [Test]
+        [Test][Ignore]
         public void Bob()
         {
             var k = new StandardKernel();
-            k.Bind<Consumes<object>.All>().To<FakeConsumer>();
-            k.Bind<Consumes<object>.All>().To<FakeConsumer2>();
+            k.Bind<IConsumer>().To<FakeConsumer>();
+            k.Bind<IConsumer>().To<FakeConsumer2>();
 
-            foreach (var binding in k.GetAll<Consumes<object>.All>())
+            foreach (var binding in k.GetBindings(typeof(IConsumer)))
             {
-                Console.WriteLine("Hi");
+                var cb = binding.ProviderCallback;
+                var req = new Request(null, typeof(IConsumer), null, () => null);
+                var x = cb(new Context(k, req, null, null, null, null));
+                var concrete = x.Type;
+
+                Console.WriteLine(concrete);
             }
 
-            
+           
             int i = 0;
         }
     }

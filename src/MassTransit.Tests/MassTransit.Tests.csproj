@@ -169,6 +169,7 @@
     <None Include="app.config" />
     <None Include="Reactive\Samples\BasicExample.cs" />
     <Compile Include="Reactive\ServiceBusSubscriptionSpecs.cs" />
+    <Compile Include="ReflectionExploration.cs" />
     <Compile Include="Saga\Builder_Specs.cs" />
     <Compile Include="Saga\CompleteSimpleSaga.cs" />
     <Compile Include="Saga\InitiateSimpleSaga.cs" />
