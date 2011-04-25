@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,9 +17,9 @@ namespace MassTransit.Transports
 	public class Transport :
 		IDuplexTransport
 	{
-		private bool _disposed;
-		private IInboundTransport _inbound;
-		private IOutboundTransport _outbound;
+		bool _disposed;
+		IInboundTransport _inbound;
+		IOutboundTransport _outbound;
 
 		public Transport(IInboundTransport inbound, IOutboundTransport outbound)
 		{
@@ -62,13 +62,13 @@ namespace MassTransit.Transports
 			get { return _inbound; }
 		}
 
-		private void GuardAgainstDisposed()
+		void GuardAgainstDisposed()
 		{
 			if (_disposed)
 				throw new ObjectDisposedException("The transport has already been disposed: " + Address);
 		}
 
-		private void Dispose(bool disposing)
+		void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)

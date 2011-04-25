@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,94 +12,77 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-    using System;
-    using Configuration;
-    using MassTransit.Serialization;
-    using MassTransit.Services.Subscriptions;
-    using MassTransit.Transports;
-    using Messages;
-    using NUnit.Framework;
-    using Rhino.Mocks;
-    using TestConsumers;
+	using MassTransit.Services.Subscriptions;
+	using MassTransit.Transports;
+	using Messages;
+	using NUnit.Framework;
+	using Rhino.Mocks;
+	using TestConsumers;
+	using TextFixtures;
 
-    [TestFixture]
-    public class When_a_handler_subscription_is_added :
-        Specification
-    {
-        private ServiceBus _serviceBus;
-        private IEndpoint _mockEndpoint;
-        private readonly Uri queueUri = new Uri("loopback://localhost/test");
-        private Subscription _subscription;
-        private IObjectBuilder _builder;
-        private IEndpointCache _endpointCache;
+	[TestFixture]
+	public class When_a_handler_subscription_is_added :
+		EndpointTestFixture<LoopbackTransportFactory>
+	{
+		ISubscriptionService _subscriptionService;
 
-    	protected override void Before_each()
-        {
-            _builder = MockRepository.GenerateMock<IObjectBuilder>();
-        	_builder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(new XmlMessageSerializer());
-			_endpointCache = EndpointCacheFactory.New(x =>
-			{
-				x.AddTransportFactory<LoopbackTransportFactory>();
-			});
+		public IServiceBus LocalBus { get; private set; }
+		public IServiceBus LocalControlBus { get; private set; }
 
-            _mockEndpoint = _endpointCache.GetEndpoint(queueUri);
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
 
-            _subscription = new Subscription(typeof (PingMessage), queueUri);
-        	_serviceBus = new ServiceBus(_mockEndpoint, _builder, _endpointCache);
-        }
+			_subscriptionService = MockRepository.GenerateMock<ISubscriptionService>();
 
-        protected override void After_each()
-        {
-            _serviceBus = null;
-            _mockEndpoint = null;
-        }
+			LocalBus = ServiceBusFactory.New(x =>
+				{
+					x.AddService(() => new SubscriptionPublisher(_subscriptionService));
+					x.ReceiveFrom("loopback://localhost/mt_client");
+					x.UseControlBus();
+				});
 
+			LocalControlBus = LocalBus.ControlBus;
+		}
 
-        [Test]
-        public void A_subscription_should_be_added_for_a_consumer()
-        {
-            using (Record())
-            {
-//                _mockSubscriptionCache.Add(_subscription);
-            }
+		protected override void TeardownContext()
+		{
+			LocalBus.Dispose();
+			LocalBus = null;
 
-            using (Playback())
-            {
-                var consumer = new TestMessageConsumer<PingMessage>();
+			LocalControlBus.Dispose();
+			LocalControlBus = null;
 
-                _serviceBus.Subscribe(consumer);
-            }
-        }
+			base.TeardownContext();
+		}
+
+		[Test]
+		public void A_subscription_should_be_added_for_a_consumer()
+		{
+			var consumer = new TestMessageConsumer<PingMessage>();
+
+			LocalBus.Subscribe(consumer);
+
+			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Uri));
+		}
 
 
-        [Test]
-        public void A_subscription_should_be_added_for_a_selective_consumer()
-        {
-            using (Record())
-            {
-  //              _mockSubscriptionCache.Add(_subscription);
-            }
+		[Test]
+		public void A_subscription_should_be_added_for_a_selective_consumer()
+		{
+			var consumer = new TestSelectiveConsumer<PingMessage>();
 
-            using (Playback())
-            {
-                var consumer = new TestSelectiveConsumer<PingMessage>();
+			LocalBus.Subscribe(consumer);
 
-                _serviceBus.Subscribe(consumer);
-            }
-        }
+			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Uri));
+		}
 
-        [Test]
-        public void The_bus_should_add_a_subscription_to_the_subscription_cache()
-        {
-            using (Record())
-            {
-    //            _mockSubscriptionCache.Add(_subscription);
-            }
+		[Test]
+		public void The_bus_should_add_a_subscription_to_the_subscription_cache()
+		{
+			LocalBus.Subscribe<PingMessage>(delegate { });
 
-            using (Playback())
-            {
-                _serviceBus.Subscribe<PingMessage>(delegate { });
-            }
-        }
-    }
+			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Uri));
+		}
+	}
 }

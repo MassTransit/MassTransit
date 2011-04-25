@@ -12,11 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using MassTransit.Internal;
+	using Magnum.TestFramework;
 	using MassTransit.Services.Subscriptions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using TextFixtures;
 
 	[TestFixture]
@@ -37,16 +36,14 @@ namespace MassTransit.Tests
 
 			LocalBus = ServiceBusFactory.New(x =>
 				{
-					x.AddService(() => new SubscriptionPublisher(SubscriptionService));
-					x.AddService(() => new SubscriptionConsumer(SubscriptionService));
+					ConnectSubscriptionService(x, SubscriptionService);
 					x.ReceiveFrom("loopback://localhost/mt_client");
 					x.UseControlBus();
 				});
 
 			RemoteBus = ServiceBusFactory.New(x =>
 				{
-					x.AddService(() => new SubscriptionPublisher(SubscriptionService));
-					x.AddService(() => new SubscriptionConsumer(SubscriptionService));
+					ConnectSubscriptionService(x, SubscriptionService);
 					x.ReceiveFrom("loopback://localhost/mt_server");
 					x.UseControlBus();
 				});
@@ -77,29 +74,18 @@ namespace MassTransit.Tests
 		void SetupSubscriptionService()
 		{
 			SubscriptionService = new LocalSubscriptionService();
-			ObjectBuilder.Stub(x => x.GetInstance<IEndpointSubscriptionEvent>())
-				.Return(SubscriptionService);
-
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionPublisher>())
-				.Return(null)
-				.WhenCalled(invocation =>
-					{
-						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionPublisher(SubscriptionService);
-					});
-
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionConsumer>())
-				.Return(null)
-				.WhenCalled(invocation =>
-					{
-						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService);
-					});
 		}
 
 		[Test]
-		public void Should_purge_messages_on_startup_if_specified()
+		public void Should_have_local_control_bus_address()
 		{
+			LocalControlBus.Endpoint.Address.Uri.ToString().ShouldEqual("loopback://localhost/mt_client_control");
+		}
+
+		[Test]
+		public void Should_have_remote_control_bus_address()
+		{
+			RemoteControlBus.Endpoint.Address.Uri.ToString().ShouldEqual("loopback://localhost/mt_server_control");
 		}
 	}
 }

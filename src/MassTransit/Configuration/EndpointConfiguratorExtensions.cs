@@ -18,7 +18,6 @@ namespace MassTransit
 	using Serialization;
 	using Transports;
 
-
 	public static class EndpointConfiguratorExtensions
 	{
 		/// <summary>
@@ -48,6 +47,15 @@ namespace MassTransit
 		public static EndpointConfigurator DiscardFaultingMessages(this EndpointConfigurator configurator)
 		{
 			return configurator.SetErrorTransportFactory((factory, settings) => new NullTransport(settings.Address));
+		}
+
+		/// <summary>
+		/// Overrides the default error address with a new error address
+		/// </summary>
+		/// <returns></returns>
+		public static EndpointConfigurator SetErrorAddress(this EndpointConfigurator configurator, string uriString)
+		{
+			return configurator.SetErrorAddress(uriString.ToUri("Error URI was not valid"));
 		}
 	}
 }

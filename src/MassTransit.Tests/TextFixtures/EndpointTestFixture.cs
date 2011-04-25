@@ -30,14 +30,17 @@ namespace MassTransit.Tests.TextFixtures
 		[SetUp]
 		public void Setup()
 		{
-			_endpointFactoryConfigurator.Validate();
+			if (_endpointFactoryConfigurator != null)
+			{
+				_endpointFactoryConfigurator.Validate();
+
+				EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
+				_endpointFactoryConfigurator = null;
+
+				EndpointCache = new EndpointCache(EndpointFactory);
+			}
 
 			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
-
-			EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
-			_endpointFactoryConfigurator = null;
-
-			EndpointCache = new EndpointCache(EndpointFactory);
 
 			ServiceBusFactory.ConfigureDefaultSettings(x =>
 				{
@@ -55,7 +58,11 @@ namespace MassTransit.Tests.TextFixtures
 		public void Teardown()
 		{
 			TeardownContext();
+		}
 
+		[TestFixtureTearDown]
+		public void FixtureTeardown()
+		{
 			EndpointCache.Dispose();
 			EndpointCache = null;
 		}

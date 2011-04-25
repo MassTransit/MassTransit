@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,11 +21,10 @@ namespace MassTransit
 		IEndpointAddress
 	{
 		protected static readonly string LocalMachineName = Environment.MachineName.ToLowerInvariant();
-		private static readonly IEndpointAddress _nullEndpointAddress = new EndpointAddress(new Uri("null://nul/nul"));
-		private bool _isTransactional;
-		private Uri _uri;
-
-		private Func<bool> _isLocal;
+		static IEndpointAddress _null;
+		Func<bool> _isLocal;
+		bool _isTransactional;
+		Uri _uri;
 
 		public EndpointAddress(Uri uri)
 		{
@@ -58,7 +57,7 @@ namespace MassTransit
 
 		public static IEndpointAddress Null
 		{
-			get { return _nullEndpointAddress; }
+			get { return _null ?? (_null = new EndpointAddress(new Uri("null://null/null"))); }
 		}
 
 		public Uri Uri
@@ -88,11 +87,6 @@ namespace MassTransit
 			return _uri.ToString();
 		}
 
-		protected static bool CheckForTransactionalHint(Uri uri)
-		{
-			return uri.Query.GetValueFromQueryString("tx", false);
-		}
-
 		protected virtual bool DetermineIfEndpointIsLocal(Uri uri)
 		{
 			string hostName = uri.Host;
@@ -103,6 +97,11 @@ namespace MassTransit
 			Interlocked.Exchange(ref _isLocal, () => local);
 
 			return local;
+		}
+
+		protected static bool CheckForTransactionalHint(Uri uri)
+		{
+			return uri.Query.GetValueFromQueryString("tx", false);
 		}
 	}
 }

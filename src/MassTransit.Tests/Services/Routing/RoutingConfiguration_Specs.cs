@@ -13,11 +13,11 @@
 namespace MassTransit.Tests.Services.Routing
 {
 	using System;
-	using MassTransit.Internal;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
 	using MassTransit.Services.Routing.Configuration;
+	using MassTransit.Transports;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -34,7 +34,7 @@ namespace MassTransit.Tests.Services.Routing
 			var endpointCache = MockRepository.GenerateStub<IEndpointCache>();
 			_address = new Uri("msmq://localhost/dru");
 			_builder.Stub(x => x.GetInstance<IEndpointCache>()).Return(endpointCache);
-			endpointCache.Stub(x => x.GetEndpoint(_address)).Return(new NullEndpoint());
+			endpointCache.Stub(x => x.GetEndpoint(_address)).Return(Endpoint.Null);
 
 			_bus.Stub(x => x.OutboundPipeline).Return(_pipeline);
 		}

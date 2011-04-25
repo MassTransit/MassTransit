@@ -24,12 +24,12 @@ namespace MassTransit.Internal
 
 		public IEndpoint Endpoint
 		{
-			get { return new NullEndpoint(); }
+			get { return Transports.Endpoint.Null; }
 		}
 
 		public IEndpoint PoisonEndpoint
 		{
-            get { return new NullEndpoint(); }
+            get { return Transports.Endpoint.Null; }
 		}
 
 		public UnsubscribeAction Subscribe<T>(Action<T> callback) where T : class
@@ -93,7 +93,7 @@ namespace MassTransit.Internal
 
 		public IEndpoint GetEndpoint(Uri address)
 	    {
-	        return new NullEndpoint();
+	        return Transports.Endpoint.Null;
 	    }
 	}
 }

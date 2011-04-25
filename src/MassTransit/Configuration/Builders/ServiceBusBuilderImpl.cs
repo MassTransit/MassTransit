@@ -82,13 +82,15 @@ namespace MassTransit.Builders
 			return bus;
 		}
 
-		void RunBusServiceConfigurators(IServiceBus bus)
+		void RunBusServiceConfigurators(ServiceBus bus)
 		{
 			foreach (var busServiceConfigurator in _busServiceConfigurators)
 			{
 				try
 				{
-					busServiceConfigurator.Create(bus);
+					IBusService busService = busServiceConfigurator.Create(bus);
+
+					bus.AddService(busServiceConfigurator.ServiceType, busService);
 				}
 				catch (Exception ex)
 				{

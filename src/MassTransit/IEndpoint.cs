@@ -13,6 +13,7 @@
 namespace MassTransit
 {
 	using System;
+	using Serialization;
 
 	/// <summary>
 	/// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
@@ -39,6 +40,16 @@ namespace MassTransit
 		/// The outbound transport for the endpoint
 		/// </summary>
 		IOutboundTransport OutboundTransport { get; }
+
+		/// <summary>
+		/// The transport where faulting messages (poison messages) are sent
+		/// </summary>
+		IOutboundTransport ErrorTransport { get; }
+
+		/// <summary>
+		/// The message serializer being used by the endpoint
+		/// </summary>
+		IMessageSerializer Serializer { get; }
 
 		/// <summary>
 		/// Send to the endpoint

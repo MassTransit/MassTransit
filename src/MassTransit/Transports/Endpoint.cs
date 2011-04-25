@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,27 +23,43 @@ namespace MassTransit.Transports
 	public class Endpoint :
 		IEndpoint
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (Endpoint));
-		private readonly IEndpointAddress _address;
-		private IDuplexTransport _transport;
-		private IOutboundTransport _errorTransport;
-		private bool _disposed;
-		private string _disposedMessage;
-		private readonly MessageRetryTracker _tracker;
+		static readonly ILog _log = LogManager.GetLogger(typeof (Endpoint));
+		static IEndpoint _null;
+		readonly IEndpointAddress _address;
+		readonly IMessageSerializer _serializer;
+		readonly MessageRetryTracker _tracker;
+		bool _disposed;
+		string _disposedMessage;
+		IOutboundTransport _errorTransport;
+		IDuplexTransport _transport;
 
-		public Endpoint(IEndpointAddress address, IMessageSerializer serializer, IDuplexTransport transport, IOutboundTransport errorTransport)
+		public Endpoint(IEndpointAddress address, IMessageSerializer serializer, IDuplexTransport transport,
+		                IOutboundTransport errorTransport)
 		{
 			_address = address;
 			_transport = transport;
 			_errorTransport = errorTransport;
-			Serializer = serializer;
+			_serializer = serializer;
 
 			_tracker = new MessageRetryTracker(5);
 
 			SetDisposedMessage();
 		}
 
-		public IMessageSerializer Serializer { get; private set; }
+		public static IEndpoint Null
+		{
+			get { return _null ?? (_null = CreateNullEndpoint()); }
+		}
+
+		public IOutboundTransport ErrorTransport
+		{
+			get { return _errorTransport; }
+		}
+
+		public IMessageSerializer Serializer
+		{
+			get { return _serializer; }
+		}
 
 		public IEndpointAddress Address
 		{
@@ -65,7 +81,7 @@ namespace MassTransit.Transports
 			get { return _transport.OutboundTransport; }
 		}
 
-		public void Send<T>(T message) 
+		public void Send<T>(T message)
 			where T : class
 		{
 			if (_disposed) throw NewDisposedException();
@@ -74,9 +90,9 @@ namespace MassTransit.Transports
 				{
 					SetOutboundMessageHeaders<T>();
 
-					Serializer.Serialize(context.Body, message);
+					_serializer.Serialize(context.Body, message);
 
-					context.SetLabel(typeof(T).Name);
+					context.SetLabel(typeof (T).Name);
 					context.MarkRecoverable();
 
 					if (OutboundMessage.Headers.ExpirationTime.HasValue)
@@ -93,17 +109,24 @@ namespace MassTransit.Transports
 			GC.SuppressFinalize(this);
 		}
 
-		private void SetDisposedMessage()
+		public void Receive(Func<object, Action<object>> receiver, TimeSpan timeout)
+		{
+			if (_disposed) throw NewDisposedException();
+
+			_transport.Receive(ReceiveFromTransport(receiver), timeout);
+		}
+
+		void SetDisposedMessage()
 		{
 			_disposedMessage = "The endpoint has already been disposed: " + _address;
 		}
 
-		private ObjectDisposedException NewDisposedException()
+		ObjectDisposedException NewDisposedException()
 		{
 			return new ObjectDisposedException(_disposedMessage);
 		}
 
-		private void SetOutboundMessageHeaders<T>()
+		void SetOutboundMessageHeaders<T>()
 		{
 			OutboundMessage.Set(headers =>
 				{
@@ -112,7 +135,7 @@ namespace MassTransit.Transports
 				});
 		}
 
-		private void Dispose(bool disposing)
+		void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
@@ -122,24 +145,17 @@ namespace MassTransit.Transports
 
 				_errorTransport.Dispose();
 				_errorTransport = null;
-
-				Serializer = null;
 			}
 
 			_disposed = true;
 		}
 
-		~Endpoint()
+		void MoveMessageToErrorTransport(IReceiveContext message)
 		{
-			Dispose(false);
-		}
-
-		private void MoveMessageToErrorTransport(IReceiveContext message)
-		{
-			_errorTransport.Send(context=>
+			_errorTransport.Send(context =>
 				{
 					message.Body.CopyTo(context.Body);
-					if(OutboundMessage.Headers.ExpirationTime.HasValue)
+					if (OutboundMessage.Headers.ExpirationTime.HasValue)
 						context.SetMessageExpiration(OutboundMessage.Headers.ExpirationTime.Value);
 				});
 
@@ -150,20 +166,13 @@ namespace MassTransit.Transports
 				SpecialLoggers.Messages.InfoFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.MessageId);
 		}
 
-		public virtual void Receive(Func<object, Action<object>> receiver, TimeSpan timeout)
-		{
-			if (_disposed) throw NewDisposedException();
-
-			_transport.Receive(ReceiveFromTransport(receiver), timeout);
-		}
-
 		Func<IReceiveContext, Action<IReceiveContext>> ReceiveFromTransport(Func<object, Action<object>> receiver)
 		{
 			return receivingContext =>
 				{
-					if(_tracker.IsRetryLimitExceeded(receivingContext.MessageId))
+					if (_tracker.IsRetryLimitExceeded(receivingContext.MessageId))
 					{
-						if(_log.IsErrorEnabled)
+						if (_log.IsErrorEnabled)
 							_log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address, receivingContext.MessageId);
 
 						return MoveMessageToErrorTransport;
@@ -173,7 +182,7 @@ namespace MassTransit.Transports
 
 					try
 					{
-						messageObj = Serializer.Deserialize(receivingContext.Body);
+						messageObj = _serializer.Deserialize(receivingContext.Body);
 					}
 					catch (SerializationException sex)
 					{
@@ -197,7 +206,8 @@ namespace MassTransit.Transports
 								_log.DebugFormat("SKIP:{0}:{1}", Address, messageObj.GetType().Name);
 
 							if (SpecialLoggers.Messages.IsInfoEnabled)
-								SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}:{2}", Address, messageObj.GetType().Name, receivingContext.MessageId);
+								SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}:{2}", Address, messageObj.GetType().Name,
+									receivingContext.MessageId);
 
 							return null;
 						}
@@ -235,6 +245,17 @@ namespace MassTransit.Transports
 							}
 						};
 				};
+		}
+
+		~Endpoint()
+		{
+			Dispose(false);
+		}
+
+		static Endpoint CreateNullEndpoint()
+		{
+			return new Endpoint(EndpointAddress.Null, new XmlMessageSerializer(), new NullTransport(EndpointAddress.Null),
+				new NullTransport(EndpointAddress.Null));
 		}
 	}
 }
