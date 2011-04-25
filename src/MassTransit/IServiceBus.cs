@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using Pipeline;
-    using Saga;
 
 	/// <summary>
 	/// The action to call to unsubscribe a previously subscribed consumer
@@ -38,11 +37,6 @@ namespace MassTransit
         /// The endpoint from which messages are received
         /// </summary>
         IEndpoint Endpoint { get; }
-
-        /// <summary>
-        /// The poison endpoint associated with this instance where messages that cannot be processed are sent
-        /// </summary>
-        IEndpoint PoisonEndpoint { get; }
 
         /// <summary>
         /// Adds a message handler to the service bus for handling a specific type of message

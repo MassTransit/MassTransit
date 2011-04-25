@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -31,23 +31,24 @@ namespace MassTransit
 	/// A service bus is used to attach message handlers (services) to endpoints, as well as 
 	/// communicate with other service bus instances in a distributed application
 	/// </summary>
+	[DebuggerDisplay("{DebugDisplay}")]
 	public class ServiceBus :
 		IControlBus
 	{
-		private static readonly ILog _log;
+		static readonly ILog _log;
 
-		private readonly TimeSpan _threadTimeout = 10.Seconds();
-		private int _consumerThreadLimit = Environment.ProcessorCount*4;
-		private volatile bool _disposed;
-		private int _receiveThreadLimit = 1;
-		private TimeSpan _receiveTimeout = 3.Seconds();
-		private IServiceContainer _serviceContainer;
-		private volatile bool _started;
-		private UnregisterAction _unsubscribeEventDispatchers = () => true;
-		private Pipe _eventAggregator;
-		private ConsumerPool _consumerPool;
-		private ServiceBusInstancePerformanceCounters _counters;
-		private ISubscriptionScope _eventAggregatorScope;
+		readonly TimeSpan _threadTimeout = 10.Seconds();
+		ConsumerPool _consumerPool;
+		int _consumerThreadLimit = Environment.ProcessorCount*4;
+		ServiceBusInstancePerformanceCounters _counters;
+		volatile bool _disposed;
+		Pipe _eventAggregator;
+		ISubscriptionScope _eventAggregatorScope;
+		int _receiveThreadLimit = 1;
+		TimeSpan _receiveTimeout = 3.Seconds();
+		IServiceContainer _serviceContainer;
+		volatile bool _started;
+		UnregisterAction _unsubscribeEventDispatchers = () => true;
 
 		static ServiceBus()
 		{
@@ -89,9 +90,8 @@ namespace MassTransit
 			OutboundPipeline = MessagePipelineConfigurator.CreateDefault(ObjectBuilder, this);
 
 			InboundPipeline = MessagePipelineConfigurator.CreateDefault(ObjectBuilder, this);
-			InboundPipeline.Configure(x => { _unsubscribeEventDispatchers += x.Register(new InboundOutboundSubscriptionBinder(OutboundPipeline, Endpoint)); });
-
-			PoisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
+			InboundPipeline.Configure(
+				x => { _unsubscribeEventDispatchers += x.Register(new InboundOutboundSubscriptionBinder(OutboundPipeline, Endpoint)); });
 
 			ControlBus = this;
 
@@ -100,7 +100,10 @@ namespace MassTransit
 
 		public static IServiceBus Null { get; private set; }
 
-		public IEndpointCache EndpointCache { get; private set; }
+		protected string DebugDisplay
+		{
+			get { return string.Format("{0}: ", Endpoint.Address); }
+		}
 
 		public IObjectBuilder ObjectBuilder { get; private set; }
 
@@ -122,7 +125,8 @@ namespace MassTransit
 			set
 			{
 				if (_started)
-					throw new ConfigurationException("The consumer thread limit cannot be changed once the bus is in motion. Beep! Beep!");
+					throw new ConfigurationException(
+						"The consumer thread limit cannot be changed once the bus is in motion. Beep! Beep!");
 
 				_consumerThreadLimit = value;
 			}
@@ -134,11 +138,14 @@ namespace MassTransit
 			set
 			{
 				if (_started)
-					throw new ConfigurationException("The receive thread limit cannot be changed once the bus is in motion. Beep! Beep!");
+					throw new ConfigurationException(
+						"The receive thread limit cannot be changed once the bus is in motion. Beep! Beep!");
 
 				_receiveThreadLimit = value;
 			}
 		}
+
+		public IEndpointCache EndpointCache { get; private set; }
 
 		public void Dispose()
 		{
@@ -210,11 +217,6 @@ namespace MassTransit
 		public IEndpoint Endpoint { get; private set; }
 
 		/// <summary>
-		/// The poison endpoint associated with this instance where exception messages are sent
-		/// </summary>
-		public IEndpoint PoisonEndpoint { get; set; }
-
-		/// <summary>
 		/// Adds a message handler to the service bus for handling a specific type of message
 		/// </summary>
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
@@ -255,18 +257,24 @@ namespace MassTransit
 		{
 			// TODO this.Call("Subscribe", new[] {consumerType}, new[] {});
 
-			MethodInfo method = typeof (ServiceBus).GetMethod("SometimesGenericsSuck", BindingFlags.NonPublic | BindingFlags.Instance);
+			MethodInfo method = typeof (ServiceBus).GetMethod("SometimesGenericsSuck",
+				BindingFlags.NonPublic | BindingFlags.Instance);
 			MethodInfo genericMethod = method.MakeGenericMethod(consumerType);
 			return (UnsubscribeAction) genericMethod.Invoke(this, null);
 		}
 
-		public UnsubscribeAction SubscribeConsumer<T>(Func<T,Action<T>> getConsumerAction)
+		public UnsubscribeAction SubscribeConsumer<T>(Func<T, Action<T>> getConsumerAction)
 			where T : class
 		{
-			return InboundPipeline.Subscribe<T>(getConsumerAction);
+			return InboundPipeline.Subscribe(getConsumerAction);
 		}
 
 		public IServiceBus ControlBus { get; set; }
+
+		public IEndpoint GetEndpoint(Uri address)
+		{
+			return EndpointCache.GetEndpoint(address);
+		}
 
 		//Just here to support Subscribe(Type)
 
@@ -341,17 +349,17 @@ namespace MassTransit
 		}
 
 		// ReSharper disable UnusedMember.Local
-		private UnsubscribeAction SometimesGenericsSuck<TComponent>() where TComponent : class
+		UnsubscribeAction SometimesGenericsSuck<TComponent>() where TComponent : class
 			// ReSharper restore UnusedMember.Local
 		{
 			return Subscribe<TComponent>();
 		}
 
-		private void InitializePerformanceCounters()
+		void InitializePerformanceCounters()
 		{
 			try
 			{
-				var instanceName = string.Format("{0}_{1}_{2}", Endpoint.Address.Path, Endpoint.Uri.Scheme, Endpoint.Uri.Host);
+				string instanceName = string.Format("{0}_{1}_{2}", Endpoint.Address.Path, Endpoint.Uri.Scheme, Endpoint.Uri.Host);
 
 				_counters = new ServiceBusInstancePerformanceCounters(instanceName);
 
@@ -387,10 +395,5 @@ namespace MassTransit
 				_log.Warn("The performance counters could not be created", ex);
 			}
 		}
-
-	    public IEndpoint GetEndpoint(Uri address)
-	    {
-	        return EndpointCache.GetEndpoint(address);
-	    }
 	}
 }

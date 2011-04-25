@@ -154,7 +154,6 @@
     <Compile Include="Internal\IdempotentHashtable.cs" />
     <Compile Include="Internal\IdempotentList.cs" />
     <Compile Include="Saga\ISagaRepository.cs" />
-    <Compile Include="Internal\NullEndpoint.cs" />
     <Compile Include="Internal\PoisonEndpointDecorator.cs" />
     <Compile Include="Saga\ISaga.cs" />
     <Compile Include="Saga\Orchestrates.cs" />

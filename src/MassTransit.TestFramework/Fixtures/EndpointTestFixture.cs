@@ -21,7 +21,6 @@ namespace MassTransit.TestFramework.Fixtures
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
-	using Serialization;
 
 	[TestFixture]
 	public class EndpointTestFixture<TTransportFactory> :
@@ -34,8 +33,6 @@ namespace MassTransit.TestFramework.Fixtures
 		public void EndpointTestFixtureSetup()
 		{
 			SetupObjectBuilder();
-
-			SetupMessageSerializer();
 
 			SetupEndpointFactory();
 
@@ -59,11 +56,6 @@ namespace MassTransit.TestFramework.Fixtures
 		protected virtual void SetupObjectBuilder()
 		{
 			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
-		}
-
-		protected virtual void SetupMessageSerializer()
-		{
-			ObjectBuilder.Add(new XmlMessageSerializer());
 		}
 
 		protected virtual void SetupEndpointFactory()

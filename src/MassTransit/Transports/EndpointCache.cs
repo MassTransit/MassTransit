@@ -14,7 +14,6 @@ namespace MassTransit.Transports
 {
 	using System;
 	using Exceptions;
-	using Internal;
 	using log4net;
 	using Magnum;
 	using Magnum.Threading;
@@ -23,7 +22,6 @@ namespace MassTransit.Transports
 		IEndpointCache
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointCache));
-		static IEndpoint _null;
 
 		readonly IEndpointFactory _endpointFactory;
 		volatile bool _disposed;
@@ -34,11 +32,6 @@ namespace MassTransit.Transports
 			_endpointFactory = endpointFactory;
 
 			_endpoints = new ReaderWriterLockedDictionary<Uri, IEndpoint>();
-		}
-
-		public static IEndpoint Null
-		{
-			get { return _null ?? (_null = new NullEndpoint()); }
 		}
 
 		public void Dispose()

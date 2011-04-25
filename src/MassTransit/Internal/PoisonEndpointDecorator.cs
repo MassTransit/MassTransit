@@ -16,8 +16,9 @@ namespace MassTransit.Internal
     using System.Diagnostics;
     using Exceptions;
     using log4net;
+    using Serialization;
 
-    [DebuggerDisplay("Poison:{Uri}")]
+	[DebuggerDisplay("Poison:{Uri}")]
     public class PoisonEndpointDecorator :
         IEndpoint
     {
@@ -54,7 +55,17 @@ namespace MassTransit.Internal
     		get { return _wrappedEndpoint.OutboundTransport; }
     	}
 
-    	public void Send<T>(T message) where T : class
+		public IOutboundTransport ErrorTransport
+		{
+			get { return _wrappedEndpoint.ErrorTransport; }
+		}
+
+		public IMessageSerializer Serializer
+		{
+			get { return _wrappedEndpoint.Serializer; }
+		}
+
+		public void Send<T>(T message) where T : class
         {
             if (_log.IsWarnEnabled)
                 _log.WarnFormat("Saving Poison Message {0}", message.GetType());
