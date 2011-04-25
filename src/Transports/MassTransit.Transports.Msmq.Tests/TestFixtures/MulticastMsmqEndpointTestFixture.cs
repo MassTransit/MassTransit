@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,6 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using System;
-	using Configuration;
-	using Configurators;
-	using EndpointConfigurators;
 	using Internal;
 	using MassTransit.Tests.TextFixtures;
 	using Services.Subscriptions;
@@ -27,20 +24,13 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		protected Uri LocalErrorUri { get; set; }
 		protected Uri RemoteEndpointUri { get; set; }
 
-		private ISubscriptionService SubscriptionService { get; set; }
+		ISubscriptionService SubscriptionService { get; set; }
 
 		protected IServiceBus LocalBus { get; set; }
 		protected IServiceBus RemoteBus { get; set; }
 
 		public MulticastMsmqEndpointTestFixture()
 		{
-			EndpointConfiguratorImpl.Defaults(x =>
-				{
-					x.CreateMissingQueues = true;
-					x.CreateTransactionalQueues = false;
-					x.PurgeOnStartup = true;
-				});
-
 			AddTransport<MulticastMsmqTransportFactory>();
 
 			LocalEndpointUri = new Uri("msmq://localhost/mt_client");
@@ -56,14 +46,13 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			LocalErrorEndpoint = EndpointCache.GetEndpoint(LocalErrorUri);
 			RemoteEndpoint = EndpointCache.GetEndpoint(RemoteEndpointUri);
 
-			LocalBus = Configuration.ServiceBusConfigurator.New(x =>
+			LocalBus = ServiceBusFactory.New(x =>
 				{
 					x.UseMulticastSubscriptionClient();
 					x.ReceiveFrom(LocalEndpointUri);
-					x.SendErrorsTo(LocalErrorUri);
 				});
 
-			RemoteBus = Configuration.ServiceBusConfigurator.New(x =>
+			RemoteBus = ServiceBusFactory.New(x =>
 				{
 					x.UseMulticastSubscriptionClient();
 					x.ReceiveFrom(RemoteEndpointUri);

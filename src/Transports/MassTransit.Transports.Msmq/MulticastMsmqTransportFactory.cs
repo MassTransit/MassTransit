@@ -39,7 +39,7 @@ namespace MassTransit.Transports.Msmq
 		{
 			try
 			{
-				ITransportSettings msmqSettings = new CreateTransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
+				ITransportSettings msmqSettings = new TransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
 
 				if (msmqSettings.MsmqAddress().IsLocal)
 				{
@@ -60,7 +60,7 @@ namespace MassTransit.Transports.Msmq
 		{
 			try
 			{
-				ITransportSettings msmqSettings = new CreateTransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
+				ITransportSettings msmqSettings = new TransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
 
 				if (msmqSettings.MsmqAddress().IsLocal)
 				{
@@ -77,7 +77,7 @@ namespace MassTransit.Transports.Msmq
 
 		public IOutboundTransport BuildError(ITransportSettings settings)
 		{
-			ITransportSettings msmqSettings = new CreateTransportSettings(settings.Address.Uri.GetQueueAddress(), settings);
+			ITransportSettings msmqSettings = new TransportSettings(settings.Address.Uri.GetQueueAddress(), settings);
 
 			return BuildOutbound(msmqSettings);
 		}

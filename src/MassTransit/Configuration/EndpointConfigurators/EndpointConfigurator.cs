@@ -13,8 +13,8 @@
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
-	using MassTransit.Serialization;
-	using MassTransit.Transports;
+	using Serialization;
+	using Transports;
 
 	/// <summary>
 	/// Configure the endpoint
@@ -24,7 +24,14 @@ namespace MassTransit.EndpointConfigurators
 		/// <summary>
 		/// Specify a serializer for this endpoint (overrides the default)
 		/// </summary>
-		EndpointConfigurator UseSerializer(Func<IMessageSerializer> serializerFactory);
+		EndpointConfigurator UseSerializer(IMessageSerializer serializer);
+
+		/// <summary>
+		/// Overrides the default error address with a new error address
+		/// </summary>
+		/// <param name="uri"></param>
+		/// <returns></returns>
+		EndpointConfigurator SetErrorAddress(Uri uri);
 
 		/// <summary>
 		/// Overrides the transport factory when the error transport is created, to modify the behavior

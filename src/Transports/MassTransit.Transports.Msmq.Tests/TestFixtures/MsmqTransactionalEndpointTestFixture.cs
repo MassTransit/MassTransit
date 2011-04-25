@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,29 +13,22 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using System;
-	using Configurators;
-	using EndpointConfigurators;
 
 	public class MsmqTransactionalEndpointTestFixture :
 		MsmqEndpointTestFixture
 	{
+		public MsmqTransactionalEndpointTestFixture()
+		{
+			ConfigureEndpointFactory(x => x.SetCreateTransactionalQueues(true));
+		}
+
 		protected override void EstablishContext()
 		{
-			EndpointConfiguratorImpl.Defaults(x =>
-				{
-					x.CreateTransactionalQueues = true;
-				});
-
 			LocalEndpointUri = new Uri("msmq://localhost/mt_client_tx");
 			LocalErrorUri = new Uri("msmq://localhost/mt_client_tx_error");
 			RemoteEndpointUri = new Uri("msmq://localhost/mt_server_tx");
 
 			base.EstablishContext();
-
-			EndpointConfiguratorImpl.Defaults(x =>
-			{
-				x.PurgeOnStartup = false;
-			});
 		}
 	}
 }

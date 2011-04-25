@@ -21,11 +21,13 @@ namespace MassTransit.EndpointConfigurators
 	public class EndpointFactoryConfiguratorImpl :
 		EndpointFactoryConfigurator
 	{
+		readonly EndpointFactoryDefaultSettings _defaultSettings;
 		readonly IList<EndpointFactoryBuilderConfigurator> _endpointFactoryConfigurators;
 		Func<EndpointFactoryBuilder> _endpointFactoryBuilderFactory;
 
 		public EndpointFactoryConfiguratorImpl(EndpointFactoryDefaultSettings defaultSettings)
 		{
+			_defaultSettings = defaultSettings;
 			_endpointFactoryBuilderFactory = DefaultEndpointResolverBuilderFactory;
 			_endpointFactoryConfigurators = new List<EndpointFactoryBuilderConfigurator>();
 		}
@@ -46,6 +48,11 @@ namespace MassTransit.EndpointConfigurators
 		public void AddEndpointFactoryConfigurator(EndpointFactoryBuilderConfigurator configurator)
 		{
 			_endpointFactoryConfigurators.Add(configurator);
+		}
+
+		public IEndpointFactoryDefaultSettings Defaults
+		{
+			get { return _defaultSettings; }
 		}
 
 		public IEndpointFactory CreateEndpointFactory()

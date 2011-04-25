@@ -13,8 +13,6 @@
 namespace MassTransit.Tests.Configuration
 {
 	using System;
-	using MassTransit.Services.Subscriptions;
-	using MassTransit.Services.Subscriptions.Client;
 	using NUnit.Framework;
 
 	[TestFixture]
@@ -29,12 +27,8 @@ namespace MassTransit.Tests.Configuration
 
 					x.UseControlBus();
 
-					x.AddService<SubscriptionPublisher>();
-
-
 
 					x.ConfigureEndpoint(new Uri(""));
-
 				});
 		}
 	}

@@ -27,7 +27,7 @@ namespace MassTransit.TestFramework.Transports
 		public void SetUp()
 		{
 			_serializer = new XmlMessageSerializer();
-			_transport = _factory.BuildOutbound(new CreateTransportSettings(new EndpointAddress(Address)));
+			_transport = _factory.BuildOutbound(new TransportSettings(new EndpointAddress(Address)));
 		}
 
 		[TearDown]
@@ -58,7 +58,7 @@ namespace MassTransit.TestFramework.Transports
 
 		public void VerifyMessageIsInQueue(ITransport ep)
 		{
-			IInboundTransport tr = _factory.BuildInbound(new CreateTransportSettings(new EndpointAddress(AddressToCheck)));
+			IInboundTransport tr = _factory.BuildInbound(new TransportSettings(new EndpointAddress(AddressToCheck)));
 			tr.ShouldContain<DeleteMessage>(_serializer);
 		}
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TextFixtures
 {
-	using Configuration;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 
@@ -27,9 +26,9 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			base.EstablishContext();
 
-			LocalBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("multicast://227.43.1.1:5309/"); });
+			LocalBus = ServiceBusFactory.New(x => { x.ReceiveFrom("multicast://227.43.1.1:5309/"); });
 
-			RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("multicast://227.43.1.1:5309/"); });
+			RemoteBus = ServiceBusFactory.New(x => { x.ReceiveFrom("multicast://227.43.1.1:5309/"); });
 		}
 
 		protected override void TeardownContext()

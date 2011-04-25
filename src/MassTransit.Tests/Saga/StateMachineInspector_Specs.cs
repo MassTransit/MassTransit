@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Saga
 {
-	using Configuration;
+	using BusConfigurators;
 	using Locator;
 	using MassTransit.Distributor;
 	using NUnit.Framework;
@@ -24,14 +24,12 @@ namespace MassTransit.Tests.Saga
 		[Test]
 		public void FirstTestName()
 		{
-			IServiceBusConfigurator configurator = MockRepository.GenerateMock<IServiceBusConfigurator>();
-			configurator.Expect(x => x.AddService<Distributor<InitiateSimpleSaga>>(null)).IgnoreArguments();
-			configurator.Expect(x => x.AddService<Distributor<CompleteSimpleSaga>>(null)).IgnoreArguments();
-			configurator.Expect(x => x.AddService<Distributor<ObservableSagaMessage>>(null)).IgnoreArguments();
+			var configurator = MockRepository.GenerateMock<ServiceBusConfigurator>();
+			configurator.Expect(x => x.AddService<Distributor<InitiateSimpleSaga>>()).IgnoreArguments();
+			configurator.Expect(x => x.AddService<Distributor<CompleteSimpleSaga>>()).IgnoreArguments();
+			configurator.Expect(x => x.AddService<Distributor<ObservableSagaMessage>>()).IgnoreArguments();
 
-			IEndpointCache endpointCache = MockRepository.GenerateMock<IEndpointCache>();
-			;
-			configurator.UseSagaDistributorFor<TestSaga>(endpointCache);
+			configurator.UseSagaDistributorFor<TestSaga>();
 
 			configurator.VerifyAllExpectations();
 		}

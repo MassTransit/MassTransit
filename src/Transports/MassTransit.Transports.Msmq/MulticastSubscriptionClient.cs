@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,19 +13,18 @@
 namespace MassTransit.Transports.Msmq
 {
 	using System;
-	using Configuration;
-	using Internal;
 	using log4net;
 	using Services.Subscriptions.Client;
 
 	public class MulticastSubscriptionClient :
 		IBusService
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (MulticastSubscriptionClient));
-		private readonly Uri _uri;
-		private SubscriptionCoordinator _coordinator;
-		private string _networkKey;
-		private IServiceBus _subscriptionBus;
+		static readonly ILog _log = LogManager.GetLogger(typeof (MulticastSubscriptionClient));
+		readonly Uri _uri;
+		SubscriptionCoordinator _coordinator;
+		bool _disposed;
+		string _networkKey;
+		IServiceBus _subscriptionBus;
 
 		public MulticastSubscriptionClient(IServiceBus subscriptionBus, Uri uri, string networkKey)
 		{
@@ -35,22 +34,16 @@ namespace MassTransit.Transports.Msmq
 			_networkKey = networkKey;
 		}
 
-
 		public void Dispose()
 		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public void Start(IServiceBus bus)
 		{
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Starting MulticastSubscriptionClient on {0}", _uri);
-
-			_subscriptionBus = ServiceBusConfigurator.New(x =>
-				{
-					x.ReceiveFrom(_uri);
-					x.SetEndpointFactory(bus.EndpointCache);
-					x.SetConcurrentConsumerLimit(1);
-				});
 
 			_coordinator = new SubscriptionCoordinator(_subscriptionBus, _subscriptionBus.Endpoint, _networkKey);
 			_coordinator.Start(bus);
@@ -64,6 +57,32 @@ namespace MassTransit.Transports.Msmq
 
 			_subscriptionBus.Dispose();
 			_subscriptionBus = null;
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				if (_coordinator != null)
+				{
+					_coordinator.Dispose();
+					_coordinator = null;
+				}
+
+				if (_subscriptionBus != null)
+				{
+					_subscriptionBus.Dispose();
+					_subscriptionBus = null;
+				}
+			}
+
+			_disposed = true;
+		}
+
+		~MulticastSubscriptionClient()
+		{
+			Dispose(false);
 		}
 	}
 }

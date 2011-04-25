@@ -15,7 +15,6 @@ namespace MassTransit.Transports
 	using System;
 	using System.Collections.Generic;
 	using Builders;
-	using Configuration;
 	using EndpointConfigurators;
 	using Exceptions;
 	using Magnum.Extensions;
@@ -23,11 +22,11 @@ namespace MassTransit.Transports
 	public class EndpointFactory :
 		IEndpointFactory
 	{
-		readonly IEndpointDefaults _defaults;
+		readonly IEndpointFactoryDefaultSettings _defaults;
 		readonly IDictionary<Uri, EndpointBuilder> _endpointBuilders;
 		readonly IDictionary<string, ITransportFactory> _transportFactories;
 
-		public EndpointFactory(IDictionary<string, ITransportFactory> transportFactories, IDictionary<Uri, EndpointBuilder> endpointBuilders, IEndpointDefaults defaults)
+		public EndpointFactory(IDictionary<string, ITransportFactory> transportFactories, IDictionary<Uri, EndpointBuilder> endpointBuilders, IEndpointFactoryDefaultSettings defaults)
 		{
 			_transportFactories = transportFactories;
 			_defaults = defaults;
@@ -43,7 +42,12 @@ namespace MassTransit.Transports
 			{
 				try
 				{
-					EndpointBuilder builder = _endpointBuilders.Retrieve(uri, () => new EndpointBuilderImpl(uri, _defaults));
+					EndpointBuilder builder = _endpointBuilders.Retrieve(uri, () =>
+						{
+							var configurator = new EndpointConfiguratorImpl(uri, _defaults);
+
+							return configurator.CreateBuilder();
+						});
 
 					return builder.CreateEndpoint(transportFactory);
 				}
@@ -61,6 +65,17 @@ namespace MassTransit.Transports
 			string scheme = factory.Scheme.ToLowerInvariant();
 
 			_transportFactories[scheme] = factory;
+		}
+
+
+		public static IDuplexTransport DefaultTransportFactory(ITransportFactory transportFactory, ITransportSettings settings)
+		{
+			return transportFactory.BuildLoopback(settings);
+		}
+
+		public static IOutboundTransport DefaultErrorTransportFactory(ITransportFactory transportFactory, ITransportSettings settings)
+		{
+			return transportFactory.BuildError(settings);
 		}
 	}
 }

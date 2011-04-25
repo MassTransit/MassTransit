@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -39,7 +39,7 @@ namespace MassTransit.Transports.Msmq
 		{
 			try
 			{
-				ITransportSettings msmqSettings = new CreateTransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
+				ITransportSettings msmqSettings = new TransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
 
 				if (msmqSettings.MsmqAddress().IsLocal)
 				{
@@ -64,7 +64,7 @@ namespace MassTransit.Transports.Msmq
 		{
 			try
 			{
-				ITransportSettings msmqSettings = new CreateTransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
+				ITransportSettings msmqSettings = new TransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
 
 				if (msmqSettings.MsmqAddress().IsLocal)
 				{
@@ -87,7 +87,7 @@ namespace MassTransit.Transports.Msmq
 			return BuildOutbound(settings);
 		}
 
-		private static void PurgeExistingMessagesIfRequested(ITransportSettings settings)
+		static void PurgeExistingMessagesIfRequested(ITransportSettings settings)
 		{
 			if (settings.Address.IsLocal && settings.PurgeExistingMessages)
 			{
@@ -95,7 +95,7 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
-		private static void ValidateLocalTransport(ITransportSettings settings)
+		static void ValidateLocalTransport(ITransportSettings settings)
 		{
 			MsmqEndpointManagement.Manage(settings.Address, q =>
 				{

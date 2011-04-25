@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.Nms.Tests.TestFixtures
 {
     using System;
-    using Configuration;
     using Internal;
     using MassTransit.Tests.TextFixtures;
     using Rhino.Mocks;
@@ -39,18 +38,16 @@ namespace MassTransit.Transports.Nms.Tests.TestFixtures
 
             SetupSubscriptionService();
 
-            LocalBus = ServiceBusConfigurator.New(x =>
-                {
-                    x.AddService<SubscriptionPublisher>();
-                    x.AddService<SubscriptionConsumer>();
+            LocalBus = ServiceBusFactory.New(x =>
+            	{
+            		ConnectSubscriptionService(x, SubscriptionService);
                     x.ReceiveFrom(new UriBuilder("activemq", ActiveMQHostName, 61616, "mt_client").Uri);
                 });
 
-            RemoteBus = ServiceBusConfigurator.New(x =>
+            RemoteBus = ServiceBusFactory.New(x =>
                 {
-                    x.AddService<SubscriptionPublisher>();
-                    x.AddService<SubscriptionConsumer>();
-                    x.ReceiveFrom(new UriBuilder("activemq", ActiveMQHostName, 61616, "mt_server").Uri);
+					ConnectSubscriptionService(x, SubscriptionService);
+					x.ReceiveFrom(new UriBuilder("activemq", ActiveMQHostName, 61616, "mt_server").Uri);
                 });
         }
 

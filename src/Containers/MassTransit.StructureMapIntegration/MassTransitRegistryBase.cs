@@ -17,7 +17,7 @@ namespace MassTransit.StructureMapIntegration
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Reflection;
-	using Configuration;
+	using BusConfigurators;
 	using Configurators;
 	using EndpointConfigurators;
 	using Internal;
@@ -151,28 +151,23 @@ namespace MassTransit.StructureMapIntegration
 				.Singleton()
 				.Use(context =>
 					{
-						return EndpointResolverConfiguratorImpl.New(x =>
-							{
-								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
-								configAction(x);
-							});
+						return EndpointCacheFactory.New(configAction);
 					});
 		}
 
-		protected void RegisterServiceBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
+		protected void RegisterServiceBus(string endpointUri, Action<ServiceBusConfigurator> configAction)
 		{
 			RegisterServiceBus(new Uri(endpointUri), configAction);
 		}
 
-		protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
+		protected void RegisterServiceBus(Uri endpointUri, Action<ServiceBusConfigurator> configAction)
 		{
 			For<IServiceBus>()
 				.Singleton()
 				.Use(context =>
 					{
-						return Configuration.ServiceBusConfigurator.New(x =>
+						return ServiceBusFactory.New(x =>
 							{
-								x.SetEndpointFactory(context.GetInstance<IEndpointCache>());
 								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 
@@ -181,47 +176,23 @@ namespace MassTransit.StructureMapIntegration
 					});
 		}
 
-		protected void RegisterServiceBus(string endpointUri, Action<IServiceBusConfigurator, IContext> configAction)
+		protected void RegisterServiceBus(string endpointUri, Action<ServiceBusConfigurator, IContext> configAction)
 		{
 			RegisterServiceBus(new Uri(endpointUri), configAction);
 		}
 
-		protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator, IContext> configAction)
+		protected void RegisterServiceBus(Uri endpointUri, Action<ServiceBusConfigurator, IContext> configAction)
 		{
 			For<IServiceBus>()
 				.Singleton()
 				.Use(context =>
 					{
-						return Configuration.ServiceBusConfigurator.New(x =>
+						return ServiceBusFactory.New(x =>
 							{
-								x.SetEndpointFactory(context.GetInstance<IEndpointCache>());
 								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 
 								configAction(x, context);
-							});
-					});
-		}
-
-		protected void RegisterControlBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
-		{
-			RegisterControlBus(new Uri(endpointUri), configAction);
-		}
-
-		protected void RegisterControlBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
-		{
-			For<IControlBus>()
-				.Singleton()
-				.Use(context =>
-					{
-						return Configuration.ControlBusConfigurator.New(x =>
-							{
-								x.SetEndpointFactory(context.GetInstance<IEndpointCache>());
-								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
-								x.ReceiveFrom(endpointUri);
-								x.SetConcurrentConsumerLimit(1);
-
-								configAction(x);
 							});
 					});
 		}
@@ -256,18 +227,14 @@ namespace MassTransit.StructureMapIntegration
 			}
 		}
 
-		protected static void ConfigureSubscriptionClient(string subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
+		protected static void ConfigureSubscriptionClient(string subscriptionServiceEndpointAddress, ServiceBusConfigurator configurator)
 		{
 			ConfigureSubscriptionClient(new Uri(subscriptionServiceEndpointAddress), configurator);
 		}
 
-		protected static void ConfigureSubscriptionClient(Uri subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
+		protected static void ConfigureSubscriptionClient(Uri subscriptionServiceEndpointAddress, ServiceBusConfigurator configurator)
 		{
-			configurator.ConfigureService<SubscriptionClientConfigurator>(y =>
-				{
-					// this is fairly easy inline, but wanted to include the example for completeness
-					y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
-				});
+			configurator.UseSubscriptionService(subscriptionServiceEndpointAddress);
 		}
 
 		private static void DefaultTransportScanner(IAssemblyScanner scanner)

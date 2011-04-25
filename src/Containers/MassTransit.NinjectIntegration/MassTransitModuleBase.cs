@@ -13,7 +13,7 @@
 namespace MassTransit.NinjectIntegration
 {
 	using System;
-	using Configuration;
+	using BusConfigurators;
 	using Configurators;
 	using EndpointConfigurators;
 	using Internal;
@@ -164,29 +164,26 @@ namespace MassTransit.NinjectIntegration
 			Bind<IEndpointCache>()
 				.ToMethod(cxt =>
 					{
-						return EndpointResolverConfiguratorImpl.New(x =>
-							{
-								x.SetObjectBuilder(cxt.Kernel.Get<IObjectBuilder>());
-								configAction(x);
-							});
+						return EndpointCacheFactory.New(configAction);
 					}).InSingletonScope();
 		}
 
-		protected void RegisterServiceBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
+		protected void RegisterServiceBus(string endpointUri, Action<ServiceBusConfigurator> configAction)
 		{
 			RegisterServiceBus(new Uri(endpointUri), configAction);
 		}
 
-		protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
+		protected void RegisterServiceBus(Uri endpointUri, Action<ServiceBusConfigurator> configAction)
 		{
 			Bind<IServiceBus>()
 				.ToMethod(context =>
 					{
-						return Configuration.ServiceBusConfigurator.New(x =>
+						return ServiceBusFactory.New(x =>
 							{
-                                x.SetEndpointFactory(context.Kernel.Get<IEndpointCache>());
 								x.SetObjectBuilder(context.Kernel.Get<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
+
+								x.UseControlBus();
 
 								configAction(x);
 							});
@@ -194,40 +191,27 @@ namespace MassTransit.NinjectIntegration
 				.InSingletonScope();
 		}
 
-		protected void RegisterControlBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
+		protected void RegisterControlBus(string endpointUri, Action<ServiceBusConfigurator> configAction)
 		{
 			RegisterControlBus(new Uri(endpointUri), configAction);
 		}
 
-		protected void RegisterControlBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
+		protected void RegisterControlBus(Uri endpointUri, Action<ServiceBusConfigurator> configAction)
 		{
 			Bind<IControlBus>()
 				.ToMethod(context =>
-					{
-						return Configuration.ControlBusConfigurator.New(x =>
-							{
-                                x.SetEndpointFactory(context.Kernel.Get<IEndpointCache>());
-								x.SetObjectBuilder(context.Kernel.Get<IObjectBuilder>());
-								x.ReceiveFrom(endpointUri);
-								x.SetConcurrentConsumerLimit(1);
-
-								configAction(x);
-							});
+					{return (IControlBus)context.Kernel.Get<IServiceBus>().ControlBus;
 					}).InSingletonScope();
 		}
 
-		protected static void ConfigureSubscriptionClient(string subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
+		protected static void ConfigureSubscriptionClient(string subscriptionServiceEndpointAddress, ServiceBusConfigurator configurator)
 		{
 			ConfigureSubscriptionClient(new Uri(subscriptionServiceEndpointAddress), configurator);
 		}
 
-		protected static void ConfigureSubscriptionClient(Uri subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
+		protected static void ConfigureSubscriptionClient(Uri subscriptionServiceEndpointAddress, ServiceBusConfigurator configurator)
 		{
-			configurator.ConfigureService<SubscriptionClientConfigurator>(y =>
-				{
-					// this is fairly easy inline, but wanted to include the example for completeness
-					y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
-				});
+			configurator.UseSubscriptionService(subscriptionServiceEndpointAddress);
 		}
 	}
 }

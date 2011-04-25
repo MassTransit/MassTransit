@@ -14,7 +14,6 @@ namespace MassTransit.Builders
 {
 	using System;
 	using BusServiceConfigurators;
-	using Configurators;
 
 	/// <summary>
 	/// A ServiceBusBuilder includes everything for configuring a complete service bus instance,

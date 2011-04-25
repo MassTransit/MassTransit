@@ -15,33 +15,41 @@ namespace MassTransit.BusConfigurators
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using MassTransit.Builders;
-	using MassTransit.Configuration;
+	using Builders;
+	using log4net;
 
 	public class ControlBusConfiguratorImpl :
 		ControlBusConfigurator,
 		BusBuilderConfigurator
 	{
-		readonly IList<BusBuilderConfigurator> _configurators;
-		readonly ServiceBusSettings _settings;
+		static readonly ILog _log = LogManager.GetLogger(typeof (ControlBusConfiguratorImpl));
 
-		public ControlBusConfiguratorImpl(ServiceBusDefaultSettings defaultSettings)
+		readonly IList<BusBuilderConfigurator> _configurators;
+		Uri _uri;
+
+		public ControlBusConfiguratorImpl(ServiceBusConfigurator configurator)
 		{
 			_configurators = new List<BusBuilderConfigurator>();
-			_settings = new ServiceBusSettings(defaultSettings);
 		}
 
 		public BusBuilder Configure(BusBuilder builder)
 		{
 			builder.Match<ServiceBusBuilder>(x =>
 				{
-					if (_settings.InputAddress == null)
-						_settings.InputAddress = builder.Settings.InputAddress.AppendToPath("_control");
+					var settings = new ServiceBusSettings(builder.Settings);
 
-					_settings.ObjectBuilder = builder.Settings.ObjectBuilder;
-					_settings.AutoStart = true;
+					settings.InputAddress = _uri ?? builder.Settings.InputAddress.AppendToPath("_control");
 
-					BusBuilder controlBusBuilder = new ControlBusBuilderImpl(_settings, x.EndpointCache);
+					if (_log.IsDebugEnabled)
+						_log.DebugFormat("Configuring control bus for {0} at {1}", builder.Settings.InputAddress, settings.InputAddress);
+
+					settings.ConcurrentConsumerLimit = 1;
+					settings.ConcurrentReceiverLimit = 1;
+					settings.AutoStart = true;
+
+					// TODO need to ConfigureEndpoint to purge messages on startup!
+
+					BusBuilder controlBusBuilder = new ControlBusBuilderImpl(settings);
 
 					controlBusBuilder = _configurators
 						.Aggregate(controlBusBuilder, (current, configurator) => configurator.Configure(current));
@@ -61,7 +69,7 @@ namespace MassTransit.BusConfigurators
 
 		public void ReceiveFrom(Uri uri)
 		{
-			_settings.InputAddress = uri;
+			_uri = uri;
 		}
 	}
 }

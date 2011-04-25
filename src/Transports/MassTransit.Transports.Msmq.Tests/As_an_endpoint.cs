@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,56 +13,43 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
-	using Configuration;
-	using Configurators;
-	using EndpointConfigurators;
 	using Exceptions;
-	using MassTransit.Serialization;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 
 	[TestFixture, Category("Integration")]
 	public class Creating_an_endpoint_that_does_not_exist
 	{
-		private IMessageSerializer _serializer;
-		private Uri _uri;
-
 		[SetUp]
 		public void Setup()
 		{
-			EndpointConfiguratorImpl.Defaults(x =>
+			EndpointCacheFactory.ConfigureDefaultSettings(x =>
 				{
-					x.CreateMissingQueues = false;
-					x.PurgeOnStartup = false;
+					x.SetCreateMissingQueues(false);
+					x.SetPurgeOnStartup(false);
 				});
 
-			_serializer = MockRepository.GenerateStub<IMessageSerializer>();
 			_uri = new Uri("msmq://localhost/idontexist_tx");
+		}
+
+		Uri _uri;
+
+		[Test]
+		[ExpectedException(typeof (EndpointException))]
+		public void Should_throw_an_endpoint_exception_from_the_endpoint_factory()
+		{
+			IEndpointCache endpointCache = EndpointCacheFactory.New(x => { x.AddTransportFactory<MsmqTransportFactory>(); });
+
+			endpointCache.GetEndpoint(_uri);
 		}
 
 		[Test]
 		[ExpectedException(typeof (EndpointException))]
 		public void Should_throw_an_endpoint_exception_from_the_msmq_endpoint_factory()
 		{
-		    var tfs = new[] {new MsmqTransportFactory()};
-		    var epf = new EndpointFactory(tfs);
-            
-		    epf.BuildEndpoint(_uri, cfg =>
-		    {
-		        cfg.SetSerializer(_serializer);
-		    });
-		}
+			var transportFactory = new MsmqTransportFactory();
+			var settings = new TransportSettings(new EndpointAddress(_uri));
 
-		[Test]
-		[ExpectedException(typeof (EndpointException))]
-		public void Should_throw_an_endpoint_exception_from_the_endpoint_factory()
-		{
-			IEndpointCache ef = EndpointResolverConfiguratorImpl.New(x =>
-			    {
-			        x.AddTransportFactory<MsmqTransportFactory>();
-			    });
-
-			ef.GetEndpoint(_uri);
+			transportFactory.BuildInbound(settings);
 		}
 	}
 }

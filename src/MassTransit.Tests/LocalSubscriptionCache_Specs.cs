@@ -37,9 +37,8 @@ namespace MassTransit.Tests
         {
             _builder = MockRepository.GenerateMock<IObjectBuilder>();
         	_builder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(new XmlMessageSerializer());
-			_endpointCache = EndpointResolverConfigurator.New(x =>
+			_endpointCache = EndpointCacheFactory.New(x =>
 			{
-				x.SetObjectBuilder(_builder);
 				x.AddTransportFactory<LoopbackTransportFactory>();
 			});
 

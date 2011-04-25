@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using System;
-	using EndpointConfigurators;
 	using Internal;
 	using MassTransit.Tests.TextFixtures;
 	using Rhino.Mocks;
@@ -23,23 +22,18 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		EndpointTestFixture<MsmqTransportFactory>
 	{
 		protected Uri LocalEndpointUri { get; set; }
+		protected Uri LocalErrorUri { get; set; }
 		protected Uri RemoteEndpointUri { get; set; }
 
-		private ISubscriptionService SubscriptionService { get; set; }
+		ISubscriptionService SubscriptionService { get; set; }
 
 		protected IServiceBus LocalBus { get; set; }
 		protected IServiceBus RemoteBus { get; set; }
 
-	    public MsmqEndpointTestFixture()
+		public MsmqEndpointTestFixture()
 		{
-			EndpointConfiguratorImpl.Defaults(x =>
-			{
-				x.CreateMissingQueues = true;
-				x.CreateTransactionalQueues = false;
-				x.PurgeOnStartup = true;
-			});
-
 			LocalEndpointUri = new Uri("msmq://localhost/mt_client");
+			LocalEndpointUri = new Uri("msmq://localhost/mt_client_error");
 			RemoteEndpointUri = new Uri("msmq://localhost/mt_server");
 		}
 
@@ -48,32 +42,31 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			base.EstablishContext();
 
 			LocalEndpoint = EndpointCache.GetEndpoint(LocalEndpointUri);
+			LocalErrorEndpoint = EndpointCache.GetEndpoint(LocalErrorUri);
 			RemoteEndpoint = EndpointCache.GetEndpoint(RemoteEndpointUri);
 
 			SetupSubscriptionService();
 
-			LocalBus = Configuration.ServiceBusConfigurator.New(x =>
+			LocalBus = ServiceBusFactory.New(x =>
 				{
-					x.AddService<SubscriptionPublisher>();
-					x.AddService<SubscriptionConsumer>();
+					ConnectSubscriptionService(x, SubscriptionService);
 					x.ReceiveFrom(LocalEndpointUri);
 				});
 
-			RemoteBus = Configuration.ServiceBusConfigurator.New(x =>
+			RemoteBus = ServiceBusFactory.New(x =>
 				{
-					x.AddService<SubscriptionPublisher>();
-					x.AddService<SubscriptionConsumer>();
+					ConnectSubscriptionService(x, SubscriptionService);
 					x.ReceiveFrom(RemoteEndpointUri);
 				});
 		}
 
 		protected void Purge(IEndpointAddress address)
 		{
-			var management = MsmqEndpointManagement.New(address.Uri);
+			IEndpointManagement management = MsmqEndpointManagement.New(address.Uri);
 			management.Purge();
 		}
 
-		private void SetupSubscriptionService()
+		void SetupSubscriptionService()
 		{
 			SubscriptionService = new LocalSubscriptionService();
 			ObjectBuilder.Stub(x => x.GetInstance<IEndpointSubscriptionEvent>())
@@ -98,6 +91,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 
 		public IEndpoint LocalEndpoint { get; private set; }
+		public IEndpoint LocalErrorEndpoint { get; private set; }
 		public IEndpoint RemoteEndpoint { get; private set; }
 
 		protected override void TeardownContext()
@@ -109,6 +103,8 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			RemoteBus = null;
 
 			LocalEndpoint = null;
+			LocalErrorEndpoint = null;
+			RemoteEndpoint = null;
 
 			base.TeardownContext();
 		}

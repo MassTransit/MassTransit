@@ -13,10 +13,12 @@
 namespace MassTransit.Tests.TextFixtures
 {
 	using System;
+	using BusConfigurators;
 	using EndpointConfigurators;
 	using Exceptions;
 	using Magnum.Extensions;
 	using MassTransit.Saga;
+	using MassTransit.Services.Subscriptions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -66,6 +68,7 @@ namespace MassTransit.Tests.TextFixtures
 
 			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(defaultSettings);
 			_endpointFactoryConfigurator.AddTransportFactory<TTransportFactory>();
+			_endpointFactoryConfigurator.SetPurgeOnStartup(true);
 		}
 
 		protected void AddTransport<T>()
@@ -94,7 +97,13 @@ namespace MassTransit.Tests.TextFixtures
 			configure(_endpointFactoryConfigurator);
 		}
 
-		public static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>(IObjectBuilder builder)
+		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator, ISubscriptionService subscriptionService)
+		{
+			configurator.AddService(() => new SubscriptionPublisher(subscriptionService));
+			configurator.AddService(() => new SubscriptionConsumer(subscriptionService));
+		}
+
+		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>(IObjectBuilder builder)
 			where TSaga : class, ISaga
 		{
 			var sagaRepository = new InMemorySagaRepository<TSaga>();
