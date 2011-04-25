@@ -23,7 +23,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
     [TestFixture]
     public class RabbitMqTransportFactoryTests
     {
-        Uri _address = new Uri("rabbitmq://localhost:5672/dru");
+        Uri _queue = new Uri("rabbitmq://localhost:5672/queue/dru");
+        Uri _exchange = new Uri("rabbitmq://localhost:5672/exchange/dru");
+
         RabbitMqTransportFactory _factory;
 
         [SetUp]
@@ -40,7 +42,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Test, Explicit]
         public void CanConnect()
         {
-            var t = _factory.BuildLoopback(new CreateTransportSettings(new RabbitMqAddress(_address)));
+            var t = _factory.BuildLoopback(new CreateTransportSettings(new RabbitMqAddress(_queue)));
             _factory.ConnectionsCount().ShouldEqual(1);
 
         }
@@ -48,14 +50,16 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		[Test, Explicit]
         public void TransportSendAndReceive()
 		{
-		    var t = _factory.BuildOutbound(new CreateTransportSettings(new RabbitMqAddress(_address)));
+		    _factory.Bind(_queue, _exchange, "fanout");
+
+		    var t = _factory.BuildOutbound(new CreateTransportSettings(new RabbitMqAddress(_exchange)));
             t.Send((s)=>
             {
                 var b = Encoding.UTF8.GetBytes("dru");
                 s.Body.Write(b, 0,b.Length);
             });
 
-		    var i = _factory.BuildInbound(new CreateTransportSettings(new RabbitMqAddress(_address)));
+		    var i = _factory.BuildInbound(new CreateTransportSettings(new RabbitMqAddress(_queue)));
 
             i.Receive(s=>
             {
@@ -74,8 +78,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		[Test,Explicit]
         public void EndpointSendAndReceive()
 		{
-		    var addr = new RabbitMqAddress(_address);
-		    var lb = _factory.BuildLoopback(new CreateTransportSettings(addr));
+            _factory.Bind(_queue, _exchange, "fanout");
+
+		    var ex = new RabbitMqAddress(_exchange);
             
             IMessageSerializer ser = new XmlMessageSerializer();
 
@@ -86,12 +91,14 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 ser.Serialize(stream, msg);
             }
 
-            var oe = new Endpoint(addr, ser, lb, null);
+		    var lb = _factory.BuildLoopback(new CreateTransportSettings(ex));
+            var oe = new Endpoint(ex, ser, lb, null);
             oe.Send(msg);
 
 
 
-            var e = new Endpoint(addr, ser, lb, null);
+		    var qu = new RabbitMqAddress(_queue);
+            var e = new Endpoint(qu, ser, lb, null);
             e.Receive(o=>
             {
                 return b =>

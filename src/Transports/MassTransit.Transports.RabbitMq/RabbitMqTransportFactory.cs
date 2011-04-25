@@ -16,6 +16,7 @@ namespace MassTransit.Transports.RabbitMq
 	using Exceptions;
 	using RabbitMQ.Client;
 	using System.Linq;
+	using Magnum.Extensions;
 
     public class RabbitMqTransportFactory :
         ITransportFactory, IDisposable
@@ -39,29 +40,38 @@ namespace MassTransit.Transports.RabbitMq
 
 		public IDuplexTransport BuildLoopback(ITransportSettings settings)
         {
-            EnsureProtocolIsCorrect(settings.Address.Uri);
+            //need to setup addresses
+            // rabbitmq://server/loopback?/<name>
 
-            var address = (RabbitMqAddress)settings.Address;
-
-            var factory = _connectionFactoryCache[ToKey(address)];
-
-            var transport = new RabbitMqTransport(settings.Address, factory.CreateConnection());
+            //build duplex address
+            var transport = new LoopbackRabbitMqTransport(settings.Address, BuildInbound(settings), BuildOutbound(settings));
             return transport;
         }
 
         public IInboundTransport BuildInbound(ITransportSettings settings)
         {
-            //must be a queue
+            EnsureProtocolIsCorrect(settings.Address.Uri);
+
+            var address = settings.Address.CastAs<RabbitMqAddress>();
+            if(address.AddressType != AddressType.Queue) throw new ConfigurationException("You can't listen on exchanges!");
+            
             //rabbitmq://server:port/queue/<queue>
-            return BuildLoopback(settings);
+            var factory = _connectionFactoryCache[ToKey(address)];
+
+            return new InboundRabbitMqTransport(address, factory.CreateConnection());
         }
 
         public IOutboundTransport BuildOutbound(ITransportSettings settings)
         {
-            //must be an exchange
-            //rabbitmq://server:port/exchange/<message:urn>
+            EnsureProtocolIsCorrect(settings.Address.Uri);
 
-            return BuildLoopback(settings);
+            var address = settings.Address.CastAs<RabbitMqAddress>();
+            if(address.AddressType != AddressType.Exchange) throw new ConfigurationException("You can't publish to queues!");
+
+            //rabbitmq://server:port/exchange/<message:urn>
+            var factory = _connectionFactoryCache[ToKey(address)];
+
+            return new OutboundRabbitMqTransport(address, factory.CreateConnection());
         }
 
         public IOutboundTransport BuildError(ITransportSettings settings)
@@ -140,6 +150,22 @@ namespace MassTransit.Transports.RabbitMq
         static ServerKey ToKey(RabbitMqAddress addr)
         {
             return new ServerKey(addr);
+        }
+
+        public void Bind(Uri queue, Uri exchange, string exchangeType)
+        {
+            var q = new RabbitMqAddress(queue);
+            var e = new RabbitMqAddress(exchange);
+
+            var factory = _connectionFactoryCache[ToKey(q)];
+            using(var connection = factory.CreateConnection())
+            using(var model = connection.CreateModel())
+            {
+                model.QueueDeclare(q.Queue, true);
+                model.ExchangeDeclare(e.Queue, exchangeType, true);
+
+                model.QueueBind(q.Queue,q.Queue,"",true, null);
+            }
         }
     }
 
