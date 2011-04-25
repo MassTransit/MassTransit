@@ -89,7 +89,7 @@ namespace MassTransit.BusConfigurators
 			_settings.ObjectBuilder = objectBuilder;
 		}
 
-		public void UseEndpointFactoryBuilder(Func<EndpointFactoryBuilder> endpointFactoryBuilderFactory)
+		public void UseEndpointFactoryBuilder(Func<IEndpointFactoryDefaultSettings, EndpointFactoryBuilder> endpointFactoryBuilderFactory)
 		{
 			_endpointFactoryConfigurator.UseEndpointFactoryBuilder(endpointFactoryBuilderFactory);
 		}

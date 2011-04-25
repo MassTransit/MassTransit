@@ -35,7 +35,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			ErrorEndpointAddress = settings.ErrorAddress;
 		}
 
-
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();

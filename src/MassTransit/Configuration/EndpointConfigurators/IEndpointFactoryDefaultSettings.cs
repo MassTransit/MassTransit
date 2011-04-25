@@ -23,6 +23,7 @@ namespace MassTransit.EndpointConfigurators
 		bool CreateTransactionalQueues { get; }
 		bool PurgeOnStartup { get; }
 		TimeSpan TransactionTimeout { get; }
+		bool RequireTransactional { get; }
 
 		EndpointSettings CreateEndpointSettings(Uri uri);
 	}

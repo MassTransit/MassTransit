@@ -35,7 +35,7 @@ namespace MassTransit.EndpointConfigurators
 		/// Overrides the default EndpointResolver builder with another builder
 		/// </summary>
 		/// <param name="endpointFactoryBuilderFactory"></param>
-		void UseEndpointFactoryBuilder(Func<EndpointFactoryBuilder> endpointFactoryBuilderFactory);
+		void UseEndpointFactoryBuilder(Func<IEndpointFactoryDefaultSettings, EndpointFactoryBuilder> endpointFactoryBuilderFactory);
 
 		/// <summary>
 		/// Adds an endpoint configurator to the endpoint resolver builder

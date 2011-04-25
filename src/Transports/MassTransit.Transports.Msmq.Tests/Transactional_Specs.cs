@@ -40,7 +40,16 @@ namespace MassTransit.Transports.Msmq.Tests
             _faultFuture = new FutureMessage<Fault<PingMessage, Guid>>();
 
 			LocalBus.Subscribe<PingMessage>(message => { throw new NotSupportedException("I am a naughty consumer! I go boom!"); });
-		    LocalBus.Subscribe<Fault<PingMessage, Guid>>(message => _faultFuture.Set(message));
+		    LocalBus.Subscribe<Fault<PingMessage, Guid>>(message =>
+		    	{
+					if (_faultFuture.IsAvailable(TimeSpan.Zero))
+						return;
+
+		    		_faultFuture.Set(message);
+		    	});
+
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			LocalBus.ShouldHaveSubscriptionFor<Fault<PingMessage, Guid>>();
 
 			_ping = new PingMessage();
 

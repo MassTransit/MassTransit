@@ -43,11 +43,12 @@ namespace MassTransit.Transports.Msmq.Tests
 		}
 
 		[Test]
-		[ExpectedException(typeof (EndpointException))]
+		[ExpectedException(typeof (TransportException))]
 		public void Should_throw_an_endpoint_exception_from_the_msmq_endpoint_factory()
 		{
 			var transportFactory = new MsmqTransportFactory();
 			var settings = new TransportSettings(new EndpointAddress(_uri));
+			settings.CreateIfMissing = false;
 
 			transportFactory.BuildInbound(settings);
 		}
