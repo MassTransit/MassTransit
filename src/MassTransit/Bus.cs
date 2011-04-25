@@ -14,7 +14,6 @@ namespace MassTransit
 {
 	using System;
 	using BusConfigurators;
-	using Configurators;
 	using Exceptions;
 
 	public static class Bus

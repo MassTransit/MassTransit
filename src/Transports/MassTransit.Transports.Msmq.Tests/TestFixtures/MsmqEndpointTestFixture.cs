@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using System;
-	using Configurators;
 	using EndpointConfigurators;
 	using Internal;
 	using MassTransit.Tests.TextFixtures;
@@ -24,7 +23,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		EndpointTestFixture<MsmqTransportFactory>
 	{
 		protected Uri LocalEndpointUri { get; set; }
-		protected Uri LocalErrorUri { get; set; }
 		protected Uri RemoteEndpointUri { get; set; }
 
 		private ISubscriptionService SubscriptionService { get; set; }
@@ -42,7 +40,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			});
 
 			LocalEndpointUri = new Uri("msmq://localhost/mt_client");
-			LocalErrorUri = new Uri("msmq://localhost/mt_client_error");
 			RemoteEndpointUri = new Uri("msmq://localhost/mt_server");
 		}
 
@@ -51,7 +48,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			base.EstablishContext();
 
 			LocalEndpoint = EndpointCache.GetEndpoint(LocalEndpointUri);
-			LocalErrorEndpoint = EndpointCache.GetEndpoint(LocalErrorUri);
 			RemoteEndpoint = EndpointCache.GetEndpoint(RemoteEndpointUri);
 
 			SetupSubscriptionService();
@@ -61,7 +57,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 					x.AddService<SubscriptionPublisher>();
 					x.AddService<SubscriptionConsumer>();
 					x.ReceiveFrom(LocalEndpointUri);
-					x.SendErrorsTo(LocalErrorUri);
 				});
 
 			RemoteBus = Configuration.ServiceBusConfigurator.New(x =>
@@ -103,7 +98,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 
 		public IEndpoint LocalEndpoint { get; private set; }
-		public IEndpoint LocalErrorEndpoint { get; private set; }
 		public IEndpoint RemoteEndpoint { get; private set; }
 
 		protected override void TeardownContext()
@@ -115,7 +109,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			RemoteBus = null;
 
 			LocalEndpoint = null;
-			LocalErrorEndpoint = null;
 
 			base.TeardownContext();
 		}

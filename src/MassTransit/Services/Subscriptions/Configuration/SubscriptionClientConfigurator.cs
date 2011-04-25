@@ -13,12 +13,11 @@
 namespace MassTransit.Services.Subscriptions.Configuration
 {
 	using System;
+	using BusServiceConfigurators;
 	using Client;
-	using Configurators;
-	using Internal;
 
 	public class SubscriptionClientConfigurator :
-		IBusServiceConfigurator
+		BusServiceConfigurator
 	{
 		Uri _subscriptionServiceUri;
 

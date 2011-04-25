@@ -14,7 +14,6 @@ namespace MassTransit.Advanced
 {
 	using System;
 	using BusConfigurators;
-	using Configurators;
 
 	public static class AdvancedBusConfiguratorExtensions
 	{

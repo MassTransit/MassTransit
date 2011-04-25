@@ -22,5 +22,6 @@ namespace MassTransit.BusConfigurators
 		void SetReceiveTimeout(TimeSpan receiveTimeout);
 		void SetConcurrentConsumerLimit(int concurrentConsumerLimit);
 		void SetConcurrentReceiverLimit(int concurrentReceiverLimit);
+		void EnableAutoStart();
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,19 +13,16 @@
 namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
-	using Configuration;
+	using BusConfigurators;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Saga;
-	using Services.Subscriptions.Client;
-	using Services.Subscriptions.Configuration;
 	using Services.Subscriptions.Server;
-	using Transports;
 
-    [TestFixture]
+	[TestFixture]
 	public class SubscriptionServiceTestFixture<TTransportFactory> :
 		EndpointTestFixture<TTransportFactory>
-		where TTransportFactory : ITransportFactory
+		where TTransportFactory : ITransportFactory, new()
 	{
 		[TestFixtureSetUp]
 		public void LocalAndRemoteTestFixtureSetup()
@@ -36,7 +33,7 @@ namespace MassTransit.TestFramework.Fixtures
 			RemoteBus = SetupServiceBus(RemoteUri);
 		}
 
-		private void SetupSubscriptionService()
+		void SetupSubscriptionService()
 		{
 			ObjectBuilder.SetupSagaRepository<SubscriptionClientSaga>();
 			ObjectBuilder.SetupSagaRepository<SubscriptionSaga>();
@@ -49,8 +46,6 @@ namespace MassTransit.TestFramework.Fixtures
 				ObjectBuilder.GetInstance<ISagaRepository<SubscriptionClientSaga>>());
 
 			SubscriptionService.Start();
-
-			ObjectBuilder.Construct(() => new SubscriptionClient());
 		}
 
 		[TestFixtureTearDown]
@@ -71,29 +66,12 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected SubscriptionService SubscriptionService { get; private set; }
 
-		protected override void ConfigureServiceBus(Uri uri, IServiceBusConfigurator configurator)
+		protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
 		{
 			base.ConfigureServiceBus(uri, configurator);
 
-			IControlBus controlBus = ControlBusConfigurator.New(x =>
-				{
-					x.ReceiveFrom(GetControlBusUri(uri));
-
-					x.PurgeBeforeStarting();
-				});
-
-			configurator.ConfigureService<SubscriptionClientConfigurator>(y =>
-				{
-					// Subscription Endpoint
-					y.SetSubscriptionServiceEndpoint(SubscriptionUri);
-				});
-
-			configurator.UseControlBus(controlBus);
-		}
-
-		protected Uri GetControlBusUri(Uri uri)
-		{
-			return uri.AppendToPath("_control");
+			configurator.UseControlBus();
+			configurator.UseSubscriptionService(SubscriptionUri);
 		}
 	}
 }

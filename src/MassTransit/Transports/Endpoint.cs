@@ -43,7 +43,7 @@ namespace MassTransit.Transports
 			SetDisposedMessage();
 		}
 
-		private IMessageSerializer Serializer { get; set; }
+		public IMessageSerializer Serializer { get; private set; }
 
 		public IEndpointAddress Address
 		{

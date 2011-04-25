@@ -92,7 +92,7 @@
     <Compile Include="NonTransactionalOutboundMsmqTransport.cs" />
     <Compile Include="OutboundMsmqTransport.cs" />
     <Compile Include="NonTransactionalInboundMsmqTransport.cs" />
-    <Compile Include="MsmqBusConfigurationExtensions.cs" />
+    <Compile Include="Configuration\MsmqBusConfigurationExtensions.cs" />
     <Compile Include="MsmqEndpointAddress.cs" />
     <Compile Include="MsmqEndpointManagement.cs" />
     <Compile Include="MsmqReceiveContext.cs" />

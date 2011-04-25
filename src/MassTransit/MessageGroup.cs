@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -57,33 +57,6 @@ namespace MassTransit
 			get { return Messages[index]; }
 		}
 
-		/// <summary>
-		/// Returns a builder for the message group of type <typeparamref name="TGroup"/>
-		/// </summary>
-		/// <typeparam name="TGroup">The type of message group to be built</typeparam>
-		/// <returns>A message builder for <typeparamref name="TGroup"/></returns>
-		public static MessageGroupBuilder<TGroup> Build<TGroup>() where TGroup : class
-		{
-			return new MessageGroupBuilder<TGroup>();
-		}
-
-		/// <summary>
-		/// Builds a list of the messages specified and returns a message group for the messages
-		/// </summary>
-		/// <param name="items">The messages to store in the message group</param>
-		/// <returns>A standard message group</returns>
-		public static MessageGroupBuilder<TGroup> Join<TGroup>(params object[] items) where TGroup : class
-		{
-			List<object> messages = new List<object>(items);
-
-			return new MessageGroupBuilder<TGroup>(messages);
-		}
-
-		public static MessageGroup Join(params object[] items)
-		{
-			return Join<MessageGroup>(items);
-		}
-
 		public object[] ToArray()
 		{
 			return Messages.ToArray();
@@ -91,7 +64,7 @@ namespace MassTransit
 
 		public T Get<T>(int index)
 		{
-            Guard.LessThan(Messages.Count, index, "index");
+			Guard.LessThan(Messages.Count, index, "index");
 
 			Type typeofT = typeof (T);
 
@@ -113,7 +86,34 @@ namespace MassTransit
 			}
 		}
 
-		private static void RepublishMessage(object message, IServiceBus bus)
+		/// <summary>
+		/// Returns a builder for the message group of type <typeparamref name="TGroup"/>
+		/// </summary>
+		/// <typeparam name="TGroup">The type of message group to be built</typeparam>
+		/// <returns>A message builder for <typeparamref name="TGroup"/></returns>
+		public static MessageGroupBuilder<TGroup> Build<TGroup>() where TGroup : class
+		{
+			return new MessageGroupBuilder<TGroup>();
+		}
+
+		/// <summary>
+		/// Builds a list of the messages specified and returns a message group for the messages
+		/// </summary>
+		/// <param name="items">The messages to store in the message group</param>
+		/// <returns>A standard message group</returns>
+		public static MessageGroupBuilder<TGroup> Join<TGroup>(params object[] items) where TGroup : class
+		{
+			var messages = new List<object>(items);
+
+			return new MessageGroupBuilder<TGroup>(messages);
+		}
+
+		public static MessageGroup Join(params object[] items)
+		{
+			return Join<MessageGroup>(items);
+		}
+
+		static void RepublishMessage(object message, IServiceBus bus)
 		{
 			bus.FastInvoke(x => x.Publish(message), message);
 		}
@@ -123,7 +123,8 @@ namespace MassTransit
 	/// Prepares the contents of a message group in order to create the class of the specified type.
 	/// </summary>
 	/// <typeparam name="TBuilder">The type of class to create for the message group</typeparam>
-	public class MessageGroupBuilder<TBuilder> where TBuilder : class
+	public class MessageGroupBuilder<TBuilder>
+		where TBuilder : class
 	{
 		internal static readonly AllowMessageTypeAttribute _allow;
 		internal readonly List<object> _messages = new List<object>();
@@ -165,14 +166,6 @@ namespace MassTransit
 			return this;
 		}
 
-		private static bool MessageTypeAllowed(Type t)
-		{
-			if (_allow == null)
-				return true;
-
-			return _allow.GetUsage(t) != MessageTypeUsage.None;
-		}
-
 		/// <summary>
 		/// Converts the <c>MessageGroupBuilder</c> into a new instance of type <c>TBuilder</c>
 		/// </summary>
@@ -182,6 +175,14 @@ namespace MassTransit
 		{
 			return FastActivator<TBuilder>.Create(builder._messages);
 			//return Activator.CreateInstance(typeof (TBuilder), builder._messages) as TBuilder;
+		}
+
+		static bool MessageTypeAllowed(Type t)
+		{
+			if (_allow == null)
+				return true;
+
+			return _allow.GetUsage(t) != MessageTypeUsage.None;
 		}
 	}
 }

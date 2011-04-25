@@ -10,23 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Configurators
+namespace MassTransit.BusConfigurators
 {
 	using System;
-	using Internal;
+	using Magnum.Extensions;
 
-	public interface IBusServiceConfigurator
+	public class ServiceBusDefaultSettings
 	{
-		/// <summary>
-		/// Returns the type of the service created by the configurator
-		/// </summary>
-		Type ServiceType { get; }
+		public ServiceBusDefaultSettings()
+		{
+			AutoStart = true;
+			ReceiveTimeout = 3.Seconds();
+			ConcurrentReceiverLimit = 1;
+			ConcurrentConsumerLimit = Environment.ProcessorCount*4;
+		}
 
-		/// <summary>
-		/// Creates the service
-		/// </summary>
-		/// <param name="bus"></param>
-		/// <returns>The instance of the service</returns>
-		IBusService Create(IServiceBus bus);
+		public bool AutoStart { get; set; }
+		public int ConcurrentConsumerLimit { get; set; }
+		public int ConcurrentReceiverLimit { get; set; }
+		public IEndpointCache EndpointCache { get; set; }
+		public IObjectBuilder ObjectBuilder { get; set; }
+		public TimeSpan ReceiveTimeout { get; set; }
 	}
 }

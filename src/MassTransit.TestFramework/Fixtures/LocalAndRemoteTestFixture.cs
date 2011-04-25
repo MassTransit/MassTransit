@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,16 +13,16 @@
 namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
-	using Configuration;
+	using BusConfigurators;
+	using Exceptions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Services.Subscriptions;
-	using Transports;
 
-    [TestFixture]
+	[TestFixture]
 	public class LocalAndRemoteTestFixture<TTransportFactory> :
 		EndpointTestFixture<TTransportFactory>
-		where TTransportFactory : ITransportFactory
+		where TTransportFactory : ITransportFactory, new()
 	{
 		[TestFixtureSetUp]
 		public void LocalAndRemoteTestFixtureSetup()
@@ -48,21 +48,20 @@ namespace MassTransit.TestFramework.Fixtures
 		protected IServiceBus RemoteBus { get; private set; }
 		protected ISubscriptionService SubscriptionService { get; private set; }
 
-		protected override void ConfigureServiceBus(Uri uri, IServiceBusConfigurator configurator)
+		protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
 		{
+			if (SubscriptionService == null)
+				throw new ConfigurationException("The subscription service must be configured before creating a service bus");
+
 			base.ConfigureServiceBus(uri, configurator);
 
-			configurator.AddService<SubscriptionPublisher>();
-			configurator.AddService<SubscriptionConsumer>();
+			configurator.AddService(() => new SubscriptionPublisher(SubscriptionService));
+			configurator.AddService(() => new SubscriptionConsumer(SubscriptionService));
 		}
 
-		private void SetupSubscriptionService()
+		void SetupSubscriptionService()
 		{
 			SubscriptionService = new LocalSubscriptionService();
-
-			ObjectBuilder.Add(SubscriptionService);
-			ObjectBuilder.Construct(() => new SubscriptionPublisher(SubscriptionService));
-			ObjectBuilder.Construct(() => new SubscriptionConsumer(SubscriptionService));
 		}
 	}
 }

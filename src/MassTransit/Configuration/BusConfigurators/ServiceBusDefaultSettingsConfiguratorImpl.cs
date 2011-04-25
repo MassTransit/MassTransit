@@ -17,9 +17,9 @@ namespace MassTransit.BusConfigurators
 	public class ServiceBusDefaultSettingsConfiguratorImpl :
 		ServiceBusDefaultSettingsConfigurator
 	{
-		readonly ServiceBusConfiguratorDefaultSettings _defaultSettings;
+		readonly ServiceBusDefaultSettings _defaultSettings;
 
-		public ServiceBusDefaultSettingsConfiguratorImpl(ServiceBusConfiguratorDefaultSettings defaultSettings)
+		public ServiceBusDefaultSettingsConfiguratorImpl(ServiceBusDefaultSettings defaultSettings)
 		{
 			_defaultSettings = defaultSettings;
 		}
@@ -52,6 +52,11 @@ namespace MassTransit.BusConfigurators
 		public void SetConcurrentReceiverLimit(int concurrentReceiverLimit)
 		{
 			_defaultSettings.ConcurrentReceiverLimit = concurrentReceiverLimit;
+		}
+
+		public void EnableAutoStart()
+		{
+			_defaultSettings.AutoStart = true;
 		}
 	}
 }

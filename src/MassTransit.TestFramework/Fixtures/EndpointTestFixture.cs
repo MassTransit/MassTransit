@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,15 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Transports
+namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Configuration;
-	using Configurators;
+	using BusConfigurators;
 	using EndpointConfigurators;
-	using Fixtures;
 	using Magnum.Extensions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
@@ -28,8 +26,10 @@ namespace MassTransit.TestFramework.Transports
 	[TestFixture]
 	public class EndpointTestFixture<TTransportFactory> :
 		AbstractTestFixture
-		where TTransportFactory : ITransportFactory
+		where TTransportFactory : ITransportFactory, new()
 	{
+		EndpointFactoryConfigurator _endpointFactoryConfigurator;
+
 		[TestFixtureSetUp]
 		public void EndpointTestFixtureSetup()
 		{
@@ -68,13 +68,29 @@ namespace MassTransit.TestFramework.Transports
 
 		protected virtual void SetupEndpointFactory()
 		{
-			EndpointCache = EndpointResolverConfiguratorImpl.New(x =>
-				{
-					x.SetObjectBuilder(ObjectBuilder);
-					x.AddTransportFactory<TTransportFactory>();
-					x.SetDefaultSerializer<XmlMessageSerializer>();
+			var defaultSettings = new EndpointFactoryDefaultSettings();
 
-					ConfigureEndpointFactory(x);
+			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(defaultSettings);
+			_endpointFactoryConfigurator.AddTransportFactory<TTransportFactory>();
+
+			_endpointFactoryConfigurator.Validate();
+
+			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
+
+			ConfigureEndpointFactory(_endpointFactoryConfigurator);
+
+			IEndpointFactory endpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
+			_endpointFactoryConfigurator = null;
+
+			EndpointCache = new EndpointCache(endpointFactory);
+
+			ServiceBusFactory.ConfigureDefaultSettings(x =>
+				{
+					x.SetEndpointCache(EndpointCache);
+					x.SetConcurrentConsumerLimit(4);
+					x.SetReceiveTimeout(50.Milliseconds());
+					x.SetObjectBuilder(ObjectBuilder);
+					x.EnableAutoStart();
 				});
 
 			ObjectBuilder.Add(EndpointCache);
@@ -86,16 +102,16 @@ namespace MassTransit.TestFramework.Transports
 
 		protected virtual void SetupServiceBusDefaults()
 		{
-			Configuration.ServiceBusConfigurator.Defaults(x =>
+			ServiceBusFactory.ConfigureDefaultSettings(x =>
 				{
-					x.SetEndpointFactory(EndpointCache);
+					x.SetEndpointCache(EndpointCache);
 					x.SetObjectBuilder(ObjectBuilder);
 					x.SetReceiveTimeout(50.Milliseconds());
 					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
 				});
 		}
 
-		private void TeardownBuses()
+		void TeardownBuses()
 		{
 			Buses.Reverse().Each(bus => { bus.Dispose(); });
 			Buses.Clear();
@@ -107,9 +123,9 @@ namespace MassTransit.TestFramework.Transports
 
 		protected IObjectBuilder ObjectBuilder { get; private set; }
 
-		protected virtual IServiceBus SetupServiceBus(Uri uri, Action<IServiceBusConfigurator> configure)
+		protected virtual IServiceBus SetupServiceBus(Uri uri, Action<ServiceBusConfigurator> configure)
 		{
-			IServiceBus bus = Configuration.ServiceBusConfigurator.New(x =>
+			IServiceBus bus = ServiceBusFactory.New(x =>
 				{
 					x.ReceiveFrom(uri);
 
@@ -126,7 +142,7 @@ namespace MassTransit.TestFramework.Transports
 			return SetupServiceBus(uri, x => ConfigureServiceBus(uri, x));
 		}
 
-		protected virtual void ConfigureServiceBus(Uri uri, IServiceBusConfigurator configurator)
+		protected virtual void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
 		{
 		}
 	}

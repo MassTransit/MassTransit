@@ -17,6 +17,7 @@ namespace MassTransit.EndpointConfigurators
 	using Magnum.Extensions;
 	using MassTransit.Serialization;
 
+
 	public class EndpointDefaults :
 		IEndpointDefaults
 	{

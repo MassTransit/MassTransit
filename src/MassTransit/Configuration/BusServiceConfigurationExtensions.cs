@@ -14,6 +14,7 @@ namespace MassTransit
 {
 	using System;
 	using BusConfigurators;
+	using BusServiceConfigurators;
 	using Configurators;
 	using Internal;
 
@@ -21,7 +22,7 @@ namespace MassTransit
 	{
 		public static void ConfigureService<TServiceConfigurator>(this ServiceBusConfigurator configurator, 
 			Action<TServiceConfigurator> configure)
-			where TServiceConfigurator : IBusServiceConfigurator, new()
+			where TServiceConfigurator : BusServiceConfigurator, new()
 		{
 			var serviceConfigurator = new TServiceConfigurator();
 

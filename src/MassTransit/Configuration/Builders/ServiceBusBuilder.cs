@@ -13,6 +13,7 @@
 namespace MassTransit.Builders
 {
 	using System;
+	using BusServiceConfigurators;
 	using Configurators;
 
 	/// <summary>
@@ -39,6 +40,6 @@ namespace MassTransit.Builders
 		/// Adds a bus service that will be started and stopped with the service bus 
 		/// </summary>
 		/// <param name="configurator"></param>
-		void AddBusServiceConfigurator(IBusServiceConfigurator configurator);
+		void AddBusServiceConfigurator(BusServiceConfigurator configurator);
 	}
 }

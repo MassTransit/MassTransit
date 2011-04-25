@@ -17,6 +17,7 @@ namespace MassTransit.Configuration
 	/// <summary>
 	/// Enables the configuration of items that can be shared between multiple ServiceBus instances
 	/// </summary>
+	[Obsolete]
 	public interface IServiceBusConfiguratorDefaults
 	{
 		/// <summary>

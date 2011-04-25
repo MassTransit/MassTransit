@@ -14,12 +14,11 @@ namespace MassTransit.BusConfigurators
 {
 	using System;
 	using System.Collections.Generic;
-	using MassTransit.Builders;
-	using MassTransit.Configuration;
-	using MassTransit.EndpointConfigurators;
-	using MassTransit.Exceptions;
+	using Builders;
+	using EndpointConfigurators;
+	using Exceptions;
 	using log4net;
-	using MassTransit.Transports;
+	using Transports;
 
 	public class ServiceBusConfiguratorImpl :
 		ServiceBusConfigurator
@@ -32,14 +31,14 @@ namespace MassTransit.BusConfigurators
 
 		EndpointFactoryConfigurator _endpointFactoryConfigurator;
 
-		public ServiceBusConfiguratorImpl(ServiceBusConfiguratorDefaultSettings defaultSettings)
+		public ServiceBusConfiguratorImpl(ServiceBusDefaultSettings defaultSettings)
 		{
 			_settings = new ServiceBusSettings(defaultSettings);
 
 			_builderFactory = DefaultBuilderFactory;
 			_configurators = new List<BusBuilderConfigurator>();
 
-			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl();
+			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(TODO);
 		}
 
 		public void Validate()
@@ -126,7 +125,10 @@ namespace MassTransit.BusConfigurators
 
 		IEndpointCache CreateEndpointCache()
 		{
-			IEndpointFactory endpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
+			if (_settings.EndpointCache != null)
+				return _settings.EndpointCache;
+
+			IEndpointFactory endpointFactory = CreateEndpointFactory();
 
 			IEndpointCache endpointCache = new EndpointCache(endpointFactory);
 

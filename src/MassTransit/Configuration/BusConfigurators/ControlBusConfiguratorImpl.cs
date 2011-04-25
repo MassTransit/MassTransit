@@ -25,7 +25,7 @@ namespace MassTransit.BusConfigurators
 		readonly IList<BusBuilderConfigurator> _configurators;
 		readonly ServiceBusSettings _settings;
 
-		public ControlBusConfiguratorImpl(ServiceBusConfiguratorDefaultSettings defaultSettings)
+		public ControlBusConfiguratorImpl(ServiceBusDefaultSettings defaultSettings)
 		{
 			_configurators = new List<BusBuilderConfigurator>();
 			_settings = new ServiceBusSettings(defaultSettings);
