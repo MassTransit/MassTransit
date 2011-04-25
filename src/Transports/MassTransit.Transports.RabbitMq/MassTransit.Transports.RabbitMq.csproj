@@ -80,11 +80,14 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="InboundRabbitMqTransport.cs" />
+    <Compile Include="OutboundRabbitMqTransport.cs" />
     <Compile Include="RabbitMqAddress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RabbitMqHelper.cs" />
     <Compile Include="RabbitMqReceiveContext.cs" />
     <Compile Include="RabbitMqSendContext.cs" />
-    <Compile Include="RabbitMqTransport.cs" />
+    <Compile Include="LoopbackRabbitMqTransport.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
   </ItemGroup>
   <ItemGroup>

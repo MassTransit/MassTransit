@@ -37,7 +37,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void ShouldBeAQueue()
         {
-            _addr.IsExchange.ShouldBeFalse();
+            _addr.AddressType.ShouldEqual(AddressType.Queue);
         }
     }
 
@@ -68,7 +68,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void ShouldBeAQueue()
         {
-            _addr.IsExchange.ShouldBeFalse();
+            _addr.AddressType.ShouldEqual(AddressType.Queue);
         }
 
     }
@@ -101,12 +101,12 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void Rebuilt()
         {
-            _addr.RebuiltUri.ShouldEqual(new Uri(@"rabbitmq://guest:guest@some_server:12/the_queue"));
+            _addr.RebuiltUri.ShouldEqual(new Uri(@"rabbitmq://guest:guest@some_server:12/queue/the_queue"));
         }
         [Then]
         public void ShouldBeAQueue()
         {
-            _addr.IsExchange.ShouldBeFalse();
+            _addr.AddressType.ShouldEqual(AddressType.Queue);
         }
     }
 
@@ -137,7 +137,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void ShouldBeAQueue()
         {
-            _addr.IsExchange.ShouldBeFalse();
+            _addr.AddressType.ShouldEqual(AddressType.Queue);
         }
     }
 
@@ -168,7 +168,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void ShouldBeAQueue()
         {
-            _addr.IsExchange.ShouldBeFalse();
+            _addr.AddressType.ShouldEqual(AddressType.Queue);
         }
     }
     
@@ -206,10 +206,27 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void ShouldBeAQueue()
         {
-            _addr.IsExchange.ShouldBeFalse();
+            _addr.AddressType.ShouldEqual(AddressType.Queue);
         }
     }
+    [Scenario]
+    public class GivenAnExchangeAddressWithHost
+    {
+        Uri uri  = new Uri("rabbitmq://dru:mt@some_server/vhost/exchange/urn:message:masstransit.ping");
+        RabbitMqAddress _addr;
 
+        [When]
+        public void WhenParsed()
+        {
+            _addr = new RabbitMqAddress(uri);
+        }
+
+        [Then]
+        public void ShouldBeAnExchange()
+        {
+            _addr.AddressType.ShouldEqual(AddressType.Exchange);
+        }
+    }
     [Scenario]
     public class GivenAnExchangeAddress
     {
@@ -225,7 +242,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void ShouldBeAnExchange()
         {
-            _addr.IsExchange.ShouldBeTrue();
+            _addr.AddressType.ShouldEqual(AddressType.Exchange);
         }
     }
 }
