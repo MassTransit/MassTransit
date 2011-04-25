@@ -10,26 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.EndpointConfigurators
 {
-	using System;
-	using BusConfigurators;
-	using Configurators;
-
-	public static class ControlBusConfigurationExtensions
+	public class EndpointFactoryDefaultSettings
 	{
-		public static void UseControlBus(this ServiceBusConfigurator configurator)
-		{
-			UseControlBus(configurator, x => { });
-		}
-
-		public static void UseControlBus(this ServiceBusConfigurator configurator, Action<ControlBusConfigurator> configure)
-		{
-			var controlBusConfigurator = new ControlBusConfiguratorImpl();
-
-			configure(controlBusConfigurator);
-
-			configurator.AddBusConfigurator(controlBusConfigurator);
-		}
 	}
 }

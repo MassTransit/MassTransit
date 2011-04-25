@@ -1,4 +1,4 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,36 +13,38 @@
 namespace MassTransit
 {
 	using System;
-	using BusConfigurators;
+	using EndpointConfigurators;
 	using Magnum;
+	using Transports;
 	using Util;
 
-	/// <summary>
-	/// The starting point to configure and create a service bus instance
-	/// </summary>
-	public static class ServiceBusFactory
+	public static class EndpointCacheFactory
 	{
-		static readonly ServiceBusDefaultSettings _defaultSettings = new ServiceBusDefaultSettings();
+		static readonly EndpointFactoryDefaultSettings _defaultSettings = new EndpointFactoryDefaultSettings();
 
 		[NotNull]
-		public static IServiceBus New([NotNull] Action<ServiceBusConfigurator> configure)
+		public static IEndpointCache New([NotNull] Action<EndpointFactoryConfigurator> configure)
 		{
 			Guard.AgainstNull(configure, "configure");
 
-			var configurator = new ServiceBusConfiguratorImpl(_defaultSettings);
+			var configurator = new EndpointFactoryConfiguratorImpl(_defaultSettings);
 
 			configure(configurator);
 
 			configurator.Validate();
 
-			return configurator.CreateServiceBus();
+			IEndpointFactory endpointFactory = configurator.CreateEndpointFactory();
+
+			IEndpointCache endpointCache = new EndpointCache(endpointFactory);
+
+			return endpointCache;
 		}
 
-		public static void ConfigureDefaultSettings([NotNull] Action<ServiceBusDefaultSettingsConfigurator> configure)
+		public static void ConfigureDefaultSettings([NotNull] Action<EndpointFactoryDefaultSettingsConfigurator> configure)
 		{
 			Guard.AgainstNull(configure);
 
-			var configurator = new ServiceBusDefaultSettingsConfiguratorImpl(_defaultSettings);
+			var configurator = new EndpointFactoryDefaultSettingsConfiguratorImpl(_defaultSettings);
 
 			configure(configurator);
 		}

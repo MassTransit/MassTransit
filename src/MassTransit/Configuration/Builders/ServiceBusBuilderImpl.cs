@@ -14,7 +14,9 @@ namespace MassTransit.Builders
 {
 	using System;
 	using System.Collections.Generic;
+	using BusServiceConfigurators;
 	using Configurators;
+	using Exceptions;
 	using log4net;
 	using Magnum;
 	using Pipeline.Configuration;
@@ -33,8 +35,11 @@ namespace MassTransit.Builders
 
 		public ServiceBusBuilderImpl(BusSettings settings, IEndpointCache endpointCache)
 		{
-			Guard.AgainstNull(settings, "description");
+			Guard.AgainstNull(settings, "settings");
+			Guard.AgainstNull(endpointCache, "endpointCache");
+
 			_settings = settings;
+			_endpointCache = endpointCache;
 
 			_postCreateActions = new List<Action<ServiceBus>>();
 		}
@@ -52,33 +57,18 @@ namespace MassTransit.Builders
 
 		public IEndpointCache EndpointCache
 		{
-			get { throw new NotImplementedException(); }
+			get {return _endpointCache; }
 		}
 
 		public IControlBus Build()
 		{
-			if (_settings.EndpointCache == null)
-			{
-				var endpointFactory = CreateEndpointFactory();
-
-				_endpointCache = CreateEndpointCache(endpointFactory);
-			}
-			else
-			{
-				_endpointCache = _settings.EndpointCache;
-			}
-
 			ServiceBus bus = CreateServiceBus(_endpointCache);
-
-//			ConfigurePoisonEndpoint(bus);
 
 			ConfigureBusSettings(bus);
 
 			ConfigureMessageInterceptors(bus);
 
-			ConfigureControlBus(bus);
-
-			ConfigureBusServices(bus);
+			RunPostCreateActions();
 
 			if (_settings.AutoStart)
 			{
@@ -88,6 +78,20 @@ namespace MassTransit.Builders
 			return bus;
 		}
 
+		void RunPostCreateActions(ServiceBus bus)
+		{
+			foreach (var postCreateAction in _postCreateActions)
+			{
+				try
+				{
+					postCreateAction(bus);
+				}
+				catch (Exception ex)
+				{
+					throw new ConfigurationException("An exception was thrown while running post-creation actions", ex);
+				}
+			}
+		}
 
 		public void UseControlBus(IControlBus controlBus)
 		{
@@ -99,7 +103,7 @@ namespace MassTransit.Builders
 			_postCreateActions.Add(postCreateAction);
 		}
 
-		public void AddBusServiceConfigurator(IBusServiceConfigurator configurator)
+		public void AddBusServiceConfigurator(BusServiceConfigurator configurator)
 		{
 			throw new NotImplementedException();
 		}

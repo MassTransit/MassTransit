@@ -13,11 +13,12 @@
 namespace MassTransit.Services.HealthMonitoring.Configuration
 {
 	using System;
+	using BusServiceConfigurators;
 	using Configurators;
 	using Internal;
 
 	public class HealthClientConfigurator :
-		IBusServiceConfigurator
+		BusServiceConfigurator
 	{
 		int _intervalInSeconds;
 

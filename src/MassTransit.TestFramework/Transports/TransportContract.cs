@@ -1,5 +1,5 @@
-// Copyright 2007-2011 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,87 +12,79 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework.Transports
 {
-    using System;
-    using System.Transactions;
-    using Configuration;
-    using MassTransit.Transports;
-    using Messages;
-    using NUnit.Framework;
-    using Rhino.Mocks;
+	using System;
+	using System.Transactions;
+	using MassTransit.Transports;
+	using Messages;
+	using NUnit.Framework;
 
-    public abstract class TransportContract<TTransportFactory>
-        where TTransportFactory : ITransportFactory
-    {
-        IEndpoint _ep;
-        IEndpointCache _endpointCache;
-        public IObjectBuilder ObjectBuilder { get; set; }
-        public Uri Address { get; set; }
-        public Action<Uri> VerifyMessageIsNotInQueue { get; set; }
+	public abstract class TransportContract<TTransportFactory>
+		where TTransportFactory : ITransportFactory, new()
+	{
+		IEndpoint _endpoint;
 
-        protected TransportContract(Uri uri)
-        {
-            Address = uri;
-        }
+		protected TransportContract(Uri uri)
+		{
+			Address = uri;
+		}
+
+		public Uri Address { get; set; }
+		public Action<Uri> VerifyMessageIsNotInQueue { get; set; }
 
 
-        [SetUp]
-        public void SetUp()
-        {
-            ObjectBuilder = MockRepository.GenerateStub<IObjectBuilder>();
-            _endpointCache = EndpointResolverConfiguratorImpl.New(c =>
-            {
-                c.AddTransportFactory<TTransportFactory>();
-                c.SetObjectBuilder(ObjectBuilder);
-            });
-            _ep = _endpointCache.GetEndpoint(Address);
-        }
+		[SetUp]
+		public void SetUp()
+		{
+			IEndpointCache endpointCache = EndpointCacheFactory.New(x => x.AddTransportFactory<TTransportFactory>());
 
-        [TearDown]
-        public void TearDown()
-        {
-            _ep.Dispose();
-            _ep = null;
-        }
+			_endpoint = endpointCache.GetEndpoint(Address);
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			_endpoint.Dispose();
+			_endpoint = null;
+		}
 
 
-        [Test]
-        public void While_writing_it_should_perisist_on_complete()
-        {
-            using (TransactionScope trx = new TransactionScope())
-            {
-                _ep.Send(new DeleteMessage());
-                trx.Complete();
-            }
+		[Test]
+		public void While_writing_it_should_perisist_on_complete()
+		{
+			using (var trx = new TransactionScope())
+			{
+				_endpoint.Send(new DeleteMessage());
+				trx.Complete();
+			}
 
-            VerifyMessageIsInQueue(_ep);
-        }
+			VerifyMessageIsInQueue(_endpoint);
+		}
 
-        [Test]
-        public void While_writing_it_should_perisist_even_on_rollback()
-        {
-            using (TransactionScope trx = new TransactionScope())
-            {
-                _ep.Send(new DeleteMessage());
-                //no complete
-            }
+		[Test]
+		public void While_writing_it_should_perisist_even_on_rollback()
+		{
+			using (var trx = new TransactionScope())
+			{
+				_endpoint.Send(new DeleteMessage());
+				//no complete
+			}
 
-            VerifyMessageIsInQueue(_ep);
-        }
+			VerifyMessageIsInQueue(_endpoint);
+		}
 
-        //outside transaction
-        [Test]
-        public void While_writing_it_should_persist()
-        {
-            _ep.Send(new DeleteMessage());
+		//outside transaction
+		[Test]
+		public void While_writing_it_should_persist()
+		{
+			_endpoint.Send(new DeleteMessage());
 
-            VerifyMessageIsInQueue(_ep);
-        }
+			VerifyMessageIsInQueue(_endpoint);
+		}
 
 
-        public void VerifyMessageIsInQueue(IEndpoint ep)
-        {
-            ep.ShouldContain<DeleteMessage>();
-        }
-
-    }
+		public void VerifyMessageIsInQueue(IEndpoint ep)
+		{
+			ep.ShouldContain<DeleteMessage>();
+		}
+	}
 }

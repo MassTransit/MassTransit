@@ -96,12 +96,14 @@
     <Compile Include="Configuration\Builders\EndpointFactoryBuilder.cs" />
     <Compile Include="Configuration\Builders\EndpointFactoryBuilderImpl.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilder.cs" />
-    <Compile Include="Configuration\BusConfiguration.cs" />
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
+    <Compile Include="Configuration\EndpointCacheFactory.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointDefaults.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettings.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettingsConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IEndpointDefaults.cs" />
-    <Compile Include="Configuration\BusConfigurators\ServiceBusConfiguratorDefaultSettings.cs" />
+    <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettings.cs" />
     <Compile Include="Configuration\BusConfigurators\PostCreateBusBuilderConfiguratorImpl.cs" />
     <Compile Include="Configuration\Configurators\Configurator.cs" />
     <Compile Include="Configuration\BusConfigurators\ControlBusConfigurator.cs" />
@@ -119,9 +121,9 @@
     <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettingsConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettingsConfiguratorImpl.cs" />
     <Compile Include="Configuration\EndpointConfigurators\TransportFactoryEndpointFactoryConfigurator.cs" />
-    <Compile Include="Configuration\ControlBusConfigurationExtensions.cs" />
+    <Compile Include="Configuration\ControlBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\MassTransitTransportFactoryOptionsExtensions.cs" />
+    <Compile Include="Configuration\EndpointFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SerializerConfigurationExtensions.cs" />
     <Compile Include="Configuration\BusSettings.cs" />
     <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
@@ -132,6 +134,7 @@
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
+    <Compile Include="IBusService.cs" />
     <Compile Include="IInboundTransport.cs" />
     <Compile Include="IOutboundTransport.cs" />
     <Compile Include="ITransport.cs" />
@@ -285,7 +288,6 @@
     <Compile Include="Internal\IInboundMessageHeaders.cs" />
     <Compile Include="Internal\IMessageHeaders.cs" />
     <Compile Include="Internal\InboundMessage.cs" />
-    <Compile Include="Internal\IBusService.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointConfigurator.cs" />
     <Compile Include="Internal\IOutboundMessage.cs" />
     <Compile Include="Internal\ISetInboundMessageHeaders.cs" />
@@ -450,10 +452,10 @@
     <Compile Include="Internal\OutboundMessage.cs" />
     <Compile Include="IEndpointCache.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryConfigurator.cs" />
-    <Compile Include="Configuration\IServiceBusConfigurator.cs" />
-    <Compile Include="Configuration\IServiceBusConfiguratorDefaults.cs" />
-    <Compile Include="Configuration\BusServiceConfigurators\IBusServiceConfigurator.cs" />
-    <Compile Include="Configuration\ServiceBusConfigurator.cs" />
+    <Compile Include="Configuration\Configuration\IServiceBusConfigurator.cs" />
+    <Compile Include="Configuration\Configuration\IServiceBusConfiguratorDefaults.cs" />
+    <Compile Include="Configuration\BusServiceConfigurators\BusServiceConfigurator.cs" />
+    <Compile Include="Configuration\Configuration\ServiceBusConfigurator.cs" />
     <Compile Include="Internal\InboundOutboundSubscriptionBinder.cs" />
     <Compile Include="Pipeline\IMessagePipeline.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfigurator.cs" />
@@ -552,7 +554,6 @@
     <Compile Include="Util\SequenceNumberGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Configuration\Configuration\" />
     <Folder Include="Services\HealthMonitoring\Client\" />
   </ItemGroup>
   <ItemGroup>

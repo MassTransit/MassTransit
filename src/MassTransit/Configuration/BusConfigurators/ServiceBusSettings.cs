@@ -17,7 +17,7 @@ namespace MassTransit.BusConfigurators
 	public class ServiceBusSettings :
 		BusSettings
 	{
-		public ServiceBusSettings(ServiceBusConfiguratorDefaultSettings defaultSettings)
+		public ServiceBusSettings(ServiceBusDefaultSettings defaultSettings)
 		{
 			AutoStart = defaultSettings.AutoStart;
 			ObjectBuilder = defaultSettings.ObjectBuilder;

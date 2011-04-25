@@ -13,11 +13,11 @@
 namespace MassTransit
 {
 	using System;
-	using Configurators;
 	using EndpointConfigurators;
 	using Magnum.Reflection;
 	using Serialization;
 	using Transports;
+
 
 	public static class EndpointConfiguratorExtensions
 	{

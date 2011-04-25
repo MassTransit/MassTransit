@@ -10,16 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Configurators
+namespace MassTransit.BusServiceConfigurators
 {
 	using System;
 	using Builders;
 	using BusConfigurators;
 	using Exceptions;
-	using Internal;
 
 	public class DefaultBusServiceConfigurator<TService> :
-		IBusServiceConfigurator,
+		BusServiceConfigurator,
 		BusBuilderConfigurator
 		where TService : IBusService
 	{
@@ -35,16 +34,6 @@ namespace MassTransit.Configurators
 			_serviceFactory = serviceFactory;
 		}
 
-		public Type ServiceType
-		{
-			get { return typeof (TService); }
-		}
-
-		public IBusService Create(IServiceBus bus)
-		{
-			return _serviceFactory(bus);
-		}
-
 		public void Validate()
 		{
 			if (_serviceFactory == null)
@@ -56,6 +45,16 @@ namespace MassTransit.Configurators
 			builder.Match<ServiceBusBuilder>(x => x.AddBusServiceConfigurator(this));
 
 			return builder;
+		}
+
+		public Type ServiceType
+		{
+			get { return typeof (TService); }
+		}
+
+		public IBusService Create(IServiceBus bus)
+		{
+			return _serviceFactory(bus);
 		}
 	}
 }

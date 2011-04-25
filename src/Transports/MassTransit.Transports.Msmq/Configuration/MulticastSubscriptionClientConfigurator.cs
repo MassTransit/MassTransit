@@ -14,6 +14,7 @@ namespace MassTransit.Configuration
 {
 	using System;
 	using System.Net;
+	using BusServiceConfigurators;
 	using Configurators;
 	using Exceptions;
 	using Internal;
@@ -22,7 +23,7 @@ namespace MassTransit.Configuration
 
 	public class MulticastSubscriptionClientConfigurator :
 		IMulticastSubscriptionClientConfigurator,
-		IBusServiceConfigurator
+		BusServiceConfigurator
 	{
 		private IPEndPoint _multicastAddress;
 		private string _networkKey;

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,32 +12,32 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using Configuration;
+	using Magnum.TestFramework;
 	using MassTransit.Serialization;
 	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Rhino.Mocks;
-	using Magnum.TestFramework;
 
-    [TestFixture]
+	[TestFixture]
 	public class Configuration_Specs
 	{
 		[Test]
 		public void Setting_a_specific_message_serializer_on_the_endpoint_should_work()
 		{
-			var objectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
-
-			var endpointFactory = EndpointResolverConfigurator.New(x =>
+			IEndpointCache endpointCache = EndpointCacheFactory.New(x =>
 				{
-					x.SetObjectBuilder(objectBuilder);
 					x.AddTransportFactory<LoopbackTransportFactory>();
-
 					x.ConfigureEndpoint("loopback://localhost/mt_client", y => { y.SetSerializer<DotNotXmlMessageSerializer>(); });
 				});
 
-			IEndpoint endpoint = endpointFactory.GetEndpoint("loopback://localhost/mt_client");
+			IEndpoint endpoint = endpointCache.GetEndpoint("loopback://localhost/mt_client");
+			endpoint.ShouldNotBeNull();
 
-		    endpoint.ShouldNotBeNull();
+			Endpoint endpointClass = endpoint as Endpoint;
+			endpointClass.ShouldNotBeNull();
+
+			IMessageSerializer serializer = endpointClass.Serializer;
+			serializer.ShouldNotBeNull();
+			serializer.ShouldBeAnInstanceOf<DotNotXmlMessageSerializer>();
 		}
 	}
 }

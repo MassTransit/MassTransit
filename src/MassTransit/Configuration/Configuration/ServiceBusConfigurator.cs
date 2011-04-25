@@ -15,31 +15,30 @@ namespace MassTransit.Configuration
 	using System;
 	using System.Collections.Generic;
 	using BusConfigurators;
+	using BusServiceConfigurators;
 	using Configurators;
 	using Exceptions;
 	using Internal;
 	using log4net;
 	using Pipeline.Configuration;
 
-    public class ServiceBusConfiguratorxx : IServiceBusConfiguratorDefaults
+	[Obsolete("Replaced by ServiceBusFactory")]
+    public class ServiceBusConfigurator : 
+		IServiceBusConfiguratorDefaults
     {
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusConfigurator));
 
 		private readonly List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>> _services;
-		private Uri _receiveFromUri;
-	    private Action _beforeConsume;
-	    private Action _afterConsume;
-        IEndpointCache _endpointCache;
 
         //CHANGED TO SUPPORT THE MOVE TO THE NEXT CONFIG MODEL
-	    internal ServiceBusConfigurator()
+	    ServiceBusConfigurator()
 		{
 			_services = new List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>>();
 		}
 
 		protected IControlBus ControlBus { get; set; }
 
-		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure) where TServiceConfigurator : IBusServiceConfigurator, new()
+		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure) where TServiceConfigurator : BusServiceConfigurator, new()
 		{
 			_services.Add((bus, builder, add) =>
 				{

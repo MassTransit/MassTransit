@@ -14,10 +14,8 @@ namespace MassTransit
 {
 	using System;
 	using BusConfigurators;
-	using Configurators;
 	using EndpointConfigurators;
 	using Exceptions;
-	using Magnum.Reflection;
 	using Serialization;
 	using Transports;
 
@@ -41,7 +39,7 @@ namespace MassTransit
 		/// <returns></returns>
 		public static EndpointConfigurator ConfigureEndpoint(this ServiceBusConfigurator configurator, string uriString)
 		{
-			return configurator.ConfigureEndpoint(uriString.ToUri("The configure endpoint URI is invalid"));
+			return ((EndpointFactoryConfigurator) configurator).ConfigureEndpoint(uriString);
 		}
 
 		/// <summary>
@@ -52,11 +50,7 @@ namespace MassTransit
 		/// <returns></returns>
 		public static EndpointConfigurator ConfigureEndpoint(this ServiceBusConfigurator configurator, Uri uri)
 		{
-			var endpointConfigurator = new EndpointConfiguratorImpl(uri);
-
-			configurator.AddEndpointFactoryConfigurator(endpointConfigurator);
-
-			return endpointConfigurator;
+			return ((EndpointFactoryConfigurator) configurator).ConfigureEndpoint(uri);
 		}
 
 		/// <summary>
@@ -69,9 +63,7 @@ namespace MassTransit
 		public static void ConfigureEndpoint(this ServiceBusConfigurator configurator, string uriString,
 		                                     Action<EndpointConfigurator> configureCallback)
 		{
-			EndpointConfigurator endpointConfigurator = configurator.ConfigureEndpoint(uriString.ToUri("The configure endpoint URI is invalid"));
-
-			configureCallback(endpointConfigurator);
+			((EndpointFactoryConfigurator) configurator).ConfigureEndpoint(uriString, configureCallback);
 		}
 
 		/// <summary>
@@ -83,42 +75,43 @@ namespace MassTransit
 		public static void ConfigureEndpoint(this ServiceBusConfigurator configurator, Uri uri,
 		                                     Action<EndpointConfigurator> configureCallback)
 		{
-			EndpointConfigurator endpointConfigurator = configurator.ConfigureEndpoint(uri);
-
-			configureCallback(endpointConfigurator);
+			((EndpointFactoryConfigurator) configurator).ConfigureEndpoint(uri, configureCallback);
 		}
 
 		public static ServiceBusConfigurator AddTransportFactory(this ServiceBusConfigurator configurator, ITransportFactory transportFactory)
 		{
-			return AddTransportFactory(configurator, () => transportFactory);
+			((EndpointFactoryConfigurator) configurator).AddTransportFactory(transportFactory);
+
+			return configurator;
 		}
 
 		public static ServiceBusConfigurator AddTransportFactory<TTransportFactory>(this ServiceBusConfigurator configurator)
 			where TTransportFactory : ITransportFactory, new()
 		{
-			return AddTransportFactory(configurator, () => new TTransportFactory());
+			((EndpointFactoryConfigurator) configurator).AddTransportFactory<TTransportFactory>();
+
+			return configurator;
 		}
 
 		public static ServiceBusConfigurator AddTransportFactory(this ServiceBusConfigurator configurator, Type transportFactoryType)
 		{
-			return AddTransportFactory(configurator, () => (ITransportFactory) FastActivator.Create(transportFactoryType));
+			((EndpointFactoryConfigurator) configurator).AddTransportFactory(transportFactoryType);
+
+			return configurator;
 		}
+
 
 		public static ServiceBusConfigurator AddTransportFactory(this ServiceBusConfigurator configurator,
 		                                                         Func<ITransportFactory> transportFactoryFactory)
 		{
-			var transportFactoryConfigurator = new TransportFactoryEndpointFactoryConfigurator(transportFactoryFactory);
-
-			configurator.AddEndpointFactoryConfigurator(transportFactoryConfigurator);
+			((EndpointFactoryConfigurator) configurator).AddTransportFactory(transportFactoryFactory);
 
 			return configurator;
 		}
 
 		public static ServiceBusConfigurator SetDefaultSerializer(this ServiceBusConfigurator configurator, Func<IMessageSerializer> serializerFactory)
 		{
-			var serializerConfigurator = new DefaultSerializerEndpointFactoryConfigurator(serializerFactory);
-
-			configurator.AddEndpointFactoryConfigurator(serializerConfigurator);
+			((EndpointFactoryConfigurator) configurator).SetDefaultSerializer(serializerFactory);
 
 			return configurator;
 		}
@@ -132,7 +125,9 @@ namespace MassTransit
 		public static ServiceBusConfigurator SetDefaultSerializer<TSerializer>(this ServiceBusConfigurator configurator)
 			where TSerializer : IMessageSerializer, new()
 		{
-			return SetDefaultSerializer(configurator, () => new TSerializer());
+			((EndpointFactoryConfigurator) configurator).SetDefaultSerializer<TSerializer>();
+
+			return configurator;
 		}
 
 		/// <summary>
@@ -143,7 +138,9 @@ namespace MassTransit
 		/// <returns></returns>
 		public static ServiceBusConfigurator SetDefaultSerializer(this ServiceBusConfigurator configurator, Type serializerType)
 		{
-			return SetDefaultSerializer(configurator, () => (IMessageSerializer) FastActivator.Create(serializerType));
+			((EndpointFactoryConfigurator) configurator).SetDefaultSerializer(serializerType);
+
+			return configurator;
 		}
 
 		/// <summary>
@@ -154,7 +151,9 @@ namespace MassTransit
 		/// <returns></returns>
 		public static ServiceBusConfigurator SetDefaultSerializer(this ServiceBusConfigurator configurator, IMessageSerializer serializer)
 		{
-			return SetDefaultSerializer(configurator, () => serializer);
+			((EndpointFactoryConfigurator) configurator).SetDefaultSerializer(serializer);
+
+			return configurator;
 		}
 
 		internal static Uri ToUri(this string uriString)

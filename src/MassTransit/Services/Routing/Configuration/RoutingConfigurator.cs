@@ -14,12 +14,13 @@ namespace MassTransit.Services.Routing.Configuration
 {
 	using System;
 	using System.Collections.Generic;
+	using BusServiceConfigurators;
 	using Configurators;
 	using Internal;
 	using Pipeline;
 
 	public class RoutingConfigurator :
-		IBusServiceConfigurator
+		BusServiceConfigurator
 	{
 		readonly IList<Func<IServiceBus, UnsubscribeAction>> _routes = new List<Func<IServiceBus, UnsubscribeAction>>();
 

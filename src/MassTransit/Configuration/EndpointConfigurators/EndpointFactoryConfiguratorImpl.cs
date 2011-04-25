@@ -14,10 +14,9 @@ namespace MassTransit.EndpointConfigurators
 {
 	using System;
 	using System.Collections.Generic;
-	using Configurators;
-	using MassTransit.Builders;
-	using MassTransit.Exceptions;
-	using MassTransit.Transports;
+	using Builders;
+	using Exceptions;
+	using Transports;
 
 	public class EndpointFactoryConfiguratorImpl :
 		EndpointFactoryConfigurator
@@ -25,7 +24,7 @@ namespace MassTransit.EndpointConfigurators
 		readonly IList<EndpointFactoryBuilderConfigurator> _endpointFactoryConfigurators;
 		Func<EndpointFactoryBuilder> _endpointFactoryBuilderFactory;
 
-		public EndpointFactoryConfiguratorImpl()
+		public EndpointFactoryConfiguratorImpl(EndpointFactoryDefaultSettings defaultSettings)
 		{
 			_endpointFactoryBuilderFactory = DefaultEndpointResolverBuilderFactory;
 			_endpointFactoryConfigurators = new List<EndpointFactoryBuilderConfigurator>();
