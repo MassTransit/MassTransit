@@ -13,6 +13,7 @@
 namespace MassTransit.Tests
 {
     using System.Threading;
+    using BusConfigurators;
     using Configuration;
     using Magnum.TestFramework;
     using MassTransit.Transports;
@@ -47,7 +48,7 @@ namespace MassTransit.Tests
             _before = new ManualResetEvent(false);
             _after = new ManualResetEvent(false);
 
-            LocalBus = ServiceBusConfigurator.New(x =>
+            LocalBus = ServiceBusFactory.New(x =>
                 {
                     x.ReceiveFrom("loopback://localhost/mt_client");
 

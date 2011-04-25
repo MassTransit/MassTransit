@@ -13,6 +13,7 @@
 namespace MassTransit.Builders
 {
 	using System;
+	using log4net;
 	using Magnum;
 	using Util;
 
@@ -20,21 +21,20 @@ namespace MassTransit.Builders
 		BusBuilder,
 		IDisposable
 	{
-		readonly IEndpointCache _endpointCache;
+		static readonly ILog _log = LogManager.GetLogger(typeof (ControlBusBuilderImpl));
+
 		readonly BusSettings _settings;
 
-		public ControlBusBuilderImpl([NotNull] BusSettings settings, [NotNull] IEndpointCache endpointCache)
+		public ControlBusBuilderImpl([NotNull] BusSettings settings)
 		{
 			Guard.AgainstNull(settings, "settings");
-			Guard.AgainstNull(endpointCache, "endpointCache");
 
 			_settings = settings;
-			_endpointCache = endpointCache;
 		}
 
 		public IEndpointCache EndpointCache
 		{
-			get { return _endpointCache; }
+			get { return _settings.EndpointCache; }
 		}
 
 		public BusSettings Settings
@@ -44,6 +44,19 @@ namespace MassTransit.Builders
 
 		public IControlBus Build()
 		{
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Creating ControlBus at {0}", _settings.InputAddress);
+
+			ServiceBus bus = CreateServiceBus();
+
+			ConfigureBusSettings(bus);
+
+			if (_settings.AutoStart)
+			{
+				bus.Start();
+			}
+
+			return bus;
 		}
 
 		public void Match<T>(Action<T> callback)
@@ -53,6 +66,26 @@ namespace MassTransit.Builders
 
 		public void Dispose()
 		{
+		}
+
+		ServiceBus CreateServiceBus()
+		{
+			IEndpoint endpoint = _settings.EndpointCache.GetEndpoint(_settings.InputAddress);
+
+			var serviceBus = new ServiceBus(endpoint, _settings.ObjectBuilder, _settings.EndpointCache);
+
+			return serviceBus;
+		}
+
+		void ConfigureBusSettings(ServiceBus bus)
+		{
+			if (_settings.ConcurrentConsumerLimit > 0)
+				bus.MaximumConsumerThreads = _settings.ConcurrentConsumerLimit;
+
+			if (_settings.ConcurrentReceiverLimit > 0)
+				bus.ConcurrentReceiveThreads = _settings.ConcurrentReceiverLimit;
+
+			bus.ReceiveTimeout = _settings.ReceiveTimeout;
 		}
 	}
 }

@@ -34,16 +34,8 @@ namespace MassTransit.Tests
 		protected override void Before_each()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_endpointCache = EndpointResolverConfigurator.New(x =>
+			_bus = ServiceBusFactory.New(x =>
 				{
-					x.SetObjectBuilder(_builder);
-					x.SetDefaultSerializer<XmlMessageSerializer>();
-					x.AddTransportFactory<LoopbackTransportFactory>();
-				});
-			_builder.Stub(x => x.GetInstance<IEndpointCache>()).Return(_endpointCache);
-			_bus = ServiceBusConfigurator.New(x =>
-				{
-                    x.SetEndpointFactory(_endpointCache);
 					x.SetObjectBuilder(_builder);
 					x.ReceiveFrom("loopback://localhost/servicebus");
 				});
@@ -125,21 +117,17 @@ namespace MassTransit.Tests
 
 		private IEndpointCache _cache;
 		private IEndpoint _endpoint;
-		private ServiceBus _bus;
+		private IServiceBus _bus;
 		private IObjectBuilder _builder;
 
 		protected override void Before_each()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_cache = EndpointResolverConfigurator.New(x =>
-				{
-					x.SetObjectBuilder(_builder);
-					x.SetDefaultSerializer<XmlMessageSerializer>();
-					x.AddTransportFactory<LoopbackTransportFactory>();
-				});
-			_endpoint = _cache.GetEndpoint(new Uri("loopback://localhost/servicebus"));
-			_bus = new ServiceBus(_endpoint, _builder, _cache);
-			_bus.Start();
+			_bus = ServiceBusFactory.New(x =>
+			{
+				x.SetObjectBuilder(_builder);
+				x.ReceiveFrom("loopback://localhost/servicebus");
+			});
 		}
 
 

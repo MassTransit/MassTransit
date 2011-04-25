@@ -13,19 +13,37 @@
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
+	using Serialization;
 
 	public interface EndpointFactoryDefaultSettingsConfigurator
 	{
-	}
+		/// <summary>
+		/// Sets the default serializer used for endpoints
+		/// </summary>
+		void SetDefaultSerializer(IMessageSerializer serializerFactory);
 
-	public class EndpointFactoryDefaultSettingsConfiguratorImpl :
-		EndpointFactoryDefaultSettingsConfigurator
-	{
-		readonly EndpointFactoryDefaultSettings _defaultSettings;
+		/// <summary>
+		/// Sets the default transaction timeout for transactional queue operations
+		/// </summary>
+		/// <param name="transactionTimeout"></param>
+		void SetDefaultTransactionTimeout(TimeSpan transactionTimeout);
 
-		public EndpointFactoryDefaultSettingsConfiguratorImpl(EndpointFactoryDefaultSettings defaultSettings)
-		{
-			_defaultSettings = defaultSettings;
-		}
+		/// <summary>
+		/// Sets the flag indicating that missing queues should be created
+		/// </summary>
+		/// <param name="createMissingQueues"></param>
+		void SetCreateMissingQueues(bool createMissingQueues);
+
+		/// <summary>
+		/// When creating queues, attempt to create transactional queues if available
+		/// </summary>
+		/// <param name="createTransactionalQueues"></param>
+		void SetCreateTransactionalQueues(bool createTransactionalQueues);
+
+		/// <summary>
+		/// Specifies if the input queue should be purged on startup
+		/// </summary>
+		/// <param name="purgeOnStartup"></param>
+		void SetPurgeOnStartup(bool purgeOnStartup);
 	}
 }

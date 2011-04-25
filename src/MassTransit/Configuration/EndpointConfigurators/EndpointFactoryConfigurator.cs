@@ -13,9 +13,9 @@
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
+	using Builders;
 	using Configurators;
-	using MassTransit.Builders;
-	using MassTransit.Transports;
+	using Transports;
 
 	/// <summary>
 	/// Allows for the configuration of the EndpointFactory through the use of an EndpointFactoryConfigurator
@@ -23,6 +23,8 @@ namespace MassTransit.EndpointConfigurators
 	public interface EndpointFactoryConfigurator :
 		Configurator
 	{
+		IEndpointFactoryDefaultSettings Defaults { get; }
+
 		/// <summary>
 		/// Creates the endpoint factory with the configuration
 		/// </summary>

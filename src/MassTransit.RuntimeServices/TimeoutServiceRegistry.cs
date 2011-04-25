@@ -39,15 +39,11 @@ namespace MassTransit.RuntimeServices
 
 			For(typeof (ISagaRepository<>)).Use(typeof (NHibernateSagaRepositoryForContainers<>));
 
-			RegisterControlBus(configuration.TimeoutServiceControlUri, x => { x.SetConcurrentConsumerLimit(1); });
-
 			RegisterServiceBus(configuration.TimeoutServiceDataUri, x =>
 				{
-					x.UseControlBus(_container.GetInstance<IControlBus>());
+					x.UseControlBus();
 					x.SetConcurrentConsumerLimit(1);
-
-					ConfigureSubscriptionClient(configuration.SubscriptionServiceUri, x);
-
+					x.UseSubscriptionService(configuration.SubscriptionServiceUri);
 					x.ConfigureService<HealthClientConfigurator>(health => health.SetHeartbeatInterval(10));
 				});
 		}

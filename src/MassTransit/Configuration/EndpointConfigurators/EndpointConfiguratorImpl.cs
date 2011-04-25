@@ -21,37 +21,39 @@ namespace MassTransit.EndpointConfigurators
 
 	public class EndpointConfiguratorImpl :
 		EndpointConfigurator,
-		ITransportSettings,
 		EndpointFactoryBuilderConfigurator
 	{
-		static readonly EndpointDefaults _defaults = new EndpointDefaults();
+		readonly EndpointSettings _settings;
 		readonly Uri _uri;
+		IEndpointAddress _errorAddress;
 		Func<ITransportFactory, ITransportSettings, IOutboundTransport> _errorTransportFactory;
-		Func<IMessageSerializer> _serializerFactory;
+		Func<ITransportFactory, ITransportSettings, IDuplexTransport> _transportFactory;
 
-		public EndpointConfiguratorImpl(Uri uri)
+		public EndpointConfiguratorImpl(Uri uri, IEndpointFactoryDefaultSettings defaultSettings)
 		{
 			_uri = uri;
 			Guard.AgainstNull(uri, "uri");
 
-			Address = new EndpointAddress(uri);
+			_transportFactory = DefaultTransportFactory;
+			_errorTransportFactory = DefaultErrorTransportFactory;
 
-			CreateIfMissing = _defaults.CreateMissingQueues;
-			PurgeExistingMessages = _defaults.PurgeOnStartup;
-			Transactional = _defaults.CreateTransactionalQueues;
-			TransactionTimeout = _defaults.TransactionTimeout;
-			RequireTransactional = false;
-
-			_serializerFactory = () => new XmlMessageSerializer();
+			_settings = defaultSettings.CreateEndpointSettings(uri);
 		}
 
-
-		public EndpointConfigurator UseSerializer(Func<IMessageSerializer> serializerFactory)
+		public EndpointConfigurator UseSerializer(IMessageSerializer serializer)
 		{
-			_serializerFactory = serializerFactory;
+			_settings.Serializer = serializer;
+			return this;
 		}
 
-		public EndpointConfigurator SetErrorTransportFactory(Func<ITransportFactory, ITransportSettings, IOutboundTransport> errorTransportFactory)
+		public EndpointConfigurator SetErrorAddress(Uri uri)
+		{
+			_errorAddress = new EndpointAddress(uri);
+			return this;
+		}
+
+		public EndpointConfigurator SetErrorTransportFactory(
+			Func<ITransportFactory, ITransportSettings, IOutboundTransport> errorTransportFactory)
 		{
 			_errorTransportFactory = errorTransportFactory;
 			return this;
@@ -59,85 +61,40 @@ namespace MassTransit.EndpointConfigurators
 
 		public void Validate()
 		{
-			throw new NotImplementedException();
+			if (_errorAddress != null)
+			{
+				if (string.Compare(_errorAddress.Uri.Scheme, _settings.Address.Uri.Scheme, true) != 0)
+					throw new ConfigurationException("The error transport must be of the same type as the endpoint transport");
+			}
 		}
 
 		public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
 		{
-			var endpointBuilder = new EndpointBuilderImpl(_uri, builder.Defaults);
+			var endpointBuilder = CreateBuilder();
 
 			builder.AddEndpointBuilder(_uri, endpointBuilder);
 
 			return builder;
 		}
 
-		public IEndpointAddress Address { get; private set; }
-
-		public bool Transactional { get; private set; }
-
-		public bool RequireTransactional { get; private set; }
-
-		public TimeSpan TransactionTimeout { get; private set; }
-
-		public bool CreateIfMissing { get; private set; }
-
-		public bool PurgeExistingMessages { get; private set; }
-
-		public EndpointSettings New(Action<EndpointConfigurator> action)
+		public EndpointBuilder CreateBuilder()
 		{
-			try
-			{
-				action(this);
+			ITransportSettings errorSettings = new TransportSettings(_errorAddress ?? _settings.ErrorAddress, _settings);
 
-				IMessageSerializer serializer = _serializerFactory();
-				Guard.AgainstNull(serializer, "The message serializer cannot be null");
+			var endpointBuilder = new EndpointBuilderImpl(_uri, _settings, errorSettings, _transportFactory,
+				_errorTransportFactory);
 
-				var settings = new CreateEndpointSettings(Address, serializer, this);
-
-				Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
-				Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
-				Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
-
-				var endpointSettings = new EndpointSettings
-					{
-						Normal = settings,
-						Error = new CreateEndpointSettings(settings.ErrorAddress, settings)
-					};
-
-				return endpointSettings;
-			}
-			catch (Exception ex)
-			{
-				throw new EndpointException(Address.Uri, "Failed to create endpoint", ex);
-			}
+			return endpointBuilder;
 		}
 
-		IEndpoint BuildEndpoint(Uri uri)
+		static IDuplexTransport DefaultTransportFactory(ITransportFactory transportFactory, ITransportSettings settings)
 		{
-			Action<EndpointConfigurator> configurator = BuildEndpointConfiguration(uri);
-
-			return _factory.BuildEndpoint(uri, configurator);
+			return transportFactory.BuildLoopback(settings);
 		}
 
-		Action<EndpointConfigurator> BuildEndpointConfiguration(Uri uri)
+		static IOutboundTransport DefaultErrorTransportFactory(ITransportFactory transportFactory, ITransportSettings settings)
 		{
-			var key = new Uri(uri.ToString().ToLowerInvariant());
-
-			return x =>
-				{
-					x.SetSerializer(_serializer);
-
-					Action<EndpointConfigurator> endpointConfigurator;
-					if (_endpointConfigurators.TryGetValue(key, out endpointConfigurator))
-					{
-						endpointConfigurator(x);
-					}
-				};
-		}
-
-		public static void Defaults(Action<IEndpointDefaults> configureDefaults)
-		{
-			configureDefaults(_defaults);
+			return transportFactory.BuildError(settings);
 		}
 	}
 }

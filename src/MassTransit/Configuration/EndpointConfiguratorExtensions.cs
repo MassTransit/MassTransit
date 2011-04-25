@@ -28,7 +28,7 @@ namespace MassTransit
 		public static EndpointConfigurator UseSerializer<TSerializer>(this EndpointConfigurator configurator)
 			where TSerializer : IMessageSerializer, new()
 		{
-			return configurator.UseSerializer(() => new TSerializer());
+			return configurator.UseSerializer(new TSerializer());
 		}
 
 		/// <summary>
@@ -38,7 +38,7 @@ namespace MassTransit
 		/// <param name="serializerType"></param>
 		public static EndpointConfigurator UseSerializer(this EndpointConfigurator configurator, Type serializerType)
 		{
-			return configurator.UseSerializer(() => (IMessageSerializer) FastActivator.Create(serializerType));
+			return configurator.UseSerializer((IMessageSerializer) FastActivator.Create(serializerType));
 		}
 
 		/// <summary>

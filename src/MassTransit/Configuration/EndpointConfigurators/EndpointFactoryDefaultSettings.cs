@@ -12,7 +12,47 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.EndpointConfigurators
 {
-	public class EndpointFactoryDefaultSettings
+	using System;
+	using Magnum.Extensions;
+	using Serialization;
+	using Transports;
+
+	public class EndpointFactoryDefaultSettings :
+		IEndpointFactoryDefaultSettings
 	{
+		public EndpointFactoryDefaultSettings()
+		{
+			CreateMissingQueues = true;
+			PurgeOnStartup = false;
+			RequireTransactional = false;
+			Serializer = new XmlMessageSerializer();
+			TransactionTimeout = 30.Seconds();
+		}
+
+		public TimeSpan TransactionTimeout { get; set; }
+
+		public IMessageSerializer Serializer { get; set; }
+
+		public bool CreateMissingQueues { get; set; }
+
+		public bool RequireTransactional { get; set; }
+
+		public bool PurgeOnStartup { get; set; }
+
+		public bool CreateTransactionalQueues { get; set; }
+
+		public EndpointSettings CreateEndpointSettings(Uri uri)
+		{
+			var settings = new EndpointSettings(uri)
+				{
+					Serializer = Serializer,
+					CreateIfMissing = CreateMissingQueues,
+					TransactionTimeout = TransactionTimeout,
+					PurgeExistingMessages = PurgeOnStartup,
+					RequireTransactional = RequireTransactional,
+				};
+
+			return settings;
+		}
 	}
 }

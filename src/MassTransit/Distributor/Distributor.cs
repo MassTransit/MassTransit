@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -26,26 +26,28 @@ namespace MassTransit.Distributor
 		Consumes<T>.Selected
 		where T : class
 	{
-		private readonly IEndpointCache _endpointCache;
-		private readonly IWorkerSelectionStrategy<T> _selectionStrategy;
-		private readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers = new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
-		private Scheduler _scheduler;
-		private Fiber _fiber;
-		private UnsubscribeAction _unsubscribeAction = () => false;
-        private readonly int _pingTimeout = (int)1.Minutes().TotalMilliseconds;
-		private ScheduledOperation _scheduled;
+		readonly int _pingTimeout = (int) 1.Minutes().TotalMilliseconds;
+		readonly IWorkerSelectionStrategy<T> _selectionStrategy;
 
-		public Distributor(IEndpointCache endpointCache, IWorkerSelectionStrategy<T> workerSelectionStrategy)
+		readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers =
+			new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
+
+		Fiber _fiber;
+		ScheduledOperation _scheduled;
+		Scheduler _scheduler;
+		UnsubscribeAction _unsubscribeAction = () => false;
+		IServiceBus _bus;
+
+		public Distributor(IWorkerSelectionStrategy<T> workerSelectionStrategy)
 		{
-			_endpointCache = endpointCache;
 			_selectionStrategy = workerSelectionStrategy;
 
 			_fiber = new PoolFiber();
 			_scheduler = new TimerScheduler(new PoolFiber());
 		}
 
-		public Distributor(IEndpointCache endpointCache) :
-				this(endpointCache, new DefaultWorkerSelectionStrategy<T>())
+		public Distributor()
+			: this(new DefaultWorkerSelectionStrategy<T>())
 		{
 		}
 
@@ -60,7 +62,7 @@ namespace MassTransit.Distributor
 
 			worker.Add();
 
-			IEndpoint endpoint = _endpointCache.GetEndpoint(worker.DataUri);
+			IEndpoint endpoint = _bus.GetEndpoint(worker.DataUri);
 
 			var distributed = new Distributed<T>(message, CurrentMessage.Headers.ResponseAddress);
 
@@ -83,11 +85,12 @@ namespace MassTransit.Distributor
 
 		public void Start(IServiceBus bus)
 		{
+			_bus = bus;
+
 			_unsubscribeAction = bus.Subscribe<WorkerAvailable<T>>(Consume);
 
 			// don't plan to unsubscribe this since it's an important thing
 			bus.Subscribe(this);
-
 
 			_scheduled = _scheduler.Schedule(_pingTimeout, _pingTimeout, _fiber, PingWorkers);
 		}
@@ -118,15 +121,20 @@ namespace MassTransit.Distributor
 						};
 				});
 
-			worker.UpdateInProgress(message.InProgress, message.InProgressLimit, message.Pending, message.PendingLimit, message.Updated);
+			worker.UpdateInProgress(message.InProgress, message.InProgressLimit, message.Pending, message.PendingLimit,
+				message.Updated);
 		}
 
-		private void PingWorkers()
+		void PingWorkers()
 		{
 			_workers.Values
 				.Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(_pingTimeout.Milliseconds()))
 				.ToList()
-				.ForEach(x => { _endpointCache.GetEndpoint(x.ControlUri).Send(new PingWorker()); });
+				.ForEach(x =>
+					{
+						_bus.GetEndpoint(x.ControlUri).Send(new PingWorker(),
+							context => context.SetResponseAddress(_bus.Endpoint.Uri));
+					});
 		}
 	}
 }

@@ -39,7 +39,7 @@ namespace MassTransit
 		/// <returns></returns>
 		public static EndpointConfigurator ConfigureEndpoint(this EndpointFactoryConfigurator configurator, Uri uri)
 		{
-			var endpointConfigurator = new EndpointConfiguratorImpl(uri);
+			var endpointConfigurator = new EndpointConfiguratorImpl(uri, configurator.Defaults);
 
 			configurator.AddEndpointFactoryConfigurator(endpointConfigurator);
 
@@ -143,6 +143,42 @@ namespace MassTransit
 		public static EndpointFactoryConfigurator SetDefaultSerializer(this EndpointFactoryConfigurator configurator, IMessageSerializer serializer)
 		{
 			return SetDefaultSerializer(configurator, () => serializer);
+		}
+
+		public static EndpointFactoryConfigurator SetDefaultTransactionTimeout(this EndpointFactoryConfigurator configurator, TimeSpan timeout)
+		{
+			var builderConfigurator = new DelegateEndpointFactoryBuilderConfigurator(x => x.SetDefaultTransactionTimeout(timeout));
+
+			configurator.AddEndpointFactoryConfigurator(builderConfigurator);
+
+			return configurator;
+		}
+
+		public static EndpointFactoryConfigurator SetCreateMissingQueues(this EndpointFactoryConfigurator configurator, bool value)
+		{
+			var builderConfigurator = new DelegateEndpointFactoryBuilderConfigurator(x => x.SetCreateMissingQueues(value));
+
+			configurator.AddEndpointFactoryConfigurator(builderConfigurator);
+
+			return configurator;
+		}
+
+		public static EndpointFactoryConfigurator SetCreateTransactionalQueues(this EndpointFactoryConfigurator configurator, bool value)
+		{
+			var builderConfigurator = new DelegateEndpointFactoryBuilderConfigurator(x => x.SetCreateTransactionalQueues(value));
+
+			configurator.AddEndpointFactoryConfigurator(builderConfigurator);
+
+			return configurator;
+		}
+
+		public static EndpointFactoryConfigurator SetPurgeOnStartup(this EndpointFactoryConfigurator configurator, bool value)
+		{
+			var builderConfigurator = new DelegateEndpointFactoryBuilderConfigurator(x => x.SetPurgeOnStartup(value));
+
+			configurator.AddEndpointFactoryConfigurator(builderConfigurator);
+
+			return configurator;
 		}
 	}
 }

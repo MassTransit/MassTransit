@@ -22,14 +22,11 @@ namespace MassTransit.SystemView
 		{
 			IConfiguration configuration = container.GetInstance<IConfiguration>();
 
-			RegisterControlBus(configuration.SystemViewControlUri, x => { });
-
 			RegisterServiceBus(configuration.SystemViewDataUri, x =>
 				{
 					x.SetConcurrentConsumerLimit(1);
-					x.UseControlBus(container.GetInstance<IControlBus>());
-
-					ConfigureSubscriptionClient(configuration.SubscriptionServiceUri, x);
+					x.UseControlBus();
+					x.UseSubscriptionService(configuration.SubscriptionServiceUri);
 				});
 		}
 	}

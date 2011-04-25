@@ -27,6 +27,20 @@ namespace MassTransit.BusConfigurators
 			EndpointCache = defaultSettings.EndpointCache;
 		}
 
+		public ServiceBusSettings(BusSettings settings)
+		{
+			AutoStart = settings.AutoStart;
+			ObjectBuilder = settings.ObjectBuilder;
+			ConcurrentConsumerLimit = settings.ConcurrentConsumerLimit;
+			ConcurrentReceiverLimit = settings.ConcurrentReceiverLimit;
+			ReceiveTimeout = settings.ReceiveTimeout;
+			EndpointCache = settings.EndpointCache;
+		}
+
+		public ServiceBusSettings()
+		{
+		}
+
 		public IEndpointCache EndpointCache { get; set; }
 		public TimeSpan ReceiveTimeout { get; set; }
 		public int ConcurrentReceiverLimit { get; set; }

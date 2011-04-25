@@ -13,18 +13,16 @@
 namespace MassTransit.Distributor.Configuration
 {
 	using System;
+	using BusConfigurators;
 	using Magnum.Reflection;
-	using MassTransit.Configuration;
 
 	public class SagaDistributorConfigurator
 	{
-		private readonly IServiceBusConfigurator _configurator;
-		private readonly IEndpointCache _endpointCache;
+		private readonly ServiceBusConfigurator _configurator;
 
-		public SagaDistributorConfigurator(IServiceBusConfigurator configurator, IEndpointCache endpointCache)
+		public SagaDistributorConfigurator(ServiceBusConfigurator configurator)
 		{
 			_configurator = configurator;
-			_endpointCache = endpointCache;
 		}
 
 		public void AddService(Type type)
@@ -37,7 +35,7 @@ namespace MassTransit.Distributor.Configuration
 // ReSharper restore UnusedMember.Local
 			where TMessage : class
 		{
-			_configurator.AddService(() => new Distributor<TMessage>(_endpointCache));
+			_configurator.AddService(() => new Distributor<TMessage>());
 		}
 	}
 }

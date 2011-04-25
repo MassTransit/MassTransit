@@ -1,5 +1,5 @@
-// Copyright 2007-2011 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,52 +12,50 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
-	using Configurators;
-	using EndpointConfigurators;
 	using MassTransit.Tests.TextFixtures;
 
-    public class MsmqEndpointOnlyTestFixture :
-        EndpointTestFixture<MsmqTransportFactory>
-    {
-        public MsmqEndpointOnlyTestFixture() :
-            this(new CreateEndpointSettings("msmq://localhost/mt_client"))
-        {
-        }
+	public class MsmqEndpointOnlyTestFixture :
+		EndpointTestFixture<MsmqTransportFactory>
+	{
+		public MsmqEndpointOnlyTestFixture()
+			: this(new EndpointSettings("msmq://localhost/mt_client"))
+		{
+			ConfigureEndpointFactory(x =>
+				{
+					x.SetCreateMissingQueues(true);
+					x.SetCreateTransactionalQueues(Transactional);
+					x.SetPurgeOnStartup(true);
+				});
+		}
 
-        public MsmqEndpointOnlyTestFixture(CreateEndpointSettings settings)
-        {
-            Transactional = settings.Transactional;
-            EndpointAddress = settings.Address;
-            ErrorEndpointAddress = settings.ErrorAddress;
-        }
+		public MsmqEndpointOnlyTestFixture(EndpointSettings settings)
+		{
+			Transactional = settings.Transactional;
+			EndpointAddress = settings.Address;
+			ErrorEndpointAddress = settings.ErrorAddress;
+		}
 
-        protected override void EstablishContext()
-        {
-            base.EstablishContext();
 
-            EndpointConfiguratorImpl.Defaults(x =>
-            {
-                x.CreateMissingQueues = true;
-                x.CreateTransactionalQueues = Transactional;
-                x.PurgeOnStartup = true;
-            });
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
 
-            Endpoint = EndpointCache.GetEndpoint(EndpointAddress.Uri);
-            ErrorEndpoint = EndpointCache.GetEndpoint(ErrorEndpointAddress.Uri);
-        }
+			Endpoint = EndpointCache.GetEndpoint(EndpointAddress.Uri);
+			ErrorEndpoint = EndpointCache.GetEndpoint(ErrorEndpointAddress.Uri);
+		}
 
-        protected override void TeardownContext()
-        {
-            Endpoint = null;
-            ErrorEndpoint = null;
+		protected override void TeardownContext()
+		{
+			Endpoint = null;
+			ErrorEndpoint = null;
 
-            base.TeardownContext();
-        }
+			base.TeardownContext();
+		}
 
-        protected bool Transactional { get; private set; }
-        protected IEndpointAddress EndpointAddress { get; set; }
-        protected IEndpointAddress ErrorEndpointAddress { get; set; }
-        protected IEndpoint Endpoint { get; private set; }
-        protected IEndpoint ErrorEndpoint { get; private set; }
-    }
+		protected bool Transactional { get; private set; }
+		protected IEndpointAddress EndpointAddress { get; set; }
+		protected IEndpointAddress ErrorEndpointAddress { get; set; }
+		protected IEndpoint Endpoint { get; private set; }
+		protected IEndpoint ErrorEndpoint { get; private set; }
+	}
 }

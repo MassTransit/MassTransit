@@ -13,14 +13,17 @@
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
-	using MassTransit.Serialization;
+	using Serialization;
+	using Transports;
 
-	public interface IEndpointDefaults
+	public interface IEndpointFactoryDefaultSettings
 	{
 		IMessageSerializer Serializer { get; }
 		bool CreateMissingQueues { get; }
 		bool CreateTransactionalQueues { get; }
 		bool PurgeOnStartup { get; }
 		TimeSpan TransactionTimeout { get; }
+
+		EndpointSettings CreateEndpointSettings(Uri uri);
 	}
 }

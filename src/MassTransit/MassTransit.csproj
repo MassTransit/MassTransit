@@ -99,10 +99,8 @@
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
     <Compile Include="Configuration\EndpointCacheFactory.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\EndpointDefaults.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettings.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettingsConfigurator.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\IEndpointDefaults.cs" />
     <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettings.cs" />
     <Compile Include="Configuration\BusConfigurators\PostCreateBusBuilderConfiguratorImpl.cs" />
     <Compile Include="Configuration\Configurators\Configurator.cs" />
@@ -120,6 +118,8 @@
     <Compile Include="Configuration\BusConfigurators\ServiceBusSettings.cs" />
     <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettingsConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettingsConfiguratorImpl.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettingsConfiguratorImpl.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\IEndpointFactoryDefaultSettings.cs" />
     <Compile Include="Configuration\EndpointConfigurators\TransportFactoryEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\ControlBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfiguratorExtensions.cs" />
@@ -176,10 +176,9 @@
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
     <Compile Include="StreamExtensions.cs" />
-    <Compile Include="Transports\CreateTransportSettings.cs" />
+    <Compile Include="Transports\TransportSettings.cs" />
     <Compile Include="Transports\EndpointCacheExtensions.cs" />
     <Compile Include="Transports\EndpointFactory.cs" />
-    <Compile Include="Transports\EndpointSettings.cs" />
     <Compile Include="Transports\IEndpointFactory.cs" />
     <Compile Include="Transports\IEndpointSettings.cs" />
     <Compile Include="Transports\IReceiveContext.cs" />
@@ -405,7 +404,7 @@
     <Compile Include="Services\Timeout\Messages\TimeoutRescheduled.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutScheduled.cs" />
     <Compile Include="Services\Timeout\Server\TimeoutSaga.cs" />
-    <Compile Include="Transports\CreateEndpointSettings.cs" />
+    <Compile Include="Transports\EndpointSettings.cs" />
     <Compile Include="Transports\Loopback\LoopbackTransport.cs" />
     <Compile Include="Transports\MessageRetryTracker.cs" />
     <Compile Include="Transports\MulticastUdp\MulticastUdpTransport.cs" />
@@ -452,10 +451,8 @@
     <Compile Include="Internal\OutboundMessage.cs" />
     <Compile Include="IEndpointCache.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryConfigurator.cs" />
-    <Compile Include="Configuration\Configuration\IServiceBusConfigurator.cs" />
     <Compile Include="Configuration\Configuration\IServiceBusConfiguratorDefaults.cs" />
     <Compile Include="Configuration\BusServiceConfigurators\BusServiceConfigurator.cs" />
-    <Compile Include="Configuration\Configuration\ServiceBusConfigurator.cs" />
     <Compile Include="Internal\InboundOutboundSubscriptionBinder.cs" />
     <Compile Include="Pipeline\IMessagePipeline.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfigurator.cs" />

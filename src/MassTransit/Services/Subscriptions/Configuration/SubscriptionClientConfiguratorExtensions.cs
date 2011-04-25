@@ -27,5 +27,10 @@ namespace MassTransit
 		{
 			configurator.ConfigureService<SubscriptionClientConfigurator>(x => x.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
 		}
+
+		public static void SetSubscriptionServiceEndpoint(this SubscriptionClientConfigurator configurator, string subscriptionServiceUri)
+		{
+			configurator.SetSubscriptionServiceEndpoint(subscriptionServiceUri.ToUri());
+		}
 	}
 }

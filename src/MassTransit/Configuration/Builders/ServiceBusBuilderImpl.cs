@@ -15,12 +15,12 @@ namespace MassTransit.Builders
 	using System;
 	using System.Collections.Generic;
 	using BusServiceConfigurators;
-	using Configurators;
 	using Exceptions;
 	using log4net;
 	using Magnum;
 	using Pipeline.Configuration;
 	using Util;
+	using Magnum.Extensions;
 
 	public class ServiceBusBuilderImpl :
 		ServiceBusBuilder,
@@ -28,6 +28,7 @@ namespace MassTransit.Builders
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusBuilderImpl));
 
+		readonly IList<BusServiceConfigurator> _busServiceConfigurators;
 		readonly IList<Action<ServiceBus>> _postCreateActions;
 		readonly BusSettings _settings;
 		bool _disposed;
@@ -42,6 +43,7 @@ namespace MassTransit.Builders
 			_endpointCache = endpointCache;
 
 			_postCreateActions = new List<Action<ServiceBus>>();
+			_busServiceConfigurators = new List<BusServiceConfigurator>();
 		}
 
 		public void Dispose()
@@ -57,7 +59,7 @@ namespace MassTransit.Builders
 
 		public IEndpointCache EndpointCache
 		{
-			get {return _endpointCache; }
+			get { return _endpointCache; }
 		}
 
 		public IControlBus Build()
@@ -68,7 +70,9 @@ namespace MassTransit.Builders
 
 			ConfigureMessageInterceptors(bus);
 
-			RunPostCreateActions();
+			RunPostCreateActions(bus);
+
+			RunBusServiceConfigurators(bus);
 
 			if (_settings.AutoStart)
 			{
@@ -78,17 +82,18 @@ namespace MassTransit.Builders
 			return bus;
 		}
 
-		void RunPostCreateActions(ServiceBus bus)
+		void RunBusServiceConfigurators(IServiceBus bus)
 		{
-			foreach (var postCreateAction in _postCreateActions)
+			foreach (var busServiceConfigurator in _busServiceConfigurators)
 			{
 				try
 				{
-					postCreateAction(bus);
+					busServiceConfigurator.Create(bus);
 				}
 				catch (Exception ex)
 				{
-					throw new ConfigurationException("An exception was thrown while running post-creation actions", ex);
+					throw new ConfigurationException("Failed to create the bus service: " +
+					                                 busServiceConfigurator.ServiceType.ToShortTypeName());
 				}
 			}
 		}
@@ -105,9 +110,8 @@ namespace MassTransit.Builders
 
 		public void AddBusServiceConfigurator(BusServiceConfigurator configurator)
 		{
-			throw new NotImplementedException();
+			_busServiceConfigurators.Add(configurator);
 		}
-
 
 		public void Match<T>([NotNull] Action<T> callback)
 			where T : class, BusBuilder
@@ -129,6 +133,21 @@ namespace MassTransit.Builders
 			}
 
 			_disposed = true;
+		}
+
+		void RunPostCreateActions(ServiceBus bus)
+		{
+			foreach (var postCreateAction in _postCreateActions)
+			{
+				try
+				{
+					postCreateAction(bus);
+				}
+				catch (Exception ex)
+				{
+					throw new ConfigurationException("An exception was thrown while running post-creation actions", ex);
+				}
+			}
 		}
 
 		ServiceBus CreateServiceBus(IEndpointCache endpointCache)

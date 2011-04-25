@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-	using Configuration;
 	using Magnum.Extensions;
 	using MassTransit.Serialization;
 	using Messages;
@@ -24,17 +23,17 @@ namespace MassTransit.Tests.Serialization
 		LoopbackLocalAndRemoteTestFixture
 		where TSerializer : IMessageSerializer, new()
 	{
-		protected override void AdditionalEndpointFactoryConfiguration(IEndpointResolverConfigurator x)
+		protected When_sending_a_message_using_the_specified_serializer()
 		{
-			x.SetDefaultSerializer<TSerializer>();
+			ConfigureEndpointFactory(x => x.SetDefaultSerializer<TSerializer>());
 		}
 
 		[Test]
 		public void The_destination_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
@@ -51,9 +50,9 @@ namespace MassTransit.Tests.Serialization
 		[Test]
 		public void The_fault_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
@@ -70,9 +69,9 @@ namespace MassTransit.Tests.Serialization
 		[Test]
 		public void The_message_type_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
@@ -89,9 +88,9 @@ namespace MassTransit.Tests.Serialization
 		[Test]
 		public void The_response_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
@@ -108,11 +107,11 @@ namespace MassTransit.Tests.Serialization
 		[Test]
 		public void The_retry_count_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
-			var retryCount = 69;
+			int retryCount = 69;
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
 					Assert.AreEqual(retryCount, CurrentMessage.Headers.RetryCount);
@@ -128,9 +127,9 @@ namespace MassTransit.Tests.Serialization
 		[Test]
 		public void The_source_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
@@ -145,28 +144,31 @@ namespace MassTransit.Tests.Serialization
 		}
 	}
 
-	[TestFixture][Explicit]
+	[TestFixture]
+	[Explicit]
 	public class For_the_binary_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<BinaryMessageSerializer>
 	{
 	}
 
-	[TestFixture][Explicit]
+	[TestFixture]
+	[Explicit]
 	public class For_the_XML_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<DotNotXmlMessageSerializer>
 	{
 	}
 
-	[TestFixture][Explicit]
+	[TestFixture]
+	[Explicit]
 	public class For_the_custom_xml_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<XmlMessageSerializer>
 	{
-	}	
+	}
 
-    [TestFixture][Explicit]
-    public class For_the_json_message_serializer :
-        When_sending_a_message_using_the_specified_serializer<JsonMessageSerializer>
-    {
-        
-    }
+	[TestFixture]
+	[Explicit]
+	public class For_the_json_message_serializer :
+		When_sending_a_message_using_the_specified_serializer<JsonMessageSerializer>
+	{
+	}
 }

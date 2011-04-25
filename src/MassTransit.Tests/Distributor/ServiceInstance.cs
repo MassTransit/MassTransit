@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,40 +13,30 @@
 namespace MassTransit.Tests.Distributor
 {
 	using System;
-	using Configuration;
+	using BusConfigurators;
 	using MassTransit.Services.Subscriptions.Configuration;
 	using Rhino.Mocks;
 
 	public class ServiceInstance :
 		IDisposable
 	{
-		private volatile bool _disposed;
+		volatile bool _disposed;
 
-		public ServiceInstance(string name, IEndpointCache endpointCache, string subscriptionServiceEndpointAddress, Action<IObjectBuilder> configureBuilder, Action<IServiceBusConfigurator> configurator)
+		public ServiceInstance(string name, IEndpointCache endpointCache, string subscriptionServiceEndpointAddress,
+		                       Action<IObjectBuilder> configureBuilder, Action<ServiceBusConfigurator> configurator)
 		{
 			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
 			ObjectBuilder.Stub(x => x.GetInstance<IEndpointCache>()).Return(endpointCache);
 
 			configureBuilder(ObjectBuilder);
 
-			ControlBus = ControlBusConfigurator.New(x =>
+
+			DataBus = ServiceBusFactory.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
-					x.ReceiveFrom(name + "_control");
-
-					x.PurgeBeforeStarting();
-				});
-
-			DataBus = ServiceBusConfigurator.New(x =>
-				{
-					x.SetObjectBuilder(ObjectBuilder);
-					x.ConfigureService<SubscriptionClientConfigurator>(y =>
-						{
-							// setup endpoint
-							y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
-						});
+					x.UseSubscriptionService(subscriptionServiceEndpointAddress);
 					x.ReceiveFrom(name);
-					x.UseControlBus(ControlBus);
+					x.UseControlBus();
 					x.SetConcurrentConsumerLimit(5);
 
 					configurator(x);
@@ -54,7 +44,6 @@ namespace MassTransit.Tests.Distributor
 		}
 
 		public IObjectBuilder ObjectBuilder { get; private set; }
-		public IControlBus ControlBus { get; private set; }
 		public IServiceBus DataBus { get; private set; }
 
 		public void Dispose()
@@ -69,9 +58,6 @@ namespace MassTransit.Tests.Distributor
 
 			DataBus.Dispose();
 			DataBus = null;
-
-			ControlBus.Dispose();
-			ControlBus = null;
 
 			_disposed = true;
 		}

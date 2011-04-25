@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,7 @@ namespace MassTransit.Tests.TextFixtures
 	using System;
 	using System.Collections.Generic;
 	using System.Threading;
-	using Configuration;
+	using BusConfigurators;
 	using Distributor;
 	using MassTransit.Saga;
 	using MassTransit.Services.Subscriptions.Client;
@@ -28,10 +28,10 @@ namespace MassTransit.Tests.TextFixtures
 	[TestFixture]
 	public class SubscriptionServiceTestFixture<TTransportFactory> :
 		EndpointTestFixture<TTransportFactory>
-		where TTransportFactory : ITransportFactory
+		where TTransportFactory : ITransportFactory, new()
 	{
-		private ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
-		private ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;
+		ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
+		ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;
 		public string SubscriptionServiceUri = "loopback://localhost/mt_subscriptions";
 		public string ClientControlUri = "loopback://localhost/mt_client_control";
 		public string ServerControlUri = "loopback://localhost/mt_server_control";
@@ -48,7 +48,7 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			base.EstablishContext();
 
-			SubscriptionBus = ServiceBusConfigurator.New(x =>
+			SubscriptionBus = ServiceBusFactory.New(x =>
 				{
 					x.ReceiveFrom(SubscriptionServiceUri);
 					x.SetConcurrentConsumerLimit(1);
@@ -65,14 +65,7 @@ namespace MassTransit.Tests.TextFixtures
 
 		protected void SetupLocalBus()
 		{
-			LocalControlBus = ControlBusConfigurator.New(x =>
-				{
-					x.ReceiveFrom(ClientControlUri);
-
-					x.PurgeBeforeStarting();
-				});
-
-			LocalBus = ServiceBusConfigurator.New(x =>
+			LocalBus = ServiceBusFactory.New(x =>
 				{
 					x.ConfigureService<SubscriptionClientConfigurator>(y =>
 						{
@@ -81,7 +74,7 @@ namespace MassTransit.Tests.TextFixtures
 						});
 					x.ReceiveFrom(ClientUri);
 					x.SetConcurrentConsumerLimit(4);
-					x.UseControlBus(LocalControlBus);
+					x.UseControlBus();
 
 					ConfigureLocalBus(x);
 				});
@@ -89,14 +82,7 @@ namespace MassTransit.Tests.TextFixtures
 
 		protected void SetupRemoteBus()
 		{
-			RemoteControlBus = ControlBusConfigurator.New(x =>
-				{
-					x.ReceiveFrom(ServerControlUri);
-
-					x.PurgeBeforeStarting();
-				});
-
-			RemoteBus = ServiceBusConfigurator.New(x =>
+			RemoteBus = ServiceBusFactory.New(x =>
 				{
 					x.ConfigureService<SubscriptionClientConfigurator>(y =>
 						{
@@ -104,7 +90,7 @@ namespace MassTransit.Tests.TextFixtures
 							y.SetSubscriptionServiceEndpoint(SubscriptionServiceUri);
 						});
 					x.ReceiveFrom(ServerUri);
-					x.UseControlBus(RemoteControlBus);
+					x.UseControlBus();
 
 					ConfigureRemoteBus(x);
 				});
@@ -112,7 +98,8 @@ namespace MassTransit.Tests.TextFixtures
 
 		protected Dictionary<string, ServiceInstance> Instances { get; private set; }
 
-		protected ServiceInstance AddInstance(string instanceName, string queueName, Action<IObjectBuilder> configureBuilder, Action<IServiceBusConfigurator> configureBus)
+		protected ServiceInstance AddInstance(string instanceName, string queueName, Action<IObjectBuilder> configureBuilder,
+		                                      Action<ServiceBusConfigurator> configureBus)
 		{
 			var instance = new ServiceInstance(queueName, EndpointCache, SubscriptionServiceUri, configureBuilder, configureBus);
 
@@ -121,27 +108,28 @@ namespace MassTransit.Tests.TextFixtures
 			return instance;
 		}
 
-		protected virtual void ConfigureLocalBus(IServiceBusConfigurator configurator)
+		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
 		}
 
-		protected virtual void ConfigureRemoteBus(IServiceBusConfigurator configurator)
+		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
 		{
 		}
 
-		private void SetupSubscriptionService(IObjectBuilder builder)
+		void SetupSubscriptionService(IObjectBuilder builder)
 		{
 			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>(builder);
-			
+
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(builder);
-			
-			SubscriptionService = new SubscriptionService(SubscriptionBus, EndpointCache, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
+
+			SubscriptionService = new SubscriptionService(SubscriptionBus, EndpointCache, _subscriptionSagaRepository,
+				_subscriptionClientSagaRepository);
 
 			SubscriptionService.Start();
 
 			builder.Stub(x => x.GetInstance<SubscriptionClient>())
 				.Return(null)
-				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(); });
+				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(new Uri(SubscriptionServiceUri)); });
 		}
 
 

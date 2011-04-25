@@ -26,7 +26,7 @@ namespace MassTransit.Tests
 			IEndpointCache endpointCache = EndpointCacheFactory.New(x =>
 				{
 					x.AddTransportFactory<LoopbackTransportFactory>();
-					x.ConfigureEndpoint("loopback://localhost/mt_client", y => { y.SetSerializer<DotNotXmlMessageSerializer>(); });
+					x.ConfigureEndpoint("loopback://localhost/mt_client", y => y.UseSerializer<DotNotXmlMessageSerializer>());
 				});
 
 			IEndpoint endpoint = endpointCache.GetEndpoint("loopback://localhost/mt_client");

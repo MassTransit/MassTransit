@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests.Serialization
 {
-	using Configuration;
-	using Configurators;
-	using EndpointConfigurators;
 	using Magnum.Extensions;
 	using MassTransit.Serialization;
 	using MassTransit.Tests;
@@ -25,11 +22,11 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 	[TestFixture, Explicit]
 	public class When_sending_a_message_using_the_specified_serializer<TSerializer> :
 		MsmqEndpointTestFixture
-		where TSerializer : IMessageSerializer
+		where TSerializer : IMessageSerializer, new()
 	{
-		protected override void AdditionalEndpointFactoryConfiguration(EndpointFactoryConfigurator x)
+		public When_sending_a_message_using_the_specified_serializer()
 		{
-			x.SetDefaultSerializer<TSerializer>();
+			ConfigureEndpointFactory(x => x.SetDefaultSerializer<TSerializer>());
 		}
 
 		[Test]

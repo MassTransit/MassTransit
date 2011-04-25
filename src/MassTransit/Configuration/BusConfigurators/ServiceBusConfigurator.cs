@@ -13,8 +13,8 @@
 namespace MassTransit.BusConfigurators
 {
 	using System;
-	using MassTransit.Builders;
-	using MassTransit.EndpointConfigurators;
+	using Builders;
+	using EndpointConfigurators;
 
 	public interface ServiceBusConfigurator :
 		EndpointFactoryConfigurator

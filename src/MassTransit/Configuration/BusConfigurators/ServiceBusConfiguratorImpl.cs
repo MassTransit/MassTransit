@@ -38,7 +38,7 @@ namespace MassTransit.BusConfigurators
 			_builderFactory = DefaultBuilderFactory;
 			_configurators = new List<BusBuilderConfigurator>();
 
-			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(TODO);
+			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(new EndpointFactoryDefaultSettings());
 		}
 
 		public void Validate()
@@ -116,6 +116,11 @@ namespace MassTransit.BusConfigurators
 			IServiceBus bus = builder.Build();
 
 			return bus;
+		}
+
+		public IEndpointFactoryDefaultSettings Defaults
+		{
+			get { return _endpointFactoryConfigurator.Defaults; }
 		}
 
 		public IEndpointFactory CreateEndpointFactory()

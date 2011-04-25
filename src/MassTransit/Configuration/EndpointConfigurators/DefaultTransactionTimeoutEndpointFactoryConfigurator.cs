@@ -13,29 +13,28 @@
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
-	using Configurators;
-	using MassTransit.Builders;
-	using MassTransit.Exceptions;
+	using Builders;
+	using Exceptions;
 
-	public class DefaultTransactionTimeoutEndpointFactoryConfigurator :
+	public class DelegateEndpointFactoryBuilderConfigurator :
 		EndpointFactoryBuilderConfigurator
 	{
-		readonly TimeSpan _transactionTimeout;
+		readonly Action<EndpointFactoryBuilder> _builderCallback;
 
-		public DefaultTransactionTimeoutEndpointFactoryConfigurator(TimeSpan transactionTimeout)
+		public DelegateEndpointFactoryBuilderConfigurator(Action<EndpointFactoryBuilder> builderCallback)
 		{
-			_transactionTimeout = transactionTimeout;
+			_builderCallback = builderCallback;
 		}
 
 		public void Validate()
 		{
-			if (_transactionTimeout <= TimeSpan.Zero)
-				throw new ConfigurationException("The transaction timeout must be greater than zero");
+			if (_builderCallback == null)
+				throw new ConfigurationException("The builder callback cannot be null");
 		}
 
 		public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
 		{
-			builder.SetDefaultTransactionTimeout(_transactionTimeout);
+			_builderCallback(builder);
 
 			return builder;
 		}

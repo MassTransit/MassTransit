@@ -47,11 +47,11 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			const string subscriptionServiceEndpointAddress = "loopback://localhost/mt_subscriptions";
 
-			SubscriptionBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom(subscriptionServiceEndpointAddress); });
+			SubscriptionBus = ServiceBusFactory.New(x => { x.ReceiveFrom(subscriptionServiceEndpointAddress); });
 
 			SetupSubscriptionService();
 
-			LocalBus = ServiceBusConfigurator.New(x =>
+			LocalBus = ServiceBusFactory.New(x =>
 				{
 					x.ConfigureService<SubscriptionClientConfigurator>(y =>
 						{
@@ -61,7 +61,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 					x.ReceiveFrom("loopback://localhost/mt_client");
 				});
 
-			RemoteBus = ServiceBusConfigurator.New(x =>
+			RemoteBus = ServiceBusFactory.New(x =>
 				{
 					x.ConfigureService<SubscriptionClientConfigurator>(y =>
 						{
@@ -86,9 +86,6 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			SubscriptionService.Start();
 
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionClient>())
-				.Return(null)
-				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(); });
 		}
 
 		private void SetupHealthService()

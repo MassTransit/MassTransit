@@ -13,7 +13,6 @@
 namespace MassTransit.Builders
 {
 	using System;
-	using Configuration;
 	using EndpointConfigurators;
 	using Serialization;
 	using Transports;
@@ -23,8 +22,8 @@ namespace MassTransit.Builders
 		/// <summary>
 		/// Returns the defaults for the endpoint factory (may be deprecated/moved)
 		/// </summary>
-		IEndpointDefaults Defaults { get; }
-		
+		IEndpointFactoryDefaultSettings Defaults { get; }
+
 		/// <summary>
 		/// Create the endpoint factory
 		/// </summary>

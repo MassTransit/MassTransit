@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,11 +16,10 @@ namespace MassTransit.Transports
 	using Magnum;
 	using Magnum.Extensions;
 
-
-	public class CreateTransportSettings :
+	public class TransportSettings :
 		ITransportSettings
 	{
-		public CreateTransportSettings(IEndpointAddress address)
+		public TransportSettings(IEndpointAddress address)
 		{
 			Guard.AgainstNull(address, "address");
 
@@ -34,7 +33,7 @@ namespace MassTransit.Transports
 			PurgeExistingMessages = false;
 		}
 
-		public CreateTransportSettings(IEndpointAddress address, ITransportSettings source)
+		public TransportSettings(IEndpointAddress address, ITransportSettings source)
 		{
 			Guard.AgainstNull(address, "address");
 			Guard.AgainstNull(source, "source");
@@ -64,21 +63,21 @@ namespace MassTransit.Transports
 		/// if the transactional queue is requested and required it will throw an exception if the queue 
 		/// exists and is not transactional
 		/// </summary>
-		public bool RequireTransactional { get; private set; }
+		public bool RequireTransactional { get; set; }
 
 		/// <summary>
 		/// The timeout for the transaction if System.Transactions is supported
 		/// </summary>
-		public TimeSpan TransactionTimeout { get; private set; }
+		public TimeSpan TransactionTimeout { get; set; }
 
 		/// <summary>
 		/// The transport should be created if it was not found
 		/// </summary>
-		public bool CreateIfMissing { get; private set; }
+		public bool CreateIfMissing { get; set; }
 
 		/// <summary>
 		/// If the transport should purge any existing messages before reading from the queue
 		/// </summary>
-		public bool PurgeExistingMessages { get; private set; }
+		public bool PurgeExistingMessages { get; set; }
 	}
 }

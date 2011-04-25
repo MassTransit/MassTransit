@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Distributor
 {
-	using Configuration;
+	using BusConfigurators;
 	using Load.Sagas;
 	using MassTransit.Distributor;
 	using MassTransit.Saga;
@@ -22,7 +22,7 @@ namespace MassTransit.Tests.Distributor
 
 	public class MultipleDistributorSagaTestFixture<TTransportFactory> :
 		SubscriptionServiceTestFixture<TTransportFactory>
-		where TTransportFactory : ITransportFactory
+		where TTransportFactory : ITransportFactory, new()
 	{
 		protected ISagaRepository<FirstSaga> FirstSagaRepository { get; private set; }
 
@@ -33,14 +33,14 @@ namespace MassTransit.Tests.Distributor
 			FirstSagaRepository = ObjectBuilder.SetupSagaRepository<FirstSaga>();
 		}
 
-		protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
+		protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
-			configurator.UseSagaDistributorFor<FirstSaga>(EndpointCache);
+			configurator.UseSagaDistributorFor<FirstSaga>();
 		}
 
-		protected override void ConfigureRemoteBus(IServiceBusConfigurator configurator)
+		protected override void ConfigureRemoteBus(ServiceBusConfigurator configurator)
 		{
-			configurator.UseSagaDistributorFor<FirstSaga>(EndpointCache);
+			configurator.UseSagaDistributorFor<FirstSaga>();
 		}
 	}
 }
