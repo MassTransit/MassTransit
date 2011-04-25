@@ -15,7 +15,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 	using System;
 	using Internal;
 	using MassTransit.Tests.TextFixtures;
-	using Rhino.Mocks;
 	using Services.Subscriptions;
 
 	public class MsmqEndpointTestFixture :
@@ -31,10 +30,22 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		protected IServiceBus RemoteBus { get; set; }
 
 		public MsmqEndpointTestFixture()
+			: this(new EndpointSettings("msmq://localhost/mt_client"))
 		{
-			LocalEndpointUri = new Uri("msmq://localhost/mt_client");
-			LocalEndpointUri = new Uri("msmq://localhost/mt_client_error");
+		}
+
+		public MsmqEndpointTestFixture(EndpointSettings settings)
+		{
+			LocalEndpointUri = settings.Address.Uri;
+			LocalErrorUri = settings.ErrorAddress.Uri;
 			RemoteEndpointUri = new Uri("msmq://localhost/mt_server");
+
+			ConfigureEndpointFactory(x =>
+				{
+					x.SetCreateMissingQueues(true);
+					x.SetCreateTransactionalQueues(settings.Transactional);
+					x.SetPurgeOnStartup(true);
+				});
 		}
 
 		protected override void EstablishContext()
@@ -72,9 +83,9 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		}
 
 
-		public IEndpoint LocalEndpoint { get; private set; }
-		public IEndpoint LocalErrorEndpoint { get; private set; }
-		public IEndpoint RemoteEndpoint { get; private set; }
+		protected IEndpoint LocalEndpoint { get; set; }
+		protected IEndpoint LocalErrorEndpoint { get; set; }
+		protected IEndpoint RemoteEndpoint { get; set; }
 
 		protected override void TeardownContext()
 		{

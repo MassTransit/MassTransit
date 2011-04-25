@@ -26,7 +26,8 @@ namespace MassTransit.Transports
 		readonly IDictionary<Uri, EndpointBuilder> _endpointBuilders;
 		readonly IDictionary<string, ITransportFactory> _transportFactories;
 
-		public EndpointFactory(IDictionary<string, ITransportFactory> transportFactories, IDictionary<Uri, EndpointBuilder> endpointBuilders, IEndpointFactoryDefaultSettings defaults)
+		public EndpointFactory(IDictionary<string, ITransportFactory> transportFactories,
+		                       IDictionary<Uri, EndpointBuilder> endpointBuilders, IEndpointFactoryDefaultSettings defaults)
 		{
 			_transportFactories = transportFactories;
 			_defaults = defaults;
@@ -65,17 +66,6 @@ namespace MassTransit.Transports
 			string scheme = factory.Scheme.ToLowerInvariant();
 
 			_transportFactories[scheme] = factory;
-		}
-
-
-		public static IDuplexTransport DefaultTransportFactory(ITransportFactory transportFactory, ITransportSettings settings)
-		{
-			return transportFactory.BuildLoopback(settings);
-		}
-
-		public static IOutboundTransport DefaultErrorTransportFactory(ITransportFactory transportFactory, ITransportSettings settings)
-		{
-			return transportFactory.BuildError(settings);
 		}
 	}
 }

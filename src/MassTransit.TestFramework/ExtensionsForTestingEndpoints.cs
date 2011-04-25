@@ -33,7 +33,7 @@ namespace MassTransit.TestFramework
 					object messageObj = serializer.Deserialize(message.Body);
 
 					var tm = messageObj as TMessage;
-					if (tm != null)
+					if (tm != null && !future.IsCompleted)
 						future.Complete(tm);
 
 					return null;

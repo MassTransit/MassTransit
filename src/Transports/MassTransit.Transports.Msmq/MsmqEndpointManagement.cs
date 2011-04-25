@@ -177,6 +177,10 @@ namespace MassTransit.Transports.Msmq
 				var management = new MsmqEndpointManagement(address);
 				action(management);
 			}
+			catch (EndpointException ex)
+			{
+				throw;
+			}
 			catch (Exception ex)
 			{
 				throw new TransportException(address.Uri, "There was a problem managing the transport", ex);

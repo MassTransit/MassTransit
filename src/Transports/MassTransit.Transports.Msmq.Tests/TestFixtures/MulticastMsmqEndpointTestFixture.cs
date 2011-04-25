@@ -13,9 +13,7 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using System;
-	using Internal;
 	using MassTransit.Tests.TextFixtures;
-	using Services.Subscriptions;
 
 	public class MulticastMsmqEndpointTestFixture :
 		EndpointTestFixture<MsmqTransportFactory>
@@ -23,8 +21,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		protected Uri LocalEndpointUri { get; set; }
 		protected Uri LocalErrorUri { get; set; }
 		protected Uri RemoteEndpointUri { get; set; }
-
-		ISubscriptionService SubscriptionService { get; set; }
 
 		protected IServiceBus LocalBus { get; set; }
 		protected IServiceBus RemoteBus { get; set; }
@@ -57,12 +53,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 					x.UseMulticastSubscriptionClient();
 					x.ReceiveFrom(RemoteEndpointUri);
 				});
-		}
-
-		protected void Purge(IEndpointAddress address)
-		{
-			IEndpointManagement management = MsmqEndpointManagement.New(address.Uri);
-			management.Purge();
 		}
 
 		public IEndpoint LocalEndpoint { get; private set; }

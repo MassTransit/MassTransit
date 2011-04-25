@@ -29,6 +29,16 @@ namespace MassTransit.EndpointConfigurators
 			TransactionTimeout = 30.Seconds();
 		}
 
+		public EndpointFactoryDefaultSettings(IEndpointFactoryDefaultSettings defaults)
+		{
+			CreateMissingQueues = defaults.CreateMissingQueues;
+			PurgeOnStartup = defaults.PurgeOnStartup;
+			RequireTransactional = defaults.RequireTransactional;
+			Serializer = defaults.Serializer;
+			TransactionTimeout = defaults.TransactionTimeout;
+			CreateTransactionalQueues = defaults.CreateTransactionalQueues;
+		}
+
 		public TimeSpan TransactionTimeout { get; set; }
 
 		public IMessageSerializer Serializer { get; set; }

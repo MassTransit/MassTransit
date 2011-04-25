@@ -39,7 +39,11 @@ namespace MassTransit.Transports.Msmq
 		{
 			try
 			{
-				ITransportSettings msmqSettings = new TransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
+				var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
+				var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
+					{
+						Transactional = msmqEndpointAddress.IsTransactional
+					};
 
 				if (msmqSettings.MsmqAddress().IsLocal)
 				{
@@ -64,7 +68,11 @@ namespace MassTransit.Transports.Msmq
 		{
 			try
 			{
-				ITransportSettings msmqSettings = new TransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
+				var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
+				var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
+				{
+					Transactional = msmqEndpointAddress.IsTransactional
+				};
 
 				if (msmqSettings.MsmqAddress().IsLocal)
 				{

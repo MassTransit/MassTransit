@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
 	using System;
+	using System.Linq;
 	using Exceptions;
 	using log4net;
 	using Magnum;
@@ -53,6 +54,10 @@ namespace MassTransit.Transports
 
 				return _endpoints.Retrieve(key, () => _endpointFactory.CreateEndpoint(uri));
 			}
+			catch (TransportException)
+			{
+				throw;
+			}
 			catch (EndpointException)
 			{
 				throw;
@@ -63,22 +68,32 @@ namespace MassTransit.Transports
 			}
 		}
 
+		public void Clear()
+		{
+			var endpoints = _endpoints.Values.ToArray();
+			_endpoints.Clear();
+
+			foreach (var endpoint in endpoints)
+			{
+				try
+				{
+					endpoint.Dispose();
+				}
+				catch (Exception ex)
+				{
+					_log.Error("An exception was thrown while disposing of an endpoint: " + endpoint.Address);
+				}
+			}
+
+			_endpoints.Clear();
+		}
+
 		protected virtual void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
 			{
-				foreach (var endpoint in _endpoints)
-				{
-					try
-					{
-						endpoint.Value.Dispose();
-					}
-					catch (Exception ex)
-					{
-						_log.Error("An exception was thrown while disposing of an endpoint: " + endpoint.Key);
-					}
-				}
+				Clear();
 
 				_endpoints.Dispose();
 				_endpoints = null;

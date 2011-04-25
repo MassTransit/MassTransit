@@ -74,8 +74,8 @@ namespace MassTransit.Tests.Load
 						});
 				}
 
-				_received.WaitOne(10.Seconds(), true);
-				while (_received.WaitOne(5.Seconds(), true))
+				_received.WaitOne(20.Seconds(), true);
+				while (_received.WaitOne(8.Seconds(), true))
 				{
 				}
 			}

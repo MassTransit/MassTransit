@@ -57,7 +57,7 @@ namespace MassTransit.Transports
 		/// True if the endpoint should be transactional. If Transactional is true and the endpoint already
 		/// exists and is not transactional, an exception will be thrown.
 		/// </summary>
-		public bool Transactional { private set; get; }
+		public bool Transactional { get; set; }
 
 		/// <summary>
 		/// if the transactional queue is requested and required it will throw an exception if the queue 

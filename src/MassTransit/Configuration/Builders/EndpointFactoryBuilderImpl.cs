@@ -25,7 +25,7 @@ namespace MassTransit.Builders
 		readonly IDictionary<Uri, EndpointBuilder> _endpointBuilders;
 		readonly IDictionary<string, ITransportFactory> _transportFactories;
 
-		public EndpointFactoryBuilderImpl()
+		public EndpointFactoryBuilderImpl(IEndpointFactoryDefaultSettings defaults)
 		{
 			_endpointBuilders = new Dictionary<Uri, EndpointBuilder>();
 			_transportFactories = new Dictionary<string, ITransportFactory>();
@@ -33,7 +33,7 @@ namespace MassTransit.Builders
 			AddTransportFactory(new LoopbackTransportFactory());
 			AddTransportFactory(new MulticastUdpTransportFactory());
 
-			_defaults = new EndpointFactoryDefaultSettings();
+			_defaults = new EndpointFactoryDefaultSettings(defaults);
 		}
 
 		public IEndpointFactoryDefaultSettings Defaults

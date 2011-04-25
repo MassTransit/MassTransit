@@ -23,7 +23,7 @@ namespace MassTransit.EndpointConfigurators
 	{
 		readonly EndpointFactoryDefaultSettings _defaultSettings;
 		readonly IList<EndpointFactoryBuilderConfigurator> _endpointFactoryConfigurators;
-		Func<EndpointFactoryBuilder> _endpointFactoryBuilderFactory;
+		Func<IEndpointFactoryDefaultSettings, EndpointFactoryBuilder> _endpointFactoryBuilderFactory;
 
 		public EndpointFactoryConfiguratorImpl(EndpointFactoryDefaultSettings defaultSettings)
 		{
@@ -40,7 +40,7 @@ namespace MassTransit.EndpointConfigurators
 			_endpointFactoryConfigurators.Each(configurator => configurator.Validate());
 		}
 
-		public void UseEndpointFactoryBuilder(Func<EndpointFactoryBuilder> endpointFactoryBuilderFactory)
+		public void UseEndpointFactoryBuilder(Func<IEndpointFactoryDefaultSettings, EndpointFactoryBuilder> endpointFactoryBuilderFactory)
 		{
 			_endpointFactoryBuilderFactory = endpointFactoryBuilderFactory;
 		}
@@ -57,7 +57,7 @@ namespace MassTransit.EndpointConfigurators
 
 		public IEndpointFactory CreateEndpointFactory()
 		{
-			EndpointFactoryBuilder builder = _endpointFactoryBuilderFactory();
+			EndpointFactoryBuilder builder = _endpointFactoryBuilderFactory(_defaultSettings);
 
 			foreach (EndpointFactoryBuilderConfigurator configurator in _endpointFactoryConfigurators)
 			{
@@ -67,9 +67,9 @@ namespace MassTransit.EndpointConfigurators
 			return builder.Build();
 		}
 
-		static EndpointFactoryBuilder DefaultEndpointResolverBuilderFactory()
+		static EndpointFactoryBuilder DefaultEndpointResolverBuilderFactory(IEndpointFactoryDefaultSettings defaults)
 		{
-			return new EndpointFactoryBuilderImpl();
+			return new EndpointFactoryBuilderImpl(defaults);
 		}
 	}
 }

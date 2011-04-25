@@ -58,6 +58,8 @@ namespace MassTransit.Tests.TextFixtures
 		public void Teardown()
 		{
 			TeardownContext();
+
+			EndpointCache.Clear();
 		}
 
 		[TestFixtureTearDown]
@@ -88,7 +90,7 @@ namespace MassTransit.Tests.TextFixtures
 		}
 
 		protected IEndpointFactory EndpointFactory { get; private set; }
-		protected IEndpointCache EndpointCache { get; set; }
+		protected EndpointCache EndpointCache { get; set; }
 		protected IObjectBuilder ObjectBuilder { get; private set; }
 
 		protected virtual void EstablishContext()
