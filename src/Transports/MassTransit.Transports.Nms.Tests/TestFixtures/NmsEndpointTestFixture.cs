@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,80 +12,64 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Nms.Tests.TestFixtures
 {
-    using System;
-    using Internal;
-    using MassTransit.Tests.TextFixtures;
-    using Rhino.Mocks;
-    using Services.Subscriptions;
+	using System;
+	using MassTransit.Tests.TextFixtures;
+	using Services.Subscriptions;
 
-    public class NmsEndpointTestFixture :
-        EndpointTestFixture<NmsTransportFactory>
-    {
-        protected ISubscriptionService SubscriptionService { get; set; }
-        protected IServiceBus LocalBus { get; set; }
-        protected IServiceBus RemoteBus { get; set; }
+	public class NmsEndpointTestFixture :
+		EndpointTestFixture<NmsTransportFactory>
+	{
+		Uri _localEndpointUri;
+		Uri _remoteEndpointUri;
+		protected ISubscriptionService SubscriptionService { get; set; }
+		protected IServiceBus LocalBus { get; set; }
+		protected IServiceBus RemoteBus { get; set; }
 
-        protected string ActiveMQHostName { get; set; }
+		protected string ActiveMQHostName { get; set; }
 
-        protected NmsEndpointTestFixture()
-        {
-            ActiveMQHostName = "192.168.0.195";
-        }
+		protected NmsEndpointTestFixture()
+		{
+			ActiveMQHostName = "192.168.0.195";
+		}
 
-        protected override void EstablishContext()
-        {
-            base.EstablishContext();
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
 
-            SetupSubscriptionService();
+			_localEndpointUri = new UriBuilder("activemq", ActiveMQHostName, 61616, "mt_client").Uri;
+			_remoteEndpointUri = new UriBuilder("activemq", ActiveMQHostName, 61616, "mt_server").Uri;
 
-            LocalBus = ServiceBusFactory.New(x =>
-            	{
-            		ConnectSubscriptionService(x, SubscriptionService);
-                    x.ReceiveFrom(new UriBuilder("activemq", ActiveMQHostName, 61616, "mt_client").Uri);
-                });
+			SetupSubscriptionService();
 
-            RemoteBus = ServiceBusFactory.New(x =>
-                {
+			LocalBus = ServiceBusFactory.New(x =>
+				{
 					ConnectSubscriptionService(x, SubscriptionService);
-					x.ReceiveFrom(new UriBuilder("activemq", ActiveMQHostName, 61616, "mt_server").Uri);
-                });
-        }
+					x.ReceiveFrom(_localEndpointUri);
+				});
 
-        private void SetupSubscriptionService()
-        {
-            SubscriptionService = new LocalSubscriptionService();
-            ObjectBuilder.Stub(x => x.GetInstance<IEndpointSubscriptionEvent>())
-                .Return(SubscriptionService);
+			RemoteBus = ServiceBusFactory.New(x =>
+				{
+					ConnectSubscriptionService(x, SubscriptionService);
+					x.ReceiveFrom(_remoteEndpointUri);
+				});
+		}
 
-            ObjectBuilder.Stub(x => x.GetInstance<SubscriptionPublisher>())
-                .Return(null)
-                .WhenCalled(invocation =>
-                    {
-                        // Return a unique instance of this class
-                        invocation.ReturnValue = new SubscriptionPublisher(SubscriptionService);
-                    });
+		void SetupSubscriptionService()
+		{
+			SubscriptionService = new LocalSubscriptionService();
+		}
 
-            ObjectBuilder.Stub(x => x.GetInstance<SubscriptionConsumer>())
-                .Return(null)
-                .WhenCalled(invocation =>
-                    {
-                        // Return a unique instance of this class
-                        invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService);
-                    });
-        }
+		protected override void TeardownContext()
+		{
+			LocalBus.Dispose();
+			LocalBus = null;
 
+			RemoteBus.Dispose();
+			RemoteBus = null;
 
-        protected override void TeardownContext()
-        {
-            LocalBus.Dispose();
-            LocalBus = null;
+			SubscriptionService = null;
 
-            RemoteBus.Dispose();
-            RemoteBus = null;
-
-            SubscriptionService = null;
-
-            base.TeardownContext();
-        }
-    }
+			base.TeardownContext();
+		}
+	}
 }

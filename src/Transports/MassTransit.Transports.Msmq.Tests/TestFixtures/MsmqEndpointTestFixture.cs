@@ -69,24 +69,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		void SetupSubscriptionService()
 		{
 			SubscriptionService = new LocalSubscriptionService();
-			ObjectBuilder.Stub(x => x.GetInstance<IEndpointSubscriptionEvent>())
-				.Return(SubscriptionService);
-
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionPublisher>())
-				.Return(null)
-				.WhenCalled(invocation =>
-					{
-						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionPublisher(SubscriptionService);
-					});
-
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionConsumer>())
-				.Return(null)
-				.WhenCalled(invocation =>
-					{
-						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService);
-					});
 		}
 
 

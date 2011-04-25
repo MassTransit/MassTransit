@@ -65,15 +65,19 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum, Version=1.0.0.225, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum.TestFramework, Version=1.0.0.230, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\lib\Magnum\net-3.5\TestFramework\Magnum.TestFramework.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.5.2.9222, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+    <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\lib\Magnum\net-4.0\\TestFrameworkMagnum.TestFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\NUnit\net-2.0\nunit.framework.dll</HintPath>
     </Reference>
@@ -81,9 +85,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Rhino.Mocks.dll</HintPath>
     </Reference>
-    <Reference Include="Stact, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Stact" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\lib\Stact\net-3.5\Stact.dll</HintPath>
+    </Reference>
+    <Reference Include="Stact" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\lib\Stact\net-4.0\Stact.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -180,7 +186,6 @@
     <Compile Include="Saga\StateMachine\Inspector_Specs.cs" />
     <Compile Include="Saga\StateMachine\SagaFault_Specs.cs" />
     <Compile Include="Saga\StateMachine\StateMachineSubscriberTestBase.cs" />
-    <Compile Include="Saga\StateMachine\Subscriber_Specs.cs" />
     <Compile Include="Saga\StateMachine\TestSaga_Specs.cs" />
     <Compile Include="Serialization\Approach\Approach_Specs.cs" />
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
@@ -248,7 +253,6 @@
     <Compile Include="Saga\StateMachine\RegisterUserStateMachine.cs" />
     <Compile Include="Saga\StateMachine\SagaStateMachine_Specs.cs" />
     <Compile Include="Services\Metadata\MessageMetadataExtraction_spec.cs" />
-    <Compile Include="Specification.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Messages\PingMessage.cs" />
@@ -270,7 +274,6 @@
     <Compile Include="Timeouts\DeferMessage_Specs.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />
     <Compile Include="Transports\TransactionalEndpointContract.cs" />
-    <Compile Include="Uri_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.Reactive\MassTransit.Reactive.csproj">

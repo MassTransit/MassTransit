@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,145 +13,69 @@
 namespace MassTransit.Tests
 {
 	using System;
-	using System.Reflection;
-	using System.Threading;
-	using Configuration;
 	using Magnum.Extensions;
-	using MassTransit.Serialization;
-	using MassTransit.Transports;
-	using Messages;
+	using Magnum.TestFramework;
 	using NUnit.Framework;
-	using Rhino.Mocks;
+	using TextFixtures;
 
 	[TestFixture]
 	public class When_a_message_fault_occurs :
-		Specification
+		LoopbackTestFixture
 	{
-		private IEndpointCache _endpointCache;
-		private IServiceBus _bus;
-		private IObjectBuilder _builder;
-
-		protected override void Before_each()
-		{
-			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_bus = ServiceBusFactory.New(x =>
-				{
-					x.SetObjectBuilder(_builder);
-					x.ReceiveFrom("loopback://localhost/servicebus");
-				});
-		}
-
-		protected override void After_each()
-		{
-			_bus.Dispose();
-			_endpointCache.Dispose();
-		}
-
 		public class SmartConsumer :
 			Consumes<Fault<Hello>>.All
 		{
-			private readonly ManualResetEvent _gotFault = new ManualResetEvent(false);
+			readonly FutureMessage<Fault<Hello>> _fault = new FutureMessage<Fault<Hello>>();
 
-			public ManualResetEvent GotFault
+			public FutureMessage<Fault<Hello>> Fault
 			{
-				get { return _gotFault; }
+				get { return _fault; }
 			}
 
 			public void Consume(Fault<Hello> message)
 			{
-				_gotFault.Set();
+				_fault.Set(message);
 			}
 		}
 
-		[Serializable]
 		public class Hello
 		{
 		}
 
-		[Serializable]
-		public class Hi
-		{
-		}
-
 		[Test]
-		public void Test_this()
+		public void Should_receive_a_fault_message()
 		{
-			Type faultType = typeof (Fault<>);
+			var consumer = new SmartConsumer();
 
-			ConstructorInfo[] constructorInfos = faultType.GetConstructors();
+			LocalBus.Subscribe<Hello>(delegate { throw new AccessViolationException("Crap!"); });
 
-			foreach (ConstructorInfo info in constructorInfos)
-			{
-				ParameterInfo[] parameters = info.GetParameters();
-			}
+			LocalBus.Subscribe(consumer);
 
-			Type customFaultType = typeof (Fault<PingMessage>);
+			LocalBus.Publish(new Hello());
 
-			constructorInfos = customFaultType.GetConstructors();
-			foreach (ConstructorInfo info in constructorInfos)
-			{
-				ParameterInfo[] parameters = info.GetParameters();
-			}
-		}
-
-
-		[Test]
-		public void I_should_receive_a_fault_message()
-		{
-			SmartConsumer sc = new SmartConsumer();
-
-			_bus.Subscribe<Hello>(delegate { throw new AccessViolationException("Crap!"); });
-
-			_bus.Subscribe(sc);
-
-			_bus.Publish(new Hello());
-
-			Assert.IsTrue(sc.GotFault.WaitOne(TimeSpan.FromSeconds(500), true));
+			consumer.Fault.IsAvailable(8.Seconds()).ShouldBeTrue();
 		}
 	}
 
 	[TestFixture]
 	public class When_a_correlated_message_fault_is_received :
-		Specification
+		LoopbackTestFixture
 	{
-
-		private IEndpointCache _cache;
-		private IEndpoint _endpoint;
-		private IServiceBus _bus;
-		private IObjectBuilder _builder;
-
-		protected override void Before_each()
-		{
-			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_bus = ServiceBusFactory.New(x =>
-			{
-				x.SetObjectBuilder(_builder);
-				x.ReceiveFrom("loopback://localhost/servicebus");
-			});
-		}
-
-
-		protected override void After_each()
-		{
-			_bus.Dispose();
-			_endpoint.Dispose();
-			_cache.Dispose();
-		}
-
 		public class SmartConsumer :
 			Consumes<Fault<Hello, Guid>>.For<Guid>
 		{
-			private readonly ManualResetEvent _gotFault = new ManualResetEvent(false);
-			private readonly Guid _id = Guid.NewGuid();
+			readonly Guid _id = Guid.NewGuid();
 
-			public ManualResetEvent GotFault
+			readonly FutureMessage<Fault<Hello, Guid>> _fault = new FutureMessage<Fault<Hello, Guid>>();
+
+			public FutureMessage<Fault<Hello, Guid>> Fault
 			{
-				get { return _gotFault; }
+				get { return _fault; }
 			}
 
 			public void Consume(Fault<Hello, Guid> message)
 			{
-				_gotFault.Set();
+				_fault.Set(message);
 			}
 
 			public Guid CorrelationId
@@ -160,51 +84,34 @@ namespace MassTransit.Tests
 			}
 		}
 
-		[Serializable]
 		public class Hello :
 			CorrelatedBy<Guid>
 		{
-			private Guid _id;
-
 			protected Hello()
 			{
 			}
 
 			public Hello(Guid id)
 			{
-				_id = id;
+				CorrelationId = id;
 			}
 
-			public Guid CorrelationId
-			{
-				get { return _id; }
-				set { _id = value; }
-			}
+			public Guid CorrelationId { get; set; }
 		}
 
-		[Serializable]
-		public class Hi
-		{
-		}
 
 		[Test]
-		public void Open_generics_should_match_properly()
+		public void Should_receive_a_fault_message()
 		{
-			Assert.IsTrue(new Hello(Guid.NewGuid()).Implements(typeof (CorrelatedBy<>)));
-		}
+			var consumer = new SmartConsumer();
 
-		[Test]
-		public void I_should_receive_a_fault_message()
-		{
-			SmartConsumer sc = new SmartConsumer();
+			LocalBus.Subscribe<Hello>(delegate { throw new AccessViolationException("Crap!"); });
 
-			_bus.Subscribe<Hello>(delegate { throw new AccessViolationException("Crap!"); });
+			LocalBus.Subscribe(consumer);
 
-			_bus.Subscribe(sc);
+			LocalBus.Publish(new Hello(consumer.CorrelationId));
 
-			_bus.Publish(new Hello(sc.CorrelationId));
-
-			Assert.IsTrue(sc.GotFault.WaitOne(TimeSpan.FromSeconds(5), true));
+			consumer.Fault.IsAvailable(8.Seconds()).ShouldBeTrue();
 		}
 	}
 }

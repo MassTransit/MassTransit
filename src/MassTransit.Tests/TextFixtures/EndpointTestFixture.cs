@@ -63,8 +63,11 @@ namespace MassTransit.Tests.TextFixtures
 		[TestFixtureTearDown]
 		public void FixtureTeardown()
 		{
-			EndpointCache.Dispose();
-			EndpointCache = null;
+			if (EndpointCache != null)
+			{
+				EndpointCache.Dispose();
+				EndpointCache = null;
+			}
 		}
 
 		EndpointFactoryConfiguratorImpl _endpointFactoryConfigurator;

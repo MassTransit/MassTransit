@@ -21,7 +21,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 	using TestFramework;
 
 	[TestFixture]
-	public class HealthService_Specs :
+	public class When_using_the_health_service :
 		HealthServiceTestFixture
 	{
 		private readonly Guid _id = Guid.NewGuid();
@@ -32,7 +32,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			LocalBus.Publish(new TimeoutExpired {CorrelationId = _id, Tag = 2});
 
-			HealthSaga saga = Repository.ShouldContainSaga(_id);
+			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Down);
 		}
@@ -42,7 +42,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		{
 			LocalBus.Publish(new EndpointCameOnline(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
 
-			HealthSaga saga = Repository.ShouldContainSaga(_id);
+			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Healthy);
 
@@ -56,7 +56,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		{
 			MakeSagaSuspect();
 
-			HealthSaga saga = Repository.ShouldContainSaga(_id);
+			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Suspect);
 		}
@@ -68,7 +68,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			LocalBus.Publish(new Heartbeat(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
 
-			HealthSaga saga = Repository.ShouldContainSaga(_id);
+			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Healthy);
 		}
@@ -80,7 +80,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			LocalBus.Publish(new TimeoutExpired {CorrelationId = _id, Tag = 2});
 
-			HealthSaga saga = Repository.ShouldContainSaga(_id);
+			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Down);
 		}
@@ -92,7 +92,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			LocalBus.Publish(new PingEndpointResponse(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
 
-			HealthSaga saga = Repository.ShouldContainSaga(_id);
+			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Healthy);
 		}
@@ -104,19 +104,25 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			LocalBus.Publish(new Heartbeat(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
 
-			HealthSaga saga = Repository.ShouldContainSaga(_id);
+			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Healthy);
 		}
 
 		[Test]
-		public void The_HealthClient_should_publish_heartbeats()
+		public void Should_publish_heartbeats_to_the_service()
 		{
 			LocalBus.Publish(new EndpointCameOnline(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
 
-			HealthSaga saga = Repository.ShouldContainSaga(_id);
+			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Healthy);
+		}
+
+		[Test]
+		public void Should_mark_an_endpoint_suspect_after_timeout()
+		{
+			MakeSagaSuspect();
 		}
 	}
 }

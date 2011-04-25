@@ -12,11 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TextFixtures
 {
-	using MassTransit.Internal;
 	using MassTransit.Services.Subscriptions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 
 	[TestFixture]
 	public class LoopbackLocalAndRemoteTestFixture :
@@ -48,24 +46,6 @@ namespace MassTransit.Tests.TextFixtures
 		void SetupSubscriptionService()
 		{
 			SubscriptionService = new LocalSubscriptionService();
-			ObjectBuilder.Stub(x => x.GetInstance<IEndpointSubscriptionEvent>())
-				.Return(SubscriptionService);
-
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionPublisher>())
-				.Return(null)
-				.WhenCalled(invocation =>
-					{
-						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionPublisher(SubscriptionService);
-					});
-
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionConsumer>())
-				.Return(null)
-				.WhenCalled(invocation =>
-					{
-						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService);
-					});
 		}
 
 		protected override void TeardownContext()

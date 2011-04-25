@@ -22,9 +22,9 @@ namespace MassTransit.Tests.Subscriptions
 	using MassTransit.Transports;
 	using Messages;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using TestConsumers;
 	using TextFixtures;
+	using TestFramework;
 
 	[TestFixture]
 	public class SubscriptionService_Specs :
@@ -59,13 +59,12 @@ namespace MassTransit.Tests.Subscriptions
 			var subscription = new SubscriptionInformation(clientId, 1, typeof (PingMessage), RemoteBus.Endpoint.Uri);
 
 			LocalControlBus.Endpoint.Send(new AddSubscription(subscription));
-			Thread.Sleep(250);
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
 			LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
-			Thread.Sleep(250);
 
-			PipelineViewer.Trace(LocalBus.OutboundPipeline);
+			LocalBus.ShouldNotHaveSubscriptionFor<PingMessage>();
 		}
 
 		[Test]
@@ -74,14 +73,12 @@ namespace MassTransit.Tests.Subscriptions
 			var consumer = new TestMessageConsumer<PingMessage>();
 			var unsubscribeAction = RemoteBus.Subscribe(consumer);
 
-			Thread.Sleep(3000);
-
-			DumpPipelines();
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			var message = new PingMessage();
 			LocalBus.Publish(message);
 
-			consumer.ShouldHaveReceivedMessage(message, 1500.Milliseconds());
+			consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
 
 			unsubscribeAction();
 		}
