@@ -27,7 +27,7 @@ namespace MassTransit.TestFramework
 
 		static ExtensionMethodsForSagas()
 		{
-			Timeout = 20.Seconds();
+			Timeout = 8.Seconds();
 		}
 
 		public static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>(this IObjectBuilder builder)

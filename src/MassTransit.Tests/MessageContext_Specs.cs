@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,6 +18,7 @@ namespace MassTransit.Tests
 	using Messages;
 	using NUnit.Framework;
 	using TestConsumers;
+	using TestFramework;
 	using TextFixtures;
 
 	[TestFixture]
@@ -27,15 +28,15 @@ namespace MassTransit.Tests
 		[Test]
 		public void A_response_should_be_published_if_no_reply_address_is_specified()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			TestMessageConsumer<PongMessage> otherConsumer = new TestMessageConsumer<PongMessage>();
+			var otherConsumer = new TestMessageConsumer<PongMessage>();
 			RemoteBus.Subscribe(otherConsumer);
 
-			TestCorrelatedConsumer<PongMessage, Guid> consumer = new TestCorrelatedConsumer<PongMessage, Guid>(ping.CorrelationId);
+			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(ping.CorrelationId);
 			LocalBus.Subscribe(consumer);
 
-			FutureMessage<PongMessage> pong = new FutureMessage<PongMessage>();
+			var pong = new FutureMessage<PongMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
@@ -55,15 +56,15 @@ namespace MassTransit.Tests
 		[Test]
 		public void A_response_should_be_sent_directly_if_a_reply_address_is_specified()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			TestMessageConsumer<PongMessage> otherConsumer = new TestMessageConsumer<PongMessage>();
+			var otherConsumer = new TestMessageConsumer<PongMessage>();
 			RemoteBus.Subscribe(otherConsumer);
 
-			TestCorrelatedConsumer<PongMessage, Guid> consumer = new TestCorrelatedConsumer<PongMessage, Guid>(ping.CorrelationId);
+			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(ping.CorrelationId);
 			LocalBus.Subscribe(consumer);
 
-			FutureMessage<PongMessage> pong = new FutureMessage<PongMessage>();
+			var pong = new FutureMessage<PongMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
@@ -72,18 +73,22 @@ namespace MassTransit.Tests
 					CurrentMessage.Respond(pong.Message);
 				});
 
+			RemoteBus.ShouldHaveSubscriptionFor<PongMessage>();
+			LocalBus.ShouldHaveSubscriptionFor<PongMessage>();
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+
 			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus));
 
-			Assert.IsTrue(pong.IsAvailable(3.Seconds()), "No pong generated");
+			Assert.IsTrue(pong.IsAvailable(8.Seconds()), "No pong generated");
 
-			consumer.ShouldHaveReceivedMessage(pong.Message, 3.Seconds());
+			consumer.ShouldHaveReceivedMessage(pong.Message, 8.Seconds());
 			otherConsumer.ShouldNotHaveReceivedMessage(pong.Message, 1.Seconds());
 		}
 
 		[Test]
 		public void The_destination_address_should_pass()
 		{
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			LocalBus.Subscribe<PingMessage>(message =>
 				{
@@ -100,7 +105,7 @@ namespace MassTransit.Tests
 		[Test]
 		public void The_fault_address_should_pass()
 		{
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			LocalBus.Subscribe<PingMessage>(message =>
 				{
@@ -117,7 +122,7 @@ namespace MassTransit.Tests
 		[Test]
 		public void The_response_address_should_pass()
 		{
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			LocalBus.Subscribe<PingMessage>(message =>
 				{
@@ -134,7 +139,7 @@ namespace MassTransit.Tests
 		[Test]
 		public void The_source_address_should_pass()
 		{
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			LocalBus.Subscribe<PingMessage>(message =>
 				{
@@ -191,57 +196,20 @@ namespace MassTransit.Tests
 		LoopbackLocalAndRemoteTestFixture
 	{
 		[Test]
-		public void The_method_should_not_be_called_when_there_are_no_subscribers()
-		{
-			var ping = new PingMessage();
-
-			List<Uri> consumers = new List<Uri>();
-
-			LocalBus.Publish(ping, x =>
-				{
-					x.ForEachSubscriber<PingMessage>((message,consumer) => consumers.Add(consumer.Uri));
-				});
-
-			Assert.AreEqual(0, consumers.Count);
-		}
-
-		[Test]
 		public void The_method_should_be_called_for_each_destination_endpoint()
 		{
 			LocalBus.Subscribe<PingMessage>(x => { });
 
 			var ping = new PingMessage();
 
-			List<Uri> consumers = new List<Uri>();
+			var consumers = new List<Uri>();
 
-			LocalBus.Publish(ping, x =>
-				{
-					x.ForEachSubscriber<PingMessage>((message,endpoint) => consumers.Add(endpoint.Uri));
-				});
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber<PingMessage>((message, endpoint) => consumers.Add(endpoint.Uri)); });
 
 			Assert.AreEqual(1, consumers.Count);
 			Assert.AreEqual(LocalBus.Endpoint.Uri, consumers[0]);
 		}
 
-		[Test]
-		public void The_method_should_not_carry_over_to_the_next_call_context()
-		{
-			var ping = new PingMessage();
-
-			List<Uri> consumers = new List<Uri>();
-
-			LocalBus.Publish(ping, x =>
-				{
-					x.ForEachSubscriber<PingMessage>((message,endpoint) => consumers.Add(endpoint.Uri));
-				});
-
-			LocalBus.Subscribe<PingMessage>(x => { });
-
-			LocalBus.Publish(ping);
-
-			Assert.AreEqual(0, consumers.Count);
-		}
-		
 		[Test]
 		public void The_method_should_be_called_for_each_destination_endpoint_when_there_are_multiple()
 		{
@@ -250,17 +218,41 @@ namespace MassTransit.Tests
 
 			var ping = new PingMessage();
 
-			List<Uri> consumers = new List<Uri>();
+			var consumers = new List<Uri>();
 
-			LocalBus.Publish(ping, x =>
-				{
-					x.ForEachSubscriber<PingMessage>((message,endpoint) => consumers.Add(endpoint.Uri));
-				});
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber<PingMessage>((message, endpoint) => consumers.Add(endpoint.Uri)); });
 
 			Assert.AreEqual(2, consumers.Count);
 			Assert.IsTrue(consumers.Contains(LocalBus.Endpoint.Uri));
 			Assert.IsTrue(consumers.Contains(RemoteBus.Endpoint.Uri));
 		}
-	}
 
+		[Test]
+		public void The_method_should_not_be_called_when_there_are_no_subscribers()
+		{
+			var ping = new PingMessage();
+
+			var consumers = new List<Uri>();
+
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber<PingMessage>((message, consumer) => consumers.Add(consumer.Uri)); });
+
+			Assert.AreEqual(0, consumers.Count);
+		}
+
+		[Test]
+		public void The_method_should_not_carry_over_to_the_next_call_context()
+		{
+			var ping = new PingMessage();
+
+			var consumers = new List<Uri>();
+
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber<PingMessage>((message, endpoint) => consumers.Add(endpoint.Uri)); });
+
+			LocalBus.Subscribe<PingMessage>(x => { });
+
+			LocalBus.Publish(ping);
+
+			Assert.AreEqual(0, consumers.Count);
+		}
+	}
 }

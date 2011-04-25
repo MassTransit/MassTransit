@@ -14,16 +14,12 @@ namespace MassTransit.Tests.TextFixtures
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Threading;
 	using BusConfigurators;
 	using Distributor;
 	using MassTransit.Saga;
-	using MassTransit.Services.Subscriptions.Client;
-	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Services.Subscriptions.Server;
 	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 
 	[TestFixture]
 	public class SubscriptionServiceTestFixture<TTransportFactory> :
@@ -32,17 +28,17 @@ namespace MassTransit.Tests.TextFixtures
 	{
 		ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
 		ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;
-		public string SubscriptionServiceUri = "loopback://localhost/mt_subscriptions";
-		public string ClientControlUri = "loopback://localhost/mt_client_control";
-		public string ServerControlUri = "loopback://localhost/mt_server_control";
-		public string ClientUri = "loopback://localhost/mt_client";
-		public string ServerUri = "loopback://localhost/mt_server";
-		public SubscriptionService SubscriptionService { get; private set; }
-		public IServiceBus LocalBus { get; private set; }
-		public IControlBus LocalControlBus { get; private set; }
-		public IServiceBus RemoteBus { get; private set; }
-		public IControlBus RemoteControlBus { get; private set; }
-		public IServiceBus SubscriptionBus { get; private set; }
+		protected string SubscriptionServiceUri = "loopback://localhost/mt_subscriptions";
+		protected string ClientControlUri = "loopback://localhost/mt_client_control";
+		protected string ServerControlUri = "loopback://localhost/mt_server_control";
+		protected string ClientUri = "loopback://localhost/mt_client";
+		protected string ServerUri = "loopback://localhost/mt_server";
+		protected SubscriptionService SubscriptionService { get; private set; }
+		protected IServiceBus LocalBus { get; set; }
+		protected IServiceBus LocalControlBus { get; set; }
+		protected IServiceBus RemoteBus { get; set; }
+		protected IServiceBus RemoteControlBus { get; private set; }
+		protected IServiceBus SubscriptionBus { get; set; }
 
 		protected override void EstablishContext()
 		{
@@ -67,33 +63,29 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			LocalBus = ServiceBusFactory.New(x =>
 				{
-					x.ConfigureService<SubscriptionClientConfigurator>(y =>
-						{
-							// setup endpoint
-							y.SetSubscriptionServiceEndpoint(SubscriptionServiceUri);
-						});
+					x.UseSubscriptionService(SubscriptionServiceUri);
 					x.ReceiveFrom(ClientUri);
 					x.SetConcurrentConsumerLimit(4);
 					x.UseControlBus();
 
 					ConfigureLocalBus(x);
 				});
+
+			LocalControlBus = LocalBus.ControlBus;
 		}
 
 		protected void SetupRemoteBus()
 		{
 			RemoteBus = ServiceBusFactory.New(x =>
 				{
-					x.ConfigureService<SubscriptionClientConfigurator>(y =>
-						{
-							// setup endpoint
-							y.SetSubscriptionServiceEndpoint(SubscriptionServiceUri);
-						});
+					x.UseSubscriptionService(SubscriptionServiceUri);
 					x.ReceiveFrom(ServerUri);
 					x.UseControlBus();
 
 					ConfigureRemoteBus(x);
 				});
+
+			RemoteControlBus = RemoteBus.ControlBus;
 		}
 
 		protected Dictionary<string, ServiceInstance> Instances { get; private set; }
@@ -126,10 +118,6 @@ namespace MassTransit.Tests.TextFixtures
 				_subscriptionClientSagaRepository);
 
 			SubscriptionService.Start();
-
-			builder.Stub(x => x.GetInstance<SubscriptionClient>())
-				.Return(null)
-				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(new Uri(SubscriptionServiceUri)); });
 		}
 
 
@@ -141,17 +129,11 @@ namespace MassTransit.Tests.TextFixtures
 
 			RemoteBus.Dispose();
 			RemoteBus = null;
-
-			RemoteControlBus.Dispose();
 			RemoteControlBus = null;
 
 			LocalBus.Dispose();
 			LocalBus = null;
-
-			LocalControlBus.Dispose();
 			LocalControlBus = null;
-
-			Thread.Sleep(500);
 
 			SubscriptionService.Stop();
 			SubscriptionService.Dispose();

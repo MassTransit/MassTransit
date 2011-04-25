@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,24 +16,34 @@ namespace MassTransit.TestFramework.Helpers
 	using Pipeline.Inspectors;
 	using Pipeline.Sinks;
 
-	public class EndpointSinkLocator :
-		PipelineInspectorBase<EndpointSinkLocator>
+	public class CorrelatedMessageSinkLocator :
+		PipelineInspectorBase<CorrelatedMessageSinkLocator>
 	{
-		private readonly Type _messageType;
+		readonly Type _keyType;
+		readonly Func<string, bool> _match;
+		readonly Type _messageType;
 
-		public EndpointSinkLocator(Type messageType)
+		public CorrelatedMessageSinkLocator(Type messageType, Type keyType, Func<string, bool> match)
 		{
 			_messageType = messageType;
+			_keyType = keyType;
+			_match = match;
 		}
 
-		public Uri DestinationAddress { get; private set; }
+		public bool Success { get; private set; }
 
-		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink) where TMessage : class
+		public bool Inspect<T, K>(CorrelatedMessageSinkRouter<T, K> sink)
+			where T : class, CorrelatedBy<K>
 		{
-			if (typeof(TMessage) == _messageType)
+			if (typeof (T) == _messageType && typeof (K) == _keyType)
 			{
-				DestinationAddress = sink.Address;
-				return false;
+				string key = sink.CorrelationId.ToString();
+
+				if (_match(key))
+				{
+					Success = true;
+					return false;
+				}
 			}
 
 			return true;

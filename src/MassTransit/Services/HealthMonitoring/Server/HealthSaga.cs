@@ -112,7 +112,6 @@ namespace MassTransit.Services.HealthMonitoring.Server
 
 		public virtual Guid CorrelationId { get; set; }
 		public virtual IServiceBus Bus { get; set; }
-		public virtual IObjectBuilder Builder { get; set; }
 
 		private void NotifyEndpointIsDown()
 		{
@@ -138,9 +137,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		{
 			Bus.Publish(new ScheduleTimeout(CorrelationId, HeartbeatIntervalInSeconds.Seconds(), (int) Timeouts.PingTimeout));
 
-			Builder
-				.GetInstance<IEndpointCache>()
-				.GetEndpoint(ControlUri)
+			Bus.GetEndpoint(ControlUri)
 				.Send(new PingEndpoint(CorrelationId));
 		}
 

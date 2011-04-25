@@ -94,6 +94,7 @@
     <Compile Include="ExtensionsForTestingEndpoints.cs" />
     <Compile Include="Fixtures\SagaTestFixture.cs" />
     <Compile Include="Future.cs" />
+    <Compile Include="Helpers\CorrelatedMessageSinkLocator.cs" />
     <Compile Include="Helpers\EndpointSinkLocator.cs" />
     <Compile Include="ExtensionMethodsForObjectBuilder.cs" />
     <Compile Include="Fixtures\AbstractTestConsumer.cs" />

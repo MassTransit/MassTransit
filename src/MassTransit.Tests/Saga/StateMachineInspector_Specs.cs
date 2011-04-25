@@ -12,8 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Saga
 {
+	using System.Collections.Generic;
+	using System.Linq;
 	using BusConfigurators;
+	using BusServiceConfigurators;
 	using Locator;
+	using Magnum.TestFramework;
 	using MassTransit.Distributor;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -25,13 +29,20 @@ namespace MassTransit.Tests.Saga
 		public void FirstTestName()
 		{
 			var configurator = MockRepository.GenerateMock<ServiceBusConfigurator>();
-			configurator.Expect(x => x.AddService<Distributor<InitiateSimpleSaga>>()).IgnoreArguments();
-			configurator.Expect(x => x.AddService<Distributor<CompleteSimpleSaga>>()).IgnoreArguments();
-			configurator.Expect(x => x.AddService<Distributor<ObservableSagaMessage>>()).IgnoreArguments();
 
 			configurator.UseSagaDistributorFor<TestSaga>();
 
-			configurator.VerifyAllExpectations();
+			IList<object[]> calls =
+				configurator.GetArgumentsForCallsMadeOn(x => x.AddService(() => new Distributor<InitiateSimpleSaga>()));
+
+			calls.Count.ShouldEqual(3, "Not enough calls were made to configure the saga");
+
+			calls.Any(x => x[0].GetType().Equals(typeof (DefaultBusServiceConfigurator<Distributor<InitiateSimpleSaga>>)))
+				.ShouldBeTrue("The event was not registered");
+			calls.Any(x => x[0].GetType().Equals(typeof (DefaultBusServiceConfigurator<Distributor<CompleteSimpleSaga>>)))
+				.ShouldBeTrue("The event was not registered");
+			calls.Any(x => x[0].GetType().Equals(typeof (DefaultBusServiceConfigurator<Distributor<ObservableSagaMessage>>)))
+				.ShouldBeTrue("The event was not registered");
 		}
 	}
 }

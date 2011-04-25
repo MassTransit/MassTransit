@@ -13,57 +13,37 @@
 namespace MassTransit.Tests.Services.Routing
 {
 	using System;
-	using MassTransit.Pipeline;
-	using MassTransit.Pipeline.Configuration;
-	using MassTransit.Pipeline.Inspectors;
 	using MassTransit.Services.Routing.Configuration;
-	using MassTransit.Transports;
 	using Messages;
 	using NUnit.Framework;
-	using Rhino.Mocks;
+	using TextFixtures;
+	using TestFramework;
 
 	[TestFixture]
-	public class RoutingConfiguration_Specs
+	public class When_configuring_routes :
+		LoopbackTestFixture
 	{
-		[SetUp]
-		public void Setup_Context()
-		{
-			_builder = MockRepository.GenerateStub<IObjectBuilder>();
-			_bus = MockRepository.GenerateStub<IServiceBus>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _bus);
-			var endpointCache = MockRepository.GenerateStub<IEndpointCache>();
-			_address = new Uri("msmq://localhost/dru");
-			_builder.Stub(x => x.GetInstance<IEndpointCache>()).Return(endpointCache);
-			endpointCache.Stub(x => x.GetEndpoint(_address)).Return(Endpoint.Null);
-
-			_bus.Stub(x => x.OutboundPipeline).Return(_pipeline);
-		}
-
-		Uri _address;
-		IServiceBus _bus;
-		MessagePipeline _pipeline;
-		IObjectBuilder _builder;
-
 		[Test]
-		public void ConfigurationTest()
+		public void Should_create_outbound_sink_for_route()
 		{
+			Uri address = new Uri("loopback://localhost/test_target");
+
 			var configurator = new RoutingConfigurator();
 
-			configurator.Route<PingMessage>().To(_address);
-			configurator.Route<PongMessage>().To(_address);
+			configurator.Route<PingMessage>().To(address);
+			configurator.Route<PongMessage>().To(address);
 
+			IBusService busService = configurator.Create(LocalBus);
+			busService.Start(LocalBus);
 
-			IBusService busService = configurator.Create(_bus);
-
-			PipelineViewer.Trace(_pipeline);
-
-			busService.Start(_bus);
-
-			PipelineViewer.Trace(_pipeline);
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			LocalBus.ShouldHaveSubscriptionFor<PongMessage>();
 
 			busService.Stop();
 
-			PipelineViewer.Trace(_pipeline);
+			LocalBus.ShouldNotHaveSubscriptionFor<PingMessage>();
+
+			busService.Dispose();
 		}
 	}
 }
