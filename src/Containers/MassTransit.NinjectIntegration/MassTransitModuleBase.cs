@@ -14,15 +14,10 @@ namespace MassTransit.NinjectIntegration
 {
 	using System;
 	using BusConfigurators;
-	using Configurators;
 	using EndpointConfigurators;
-	using Internal;
 	using Ninject;
 	using Ninject.Modules;
 	using Saga;
-	using Services.Subscriptions;
-	using Services.Subscriptions.Configuration;
-	using Transports;
 
 	/// <summary>
 	/// This is an extension of the Ninject Module exposing methods to make it easy to get Mass
@@ -99,39 +94,14 @@ namespace MassTransit.NinjectIntegration
 		public override void Load()
 		{
 			RegisterBusDependencies();
-
-			if (_transportTypes != null)
-			{
-				RegisterEndpointFactory(x => _configurationAction(x));
-			}
 		}
 
 		protected void DefaultEndpointResolverConfigurator(EndpointFactoryConfigurator endpointFactoryConfigurator)
 		{
-			endpointFactoryConfigurator.AddTransportFactory<LoopbackTransportFactory>();
-			endpointFactoryConfigurator.AddTransportFactory<MulticastUdpTransportFactory>();
-
 			foreach (Type type in _transportTypes)
 			{
 				endpointFactoryConfigurator.AddTransportFactory(type);
 			}
-		}
-
-		/// <summary>
-		/// Registers the in-memory subscription service so that all buses created in the same
-		/// process share subscriptions
-		/// </summary>
-		protected void RegisterInMemorySubscriptionService()
-		{
-			Bind<IEndpointSubscriptionEvent>()
-				.To<LocalSubscriptionService>()
-				.InSingletonScope();
-
-			Bind<SubscriptionPublisher>()
-				.To<SubscriptionPublisher>();
-
-			Bind<SubscriptionConsumer>()
-				.To<SubscriptionConsumer>();
 		}
 
 		protected void RegisterInMemorySagaRepository()
@@ -159,15 +129,6 @@ namespace MassTransit.NinjectIntegration
 			// OrchestrateSagaStateMachineSink<,>)
 		}
 
-		protected void RegisterEndpointFactory(Action<EndpointFactoryConfigurator> configAction)
-		{
-			Bind<IEndpointCache>()
-				.ToMethod(cxt =>
-					{
-						return EndpointCacheFactory.New(configAction);
-					}).InSingletonScope();
-		}
-
 		protected void RegisterServiceBus(string endpointUri, Action<ServiceBusConfigurator> configAction)
 		{
 			RegisterServiceBus(new Uri(endpointUri), configAction);
@@ -180,6 +141,9 @@ namespace MassTransit.NinjectIntegration
 					{
 						return ServiceBusFactory.New(x =>
 							{
+								if (_configurationAction != null)
+									_configurationAction(x);
+
 								x.SetObjectBuilder(context.Kernel.Get<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 
@@ -202,16 +166,6 @@ namespace MassTransit.NinjectIntegration
 				.ToMethod(context =>
 					{return (IControlBus)context.Kernel.Get<IServiceBus>().ControlBus;
 					}).InSingletonScope();
-		}
-
-		protected static void ConfigureSubscriptionClient(string subscriptionServiceEndpointAddress, ServiceBusConfigurator configurator)
-		{
-			ConfigureSubscriptionClient(new Uri(subscriptionServiceEndpointAddress), configurator);
-		}
-
-		protected static void ConfigureSubscriptionClient(Uri subscriptionServiceEndpointAddress, ServiceBusConfigurator configurator)
-		{
-			configurator.UseSubscriptionService(subscriptionServiceEndpointAddress);
 		}
 	}
 }
