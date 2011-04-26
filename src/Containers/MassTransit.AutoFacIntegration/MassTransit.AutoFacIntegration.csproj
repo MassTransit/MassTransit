@@ -31,13 +31,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac">
+    <Reference Include="Autofac, Version=2.4.5.724, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\Autofac\NET40\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Autofac.Configuration">
+    <Reference Include="Autofac.Configuration, Version=2.4.5.724, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\Autofac\NET40\Autofac.Configuration.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum">
+    <Reference Include="Magnum, Version=1.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="System" />
