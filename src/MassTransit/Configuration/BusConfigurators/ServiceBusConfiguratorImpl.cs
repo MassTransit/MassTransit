@@ -27,7 +27,7 @@ namespace MassTransit.BusConfigurators
 
 		readonly IList<BusBuilderConfigurator> _configurators;
 		readonly ServiceBusSettings _settings;
-		Func<BusSettings, IEndpointCache, BusBuilder> _builderFactory;
+		Func<BusSettings, BusBuilder> _builderFactory;
 
 		EndpointFactoryConfigurator _endpointFactoryConfigurator;
 
@@ -53,7 +53,7 @@ namespace MassTransit.BusConfigurators
 			_endpointFactoryConfigurator.Validate();
 		}
 
-		public void UseBusBuilder(Func<BusSettings, IEndpointCache, BusBuilder> builderFactory)
+		public void UseBusBuilder(Func<BusSettings, BusBuilder> builderFactory)
 		{
 			_builderFactory = builderFactory;
 		}
@@ -105,8 +105,9 @@ namespace MassTransit.BusConfigurators
 				Environment.Version);
 
 			IEndpointCache endpointCache = CreateEndpointCache();
+			_settings.EndpointCache = endpointCache;
 
-			BusBuilder builder = _builderFactory(_settings, endpointCache);
+			BusBuilder builder = _builderFactory(_settings);
 
 			foreach (BusBuilderConfigurator configurator in _configurators)
 			{
@@ -140,9 +141,9 @@ namespace MassTransit.BusConfigurators
 			return endpointCache;
 		}
 
-		static BusBuilder DefaultBuilderFactory(BusSettings settings, IEndpointCache endpointCache)
+		static BusBuilder DefaultBuilderFactory(BusSettings settings)
 		{
-			return new ServiceBusBuilderImpl(settings, endpointCache);
+			return new ServiceBusBuilderImpl(settings);
 		}
 	}
 }

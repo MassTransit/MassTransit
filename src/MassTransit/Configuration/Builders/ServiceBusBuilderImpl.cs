@@ -34,13 +34,15 @@ namespace MassTransit.Builders
 		bool _disposed;
 		IEndpointCache _endpointCache;
 
-		public ServiceBusBuilderImpl(BusSettings settings, IEndpointCache endpointCache)
+		public ServiceBusBuilderImpl(BusSettings settings)
 		{
 			Guard.AgainstNull(settings, "settings");
-			Guard.AgainstNull(endpointCache, "endpointCache");
+
+			Guard.AgainstNull(settings.EndpointCache, "endpointCache");
+			Guard.AgainstNull(settings.ObjectBuilder, "objectBuilder");
 
 			_settings = settings;
-			_endpointCache = endpointCache;
+			_endpointCache = settings.EndpointCache;
 
 			_postCreateActions = new List<Action<ServiceBus>>();
 			_busServiceConfigurators = new List<BusServiceConfigurator>();
@@ -55,11 +57,6 @@ namespace MassTransit.Builders
 		public BusSettings Settings
 		{
 			get { return _settings; }
-		}
-
-		public IEndpointCache EndpointCache
-		{
-			get { return _endpointCache; }
 		}
 
 		public IControlBus Build()
