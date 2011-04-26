@@ -32,7 +32,7 @@ namespace MassTransit
 		{
 			Guard.AgainstNull(configure, "configure");
 
-			ServiceBusConfigurator configurator = new ServiceBusConfiguratorImpl(_defaultSettings);
+			var configurator = new ServiceBusConfiguratorImpl(_defaultSettings);
 
 			configure(configurator);
 

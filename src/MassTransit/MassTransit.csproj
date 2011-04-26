@@ -140,7 +140,10 @@
     <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ServiceBusFactory.cs" />
     <Compile Include="Configuration\BusConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\Subscriptions\SubscriptionConfiguration.cs" />
+    <Compile Include="Configuration\SubscriptionConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionBusServiceConfigurator.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfiguration.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfigurator.cs" />
     <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
     <Compile Include="Configuration\Xml\SettingsOptions.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
@@ -187,6 +190,7 @@
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
     <Compile Include="StreamExtensions.cs" />
+    <Compile Include="Subscriptions\SubscriptionBusService.cs" />
     <Compile Include="Transports\TransportSettings.cs" />
     <Compile Include="Transports\EndpointCacheExtensions.cs" />
     <Compile Include="Transports\EndpointFactory.cs" />

@@ -49,17 +49,10 @@ namespace MassTransit.BusConfigurators
 		/// <param name="afterConsume"></param>
 		void AfterConsumingMessage(Action afterConsume);
 
-
 		/// <summary>
 		/// Sets the object builder used by certain parts of the bus infrastructure
 		/// </summary>
 		/// <param name="objectBuilder"></param>
 		void SetObjectBuilder(IObjectBuilder objectBuilder);
-
-
-		IServiceBus CreateServiceBus();
-
-
-	    void RegisterSubscription(Type concreteConsumerType);
 	}
 }
