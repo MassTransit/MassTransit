@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,10 +20,9 @@ namespace Starbucks.Barista
 	using log4net.Config;
 	using Magnum;
 	using Magnum.StateMachine;
-	using MassTransit.Configuration;
+	using MassTransit;
 	using MassTransit.Configuration.Xml;
 	using MassTransit.Saga;
-	using MassTransit.Transports;
 	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Topshelf;
@@ -33,62 +32,52 @@ namespace Starbucks.Barista
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
-        [STAThread]
-        private static void Main(string[] args)
+		[STAThread]
+		private static void Main(string[] args)
 		{
-		    XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
+			XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
 
-		    var container = new WindsorContainer();
-			SettingsOptions options = new SettingsOptions()
+			var container = new WindsorContainer();
+			var options = new SettingsOptions
 				{
 					ReceiveFrom = "msmq://localhost/starbucks_barista",
 				};
 
 			options.Transports.Add(typeof (MsmqTransportFactory).AssemblyQualifiedName);
 			options.Transports.Add(typeof (MulticastMsmqTransportFactory).AssemblyQualifiedName);
-			options.Callback = x =>
-				{
-					x.UseMulticastSubscriptionClient();
-				};
+			options.Callback = x => { x.UseMulticastSubscriptionClient(); };
 
 			container.Install(new MassTransitInstaller(options));
 
-		    container.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)));
-		    container.Register(Component.For<DrinkPreparationSaga>(),
-		                       Component.For<BaristaService>().LifeStyle.Singleton);
+			container.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)));
+			container.Register(Component.For<DrinkPreparationSaga>(),
+				Component.For<BaristaService>().LifeStyle.Singleton);
 
-		    HostFactory.Run(c =>
-		    {
-		        c.SetServiceName("StarbucksBarista");
-		        c.SetDisplayName("Starbucks Barista");
-		        c.SetDescription("a Mass Transit sample service for making orders of coffee.");
+			HostFactory.Run(c =>
+				{
+					c.SetServiceName("StarbucksBarista");
+					c.SetDisplayName("Starbucks Barista");
+					c.SetDescription("a Mass Transit sample service for making orders of coffee.");
 
-		        c.DependsOnMsmq();
-		        c.RunAsLocalService();
+					c.DependsOnMsmq();
+					c.RunAsLocalService();
 
-		        EndpointConfigurator.Defaults(x =>
-		        {
-		            x.CreateMissingQueues = true;
-		        });
+					DisplayStateMachine();
 
-
-		        DisplayStateMachine();
-
-		        c.Service<BaristaService>(s =>
-		        {
-		            s.ConstructUsing(builder => container.Resolve<BaristaService>());
-		            s.WhenStarted(o => o.Start());
-		            s.WhenStopped(o =>
-		            {
-		                o.Stop();
-		                container.Dispose();
-		            });
-		        });
-		    });
-
+					c.Service<BaristaService>(s =>
+						{
+							s.ConstructUsing(builder => container.Resolve<BaristaService>());
+							s.WhenStarted(o => o.Start());
+							s.WhenStopped(o =>
+								{
+									o.Stop();
+									container.Dispose();
+								});
+						});
+				});
 		}
 
-	    private static void DisplayStateMachine()
+		private static void DisplayStateMachine()
 		{
 			Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 

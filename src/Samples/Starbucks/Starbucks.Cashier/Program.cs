@@ -20,9 +20,6 @@ namespace Starbucks.Cashier
 	using Magnum.StateMachine;
 
 	using MassTransit.NinjectIntegration;
-	using MassTransit.Saga;
-	using MassTransit.Transports;
-
 	using Ninject;
 
 	using Topshelf;
@@ -47,8 +44,6 @@ namespace Starbucks.Cashier
 
 					c.RunAsLocalSystem();
 					c.DependencyOnMsmq();
-
-					EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
                     StandardKernel kernel = new StandardKernel();
                     NinjectObjectBuilder container = new NinjectObjectBuilder(kernel);

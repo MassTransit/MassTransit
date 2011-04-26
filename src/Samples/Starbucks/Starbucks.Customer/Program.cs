@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace Starbucks.Customer
 	using System.Windows.Forms;
 	using log4net.Config;
 	using MassTransit;
-	using MassTransit.Transports;
 	using StructureMap;
 
 	internal static class Program
@@ -29,8 +28,6 @@ namespace Starbucks.Customer
 		private static void Main(string[] args)
 		{
 			XmlConfigurator.Configure(new FileInfo("customer.log4net.xml"));
-			
-			EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
 			IContainer c = BootstrapContainer();
 
@@ -41,10 +38,7 @@ namespace Starbucks.Customer
 
 		private static IContainer BootstrapContainer()
 		{
-			var container = new Container(x =>
-				{
-					x.AddType(typeof (OrderDrinkForm));
-				});
+			var container = new Container(x => { x.AddType(typeof (OrderDrinkForm)); });
 
 			container.Configure(x => x.AddRegistry(new CustomerRegistry(container)));
 
