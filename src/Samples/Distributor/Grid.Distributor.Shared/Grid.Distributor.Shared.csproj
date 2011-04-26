@@ -74,7 +74,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IocRegistry.cs" />
+    <Compile Include="IServiceInterface.cs" />
     <Compile Include="Messages\CompletedSimpleWorkItem.cs" />
     <Compile Include="Messages\DoSimpleWorkItem.cs" />
     <Compile Include="ServiceSetup.cs" />
