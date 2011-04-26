@@ -16,10 +16,8 @@ namespace MassTransit.StructureMapIntegration
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.IO;
-	using System.Linq;
 	using System.Reflection;
 	using BusConfigurators;
-	using EndpointConfigurators;
 	using Saga;
 	using StructureMap;
 	using StructureMap.Configuration.DSL;
@@ -91,23 +89,6 @@ namespace MassTransit.StructureMapIntegration
 				.Use<StructureMapObjectBuilder>();
 		}
 
-		/// <summary>
-		/// This is not needed really
-		/// </summary>
-		/// <param name="configAction"></param>
-		protected void RegisterEndpointFactory(Action<EndpointFactoryConfigurator> configAction)
-		{
-			For<IEndpointCache>()
-				.Singleton()
-				.Use(context =>
-					{
-						return EndpointCacheFactory.New(x =>
-							{
-								configAction(x);
-							});
-					});
-		}
-
 		protected void RegisterServiceBus(string endpointUri, Action<ServiceBusConfigurator> configAction)
 		{
 			RegisterServiceBus(new Uri(endpointUri), configAction);
@@ -115,24 +96,7 @@ namespace MassTransit.StructureMapIntegration
 
 		protected void RegisterServiceBus(Uri endpointUri, Action<ServiceBusConfigurator> configAction)
 		{
-			For<IServiceBus>()
-				.Singleton()
-				.Use(context =>
-					{
-						return ServiceBusFactory.New(x =>
-							{
-								if (_transports != null)
-									_transports.Each(transport => x.AddTransportFactory(transport));
-
-								if (_transportFactoryConvention != null)
-									_transportFactoryConvention.Each(transport => x.AddTransportFactory(transport));
-
-								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
-								x.ReceiveFrom(endpointUri);
-
-								configAction(x);
-							});
-					});
+			RegisterServiceBus(endpointUri, (x, context) => configAction(x));
 		}
 
 		protected void RegisterServiceBus(string endpointUri, Action<ServiceBusConfigurator, IContext> configAction)

@@ -13,46 +13,37 @@
 namespace Grid.Distributor.Shared
 {
     using System;
-    using MassTransit.Transports;
-    using MassTransit.Transports.Msmq;
+    using MassTransit.StructureMapIntegration;
     using StructureMap;
     using Topshelf;
-    using Topshelf.Configuration.Dsl;
 
-    public interface IServiceInterface
-    {
-        void Start();
-        void Stop();
-    }
-
-    public abstract class ServiceSetup
+	public abstract class ServiceSetup
     {
         abstract public string ServiceName { get; set; }
         abstract public string DisplayName { get; set; }
         abstract public string Description { get; set; }
         abstract public string SourceQueue { get; set; }
-        abstract public string SubscriptionQueue { get; set; }
         abstract public Action<ConfigurationExpression> ContainerSetup { get; set; }
 
-        public void ConfigureService<T>(string[] args) where T : class, IServiceInterface
+        public void ConfigureService<T>()
+			where T : class, IServiceInterface
         {
-            var cfg = RunnerConfigurator.New(c =>
+            HostFactory.Run(c =>
             {
                 c.SetServiceName(ServiceName);
                 c.SetDisplayName(DisplayName);
                 c.SetDescription(Description);
 
                 c.RunAsLocalSystem();
-                c.DependencyOnMsmq();
+                c.DependsOnMsmq();
 
-                c.ConfigureService<T>( s =>
+                c.Service<T>( s =>
                 {
-                    EndpointConfigurator.Defaults(def => def.CreateMissingQueues = true);
-                    s.HowToBuildService(name =>
+                    s.ConstructUsing(name =>
                     {
                         Container container = new Container(x =>
                         {
-                            x.AddRegistry(new IocRegistry(SourceQueue, SubscriptionQueue));
+                            x.AddRegistry(new MassTransitRegistryBase());
 
                             ContainerSetup(x);
                         });
@@ -63,12 +54,9 @@ namespace Grid.Distributor.Shared
                     s.WhenStarted(start => start.Start());
                     s.WhenStopped(stop => stop.Stop());
                 });
-            });
 
-            ObjectFactory.AssertConfigurationIsValid();
-
-            Runner.Host(cfg, args);
+				ObjectFactory.AssertConfigurationIsValid();
+			});
         }
-
     }
 }

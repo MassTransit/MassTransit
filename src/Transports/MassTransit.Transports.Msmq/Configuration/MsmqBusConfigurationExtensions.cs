@@ -19,7 +19,8 @@ namespace MassTransit
 	{
 		public static ServiceBusConfigurator UseMsmq(this ServiceBusConfigurator configurator)
 		{
-			return configurator.AddTransportFactory<MsmqTransportFactory>();
+			return configurator.AddTransportFactory<MsmqTransportFactory>()
+				.AddTransportFactory<MulticastMsmqTransportFactory>();
 		}
 	}
 }

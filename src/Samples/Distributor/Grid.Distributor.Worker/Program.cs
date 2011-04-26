@@ -12,27 +12,34 @@
 // specific language governing permissions and limitations under the License.
 namespace Grid.Distributor.Worker
 {
-    using System.Configuration;
+	using System;
+	using System.Configuration;
     using System.IO;
     using log4net.Config;
 
     internal class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             XmlConfigurator.ConfigureAndWatch(new FileInfo(@"worker.log4net.config"));
 
-            var service = new WorkerServiceProvider
-            {
-                ServiceName = ConfigurationManager.AppSettings["ServiceName"],
-                DisplayName = ConfigurationManager.AppSettings["DisplayName"],
-                Description = ConfigurationManager.AppSettings["Description"],
-                SourceQueue = ConfigurationManager.AppSettings["SourceQueue"],
-                SubscriptionQueue = ConfigurationManager.AppSettings["SubscriptionQueue"],
-                ContainerSetup = x => { }
-            };
+        	try
+        	{
+        		var service = new WorkerServiceProvider
+        			{
+        				ServiceName = ConfigurationManager.AppSettings["ServiceName"],
+        				DisplayName = ConfigurationManager.AppSettings["DisplayName"],
+        				Description = ConfigurationManager.AppSettings["Description"],
+        				SourceQueue = ConfigurationManager.AppSettings["SourceQueue"],
+        				ContainerSetup = x => { }
+        			};
 
-            service.ConfigureService<DoWork>(args);
+        		service.ConfigureService<DoWork>();
+        	}
+        	catch (Exception ex)
+        	{
+        		Console.WriteLine(ex);
+        	}
         }
     }
 }
