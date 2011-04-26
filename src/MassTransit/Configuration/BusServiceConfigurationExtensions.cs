@@ -15,13 +15,11 @@ namespace MassTransit
 	using System;
 	using BusConfigurators;
 	using BusServiceConfigurators;
-	using Configurators;
-	using Internal;
 
 	public static class BusServiceConfigurationExtensions
 	{
-		public static void ConfigureService<TServiceConfigurator>(this ServiceBusConfigurator configurator, 
-			Action<TServiceConfigurator> configure)
+		public static void ConfigureService<TServiceConfigurator>(this ServiceBusConfigurator configurator,
+		                                                          Action<TServiceConfigurator> configure)
 			where TServiceConfigurator : BusServiceConfigurator, new()
 		{
 			var serviceConfigurator = new TServiceConfigurator();
@@ -49,7 +47,8 @@ namespace MassTransit
 			configurator.AddBusConfigurator(serviceConfigurator);
 		}
 
-		public static void AddService<TService>(this ServiceBusConfigurator configurator, Func<IServiceBus, TService> serviceFactory)
+		public static void AddService<TService>(this ServiceBusConfigurator configurator,
+		                                        Func<IServiceBus, TService> serviceFactory)
 			where TService : IBusService
 		{
 			var serviceConfigurator = new DefaultBusServiceConfigurator<TService>(serviceFactory);

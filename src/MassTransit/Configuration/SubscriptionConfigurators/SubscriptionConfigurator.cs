@@ -10,27 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.StructureMapIntegration
+namespace MassTransit.SubscriptionConfigurators
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
 	using BusConfigurators;
-	using StructureMap;
 
-	public static class MassTransitStructureMapExtensions
+	public interface SubscriptionConfigurator
 	{
-		public static void LoadConsumersFromContainer(this ServiceBusConfigurator configurator, IContainer container)
+
+	}
+
+	public class SubscriptionConfiguratorImpl : 
+		SubscriptionConfigurator
+	{
+		public SubscriptionConfiguratorImpl(ServiceBusConfigurator configurator)
 		{
-			IList<Type> concreteTypes = container.Model
-				.InstancesOf<IConsumer>()
-				.Select(i => i.ConcreteType)
-				.ToList();
-
-			if (concreteTypes.Count == 0)
-				return;
-
-			configurator.RegisterSubscription(x => concreteTypes.Each(type => x.RegisterConsumer(type, container.GetInstance)));
+			
 		}
 	}
 }

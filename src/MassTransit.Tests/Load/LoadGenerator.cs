@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -29,10 +29,10 @@ namespace MassTransit.Tests.Load
 		where TResponse : class, First
 
 	{
-		private readonly Dictionary<Guid, CommandInstance> _commands = new Dictionary<Guid, CommandInstance>();
-		private readonly AutoResetEvent _received = new AutoResetEvent(false);
-		private int _responseCount;
-		private int _unknownCommands;
+		readonly Dictionary<Guid, CommandInstance> _commands = new Dictionary<Guid, CommandInstance>();
+		readonly AutoResetEvent _received = new AutoResetEvent(false);
+		int _responseCount;
+		int _unknownCommands;
 
 		public void Consume(TResponse message)
 		{
@@ -52,7 +52,8 @@ namespace MassTransit.Tests.Load
 			_received.Set();
 		}
 
-		public void Run(IServiceBus bus, IEndpoint sendTo, IEnumerable<IServiceBus> instances, int iterations, Func<Guid, TRequest> generateRequest)
+		public void Run(IServiceBus bus, IEndpoint sendTo, IEnumerable<IServiceBus> instances, int iterations,
+		                Func<Guid, TRequest> generateRequest)
 		{
 			using (bus.Subscribe(this).Disposable())
 			{
@@ -64,14 +65,11 @@ namespace MassTransit.Tests.Load
 					lock (_commands)
 						_commands.Add(commandInstance.Id, commandInstance);
 
-					var command = generateRequest(commandInstance.Id);
+					TRequest command = generateRequest(commandInstance.Id);
 
 					ThreadUtil.Sleep(5.Milliseconds());
 
-					sendTo.Send(command, x =>
-						{
-							x.SendResponseTo(bus.Endpoint);
-						});
+					sendTo.Send(command, x => { x.SendResponseTo(bus.Endpoint); });
 				}
 
 				_received.WaitOne(20.Seconds(), true);
@@ -83,9 +81,27 @@ namespace MassTransit.Tests.Load
 			DisplayResults();
 		}
 
-		private void DisplayResults()
+		public Dictionary<Uri, int> GetWorkerLoad()
 		{
-            var sources = GetWorkerLoad();
+			var sources = new Dictionary<Uri, int>();
+
+			_commands.Values.Each(command =>
+				{
+					if (command.Worker != null)
+					{
+						if (sources.ContainsKey(command.Worker))
+							sources[command.Worker] = sources[command.Worker] + 1;
+						else
+							sources.Add(command.Worker, 1);
+					}
+				});
+
+			return sources;
+		}
+
+		void DisplayResults()
+		{
+			Dictionary<Uri, int> sources = GetWorkerLoad();
 
 			int sent = 0;
 			int received = 0;
@@ -117,7 +133,7 @@ namespace MassTransit.Tests.Load
 
 			if (received > 0)
 			{
-				var query = _commands.Values.Select(x => x.ResponseReceivedAt - x.CreatedAt).OrderBy(x => x);
+				IOrderedEnumerable<TimeSpan> query = _commands.Values.Select(x => x.ResponseReceivedAt - x.CreatedAt).OrderBy(x => x);
 
 				int count = query.Count();
 
@@ -134,23 +150,5 @@ namespace MassTransit.Tests.Load
 
 			received.ShouldEqual(sent);
 		}
-
-        public Dictionary<Uri, int> GetWorkerLoad()
-        {
-            var sources = new Dictionary<Uri, int>();
-
-            _commands.Values.Each(command =>
-            {
-                if (command.Worker != null)
-                {
-                    if (sources.ContainsKey(command.Worker))
-                        sources[command.Worker] = sources[command.Worker] + 1;
-                    else
-                        sources.Add(command.Worker, 1);
-                }
-            });
-
-            return sources;
-        }
 	}
 }
