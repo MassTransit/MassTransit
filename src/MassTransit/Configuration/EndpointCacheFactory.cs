@@ -13,7 +13,9 @@
 namespace MassTransit
 {
 	using System;
+	using Configurators;
 	using EndpointConfigurators;
+	using Exceptions;
 	using Magnum;
 	using Transports;
 	using Util;
@@ -31,13 +33,20 @@ namespace MassTransit
 
 			configure(configurator);
 
-			configurator.Validate();
+			ConfigurationResult result = ConfigurationResultImpl.CompileResults(configurator.Validate());
 
-			IEndpointFactory endpointFactory = configurator.CreateEndpointFactory();
+			try
+			{
+				IEndpointFactory endpointFactory = configurator.CreateEndpointFactory();
 
-			IEndpointCache endpointCache = new EndpointCache(endpointFactory);
+				IEndpointCache endpointCache = new EndpointCache(endpointFactory);
 
-			return endpointCache;
+				return endpointCache;
+			}
+			catch (Exception ex)
+			{
+				throw new ConfigurationException(result, "An exception was thrown during endpoint cache creation", ex);
+			}
 		}
 
 		public static void ConfigureDefaultSettings([NotNull] Action<EndpointFactoryDefaultSettingsConfigurator> configure)

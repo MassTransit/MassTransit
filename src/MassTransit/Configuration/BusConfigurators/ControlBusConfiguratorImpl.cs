@@ -16,6 +16,7 @@ namespace MassTransit.BusConfigurators
 	using System.Collections.Generic;
 	using System.Linq;
 	using Builders;
+	using Configurators;
 	using log4net;
 
 	public class ControlBusConfiguratorImpl :
@@ -62,9 +63,11 @@ namespace MassTransit.BusConfigurators
 			return builder;
 		}
 
-		public void Validate()
+		public IEnumerable<ValidationResult> Validate()
 		{
-			_configurators.Each(x => x.Validate());
+			return from configurator in _configurators 
+				   from result in configurator.Validate() 
+				   select result.WithParentKey("ControlBus");
 		}
 
 		public void ReceiveFrom(Uri uri)

@@ -13,10 +13,11 @@
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
+	using System.Collections.Generic;
+	using Builders;
 	using Configurators;
-	using MassTransit.Builders;
-	using MassTransit.Exceptions;
-	using MassTransit.Serialization;
+	using Exceptions;
+	using Serialization;
 
 	public class DefaultSerializerEndpointFactoryConfigurator :
 		EndpointFactoryBuilderConfigurator
@@ -28,17 +29,17 @@ namespace MassTransit.EndpointConfigurators
 			_serializerFactory = serializerFactory;
 		}
 
-		public void Validate()
+		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_serializerFactory == null)
-				throw new ConfigurationException("A null serializer factory was specified");
+				yield return this.Failure("DefaultSerializer", "was not configured");
 		}
 
 		public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
 		{
 			IMessageSerializer serializer = _serializerFactory();
 			if (serializer == null)
-				throw new ConfigurationException("A serialize was not created");
+				throw new ConfigurationException("The configured default serializer could not be created");
 
 			builder.SetDefaultSerializer(serializer);
 

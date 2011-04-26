@@ -13,9 +13,10 @@
 namespace MassTransit.BusServiceConfigurators
 {
 	using System;
+	using System.Collections.Generic;
 	using Builders;
 	using BusConfigurators;
-	using Exceptions;
+	using Configurators;
 
 	public class DefaultBusServiceConfigurator<TService> :
 		BusServiceConfigurator,
@@ -24,20 +25,16 @@ namespace MassTransit.BusServiceConfigurators
 	{
 		readonly Func<IServiceBus, TService> _serviceFactory;
 
-		public DefaultBusServiceConfigurator(Func<TService> serviceFactory)
-		{
-			_serviceFactory = bus => serviceFactory();
-		}
-
 		public DefaultBusServiceConfigurator(Func<IServiceBus, TService> serviceFactory)
 		{
 			_serviceFactory = serviceFactory;
 		}
 
-		public void Validate()
+		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_serviceFactory == null)
-				throw new ConfigurationException("The bus service factory can not be null: " + typeof (TService).Name);
+				yield return this.Failure("BusServiceFactory", "The bus service factory for {0} was null."
+					.FormatWith(typeof (TService).Name));
 		}
 
 		public BusBuilder Configure(BusBuilder builder)

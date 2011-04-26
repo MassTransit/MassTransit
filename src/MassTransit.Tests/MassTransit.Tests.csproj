@@ -114,6 +114,7 @@
   <ItemGroup>
     <Compile Include="Batch_Specs.cs" />
     <Compile Include="BddExtensions.cs" />
+    <Compile Include="Configuration\When_configuration_fails.cs" />
     <Compile Include="Configuration\When_configuring_an_endpoint.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="ControlBus_Specs.cs" />

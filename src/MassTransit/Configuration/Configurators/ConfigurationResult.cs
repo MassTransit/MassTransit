@@ -14,8 +14,8 @@ namespace MassTransit.Configurators
 {
 	using System.Collections.Generic;
 
-	public interface Configurator
+	public interface ConfigurationResult
 	{
-		IEnumerable<ValidationResult> Validate();
+		IEnumerable<ValidationResult> Results { get; }
 	}
 }
