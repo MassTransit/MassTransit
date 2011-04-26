@@ -73,15 +73,19 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum, Version=0.1.0.275, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum.TestFramework, Version=1.0.0.230, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\lib\Magnum\net-3.5\TestFramework\Magnum.TestFramework.dll</HintPath>
     </Reference>
-    <Reference Include="NHibernate, Version=2.1.2.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+    <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\..\lib\Magnum\net-4.0\TestFramework\Magnum.TestFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\NHibernate\NHibernate.dll</HintPath>
     </Reference>
@@ -89,7 +93,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\NHibernate\NHibernate.ByteCode.Castle.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.4.6.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+    <Reference Include="nunit.framework">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\NUnit\net-2.0\nunit.framework.dll</HintPath>
     </Reference>
