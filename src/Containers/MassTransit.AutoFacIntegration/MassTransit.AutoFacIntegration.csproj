@@ -8,8 +8,8 @@
     <ProjectGuid>{A31F2C6B-C806-46FD-A4F3-C54209DD495C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.AutoFacIntegration</RootNamespace>
-    <AssemblyName>MassTransit.AutoFacIntegration</AssemblyName>
+    <RootNamespace>MassTransit.AutofacIntegration</RootNamespace>
+    <AssemblyName>MassTransit.AutofacIntegration</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

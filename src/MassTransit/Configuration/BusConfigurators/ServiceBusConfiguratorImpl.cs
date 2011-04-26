@@ -31,6 +31,8 @@ namespace MassTransit.BusConfigurators
 		readonly ServiceBusSettings _settings;
 		Func<BusSettings, BusBuilder> _builderFactory;
 
+	    readonly IList<Type> _consumersWhoNeedRegistering;
+
 		EndpointFactoryConfigurator _endpointFactoryConfigurator;
 
 		public ServiceBusConfiguratorImpl(ServiceBusDefaultSettings defaultSettings)
@@ -40,6 +42,7 @@ namespace MassTransit.BusConfigurators
 			_builderFactory = DefaultBuilderFactory;
 			_configurators = new List<BusBuilderConfigurator>();
 
+            _consumersWhoNeedRegistering = new List<Type>();
 			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(new EndpointFactoryDefaultSettings());
 		}
 
@@ -103,7 +106,13 @@ namespace MassTransit.BusConfigurators
 			_endpointFactoryConfigurator.AddEndpointFactoryConfigurator(configurator);
 		}
 
-		public IServiceBus CreateServiceBus()
+	    public void RegisterSubscription(Type concreteConsumerType)
+	    {
+	        _consumersWhoNeedRegistering.Add(concreteConsumerType);
+	    }
+
+
+	    public IServiceBus CreateServiceBus()
 		{
 			_log.InfoFormat("MassTransit v{0}, .NET Framework v{1}", typeof (ServiceBusFactory).Assembly.GetName().Version,
 				Environment.Version);

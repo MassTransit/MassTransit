@@ -10,6 +10,8 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+using MassTransit.BusConfigurators;
+
 namespace MassTransit.StructureMapIntegration
 {
     using System.Linq;
@@ -18,12 +20,13 @@ namespace MassTransit.StructureMapIntegration
 
     public static class MassTransitStructureMapExtensions
     {
-        public static UnsubscribeAction LoadConsumersFromContainer(this BusConfiguration cfg, IContainer container)
+        public static UnsubscribeAction LoadConsumersFromContainer(this ServiceBusConfigurator cfg, IContainer container)
         {
             var concreteTypes = from i in container.Model.InstancesOf<IConsumer>()
                                 select i.ConcreteType;
 
-            //cfg.AddSubscribersByType(concretes);
+            concreteTypes.Each(cfg.RegisterSubscription);
+
             return () => true;
         }
     }

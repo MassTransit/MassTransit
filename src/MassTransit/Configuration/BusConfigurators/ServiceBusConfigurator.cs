@@ -58,5 +58,8 @@ namespace MassTransit.BusConfigurators
 
 
 		IServiceBus CreateServiceBus();
+
+
+	    void RegisterSubscription(Type concreteConsumerType);
 	}
 }

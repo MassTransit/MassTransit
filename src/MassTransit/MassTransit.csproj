@@ -140,6 +140,7 @@
     <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ServiceBusFactory.cs" />
     <Compile Include="Configuration\BusConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\Subscriptions\SubscriptionConfiguration.cs" />
     <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
     <Compile Include="Configuration\Xml\SettingsOptions.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
