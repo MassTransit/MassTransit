@@ -12,10 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.BusServiceConfigurators
 {
+	using System.Collections.Generic;
 	using Builders;
 	using BusConfigurators;
 	using Configurators;
-	using Exceptions;
 
 	public class CustomBusServiceConfigurator :
 		BusBuilderConfigurator
@@ -27,10 +27,10 @@ namespace MassTransit.BusServiceConfigurators
 			_configurator = configurator;
 		}
 
-		public void Validate()
+		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_configurator == null)
-				throw new ConfigurationException("The bus service configurator can not be null.");
+				yield return this.Failure("BusServiceConfigurator", "The bus service configurator cannot be null");
 		}
 
 		public BusBuilder Configure(BusBuilder builder)

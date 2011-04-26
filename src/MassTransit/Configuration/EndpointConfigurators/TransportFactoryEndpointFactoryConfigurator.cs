@@ -13,7 +13,9 @@
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
+	using System.Collections.Generic;
 	using Builders;
+	using Configurators;
 	using Exceptions;
 	using Transports;
 
@@ -27,10 +29,10 @@ namespace MassTransit.EndpointConfigurators
 			_transportFactory = transportFactory;
 		}
 
-		public void Validate()
+		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_transportFactory == null)
-				throw new ConfigurationException("A null transport factory was specified");
+				yield return this.Failure("TransportFactory", "The transport factory was null.");
 		}
 
 		public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)

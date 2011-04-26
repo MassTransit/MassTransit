@@ -13,7 +13,10 @@
 namespace MassTransit
 {
 	using System;
+	using System.Collections.Generic;
 	using BusConfigurators;
+	using Configurators;
+	using Exceptions;
 	using Magnum;
 	using Util;
 
@@ -33,9 +36,16 @@ namespace MassTransit
 
 			configure(configurator);
 
-			configurator.Validate();
+			ConfigurationResult result = ConfigurationResultImpl.CompileResults(configurator.Validate());
 
-			return configurator.CreateServiceBus();
+			try
+			{
+				return configurator.CreateServiceBus();
+			}
+			catch (Exception ex)
+			{
+				throw new ConfigurationException(result, "An exception was thrown during service bus creation", ex);
+			}
 		}
 
 		public static void ConfigureDefaultSettings([NotNull] Action<ServiceBusDefaultSettingsConfigurator> configure)

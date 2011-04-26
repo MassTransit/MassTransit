@@ -36,6 +36,12 @@ namespace MassTransit.EndpointConfigurators
 		/// <summary>
 		/// Overrides the transport factory when the error transport is created, to modify the behavior
 		/// </summary>
+		/// <param name="transportFactory"></param>
+		EndpointConfigurator SetTransportFactory(Func<ITransportFactory, ITransportSettings, IDuplexTransport> transportFactory);
+
+		/// <summary>
+		/// Overrides the transport factory when the error transport is created, to modify the behavior
+		/// </summary>
 		/// <param name="errorTransportFactory"></param>
 		EndpointConfigurator SetErrorTransportFactory(Func<ITransportFactory, ITransportSettings, IOutboundTransport> errorTransportFactory);
 	}

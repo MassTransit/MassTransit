@@ -14,7 +14,9 @@ namespace MassTransit.BusConfigurators
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using Builders;
+	using Configurators;
 	using EndpointConfigurators;
 	using Exceptions;
 	using log4net;
@@ -41,16 +43,18 @@ namespace MassTransit.BusConfigurators
 			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(new EndpointFactoryDefaultSettings());
 		}
 
-		public void Validate()
+		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_builderFactory == null)
-				throw new ConfigurationException("The builder factory can not be null.");
+				yield return this.Failure("BuilderFactory", "The builder factory cannot be null.");
 			if (_settings.InputAddress == null)
-				throw new ConfigurationException("The input address can not be null.");
+				yield return this.Failure("InputAddress", "The input address cannot be null.");
 
-			_configurators.Each(configurator => configurator.Validate());
+			foreach (var result in _endpointFactoryConfigurator.Validate())
+				yield return result.WithParentKey("EndpointFactory");
 
-			_endpointFactoryConfigurator.Validate();
+			foreach (var result in _configurators.SelectMany(configurator => configurator.Validate()))
+				yield return result;
 		}
 
 		public void UseBusBuilder(Func<BusSettings, BusBuilder> builderFactory)

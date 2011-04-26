@@ -14,7 +14,9 @@ namespace MassTransit.BusConfigurators
 {
 	using System;
 	using System.Collections.Generic;
-	using MassTransit.Builders;
+	using System.Linq;
+	using Builders;
+	using Configurators;
 
 	public class PostCreateBusBuilderConfiguratorImpl :
 		BusBuilderConfigurator
@@ -35,9 +37,11 @@ namespace MassTransit.BusConfigurators
 			return builder;
 		}
 
-		public void Validate()
+		public IEnumerable<ValidationResult> Validate()
 		{
-			_configurators.Each(x => x.Validate());
+			return from configurator in _configurators
+			       from result in configurator.Validate()
+			       select result.WithParentKey("PostCreateBus");
 		}
 	}
 }

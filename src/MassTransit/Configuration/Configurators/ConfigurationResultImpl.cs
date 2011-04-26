@@ -10,35 +10,37 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.EndpointConfigurators
+namespace MassTransit.Configurators
 {
 	using System;
 	using System.Collections.Generic;
-	using Builders;
-	using Configurators;
+	using System.Linq;
 	using Exceptions;
 
-	public class DelegateEndpointFactoryBuilderConfigurator :
-		EndpointFactoryBuilderConfigurator
+	[Serializable]
+	public class ConfigurationResultImpl :
+		ConfigurationResult
 	{
-		readonly Action<EndpointFactoryBuilder> _builderCallback;
+		readonly IList<ValidationResult> _results;
 
-		public DelegateEndpointFactoryBuilderConfigurator(Action<EndpointFactoryBuilder> builderCallback)
+		ConfigurationResultImpl(IEnumerable<ValidationResult> results)
 		{
-			_builderCallback = builderCallback;
+			_results = results.ToList();
 		}
 
-		public IEnumerable<ValidationResult> Validate()
+		public IEnumerable<ValidationResult> Results
 		{
-			if (_builderCallback == null)
-				yield return this.Failure("BuilderCallback", "was not configured");
+			get { return _results; }
 		}
 
-		public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
+		public static ConfigurationResult CompileResults(IEnumerable<ValidationResult> results)
 		{
-			_builderCallback(builder);
+			var result = new ConfigurationResultImpl(results);
 
-			return builder;
+			if (result.Results.Any(x => x.Disposition == ValidationResultDisposition.Failure))
+				throw new ConfigurationException(result, "The service bus was not properly configured (see Results for details)");
+
+			return result;
 		}
 	}
 }

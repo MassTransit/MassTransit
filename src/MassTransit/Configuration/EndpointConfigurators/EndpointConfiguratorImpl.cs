@@ -13,8 +13,9 @@
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
+	using System.Collections.Generic;
 	using Builders;
-	using Exceptions;
+	using Configurators;
 	using Magnum;
 	using Serialization;
 	using Transports;
@@ -52,6 +53,12 @@ namespace MassTransit.EndpointConfigurators
 			return this;
 		}
 
+		public EndpointConfigurator SetTransportFactory(Func<ITransportFactory, ITransportSettings, IDuplexTransport> transportFactory)
+		{
+			_transportFactory = transportFactory;
+			return this;
+		}
+
 		public EndpointConfigurator SetErrorTransportFactory(
 			Func<ITransportFactory, ITransportSettings, IOutboundTransport> errorTransportFactory)
 		{
@@ -59,18 +66,27 @@ namespace MassTransit.EndpointConfigurators
 			return this;
 		}
 
-		public void Validate()
+		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_errorAddress != null)
 			{
 				if (string.Compare(_errorAddress.Uri.Scheme, _settings.Address.Uri.Scheme, true) != 0)
-					throw new ConfigurationException("The error transport must be of the same type as the endpoint transport");
+					yield return this.Failure("ErrorAddress", _errorAddress.ToString(),
+						"The error address must use the same scheme as the endpoint address");
+				else
+					yield return this.Success("ErrorAddress", "Using specified error address: " + _errorAddress);
 			}
+
+			if (_transportFactory == null)
+				yield return this.Failure("TransportFactory", "The transport factory method is null");
+
+			if (_errorTransportFactory == null)
+				yield return this.Failure("ErrorTransportFactory", "The error transport factory method is null");
 		}
 
 		public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
 		{
-			var endpointBuilder = CreateBuilder();
+			EndpointBuilder endpointBuilder = CreateBuilder();
 
 			builder.AddEndpointBuilder(_uri, endpointBuilder);
 

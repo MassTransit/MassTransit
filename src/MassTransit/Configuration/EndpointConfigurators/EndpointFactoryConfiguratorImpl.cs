@@ -14,7 +14,9 @@ namespace MassTransit.EndpointConfigurators
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using Builders;
+	using Configurators;
 	using Exceptions;
 	using Transports;
 
@@ -32,12 +34,13 @@ namespace MassTransit.EndpointConfigurators
 			_endpointFactoryConfigurators = new List<EndpointFactoryBuilderConfigurator>();
 		}
 
-		public void Validate()
+		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_endpointFactoryBuilderFactory == null)
-				throw new ConfigurationException("The endpoint resolver builder factory can not be null.");
+				yield return this.Failure("BuilderFactory", "The builder factory was null.");
 
-			_endpointFactoryConfigurators.Each(configurator => configurator.Validate());
+			foreach (var result in _endpointFactoryConfigurators.SelectMany(configurator => configurator.Validate()))
+				yield return result.WithParentKey("EndpointFactory");
 		}
 
 		public void UseEndpointFactoryBuilder(Func<IEndpointFactoryDefaultSettings, EndpointFactoryBuilder> endpointFactoryBuilderFactory)

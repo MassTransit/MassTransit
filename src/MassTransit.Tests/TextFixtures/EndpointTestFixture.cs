@@ -14,6 +14,7 @@ namespace MassTransit.Tests.TextFixtures
 {
 	using System;
 	using BusConfigurators;
+	using Configurators;
 	using EndpointConfigurators;
 	using Exceptions;
 	using Magnum.Extensions;
@@ -32,12 +33,19 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			if (_endpointFactoryConfigurator != null)
 			{
-				_endpointFactoryConfigurator.Validate();
+				ConfigurationResult result = ConfigurationResultImpl.CompileResults(_endpointFactoryConfigurator.Validate());
 
-				EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
-				_endpointFactoryConfigurator = null;
+				try
+				{
+					EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
+					_endpointFactoryConfigurator = null;
 
-				EndpointCache = new EndpointCache(EndpointFactory);
+					EndpointCache = new EndpointCache(EndpointFactory);
+				}
+				catch (Exception ex)
+				{
+					throw new ConfigurationException(result, "An exception was thrown during endpoint cache creation", ex);
+				}
 			}
 
 			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
