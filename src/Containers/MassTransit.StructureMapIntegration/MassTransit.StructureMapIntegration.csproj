@@ -57,11 +57,17 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Magnum">
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum.ForNHibernate">
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum.ForNHibernate" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\lib\Magnum\net-3.5\NHibernate\Magnum.ForNHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum.ForNHibernate" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\..\lib\Magnum\net-4.0\NHibernate\Magnum.ForNHibernate.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap, Version=2.4.9.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

@@ -61,10 +61,11 @@
       <HintPath>..\..\..\lib\log4net.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Magnum, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
-      <Private>False</Private>
+    </Reference>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="RabbitMQ.Client, Version=1.6.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
