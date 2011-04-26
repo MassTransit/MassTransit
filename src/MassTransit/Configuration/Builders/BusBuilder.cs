@@ -26,11 +26,6 @@ namespace MassTransit.Builders
 		BusSettings Settings { get; }
 
 		/// <summary>
-		/// Returns the IEndpointCache that is being used to build up the bus instance
-		/// </summary>
-		IEndpointCache EndpointCache { get; }
-
-		/// <summary>
 		/// Builds the bus instance
 		/// </summary>
 		/// <returns></returns>

@@ -23,7 +23,7 @@ namespace MassTransit.BusConfigurators
 		/// Specifies the builder factory to use when the service is invoked
 		/// </summary>
 		/// <param name="builderFactory"></param>
-		void UseBusBuilder(Func<BusSettings, IEndpointCache, BusBuilder> builderFactory);
+		void UseBusBuilder(Func<BusSettings, BusBuilder> builderFactory);
 
 		/// <summary>
 		/// Adds a configurator for the service bus builder to the configurator
