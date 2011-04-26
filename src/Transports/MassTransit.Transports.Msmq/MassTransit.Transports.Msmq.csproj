@@ -59,7 +59,7 @@
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\log4net.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
@@ -75,6 +75,7 @@
     <Reference Include="System.Net">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -88,6 +89,14 @@
     <Compile Include="IMsmqEndpointAddress.cs" />
     <Compile Include="InboundMsmqTransport.cs" />
     <Compile Include="InboundMulticastMsmqTransport.cs" />
+    <Compile Include="Management\ManagementExtensions.cs" />
+    <Compile Include="Management\MsmqInstaller.cs" />
+    <Compile Include="Management\MsmqManagement.cs" />
+    <Compile Include="Management\WindowsServer2003Installer.cs" />
+    <Compile Include="Management\WindowsServer2008Installer.cs" />
+    <Compile Include="Management\WindowsServer2008R2Installer.cs" />
+    <Compile Include="Management\WindowsVersion.cs" />
+    <Compile Include="Management\WindowsVistaInstaller.cs" />
     <Compile Include="MessageQueueConnection.cs" />
     <Compile Include="MsmqTransporSettingsExtensions.cs" />
     <Compile Include="MulticastMsmqTransportFactory.cs" />
@@ -111,7 +120,7 @@
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
-      <Private>False</Private>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +145,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
