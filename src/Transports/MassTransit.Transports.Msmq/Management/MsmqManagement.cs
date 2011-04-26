@@ -1,0 +1,182 @@
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Transports.Msmq.Management
+{
+	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.Linq;
+	using System.ServiceProcess;
+	using Microsoft.Win32;
+
+	public class MsmqManagement
+	{
+		readonly IEnumerable<string> _installedComponents = GetInstalledComponents();
+		readonly IEnumerable<string> _optionalComponents;
+		readonly IEnumerable<string> _requiredComponents;
+		readonly IEnumerable<string> _unnecessaryComponents;
+
+		public MsmqManagement()
+		{
+			_requiredComponents = new[]
+				{
+					"msmq_Core",
+					"msmq_LocalStorage",
+				};
+
+			_unnecessaryComponents = new[]
+				{
+					"msmq_ADIntegrated",
+					"msmq_TriggersService",
+					"msmq_TriggersInstalled",
+					"msmq_RoutingSupport",
+					"msmq_RoutingInstalled",
+					"msmq_MQDSService",
+					"msmq_MQDSServiceInstalled",
+					"msmq_HTTPSupport",
+					"msmq_DCOMProxy",
+				};
+
+			_optionalComponents = new[]
+				{
+					"msmq_MulticastInstalled",
+				};
+		}
+
+		public bool IsInstalled()
+		{
+			if (GetMissingComponents().Any())
+				return false;
+
+			return true;
+		}
+
+		public void Install()
+		{
+			MsmqInstaller installer;
+			switch (GetWindowsVersion())
+			{
+				case WindowsVersion.TooOldToCare:
+				case WindowsVersion.Windows2000:
+					throw new NotSupportedException("The Windows version is too old to support automatic installation");
+
+				case WindowsVersion.WindowsXp:
+				case WindowsVersion.Windows2003:
+					installer = new WindowsServer2003Installer();
+					break;
+
+				case WindowsVersion.WindowsVista:
+					installer = new WindowsVistaInstaller();
+					break;
+
+				case WindowsVersion.Windows2008:
+					installer = new WindowsServer2008Installer();
+					break;
+
+				case WindowsVersion.Windows7:
+				case WindowsVersion.Windows2008R2:
+					installer = new WindowsServer2008R2Installer();
+					break;
+
+				default:
+					throw new NotSupportedException("The Windows version was not recognized, installation cannot continue.");
+			}
+
+			Process process = installer.Install();
+
+			process.WaitForExit();
+		}
+
+		static WindowsVersion GetWindowsVersion()
+		{
+			OperatingSystem osInfo = Environment.OSVersion;
+			Version version = osInfo.Version;
+
+			if(osInfo.Platform == PlatformID.Win32Windows)
+				return WindowsVersion.TooOldToCare;
+
+			if(osInfo.Platform != PlatformID.Win32NT)
+				return WindowsVersion.TooOldToCare;
+
+			if(version.Major < 5)
+				return WindowsVersion.TooOldToCare;
+
+			switch(version.Major)
+			{
+				case 5:
+					if (version.Minor == 0)
+						return WindowsVersion.Windows2000;
+					if(version.Minor == 1)
+						return WindowsVersion.WindowsXp;
+					return WindowsVersion.Windows2003;
+
+				case 6:
+					if(version.Minor == 0)
+						return WindowsVersion.WindowsVista;
+					return WindowsVersion.Windows2008R2;
+
+				default:
+					return WindowsVersion.Unknown;
+			}
+		}
+
+		IEnumerable<string> GetMissingComponents()
+		{
+			return _requiredComponents.Except(_installedComponents);
+		}
+
+		IEnumerable<string> GetOptionalComponents()
+		{
+			return _optionalComponents.Except(_installedComponents);
+		}
+
+		IEnumerable<string> GetUnnecessaryComponents()
+		{
+			return _unnecessaryComponents.Except(_installedComponents);
+		}
+
+		static bool IsServiceInStatus(ServiceController controller, params ServiceControllerStatus[] statuses)
+		{
+			ServiceControllerStatus serviceStatus = controller.Status;
+
+			return statuses.Contains(serviceStatus);
+		}
+
+		static bool IsStopped(ServiceController controller)
+		{
+			return IsServiceInStatus(controller, ServiceControllerStatus.Stopped, ServiceControllerStatus.StopPending);
+		}
+
+		static bool IsRunning(ServiceController controller)
+		{
+			return IsServiceInStatus(controller, ServiceControllerStatus.Running, ServiceControllerStatus.StartPending,
+				ServiceControllerStatus.ContinuePending);
+		}
+
+		static IEnumerable<string> GetInstalledComponents()
+		{
+			IEnumerable<string> installedComponents = Enumerable.Empty<string>();
+
+			using (RegistryKey registryKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\MSMQ\Setup"))
+			{
+				if (registryKey == null)
+					return installedComponents;
+
+				installedComponents = registryKey.GetValueNames();
+				registryKey.Close();
+			}
+
+			return installedComponents;
+		}
+	}
+}
