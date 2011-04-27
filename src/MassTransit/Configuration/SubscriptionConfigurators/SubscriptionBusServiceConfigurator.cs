@@ -13,9 +13,11 @@
 namespace MassTransit.SubscriptionConfigurators
 {
 	using System;
+	using System.Collections.Generic;
 	using Builders;
 	using BusConfigurators;
 	using BusServiceConfigurators;
+	using Configurators;
 	using Exceptions;
 	using Subscriptions;
 
@@ -32,8 +34,9 @@ namespace MassTransit.SubscriptionConfigurators
 		{
 		}
 
-		public void Validate()
+		public IEnumerable<ValidationResult> Validate()
 		{
+			yield break;
 		}
 
 		public BusBuilder Configure(BusBuilder builder)
