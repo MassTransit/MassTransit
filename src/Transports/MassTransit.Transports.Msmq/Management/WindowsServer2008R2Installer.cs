@@ -14,6 +14,7 @@ namespace MassTransit.Transports.Msmq.Management
 {
 	using System;
 	using System.Diagnostics;
+	using System.IO;
 
 	public class WindowsServer2008R2Installer :
 		MsmqInstaller
@@ -23,12 +24,12 @@ namespace MassTransit.Transports.Msmq.Management
 
 		public Process Install()
 		{
-			var psi = new ProcessStartInfo(ServerManager);
-			psi.WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.System);
-			psi.Arguments = Arguments;
-			psi.UseShellExecute = false;
+			string path = Environment.GetFolderPath(Environment.SpecialFolder.System);
+			if (IntPtr.Size == 4)
+				path = path.Replace("system32", "SysNative");
+			string file = Path.Combine(path, ServerManager);
 
-			return Process.Start(psi);
+			return Process.Start(file, Arguments);
 		}
 	}
 }
