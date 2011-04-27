@@ -10,24 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Saga
+namespace MassTransit.Infrastructure.Saga
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq.Expressions;
+	using Internal;
+	using MassTransit.Saga;
+	using NHibernate;
 
-	/// <summary>
-	/// A saga repository is used by the service bus to dispatch messages to sagas
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	public interface ISagaRepository<T> :
-		IDisposable
-		where T : class, ISaga
+	public class NHibernateSagaRepositoryFactory :
+		ISagaRepositoryFactory
 	{
-		void Send<TMessage>(Expression<Func<T, bool>> filter, ISagaPolicy<T, TMessage> policy, TMessage message,
-		                    Action<T> consumerAction)
-			where TMessage : class;
+		readonly ISessionFactory _sessionFactory;
 
-		IEnumerable<T> Where(Expression<Func<T, bool>> filter);
+		public NHibernateSagaRepositoryFactory(ISessionFactory sessionFactory)
+		{
+			_sessionFactory = sessionFactory;
+		}
+
+		public ISagaRepository<T> GetRepository<T>()
+			where T : class, ISaga
+		{
+			return new NHibernateSagaRepository<T>(_sessionFactory);
+		}
 	}
 }

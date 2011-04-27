@@ -112,6 +112,7 @@
     <Compile Include="Sagas\SagaLoadTest.cs" />
     <Compile Include="Sagas\SagaLocator_Specs.cs" />
     <Compile Include="Sagas\SagaRepository_Specs.cs" />
+    <Compile Include="Sagas\SimpleConfiguration_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

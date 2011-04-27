@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,10 +23,16 @@ namespace MassTransit.Saga
 		ISagaRepository<TSaga>
 		where TSaga : class, ISaga
 	{
-		private IndexedCollection<TSaga> _collection = new IndexedCollection<TSaga>();
-		private bool _disposed;
+		IndexedCollection<TSaga> _collection;
+		bool _disposed;
 
-		public void Send<TMessage>(Expression<Func<TSaga, bool>> filter, ISagaPolicy<TSaga, TMessage> policy, TMessage message, Action<TSaga> consumerAction)
+		public InMemorySagaRepository()
+		{
+			_collection = new IndexedCollection<TSaga>();
+		}
+
+		public void Send<TMessage>(Expression<Func<TSaga, bool>> filter, ISagaPolicy<TSaga, TMessage> policy, TMessage message,
+		                           Action<TSaga> consumerAction)
 			where TMessage : class
 		{
 			IEnumerable<TSaga> existingSagas;
@@ -63,13 +69,13 @@ namespace MassTransit.Saga
 				_collection.Add(newSaga);
 		}
 
-		private void RemoveSaga(TSaga saga)
+		void RemoveSaga(TSaga saga)
 		{
 			lock (_collection)
 				_collection.Remove(saga);
 		}
 
-		private void Dispose(bool disposing)
+		void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)

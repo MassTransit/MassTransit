@@ -73,7 +73,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		{
 			base.EstablishContext();
 
-			_sagaRepository = new NHibernateSagaRepositoryForContainers<ConcurrentSaga>(_sessionFactory);
+			_sagaRepository = new NHibernateSagaRepository<ConcurrentSaga>(_sessionFactory);
 			ObjectBuilder.Stub(x => x.GetInstance<ISagaRepository<ConcurrentSaga>>()).Return(_sagaRepository);
 		}
 
@@ -126,7 +126,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		{
 			base.EstablishContext();
 
-			_sagaRepository = new NHibernateSagaRepositoryForContainers<ConcurrentLegacySaga>(_sessionFactory);
+			_sagaRepository = new NHibernateSagaRepository<ConcurrentLegacySaga>(_sessionFactory);
 			ObjectBuilder.Stub(x => x.GetInstance<ISagaRepository<ConcurrentLegacySaga>>()).Return(_sagaRepository);
 		}
 
@@ -179,7 +179,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		{
 			base.EstablishContext();
 
-			_sagaRepository = new NHibernateSagaRepositoryForContainers<ConcurrentLegacySaga>(_sessionFactory);
+			_sagaRepository = new NHibernateSagaRepository<ConcurrentLegacySaga>(_sessionFactory);
 			ObjectBuilder.Stub(x => x.GetInstance<ISagaRepository<ConcurrentLegacySaga>>()).Return(_sagaRepository);
 		}
 

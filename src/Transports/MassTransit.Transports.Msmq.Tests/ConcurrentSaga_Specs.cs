@@ -36,7 +36,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			base.EstablishContext();
 
-			_sagaRepository = new NHibernateSagaRepositoryForContainers<ConcurrentLegacySaga>(SessionFactory);
+			_sagaRepository = new NHibernateSagaRepository<ConcurrentLegacySaga>(SessionFactory);
 			ObjectBuilder.Stub(x => x.GetInstance<ISagaRepository<ConcurrentLegacySaga>>()).Return(_sagaRepository);
 		}
 

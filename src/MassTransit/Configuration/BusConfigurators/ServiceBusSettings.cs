@@ -13,6 +13,7 @@
 namespace MassTransit.BusConfigurators
 {
 	using System;
+	using Internal;
 
 	public class ServiceBusSettings :
 		BusSettings
@@ -25,6 +26,7 @@ namespace MassTransit.BusConfigurators
 			ConcurrentReceiverLimit = defaultSettings.ConcurrentReceiverLimit;
 			ReceiveTimeout = defaultSettings.ReceiveTimeout;
 			EndpointCache = defaultSettings.EndpointCache;
+			ObjectBuilder = new FastActivatorObjectBuilder();
 		}
 
 		public ServiceBusSettings(BusSettings settings)

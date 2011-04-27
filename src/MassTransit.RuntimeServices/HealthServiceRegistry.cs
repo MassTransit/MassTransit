@@ -39,7 +39,7 @@ namespace MassTransit.RuntimeServices
 				.Use(context => CreateSessionFactory());
 
 			For(typeof (ISagaRepository<>))
-				.Add(typeof (NHibernateSagaRepositoryForContainers<>));
+				.Add(typeof (NHibernateSagaRepository<>));
 
 			RegisterServiceBus(configuration.HealthServiceDataUri, x =>
 				{
