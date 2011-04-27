@@ -31,16 +31,22 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac, Version=2.4.5.724, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Autofac" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\..\lib\Autofac\NET35\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\lib\Autofac\NET40\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Autofac.Configuration, Version=2.4.5.724, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Autofac.Configuration" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\..\lib\Autofac\NET35\Autofac.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Configuration" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\lib\Autofac\NET40\Autofac.Configuration.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum, Version=1.1.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="System" />
