@@ -36,4 +36,16 @@ namespace MassTransit.Transports.Msmq.Tests
 			management.Install();
 		}
 	}
+
+	[TestFixture]
+	public class When_verify_the_msdtc_installation
+	{
+		[Test]
+		public void Should_install_and_configure()
+		{
+			var msdtc = new MsDtcManagement();
+			msdtc.VerifyConfiguration(true, true);
+			msdtc.VerifyRunning(true);
+		}
+	}
 }
