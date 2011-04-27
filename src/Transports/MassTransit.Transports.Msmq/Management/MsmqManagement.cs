@@ -16,7 +16,6 @@ namespace MassTransit.Transports.Msmq.Management
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
-	using System.ServiceProcess;
 	using Microsoft.Win32;
 
 	public class MsmqManagement
@@ -92,41 +91,9 @@ namespace MassTransit.Transports.Msmq.Management
 					throw new NotSupportedException("The Windows version was not recognized, installation cannot continue.");
 			}
 
-			Process process = installer.Install();
-
-			process.WaitForExit();
-		}
-
-		static WindowsVersion GetWindowsVersion()
-		{
-			OperatingSystem osInfo = Environment.OSVersion;
-			Version version = osInfo.Version;
-
-			if(osInfo.Platform == PlatformID.Win32Windows)
-				return WindowsVersion.TooOldToCare;
-
-			if(osInfo.Platform != PlatformID.Win32NT)
-				return WindowsVersion.TooOldToCare;
-
-			if(version.Major < 5)
-				return WindowsVersion.TooOldToCare;
-
-			switch(version.Major)
+			using (Process process = installer.Install())
 			{
-				case 5:
-					if (version.Minor == 0)
-						return WindowsVersion.Windows2000;
-					if(version.Minor == 1)
-						return WindowsVersion.WindowsXp;
-					return WindowsVersion.Windows2003;
-
-				case 6:
-					if(version.Minor == 0)
-						return WindowsVersion.WindowsVista;
-					return WindowsVersion.Windows2008R2;
-
-				default:
-					return WindowsVersion.Unknown;
+				process.WaitForExit();
 			}
 		}
 
@@ -145,38 +112,62 @@ namespace MassTransit.Transports.Msmq.Management
 			return _unnecessaryComponents.Except(_installedComponents);
 		}
 
-		static bool IsServiceInStatus(ServiceController controller, params ServiceControllerStatus[] statuses)
+		static WindowsVersion GetWindowsVersion()
 		{
-			ServiceControllerStatus serviceStatus = controller.Status;
+			OperatingSystem osInfo = Environment.OSVersion;
+			Version version = osInfo.Version;
 
-			return statuses.Contains(serviceStatus);
-		}
+			if (osInfo.Platform == PlatformID.Win32Windows)
+				return WindowsVersion.TooOldToCare;
 
-		static bool IsStopped(ServiceController controller)
-		{
-			return IsServiceInStatus(controller, ServiceControllerStatus.Stopped, ServiceControllerStatus.StopPending);
-		}
+			if (osInfo.Platform != PlatformID.Win32NT)
+				return WindowsVersion.TooOldToCare;
 
-		static bool IsRunning(ServiceController controller)
-		{
-			return IsServiceInStatus(controller, ServiceControllerStatus.Running, ServiceControllerStatus.StartPending,
-				ServiceControllerStatus.ContinuePending);
+			if (version.Major < 5)
+				return WindowsVersion.TooOldToCare;
+
+			switch (version.Major)
+			{
+				case 5:
+					if (version.Minor == 0)
+						return WindowsVersion.Windows2000;
+					if (version.Minor == 1)
+						return WindowsVersion.WindowsXp;
+					return WindowsVersion.Windows2003;
+
+				case 6:
+					if (version.Minor == 0)
+						return WindowsVersion.WindowsVista;
+					return WindowsVersion.Windows2008R2;
+
+				default:
+					return WindowsVersion.Unknown;
+			}
 		}
 
 		static IEnumerable<string> GetInstalledComponents()
 		{
 			IEnumerable<string> installedComponents = Enumerable.Empty<string>();
 
-			using (RegistryKey registryKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\MSMQ\Setup"))
-			{
-				if (registryKey == null)
-					return installedComponents;
+			RegistryKey registryKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\MSMQ\Setup");
+			if (registryKey == null)
+				return installedComponents;
 
+			using (registryKey)
+			{
 				installedComponents = registryKey.GetValueNames();
 				registryKey.Close();
 			}
 
 			return installedComponents;
+		}
+
+		public void Start()
+		{
+			using(var service = new WindowsService("MSMQ"))
+			{
+				service.Start();
+			}
 		}
 	}
 }

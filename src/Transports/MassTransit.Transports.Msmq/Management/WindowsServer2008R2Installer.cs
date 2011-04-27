@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Management
 {
+	using System;
 	using System.Diagnostics;
 
 	public class WindowsServer2008R2Installer :
@@ -22,7 +23,12 @@ namespace MassTransit.Transports.Msmq.Management
 
 		public Process Install()
 		{
-			return Process.Start(ServerManager, Arguments);
+			var psi = new ProcessStartInfo(ServerManager);
+			psi.WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.System);
+			psi.Arguments = Arguments;
+			psi.UseShellExecute = false;
+
+			return Process.Start(psi);
 		}
 	}
 }
