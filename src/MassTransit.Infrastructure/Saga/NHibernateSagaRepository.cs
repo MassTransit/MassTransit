@@ -21,16 +21,16 @@ namespace MassTransit.Infrastructure.Saga
 	using NHibernate;
 	using NHibernate.Linq;
 
-	public class NHibernateSagaRepositoryForContainers<T> :
+	public class NHibernateSagaRepository<T> :
 		AbstractSagaRepository<T>,
 		ISagaRepository<T>
 		where T : class, ISaga
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepositoryForContainers<T>).ToFriendlyName());
+		private static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepository<T>).ToFriendlyName());
 		private volatile bool _disposed;
 		private ISessionFactory _sessionFactory;
 
-		public NHibernateSagaRepositoryForContainers(ISessionFactory sessionFactory)
+		public NHibernateSagaRepository(ISessionFactory sessionFactory)
 		{
 			_sessionFactory = sessionFactory;
 		}
@@ -90,7 +90,7 @@ namespace MassTransit.Infrastructure.Saga
 			_disposed = true;
 		}
 
-		~NHibernateSagaRepositoryForContainers()
+		~NHibernateSagaRepository()
 		{
 			Dispose(false);
 		}

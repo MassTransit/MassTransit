@@ -13,7 +13,6 @@
 namespace MassTransit
 {
 	using System;
-	using System.Collections.Generic;
 	using BusConfigurators;
 	using Configurators;
 	using Exceptions;

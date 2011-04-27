@@ -151,6 +151,9 @@
     <Compile Include="Fault.cs" />
     <Compile Include="IBusService.cs" />
     <Compile Include="IInboundTransport.cs" />
+    <Compile Include="Internal\FastActivatorObjectBuilder.cs" />
+    <Compile Include="Internal\InMemorySagaRepositoryFactory.cs" />
+    <Compile Include="Internal\ISagaRepositoryFactory.cs" />
     <Compile Include="IOutboundTransport.cs" />
     <Compile Include="ITransport.cs" />
     <Compile Include="Parallel\DistributedTaskController.cs" />

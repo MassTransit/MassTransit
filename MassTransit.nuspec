@@ -2,15 +2,31 @@
 <package> 
   <metadata> 
     <id>MassTransit</id> 
-    <version>1.3.0.0</version> 
+    <version>1.9.0.0</version> 
     <authors>Chris Patterson, Dru Sellers, Travis Smith</authors>
     <description>MassTransit is a distributed application framework for .NET, including support for MSMQ, ActiveMQ, and RabbitMQ.</description> 
     <language>en-US</language>
     <licenseUrl>https://github.com/MassTransit/MassTransit/blob/master/LICENSE</licenseUrl>
     <projectUrl>http://masstransit-project.com</projectUrl>
+    <tags>msmq messaging service bus</tags>
+    <dependencies>
+      <dependency id="log4net" version="1.2.10" />
+      <dependency id="Magnum" version="1.1.1" />
+    </dependencies> 
   </metadata> 
   <files>
-    <file src="build_output\**\*" target="lib" />
+    <file src="build_output\net-3.5\MassTransit.dll" target="lib\NET35" />
+    <file src="build_output\net-3.5\MassTransit.pdb" target="lib\NET35" />
+    <file src="build_output\net-3.5\MassTransit.xml" target="lib\NET35" />
+    <file src="build_output\net-3.5\Transports\MSMQ\MassTransit.Transports.MSMQ.dll" target="lib\NET35" />
+    <file src="build_output\net-3.5\Transports\MSMQ\MassTransit.Transports.MSMQ.pdb" target="lib\NET35" />
+    <file src="build_output\net-3.5\Transports\MSMQ\MassTransit.Transports.MSMQ.xml" target="lib\NET35" />
+    <file src="build_output\net-4.0\MassTransit.dll" target="lib\NET40" />
+    <file src="build_output\net-4.0\MassTransit.pdb" target="lib\NET40" />
+    <file src="build_output\net-4.0\MassTransit.xml" target="lib\NET40" />
+    <file src="build_output\net-4.0\Transports\MSMQ\MassTransit.Transports.MSMQ.dll" target="lib\NET40" />
+    <file src="build_output\net-4.0\Transports\MSMQ\MassTransit.Transports.MSMQ.pdb" target="lib\NET40" />
+    <file src="build_output\net-4.0\Transports\MSMQ\MassTransit.Transports.MSMQ.xml" target="lib\NET40" />
   </files>
 </package>
 

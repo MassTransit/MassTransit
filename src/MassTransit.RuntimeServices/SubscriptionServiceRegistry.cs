@@ -35,7 +35,7 @@ namespace MassTransit.RuntimeServices
 				.Use(context => CreateSessionFactory());
 
 			For(typeof (ISagaRepository<>))
-				.Add(typeof (NHibernateSagaRepositoryForContainers<>));
+				.Add(typeof (NHibernateSagaRepository<>));
 
 			RegisterServiceBus(configuration.SubscriptionServiceUri, x => { x.SetConcurrentConsumerLimit(1); });
 		}

@@ -10,24 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Saga
+namespace MassTransit.Tests.Configuration
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq.Expressions;
+	using Magnum.Extensions;
+	using Magnum.TestFramework;
+	using Messages;
 
-	/// <summary>
-	/// A saga repository is used by the service bus to dispatch messages to sagas
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	public interface ISagaRepository<T> :
-		IDisposable
-		where T : class, ISaga
+	[Scenario]
+	public class When_configuring_a_service_bus_easily
 	{
-		void Send<TMessage>(Expression<Func<T, bool>> filter, ISagaPolicy<T, TMessage> policy, TMessage message,
-		                    Action<T> consumerAction)
-			where TMessage : class;
+		[When]
+		public void Configuring_a_service_bus_easily()
+		{
+			var bus = ServiceBusFactory.New(x =>
+				{
+					x.ReceiveFrom("loopback://localhost/queue");
+				});
 
-		IEnumerable<T> Where(Expression<Func<T, bool>> filter);
+			var received = new FutureMessage<PingMessage>();
+
+			bus.Subscribe<PingMessage>(received.Set);
+
+			bus.Publish(new PingMessage());
+
+			received.IsAvailable(8.Seconds()).ShouldBeTrue();
+		}
 	}
 }

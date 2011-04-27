@@ -44,7 +44,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 			_cfg.SetProperty("show_sql", "true");
 			_cfg.SetProperty("proxyfactory.factory_class", "NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle");
 
-			_cfg.AddAssembly(typeof (NHibernateSagaRepositoryForContainers<>).Assembly);
+			_cfg.AddAssembly(typeof (NHibernateSagaRepository<>).Assembly);
 			_cfg.AddAssembly(typeof (RegisterUserStateMachine).Assembly);
 			_cfg.AddAssembly(typeof (When_using_the_saga_locator_with_NHibernate).Assembly);
 
@@ -65,7 +65,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		[Test]
 		public void A_correlated_message_should_find_the_correct_saga()
 		{
-			using (var repository = new NHibernateSagaRepositoryForContainers<TestSaga>(_sessionFactory))
+			using (var repository = new NHibernateSagaRepository<TestSaga>(_sessionFactory))
 			{
 				var ping = new PingMessage(_sagaId);
 

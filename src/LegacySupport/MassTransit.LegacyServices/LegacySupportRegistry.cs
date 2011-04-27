@@ -38,7 +38,7 @@ namespace LegacyRuntime
 
 			For<ISessionFactory>().Singleton().Use(context => CreateSessionFactory());
 
-			For(typeof (ISagaRepository<>)).Use(typeof (NHibernateSagaRepositoryForContainers<>));
+			For(typeof (ISagaRepository<>)).Use(typeof (NHibernateSagaRepository<>));
 
 			RegisterServiceBus(configuration.LegacyServiceDataUri, x =>
 				{

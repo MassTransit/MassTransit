@@ -17,7 +17,6 @@ namespace MassTransit.EndpointConfigurators
 	using System.Linq;
 	using Builders;
 	using Configurators;
-	using Exceptions;
 	using Transports;
 
 	public class EndpointFactoryConfiguratorImpl :
