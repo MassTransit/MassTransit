@@ -12,20 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
-	using System;
 	using BusConfigurators;
 
 	public interface SubscriptionConfigurator
 	{
-
 	}
 
 	public class SubscriptionConfiguratorImpl : 
 		SubscriptionConfigurator
 	{
-		public SubscriptionConfiguratorImpl(ServiceBusConfigurator configurator)
+	    ServiceBusConfigurator _configurator;
+
+	    public SubscriptionConfiguratorImpl(ServiceBusConfigurator configurator)
 		{
-			
+		    _configurator = configurator;
 		}
 	}
 }

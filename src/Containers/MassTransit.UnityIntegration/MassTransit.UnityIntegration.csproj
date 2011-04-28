@@ -81,7 +81,7 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="MassTransitUnitExtensions.cs" />
+    <Compile Include="MassTransitUnityExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnityObjectBuilder.cs" />
   </ItemGroup>

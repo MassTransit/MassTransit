@@ -19,7 +19,7 @@ namespace MassTransit.UnityIntegration
 	using Magnum.Extensions;
 	using Microsoft.Practices.Unity;
 
-	public static class MassTransitUnitExtensions
+	public static class MassTransitUnityExtensions
 	{
 		public static void LoadConsumersFromContainer(this ServiceBusConfigurator configurator, UnityContainer container)
 		{
@@ -31,8 +31,7 @@ namespace MassTransit.UnityIntegration
 			if (concreteTypes.Count == 0)
 				return;
 
-			configurator.RegisterSubscription(
-				x => concreteTypes.Each(type => x.RegisterConsumer(type, y => container.Resolve(y))));
+            configurator.Subscribe(x=> concreteTypes.Each(type=> x.Consumer(type, t=>container.Resolve(t))));
 		}
 	}
 }

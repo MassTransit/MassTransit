@@ -12,7 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions
 {
-	/// <summary>
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    /// <summary>
 	/// Manages the subscription and unsubscription of message consumers to the
 	/// service bus as part of the bus lifecycle.
 	/// 
@@ -29,16 +33,47 @@ namespace MassTransit.Subscriptions
 	public class SubscriptionBusService :
 		IBusService
 	{
+	    IList<SubscriptionRegistration> _unsubscribes;
+
 		public void Dispose()
 		{
 		}
 
 		public void Start(IServiceBus bus)
 		{
+		    foreach (var unsubscribe in _unsubscribes)
+		    {
+		        var ua = bus.Subscribe(unsubscribe.ConsumingType);
+		        unsubscribe.Unsubscribe = ua;
+		    }
+
+		    bus.SubscribeConsumer<object>(o =>
+		    {
+		        if (o == null)
+		            return null;
+
+		        var sr = new SubscriptionRegistration();
+
+                return msg =>
+                {
+                    sr.ConsumerFactory(sr.ConsumingType);
+                };
+		    });
 		}
 
 		public void Stop()
 		{
+		    _unsubscribes
+                .Where(u=>u.AutoUnsubscribe)
+                .Each(u => u.Unsubscribe());
 		}
 	}
+
+    public class SubscriptionRegistration
+    {
+        public Type ConsumingType { get; private set; }
+        public Func<Type, object> ConsumerFactory { get; private set; }
+        public bool AutoUnsubscribe { get; private set; }
+        public UnsubscribeAction Unsubscribe { get; set; }
+    }
 }

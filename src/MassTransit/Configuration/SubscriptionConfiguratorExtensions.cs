@@ -18,7 +18,7 @@ namespace MassTransit
 
 	public static class SubscriptionConfiguratorExtensions
 	{
-		public static void RegisterSubscription(this ServiceBusConfigurator configurator, Action<SubscriptionConfigurator> configure)
+		public static void Subscribe(this ServiceBusConfigurator configurator, Action<SubscriptionConfigurator> configure)
 		{
 			var subscriptionConfigurator = new SubscriptionConfiguratorImpl(configurator);
 
@@ -28,14 +28,27 @@ namespace MassTransit
 		/// <summary>
 		/// Subscribes an object instance that implements one or more Consumes&lt;T&gt;.* interfaces
 		/// to receive messages
-		/// TODO: DRU/SUB
 		/// </summary>
 		/// <param name="configurator"></param>
 		/// <param name="consumerInstance">The instance of the consumer object</param>
-		public static void AddConsumerInstance(this SubscriptionConfigurator configurator, object consumerInstance)
+		public static ConsumerConfigurator Instance(this SubscriptionConfigurator configurator, object consumerInstance)
 		{
-			// build up the model class for this consumer, and add it to the configurator
+            var consumer = new ConsumerConfiguratorImpl();
+
+
+            return consumer;
 		}
+
+
+
+        public static ConsumerConfigurator Saga<T>(this SubscriptionConfigurator configurator)
+        {
+            var consumer = new ConsumerConfiguratorImpl();
+
+
+            return consumer;
+        }
+
 
 		/// <summary>
 		/// Adds a consumer type, and specifies the factory method to create the consumer to handle the
@@ -44,9 +57,34 @@ namespace MassTransit
 		/// <param name="configurator"></param>
 		/// <param name="consumerType">The type of object being registered</param>
 		/// <param name="objectFactory">The factory method is called once for every message that is received.</param>
-		public static void RegisterConsumer(this SubscriptionConfigurator configurator, Type consumerType, Func<Type, object> objectFactory)
+		public static ConsumerConfigurator  Consumer(this SubscriptionConfigurator configurator, Type consumerType, Func<Type, object> objectFactory)
 		{
+            var consumer = new ConsumerConfiguratorImpl();
 
+
+            return consumer;
 		}
+
+
+        public static ConsumerConfigurator Handler<T>(this SubscriptionConfigurator configurator, Action<T> handler)
+        {
+            var consumer = new ConsumerConfiguratorImpl();
+
+
+            return consumer;
+        }
+
+	    public static ConsumerConfigurator Consumer<TConsumer>(this SubscriptionConfigurator configurator, Func<Type, TConsumer> objectFactory) where TConsumer : class, IConsumer
+	    {
+	        var consumer = new ConsumerConfiguratorImpl();
+
+            //add to configurator
+           
+
+            //set the factory
+            //set the type
+
+	        return consumer;
+	    }
 	}
 }
