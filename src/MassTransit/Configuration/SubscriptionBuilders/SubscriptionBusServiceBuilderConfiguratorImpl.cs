@@ -10,38 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Internal
+namespace MassTransit.SubscriptionBuilders
 {
-	using System;
 	using System.Collections.Generic;
-	using Saga;
+	using Configurators;
 
-	public class InMemorySagaRepositoryFactory :
-		ISagaRepositoryFactory
+	public class SubscriptionBusServiceBuilderConfiguratorImpl :
+		SubscriptionBusServiceBuilderConfigurator
 	{
-		object _lock;
-		IDictionary<Type, object> _repositories;
+		readonly SubscriptionBuilderConfigurator _configurator;
 
-		public InMemorySagaRepositoryFactory()
+		public SubscriptionBusServiceBuilderConfiguratorImpl(SubscriptionBuilderConfigurator configurator)
 		{
-			_lock = new object();
-			_repositories = new Dictionary<Type, object>();
+			_configurator = configurator;
 		}
 
-		public ISagaRepository<T> GetRepository<T>()
-			where T : class, ISaga
+		public IEnumerable<ValidationResult> Validate()
 		{
-			lock (_lock)
-			{
-				object existing;
-				if (_repositories.TryGetValue(typeof (T), out existing))
-					return (ISagaRepository<T>) existing;
+			return _configurator.Validate();
+		}
 
-				var repository = new InMemorySagaRepository<T>();
-				_repositories.Add(typeof (T), repository);
+		public SubscriptionBusServiceBuilder Configure(SubscriptionBusServiceBuilder builder)
+		{
+			SubscriptionBuilder subscriptionBuilder = _configurator.Configure();
 
-				return repository;
-			}
+			builder.AddSubscriptionBuilder(subscriptionBuilder);
+
+			return builder;
 		}
 	}
 }

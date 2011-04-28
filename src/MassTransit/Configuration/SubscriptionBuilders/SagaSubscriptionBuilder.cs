@@ -10,38 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Internal
+namespace MassTransit.SubscriptionBuilders
 {
 	using System;
-	using System.Collections.Generic;
 	using Saga;
+	using Subscriptions;
 
-	public class InMemorySagaRepositoryFactory :
-		ISagaRepositoryFactory
+	public class SagaSubscriptionBuilder<TSaga> :
+		SubscriptionBuilder
+		where TSaga : class, ISaga
 	{
-		object _lock;
-		IDictionary<Type, object> _repositories;
+		readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
+		readonly ISagaRepository<TSaga> _sagaRepository;
 
-		public InMemorySagaRepositoryFactory()
+		public SagaSubscriptionBuilder(ISagaRepository<TSaga> sagaRepository,
+		                               Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)
 		{
-			_lock = new object();
-			_repositories = new Dictionary<Type, object>();
+			_sagaRepository = sagaRepository;
+			_referenceFactory = referenceFactory;
 		}
 
-		public ISagaRepository<T> GetRepository<T>()
-			where T : class, ISaga
+		public ISubscriptionReference Subscribe(IServiceBus bus)
 		{
-			lock (_lock)
-			{
-				object existing;
-				if (_repositories.TryGetValue(typeof (T), out existing))
-					return (ISagaRepository<T>) existing;
+			UnsubscribeAction unsubscribe = bus.Subscribe<TSaga>();
 
-				var repository = new InMemorySagaRepository<T>();
-				_repositories.Add(typeof (T), repository);
-
-				return repository;
-			}
+			return _referenceFactory(unsubscribe);
 		}
 	}
 }

@@ -10,17 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionConfigurators
+namespace MassTransit
 {
-	using Configurators;
-	using SubscriptionBuilders;
+	using SubscriptionConfigurators;
 
-	/// <summary>
-	/// The configuration scope for subscriptions on the bus
-	/// </summary>
-	public interface SubscriptionBusServiceConfigurator :
-		Configurator
+	public interface SubscriptionSettings
 	{
-		void AddConfigurator(SubscriptionBusServiceBuilderConfigurator configurator);
+		SubscriptionLifeCycle LifeCycle { get; }
 	}
 }

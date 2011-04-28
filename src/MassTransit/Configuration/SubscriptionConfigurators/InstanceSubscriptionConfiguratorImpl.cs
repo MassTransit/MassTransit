@@ -12,7 +12,31 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
-	public interface ConsumerConfigurator
+	using System.Collections.Generic;
+	using Configurators;
+	using SubscriptionBuilders;
+
+	public class InstanceSubscriptionConfiguratorImpl :
+		SubscriptionConfiguratorImpl<InstanceSubscriptionConfigurator>,
+		InstanceSubscriptionConfigurator,
+		SubscriptionBuilderConfigurator
 	{
+		readonly object _instance;
+
+		public InstanceSubscriptionConfiguratorImpl(object instance)
+		{
+			_instance = instance;
+		}
+
+		public IEnumerable<ValidationResult> Validate()
+		{
+			if (_instance == null)
+				yield return this.Failure("The instance cannot be null.");
+		}
+
+		public SubscriptionBuilder Configure()
+		{
+			return new InstanceSubscriptionBuilder(_instance, ReferenceFactory);
+		}
 	}
 }

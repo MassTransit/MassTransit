@@ -14,77 +14,92 @@ namespace MassTransit
 {
 	using System;
 	using BusConfigurators;
+	using Saga;
+	using SubscriptionBuilders;
 	using SubscriptionConfigurators;
+	using Util;
 
 	public static class SubscriptionConfiguratorExtensions
 	{
-		public static void Subscribe(this ServiceBusConfigurator configurator, Action<SubscriptionConfigurator> configure)
+		public static void Subscribe(this ServiceBusConfigurator configurator,
+		                             Action<SubscriptionBusServiceConfigurator> configure)
 		{
-			var subscriptionConfigurator = new SubscriptionConfiguratorImpl(configurator);
+			var subscriptionConfigurator = new SubscriptionBusServiceConfiguratorImpl();
 
 			configure(subscriptionConfigurator);
+
+			configurator.AddBusConfigurator(subscriptionConfigurator);
 		}
 
 		/// <summary>
-		/// Subscribes an object instance that implements one or more Consumes&lt;T&gt;.* interfaces
-		/// to receive messages
+		/// Subscribes a message handler (which can be any delegate of the message type,
+		/// such as a class instance method, a delegate, or a lambda expression)
 		/// </summary>
+		/// <typeparam name="T"></typeparam>
 		/// <param name="configurator"></param>
-		/// <param name="consumerInstance">The instance of the consumer object</param>
-		public static ConsumerConfigurator Instance(this SubscriptionConfigurator configurator, object consumerInstance)
+		/// <param name="handler"></param>
+		/// <returns></returns>
+		public static HandlerSubscriptionConfigurator<T> Handler<T>(this SubscriptionBusServiceConfigurator configurator,
+		                                                            Action<T> handler)
+			where T : class
 		{
-            var consumer = new ConsumerConfiguratorImpl();
+			var handlerConfigurator = new HandlerSubscriptionConfiguratorImpl<T>(handler);
 
+			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(handlerConfigurator);
 
-            return consumer;
+			configurator.AddConfigurator(busServiceConfigurator);
+
+			return handlerConfigurator;
 		}
-
-
-
-        public static ConsumerConfigurator Saga<T>(this SubscriptionConfigurator configurator)
-        {
-            var consumer = new ConsumerConfiguratorImpl();
-
-
-            return consumer;
-        }
-
 
 		/// <summary>
-		/// Adds a consumer type, and specifies the factory method to create the consumer to handle the
-		/// message (which can delegate to the container, or constructor call).
+		/// Subscribes an object instance to the bus
 		/// </summary>
 		/// <param name="configurator"></param>
-		/// <param name="consumerType">The type of object being registered</param>
-		/// <param name="objectFactory">The factory method is called once for every message that is received.</param>
-		public static ConsumerConfigurator  Consumer(this SubscriptionConfigurator configurator, Type consumerType, Func<Type, object> objectFactory)
+		/// <param name="instance"></param>
+		/// <returns></returns>
+		public static InstanceSubscriptionConfigurator Instance(this SubscriptionBusServiceConfigurator configurator,
+		                                                        object instance)
 		{
-            var consumer = new ConsumerConfiguratorImpl();
+			var instanceConfigurator = new InstanceSubscriptionConfiguratorImpl(instance);
 
+			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(instanceConfigurator);
 
-            return consumer;
+			configurator.AddConfigurator(busServiceConfigurator);
+
+			return instanceConfigurator;
 		}
 
+		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
+			this SubscriptionBusServiceConfigurator configurator, Func<Action<Action<TConsumer>>> consumerFactory)
+			where TConsumer : class
+		{
+			var consumerConfigurator = new ConsumerSubscriptionConfiguratorImpl<TConsumer>(consumerFactory);
 
-        public static ConsumerConfigurator Handler<T>(this SubscriptionConfigurator configurator, Action<T> handler)
-        {
-            var consumer = new ConsumerConfiguratorImpl();
+			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(consumerConfigurator);
 
+			configurator.AddConfigurator(busServiceConfigurator);
 
-            return consumer;
-        }
+			return consumerConfigurator;
+		}
 
-	    public static ConsumerConfigurator Consumer<TConsumer>(this SubscriptionConfigurator configurator, Func<Type, TConsumer> objectFactory) where TConsumer : class, IConsumer
-	    {
-	        var consumer = new ConsumerConfiguratorImpl();
+		public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
+			this SubscriptionBusServiceConfigurator configurator, ISagaRepository<TSaga> sagaRepository)
+			where TSaga : class, ISaga
+		{
+			var sagaConfigurator = new SagaSubscriptionConfiguratorImpl<TSaga>(sagaRepository);
 
-            //add to configurator
-           
+			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(sagaConfigurator);
 
-            //set the factory
-            //set the type
+			configurator.AddConfigurator(busServiceConfigurator);
 
-	        return consumer;
-	    }
+			return sagaConfigurator;
+		}
+
+		public static void Consumer(this SubscriptionBusServiceConfigurator configurator, Type consumerType,
+		                            Func<Type, object> consumerFactory)
+		{
+			throw new NotImplementedException("The consumer by type has not yet been implemented.");
+		}
 	}
 }
