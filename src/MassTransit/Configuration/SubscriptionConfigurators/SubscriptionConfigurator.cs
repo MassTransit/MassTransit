@@ -12,20 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
-	using BusConfigurators;
+	using System;
+	using Subscriptions;
 
-	public interface SubscriptionConfigurator
+	/// <summary>
+	/// The base configuration interface for a subscription
+	/// </summary>
+	public interface SubscriptionConfigurator<out TInterface>
+		where TInterface : class
 	{
-	}
-
-	public class SubscriptionConfiguratorImpl : 
-		SubscriptionConfigurator
-	{
-	    ServiceBusConfigurator _configurator;
-
-	    public SubscriptionConfiguratorImpl(ServiceBusConfigurator configurator)
-		{
-		    _configurator = configurator;
-		}
+		TInterface Permanent();
+		TInterface Transient();
+		TInterface SetReferenceFactory(Func<UnsubscribeAction, ISubscriptionReference> referenceFactory);
 	}
 }

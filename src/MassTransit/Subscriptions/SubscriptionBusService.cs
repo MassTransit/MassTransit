@@ -12,12 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+	using System;
+	using System.Collections.Generic;
+	using SubscriptionBuilders;
 
-    /// <summary>
-	/// Manages the subscription and unsubscription of message consumers to the
+	/// <summary>
+	/// Manages the subscription and un subscription of message consumers to the
 	/// service bus as part of the bus lifecycle.
 	/// 
 	/// As a bus service, once the bus is started and operational, this service 
@@ -27,53 +27,52 @@ namespace MassTransit.Subscriptions
 	/// When stop is called, those subscriptions will be removed unless the
 	/// registration information indicated that the subscription is meant to be
 	/// persistent, and not removed on service shutdown.
-	/// 
-	/// TODO: DRU/SUB
 	/// </summary>
 	public class SubscriptionBusService :
 		IBusService
 	{
-	    IList<SubscriptionRegistration> _unsubscribes;
+		IList<SubscriptionBuilder> _builders;
+		IList<ISubscriptionReference> _subscriptions;
+
+		public SubscriptionBusService(IList<SubscriptionBuilder> builders)
+		{
+			_builders = builders;
+
+			_subscriptions = new List<ISubscriptionReference>();
+		}
 
 		public void Dispose()
 		{
+			_builders.Clear();
+			_subscriptions.Clear();
 		}
 
 		public void Start(IServiceBus bus)
 		{
-		    foreach (var unsubscribe in _unsubscribes)
-		    {
-		        var ua = bus.Subscribe(unsubscribe.ConsumingType);
-		        unsubscribe.Unsubscribe = ua;
-		    }
-
-		    bus.SubscribeConsumer<object>(o =>
-		    {
-		        if (o == null)
-		            return null;
-
-		        var sr = new SubscriptionRegistration();
-
-                return msg =>
-                {
-                    sr.ConsumerFactory(sr.ConsumingType);
-                };
-		    });
+			foreach (SubscriptionBuilder builder in _builders)
+			{
+				try
+				{
+					ISubscriptionReference subscription = builder.Subscribe(bus);
+					_subscriptions.Add(subscription);
+				}
+				catch (Exception)
+				{
+					StopAllSubscriptions();
+					throw;
+				}
+			}
 		}
 
 		public void Stop()
 		{
-		    _unsubscribes
-                .Where(u=>u.AutoUnsubscribe)
-                .Each(u => u.Unsubscribe());
+			StopAllSubscriptions();
+		}
+
+		void StopAllSubscriptions()
+		{
+			_subscriptions.Each(x => x.OnStop());
+			_subscriptions.Clear();
 		}
 	}
-
-    public class SubscriptionRegistration
-    {
-        public Type ConsumingType { get; private set; }
-        public Func<Type, object> ConsumerFactory { get; private set; }
-        public bool AutoUnsubscribe { get; private set; }
-        public UnsubscribeAction Unsubscribe { get; set; }
-    }
 }

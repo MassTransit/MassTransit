@@ -12,15 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
-	using Configurators;
-	using SubscriptionBuilders;
+	using System;
 
-	/// <summary>
-	/// The configuration scope for subscriptions on the bus
-	/// </summary>
-	public interface SubscriptionBusServiceConfigurator :
-		Configurator
+	public interface HandlerSubscriptionConfigurator<TMessage> :
+		SubscriptionConfigurator<HandlerSubscriptionConfigurator<TMessage>>
+		where TMessage : class
 	{
-		void AddConfigurator(SubscriptionBusServiceBuilderConfigurator configurator);
+		HandlerSubscriptionConfigurator<TMessage> Where(Predicate<TMessage> condition);
 	}
 }

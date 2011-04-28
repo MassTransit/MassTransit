@@ -114,8 +114,11 @@
   <ItemGroup>
     <Compile Include="Batch_Specs.cs" />
     <Compile Include="BddExtensions.cs" />
+    <Compile Include="Configuration\ConsumerSubscription_Specs.cs" />
+    <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
+    <Compile Include="Configuration\SagaSubscription_Specs.cs" />
     <Compile Include="Configuration\SimpleConfiguration_Specs.cs" />
-    <Compile Include="Configuration\SubscriptionSpike.cs" />
+    <Compile Include="Configuration\HandlerSubscription_Specs.cs" />
     <Compile Include="Configuration\When_configuration_fails.cs" />
     <Compile Include="Configuration\When_configuring_an_endpoint.cs" />
     <Compile Include="ContextSetup.cs" />

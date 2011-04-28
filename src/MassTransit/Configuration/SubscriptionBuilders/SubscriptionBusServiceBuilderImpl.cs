@@ -10,14 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.BusConfigurators
+namespace MassTransit.SubscriptionBuilders
 {
-	using Builders;
-	using Configurators;
+	using System.Collections.Generic;
+	using Subscriptions;
 
-	public interface BusBuilderConfigurator :
-		Configurator
+	public class SubscriptionBusServiceBuilderImpl :
+		SubscriptionBusServiceBuilder
 	{
-		BusBuilder Configure(BusBuilder builder);
+		IList<SubscriptionBuilder> _builders;
+
+		public SubscriptionBusServiceBuilderImpl()
+		{
+			_builders = new List<SubscriptionBuilder>();
+		}
+
+		public IBusService Build()
+		{
+			return new SubscriptionBusService(_builders);
+		}
+
+		public void AddSubscriptionBuilder(SubscriptionBuilder builder)
+		{
+			_builders.Add(builder);
+		}
 	}
 }

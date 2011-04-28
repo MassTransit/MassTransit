@@ -42,10 +42,15 @@ namespace MassTransit.Internal
 		{
 			if (typeof (T).IsGenericType && typeof (T).GetGenericTypeDefinition() == typeof (ISagaRepository<>))
 			{
-				_sagaRepositoryFactory.FastInvoke(typeof (T).GetGenericArguments(), "GetRepository");
+				return GetSagaRepository<T>(typeof (T).GetGenericArguments());
 			}
 
 			return FastActivator<T>.Create();
+		}
+
+		T GetSagaRepository<T>(Type[] sagaType)
+		{
+			return _sagaRepositoryFactory.FastInvoke<ISagaRepositoryFactory, T>(sagaType, "GetRepository");
 		}
 
 		public void Release<T>(T obj)
