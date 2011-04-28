@@ -7,8 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transports", "Transports", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Containers", "Containers", "{6C61507E-FF16-45C8-8FE4-350069D9B4C1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Legacy Support", "Legacy Support", "{C7764D1D-A0D9-416B-B32F-8DE375D393CB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Tests", "MassTransit.Tests\MassTransit.Tests.csproj", "{76646B96-936B-4D31-A053-35CD630E3C68}"
@@ -33,8 +31,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.UnityIntegratio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NinjectIntegration", "Containers\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj", "{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.LegacySupport", "LegacySupport\MassTransit.LegacySupport\MassTransit.LegacySupport.csproj", "{EBC898FE-E3E4-4599-8DC3-D98A829424AC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Visualizers", "MassTransit.Visualizers\MassTransit.Visualizers.csproj", "{DD031A51-CC4B-4375-AF6B-4F3ADBE23C07}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RuntimeServices", "MassTransit.RuntimeServices\MassTransit.RuntimeServices.csproj", "{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}"
@@ -44,8 +40,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.TestFramework", "MassTransit.TestFramework\MassTransit.TestFramework.csproj", "{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SystemView2", "MassTransit.SystemView2\MassTransit.SystemView2.csproj", "{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.LegacyServices", "LegacySupport\MassTransit.LegacyServices\MassTransit.LegacyServices.csproj", "{1501B1CE-C525-4003-9A90-208538FAD30B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SystemView.Core", "MassTransit.SystemView.Core\MassTransit.SystemView.Core.csproj", "{40F4115D-713B-471D-9A6A-39C678F1133C}"
 EndProject
@@ -111,10 +105,6 @@ Global
 		{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EBC898FE-E3E4-4599-8DC3-D98A829424AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EBC898FE-E3E4-4599-8DC3-D98A829424AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EBC898FE-E3E4-4599-8DC3-D98A829424AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EBC898FE-E3E4-4599-8DC3-D98A829424AC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DD031A51-CC4B-4375-AF6B-4F3ADBE23C07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DD031A51-CC4B-4375-AF6B-4F3ADBE23C07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD031A51-CC4B-4375-AF6B-4F3ADBE23C07}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -135,10 +125,6 @@ Global
 		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1501B1CE-C525-4003-9A90-208538FAD30B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1501B1CE-C525-4003-9A90-208538FAD30B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1501B1CE-C525-4003-9A90-208538FAD30B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1501B1CE-C525-4003-9A90-208538FAD30B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{40F4115D-713B-471D-9A6A-39C678F1133C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{40F4115D-713B-471D-9A6A-39C678F1133C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40F4115D-713B-471D-9A6A-39C678F1133C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -177,7 +163,5 @@ Global
 		{8AB71E2F-3210-45AF-982F-FC782D9C06B7} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{A31F2C6B-C806-46FD-A4F3-C54209DD495C} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
-		{EBC898FE-E3E4-4599-8DC3-D98A829424AC} = {C7764D1D-A0D9-416B-B32F-8DE375D393CB}
-		{1501B1CE-C525-4003-9A90-208538FAD30B} = {C7764D1D-A0D9-416B-B32F-8DE375D393CB}
 	EndGlobalSection
 EndGlobal
