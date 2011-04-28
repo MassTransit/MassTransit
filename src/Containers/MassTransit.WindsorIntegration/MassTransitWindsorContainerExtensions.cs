@@ -30,7 +30,7 @@ namespace MassTransit.WindsorIntegration
 			if (concreteTypes.Count == 0)
 				return;
 
-			configurator.RegisterSubscription(x => concreteTypes.Each(type => x.RegisterConsumer(type, container.Resolve)));
+			configurator.Subscribe(x => concreteTypes.Each(type => x.Consumer(type, container.Resolve)));
 		}
 	}
 }

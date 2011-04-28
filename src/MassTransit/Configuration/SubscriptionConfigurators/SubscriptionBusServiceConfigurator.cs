@@ -18,7 +18,6 @@ namespace MassTransit.SubscriptionConfigurators
 	using BusConfigurators;
 	using BusServiceConfigurators;
 	using Configurators;
-	using Exceptions;
 	using Subscriptions;
 
 	/// <summary>
