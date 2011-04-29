@@ -19,7 +19,8 @@ namespace HeavyLoad.Load
 
 		public LoopbackLoadTest()
 		{
-			_container = new DefaultMassTransitContainer("Loopback.castle.xml");
+			_container = new WindsorContainer("Loopback.castle.xml");
+		    _container.Install(new MassTransitInstaller());
 
 			_bus = _container.Resolve<IServiceBus>();
 		}
