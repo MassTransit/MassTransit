@@ -17,15 +17,16 @@ namespace MassTransit
 	using System.Reflection;
 	using Events;
 	using Exceptions;
-	using Internal;
 	using log4net;
 	using Magnum;
 	using Magnum.Extensions;
 	using Magnum.Pipeline;
 	using Magnum.Pipeline.Segments;
+	using MessageHeaders;
 	using Monitoring;
 	using Pipeline;
 	using Pipeline.Configuration;
+	using Util;
 
 	/// <summary>
 	/// A service bus is used to attach message handlers (services) to endpoints, as well as 

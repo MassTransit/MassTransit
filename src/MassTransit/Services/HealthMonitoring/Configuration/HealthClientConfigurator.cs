@@ -15,7 +15,6 @@ namespace MassTransit.Services.HealthMonitoring.Configuration
 	using System;
 	using BusServiceConfigurators;
 	using Configurators;
-	using Internal;
 
 	public class HealthClientConfigurator :
 		BusServiceConfigurator

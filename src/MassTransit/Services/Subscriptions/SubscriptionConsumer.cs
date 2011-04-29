@@ -13,7 +13,6 @@
 namespace MassTransit.Services.Subscriptions
 {
 	using System;
-	using Internal;
 	using Pipeline;
 
 	public class SubscriptionConsumer :

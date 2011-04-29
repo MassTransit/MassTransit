@@ -13,9 +13,9 @@
 namespace MassTransit.Serialization
 {
     using System;
-    using Internal;
+    using MessageHeaders;
 
-    public class JsonMessageEnvelope :
+	public class JsonMessageEnvelope :
         MessageEnvelopeBase
     {
         public JsonMessageEnvelope()

@@ -17,10 +17,10 @@ namespace MassTransit.Services.Subscriptions.Client
 	using System.ComponentModel;
 	using System.Linq;
 	using System.Reflection;
-	using Internal;
 	using log4net;
 	using Magnum;
 	using Messages;
+	using Pipeline;
 	using Util;
 
 	public class SubscriptionCoordinator :

@@ -15,7 +15,6 @@ namespace MassTransit.Transports.Msmq.Tests
 	using System;
 	using System.IO;
 	using System.Messaging;
-	using Internal;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
 	using Rhino.Mocks;

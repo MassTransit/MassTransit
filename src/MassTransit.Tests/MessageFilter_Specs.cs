@@ -2,7 +2,6 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading;
-    using MassTransit.Internal;
     using Messages;
     using NUnit.Framework;
     using TextFixtures;

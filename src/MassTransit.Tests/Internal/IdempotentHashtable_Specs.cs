@@ -13,8 +13,8 @@
 namespace MassTransit.Tests.Internal
 {
 	using System;
-	using MassTransit.Internal;
 	using NUnit.Framework;
+	using Util;
 
 	[TestFixture]
 	public class Working_with_an_idempotent_hashtable

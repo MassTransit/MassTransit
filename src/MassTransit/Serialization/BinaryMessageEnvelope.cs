@@ -15,9 +15,9 @@ namespace MassTransit.Serialization
 	using System;
 	using System.Collections.Generic;
 	using System.Runtime.Remoting.Messaging;
-	using Internal;
+	using MessageHeaders;
 
-    public class BinaryMessageEnvelope :
+	public class BinaryMessageEnvelope :
 		MessageEnvelopeBase
 	{
 		private const string ConversationIdKey = "ConversationId";

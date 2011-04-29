@@ -15,8 +15,6 @@ namespace MassTransit.Pipeline.Inspectors
 	using System;
 	using System.Linq;
 	using System.Text;
-	using Batch;
-	using Batch.Pipeline;
 	using Distributor.Pipeline;
 	using Saga;
 	using Saga.Pipeline;
@@ -53,22 +51,6 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage>(MessageRouter<TMessage> element) where TMessage : class
 		{
 			Append(string.Format("Routed ({0})", typeof (TMessage).ToFriendlyName()));
-
-			return true;
-		}
-
-		public bool Inspect<TMessage, TBatchId>(BatchMessageRouter<TMessage, TBatchId> element)
-			where TMessage : class, BatchedBy<TBatchId>
-		{
-			Append(string.Format("Batch Routed ({0})", typeof (TMessage).ToFriendlyName()));
-
-			return true;
-		}
-
-		public bool Inspect<TMessage, TBatchId>(BatchCombiner<TMessage, TBatchId> element)
-			where TMessage : class, BatchedBy<TBatchId>
-		{
-			Append(string.Format("Batch Combiner ({0}) [{1}]", typeof (TMessage).ToFriendlyName(), element.BatchId));
 
 			return true;
 		}

@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using System;
-	using Internal;
 	using MassTransit.Tests.TextFixtures;
 	using Services.Subscriptions;
 

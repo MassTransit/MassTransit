@@ -17,8 +17,8 @@ namespace MassTransit.Transports.Nms
 	using Apache.NMS;
 	using Apache.NMS.ActiveMQ;
 	using Exceptions;
-	using Internal;
 	using log4net;
+	using Util;
 
 	[DebuggerDisplay("{Address}")]
 	public class NmsTransport :

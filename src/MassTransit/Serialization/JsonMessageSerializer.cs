@@ -15,9 +15,9 @@ namespace MassTransit.Serialization
     using System;
     using System.IO;
     using System.Text;
-    using Internal;
     using log4net;
     using Magnum.Extensions;
+    using MessageHeaders;
     using Newtonsoft.Json;
 
     public class JsonMessageSerializer :

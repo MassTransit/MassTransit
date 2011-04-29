@@ -17,8 +17,8 @@ namespace MassTransit.Serialization
 	using System.IO;
 	using System.Runtime.Remoting.Messaging;
 	using System.Runtime.Serialization.Formatters.Binary;
-	using Internal;
 	using log4net;
+	using MessageHeaders;
 	using Util;
 
 	/// <summary>

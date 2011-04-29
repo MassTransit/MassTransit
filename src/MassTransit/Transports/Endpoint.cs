@@ -15,9 +15,10 @@ namespace MassTransit.Transports
 	using System;
 	using System.Diagnostics;
 	using System.Runtime.Serialization;
-	using Internal;
 	using log4net;
+	using MessageHeaders;
 	using Serialization;
+	using Util;
 
 	[DebuggerDisplay("{Address}")]
 	public class Endpoint :

@@ -14,8 +14,8 @@ namespace MassTransit.Distributor
 {
 	using System;
 	using System.Threading;
-	using Internal;
 	using Magnum.Extensions;
+	using MessageHeaders;
 	using Messages;
 	using Stact;
 	using Stact.Internal;

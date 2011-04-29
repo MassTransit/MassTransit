@@ -16,11 +16,12 @@ namespace MassTransit.Tests.Serialization
     using System.Diagnostics;
     using System.IO;
     using System.Text;
-    using MassTransit.Internal;
     using MassTransit.Serialization;
+    using MessageHeaders;
     using NUnit.Framework;
 
-    public class SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
+    public class SerializationSpecificationBase<TSerializer> 
+		where TSerializer : IMessageSerializer, new()
     {
         Uri _sourceUri;
         Uri _responseUri;

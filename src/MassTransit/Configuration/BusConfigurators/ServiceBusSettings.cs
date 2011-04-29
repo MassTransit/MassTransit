@@ -13,7 +13,7 @@
 namespace MassTransit.BusConfigurators
 {
 	using System;
-	using Internal;
+	using Util;
 
 	public class ServiceBusSettings :
 		BusSettings

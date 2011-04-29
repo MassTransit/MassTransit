@@ -13,7 +13,7 @@
 namespace MassTransit.Serialization
 {
 	using System;
-	using Internal;
+	using MessageHeaders;
 
 	public static class ExtensionsToMessageEnvelope
 	{

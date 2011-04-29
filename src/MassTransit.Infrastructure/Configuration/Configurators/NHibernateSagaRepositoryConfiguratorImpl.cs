@@ -16,11 +16,11 @@ namespace MassTransit.Infrastructure.Configurators
 	using Builders;
 	using BusConfigurators;
 	using Exceptions;
-	using Internal;
 	using log4net;
 	using MassTransit.Configurators;
 	using NHibernate;
 	using Saga;
+	using Util;
 
 	public class NHibernateSagaRepositoryConfiguratorImpl :
 		BusBuilderConfigurator

@@ -16,8 +16,8 @@ namespace MassTransit.Transports.Nms
 	using System.IO;
 	using System.Text;
 	using Apache.NMS;
-	using Internal;
 	using Magnum;
+	using MessageHeaders;
 
 	public class NmsSendContext :
 		ISendContext

@@ -16,7 +16,7 @@ namespace MassTransit.Serialization
 	using System.IO;
 	using System.Runtime.Serialization;
 	using Custom;
-	using Internal;
+	using MessageHeaders;
 
 	public class XmlMessageSerializer :
 		IMessageSerializer
