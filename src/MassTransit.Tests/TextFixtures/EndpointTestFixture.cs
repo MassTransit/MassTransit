@@ -78,6 +78,12 @@ namespace MassTransit.Tests.TextFixtures
 				EndpointCache.Dispose();
 				EndpointCache = null;
 			}
+
+			ServiceBusFactory.ConfigureDefaultSettings(x =>
+				{
+					x.SetEndpointCache(null);
+					x.SetObjectBuilder(null);
+				});
 		}
 
 		EndpointFactoryConfiguratorImpl _endpointFactoryConfigurator;

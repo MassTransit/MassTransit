@@ -14,7 +14,6 @@ namespace MassTransit.BusConfigurators
 {
 	using System;
 	using Magnum.Extensions;
-	using Util;
 
 	public class ServiceBusDefaultSettings
 	{
@@ -24,7 +23,6 @@ namespace MassTransit.BusConfigurators
 			ReceiveTimeout = 3.Seconds();
 			ConcurrentReceiverLimit = 1;
 			ConcurrentConsumerLimit = Environment.ProcessorCount*4;
-			ObjectBuilder = new FastActivatorObjectBuilder();
 		}
 
 		public bool AutoStart { get; set; }
