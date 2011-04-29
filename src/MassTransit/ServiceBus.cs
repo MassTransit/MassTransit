@@ -217,6 +217,11 @@ namespace MassTransit
 		/// </summary>
 		public IEndpoint Endpoint { get; private set; }
 
+		public UnsubscribeAction Configure(Func<IPipelineConfigurator, UnsubscribeAction> configure)
+		{
+			return InboundPipeline.Configure(configure);
+		}
+
 		/// <summary>
 		/// Adds a message handler to the service bus for handling a specific type of message
 		/// </summary>

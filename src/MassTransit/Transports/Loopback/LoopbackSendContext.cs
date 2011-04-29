@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,7 +18,8 @@ namespace MassTransit.Transports.Loopback
 	public class LoopbackSendContext :
 		ISendContext
 	{
-		private LoopbackMessage _message;
+		bool _disposed;
+		LoopbackMessage _message;
 
 		public LoopbackSendContext()
 		{
@@ -42,14 +43,10 @@ namespace MassTransit.Transports.Loopback
 		{
 		}
 
-
 		public void Dispose()
 		{
-			if (_message != null)
-			{
-				_message.Dispose();
-				_message = null;
-			}
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public LoopbackMessage GetMessage()
@@ -61,6 +58,26 @@ namespace MassTransit.Transports.Loopback
 			_message = null;
 
 			return message;
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				if (_message != null)
+				{
+					_message.Dispose();
+					_message = null;
+				}
+			}
+
+			_disposed = true;
+		}
+
+		~LoopbackSendContext()
+		{
+			Dispose(false);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,13 +21,18 @@ namespace MassTransit.Services.Timeout.Server
 		SagaStateMachine<TimeoutSaga>,
 		ISaga
 	{
+		Guid _correlationId;
+
 		static TimeoutSaga()
 		{
 			Define(() =>
 				{
-					Correlate(SchedulingTimeout).By((saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
-					Correlate(CancellingTimeout).By((saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
-					Correlate(CompletingTimeout).By((saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
+					Correlate(SchedulingTimeout).By(
+						(saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
+					Correlate(CancellingTimeout).By(
+						(saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
+					Correlate(CompletingTimeout).By(
+						(saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
 
 					Initially(
 						When(SchedulingTimeout)
@@ -67,7 +72,7 @@ namespace MassTransit.Services.Timeout.Server
 
 		public TimeoutSaga(Guid correlationId)
 		{
-			CorrelationId = correlationId;
+			_correlationId = correlationId;
 		}
 
 		protected TimeoutSaga()
@@ -87,7 +92,12 @@ namespace MassTransit.Services.Timeout.Server
 		public virtual DateTime TimeoutAt { get; set; }
 		public virtual int Tag { get; set; }
 		public virtual IServiceBus Bus { get; set; }
-		public virtual Guid CorrelationId { get; set; }
+
+		public virtual Guid CorrelationId
+		{
+			get { return _correlationId; }
+			set { _correlationId = value; }
+		}
 
 		public virtual bool Equals(TimeoutSaga obj)
 		{
@@ -112,7 +122,7 @@ namespace MassTransit.Services.Timeout.Server
 			}
 		}
 
-		private void NotifyTimeoutScheduled()
+		void NotifyTimeoutScheduled()
 		{
 			Bus.Publish(new TimeoutScheduled
 				{
@@ -122,7 +132,7 @@ namespace MassTransit.Services.Timeout.Server
 				});
 		}
 
-		private void NotifyTimeoutRescheduled()
+		void NotifyTimeoutRescheduled()
 		{
 			Bus.Publish(new TimeoutRescheduled
 				{
@@ -132,7 +142,7 @@ namespace MassTransit.Services.Timeout.Server
 				});
 		}
 
-		private void NotifyTimeoutCancelled()
+		void NotifyTimeoutCancelled()
 		{
 			Bus.Publish(new TimeoutCancelled
 				{

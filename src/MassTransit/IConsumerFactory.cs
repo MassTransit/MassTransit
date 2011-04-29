@@ -10,11 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionConfigurators
+namespace MassTransit
 {
-	public class ConsumerConfiguratorImpl :
-		ConsumerConfigurator
+	using System;
+	using System.Collections.Generic;
+
+	public interface IConsumerFactory<TConsumer>
+		where TConsumer : class
 	{
-		public SubscriptionLifeCycle Lifecycle { get; set; }
+		IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback);
 	}
 }

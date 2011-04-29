@@ -17,6 +17,7 @@ namespace MassTransit.Transports.Msmq
 	using System.Threading;
 	using Exceptions;
 	using log4net;
+	using Magnum.Extensions;
 
 
 	public abstract class InboundMsmqTransport :

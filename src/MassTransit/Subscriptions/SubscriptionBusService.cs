@@ -41,12 +41,30 @@ namespace MassTransit.Subscriptions
 			_subscriptions = new List<ISubscriptionReference>();
 		}
 
+		bool _disposed;
+
 		public void Dispose()
 		{
-			_builders.Clear();
-			_subscriptions.Clear();
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
+		~SubscriptionBusService()
+		{
+			Dispose(false);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_builders.Clear();
+				_subscriptions.Clear();
+			}
+
+			_disposed = true;
+		}
 		public void Start(IServiceBus bus)
 		{
 			foreach (SubscriptionBuilder builder in _builders)

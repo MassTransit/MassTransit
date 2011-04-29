@@ -57,8 +57,27 @@ namespace MassTransit.Pipeline.Sinks
 			return true;
 		}
 
+		bool _disposed;
+
 		public void Dispose()
 		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
-	}
+
+		~EndpointMessageSink()
+		{
+			Dispose(false);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				
+			}
+
+			_disposed = true;
+		}	}
 }

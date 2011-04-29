@@ -51,6 +51,7 @@ namespace MassTransit.Saga.Configuration
 			return () => result() && (router.SinkCount == 0) && remove();
 		}
 
+
 		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context, TComponent instance)
 		{
 			yield break;

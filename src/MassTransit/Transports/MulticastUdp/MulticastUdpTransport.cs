@@ -128,6 +128,7 @@ namespace MassTransit.Transports
                 using (_sendClient)
                     _sendClient.Close();
             }
+        	_sendClient = null;
         }
 
         private void StopReceiver()
@@ -138,6 +139,7 @@ namespace MassTransit.Transports
                 {
                     _receiveClient.Close();
                 }
+            	_receiveClient = null;
             }
         }
 

@@ -38,6 +38,12 @@ namespace MassTransit
         /// </summary>
         IEndpoint Endpoint { get; }
 
+		/// <summary>
+		/// Not sure this is going to make it, but trying a new approach.
+		/// </summary>
+		/// <param name="configure"></param>
+    	UnsubscribeAction Configure(Func<IPipelineConfigurator,UnsubscribeAction> configure);
+
         /// <summary>
         /// Adds a message handler to the service bus for handling a specific type of message
         /// </summary>

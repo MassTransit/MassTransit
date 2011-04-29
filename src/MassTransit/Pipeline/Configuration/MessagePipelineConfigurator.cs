@@ -22,7 +22,6 @@ namespace MassTransit.Pipeline.Configuration
 
     public class MessagePipelineConfigurator :
         IPipelineConfigurator,
-        ISubscriptionEvent,
         IDisposable
     {
         private readonly IObjectBuilder _builder;
@@ -65,7 +64,12 @@ namespace MassTransit.Pipeline.Configuration
             return _subscriptionEventHandlers.Register(subscriptionEventHandler);
         }
 
-        public UnsubscribeAction Subscribe<TComponent>()
+    	public IMessagePipeline Pipeline
+    	{
+    		get { return _pipeline; }
+    	}
+
+    	public UnsubscribeAction Subscribe<TComponent>()
             where TComponent : class
         {
             return Subscribe((context, interceptor) => interceptor.Subscribe<TComponent>(context));

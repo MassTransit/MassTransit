@@ -13,6 +13,8 @@
 namespace MassTransit.SubscriptionBuilders
 {
 	using System;
+	using System.Collections.Generic;
+	using SubscriptionConnectors;
 	using Subscriptions;
 
 	public class ConsumerSubscriptionBuilder<TConsumer> :
@@ -21,12 +23,20 @@ namespace MassTransit.SubscriptionBuilders
 	{
 		readonly Func<Action<Action<TConsumer>>> _consumerFactory;
 		readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
+		readonly IList<ConsumerSubscriptionConnector> _connectors;
 
 		public ConsumerSubscriptionBuilder(Func<Action<Action<TConsumer>>> consumerFactory,
 		                                   Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)
 		{
 			_consumerFactory = consumerFactory;
 			_referenceFactory = referenceFactory;
+
+			_connectors = new List<ConsumerSubscriptionConnector>();
+		}
+
+		public IEnumerable<ConsumerSubscriptionConnector> Connectors
+		{
+			get { return _connectors; }
 		}
 
 		public ISubscriptionReference Subscribe(IServiceBus bus)

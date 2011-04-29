@@ -43,7 +43,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>3009,3001,3008</NoWarn>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -106,7 +106,6 @@
     <Compile Include="Configuration\Configurators\ValidationResult.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultDisposition.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultImpl.cs" />
-    <Compile Include="Configuration\ConsumerConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\ConsumerSubscriptionBuilder.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\InstanceSubscriptionBuilder.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\SagaSubscriptionBuilder.cs" />
@@ -117,7 +116,6 @@
     <Compile Include="Configuration\SubscriptionBuilders\SubscriptionBusServiceBuilderConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\SubscriptionBusServiceBuilderConfiguratorImpl.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\SubscriptionBusServiceBuilderImpl.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\ConsumerConfigurator.cs" />
     <Compile Include="Configuration\EndpointCacheFactory.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettings.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettingsConfigurator.cs" />
@@ -150,7 +148,6 @@
     <Compile Include="Configuration\ServiceBusFactory.cs" />
     <Compile Include="Configuration\BusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\ConsumerConfiguratorImpl.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerSubscriptionConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerSubscriptionConfiguratorImpl.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\HandlerSubscriptionConfigurator.cs" />
@@ -166,13 +163,24 @@
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfiguration.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfiguratorImpl.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ConsumerSubscriber.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ConsumerSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\CorrelatedInstanceSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\InstanceSubscriber.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\InstanceSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\SelectedConsumerSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\SelectedInstanceSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\SubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionSettings.cs" />
     <Compile Include="Configuration\SubscriptionSettingsImpl.cs" />
     <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
     <Compile Include="Configuration\Xml\SettingsOptions.cs" />
+    <Compile Include="DelegateConsumerFactory.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="Fault.cs" />
     <Compile Include="IBusService.cs" />
+    <Compile Include="IConsumer.cs" />
+    <Compile Include="IConsumerFactory.cs" />
     <Compile Include="IServiceContainer.cs" />
     <Compile Include="MessageHeaders\IInboundMessageHeaders.cs" />
     <Compile Include="MessageHeaders\IMessageHeaders.cs" />
@@ -183,6 +191,7 @@
     <Compile Include="MessageHeaders\MessageHeadersBase.cs" />
     <Compile Include="MessageHeaders\OutboundMessage.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderImpl.cs" />
+    <Compile Include="ObjectBuilderConsumerFactory.cs" />
     <Compile Include="Pipeline\IEndpointSubscriptionEvent.cs" />
     <Compile Include="Pipeline\InboundOutboundSubscriptionBinder.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
@@ -271,6 +280,7 @@
     <Compile Include="Util\FastActivatorObjectBuilder.cs" />
     <Compile Include="Util\IdempotentHashtable.cs" />
     <Compile Include="Util\IUnsubscribeAction.cs" />
+    <Compile Include="Util\LambdaEqualityComparer.cs" />
     <Compile Include="Util\NullServiceBus.cs" />
     <Compile Include="Util\ReSharperStaticAnalysis.cs" />
     <Compile Include="Util\ServiceBusReceiveContext.cs" />

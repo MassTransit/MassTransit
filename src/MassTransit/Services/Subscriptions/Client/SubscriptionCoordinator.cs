@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,25 +32,25 @@ namespace MassTransit.Services.Subscriptions.Client
 		Consumes<AddSubscription>.All,
 		Consumes<RemoveSubscription>.All
 	{
-		private const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionClient));
-		private static readonly ClientSubscriptionInfoMapper _mapper = new ClientSubscriptionInfoMapper();
-		private readonly IServiceBus _bus;
-		private readonly RegistrationList<IEndpointSubscriptionEvent> _clients;
-		private readonly HashSet<string> _ignoredSubscriptions;
-		private readonly EndpointList _localEndpoints;
-		private readonly string _network;
-		private readonly IEndpoint _outboundEndpoint;
-		private readonly SequenceNumberGenerator _sequence;
-		private readonly IList<IBusService> _services;
-		private readonly IdempotentHashtable<Guid, ClientSubscriptionInformation> _subscriptions;
-		private readonly TypeConverter _typeConverter;
-		private readonly Uri _uri;
+		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionClient));
+		static readonly ClientSubscriptionInfoMapper _mapper = new ClientSubscriptionInfoMapper();
+		readonly IServiceBus _bus;
+		readonly HashSet<string> _ignoredSubscriptions;
+		readonly EndpointList _localEndpoints;
+		readonly string _network;
+		readonly IEndpoint _outboundEndpoint;
+		readonly SequenceNumberGenerator _sequence;
+		readonly IList<IBusService> _services;
+		readonly IdempotentHashtable<Guid, ClientSubscriptionInformation> _subscriptions;
+		readonly TypeConverter _typeConverter;
+		readonly Uri _uri;
 
-		private Guid _clientId;
-		private volatile bool _disposed;
+		Guid _clientId;
+		RegistrationList<IEndpointSubscriptionEvent> _clients;
+		volatile bool _disposed;
 
-		private UnsubscribeAction _unsubscribeAction;
+		UnsubscribeAction _unsubscribeAction;
 
 		public SubscriptionCoordinator(IServiceBus bus, IEndpoint outboundEndpoint, string network)
 		{
@@ -89,10 +89,11 @@ namespace MassTransit.Services.Subscriptions.Client
 				return;
 
 			IEnumerable<SubscriptionInformation> subscriptions = _subscriptions
-				.Select(x => new SubscriptionInformation(x.ClientId, x.SequenceNumber, x.MessageName, x.CorrelationId, x.EndpointUri)
-					{
-						SubscriptionId = x.SubscriptionId
-					});
+				.Select(
+					x => new SubscriptionInformation(x.ClientId, x.SequenceNumber, x.MessageName, x.CorrelationId, x.EndpointUri)
+						{
+							SubscriptionId = x.SubscriptionId
+						});
 
 			Send(new SubscriptionRefresh(subscriptions));
 		}
@@ -170,7 +171,8 @@ namespace MassTransit.Services.Subscriptions.Client
 		public UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId, Uri endpointUri)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
-			var info = new SubscriptionInformation(_clientId, _sequence.Next(), typeof (TMessage), correlationId.ToString(), endpointUri);
+			var info = new SubscriptionInformation(_clientId, _sequence.Next(), typeof (TMessage), correlationId.ToString(),
+				endpointUri);
 
 			return SendAddSubscription(info);
 		}
@@ -204,10 +206,15 @@ namespace MassTransit.Services.Subscriptions.Client
 				});
 			_services.Clear();
 
+			if (_clients != null)
+			{
+				_clients.Dispose();
+				_clients = null;
+			}
 			_disposed = true;
 		}
 
-		private bool ShouldIgnoreMessage<T>(T message)
+		bool ShouldIgnoreMessage<T>(T message)
 		{
 			if (CurrentMessage.Headers.SourceAddress == _bus.Endpoint.Address.Uri)
 				return true;
@@ -218,7 +225,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			return false;
 		}
 
-		private void Send<T>(T message)
+		void Send<T>(T message)
 			where T : class
 		{
 			_outboundEndpoint.Send(message, context =>
@@ -228,13 +235,13 @@ namespace MassTransit.Services.Subscriptions.Client
 				});
 		}
 
-		private void SendAddSubscriptionClient(IServiceBus bus)
+		void SendAddSubscriptionClient(IServiceBus bus)
 		{
 			var message = new AddSubscriptionClient(_clientId, bus.ControlBus.Endpoint.Uri, bus.Endpoint.Uri);
 			Send(message);
 		}
 
-		private void Remove(SubscriptionInformation subscription)
+		void Remove(SubscriptionInformation subscription)
 		{
 			if (!_subscriptions.Contains(subscription.SubscriptionId))
 				return;
@@ -260,7 +267,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			}
 		}
 
-		private void Add(SubscriptionInformation sub)
+		void Add(SubscriptionInformation sub)
 		{
 			if (IgnoreIfLocalEndpoint(sub.EndpointUri))
 				return;
@@ -301,7 +308,8 @@ namespace MassTransit.Services.Subscriptions.Client
 			}
 		}
 
-		private UnsubscribeAction AddCorrelationSubscription(Type correlatedByType, string correlationValue, Type messageType, Uri endpointUri)
+		UnsubscribeAction AddCorrelationSubscription(Type correlatedByType, string correlationValue, Type messageType,
+		                                             Uri endpointUri)
 		{
 			Type keyType = correlatedByType.GetGenericArguments().First();
 
@@ -322,7 +330,8 @@ namespace MassTransit.Services.Subscriptions.Client
 			{
 				if (!_typeConverter.CanConvertTo(keyType))
 				{
-					_log.Error("The correlationId in the subscription could not be converted to the CorrelatedBy type: " + keyType.FullName);
+					_log.Error("The correlationId in the subscription could not be converted to the CorrelatedBy type: " +
+					           keyType.FullName);
 					return null;
 				}
 
@@ -332,7 +341,8 @@ namespace MassTransit.Services.Subscriptions.Client
 				}
 				catch (Exception)
 				{
-					_log.Error("The correlationId in the subscription failed to be converted to the CorrelatedBy type: " + keyType.FullName);
+					_log.Error("The correlationId in the subscription failed to be converted to the CorrelatedBy type: " +
+					           keyType.FullName);
 					return null;
 				}
 			}
@@ -346,7 +356,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			                           	.Invoke(this, new[] {correlationId, endpointUri});
 		}
 
-		private UnsubscribeAction SendAddSubscription(SubscriptionInformation info)
+		UnsubscribeAction SendAddSubscription(SubscriptionInformation info)
 		{
 			if (_ignoredSubscriptions.Contains(info.MessageName))
 				return () => true;
@@ -376,7 +386,7 @@ namespace MassTransit.Services.Subscriptions.Client
 				};
 		}
 
-		private UnsubscribeAction AddToClients<T>(Uri endpointUri)
+		UnsubscribeAction AddToClients<T>(Uri endpointUri)
 			where T : class
 		{
 			UnsubscribeAction result = () => true;
@@ -386,7 +396,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			return result;
 		}
 
-		private UnsubscribeAction AddToClientsWithCorrelation<T, K>(K key, Uri endpointUri)
+		UnsubscribeAction AddToClientsWithCorrelation<T, K>(K key, Uri endpointUri)
 			where T : class, CorrelatedBy<K>
 		{
 			UnsubscribeAction result = () => true;
@@ -396,7 +406,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			return result;
 		}
 
-		private bool IgnoreIfLocalEndpoint(Uri endpointUri)
+		bool IgnoreIfLocalEndpoint(Uri endpointUri)
 		{
 			return _localEndpoints.Contains(endpointUri);
 		}
@@ -407,7 +417,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		}
 
 
-		private static Type GetCorrelatedByType(string correlationId, Type messageType)
+		static Type GetCorrelatedByType(string correlationId, Type messageType)
 		{
 			if (string.IsNullOrEmpty(correlationId))
 				return null;

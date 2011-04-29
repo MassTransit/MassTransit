@@ -12,9 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration.Subscribers
 {
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
 
-    public interface IPipelineSubscriber
+    public interface IPipelineSubscriber :
+		IDisposable
     {
         IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context);
         IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context, TComponent instance);

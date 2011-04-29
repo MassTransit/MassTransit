@@ -10,22 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.SubscriptionConnectors
 {
 	using System;
-	using SubscriptionConfigurators;
+	using Pipeline;
 
-	public static class ConsumerConfiguratorExtensions
+	public interface ConsumerSubscriptionConnector
 	{
-		public static void Where<TMessage>(this ConsumerConfigurator configurator, Predicate<TMessage> condition)
-		{
-			//set the predicate
-			//set to selected?
-		}
+		Type MessageType { get; }
 
-		public static void Permanent(this ConsumerConfigurator cfg)
-		{
-			//set lifecyle to permanent
-		}
+		UnsubscribeAction Connect(IPipelineConfigurator configurator);
+	}
+
+	public interface InstanceConnector
+	{
+		UnsubscribeAction Connect(IPipelineConfigurator configurator, object instance);
+	}
+
+	public interface InstanceSubscriptionConnector :
+		InstanceConnector
+	{
+		Type MessageType { get; }
 	}
 }

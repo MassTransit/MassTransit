@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,9 +14,8 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Exceptions;
 
-    /// <summary>
+	/// <summary>
 	/// Routes messages to instances of subscribed components. A new instance of the component
 	/// is created from the container for each message received.
 	/// </summary>
@@ -27,29 +26,28 @@ namespace MassTransit.Pipeline.Sinks
 		where TMessage : class
 		where TComponent : class, Consumes<TMessage>.All
 	{
-		private readonly IObjectBuilder _builder;
+		readonly IConsumerFactory<TComponent> _consumerFactory;
+		bool _disposed;
 
 		public ComponentMessageSink(ISubscriberContext context)
 		{
-			_builder = context.Builder;
+			_consumerFactory = new ObjectBuilderConsumerFactory<TComponent>(context.Builder);
+		}
+
+		public ComponentMessageSink(IConsumerFactory<TComponent> consumerFactory)
+		{
+			_consumerFactory = consumerFactory;
 		}
 
 		public void Dispose()
 		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
 		{
-			Consumes<TMessage>.All consumer = BuildConsumer();
-
-			try
-			{
-				yield return consumer.Consume;
-			}
-			finally
-			{
-				Release(consumer);
-			}
+			return _consumerFactory.GetConsumer<TMessage>(consumer => consumer.Consume);
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
@@ -57,20 +55,19 @@ namespace MassTransit.Pipeline.Sinks
 			return inspector.Inspect(this);
 		}
 
-		private void Release(Consumes<TMessage>.All consumer)
+		void Dispose(bool disposing)
 		{
-			_builder.Release(consumer.TranslateTo<TComponent>());
+			if (_disposed) return;
+			if (disposing)
+			{
+			}
+
+			_disposed = true;
 		}
 
-		private Consumes<TMessage>.All BuildConsumer()
+		~ComponentMessageSink()
 		{
-			TComponent component = _builder.GetInstance<TComponent>();
-			if (component == null)
-				throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ", typeof(TComponent)));
-
-			Consumes<TMessage>.All consumer = component.TranslateTo<Consumes<TMessage>.All>();
-
-			return consumer;
+			Dispose(false);
 		}
 	}
 }

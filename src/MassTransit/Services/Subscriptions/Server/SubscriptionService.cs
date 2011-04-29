@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.Services.Subscriptions.Server
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using Exceptions;
 	using log4net;
@@ -29,13 +30,14 @@ namespace MassTransit.Services.Subscriptions.Server
 		Consumes<SubscriptionRemoved>.All,
 		IDisposable
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
-		private readonly IEndpointCache _endpointCache;
-		private readonly ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagas;
-		private readonly ISagaRepository<SubscriptionSaga> _subscriptionSagas;
-		private IServiceBus _bus;
-		private UnsubscribeAction _unsubscribeToken = () => false;
-		private readonly Fiber _fiber = new PoolFiber();
+		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
+		readonly IEndpointCache _endpointCache;
+		readonly Fiber _fiber = new PoolFiber();
+		readonly ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagas;
+		readonly ISagaRepository<SubscriptionSaga> _subscriptionSagas;
+		IServiceBus _bus;
+		bool _disposed;
+		UnsubscribeAction _unsubscribeToken = () => false;
 
 		public SubscriptionService(IServiceBus bus,
 		                           IEndpointCache endpointCache,
@@ -79,25 +81,13 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var remove = new RemoveSubscription(message.Subscription);
 
-			_fiber.Add(()=>SendToClients(remove));
+			_fiber.Add(() => SendToClients(remove));
 		}
 
 		public void Dispose()
 		{
-			try
-			{
-				_fiber.Shutdown(60.Seconds());
-
-				_bus.Dispose();
-				_bus = null;
-			}
-			catch (Exception ex)
-			{
-				string message = "Error in shutting down the SubscriptionService: " + ex.Message;
-				ShutDownException exp = new ShutDownException(message, ex);
-				_log.Error(message, exp);
-				throw exp;
-			}
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public void Start()
@@ -122,7 +112,31 @@ namespace MassTransit.Services.Subscriptions.Server
 			_log.Info("Subscription Service Stopped");
 		}
 
-		private void SendToClients<T>(T message)
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				try
+				{
+					_fiber.Shutdown(60.Seconds());
+
+					_bus.Dispose();
+					_bus = null;
+				}
+				catch (Exception ex)
+				{
+					string message = "Error in shutting down the SubscriptionService: " + ex.Message;
+					var exp = new ShutDownException(message, ex);
+					_log.Error(message, exp);
+					throw exp;
+				}
+			}
+
+			_disposed = true;
+		}
+
+		void SendToClients<T>(T message)
 			where T : class
 		{
 			_subscriptionClientSagas.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
@@ -134,9 +148,10 @@ namespace MassTransit.Services.Subscriptions.Server
 					});
 		}
 
-		private void SendCacheUpdateToClient(Uri uri)
+		void SendCacheUpdateToClient(Uri uri)
 		{
-			var subscriptions = _subscriptionSagas.Where(x => x.CurrentState == SubscriptionSaga.Active)
+			IEnumerable<SubscriptionInformation> subscriptions = _subscriptionSagas.Where(
+				x => x.CurrentState == SubscriptionSaga.Active)
 				.Select(x => x.SubscriptionInfo);
 
 			var response = new SubscriptionRefresh(subscriptions);
@@ -144,6 +159,11 @@ namespace MassTransit.Services.Subscriptions.Server
 			IEndpoint endpoint = _endpointCache.GetEndpoint(uri);
 
 			endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Uri));
+		}
+
+		~SubscriptionService()
+		{
+			Dispose(false);
 		}
 	}
 }
