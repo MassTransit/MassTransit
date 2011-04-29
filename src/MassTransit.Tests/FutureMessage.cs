@@ -45,4 +45,80 @@ namespace MassTransit.Tests
 			return _received.WaitOne(timeout, true);
 		}
 	}
+
+	public class SelectedFutureMessage<TMessage> :
+		Consumes<TMessage>.Selected
+		where TMessage : class
+	{
+		private readonly Func<TMessage, bool> _acceptor;
+		private readonly ManualResetEvent _received = new ManualResetEvent(false);
+
+		public TMessage Message { get; private set; }
+
+		public SelectedFutureMessage(Func<TMessage, bool> acceptor)
+		{
+			_acceptor = acceptor;
+		}
+
+		public void Consume(TMessage message)
+		{
+			Set(message);
+		}
+
+		public void Set(TMessage message)
+		{
+			Message = message;
+			_received.Set();
+		}
+
+		public bool WaitUntilAvailable(TimeSpan timeout)
+		{
+			return _received.WaitOne(timeout, true);
+		}
+
+		public bool Accept(TMessage message)
+		{
+			return _acceptor(message);
+		}
+	}
+
+	/// <summary>
+	/// A simple class that helps to work with the async nature of messaging
+	/// </summary>
+	/// <remarks>
+	/// http://www.ps.uni-sb.de/alice/manual/futures.html
+	/// </remarks>
+	/// <typeparam name="TMessage">The type of message being consumed</typeparam>
+	/// <typeparam name="TKey"></typeparam>
+	public class FutureMessage<TMessage, TKey> :
+		Consumes<TMessage>.For<TKey>
+		where TMessage : class
+	{
+		private readonly ManualResetEvent _received = new ManualResetEvent(false);
+
+		public FutureMessage(TKey correlationId)
+		{
+			CorrelationId = correlationId;
+		}
+
+		public TMessage Message { get; private set; }
+
+		public void Consume(TMessage message)
+		{
+			Set(message);
+		}
+
+		public TKey CorrelationId { get; private set; }
+
+		public void Set(TMessage message)
+		{
+			Message = message;
+			_received.Set();
+		}
+
+		public bool WaitUntilAvailable(TimeSpan timeout)
+		{
+			return _received.WaitOne(timeout, true);
+		}
+	}
 }

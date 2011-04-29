@@ -15,6 +15,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using System;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
+	using MassTransit.Tests;
 	using MassTransit.Tests.Messages;
 	using NUnit.Framework;
 	using TestFixtures;

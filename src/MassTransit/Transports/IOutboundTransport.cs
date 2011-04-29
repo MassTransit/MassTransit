@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,29 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Parallel.Messages
+namespace MassTransit.Transports
 {
 	using System;
 
-	[Serializable]
-	[ExpiresIn("00:01:00")]
-	public class SubTaskWorkerAvailable<TInput>
+	public interface IOutboundTransport :
+		ITransport
 	{
-		public SubTaskWorkerAvailable(string address, int taskLimit, int activeTaskCount)
-		{
-			Address = address;
-			ActiveTaskCount = activeTaskCount;
-			TaskLimit = taskLimit;
-		}
-
-		protected SubTaskWorkerAvailable()
-		{
-		}
-
-		public string Address { get; set; }
-
-		public int TaskLimit { get; set; }
-
-		public int ActiveTaskCount { get; set; }
+		void Send(Action<ISendContext> callback);
 	}
 }

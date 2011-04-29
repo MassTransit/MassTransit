@@ -14,6 +14,7 @@ namespace MassTransit
 {
 	using System;
 	using Serialization;
+	using Transports;
 
 	/// <summary>
 	/// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
