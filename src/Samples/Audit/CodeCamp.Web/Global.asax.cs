@@ -2,6 +2,7 @@ namespace CodeCamp.Web
 {
     using System;
     using System.Web;
+    using Castle.Windsor;
     using Domain;
     using log4net.Config;
     using Magnum;
@@ -14,9 +15,9 @@ namespace CodeCamp.Web
 
 	public class Global : HttpApplication
     {
-        private DefaultMassTransitContainer _container;
+        private WindsorContainer _container;
 
-        public DefaultMassTransitContainer Container
+        public WindsorContainer Container
         {
             get { return _container; }
         }
@@ -25,7 +26,8 @@ namespace CodeCamp.Web
         {
             XmlConfigurator.Configure();
 
-            _container = new DefaultMassTransitContainer(Server.MapPath("/web-castle.config"));
+            _container = new WindsorContainer(Server.MapPath("/web-castle.config"));
+            _container.Install(new MassTransitInstaller());
 
 			Configuration _cfg = new Configuration().Configure();
 
