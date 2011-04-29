@@ -27,19 +27,20 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		{
 			var sessionFactory = MockRepository.GenerateMock<ISessionFactory>();
 
-			var bus = ServiceBusFactory.New(x =>
+			FutureMessage<PingMessage> received;
+			using (var bus = ServiceBusFactory.New(x =>
+				{
+					x.ReceiveFrom("loopback://localhost/queue");
+					x.UseNHibernateSagaRepository(sessionFactory);
+				}))
 			{
-				x.ReceiveFrom("loopback://localhost/queue");
-				x.UseNHibernateSagaRepository(sessionFactory);
-			});
+				received = new FutureMessage<PingMessage>();
 
-			var received = new FutureMessage<PingMessage>();
+				bus.Subscribe<PingMessage>(received.Set);
 
-			bus.Subscribe<PingMessage>(received.Set);
-
-			bus.Publish(new PingMessage());
-
-			received.IsAvailable(8.Seconds()).ShouldBeTrue();
+				bus.Publish(new PingMessage());
+				received.IsAvailable(8.Seconds()).ShouldBeTrue();
+			}
 		}
 	}
 }

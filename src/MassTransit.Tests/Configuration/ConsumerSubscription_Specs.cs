@@ -44,6 +44,12 @@ namespace MassTransit.Tests.Configuration
 			_bus.Publish(_ping);
 		}
 
+		[Finally]
+		public void Finally()
+		{
+			_bus.Dispose();
+		}
+
 		[Then]
 		public void Should_have_subscribed()
 		{

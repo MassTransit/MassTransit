@@ -32,7 +32,6 @@ namespace MassTransit.Builders
 		readonly IList<Action<ServiceBus>> _postCreateActions;
 		readonly BusSettings _settings;
 		bool _disposed;
-		IEndpointCache _endpointCache;
 
 		public ServiceBusBuilderImpl(BusSettings settings)
 		{
@@ -42,7 +41,6 @@ namespace MassTransit.Builders
 			Guard.AgainstNull(settings.ObjectBuilder, "objectBuilder");
 
 			_settings = settings;
-			_endpointCache = settings.EndpointCache;
 
 			_postCreateActions = new List<Action<ServiceBus>>();
 			_busServiceConfigurators = new List<BusServiceConfigurator>();
@@ -61,7 +59,7 @@ namespace MassTransit.Builders
 
 		public IControlBus Build()
 		{
-			ServiceBus bus = CreateServiceBus(_endpointCache);
+			ServiceBus bus = CreateServiceBus(_settings.EndpointCache);
 
 			ConfigureBusSettings(bus);
 
