@@ -69,13 +69,14 @@ namespace MassTransit.Services.Subscriptions.Client
 		{
 			_coordinator.Stop();
 			_coordinator.OnRefresh -= CoordinatorOnRefresh;
-			_coordinator.Dispose();
-			_coordinator = null;
 		}
 
 		public virtual void Dispose(bool disposing)
 		{
 			if (!disposing || _disposed) return;
+
+			_ready.Dispose();
+			_coordinator.Dispose();
 
 			_disposed = true;
 		}

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,15 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Subscriptions
 {
+	using System;
 	using Pipeline;
 
 	public class SubscriptionPublisher :
 		ISubscriptionEvent,
 		IBusService
 	{
-		private IServiceBus _bus;
-		private ISubscriptionService _service;
-		private UnregisterAction _unregisterAction;
+		IServiceBus _bus;
+		bool _disposed;
+		ISubscriptionService _service;
+		UnregisterAction _unregisterAction;
 
 		/// <summary>
 		/// Publishes subscription events to the ISubscriptionService
@@ -33,8 +35,8 @@ namespace MassTransit.Services.Subscriptions
 
 		public void Dispose()
 		{
-			_bus = null;
-			_service = null;
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public void Start(IServiceBus bus)
@@ -58,6 +60,23 @@ namespace MassTransit.Services.Subscriptions
 			where T : class, CorrelatedBy<K>
 		{
 			return _service.SubscribedTo<T, K>(correlationId, _bus.Endpoint.Uri);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_bus = null;
+				_service = null;
+			}
+
+			_disposed = true;
+		}
+
+		~SubscriptionPublisher()
+		{
+			Dispose(false);
 		}
 	}
 }

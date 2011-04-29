@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -48,15 +48,15 @@ namespace MassTransit
 			UnsubscribeAction unsub = null;
 
 			actions.Each(x =>
-			{
-				if (x == null)
-					return;
+				{
+					if (x == null)
+						return;
 
-				if (unsub == null)
-					unsub = x;
-				else
-					unsub += x;
-			});
+					if (unsub == null)
+						unsub = x;
+					else
+						unsub += x;
+				});
 
 			return unsub ?? (() => false);
 		}
@@ -85,11 +85,11 @@ namespace MassTransit
 		public static string ToMessageName(this Type messageType)
 		{
 			string messageName;
-			if(messageType.IsGenericType)
+			if (messageType.IsGenericType)
 			{
 				messageName = messageType.GetGenericTypeDefinition().FullName;
 				messageName += "[";
-				var prefix = "";
+				string prefix = "";
 				foreach (Type argument in messageType.GetGenericArguments())
 				{
 					messageName += prefix + "[" + argument.ToMessageName() + "]";
@@ -146,9 +146,10 @@ namespace MassTransit
 			if (input == null)
 				throw new ArgumentNullException("input");
 
-			T result = input as T;
+			var result = input as T;
 			if (result == null)
-				throw new InvalidOperationException("Unable to convert from " + input.GetType().FullName + " to " + typeof (T).FullName);
+				throw new InvalidOperationException("Unable to convert from " + input.GetType().FullName + " to " +
+				                                    typeof (T).FullName);
 
 			return result;
 		}
@@ -162,10 +163,5 @@ namespace MassTransit
 
 			return collection;
 		}
-
-        public static string FormatWith(this string format, params object[] args)
-        {
-            return string.Format(format, args);
-        }
 	}
 }

@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq
 {
 	using System;
 	using Exceptions;
+	using Magnum.Extensions;
 	using RabbitMQ.Client;
 
 	public class RabbitMqTransportFactory :

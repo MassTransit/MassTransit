@@ -43,25 +43,44 @@ namespace MassTransit.Services.Timeout
 			_repository = repository;
 		}
 
+		bool _disposed;
+
 		public void Dispose()
 		{
-			try
-			{
-				_scheduler.Stop(60.Seconds());
-				_fiber.Shutdown(60.Seconds());
-
-				_bus.Dispose();
-				_bus = null;
-			}
-			catch (Exception ex)
-			{
-				string message = "Error in shutting down the TimeoutService: " + ex.Message;
-				ShutDownException exp = new ShutDownException(message, ex);
-				_log.Error(message, exp);
-				throw exp;
-			}
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
+		~TimeoutService()
+		{
+			Dispose(false);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				try
+				{
+					_scheduler.Stop(60.Seconds());
+					_fiber.Shutdown(60.Seconds());
+
+					_bus.Dispose();
+					_bus = null;
+				}
+				catch (Exception ex)
+				{
+					string message = "Error in shutting down the TimeoutService: " + ex.Message;
+					ShutDownException exp = new ShutDownException(message, ex);
+					_log.Error(message, exp);
+					throw exp;
+				}
+
+			}
+
+			_disposed = true;
+		}
 		public void Start()
 		{
 			if (_log.IsInfoEnabled)

@@ -113,7 +113,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BddExtensions.cs" />
+    <Compile Include="Configuration\ChannelConfigurator_Specs.cs" />
     <Compile Include="Configuration\ConsumerSubscription_Specs.cs" />
+    <Compile Include="Configuration\ConsumesAll_Specs.cs" />
     <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
     <Compile Include="Configuration\SagaSubscription_Specs.cs" />
     <Compile Include="Configuration\SimpleConfiguration_Specs.cs" />

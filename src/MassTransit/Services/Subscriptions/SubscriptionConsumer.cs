@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,10 +19,11 @@ namespace MassTransit.Services.Subscriptions
 		IEndpointSubscriptionEvent,
 		IBusService
 	{
-		private IServiceBus _bus;
-		private IMessagePipeline _pipeline;
-		private ISubscriptionService _service;
-		private UnregisterAction _unregisterAction;
+		IServiceBus _bus;
+		bool _disposed;
+		IMessagePipeline _pipeline;
+		ISubscriptionService _service;
+		UnregisterAction _unregisterAction;
 
 		public SubscriptionConsumer(ISubscriptionService service)
 		{
@@ -31,9 +32,8 @@ namespace MassTransit.Services.Subscriptions
 
 		public void Dispose()
 		{
-			_pipeline = null;
-			_bus = null;
-			_service = null;
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public void Start(IServiceBus bus)
@@ -68,6 +68,24 @@ namespace MassTransit.Services.Subscriptions
 			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
 			return _pipeline.Subscribe<T, K>(correlationId, endpoint);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_pipeline = null;
+				_bus = null;
+				_service = null;
+			}
+
+			_disposed = true;
+		}
+
+		~SubscriptionConsumer()
+		{
+			Dispose(false);
 		}
 	}
 }

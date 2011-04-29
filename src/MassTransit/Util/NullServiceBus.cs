@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,8 +18,12 @@ namespace MassTransit.Util
 	public class NullServiceBus :
 		IServiceBus
 	{
+		bool _disposed;
+
 		public void Dispose()
 		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public IEndpoint Endpoint
@@ -27,9 +31,9 @@ namespace MassTransit.Util
 			get { return Transports.Endpoint.Null; }
 		}
 
-		public IEndpoint PoisonEndpoint
+		public UnsubscribeAction Configure(Func<IPipelineConfigurator, UnsubscribeAction> configure)
 		{
-            get { return Transports.Endpoint.Null; }
+			return () => true;
 		}
 
 		public UnsubscribeAction Subscribe<T>(Action<T> callback) where T : class
@@ -68,17 +72,17 @@ namespace MassTransit.Util
 
 		public TService GetService<TService>()
 		{
-			throw new System.NotImplementedException();
+			throw new NotImplementedException();
 		}
 
 		public IMessagePipeline OutboundPipeline
 		{
-			get { throw new System.NotImplementedException(); }
+			get { throw new NotImplementedException(); }
 		}
 
 		public IMessagePipeline InboundPipeline
 		{
-			get { throw new System.NotImplementedException(); }
+			get { throw new NotImplementedException(); }
 		}
 
 		public IServiceBus ControlBus
@@ -92,8 +96,23 @@ namespace MassTransit.Util
 		}
 
 		public IEndpoint GetEndpoint(Uri address)
-	    {
-	        return Transports.Endpoint.Null;
-	    }
+		{
+			return Transports.Endpoint.Null;
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+			}
+
+			_disposed = true;
+		}
+
+		~NullServiceBus()
+		{
+			Dispose(false);
+		}
 	}
 }

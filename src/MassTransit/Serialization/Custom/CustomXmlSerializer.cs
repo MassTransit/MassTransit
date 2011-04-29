@@ -48,10 +48,16 @@ namespace MassTransit.Serialization.Custom
             where T : class
         {
             using (var outputStream = new NonClosingStream(stream))
-            using (var streamWriter = new StreamWriter(outputStream))
-            using (XmlWriter writer = XmlWriter.Create(streamWriter, _writerSettings))
             {
-            	SerializeMessage(message, writer, new SerializerContext());
+            	using (var streamWriter = new StreamWriter(outputStream))
+            	{
+            		using (XmlWriter writer = XmlWriter.Create(streamWriter, _writerSettings))
+            		{
+            			SerializeMessage(message, writer, new SerializerContext());
+            		}
+            	
+            	}
+            	
             }
         }
 
@@ -59,12 +65,18 @@ namespace MassTransit.Serialization.Custom
 			where T : class
     	{
 			using (var outputStream = new NonClosingStream(stream))
-			using (var streamWriter = new StreamWriter(outputStream))
-			using (XmlWriter writer = XmlWriter.Create(streamWriter, _writerSettings))
 			{
-				SerializeMessage(message, writer, new SerializerContext(typeMapper));
+				using (var streamWriter = new StreamWriter(outputStream))
+				{
+					using (XmlWriter writer = XmlWriter.Create(streamWriter, _writerSettings))
+					{
+						SerializeMessage(message, writer, new SerializerContext(typeMapper));
+					}
+				
+				}
+				
 			}
-		}
+    	}
 
     	public void Serialize<T>(TextWriter stream, T message)
             where T : class

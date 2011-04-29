@@ -106,15 +106,33 @@ namespace MassTransit.Distributor
 			_wakeUpPending = false;
 		}
 
+		bool _disposed;
+
 		public void Dispose()
 		{
-			Stop();
-			_fiber.Stop();
-
-			_controlBus = null;
-			_getConsumer = null;
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
+		~Worker()
+		{
+			Dispose(false);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				Stop();
+				_fiber.Stop();
+
+				_controlBus = null;
+				_getConsumer = null;
+			}
+
+			_disposed = true;
+		}
 		public void Start(IServiceBus bus)
 		{
 			_bus = bus;

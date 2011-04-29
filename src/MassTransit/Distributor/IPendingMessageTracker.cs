@@ -12,8 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
+	using System;
+
 	public interface IPendingMessageTracker<T> :
-		IPendingMessageCount
+		IPendingMessageCount,
+		IDisposable
 	{
 		void Viewed(T item);
 		void Consumed(T item);

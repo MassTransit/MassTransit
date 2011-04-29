@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,48 +10,41 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.MulticastUdp
+namespace MassTransit.Tests.Configuration
 {
 	using System;
-	using System.IO;
+	using Magnum.TestFramework;
+	using MassTransit.Pipeline.Sinks;
+	using SubscriptionConnectors;
 
-	public class MulticastUdpSendContext :
-		ISendContext
+	[Scenario]
+	public class When_configuring_a_channel_using_the_connector
 	{
-		bool _disposed;
-		public Stream Body { get; set; }
+		[When]
+		public void Configuring_a_channel_using_the_connector()
+		{
+			var bus = ServiceBusFactory.New(x => x.ReceiveFrom("loopback://localhost/my_queue"));
 
-		public void MarkRecoverable()
+//			bus.Configure(configurator =>
+//				{
+//				});
+		}
+
+		[Then]
+		public void Should_include_the_proper_nodes()
 		{
 		}
 
-		public void SetLabel(string label)
+		class A
 		{
 		}
 
-		public void SetMessageExpiration(DateTime d)
+		class Consumer :
+			Consumes<A>.All
 		{
-		}
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
+			public void Consume(A message)
 			{
 			}
-
-			_disposed = true;
-		}
-
-		~MulticastUdpSendContext()
-		{
-			Dispose(false);
 		}
 	}
 }

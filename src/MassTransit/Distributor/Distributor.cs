@@ -74,15 +74,33 @@ namespace MassTransit.Distributor
 			return _selectionStrategy.HasAvailableWorker(_workers.Values, message);
 		}
 
+		bool _disposed;
+
 		public void Dispose()
 		{
-			_scheduler.Stop(60.Seconds());
-			_scheduler = null;
-
-			_fiber.Shutdown(60.Seconds());
-			_fiber = null;
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
+		~Distributor()
+		{
+			Dispose(false);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_scheduler.Stop(60.Seconds());
+				_scheduler = null;
+
+				_fiber.Shutdown(60.Seconds());
+				_fiber = null;
+			}
+
+			_disposed = true;
+		}
 		public void Start(IServiceBus bus)
 		{
 			_bus = bus;

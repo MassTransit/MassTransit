@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,11 +24,17 @@ namespace MassTransit.Pipeline.Sinks
 		IPipelineSink<TMessage>
 		where TMessage : class
 	{
-		private readonly ReaderWriterLockedObject<List<IPipelineSink<TMessage>>> _sinks;
+		readonly ReaderWriterLockedObject<List<IPipelineSink<TMessage>>> _sinks;
+		bool _disposed;
 
 		public MessageRouter()
 		{
 			_sinks = new ReaderWriterLockedObject<List<IPipelineSink<TMessage>>>(new List<IPipelineSink<TMessage>>());
+		}
+
+		public int SinkCount
+		{
+			get { return _sinks.ReadLock(x => x.Count); }
 		}
 
 		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
@@ -46,7 +52,7 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			return inspector.Inspect(this, () =>
 				{
-					foreach (IPipelineSink<TMessage> sink in _sinks.ReadLock(x => x.ToArray()))
+					foreach (var sink in _sinks.ReadLock(x => x.ToArray()))
 					{
 						if (sink.Inspect(inspector) == false)
 							return false;
@@ -56,9 +62,10 @@ namespace MassTransit.Pipeline.Sinks
 				});
 		}
 
-		public int SinkCount
+		public void Dispose()
 		{
-			get { return _sinks.ReadLock(x => x.Count); }
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		/// <summary>
@@ -70,12 +77,23 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			_sinks.WriteLock(sinks => sinks.Add(sink));
 
-            return () => _sinks.WriteLock(sinks => sinks.Remove(sink));
+			return () => _sinks.WriteLock(sinks => sinks.Remove(sink));
 		}
 
-	    public void Dispose()
+		void Dispose(bool disposing)
 		{
-			_sinks.Dispose();
+			if (_disposed) return;
+			if (disposing)
+			{
+				_sinks.Dispose();
+			}
+
+			_disposed = true;
+		}
+
+		~MessageRouter()
+		{
+			Dispose(false);
 		}
 	}
 }

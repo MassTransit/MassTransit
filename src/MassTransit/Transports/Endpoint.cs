@@ -141,6 +141,8 @@ namespace MassTransit.Transports
 			if (_disposed) return;
 			if (disposing)
 			{
+				_tracker.Dispose();
+
 				_transport.Dispose();
 				_transport = null;
 

@@ -17,6 +17,7 @@ namespace MassTransit.BusServiceConfigurators
 	using Builders;
 	using BusConfigurators;
 	using Configurators;
+	using Magnum.Extensions;
 
 	public class DefaultBusServiceConfigurator<TService> :
 		BusServiceConfigurator,

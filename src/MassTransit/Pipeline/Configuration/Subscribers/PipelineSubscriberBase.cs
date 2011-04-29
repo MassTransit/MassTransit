@@ -81,6 +81,30 @@ namespace MassTransit.Pipeline.Configuration.Subscribers
             return methodInfo;
         }
 
+    	bool _disposed;
+
+    	public void Dispose()
+    	{
+    		Dispose(true);
+    		GC.SuppressFinalize(this);
+    	}
+
+    	~PipelineSubscriberBase()
+    	{
+    		Dispose(false);
+    	}
+
+    	protected virtual void Dispose(bool disposing)
+    	{
+    		if (_disposed) return;
+    		if (disposing)
+    		{
+    			
+    		}
+
+    		_disposed = true;
+    	}
+
         private static bool ParameterTypesAreCompatible(Type[] parameterTypes, ParameterInfo[] parameters)
         {
             for (int i = 0; i < parameters.Length; i++)
