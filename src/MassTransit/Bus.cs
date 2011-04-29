@@ -20,14 +20,12 @@ namespace MassTransit
 	{
 		static IServiceBus _instance;
 
-		public static void Initialize(IObjectBuilder objectBuilder, Action<ServiceBusConfigurator> configure)
+		public static void Initialize(Action<ServiceBusConfigurator> configure)
 		{
 			Shutdown();
 
 			_instance = ServiceBusFactory.New(configurator =>
 				{
-					configurator.SetObjectBuilder(objectBuilder);
-
 					configurator.UseControlBus();
 
 					configure(configurator);

@@ -14,6 +14,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 {
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
+	using MassTransit.Tests;
 	using MassTransit.Tests.Messages;
 	using NHibernate;
 	using Rhino.Mocks;
@@ -38,7 +39,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 
 			bus.Publish(new PingMessage());
 
-			received.WaitUntilAvailable(8.Seconds()).ShouldBeTrue();
+			received.IsAvailable(8.Seconds()).ShouldBeTrue();
 		}
 	}
 }

@@ -171,13 +171,9 @@
     <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
     <Compile Include="Configuration\Xml\SettingsOptions.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
-    <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
     <Compile Include="IBusService.cs" />
-    <Compile Include="IInboundTransport.cs" />
-    <Compile Include="IOutboundTransport.cs" />
     <Compile Include="IServiceContainer.cs" />
-    <Compile Include="ITransport.cs" />
     <Compile Include="MessageHeaders\IInboundMessageHeaders.cs" />
     <Compile Include="MessageHeaders\IMessageHeaders.cs" />
     <Compile Include="MessageHeaders\InboundMessage.cs" />
@@ -186,14 +182,6 @@
     <Compile Include="MessageHeaders\ISetMessageHeaders.cs" />
     <Compile Include="MessageHeaders\MessageHeadersBase.cs" />
     <Compile Include="MessageHeaders\OutboundMessage.cs" />
-    <Compile Include="Parallel\DistributedTaskController.cs" />
-    <Compile Include="Parallel\IDistributedTask.cs" />
-    <Compile Include="Parallel\ISubTaskWorker.cs" />
-    <Compile Include="Parallel\Messages\EnlistSubTaskWorkers.cs" />
-    <Compile Include="Parallel\Messages\ExecuteSubTask.cs" />
-    <Compile Include="Parallel\Messages\SubTaskComplete.cs" />
-    <Compile Include="Parallel\Messages\SubTaskWorkerAvailable.cs" />
-    <Compile Include="Parallel\SubTaskWorker.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderImpl.cs" />
     <Compile Include="Pipeline\IEndpointSubscriptionEvent.cs" />
     <Compile Include="Pipeline\InboundOutboundSubscriptionBinder.cs" />
@@ -217,14 +205,6 @@
     <Compile Include="Saga\ISaga.cs" />
     <Compile Include="Saga\Orchestrates.cs" />
     <Compile Include="Saga\InitiatedBy.cs" />
-    <Compile Include="Services\MessageDeferral\DeferMessageConsumer.cs" />
-    <Compile Include="Services\MessageDeferral\DeferredMessage.cs" />
-    <Compile Include="Services\MessageDeferral\MessageDeferralService.cs" />
-    <Compile Include="Services\MessageDeferral\IDeferredMessageRepository.cs" />
-    <Compile Include="Services\MessageDeferral\InMemoryDeferredMessageRepository.cs" />
-    <Compile Include="Services\MessageDeferral\Messages\DeferMessage.cs" />
-    <Compile Include="Services\MessageDeferral\TimeoutExpiredConsumer.cs" />
-    <Compile Include="ReliableAttribute.cs" />
     <Compile Include="Services\Routing\Configuration\RouteTo.cs" />
     <Compile Include="Services\Subscriptions\Client\EndpointList.cs" />
     <Compile Include="Services\Subscriptions\Client\SubscriptionCoordinator.cs" />
@@ -238,6 +218,10 @@
     <Compile Include="Subscriptions\PermanentSubscriptionReference.cs" />
     <Compile Include="Subscriptions\SubscriptionBusService.cs" />
     <Compile Include="Subscriptions\TransientSubscriptionReference.cs" />
+    <Compile Include="Transports\IDuplexTransport.cs" />
+    <Compile Include="Transports\IInboundTransport.cs" />
+    <Compile Include="Transports\IOutboundTransport.cs" />
+    <Compile Include="Transports\ITransport.cs" />
     <Compile Include="Transports\TransportSettings.cs" />
     <Compile Include="Transports\EndpointCacheExtensions.cs" />
     <Compile Include="Transports\EndpointFactory.cs" />
@@ -261,7 +245,6 @@
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
-    <Compile Include="MessageFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="Services\Subscriptions\Messages\AddSubscription.cs" />
@@ -273,7 +256,6 @@
     <Compile Include="Services\Subscriptions\Subscription.cs" />
     <Compile Include="Services\Subscriptions\Client\SubscriptionClient.cs" />
     <Compile Include="Services\Subscriptions\Server\SubscriptionService.cs" />
-    <Compile Include="TimeoutAttribute.cs" />
     <Compile Include="Transports\ITransportSettings.cs" />
     <Compile Include="Transports\Loopback\LoopbackMessage.cs" />
     <Compile Include="Transports\Loopback\LoopbackReceiveContext.cs" />
@@ -330,21 +312,18 @@
     <Compile Include="Events\ThreadPoolEvent.cs" />
     <Compile Include="Exceptions\AbstractUriException.cs" />
     <Compile Include="Exceptions\TransportException.cs" />
-    <Compile Include="FutureMessage.cs" />
     <Compile Include="IEndpointAddress.cs" />
     <Compile Include="Transports\Endpoint.cs" />
     <Compile Include="Events\ConsumeCompleted.cs" />
     <Compile Include="Events\ReceiveCompleted.cs" />
     <Compile Include="Events\MessageConsumed.cs" />
     <Compile Include="Events\MessageReceived.cs" />
-    <Compile Include="IDuplexTransport.cs" />
     <Compile Include="Monitoring\InstancePerformanceCounter.cs" />
     <Compile Include="Monitoring\IPerformanceCounter.cs" />
     <Compile Include="Monitoring\NullPerformanceCounter.cs" />
     <Compile Include="Monitoring\RuntimePerformanceCounter.cs" />
     <Compile Include="Monitoring\ServiceBusInstancePerformanceCounters.cs" />
     <Compile Include="Monitoring\ServiceBusPerformanceCounters.cs" />
-    <Compile Include="Parallel\ITask.cs" />
     <Compile Include="IControlBus.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointConfigurator.cs" />
     <Compile Include="Configuration\BusServiceConfigurators\DefaultBusServiceConfigurator.cs" />
@@ -512,18 +491,6 @@
     <Compile Include="Serialization\BinaryMessageEnvelope.cs" />
     <Compile Include="Serialization\ExtensionsToMessageEnvelope.cs" />
     <Compile Include="ExtensionsToServiceBus.cs" />
-    <Compile Include="Services\Metadata\Client\MessageModelFilter.cs" />
-    <Compile Include="Services\Metadata\Domain\IMetadataRepository.cs" />
-    <Compile Include="Services\Metadata\Domain\MessageMetadata.cs" />
-    <Compile Include="Services\Metadata\Messages\MessageDefinition.cs" />
-    <Compile Include="Services\Metadata\Messages\MetadataSearch.cs" />
-    <Compile Include="Services\Metadata\Messages\MetadataSearchResult.cs" />
-    <Compile Include="Services\Metadata\MetadataClient.cs" />
-    <Compile Include="Services\Metadata\MetadataExtracter.cs" />
-    <Compile Include="Services\Metadata\MetadataService.cs" />
-    <Compile Include="Services\Metadata\Server\MessageDefinitionConsumer.cs" />
-    <Compile Include="Services\Metadata\Server\MetadataSearchConsumer.cs" />
-    <Compile Include="Services\Metadata\WireTap.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionInformation.cs" />
     <Compile Include="Services\Subscriptions\LocalSubscriptionService.cs" />
     <Compile Include="Services\Timeout\ScheduledTimeout.cs" />
@@ -568,14 +535,10 @@
     <Compile Include="Serialization\XmlMessageEnvelope.cs" />
     <Compile Include="Serialization\DotNotXmlMessageSerializer.cs" />
     <Compile Include="Serialization\XmlReceiveMessageEnvelope.cs" />
-    <Compile Include="Services\MessageDeferral\RemoteMessageDeferralViewer.cs" />
-    <Compile Include="Services\MessageDeferral\Messages\DeferedMessageRepublished.cs" />
-    <Compile Include="Services\MessageDeferral\Messages\NewDeferMessageReceived.cs" />
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
     <Compile Include="Util\SequenceNumberGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Internal\" />
     <Folder Include="Services\HealthMonitoring\Client\" />
   </ItemGroup>
   <ItemGroup>

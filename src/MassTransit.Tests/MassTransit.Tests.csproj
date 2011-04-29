@@ -199,8 +199,6 @@
     <Compile Include="LocalSubscriptionCache_Specs.cs" />
     <Compile Include="Messages\ResponseMessage.cs" />
     <Compile Include="Dispatcher_Specs.cs" />
-    <Compile Include="MessageAttribute_Specs.cs" />
-    <Compile Include="MessageFilter_Specs.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />
     <Compile Include="Serialization\GivenAComplexMessage.cs" />
@@ -254,7 +252,6 @@
     <Compile Include="Saga\RegisterUser_Specs.cs" />
     <Compile Include="Saga\StateMachine\RegisterUserStateMachine.cs" />
     <Compile Include="Saga\StateMachine\SagaStateMachine_Specs.cs" />
-    <Compile Include="Services\Metadata\MessageMetadataExtraction_spec.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Messages\PingMessage.cs" />
@@ -272,7 +269,6 @@
     <Compile Include="TextFixtures\LoopbackLocalAndRemoteTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackTestFixture.cs" />
     <Compile Include="TextFixtures\MulticastUdpTestFixture.cs" />
-    <Compile Include="Timeouts\DeferMessage_Specs.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />
     <Compile Include="Transports\TransactionalEndpointContract.cs" />
   </ItemGroup>
@@ -309,6 +305,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\LoadBalancer\" />
+    <Folder Include="Services\Metadata\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -15,7 +15,6 @@ namespace MassTransit.Tests.Saga.Messages
 	using System;
 
 	[Serializable]
-	[Reliable]
 	public class SendUserVerificationEmail :
 		CorrelatedMessage
 	{

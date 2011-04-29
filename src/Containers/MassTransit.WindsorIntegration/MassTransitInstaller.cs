@@ -51,8 +51,10 @@ namespace MassTransit.WindsorIntegration
                 Component.For<IObjectBuilder>().Named("objectBuilder").Instance(wob).LifeStyle.Singleton
                 );
 
-            Bus.Initialize(wob, configurator =>
-                {
+            Bus.Initialize(configurator =>
+            	{
+            		configurator.SetObjectBuilder(wob);
+
 					foreach (var transportType in _options.Transports.Select(Type.GetType))
 						configurator.AddTransportFactory(transportType);
 
