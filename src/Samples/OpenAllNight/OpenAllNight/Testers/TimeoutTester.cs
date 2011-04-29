@@ -1,7 +1,7 @@
 namespace OpenAllNight.Testers
 {
     using System;
-    using Magnum.DateTimeExtensions;
+    using Magnum.Extensions;
     using MassTransit;
     using MassTransit.Services.Timeout.Messages;
 

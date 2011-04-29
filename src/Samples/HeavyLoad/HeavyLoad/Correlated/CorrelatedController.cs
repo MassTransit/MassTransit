@@ -13,7 +13,7 @@
 namespace HeavyLoad.Correlated
 {
 	using System;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
 	using MassTransit;
 
 	internal class CorrelatedController

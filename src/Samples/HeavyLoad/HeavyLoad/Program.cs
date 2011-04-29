@@ -1,7 +1,6 @@
 namespace HeavyLoad
 {
 	using System;
-	using BatchLoad;
 	using Correlated;
 	using Load;
 	using log4net;
@@ -25,8 +24,6 @@ namespace HeavyLoad
             Console.WriteLine();
 
 //			RunLoopbackLoadTest();
-
-//			RunBatchLoadTest();
 
 //			RunTransactionLoadTest();
 
@@ -72,21 +69,6 @@ namespace HeavyLoad
             Console.WriteLine(stopWatch.ToString());
             Console.WriteLine();
         }
-
-		private static void RunBatchLoadTest()
-		{
-            Console.WriteLine("Starting Local MSMQ Batch Load Test");
-			StopWatch stopWatch = new StopWatch();
-
-			using (BatchLoadTest test = new BatchLoadTest())
-			{
-				test.Run(stopWatch);
-			}
-
-			Console.WriteLine("Batch Load Test: ");
-            Console.WriteLine(stopWatch.ToString());
-            Console.WriteLine();
-		}
 
 		private static void RunLocalMsmqLoadTest()
 		{

@@ -31,7 +31,8 @@ namespace HeavyLoad.Load
 
 		public ActiveMQLoadTest()
 		{
-			_container = new DefaultMassTransitContainer("activemq.castle.xml");
+			_container = new WindsorContainer("activemq.castle.xml");
+            _container.Install(new MassTransitInstaller());
 
 			_bus = _container.Resolve<IServiceBus>();
 		}

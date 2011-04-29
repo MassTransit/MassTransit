@@ -22,7 +22,8 @@ namespace HeavyLoad.Load
 
 		public WcfLoadTest()
 		{
-			_container = new DefaultMassTransitContainer("wcf.castle.xml");
+			_container = new WindsorContainer("wcf.castle.xml");
+            _container.Install(new MassTransitInstaller());
 
 			_localBus = _container.Resolve<IServiceBus>("local");
 			_remoteBus = _container.Resolve<IServiceBus>("remote");

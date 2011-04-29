@@ -31,7 +31,8 @@ namespace HeavyLoad.Load
 
 		public RabbitMQLoadTest()
 		{
-			_container = new DefaultMassTransitContainer("rabbitmq.castle.xml");
+			_container = new WindsorContainer("rabbitmq.castle.xml");
+            _container.Install(new MassTransitInstaller());
 
 			_bus = _container.Resolve<IServiceBus>();
 		}

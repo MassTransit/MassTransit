@@ -32,7 +32,8 @@ namespace HeavyLoad.Load
 
         public TransactionLoadTest()
         {
-            _container = new DefaultMassTransitContainer("transaction.castle.xml");
+            _container = new WindsorContainer("transaction.castle.xml");
+            _container.Install(new MassTransitInstaller());
 
             _bus = _container.Resolve<IServiceBus>();
 
