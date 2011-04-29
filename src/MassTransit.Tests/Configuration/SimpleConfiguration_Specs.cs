@@ -19,21 +19,20 @@ namespace MassTransit.Tests.Configuration
 	[Scenario]
 	public class When_configuring_a_service_bus_easily
 	{
-		[When]
+		[Then]
 		public void Configuring_a_service_bus_easily()
 		{
-			var bus = ServiceBusFactory.New(x =>
-				{
-					x.ReceiveFrom("loopback://localhost/queue");
-				});
+			FutureMessage<PingMessage> received;
+			using (var bus = ServiceBusFactory.New(x => { x.ReceiveFrom("loopback://localhost/queue"); }))
+			{
+				received = new FutureMessage<PingMessage>();
 
-			var received = new FutureMessage<PingMessage>();
+				bus.Subscribe<PingMessage>(received.Set);
 
-			bus.Subscribe<PingMessage>(received.Set);
+				bus.Publish(new PingMessage());
 
-			bus.Publish(new PingMessage());
-
-			received.IsAvailable(8.Seconds()).ShouldBeTrue();
+				received.IsAvailable(8.Seconds()).ShouldBeTrue();
+			}
 		}
 	}
 }

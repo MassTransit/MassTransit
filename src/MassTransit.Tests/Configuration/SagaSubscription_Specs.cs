@@ -35,6 +35,12 @@ namespace MassTransit.Tests.Configuration
 				});
 		}
 
+		[Finally]
+		public void Finally()
+		{
+			_bus.Dispose();
+		}
+
 		[Then]
 		public void Should_have_subscribed_start_message()
 		{

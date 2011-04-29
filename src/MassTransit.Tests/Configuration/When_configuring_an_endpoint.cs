@@ -36,6 +36,13 @@ namespace MassTransit.Tests.Configuration
 				});
 		}
 
+
+		[Finally]
+		public void Finally()
+		{
+			_endpointCache.Dispose();
+		}
+
 		[Then]
 		public void Should_get_the_endpoint()
 		{

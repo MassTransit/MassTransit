@@ -111,7 +111,7 @@ namespace MassTransit.Tests.Saga
 
 			LocalBus.InboundPipeline.Dispatch(message);
 
-			_repository.ShouldContainSaga(_sagaId);
+			_repository.ShouldContainSaga(_sagaId).ShouldNotBeNull();
 		}
 
 		[Test]
