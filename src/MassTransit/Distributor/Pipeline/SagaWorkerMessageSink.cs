@@ -14,8 +14,8 @@ namespace MassTransit.Distributor.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
-	using Internal;
 	using MassTransit.Pipeline;
+	using MessageHeaders;
 	using Messages;
 	using Saga;
 

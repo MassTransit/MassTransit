@@ -3,7 +3,6 @@ namespace MassTransit.Transports.Msmq.Tests
     using System;
     using System.Messaging;
     using System.Transactions;
-    using Internal;
 
 	public static class MessageQueue_Extensions
     {

@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Configuration
 {
 	using System;
 	using System.Collections.Generic;
-	using Internal;
 
 	public class SubscriberContext :
 		ISubscriberContext

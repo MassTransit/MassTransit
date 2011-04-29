@@ -17,7 +17,6 @@ namespace MassTransit.Transports.Msmq
 	using System.Messaging;
 	using System.Security.Principal;
 	using Exceptions;
-	using Internal;
 	using log4net;
 
 	public class MsmqEndpointManagement :

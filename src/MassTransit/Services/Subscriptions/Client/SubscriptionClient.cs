@@ -15,7 +15,6 @@ namespace MassTransit.Services.Subscriptions.Client
 	using System;
 	using System.Threading;
 	using Exceptions;
-	using Internal;
 	using log4net;
 	using Magnum.Extensions;
 

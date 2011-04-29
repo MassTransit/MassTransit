@@ -14,8 +14,9 @@ namespace MassTransit
 {
 	using System;
 	using System.Collections.Generic;
-	using Internal;
-	using Internal.RequestResponse;
+	using MessageHeaders;
+	using RequestResponse;
+	using Util;
 
 	public static class ExtensionsToServiceBus
 	{

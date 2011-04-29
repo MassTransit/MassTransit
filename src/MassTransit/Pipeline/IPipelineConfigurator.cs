@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using Configuration.Subscribers;
-	using Internal;
 
 	public interface IPipelineConfigurator
 	{

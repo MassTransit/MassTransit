@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-	using Internal;
 	using Messages;
 
 	public interface ISagaWorker :

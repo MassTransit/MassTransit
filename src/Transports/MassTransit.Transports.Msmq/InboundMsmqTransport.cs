@@ -16,7 +16,6 @@ namespace MassTransit.Transports.Msmq
 	using System.Messaging;
 	using System.Threading;
 	using Exceptions;
-	using Internal;
 	using log4net;
 
 

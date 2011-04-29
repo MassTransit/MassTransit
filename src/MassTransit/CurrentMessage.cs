@@ -13,7 +13,7 @@
 namespace MassTransit
 {
 	using System;
-	using Internal;
+	using MessageHeaders;
 
 	public static class CurrentMessage
 	{

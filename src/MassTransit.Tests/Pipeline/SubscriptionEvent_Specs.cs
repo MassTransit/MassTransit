@@ -13,7 +13,6 @@
 namespace MassTransit.Tests.Pipeline
 {
 	using System;
-	using MassTransit.Internal;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using Messages;
@@ -50,35 +49,6 @@ namespace MassTransit.Tests.Pipeline
 		private MessagePipeline _pipeline;
 		private ISubscriptionEvent _subscriptionEvent;
 		private UnsubscribeAction _unsubscribe;
-
-		[Test]
-		public void for_batch_component_subscriptions()
-		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo<IndividualBatchMessage>()).Return(() =>
-				{
-					_unsubscribe();
-					return true;
-				});
-
-			_pipeline.Subscribe<TestBatchConsumer<IndividualBatchMessage, Guid>>();
-
-			_subscriptionEvent.VerifyAllExpectations();
-		}
-
-		[Test]
-		public void for_batch_subscriptions()
-		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo<IndividualBatchMessage>()).Return(() =>
-			{
-				_unsubscribe();
-				return true;
-				});
-
-			var consumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
-			_pipeline.Subscribe(consumer);
-
-			_subscriptionEvent.VerifyAllExpectations();
-		}
 
 		[Test]
 		public void for_component_subscriptions()
@@ -186,44 +156,6 @@ namespace MassTransit.Tests.Pipeline
 		private ISubscriptionEvent _subscriptionEvent;
 		private UnsubscribeAction _unsubscribe;
 
-		[Test]
-		public void for_batch_subscriptions()
-		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo<IndividualBatchMessage>()).Return(() =>
-				{
-					_unsubscribe();
-					return true;
-				});
-
-			var consumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
-			var token = _pipeline.Subscribe(consumer);
-
-			token();
-
-			_subscriptionEvent.VerifyAllExpectations();
-			_unsubscribe.AssertWasCalled(x => x());
-		}
-
-		[Test]
-		public void for_batch_subscriptions_but_not_when_another_exists()
-		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo<IndividualBatchMessage>()).Repeat.Twice().Return(() =>
-				{
-					_unsubscribe();
-					return true;
-				});
-
-			var consumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
-			var token = _pipeline.Subscribe(consumer);
-
-			var consumerB = new TestBatchConsumer<IndividualBatchMessage, Guid>();
-			var tokenB = _pipeline.Subscribe(consumerB);
-
-			token();
-
-			_subscriptionEvent.VerifyAllExpectations();
-			_unsubscribe.AssertWasNotCalled(x => x());
-		}
 
 		[Test]
 		public void for_component_subscriptions()

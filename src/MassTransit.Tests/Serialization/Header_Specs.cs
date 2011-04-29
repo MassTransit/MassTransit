@@ -17,8 +17,8 @@ namespace MassTransit.Tests.Serialization
 	using System.IO;
 	using System.Text;
 	using Magnum.Extensions;
-	using MassTransit.Internal;
 	using MassTransit.Serialization;
+	using MessageHeaders;
 	using Messages;
 	using NUnit.Framework;
 

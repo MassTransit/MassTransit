@@ -14,7 +14,7 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Internal;
+	using MessageHeaders;
 
 	/// <summary>
 	/// A message sink that sends to an endpoint

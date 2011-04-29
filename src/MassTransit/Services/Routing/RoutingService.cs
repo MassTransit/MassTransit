@@ -14,7 +14,6 @@ namespace MassTransit.Services.Routing
 {
 	using System;
 	using System.Collections.Generic;
-	using Internal;
 
 	public class RoutingService :
 		IBusService

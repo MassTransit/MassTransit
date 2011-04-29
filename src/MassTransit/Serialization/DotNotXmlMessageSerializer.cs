@@ -17,8 +17,8 @@ namespace MassTransit.Serialization
 	using System.Runtime.Serialization;
 	using System.Xml;
 	using System.Xml.Serialization;
-	using Internal;
 	using Magnum.Threading;
+	using MessageHeaders;
 	using Util;
 
 	/// <summary>

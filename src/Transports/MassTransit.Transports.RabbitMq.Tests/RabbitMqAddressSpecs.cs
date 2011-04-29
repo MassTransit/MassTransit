@@ -15,7 +15,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System;
     using System.IO;
     using System.Text;
-    using Internal;
     using NUnit.Framework;
     using RabbitMQ.Client;
     using Serialization;
