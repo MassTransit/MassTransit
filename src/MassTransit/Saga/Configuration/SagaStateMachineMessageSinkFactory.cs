@@ -35,7 +35,7 @@ namespace MassTransit.Saga.Configuration
 		{
 			_context = context;
 			_policyFactory = policyFactory;
-			_bus = _context.Data as IServiceBus;
+			_bus = _context.Data;
 			_repository = _context.Builder.GetInstance<ISagaRepository<TSaga>>();
 		}
 
@@ -65,7 +65,7 @@ namespace MassTransit.Saga.Configuration
 		protected virtual IPipelineSink<TMessage> CreateSink<V>(DataEvent<TSaga, V> dataEvent, ISagaPolicy<TSaga, V> policy, Expression<Func<TSaga, V, bool>> selector)
 			where V : class
 		{
-			var sink = new PropertySagaStateMachineMessageSink<TSaga, V>(_context, _bus, _repository, policy, selector, dataEvent);
+			var sink = new PropertySagaStateMachineMessageSink<TSaga, V>(_bus, _repository, policy, selector, dataEvent);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the message sink: " + typeof (PropertySagaStateMachineMessageSink<TSaga, V>).ToFriendlyName());
 
@@ -75,7 +75,7 @@ namespace MassTransit.Saga.Configuration
 		protected virtual IPipelineSink<TMessage> CreateCorrelatedSink<V>(DataEvent<TSaga, V> dataEvent, ISagaPolicy<TSaga, V> policy)
 			where V : class, CorrelatedBy<Guid>
 		{
-			var sink = new CorrelatedSagaStateMachineMessageSink<TSaga, V>(_context, _bus, _repository, policy, dataEvent);
+			var sink = new CorrelatedSagaStateMachineMessageSink<TSaga, V>(_bus, _repository, policy, dataEvent);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the message sink: " + typeof (CorrelatedSagaStateMachineMessageSink<TSaga, V>).ToFriendlyName());
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,20 +14,18 @@ namespace MassTransit.Saga.Pipeline
 {
 	using System;
 	using System.Linq.Expressions;
-	using MassTransit.Pipeline;
 
 	public class CorrelatedSagaMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
 		where TMessage : class, CorrelatedBy<Guid>
 		where TSaga : class, ISaga, Consumes<TMessage>.All
 	{
-		private Expression<Func<TSaga, TMessage, bool>> _selector;
+		readonly Expression<Func<TSaga, TMessage, bool>> _selector;
 
-		public CorrelatedSagaMessageSink(ISubscriberContext context,
-		                                 IServiceBus bus,
+		public CorrelatedSagaMessageSink(IServiceBus bus,
 		                                 ISagaRepository<TSaga> repository,
 		                                 ISagaPolicy<TSaga, TMessage> policy)
-			: base(context, bus, repository, policy)
+			: base(bus, repository, policy)
 		{
 			_selector = CreateCorrelatedSelector();
 		}

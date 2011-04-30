@@ -17,12 +17,12 @@ namespace MassTransit.Tests.Examples.Sagas
 
 	[Scenario]
 	public class Given_a_simple_saga_does_not_exist :
-		SagaTestFixture<SimpleSaga>
+		SagaTestFixture<SimpleStateMachineSaga>
 	{
 		[Given]
 		public void A_simple_saga_does_not_exist()
 		{
-			LocalBus.Subscribe<SimpleSaga>();
+			LocalBus.Subscribe<SimpleStateMachineSaga>();
 		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,24 +16,23 @@ namespace MassTransit.Saga.Pipeline
 	using System.Linq.Expressions;
 	using log4net;
 	using Magnum.StateMachine;
-	using MassTransit.Pipeline;
 
 	public class CorrelatedSagaStateMachineMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
 		where TMessage : class, CorrelatedBy<Guid>
 		where TSaga : SagaStateMachine<TSaga>, ISaga
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof(CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
+		static readonly ILog _log =
+			LogManager.GetLogger(typeof (CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
 
-		private readonly DataEvent<TSaga, TMessage> _dataEvent;
-		private readonly Expression<Func<TSaga, TMessage, bool>> _selector;
+		readonly DataEvent<TSaga, TMessage> _dataEvent;
+		readonly Expression<Func<TSaga, TMessage, bool>> _selector;
 
-		public CorrelatedSagaStateMachineMessageSink(ISubscriberContext context,
-		                                             IServiceBus bus,
+		public CorrelatedSagaStateMachineMessageSink(IServiceBus bus,
 		                                             ISagaRepository<TSaga> repository,
 		                                             ISagaPolicy<TSaga, TMessage> policy,
 		                                             DataEvent<TSaga, TMessage> dataEvent)
-			: base(context, bus, repository, policy)
+			: base(bus, repository, policy)
 		{
 			_dataEvent = dataEvent;
 
@@ -47,8 +46,8 @@ namespace MassTransit.Saga.Pipeline
 
 		protected override void ConsumerAction(TSaga saga, TMessage message)
 		{
-			if(_log.IsDebugEnabled)
-				_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof(TSaga).Name, _dataEvent.Name, saga.CorrelationId);
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof (TSaga).Name, _dataEvent.Name, saga.CorrelationId);
 
 			saga.RaiseEvent(_dataEvent, message);
 		}

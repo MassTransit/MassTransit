@@ -36,7 +36,7 @@ namespace MassTransit.Tests.Examples.Sagas
 		[Then]
 		public void The_saga_should_be_in_the_waiting_for_finish_state()
 		{
-			Saga.ShouldBeInState(SimpleSaga.WaitingForFinish);
+			Saga.ShouldBeInState(SimpleStateMachineSaga.WaitingForFinish);
 		}
 	}
 }

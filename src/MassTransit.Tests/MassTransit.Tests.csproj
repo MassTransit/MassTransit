@@ -117,11 +117,13 @@
     <Compile Include="Configuration\ConsumerSubscription_Specs.cs" />
     <Compile Include="Configuration\ConsumesAll_Specs.cs" />
     <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
+    <Compile Include="Configuration\SagaConnector_Specs.cs" />
     <Compile Include="Configuration\SagaSubscription_Specs.cs" />
     <Compile Include="Configuration\SimpleConfiguration_Specs.cs" />
     <Compile Include="Configuration\HandlerSubscription_Specs.cs" />
     <Compile Include="Configuration\When_configuration_fails.cs" />
     <Compile Include="Configuration\When_configuring_an_endpoint.cs" />
+    <Compile Include="Configuration\StateMachineSagaConfiguration_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="ControlBus_Specs.cs" />
     <Compile Include="Distributor\DistributorSagaTestFixture.cs" />
@@ -141,7 +143,7 @@
     <Compile Include="Examples\Sagas\Messages\ApproveSimpleCustomer.cs" />
     <Compile Include="Examples\Sagas\Messages\FinishSimpleSaga.cs" />
     <Compile Include="Examples\Sagas\Messages\StartSimpleSaga.cs" />
-    <Compile Include="Examples\Sagas\SimpleSaga.cs" />
+    <Compile Include="Examples\Sagas\SimpleStateMachineSaga.cs" />
     <Compile Include="Examples\Sagas\When_an_approval_message_is_published.cs" />
     <Compile Include="Examples\Sagas\When_a_start_message_is_received.cs" />
     <Compile Include="Examples\When_a_message_is_published_to_the_bus.cs" />

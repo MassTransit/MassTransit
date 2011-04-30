@@ -22,6 +22,12 @@ namespace MassTransit.SubscriptionConnectors
 	using Saga;
 	using Util;
 
+
+	public interface ConsumerConnector
+	{
+		UnsubscribeAction Connect(IPipelineConfigurator configurator);
+	}
+
 	public class ConsumerConnector<T> :
 		ConsumerConnector
 		where T : class
@@ -67,7 +73,8 @@ namespace MassTransit.SubscriptionConnectors
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(x => FastActivator.Create(typeof (ConsumerSubscriptionConnector<,>), new[]{typeof(T),x.MessageType}, _args))
+				.Select(
+					x => FastActivator.Create(typeof (ConsumerSubscriptionConnector<,>), new[] {typeof (T), x.MessageType}, _args))
 				.Cast<ConsumerSubscriptionConnector>();
 		}
 
@@ -78,7 +85,9 @@ namespace MassTransit.SubscriptionConnectors
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.Selected))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(x => FastActivator.Create(typeof (SelectedConsumerSubscriptionConnector<,>), new[]{typeof(T),x.MessageType}, _args))
+				.Select(
+					x =>
+					FastActivator.Create(typeof (SelectedConsumerSubscriptionConnector<,>), new[] {typeof (T), x.MessageType}, _args))
 				.Cast<ConsumerSubscriptionConnector>();
 		}
 	}

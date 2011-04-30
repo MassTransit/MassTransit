@@ -17,11 +17,11 @@ namespace MassTransit.Tests.Examples.Sagas
 	using MassTransit.Saga;
 	using Messages;
 
-	public class SimpleSaga :
-		SagaStateMachine<SimpleSaga>,
+	public class SimpleStateMachineSaga :
+		SagaStateMachine<SimpleStateMachineSaga>,
 		ISaga
 	{
-		static SimpleSaga()
+		static SimpleStateMachineSaga()
 		{
 			Define(Saga);
 		}
@@ -46,12 +46,12 @@ namespace MassTransit.Tests.Examples.Sagas
 					.Complete());
 		}
 
-		public SimpleSaga(Guid correlationId)
+		public SimpleStateMachineSaga(Guid correlationId)
 		{
 			CorrelationId = correlationId;
 		}
 
-		protected SimpleSaga()
+		protected SimpleStateMachineSaga()
 		{
 		}
 

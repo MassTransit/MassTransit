@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,12 +13,12 @@
 namespace MassTransit.Saga.Configuration
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using Exceptions;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Configuration.Subscribers;
+	using MassTransit.Pipeline.Sinks;
 	using Pipeline;
 
 	public class InitiatesSubscriber :
@@ -29,32 +29,33 @@ namespace MassTransit.Saga.Configuration
 			get { return typeof (InitiatedBy<>); }
 		}
 
+
+		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context, TComponent instance)
+		{
+			yield break;
+		}
+
 		protected virtual UnsubscribeAction Connect<TComponent, TMessage>(ISubscriberContext context)
 			where TMessage : class, CorrelatedBy<Guid>
 			where TComponent : class, InitiatedBy<TMessage>, ISaga
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
-			var router = routerConfigurator.FindOrCreate<TMessage>();
+			MessageRouter<TMessage> router = routerConfigurator.FindOrCreate<TMessage>();
 
 			var repository = context.Builder.GetInstance<ISagaRepository<TComponent>>();
 			var policy = new InitiatingSagaPolicy<TComponent, TMessage>(x => false);
 
-			var sink = new CorrelatedSagaMessageSink<TComponent, TMessage>(context, context.Data as IServiceBus, repository, policy);
+			var sink = new CorrelatedSagaMessageSink<TComponent, TMessage>(context.Data, repository,
+				policy);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the initiating message sink for " + typeof (TComponent).FullName);
 
-			var result = router.Connect(sink);
+			UnsubscribeAction result = router.Connect(sink);
 
 			UnsubscribeAction remove = context.SubscribedTo<TMessage>();
 
 			return () => result() && (router.SinkCount == 0) && remove();
-		}
-
-
-		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context, TComponent instance)
-		{
-			yield break;
 		}
 	}
 }

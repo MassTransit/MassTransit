@@ -17,6 +17,12 @@ namespace MassTransit.SubscriptionConnectors
 	using Pipeline.Configuration;
 	using Pipeline.Sinks;
 
+	public interface InstanceSubscriptionConnector :
+		InstanceConnector
+	{
+		Type MessageType { get; }
+	}
+
 	public class InstanceSubscriptionConnector<TConsumer, TMessage> :
 		InstanceSubscriptionConnector
 		where TConsumer : class, Consumes<TMessage>.All
