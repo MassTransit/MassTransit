@@ -13,41 +13,31 @@
 namespace Starbucks.Cashier
 {
 	using MassTransit;
-	using MassTransit.NinjectIntegration;
-	using MassTransit.Services.HealthMonitoring.Configuration;
-	using MassTransit.Transports.Msmq;
+	using Ninject.Modules;
 
-	public class CashierRegistry :
-		MassTransitModuleBase
+    public class CashierRegistry :
+		NinjectModule
 	{
-		public CashierRegistry()
-			: base(typeof (MsmqTransportFactory), typeof (MulticastMsmqTransportFactory))
-		{
-		}
 
 		public override void Load()
 		{
-			base.Load();
-
 			Bind<CashierSaga>()
 				.To<CashierSaga>();
 			Bind<CashierService>()
 				.To<CashierService>()
 				.InSingletonScope();
 
-			RegisterInMemorySagaRepository();
+		    Bus.Initialize(sbc =>
+		    {
+                sbc.ReceiveFrom("msmq://localhost/starbucks_cashier");
+                sbc.SetConcurrentConsumerLimit(1); //a cashier cannot multi-task
+		        sbc.UseMsmq();
+                sbc.UseMulticastSubscriptionClient();
+		        
+                sbc.UseHealthMonitoring(10);
+		    });
 
-			RegisterServiceBus("msmq://localhost/starbucks_cashier", x =>
-				{
-					x.UseControlBus();
-					x.SetConcurrentConsumerLimit(1); // a cashier cannot multi-task
-
-					x.UseMulticastSubscriptionClient();
-
-					//ConfigureSubscriptionClient("msmq://localhost/mt_subscriptions", x);
-
-					x.ConfigureService<HealthClientConfigurator>(health => health.SetHeartbeatInterval(10));
-				});
+		    Bind<IServiceBus>().ToConstant(Bus.Instance());
 		}
 	}
 }
