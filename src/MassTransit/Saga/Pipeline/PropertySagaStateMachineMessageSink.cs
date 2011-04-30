@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,28 +16,27 @@ namespace MassTransit.Saga.Pipeline
 	using System.Linq.Expressions;
 	using log4net;
 	using Magnum.StateMachine;
-	using MassTransit.Pipeline;
 
 	public class PropertySagaStateMachineMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
 		where TSaga : SagaStateMachine<TSaga>, ISaga, CorrelatedBy<Guid>
 		where TMessage : class
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (PropertySagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
+		static readonly ILog _log =
+			LogManager.GetLogger(typeof (PropertySagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
 
-		public PropertySagaStateMachineMessageSink(ISubscriberContext context,
-		                                           IServiceBus bus,
+		readonly DataEvent<TSaga, TMessage> _dataEvent;
+
+		public PropertySagaStateMachineMessageSink(IServiceBus bus,
 		                                           ISagaRepository<TSaga> repository,
 		                                           ISagaPolicy<TSaga, TMessage> policy,
 		                                           Expression<Func<TSaga, TMessage, bool>> selector,
 		                                           DataEvent<TSaga, TMessage> dataEvent)
-			: base(context, bus, repository, policy)
+			: base(bus, repository, policy)
 		{
 			Selector = selector;
-			DataEvent = dataEvent;
+			_dataEvent = dataEvent;
 		}
-
-		public DataEvent<TSaga, TMessage> DataEvent { get; private set; }
 
 		public Expression<Func<TSaga, TMessage, bool>> Selector { get; private set; }
 
@@ -49,9 +48,9 @@ namespace MassTransit.Saga.Pipeline
 		protected override void ConsumerAction(TSaga saga, TMessage message)
 		{
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof(TSaga).Name, DataEvent.Name, saga.CorrelationId);
+				_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof (TSaga).Name, _dataEvent.Name, saga.CorrelationId);
 
-			saga.RaiseEvent(DataEvent, message);
+			saga.RaiseEvent(_dataEvent, message);
 		}
 	}
 }

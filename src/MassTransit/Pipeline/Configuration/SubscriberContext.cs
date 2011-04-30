@@ -21,7 +21,7 @@ namespace MassTransit.Pipeline.Configuration
 		private readonly ISubscriptionEvent _subscriptionEvent;
 		private readonly HashSet<Type> _usedMessageTypes = new HashSet<Type>();
 
-		public SubscriberContext(IMessagePipeline pipeline, IObjectBuilder builder, ISubscriptionEvent subscriptionEvent, object data)
+		public SubscriberContext(IMessagePipeline pipeline, IObjectBuilder builder, ISubscriptionEvent subscriptionEvent, IServiceBus data)
 		{
 			_subscriptionEvent = subscriptionEvent;
 
@@ -34,7 +34,7 @@ namespace MassTransit.Pipeline.Configuration
 
 		public IMessagePipeline Pipeline { get; private set; }
 
-		public object Data { get; private set; }
+		public IServiceBus Data { get; private set; }
 
 		public bool HasMessageTypeBeenDefined(Type messageType)
 		{

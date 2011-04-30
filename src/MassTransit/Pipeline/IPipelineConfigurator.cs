@@ -20,6 +20,8 @@ namespace MassTransit.Pipeline
 	{
 		IMessagePipeline Pipeline { get; }
 
+		IServiceBus Bus { get; }
+
 		UnsubscribeAction Subscribe<TComponent>()
 			where TComponent : class;
 

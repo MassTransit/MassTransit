@@ -49,7 +49,7 @@ namespace MassTransit.Saga.Configuration
 
 			var repository = context.Builder.GetInstance<ISagaRepository<TComponent>>();
 			var policy = new ExistingSagaPolicy<TComponent, TMessage>(x => false);
-			var sink = new PropertySagaMessageSink<TComponent, TMessage>(context, context.Data as IServiceBus, repository, policy, selector);
+			var sink = new PropertySagaMessageSink<TComponent, TMessage>(context.Data, repository, policy, selector);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the message sink for " + typeof (TComponent).FullName);
 

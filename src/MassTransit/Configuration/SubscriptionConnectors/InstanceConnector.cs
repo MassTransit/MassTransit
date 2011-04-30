@@ -10,6 +10,11 @@
 	using Saga;
 	using Util;
 
+	public interface InstanceConnector
+	{
+		UnsubscribeAction Connect(IPipelineConfigurator configurator, object instance);
+	}
+
 	public class InstanceConnector<T> :
 		InstanceConnector
 		where T : class
