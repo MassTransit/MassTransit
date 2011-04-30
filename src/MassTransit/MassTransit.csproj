@@ -163,10 +163,10 @@
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfiguration.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfiguratorImpl.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\ConsumerSubscriber.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\CorrelatedInstanceSubscriptionConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\InstanceSubscriber.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\InstanceConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\SelectedConsumerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\SelectedInstanceSubscriptionConnector.cs" />

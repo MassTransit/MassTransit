@@ -19,19 +19,20 @@ namespace MassTransit.SubscriptionConnectors
 	using Magnum.Extensions;
 	using Magnum.Reflection;
 	using Pipeline;
-	using Pipeline.Sinks;
 	using Saga;
 	using Util;
 
-	public class ConsumerSubscriber<T>
+	public class ConsumerConnector<T> :
+		ConsumerConnector
 		where T : class
 	{
-		readonly IConsumerFactory<T> _consumerFactory;
 		readonly IEnumerable<ConsumerSubscriptionConnector> _connectors;
+		object[] _args;
 
-		public ConsumerSubscriber(IConsumerFactory<T> consumerFactory)
+		public ConsumerConnector(IConsumerFactory<T> consumerFactory)
 		{
-			_consumerFactory = consumerFactory;
+			_args = new object[] {consumerFactory};
+
 			Type[] interfaces = typeof (T).GetInterfaces();
 
 			if (interfaces.Contains(typeof (ISaga)))
@@ -42,16 +43,10 @@ namespace MassTransit.SubscriptionConnectors
 			    || interfaces.Implements(typeof (Observes<,>)))
 				throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
 
-			_connectors = ConsumesSelected(consumerFactory)
-				.Union(ConsumesAll(consumerFactory))
+			_connectors = ConsumesSelected()
+				.Union(ConsumesAll())
 				.Distinct((x, y) => x.MessageType == y.MessageType)
 				.ToList();
-		}
-
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator)
-		{
-			return _connectors.Select(x => x.Connect(configurator))
-				.Aggregate<UnsubscribeAction,UnsubscribeAction>(() => true, (seed, x) => () => seed() && x());
 		}
 
 		public IEnumerable<ConsumerSubscriptionConnector> Connectors
@@ -59,27 +54,31 @@ namespace MassTransit.SubscriptionConnectors
 			get { return _connectors; }
 		}
 
-		static IEnumerable<ConsumerSubscriptionConnector> ConsumesAll(IConsumerFactory<T> consumerFactory)
+		public UnsubscribeAction Connect(IPipelineConfigurator configurator)
+		{
+			return _connectors.Select(x => x.Connect(configurator))
+				.Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x());
+		}
+
+		IEnumerable<ConsumerSubscriptionConnector> ConsumesAll()
 		{
 			return typeof (T).GetInterfaces()
 				.Where(x => x.IsGenericType)
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(x => typeof (ConsumerSubscriptionConnector<,>).MakeGenericType(typeof (T), x.MessageType))
-				.Select(x => FastActivator.Create(x, consumerFactory))
+				.Select(x => FastActivator.Create(typeof (ConsumerSubscriptionConnector<,>), new[]{typeof(T),x.MessageType}, _args))
 				.Cast<ConsumerSubscriptionConnector>();
 		}
 
-		static IEnumerable<ConsumerSubscriptionConnector> ConsumesSelected(IConsumerFactory<T> consumerFactory)
+		IEnumerable<ConsumerSubscriptionConnector> ConsumesSelected()
 		{
 			return typeof (T).GetInterfaces()
 				.Where(x => x.IsGenericType)
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.Selected))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(x => typeof (SelectedConsumerSubscriptionConnector<,>).MakeGenericType(typeof (T), x.MessageType))
-				.Select(x => FastActivator.Create(x, consumerFactory))
+				.Select(x => FastActivator.Create(typeof (SelectedConsumerSubscriptionConnector<,>), new[]{typeof(T),x.MessageType}, _args))
 				.Cast<ConsumerSubscriptionConnector>();
 		}
 	}
