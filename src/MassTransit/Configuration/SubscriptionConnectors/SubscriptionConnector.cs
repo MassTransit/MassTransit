@@ -15,11 +15,15 @@ namespace MassTransit.SubscriptionConnectors
 	using System;
 	using Pipeline;
 
-	public interface ConsumerSubscriptionConnector
+	public interface ConsumerConnector
+	{
+		UnsubscribeAction Connect(IPipelineConfigurator configurator);
+	}
+
+	public interface ConsumerSubscriptionConnector :
+		ConsumerConnector
 	{
 		Type MessageType { get; }
-
-		UnsubscribeAction Connect(IPipelineConfigurator configurator);
 	}
 
 	public interface InstanceConnector

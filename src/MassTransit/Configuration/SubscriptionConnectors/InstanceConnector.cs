@@ -10,13 +10,13 @@
 	using Saga;
 	using Util;
 
-	public class InstanceSubscriber<T> :
+	public class InstanceConnector<T> :
 		InstanceConnector
 		where T : class
 	{
 		readonly IEnumerable<InstanceSubscriptionConnector> _connectors;
 
-		public InstanceSubscriber()
+		public InstanceConnector()
 		{
 			Type[] interfaces = typeof (T).GetInterfaces();
 
@@ -54,22 +54,20 @@
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(x => typeof (InstanceSubscriptionConnector<,>).MakeGenericType(typeof (T), x.MessageType))
-				.Select(x => FastActivator.Create(x))
+				.Select(x => FastActivator.Create(typeof (InstanceSubscriptionConnector<,>), new[]{typeof(T),x.MessageType}))
 				.Cast<InstanceSubscriptionConnector>();
 		}
 
-		static IEnumerable<InstanceSubscriptionConnector> ConsumesSelected()
+		IEnumerable<InstanceSubscriptionConnector> ConsumesSelected()
 		{
 			return typeof (T).GetInterfaces()
 				.Where(x => x.IsGenericType)
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.Selected))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(x => typeof (SelectedInstanceSubscriptionConnector<,>).MakeGenericType(typeof (T), x.MessageType))
-				.Select(x => FastActivator.Create(x))
+				.Select(x => FastActivator.Create(typeof (SelectedInstanceSubscriptionConnector<,>), new[]{typeof(T),x.MessageType}))
 				.Cast<InstanceSubscriptionConnector>();
-		}
+		}		
 
 		static IEnumerable<InstanceSubscriptionConnector> ConsumesCorrelated()
 		{
