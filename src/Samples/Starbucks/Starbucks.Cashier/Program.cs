@@ -18,13 +18,8 @@ namespace Starbucks.Cashier
 	using log4net.Config;
 	using Magnum;
 	using Magnum.StateMachine;
-
-	using MassTransit.NinjectIntegration;
 	using Ninject;
-
 	using Topshelf;
-	using Topshelf.Configuration;
-	using Topshelf.Configuration.Dsl;
 
 	internal static class Program
 	{
@@ -36,29 +31,28 @@ namespace Starbucks.Cashier
 		{
 			XmlConfigurator.Configure(new FileInfo("cashier.log4net.xml"));
 
-			RunConfiguration cfg = RunnerConfigurator.New(c =>
+			HostFactory.Run(c =>
 				{
 					c.SetServiceName("StarbucksCashier");
 					c.SetDisplayName("Starbucks Cashier");
 					c.SetDescription("a Mass Transit sample service for handling orders of coffee.");
 
 					c.RunAsLocalSystem();
-					c.DependencyOnMsmq();
+				    c.DependsOnMsmq();
 
-                    StandardKernel kernel = new StandardKernel();
-                    CashierRegistry module = new CashierRegistry();
+				    var kernel = new StandardKernel();
+                    var module = new CashierRegistry();
                     kernel.Load(module);
 
 					DisplayStateMachine();
 
-					c.ConfigureService<CashierService>(s =>
-					{
-							s.HowToBuildService(builder => kernel.Get<CashierService>());
+					c.Service<CashierService>(s =>
+						{
+							s.ConstructUsing(builder => kernel.Get<CashierService>());
 							s.WhenStarted(o => o.Start());
 							s.WhenStopped(o => o.Stop());
 						});
 				});
-			Runner.Host(cfg, args);
 		}
 
 		private static void DisplayStateMachine()

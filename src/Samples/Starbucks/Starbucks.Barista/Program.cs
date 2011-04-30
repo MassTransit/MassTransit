@@ -38,20 +38,19 @@ namespace Starbucks.Barista
 			XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
 
 			var container = new WindsorContainer();
-			var options = new SettingsOptions
-				{
-					ReceiveFrom = "msmq://localhost/starbucks_barista",
-				};
+		    container.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)),
+		                       Component.For<DrinkPreparationSaga>(),
+		                       Component.For<BaristaService>().LifeStyle.Singleton);
 
-			options.Transports.Add(typeof (MsmqTransportFactory).AssemblyQualifiedName);
-			options.Transports.Add(typeof (MulticastMsmqTransportFactory).AssemblyQualifiedName);
-			options.Callback = x => { x.UseMulticastSubscriptionClient(); };
-
-			container.Install(new MassTransitInstaller(options));
-
-			container.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)));
-			container.Register(Component.For<DrinkPreparationSaga>(),
-				Component.For<BaristaService>().LifeStyle.Singleton);
+		    Bus.Initialize(sbc =>
+		    {
+		        sbc.ReceiveFrom("msmq://localhost/starbucks_barista");
+		        sbc.UseMsmq();
+		        //do i need to set the multicast transport factory?
+		        sbc.UseMulticastSubscriptionClient();
+		        sbc.LoadConsumersFromContainer(container);
+		    });
+		    container.Register(Component.For<IServiceBus>().Instance(Bus.Instance()));
 
 			HostFactory.Run(c =>
 				{

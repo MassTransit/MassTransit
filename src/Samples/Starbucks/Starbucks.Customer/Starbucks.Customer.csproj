@@ -75,7 +75,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomerRegistry.cs" />
     <Compile Include="OrderDrinkForm.cs">
       <SubType>Form</SubType>
     </Compile>
