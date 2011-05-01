@@ -31,7 +31,7 @@ namespace MassTransit.Tests.Subscriptions
 			RemoteBus.SubscribeHandler<A>(x => { });
 			RemoteBus.Dispose();
 
-			LocalBus.ShouldHaveSubscriptionFor<A>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<A>();
 		}
 	}
 
@@ -48,7 +48,7 @@ namespace MassTransit.Tests.Subscriptions
 		{
 			RemoteBus.SubscribeHandler<A>(x => { });
 
-			LocalBus.ShouldHaveSubscriptionFor<A>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<A>();
 
 			RemoteBus.Dispose();
 

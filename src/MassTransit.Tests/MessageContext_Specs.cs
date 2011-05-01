@@ -73,9 +73,9 @@ namespace MassTransit.Tests
 					CurrentMessage.Respond(pong.Message);
 				});
 
-			RemoteBus.ShouldHaveSubscriptionFor<PongMessage>();
-			LocalBus.ShouldHaveSubscriptionFor<PongMessage>();
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			RemoteBus.ShouldHaveRemoteSubscriptionFor<PongMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PongMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
 			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus));
 

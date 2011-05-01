@@ -30,13 +30,13 @@ namespace MassTransit.Tests.Distributor
 		[Test]
 		public void Should_have_a_subscription_for_the_first_command()
 		{
-			LocalBus.ShouldHaveSubscriptionFor<FirstCommand>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<FirstCommand>();
 		}
 
 		[Test]
 		public void Should_have_a_subscription_for_the_pending_command()
 		{
-			LocalBus.ShouldHaveSubscriptionFor<FirstPending>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<FirstPending>();
 		}
 	}
 
@@ -61,9 +61,9 @@ namespace MassTransit.Tests.Distributor
 		[Test]
 		public void Should_register_the_message_consumers()
 		{
-			Instances["A"].DataBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
-			Instances["B"].DataBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
-			Instances["C"].DataBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
+			Instances["A"].DataBus.ShouldHaveRemoteSubscriptionFor<Distributed<FirstCommand>>();
+			Instances["B"].DataBus.ShouldHaveRemoteSubscriptionFor<Distributed<FirstCommand>>();
+			Instances["C"].DataBus.ShouldHaveRemoteSubscriptionFor<Distributed<FirstCommand>>();
 		}
 
 		[Test, Explicit]

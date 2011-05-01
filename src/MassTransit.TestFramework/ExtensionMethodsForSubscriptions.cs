@@ -28,7 +28,7 @@ namespace MassTransit.TestFramework
 			Timeout = 8.Seconds();
 		}
 
-		public static void ShouldHaveSubscriptionFor<TMessage>(this IServiceBus bus)
+		public static void ShouldHaveRemoteSubscriptionFor<TMessage>(this IServiceBus bus)
 		{
 			DateTime giveUpAt = DateTime.Now + Timeout;
 
@@ -47,17 +47,24 @@ namespace MassTransit.TestFramework
 			Assert.Fail("A subscription for " + typeof (TMessage).ToFriendlyName() + " was not found on " + bus.Endpoint.Uri);
 		}
 
-		public static void ShouldHaveSubscriptionFor<TMessage>(this IMessagePipeline pipeline)
+		public static void ShouldHaveSubscriptionFor<TMessage>(this IServiceBus bus)
+			where TMessage : class
+		{
+			bus.OutboundPipeline.ShouldHaveSubscriptionFor<TMessage>();
+		}
+
+		public static void ShouldHaveSubscriptionFor<TMessage>(this IMessagePipeline pipeline) 
+			where TMessage : class
 		{
 			DateTime giveUpAt = DateTime.Now + Timeout;
 
 			while (DateTime.Now < giveUpAt)
 			{
-				var inspector = new EndpointSinkLocator(typeof (TMessage));
+				var inspector = new PipelineSinkLocator<TMessage>();
 
 				pipeline.Inspect(inspector);
 
-				if (inspector.DestinationAddress != null)
+				if (inspector.Result != null)
 					return;
 
 				Thread.Sleep(10);

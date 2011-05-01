@@ -20,14 +20,12 @@ namespace MassTransit.Tests.TestConsumers
 		where TMessage : class, CorrelatedBy<TKey>
 		where TReplyMessage : class, CorrelatedBy<TKey>
 	{
-		public IServiceBus Bus { get; set; }
-
 		public override void Consume(TMessage message)
 		{
 			base.Consume(message);
 
 			var reply = FastActivator<TReplyMessage>.Create(message.CorrelationId);
-			Bus.Publish(reply);
+			CurrentMessage.Respond(reply);
 		}
 	}
 }

@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Distributor
 			AddFirstCommandInstance("B", "loopback://localhost/b");
 			AddFirstCommandInstance("C", "loopback://localhost/c");
 
-			RemoteBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
+			RemoteBus.ShouldHaveRemoteSubscriptionFor<Distributed<FirstCommand>>();
 		}
 
 		[Test]

@@ -58,7 +58,7 @@ namespace MassTransit.Tests.Subscriptions
 			var subscription = new SubscriptionInformation(clientId, 1, typeof (PingMessage), RemoteBus.Endpoint.Uri);
 
 			LocalControlBus.Endpoint.Send(new AddSubscription(subscription));
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
 			LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
 			LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
@@ -72,7 +72,7 @@ namespace MassTransit.Tests.Subscriptions
 			var consumer = new TestMessageConsumer<PingMessage>();
 			var unsubscribeAction = RemoteBus.SubscribeInstance(consumer);
 
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
 			var message = new PingMessage();
 			LocalBus.Publish(message);

@@ -37,15 +37,15 @@ namespace MassTransit.Tests
 		[Test]
 		public void A_reply_should_be_received_by_the_requestor()
 		{
-			RemoteBus.ShouldHaveSubscriptionFor<PingMessage>();
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			RemoteBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
 			var message = new PingMessage();
 
 			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(message.CorrelationId);
 			LocalBus.SubscribeInstance(consumer);
 
-			RemoteBus.ShouldHaveSubscriptionFor<PongMessage>();
+			RemoteBus.ShouldHaveRemoteSubscriptionFor<PongMessage>();
 
 			LocalBus.Publish(message);
 
