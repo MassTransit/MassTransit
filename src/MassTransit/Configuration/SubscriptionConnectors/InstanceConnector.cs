@@ -75,8 +75,8 @@ namespace MassTransit.SubscriptionConnectors
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(x => FastActivator.Create(typeof (InstanceSubscriptionConnector<,>), new[] {typeof (T), x.MessageType}))
-				.Cast<InstanceSubscriptionConnector>();
+				.Select(x => (InstanceSubscriptionConnector)Activator.CreateInstance(
+					typeof (InstanceSubscriptionConnector<,>).MakeGenericType(typeof (T), x.MessageType)));
 		}
 
 		static IEnumerable<InstanceSubscriptionConnector> ConsumesSelected()
@@ -86,9 +86,8 @@ namespace MassTransit.SubscriptionConnectors
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.Selected))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(
-					x => FastActivator.Create(typeof (SelectedInstanceSubscriptionConnector<,>), new[] {typeof (T), x.MessageType}))
-				.Cast<InstanceSubscriptionConnector>();
+				.Select(x =>  (InstanceSubscriptionConnector)Activator.CreateInstance(
+						typeof (SelectedInstanceSubscriptionConnector<,>).MakeGenericType(typeof (T), x.MessageType)));
 		}
 
 		static IEnumerable<InstanceSubscriptionConnector> ConsumesCorrelated()
@@ -103,11 +102,8 @@ namespace MassTransit.SubscriptionConnectors
 						CorrelationType = x.GetGenericArguments()[1]
 					})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(
-					x =>
-					typeof (CorrelatedInstanceSubscriptionConnector<,,>).MakeGenericType(typeof (T), x.MessageType, x.CorrelationType))
-				.Select(x => FastActivator.Create(x))
-				.Cast<InstanceSubscriptionConnector>();
+				.Select(x => (InstanceSubscriptionConnector) Activator.CreateInstance(
+					typeof (CorrelatedInstanceSubscriptionConnector<,,>).MakeGenericType(typeof (T), x.MessageType, x.CorrelationType)));
 		}
 
 		static IEnumerable<InstanceSubscriptionConnector> Distributors()
@@ -117,8 +113,8 @@ namespace MassTransit.SubscriptionConnectors
 				.Where(x => x.GetGenericTypeDefinition() == typeof (IDistributor<>))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(x => FastActivator.Create(typeof (DistributorSubscriptionConnector<>), new[] {x.MessageType}))
-				.Cast<InstanceSubscriptionConnector>();
+				.Select(x => (InstanceSubscriptionConnector)Activator.CreateInstance(
+					typeof(DistributorSubscriptionConnector<>).MakeGenericType(x.MessageType)));
 		}
 
 		static IEnumerable<InstanceSubscriptionConnector> Workers()
@@ -128,8 +124,8 @@ namespace MassTransit.SubscriptionConnectors
 				.Where(x => x.GetGenericTypeDefinition() == typeof (IWorker<>))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(x => FastActivator.Create(typeof (WorkerSubscriptionConnector<>), new[] {x.MessageType}))
-				.Cast<InstanceSubscriptionConnector>();
+				.Select(x =>  (InstanceSubscriptionConnector)Activator.CreateInstance(
+					typeof (WorkerSubscriptionConnector<>).MakeGenericType(x.MessageType)));
 		}
 	}
 }

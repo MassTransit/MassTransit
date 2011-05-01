@@ -31,7 +31,7 @@ namespace MassTransit.Tests.Examples
 		[Then]
 		public void The_consumer_should_receive_the_message()
 		{
-			Consumer.ShouldHaveReceived(Message, 1.Seconds());
+			Consumer.ShouldHaveReceived(Message, 3.Seconds());
 		}
 
 		protected SimpleMessage Message { get; private set; }
