@@ -82,7 +82,7 @@
 
 			if (_unsubscribeToken != null)
 				_unsubscribeToken();
-			_unsubscribeToken = Bus.Subscribe(this);
+			_unsubscribeToken = Bus.SubscribeInstance(this);
 
 			var message = new NewOrderMessage
 				{

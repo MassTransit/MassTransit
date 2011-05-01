@@ -46,15 +46,14 @@ namespace Starbucks.Cashier
 					c.DependencyOnMsmq();
 
                     StandardKernel kernel = new StandardKernel();
-                    NinjectObjectBuilder container = new NinjectObjectBuilder(kernel);
-                    CashierRegistry module = new CashierRegistry(container);
+                    CashierRegistry module = new CashierRegistry();
                     kernel.Load(module);
 
 					DisplayStateMachine();
 
 					c.ConfigureService<CashierService>(s =>
-						{
-							s.HowToBuildService(builder => container.GetInstance<CashierService>());
+					{
+							s.HowToBuildService(builder => kernel.Get<CashierService>());
 							s.WhenStarted(o => o.Start());
 							s.WhenStopped(o => o.Stop());
 						});
