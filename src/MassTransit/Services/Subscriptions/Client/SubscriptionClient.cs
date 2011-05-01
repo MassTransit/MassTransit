@@ -75,7 +75,10 @@ namespace MassTransit.Services.Subscriptions.Client
 		{
 			if (!disposing || _disposed) return;
 
-			_ready.Dispose();
+			using (_ready)
+			{
+			}
+
 			_coordinator.Dispose();
 
 			_disposed = true;
