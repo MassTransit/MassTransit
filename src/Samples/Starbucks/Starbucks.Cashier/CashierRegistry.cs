@@ -20,8 +20,8 @@ namespace Starbucks.Cashier
 	public class CashierRegistry :
 		MassTransitModuleBase
 	{
-		public CashierRegistry(IObjectBuilder builder)
-			: base(builder, typeof (MsmqTransportFactory), typeof (MulticastMsmqTransportFactory))
+		public CashierRegistry()
+			: base(typeof (MsmqTransportFactory), typeof (MulticastMsmqTransportFactory))
 		{
 		}
 
