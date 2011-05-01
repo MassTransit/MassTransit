@@ -16,32 +16,54 @@ namespace MassTransit.TestFramework.Fixtures
 	using System.Collections.Generic;
 	using System.Linq;
 	using BusConfigurators;
+	using Configurators;
 	using EndpointConfigurators;
+	using Exceptions;
 	using Magnum.Extensions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using Saga;
+	using Services.Subscriptions;
 
 	[TestFixture]
 	public class EndpointTestFixture<TTransportFactory> :
 		AbstractTestFixture
 		where TTransportFactory : ITransportFactory, new()
 	{
-		EndpointFactoryConfigurator _endpointFactoryConfigurator;
-
 		[TestFixtureSetUp]
-		public void EndpointTestFixtureSetup()
+		public void Setup()
 		{
-			SetupEndpointFactory();
+			if (_endpointFactoryConfigurator != null)
+			{
+				ConfigurationResult result = ConfigurationResultImpl.CompileResults(_endpointFactoryConfigurator.Validate());
 
-			SetupServiceBusDefaults();
+				try
+				{
+					EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
+					_endpointFactoryConfigurator = null;
+
+					EndpointCache = new EndpointCache(EndpointFactory);
+				}
+				catch (Exception ex)
+				{
+					throw new ConfigurationException(result, "An exception was thrown during endpoint cache creation", ex);
+				}
+			}
+
+			ServiceBusFactory.ConfigureDefaultSettings(x =>
+				{
+					x.SetEndpointCache(EndpointCache);
+					x.SetConcurrentConsumerLimit(4);
+					x.SetReceiveTimeout(50.Milliseconds());
+					x.EnableAutoStart();
+				});
 		}
 
 		[TestFixtureTearDown]
-		public void EndpointTestFixtureTeardown()
+		public void FixtureTeardown()
 		{
 			TeardownBuses();
+
 			if (EndpointCache != null)
 			{
 				EndpointCache.Dispose();
@@ -54,41 +76,47 @@ namespace MassTransit.TestFramework.Fixtures
 		protected EndpointTestFixture()
 		{
 			Buses = new List<IServiceBus>();
-		}
 
-		protected virtual void SetupEndpointFactory()
-		{
 			var defaultSettings = new EndpointFactoryDefaultSettings();
 
 			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(defaultSettings);
 			_endpointFactoryConfigurator.AddTransportFactory<TTransportFactory>();
 			_endpointFactoryConfigurator.SetPurgeOnStartup(true);
-
-			_endpointFactoryConfigurator.Validate();
-
-			ConfigureEndpointFactory(_endpointFactoryConfigurator);
-
-			IEndpointFactory endpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
-			_endpointFactoryConfigurator = null;
-
-			EndpointCache = new EndpointCache(endpointFactory);
 		}
 
-		protected virtual void ConfigureEndpointFactory(EndpointFactoryConfigurator x)
+		protected void AddTransport<T>()
+			where T : ITransportFactory, new()
 		{
+			_endpointFactoryConfigurator.AddTransportFactory<T>();
 		}
 
-		protected virtual void SetupServiceBusDefaults()
+		protected IEndpointFactory EndpointFactory { get; private set; }
+
+		protected void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configure)
 		{
-			ServiceBusFactory.ConfigureDefaultSettings(x =>
-			{
-				x.SetEndpointCache(EndpointCache);
-				x.SetConcurrentConsumerLimit(4);
-				x.SetReceiveTimeout(50.Milliseconds());
-				x.EnableAutoStart();
-			});
+			if (_endpointFactoryConfigurator == null)
+				throw new ConfigurationException("The endpoint factory configurator has already been executed.");
 
+			configure(_endpointFactoryConfigurator);
 		}
+
+		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator,
+		                                          ISubscriptionService subscriptionService)
+		{
+			configurator.AddService(() => new SubscriptionPublisher(subscriptionService));
+			configurator.AddService(() => new SubscriptionConsumer(subscriptionService));
+		}
+
+		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
+			where TSaga : class, ISaga
+		{
+			var sagaRepository = new InMemorySagaRepository<TSaga>();
+
+			return sagaRepository;
+		}
+
+
+		EndpointFactoryConfigurator _endpointFactoryConfigurator;
 
 		void TeardownBuses()
 		{
@@ -98,15 +126,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected IList<IServiceBus> Buses { get; private set; }
 
-		protected IEndpointCache EndpointCache { get; private set; }
-
-		public InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
-			where TSaga : class, ISaga
-		{
-			var repository = new InMemorySagaRepository<TSaga>();
-
-			return repository;
-		}
+		protected EndpointCache EndpointCache { get; private set; }
 
 		protected virtual IServiceBus SetupServiceBus(Uri uri, Action<ServiceBusConfigurator> configure)
 		{

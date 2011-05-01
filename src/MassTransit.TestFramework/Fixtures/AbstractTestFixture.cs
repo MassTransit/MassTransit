@@ -24,16 +24,12 @@ namespace MassTransit.TestFramework.Fixtures
 	[TestFixture]
 	public class AbstractTestFixture
 	{
-		[SetUp]
-		public void AbstractSetup()
-		{
-			_timer = Stopwatch.StartNew();
-		}
-
 		[TestFixtureSetUp]
 		public void AbstractTestFixtureSetup()
 		{
 			OutputTestName(GetType());
+
+			_timer = Stopwatch.StartNew();	
 		}
 
 		[TestFixtureTearDown]
