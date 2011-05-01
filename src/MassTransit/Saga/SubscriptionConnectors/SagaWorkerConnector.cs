@@ -61,11 +61,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 			}
 		}
 
-		public IEnumerable<InstanceSubscriptionConnector> Connectors
-		{
-			get { return _connectors; }
-		}
-
 		public Type SagaType
 		{
 			get { return typeof (T); }
