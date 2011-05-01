@@ -17,7 +17,6 @@ namespace Starbucks.Customer
 	using System.Windows.Forms;
 	using log4net.Config;
 	using MassTransit;
-	using MassTransit.StructureMapIntegration;
 	using StructureMap;
 
 	internal static class Program
@@ -49,7 +48,11 @@ namespace Starbucks.Customer
                 sbc.ReceiveFrom("msmq://localhost/starbucks_customer");
 		        sbc.UseMsmq();
                 sbc.UseMulticastSubscriptionClient();
-                sbc.LoadConsumersFromContainer(container);
+                
+                sbc.Subscribe(subs=>
+                {
+                    subs.LoadFrom(container);
+                });
 		    });
 		
             container.Configure(cfg=>cfg.For<IServiceBus>().Use(Bus.Instance));

@@ -13,7 +13,9 @@
 namespace Starbucks.Cashier
 {
 	using MassTransit;
+	using MassTransit.Saga;
 	using Ninject.Modules;
+	using Ninject;
 
     public class CashierRegistry :
 		NinjectModule
@@ -34,7 +36,11 @@ namespace Starbucks.Cashier
 		        sbc.UseMsmq();
                 sbc.UseMulticastSubscriptionClient();
 		        
-                sbc.UseHealthMonitoring(10);
+                sbc.Subscribe(subs=>
+                {
+                    subs.Consumer(typeof (CashierService), t => Kernel.Get(t));
+                    subs.Saga(new InMemorySagaRepository<CashierSaga>());
+                });
 		    });
 
 		    Bind<IServiceBus>().ToConstant(Bus.Instance());

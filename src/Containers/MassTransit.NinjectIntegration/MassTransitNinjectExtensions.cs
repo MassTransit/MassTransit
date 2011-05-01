@@ -1,12 +1,12 @@
 namespace MassTransit.NinjectIntegration
 {
     using System;
-    using BusConfigurators;
     using Ninject;
+    using SubscriptionConfigurators;
 
     public static class MassTransitNinjectExtensions
     {
-        public static UnsubscribeAction LoadConsumersFromContainer(this ServiceBusConfigurator cfg, IKernel kernel)
+        public static UnsubscribeAction LoadFrom(this SubscriptionBusServiceConfigurator cfg, IKernel kernel)
         {
             throw new NotImplementedException("Ninject doesn't support this feature. Github Issue https://github.com/ninject/ninject/issues/35");
 
