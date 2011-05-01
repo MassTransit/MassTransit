@@ -49,6 +49,8 @@ namespace Starbucks.Customer
 		        sbc.UseMsmq();
                 sbc.UseMulticastSubscriptionClient();
                 
+		        sbc.UseControlBus();
+
                 sbc.Subscribe(subs=>
                 {
                     subs.LoadFrom(container);
