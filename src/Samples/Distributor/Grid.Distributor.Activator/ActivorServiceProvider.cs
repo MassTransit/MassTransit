@@ -12,9 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace Grid.Distributor.Activator
 {
-    using System;
-    using StructureMap;
-    using Shared;
+	using Shared;
 
     public class ActivorServiceProvider : ServiceSetup
     {
@@ -22,6 +20,5 @@ namespace Grid.Distributor.Activator
         public override string DisplayName { get; set; }
         public override string Description { get; set; }
         public override string SourceQueue { get; set; }
-        public override Action<ConfigurationExpression> ContainerSetup { get; set; }
     }
 }

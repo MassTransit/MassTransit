@@ -22,9 +22,8 @@ namespace Grid.Distributor.Activator
     using MassTransit;
     using MassTransit.Distributor;
     using System.Configuration;
-    using MassTransit.Transports.Msmq;
 
-    public class CollectCompletedWork :
+	public class CollectCompletedWork :
         Consumes<CompletedSimpleWorkItem>.All,
         IServiceInterface
     {
@@ -34,22 +33,18 @@ namespace Grid.Distributor.Activator
         private int _sent;
         private readonly List<int> _values = new List<int>();
 
-        public IObjectBuilder ObjectBuilder { get; set; }
 		public IServiceBus ControlBus { get; set; }
         public IServiceBus DataBus { get; set; }
 
-        public CollectCompletedWork(IObjectBuilder objectBuilder)
+        public CollectCompletedWork()
         {
-            ObjectBuilder = objectBuilder;
-
         	DataBus = ServiceBusFactory.New(x =>
         		{
 					x.ReceiveFrom(ConfigurationManager.AppSettings["SourceQueue"]);
-					x.UseMsmq();
 
-					x.SetObjectBuilder(objectBuilder);
-					x.AddTransportFactory<MsmqTransportFactory>();
+					x.UseMsmq();
         			x.UseMulticastSubscriptionClient();
+
 					x.SetConcurrentConsumerLimit(4);
 	                x.UseDistributorFor<DoSimpleWorkItem>();
         			x.UseControlBus();
@@ -64,18 +59,24 @@ namespace Grid.Distributor.Activator
 
             int messageMs = DateTime.UtcNow.Subtract(message.RequestCreatedAt).Milliseconds;
 
-            lock (_values)
+        	int max;
+        	int min;
+        	double average;
+        	lock (_values)
             {
                 _values.Add(messageMs);
+            	min = _values.Min();
+            	max = _values.Max();
+            	average = _values.Average();
             }
 
             _log.InfoFormat("Received: {0} - {1} [{2}ms]", _received, message.CorrelationId, messageMs);
-            _log.InfoFormat("Stats\n\tMin: {0:0000.0}ms\n\tMax: {1:0000.0}ms\n\tAvg: {2:0000.0}ms", _values.Min(), _values.Max(), _values.Average());
+        	_log.InfoFormat("Stats\n\tMin: {0:0000.0}ms\n\tMax: {1:0000.0}ms\n\tAvg: {2:0000.0}ms", min, max, average);
         }
 
         public void Start()
         {
-            _unsubscribeAction = DataBus.Subscribe(this);
+            _unsubscribeAction = DataBus.SubscribeInstance(this);
 
             Thread.Sleep(5000);
 

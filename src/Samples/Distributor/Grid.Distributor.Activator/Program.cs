@@ -31,7 +31,6 @@ namespace Grid.Distributor.Activator
         				DisplayName = ConfigurationManager.AppSettings["DisplayName"],
         				Description = ConfigurationManager.AppSettings["Description"],
         				SourceQueue = ConfigurationManager.AppSettings["SourceQueue"],
-        				ContainerSetup = x => { }
         			};
 
         		service.ConfigureService<CollectCompletedWork>();
