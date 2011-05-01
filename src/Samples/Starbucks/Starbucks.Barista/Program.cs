@@ -32,10 +32,6 @@ namespace Starbucks.Barista
 		[STAThread]
 		private static void Main(string[] args)
 		{
-		    AppDomain.CurrentDomain.UnhandledException += (a, ex) =>
-		    {
-                Console.WriteLine("hi");
-		    };
 			XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
 
 			var container = new WindsorContainer();
@@ -49,11 +45,14 @@ namespace Starbucks.Barista
 		        sbc.UseMsmq();
 		        sbc.UseMulticastSubscriptionClient();
 
+		        sbc.UseControlBus();
+
                 sbc.Subscribe(subs=>
                 {
                     subs.LoadFrom(container);
                 });
 		    });
+
 		    container.Register(Component.For<IServiceBus>().Instance(Bus.Instance()));
 
 			HostFactory.Run(c =>

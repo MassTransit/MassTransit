@@ -23,22 +23,27 @@ namespace Starbucks.Cashier
 
 		public override void Load()
 		{
+		    Bind<ISagaRepository<CashierSaga>>()
+                .To<InMemorySagaRepository<CashierSaga>>();
+
 			Bind<CashierSaga>()
 				.To<CashierSaga>();
-			Bind<CashierService>()
+			
+            Bind<CashierService>()
 				.To<CashierService>()
 				.InSingletonScope();
 
 		    Bus.Initialize(sbc =>
 		    {
-                sbc.ReceiveFrom("msmq://localhost/starbucks_cashier");
-                sbc.SetConcurrentConsumerLimit(1); //a cashier cannot multi-task
 		        sbc.UseMsmq();
                 sbc.UseMulticastSubscriptionClient();
-		        
+                sbc.ReceiveFrom("msmq://localhost/starbucks_cashier");
+                sbc.SetConcurrentConsumerLimit(1); //a cashier cannot multi-task
+
+		        sbc.UseControlBus();
+
                 sbc.Subscribe(subs=>
                 {
-                    subs.Consumer(typeof (CashierService), t => Kernel.Get(t));
                     subs.Saga(new InMemorySagaRepository<CashierSaga>());
                 });
 		    });
