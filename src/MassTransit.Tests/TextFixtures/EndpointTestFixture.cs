@@ -22,7 +22,6 @@ namespace MassTransit.Tests.TextFixtures
 	using MassTransit.Services.Subscriptions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 
 	[TestFixture]
 	public abstract class EndpointTestFixture<TTransportFactory>
@@ -48,14 +47,11 @@ namespace MassTransit.Tests.TextFixtures
 				}
 			}
 
-			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
-
 			ServiceBusFactory.ConfigureDefaultSettings(x =>
 				{
 					x.SetEndpointCache(EndpointCache);
 					x.SetConcurrentConsumerLimit(4);
 					x.SetReceiveTimeout(50.Milliseconds());
-					x.SetObjectBuilder(ObjectBuilder);
 					x.EnableAutoStart();
 				});
 
@@ -79,11 +75,7 @@ namespace MassTransit.Tests.TextFixtures
 				EndpointCache = null;
 			}
 
-			ServiceBusFactory.ConfigureDefaultSettings(x =>
-				{
-					x.SetEndpointCache(null);
-					x.SetObjectBuilder(null);
-				});
+			ServiceBusFactory.ConfigureDefaultSettings(x => { x.SetEndpointCache(null); });
 		}
 
 		EndpointFactoryConfiguratorImpl _endpointFactoryConfigurator;
@@ -105,7 +97,6 @@ namespace MassTransit.Tests.TextFixtures
 
 		protected IEndpointFactory EndpointFactory { get; private set; }
 		protected EndpointCache EndpointCache { get; set; }
-		protected IObjectBuilder ObjectBuilder { get; private set; }
 
 		protected virtual void EstablishContext()
 		{
@@ -123,7 +114,8 @@ namespace MassTransit.Tests.TextFixtures
 			configure(_endpointFactoryConfigurator);
 		}
 
-		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator, ISubscriptionService subscriptionService)
+		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator,
+		                                          ISubscriptionService subscriptionService)
 		{
 			configurator.AddService(() => new SubscriptionPublisher(subscriptionService));
 			configurator.AddService(() => new SubscriptionConsumer(subscriptionService));

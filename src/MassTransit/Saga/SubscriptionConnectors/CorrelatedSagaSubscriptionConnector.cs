@@ -48,13 +48,19 @@ namespace MassTransit.Saga.SubscriptionConnectors
 
 		public UnsubscribeAction Connect(IPipelineConfigurator configurator)
 		{
+			IPipelineSink<TMessage> sink = CreateSink(configurator);
+
+			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
+		}
+
+		public IPipelineSink<TMessage> CreateSink(IPipelineConfigurator configurator)
+		{
 			var sink = new CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>(configurator.Bus, _sagaRepository, _policy,
 				_dataEvent);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the message sink: " +
 				                                 typeof (CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
-
-			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
+			return sink;
 		}
 	}
 }

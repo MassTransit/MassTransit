@@ -54,13 +54,18 @@ namespace MassTransit.Saga.SubscriptionConnectors
 
 			MessageRouter<TMessage> router = routerConfigurator.FindOrCreate<TMessage>();
 
-			IPipelineSink<TMessage> sink = CreateSink(configurator.Bus, _sagaRepository, _policy);
+			IPipelineSink<TMessage> sink = CreateSink(configurator);
 
 			UnsubscribeAction result = router.Connect(sink);
 
 			UnsubscribeAction remove = configurator.SubscribedTo<TMessage>();
 
 			return () => result() && (router.SinkCount == 0) && remove();
+		}
+
+		public IPipelineSink<TMessage> CreateSink(IPipelineConfigurator configurator)
+		{
+			return CreateSink(configurator.Bus, _sagaRepository, _policy);
 		}
 
 		protected abstract IPipelineSink<TMessage> CreateSink(IServiceBus bus, ISagaRepository<TSaga> repository,

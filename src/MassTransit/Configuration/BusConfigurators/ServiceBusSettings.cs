@@ -13,7 +13,6 @@
 namespace MassTransit.BusConfigurators
 {
 	using System;
-	using Util;
 
 	public class ServiceBusSettings :
 		BusSettings
@@ -21,7 +20,6 @@ namespace MassTransit.BusConfigurators
 		public ServiceBusSettings(ServiceBusDefaultSettings defaultSettings)
 		{
 			AutoStart = defaultSettings.AutoStart;
-			ObjectBuilder = defaultSettings.ObjectBuilder ?? new FastActivatorObjectBuilder();
 			ConcurrentConsumerLimit = defaultSettings.ConcurrentConsumerLimit;
 			ConcurrentReceiverLimit = defaultSettings.ConcurrentReceiverLimit;
 			ReceiveTimeout = defaultSettings.ReceiveTimeout;
@@ -31,7 +29,6 @@ namespace MassTransit.BusConfigurators
 		public ServiceBusSettings(BusSettings settings)
 		{
 			AutoStart = settings.AutoStart;
-			ObjectBuilder = settings.ObjectBuilder;
 			ConcurrentConsumerLimit = settings.ConcurrentConsumerLimit;
 			ConcurrentReceiverLimit = settings.ConcurrentReceiverLimit;
 			ReceiveTimeout = settings.ReceiveTimeout;
@@ -50,7 +47,6 @@ namespace MassTransit.BusConfigurators
 
 		public Action BeforeConsume { get; set; }
 		public Action AfterConsume { get; set; }
-		public IObjectBuilder ObjectBuilder { get; set; }
 
 		public bool AutoStart { get; set; }
 		public Uri InputAddress { get; set; }

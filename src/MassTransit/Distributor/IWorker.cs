@@ -12,13 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
+	using Messages;
+
 	public interface IWorker :
 		IBusService
 	{
 	}
 
 	public interface IWorker<T> :
-		IWorker
+		IWorker, Consumes<Distributed<T>>.Selected
 	{
 	}
 }

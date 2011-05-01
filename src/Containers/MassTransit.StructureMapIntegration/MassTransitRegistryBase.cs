@@ -84,9 +84,6 @@ namespace MassTransit.StructureMapIntegration
 		/// </summary>
 		protected void RegisterBusDependencies()
 		{
-			For<IObjectBuilder>()
-				.Singleton()
-				.Use<StructureMapObjectBuilder>();
 		}
 
 		protected void RegisterServiceBus(string endpointUri, Action<ServiceBusConfigurator> configAction)
@@ -118,7 +115,6 @@ namespace MassTransit.StructureMapIntegration
 								if (_transportFactoryConvention != null)
 									_transportFactoryConvention.Each(transport => x.AddTransportFactory(transport));
 
-								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 
 								configAction(x, context);

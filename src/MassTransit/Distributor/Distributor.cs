@@ -22,8 +22,7 @@ namespace MassTransit.Distributor
 	using Stact.Internal;
 
 	public class Distributor<T> :
-		IDistributor<T>,
-		Consumes<T>.Selected
+		IDistributor<T>
 		where T : class
 	{
 		readonly int _pingTimeout = (int) 1.Minutes().TotalMilliseconds;

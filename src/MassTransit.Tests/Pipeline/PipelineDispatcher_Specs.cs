@@ -17,7 +17,6 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline.Inspectors;
 	using Messages;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 
 	[TestFixture]
 	public class When_subscription_a_component_to_the_pipeline
@@ -25,11 +24,9 @@ namespace MassTransit.Tests.Pipeline
 		[SetUp]
 		public void Setup()
 		{
-			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, null);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(null);
 		}
 
-		private IObjectBuilder _builder;
 		private MessagePipeline _pipeline;
 
 		[Test]

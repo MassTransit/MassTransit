@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,8 +14,8 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using Configuration;
-	using Configuration.Subscribers;
 	using Sinks;
+	using SubscriptionConnectors;
 
 	public static class MessagePipelineExtensions
 	{
@@ -40,7 +40,7 @@ namespace MassTransit.Pipeline
 		{
 			bool consumed = false;
 
-			foreach (Action<object> consumer in pipeline.Enumerate(message))
+			foreach (var consumer in pipeline.Enumerate(message))
 			{
 				if (!acknowledge(message))
 					return false;
@@ -50,7 +50,6 @@ namespace MassTransit.Pipeline
 				consumed = true;
 
 				consumer(message);
-
 			}
 
 			return consumed;
@@ -62,9 +61,35 @@ namespace MassTransit.Pipeline
 		/// <typeparam name="TComponent"></typeparam>
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <returns></returns>
-		public static UnsubscribeAction Subscribe<TComponent>(this IMessagePipeline pipeline) where TComponent : class
+		public static UnsubscribeAction Subscribe<TComponent>(this IMessagePipeline pipeline)
+			where TComponent : class, new()
 		{
-			return pipeline.Configure(x => x.Subscribe<TComponent>());
+			return pipeline.Configure(x =>
+				{
+					var consumerFactory = new DelegateConsumerFactory<TComponent>(() => new TComponent());
+
+					ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector(consumerFactory);
+					return connector.Connect(x);
+				});
+		}
+
+		/// <summary>
+		/// Subscribe a component type to the pipeline that is resolved from the container for each message
+		/// </summary>
+		/// <typeparam name="TComponent"></typeparam>
+		/// <param name="pipeline">The pipeline to configure</param>
+		/// <returns></returns>
+		public static UnsubscribeAction Subscribe<TComponent>(this IMessagePipeline pipeline,
+		                                                      Func<TComponent> componentFactory)
+			where TComponent : class
+		{
+			return pipeline.Configure(x =>
+				{
+					var consumerFactory = new DelegateConsumerFactory<TComponent>(componentFactory);
+
+					ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector(consumerFactory);
+					return connector.Connect(x);
+				});
 		}
 
 		/// <summary>
@@ -77,34 +102,40 @@ namespace MassTransit.Pipeline
 		public static UnsubscribeAction Subscribe<TComponent>(this IMessagePipeline pipeline, TComponent instance)
 			where TComponent : class
 		{
-			return pipeline.Configure(x => x.Subscribe(instance));
+			return pipeline.Configure(x =>
+				{
+					InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<TComponent>();
+					return connector.Connect(x, instance);
+				});
 		}
 
-		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, Action<TMessage> handler, Predicate<TMessage> acceptor) 
+		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, Action<TMessage> handler,
+		                                                    Predicate<TMessage> condition)
 			where TMessage : class
 		{
-			return pipeline.Configure(x => x.Subscribe(handler, acceptor));
+			return pipeline.Configure(x =>
+				{
+					var connector = new HandlerSubscriptionConnector<TMessage>();
+
+					return connector.Connect(x, message => condition(message) ? handler : null);
+				});
 		}
 
-		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, Func<TMessage, Action<TMessage>> getHandler) 
+		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, IEndpoint endpoint)
 			where TMessage : class
-		{
-			return pipeline.Configure(x => x.Subscribe<TMessage>(getHandler));
-		}
-
-		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, IEndpoint endpoint) where TMessage : class
 		{
 			var sink = new EndpointMessageSink<TMessage>(endpoint);
 
 			return pipeline.ConnectToRouter(sink);
 		}
 
-		public static UnsubscribeAction Subscribe<TMessage,TKey>(this IMessagePipeline pipeline, TKey correlationId, IEndpoint endpoint) 
+		public static UnsubscribeAction Subscribe<TMessage, TKey>(this IMessagePipeline pipeline, TKey correlationId,
+		                                                          IEndpoint endpoint)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
-			var correlatedConfigurator = CorrelatedMessageRouterConfigurator.For(pipeline);
+			CorrelatedMessageRouterConfigurator correlatedConfigurator = CorrelatedMessageRouterConfigurator.For(pipeline);
 
-			var router = correlatedConfigurator.FindOrCreate<TMessage, TKey>();
+			CorrelatedMessageRouter<TMessage, TKey> router = correlatedConfigurator.FindOrCreate<TMessage, TKey>();
 
 			UnsubscribeAction result = router.Connect(correlationId, new EndpointMessageSink<TMessage>(endpoint));
 
@@ -117,21 +148,17 @@ namespace MassTransit.Pipeline
 			return Filter(pipeline, "", allow);
 		}
 
-		public static UnregisterAction Filter<TMessage>(this IMessagePipeline pipeline, string description, Func<TMessage, bool> allow)
+		public static UnregisterAction Filter<TMessage>(this IMessagePipeline pipeline, string description,
+		                                                Func<TMessage, bool> allow)
 			where TMessage : class
 		{
 			MessageFilterConfigurator configurator = MessageFilterConfigurator.For(pipeline);
 
-			var filter = configurator.Create(description, allow);
+			MessageFilter<TMessage> filter = configurator.Create(description, allow);
 
 			UnregisterAction result = () => { throw new NotSupportedException("Removal of filters not yet supported"); };
 
 			return result;
-		}
-
-		public static UnregisterAction Register(this IPipelineConfigurator context, IPipelineSubscriber subscriber)
-		{
-			return context.Register(subscriber);
 		}
 	}
 }

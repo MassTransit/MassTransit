@@ -98,7 +98,7 @@ namespace MassTransit.Distributor
 		                                                     ISagaRepository<T> repository)
 			where T : SagaStateMachine<T>, ISaga
 		{
-			configurator.AddService(() => new SagaWorker<T>());
+			configurator.AddService(bus => new SagaWorker<T>(repository));
 		}
 	}
 }

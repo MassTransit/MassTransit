@@ -17,6 +17,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using System.Collections.Generic;
 	using System.Linq;
 	using Configuration;
+	using Distributor.SubscriptionConnectors;
 	using Magnum.Reflection;
 
 	public class StateMachineSagaConnector<T> :

@@ -20,12 +20,6 @@ namespace MassTransit.Configuration
 	[Obsolete]
 	public interface IServiceBusConfiguratorDefaults
 	{
-		/// <summary>
-		/// Specify the IObjectBuilder to use when creating objects
-		/// </summary>
-		/// <param name="objectBuilder"></param>
-		void SetObjectBuilder(IObjectBuilder objectBuilder);
-
 	    /// <summary>
 	    /// Specify the IEndpointFactory to use
 	    /// </summary>

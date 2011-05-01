@@ -31,9 +31,9 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		readonly Expression<Func<TSaga, TMessage, bool>> _selector;
 
 		public PropertySagaSubscriptionConnector(ISagaRepository<TSaga> sagaRepository,
-		                                              DataEvent<TSaga, TMessage> dataEvent,
-		                                              ISagaPolicy<TSaga, TMessage> policy,
-		                                              Expression<Func<TSaga, TMessage, bool>> selector)
+		                                         DataEvent<TSaga, TMessage> dataEvent,
+		                                         ISagaPolicy<TSaga, TMessage> policy,
+		                                         Expression<Func<TSaga, TMessage, bool>> selector)
 		{
 			_sagaRepository = sagaRepository;
 			_dataEvent = dataEvent;
@@ -53,15 +53,20 @@ namespace MassTransit.Saga.SubscriptionConnectors
 
 		public UnsubscribeAction Connect(IPipelineConfigurator configurator)
 		{
+			IPipelineSink<TMessage> sink = CreateSink(configurator);
+
+			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
+		}
+
+		public IPipelineSink<TMessage> CreateSink(IPipelineConfigurator configurator)
+		{
 			var sink = new PropertySagaStateMachineMessageSink<TSaga, TMessage>(configurator.Bus, _sagaRepository, _policy,
 				_selector, _dataEvent);
 
 			if (sink == null)
 				throw new ConfigurationException("Could not build the message sink: " +
 				                                 typeof (PropertySagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
-
-
-			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
+			return sink;
 		}
 	}
 }

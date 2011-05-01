@@ -29,11 +29,9 @@ namespace MassTransit.Tests.Pipeline
 		[SetUp]
 		public void Setup()
 		{
-			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, null);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(null);
 		}
 
-		private IObjectBuilder _builder;
 		private MessagePipeline _pipeline;
 
 		[Test]
@@ -79,9 +77,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			TestMessageConsumer<PingMessage> consumer = MockRepository.GenerateMock<TestMessageConsumer<PingMessage>>();
 
-			_builder.Expect(x => x.GetInstance<TestMessageConsumer<PingMessage>>()).Return(consumer).Repeat.Once();
-
-			_pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
+			_pipeline.Subscribe<TestMessageConsumer<PingMessage>>(() => consumer);
 
 			PipelineViewer.Trace(_pipeline);
 
@@ -91,7 +87,6 @@ namespace MassTransit.Tests.Pipeline
 			_pipeline.Dispatch(message);
 
 			consumer.VerifyAllExpectations();
-			_builder.VerifyAllExpectations();
 		}
 
 		[Test]
@@ -99,9 +94,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			ParticularConsumer consumer = MockRepository.GenerateMock<ParticularConsumer>();
 
-			_builder.Expect(x => x.GetInstance<ParticularConsumer>()).Return(consumer).Repeat.Once();
-
-			_pipeline.Subscribe<ParticularConsumer>();
+			_pipeline.Subscribe<ParticularConsumer>(() => consumer);
 
 			PipelineViewer.Trace(_pipeline);
 
@@ -112,7 +105,6 @@ namespace MassTransit.Tests.Pipeline
 			_pipeline.Dispatch(message);
 
 			consumer.VerifyAllExpectations();
-			_builder.VerifyAllExpectations();
 		}
 
 		[Test]
@@ -120,9 +112,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			PingPongConsumer consumer = MockRepository.GenerateMock<PingPongConsumer>();
 
-			_builder.Expect(x => x.GetInstance<PingPongConsumer>()).Return(consumer).Repeat.Twice();
-
-			_pipeline.Subscribe<PingPongConsumer>();
+			_pipeline.Subscribe<PingPongConsumer>(() => consumer);
 
 			PipelineViewer.Trace(_pipeline);
 
@@ -134,7 +124,6 @@ namespace MassTransit.Tests.Pipeline
 			consumer.Expect(x => x.Consume(pong));
 			_pipeline.Dispatch(pong);
 
-			_builder.VerifyAllExpectations();
 			consumer.VerifyAllExpectations();
 		}
 

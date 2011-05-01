@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Subscriptions
 {
 	using System;
 	using System.Diagnostics;
-	using System.Threading;
 	using Magnum;
 	using Magnum.Extensions;
 	using MassTransit.Pipeline.Inspectors;

@@ -14,26 +14,16 @@ namespace MassTransit.Tests.Distributor
 {
 	using System;
 	using BusConfigurators;
-	using MassTransit.Services.Subscriptions.Configuration;
-	using Rhino.Mocks;
 
 	public class ServiceInstance :
 		IDisposable
 	{
 		volatile bool _disposed;
 
-		public ServiceInstance(string name, IEndpointCache endpointCache, string subscriptionServiceEndpointAddress,
-		                       Action<IObjectBuilder> configureBuilder, Action<ServiceBusConfigurator> configurator)
+		public ServiceInstance(string name, string subscriptionServiceEndpointAddress, Action<ServiceBusConfigurator> configurator)
 		{
-			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
-			ObjectBuilder.Stub(x => x.GetInstance<IEndpointCache>()).Return(endpointCache);
-
-			configureBuilder(ObjectBuilder);
-
-
 			DataBus = ServiceBusFactory.New(x =>
 				{
-					x.SetObjectBuilder(ObjectBuilder);
 					x.UseSubscriptionService(subscriptionServiceEndpointAddress);
 					x.ReceiveFrom(name);
 					x.UseControlBus();
@@ -43,7 +33,6 @@ namespace MassTransit.Tests.Distributor
 				});
 		}
 
-		public IObjectBuilder ObjectBuilder { get; private set; }
 		public IServiceBus DataBus { get; private set; }
 
 		public void Dispose()

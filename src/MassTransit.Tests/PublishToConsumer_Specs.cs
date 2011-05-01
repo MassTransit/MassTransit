@@ -36,8 +36,6 @@ namespace MassTransit.Tests
 		[Test]
 		public void It_should_be_received_by_a_component()
 		{
-			ObjectBuilder.Stub(x => x.GetInstance<TestMessageConsumer<PingMessage>>()).Return(new TestMessageConsumer<PingMessage>());
-
 			RemoteBus.SubscribeConsumer<TestMessageConsumer<PingMessage>>();
 
 			PingMessage message = new PingMessage();

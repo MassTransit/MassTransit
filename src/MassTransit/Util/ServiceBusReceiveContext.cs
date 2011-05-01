@@ -31,7 +31,6 @@ namespace MassTransit.Util
 		private readonly Stopwatch _receiveTime;
 		private readonly Stopwatch _consumeTime;
 		private readonly IServiceBus _bus;
-		private readonly IObjectBuilder _objectBuilder;
 		private readonly Pipe _eventAggregator;
 		private IEnumerator<Action<object>> _consumers;
 		private int _consumeCount;
@@ -39,11 +38,10 @@ namespace MassTransit.Util
 		private bool _consumeNotified;
 		private readonly TimeSpan _receiveTimeout;
 
-		public ServiceBusReceiveContext(IServiceBus bus, IObjectBuilder objectBuilder, Pipe eventAggregator, TimeSpan receiveTimeout)
+		public ServiceBusReceiveContext(IServiceBus bus, Pipe eventAggregator, TimeSpan receiveTimeout)
 		{
 			_bus = bus;
 			_receiveTimeout = receiveTimeout;
-			_objectBuilder = objectBuilder;
 			_eventAggregator = eventAggregator;
 			_receiveTime = new Stopwatch();
 			_consumeTime = new Stopwatch();
@@ -69,7 +67,6 @@ namespace MassTransit.Util
 						InboundMessageHeaders.SetCurrent(context =>
 							{
 								context.ReceivedOn(_bus);
-								context.SetObjectBuilder(_objectBuilder);
 								context.ReceivedAs(message);
 							});
 

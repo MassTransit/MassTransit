@@ -78,7 +78,6 @@
     </Compile>
     <Compile Include="MassTransitModuleBase.cs" />
     <Compile Include="MassTransitNinjectExtensions.cs" />
-    <Compile Include="NinjectObjectBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

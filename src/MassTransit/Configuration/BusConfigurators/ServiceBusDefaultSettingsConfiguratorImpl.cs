@@ -24,11 +24,6 @@ namespace MassTransit.BusConfigurators
 			_defaultSettings = defaultSettings;
 		}
 
-		public void SetObjectBuilder(IObjectBuilder objectBuilder)
-		{
-			_defaultSettings.ObjectBuilder = objectBuilder;
-		}
-
 		public void SetEndpointCache(IEndpointCache endpointCache)
 		{
 			_defaultSettings.EndpointCache = endpointCache;

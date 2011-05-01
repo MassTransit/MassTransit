@@ -38,7 +38,6 @@ namespace MassTransit.Builders
 			Guard.AgainstNull(settings, "settings");
 
 			Guard.AgainstNull(settings.EndpointCache, "endpointCache");
-			Guard.AgainstNull(settings.ObjectBuilder, "objectBuilder");
 
 			_settings = settings;
 
@@ -151,7 +150,7 @@ namespace MassTransit.Builders
 		{
 			IEndpoint endpoint = endpointCache.GetEndpoint(_settings.InputAddress);
 
-			var serviceBus = new ServiceBus(endpoint, _settings.ObjectBuilder, endpointCache);
+			var serviceBus = new ServiceBus(endpoint, endpointCache);
 
 			return serviceBus;
 		}
