@@ -21,10 +21,7 @@ namespace Starbucks.Barista
 	using Magnum;
 	using Magnum.StateMachine;
 	using MassTransit;
-	using MassTransit.Configuration.Xml;
 	using MassTransit.Saga;
-	using MassTransit.Transports.Msmq;
-	using MassTransit.WindsorIntegration;
 	using Topshelf;
 
 	internal static class Program
@@ -35,6 +32,10 @@ namespace Starbucks.Barista
 		[STAThread]
 		private static void Main(string[] args)
 		{
+		    AppDomain.CurrentDomain.UnhandledException += (a, ex) =>
+		    {
+                Console.WriteLine("hi");
+		    };
 			XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
 
 			var container = new WindsorContainer();
@@ -46,9 +47,12 @@ namespace Starbucks.Barista
 		    {
 		        sbc.ReceiveFrom("msmq://localhost/starbucks_barista");
 		        sbc.UseMsmq();
-		        //do i need to set the multicast transport factory?
 		        sbc.UseMulticastSubscriptionClient();
-		        sbc.LoadConsumersFromContainer(container);
+
+                sbc.Subscribe(subs=>
+                {
+                    subs.LoadFrom(container);
+                });
 		    });
 		    container.Register(Component.For<IServiceBus>().Instance(Bus.Instance()));
 
