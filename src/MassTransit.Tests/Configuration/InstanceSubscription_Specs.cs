@@ -45,7 +45,7 @@ namespace MassTransit.Tests.Configuration
 		[Then]
 		public void Should_have_subscribed()
 		{
-			_bus.ShouldHaveSubscriptionFor<PingMessage>();
+			_bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 		}
 
 		[Then]

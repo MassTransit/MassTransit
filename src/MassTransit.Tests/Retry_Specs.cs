@@ -50,7 +50,7 @@ namespace MassTransit.Tests
 					}
 				});
 
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
 			LocalBus.Publish(new PingMessage());
 

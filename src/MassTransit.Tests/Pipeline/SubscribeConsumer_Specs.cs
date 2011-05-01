@@ -22,6 +22,7 @@ namespace MassTransit.Tests.Pipeline
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using TestConsumers;
+	using TestFramework;
 
 	[TestFixture]
 	public class When_subscribing_a_consumer_to_the_pipeline
@@ -75,18 +76,19 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void A_component_should_be_subscribed_to_the_pipeline()
 		{
-			TestMessageConsumer<PingMessage> consumer = MockRepository.GenerateMock<TestMessageConsumer<PingMessage>>();
+			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
 			_pipeline.Subscribe<TestMessageConsumer<PingMessage>>(() => consumer);
 
 			PipelineViewer.Trace(_pipeline);
 
 			PingMessage message = new PingMessage();
-			consumer.Expect(x => x.Consume(message));
+
+			_pipeline.ShouldHaveSubscriptionFor<PingMessage>();
 
 			_pipeline.Dispatch(message);
 
-			consumer.VerifyAllExpectations();
+			consumer.ShouldHaveReceivedMessage(message, 1.Seconds());
 		}
 
 		[Test]

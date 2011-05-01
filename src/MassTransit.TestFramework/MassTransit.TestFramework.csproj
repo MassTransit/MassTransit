@@ -109,6 +109,7 @@
     <Compile Include="Fixtures\SubscriptionServiceTestFixture.cs" />
     <Compile Include="Given_a_subscription_service_and_two_service_buses.cs" />
     <Compile Include="Given_two_service_buses_with_shared_subscriptions.cs" />
+    <Compile Include="Helpers\PipelineSinkLocator.cs" />
     <Compile Include="LogSetup.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="SelectiveConsumerOf.cs" />

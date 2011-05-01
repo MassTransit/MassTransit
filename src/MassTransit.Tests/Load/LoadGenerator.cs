@@ -57,7 +57,7 @@ namespace MassTransit.Tests.Load
 		{
 			using (bus.SubscribeInstance(this).Disposable())
 			{
-				instances.Each(x => x.ShouldHaveSubscriptionFor<TResponse>());
+				instances.Each(x => x.ShouldHaveRemoteSubscriptionFor<TResponse>());
 
 				for (int i = 0; i < iterations; i++)
 				{

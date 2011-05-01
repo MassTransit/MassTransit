@@ -48,8 +48,8 @@ namespace MassTransit.Transports.Msmq.Tests
 		    		_faultFuture.Set(message);
 		    	});
 
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
-			LocalBus.ShouldHaveSubscriptionFor<Fault<PingMessage, Guid>>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<Fault<PingMessage, Guid>>();
 
 			_ping = new PingMessage();
 

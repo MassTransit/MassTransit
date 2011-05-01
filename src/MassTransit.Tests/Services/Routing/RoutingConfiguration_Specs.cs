@@ -36,8 +36,8 @@ namespace MassTransit.Tests.Services.Routing
 			IBusService busService = configurator.Create(LocalBus);
 			busService.Start(LocalBus);
 
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
-			LocalBus.ShouldHaveSubscriptionFor<PongMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PongMessage>();
 
 			busService.Stop();
 

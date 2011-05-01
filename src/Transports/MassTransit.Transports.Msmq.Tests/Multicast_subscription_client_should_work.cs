@@ -38,7 +38,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			RemoteBus.SubscribeHandler<PingMessage>(message => { _future.Set(message); });
 
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
 			LocalBus.Publish(_ping);
 		}

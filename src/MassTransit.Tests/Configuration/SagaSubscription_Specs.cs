@@ -45,19 +45,19 @@ namespace MassTransit.Tests.Configuration
 		[Then]
 		public void Should_have_subscribed_start_message()
 		{
-			_bus.ShouldHaveSubscriptionFor<StartSimpleSaga>();
+			_bus.ShouldHaveRemoteSubscriptionFor<StartSimpleSaga>();
 		}
 
 		[Then]
 		public void Should_have_subscribed_approve_message()
 		{
-			_bus.ShouldHaveSubscriptionFor<ApproveSimpleCustomer>();
+			_bus.ShouldHaveRemoteSubscriptionFor<ApproveSimpleCustomer>();
 		}
 
 		[Then]
 		public void Should_have_subscribed_finish_message()
 		{
-			_bus.ShouldHaveSubscriptionFor<FinishSimpleSaga>();
+			_bus.ShouldHaveRemoteSubscriptionFor<FinishSimpleSaga>();
 		}
 	}
 }
