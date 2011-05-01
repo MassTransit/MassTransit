@@ -21,6 +21,7 @@ namespace MassTransit.TestFramework.Fixtures
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
+	using Saga;
 
 	[TestFixture]
 	public class EndpointTestFixture<TTransportFactory> :
@@ -32,8 +33,6 @@ namespace MassTransit.TestFramework.Fixtures
 		[TestFixtureSetUp]
 		public void EndpointTestFixtureSetup()
 		{
-			SetupObjectBuilder();
-
 			SetupEndpointFactory();
 
 			SetupServiceBusDefaults();
@@ -53,11 +52,6 @@ namespace MassTransit.TestFramework.Fixtures
 			Buses = new List<IServiceBus>();
 		}
 
-		protected virtual void SetupObjectBuilder()
-		{
-			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
-		}
-
 		protected virtual void SetupEndpointFactory()
 		{
 			var defaultSettings = new EndpointFactoryDefaultSettings();
@@ -66,8 +60,6 @@ namespace MassTransit.TestFramework.Fixtures
 			_endpointFactoryConfigurator.AddTransportFactory<TTransportFactory>();
 
 			_endpointFactoryConfigurator.Validate();
-
-			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
 
 			ConfigureEndpointFactory(_endpointFactoryConfigurator);
 
@@ -81,11 +73,8 @@ namespace MassTransit.TestFramework.Fixtures
 					x.SetEndpointCache(EndpointCache);
 					x.SetConcurrentConsumerLimit(4);
 					x.SetReceiveTimeout(50.Milliseconds());
-					x.SetObjectBuilder(ObjectBuilder);
 					x.EnableAutoStart();
 				});
-
-			ObjectBuilder.Add(EndpointCache);
 		}
 
 		protected virtual void ConfigureEndpointFactory(EndpointFactoryConfigurator x)
@@ -97,7 +86,6 @@ namespace MassTransit.TestFramework.Fixtures
 			ServiceBusFactory.ConfigureDefaultSettings(x =>
 				{
 					x.SetEndpointCache(EndpointCache);
-					x.SetObjectBuilder(ObjectBuilder);
 					x.SetReceiveTimeout(50.Milliseconds());
 					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
 				});
@@ -113,7 +101,13 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected IEndpointCache EndpointCache { get; private set; }
 
-		protected IObjectBuilder ObjectBuilder { get; private set; }
+		public InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
+			where TSaga : class, ISaga
+		{
+			var repository = new InMemorySagaRepository<TSaga>();
+
+			return repository;
+		}
 
 		protected virtual IServiceBus SetupServiceBus(Uri uri, Action<ServiceBusConfigurator> configure)
 		{

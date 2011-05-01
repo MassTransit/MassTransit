@@ -13,39 +13,30 @@
 namespace MassTransit.SubscriptionBuilders
 {
 	using System;
-	using Magnum.Reflection;
+	using Pipeline;
+	using SubscriptionConnectors;
 	using Subscriptions;
-	using Util;
 
 	public class InstanceSubscriptionBuilder :
 		SubscriptionBuilder
 	{
 		readonly object _instance;
 		readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
+		InstanceConnector _connector;
 
 		public InstanceSubscriptionBuilder(object instance,
 		                                   Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)
 		{
 			_instance = instance;
+			_connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
 			_referenceFactory = referenceFactory;
 		}
 
-		public ISubscriptionReference Subscribe(IServiceBus bus)
+		public ISubscriptionReference Subscribe(IPipelineConfigurator configurator)
 		{
-			Type instanceType = _instance.GetType();
-			var genericTypes = new[] {instanceType};
-
-			UnsubscribeAction unsubscribe = this.FastInvoke<InstanceSubscriptionBuilder, UnsubscribeAction>(genericTypes,
-				"AddSubscription", bus, _instance);
+			UnsubscribeAction unsubscribe = _connector.Connect(configurator, _instance);
 
 			return _referenceFactory(unsubscribe);
-		}
-
-		[UsedImplicitly]
-		UnsubscribeAction AddSubscription<T>(IServiceBus bus, T instance)
-			where T : class
-		{
-			return bus.Subscribe(instance);
 		}
 	}
 }

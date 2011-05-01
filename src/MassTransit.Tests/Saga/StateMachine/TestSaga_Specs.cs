@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			_sagaId = Guid.NewGuid();
 
-			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
+			_repository = SetupSagaRepository<TestSaga>();
 
 		    _initiateSimpleSagaUnsubscribeCalled = false;
 		    _completeSimpleSagaUnsubscribeCalled = false;
@@ -48,7 +48,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			LocalBus.InboundPipeline.Configure(x => x.Register(_subscriptionEvent));
 
-			_remove = LocalBus.Subscribe<TestSaga>();
+			_remove = LocalBus.SubscribeSaga<TestSaga>(_repository);
 
 			PipelineViewer.Trace(LocalBus.InboundPipeline);
 		}
@@ -90,9 +90,9 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			_sagaId = Guid.NewGuid();
 
-			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
+			_repository = SetupSagaRepository<TestSaga>();
 
-			_remove = LocalBus.Subscribe<TestSaga>();
+			_remove = LocalBus.SubscribeSaga<TestSaga>(_repository);
 
 			PipelineViewer.Trace(LocalBus.InboundPipeline);
 		}
@@ -150,9 +150,9 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			_sagaId = Guid.NewGuid();
 
-			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
+			_repository = SetupSagaRepository<TestSaga>();
 
-			LocalBus.Subscribe<TestSaga>();
+			LocalBus.SubscribeSaga<TestSaga>(_repository);
 		}
 
 		private Guid _sagaId;

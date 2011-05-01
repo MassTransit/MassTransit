@@ -67,19 +67,24 @@ namespace MassTransit.Subscriptions
 		}
 		public void Start(IServiceBus bus)
 		{
-			foreach (SubscriptionBuilder builder in _builders)
-			{
-				try
+			bus.Configure(pipelineConfigurator =>
 				{
-					ISubscriptionReference subscription = builder.Subscribe(bus);
-					_subscriptions.Add(subscription);
-				}
-				catch (Exception)
-				{
-					StopAllSubscriptions();
-					throw;
-				}
-			}
+					foreach (SubscriptionBuilder builder in _builders)
+					{
+						try
+						{
+							ISubscriptionReference subscription = builder.Subscribe(pipelineConfigurator);
+							_subscriptions.Add(subscription);
+						}
+						catch (Exception)
+						{
+							StopAllSubscriptions();
+							throw;
+						}
+					}
+
+					return () => true;
+				});
 		}
 
 		public void Stop()

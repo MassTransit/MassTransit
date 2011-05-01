@@ -10,37 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionConnectors
+namespace MassTransit.Saga.SubscriptionConnectors
 {
 	using System;
-	using System.Linq.Expressions;
 	using Exceptions;
-	using Magnum.Reflection;
+	using MassTransit.Pipeline;
 	using Pipeline;
-	using Saga;
-	using Saga.Pipeline;
 
-	public class ObservesSagaSubscriptionConnector<TSaga, TMessage> :
+	public class InitiatedBySagaSubscriptionConnector<TSaga, TMessage> :
 		SagaSubscriptionConnector<TSaga, TMessage>
-		where TSaga : class, ISaga, Observes<TMessage, TSaga>
-		where TMessage : class
+		where TSaga : class, ISaga, InitiatedBy<TMessage>
+		where TMessage : class, CorrelatedBy<Guid>
 	{
-		readonly Expression<Func<TSaga, TMessage, bool>> _selector;
-
-		public ObservesSagaSubscriptionConnector(ISagaRepository<TSaga> sagaRepository)
-			: base(sagaRepository, new ExistingSagaPolicy<TSaga, TMessage>(x => false))
+		public InitiatedBySagaSubscriptionConnector(ISagaRepository<TSaga> sagaRepository)
+			: base(sagaRepository, new InitiatingSagaPolicy<TSaga, TMessage>(x => false))
 		{
-			var instance = (Observes<TMessage, TSaga>) FastActivator<TSaga>.Create(Guid.Empty);
-
-			_selector = instance.GetBindExpression();
 		}
 
 		protected override IPipelineSink<TMessage> CreateSink(IServiceBus bus, ISagaRepository<TSaga> repository,
 		                                                      ISagaPolicy<TSaga, TMessage> policy)
 		{
-			var sink = new PropertySagaMessageSink<TSaga, TMessage>(bus, repository, policy, _selector);
+			var sink = new CorrelatedSagaMessageSink<TSaga, TMessage>(bus, repository, policy);
 			if (sink == null)
-				throw new ConfigurationException("Could not build the message sink for " + typeof (TSaga).FullName);
+				throw new ConfigurationException("Could not build the initiating message sink for " + typeof (TSaga).FullName);
 
 			return sink;
 		}

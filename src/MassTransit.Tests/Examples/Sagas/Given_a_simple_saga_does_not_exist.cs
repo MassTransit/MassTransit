@@ -22,7 +22,7 @@ namespace MassTransit.Tests.Examples.Sagas
 		[Given]
 		public void A_simple_saga_does_not_exist()
 		{
-			LocalBus.Subscribe<SimpleStateMachineSaga>();
+			LocalBus.SubscribeSaga<SimpleStateMachineSaga>(Repository);
 		}
 	}
 }

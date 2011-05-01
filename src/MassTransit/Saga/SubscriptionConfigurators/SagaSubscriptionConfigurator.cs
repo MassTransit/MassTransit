@@ -10,9 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionConfigurators
+namespace MassTransit.Saga.SubscriptionConfigurators
 {
-	using Saga;
+	using MassTransit.SubscriptionConfigurators;
 
 	public interface SagaSubscriptionConfigurator<TSaga> :
 		SubscriptionConfigurator<SagaSubscriptionConfigurator<TSaga>>

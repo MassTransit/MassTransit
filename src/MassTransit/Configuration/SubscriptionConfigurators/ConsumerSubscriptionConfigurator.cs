@@ -12,6 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
+	public interface ConsumerSubscriptionConfigurator :
+		SubscriptionConfigurator<ConsumerSubscriptionConfigurator>
+	{
+		
+	}
+
 	public interface ConsumerSubscriptionConfigurator<TConsumer> :
 		SubscriptionConfigurator<ConsumerSubscriptionConfigurator<TConsumer>>
 		where TConsumer : class

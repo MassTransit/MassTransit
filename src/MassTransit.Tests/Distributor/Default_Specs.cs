@@ -48,7 +48,7 @@ namespace MassTransit.Tests.Distributor
 			int workerAvaiableCountRecieved = 0;
 			var messageRecieved = new ManualResetEvent(false);
 
-			UnsubscribeAction unsubscribe = LocalBus.Subscribe<IWorkerAvailable>(message =>
+			UnsubscribeAction unsubscribe = LocalBus.SubscribeHandler<IWorkerAvailable>(message =>
 				{
 					Interlocked.Increment(ref workerAvaiableCountRecieved);
 					messageRecieved.Set();
@@ -69,7 +69,7 @@ namespace MassTransit.Tests.Distributor
 			int pingRequestsRecieved = 0;
 			var messageRecieved = new ManualResetEvent(false);
 
-			UnsubscribeAction unsubscribe = Instances["A"].DataBus.ControlBus.Subscribe<PingWorker>(message =>
+			UnsubscribeAction unsubscribe = Instances["A"].DataBus.ControlBus.SubscribeHandler<PingWorker>(message =>
 				{
 					Interlocked.Increment(ref pingRequestsRecieved);
 					messageRecieved.Set();
@@ -88,7 +88,7 @@ namespace MassTransit.Tests.Distributor
 			int workerAvaiableCountRecieved = 0;
 			var messageRecieved = new ManualResetEvent(false);
 
-			UnsubscribeAction unsubscribe = LocalBus.Subscribe<WorkerAvailable<FirstCommand>>(message =>
+			UnsubscribeAction unsubscribe = LocalBus.SubscribeHandler<WorkerAvailable<FirstCommand>>(message =>
 				{
 					Interlocked.Increment(ref workerAvaiableCountRecieved);
 					messageRecieved.Set();

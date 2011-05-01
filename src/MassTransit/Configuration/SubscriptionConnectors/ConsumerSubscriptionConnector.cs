@@ -16,7 +16,6 @@ namespace MassTransit.SubscriptionConnectors
 	using Pipeline;
 	using Pipeline.Configuration;
 	using Pipeline.Sinks;
-	using Saga.Configuration;
 
 	public interface ConsumerSubscriptionConnector :
 		ConsumerConnector

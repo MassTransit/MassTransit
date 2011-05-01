@@ -12,33 +12,34 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
+	using System;
 	using System.Collections.Generic;
 	using Configurators;
-	using Saga;
 	using SubscriptionBuilders;
 
-	public class SagaSubscriptionConfiguratorImpl<TSaga> :
-		SubscriptionConfiguratorImpl<SagaSubscriptionConfigurator<TSaga>>,
-		SagaSubscriptionConfigurator<TSaga>,
+	public class UntypedConsumerSubscriptionConfigurator<TConsumer> :
+		SubscriptionConfiguratorImpl<ConsumerSubscriptionConfigurator>,
+		ConsumerSubscriptionConfigurator,
 		SubscriptionBuilderConfigurator
-		where TSaga : class, ISaga
+		where TConsumer : class
 	{
-		readonly ISagaRepository<TSaga> _sagaRepository;
+		readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-		public SagaSubscriptionConfiguratorImpl(ISagaRepository<TSaga> sagaRepository)
+		public UntypedConsumerSubscriptionConfigurator(Func<Type, object> consumerFactory)
 		{
-			_sagaRepository = sagaRepository;
+			_consumerFactory = new DelegateConsumerFactory<TConsumer>(() => (TConsumer) consumerFactory(typeof (TConsumer)));
 		}
+
 
 		public IEnumerable<ValidationResult> Validate()
 		{
-			if (_sagaRepository == null)
-				yield return this.Failure("The saga repository cannot be null.");
+			if (_consumerFactory == null)
+				yield return this.Failure("The consumer factory cannot be null.");
 		}
 
 		public SubscriptionBuilder Configure()
 		{
-			return new SagaSubscriptionBuilder<TSaga>(_sagaRepository, ReferenceFactory);
+			return new ConsumerSubscriptionBuilder<TConsumer>(_consumerFactory, ReferenceFactory);
 		}
 	}
 }

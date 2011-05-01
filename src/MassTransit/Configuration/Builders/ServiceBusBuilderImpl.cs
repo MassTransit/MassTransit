@@ -90,7 +90,7 @@ namespace MassTransit.Builders
 				catch (Exception ex)
 				{
 					throw new ConfigurationException("Failed to create the bus service: " +
-					                                 busServiceConfigurator.ServiceType.ToShortTypeName());
+					                                 busServiceConfigurator.ServiceType.ToShortTypeName(), ex);
 				}
 			}
 		}

@@ -26,6 +26,11 @@ namespace MassTransit.TestFramework.Fixtures
 	{
 		private InMemorySagaRepository<TSaga> _repository;
 
+		public InMemorySagaRepository<TSaga> Repository
+		{
+			get { return _repository; }
+		}
+
 		public SagaTestFixture()
 		{
 			LocalUri = new Uri("loopback://localhost/mt_client");
@@ -35,7 +40,7 @@ namespace MassTransit.TestFramework.Fixtures
 		[TestFixtureSetUp]
 		public void SagaTestFixtureSetup()
 		{
-			_repository = ObjectBuilder.SetupSagaRepository<TSaga>();
+			_repository = SetupSagaRepository<TSaga>();
 		}
 
 		protected Guid SagaId { get; private set; }

@@ -93,10 +93,10 @@ namespace MassTransit.Services.Subscriptions.Server
 		public void Start()
 		{
 			_log.Info("Subscription Service Starting");
-			_unsubscribeToken += _bus.Subscribe(this);
+			_unsubscribeToken += _bus.SubscribeInstance(this);
 
-			_unsubscribeToken += _bus.Subscribe<SubscriptionClientSaga>();
-			_unsubscribeToken += _bus.Subscribe<SubscriptionSaga>();
+			_unsubscribeToken += _bus.SubscribeSaga<SubscriptionClientSaga>(_subscriptionClientSagas);
+			_unsubscribeToken += _bus.SubscribeSaga<SubscriptionSaga>(_subscriptionSagas);
 
 			// TODO may need to load/prime the subscription repository at this point?
 

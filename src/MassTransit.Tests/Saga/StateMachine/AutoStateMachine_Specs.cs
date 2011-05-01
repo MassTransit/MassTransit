@@ -33,10 +33,10 @@ namespace MassTransit.Tests.Saga.StateMachine
 		{
 			base.EstablishContext();
 
-			_repository = SetupSagaRepository<AutoStateMachineSaga>(ObjectBuilder);
+			_repository = SetupSagaRepository<AutoStateMachineSaga>();
 
 			// this just shows that you can easily respond to the message
-			RemoteBus.Subscribe<SendUserVerificationEmail>(
+			RemoteBus.SubscribeHandler<SendUserVerificationEmail>(
 				x => RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email)));
 
 			_transactionId = CombGuid.Generate();
@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 		[Test]
 		public void A_state_machine_based_saga_should_automatically_wire_up_subscriptions()
 		{
-			RemoteBus.Subscribe<AutoStateMachineSaga>();
+			RemoteBus.SubscribeSaga<AutoStateMachineSaga>(_repository);
 
 			PipelineViewer.Trace(RemoteBus.InboundPipeline);
 

@@ -61,7 +61,7 @@ namespace MassTransit.Tests
 		{
 			var consumer = new TestMessageConsumer<PingMessage>();
 
-			LocalBus.Subscribe(consumer);
+			LocalBus.SubscribeInstance(consumer);
 
 			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Uri));
 		}
@@ -72,7 +72,7 @@ namespace MassTransit.Tests
 		{
 			var consumer = new TestSelectiveConsumer<PingMessage>();
 
-			LocalBus.Subscribe(consumer);
+			LocalBus.SubscribeInstance(consumer);
 
 			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Uri));
 		}
@@ -80,7 +80,7 @@ namespace MassTransit.Tests
 		[Test]
 		public void The_bus_should_add_a_subscription_to_the_subscription_cache()
 		{
-			LocalBus.Subscribe<PingMessage>(delegate { });
+			LocalBus.SubscribeHandler<PingMessage>(delegate { });
 
 			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Uri));
 		}

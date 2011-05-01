@@ -29,10 +29,10 @@ namespace MassTransit.Transports.Nms.Tests
 		public void It_should_be_received_by_multiple_subscribed_consumers()
 		{
 			var localConsumer = new TestMessageConsumer<PingMessage>();
-			LocalBus.Subscribe(localConsumer);
+			LocalBus.SubscribeInstance(localConsumer);
 
 			var remoteConsumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.Subscribe(remoteConsumer);
+			RemoteBus.SubscribeInstance(remoteConsumer);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
@@ -45,7 +45,7 @@ namespace MassTransit.Transports.Nms.Tests
 		public void It_should_be_received_by_one_subscribed_consumer()
 		{
 			var consumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.Subscribe(consumer);
+			RemoteBus.SubscribeInstance(consumer);
 
 			var message = new PingMessage();
 			LocalBus.Publish(message);
@@ -57,7 +57,7 @@ namespace MassTransit.Transports.Nms.Tests
 		public void It_should_be_received_by_one_subscribed_consumer_on_the_same_bus()
 		{
 			var consumer = new TestMessageConsumer<PingMessage>();
-			LocalBus.Subscribe(consumer);
+			LocalBus.SubscribeInstance(consumer);
 
 			var message = new PingMessage();
 			LocalBus.Publish(message);

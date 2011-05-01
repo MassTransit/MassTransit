@@ -26,13 +26,13 @@ namespace MassTransit.Tests.Saga
 		{
 			base.EstablishContext();
 
-			var sagaRepository = SetupSagaRepository<RegisterUserSaga>(ObjectBuilder);
+			var sagaRepository = SetupSagaRepository<RegisterUserSaga>();
 
 			// this just shows that you can easily respond to the message
-			RemoteBus.Subscribe<SendUserVerificationEmail>(
+			RemoteBus.SubscribeHandler<SendUserVerificationEmail>(
 				x => RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email)));
 
-			RemoteBus.Subscribe<RegisterUserSaga>();
+			RemoteBus.SubscribeSaga<RegisterUserSaga>(sagaRepository);
 		}
 
 		[Test]

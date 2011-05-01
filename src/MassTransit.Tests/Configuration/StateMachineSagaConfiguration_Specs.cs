@@ -4,6 +4,7 @@
 	using Examples.Sagas.Messages;
 	using Magnum.TestFramework;
 	using MassTransit.Saga;
+	using MassTransit.Saga.Configuration;
 	using Rhino.Mocks;
 	using TestFramework;
 

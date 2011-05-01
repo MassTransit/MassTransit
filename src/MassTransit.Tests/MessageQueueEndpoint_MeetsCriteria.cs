@@ -29,7 +29,7 @@ namespace MassTransit.Tests
             FutureMessage<PingMessage> fm=new FutureMessage<PingMessage>();
 			bool workDid = false;
 
-			LocalBus.Subscribe<PingMessage>(
+			LocalBus.SubscribeHandler<PingMessage>(
 				(msg)=> {workDid = true; fm.Set(msg); },
 				delegate { return true; });
 

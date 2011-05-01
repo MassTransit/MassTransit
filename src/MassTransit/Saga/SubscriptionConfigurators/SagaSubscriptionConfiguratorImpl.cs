@@ -10,34 +10,36 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionConfigurators
+namespace MassTransit.Saga.SubscriptionConfigurators
 {
 	using System.Collections.Generic;
 	using Configurators;
+	using MassTransit.SubscriptionBuilders;
+	using MassTransit.SubscriptionConfigurators;
 	using SubscriptionBuilders;
 
-	public class ConsumerSubscriptionConfiguratorImpl<TConsumer> :
-		SubscriptionConfiguratorImpl<ConsumerSubscriptionConfigurator<TConsumer>>,
-		ConsumerSubscriptionConfigurator<TConsumer>,
+	public class SagaSubscriptionConfiguratorImpl<TSaga> :
+		SubscriptionConfiguratorImpl<SagaSubscriptionConfigurator<TSaga>>,
+		SagaSubscriptionConfigurator<TSaga>,
 		SubscriptionBuilderConfigurator
-		where TConsumer : class
+		where TSaga : class, ISaga
 	{
-		readonly IConsumerFactory<TConsumer> _consumerFactory;
+		readonly ISagaRepository<TSaga> _sagaRepository;
 
-		public ConsumerSubscriptionConfiguratorImpl(IConsumerFactory<TConsumer> consumerFactory)
+		public SagaSubscriptionConfiguratorImpl(ISagaRepository<TSaga> sagaRepository)
 		{
-			_consumerFactory = consumerFactory;
+			_sagaRepository = sagaRepository;
 		}
 
 		public IEnumerable<ValidationResult> Validate()
 		{
-			if (_consumerFactory == null)
-				yield return this.Failure("The consumer factory cannot be null.");
+			if (_sagaRepository == null)
+				yield return this.Failure("The saga repository cannot be null.");
 		}
 
 		public SubscriptionBuilder Configure()
 		{
-			return new ConsumerSubscriptionBuilder<TConsumer>(_consumerFactory, ReferenceFactory);
+			return new SagaSubscriptionBuilder<TSaga>(_sagaRepository, ReferenceFactory);
 		}
 	}
 }

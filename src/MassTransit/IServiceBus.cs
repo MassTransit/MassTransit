@@ -44,50 +44,6 @@ namespace MassTransit
 		/// <param name="configure"></param>
     	UnsubscribeAction Configure(Func<IPipelineConfigurator,UnsubscribeAction> configure);
 
-        /// <summary>
-        /// Adds a message handler to the service bus for handling a specific type of message
-        /// </summary>
-        /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
-        /// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		UnsubscribeAction Subscribe<T>(Action<T> callback) where T : class;
-
-        /// <summary>
-        /// Adds a message handler to the service bus for handling a specific type of message
-        /// </summary>
-        /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
-        /// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        /// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		UnsubscribeAction Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class;
-
-        /// <summary>
-        /// Connects any consumers for the component to the message dispatcher
-        /// </summary>
-        /// <typeparam name="T">The consumer type</typeparam>
-        /// <param name="consumer">The component</param>
-		UnsubscribeAction Subscribe<T>(T consumer) where T : class;
-
-    	/// <summary>
-        /// Adds a component to the dispatcher that will be created on demand to handle messages
-        /// </summary>
-        /// <typeparam name="TConsumer">The type of the component to add</typeparam>
-		UnsubscribeAction Subscribe<TConsumer>() where TConsumer : class;
-
-        /// <summary>
-        /// Adds a component to the dispatcher that will be created on demand to handle messages
-        /// </summary>
-        /// <param name="consumerType">The type of component to add</param>
-		UnsubscribeAction Subscribe(Type consumerType);
-
-
-		/// <summary>
-		/// Subscribe to a message that has a consumer that is retrieved from the specified expression
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="getConsumerAction"></param>
-		/// <returns></returns>
-    	UnsubscribeAction SubscribeConsumer<T>(Func<T,Action<T>> getConsumerAction) where T : class;
-
-
     	/// <summary>
         /// Publishes a message to all subscribed consumers for the message type
         /// </summary>
@@ -112,6 +68,4 @@ namespace MassTransit
 
         IEndpoint GetEndpoint(Uri address);
     }
-
-	public delegate Action<T> GetConsumerAction<T>(T message);
 }

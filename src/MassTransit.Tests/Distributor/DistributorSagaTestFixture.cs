@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Distributor
 		{
 			base.EstablishContext();
 
-			FirstSagaRepository = ObjectBuilder.SetupSagaRepository<FirstSaga>();
+			FirstSagaRepository = SetupSagaRepository<FirstSaga>();
 		}
 
 		protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)

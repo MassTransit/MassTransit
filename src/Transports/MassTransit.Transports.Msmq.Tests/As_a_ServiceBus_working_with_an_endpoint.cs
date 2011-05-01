@@ -33,7 +33,7 @@ namespace MassTransit.Transports.Msmq.Tests
         public void It_should_be_received_by_one_subscribed_consumer()
         {
             var consumer = new TestMessageConsumer<PingMessage>();
-            RemoteBus.Subscribe(consumer);
+            RemoteBus.SubscribeInstance(consumer);
 
             var message = new PingMessage();
             LocalBus.Publish(message);
@@ -46,7 +46,7 @@ namespace MassTransit.Transports.Msmq.Tests
         {
 			FutureMessage<PingMessage> future = new FutureMessage<PingMessage>();
 
-            RemoteBus.Subscribe<PingMessage>(m =>
+            RemoteBus.SubscribeHandler<PingMessage>(m =>
             	{
             		future.Set(m);
 
@@ -65,12 +65,12 @@ namespace MassTransit.Transports.Msmq.Tests
         public void It_should_not_rollback_a_send_if_an_exception_is_thrown()
         {
             var consumer = new TestMessageConsumer<PongMessage>();
-            LocalBus.Subscribe(consumer);
+            LocalBus.SubscribeInstance(consumer);
 
             var message = new PingMessage();
             var response = new PongMessage(message.CorrelationId);
 
-            RemoteBus.Subscribe<PingMessage>(m =>
+            RemoteBus.SubscribeHandler<PingMessage>(m =>
             {
                 RemoteBus.Publish(response);
                 throw new ApplicationException("Boing!");
@@ -91,12 +91,12 @@ namespace MassTransit.Transports.Msmq.Tests
         public void Multiple_Local_Services_Should_Be_Available()
         {
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
-            LocalBus.Subscribe<UpdateMessage>(msg => _updateEvent.Set());
+            LocalBus.SubscribeHandler<UpdateMessage>(msg => _updateEvent.Set());
 
             ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
 
-            LocalBus.Subscribe<DeleteMessage>(
+            LocalBus.SubscribeHandler<DeleteMessage>(
                 delegate { _deleteEvent.Set(); });
 
 
@@ -123,12 +123,12 @@ namespace MassTransit.Transports.Msmq.Tests
 
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            RemoteBus.Subscribe<UpdateMessage>(
+            RemoteBus.SubscribeHandler<UpdateMessage>(
                 delegate { _updateEvent.Set(); });
 
             ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-            RemoteBus.Subscribe<DeleteMessage>(
+            RemoteBus.SubscribeHandler<DeleteMessage>(
                 delegate { _deleteEvent.Set(); });
 
             DeleteMessage dm = new DeleteMessage();
@@ -153,7 +153,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            LocalBus.Subscribe<UpdateMessage>(
+            LocalBus.SubscribeHandler<UpdateMessage>(
                 delegate { _updateEvent.Set(); });
 
             UpdateMessage um = new UpdateMessage();
@@ -171,7 +171,7 @@ namespace MassTransit.Transports.Msmq.Tests
            
                 ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-                RemoteBus.Subscribe<UpdateMessage>(
+                RemoteBus.SubscribeHandler<UpdateMessage>(
                     delegate { _updateEvent.Set(); });
 
                 UpdateMessage um = new UpdateMessage();
@@ -198,9 +198,9 @@ namespace MassTransit.Transports.Msmq.Tests
 
             ManualResetEvent _repliedEvent = new ManualResetEvent(false);
 
-            RemoteBus.Subscribe(handler);
+            RemoteBus.SubscribeInstance(handler);
 
-            LocalBus.Subscribe<UpdateAcceptedMessage>(
+            LocalBus.SubscribeHandler<UpdateAcceptedMessage>(
                 delegate { _repliedEvent.Set(); });
 
             UpdateMessage um = new UpdateMessage();
@@ -224,7 +224,7 @@ namespace MassTransit.Transports.Msmq.Tests
         {
             CrashingService service = new CrashingService();
 
-            LocalBus.Subscribe(service);
+            LocalBus.SubscribeInstance(service);
 
             LocalEndpoint.Send(new BogusMessage());
 
@@ -289,7 +289,7 @@ namespace MassTransit.Transports.Msmq.Tests
         public void It_should_be_received_by_one_subscribed_consumer()
         {
             var consumer = new TestMessageConsumer<PingMessage>();
-            RemoteBus.Subscribe(consumer);
+            RemoteBus.SubscribeInstance(consumer);
 
             Thread.Sleep(5.Seconds());
 

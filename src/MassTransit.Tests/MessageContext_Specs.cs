@@ -31,14 +31,14 @@ namespace MassTransit.Tests
 			var ping = new PingMessage();
 
 			var otherConsumer = new TestMessageConsumer<PongMessage>();
-			RemoteBus.Subscribe(otherConsumer);
+			RemoteBus.SubscribeInstance(otherConsumer);
 
 			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(ping.CorrelationId);
-			LocalBus.Subscribe(consumer);
+			LocalBus.SubscribeInstance(consumer);
 
 			var pong = new FutureMessage<PongMessage>();
 
-			RemoteBus.Subscribe<PingMessage>(message =>
+			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
 					pong.Set(new PongMessage(message.CorrelationId));
 
@@ -59,14 +59,14 @@ namespace MassTransit.Tests
 			var ping = new PingMessage();
 
 			var otherConsumer = new TestMessageConsumer<PongMessage>();
-			RemoteBus.Subscribe(otherConsumer);
+			RemoteBus.SubscribeInstance(otherConsumer);
 
 			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(ping.CorrelationId);
-			LocalBus.Subscribe(consumer);
+			LocalBus.SubscribeInstance(consumer);
 
 			var pong = new FutureMessage<PongMessage>();
 
-			RemoteBus.Subscribe<PingMessage>(message =>
+			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
 					pong.Set(new PongMessage(message.CorrelationId));
 
@@ -90,7 +90,7 @@ namespace MassTransit.Tests
 		{
 			var received = new FutureMessage<PingMessage>();
 
-			LocalBus.Subscribe<PingMessage>(message =>
+			LocalBus.SubscribeHandler<PingMessage>(message =>
 				{
 					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.DestinationAddress);
 
@@ -107,7 +107,7 @@ namespace MassTransit.Tests
 		{
 			var received = new FutureMessage<PingMessage>();
 
-			LocalBus.Subscribe<PingMessage>(message =>
+			LocalBus.SubscribeHandler<PingMessage>(message =>
 				{
 					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.FaultAddress);
 
@@ -124,7 +124,7 @@ namespace MassTransit.Tests
 		{
 			var received = new FutureMessage<PingMessage>();
 
-			LocalBus.Subscribe<PingMessage>(message =>
+			LocalBus.SubscribeHandler<PingMessage>(message =>
 				{
 					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.ResponseAddress);
 
@@ -141,7 +141,7 @@ namespace MassTransit.Tests
 		{
 			var received = new FutureMessage<PingMessage>();
 
-			LocalBus.Subscribe<PingMessage>(message =>
+			LocalBus.SubscribeHandler<PingMessage>(message =>
 				{
 					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.SourceAddress);
 
@@ -198,7 +198,7 @@ namespace MassTransit.Tests
 		[Test]
 		public void The_method_should_be_called_for_each_destination_endpoint()
 		{
-			LocalBus.Subscribe<PingMessage>(x => { });
+			LocalBus.SubscribeHandler<PingMessage>(x => { });
 
 			var ping = new PingMessage();
 
@@ -213,8 +213,8 @@ namespace MassTransit.Tests
 		[Test]
 		public void The_method_should_be_called_for_each_destination_endpoint_when_there_are_multiple()
 		{
-			LocalBus.Subscribe<PingMessage>(x => { });
-			RemoteBus.Subscribe<PingMessage>(x => { });
+			LocalBus.SubscribeHandler<PingMessage>(x => { });
+			RemoteBus.SubscribeHandler<PingMessage>(x => { });
 
 			var ping = new PingMessage();
 
@@ -248,7 +248,7 @@ namespace MassTransit.Tests
 
 			LocalBus.Publish(ping, x => { x.ForEachSubscriber<PingMessage>((message, endpoint) => consumers.Add(endpoint.Uri)); });
 
-			LocalBus.Subscribe<PingMessage>(x => { });
+			LocalBus.SubscribeHandler<PingMessage>(x => { });
 
 			LocalBus.Publish(ping);
 

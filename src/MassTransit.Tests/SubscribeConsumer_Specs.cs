@@ -34,7 +34,7 @@ namespace MassTransit.Tests
 			var getter = MockRepository.GenerateMock<Func<PingMessage, Action<PingMessage>>>();
 			getter.Expect(x => x(ping)).Return(called.Set);
 
-			LocalBus.SubscribeConsumer<PingMessage>(getter);
+			LocalBus.SubscribeSelectiveHandler<PingMessage>(getter);
 
 			LocalBus.Publish(ping);
 

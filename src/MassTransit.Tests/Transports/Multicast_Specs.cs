@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Transports
 			PingMessage message = new PingMessage();
 
 			var consumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
-			RemoteBus.Subscribe(consumer);
+			RemoteBus.SubscribeInstance(consumer);
 
 			LocalBus.Publish(message);
 			LocalBus.Publish(message);
@@ -44,10 +44,10 @@ namespace MassTransit.Tests.Transports
 			PingMessage message = new PingMessage();
 
 			var remoteConsumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
-			RemoteBus.Subscribe(remoteConsumer);
+			RemoteBus.SubscribeInstance(remoteConsumer);
 
 			var localConsumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
-			LocalBus.Subscribe(localConsumer);
+			LocalBus.SubscribeInstance(localConsumer);
 
 			// okay so a shared endpoint results in only one service bus in the process getting the message
 

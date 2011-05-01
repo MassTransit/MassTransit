@@ -26,7 +26,7 @@ namespace MassTransit.Tests
 		public void A_simple_bus_should_be_able_to_subscribe_and_publish()
 		{
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-			LocalBus.Subscribe(consumer);
+			LocalBus.SubscribeInstance(consumer);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);

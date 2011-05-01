@@ -33,7 +33,7 @@ namespace MassTransit.Tests
         [Test]
         public void An_interceptor_should_be_called_when_a_message_is_received()
         {
-            LocalBus.Subscribe<PingMessage>(x => { Assert.IsFalse(_after.WaitOne(0, false), "Should not have called after yet"); });
+            LocalBus.SubscribeHandler<PingMessage>(x => { Assert.IsFalse(_after.WaitOne(0, false), "Should not have called after yet"); });
 
             LocalBus.Publish(new PingMessage());
 

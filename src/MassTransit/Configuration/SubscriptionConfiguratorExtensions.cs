@@ -14,10 +14,9 @@ namespace MassTransit
 {
 	using System;
 	using BusConfigurators;
-	using Saga;
+	using Magnum.Reflection;
 	using SubscriptionBuilders;
 	using SubscriptionConfigurators;
-	using Util;
 
 	public static class SubscriptionConfiguratorExtensions
 	{
@@ -71,7 +70,7 @@ namespace MassTransit
 		}
 
 		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-			this SubscriptionBusServiceConfigurator configurator, Func<Action<Action<TConsumer>>> consumerFactory)
+			this SubscriptionBusServiceConfigurator configurator, IConsumerFactory<TConsumer> consumerFactory)
 			where TConsumer : class
 		{
 			var consumerConfigurator = new ConsumerSubscriptionConfiguratorImpl<TConsumer>(consumerFactory);
@@ -83,23 +82,48 @@ namespace MassTransit
 			return consumerConfigurator;
 		}
 
-		public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-			this SubscriptionBusServiceConfigurator configurator, ISagaRepository<TSaga> sagaRepository)
-			where TSaga : class, ISaga
+		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
+			this SubscriptionBusServiceConfigurator configurator)
+			where TConsumer : class, new()
 		{
-			var sagaConfigurator = new SagaSubscriptionConfiguratorImpl<TSaga>(sagaRepository);
+			var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(() => new TConsumer());
 
-			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(sagaConfigurator);
+			var consumerConfigurator = new ConsumerSubscriptionConfiguratorImpl<TConsumer>(delegateConsumerFactory);
+
+			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(consumerConfigurator);
 
 			configurator.AddConfigurator(busServiceConfigurator);
 
-			return sagaConfigurator;
+			return consumerConfigurator;
 		}
 
-		public static void Consumer(this SubscriptionBusServiceConfigurator configurator, Type consumerType,
+		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
+			this SubscriptionBusServiceConfigurator configurator, Func<TConsumer> consumerFactory)
+			where TConsumer : class
+		{
+			var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactory);
+
+			var consumerConfigurator = new ConsumerSubscriptionConfiguratorImpl<TConsumer>(delegateConsumerFactory);
+
+			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(consumerConfigurator);
+
+			configurator.AddConfigurator(busServiceConfigurator);
+
+			return consumerConfigurator;
+		}
+
+		public static ConsumerSubscriptionConfigurator Consumer(this SubscriptionBusServiceConfigurator configurator, Type consumerType,
 		                            Func<Type, object> consumerFactory)
 		{
-			throw new NotImplementedException("The consumer by type has not yet been implemented.");
+			var consumerConfigurator =
+				(SubscriptionBuilderConfigurator)FastActivator.Create(typeof(UntypedConsumerSubscriptionConfigurator<>),
+					new[] {consumerType}, new object[] {consumerFactory});
+
+			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(consumerConfigurator);
+
+			configurator.AddConfigurator(busServiceConfigurator);
+
+			return consumerConfigurator as ConsumerSubscriptionConfigurator;
 		}
 	}
 }

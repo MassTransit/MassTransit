@@ -76,7 +76,7 @@ namespace MassTransit.Services.HealthMonitoring
 			_controlUri = _bus.ControlBus.Endpoint.Uri;
 			_dataUri = _bus.Endpoint.Uri;
 
-			_unsubscribe = _bus.ControlBus.Subscribe(this);
+			_unsubscribe = _bus.ControlBus.SubscribeInstance(this);
 
 			var message = new EndpointCameOnline(SystemId, _controlUri, _dataUri, _heartbeatIntervalInSeconds);
 			_bus.ControlBus.Publish(message);

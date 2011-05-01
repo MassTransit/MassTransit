@@ -75,7 +75,7 @@ namespace MassTransit.Tests.Saga
 
 		public bool ValidateUser()
 		{
-			using (_bus.Subscribe(this).Disposable())
+			using (_bus.SubscribeInstance(this).Disposable())
 			{
 				_bus.Publish(new UserValidated(CorrelationId));
 

@@ -25,18 +25,22 @@ namespace MassTransit.Tests
 	{
 		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
 
+
+		protected override void ConfigureRemoteBus(BusConfigurators.ServiceBusConfigurator configurator)
+		{
+			base.ConfigureRemoteBus(configurator);
+
+			configurator.Subscribe(x => x.Consumer<TestReplyService<PingMessage,Guid, PongMessage>>());
+		}
 		[Test]
 		public void A_reply_should_be_received_by_the_requestor()
 		{
-			ObjectBuilder.Stub(x => x.GetInstance<TestReplyService<PingMessage, Guid, PongMessage>>())
-				.Return(new TestReplyService<PingMessage, Guid, PongMessage> {Bus = RemoteBus});
-
-			RemoteBus.Subscribe<TestReplyService<PingMessage, Guid, PongMessage>>();
+			RemoteBus.SubscribeConsumer<TestReplyService<PingMessage, Guid, PongMessage>>();
 
 			PingMessage message = new PingMessage();
 
 			TestCorrelatedConsumer<PongMessage, Guid> consumer = new TestCorrelatedConsumer<PongMessage, Guid>(message.CorrelationId);
-			LocalBus.Subscribe(consumer);
+			LocalBus.SubscribeInstance(consumer);
 
 			LocalBus.Publish(message);
 

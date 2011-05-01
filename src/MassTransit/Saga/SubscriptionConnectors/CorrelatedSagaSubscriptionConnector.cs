@@ -10,15 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionConnectors
+namespace MassTransit.Saga.SubscriptionConnectors
 {
 	using System;
 	using Exceptions;
 	using Magnum.StateMachine;
+	using MassTransit.Pipeline;
+	using MassTransit.Pipeline.Configuration;
 	using Pipeline;
-	using Pipeline.Configuration;
-	using Saga;
-	using Saga.Pipeline;
 
 	public class CorrelatedSagaSubscriptionConnector<TSaga, TMessage> :
 		SagaSubscriptionConnector

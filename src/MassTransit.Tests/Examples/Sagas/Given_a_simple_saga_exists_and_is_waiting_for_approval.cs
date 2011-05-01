@@ -23,7 +23,7 @@ namespace MassTransit.Tests.Examples.Sagas
 		[Given]
 		public void A_simple_saga_exists_and_is_waiting_for_approval()
 		{
-			LocalBus.Subscribe<SimpleStateMachineSaga>();
+			LocalBus.SubscribeSaga<SimpleStateMachineSaga>(Repository);
 
 			AddExistingSaga(SagaId, x =>
 				{

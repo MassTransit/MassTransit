@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Timeouts
 
             _correlationId = CombGuid.Generate();
 
-        	_timeoutSagaRepository = SetupSagaRepository<TimeoutSaga>(ObjectBuilder);
+        	_timeoutSagaRepository = SetupSagaRepository<TimeoutSaga>();
 
             _timeoutService = new TimeoutService(LocalBus, _timeoutSagaRepository);
             _timeoutService.Start();
@@ -57,7 +57,7 @@ namespace MassTransit.Tests.Timeouts
         {
             var _timedOut = new ManualResetEvent(false);
 
-            LocalBus.Subscribe<TimeoutExpired>(x => _timedOut.Set());
+            LocalBus.SubscribeHandler<TimeoutExpired>(x => _timedOut.Set());
 
             LocalBus.Publish(new ScheduleTimeout(_correlationId, 1.Seconds()));
 
