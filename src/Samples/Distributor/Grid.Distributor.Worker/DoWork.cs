@@ -16,17 +16,15 @@ namespace Grid.Distributor.Worker
 		ILog _log = LogManager.GetLogger(typeof (DoWork));
 		UnsubscribeAction _unsubscribeAction;
 
-		public DoWork(IObjectBuilder objectBuilder)
+		public DoWork()
 		{
-			ObjectBuilder = objectBuilder;
-
 			DataBus = ServiceBusFactory.New(x =>
 				{
 					x.ReceiveFrom(ConfigurationManager.AppSettings["SourceQueue"]);
+			
 					x.UseMsmq();
-
-					x.SetObjectBuilder(objectBuilder);
 					x.UseMulticastSubscriptionClient();
+
 					x.UseControlBus();
 					x.SetConcurrentConsumerLimit(4);
 					x.ImplementDistributorWorker<DoSimpleWorkItem>(ConsumeMessage, 2, 8);
@@ -35,7 +33,6 @@ namespace Grid.Distributor.Worker
 			ControlBus = DataBus.ControlBus;
 		}
 
-		public IObjectBuilder ObjectBuilder { get; set; }
 		public IServiceBus ControlBus { get; set; }
 		public IServiceBus DataBus { get; set; }
 
@@ -51,7 +48,7 @@ namespace Grid.Distributor.Worker
 
 		public void Start()
 		{
-			_unsubscribeAction = DataBus.Subscribe(this);
+			_unsubscribeAction = DataBus.SubscribeInstance(this);
 		}
 
 		public void Stop()

@@ -12,16 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace Grid.Distributor.Worker
 {
-    using System;
-    using Shared;
-    using StructureMap;
+	using Shared;
 
-    public class WorkerServiceProvider : ServiceSetup
+	public class WorkerServiceProvider : ServiceSetup
     {
         public override string ServiceName { get; set; }
         public override string DisplayName { get; set; }
         public override string Description { get; set; }
         public override string SourceQueue { get; set; }
-        public override Action<ConfigurationExpression> ContainerSetup { get; set; }
     }
 }
