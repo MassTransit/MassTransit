@@ -32,7 +32,7 @@ namespace MassTransit.Tests.Distributor
 
 		protected void AddFirstCommandInstance(string instanceName, string queueName)
 		{
-			AddInstance(instanceName, queueName, builder => { }, x =>
+			AddInstance(instanceName, queueName, x =>
 				{
 					// setup our worker on the service instance
 					x.ImplementDistributorWorker<FirstCommand>(FirstCommandConsumer);

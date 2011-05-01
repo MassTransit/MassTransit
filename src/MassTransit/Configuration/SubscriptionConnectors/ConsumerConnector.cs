@@ -15,6 +15,7 @@ namespace MassTransit.SubscriptionConnectors
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using Distributor;
 	using Exceptions;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
@@ -48,6 +49,11 @@ namespace MassTransit.SubscriptionConnectors
 			    || interfaces.Implements(typeof (Orchestrates<>))
 			    || interfaces.Implements(typeof (Observes<,>)))
 				throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
+
+			if (interfaces.Implements(typeof(IDistributor<>))
+				|| interfaces.Implements(typeof(IWorker<>))
+				|| interfaces.Implements(typeof(ISagaWorker<>)))
+				throw new ConfigurationException("Distributor classes can only be subscribed as instances");
 
 			_connectors = ConsumesSelected()
 				.Union(ConsumesAll())

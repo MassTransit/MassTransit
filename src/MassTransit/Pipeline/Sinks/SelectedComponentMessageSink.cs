@@ -31,11 +31,6 @@ namespace MassTransit.Pipeline.Sinks
 
 		bool _disposed;
 
-		public SelectedComponentMessageSink(ISubscriberContext context)
-		{
-			_consumerFactory = new ObjectBuilderConsumerFactory<TComponent>(context.Builder);
-		}
-
 		public SelectedComponentMessageSink(IConsumerFactory<TComponent> consumerFactory)
 		{
 			_consumerFactory = consumerFactory;

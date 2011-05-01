@@ -26,8 +26,6 @@ namespace MassTransit.Tests.Pipeline
 		[SetUp]
 		public void Setup()
 		{
-			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-
 			_endpoint = MockRepository.GenerateMock<IEndpoint>();
 			_endpoint.Stub(x => x.Uri).Return(_uri);
 
@@ -37,11 +35,10 @@ namespace MassTransit.Tests.Pipeline
 			_unsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
 
 			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _bus);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_bus);
 			_pipeline.Configure(x => x.Register(_subscriptionEvent));
 		}
 
-		private IObjectBuilder _builder;
 		private IServiceBus _bus;
 
 		private readonly Uri _uri = new Uri("msmq://localhost/mt_client");
@@ -132,8 +129,6 @@ namespace MassTransit.Tests.Pipeline
 		[SetUp]
 		public void Setup()
 		{
-			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-
 			_endpoint = MockRepository.GenerateMock<IEndpoint>();
 			_endpoint.Stub(x => x.Uri).Return(_uri);
 
@@ -143,11 +138,10 @@ namespace MassTransit.Tests.Pipeline
 			_bus.Stub(x => x.Endpoint).Return(_endpoint);
 
 			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _bus);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_bus);
 			_pipeline.Configure(x => x.Register(_subscriptionEvent));
 		}
 
-		private IObjectBuilder _builder;
 		private IServiceBus _bus;
 
 		private readonly Uri _uri = new Uri("msmq://localhost/mt_client");

@@ -26,7 +26,6 @@ namespace MassTransit.Util
 
 		private readonly IServiceBus _bus;
 		private readonly Pipe _eventAggregator;
-		private readonly IObjectBuilder _objectBuilder;
 		private int _consumerCount;
 		private bool _disposed;
 		private bool _enabled;
@@ -36,9 +35,8 @@ namespace MassTransit.Util
 		private readonly TimeSpan _receiveTimeout;
 		private readonly object _locker = new object();
 
-		public ThreadPoolConsumerPool(IServiceBus bus, IObjectBuilder objectBuilder, Pipe eventAggregator, TimeSpan receiveTimeout)
+		public ThreadPoolConsumerPool(IServiceBus bus, Pipe eventAggregator, TimeSpan receiveTimeout)
 		{
-			_objectBuilder = objectBuilder;
 			_receiveTimeout = receiveTimeout;
 			_eventAggregator = eventAggregator;
 			_bus = bus;
@@ -148,7 +146,7 @@ namespace MassTransit.Util
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("Queueing receiver for {0}", _bus.Endpoint.Uri);
 
-				var context = new ServiceBusReceiveContext(_bus, _objectBuilder, _eventAggregator, _receiveTimeout);
+				var context = new ServiceBusReceiveContext(_bus, _eventAggregator, _receiveTimeout);
 
 				Interlocked.Increment(ref _receiverCount);
 				Interlocked.Increment(ref _consumerCount);

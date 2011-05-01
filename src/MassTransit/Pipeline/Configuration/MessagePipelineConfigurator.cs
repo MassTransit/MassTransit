@@ -13,53 +13,30 @@
 namespace MassTransit.Pipeline.Configuration
 {
     using System;
-    using System.Collections.Generic;
-    using Distributor.Configuration;
-    using Saga.Configuration;
     using Sinks;
-    using Subscribers;
     using Util;
 
     public class MessagePipelineConfigurator :
         IPipelineConfigurator,
         IDisposable
     {
-        private readonly IObjectBuilder _builder;
-        private readonly UnsubscribeAction _emptyToken = () => true;
+    	private readonly UnsubscribeAction _emptyToken = () => true;
         private volatile bool _disposed;
 
-        private RegistrationList<IPipelineSubscriber> _interceptors = new RegistrationList<IPipelineSubscriber>();
         private RegistrationList<ISubscriptionEvent> _subscriptionEventHandlers = new RegistrationList<ISubscriptionEvent>();
         private MessagePipeline _pipeline;
     	private IServiceBus _bus;
 
-    	private MessagePipelineConfigurator(IObjectBuilder builder, IServiceBus bus)
+    	private MessagePipelineConfigurator(IServiceBus bus)
         {
-            _builder = builder;
-        	_bus = bus;
+    		_bus = bus;
 
             var router = new MessageRouter<object>();
 
             _pipeline = new MessagePipeline(router, this);
-
-            // interceptors are inserted at the front of the list, so do them from least to most specific
-            _interceptors.Register(new ConsumesAllSubscriber());
-            _interceptors.Register(new ConsumesSelectedSubscriber());
-            _interceptors.Register(new ConsumesForSubscriber());
-            _interceptors.Register(new SagaStateMachineSubscriber());
-            _interceptors.Register(new ObservesSubscriber());
-            _interceptors.Register(new OrchestratesSubscriber());
-            _interceptors.Register(new InitiatesSubscriber());
-    		_interceptors.Register(new DistributorSubscriber());
-			_interceptors.Register(new SagaDistributorSubscriber());
 		}
 
-        public UnregisterAction Register(IPipelineSubscriber subscriber)
-        {
-            return _interceptors.Register(subscriber);
-        }
-
-        public UnregisterAction Register(ISubscriptionEvent subscriptionEventHandler)
+    	public UnregisterAction Register(ISubscriptionEvent subscriptionEventHandler)
         {
             return _subscriptionEventHandlers.Register(subscriptionEventHandler);
         }
@@ -74,48 +51,7 @@ namespace MassTransit.Pipeline.Configuration
 			get { return _bus; }
     	}
 
-    	public UnsubscribeAction Subscribe<TComponent>()
-            where TComponent : class
-        {
-            return Subscribe((context, interceptor) => interceptor.Subscribe<TComponent>(context));
-        }
-
-        public UnsubscribeAction Subscribe<TMessage>(Action<TMessage> handler, Predicate<TMessage> acceptor)
-            where TMessage : class
-        {
-            Func<TMessage, Action<TMessage>> consumer;
-            if (acceptor != null)
-                consumer = (message => acceptor(message) ? handler : null);
-            else
-                consumer = message => handler;
-
-        	return Subscribe<TMessage>(consumer);
-        }
-
-    	public UnsubscribeAction Subscribe<TMessage>(Func<TMessage, Action<TMessage>> getHandler) where TMessage : class
-    	{
-			var routerConfigurator = MessageRouterConfigurator.For(_pipeline);
-
-			var router = routerConfigurator.FindOrCreate<TMessage>();
-
-			Func<TMessage, Action<TMessage>> consumer = getHandler;
-
-			var sink = new InstanceMessageSink<TMessage>(consumer);
-
-			var result = router.Connect(sink);
-
-			UnsubscribeAction remove = SubscribedTo<TMessage>();
-
-			return () => result() && (router.SinkCount == 0) && remove();
-		}
-
-    	public UnsubscribeAction Subscribe<TComponent>(TComponent instance)
-            where TComponent : class
-        {
-            return Subscribe((context, interceptor) => interceptor.Subscribe(context, instance));
-        }
-
-        public void Dispose()
+    	public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
@@ -125,11 +61,7 @@ namespace MassTransit.Pipeline.Configuration
         {
             if (!disposing || _disposed) return;
 
-            if (_interceptors != null)
-                _interceptors.Dispose();
-
             _pipeline = null;
-            _interceptors = null;
             _subscriptionEventHandlers = null;
 
             _disposed = true;
@@ -140,36 +72,9 @@ namespace MassTransit.Pipeline.Configuration
             Dispose(false);
         }
 
-        public V Configure<V>(Func<IPipelineConfigurator, V> action)
+    	public static MessagePipeline CreateDefault(IServiceBus bus)
         {
-            V result = action(this);
-
-            return result;
-        }
-
-        private UnsubscribeAction Subscribe(Func<ISubscriberContext, IPipelineSubscriber, IEnumerable<UnsubscribeAction>> subscriber)
-        {
-        	var context = new SubscriberContext(_pipeline, _builder, this, _bus);
-
-            UnsubscribeAction result = null;
-
-            _interceptors.Each(interceptor =>
-                {
-                    foreach (UnsubscribeAction token in subscriber(context, interceptor))
-                    {
-                        if (result == null)
-                            result = token;
-                        else
-                            result += token;
-                    }
-                });
-
-            return result ?? _emptyToken;
-        }
-
-        public static MessagePipeline CreateDefault(IObjectBuilder builder, IServiceBus bus)
-        {
-            return new MessagePipelineConfigurator(builder, bus)._pipeline;
+            return new MessagePipelineConfigurator(bus)._pipeline;
         }
 
         public UnsubscribeAction SubscribedTo<T>() where T : class

@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-	using System;
-	using Configuration.Subscribers;
-
 	public interface IPipelineConfigurator :
 		ISubscriptionEvent
 	{
@@ -22,19 +19,6 @@ namespace MassTransit.Pipeline
 
 		IServiceBus Bus { get; }
 
-		UnsubscribeAction Subscribe<TComponent>()
-			where TComponent : class;
-
-		UnsubscribeAction Subscribe<TMessage>(Action<TMessage> handler, Predicate<TMessage> acceptor)
-			where TMessage : class;
-
-		UnsubscribeAction Subscribe<TMessage>(Func<TMessage, Action<TMessage>> getHandler)
-			where TMessage : class;
-
-		UnsubscribeAction Subscribe<TComponent>(TComponent instance)
-			where TComponent : class;
-
-		UnregisterAction Register(IPipelineSubscriber subscriber);
 		UnregisterAction Register(ISubscriptionEvent subscriptionEventHandler);
 	}
 }

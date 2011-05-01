@@ -16,8 +16,6 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	using Magnum.TestFramework;
 	using MassTransit.Tests;
 	using MassTransit.Tests.Messages;
-	using NHibernate;
-	using Rhino.Mocks;
 
 	[Scenario]
 	public class When_configuring_a_service_bus_easily
@@ -25,13 +23,10 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		[When]
 		public void Configuring_a_service_bus_easily()
 		{
-			var sessionFactory = MockRepository.GenerateMock<ISessionFactory>();
-
 			FutureMessage<PingMessage> received;
 			using (var bus = ServiceBusFactory.New(x =>
 				{
 					x.ReceiveFrom("loopback://localhost/queue");
-					x.UseNHibernateSagaRepository(sessionFactory);
 				}))
 			{
 				received = new FutureMessage<PingMessage>();

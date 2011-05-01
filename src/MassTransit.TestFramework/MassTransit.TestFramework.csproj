@@ -101,7 +101,6 @@
     <Compile Include="Future.cs" />
     <Compile Include="Helpers\CorrelatedMessageSinkLocator.cs" />
     <Compile Include="Helpers\EndpointSinkLocator.cs" />
-    <Compile Include="ExtensionMethodsForObjectBuilder.cs" />
     <Compile Include="Fixtures\AbstractTestConsumer.cs" />
     <Compile Include="ConsumerOf.cs" />
     <Compile Include="Fixtures\AbstractTestFixture.cs" />

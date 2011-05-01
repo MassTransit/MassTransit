@@ -48,16 +48,13 @@ namespace MassTransit.Tests.Distributor
 		{
 			base.EstablishContext();
 
-			AddInstance("A", "loopback://localhost/a", 
-				builder => builder.Add(FirstSagaRepository),
+			AddInstance("A", "loopback://localhost/a",
 				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
 			
-			AddInstance("B", "loopback://localhost/b", 
-				builder => builder.Add(FirstSagaRepository),
+			AddInstance("B", "loopback://localhost/b",
 				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
 			
-			AddInstance("C", "loopback://localhost/c", 
-				builder => builder.Add(FirstSagaRepository),
+			AddInstance("C", "loopback://localhost/c",
 				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
 		}
 
@@ -100,16 +97,13 @@ namespace MassTransit.Tests.Distributor
 		{
 			base.EstablishContext();
 
-			AddInstance("A", "loopback://localhost/a", 
-				builder => builder.Add(FirstSagaRepository),
+			AddInstance("A", "loopback://localhost/a",
 				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
 			
-			AddInstance("B", "loopback://localhost/b", 
-				builder => builder.Add(FirstSagaRepository),
+			AddInstance("B", "loopback://localhost/b",
 				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
 			
-			AddInstance("C", "loopback://localhost/c", 
-				builder => builder.Add(FirstSagaRepository),
+			AddInstance("C", "loopback://localhost/c",
 				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
 		}
 

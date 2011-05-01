@@ -26,27 +26,24 @@ namespace MassTransit.NinjectIntegration
 	public class MassTransitModuleBase :
 		NinjectModule
 	{
-		private readonly IObjectBuilder _builder;
 		private readonly Action<EndpointFactoryConfigurator> _configurationAction;
 		private readonly Type[] _transportTypes;
 
-		public MassTransitModuleBase(IObjectBuilder builder)
-			: this(builder, null, (Type[]) null)
+		public MassTransitModuleBase()
+			: this((Action<EndpointFactoryConfigurator>) null, (Type[]) null)
 		{
 		}
 
-		public MassTransitModuleBase(IObjectBuilder builder,
-		                             Action<EndpointFactoryConfigurator> configurationAction)
-			: this(builder, configurationAction, null)
+		public MassTransitModuleBase(Action<EndpointFactoryConfigurator> configurationAction)
+			: this(configurationAction, null)
 		{
 		}
 
 		/// <summary>
 		/// Creates a registry for a service bus listening to an endpoint
 		/// </summary>
-		public MassTransitModuleBase(IObjectBuilder builder,
-		                             params Type[] transportTypes)
-			: this(builder, null, transportTypes)
+		public MassTransitModuleBase(params Type[] transportTypes)
+			: this((Action<EndpointFactoryConfigurator>) null, transportTypes)
 		{
 		}
 
@@ -59,8 +56,6 @@ namespace MassTransit.NinjectIntegration
 		/// construction time. We will save the values and do the setup later
 		/// when Load() is called.
 		/// </remarks>
-		/// <param name="builder">
-		/// </param>
 		/// <param name="configurationAction">
 		/// The endpoint factory configuration action to use when creating an
 		/// endpoint factory.
@@ -68,12 +63,9 @@ namespace MassTransit.NinjectIntegration
 		/// <param name="transportTypes">
 		/// The transport types to configure.
 		/// </param>
-		public MassTransitModuleBase(IObjectBuilder builder,
-		                             Action<EndpointFactoryConfigurator> configurationAction,
+		public MassTransitModuleBase(Action<EndpointFactoryConfigurator> configurationAction,
 		                             params Type[] transportTypes)
 		{
-			_builder = builder;
-
 			if (configurationAction == null)
 			{
 				_configurationAction = DefaultEndpointResolverConfigurator;
@@ -84,11 +76,6 @@ namespace MassTransit.NinjectIntegration
 			}
 
 			_transportTypes = transportTypes;
-		}
-
-		protected IObjectBuilder Builder
-		{
-			get { return _builder; }
 		}
 
 		public override void Load()
@@ -117,9 +104,6 @@ namespace MassTransit.NinjectIntegration
 		/// </summary>
 		protected void RegisterBusDependencies()
 		{
-			//how singlton
-			Bind<IObjectBuilder>().To<NinjectObjectBuilder>().InSingletonScope();
-
 
 			//we are expecting NINJECT to auto-resolve
 			// SubscriptionClient
@@ -144,7 +128,6 @@ namespace MassTransit.NinjectIntegration
 								if (_configurationAction != null)
 									_configurationAction(x);
 
-								x.SetObjectBuilder(context.Kernel.Get<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 
 								x.UseControlBus();

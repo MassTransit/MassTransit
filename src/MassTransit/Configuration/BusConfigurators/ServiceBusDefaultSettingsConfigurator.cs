@@ -16,7 +16,6 @@ namespace MassTransit.BusConfigurators
 
 	public interface ServiceBusDefaultSettingsConfigurator
 	{
-		void SetObjectBuilder(IObjectBuilder objectBuilder);
 		void SetEndpointCache(IEndpointCache endpointCache);
 		void DisableAutoStart();
 		void SetReceiveTimeout(TimeSpan receiveTimeout);

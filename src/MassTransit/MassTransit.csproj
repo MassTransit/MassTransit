@@ -107,7 +107,10 @@
     <Compile Include="Configuration\Configurators\ValidationResultDisposition.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultImpl.cs" />
     <Compile Include="Configuration\ConsumerConnectorCache.cs" />
+    <Compile Include="Configuration\ConsumerSubscriptionConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\HandlerSubscriptionConfiguratorExtensions.cs" />
     <Compile Include="Configuration\InstanceConnectorCache.cs" />
+    <Compile Include="Configuration\InstanceSubscriptionConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ServiceBusSubscriptionExtensions.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\ConsumerSubscriptionBuilder.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\InstanceSubscriptionBuilder.cs" />
@@ -172,11 +175,12 @@
     <Compile Include="Configuration\SubscriptionConnectors\InstanceSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\SelectedConsumerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\SelectedInstanceSubscriptionConnector.cs" />
-    <Compile Include="Configuration\SubscriptionSettings.cs" />
-    <Compile Include="Configuration\SubscriptionSettingsImpl.cs" />
     <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
     <Compile Include="Configuration\Xml\SettingsOptions.cs" />
     <Compile Include="DelegateConsumerFactory.cs" />
+    <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
+    <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
+    <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="Fault.cs" />
     <Compile Include="IBusService.cs" />
@@ -192,7 +196,6 @@
     <Compile Include="MessageHeaders\MessageHeadersBase.cs" />
     <Compile Include="MessageHeaders\OutboundMessage.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderImpl.cs" />
-    <Compile Include="ObjectBuilderConsumerFactory.cs" />
     <Compile Include="ObjectConsumerFactory.cs" />
     <Compile Include="Pipeline\IEndpointSubscriptionEvent.cs" />
     <Compile Include="Pipeline\InboundOutboundSubscriptionBinder.cs" />
@@ -212,14 +215,23 @@
     <Compile Include="Saga\SubscriptionConfigurators\SagaSubscriptionConfigurator.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\SagaSubscriptionConfiguratorImpl.cs" />
     <Compile Include="Saga\SubscriptionConnectors\CorrelatedSagaSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\CorrelatedSagaWorkerSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\InitiatedBySagaWorkerSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\InitiatedBySagaSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\ObservesSagaSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\ObservesSagaWorkerSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\OrchestratesSagaSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\OrchestratesSagaWorkerSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\PropertySagaSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\PropertySagaWorkerSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\SagaWorkerConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\SagaWorkerSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaEventConnectorFactory.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\SagaWorkerEventConnectorFactory.cs" />
     <Compile Include="Saga\SubscriptionConnectors\StateMachineSagaConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\StateMachineSagaWorkerConnector.cs" />
     <Compile Include="Serialization\JsonMessageEnvelope.cs" />
     <Compile Include="Serialization\JsonMessageSerializer.cs" />
     <Compile Include="ServiceContainer.cs" />
@@ -267,7 +279,6 @@
     <Compile Include="Services\HealthMonitoring\HealthClient.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="IEndpoint.cs" />
-    <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
@@ -292,7 +303,6 @@
     <Compile Include="Util\CheckConvention.cs" />
     <Compile Include="Util\ConsumerPool.cs" />
     <Compile Include="Util\DisposableUnsubscribeAction.cs" />
-    <Compile Include="Util\FastActivatorObjectBuilder.cs" />
     <Compile Include="Util\IdempotentHashtable.cs" />
     <Compile Include="Util\IUnsubscribeAction.cs" />
     <Compile Include="Util\LambdaEqualityComparer.cs" />
@@ -304,8 +314,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CurrentMessage.cs" />
-    <Compile Include="Distributor\Configuration\DistributorSubscriber.cs" />
-    <Compile Include="Distributor\Configuration\SagaDistributorSubscriber.cs" />
     <Compile Include="Distributor\IPendingMessageCount.cs" />
     <Compile Include="Distributor\IPendingMessageTracker.cs" />
     <Compile Include="Distributor\Messages\ConfigureWorker.cs" />
@@ -360,13 +368,10 @@
     <Compile Include="Saga\Configuration\EventInspectorResult.cs" />
     <Compile Include="Saga\Configuration\ExtensionsForSagas.cs" />
     <Compile Include="Saga\Configuration\ISagaPolicyFactory.cs" />
-    <Compile Include="Saga\Configuration\ObservesSubscriber.cs" />
     <Compile Include="Pipeline\Configuration\ExtensionsForPipelineConfiguration.cs" />
     <Compile Include="Saga\Configuration\SagaEvent.cs" />
-    <Compile Include="Saga\Configuration\SagaEventSubscriber.cs" />
     <Compile Include="Saga\Configuration\SagaPolicyFactory.cs" />
     <Compile Include="Saga\Configuration\SagaStateMachineEventInspector.cs" />
-    <Compile Include="Saga\Configuration\SagaStateMachineMessageSinkFactory.cs" />
     <Compile Include="Saga\CreateOrUseExistingSagaPolicy.cs" />
     <Compile Include="Saga\DataEventBinder.cs" />
     <Compile Include="Saga\EventBinder.cs" />
@@ -476,7 +481,6 @@
     <Compile Include="Util\IndexedCollection.cs" />
     <Compile Include="Saga\Pipeline\PropertySagaMessageSink.cs" />
     <Compile Include="Saga\Pipeline\PropertySagaStateMachineMessageSink.cs" />
-    <Compile Include="Saga\Configuration\SagaStateMachineSubscriber.cs" />
     <Compile Include="Saga\Pipeline\SagaMessageSinkBase.cs" />
     <Compile Include="Saga\SagaStateMachine.cs" />
     <Compile Include="Serialization\XmlMessageSerializer.cs" />
@@ -521,22 +525,13 @@
     <Compile Include="Services\Timeout\ScheduledTimeout.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />
     <Compile Include="Saga\InMemorySagaRepository.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\ConsumesForSubscriber.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorScope.cs" />
-    <Compile Include="Saga\Configuration\InitiatesSubscriber.cs" />
-    <Compile Include="Saga\Configuration\OrchestratesSubscriber.cs" />
     <Compile Include="Pipeline\Sinks\ComponentMessageSink.cs" />
-    <Compile Include="Pipeline\Configuration\SubscriberContext.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\ConsumesAllSubscriber.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfigurator.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\ConsumesSubscriberBase.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\ConsumesSelectedSubscriber.cs" />
     <Compile Include="Util\IRegistrationList.cs" />
     <Compile Include="Pipeline\IPipelineConfigurator.cs" />
     <Compile Include="Pipeline\IPipelineSink.cs" />
     <Compile Include="Pipeline\IPipelineInspector.cs" />
-    <Compile Include="Pipeline\ISubscriberContext.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\IPipelineSubscriber.cs" />
     <Compile Include="Util\QueryStringExtensions.cs" />
     <Compile Include="Util\RegistrationList.cs" />
     <Compile Include="Pipeline\MessagePipeline.cs" />
@@ -550,7 +545,6 @@
     <Compile Include="Pipeline\Sinks\PipelineSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\MessageTranslator.cs" />
     <Compile Include="Exceptions\PipelineException.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\PipelineSubscriberBase.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineViewer.cs" />
     <Compile Include="Pipeline\Configuration\MessagePipelineConfigurator.cs" />
     <Compile Include="Pipeline\Sinks\SelectedComponentMessageSink.cs" />
@@ -564,6 +558,7 @@
     <Compile Include="Util\SequenceNumberGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Pipeline\Configuration\Subscribers\" />
     <Folder Include="Services\HealthMonitoring\Client\" />
   </ItemGroup>
   <ItemGroup>

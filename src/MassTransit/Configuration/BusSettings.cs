@@ -18,8 +18,6 @@ namespace MassTransit
 	{
 		Uri InputAddress { get; }
 
-		IObjectBuilder ObjectBuilder { get; }
-
 		Action BeforeConsume { get; }
 		Action AfterConsume { get; }
 

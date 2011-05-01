@@ -27,8 +27,6 @@ namespace MassTransit.MessageHeaders
 			get { return LocalContext.Current.Retrieve(TypedKey<InboundMessageHeaders>.UniqueKey, () => new InboundMessageHeaders()); }
 		}
 
-		public IObjectBuilder ObjectBuilder { get; private set; }
-
 		public object Message { get; private set; }
 
 		public void RetryLater()
@@ -74,11 +72,6 @@ namespace MassTransit.MessageHeaders
 		public void ReceivedAs(object message)
 		{
 			Message = message;
-		}
-
-		public void SetObjectBuilder(IObjectBuilder objectBuilder)
-		{
-			ObjectBuilder = objectBuilder;
 		}
 
 		public static void SetCurrent(Action<ISetInboundMessageHeaders> action)

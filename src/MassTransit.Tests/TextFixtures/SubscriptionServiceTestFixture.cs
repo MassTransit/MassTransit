@@ -90,10 +90,10 @@ namespace MassTransit.Tests.TextFixtures
 
 		protected Dictionary<string, ServiceInstance> Instances { get; private set; }
 
-		protected ServiceInstance AddInstance(string instanceName, string queueName, Action<IObjectBuilder> configureBuilder,
+		protected ServiceInstance AddInstance(string instanceName, string queueName,
 		                                      Action<ServiceBusConfigurator> configureBus)
 		{
-			var instance = new ServiceInstance(queueName, EndpointCache, SubscriptionServiceUri, configureBuilder, configureBus);
+			var instance = new ServiceInstance(queueName, SubscriptionServiceUri, configureBus);
 
 			Instances.Add(instanceName, instance);
 

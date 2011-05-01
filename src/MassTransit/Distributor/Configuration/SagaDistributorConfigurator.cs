@@ -15,6 +15,7 @@ namespace MassTransit.Distributor.Configuration
 	using System;
 	using BusConfigurators;
 	using Magnum.Reflection;
+	using Util;
 
 	public class SagaDistributorConfigurator
 	{
@@ -30,9 +31,8 @@ namespace MassTransit.Distributor.Configuration
 			this.FastInvoke(new[] {type}, "AddServiceForDataEvent");
 		}
 
-// ReSharper disable UnusedMember.Local
+		[UsedImplicitly]
 		private void AddServiceForDataEvent<TMessage>()
-// ReSharper restore UnusedMember.Local
 			where TMessage : class
 		{
 			_configurator.AddService(() => new Distributor<TMessage>());

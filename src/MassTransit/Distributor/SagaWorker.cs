@@ -28,6 +28,7 @@ namespace MassTransit.Distributor
 		Consumes<WakeUpWorker>.All
 		where TSaga : SagaStateMachine<TSaga>, ISaga
 	{
+		readonly ISagaRepository<TSaga> _sagaRepository;
 		private readonly IList<Type> _messageTypes = new List<Type>();
 		private readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
 		private readonly Fiber _fiber = new PoolFiber();
@@ -43,13 +44,14 @@ namespace MassTransit.Distributor
 		private Scheduler _scheduler;
 		private ScheduledOperation _scheduled;
 
-		public SagaWorker()
-			: this(new WorkerSettings())
+		public SagaWorker(ISagaRepository<TSaga> sagaRepository)
+			: this(sagaRepository, new WorkerSettings())
 		{
 		}
 
-		public SagaWorker(WorkerSettings settings)
+		public SagaWorker(ISagaRepository<TSaga> sagaRepository, WorkerSettings settings)
 		{
+			_sagaRepository = sagaRepository;
 			_inProgress = 0;
 			_inProgressLimit = settings.InProgressLimit;
 			_pendingLimit = settings.PendingLimit;
@@ -78,6 +80,7 @@ namespace MassTransit.Distributor
 
 			_unsubscribeAction = bus.ControlBus.SubscribeHandler<ConfigureWorker>(Consume, Accept);
 			_unsubscribeAction += bus.SubscribeInstance(this);
+			_unsubscribeAction += bus.SubscribeSagaWorker(this, _sagaRepository);
 
 			CacheMessageTypesForSaga();
 

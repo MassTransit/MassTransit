@@ -42,9 +42,13 @@ namespace MassTransit.TestFramework.Fixtures
 		public void EndpointTestFixtureTeardown()
 		{
 			TeardownBuses();
+			if (EndpointCache != null)
+			{
+				EndpointCache.Dispose();
+				EndpointCache = null;
+			}
 
-			EndpointCache.Dispose();
-			EndpointCache = null;
+			ServiceBusFactory.ConfigureDefaultSettings(x => { x.SetEndpointCache(null); });
 		}
 
 		protected EndpointTestFixture()
@@ -58,6 +62,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(defaultSettings);
 			_endpointFactoryConfigurator.AddTransportFactory<TTransportFactory>();
+			_endpointFactoryConfigurator.SetPurgeOnStartup(true);
 
 			_endpointFactoryConfigurator.Validate();
 
@@ -67,14 +72,6 @@ namespace MassTransit.TestFramework.Fixtures
 			_endpointFactoryConfigurator = null;
 
 			EndpointCache = new EndpointCache(endpointFactory);
-
-			ServiceBusFactory.ConfigureDefaultSettings(x =>
-				{
-					x.SetEndpointCache(EndpointCache);
-					x.SetConcurrentConsumerLimit(4);
-					x.SetReceiveTimeout(50.Milliseconds());
-					x.EnableAutoStart();
-				});
 		}
 
 		protected virtual void ConfigureEndpointFactory(EndpointFactoryConfigurator x)
@@ -84,11 +81,13 @@ namespace MassTransit.TestFramework.Fixtures
 		protected virtual void SetupServiceBusDefaults()
 		{
 			ServiceBusFactory.ConfigureDefaultSettings(x =>
-				{
-					x.SetEndpointCache(EndpointCache);
-					x.SetReceiveTimeout(50.Milliseconds());
-					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
-				});
+			{
+				x.SetEndpointCache(EndpointCache);
+				x.SetConcurrentConsumerLimit(4);
+				x.SetReceiveTimeout(50.Milliseconds());
+				x.EnableAutoStart();
+			});
+
 		}
 
 		void TeardownBuses()

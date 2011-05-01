@@ -18,7 +18,8 @@ namespace MassTransit.Distributor
 	}
 
 	public interface IDistributor<T> :
-		IDistributor
+		IDistributor, Consumes<T>.Selected
+		where T : class
 	{
 	}
 }

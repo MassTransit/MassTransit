@@ -29,11 +29,6 @@ namespace MassTransit.Pipeline.Sinks
 		readonly IConsumerFactory<TComponent> _consumerFactory;
 		bool _disposed;
 
-		public ComponentMessageSink(ISubscriberContext context)
-		{
-			_consumerFactory = new ObjectBuilderConsumerFactory<TComponent>(context.Builder);
-		}
-
 		public ComponentMessageSink(IConsumerFactory<TComponent> consumerFactory)
 		{
 			_consumerFactory = consumerFactory;

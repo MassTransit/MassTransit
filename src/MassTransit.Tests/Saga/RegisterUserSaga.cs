@@ -58,8 +58,6 @@ namespace MassTransit.Tests.Saga
 			get { return CorrelationId; }
 		}
 
-		public IObjectBuilder ServiceLocator { get; set; }
-
 		public void Consume(RegisterUser message)
 		{
 			CorrelationId = message.CorrelationId;

@@ -29,7 +29,6 @@ namespace MassTransit.BusConfigurators
 		public int ConcurrentConsumerLimit { get; set; }
 		public int ConcurrentReceiverLimit { get; set; }
 		public IEndpointCache EndpointCache { get; set; }
-		public IObjectBuilder ObjectBuilder { get; set; }
 		public TimeSpan ReceiveTimeout { get; set; }
 	}
 }

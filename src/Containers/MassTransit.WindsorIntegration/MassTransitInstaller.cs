@@ -45,16 +45,8 @@ namespace MassTransit.WindsorIntegration
         // OrchestrateSagaStateMachineSink<,>)
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            var wob = new WindsorObjectBuilder(container.Kernel);
-
-            container.Register(
-                Component.For<IObjectBuilder>().Named("objectBuilder").Instance(wob).LifeStyle.Singleton
-                );
-
             Bus.Initialize(configurator =>
             	{
-            		configurator.SetObjectBuilder(wob);
-
 					foreach (var transportType in _options.Transports.Select(Type.GetType))
 						configurator.AddTransportFactory(transportType);
 

@@ -69,16 +69,13 @@ namespace MassTransit
 		/// and operation.
 		/// </summary>
 		public ServiceBus(IEndpoint endpointToListenOn,
-		                  IObjectBuilder objectBuilder,
 		                  IEndpointCache endpointCache)
 		{
 			ReceiveTimeout = TimeSpan.FromSeconds(3);
 			Guard.AgainstNull(endpointToListenOn, "endpointToListenOn", "This parameter cannot be null");
-			Guard.AgainstNull(objectBuilder, "objectBuilder", "This parameter cannot be null");
 			Guard.AgainstNull(endpointCache, "endpointFactory", "This parameter cannot be null");
 
 			Endpoint = endpointToListenOn;
-			ObjectBuilder = objectBuilder;
 			EndpointCache = endpointCache;
 
 			_eventAggregator = PipeSegment.New();
@@ -86,9 +83,9 @@ namespace MassTransit
 
 			_serviceContainer = new ServiceContainer(this);
 
-			OutboundPipeline = MessagePipelineConfigurator.CreateDefault(ObjectBuilder, this);
+			OutboundPipeline = MessagePipelineConfigurator.CreateDefault(this);
 
-			InboundPipeline = MessagePipelineConfigurator.CreateDefault(ObjectBuilder, this);
+			InboundPipeline = MessagePipelineConfigurator.CreateDefault(this);
 			InboundPipeline.Configure(
 				x => { _unsubscribeEventDispatchers += x.Register(new InboundOutboundSubscriptionBinder(OutboundPipeline, Endpoint)); });
 
@@ -104,8 +101,6 @@ namespace MassTransit
 		{
 			get { return string.Format("{0}: ", Endpoint.Address); }
 		}
-
-		public IObjectBuilder ObjectBuilder { get; private set; }
 
 		public TimeSpan ReceiveTimeout
 		{
@@ -221,13 +216,6 @@ namespace MassTransit
 			return InboundPipeline.Configure(configure);
 		}
 
-		public UnsubscribeAction Subscribe<TComponent>() where TComponent : class
-		{
-			UnsubscribeAction result = InboundPipeline.Subscribe<TComponent>();
-
-			return (result);
-		}
-
 		public IServiceBus ControlBus { get; set; }
 
 		public IEndpoint GetEndpoint(Uri address)
@@ -240,7 +228,7 @@ namespace MassTransit
 			if (_started)
 				return;
 
-			_consumerPool = new ThreadPoolConsumerPool(this, ObjectBuilder, _eventAggregator, _receiveTimeout)
+			_consumerPool = new ThreadPoolConsumerPool(this, _eventAggregator, _receiveTimeout)
 				{
 					MaximumConsumerCount = MaximumConsumerThreads,
 				};
@@ -303,13 +291,6 @@ namespace MassTransit
 				}
 			}
 			_disposed = true;
-		}
-
-		// ReSharper disable UnusedMember.Local
-		UnsubscribeAction SometimesGenericsSuck<TComponent>() where TComponent : class
-			// ReSharper restore UnusedMember.Local
-		{
-			return Subscribe<TComponent>();
 		}
 
 		void InitializePerformanceCounters()
