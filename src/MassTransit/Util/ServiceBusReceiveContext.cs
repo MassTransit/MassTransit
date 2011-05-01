@@ -54,8 +54,8 @@ namespace MassTransit.Util
 		{
 			try
 			{
-				if(_log.IsDebugEnabled)
-					_log.DebugFormat("Calling Receive on {0} from thread {1} ({2})", _bus.Endpoint.Uri, 
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("Calling Receive on {0} from thread {1} ({2})", _bus.Endpoint.Uri,
 						Thread.CurrentThread.ManagedThreadId, _receiveTimeout);
 
 				_receiveTime.Start();
@@ -63,7 +63,7 @@ namespace MassTransit.Util
 				_bus.Endpoint.Receive(message =>
 					{
 						if (_log.IsDebugEnabled)
-							_log.DebugFormat("Enumerating pipeline on {0} from thread {1}", _bus.Endpoint.Uri, 
+							_log.DebugFormat("Enumerating pipeline on {0} from thread {1}", _bus.Endpoint.Uri,
 								Thread.CurrentThread.ManagedThreadId);
 
 						InboundMessageHeaders.SetCurrent(context =>
@@ -84,6 +84,10 @@ namespace MassTransit.Util
 
 						return DeliverMessageToConsumers;
 					}, _receiveTimeout);
+			}
+			catch (ObjectDisposedException ex)
+			{
+				Thread.Sleep(1000);
 			}
 			catch (Exception ex)
 			{

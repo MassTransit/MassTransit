@@ -27,7 +27,7 @@ namespace MassTransit.Tests.Configuration
 			{
 				received = new FutureMessage<PingMessage>();
 
-				bus.Subscribe<PingMessage>(received.Set);
+				bus.SubscribeHandler<PingMessage>(received.Set);
 
 				bus.Publish(new PingMessage());
 

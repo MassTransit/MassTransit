@@ -10,10 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionBuilders
+namespace MassTransit.Saga.SubscriptionBuilders
 {
 	using System;
-	using Saga;
+	using MassTransit.Pipeline;
+	using MassTransit.SubscriptionBuilders;
+	using SubscriptionConnectors;
 	using Subscriptions;
 
 	public class SagaSubscriptionBuilder<TSaga> :
@@ -21,18 +23,18 @@ namespace MassTransit.SubscriptionBuilders
 		where TSaga : class, ISaga
 	{
 		readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
-		readonly ISagaRepository<TSaga> _sagaRepository;
+		SagaConnector<TSaga> _connector;
 
 		public SagaSubscriptionBuilder(ISagaRepository<TSaga> sagaRepository,
 		                               Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)
 		{
-			_sagaRepository = sagaRepository;
+			_connector = new SagaConnector<TSaga>(sagaRepository);
 			_referenceFactory = referenceFactory;
 		}
 
-		public ISubscriptionReference Subscribe(IServiceBus bus)
+		public ISubscriptionReference Subscribe(IPipelineConfigurator configurator)
 		{
-			UnsubscribeAction unsubscribe = bus.Subscribe<TSaga>();
+			UnsubscribeAction unsubscribe = _connector.Connect(configurator);
 
 			return _referenceFactory(unsubscribe);
 		}

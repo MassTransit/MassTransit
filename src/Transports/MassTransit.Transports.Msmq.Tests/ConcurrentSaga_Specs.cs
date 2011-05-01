@@ -56,9 +56,9 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			_log.Info("Just published the start message");
 
-			UnsubscribeAction unsubscribeAction = LocalBus.Subscribe<ConcurrentLegacySaga>();
-
-			Thread.Sleep(1500);
+			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga<ConcurrentLegacySaga>(_sagaRepository);
+		
+			Thread.Sleep(3000);
 
 			const int nextValue = 2;
 			var continueConcurrentSaga = new ContinueConcurrentSaga {CorrelationId = transactionId, Value = nextValue};

@@ -17,7 +17,6 @@ namespace MassTransit.Tests.Distributor
 	using MassTransit.Distributor;
 	using MassTransit.Saga;
 	using MassTransit.Transports;
-	using TestFramework;
 	using TextFixtures;
 
 	public class MultipleDistributorSagaTestFixture<TTransportFactory> :
@@ -30,7 +29,7 @@ namespace MassTransit.Tests.Distributor
 		{
 			base.EstablishContext();
 
-			FirstSagaRepository = ObjectBuilder.SetupSagaRepository<FirstSaga>();
+			FirstSagaRepository = SetupSagaRepository<FirstSaga>();
 		}
 
 		protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)

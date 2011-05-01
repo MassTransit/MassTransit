@@ -36,7 +36,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			_future = new FutureMessage<PingMessage, Guid>(_ping.CorrelationId);
 
-			RemoteBus.Subscribe<PingMessage>(message => { _future.Set(message); });
+			RemoteBus.SubscribeHandler<PingMessage>(message => { _future.Set(message); });
 
 			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 

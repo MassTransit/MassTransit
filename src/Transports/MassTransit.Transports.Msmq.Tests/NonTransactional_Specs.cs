@@ -44,14 +44,14 @@ namespace MassTransit.Transports.Msmq.Tests
 			_faultFuture = new FutureMessage<Fault<PingMessage, Guid>>();
 			_future = new FutureMessage<PingMessage, Guid>(_ping.CorrelationId);
 
-			LocalBus.Subscribe<PingMessage>(message =>
+			LocalBus.SubscribeHandler<PingMessage>(message =>
 				{
 					_future.Set(message);
 
 					throw new NotSupportedException("I am a naughty consumer! I go boom!");
 				});
 
-			LocalBus.Subscribe<Fault<PingMessage, Guid>>(message => _faultFuture.Set(message));
+			LocalBus.SubscribeHandler<Fault<PingMessage, Guid>>(message => _faultFuture.Set(message));
 
 			LocalBus.Publish(_ping);
 
@@ -91,7 +91,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			_future = new FutureMessage<PingMessage>();
 
-			LocalBus.Subscribe<PingMessage>(message => _future.Set(message));
+			LocalBus.SubscribeHandler<PingMessage>(message => _future.Set(message));
 
 			_ping = new PingMessage();
 

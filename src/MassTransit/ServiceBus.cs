@@ -14,7 +14,6 @@ namespace MassTransit
 {
 	using System;
 	using System.Diagnostics;
-	using System.Reflection;
 	using Events;
 	using Exceptions;
 	using log4net;
@@ -38,7 +37,6 @@ namespace MassTransit
 	{
 		static readonly ILog _log;
 
-		readonly TimeSpan _threadTimeout = 10.Seconds();
 		ConsumerPool _consumerPool;
 		int _consumerThreadLimit = Environment.ProcessorCount*4;
 		ServiceBusInstancePerformanceCounters _counters;
@@ -101,6 +99,7 @@ namespace MassTransit
 
 		public static IServiceBus Null { get; private set; }
 
+		[UsedImplicitly]
 		protected string DebugDisplay
 		{
 			get { return string.Format("{0}: ", Endpoint.Address); }
@@ -222,57 +221,11 @@ namespace MassTransit
 			return InboundPipeline.Configure(configure);
 		}
 
-		/// <summary>
-		/// Adds a message handler to the service bus for handling a specific type of message
-		/// </summary>
-		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
-		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		public UnsubscribeAction Subscribe<T>(Action<T> callback) where T : class
-		{
-			return Subscribe(callback, null);
-		}
-
-		/// <summary>
-		/// Adds a message handler to the service bus for handling a specific type of message
-		/// </summary>
-		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
-		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		public UnsubscribeAction Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
-		{
-			UnsubscribeAction result = InboundPipeline.Subscribe(callback, condition);
-
-			return result;
-		}
-
-		public UnsubscribeAction Subscribe<T>(T consumer) where T : class
-		{
-			UnsubscribeAction result = InboundPipeline.Subscribe(consumer);
-
-			return (result);
-		}
-
 		public UnsubscribeAction Subscribe<TComponent>() where TComponent : class
 		{
 			UnsubscribeAction result = InboundPipeline.Subscribe<TComponent>();
 
 			return (result);
-		}
-
-		public UnsubscribeAction Subscribe(Type consumerType)
-		{
-			// TODO this.Call("Subscribe", new[] {consumerType}, new[] {});
-
-			MethodInfo method = typeof (ServiceBus).GetMethod("SometimesGenericsSuck",
-				BindingFlags.NonPublic | BindingFlags.Instance);
-			MethodInfo genericMethod = method.MakeGenericMethod(consumerType);
-			return (UnsubscribeAction) genericMethod.Invoke(this, null);
-		}
-
-		public UnsubscribeAction SubscribeConsumer<T>(Func<T, Action<T>> getConsumerAction)
-			where T : class
-		{
-			return InboundPipeline.Subscribe(getConsumerAction);
 		}
 
 		public IServiceBus ControlBus { get; set; }
@@ -281,8 +234,6 @@ namespace MassTransit
 		{
 			return EndpointCache.GetEndpoint(address);
 		}
-
-		//Just here to support Subscribe(Type)
 
 		public void Start()
 		{

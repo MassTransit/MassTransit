@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TextFixtures
 {
+	using BusConfigurators;
 	using MassTransit.Services.Subscriptions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
@@ -34,13 +35,25 @@ namespace MassTransit.Tests.TextFixtures
 				{
 					ConnectSubscriptionService(x, SubscriptionService);
 					x.ReceiveFrom("loopback://localhost/mt_client");
+
+					ConfigureLocalBus(x);
 				});
 
 			RemoteBus = ServiceBusFactory.New(x =>
 				{
 					ConnectSubscriptionService(x, SubscriptionService);
 					x.ReceiveFrom("loopback://localhost/mt_server");
+
+					ConfigureRemoteBus(x);
 				});
+		}
+
+		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
+		{
+		}
+
+		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
+		{
 		}
 
 		void SetupSubscriptionService()

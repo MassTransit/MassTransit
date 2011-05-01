@@ -27,7 +27,7 @@ namespace MassTransit.Tests
 		{
 			FutureMessage<PongMessage> ponged = new FutureMessage<PongMessage>();
 
-			LocalBus.Subscribe<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
+			LocalBus.SubscribeHandler<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
 
 			PingMessage ping = new PingMessage();
 
@@ -49,9 +49,9 @@ namespace MassTransit.Tests
 			FutureMessage<PongMessage> invalidPong = new FutureMessage<PongMessage>();
 			FutureMessage<PongMessage> validPong = new FutureMessage<PongMessage>();
 
-			LocalBus.Subscribe<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
+			LocalBus.SubscribeHandler<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
 
-			LocalBus.Subscribe<PongMessage>(message => validPong.Set(message));
+			LocalBus.SubscribeHandler<PongMessage>(message => validPong.Set(message));
 
 			PingMessage ping = new PingMessage();
 
@@ -92,7 +92,7 @@ namespace MassTransit.Tests
 		[Test]
 		public void Any_type_of_send_should_be_supported()
 		{
-			RemoteBus.Subscribe<PingMessage>(x => RemoteBus.Publish(new PongMessage(x.CorrelationId)));
+			RemoteBus.SubscribeHandler<PingMessage>(x => RemoteBus.Publish(new PongMessage(x.CorrelationId)));
 
 			PingMessage ping = new PingMessage();
 
@@ -128,7 +128,7 @@ namespace MassTransit.Tests
 				.OnTimeout(() => mre.Set())
 				.BeginSend((state) => mre.Set(), null);
 
-			LocalBus.Subscribe<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
+			LocalBus.SubscribeHandler<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
 
 			Assert.IsTrue(mre.WaitOne(5.Seconds(), true));
 			Assert.IsTrue(ponged.IsAvailable(1.Seconds()));

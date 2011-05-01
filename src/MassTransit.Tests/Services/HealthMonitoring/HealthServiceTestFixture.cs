@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 		private void SetupHealthService()
 		{
-			_healthSagaHealthSagaRepository = SetupSagaRepository<HealthSaga>(ObjectBuilder);
+			_healthSagaHealthSagaRepository = SetupSagaRepository<HealthSaga>();
 
 			HealthService = new HealthService(RemoteBus, _healthSagaHealthSagaRepository);
 

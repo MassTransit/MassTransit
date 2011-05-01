@@ -12,10 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionBuilders
 {
+	using Pipeline;
 	using Subscriptions;
 
 	public interface SubscriptionBuilder
 	{
-		ISubscriptionReference Subscribe(IServiceBus bus);
+		ISubscriptionReference Subscribe(IPipelineConfigurator configurator);
 	}
 }

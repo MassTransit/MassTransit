@@ -30,14 +30,7 @@ namespace MassTransit.Tests.Configuration
 				{
 					x.ReceiveFrom("loopback://localhost/mt_test");
 
-					x.Subscribe(s => s.Consumer<ConsumerOf<PingMessage>>(() => callback =>
-						{
-							var consumer = new ConsumerOf<PingMessage>();
-
-							callback(consumer);
-
-							consumer.ShouldHaveReceived(_ping);
-						}));
+					x.Subscribe(s => s.Consumer<ConsumerOf<PingMessage>>());
 				});
 
 			_ping = new PingMessage();

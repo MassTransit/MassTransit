@@ -32,7 +32,7 @@ namespace MassTransit.Tests
 
 			bool first = true;
 
-			LocalBus.Subscribe<PingMessage>(message =>
+			LocalBus.SubscribeHandler<PingMessage>(message =>
 				{
 					if(first)
 					{

@@ -23,17 +23,19 @@ namespace MassTransit.Tests.Saga.StateMachine
 	public class SagaFault_Specs :
 		LoopbackTestFixture
 	{
+		InMemorySagaRepository<CreateCustomerSaga> _repository;
+
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
-			var repository = SetupSagaRepository<CreateCustomerSaga>(ObjectBuilder);
+			_repository = SetupSagaRepository<CreateCustomerSaga>();
 		}
 
 		[Test]
 		public void The_saga_should_be_subscribable()
 		{
-			var unsubscribeAction = LocalBus.Subscribe<CreateCustomerSaga>();
+			var unsubscribeAction = LocalBus.SubscribeSaga<CreateCustomerSaga>(_repository);
 
 
 			unsubscribeAction();

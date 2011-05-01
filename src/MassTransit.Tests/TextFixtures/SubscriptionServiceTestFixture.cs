@@ -50,7 +50,7 @@ namespace MassTransit.Tests.TextFixtures
 					x.SetConcurrentConsumerLimit(1);
 				});
 
-			SetupSubscriptionService(ObjectBuilder);
+			SetupSubscriptionService();
 
 			SetupLocalBus();
 
@@ -108,11 +108,11 @@ namespace MassTransit.Tests.TextFixtures
 		{
 		}
 
-		void SetupSubscriptionService(IObjectBuilder builder)
+		void SetupSubscriptionService()
 		{
-			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>(builder);
+			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>();
 
-			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(builder);
+			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>();
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus, EndpointCache, _subscriptionSagaRepository,
 				_subscriptionClientSagaRepository);

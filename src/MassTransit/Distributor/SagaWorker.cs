@@ -76,8 +76,8 @@ namespace MassTransit.Distributor
 			_dataUri = _bus.Endpoint.Uri;
 			_controlUri = _controlBus.Endpoint.Uri;
 
-			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker>(Consume, Accept);
-			_unsubscribeAction += bus.Subscribe(this);
+			_unsubscribeAction = bus.ControlBus.SubscribeHandler<ConfigureWorker>(Consume, Accept);
+			_unsubscribeAction += bus.SubscribeInstance(this);
 
 			CacheMessageTypesForSaga();
 

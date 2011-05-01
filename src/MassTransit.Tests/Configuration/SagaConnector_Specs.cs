@@ -3,6 +3,7 @@ namespace MassTransit.Tests.Configuration
 	using System.Linq;
 	using Magnum.TestFramework;
 	using MassTransit.Saga;
+	using MassTransit.Saga.SubscriptionConnectors;
 	using Rhino.Mocks;
 	using Saga;
 	using SubscriptionConnectors;

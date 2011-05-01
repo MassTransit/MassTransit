@@ -44,7 +44,7 @@ namespace MassTransit.RequestResponse
 
 		public UnsubscribeAction SubscribeTo(IServiceBus bus)
 		{
-			return bus.Subscribe(this);
+			return bus.SubscribeInstance(this);
 		}
 	}
 }

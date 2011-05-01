@@ -16,46 +16,17 @@ namespace MassTransit.SubscriptionConnectors
 	using Pipeline;
 	using Pipeline.Configuration;
 	using Pipeline.Sinks;
-	using Saga;
 
-	public interface SagaSubscriptionConnector :
-		SagaConnector
-	{
-		Type MessageType { get; }
-	}
-
-	public abstract class SagaSubscriptionConnector<TSaga, TMessage> :
-		SagaSubscriptionConnector
-		where TSaga : class, ISaga, Consumes<TMessage>.All
+	public class HandlerSubscriptionConnector<TMessage>
 		where TMessage : class
 	{
-		readonly ISagaPolicy<TSaga, TMessage> _policy;
-		readonly ISagaRepository<TSaga> _sagaRepository;
-
-		protected SagaSubscriptionConnector(ISagaRepository<TSaga> sagaRepository,
-		                                    ISagaPolicy<TSaga, TMessage> policy)
-		{
-			_sagaRepository = sagaRepository;
-			_policy = policy;
-		}
-
-		public Type MessageType
-		{
-			get { return typeof (TMessage); }
-		}
-
-		public Type SagaType
-		{
-			get { return typeof (TSaga); }
-		}
-
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator)
+		public UnsubscribeAction Connect(IPipelineConfigurator configurator, Func<TMessage, Action<TMessage>> handler)
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(configurator.Pipeline);
 
 			MessageRouter<TMessage> router = routerConfigurator.FindOrCreate<TMessage>();
 
-			IPipelineSink<TMessage> sink = CreateSink(configurator.Bus, _sagaRepository, _policy);
+			var sink = new InstanceMessageSink<TMessage>(handler);
 
 			UnsubscribeAction result = router.Connect(sink);
 
@@ -63,8 +34,5 @@ namespace MassTransit.SubscriptionConnectors
 
 			return () => result() && (router.SinkCount == 0) && remove();
 		}
-
-		protected abstract IPipelineSink<TMessage> CreateSink(IServiceBus bus, ISagaRepository<TSaga> repository,
-		                                                      ISagaPolicy<TSaga, TMessage> policy);
 	}
 }

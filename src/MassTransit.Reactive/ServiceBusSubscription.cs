@@ -1,5 +1,5 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,26 +12,38 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Reactive
 {
-    using System;
+	using System;
 
-    public class ServiceBusSubscription<T> : 
-        IDisposable where T : class
-    {
-        readonly UnsubscribeAction _unsubscribeAction;
+	public class ServiceBusSubscription<T> :
+		IDisposable
+		where T : class
+	{
+		readonly UnsubscribeAction _unsubscribeAction;
 
-        public ServiceBusSubscription(IServiceBus bus, IObserver<T> observer, Predicate<T> condition)
-        {
-            _unsubscribeAction = condition == null ?
-                bus.Subscribe<T>(observer.OnNext) :
-                bus.Subscribe(observer.OnNext, condition);
+		public ServiceBusSubscription(IServiceBus bus, IObserver<T> observer, Predicate<T> condition)
+		{
+			_unsubscribeAction = bus.SubscribeSelectiveHandler<T>(message =>
+				{
+					if (condition != null && !condition(message))
+						return null;
 
-            // TODO: Hook for observer.OnError?
-        }
+					return m =>
+						{
+							try
+							{
+								observer.OnNext(m);
+							}
+							catch (Exception ex)
+							{
+								observer.OnError(ex);
+							}
+						};
+				});
+		}
 
-
-        public void Dispose()
-        {
-            _unsubscribeAction();
-        }
-    }
+		public void Dispose()
+		{
+			_unsubscribeAction();
+		}
+	}
 }

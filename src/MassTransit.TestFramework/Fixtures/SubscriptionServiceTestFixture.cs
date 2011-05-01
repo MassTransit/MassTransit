@@ -35,18 +35,22 @@ namespace MassTransit.TestFramework.Fixtures
 
 		void SetupSubscriptionService()
 		{
-			ObjectBuilder.SetupSagaRepository<SubscriptionClientSaga>();
-			ObjectBuilder.SetupSagaRepository<SubscriptionSaga>();
+			SubscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>();
+			SubscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>();
 
 			SubscriptionBus = SetupServiceBus(SubscriptionUri, x => { x.SetConcurrentConsumerLimit(1); });
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus,
 				EndpointCache,
-				ObjectBuilder.GetInstance<ISagaRepository<SubscriptionSaga>>(),
-				ObjectBuilder.GetInstance<ISagaRepository<SubscriptionClientSaga>>());
+				SubscriptionSagaRepository,
+				SubscriptionClientSagaRepository);
 
 			SubscriptionService.Start();
 		}
+
+		protected InMemorySagaRepository<SubscriptionSaga> SubscriptionSagaRepository { get; private set; }
+
+		protected InMemorySagaRepository<SubscriptionClientSaga> SubscriptionClientSagaRepository { get; private set; }
 
 		[TestFixtureTearDown]
 		public void LocalAndRemoteTestFixtureTeardown()

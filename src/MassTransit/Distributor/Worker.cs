@@ -141,9 +141,9 @@ namespace MassTransit.Distributor
 			_dataUri = _bus.Endpoint.Uri;
 			_controlUri = _controlBus.Endpoint.Uri;
 
-			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker>(Consume, Accept);
-			_unsubscribeAction += bus.ControlBus.Subscribe<PingWorker>(Consume);
-			_unsubscribeAction += bus.Subscribe(this);
+			_unsubscribeAction = bus.ControlBus.SubscribeHandler<ConfigureWorker>(Consume, Accept);
+			_unsubscribeAction += bus.ControlBus.SubscribeHandler<PingWorker>(Consume);
+			_unsubscribeAction += bus.SubscribeInstance(this);
 
             _scheduler = new TimerScheduler(new PoolFiber());
 			_scheduled = _scheduler.Schedule(3.Seconds(), 1.Minutes(), _fiber, PublishWorkerAvailability);

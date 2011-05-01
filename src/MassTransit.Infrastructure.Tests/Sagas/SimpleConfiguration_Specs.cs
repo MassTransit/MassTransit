@@ -36,7 +36,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 			{
 				received = new FutureMessage<PingMessage>();
 
-				bus.Subscribe<PingMessage>(received.Set);
+				bus.SubscribeHandler<PingMessage>(received.Set);
 
 				bus.Publish(new PingMessage());
 				received.IsAvailable(8.Seconds()).ShouldBeTrue();

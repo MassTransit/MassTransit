@@ -80,7 +80,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		[Test]
 		public void Should_process_the_messages_in_order_and_not_at_the_same_time()
 		{
-			UnsubscribeAction unsubscribeAction = LocalBus.Subscribe<ConcurrentSaga>();
+			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga<ConcurrentSaga>(_sagaRepository);
 
 			Guid transactionId = CombGuid.Generate();
 
@@ -133,7 +133,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		[Test]
 		public void Should_process_the_messages_in_order_and_not_at_the_same_time()
 		{
-			UnsubscribeAction unsubscribeAction = LocalBus.Subscribe<ConcurrentLegacySaga>();
+			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga<ConcurrentLegacySaga>(_sagaRepository);
 
 			Guid transactionId = CombGuid.Generate();
 
@@ -199,7 +199,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 
 			_log.Info("Just published the start message");
 
-			UnsubscribeAction unsubscribeAction = LocalBus.Subscribe<ConcurrentLegacySaga>();
+			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga<ConcurrentLegacySaga>(_sagaRepository);
 
 			Thread.Sleep(1500);
 

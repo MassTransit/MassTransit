@@ -35,8 +35,8 @@ namespace MassTransit.Tests.Performance
 
 		public void Run()
 		{
-			_bus.Subscribe<LoadedRequest>(HandleLoadedRequest);
-			_bus.Subscribe<LoadedResponse>(HandleLoadedResponse);
+			_bus.SubscribeHandler<LoadedRequest>(HandleLoadedRequest);
+			_bus.SubscribeHandler<LoadedResponse>(HandleLoadedResponse);
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 

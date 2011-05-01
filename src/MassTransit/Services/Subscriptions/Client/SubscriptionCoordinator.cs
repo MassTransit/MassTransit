@@ -147,7 +147,7 @@ namespace MassTransit.Services.Subscriptions.Client
 
 			_clientId = CombGuid.Generate();
 
-			_unsubscribeAction = _bus.Subscribe(this);
+			_unsubscribeAction = _bus.SubscribeInstance(this);
 
 			SendAddSubscriptionClient(bus);
 		}

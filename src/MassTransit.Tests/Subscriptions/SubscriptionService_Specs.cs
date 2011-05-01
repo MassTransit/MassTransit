@@ -71,7 +71,7 @@ namespace MassTransit.Tests.Subscriptions
 		public void The_system_should_be_ready_to_use_before_getting_underway()
 		{
 			var consumer = new TestMessageConsumer<PingMessage>();
-			var unsubscribeAction = RemoteBus.Subscribe(consumer);
+			var unsubscribeAction = RemoteBus.SubscribeInstance(consumer);
 
 			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 

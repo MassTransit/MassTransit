@@ -190,7 +190,7 @@ namespace MassTransit.SystemView
 		private void BootstrapServiceBus()
 		{
 			_bus = _container.GetInstance<IServiceBus>();
-			_unsubscribe = _bus.Subscribe(this);
+			_unsubscribe = _bus.SubscribeInstance(this);
 		}
 
 		private void BootstrapContainer()

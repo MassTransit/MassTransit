@@ -105,10 +105,10 @@ namespace MassTransit.Distributor
 		{
 			_bus = bus;
 
-			_unsubscribeAction = bus.Subscribe<WorkerAvailable<T>>(Consume);
+			_unsubscribeAction = bus.SubscribeHandler<WorkerAvailable<T>>(Consume);
 
 			// don't plan to unsubscribe this since it's an important thing
-			bus.Subscribe(this);
+			bus.SubscribeInstance(this);
 
 			_scheduled = _scheduler.Schedule(_pingTimeout, _pingTimeout, _fiber, PingWorkers);
 		}

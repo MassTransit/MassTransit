@@ -36,7 +36,7 @@ namespace MassTransit.SystemView.Core.Consumer
 			_bus = bus;
 			_subscriptionServiceUri = subscriptionServiceUri;
 
-			_unsubscribe = _bus.Subscribe(this);
+			_unsubscribe = _bus.SubscribeInstance(this);
 
 			ConnectToSubscriptionService();
 		}

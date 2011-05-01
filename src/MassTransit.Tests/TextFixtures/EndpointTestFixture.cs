@@ -129,13 +129,10 @@ namespace MassTransit.Tests.TextFixtures
 			configurator.AddService(() => new SubscriptionConsumer(subscriptionService));
 		}
 
-		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>(IObjectBuilder builder)
+		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
 			where TSaga : class, ISaga
 		{
 			var sagaRepository = new InMemorySagaRepository<TSaga>();
-
-			builder.Stub(x => x.GetInstance<ISagaRepository<TSaga>>())
-				.Return(sagaRepository);
 
 			return sagaRepository;
 		}

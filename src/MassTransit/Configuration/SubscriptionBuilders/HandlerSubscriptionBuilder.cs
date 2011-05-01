@@ -13,12 +13,15 @@
 namespace MassTransit.SubscriptionBuilders
 {
 	using System;
+	using Pipeline;
+	using SubscriptionConnectors;
 	using Subscriptions;
 
 	public class HandlerSubscriptionBuilder<TMessage> :
 		SubscriptionBuilder
 		where TMessage : class
 	{
+		readonly HandlerSubscriptionConnector<TMessage> _connector;
 		readonly Func<TMessage, Action<TMessage>> _handler;
 		readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
 
@@ -27,11 +30,13 @@ namespace MassTransit.SubscriptionBuilders
 		{
 			_handler = handler;
 			_referenceFactory = referenceFactory;
+
+			_connector = new HandlerSubscriptionConnector<TMessage>();
 		}
 
-		public ISubscriptionReference Subscribe(IServiceBus bus)
+		public ISubscriptionReference Subscribe(IPipelineConfigurator configurator)
 		{
-			UnsubscribeAction unsubscribe = bus.SubscribeConsumer(_handler);
+			UnsubscribeAction unsubscribe = _connector.Connect(configurator, _handler);
 
 			return _referenceFactory(unsubscribe);
 		}

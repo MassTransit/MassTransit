@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionConnectors
+namespace MassTransit.Saga.SubscriptionConnectors
 {
 	using System;
 	using System.Collections.Generic;
@@ -18,8 +18,7 @@ namespace MassTransit.SubscriptionConnectors
 	using Exceptions;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
-	using Pipeline;
-	using Saga;
+	using MassTransit.Pipeline;
 	using Util;
 
 	public interface SagaConnector
@@ -39,19 +38,26 @@ namespace MassTransit.SubscriptionConnectors
 
 		public SagaConnector(ISagaRepository<T> sagaRepository)
 		{
-			_args = new object[] {sagaRepository};
+			try
+			{
+				_args = new object[] {sagaRepository};
 
-			Type[] interfaces = typeof (T).GetInterfaces();
+				Type[] interfaces = typeof (T).GetInterfaces();
 
-			if (!interfaces.Contains(typeof (ISaga)))
-				throw new ConfigurationException("The type specified is not a saga");
+				if (!interfaces.Contains(typeof (ISaga)))
+					throw new ConfigurationException("The type specified is not a saga");
 
-			_connectors = StateMachineEvents()
-				.Union(Initiates())
-				.Union(Orchestrates())
-				.Union(Observes())
-				.Distinct((x, y) => x.MessageType == y.MessageType)
-				.ToList();
+				_connectors = StateMachineEvents()
+					.Union(Initiates())
+					.Union(Orchestrates())
+					.Union(Observes())
+					.Distinct((x, y) => x.MessageType == y.MessageType)
+					.ToList();
+			}
+			catch (Exception ex)
+			{
+				throw new ConfigurationException("Failed to create the saga connector for " + typeof (T).FullName, ex);
+			}
 		}
 
 		public IEnumerable<SagaSubscriptionConnector> Connectors

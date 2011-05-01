@@ -30,16 +30,6 @@ namespace MassTransit.TestFramework
 			Timeout = 8.Seconds();
 		}
 
-		public static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>(this IObjectBuilder builder)
-			where TSaga : class, ISaga
-		{
-			var repository = new InMemorySagaRepository<TSaga>();
-
-			builder.Add<ISagaRepository<TSaga>>(repository);
-
-			return repository;
-		}
-
 		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId)
 			where TSaga : class, ISaga
 		{

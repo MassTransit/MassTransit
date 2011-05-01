@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Subscriptions
 		[Test]
 		public void Should_not_remove_any_existing_subscriptions()
 		{
-			RemoteBus.Subscribe<A>(x => { });
+			RemoteBus.SubscribeHandler<A>(x => { });
 			RemoteBus.Dispose();
 
 			LocalBus.ShouldHaveSubscriptionFor<A>();
@@ -46,7 +46,7 @@ namespace MassTransit.Tests.Subscriptions
 		[Test]
 		public void Should_remove_any_previous_subscriptions()
 		{
-			RemoteBus.Subscribe<A>(x => { });
+			RemoteBus.SubscribeHandler<A>(x => { });
 
 			LocalBus.ShouldHaveSubscriptionFor<A>();
 
