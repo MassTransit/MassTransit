@@ -1,8 +1,8 @@
 ﻿namespace MassTransit.Transports.RabbitMq
 {
     using System;
-    using Internal;
     using RabbitMQ.Client;
+    using Util;
 
     public class OutboundRabbitMqTransport : IOutboundTransport
     {
