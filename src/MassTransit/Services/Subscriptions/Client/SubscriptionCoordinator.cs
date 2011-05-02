@@ -134,6 +134,9 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		public void Start(IServiceBus bus)
 		{
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Starting subscription coordinator on network '{0}'", _network);
+
 			ConnectBus(bus);
 
 			IServiceBus controlBus = bus.ControlBus;
@@ -217,10 +220,16 @@ namespace MassTransit.Services.Subscriptions.Client
 		bool ShouldIgnoreMessage<T>(T message)
 		{
 			if (CurrentMessage.Headers.SourceAddress == _bus.Endpoint.Address.Uri)
+			{
+			   _log.Debug("Ignoring subscription because its source address equals the busses address"); 
 				return true;
+			}
 
 			if (!string.Equals(CurrentMessage.Headers.Network, _network))
+			{
+			   _log.DebugFormat("Ignoring subscription because the network '{0}' != ours '{1}1",CurrentMessage.Headers.Network, _network); 
 				return true;
+			}
 
 			return false;
 		}
@@ -274,10 +283,10 @@ namespace MassTransit.Services.Subscriptions.Client
 
 			_log.Debug("SubscriptionClient Add: " + sub);
 
-			Type messageType = Type.GetType(sub.MessageName);
+			var messageType = Type.GetType(sub.MessageName);
 			if (messageType == null)
 			{
-				_log.InfoFormat("Unknown message type {0}, unable to add subscription", sub.MessageName);
+				_log.InfoFormat("Unknown message type '{0}', unable to add subscription", sub.MessageName);
 				return;
 			}
 
@@ -408,7 +417,10 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		bool IgnoreIfLocalEndpoint(Uri endpointUri)
 		{
-			return _localEndpoints.Contains(endpointUri);
+		    var r = _localEndpoints.Contains(endpointUri);
+            _log.Debug("Ignored a subscription because its endpoint was local.");
+
+			return r;
 		}
 
 		~SubscriptionCoordinator()
