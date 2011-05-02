@@ -81,6 +81,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SolutionVersion.cs">
+      <Link>SolutionVersion.cs</Link>
+    </Compile>
     <Compile Include="Configuration.cs" />
     <Compile Include="Consumer\SubscriptionDataConsumer.cs" />
     <Compile Include="IConfiguration.cs" />

@@ -203,7 +203,7 @@ namespace MassTransit.SystemView
 						.Use<Configuration>();
 				});
 
-			var registry = new SystemViewRegistry(_container);
+			var registry = new SystemViewRegistry(_container.GetInstance<IConfiguration>());
 			_container.Configure(x => x.AddRegistry(registry));
 		}
 

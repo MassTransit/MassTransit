@@ -12,20 +12,18 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView.Core
 {
-	using StructureMap;
 	using StructureMap.Configuration.DSL;
 
     public class SystemViewRegistry :
 		Registry
 	{
-		public SystemViewRegistry(IConfiguration configuration, IContainer container)
+		public SystemViewRegistry(IConfiguration configuration)
 		{
 		    var bus = ServiceBusFactory.New(sbc =>
 		        {
-		            sbc.ReceiveFrom(configuration.SystemViewDataUri);
-		            sbc.SetConcurrentConsumerLimit(1);
-		            sbc.UseControlBus();
-		            sbc.UseMulticastSubscriptionClient();
+					sbc.ReceiveFrom(configuration.SystemViewDataUri);
+					sbc.UseMsmq();
+					sbc.SetConcurrentConsumerLimit(1);
 		        });
 
 		    For<IServiceBus>().Use(bus);
