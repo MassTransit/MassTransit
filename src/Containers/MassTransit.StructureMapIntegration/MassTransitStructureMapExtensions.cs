@@ -20,8 +20,7 @@ namespace MassTransit
 
 	public static class MassTransitStructureMapExtensions
 	{
-		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator,
-		                                              IContainer container)
+		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IContainer container)
 		{
 			IList<Type> concreteTypes = container.Model
 				.InstancesOf<IConsumer>()
