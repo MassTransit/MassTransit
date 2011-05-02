@@ -21,10 +21,10 @@ namespace MassTransit.RuntimeServices
 	using Saga;
 	using Services.HealthMonitoring;
 	using StructureMap;
-	using StructureMapIntegration;
+	using StructureMap.Configuration.DSL;
 
-	public class HealthServiceRegistry :
-		MassTransitRegistryBase
+    public class HealthServiceRegistry :
+		Registry
 	{
 		private readonly IContainer _container;
 
@@ -41,13 +41,16 @@ namespace MassTransit.RuntimeServices
 			For(typeof (ISagaRepository<>))
 				.Add(typeof (NHibernateSagaRepository<>));
 
-			RegisterServiceBus(configuration.HealthServiceDataUri, x =>
-				{
-					x.UseControlBus();
-					x.SetConcurrentConsumerLimit(1);
+		    var bus = ServiceBusFactory.New(sbc =>
+		        {
+                    sbc.UseControlBus();
+		            sbc.UseMsmq();
+                    sbc.ReceiveFrom(configuration.HealthServiceDataUri);
+                    sbc.SetConcurrentConsumerLimit(1);
+                    sbc.UseMulticastSubscriptionClient();
+		        });
 
-					x.UseSubscriptionService(configuration.SubscriptionServiceUri);
-				});
+		    For<IServiceBus>().Use(bus);
 		}
 
 		private static ISessionFactory CreateSessionFactory()

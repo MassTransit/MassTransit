@@ -19,13 +19,12 @@ namespace MassTransit.RuntimeServices
 	using NHibernate;
 	using NHibernate.Tool.hbm2ddl;
 	using Saga;
-	using Services.HealthMonitoring.Configuration;
 	using Services.Timeout;
 	using StructureMap;
-	using StructureMapIntegration;
+	using StructureMap.Configuration.DSL;
 
-	public class TimeoutServiceRegistry :
-		MassTransitRegistryBase
+    public class TimeoutServiceRegistry :
+		Registry
 	{
 		private readonly IContainer _container;
 
@@ -39,13 +38,17 @@ namespace MassTransit.RuntimeServices
 
 			For(typeof (ISagaRepository<>)).Use(typeof (NHibernateSagaRepository<>));
 
-			RegisterServiceBus(configuration.TimeoutServiceDataUri, x =>
-				{
-					x.UseControlBus();
-					x.SetConcurrentConsumerLimit(1);
-					x.UseSubscriptionService(configuration.SubscriptionServiceUri);
-					x.ConfigureService<HealthClientConfigurator>(health => health.SetHeartbeatInterval(10));
-				});
+		    var bus = ServiceBusFactory.New(sbc =>
+		        {
+                    sbc.UseControlBus();
+                    sbc.SetConcurrentConsumerLimit(1);
+		            sbc.UseMsmq();
+                    sbc.UseMulticastSubscriptionClient();
+                    sbc.ReceiveFrom(configuration.TimeoutServiceDataUri);
+                    sbc.UseHealthMonitoring(10);
+		        });
+
+		    For<IServiceBus>().Use(bus);
 		}
 
 		private static ISessionFactory CreateSessionFactory()
