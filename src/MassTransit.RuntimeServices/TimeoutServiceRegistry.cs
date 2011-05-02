@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,35 +23,36 @@ namespace MassTransit.RuntimeServices
 	using StructureMap;
 	using StructureMap.Configuration.DSL;
 
-    public class TimeoutServiceRegistry :
+	public class TimeoutServiceRegistry :
 		Registry
 	{
-		private readonly IContainer _container;
-
 		public TimeoutServiceRegistry(IContainer container)
 		{
-			_container = container;
-
 			var configuration = container.GetInstance<IConfiguration>();
 
-			For<ISessionFactory>().Singleton().Use(context => CreateSessionFactory());
+			For<ISessionFactory>()
+				.Singleton()
+				.Use(context => CreateSessionFactory());
 
-			For(typeof (ISagaRepository<>)).Use(typeof (NHibernateSagaRepository<>));
+			For(typeof (ISagaRepository<>))
+				.Add(typeof (NHibernateSagaRepository<>));
 
-		    var bus = ServiceBusFactory.New(sbc =>
-		        {
-                    sbc.UseControlBus();
-                    sbc.SetConcurrentConsumerLimit(1);
-		            sbc.UseMsmq();
-                    sbc.UseMulticastSubscriptionClient();
-                    sbc.ReceiveFrom(configuration.TimeoutServiceDataUri);
-                    sbc.UseHealthMonitoring(10);
-		        });
+			IServiceBus bus = ServiceBusFactory.New(sbc =>
+				{
+					sbc.ReceiveFrom(configuration.TimeoutServiceDataUri);
+					sbc.UseControlBus();
 
-		    For<IServiceBus>().Use(bus);
+					sbc.UseMsmq();
+					sbc.UseSubscriptionService(configuration.SubscriptionServiceUri);
+
+					sbc.SetConcurrentConsumerLimit(1);
+					sbc.UseHealthMonitoring(10);
+				});
+
+			For<IServiceBus>().Use(bus);
 		}
 
-		private static ISessionFactory CreateSessionFactory()
+		static ISessionFactory CreateSessionFactory()
 		{
 			return Fluently.Configure()
 				.Mappings(m => { m.FluentMappings.Add<TimeoutSagaMap>(); })
@@ -59,11 +60,12 @@ namespace MassTransit.RuntimeServices
 				.BuildSessionFactory();
 		}
 
-		private static void BuildSchema(NHibernate.Cfg.Configuration config)
+		static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
 			new SchemaUpdate(config).Execute(false, true);
 
-			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (TimeoutService).Assembly.Location), typeof (TimeoutService).Name + ".sql");
+			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (TimeoutService).Assembly.Location),
+				typeof (TimeoutService).Name + ".sql");
 
 			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
 		}

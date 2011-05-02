@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,18 +23,12 @@ namespace MassTransit.RuntimeServices
 	using StructureMap;
 	using StructureMap.Configuration.DSL;
 
-    public class SubscriptionServiceRegistry :
+	public class SubscriptionServiceRegistry :
 		Registry
 	{
 		public SubscriptionServiceRegistry(IContainer container)
 		{
 			var configuration = container.GetInstance<IConfiguration>();
-		    var bus = ServiceBusFactory.New(sbc=>
-		        {
-		            sbc.UseMsmq();
-                    sbc.ReceiveFrom(configuration.SubscriptionServiceUri);
-                    sbc.SetConcurrentConsumerLimit(1);
-		        });
 
 			For<ISessionFactory>()
 				.Singleton()
@@ -43,11 +37,19 @@ namespace MassTransit.RuntimeServices
 			For(typeof (ISagaRepository<>))
 				.Add(typeof (NHibernateSagaRepository<>));
 
-		    For<IServiceBus>()
-		        .Use(bus);
+			IServiceBus bus = ServiceBusFactory.New(sbc =>
+				{
+					sbc.ReceiveFrom(configuration.SubscriptionServiceUri);
+
+					sbc.UseMsmq();
+
+					sbc.SetConcurrentConsumerLimit(1);
+				});
+
+			For<IServiceBus>().Use(bus);
 		}
 
-		private static ISessionFactory CreateSessionFactory()
+		static ISessionFactory CreateSessionFactory()
 		{
 			return Fluently.Configure()
 				.Mappings(m =>
@@ -59,11 +61,12 @@ namespace MassTransit.RuntimeServices
 				.BuildSessionFactory();
 		}
 
-		private static void BuildSchema(NHibernate.Cfg.Configuration config)
+		static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
 			new SchemaUpdate(config).Execute(false, true);
 
-			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (SubscriptionService).Assembly.Location), typeof (SubscriptionService).Name + ".sql");
+			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (SubscriptionService).Assembly.Location),
+				typeof (SubscriptionService).Name + ".sql");
 
 			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
 		}

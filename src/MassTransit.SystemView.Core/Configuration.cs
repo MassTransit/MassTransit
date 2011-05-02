@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,81 +12,72 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView.Core
 {
-    using System;
-    using System.Configuration;
-    using System.Reflection;
+	using System;
+	using System.Configuration;
+	using System.Reflection;
 
-    public class Configuration :
-        IConfiguration
-    {
-        private const string _subscriptionServiceUriKey = "SubscriptionServiceUri";
-        private const string _systemViewControlUriKey = "SystemViewControlUri";
-        private const string _systemViewDataUriKey = "SystemViewDataUri";
+	public class Configuration :
+		IConfiguration
+	{
+		const string SubscriptionServiceUriKey = "SubscriptionServiceUri";
+		const string SystemViewControlUriKey = "SystemViewControlUri";
+		const string SystemViewDataUriKey = "SystemViewDataUri";
 
-        public Uri SubscriptionServiceUri
-        {
-            get
-            {
-                return GetUriApplicationSetting(_subscriptionServiceUriKey);
-            }
-        }
+		public Uri SubscriptionServiceUri
+		{
+			get { return GetUriApplicationSetting(SubscriptionServiceUriKey); }
+		}
 
-        public Uri SystemViewControlUri
-        {
-            get
-            {
-                return GetUriApplicationSetting(_systemViewControlUriKey);
-            }
-        }
+		public Uri SystemViewControlUri
+		{
+			get { return GetUriApplicationSetting(SystemViewControlUriKey); }
+		}
 
-        public Uri SystemViewDataUri
-        {
-            get
-            {
-                return GetUriApplicationSetting(_systemViewDataUriKey);
-            }
-        }
+		public Uri SystemViewDataUri
+		{
+			get { return GetUriApplicationSetting(SystemViewDataUriKey); }
+		}
 
-        private static Uri GetUriApplicationSetting(string key)
-        {
-            try
-            {
-                Uri value = new Uri(GetApplicationSetting(key));
+		static Uri GetUriApplicationSetting(string key)
+		{
+			try
+			{
+				var value = new Uri(GetApplicationSetting(key));
 
-                return value;
-            }
-            catch (UriFormatException ex)
-            {
-                throw new ConfigurationErrorsException("The " + key + " is not a valid Uri", ex);
-            }
-            catch (ConfigurationErrorsException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new ConfigurationErrorsException("The " + key + " application setting failed to load", ex);
-            }
-        }
+				return value;
+			}
+			catch (UriFormatException ex)
+			{
+				throw new ConfigurationErrorsException("The " + key + " is not a valid Uri", ex);
+			}
+			catch (ConfigurationErrorsException)
+			{
+				throw;
+			}
+			catch (Exception ex)
+			{
+				throw new ConfigurationErrorsException("The " + key + " application setting failed to load", ex);
+			}
+		}
 
-        private static string GetApplicationSetting(string key)
-        {
-            string value = ConfigurationManager.AppSettings[key] ?? LocateConfiguration().AppSettings.Settings[key].Value;
+		static string GetApplicationSetting(string key)
+		{
+			string value = ConfigurationManager.AppSettings[key] ?? LocateConfiguration().AppSettings.Settings[key].Value;
 
-            if (value == null)
-                throw new ConfigurationErrorsException("There are no configuration string configured");
+			if (value == null)
+				throw new ConfigurationErrorsException("There are no configuration string configured");
 
-            return value;
-        }
+			return value;
+		}
 
-        private static System.Configuration.Configuration LocateConfiguration()
-        {
-            ExeConfigurationFileMap map = new ExeConfigurationFileMap
-                {
-                    ExeConfigFilename = Assembly.GetExecutingAssembly().Location + ".config"
-                };
+		static System.Configuration.Configuration LocateConfiguration()
+		{
+			var map = new ExeConfigurationFileMap
+				{
+					ExeConfigFilename = Assembly.GetExecutingAssembly().Location + ".config"
+				};
 
-            return ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
-        }
-    }
+			return ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
+		}
+	}
 }

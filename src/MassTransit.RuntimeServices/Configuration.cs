@@ -64,12 +64,7 @@ namespace MassTransit.RuntimeServices
 			get { return GetApplicationSetting(TimeoutServiceEnabledKey, true); }
 		}
 
-		public Uri TimeoutServiceControlUri
-		{
-			get { return GetUriApplicationSetting(TimeoutServiceControlUriKey); }
-		}
-
-		public Uri TimeoutServiceDataUri
+    	public Uri TimeoutServiceDataUri
 		{
 			get { return GetUriApplicationSetting(TimeoutServiceDataUriKey); }
 		}
@@ -79,12 +74,7 @@ namespace MassTransit.RuntimeServices
 			get { return GetApplicationSetting(HealthServiceEnabledKey, true); }
 		}
 
-		public Uri HealthServiceControlUri
-		{
-			get { return GetUriApplicationSetting(HealthServiceControlUriKey); }
-		}
-
-		public Uri HealthServiceDataUri
+    	public Uri HealthServiceDataUri
 		{
 			get { return GetUriApplicationSetting(HealthServiceDataUriKey); }
 		}
