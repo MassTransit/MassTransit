@@ -56,7 +56,7 @@ namespace MassTransit
 		/// </summary>
 		/// <typeparam name="TService"></typeparam>
 		/// <returns></returns>
-    	TService GetService<TService>();
+    	TService GetService<TService>() where TService : IBusService;
 
 		IMessagePipeline OutboundPipeline { get; }
 
