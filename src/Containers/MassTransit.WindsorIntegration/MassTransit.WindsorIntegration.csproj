@@ -84,11 +84,6 @@
     <Compile Include="MassTransitWindsorContainerExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj">
-      <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
-      <Name>MassTransit.NHibernateIntegration</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>

@@ -15,40 +15,34 @@ namespace Starbucks.Cashier
 	using MassTransit;
 	using MassTransit.Saga;
 	using Ninject.Modules;
-	using Ninject;
 
-    public class CashierRegistry :
+	public class CashierRegistry :
 		NinjectModule
 	{
-
 		public override void Load()
 		{
-		    Bind<ISagaRepository<CashierSaga>>()
-                .To<InMemorySagaRepository<CashierSaga>>();
+			Bind<ISagaRepository<CashierSaga>>()
+				.To<InMemorySagaRepository<CashierSaga>>();
 
 			Bind<CashierSaga>()
 				.To<CashierSaga>();
-			
-            Bind<CashierService>()
+
+			Bind<CashierService>()
 				.To<CashierService>()
 				.InSingletonScope();
 
-		    Bus.Initialize(sbc =>
-		    {
-		        sbc.UseMsmq();
-                sbc.UseMulticastSubscriptionClient();
-                sbc.ReceiveFrom("msmq://localhost/starbucks_cashier");
-                sbc.SetConcurrentConsumerLimit(1); //a cashier cannot multi-task
+			Bind<IServiceBus>().ToMethod(context =>
+				{
+					return ServiceBusFactory.New(sbc =>
+						{
+							sbc.UseMsmq();
+							sbc.UseMulticastSubscriptionClient();
+							sbc.ReceiveFrom("msmq://localhost/starbucks_cashier");
+							sbc.SetConcurrentConsumerLimit(1); //a cashier cannot multi-task
 
-		        sbc.UseControlBus();
-
-                sbc.Subscribe(subs=>
-                {
-                    subs.Saga(new InMemorySagaRepository<CashierSaga>());
-                });
-		    });
-
-		    Bind<IServiceBus>().ToConstant(Bus.Instance());
+							sbc.UseControlBus();
+						});
+				});
 		}
 	}
 }
