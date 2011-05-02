@@ -8,8 +8,8 @@
     <ProjectGuid>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.Infrastructure</RootNamespace>
-    <AssemblyName>MassTransit.Infrastructure</AssemblyName>
+    <RootNamespace>MassTransit.NHibernateIntegration</RootNamespace>
+    <AssemblyName>MassTransit.NHibernateIntegration</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -50,39 +50,39 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\MassTransit.Infrastructure.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Persistence\MassTransit.NHibernateIntegration.XML</DocumentationFile>
     <NoWarn>1591</NoWarn>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=1.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Castle.Core\Castle.Core.dll</HintPath>
+      <HintPath>..\..\..\lib\Castle.Core\Castle.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="FluentNHibernate">
-      <HintPath>..\..\lib\FluentNHibernate\FluentNHibernate.dll</HintPath>
+      <HintPath>..\..\..\lib\FluentNHibernate\FluentNHibernate.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Iesi.Collections, Version=1.0.1.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\NHibernate\Iesi.Collections.dll</HintPath>
+      <HintPath>..\..\..\lib\NHibernate\Iesi.Collections.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\log4net.dll</HintPath>
+      <HintPath>..\..\..\lib\log4net.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\NHibernate\NHibernate.dll</HintPath>
+      <HintPath>..\..\..\lib\NHibernate\NHibernate.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -93,11 +93,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\SolutionVersion.cs">
+    <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Saga\NHibernateSagaRepository.cs" />
-    <Compile Include="Saga\NHibernateSagaRepositoryFactory.cs" />
     <Compile Include="StateMachineUserType.cs" />
     <Compile Include="StateMachineUserTypeConvention.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -105,7 +104,7 @@
     <Compile Include="UriUserTypeConvention.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
       <Private>False</Private>

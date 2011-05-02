@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,7 @@
 namespace MassTransit.RuntimeServices.Model
 {
 	using FluentNHibernate.Mapping;
-	using Infrastructure;
+	using NHibernateIntegration;
 	using Services.Subscriptions.Server;
 
 	public class SubscriptionSagaMap :
@@ -32,7 +32,8 @@ namespace MassTransit.RuntimeServices.Model
 				{
 					x.Map(c => c.ClientId);
 					x.Map(c => c.CorrelationId, "MessageCorrelationId");
-					x.Map(c => c.EndpointUri).CustomType<UriUserType>(); ;
+					x.Map(c => c.EndpointUri).CustomType<UriUserType>();
+					;
 					x.Map(c => c.MessageName);
 					x.Map(c => c.SequenceNumber);
 					x.Map(c => c.SubscriptionId);

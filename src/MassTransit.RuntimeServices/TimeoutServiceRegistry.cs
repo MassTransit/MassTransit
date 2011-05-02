@@ -14,10 +14,10 @@ namespace MassTransit.RuntimeServices
 {
 	using System.IO;
 	using FluentNHibernate.Cfg;
-	using Infrastructure.Saga;
 	using Model;
 	using NHibernate;
 	using NHibernate.Tool.hbm2ddl;
+	using NHibernateIntegration.Saga;
 	using Saga;
 	using Services.Timeout;
 	using StructureMap;
@@ -37,19 +37,22 @@ namespace MassTransit.RuntimeServices
 			For(typeof (ISagaRepository<>))
 				.Add(typeof (NHibernateSagaRepository<>));
 
-			IServiceBus bus = ServiceBusFactory.New(sbc =>
-				{
-					sbc.ReceiveFrom(configuration.TimeoutServiceDataUri);
-					sbc.UseControlBus();
+			For<IServiceBus>()
+				.Singleton()
+				.Use(context =>
+					{
+						return ServiceBusFactory.New(sbc =>
+							{
+								sbc.ReceiveFrom(configuration.TimeoutServiceDataUri);
+								sbc.UseControlBus();
 
-					sbc.UseMsmq();
-					sbc.UseSubscriptionService(configuration.SubscriptionServiceUri);
+								sbc.UseMsmq();
+								sbc.UseSubscriptionService(configuration.SubscriptionServiceUri);
 
-					sbc.SetConcurrentConsumerLimit(1);
-					sbc.UseHealthMonitoring(10);
-				});
-
-			For<IServiceBus>().Use(bus);
+								sbc.SetConcurrentConsumerLimit(1);
+								sbc.UseHealthMonitoring(10);
+							});
+					});
 		}
 
 		static ISessionFactory CreateSessionFactory()

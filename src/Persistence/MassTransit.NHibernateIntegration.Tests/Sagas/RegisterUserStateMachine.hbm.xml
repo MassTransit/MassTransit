@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2"
-                   namespace="MassTransit.Infrastructure.Tests"
-                   assembly="MassTransit.Infrastructure.Tests"
+                   namespace="MassTransit.NHibernateIntegration.Tests"
+                   assembly="MassTransit.NHibernateIntegration.Tests"
                    default-access="property"
                    default-lazy="false"
                    default-cascade="none" >
@@ -10,7 +10,7 @@
       <generator class="assigned" />
     </id>
 
-    <property name="CurrentState" access="field.camelcase-underscore" type="Magnum.ForNHibernate.StateMachine.StateMachineUserType, Magnum.ForNHibernate" />
+    <property name="CurrentState" access="field.camelcase-underscore" type="MassTransit.NHibernateIntegration.StateMachineUserType, MassTransit.NHibernateIntegration" />
 
     <property name="Username" length="40"/>
     <property name="Password" length="40"/>

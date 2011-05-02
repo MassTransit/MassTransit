@@ -114,7 +114,7 @@ namespace MassTransit.Tests.TextFixtures
 
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>();
 
-			SubscriptionService = new SubscriptionService(SubscriptionBus, EndpointCache, _subscriptionSagaRepository,
+			SubscriptionService = new SubscriptionService(SubscriptionBus, _subscriptionSagaRepository,
 				_subscriptionClientSagaRepository);
 
 			SubscriptionService.Start();

@@ -23,7 +23,7 @@ namespace MassTransit.RuntimeServices
 	using StructureMap;
 	using StructureMap.Configuration.DSL;
 	using Topshelf;
-	using Topshelf.ServiceConfigurators;
+	using Topshelf.HostConfigurators;
 
 	class Program
 	{
@@ -54,17 +54,20 @@ namespace MassTransit.RuntimeServices
 
 					if (serviceConfiguration.SubscriptionServiceEnabled)
 					{
-						config.Service<SubscriptionService>(service => ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop()));
+						config.ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(
+							c => new SubscriptionServiceRegistry(c),start => start.Start(), stop => stop.Stop());
 					}
 
 					if (serviceConfiguration.HealthServiceEnabled)
 					{
-						config.Service<HealthService>(service => ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop()));
+						config.ConfigureService<HealthService, HealthServiceRegistry>(
+							c => new HealthServiceRegistry(c), start => start.Start(), stop => stop.Stop());
 					}
 
 					if (serviceConfiguration.TimeoutServiceEnabled)
 					{
-						config.Service<TimeoutService>(service => ConfigureService<TimeoutService, TimeoutServiceRegistry>(service, start => start.Start(), stop => stop.Stop()));
+						config.ConfigureService<TimeoutService, TimeoutServiceRegistry>(
+							c => new TimeoutServiceRegistry(c), start => start.Start(), stop => stop.Stop());
 					}
 
 					config.AfterStoppingServices(x => { _log.Info("MassTransit Runtime Services are exiting..."); });
@@ -73,14 +76,19 @@ namespace MassTransit.RuntimeServices
 
 		static void BootstrapLogger()
 		{
-			string configFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, typeof (Program).Namespace + ".log4net.xml");
+			string configFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+				typeof (Program).Namespace + ".log4net.xml");
 
 			XmlConfigurator.ConfigureAndWatch(new FileInfo(configFileName));
 
 			_log.Info("Loading " + typeof (Program).Namespace + " Services...");
 		}
+	}
 
-		static void ConfigureService<TService, TRegistry>(ServiceConfigurator<TService> service, Action<TService> start, Action<TService> stop)
+	public static class ConfigureServiceExtension
+	{
+		public static void ConfigureService<TService, TRegistry>(this HostConfigurator configurator, Func<IContainer, TRegistry> registry,
+		                                                         Action<TService> start, Action<TService> stop)
 			where TRegistry : Registry
 			where TService : class
 		{
@@ -95,13 +103,14 @@ namespace MassTransit.RuntimeServices
 						.Use<TService>();
 				});
 
-			TRegistry registry = FastActivator<TRegistry>.Create(container);
+			container.Configure(x => x.AddRegistry(registry(container)));
 
-			container.Configure(x => x.AddRegistry(registry));
-
-			service.ConstructUsing(builder => container.GetInstance<TService>());
-			service.WhenStarted(start);
-			service.WhenStopped(stop);
+			configurator.Service<TService>(service =>
+				{
+					service.ConstructUsing(builder => container.GetInstance<TService>());
+					service.WhenStarted(start);
+					service.WhenStopped(stop);
+				});
 		}
 	}
 }

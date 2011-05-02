@@ -31,7 +31,6 @@ namespace MassTransit.Services.Subscriptions.Server
 		IDisposable
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
-		readonly IEndpointCache _endpointCache;
 		readonly Fiber _fiber = new PoolFiber();
 		readonly ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagas;
 		readonly ISagaRepository<SubscriptionSaga> _subscriptionSagas;
@@ -40,12 +39,10 @@ namespace MassTransit.Services.Subscriptions.Server
 		UnsubscribeAction _unsubscribeToken = () => false;
 
 		public SubscriptionService(IServiceBus bus,
-		                           IEndpointCache endpointCache,
 		                           ISagaRepository<SubscriptionSaga> subscriptionSagas,
 		                           ISagaRepository<SubscriptionClientSaga> subscriptionClientSagas)
 		{
 			_bus = bus;
-			_endpointCache = endpointCache;
 			_subscriptionSagas = subscriptionSagas;
 			_subscriptionClientSagas = subscriptionClientSagas;
 		}
@@ -142,7 +139,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			_subscriptionClientSagas.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
 				.Each(client =>
 					{
-						IEndpoint endpoint = _endpointCache.GetEndpoint(client.ControlUri);
+						IEndpoint endpoint = _bus.GetEndpoint(client.ControlUri);
 
 						endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
 					});
@@ -156,7 +153,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var response = new SubscriptionRefresh(subscriptions);
 
-			IEndpoint endpoint = _endpointCache.GetEndpoint(uri);
+			IEndpoint endpoint = _bus.GetEndpoint(uri);
 
 			endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Uri));
 		}

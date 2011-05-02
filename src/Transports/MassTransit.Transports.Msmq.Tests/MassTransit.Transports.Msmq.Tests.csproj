@@ -145,13 +145,13 @@
     <Compile Include="Transactional_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit.Infrastructure.Tests\MassTransit.Infrastructure.Tests.csproj">
+    <ProjectReference Include="..\..\Persistence\MassTransit.NHibernateIntegration.Tests\MassTransit.NHibernateIntegration.Tests.csproj">
       <Project>{44E6D06D-B60E-434B-981D-D8139062A6EC}</Project>
-      <Name>MassTransit.Infrastructure.Tests</Name>
+      <Name>MassTransit.NHibernateIntegration.Tests</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
+    <ProjectReference Include="..\..\Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj">
       <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
-      <Name>MassTransit.Infrastructure</Name>
+      <Name>MassTransit.NHibernateIntegration</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
       <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>

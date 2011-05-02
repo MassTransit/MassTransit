@@ -41,7 +41,6 @@ namespace MassTransit.TestFramework.Fixtures
 			SubscriptionBus = SetupServiceBus(SubscriptionUri, x => { x.SetConcurrentConsumerLimit(1); });
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus,
-				EndpointCache,
 				SubscriptionSagaRepository,
 				SubscriptionClientSagaRepository);
 

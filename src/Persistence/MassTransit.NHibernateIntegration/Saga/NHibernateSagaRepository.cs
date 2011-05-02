@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Infrastructure.Saga
+namespace MassTransit.NHibernateIntegration.Saga
 {
 	using System;
 	using System.Collections.Generic;
@@ -26,9 +26,9 @@ namespace MassTransit.Infrastructure.Saga
 		ISagaRepository<T>
 		where T : class, ISaga
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepository<T>).ToFriendlyName());
-		private volatile bool _disposed;
-		private ISessionFactory _sessionFactory;
+		static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepository<T>).ToFriendlyName());
+		volatile bool _disposed;
+		ISessionFactory _sessionFactory;
 
 		public NHibernateSagaRepository(ISessionFactory sessionFactory)
 		{
@@ -41,7 +41,8 @@ namespace MassTransit.Infrastructure.Saga
 			GC.SuppressFinalize(this);
 		}
 
-		public void Send<TMessage>(Expression<Func<T, bool>> filter, ISagaPolicy<T, TMessage> policy, TMessage message, Action<T> consumerAction)
+		public void Send<TMessage>(Expression<Func<T, bool>> filter, ISagaPolicy<T, TMessage> policy, TMessage message,
+		                           Action<T> consumerAction)
 			where TMessage : class
 		{
 			using (ISession session = _sessionFactory.OpenSession())
