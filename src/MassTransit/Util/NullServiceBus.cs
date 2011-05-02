@@ -70,7 +70,7 @@ namespace MassTransit.Util
 		{
 		}
 
-		public TService GetService<TService>()
+		public TService GetService<TService>() where TService : IBusService
 		{
 			throw new NotImplementedException();
 		}

@@ -197,7 +197,7 @@ namespace MassTransit
 
 		//		endpoint.Send(message, info.TimeToLive);
 
-		public TService GetService<TService>()
+		public TService GetService<TService>() where TService : IBusService
 		{
 			return _serviceContainer.GetService<TService>();
 		}
