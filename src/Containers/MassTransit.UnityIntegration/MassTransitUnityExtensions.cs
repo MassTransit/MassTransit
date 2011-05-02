@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.UnityIntegration
+namespace MassTransit
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using BusConfigurators;
 	using Magnum.Extensions;
 	using Microsoft.Practices.Unity;
+	using SubscriptionConfigurators;
 
 	public static class MassTransitUnityExtensions
 	{
-		public static void LoadConsumersFromContainer(this ServiceBusConfigurator configurator, UnityContainer container)
+		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IUnityContainer container)
 		{
 			IList<Type> concreteTypes = container.Registrations
 				.Where(r => r.MappedToType.Implements<IConsumer>())
@@ -31,7 +31,7 @@ namespace MassTransit.UnityIntegration
 			if (concreteTypes.Count == 0)
 				return;
 
-            configurator.Subscribe(x=> concreteTypes.Each(type=> x.Consumer(type, t=>container.Resolve(t))));
+			concreteTypes.Each(type => configurator.Consumer(type, t => container.Resolve(t)));
 		}
 	}
 }
