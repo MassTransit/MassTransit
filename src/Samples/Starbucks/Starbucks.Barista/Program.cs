@@ -39,21 +39,22 @@ namespace Starbucks.Barista
 		                       Component.For<DrinkPreparationSaga>(),
 		                       Component.For<BaristaService>().LifeStyle.Singleton);
 
-		    Bus.Initialize(sbc =>
-		    {
-		        sbc.ReceiveFrom("msmq://localhost/starbucks_barista");
-		        sbc.UseMsmq();
-		        sbc.UseMulticastSubscriptionClient();
+			container.Register(Component.For<IServiceBus>().UsingFactoryMethod(() =>
+				{
+					return ServiceBusFactory.New(sbc =>
+					{
+						sbc.ReceiveFrom("msmq://localhost/starbucks_barista");
+						sbc.UseMsmq();
+						sbc.UseMulticastSubscriptionClient();
 
-		        sbc.UseControlBus();
+						sbc.UseControlBus();
 
-                sbc.Subscribe(subs=>
-                {
-                    subs.LoadFrom(container);
-                });
-		    });
-
-		    container.Register(Component.For<IServiceBus>().Instance(Bus.Instance()));
+						sbc.Subscribe(subs =>
+						{
+							subs.LoadFrom(container);
+						});
+					});
+				}));
 
 			HostFactory.Run(c =>
 				{

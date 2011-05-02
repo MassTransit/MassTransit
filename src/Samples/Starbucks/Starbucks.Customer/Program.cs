@@ -38,26 +38,22 @@ namespace Starbucks.Customer
 
 		private static IContainer BootstrapContainer()
 		{
-			var container = new Container(x =>
-			{
-			    x.AddType(typeof (OrderDrinkForm));
-			});
+			var container = new Container(x => { x.AddType(typeof (OrderDrinkForm)); });
 
-            Bus.Initialize(sbc =>
-		    {
-                sbc.ReceiveFrom("msmq://localhost/starbucks_customer");
-		        sbc.UseMsmq();
-                sbc.UseMulticastSubscriptionClient();
-                
-		        sbc.UseControlBus();
+			container.Configure(cfg =>
+				{
+					cfg.For<IServiceBus>().Use(context => ServiceBusFactory.New(sbc =>
+						{
+							sbc.ReceiveFrom("msmq://localhost/starbucks_customer");
+							sbc.UseMsmq();
+							sbc.UseMulticastSubscriptionClient();
 
-                sbc.Subscribe(subs=>
-                {
-                    subs.LoadFrom(container);
-                });
-		    });
-		
-            container.Configure(cfg=>cfg.For<IServiceBus>().Use(Bus.Instance));
+							sbc.UseControlBus();
+
+							sbc.Subscribe(subs => { subs.LoadFrom(container); });
+						}));
+				});
+
 			return container;
 		}
 	}
