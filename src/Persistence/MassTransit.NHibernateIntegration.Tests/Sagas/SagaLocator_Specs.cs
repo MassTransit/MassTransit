@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,14 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Infrastructure.Tests.Sagas
+namespace MassTransit.NHibernateIntegration.Tests.Sagas
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Data;
 	using System.Linq;
 	using Magnum;
-	using Magnum.Data;
 	using MassTransit.Saga;
 	using MassTransit.Tests.Messages;
 	using MassTransit.Tests.Saga.Locator;
@@ -42,7 +40,8 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 			_cfg.SetProperty("dialect", "NHibernate.Dialect.MsSql2005Dialect");
 			_cfg.SetProperty("default_schema", "bus");
 			_cfg.SetProperty("show_sql", "true");
-			_cfg.SetProperty("proxyfactory.factory_class", "NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle");
+			_cfg.SetProperty("proxyfactory.factory_class",
+				"NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle");
 
 			_cfg.AddAssembly(typeof (NHibernateSagaRepository<>).Assembly);
 			_cfg.AddAssembly(typeof (RegisterUserStateMachine).Assembly);
@@ -55,11 +54,11 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 			_sagaId = CombGuid.Generate();
 		}
 
-		private Guid _sagaId;
+		Guid _sagaId;
 
-		private const string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
-		private Configuration _cfg;
-		private ISessionFactory _sessionFactory;
+		const string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
+		Configuration _cfg;
+		ISessionFactory _sessionFactory;
 
 
 		[Test]

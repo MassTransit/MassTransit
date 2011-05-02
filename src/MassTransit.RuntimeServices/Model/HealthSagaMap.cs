@@ -1,5 +1,5 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,29 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RuntimeServices.Model
 {
-    using FluentNHibernate.Mapping;
-    using Infrastructure;
-    using Services.HealthMonitoring.Server;
+	using FluentNHibernate.Mapping;
+	using NHibernateIntegration;
+	using Services.HealthMonitoring.Server;
 
-    public class HealthSagaMap :
-        ClassMap<HealthSaga>
-    {
-        public HealthSagaMap()
-        {
-            Id(x => x.CorrelationId)
-                .GeneratedBy.Assigned();
+	public class HealthSagaMap :
+		ClassMap<HealthSaga>
+	{
+		public HealthSagaMap()
+		{
+			Id(x => x.CorrelationId)
+				.GeneratedBy.Assigned();
 
-            Map(x => x.CurrentState)
-                .Access.ReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
-                .CustomType<StateMachineUserType>();
+			Map(x => x.CurrentState)
+				.Access.ReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
+				.CustomType<StateMachineUserType>();
 
-            Map(x => x.ControlUri)
-                .CustomType<UriUserType>();
-            Map(x => x.DataUri)
-                .CustomType<UriUserType>();
+			Map(x => x.ControlUri)
+				.CustomType<UriUserType>();
+			Map(x => x.DataUri)
+				.CustomType<UriUserType>();
 
-            Map(x => x.LastHeartbeat);
-            Map(x => x.HeartbeatIntervalInSeconds);
-        }
-    }
+			Map(x => x.LastHeartbeat);
+			Map(x => x.HeartbeatIntervalInSeconds);
+		}
+	}
 }

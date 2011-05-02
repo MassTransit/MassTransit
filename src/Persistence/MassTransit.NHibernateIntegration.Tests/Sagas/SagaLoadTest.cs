@@ -10,32 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Infrastructure.Tests.Sagas
+namespace MassTransit.NHibernateIntegration.Tests.Sagas
 {
-	using Magnum.Extensions;
-	using Magnum.TestFramework;
-	using MassTransit.Tests;
-	using MassTransit.Tests.Messages;
+	using MassTransit.Tests.TextFixtures;
+	using NUnit.Framework;
 
-	[Scenario]
-	public class When_configuring_a_service_bus_easily
+	[TestFixture, Category("Integration")]
+	public class SagaLoadTest :
+		LoopbackTestFixture
 	{
-		[When]
-		public void Configuring_a_service_bus_easily()
+		[Test]
+		public void Put_some_stress_on_the_saga_dispatcher_to_see_how_it_handles_multiple_sagas_at_once()
 		{
-			FutureMessage<PingMessage> received;
-			using (var bus = ServiceBusFactory.New(x =>
-				{
-					x.ReceiveFrom("loopback://localhost/queue");
-				}))
-			{
-				received = new FutureMessage<PingMessage>();
-
-				bus.SubscribeHandler<PingMessage>(received.Set);
-
-				bus.Publish(new PingMessage());
-				received.IsAvailable(8.Seconds()).ShouldBeTrue();
-			}
 		}
 	}
 }

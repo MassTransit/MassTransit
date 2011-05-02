@@ -10,27 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RuntimeServices.Model
+namespace MassTransit.NHibernateIntegration.Tests.Sagas
 {
-	using FluentNHibernate.Mapping;
-	using NHibernateIntegration;
-	using Services.Subscriptions.Server;
+	using Magnum.Extensions;
+	using Magnum.TestFramework;
+	using MassTransit.Tests;
+	using MassTransit.Tests.Messages;
 
-	public class SubscriptionClientSagaMap :
-		ClassMap<SubscriptionClientSaga>
+	[Scenario]
+	public class When_configuring_a_service_bus_easily
 	{
-		public SubscriptionClientSagaMap()
+		[When]
+		public void Configuring_a_service_bus_easily()
 		{
-			Id(x => x.CorrelationId)
-				.GeneratedBy.Assigned();
+			FutureMessage<PingMessage> received;
+			using (IServiceBus bus = ServiceBusFactory.New(x => { x.ReceiveFrom("loopback://localhost/queue"); }))
+			{
+				received = new FutureMessage<PingMessage>();
 
-			Map(x => x.CurrentState)
-				.Access.ReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
-				.CustomType<StateMachineUserType>();
+				bus.SubscribeHandler<PingMessage>(received.Set);
 
-			Map(x => x.ControlUri).CustomType<UriUserType>();
-			Map(x => x.DataUri).CustomType<UriUserType>();
-			;
+				bus.Publish(new PingMessage());
+				received.IsAvailable(8.Seconds()).ShouldBeTrue();
+			}
 		}
 	}
 }

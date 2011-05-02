@@ -129,9 +129,9 @@
       <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
       <Name>MassTransit.StructureMapIntegration</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
+    <ProjectReference Include="..\Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj">
       <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
-      <Name>MassTransit.Infrastructure</Name>
+      <Name>MassTransit.NHibernateIntegration</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>

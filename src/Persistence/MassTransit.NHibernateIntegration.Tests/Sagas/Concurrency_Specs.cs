@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Infrastructure.Tests.Sagas
+namespace MassTransit.NHibernateIntegration.Tests.Sagas
 {
 	using System;
 	using System.Data;
@@ -24,9 +24,9 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	using MassTransit.Saga;
 	using MassTransit.Tests.TextFixtures;
 	using NHibernate;
+	using NHibernate.Cfg;
 	using NHibernate.Tool.hbm2ddl;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using Saga;
 
 	[TestFixture, Category("Integration")]
@@ -41,14 +41,14 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 
 			_sessionFactory = Fluently.Configure()
 				.Database(
-				MsSqlConfiguration.MsSql2005
-					.AdoNetBatchSize(100)
-					.ConnectionString(s => s.Is("Server=(local);initial catalog=test;Trusted_Connection=yes"))
-					.DefaultSchema("dbo")
-					.ShowSql()
-					.ProxyFactoryFactory("NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle")
-					.Raw(NHibernate.Cfg.Environment.Isolation, IsolationLevel.Serializable.ToString()))
-				.Mappings(m => 
+					MsSqlConfiguration.MsSql2005
+						.AdoNetBatchSize(100)
+						.ConnectionString(s => s.Is("Server=(local);initial catalog=test;Trusted_Connection=yes"))
+						.DefaultSchema("dbo")
+						.ShowSql()
+						.ProxyFactoryFactory("NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle")
+						.Raw(NHibernate.Cfg.Environment.Isolation, IsolationLevel.Serializable.ToString()))
+				.Mappings(m =>
 					{
 						m.FluentMappings.Add<ConcurrentSagaMap>();
 						m.FluentMappings.Add<ConcurrentLegacySagaMap>();
@@ -57,7 +57,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 				.BuildSessionFactory();
 		}
 
-		private static void BuildSchema(NHibernate.Cfg.Configuration config)
+		static void BuildSchema(Configuration config)
 		{
 			new SchemaExport(config).Create(false, true);
 		}
@@ -67,7 +67,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	public class Sending_multiple_messages_to_the_same_saga_at_the_same_time :
 		ConcurrentSagaTestFixtureBase
 	{
-		private ISagaRepository<ConcurrentSaga> _sagaRepository;
+		ISagaRepository<ConcurrentSaga> _sagaRepository;
 
 		protected override void EstablishContext()
 		{
@@ -79,7 +79,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		[Test]
 		public void Should_process_the_messages_in_order_and_not_at_the_same_time()
 		{
-			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga<ConcurrentSaga>(_sagaRepository);
+			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga(_sagaRepository);
 
 			Guid transactionId = CombGuid.Generate();
 
@@ -117,9 +117,10 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	public class Sending_multiple_messages_to_the_same_saga_legacy_at_the_same_time :
 		ConcurrentSagaTestFixtureBase
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (Sending_multiple_messages_to_the_same_saga_legacy_at_the_same_time));
+		static readonly ILog _log =
+			LogManager.GetLogger(typeof (Sending_multiple_messages_to_the_same_saga_legacy_at_the_same_time));
 
-		private ISagaRepository<ConcurrentLegacySaga> _sagaRepository;
+		ISagaRepository<ConcurrentLegacySaga> _sagaRepository;
 
 		protected override void EstablishContext()
 		{
@@ -131,7 +132,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		[Test]
 		public void Should_process_the_messages_in_order_and_not_at_the_same_time()
 		{
-			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga<ConcurrentLegacySaga>(_sagaRepository);
+			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga(_sagaRepository);
 
 			Guid transactionId = CombGuid.Generate();
 
@@ -169,9 +170,9 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	public class Sending_multiple_initiating_messages_should_not_fail_badly :
 		ConcurrentSagaTestFixtureBase
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof(Sending_multiple_initiating_messages_should_not_fail_badly));
+		static readonly ILog _log = LogManager.GetLogger(typeof (Sending_multiple_initiating_messages_should_not_fail_badly));
 
-		private ISagaRepository<ConcurrentLegacySaga> _sagaRepository;
+		ISagaRepository<ConcurrentLegacySaga> _sagaRepository;
 
 		protected override void EstablishContext()
 		{
@@ -190,13 +191,13 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 			const int startValue = 1;
 
 			var startConcurrentSaga = new StartConcurrentSaga {CorrelationId = transactionId, Name = "Chris", Value = startValue};
-			
+
 			LocalBus.Endpoint.Send(startConcurrentSaga);
 			LocalBus.Endpoint.Send(startConcurrentSaga);
 
 			_log.Info("Just published the start message");
 
-			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga<ConcurrentLegacySaga>(_sagaRepository);
+			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga(_sagaRepository);
 
 			Thread.Sleep(1500);
 

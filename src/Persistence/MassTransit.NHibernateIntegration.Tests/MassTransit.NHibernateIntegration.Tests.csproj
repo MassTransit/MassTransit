@@ -8,8 +8,8 @@
     <ProjectGuid>{44E6D06D-B60E-434B-981D-D8139062A6EC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.Infrastructure.Tests</RootNamespace>
-    <AssemblyName>MassTransit.Infrastructure.Tests</AssemblyName>
+    <RootNamespace>MassTransit.NHibernateIntegration.Tests</RootNamespace>
+    <AssemblyName>MassTransit.NHibernateIntegration.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -57,42 +57,42 @@
   <ItemGroup>
     <Reference Include="FluentNHibernate, Version=0.1.0.483, Culture=neutral, PublicKeyToken=8aa435e3cb308880, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\FluentNHibernate\FluentNHibernate.dll</HintPath>
+      <HintPath>..\..\..\lib\FluentNHibernate\FluentNHibernate.dll</HintPath>
     </Reference>
     <Reference Include="Iesi.Collections, Version=1.0.1.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\NHibernate\Iesi.Collections.dll</HintPath>
+      <HintPath>..\..\..\lib\NHibernate\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\log4net.dll</HintPath>
+      <HintPath>..\..\..\lib\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\lib\Magnum\net-3.5\TestFramework\Magnum.TestFramework.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\TestFramework\Magnum.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\lib\Magnum\net-4.0\TestFramework\Magnum.TestFramework.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-4.0\TestFramework\Magnum.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate, Version=2.1.2.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\NHibernate\NHibernate.dll</HintPath>
+      <HintPath>..\..\..\lib\NHibernate\NHibernate.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate.ByteCode.Castle">
-      <HintPath>..\..\lib\NHibernate\NHibernate.ByteCode.Castle.dll</HintPath>
+      <HintPath>..\..\..\lib\NHibernate\NHibernate.ByteCode.Castle.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\NUnit\net-2.0\nunit.framework.dll</HintPath>
+      <HintPath>..\..\..\lib\NUnit\net-2.0\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="Rhino.Mocks, Version=3.6.0.0, Culture=neutral, PublicKeyToken=0b3305902db7183f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rhino.Mocks.dll</HintPath>
+      <HintPath>..\..\..\lib\Rhino.Mocks.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -118,15 +118,15 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
+    <ProjectReference Include="..\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj">
       <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
-      <Name>MassTransit.Infrastructure</Name>
+      <Name>MassTransit.NHibernateIntegration</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Tests\MassTransit.Tests.csproj">
+    <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj">
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>
       <Name>MassTransit.Tests</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>

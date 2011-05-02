@@ -209,8 +209,6 @@
     <Compile Include="RequestResponse\ResponseAction.cs" />
     <Compile Include="RequestResponse\ResponseActionBuilder.cs" />
     <Compile Include="Saga\Configuration\SagaSubscriptionConfiguratorExtensions.cs" />
-    <Compile Include="Saga\InMemorySagaRepositoryFactory.cs" />
-    <Compile Include="Saga\ISagaRepositoryFactory.cs" />
     <Compile Include="Saga\SubscriptionBuilders\SagaSubscriptionBuilder.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\SagaSubscriptionConfigurator.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\SagaSubscriptionConfiguratorImpl.cs" />

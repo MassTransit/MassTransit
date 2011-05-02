@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{56F516D7-BC3C-49E1-A639-83C5F14953F8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistence", "Persistence", "{56F516D7-BC3C-49E1-A639-83C5F14953F8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transports", "Transports", "{0006D6BB-1382-4B32-AD32-CA037F5CD4F6}"
 EndProject
@@ -23,9 +23,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegrat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure", "MassTransit.Infrastructure\MassTransit.Infrastructure.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NHibernateIntegration", "Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure.Tests", "MassTransit.Infrastructure.Tests\MassTransit.Infrastructure.Tests.csproj", "{44E6D06D-B60E-434B-981D-D8139062A6EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NHibernateIntegration.Tests", "Persistence\MassTransit.NHibernateIntegration.Tests\MassTransit.NHibernateIntegration.Tests.csproj", "{44E6D06D-B60E-434B-981D-D8139062A6EC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.UnityIntegration", "Containers\MassTransit.UnityIntegration\MassTransit.UnityIntegration.csproj", "{8AB71E2F-3210-45AF-982F-FC782D9C06B7}"
 EndProject
