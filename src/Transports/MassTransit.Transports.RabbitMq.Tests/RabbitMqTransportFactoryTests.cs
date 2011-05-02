@@ -42,7 +42,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Test, Explicit]
         public void CanConnect()
         {
-            var t = _factory.BuildLoopback(new CreateTransportSettings(new RabbitMqAddress(_queue)));
+            var t = _factory.BuildLoopback(new TransportSettings(new RabbitMqAddress(_queue)));
             _factory.ConnectionsCount().ShouldEqual(1);
 
         }
@@ -52,14 +52,14 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		{
 		    _factory.Bind(_queue, _exchange, "fanout");
 
-		    var t = _factory.BuildOutbound(new CreateTransportSettings(new RabbitMqAddress(_exchange)));
+		    var t = _factory.BuildOutbound(new TransportSettings(new RabbitMqAddress(_exchange)));
             t.Send((s)=>
             {
                 var b = Encoding.UTF8.GetBytes("dru");
                 s.Body.Write(b, 0,b.Length);
             });
 
-		    var i = _factory.BuildInbound(new CreateTransportSettings(new RabbitMqAddress(_queue)));
+		    var i = _factory.BuildInbound(new TransportSettings(new RabbitMqAddress(_queue)));
 
             i.Receive(s=>
             {
@@ -91,7 +91,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 ser.Serialize(stream, msg);
             }
 
-		    var lb = _factory.BuildLoopback(new CreateTransportSettings(ex));
+		    var lb = _factory.BuildLoopback(new TransportSettings(ex));
             var oe = new Endpoint(ex, ser, lb, null);
             oe.Send(msg);
 

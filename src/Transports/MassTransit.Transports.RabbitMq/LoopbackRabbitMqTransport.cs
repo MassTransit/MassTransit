@@ -15,7 +15,7 @@ namespace MassTransit.Transports.RabbitMq
     using System;
 
     public class LoopbackRabbitMqTransport :
-        ILoopbackTransport
+        IDuplexTransport
     {
         readonly IInboundTransport _inbound;
         readonly IOutboundTransport _outbound;
