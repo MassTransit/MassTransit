@@ -13,20 +13,22 @@
 namespace MassTransit.SystemView.Core
 {
 	using StructureMap;
-	using StructureMapIntegration;
+	using StructureMap.Configuration.DSL;
 
-	public class SystemViewRegistry :
-		MassTransitRegistryBase
+    public class SystemViewRegistry :
+		Registry
 	{
 		public SystemViewRegistry(IConfiguration configuration, IContainer container)
 		{
-			RegisterServiceBus(configuration.SystemViewDataUri, x =>
-				{
-					x.SetConcurrentConsumerLimit(1);
-					x.UseControlBus();
+		    var bus = ServiceBusFactory.New(sbc =>
+		        {
+		            sbc.ReceiveFrom(configuration.SystemViewDataUri);
+		            sbc.SetConcurrentConsumerLimit(1);
+		            sbc.UseControlBus();
+		            sbc.UseMulticastSubscriptionClient();
+		        });
 
-					x.UseSubscriptionService(configuration.SubscriptionServiceUri);
-				});
+		    For<IServiceBus>().Use(bus);
 		}
 	}
 }

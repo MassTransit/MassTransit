@@ -21,14 +21,20 @@ namespace MassTransit.RuntimeServices
 	using Saga;
 	using Services.Subscriptions.Server;
 	using StructureMap;
-	using StructureMapIntegration;
+	using StructureMap.Configuration.DSL;
 
-	public class SubscriptionServiceRegistry :
-		MassTransitRegistryBase
+    public class SubscriptionServiceRegistry :
+		Registry
 	{
 		public SubscriptionServiceRegistry(IContainer container)
 		{
 			var configuration = container.GetInstance<IConfiguration>();
+		    var bus = ServiceBusFactory.New(sbc=>
+		        {
+		            sbc.UseMsmq();
+                    sbc.ReceiveFrom(configuration.SubscriptionServiceUri);
+                    sbc.SetConcurrentConsumerLimit(1);
+		        });
 
 			For<ISessionFactory>()
 				.Singleton()
@@ -37,7 +43,8 @@ namespace MassTransit.RuntimeServices
 			For(typeof (ISagaRepository<>))
 				.Add(typeof (NHibernateSagaRepository<>));
 
-			RegisterServiceBus(configuration.SubscriptionServiceUri, x => { x.SetConcurrentConsumerLimit(1); });
+		    For<IServiceBus>()
+		        .Use(bus);
 		}
 
 		private static ISessionFactory CreateSessionFactory()
