@@ -35,26 +35,25 @@ namespace Starbucks.Barista
 			XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
 
 			var container = new WindsorContainer();
-		    container.Register(Component.For(typeof (ISagaRepository<>)).ImplementedBy(typeof (InMemorySagaRepository<>)),
-		                       Component.For<DrinkPreparationSaga>(),
-		                       Component.For<BaristaService>().LifeStyle.Singleton);
-
-			container.Register(Component.For<IServiceBus>().UsingFactoryMethod(() =>
-				{
-					return ServiceBusFactory.New(sbc =>
+			container.Register(
+				Component.For(typeof (ISagaRepository<>))
+					.ImplementedBy(typeof (InMemorySagaRepository<>))
+					.LifeStyle.Singleton,
+				Component.For<BaristaService>()
+					.LifeStyle.Singleton,
+				Component.For<IServiceBus>().UsingFactoryMethod(() =>
 					{
-						sbc.ReceiveFrom("msmq://localhost/starbucks_barista");
-						sbc.UseMsmq();
-						sbc.UseMulticastSubscriptionClient();
+						return ServiceBusFactory.New(sbc =>
+							{
+								sbc.ReceiveFrom("msmq://localhost/starbucks_barista");
+								sbc.UseMsmq();
+								sbc.UseMulticastSubscriptionClient();
 
-						sbc.UseControlBus();
+								sbc.UseControlBus();
 
-						sbc.Subscribe(subs =>
-						{
-							subs.LoadFrom(container);
-						});
-					});
-				}));
+								sbc.Subscribe(subs => { subs.LoadFrom(container); });
+							});
+					}).LifeStyle.Singleton);
 
 			HostFactory.Run(c =>
 				{

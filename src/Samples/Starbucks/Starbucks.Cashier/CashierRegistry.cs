@@ -22,10 +22,8 @@ namespace Starbucks.Cashier
 		public override void Load()
 		{
 			Bind<ISagaRepository<CashierSaga>>()
-				.To<InMemorySagaRepository<CashierSaga>>();
-
-			Bind<CashierSaga>()
-				.To<CashierSaga>();
+				.To<InMemorySagaRepository<CashierSaga>>()
+				.InSingletonScope();
 
 			Bind<CashierService>()
 				.To<CashierService>()
@@ -42,7 +40,8 @@ namespace Starbucks.Cashier
 
 							sbc.UseControlBus();
 						});
-				});
+				})
+				.InSingletonScope();
 		}
 	}
 }
