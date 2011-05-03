@@ -56,7 +56,7 @@ namespace MassTransit.Tests.TestConsumers
             while (_messages.Contains(message) == false)
             {
                 if (_received.WaitOne(timeout, true) == false)
-                    return false;
+					return _messages.Contains(message);
             }
 
             return true;

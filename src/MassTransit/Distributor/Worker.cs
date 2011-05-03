@@ -23,8 +23,7 @@ namespace MassTransit.Distributor
 	public class Worker<T> :
 		IWorker<T>,
 		Consumes<WakeUpWorker>.All,
-		Consumes<PingWorker>.All,
-		Consumes<Distributed<T>>.Selected
+		Consumes<PingWorker>.All
 		where T : class
 	{
 		private readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();

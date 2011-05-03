@@ -13,14 +13,22 @@
 namespace MassTransit.TestFramework
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 	using System.Threading;
 	using Helpers;
+	using log4net;
 	using Magnum.Extensions;
 	using NUnit.Framework;
 	using Pipeline;
+	using Pipeline.Inspectors;
+	using Saga;
+	using Saga.Pipeline;
 
 	public static class ExtensionMethodsForSubscriptions
 	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (ExtensionMethodsForSubscriptions));
+
 		public static TimeSpan Timeout { get; set; }
 
 		static ExtensionMethodsForSubscriptions()
@@ -44,16 +52,27 @@ namespace MassTransit.TestFramework
 				Thread.Sleep(10);
 			}
 
+			PipelineViewer.Trace(bus.OutboundPipeline, text => _log.ErrorFormat("Pipeline Inspection Result: " + text));
+
 			Assert.Fail("A subscription for " + typeof (TMessage).ToFriendlyName() + " was not found on " + bus.Endpoint.Uri);
 		}
 
-		public static void ShouldHaveSubscriptionFor<TMessage>(this IServiceBus bus)
+		public static IEnumerable<IPipelineSink<TMessage>> ShouldHaveSubscriptionFor<TMessage>(this IServiceBus bus)
 			where TMessage : class
 		{
-			bus.OutboundPipeline.ShouldHaveSubscriptionFor<TMessage>();
+			return bus.OutboundPipeline.ShouldHaveSubscriptionFor<TMessage>();
 		}
 
-		public static void ShouldHaveSubscriptionFor<TMessage>(this IMessagePipeline pipeline) 
+		public static IEnumerable<IPipelineSink<TMessage>> ShouldHaveSagaSubscriptionFor<TSaga, TMessage>(this IServiceBus bus, Type policyType)
+			where TMessage : class 
+			where TSaga : class, ISaga
+		{
+			return bus.OutboundPipeline.ShouldHaveSubscriptionFor<TMessage>()
+				.Where(sink => sink.GetType().Implements(typeof(SagaMessageSinkBase<TSaga,TMessage>)))
+				.Where(sink => ((ISagaMessageSink<TSaga,TMessage>)sink).Policy.GetType().GetGenericTypeDefinition() == policyType);
+		}
+
+		public static IEnumerable<IPipelineSink<TMessage>> ShouldHaveSubscriptionFor<TMessage>(this IMessagePipeline pipeline) 
 			where TMessage : class
 		{
 			DateTime giveUpAt = DateTime.Now + Timeout;
@@ -64,13 +83,15 @@ namespace MassTransit.TestFramework
 
 				pipeline.Inspect(inspector);
 
-				if (inspector.Result != null)
-					return;
+				if (inspector.Result.Count() > 0)
+					return inspector.Result;
 
 				Thread.Sleep(10);
 			}
 
 			Assert.Fail("A subscription for " + typeof (TMessage).ToFriendlyName() + " was not found on the pipeline");
+
+			return null;
 		}
 
 		public static void ShouldNotHaveSubscriptionFor<TMessage>(this IServiceBus bus)

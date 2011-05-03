@@ -33,7 +33,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		Consumes<RemoveSubscription>.All
 	{
 		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionClient));
+		static readonly ILog _log = LogManager.GetLogger(typeof(SubscriptionCoordinator));
 		static readonly ClientSubscriptionInfoMapper _mapper = new ClientSubscriptionInfoMapper();
 		readonly IServiceBus _bus;
 		readonly HashSet<string> _ignoredSubscriptions;
@@ -51,12 +51,14 @@ namespace MassTransit.Services.Subscriptions.Client
 		volatile bool _disposed;
 
 		UnsubscribeAction _unsubscribeAction;
+		bool _multicast;
 
-		public SubscriptionCoordinator(IServiceBus bus, IEndpoint outboundEndpoint, string network)
+		public SubscriptionCoordinator(IServiceBus bus, IEndpoint outboundEndpoint, string network, bool multicast)
 		{
 			_bus = bus;
 			_uri = _bus.Endpoint.Address.Uri;
 			_network = network;
+			_multicast = multicast;
 			_outboundEndpoint = outboundEndpoint;
 
 			_clients = new RegistrationList<IEndpointSubscriptionEvent>();
@@ -88,14 +90,17 @@ namespace MassTransit.Services.Subscriptions.Client
 			if (ShouldIgnoreMessage(message))
 				return;
 
-			IEnumerable<SubscriptionInformation> subscriptions = _subscriptions
-				.Select(
-					x => new SubscriptionInformation(x.ClientId, x.SequenceNumber, x.MessageName, x.CorrelationId, x.EndpointUri)
-						{
-							SubscriptionId = x.SubscriptionId
-						});
+			if (_multicast)
+			{
+				IEnumerable<SubscriptionInformation> subscriptions = _subscriptions
+					.Select(
+						x => new SubscriptionInformation(x.ClientId, x.SequenceNumber, x.MessageName, x.CorrelationId, x.EndpointUri)
+							{
+								SubscriptionId = x.SubscriptionId
+							});
 
-			Send(new SubscriptionRefresh(subscriptions));
+				Send(new SubscriptionRefresh(subscriptions));
+			}
 		}
 
 		public void Consume(RemoveSubscription message)
@@ -187,7 +192,7 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		public event Action OnRefresh;
 
-		public void ConnectBus(IServiceBus bus)
+		void ConnectBus(IServiceBus bus)
 		{
 			var publisher = new SubscriptionPublisher(this);
 			publisher.Start(bus);

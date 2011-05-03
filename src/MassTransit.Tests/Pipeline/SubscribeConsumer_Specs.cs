@@ -88,7 +88,7 @@ namespace MassTransit.Tests.Pipeline
 
 			_pipeline.Dispatch(message);
 
-			consumer.ShouldHaveReceivedMessage(message, 1.Seconds());
+			TestMessageConsumer<PingMessage>.AnyShouldHaveReceivedMessage(message, 1.Seconds());
 		}
 
 		[Test]

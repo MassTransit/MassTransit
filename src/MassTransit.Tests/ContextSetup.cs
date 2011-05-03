@@ -15,7 +15,8 @@ namespace MassTransit.Tests
 	using System.Diagnostics;
 	using System.IO;
     using System.Reflection;
-    using log4net.Config;
+	using log4net;
+	using log4net.Config;
     using NUnit.Framework;
 
     [SetUpFixture]
@@ -32,5 +33,11 @@ namespace MassTransit.Tests
 
             XmlConfigurator.Configure(new FileInfo(file));
         }
+
+		[TearDown]
+		public void After_all()
+		{
+			LogManager.Shutdown();
+		}
     }
 }

@@ -258,5 +258,14 @@ namespace MassTransit.Pipeline.Inspectors
 
 			System.Diagnostics.Trace.WriteLine(viewer.Text);
 		}
+
+		public static void Trace(IMessagePipeline pipeline, Action<string> callback)
+		{
+			PipelineViewer viewer = new PipelineViewer();
+
+			pipeline.Inspect(viewer);
+
+			callback(viewer.Text);
+		}
 	}
 }

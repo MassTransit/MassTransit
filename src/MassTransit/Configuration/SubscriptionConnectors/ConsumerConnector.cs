@@ -56,7 +56,7 @@ namespace MassTransit.SubscriptionConnectors
 				throw new ConfigurationException("Distributor classes can only be subscribed as instances");
 
 			_connectors = ConsumesSelected()
-				.Union(ConsumesAll())
+				.Concat(ConsumesAll())
 				.Distinct((x, y) => x.MessageType == y.MessageType)
 				.ToList();
 		}
