@@ -89,7 +89,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 		public void Start()
 		{
-			_log.Info("Subscription Service Starting");
+			_log.InfoFormat("Subscription Service Starting: {0}", _bus.Endpoint.Address);
 			_unsubscribeToken += _bus.SubscribeInstance(this);
 
 			_unsubscribeToken += _bus.SubscribeSaga<SubscriptionClientSaga>(_subscriptionClientSagas);
@@ -134,10 +134,12 @@ namespace MassTransit.Services.Subscriptions.Server
 		}
 
 		void SendToClients<T>(T message)
-			where T : class
+			where T : SubscriptionChange
 		{
-			_subscriptionClientSagas.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
-				.Each(client =>
+			IEnumerable<SubscriptionClientSaga> sagas = _subscriptionClientSagas.Where(x => x.CurrentState == SubscriptionClientSaga.Active);
+
+			_log.DebugFormat("Sending {0}:{1} to {2} clients", typeof (T).Name, message.Subscription.MessageName, sagas.Count());
+			sagas.Each(client =>
 					{
 						IEndpoint endpoint = _bus.GetEndpoint(client.ControlUri);
 

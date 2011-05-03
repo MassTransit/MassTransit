@@ -45,7 +45,7 @@ namespace MassTransit.Transports.Msmq
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Starting MulticastSubscriptionClient on {0}", _uri);
 
-			_coordinator = new SubscriptionCoordinator(_subscriptionBus, _subscriptionBus.Endpoint, _networkKey);
+			_coordinator = new SubscriptionCoordinator(_subscriptionBus, _subscriptionBus.Endpoint, _networkKey, true);
 			_coordinator.Start(bus);
 		}
 

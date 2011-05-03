@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework.Helpers
 {
+	using System.Collections.Generic;
+	using System.Linq;
 	using Pipeline;
 	using Pipeline.Inspectors;
 	using Pipeline.Sinks;
@@ -20,7 +22,12 @@ namespace MassTransit.TestFramework.Helpers
 		PipelineInspectorBase<PipelineSinkLocator<T>>
 		where T : class
 	{
-		public IPipelineSink<T> Result { get; private set; }
+		public IEnumerable<IPipelineSink<T>> Result { get; private set; }
+
+		public PipelineSinkLocator()
+		{
+			Result = Enumerable.Empty<IPipelineSink<T>>();
+		}
 
 		public bool Inspect<TComponent, TMessage>(ComponentMessageSink<TComponent, TMessage> sink)
 			where TComponent : class, Consumes<TMessage>.All
@@ -28,7 +35,7 @@ namespace MassTransit.TestFramework.Helpers
 		{
 			if (typeof (TMessage) == typeof (T))
 			{
-				Result = sink as IPipelineSink<T>;
+				Result = Result.Concat(new[]{sink as IPipelineSink<T>});
 
 				return false;
 			}
@@ -42,7 +49,7 @@ namespace MassTransit.TestFramework.Helpers
 		{
 			if (typeof (TMessage) == typeof (T))
 			{
-				Result = sink as IPipelineSink<T>;
+				Result = Result.Concat(new[] { sink as IPipelineSink<T> });
 
 				return false;
 			}
@@ -55,7 +62,7 @@ namespace MassTransit.TestFramework.Helpers
 		{
 			if (typeof (TMessage) == typeof (T))
 			{
-				Result = sink as IPipelineSink<T>;
+				Result = Result.Concat(new[] { sink as IPipelineSink<T> });
 
 				return false;
 			}
@@ -68,7 +75,7 @@ namespace MassTransit.TestFramework.Helpers
 		{
 			if (typeof(TMessage) == typeof(T))
 			{
-				Result = sink as IPipelineSink<T>;
+				Result = Result.Concat(new[] { sink as IPipelineSink<T> });
 
 				return false;
 			}

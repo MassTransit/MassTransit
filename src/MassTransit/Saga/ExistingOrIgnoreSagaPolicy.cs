@@ -14,11 +14,14 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Linq.Expressions;
+	using log4net;
 
 	public class ExistingOrIgnoreSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
 	{
+		static readonly ILog _log = LogManager.GetLogger("MassTransit.Saga.ExistingOrIgnoreSagaPolicy");
+
 		private readonly Func<TSaga, bool> _shouldBeRemoved;
 
 		public ExistingOrIgnoreSagaPolicy(Expression<Func<TSaga, bool>> shouldBeRemoved)
@@ -29,6 +32,9 @@ namespace MassTransit.Saga
 		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)
 		{
 			saga = null;
+
+			if(_log.IsDebugEnabled)
+				_log.DebugFormat("Matching {0} not found, ignoring {1}", typeof(TSaga).Name, typeof (TMessage).Name);
 
 			return false;
 		}

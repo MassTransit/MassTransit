@@ -26,12 +26,14 @@ namespace MassTransit.Services.Subscriptions.Client
 		private SubscriptionCoordinator _coordinator;
 		private volatile bool _disposed;
 		private IEndpoint _subscriptionServiceEndpoint;
+		string _network;
 
 
 		public SubscriptionClient(Uri subscriptionServiceUri)
 		{
 			SubscriptionServiceUri = subscriptionServiceUri;
 			StartTimeout = 1.Minutes();
+			_network = null;
 		}
 
 		public TimeSpan StartTimeout { get; set; }
@@ -46,8 +48,8 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		public void Start(IServiceBus bus)
 		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Starting SubscriptionClient on {0}", bus.Endpoint.Uri);
+			if (_log.IsInfoEnabled)
+				_log.InfoFormat("Starting SubscriptionClient on {0}", bus.Endpoint.Uri);
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Getting endpoint for subscription service at {0}", SubscriptionServiceUri);
@@ -58,7 +60,7 @@ namespace MassTransit.Services.Subscriptions.Client
 
 			_ready.Reset();
 
-			_coordinator = new SubscriptionCoordinator(bus.ControlBus, _subscriptionServiceEndpoint, null);
+			_coordinator = new SubscriptionCoordinator(bus.ControlBus, _subscriptionServiceEndpoint, _network, false);
 			_coordinator.OnRefresh += CoordinatorOnRefresh;
 			_coordinator.Start(bus);
 

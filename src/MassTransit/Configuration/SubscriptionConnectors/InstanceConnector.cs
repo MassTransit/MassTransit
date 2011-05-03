@@ -48,10 +48,10 @@ namespace MassTransit.SubscriptionConnectors
 				throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
 
 			_connectors = Distributors()
-				.Union(Workers())
-				.Union(ConsumesCorrelated())
-				.Union(ConsumesSelected())
-				.Union(ConsumesAll())
+				.Concat(Workers())
+				.Concat(ConsumesCorrelated())
+				.Concat(ConsumesSelected())
+				.Concat(ConsumesAll())
 				.Distinct((x, y) => x.MessageType == y.MessageType)
 				.ToList();
 		}

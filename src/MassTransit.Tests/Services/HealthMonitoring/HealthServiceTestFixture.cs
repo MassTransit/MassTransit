@@ -35,8 +35,6 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			base.EstablishContext();
 
 			SetupHealthService();
-
-			Thread.Sleep(500);
 		}
 
 		private void SetupHealthService()
@@ -46,6 +44,8 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			HealthService = new HealthService(RemoteBus, _healthSagaHealthSagaRepository);
 
 			HealthService.Start();
+
+			Thread.Sleep(500);
 
 			LocalBus.ShouldHaveRemoteSubscriptionFor<EndpointCameOnline>();
 			LocalBus.ShouldHaveRemoteSubscriptionFor<Heartbeat>();
