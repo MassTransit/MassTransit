@@ -102,7 +102,7 @@ task :compile => [:global_version, :build] do
 	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "log4net.{dll,pdb,xml}", props[:output]
 	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "Magnum.{dll,pdb,xml}", props[:output]
 
-	copyOutputFiles File.join(props[:src], "MassTransit.Infrastructure/bin/#{BUILD_CONFIG}"), "MassTransit.Infrastructure.{dll,pdb,xml}", File.join(props[:output], "NHibernate")
+	copyOutputFiles File.join(props[:src], "Persistence/MassTransit.NHibernateIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NHibernateIntegration.{dll,pdb,xml}", File.join(props[:output], "Persistence/NHibernate")
 	outc = File.join(props[:output], "Containers")
 
 	copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", outc
@@ -293,6 +293,8 @@ end
 desc "Builds the nuget package"
 task :nuget do
 	sh "lib/nuget.exe pack MassTransit.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack MassTransit.StructureMap.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack MassTransit.NHibernate.nuspec -o build_artifacts"
 end
 
 def project_outputs(props)
