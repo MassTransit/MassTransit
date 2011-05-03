@@ -292,9 +292,13 @@ end
 
 desc "Builds the nuget package"
 task :nuget do
-	sh "lib/nuget.exe pack MassTransit.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack MassTransit.StructureMap.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack MassTransit.NHibernate.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack nugets/MassTransit.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack nugets/MassTransit.StructureMap.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack nugets/MassTransit.Autofac.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack nugets/MassTransit.Ninject.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack nugets/MassTransit.Unity.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack nugets/MassTransit.CastleWindsor.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack nugets/MassTransit.NHibernate.nuspec -o build_artifacts"
 end
 
 def project_outputs(props)

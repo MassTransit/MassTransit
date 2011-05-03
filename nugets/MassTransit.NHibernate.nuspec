@@ -17,8 +17,8 @@
     </dependencies> 
   </metadata> 
   <files>
-    <file src="build_output\net-3.5\Persistence\NHibernate\MassTransit.NHibernateIntegration.*" target="lib\NET35" />
-    <file src="build_output\net-4.0\Persistence\NHibernate\MassTransit.NHibernateIntegration.*" target="lib\NET40" />
+    <file src="..\build_output\net-3.5\Persistence\NHibernate\MassTransit.NHibernateIntegration.*" target="lib\NET35" />
+    <file src="..\build_output\net-4.0\Persistence\NHibernate\MassTransit.NHibernateIntegration.*" target="lib\NET40" />
   </files>
 </package>
 

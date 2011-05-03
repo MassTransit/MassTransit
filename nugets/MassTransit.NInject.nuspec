@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <package> 
   <metadata> 
-    <id>MassTransit.StructureMap</id> 
+    <id>MassTransit.Ninject</id> 
     <version>2.0.0.0</version> 
     <authors>Chris Patterson, Dru Sellers, Travis Smith</authors>
     <description>This integration library adds support for StructureMap to MassTransit, a distributed application framework for .NET, including support for MSMQ, ActiveMQ, and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.</description> 
@@ -10,15 +10,13 @@
     <projectUrl>http://masstransit-project.com</projectUrl>
     <tags>msmq messaging service bus</tags>
     <dependencies>
-      <dependency id="log4net" version="1.2.10" />
-      <dependency id="Magnum" version="1.1.1" />
       <dependency id="MassTransit" version="2.0.0.0" />
-      <dependency id="structuremap" version="2.6.2" />
+      <dependency id="Ninject" version="2.2.1.0" />
     </dependencies> 
   </metadata> 
   <files>
-    <file src="build_output\net-3.5\Containers\MassTransit.StructureMapIntegration.*" target="lib\NET35" />
-    <file src="build_output\net-4.0\Containers\MassTransit.StructureMapIntegration.*" target="lib\NET40" />
+    <file src="..\build_output\net-3.5\Containers\MassTransit.NinjectIntegration.*" target="lib\NET35" />
+    <file src="..\build_output\net-4.0\Containers\MassTransit.NinjectIntegration.*" target="lib\NET40" />
   </files>
 </package>
 
