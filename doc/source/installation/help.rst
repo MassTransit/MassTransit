@@ -1,0 +1,59 @@
+Getting hold of us
+==================
+
+Getting hold of the gang behind MassTransit is pretty straight forward, we try
+to help as much as time permits and have tried to streamline this process as much
+as possible.
+
+But before you grab hold of us, spend a moment composing your thoughts and
+formulate your question, there is nothing as pointless as simply telling us
+"MassTransit does not work for me" with no further information to give any clue
+to why.
+
+And before you even do that, do a couple of searches to see if your question is
+already answered, if it has been, you will get your answer much faster that way.
+
+Mailing List
+""""""""""""
+
+Getting on or off our mailinglist happens through Google Groups.
+
+ http://groups.google.com/group/masstransit-discuss/
+
+If you are going to use MassTransit, subscribing to our ``masstransit-discuss``
+mailing list is probably a very good idea.  This is where most conversation
+about MassTransit is going to happen.
+
+Make sure to pick a good subject line, and if the subject of the
+thread changes, please change the subject to match, some of us deal
+with hundreds of emails per day, after spam-filters, and we need all
+the help we can get to pick the interesting ones.
+
+Twitter
+"""""""
+
+The most immediate way to get hold of us, is to shoot a tweet to ``#mtproj``
+
+Our main time zone is Central time in the United States.
+
+If you can explain your problem in a clear sentence, twitter is a good way
+to get quick response. If you do need to paste log files, config and so on,
+please use a ``gist``. But because its often not clear because usually
+there isa great deal of context to a question we may push you to our mailing
+list on google groups.
+
+If the twitter is all quiet, try the mailing list as well, we do have lives,
+families and jobs to deal with also.
+
+
+Issues / Tickets
+""""""""""""""""
+
+Please do not open an issue on github, unless you have spotted an actual
+bug in MassTransit.  Ask on the mailing list  first if you are in doubt.
+
+ https://github.com/masstransit/masstransit/issues
+
+The reason for this policy, is to avoid the bugs being drowned in a
+pile of sensible suggestions for future enhancements and call for help
+from people who forget to check back if they get it and so on.
