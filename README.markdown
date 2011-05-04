@@ -16,11 +16,15 @@ MassTransit is lean service bus implementation for building loosely coupled appl
 ## Getting started with Mass Transit
 ### Documentation
 
-Documentation is located at [http://masstransit.pbworks.com/](http://masstransit.pbworks.com/).
+Documentation is located at [http://docs.masstransit-project.com/](http://docs.masstransit-project.com/).
 
 ### Downloads
-
- Download Binaries from [TeamCity](http://teamcity.codebetter.com/viewType.html?buildTypeId=bt8&tab=buildTypeStatusDiv).
+ Download straight from NuGet 'MassTransit' [Search NuGet for MassTransit](http://nuget.org/List/Search?packageType=Packages&searchCategory=All+Categories&searchTerm=MassTransit&sortOrder=package-download-count&pageSize=10)
+ 
+ Download officially released builds from 
+ [Github](http://github.com/masstransit/masstransit/downloads/).
+ 
+ Download Nightly Binaries from [TeamCity](http://teamcity.codebetter.com/viewType.html?buildTypeId=bt8&tab=buildTypeStatusDiv).
 
 ### Mailing List
 
