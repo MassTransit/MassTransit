@@ -38,7 +38,13 @@ namespace MassTransit.Configurators
 			var result = new ConfigurationResultImpl(results);
 
 			if (result.Results.Any(x => x.Disposition == ValidationResultDisposition.Failure))
-				throw new ConfigurationException(result, "The service bus was not properly configured (see Results for details)");
+			{
+				string message = "The service bus was not properly configured:" +
+				                 Environment.NewLine +
+				                 string.Join(Environment.NewLine, result.Results.Select(x => x.Message).ToArray());
+
+				throw new ConfigurationException(result, message);
+			}
 
 			return result;
 		}

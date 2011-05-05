@@ -9,7 +9,7 @@ call rake unclean
 IF NOT %ERRORLEVEL% == 0 goto FAILED
 
 echo Creating NU package
-lib\nuget pack nugets\MassTransit.nuspec /OutputDirectory build_artifacts 
+call rake nuget
 IF NOT %ERRORLEVEL% == 0 goto FAILED
 
 echo Create ZIP package
