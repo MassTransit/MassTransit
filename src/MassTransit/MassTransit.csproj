@@ -199,6 +199,7 @@
     <Compile Include="ObjectConsumerFactory.cs" />
     <Compile Include="Pipeline\IEndpointSubscriptionEvent.cs" />
     <Compile Include="Pipeline\InboundOutboundSubscriptionBinder.cs" />
+    <Compile Include="Pipeline\Inspectors\PipelineViewerExtensions.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
     <Compile Include="RequestResponse\ConditionalResponseAction.cs" />
     <Compile Include="RequestResponse\ConditionalResponseActionBuilder.cs" />

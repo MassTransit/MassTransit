@@ -41,6 +41,7 @@ namespace Grid.Distributor.Activator
         	DataBus = ServiceBusFactory.New(x =>
         		{
 					x.ReceiveFrom(ConfigurationManager.AppSettings["SourceQueue"]);
+        			x.SetPurgeOnStartup(true);
 
 					x.UseMsmq();
         			x.UseMulticastSubscriptionClient();
@@ -79,6 +80,12 @@ namespace Grid.Distributor.Activator
             _unsubscribeAction = DataBus.SubscribeInstance(this);
 
             Thread.Sleep(5000);
+
+        	DataBus.OutboundPipeline.View(Console.WriteLine);
+
+			Thread.Sleep(5000);
+			Thread.Sleep(5000);
+			Thread.Sleep(5000);
 
             for (int i = 0; i < 100; i++)
             {

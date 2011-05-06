@@ -80,7 +80,12 @@ namespace MassTransit.Distributor
 		                                                 Func<T, Action<T>> getConsumer, int inProgressLimit, int pendingLimit)
 			where T : class
 		{
-			var settings = new WorkerSettings {InProgressLimit = inProgressLimit, PendingLimit = pendingLimit};
+			var settings = new WorkerSettings
+				{
+					InProgressLimit = inProgressLimit, 
+					PendingLimit = pendingLimit
+				};
+
 			configurator.AddService(() => new Worker<T>(getConsumer, settings));
 		}
 

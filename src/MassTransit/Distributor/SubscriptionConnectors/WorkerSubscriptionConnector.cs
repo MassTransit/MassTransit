@@ -13,6 +13,7 @@
 namespace MassTransit.Distributor.SubscriptionConnectors
 {
 	using System;
+	using Exceptions;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.SubscriptionConnectors;
@@ -23,18 +24,23 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 		InstanceSubscriptionConnector
 		where TMessage : class
 	{
+		static Action<Distributed<TMessage>> NullConsumer;
+
 		public Type MessageType
 		{
-			get { return typeof (TMessage); }
+			get { return typeof (Distributed<TMessage>); }
 		}
 
 		public UnsubscribeAction Connect(IPipelineConfigurator configurator, object instance)
 		{
 			var worker = instance as IWorker<TMessage>;
+			if (worker == null)
+				throw new ConfigurationException("The instance is not a distributor worker");
+
 			var sink = new WorkerMessageSink<Distributed<TMessage>>(message =>
 				{
 					// rock it
-					return worker.Accept(message) ? (Action<Distributed<TMessage>>) worker.Consume : null;
+					return worker.Accept(message) ? worker.Consume : NullConsumer;
 				});
 
 			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<Distributed<TMessage>>());

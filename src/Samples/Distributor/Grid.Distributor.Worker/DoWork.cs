@@ -2,6 +2,7 @@ namespace Grid.Distributor.Worker
 {
 	using System;
 	using System.Configuration;
+	using System.Threading;
 	using log4net;
 	using MassTransit;
 	using MassTransit.Distributor;
@@ -10,18 +11,17 @@ namespace Grid.Distributor.Worker
 
 	public class DoWork :
 		IServiceInterface,
-		IDisposable,
-		Consumes<DoSimpleWorkItem>.All
+		IDisposable
 	{
 		ILog _log = LogManager.GetLogger(typeof (DoWork));
-		UnsubscribeAction _unsubscribeAction;
 
 		public DoWork()
 		{
 			DataBus = ServiceBusFactory.New(x =>
 				{
 					x.ReceiveFrom(ConfigurationManager.AppSettings["SourceQueue"]);
-			
+					x.SetPurgeOnStartup(true);
+
 					x.UseMsmq();
 					x.UseMulticastSubscriptionClient();
 
@@ -36,30 +36,26 @@ namespace Grid.Distributor.Worker
 		public IServiceBus ControlBus { get; set; }
 		public IServiceBus DataBus { get; set; }
 
-		public void Consume(DoSimpleWorkItem message)
-		{
-			_log.InfoFormat("Responding to {0}", message.CorrelationId);
-			CurrentMessage.Respond(new CompletedSimpleWorkItem(message.CorrelationId, message.CreatedAt));
-		}
-
 		public void Dispose()
 		{
 		}
 
 		public void Start()
 		{
-			_unsubscribeAction = DataBus.SubscribeInstance(this);
+			DataBus.InboundPipeline.View(Console.WriteLine);
 		}
 
 		public void Stop()
 		{
-			if (_unsubscribeAction != null)
-				_unsubscribeAction();
 		}
 
-		public Action<DoSimpleWorkItem> ConsumeMessage(DoSimpleWorkItem message)
+		Action<DoSimpleWorkItem> ConsumeMessage(DoSimpleWorkItem message)
 		{
-			return m => { Consume(m); };
+			return m =>
+				{
+					_log.InfoFormat("Responding to {0}", m.CorrelationId);
+					CurrentMessage.Respond(new CompletedSimpleWorkItem(m.CorrelationId, m.CreatedAt));
+				};
 		}
 	}
 }

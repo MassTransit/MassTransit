@@ -20,7 +20,8 @@ namespace MassTransit.Distributor
 	}
 
 	public interface IWorker<T> :
-		IWorker, Consumes<Distributed<T>>.Selected
+		IWorker, 
+		Consumes<Distributed<T>>.Selected
 	{
 	}
 }
