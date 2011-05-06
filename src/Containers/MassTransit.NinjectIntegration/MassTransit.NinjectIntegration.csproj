@@ -76,7 +76,8 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="MassTransitNinjectExtensions.cs" />
+    <Compile Include="NinjectExtensions.cs" />
+    <Compile Include="NinjectConsumerFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

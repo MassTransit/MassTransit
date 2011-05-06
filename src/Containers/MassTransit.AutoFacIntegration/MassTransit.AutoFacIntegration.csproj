@@ -57,7 +57,9 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="MassTransitAutofacExtensions.cs" />
+    <Compile Include="AutofacConsumerFactory.cs" />
+    <Compile Include="AutofacConsumerFactoryConfigurator.cs" />
+    <Compile Include="AutofacExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

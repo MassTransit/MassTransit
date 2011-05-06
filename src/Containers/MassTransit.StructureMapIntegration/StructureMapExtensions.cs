@@ -16,9 +16,10 @@ namespace MassTransit
 	using System.Collections.Generic;
 	using System.Linq;
 	using StructureMap;
+	using StructureMapIntegration;
 	using SubscriptionConfigurators;
 
-	public static class MassTransitStructureMapExtensions
+	public static class StructureMapExtensions
 	{
 		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IContainer container)
 		{
@@ -30,10 +31,21 @@ namespace MassTransit
 			if (concreteTypes.Count == 0)
 				return;
 
-			foreach (Type type in concreteTypes)
+			var consumerConfigurator = new StructureMapConsumerFactoryConfigurator(configurator, container);
+
+			foreach (Type concreteType in concreteTypes)
 			{
-				configurator.Consumer(type, container.GetInstance);
+				consumerConfigurator.ConfigureConsumer(concreteType);
 			}
+		}
+
+		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
+			this SubscriptionBusServiceConfigurator configurator, IContainer kernel)
+			where TConsumer : class
+		{
+			var consumerFactory = new StructureMapConsumerFactory<TConsumer>(kernel);
+
+			return configurator.Consumer(consumerFactory);
 		}
 	}
 }

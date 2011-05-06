@@ -18,8 +18,9 @@ namespace MassTransit
 	using Magnum.Extensions;
 	using Microsoft.Practices.Unity;
 	using SubscriptionConfigurators;
+	using UnityIntegration;
 
-	public static class MassTransitUnityExtensions
+	public static class UnityExtensions
 	{
 		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IUnityContainer container)
 		{
@@ -31,7 +32,21 @@ namespace MassTransit
 			if (concreteTypes.Count == 0)
 				return;
 
-			concreteTypes.Each(type => configurator.Consumer(type, t => container.Resolve(t)));
+			var consumerConfigurator = new UnityConsumerFactoryConfigurator(configurator, container);
+
+			foreach (Type concreteType in concreteTypes)
+			{
+				consumerConfigurator.ConfigureConsumer(concreteType);
+			}
+		}
+
+		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
+			this SubscriptionBusServiceConfigurator configurator, IUnityContainer container)
+			where TConsumer : class
+		{
+			var consumerFactory = new UnityConsumerFactory<TConsumer>(container);
+
+			return configurator.Consumer(consumerFactory);
 		}
 	}
 }
