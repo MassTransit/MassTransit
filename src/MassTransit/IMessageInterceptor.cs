@@ -10,34 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Pipeline
+namespace MassTransit
 {
-	using MassTransit.Pipeline;
-	using MassTransit.Pipeline.Configuration;
-	using Messages;
-	using NUnit.Framework;
-
-	[TestFixture]
-	public class When_building_a_pipeline
+	/// <summary>
+	/// A generic interceptor for handling messages before and after it is
+	/// handled by downstream handlers
+	/// </summary>
+	public interface IMessageInterceptor
 	{
-		[SetUp]
-		public void Setup()
-		{
-			_pipeline = MessagePipelineConfigurator.CreateDefault(null);
-		}
+		void PreDispatch(object message);
 
-		MessagePipeline _pipeline;
-
-		[Test]
-		public void The_pipeline_should_be_happy()
-		{
-			var consumer = new IndiscriminantConsumer<PingMessage>();
-
-			_pipeline.ConnectInstance(consumer);
-
-			_pipeline.Dispatch(new PingMessage());
-
-			Assert.IsNotNull(consumer.Consumed);
-		}
+		void PostDispatch(object message);
 	}
 }

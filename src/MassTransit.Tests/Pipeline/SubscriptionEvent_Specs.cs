@@ -56,7 +56,7 @@ namespace MassTransit.Tests.Pipeline
 					return true;
 				});
 
-			_pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
+			_pipeline.ConnectConsumer<TestMessageConsumer<PingMessage>>();
 
 			_subscriptionEvent.VerifyAllExpectations();
 		}
@@ -73,7 +73,7 @@ namespace MassTransit.Tests.Pipeline
 				});
 
 			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(pongGuid);
-			_pipeline.Subscribe(consumer);
+			_pipeline.ConnectInstance(consumer);
 
 			_subscriptionEvent.VerifyAllExpectations();
 		}
@@ -88,7 +88,7 @@ namespace MassTransit.Tests.Pipeline
 				});
 
 			var consumer = new TestMessageConsumer<PingMessage>();
-			_pipeline.Subscribe(consumer);
+			_pipeline.ConnectInstance(consumer);
 
 			_subscriptionEvent.VerifyAllExpectations();
 		}
@@ -102,7 +102,7 @@ namespace MassTransit.Tests.Pipeline
 					return true;
 				});
 
-			_pipeline.Subscribe<TestSelectiveConsumer<PingMessage>>();
+			_pipeline.ConnectConsumer<TestSelectiveConsumer<PingMessage>>();
 
 			_subscriptionEvent.VerifyAllExpectations();
 		}
@@ -117,7 +117,7 @@ namespace MassTransit.Tests.Pipeline
 				});
 
 			var consumer = new TestSelectiveConsumer<PingMessage>();
-			_pipeline.Subscribe(consumer);
+			_pipeline.ConnectInstance(consumer);
 
 			_subscriptionEvent.VerifyAllExpectations();
 		}
@@ -160,7 +160,7 @@ namespace MassTransit.Tests.Pipeline
 					return true;
 				});
 
-			var token = _pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
+			var token = _pipeline.ConnectConsumer<TestMessageConsumer<PingMessage>>();
 
 			token();
 
@@ -180,7 +180,7 @@ namespace MassTransit.Tests.Pipeline
 				});
 
 			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(pongGuid);
-			var remove = _pipeline.Subscribe(consumer);
+			var remove = _pipeline.ConnectInstance(consumer);
 
 			remove();
 
@@ -201,8 +201,8 @@ namespace MassTransit.Tests.Pipeline
 
 			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(pongGuid);
 			var otherConsumer = new TestCorrelatedConsumer<PongMessage, Guid>(pongGuid);
-			var remove = _pipeline.Subscribe(consumer);
-			var removeOther = _pipeline.Subscribe(otherConsumer);
+			var remove = _pipeline.ConnectInstance(consumer);
+			var removeOther = _pipeline.ConnectInstance(otherConsumer);
 
 			remove();
 			_subscriptionEvent.VerifyAllExpectations();
@@ -226,7 +226,7 @@ namespace MassTransit.Tests.Pipeline
 				});
 
 			var consumer = new TestMessageConsumer<PingMessage>();
-			var token = _pipeline.Subscribe(consumer);
+			var token = _pipeline.ConnectInstance(consumer);
 
 			token();
 
@@ -243,7 +243,7 @@ namespace MassTransit.Tests.Pipeline
 					return true;
 				});
 
-			var token = _pipeline.Subscribe<TestSelectiveConsumer<PingMessage>>();
+			var token = _pipeline.ConnectConsumer<TestSelectiveConsumer<PingMessage>>();
 
 			token();
 
@@ -261,7 +261,7 @@ namespace MassTransit.Tests.Pipeline
 				});
 
 			var consumer = new TestSelectiveConsumer<PingMessage>();
-			var token = _pipeline.Subscribe(consumer);
+			var token = _pipeline.ConnectInstance(consumer);
 
 			token();
 

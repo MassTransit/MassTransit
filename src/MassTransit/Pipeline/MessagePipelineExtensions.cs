@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using Configuration;
+	using Magnum.Reflection;
 	using Sinks;
 	using SubscriptionConnectors;
 
@@ -61,7 +62,7 @@ namespace MassTransit.Pipeline
 		/// <typeparam name="TComponent"></typeparam>
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <returns></returns>
-		public static UnsubscribeAction Subscribe<TComponent>(this IMessagePipeline pipeline)
+		public static UnsubscribeAction ConnectConsumer<TComponent>(this IMessagePipeline pipeline)
 			where TComponent : class, new()
 		{
 			return pipeline.Configure(x =>
@@ -76,18 +77,19 @@ namespace MassTransit.Pipeline
 		/// <summary>
 		/// Subscribe a component type to the pipeline that is resolved from the container for each message
 		/// </summary>
-		/// <typeparam name="TComponent"></typeparam>
+		/// <typeparam name="TConsumer"></typeparam>
 		/// <param name="pipeline">The pipeline to configure</param>
+		/// <param name="consumerFactory"></param>
 		/// <returns></returns>
-		public static UnsubscribeAction Subscribe<TComponent>(this IMessagePipeline pipeline,
-		                                                      Func<TComponent> componentFactory)
-			where TComponent : class
+		public static UnsubscribeAction ConnectConsumer<TConsumer>(this IMessagePipeline pipeline,
+		                                                           Func<TConsumer> consumerFactory)
+			where TConsumer : class
 		{
 			return pipeline.Configure(x =>
 				{
-					var consumerFactory = new DelegateConsumerFactory<TComponent>(componentFactory);
+					var factory = new DelegateConsumerFactory<TConsumer>(consumerFactory);
 
-					ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector(consumerFactory);
+					ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector(factory);
 					return connector.Connect(x);
 				});
 		}
@@ -99,7 +101,7 @@ namespace MassTransit.Pipeline
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <param name="instance">The instance that will handle the messages</param>
 		/// <returns></returns>
-		public static UnsubscribeAction Subscribe<TComponent>(this IMessagePipeline pipeline, TComponent instance)
+		public static UnsubscribeAction ConnectInstance<TComponent>(this IMessagePipeline pipeline, TComponent instance)
 			where TComponent : class
 		{
 			return pipeline.Configure(x =>
@@ -109,8 +111,8 @@ namespace MassTransit.Pipeline
 				});
 		}
 
-		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, Action<TMessage> handler,
-		                                                    Predicate<TMessage> condition)
+		public static UnsubscribeAction ConnectHandler<TMessage>(this IMessagePipeline pipeline, Action<TMessage> handler,
+		                                                         Predicate<TMessage> condition)
 			where TMessage : class
 		{
 			return pipeline.Configure(x =>
@@ -121,7 +123,7 @@ namespace MassTransit.Pipeline
 				});
 		}
 
-		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, IEndpoint endpoint)
+		public static UnsubscribeAction ConnectEndpoint<TMessage>(this IMessagePipeline pipeline, IEndpoint endpoint)
 			where TMessage : class
 		{
 			var sink = new EndpointMessageSink<TMessage>(endpoint);
@@ -129,8 +131,16 @@ namespace MassTransit.Pipeline
 			return pipeline.ConnectToRouter(sink);
 		}
 
-		public static UnsubscribeAction Subscribe<TMessage, TKey>(this IMessagePipeline pipeline, TKey correlationId,
-		                                                          IEndpoint endpoint)
+		public static UnsubscribeAction ConnectEndpoint(this IMessagePipeline pipeline, Type messageType, IEndpoint endpoint)
+		{
+			object sink = FastActivator.Create(typeof (EndpointMessageSink<>).MakeGenericType(messageType),
+				new object[] {endpoint});
+
+			return pipeline.FastInvoke<IMessagePipeline, UnsubscribeAction>("ConnectToRouter", sink);
+		}
+
+		public static UnsubscribeAction ConnectEndpoint<TMessage, TKey>(this IMessagePipeline pipeline, TKey correlationId,
+		                                                                IEndpoint endpoint)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
 			CorrelatedMessageRouterConfigurator correlatedConfigurator = CorrelatedMessageRouterConfigurator.For(pipeline);

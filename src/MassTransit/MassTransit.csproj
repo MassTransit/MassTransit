@@ -178,6 +178,7 @@
     <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
     <Compile Include="Configuration\Xml\SettingsOptions.cs" />
     <Compile Include="DelegateConsumerFactory.cs" />
+    <Compile Include="DelegateMessageInterceptor.cs" />
     <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
@@ -188,6 +189,7 @@
     <Compile Include="IConsumer.cs" />
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="MessageUrn.cs" />
+    <Compile Include="IMessageInterceptor.cs" />
     <Compile Include="IServiceContainer.cs" />
     <Compile Include="MessageHeaders\IInboundMessageHeaders.cs" />
     <Compile Include="MessageHeaders\IMessageHeaders.cs" />

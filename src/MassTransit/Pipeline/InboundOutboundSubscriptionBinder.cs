@@ -27,13 +27,13 @@ namespace MassTransit.Pipeline
 		public UnsubscribeAction SubscribedTo<T>()
 			where T : class
 		{
-			return _outbound.Subscribe<T>(_localEndpoint);
+			return _outbound.ConnectEndpoint<T>(_localEndpoint);
 		}
 
 		public UnsubscribeAction SubscribedTo<T, K>(K correlationId)
 			where T : class, CorrelatedBy<K>
 		{
-			return _outbound.Subscribe<T, K>(correlationId, _localEndpoint);
+			return _outbound.ConnectEndpoint<T, K>(correlationId, _localEndpoint);
 		}
 	}
 }

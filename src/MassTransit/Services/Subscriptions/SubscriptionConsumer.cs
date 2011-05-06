@@ -56,7 +56,7 @@ namespace MassTransit.Services.Subscriptions
 
 			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
-			return _pipeline.Subscribe<T>(endpoint);
+			return _pipeline.ConnectEndpoint<T>(endpoint);
 		}
 
 		public UnsubscribeAction SubscribedTo<T, K>(K correlationId, Uri endpointUri)
@@ -67,7 +67,7 @@ namespace MassTransit.Services.Subscriptions
 
 			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
-			return _pipeline.Subscribe<T, K>(correlationId, endpoint);
+			return _pipeline.ConnectEndpoint<T, K>(correlationId, endpoint);
 		}
 
 		void Dispose(bool disposing)
