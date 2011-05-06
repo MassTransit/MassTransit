@@ -2,6 +2,7 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using Magnum.Extensions;
     using Util;
@@ -9,22 +10,25 @@ namespace MassTransit.Transports.RabbitMq
     public class RabbitMqAddress :
         IEndpointAddress
     {
+        static Regex _addressParser = new Regex(@"(?<scheme>\w+)://(?<host>[\w-]+)(?<port>:\d+)?(?<type>/\w+)(?<path>/[\w/]+)",RegexOptions.Compiled);
+        const int DEFAULT_PORT = 5432;
+
 		protected static readonly string LocalMachineName = Environment.MachineName.ToLowerInvariant();
         readonly Uri _rawUri;
         readonly Uri _rebuiltUri;
         readonly bool _isTransactional;
         Func<bool> _isLocal;
 
-        const int DEFAULT_PORT = 5432;
 
-        public RabbitMqAddress(Uri uri)
+        public RabbitMqAddress(Uri uri, Uri rebuiltUri, string username, string password, string vhost)
         {
             _rawUri = uri;
-            
-            Username = ParseUsername();
-            Password = ParsePassword();
-            Host = _rawUri.Host;
-            VHost = ParseVHost(_rawUri);
+            _rebuiltUri = rebuiltUri;
+
+            Username = username;
+            Password = password;
+            Host = rebuiltUri.Host;
+            VHost = vhost;
             AddressType = ParseExchange(_rawUri);
             Queue = ParseQueue(_rawUri);
             Port = ParsePort();
@@ -104,19 +108,7 @@ namespace MassTransit.Transports.RabbitMq
         {
             return _rawUri.Port == -1 ? DEFAULT_PORT : _rawUri.Port;
         }
-        string ParsePassword()
-        {
-            if (_rawUri.UserInfo.IsEmpty()) return "guest";
 
-            return _rawUri.UserInfo.Split(':')[1];
-        }
-        string ParseUsername()
-        {
-            var userInfo = _rawUri.UserInfo;
-            if (userInfo.IsEmpty()) return "guest";
-
-            return userInfo.Split(':')[0];
-        }
         string ParseVHost(Uri uri)
         {
             string[] bits = uri.LocalPath.Split('/');
@@ -178,6 +170,53 @@ namespace MassTransit.Transports.RabbitMq
         }
 
         public AddressType AddressType { get; set; }
+
+        public static RabbitMqAddress Parse(string address)
+        {
+            return Parse(new Uri(address));
+        }
+
+        public static RabbitMqAddress Parse(Uri address)
+        {
+            var port = address.Port == -1 ? DEFAULT_PORT : address.Port;
+            var path = address.PathAndQuery;
+            var user = "guest";
+            var password = "guest";
+            if(!address.UserInfo.IsEmpty())
+            {
+                var parts = address.UserInfo.Split(':');
+                user = parts[0];
+                password = parts[1];
+            }
+            //vdir
+            var vhost = "/";
+            
+            //type
+            //path
+            //query string
+
+            var ub = new UriBuilder(address.Scheme, address.Host, port, path);
+            return new RabbitMqAddress(address, ub.Uri, user, password, vhost);
+            
+        }
+
+        public static RabbitMqAddress ParseForInbound(string address)
+        {
+            var m = _addressParser.Match(address);
+            return new RabbitMqAddress(new Uri(address));
+        }
+
+        public static RabbitMqAddress ParseForOutbound(string address)
+        {
+            var m = _addressParser.Match(address);
+            return new RabbitMqAddress(new Uri(address));
+        }
+
+        public static RabbitMqAddress ParseForDuplex(string address)
+        {
+            var m = _addressParser.Match(address);
+            return new RabbitMqAddress(new Uri(address));
+        }
     }
 
     public enum AddressType { Exchange, Queue }

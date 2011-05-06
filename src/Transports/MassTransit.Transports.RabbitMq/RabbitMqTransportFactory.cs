@@ -22,7 +22,7 @@ namespace MassTransit.Transports.RabbitMq
     public class RabbitMqTransportFactory :
         ITransportFactory, IDisposable
     {
-        static Cache<ServerKey, ConnectionFactory> _connectionFactoryCache = new Cache<ServerKey, ConnectionFactory>(a =>
+        static Cache<ServerKey, IConnection> _connectionFactoryCache = new Cache<ServerKey, IConnection>(a =>
         {
             return new ConnectionFactory
                 {
@@ -31,7 +31,7 @@ namespace MassTransit.Transports.RabbitMq
                     Port = a.Port,
                     UserName = a.Username,
                     Password = a.Password,
-                };
+                }.CreateConnection();
         });
 
         public string Scheme
@@ -57,9 +57,9 @@ namespace MassTransit.Transports.RabbitMq
             if(address.AddressType != AddressType.Queue) throw new ConfigurationException("You can't listen on exchanges!");
             
             //rabbitmq://server:port/queue/<queue>
-            var factory = _connectionFactoryCache[ToKey(address)];
+            var connection = _connectionFactoryCache[ToKey(address)];
 
-            return new InboundRabbitMqTransport(address, factory.CreateConnection());
+            return new InboundRabbitMqTransport(address, connection);
         }
 
         public IOutboundTransport BuildOutbound(ITransportSettings settings)
@@ -69,10 +69,11 @@ namespace MassTransit.Transports.RabbitMq
             var address = settings.Address.CastAs<RabbitMqAddress>();
             if(address.AddressType != AddressType.Exchange) throw new ConfigurationException("You can't publish to queues!");
 
+            //rabbitmq://server:port/queue/<queue> -> rabbitmq://server:port/exchange/queue/<queue>
             //rabbitmq://server:port/exchange/<message:urn>
-            var factory = _connectionFactoryCache[ToKey(address)];
+            var connection = _connectionFactoryCache[ToKey(address)];
 
-            return new OutboundRabbitMqTransport(address, factory.CreateConnection());
+            return new OutboundRabbitMqTransport(address, connection);
         }
 
         public IOutboundTransport BuildError(ITransportSettings settings)
@@ -89,6 +90,7 @@ namespace MassTransit.Transports.RabbitMq
 
         public void Dispose()
         {
+            _connectionFactoryCache.Each(conn => conn.Close());
             _connectionFactoryCache.ClearAll();
             _connectionFactoryCache = null;
         }
