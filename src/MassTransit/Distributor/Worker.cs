@@ -22,8 +22,7 @@ namespace MassTransit.Distributor
 
 	public class Worker<T> :
 		IWorker<T>,
-		Consumes<WakeUpWorker>.All,
-		Consumes<PingWorker>.All
+		Consumes<WakeUpWorker>.All
 		where T : class
 	{
 		private readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
@@ -95,7 +94,7 @@ namespace MassTransit.Distributor
 			return true;
 		}
 
-		public void Consume(PingWorker message)
+		void Consume(PingWorker message)
 		{
 			PublishWorkerAvailability();
 		}
@@ -142,6 +141,7 @@ namespace MassTransit.Distributor
 
 			_unsubscribeAction = bus.ControlBus.SubscribeHandler<ConfigureWorker>(Consume, Accept);
 			_unsubscribeAction += bus.ControlBus.SubscribeHandler<PingWorker>(Consume);
+
 			_unsubscribeAction += bus.SubscribeInstance(this);
 
             _scheduler = new TimerScheduler(new PoolFiber());

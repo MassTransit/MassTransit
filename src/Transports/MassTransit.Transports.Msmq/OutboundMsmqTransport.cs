@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2011 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq
+﻿namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Messaging;
@@ -19,12 +7,12 @@ namespace MassTransit.Transports.Msmq
 	public abstract class OutboundMsmqTransport :
 		IOutboundTransport
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (OutboundMsmqTransport));
-		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");
-		private readonly IMsmqEndpointAddress _address;
+		static readonly ILog _log = LogManager.GetLogger(typeof (OutboundMsmqTransport));
+		static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");
+		readonly IMsmqEndpointAddress _address;
 
-		private MessageQueueConnection _connection;
-		private bool _disposed;
+		MessageQueueConnection _connection;
+		bool _disposed;
 
 		protected OutboundMsmqTransport(IMsmqEndpointAddress address)
 		{
@@ -45,13 +33,10 @@ namespace MassTransit.Transports.Msmq
 
 				try
 				{
-					using (MessageQueue queue = _connection.Queue)
-					{
-						SendMessage(queue, context.Message);
+					SendMessage(_connection.Queue, context.Message);
 
-						if (_messageLog.IsDebugEnabled)
-							_messageLog.DebugFormat("SEND:{0}:{1}:{2}", _address.OutboundFormatName, context.Message.Label, context.Message.Id);
-					}
+					if (_messageLog.IsDebugEnabled)
+						_messageLog.DebugFormat("SEND:{0}:{1}:{2}", _address.OutboundFormatName, context.Message.Label, context.Message.Id);
 				}
 				catch (MessageQueueException ex)
 				{
@@ -71,7 +56,7 @@ namespace MassTransit.Transports.Msmq
 			queue.Send(message, MessageQueueTransactionType.None);
 		}
 
-		private void Dispose(bool disposing)
+		void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
@@ -83,7 +68,7 @@ namespace MassTransit.Transports.Msmq
 			_disposed = true;
 		}
 
-		private void HandleOutboundMessageQueueException(MessageQueueException ex)
+		void HandleOutboundMessageQueueException(MessageQueueException ex)
 		{
 			_connection.Disconnect();
 
