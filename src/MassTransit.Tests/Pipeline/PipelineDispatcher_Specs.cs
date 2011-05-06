@@ -34,7 +34,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			_pipeline.Subscribe(consumer);
+			_pipeline.ConnectInstance(consumer);
 
 			PingMessage message = new PingMessage();
 
@@ -51,8 +51,8 @@ namespace MassTransit.Tests.Pipeline
 			IndiscriminantConsumer<PingMessage> pingConsumer = new IndiscriminantConsumer<PingMessage>();
 			IndiscriminantConsumer<PongMessage> pongConsumer = new IndiscriminantConsumer<PongMessage>();
 
-			UnsubscribeAction pingToken = _pipeline.Subscribe(pingConsumer);
-			UnsubscribeAction pongToken = _pipeline.Subscribe(pongConsumer);
+			UnsubscribeAction pingToken = _pipeline.ConnectInstance(pingConsumer);
+			UnsubscribeAction pongToken = _pipeline.ConnectInstance(pongConsumer);
 
 			PipelineViewer.Trace(_pipeline);
 
@@ -76,7 +76,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			_pipeline.Subscribe(consumer);
+			_pipeline.ConnectInstance(consumer);
 
 			PingMessage message = new PingMessage();
 
@@ -102,7 +102,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			_pipeline.Subscribe(consumer);
+			_pipeline.ConnectInstance(consumer);
 
 			PingMessage message = new PingMessage();
 

@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Pipeline
 	    public void I_want_to_display_a_more_detailed_flow()
 	    {
             _pipeline.Filter<object>(m => true);
-            _pipeline.Subscribe<PingMessage>(m => { }, x => { return true; });
+            _pipeline.ConnectHandler<PingMessage>(m => { }, x => { return true; });
 	        
             PipelineViewer.Trace(_pipeline);
 	    }

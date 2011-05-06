@@ -18,9 +18,9 @@ namespace MassTransit.Builders
 	using Exceptions;
 	using log4net;
 	using Magnum;
+	using Magnum.Extensions;
 	using Pipeline.Configuration;
 	using Util;
-	using Magnum.Extensions;
 
 	public class ServiceBusBuilderImpl :
 		ServiceBusBuilder,
@@ -76,24 +76,6 @@ namespace MassTransit.Builders
 			return bus;
 		}
 
-		void RunBusServiceConfigurators(ServiceBus bus)
-		{
-			foreach (var busServiceConfigurator in _busServiceConfigurators)
-			{
-				try
-				{
-					IBusService busService = busServiceConfigurator.Create(bus);
-
-					bus.AddService(busServiceConfigurator.ServiceType, busService);
-				}
-				catch (Exception ex)
-				{
-					throw new ConfigurationException("Failed to create the bus service: " +
-					                                 busServiceConfigurator.ServiceType.ToShortTypeName(), ex);
-				}
-			}
-		}
-
 		public void UseControlBus(IControlBus controlBus)
 		{
 			_postCreateActions.Add(bus => bus.ControlBus = controlBus);
@@ -129,6 +111,24 @@ namespace MassTransit.Builders
 			}
 
 			_disposed = true;
+		}
+
+		void RunBusServiceConfigurators(ServiceBus bus)
+		{
+			foreach (BusServiceConfigurator busServiceConfigurator in _busServiceConfigurators)
+			{
+				try
+				{
+					IBusService busService = busServiceConfigurator.Create(bus);
+
+					bus.AddService(busServiceConfigurator.ServiceType, busService);
+				}
+				catch (Exception ex)
+				{
+					throw new ConfigurationException("Failed to create the bus service: " +
+					                                 busServiceConfigurator.ServiceType.ToShortTypeName(), ex);
+				}
+			}
 		}
 
 		void RunPostCreateActions(ServiceBus bus)
@@ -172,7 +172,11 @@ namespace MassTransit.Builders
 		{
 			if (_settings.BeforeConsume != null || _settings.AfterConsume != null)
 			{
-				MessageInterceptorConfigurator.For(bus.InboundPipeline).Create(_settings.BeforeConsume, _settings.AfterConsume);
+				var configurator = new MessageInterceptorConfigurator(bus.InboundPipeline);
+
+				var interceptor = new DelegateMessageInterceptor(_settings.BeforeConsume, _settings.AfterConsume);
+
+				configurator.Create(interceptor);
 			}
 		}
 	}

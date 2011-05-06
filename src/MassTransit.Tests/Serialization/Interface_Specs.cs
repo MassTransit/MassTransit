@@ -58,7 +58,7 @@ namespace MassTransit.Tests.Serialization
 
 			var consumer = new TestMessageConsumer<ComplaintAdded>();
 
-			var unsubscribeAction = pipeline.Subscribe(consumer);
+			var unsubscribeAction = pipeline.ConnectInstance(consumer);
 
 			var user = new UserImpl("Chris", "noone@nowhere.com");
 			ComplaintAdded complaint = new ComplaintAddedImpl(user, "No toilet paper", BusinessArea.Appearance)

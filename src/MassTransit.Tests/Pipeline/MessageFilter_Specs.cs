@@ -37,7 +37,7 @@ namespace MassTransit.Tests.Pipeline
 
 			_pipeline.Filter<PingMessage>("Message Blocker", x => false);
 
-			_pipeline.Subscribe(consumer);
+			_pipeline.ConnectInstance(consumer);
 
 			var message = new PingMessage();
 
@@ -78,7 +78,7 @@ namespace MassTransit.Tests.Pipeline
 
 			_pipeline.Filter<PingMessage>(x => false);
 
-			_pipeline.Subscribe(consumer);
+			_pipeline.ConnectInstance(consumer);
 
 			PingMessage message = new PingMessage();
 
@@ -96,7 +96,7 @@ namespace MassTransit.Tests.Pipeline
 
 			_pipeline.Filter<PingMessage>(x => true);
 
-			_pipeline.Subscribe(consumer);
+			_pipeline.ConnectInstance(consumer);
 
 			var message = new PingMessage();
 
@@ -112,7 +112,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			var consumer = new TestMessageConsumer<PingMessage>();
 
-			_pipeline.Subscribe(consumer);
+			_pipeline.ConnectInstance(consumer);
 
 			var message = new PingMessage();
 
@@ -128,7 +128,7 @@ namespace MassTransit.Tests.Pipeline
 
             _pipeline.Filter<object>("Message Blocker", x => false);
 
-            _pipeline.Subscribe(consumer);
+            _pipeline.ConnectInstance(consumer);
  
             var message = new PingMessage();
 
@@ -146,7 +146,7 @@ namespace MassTransit.Tests.Pipeline
 
             _pipeline.Filter<object>("Message Passer", x => true);
 
-            _pipeline.Subscribe(consumer);
+            _pipeline.ConnectInstance(consumer);
  
             var message = new PingMessage();
 

@@ -36,36 +36,6 @@ namespace MassTransit.Util
 			return () => true;
 		}
 
-		public UnsubscribeAction Subscribe<T>(Action<T> callback) where T : class
-		{
-			return () => true;
-		}
-
-		public UnsubscribeAction Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
-		{
-			return () => true;
-		}
-
-		public UnsubscribeAction Subscribe<T>(T consumer) where T : class
-		{
-			return () => true;
-		}
-
-		public UnsubscribeAction Subscribe<TComponent>() where TComponent : class
-		{
-			return () => true;
-		}
-
-		public UnsubscribeAction Subscribe(Type consumerType)
-		{
-			return () => true;
-		}
-
-		public UnsubscribeAction SubscribeConsumer<T>(Func<T, Action<T>> getConsumerAction) where T : class
-		{
-			return () => true;
-		}
-
 		public void Publish<T>(T message) where T : class
 		{
 		}

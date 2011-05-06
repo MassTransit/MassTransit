@@ -12,32 +12,27 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Pipeline
 {
-	using MassTransit.Pipeline;
-	using MassTransit.Pipeline.Configuration;
-	using Messages;
-	using NUnit.Framework;
+	using Magnum.TestFramework;
+	using TextFixtures;
 
-	[TestFixture]
-	public class When_building_a_pipeline
+	[Scenario]
+	public class When_intercepting_messages_as_they_are_published
+		: LoopbackTestFixture
 	{
-		[SetUp]
-		public void Setup()
+		[When]
+		public void Intercepting_messages_as_they_are_published()
 		{
-			_pipeline = MessagePipelineConfigurator.CreateDefault(null);
+
 		}
 
-		MessagePipeline _pipeline;
-
-		[Test]
-		public void The_pipeline_should_be_happy()
+		protected override void ConfigureLocalBus(BusConfigurators.ServiceBusConfigurator configurator)
 		{
-			var consumer = new IndiscriminantConsumer<PingMessage>();
+			base.ConfigureLocalBus(configurator);
+		}
 
-			_pipeline.ConnectInstance(consumer);
-
-			_pipeline.Dispatch(new PingMessage());
-
-			Assert.IsNotNull(consumer.Consumed);
+		[Then]
+		public void Should_receive_the_message_before_the_pipeline()
+		{
 		}
 	}
 }

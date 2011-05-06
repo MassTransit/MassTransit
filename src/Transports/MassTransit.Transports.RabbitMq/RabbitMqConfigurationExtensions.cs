@@ -10,40 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.TextFixtures
+namespace MassTransit
 {
 	using BusConfigurators;
-	using MassTransit.Transports;
-	using NUnit.Framework;
+	using Pipeline.Configuration;
+	using Transports.RabbitMq;
 
-	[TestFixture]
-	public class LoopbackTestFixture :
-		EndpointTestFixture<LoopbackTransportFactory>
+	public static class RabbitMqConfigurationExtensions
 	{
-		public IServiceBus LocalBus { get; private set; }
-
-		protected override void EstablishContext()
+		public static void UseRabbitMqPublishConvention(this ServiceBusConfigurator configurator)
 		{
-			base.EstablishContext();
-
-			LocalBus = ServiceBusFactory.New(x =>
+			var busConfigurator = new PostCreateBusBuilderConfiguratorImpl(bus =>
 				{
-					x.ReceiveFrom("loopback://localhost/mt_client");
+					var interceptorConfigurator = new MessageInterceptorConfigurator(bus.OutboundPipeline);
 
-					ConfigureLocalBus(x);
+					IEndpointAddressProvider provider = new ExchangePublishEndpointAddressProvider();
+
+					interceptorConfigurator.Create(new PublishEndpointInterceptor(bus, provider));
 				});
-		}
 
-		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
-		{
-		}
-
-		protected override void TeardownContext()
-		{
-			LocalBus.Dispose();
-			LocalBus = null;
-
-			base.TeardownContext();
+			configurator.AddBusConfigurator(busConfigurator);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,38 +12,38 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
-    using System;
-    using Exceptions;
-    using Sinks;
+	using System;
+	using Exceptions;
+	using Sinks;
 
-    public class MessageInterceptorConfigurator
-    {
-        private readonly IPipelineSink<object> _sink;
+	public class MessageInterceptorConfigurator
+	{
+		readonly IPipelineSink<object> _sink;
 
-        private MessageInterceptorConfigurator(IPipelineSink<object> sink)
-        {
-            _sink = sink;
-        }
+		public MessageInterceptorConfigurator(IPipelineSink<object> sink)
+		{
+			_sink = sink;
+		}
 
-        public MessageInterceptor Create(Action beforeConsume, Action afterConsume)
-        {
-            var scope = new MessageInterceptorConfiguratorScope();
-            _sink.Inspect(scope);
+		public MessageInterceptor Create(IMessageInterceptor messageInterceptor)
+		{
+			var scope = new MessageInterceptorConfiguratorScope();
+			_sink.Inspect(scope);
 
-            return ConfigureFilter(scope.InsertAfter, beforeConsume, afterConsume);
-        }
+			return ConfigureInterceptor(scope.InsertAfter, messageInterceptor);
+		}
 
-        private static MessageInterceptor ConfigureFilter(Func<IPipelineSink<object>, IPipelineSink<object>> insertAfter, Action beforeConsume, Action afterConsume)
-        {
-            if (insertAfter == null)
-                throw new PipelineException("Unable to insert filter into pipeline for message type " + typeof (object).FullName);
+		static MessageInterceptor ConfigureInterceptor(Func<IPipelineSink<object>, IPipelineSink<object>> insertAfter,
+		                                               IMessageInterceptor messageInterceptor)
+		{
+			if (insertAfter == null)
+				throw new PipelineException("Unable to insert filter into pipeline for message type " + typeof (object).FullName);
 
-            return new MessageInterceptor(insertAfter, beforeConsume, afterConsume);
-        }
+			var interceptor = new MessageInterceptor(messageInterceptor);
 
-        public static MessageInterceptorConfigurator For(IMessagePipeline sink)
-        {
-            return new MessageInterceptorConfigurator(sink);
-        }
-    }
+			interceptor.ReplaceOutputSink(insertAfter(interceptor));
+
+			return interceptor;
+		}
+	}
 }
