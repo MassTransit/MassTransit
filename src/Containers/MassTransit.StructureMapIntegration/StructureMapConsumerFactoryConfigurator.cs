@@ -10,32 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.StructureMapIntegration
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Ninject;
+	using Magnum.Reflection;
+	using StructureMap;
 	using SubscriptionConfigurators;
 
-	public static class MassTransitNinjectExtensions
+	public class StructureMapConsumerFactoryConfigurator
 	{
-		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IKernel kernel)
+		readonly IContainer _container;
+		SubscriptionBusServiceConfigurator _configurator;
+
+		public StructureMapConsumerFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IContainer container)
 		{
-			// Note that this might not be the right thing to do here, since they aren't registering
-			// the consumer and there is no way to enumerate all the bindings in NInject
+			_container = container;
+			_configurator = configurator;
+		}
 
-			IList<Type> concreteTypes = kernel.GetBindings(typeof (Consumes<>.All))
-				.Select(x => x.Service)
-				.ToList();
+		public void ConfigureConsumer(Type messageType)
+		{
+			this.FastInvoke(new[] {messageType}, "Configure");
+		}
 
-			if (concreteTypes.Count == 0)
-				return;
-
-			foreach (Type type in concreteTypes)
-			{
-				configurator.Consumer(type, t => kernel.Get(t));
-			}
+		public void Configure<T>()
+			where T : class
+		{
+			_configurator.Consumer(new StructureMapConsumerFactory<T>(_container));
 		}
 	}
 }

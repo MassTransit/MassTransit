@@ -16,10 +16,11 @@ namespace MassTransit
 	using System.Collections.Generic;
 	using System.Linq;
 	using Autofac;
+	using AutofacIntegration;
 	using Magnum.Extensions;
 	using SubscriptionConfigurators;
 
-	public static class MassTransitAutofacExtensions
+	public static class AutofacExtensions
 	{
 		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IContainer container)
 		{
@@ -31,7 +32,21 @@ namespace MassTransit
 			if (concreteTypes.Count == 0)
 				return;
 
-			concreteTypes.Each(type => configurator.Consumer(type, t => container.Resolve(t)));
+			var consumerConfigurator = new AutofacConsumerFactoryConfigurator(configurator, container);
+
+			foreach (Type concreteType in concreteTypes)
+			{
+				consumerConfigurator.ConfigureConsumer(concreteType);
+			}
+		}
+
+		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
+			this SubscriptionBusServiceConfigurator configurator, IContainer kernel)
+			where TConsumer : class
+		{
+			var consumerFactory = new AutofacConsumerFactory<TConsumer>(kernel);
+
+			return configurator.Consumer(consumerFactory);
 		}
 	}
 }
