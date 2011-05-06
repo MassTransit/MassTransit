@@ -1,109 +1,79 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace HeavyLoad.Load
 {
-    using System;
-    using System.Threading;
-    using Castle.Windsor;
-    using MassTransit;
-    using MassTransit.Transports.Msmq;
-    using MassTransit.WindsorIntegration;
+	using System;
+	using System.Threading;
+	using MassTransit;
 
-    public class TransactionLoadTest : IDisposable
-    {
-        private const int _repeatCount = 5000;
-        private static readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
-        private readonly IWindsorContainer _container;
-        private static readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
+	public class TransactionLoadTest :
+		IDisposable
+	{
+		const int _repeatCount = 5000;
+		static readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
+		static readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
 
-        private IServiceBus _bus;
-        private static int _counter = 0;
-        private static int _responseCounter = 0;
+		IServiceBus _bus;
+		int _requestCounter;
+		int _responseCounter;
 
-        public TransactionLoadTest()
-        {
-            _container = new WindsorContainer("transaction.castle.xml");
-            _container.Install(new MassTransitInstaller());
+		public TransactionLoadTest()
+		{
+			_bus = ServiceBusFactory.New(x =>
+				{
+					x.ReceiveFrom("msmq://localhost/heavy_load_tx");
+					x.SetPurgeOnStartup(true);
 
-            _bus = _container.Resolve<IServiceBus>();
+					x.UseMsmq();
 
-			var management = MsmqEndpointManagement.New(_bus.Endpoint.Address.Uri);
-			management.Purge();
+					x.Subscribe(s =>
+						{
+							s.Handler<GeneralMessage>(Handle);
+							s.Handler<SimpleResponse>(Handler);
+						});
+				});
 		}
 
-        public void Dispose()
-        {
-            _bus.Dispose();
-            _container.Dispose();
-        }
+		public void Dispose()
+		{
+			_bus.Dispose();
+		}
 
-        public void Run(StopWatch stopWatch)
-        {
-            _container.AddComponent<RequestConsumer>();
-            _container.AddComponent<ResponseConsumer>();
+		public void Run(StopWatch stopWatch)
+		{
+			stopWatch.Start();
 
-            _bus.Subscribe<RequestConsumer>();
-            _bus.Subscribe<ResponseConsumer>();
+			CheckPoint publishCheckpoint = stopWatch.Mark("Publishing " + _repeatCount + " messages");
+			CheckPoint receiveCheckpoint = stopWatch.Mark("Receiving " + _repeatCount + " messages");
 
-            stopWatch.Start();
+			for (int index = 0; index < _repeatCount; index++)
+			{
+				_bus.Publish(new GeneralMessage());
+			}
 
-            CheckPoint publishCheckpoint = stopWatch.Mark("Publishing " + _repeatCount + " messages");
-            CheckPoint receiveCheckpoint = stopWatch.Mark("Receiving " + _repeatCount + " messages");
+			publishCheckpoint.Complete(_repeatCount);
 
-            for (int index = 0; index < _repeatCount; index++)
-            {
-                _bus.Publish(new GeneralMessage());
-            }
+			_completeEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
-            publishCheckpoint.Complete(_repeatCount);
+			_responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
-            bool completed = _completeEvent.WaitOne(TimeSpan.FromSeconds(60), true);
+			receiveCheckpoint.Complete(_requestCounter + _responseCounter);
 
-            bool responseCompleted = _responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
+			stopWatch.Stop();
+		}
 
-            receiveCheckpoint.Complete(_counter + _responseCounter);
+		void Handler(SimpleResponse obj)
+		{
+			Interlocked.Increment(ref _responseCounter);
+			if (_responseCounter == _repeatCount)
+				_responseEvent.Set();
+		}
 
-            stopWatch.Stop();
-        }
+		void Handle(GeneralMessage obj)
+		{
+			_bus.Publish(new SimpleResponse());
 
-        internal class ResponseConsumer : Consumes<SimpleResponse>.All
-        {
-            public void Consume(SimpleResponse message)
-            {
-                Interlocked.Increment(ref _responseCounter);
-                if (_responseCounter == _repeatCount)
-                    _responseEvent.Set();
-            }
-        }
-
-        internal class RequestConsumer :
-            Consumes<GeneralMessage>.All
-        {
-            private IServiceBus _bus = ServiceBus.Null;
-
-            public void Consume(GeneralMessage message)
-            {
-                Interlocked.Increment(ref _counter);
-                if (_counter == _repeatCount)
-                    _completeEvent.Set();
-
-                _bus.Publish(new SimpleResponse());
-            }
-
-            public IServiceBus Bus
-            {
-                set { _bus = value; }
-            }
-        }
-    }
+			Interlocked.Increment(ref _requestCounter);
+			if (_requestCounter == _repeatCount)
+				_completeEvent.Set();
+		}
+	}
 }

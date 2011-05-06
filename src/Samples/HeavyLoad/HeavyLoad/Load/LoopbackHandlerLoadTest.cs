@@ -4,25 +4,22 @@ namespace HeavyLoad.Load
 	using System.Threading;
 	using MassTransit;
 
-	public class LocalLoadTest :
+	public class LoopbackHandlerLoadTest :
 		IDisposable
 	{
-		const int _repeatCount = 10000;
-		readonly IServiceBus _bus;
+		const int _repeatCount = 50000;
 		readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
 		readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
 
-		int _requestCounter;
+		IServiceBus _bus;
+		int _counter;
 		int _responseCounter;
 
-		public LocalLoadTest()
+		public LoopbackHandlerLoadTest()
 		{
 			_bus = ServiceBusFactory.New(x =>
 				{
-					x.ReceiveFrom("msmq://localhost/heavy_load");
-					x.SetPurgeOnStartup(true);
-
-					x.UseMsmq();
+					x.ReceiveFrom("loopback://localhost/heavy_load");
 
 					x.Subscribe(s =>
 						{
@@ -41,8 +38,8 @@ namespace HeavyLoad.Load
 		{
 			stopWatch.Start();
 
-			CheckPoint publishCheckpoint = stopWatch.Mark("Sending " + _repeatCount + " messages");
-			CheckPoint receiveCheckpoint = stopWatch.Mark("Request/Response " + _repeatCount + " messages");
+			CheckPoint publishCheckpoint = stopWatch.Mark("Publishing " + _repeatCount + " messages");
+			CheckPoint receiveCheckpoint = stopWatch.Mark("Receiving " + _repeatCount + " messages");
 
 			for (int index = 0; index < _repeatCount; index++)
 			{
@@ -55,7 +52,7 @@ namespace HeavyLoad.Load
 
 			_responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
-			receiveCheckpoint.Complete(_requestCounter + _responseCounter);
+			receiveCheckpoint.Complete(_counter + _responseCounter);
 
 			stopWatch.Stop();
 		}
@@ -71,8 +68,8 @@ namespace HeavyLoad.Load
 		{
 			_bus.Publish(new SimpleResponse());
 
-			Interlocked.Increment(ref _requestCounter);
-			if (_requestCounter == _repeatCount)
+			Interlocked.Increment(ref _counter);
+			if (_counter == _repeatCount)
 				_completeEvent.Set();
 		}
 	}
