@@ -53,14 +53,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\Castle.Core\Castle.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Castle.Windsor, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\Castle.Windsor\Castle.Windsor.dll</HintPath>
-    </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\lib\log4net.dll</HintPath>
@@ -68,6 +60,9 @@
     <Reference Include="Magnum, Version=0.8.0.383, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="StructureMap">
+      <HintPath>..\..\..\..\lib\StructureMap\StructureMap.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -84,14 +79,13 @@
     <Compile Include="Correlated\SimpleRequestService.cs" />
     <Compile Include="Correlated\SimpleResponseMessage.cs" />
     <Compile Include="GeneralMessage.cs" />
-    <Compile Include="HeavyLoadContainer.cs" />
     <Compile Include="Load\ActiveMQLoadTest.cs" />
-    <Compile Include="Load\ContainerLoadTest.cs" />
+    <Compile Include="Load\LoopbackConsumerLoadTest.cs" />
     <Compile Include="Load\RabbitMQLoadTest.cs" />
     <Compile Include="Load\LocalLoadTest.cs" />
-    <Compile Include="Load\LoopbackLoadTest.cs" />
+    <Compile Include="Load\LoopbackHandlerLoadTest.cs" />
+    <Compile Include="Load\StructureMapConsumerLoadTest.cs" />
     <Compile Include="Load\TransactionLoadTest.cs" />
-    <Compile Include="Load\WcfLoadTest.cs" />
     <Compile Include="ManagedThreadPool.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -99,6 +93,10 @@
     <Compile Include="StopWatch.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj">
+      <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
+      <Name>MassTransit.StructureMapIntegration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
@@ -111,10 +109,6 @@
       <Project>{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}</Project>
       <Name>MassTransit.Transports.Nms</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
-      <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
-      <Name>MassTransit.WindsorIntegration</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\Transports\MassTransit.Transports.RabbitMq\MassTransit.Transports.RabbitMq.csproj">
       <Project>{6C7149D7-4D97-45DF-A05D-61EC7374491D}</Project>
       <Name>MassTransit.Transports.RabbitMq</Name>
@@ -125,26 +119,6 @@
     <None Include="log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="activemq.castle.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="castle.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="rabbitmq.castle.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Loopback.castle.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="transaction.castle.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="wcf.castle.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

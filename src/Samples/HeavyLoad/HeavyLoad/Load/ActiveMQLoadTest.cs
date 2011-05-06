@@ -14,9 +14,7 @@ namespace HeavyLoad.Load
 {
 	using System;
 	using System.Threading;
-	using Castle.Windsor;
 	using MassTransit;
-	using MassTransit.WindsorIntegration;
 
 	public class ActiveMQLoadTest : IDisposable
 	{
@@ -26,30 +24,25 @@ namespace HeavyLoad.Load
 
 		private static int _counter;
 		private static int _responseCounter;
-		private readonly IWindsorContainer _container;
 		private IServiceBus _bus;
 
 		public ActiveMQLoadTest()
 		{
-			_container = new WindsorContainer("activemq.castle.xml");
-            _container.Install(new MassTransitInstaller());
+//			_container = new WindsorContainer("activemq.castle.xml");
 
-			_bus = _container.Resolve<IServiceBus>();
+			//_bus = _container.Resolve<IServiceBus>();
 		}
 
 		public void Dispose()
 		{
 			_bus.Dispose();
-			_container.Dispose();
 		}
 
 		public void Run(StopWatch stopWatch)
 		{
-			_container.AddComponent<RequestConsumer>();
-			_container.AddComponent<ResponseConsumer>();
 
-			_bus.Subscribe<RequestConsumer>();
-			_bus.Subscribe<ResponseConsumer>();
+	//		_bus.Subscribe<RequestConsumer>();
+		//	_bus.Subscribe<ResponseConsumer>();
 
 			stopWatch.Start();
 
