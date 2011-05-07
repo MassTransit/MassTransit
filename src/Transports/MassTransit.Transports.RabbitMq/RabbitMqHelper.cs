@@ -11,7 +11,7 @@ namespace MassTransit.Transports.RabbitMq
         {
             using(var m = connection.CreateModel())
             {
-                 m.QueueBind(queue, exchange, "",true, null);
+                 m.QueueBind(queue, exchange, "", null);
             }
         }
     }

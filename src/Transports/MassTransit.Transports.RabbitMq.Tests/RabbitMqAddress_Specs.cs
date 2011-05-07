@@ -12,7 +12,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [When]
         public void WhenParsed()
         {
-            _addr = new RabbitMqAddress(Uri);
+            _addr = RabbitMqAddress.ParseForInbound(Uri);
         }
 
         [Then]
@@ -25,7 +25,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void TheQueue()
         {
-            _addr.Queue.ShouldEqual("the_queue");
+            _addr.Queue.ShouldEqual("/the_queue");
         }
 
         [Then]
@@ -50,7 +50,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [When]
         public void WhenParsed()
         {
-            _addr = new RabbitMqAddress(Uri);
+            _addr = RabbitMqAddress.ParseForInbound(Uri);
         }
 
         [Then]
@@ -63,7 +63,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void TheQueue()
         {
-            _addr.Queue.ShouldEqual("the_queue");
+            _addr.Queue.ShouldEqual("/the_queue");
         }
         [Then]
         public void ShouldBeAQueue()
@@ -82,7 +82,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [When]
         public void WhenParsed()
         {
-            _addr = new RabbitMqAddress(Uri);
+            _addr = RabbitMqAddress.ParseForInbound(Uri);
         }
 
         [Then]
@@ -119,7 +119,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [When]
         public void WhenParsed()
         {
-            _addr = new RabbitMqAddress(Uri);
+            _addr = RabbitMqAddress.ParseForInbound(Uri);
         }
 
         [Then]
@@ -151,7 +151,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [When]
         public void WhenParsed()
         {
-            _addr = new RabbitMqAddress(Uri);
+            _addr = RabbitMqAddress.ParseForInbound(Uri);
         }
 
         [Then]
@@ -182,7 +182,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [When]
         public void WhenParsed()
         {
-            _addr = new RabbitMqAddress(Uri);
+            _addr = RabbitMqAddress.ParseForInbound(Uri);
         }
 
         [Then]
@@ -218,7 +218,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [When]
         public void WhenParsed()
         {
-            _addr = new RabbitMqAddress(uri);
+            _addr = RabbitMqAddress.ParseForOutbound(uri);
         }
 
         [Then]
@@ -236,7 +236,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [When]
         public void WhenParsed()
         {
-            _addr = new RabbitMqAddress(uri);
+            _addr = RabbitMqAddress.ParseForOutbound(uri);
         }
 
         [Then]

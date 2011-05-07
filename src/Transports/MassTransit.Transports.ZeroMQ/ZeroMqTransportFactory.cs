@@ -10,7 +10,7 @@ namespace MassTransit.Transports.ZeroMQ
             get { return "zmq"; }
         }
 
-        public ILoopbackTransport BuildLoopback(ITransportSettings settings)
+        public IDuplexTransport BuildLoopback(ITransportSettings settings)
         {
             return new ZeroMqTransport(settings.Address);
         }
