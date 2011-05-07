@@ -10,7 +10,7 @@ namespace MassTransit.Transports.RabbitMq
     public class RabbitMqAddress :
         IEndpointAddress
     {
-        static Regex _addressParser = new Regex(@"(?<scheme>\w+)://(?<host>[\w-]+)(?<port>:\d+)?(?<type>/\w+)(?<path>/[\w/]+)",RegexOptions.Compiled);
+        static Regex _addressParser = new Regex(@"(?<=/?(?<vhost>\w+)?/(?<type>queue|exchange))(?<path>/[\w/?=]+)",RegexOptions.Compiled);
         const int DEFAULT_PORT = 5432;
 
 		protected static readonly string LocalMachineName = Environment.MachineName.ToLowerInvariant();
@@ -20,7 +20,7 @@ namespace MassTransit.Transports.RabbitMq
         Func<bool> _isLocal;
 
 
-        public RabbitMqAddress(Uri uri, Uri rebuiltUri, string username, string password, string vhost)
+        public RabbitMqAddress(Uri uri, Uri rebuiltUri, string username, string password, string vhost, AddressType type, string queue, string args)
         {
             _rawUri = uri;
             _rebuiltUri = rebuiltUri;
@@ -29,41 +29,11 @@ namespace MassTransit.Transports.RabbitMq
             Password = password;
             Host = rebuiltUri.Host;
             VHost = vhost;
-            AddressType = ParseExchange(_rawUri);
-            Queue = ParseQueue(_rawUri);
-            Port = ParsePort();
-            _isTransactional = CheckForTransactionalHint(_rawUri);
+            AddressType = type;
+            Queue = queue;
+            Port = rebuiltUri.Port;
+            _isTransactional = args.GetValueFromQueryString("tx", false);
             _isLocal = ()=>DetermineIfEndpointIsLocal(_rawUri);
-
-            var sb = new StringBuilder();
-            sb.Append(VHost);
-            
-            if(!VHost.EndsWith("/"))
-                sb.Append('/');
-
-            sb.Append(AddressType.ToString().ToLower());
-            sb.Append('/');
-            sb.Append(Queue);
-
-            var builder = new UriBuilder("rabbitmq", Host, Port, sb.ToString())
-                {
-                    UserName = Username,
-                    Password = Password,
-                };
-
-            _rebuiltUri = builder.Uri;
-        }
-
-        AddressType ParseExchange(Uri uri)
-        {
-            string[] bits = uri.LocalPath.Split('/');
-            
-            var e = bits[1];
-            if (bits.Length == 4)
-                e = bits[2];
-
-            return e.Equals("exchange",StringComparison.InvariantCultureIgnoreCase) 
-                ? RabbitMq.AddressType.Exchange : RabbitMq.AddressType.Queue;
         }
 
         bool DetermineIfEndpointIsLocal(Uri uri)
@@ -76,11 +46,6 @@ namespace MassTransit.Transports.RabbitMq
 			Interlocked.Exchange(ref _isLocal, () => local);
 
 			return local;
-        }
-
-        bool CheckForTransactionalHint(Uri rawUri)
-        {
-			return rawUri.Query.GetValueFromQueryString("tx", false);
         }
 
         public Uri GetConnectionUri()
@@ -179,7 +144,6 @@ namespace MassTransit.Transports.RabbitMq
         public static RabbitMqAddress Parse(Uri address)
         {
             var port = address.Port == -1 ? DEFAULT_PORT : address.Port;
-            var path = address.PathAndQuery;
             var user = "guest";
             var password = "guest";
             if(!address.UserInfo.IsEmpty())
@@ -188,34 +152,44 @@ namespace MassTransit.Transports.RabbitMq
                 user = parts[0];
                 password = parts[1];
             }
-            //vdir
-            var vhost = "/";
-            
-            //type
-            //path
-            //query string
+            var pathParse = _addressParser.Match(address.PathAndQuery);
+            var path = pathParse.Groups["path"].Value;
+            var vhost = pathParse.Groups["vhost"].Value;
+            if (vhost.IsEmpty())
+                vhost = "/";
 
-            var ub = new UriBuilder(address.Scheme, address.Host, port, path);
-            return new RabbitMqAddress(address, ub.Uri, user, password, vhost);
+            var type = (AddressType) Enum.Parse(typeof (AddressType), pathParse.Groups["type"].Value, true);
+            
+            var ub = new UriBuilder(address.Scheme, address.Host, port, address.LocalPath);
+            ub.UserName = user;
+            ub.Password = password;
+
+            return new RabbitMqAddress(address, ub.Uri, user, password, vhost, type, path, address.Query);
             
         }
 
         public static RabbitMqAddress ParseForInbound(string address)
         {
-            var m = _addressParser.Match(address);
-            return new RabbitMqAddress(new Uri(address));
+            return ParseForInbound(new Uri(address));
         }
+        public static RabbitMqAddress ParseForInbound(Uri address)
+        {
+            return Parse(address);
+        }
+
 
         public static RabbitMqAddress ParseForOutbound(string address)
         {
-            var m = _addressParser.Match(address);
-            return new RabbitMqAddress(new Uri(address));
+            return ParseForOutbound(new Uri(address));
         }
 
+        public static RabbitMqAddress ParseForOutbound(Uri address)
+        {
+            return Parse(address);
+        }
         public static RabbitMqAddress ParseForDuplex(string address)
         {
-            var m = _addressParser.Match(address);
-            return new RabbitMqAddress(new Uri(address));
+            return Parse(address);
         }
     }
 

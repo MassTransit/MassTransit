@@ -157,17 +157,16 @@ namespace MassTransit.Transports.RabbitMq
 
         public void Bind(Uri queue, Uri exchange, string exchangeType)
         {
-            var q = new RabbitMqAddress(queue);
-            var e = new RabbitMqAddress(exchange);
+            var q = RabbitMqAddress.ParseForInbound(queue);
+            var e = RabbitMqAddress.ParseForOutbound(exchange);
 
-            var factory = _connectionFactoryCache[ToKey(q)];
-            using(var connection = factory.CreateConnection())
+            using(var connection = _connectionFactoryCache[ToKey(q)])
             using(var model = connection.CreateModel())
             {
-                model.QueueDeclare(q.Queue, true);
+                model.QueueDeclare(q.Queue, true, true, true, null);
                 model.ExchangeDeclare(e.Queue, exchangeType, true);
 
-                model.QueueBind(q.Queue,q.Queue,"",true, null);
+                model.QueueBind(q.Queue,q.Queue,"", null);
             }
         }
     }

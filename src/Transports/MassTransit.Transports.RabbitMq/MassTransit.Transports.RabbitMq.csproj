@@ -89,6 +89,7 @@
     <Compile Include="RabbitMqSendContext.cs" />
     <Compile Include="LoopbackRabbitMqTransport.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
+    <Compile Include="ServiceBusExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
