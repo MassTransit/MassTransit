@@ -83,7 +83,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assumptions\BasicExchangePerformanceDifferences.cs" />
+    <Compile Include="Assumptions\GivenAChannel.cs" />
+    <Compile Include="Assumptions\PerformanceAssumptions.cs" />
     <Compile Include="Assumptions\RoutingAssumptions.cs" />
+    <Compile Include="Assumptions\TransactionAssumptions.cs" />
     <Compile Include="RabbitMqTransportFactoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMqAddress_Specs.cs" />

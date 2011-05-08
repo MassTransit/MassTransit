@@ -27,7 +27,7 @@
             using (IModel channel = _connection.CreateModel())
             {
                 channel.QueueDeclare(_address.Path, true, true, true, null);
-                BasicGetResult result = channel.BasicGet(_address.Path, true);
+                BasicGetResult result = channel.BasicGet(_address.Path, false); //this is odd but false turns ack on.
 
                 using (var context = new RabbitMqReceiveContext(result))
                 {
