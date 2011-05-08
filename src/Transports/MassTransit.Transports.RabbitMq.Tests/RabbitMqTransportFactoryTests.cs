@@ -42,7 +42,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Test, Explicit]
         public void CanConnect()
         {
-            var t = _factory.BuildLoopback(new TransportSettings(RabbitMqAddress.ParseForInbound(_queue)));
+            var t = _factory.BuildLoopback(new TransportSettings(RabbitMqAddress.Parse(_queue)));
             _factory.ConnectionsCount().ShouldEqual(1);
 
         }
@@ -52,14 +52,14 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		{
 		    _factory.Bind(_queue, _exchange, "fanout");
 
-		    var t = _factory.BuildOutbound(new TransportSettings(RabbitMqAddress.ParseForOutbound(_exchange)));
+		    var t = _factory.BuildOutbound(new TransportSettings(RabbitMqAddress.Parse(_exchange)));
             t.Send((s)=>
             {
                 var b = Encoding.UTF8.GetBytes("dru");
                 s.Body.Write(b, 0,b.Length);
             });
 
-		    var i = _factory.BuildInbound(new TransportSettings(RabbitMqAddress.ParseForInbound(_queue)));
+		    var i = _factory.BuildInbound(new TransportSettings(RabbitMqAddress.Parse(_queue)));
 
             i.Receive(s=>
             {
@@ -80,7 +80,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		{
             _factory.Bind(_queue, _exchange, "fanout");
 
-		    var ex = RabbitMqAddress.ParseForOutbound(_exchange);
+		    var ex = RabbitMqAddress.Parse(_exchange);
             
             IMessageSerializer ser = new XmlMessageSerializer();
 
@@ -97,7 +97,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
 
 
-		    var qu = RabbitMqAddress.ParseForInbound(_queue);
+		    var qu = RabbitMqAddress.Parse(_queue);
             var e = new Endpoint(qu, ser, lb, null);
             e.Receive(o=>
             {

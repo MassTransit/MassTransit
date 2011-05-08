@@ -26,8 +26,8 @@
 
             using (IModel channel = _connection.CreateModel())
             {
-                channel.QueueDeclare(_address.Queue, true, true, true, null);
-                BasicGetResult result = channel.BasicGet(_address.Queue, true);
+                channel.QueueDeclare(_address.Path, true, true, true, null);
+                BasicGetResult result = channel.BasicGet(_address.Path, true);
 
                 using (var context = new RabbitMqReceiveContext(result))
                 {
