@@ -54,7 +54,6 @@ namespace MassTransit.Transports.RabbitMq
             EnsureProtocolIsCorrect(settings.Address.Uri);
 
             var address = settings.Address.CastAs<RabbitMqAddress>();
-            if(address.AddressType != AddressType.Queue) throw new ConfigurationException("You can't listen on exchanges!");
             
             //rabbitmq://server:port/queue/<queue>
             var connection = _connectionFactoryCache[ToKey(address)];
@@ -67,7 +66,6 @@ namespace MassTransit.Transports.RabbitMq
             EnsureProtocolIsCorrect(settings.Address.Uri);
 
             var address = settings.Address.CastAs<RabbitMqAddress>();
-            if(address.AddressType != AddressType.Exchange) throw new ConfigurationException("You can't publish to queues!");
 
             //rabbitmq://server:port/queue/<queue> -> rabbitmq://server:port/exchange/queue/<queue>
             //rabbitmq://server:port/exchange/<message:urn>
@@ -157,16 +155,16 @@ namespace MassTransit.Transports.RabbitMq
 
         public void Bind(Uri queue, Uri exchange, string exchangeType)
         {
-            var q = RabbitMqAddress.ParseForInbound(queue);
-            var e = RabbitMqAddress.ParseForOutbound(exchange);
+            var q = RabbitMqAddress.Parse(queue);
+            var e = RabbitMqAddress.Parse(exchange);
 
             using(var connection = _connectionFactoryCache[ToKey(q)])
             using(var model = connection.CreateModel())
             {
-                model.QueueDeclare(q.Queue, true, true, true, null);
-                model.ExchangeDeclare(e.Queue, exchangeType, true);
+                model.QueueDeclare(q.Path, true, true, true, null);
+                model.ExchangeDeclare(e.Path, exchangeType, true);
 
-                model.QueueBind(q.Queue,q.Queue,"", null);
+                model.QueueBind(q.Path, e.Path, "", null);
             }
         }
     }

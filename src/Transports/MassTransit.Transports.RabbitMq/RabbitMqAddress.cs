@@ -1,7 +1,6 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
-    using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading;
     using Magnum.Extensions;
@@ -10,7 +9,6 @@ namespace MassTransit.Transports.RabbitMq
     public class RabbitMqAddress :
         IEndpointAddress
     {
-        static Regex _addressParser = new Regex(@"(?<=/?(?<vhost>\w+)?/(?<type>queue|exchange))(?<path>/[\w/?=]+)",RegexOptions.Compiled);
         const int DEFAULT_PORT = 5432;
 
 		protected static readonly string LocalMachineName = Environment.MachineName.ToLowerInvariant();
@@ -20,7 +18,7 @@ namespace MassTransit.Transports.RabbitMq
         Func<bool> _isLocal;
 
 
-        public RabbitMqAddress(Uri uri, Uri rebuiltUri, string username, string password, string vhost, AddressType type, string queue, string args)
+        public RabbitMqAddress(Uri uri, Uri rebuiltUri, string username, string password, string vhost, string path, string args)
         {
             _rawUri = uri;
             _rebuiltUri = rebuiltUri;
@@ -28,9 +26,8 @@ namespace MassTransit.Transports.RabbitMq
             Username = username;
             Password = password;
             Host = rebuiltUri.Host;
+            Path = path;
             VHost = vhost;
-            AddressType = type;
-            Queue = queue;
             Port = rebuiltUri.Port;
             _isTransactional = args.GetValueFromQueryString("tx", false);
             _isLocal = ()=>DetermineIfEndpointIsLocal(_rawUri);
@@ -54,7 +51,6 @@ namespace MassTransit.Transports.RabbitMq
         }
 
         public int Port { get; private set; }
-        public string Queue { get; private set; }
         public string VHost { get; private set; }
         public string Host { get; private set; }
         public string Username { get; private set; }
@@ -124,17 +120,12 @@ namespace MassTransit.Transports.RabbitMq
             get { return _isLocal(); }
         }
 
-        public string Path
-        {
-            get { return _rebuiltUri.AbsolutePath.Substring(1); }
-        }
+        public string Path { get; private set; }
 
         public bool IsTransactional
         {
             get { return _isTransactional; }
         }
-
-        public AddressType AddressType { get; set; }
 
         public static RabbitMqAddress Parse(string address)
         {
@@ -152,46 +143,32 @@ namespace MassTransit.Transports.RabbitMq
                 user = parts[0];
                 password = parts[1];
             }
-            var pathParse = _addressParser.Match(address.PathAndQuery);
-            var path = pathParse.Groups["path"].Value;
-            var vhost = pathParse.Groups["vhost"].Value;
-            if (vhost.IsEmpty())
-                vhost = "/";
+            var pathbits = address.LocalPath.Split('/');
+            var vhost = "/";
+            var path = address.LocalPath.Substring(1); //removes first '/'
+            if(pathbits.Length == 3)
+            {
+                vhost = pathbits[1];
+                path = pathbits[2];
+            }
 
-            var type = (AddressType) Enum.Parse(typeof (AddressType), pathParse.Groups["type"].Value, true);
-            
+            VerifyRabbitPath(path);
+
             var ub = new UriBuilder(address.Scheme, address.Host, port, address.LocalPath);
             ub.UserName = user;
             ub.Password = password;
 
-            return new RabbitMqAddress(address, ub.Uri, user, password, vhost, type, path, address.Query);
+            return new RabbitMqAddress(address, ub.Uri, user, password, vhost, path, address.Query);
             
         }
+        private const string FORMAT_ERROR_MSG = "The path can be empty, or a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.";
+        static Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
+        static void VerifyRabbitPath(string path)
+        {
+            var m = _regex.Match(path);
 
-        public static RabbitMqAddress ParseForInbound(string address)
-        {
-            return ParseForInbound(new Uri(address));
-        }
-        public static RabbitMqAddress ParseForInbound(Uri address)
-        {
-            return Parse(address);
-        }
-
-
-        public static RabbitMqAddress ParseForOutbound(string address)
-        {
-            return ParseForOutbound(new Uri(address));
-        }
-
-        public static RabbitMqAddress ParseForOutbound(Uri address)
-        {
-            return Parse(address);
-        }
-        public static RabbitMqAddress ParseForDuplex(string address)
-        {
-            return Parse(address);
+            if(!m.Success)
+                throw new Exception(FORMAT_ERROR_MSG);
         }
     }
-
-    public enum AddressType { Exchange, Queue }
 }

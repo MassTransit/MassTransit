@@ -26,13 +26,13 @@
 
             using (IModel channel = _connection.CreateModel())
             {
-                channel.ExchangeDeclare(_address.Queue, "fanout", true);
+                channel.ExchangeDeclare(_address.Path, "fanout", true);
 
                 using (var context = new RabbitMqSendContext(channel))
                 {
                     callback(context);
 
-                    channel.BasicPublish(_address.Queue, "msg", context.Properties, context.GetBytes());
+                    channel.BasicPublish(_address.Path, "msg", context.Properties, context.GetBytes());
 
                     if (SpecialLoggers.Messages.IsInfoEnabled)
                         SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, context.Properties.MessageId);
