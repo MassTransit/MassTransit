@@ -168,7 +168,7 @@ namespace MassTransit.Transports.RabbitMq
             var m = _regex.Match(path);
 
             if(!m.Success)
-                throw new Exception(FORMAT_ERROR_MSG);
+                throw new RabbitMqAddressException(FORMAT_ERROR_MSG);
         }
     }
 }

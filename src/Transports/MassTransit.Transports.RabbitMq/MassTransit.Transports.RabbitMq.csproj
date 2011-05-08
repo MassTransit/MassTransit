@@ -84,6 +84,7 @@
     <Compile Include="OutboundRabbitMqTransport.cs" />
     <Compile Include="RabbitMqAddress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RabbitMqAddressException.cs" />
     <Compile Include="RabbitMqHelper.cs" />
     <Compile Include="RabbitMqReceiveContext.cs" />
     <Compile Include="RabbitMqSendContext.cs" />
