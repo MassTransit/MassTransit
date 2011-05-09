@@ -81,6 +81,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="InboundRabbitMqTransport.cs" />
+    <Compile Include="MessageName.cs" />
     <Compile Include="OutboundRabbitMqTransport.cs" />
     <Compile Include="RabbitMqAddress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -90,7 +91,7 @@
     <Compile Include="RabbitMqSendContext.cs" />
     <Compile Include="LoopbackRabbitMqTransport.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
-    <Compile Include="ServiceBusExtensions.cs" />
+    <Compile Include="Configuration\RabbitMqServiceBusExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
