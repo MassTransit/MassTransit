@@ -26,6 +26,20 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
                 });
         }
 
+        [Test]
+        public void NoAcks()
+        {
+            WithChannel(chan =>
+                {
+                    WithStopWatch("Acks", () =>
+                        {
+                            for (int i = 0; i < HowMany; i++)
+                            {
+                                var msg = chan.BasicGet(theQueue, true);
+                            }
+                        });
+                });
+        }
 
         [Test]
         public void Acks()
