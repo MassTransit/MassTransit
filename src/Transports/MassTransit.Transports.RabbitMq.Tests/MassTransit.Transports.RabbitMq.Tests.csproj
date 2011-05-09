@@ -84,6 +84,7 @@
   <ItemGroup>
     <Compile Include="Assumptions\BasicExchangePerformanceDifferences.cs" />
     <Compile Include="Assumptions\GivenAChannel.cs" />
+    <Compile Include="Assumptions\ExchangeQueueBinding_Specs.cs" />
     <Compile Include="Assumptions\PerformanceAssumptions.cs" />
     <Compile Include="Assumptions\RoutingAssumptions.cs" />
     <Compile Include="Assumptions\TransactionAssumptions.cs" />
