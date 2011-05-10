@@ -7,7 +7,7 @@
 	public class RabbitMqHandlerLoadTest :
 		IDisposable
 	{
-		const int _repeatCount = 3000;
+		const int _repeatCount = 10000;
 		readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
 		readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
 
