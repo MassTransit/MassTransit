@@ -34,7 +34,8 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 					Password = "guest",
 					Port = 5672,
 					VirtualHost = "/",
-					HostName = "10.0.1.22"
+					HostName = "localhost",
+					Protocol = Protocols.AMQP_0_9_1,
 				};
 
 			Connection = Factory.CreateConnection();
@@ -118,6 +119,30 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 		{
 			BasicGetResult x = Model.BasicGet(_queueName, true);
 			x.Exchange.ShouldEqual("TheClass");
+		}
+	}
+
+	[Scenario]
+	public class When_an_exchange_is_bound_to_an_exchange :
+		Given_a_rabbitmq_server
+	{
+		string _queueName;
+
+		[When]
+		public void An_exchange_is_bound_to_a_queue()
+		{
+			Model.ExchangeDeclare("TheSource", ExchangeType.Fanout, true, true, null);
+			Model.ExchangeDeclare("TheDestination", ExchangeType.Fanout, true, true, null);
+			Model.QueueDeclare("TheQueue", true, true, true, null);
+			Model.QueueBind("TheQueue", "TheDestination", "");
+
+			Model.ExchangeBind("TheDestination", "TheSource", "");
+		}
+
+		[Then]
+		public void Should_be_able_to_unbind_the_exchanges()
+		{
+			Model.ExchangeUnbind("TheDestination", "TheSource", "");
 		}
 	}
 }

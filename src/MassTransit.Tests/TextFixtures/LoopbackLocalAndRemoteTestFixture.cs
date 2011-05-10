@@ -15,6 +15,7 @@ namespace MassTransit.Tests.TextFixtures
 	using BusConfigurators;
 	using MassTransit.Services.Subscriptions;
 	using MassTransit.Transports;
+	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
 
 	[TestFixture]

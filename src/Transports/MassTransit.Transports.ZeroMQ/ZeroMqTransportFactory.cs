@@ -29,5 +29,9 @@ namespace MassTransit.Transports.ZeroMQ
         {
             return BuildLoopback(settings);
         }
+
+    	public void Dispose()
+    	{
+    	}
     }
 }

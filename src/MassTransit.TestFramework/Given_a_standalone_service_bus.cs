@@ -16,6 +16,7 @@ namespace MassTransit.TestFramework
 	using Fixtures;
 	using Magnum.TestFramework;
 	using MassTransit.Transports;
+	using MassTransit.Transports.Loopback;
 
 	[Scenario]
 	public class Given_a_standalone_service_bus :

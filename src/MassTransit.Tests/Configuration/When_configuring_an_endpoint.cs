@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Configuration
 	using Magnum.TestFramework;
 	using MassTransit.Serialization;
 	using MassTransit.Transports;
+	using MassTransit.Transports.Loopback;
 
 	[Scenario]
 	public class When_configuring_an_endpoint

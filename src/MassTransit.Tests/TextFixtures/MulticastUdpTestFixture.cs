@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.TextFixtures
 {
 	using MassTransit.Transports;
+	using MassTransit.Transports.MulticastUdp;
 	using NUnit.Framework;
 
 	[TestFixture]

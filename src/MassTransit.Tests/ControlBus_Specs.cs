@@ -15,6 +15,7 @@ namespace MassTransit.Tests
 	using Magnum.TestFramework;
 	using MassTransit.Services.Subscriptions;
 	using MassTransit.Transports;
+	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
 	using TextFixtures;
 

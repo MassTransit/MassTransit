@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
 	using MassTransit.Services.Subscriptions;
 	using MassTransit.Transports;
+	using MassTransit.Transports.Loopback;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
