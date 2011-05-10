@@ -46,7 +46,7 @@ namespace MassTransit.Transports.RabbitMq
 
 		public void SetLabel(string label)
 		{
-			_properties.Headers["label"] = label;
+			//_properties.Headers["label"] = label;
 		}
 
 		public void SetMessageExpiration(DateTime d)

@@ -19,10 +19,10 @@ namespace MassTransit.Transports.RabbitMq
 	public class PublishEndpointSinkLocator :
 		PipelineInspectorBase<PublishEndpointSinkLocator>
 	{
-		readonly Uri _endpointAddress;
+		readonly IRabbitMqEndpointAddress _endpointAddress;
 		readonly Type _messageType;
 
-		public PublishEndpointSinkLocator(Type messageType, Uri endpointAddress)
+		public PublishEndpointSinkLocator(Type messageType, IRabbitMqEndpointAddress endpointAddress)
 		{
 			_endpointAddress = endpointAddress;
 			_messageType = messageType;
@@ -30,9 +30,10 @@ namespace MassTransit.Transports.RabbitMq
 
 		public bool Found { get; private set; }
 
-		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink) where TMessage : class
+		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink) 
+			where TMessage : class
 		{
-			if (typeof (TMessage) == _messageType && _endpointAddress == sink.Address)
+			if (typeof (TMessage) == _messageType && _endpointAddress.Uri == sink.Address)
 			{
 				Found = true;
 

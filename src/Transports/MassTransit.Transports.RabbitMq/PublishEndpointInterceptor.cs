@@ -14,21 +14,33 @@ namespace MassTransit.Transports.RabbitMq
 {
 	using System;
 	using System.Collections.Generic;
-	using Pipeline;
+	using Exceptions;
+	using Magnum.Extensions;
+	using Magnum.Reflection;
+	using Management;
+	using Pipeline.Configuration;
+	using Pipeline.Sinks;
+	using Util;
 
 	public class PublishEndpointInterceptor :
 		IMessageInterceptor
 	{
-		readonly HashSet<Type> _added;
+		readonly IDictionary<Type, UnsubscribeAction> _added;
 		readonly IServiceBus _bus;
-		readonly IEndpointAddressProvider _provider;
+		readonly InboundRabbitMqTransport _inboundTransport;
+		IRabbitMqEndpointAddress _address;
 
-		public PublishEndpointInterceptor(IServiceBus bus, IEndpointAddressProvider provider)
+		public PublishEndpointInterceptor(IServiceBus bus)
 		{
 			_bus = bus;
-			_provider = provider;
 
-			_added = new HashSet<Type>();
+			_inboundTransport = _bus.Endpoint.InboundTransport as InboundRabbitMqTransport;
+			if (_inboundTransport == null)
+				throw new ConfigurationException("The bus must be receiving from a RabbitMQ endpoint for this interceptor to work");
+
+			_address = _inboundTransport.Address.CastAs<IRabbitMqEndpointAddress>();
+
+			_added = new Dictionary<Type, UnsubscribeAction>();
 		}
 
 		public void PreDispatch(object message)
@@ -37,7 +49,7 @@ namespace MassTransit.Transports.RabbitMq
 			{
 				Type messageType = message.GetType();
 
-				if (_added.Contains(messageType))
+				if (_added.ContainsKey(messageType))
 					return;
 
 				AddEndpointForType(messageType);
@@ -50,28 +62,51 @@ namespace MassTransit.Transports.RabbitMq
 
 		void AddEndpointForType(Type messageType)
 		{
-			IEnumerable<Uri> addresses = _provider.GetAddressForMessage(messageType);
-
-			foreach (Uri address in addresses)
+			using (var management = new RabbitMqEndpointManagement(_address))
 			{
-				FindOrAddEndpoint(messageType, address);
+				IEnumerable<Type> types = management.BindExchangesForPublisher(messageType);
+				foreach (Type type in types)
+				{
+					var messageName = new MessageName(type);
+
+					IRabbitMqEndpointAddress messageEndpointAddress = _address.ForQueue(messageName.ToString());
+
+					if (_added.ContainsKey(type))
+						continue;
+
+					FindOrAddEndpoint(type, messageEndpointAddress);
+				}
 			}
 		}
 
-		void FindOrAddEndpoint(Type messageType, Uri address)
+		void FindOrAddEndpoint(Type messageType, IRabbitMqEndpointAddress address)
 		{
 			var locator = new PublishEndpointSinkLocator(messageType, address);
 			_bus.OutboundPipeline.Inspect(locator);
 
 			if (locator.Found)
 			{
-				_added.Add(messageType);
+				_added.Add(messageType, () => true);
 				return;
 			}
 
-			IEndpoint endpoint = _bus.GetEndpoint(address);
+			IEndpoint endpoint = _bus.GetEndpoint(address.Uri);
 
-			_bus.OutboundPipeline.ConnectEndpoint(messageType, endpoint);
+			this.FastInvoke(new[] {messageType}, "CreateEndpointSink", endpoint);
+		}
+
+		[UsedImplicitly]
+		void CreateEndpointSink<TMessage>(IEndpoint endpoint)
+			where TMessage : class
+		{
+			var endpointSink = new EndpointMessageSink<TMessage>(endpoint);
+
+			var filterSink = new MessageFilter<TMessage>("Type-specific", endpointSink,
+				message => message.GetType() == typeof (TMessage));
+
+			UnsubscribeAction unsubscribeAction = _bus.OutboundPipeline.ConnectToRouter(filterSink);
+
+			_added.Add(typeof (TMessage), unsubscribeAction);
 		}
 	}
 }

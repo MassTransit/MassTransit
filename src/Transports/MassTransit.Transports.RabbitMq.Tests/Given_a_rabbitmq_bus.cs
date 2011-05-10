@@ -10,21 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Transports.RabbitMq.Tests
 {
 	using System;
-	using System.Collections.Generic;
-	using Transports.RabbitMq;
+	using Magnum.TestFramework;
+	using TestFramework.Fixtures;
 
-	public class ExchangePublishEndpointAddressProvider :
-		IEndpointAddressProvider
+	[Scenario]
+	public class Given_a_rabbitmq_bus :
+		LocalTestFixture<RabbitMqTransportFactory>
 	{
-		public IEnumerable<Uri> GetAddressForMessage(Type messageType)
+		protected Given_a_rabbitmq_bus()
 		{
-			// TODO DRU return the proper endpoint address here for the message type
-			// it is enumerable because the message may implement interfaces, and we 
-			// need to publish those too!
-			throw new NotImplementedException();
+			LocalUri = new Uri("rabbitmq://localhost:5672/test_queue");
+
+			ConfigureEndpointFactory(x =>
+				{
+					x.UseJsonSerializer();
+				});
+		}
+
+		protected override void ConfigureServiceBus(Uri uri, BusConfigurators.ServiceBusConfigurator configurator)
+		{
+			base.ConfigureServiceBus(uri, configurator);
+		
+			configurator.UseRabbitMqRouting();
 		}
 	}
 }

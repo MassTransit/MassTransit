@@ -1,5 +1,5 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
-// 
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,107 +12,112 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq.Tests
 {
-    using System;
-    using System.IO;
-    using System.Text;
-    using Magnum.TestFramework;
-    using NUnit.Framework;
-    using Serialization;
-    using Magnum.Extensions;
+	using System;
+	using System.IO;
+	using System.Text;
+	using Magnum.Extensions;
+	using Magnum.TestFramework;
+	using Management;
+	using NUnit.Framework;
+	using RabbitMQ.Client;
+	using Serialization;
 
-    [TestFixture]
-    public class RabbitMqTransportFactoryTests
-    {
-        Uri _queue = new Uri("rabbitmq://localhost:5672/queue/dru");
-        Uri _exchange = new Uri("rabbitmq://localhost:5672/exchange/dru");
+	[TestFixture]
+	public class RabbitMqTransportFactoryTests
+	{
+		[SetUp]
+		public void Setup()
+		{
+			_factory = new RabbitMqTransportFactory();
+		}
 
-        RabbitMqTransportFactory _factory;
+		[TearDown]
+		public void Teardown()
+		{
+			_factory.Dispose();
+			_factory = null;
+		}
 
-        [SetUp]
-        public void Setup()
-        {
-            _factory = new RabbitMqTransportFactory();
-        }
-        [TearDown]
-        public void Teardown()
-        {
-            _factory.Dispose();            
-            _factory = null;
-        }
-        [Test, Explicit]
-        public void CanConnect()
-        {
-            var t = _factory.BuildLoopback(new TransportSettings(RabbitMqAddress.Parse(_queue)));
-            _factory.ConnectionsCount().ShouldEqual(1);
+		readonly IRabbitMqEndpointAddress _queue = RabbitMqEndpointAddress.Parse("rabbitmq://localhost/queue/dru");
+		readonly IRabbitMqEndpointAddress _exchange = RabbitMqEndpointAddress.Parse("rabbitmq://localhost/exchange/dru");
 
-        }
+		RabbitMqTransportFactory _factory;
 
 		[Test, Explicit]
-        public void TransportSendAndReceive()
+		public void CanConnect()
 		{
-		    _factory.Bind(_queue, _exchange, "fanout");
-
-		    var t = _factory.BuildOutbound(new TransportSettings(RabbitMqAddress.Parse(_exchange)));
-            t.Send((s)=>
-            {
-                var b = Encoding.UTF8.GetBytes("dru");
-                s.Body.Write(b, 0,b.Length);
-            });
-
-		    var i = _factory.BuildInbound(new TransportSettings(RabbitMqAddress.Parse(_queue)));
-
-            i.Receive(s=>
-            {
-                return ss =>
-                {
-                    var buff = new byte[3];
-                    ss.Body.Read(buff, 0, buff.Length);
-                    var name = Encoding.UTF8.GetString(buff);
-                    Assert.AreEqual("dru", name);
-                    Console.WriteLine(name);
-                };
-            }, 1.Minutes());
-        }
+			IDuplexTransport t = _factory.BuildLoopback(new TransportSettings(_queue));
+			_factory.ConnectionCount().ShouldEqual(1);
+		}
 
 
-		[Test,Explicit]
-        public void EndpointSendAndReceive()
+		[Test, Explicit]
+		public void EndpointSendAndReceive()
 		{
-            _factory.Bind(_queue, _exchange, "fanout");
+			using (var management = new RabbitMqEndpointManagement(_queue))
+			{
+				management.BindQueue(_queue.Name, _exchange.Name, ExchangeType.Fanout, "");
+			}
 
-		    var ex = RabbitMqAddress.Parse(_exchange);
-            
-            IMessageSerializer ser = new XmlMessageSerializer();
+			IMessageSerializer serializer = new XmlMessageSerializer();
 
-            var msg = new BugsBunny() {Food = "Carrot"};
+			var message = new BugsBunny {Food = "Carrot"};
 
-            using (var stream = new MemoryStream())
-            {
-                ser.Serialize(stream, msg);
-            }
+			using (var stream = new MemoryStream())
+			{
+				serializer.Serialize(stream, message);
+			}
 
-		    var lb = _factory.BuildLoopback(new TransportSettings(ex));
-            var oe = new Endpoint(ex, ser, lb, null);
-            oe.Send(msg);
+			IDuplexTransport transport = _factory.BuildLoopback(new TransportSettings(_exchange));
+			var sendEndpoint = new Endpoint(_exchange, serializer, transport, null);
+			sendEndpoint.Send(message);
 
 
+			var receiveEndpoint = new Endpoint(_queue, serializer, transport, null);
+			receiveEndpoint.Receive(o =>
+				{
+					return b =>
+						{
+							var bb = (BugsBunny) b;
+							Console.WriteLine(bb.Food);
+						};
+				}, TimeSpan.Zero);
+		}
 
-		    var qu = RabbitMqAddress.Parse(_queue);
-            var e = new Endpoint(qu, ser, lb, null);
-            e.Receive(o=>
-            {
-                return b =>
-                {
-                    var bb = (BugsBunny) b;
-                    Console.WriteLine(bb.Food);
-                };
-            }, TimeSpan.Zero);  
-        }
-    }
+		[Test, Explicit]
+		public void TransportSendAndReceive()
+		{
+			using (var management = new RabbitMqEndpointManagement(_queue))
+			{
+				management.BindQueue(_queue.Name, _exchange.Name, ExchangeType.Fanout, "");
+			}
 
-    [Serializable]
-    public class BugsBunny
-    {
-        public string Food { get; set;}
-    }
+			IOutboundTransport t = _factory.BuildOutbound(new TransportSettings(_exchange));
+			t.Send((s) =>
+				{
+					byte[] b = Encoding.UTF8.GetBytes("dru");
+					s.Body.Write(b, 0, b.Length);
+				});
+
+			IInboundTransport i = _factory.BuildInbound(new TransportSettings(_queue));
+
+			i.Receive(s =>
+				{
+					return ss =>
+						{
+							var buff = new byte[3];
+							ss.Body.Read(buff, 0, buff.Length);
+							string name = Encoding.UTF8.GetString(buff);
+							Assert.AreEqual("dru", name);
+							Console.WriteLine(name);
+						};
+				}, 1.Minutes());
+		}
+	}
+
+	[Serializable]
+	public class BugsBunny
+	{
+		public string Food { get; set; }
+	}
 }

@@ -18,15 +18,19 @@ namespace MassTransit
 
 	public static class RabbitMqConfigurationExtensions
 	{
-		public static void UseRabbitMqPublishConvention(this ServiceBusConfigurator configurator)
+		public static void UseRabbitMqRouting(this ServiceBusConfigurator configurator)
 		{
 			var busConfigurator = new PostCreateBusBuilderConfiguratorImpl(bus =>
 				{
+					bus.RemoveLoopbackSubsciber();
+					bus.InboundPipeline.Configure(x =>
+						{
+							x.Register(new RabbitMqSubscriptionBinder(bus.Endpoint.InboundTransport));
+						});
+
 					var interceptorConfigurator = new MessageInterceptorConfigurator(bus.OutboundPipeline);
 
-					IEndpointAddressProvider provider = new ExchangePublishEndpointAddressProvider();
-
-					interceptorConfigurator.Create(new PublishEndpointInterceptor(bus, provider));
+					interceptorConfigurator.Create(new PublishEndpointInterceptor(bus));
 				});
 
 			configurator.AddBusConfigurator(busConfigurator);

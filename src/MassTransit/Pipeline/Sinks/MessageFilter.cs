@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,42 +12,50 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
-    using System;
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
 
-    public class MessageFilter<TMessage> :
-        PipelineSinkBase<TMessage, TMessage>
-        where TMessage : class
-    {
-        private readonly Func<TMessage, bool> _allow;
+	public class MessageFilter<TMessage> :
+		PipelineSinkBase<TMessage, TMessage>
+		where TMessage : class
+	{
+		readonly Func<TMessage, bool> _allow;
 
-        public MessageFilter(string description, Func<IPipelineSink<TMessage>, IPipelineSink<TMessage>> insertAfter, Func<TMessage, bool> allow)
-            :
-                base(null)
-        {
-            Description = description ?? string.Empty;
+		public MessageFilter(string description, IPipelineSink<TMessage> output, Func<TMessage, bool> allow)
+			: base(output)
+		{
+			Description = description ?? string.Empty;
 
-            _allow = allow;
+			_allow = allow;
+		}
 
-            ReplaceOutputSink(insertAfter(this));
-        }
+		public MessageFilter(string description, Func<IPipelineSink<TMessage>, IPipelineSink<TMessage>> insertAfter,
+		                     Func<TMessage, bool> allow)
+			: base(null)
+		{
+			Description = description ?? string.Empty;
 
-        public string Description { get; private set; }
+			_allow = allow;
 
-        public override IEnumerable<Action<TMessage>> Enumerate(TMessage message)
-        {
-            if (!_allow(message))
-                yield break;
+			ReplaceOutputSink(insertAfter(this));
+		}
 
-            foreach (Action<TMessage> consumer in _outputSink.Enumerate(message))
-            {
-                yield return consumer;
-            }
-        }
+		public string Description { get; private set; }
 
-        public override bool Inspect(IPipelineInspector inspector)
-        {
-            return inspector.Inspect(this) && _outputSink.Inspect(inspector);
-        }
-    }
+		public override IEnumerable<Action<TMessage>> Enumerate(TMessage message)
+		{
+			if (!_allow(message))
+				yield break;
+
+			foreach (var consumer in _outputSink.Enumerate(message))
+			{
+				yield return consumer;
+			}
+		}
+
+		public override bool Inspect(IPipelineInspector inspector)
+		{
+			return inspector.Inspect(this) && _outputSink.Inspect(inspector);
+		}
+	}
 }

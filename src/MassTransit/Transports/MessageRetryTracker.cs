@@ -39,6 +39,9 @@ namespace MassTransit.Transports
 
 		public bool IsRetryLimitExceeded(string id)
 		{
+			if (string.IsNullOrEmpty(id))
+				return false;
+
 			int retryCount = 0;
 			if (!_messages.ReadLock(x => x.TryGetValue(id, out retryCount)))
 				return false;
@@ -48,11 +51,17 @@ namespace MassTransit.Transports
 
 		public void IncrementRetryCount(string id)
 		{
+			if (string.IsNullOrEmpty(id))
+				return;
+
 			_messages.WriteLock(x => { x[id] = x.ContainsKey(id) ? x[id] + 1 : 1; });
 		}
 
 		public void MessageWasReceivedSuccessfully(string id)
 		{
+			if (string.IsNullOrEmpty(id))
+				return;
+
 			_messages.WriteLock(x =>
 				{
 					if (x.ContainsKey(id))

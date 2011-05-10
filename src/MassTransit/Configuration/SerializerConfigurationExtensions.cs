@@ -12,33 +12,37 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using BusConfigurators;
+	using EndpointConfigurators;
 	using Serialization;
 
 	public static class SerializerConfigurationExtensions
 	{
-		public static ServiceBusConfigurator UseDotNetXmlSerializer(this ServiceBusConfigurator configurator)
+		public static T UseDotNetXmlSerializer<T>(this T configurator)
+			where T : EndpointFactoryConfigurator
 		{
 			configurator.SetDefaultSerializer<DotNotXmlMessageSerializer>();
 
 			return configurator;
 		}
 
-		public static ServiceBusConfigurator UseJsonSerializer(this ServiceBusConfigurator configurator)
+		public static T UseJsonSerializer<T>(this T configurator)
+			where T : EndpointFactoryConfigurator
 		{
 			configurator.SetDefaultSerializer<JsonMessageSerializer>();
 
 			return configurator;
 		}
 
-		public static ServiceBusConfigurator UseXmlSerializer(this ServiceBusConfigurator configurator)
+		public static T UseXmlSerializer<T>(this T configurator)
+			where T : EndpointFactoryConfigurator
 		{
 			configurator.SetDefaultSerializer<XmlMessageSerializer>();
 
 			return configurator;
 		}
 
-		public static ServiceBusConfigurator UseBinarySerializer(this ServiceBusConfigurator configurator)
+		public static T UseBinarySerializer<T>(this T configurator)
+			where T : EndpointFactoryConfigurator
 		{
 			configurator.SetDefaultSerializer<BinaryMessageSerializer>();
 

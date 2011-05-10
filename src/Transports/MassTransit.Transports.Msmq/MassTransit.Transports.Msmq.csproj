@@ -101,7 +101,7 @@
     <Compile Include="Management\WindowsVersion.cs" />
     <Compile Include="Management\WindowsVistaInstaller.cs" />
     <Compile Include="MessageQueueConnection.cs" />
-    <Compile Include="MsmqTransporSettingsExtensions.cs" />
+    <Compile Include="MsmqTransportSettingsExtensions.cs" />
     <Compile Include="MulticastMsmqTransportFactory.cs" />
     <Compile Include="NonTransactionalOutboundMsmqTransport.cs" />
     <Compile Include="OutboundMsmqTransport.cs" />
