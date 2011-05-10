@@ -1,5 +1,5 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,39 +12,54 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-    using System;
-    using System.IO;
-    using System.Text;
-    using log4net;
-    using Magnum.Extensions;
-    using MessageHeaders;
-    using Newtonsoft.Json;
+	using System;
+	using System.IO;
+	using System.Text;
+	using Magnum.Extensions;
+	using MessageHeaders;
+	using Newtonsoft.Json;
 
-    public class JsonMessageSerializer :
-        IMessageSerializer
-    {
-        static readonly ILog _log = LogManager.GetLogger(typeof (JsonMessageSerializer));
+	public class JsonMessageSerializer :
+		IMessageSerializer
+	{
+		JsonSerializerSettings _settings;
 
-        public void Serialize<T>(Stream output, T message)
-        {
-            var data = JsonConvert.SerializeObject(message);
-            var envelope = JsonMessageEnvelope.Create<T>(data);
-            var strOut = JsonConvert.SerializeObject(envelope);
-            var buff = Encoding.UTF8.GetBytes(strOut);
+		public JsonMessageSerializer()
+		{
+			_settings = new JsonSerializerSettings
+				{
+					MissingMemberHandling = MissingMemberHandling.Ignore,
+					NullValueHandling = NullValueHandling.Ignore,
+					ObjectCreationHandling = ObjectCreationHandling.Auto,
+					DefaultValueHandling = DefaultValueHandling.Ignore
+				};
+		}
 
-            output.Write(buff, 0, buff.Length);
-        }
+		public void Serialize<T>(Stream output, T message)
+		{
+			JsonMessageEnvelope envelope = JsonMessageEnvelope.Create<T>(message);
 
-        public object Deserialize(Stream input)
-        {
-            var text = input.ReadToEndAsText();
-            var env = JsonConvert.DeserializeObject<JsonMessageEnvelope>(text);
+			string strOut = JsonConvert.SerializeObject(envelope, Formatting.Indented, _settings);
+			byte[] buff = Encoding.UTF8.GetBytes(strOut);
 
-            InboundMessageHeaders.SetCurrent(env.GetMessageHeadersSetAction());
+			output.Write(buff, 0, buff.Length);
+		}
 
-            var data = env.Message;
-            var mtype = Type.GetType(env.MessageType);
-            return JsonConvert.DeserializeObject(data, mtype);
-        }
-    }
+		public object Deserialize(Stream input)
+		{
+			string text = input.ReadToEndAsText();
+
+			var envelope = JsonConvert.DeserializeObject<JsonMessageEnvelope>(text, _settings);
+
+			InboundMessageHeaders.SetCurrent(envelope.GetMessageHeadersSetAction());
+
+			Type messageType = Type.GetType(envelope.MessageType, false, true);
+			if (messageType == null)
+				return envelope.Message;
+
+			object obj = JsonConvert.DeserializeObject(envelope.Message.ToString(), messageType);
+			
+			return obj;
+		}
+	}
 }

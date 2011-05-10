@@ -20,7 +20,6 @@ namespace MassTransit.Tests.Serialization
 	using MassTransit.Pipeline.Inspectors;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using TestConsumers;
 
 	
