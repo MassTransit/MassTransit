@@ -19,6 +19,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 	using MassTransit.Services.HealthMonitoring.Server;
 	using MassTransit.Services.Timeout.Messages;
 	using MassTransit.Transports;
+	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
 	using TextFixtures;
 	using TestFramework;
