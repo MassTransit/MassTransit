@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq
+﻿namespace MassTransit.Transports.RabbitMq
 {
 	using System;
 	using RabbitMQ.Client;
@@ -21,6 +9,7 @@ namespace MassTransit.Transports.RabbitMq
 	{
 		readonly IRabbitMqEndpointAddress _address;
 		readonly IConnection _connection;
+		IModel _channel;
 		bool _declared;
 
 		public OutboundRabbitMqTransport(IRabbitMqEndpointAddress address, IConnection connection)
@@ -36,39 +25,40 @@ namespace MassTransit.Transports.RabbitMq
 
 		public void Send(Action<ISendContext> callback)
 		{
-			//GuardAgainstDisposed();
+			DeclareBindings();
 
-			using (IModel channel = _connection.CreateModel())
+			using (var context = new RabbitMqSendContext(_channel))
 			{
-				DeclareBindings(channel);
+				callback(context);
 
-				using (var context = new RabbitMqSendContext(channel))
-				{
-					callback(context);
+				_channel.BasicPublish(_address.Name, "", context.Properties, context.GetBytes());
 
-					channel.BasicPublish(_address.Name, "", context.Properties, context.GetBytes());
-
-					if (SpecialLoggers.Messages.IsInfoEnabled)
-						SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, context.Properties.MessageId);
-				}
-
-				channel.Close(200, "ok");
+				if (SpecialLoggers.Messages.IsInfoEnabled)
+					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, context.Properties.MessageId);
 			}
-		}
-
-		void DeclareBindings(IModel channel)
-		{
-			if (_declared)
-				return;
-
-			channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, true);
-
-			_declared = true;
 		}
 
 		public void Dispose()
 		{
-			_connection.Dispose();
+			if (_channel != null)
+			{
+				if (_channel.IsOpen)
+					_channel.Close(200, "dispose");
+				_channel.Dispose();
+				_channel = null;
+			}
+		}
+
+		void DeclareBindings()
+		{
+			if (_declared)
+				return;
+
+			_channel = _connection.CreateModel();
+
+			_channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, true);
+
+			_declared = true;
 		}
 	}
 }

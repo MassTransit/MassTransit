@@ -14,7 +14,8 @@ namespace MassTransit.Transports
 {
 	using System;
 
-	public interface IEndpointFactory
+	public interface IEndpointFactory :
+		IDisposable
 	{
 		/// <summary>
 		/// Creates a new endpoint for the specified URI

@@ -34,6 +34,8 @@ namespace MassTransit
 				});
 
 			configurator.AddBusConfigurator(busConfigurator);
+
+			configurator.UseRabbitMq();
 		}
 	}
 }

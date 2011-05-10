@@ -1,23 +1,12 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq
+﻿namespace MassTransit.Transports.RabbitMq
 {
 	using System;
-	using System.Threading;
+	using System.IO;
 	using log4net;
-	using Magnum;
+	using Magnum.Extensions;
 	using Management;
 	using RabbitMQ.Client;
+	using RabbitMQ.Client.Events;
 	using Util;
 
 	public class InboundRabbitMqTransport :
@@ -27,7 +16,11 @@ namespace MassTransit.Transports.RabbitMq
 
 		readonly IRabbitMqEndpointAddress _address;
 		readonly IConnection _connection;
+		IModel _channel;
+		QueueingBasicConsumer _consumer;
+		string _consumerTag;
 		bool _declared;
+		bool _disposed;
 
 		public InboundRabbitMqTransport(IRabbitMqEndpointAddress address, IConnection connection)
 		{
@@ -42,20 +35,19 @@ namespace MassTransit.Transports.RabbitMq
 
 		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
 		{
-			DeclareBindings();
+			BeginReceiver();
 
-			//GuardAgainstDisposed();
-
-			using (IModel channel = _connection.CreateModel())
+			try
 			{
-				BasicGetResult result = channel.BasicGet(_address.Name, false); //this is odd but false turns ack on.
-				if (result == null)
-				{
-					ThreadUtil.Sleep(timeout);
-					return;				
-				}
+				object obj;
+				if (!_consumer.Queue.Dequeue((int) timeout.TotalMilliseconds, out obj))
+					return;
 
-				using (var context = new RabbitMqReceiveContext(result))
+				var result = obj as BasicDeliverEventArgs;
+				if (result == null)
+					return;
+
+				using (var context = new RabbitMqReceiveContext(result.BasicProperties, result.Body))
 				{
 					Action<IReceiveContext> receive = callback(context);
 					if (receive == null)
@@ -72,14 +64,72 @@ namespace MassTransit.Transports.RabbitMq
 					}
 				}
 
-				channel.BasicAck(result.DeliveryTag, false);
-				channel.Close(200, "ok");
+				_channel.BasicAck(result.DeliveryTag, false);
+			}
+			catch (EndOfStreamException ex)
+			{
+				return;
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Failed to consume message from endpoint", ex);
+
+				throw;
 			}
 		}
 
 		public void Dispose()
 		{
-			_connection.Dispose();
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		void BeginReceiver()
+		{
+			if (_channel != null)
+				return;
+
+			DeclareBindings();
+
+			_channel = _connection.CreateModel();
+			_consumer = new QueueingBasicConsumer(_channel);
+			_consumerTag = Guid.NewGuid().ToString();
+			_channel.BasicConsume(_address.Name, false, _consumerTag, _consumer);
+		}
+
+		void EndReceiver()
+		{
+			if (_consumerTag.IsNotEmpty())
+			{
+				_channel.BasicCancel(_consumerTag);
+				_consumerTag = null;
+			}
+
+			_consumer = null;
+
+			if (_channel != null)
+			{
+				if (_channel.IsOpen)
+					_channel.Close(200, "end");
+				_channel.Dispose();
+				_channel = null;
+			}
+		}
+
+		~InboundRabbitMqTransport()
+		{
+			Dispose(false);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				EndReceiver();
+			}
+
+			_disposed = true;
 		}
 
 		void DeclareBindings()

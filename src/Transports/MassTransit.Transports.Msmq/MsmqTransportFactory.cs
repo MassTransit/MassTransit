@@ -124,5 +124,9 @@ namespace MassTransit.Transports.Msmq
 					}
 				});
 		}
+
+		public void Dispose()
+		{
+		}
 	}
 }

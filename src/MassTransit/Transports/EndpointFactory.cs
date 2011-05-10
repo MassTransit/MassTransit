@@ -67,5 +67,32 @@ namespace MassTransit.Transports
 
 			_transportFactories[scheme] = factory;
 		}
+
+		bool _disposed;
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		~EndpointFactory()
+		{
+			Dispose(false);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_transportFactories.Values.Each(x =>
+					{
+						x.Dispose();
+					});
+			}
+
+			_disposed = true;
+		}
 	}
 }

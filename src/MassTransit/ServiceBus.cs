@@ -289,6 +289,8 @@ namespace MassTransit
 					_counters.Dispose();
 					_counters = null;
 				}
+
+				EndpointCache.Dispose();
 			}
 			_disposed = true;
 		}

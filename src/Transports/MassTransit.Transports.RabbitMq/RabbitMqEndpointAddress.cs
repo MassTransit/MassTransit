@@ -115,7 +115,7 @@ namespace MassTransit.Transports.RabbitMq
 				};
 
 			if (address.IsDefaultPort)
-				connectionFactory.Port = 5432;
+				connectionFactory.Port = 5672;
 			else if (!address.IsDefaultPort)
 				connectionFactory.Port = address.Port;
 
