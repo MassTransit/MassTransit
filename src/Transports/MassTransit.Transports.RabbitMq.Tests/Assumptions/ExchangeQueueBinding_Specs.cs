@@ -61,7 +61,6 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 		[When]
 		public void An_exchange_is_bound_to_a_queue()
 		{
-
 			Model.ExchangeDeclare("TypeA", ExchangeType.Fanout, true, true, null);
 			_queueName = Model.QueueDeclare("TypeA", true, true, true, null);
 
@@ -94,10 +93,10 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 		public void An_exchange_is_bound_to_a_queue()
 		{
 			Model.ExchangeDeclare("TheClass", ExchangeType.Fanout, true, true, null);
-			
+
 			Model.ExchangeDeclare("InterfaceA", ExchangeType.Fanout, true, true, null);
 			Model.ExchangeBind("InterfaceA", "TheClass", "");
-			
+
 			Model.ExchangeDeclare("InterfaceB", ExchangeType.Fanout, true, true, null);
 			Model.ExchangeBind("InterfaceB", "InterfaceA", "");
 

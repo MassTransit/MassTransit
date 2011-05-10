@@ -41,12 +41,11 @@ namespace MassTransit.Transports.RabbitMq
 
 		public void MarkRecoverable()
 		{
-			_properties.DeliveryMode = 2;
+			_properties.SetPersistent(true);
 		}
 
 		public void SetLabel(string label)
 		{
-			//_properties.Headers["label"] = label;
 		}
 
 		public void SetMessageExpiration(DateTime d)
