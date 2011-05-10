@@ -23,20 +23,19 @@ namespace HeavyLoad
 			Console.WriteLine("HeavyLoad - MassTransit Load Generator");
 			Console.WriteLine();
 
+			RunLoopbackHandlerLoadTest();
+
+			RunLoopbackConsumerLoadTest();
+
+			RunStructureMapLoadTest();
+
+			RunLocalMsmqLoadTest();
+
+			RunTransactionLoadTest();
+
+			RunCorrelatedMessageTest();
+
 			RunRabbitMqLoadTest();
-
-//			RunLoopbackHandlerLoadTest();
-//
-//			RunLoopbackConsumerLoadTest();
-//
-//			RunStructureMapLoadTest();
-//
-//			RunLocalMsmqLoadTest();
-//
-//			RunTransactionLoadTest();
-//
-//			RunCorrelatedMessageTest();
-
 
 			//RunLocalActiveMqLoadTest();
 
