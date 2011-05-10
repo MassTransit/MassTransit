@@ -22,7 +22,7 @@ namespace MassTransit.Serialization
         {
         }
 
-        JsonMessageEnvelope(Type messageType, string message)
+        JsonMessageEnvelope(Type messageType, object message)
         {
             Message = message;
             MessageType = messageType.ToMessageName();
@@ -30,9 +30,9 @@ namespace MassTransit.Serialization
             this.CopyFrom(OutboundMessage.Headers);
         }
 
-        public string Message { get; set; }
+		public object Message { get; set; }
 
-        public static JsonMessageEnvelope Create<T>(string message)
+        public static JsonMessageEnvelope Create<T>(object message)
         {
             return new JsonMessageEnvelope(typeof (T), message);
         }

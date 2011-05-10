@@ -197,7 +197,6 @@
     <Compile Include="Saga\StateMachine\SagaFault_Specs.cs" />
     <Compile Include="Saga\StateMachine\StateMachineSubscriberTestBase.cs" />
     <Compile Include="Saga\StateMachine\TestSaga_Specs.cs" />
-    <Compile Include="Serialization\Approach\Approach_Specs.cs" />
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
     <Compile Include="Internal\IdempotentHashtable_Specs.cs" />
     <Compile Include="LocalSubscriptionCache_Specs.cs" />
@@ -208,6 +207,7 @@
     <Compile Include="Serialization\GivenAComplexMessage.cs" />
     <Compile Include="Serialization\GivenASimpleMessage.cs" />
     <Compile Include="Serialization\Header_Specs.cs" />
+    <Compile Include="Serialization\InterfaceBinding_Specs.cs" />
     <Compile Include="Serialization\Interface_Specs.cs" />
     <Compile Include="Serialization\MoreSerialization_Specs.cs" />
     <Compile Include="Serialization\Performance_Specs.cs" />
