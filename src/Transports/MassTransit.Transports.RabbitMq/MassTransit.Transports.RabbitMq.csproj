@@ -81,13 +81,14 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="InboundRabbitMqTransport.cs" />
+    <Compile Include="IRabbitMqEndpointAddress.cs" />
+    <Compile Include="Management\IRabbitMqEndpointManagement.cs" />
+    <Compile Include="Management\RabbitMQEndpointManagement.cs" />
     <Compile Include="MessageName.cs" />
     <Compile Include="OutboundRabbitMqTransport.cs" />
-    <Compile Include="ExchangePublishEndpointAddressProvider.cs" />
-    <Compile Include="IEndpointAddressProvider.cs" />
     <Compile Include="PublishEndpointInterceptor.cs" />
     <Compile Include="PublishEndpointSinkLocator.cs" />
-    <Compile Include="RabbitMqAddress.cs" />
+    <Compile Include="RabbitMqEndpointAddress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMqAddressException.cs" />
     <Compile Include="RabbitMqConfigurationExtensions.cs" />
@@ -95,6 +96,7 @@
     <Compile Include="RabbitMqReceiveContext.cs" />
     <Compile Include="RabbitMqSendContext.cs" />
     <Compile Include="LoopbackRabbitMqTransport.cs" />
+    <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
     <Compile Include="Configuration\RabbitMqServiceBusExtensions.cs" />
   </ItemGroup>

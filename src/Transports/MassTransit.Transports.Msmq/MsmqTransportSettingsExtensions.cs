@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq
 {
-	public static class MsmqTransporSettingsExtensions
+	public static class MsmqTransportSettingsExtensions
 	{
 		public static IMsmqEndpointAddress MsmqAddress(this ITransportSettings settings)
 		{

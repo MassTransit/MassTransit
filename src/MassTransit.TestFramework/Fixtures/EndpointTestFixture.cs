@@ -54,7 +54,7 @@ namespace MassTransit.TestFramework.Fixtures
 				{
 					x.SetEndpointCache(EndpointCache);
 					x.SetConcurrentConsumerLimit(4);
-					x.SetReceiveTimeout(50.Milliseconds());
+					x.SetReceiveTimeout(150.Milliseconds());
 					x.EnableAutoStart();
 				});
 		}

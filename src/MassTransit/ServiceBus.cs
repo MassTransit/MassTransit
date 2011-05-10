@@ -266,7 +266,7 @@ namespace MassTransit
 				if (ControlBus != this)
 					ControlBus.Dispose();
 
-				_unsubscribeEventDispatchers();
+				RemoveLoopbackSubsciber();
 
 				InboundPipeline.Dispose();
 				InboundPipeline = null;
@@ -332,6 +332,12 @@ namespace MassTransit
 			{
 				_log.Warn("The performance counters could not be created", ex);
 			}
+		}
+
+		public void RemoveLoopbackSubsciber()
+		{
+			_unsubscribeEventDispatchers();
+			_unsubscribeEventDispatchers = () => true;
 		}
 	}
 }

@@ -26,14 +26,14 @@ namespace MassTransit.Transports.RabbitMq
 
 		readonly string _name;
 
-		public MessageName(SerializationInfo info, StreamingContext context)
-		{
-			_name = info.GetString("Name");
-		}
-
 		public MessageName(Type messageType)
 		{
 			_name = GetNameForType(messageType);
+		}
+
+		protected MessageName(SerializationInfo info, StreamingContext context)
+		{
+			_name = info.GetString("Name");
 		}
 
 		public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -92,7 +92,7 @@ namespace MassTransit.Transports.RabbitMq
 
 			if (type.IsNested)
 			{
-				GetMessageName(sb, type.DeclaringType, null);
+				GetMessageName(sb, type.DeclaringType, type.Namespace);
 				sb.Append('-');
 			}
 

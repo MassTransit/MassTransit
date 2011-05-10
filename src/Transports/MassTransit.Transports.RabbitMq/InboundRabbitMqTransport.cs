@@ -13,34 +13,47 @@
 namespace MassTransit.Transports.RabbitMq
 {
 	using System;
+	using System.Threading;
 	using log4net;
+	using Magnum;
+	using Management;
 	using RabbitMQ.Client;
 	using Util;
 
-	public class InboundRabbitMqTransport : 
+	public class InboundRabbitMqTransport :
 		IInboundTransport
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (InboundRabbitMqTransport));
 
-		readonly RabbitMqAddress _address;
+		readonly IRabbitMqEndpointAddress _address;
 		readonly IConnection _connection;
+		bool _declared;
 
-		public InboundRabbitMqTransport(RabbitMqAddress address, IConnection connection)
+		public InboundRabbitMqTransport(IRabbitMqEndpointAddress address, IConnection connection)
 		{
 			_address = address;
 			_connection = connection;
 		}
 
-		public IEndpointAddress Address { get; private set; }
+		public IEndpointAddress Address
+		{
+			get { return _address; }
+		}
 
 		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
 		{
+			DeclareBindings();
+
 			//GuardAgainstDisposed();
 
 			using (IModel channel = _connection.CreateModel())
 			{
-				channel.QueueDeclare(_address.Path, true, true, true, null);
-                BasicGetResult result = channel.BasicGet(_address.Path, false); //this is odd but false turns ack on.
+				BasicGetResult result = channel.BasicGet(_address.Name, false); //this is odd but false turns ack on.
+				if (result == null)
+				{
+					ThreadUtil.Sleep(timeout);
+					return;				
+				}
 
 				using (var context = new RabbitMqReceiveContext(result))
 				{
@@ -67,6 +80,19 @@ namespace MassTransit.Transports.RabbitMq
 		public void Dispose()
 		{
 			_connection.Dispose();
+		}
+
+		void DeclareBindings()
+		{
+			if (_declared)
+				return;
+
+			using (var management = new RabbitMqEndpointManagement(_address, _connection))
+			{
+				management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "");
+			}
+
+			_declared = true;
 		}
 	}
 }

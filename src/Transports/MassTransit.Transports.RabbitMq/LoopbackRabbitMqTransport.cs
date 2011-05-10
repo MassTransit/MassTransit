@@ -1,5 +1,5 @@
-// Copyright 2007-2011 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,47 +12,70 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-    using System;
+	using System;
 
-    public class LoopbackRabbitMqTransport :
-        IDuplexTransport
-    {
-        readonly IInboundTransport _inbound;
-        readonly IOutboundTransport _outbound;
+	public class LoopbackRabbitMqTransport :
+		IDuplexTransport
+	{
+		readonly IRabbitMqEndpointAddress _address;
+		readonly IInboundTransport _inbound;
+		readonly IOutboundTransport _outbound;
+		bool _disposed;
 
-        public LoopbackRabbitMqTransport(IEndpointAddress address, IInboundTransport inbound, IOutboundTransport outbound)
-        {
-            _inbound = inbound;
-            _outbound = outbound;
-            Address = address;
-        }
+		public LoopbackRabbitMqTransport(IRabbitMqEndpointAddress address, IInboundTransport inbound,
+		                                 IOutboundTransport outbound)
+		{
+			_inbound = inbound;
+			_outbound = outbound;
+			_address = address;
+		}
 
-        public IEndpointAddress Address { get; private set; }
+		public IEndpointAddress Address
+		{
+			get { return _address; }
+		}
 
-        public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
-        {
-            _inbound.Receive(callback, timeout);
-        }
+		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+		{
+			_inbound.Receive(callback, timeout);
+		}
 
-        public void Send(Action<ISendContext> callback)
-        {
-            _outbound.Send(callback);
-        }
+		public void Send(Action<ISendContext> callback)
+		{
+			_outbound.Send(callback);
+		}
 
-        public IOutboundTransport OutboundTransport
-        {
-            get { return _outbound; }
-        }
+		public IOutboundTransport OutboundTransport
+		{
+			get { return _outbound; }
+		}
 
-        public IInboundTransport InboundTransport
-        {
-            get { return _inbound; }
-        }
+		public IInboundTransport InboundTransport
+		{
+			get { return _inbound; }
+		}
 
-        public void Dispose()
-        {
-            _inbound.Dispose();
-            _outbound.Dispose();
-        }
-    }
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_inbound.Dispose();
+				_outbound.Dispose();
+			}
+
+			_disposed = true;
+		}
+
+		~LoopbackRabbitMqTransport()
+		{
+			Dispose(false);
+		}
+	}
 }

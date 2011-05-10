@@ -27,6 +27,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		}
 
 		[Then]
+		public void Should_handle_nested_classes()
+		{
+			var name = new MessageName(typeof(Nested));
+			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:When_converting_a_type_to_a_message_name-Nested");
+		}
+
+		[Then]
 		public void Should_handle_regular_classes()
 		{
 			var name = new MessageName(typeof(NameEasy));
@@ -59,6 +66,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
 			var name = new MessageName(typeof(NameDoubleGeneric<NameGeneric<NameEasyToo>,NameEasy>));
 			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:NameDoubleGeneric--NameGeneric--NameEasyToo--::NameEasy--");
 		}
+
+		class Nested
+		{ }
 	}
 
 	class NameEasy
