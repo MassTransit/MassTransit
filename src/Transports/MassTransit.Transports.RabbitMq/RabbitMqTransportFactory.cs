@@ -21,8 +21,7 @@ namespace MassTransit.Transports.RabbitMq
 	using RabbitMQ.Client;
 
 	public class RabbitMqTransportFactory :
-		ITransportFactory,
-		IDisposable
+		ITransportFactory
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqTransportFactory));
 		readonly ReaderWriterLockedDictionary<Uri, IConnection> _connectionCache;
@@ -90,7 +89,8 @@ namespace MassTransit.Transports.RabbitMq
 					{
 						try
 						{
-							x.Close(200, "disposed");
+							if(x.IsOpen)
+								x.Close(200, "disposed");
 							x.Dispose();
 						}
 						catch (Exception ex)

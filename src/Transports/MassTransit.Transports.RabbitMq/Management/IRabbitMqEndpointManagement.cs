@@ -24,5 +24,6 @@ namespace MassTransit.Transports.RabbitMq.Management
 
 		IEnumerable<Type> BindExchangesForPublisher(Type messageType);
 		void BindExchangesForSubscriber(Type messageType);
+		void UnbindExchange(string destination, string source, string routingKey);
 	}
 }

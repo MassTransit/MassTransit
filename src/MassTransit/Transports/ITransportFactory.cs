@@ -12,7 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-	public interface ITransportFactory
+	using System;
+
+	public interface ITransportFactory :
+		IDisposable
 	{
 		string Scheme { get; }
 

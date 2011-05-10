@@ -17,6 +17,8 @@ namespace MassTransit.Builders
 	using EndpointConfigurators;
 	using Serialization;
 	using Transports;
+	using Transports.Loopback;
+	using Transports.MulticastUdp;
 
 	public class EndpointFactoryBuilderImpl :
 		EndpointFactoryBuilder

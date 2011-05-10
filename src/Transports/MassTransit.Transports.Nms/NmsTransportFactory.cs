@@ -41,5 +41,9 @@ namespace MassTransit.Transports.Nms
 		{
 			return BuildOutbound(settings);
 		}
+
+		public void Dispose()
+		{
+		}
 	}
 }

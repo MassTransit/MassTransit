@@ -67,12 +67,12 @@ namespace MassTransit.Transports.RabbitMq
 				IEnumerable<Type> types = management.BindExchangesForPublisher(messageType);
 				foreach (Type type in types)
 				{
+					if (_added.ContainsKey(type))
+						continue;
+
 					var messageName = new MessageName(type);
 
 					IRabbitMqEndpointAddress messageEndpointAddress = _address.ForQueue(messageName.ToString());
-
-					if (_added.ContainsKey(type))
-						continue;
 
 					FindOrAddEndpoint(type, messageEndpointAddress);
 				}

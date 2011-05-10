@@ -97,6 +97,8 @@ namespace MassTransit.Transports
 
 				_endpoints.Dispose();
 				_endpoints = null;
+
+				_endpointFactory.Dispose();
 			}
 
 			_disposed = true;
