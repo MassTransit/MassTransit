@@ -92,6 +92,7 @@ namespace MassTransit.Transports.RabbitMq.Management
 
 				IEnumerable<Type> interfaces = messageType
 					.GetInterfaces()
+					.Where(x => !(x.IsGenericType && x.GetGenericTypeDefinition() == typeof(CorrelatedBy<>)))
 					.Where(x => x.Namespace != null)
 					.Where(x => x.Namespace != "System")
 					.Where(x => !x.Namespace.StartsWith("System."));
