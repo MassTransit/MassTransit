@@ -42,7 +42,8 @@ namespace MassTransit.TestFramework.Fixtures
 					EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
 					_endpointFactoryConfigurator = null;
 
-					EndpointCache = new EndpointCache(EndpointFactory);
+					_endpointCache = new EndpointCache(EndpointFactory);
+					EndpointCache = new EndpointCacheProxy(_endpointCache);
 				}
 				catch (Exception ex)
 				{
@@ -66,7 +67,8 @@ namespace MassTransit.TestFramework.Fixtures
 
 			if (EndpointCache != null)
 			{
-				EndpointCache.Dispose();
+				_endpointCache.Dispose();
+				_endpointCache = null;
 				EndpointCache = null;
 			}
 
@@ -117,6 +119,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 
 		EndpointFactoryConfigurator _endpointFactoryConfigurator;
+		EndpointCache _endpointCache;
 
 		void TeardownBuses()
 		{
@@ -126,7 +129,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected IList<IServiceBus> Buses { get; private set; }
 
-		protected EndpointCache EndpointCache { get; private set; }
+		protected IEndpointCache EndpointCache { get; private set; }
 
 		protected virtual IServiceBus SetupServiceBus(Uri uri, Action<ServiceBusConfigurator> configure)
 		{
