@@ -33,6 +33,7 @@ namespace MassTransit
 			management.Start();
 		}
 
+
 		/// <summary>
 		/// This method will verify that the MS DTC is installed and properly configured. If
 		/// the configuration is invalid or the MS DTC is not installed, it will be installed,

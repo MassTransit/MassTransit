@@ -21,7 +21,6 @@ namespace MassTransit.Transports.Msmq.Management
 	public class MsmqManagement
 	{
 		readonly IEnumerable<string> _installedComponents = GetInstalledComponents();
-		readonly IEnumerable<string> _optionalComponents;
 		readonly IEnumerable<string> _requiredComponents;
 		readonly IEnumerable<string> _unnecessaryComponents;
 
@@ -31,6 +30,7 @@ namespace MassTransit.Transports.Msmq.Management
 				{
 					"msmq_Core",
 					"msmq_LocalStorage",
+					"msmq_MulticastInstalled",
 				};
 
 			_unnecessaryComponents = new[]
@@ -44,11 +44,6 @@ namespace MassTransit.Transports.Msmq.Management
 					"msmq_MQDSServiceInstalled",
 					"msmq_HTTPSupport",
 					"msmq_DCOMProxy",
-				};
-
-			_optionalComponents = new[]
-				{
-					"msmq_MulticastInstalled",
 				};
 		}
 
@@ -100,11 +95,6 @@ namespace MassTransit.Transports.Msmq.Management
 		IEnumerable<string> GetMissingComponents()
 		{
 			return _requiredComponents.Except(_installedComponents);
-		}
-
-		IEnumerable<string> GetOptionalComponents()
-		{
-			return _optionalComponents.Except(_installedComponents);
 		}
 
 		IEnumerable<string> GetUnnecessaryComponents()
