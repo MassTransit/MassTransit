@@ -39,7 +39,9 @@ namespace MassTransit.Tests.TextFixtures
 					EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
 					_endpointFactoryConfigurator = null;
 
-					EndpointCache = new EndpointCache(EndpointFactory);
+					_endpointCache = new EndpointCache(EndpointFactory);
+
+					EndpointCache = new EndpointCacheProxy(_endpointCache);
 				}
 				catch (Exception ex)
 				{
@@ -63,7 +65,7 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			TeardownContext();
 
-			EndpointCache.Clear();
+			_endpointCache.Clear();
 		}
 
 		[TestFixtureTearDown]
@@ -79,6 +81,7 @@ namespace MassTransit.Tests.TextFixtures
 		}
 
 		EndpointFactoryConfiguratorImpl _endpointFactoryConfigurator;
+		EndpointCache _endpointCache;
 
 		protected EndpointTestFixture()
 		{
@@ -96,7 +99,7 @@ namespace MassTransit.Tests.TextFixtures
 		}
 
 		protected IEndpointFactory EndpointFactory { get; private set; }
-		protected EndpointCache EndpointCache { get; set; }
+		protected IEndpointCache EndpointCache { get; set; }
 
 		protected virtual void EstablishContext()
 		{
