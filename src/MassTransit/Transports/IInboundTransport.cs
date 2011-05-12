@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
 	using System;
+	using Context;
 
 	public interface IInboundTransport :
 		ITransport

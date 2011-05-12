@@ -13,35 +13,35 @@
 namespace MassTransit.Pipeline.Configuration
 {
 	using System;
+	using Context;
 	using Exceptions;
 	using Sinks;
 
-	public class MessageInterceptorConfigurator
+	public class InboundMessageInterceptorConfigurator
 	{
-		readonly IPipelineSink<object> _sink;
+		readonly IInboundMessagePipeline _sink;
 
-		public MessageInterceptorConfigurator(IPipelineSink<object> sink)
+		public InboundMessageInterceptorConfigurator(IInboundMessagePipeline sink)
 		{
 			_sink = sink;
 		}
 
-		public MessageInterceptor Create(IMessageInterceptor messageInterceptor)
+		public MessageInterceptor<IConsumeContext> Create(IMessageInterceptor messageInterceptor)
 		{
-			var scope = new MessageInterceptorConfiguratorScope();
+			var scope = new InboundMessageInterceptorConfiguratorScope();
 			_sink.Inspect(scope);
 
 			return ConfigureInterceptor(scope.InsertAfter, messageInterceptor);
 		}
 
-		static MessageInterceptor ConfigureInterceptor(Func<IPipelineSink<object>, IPipelineSink<object>> insertAfter,
-		                                               IMessageInterceptor messageInterceptor)
+		static MessageInterceptor<IConsumeContext> ConfigureInterceptor(
+			Func<IPipelineSink<IConsumeContext>, IPipelineSink<IConsumeContext>> insertAfter,
+			IMessageInterceptor messageInterceptor)
 		{
 			if (insertAfter == null)
 				throw new PipelineException("Unable to insert filter into pipeline for message type " + typeof (object).FullName);
 
-			var interceptor = new MessageInterceptor(messageInterceptor);
-
-			interceptor.ReplaceOutputSink(insertAfter(interceptor));
+			var interceptor = new MessageInterceptor<IConsumeContext>(insertAfter, messageInterceptor);
 
 			return interceptor;
 		}

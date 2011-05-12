@@ -14,6 +14,7 @@ namespace MassTransit.Subscriptions
 {
 	using System;
 	using System.Collections.Generic;
+	using Magnum.Extensions;
 	using SubscriptionBuilders;
 
 	/// <summary>
@@ -31,8 +32,10 @@ namespace MassTransit.Subscriptions
 	public class SubscriptionBusService :
 		IBusService
 	{
-		IList<SubscriptionBuilder> _builders;
-		IList<ISubscriptionReference> _subscriptions;
+		readonly IList<SubscriptionBuilder> _builders;
+		readonly IList<ISubscriptionReference> _subscriptions;
+
+		bool _disposed;
 
 		public SubscriptionBusService(IList<SubscriptionBuilder> builders)
 		{
@@ -41,30 +44,12 @@ namespace MassTransit.Subscriptions
 			_subscriptions = new List<ISubscriptionReference>();
 		}
 
-		bool _disposed;
-
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
-		~SubscriptionBusService()
-		{
-			Dispose(false);
-		}
-
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_builders.Clear();
-				_subscriptions.Clear();
-			}
-
-			_disposed = true;
-		}
 		public void Start(IServiceBus bus)
 		{
 			bus.Configure(pipelineConfigurator =>
@@ -92,10 +77,27 @@ namespace MassTransit.Subscriptions
 			StopAllSubscriptions();
 		}
 
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_builders.Clear();
+				_subscriptions.Clear();
+			}
+
+			_disposed = true;
+		}
+
 		void StopAllSubscriptions()
 		{
 			_subscriptions.Each(x => x.OnStop());
 			_subscriptions.Clear();
+		}
+
+		~SubscriptionBusService()
+		{
+			Dispose(false);
 		}
 	}
 }

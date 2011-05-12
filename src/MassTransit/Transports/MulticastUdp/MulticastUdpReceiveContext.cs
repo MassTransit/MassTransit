@@ -16,7 +16,7 @@ namespace MassTransit.Transports.MulticastUdp
 	using System.IO;
 
 	public class MulticastUdpReceiveContext :
-		IReceiveContext
+		IOldCrapyContext
 	{
 		public string MessageId
 		{

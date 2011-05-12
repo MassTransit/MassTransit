@@ -13,6 +13,7 @@
 namespace MassTransit.SubscriptionConnectors
 {
 	using System;
+	using Context;
 	using Pipeline;
 	using Pipeline.Configuration;
 	using Pipeline.Sinks;
@@ -27,23 +28,26 @@ namespace MassTransit.SubscriptionConnectors
 			get { return typeof (TMessage); }
 		}
 
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator, object instance)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
 		{
 			var consumer = instance as TConsumer;
 			if (consumer == null)
 				throw new NullReferenceException("The consumer instance cannot be null.");
 
-			CorrelatedMessageRouterConfigurator correlatedConfigurator =
-				CorrelatedMessageRouterConfigurator.For(configurator.Pipeline);
+			var correlatedConfigurator = new InboundCorrelatedMessageRouterConfigurator(configurator.Pipeline);
 
-			CorrelatedMessageRouter<TMessage, TKey> router = correlatedConfigurator.FindOrCreate<TMessage, TKey>();
+			CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey> router =
+				correlatedConfigurator.FindOrCreate<TMessage, TKey>();
 
-			UnsubscribeAction result = router.Connect(consumer.CorrelationId,
-				new InstanceMessageSink<TMessage>(message => consumer.Consume));
+			var sink = new InstanceMessageSink<TMessage>(message => consumer.Consume);
 
-			UnsubscribeAction remove = configurator.SubscribedTo<TMessage, TKey>(consumer.CorrelationId);
+			TKey correlationId = consumer.CorrelationId;
 
-			return () => result() && remove();
+			UnsubscribeAction result = router.Connect(correlationId, sink);
+
+			UnsubscribeAction remove = configurator.SubscribedTo<TMessage, TKey>(correlationId);
+
+			return () => result() && (router.SinkCount(correlationId) == 0)  && remove();
 		}
 	}
 }

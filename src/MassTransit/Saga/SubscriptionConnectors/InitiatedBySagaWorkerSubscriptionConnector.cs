@@ -17,7 +17,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using Distributor.Messages;
 	using Distributor.Pipeline;
 	using MassTransit.Pipeline;
-	using MassTransit.Pipeline.Configuration;
 
 	public class InitiatedBySagaWorkerSubscriptionConnector<TSaga, TMessage> :
 		SagaWorkerSubscriptionConnector
@@ -36,10 +35,10 @@ namespace MassTransit.Saga.SubscriptionConnectors
 			get { return typeof (TSaga); }
 		}
 
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator, object instance)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
 		{
 			var worker = instance as ISagaWorker<TSaga>;
-			IPipelineSink<TMessage> sink = _connector.CreateSink(configurator);
+			ISagaMessageSink<TSaga, TMessage> sink = _connector.CreateSink();
 			var workerSink = new SagaWorkerMessageSink<TSaga, TMessage>(worker, sink);
 
 			return configurator.Pipeline.ConnectToRouter(workerSink, () => configurator.SubscribedTo<Distributed<TMessage>>());

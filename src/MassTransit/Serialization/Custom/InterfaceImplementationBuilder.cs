@@ -15,6 +15,7 @@ namespace MassTransit.Serialization.Custom
 	using System;
 	using System.Reflection;
 	using System.Reflection.Emit;
+	using Magnum.Extensions;
 	using Magnum.Threading;
 
 	public static class InterfaceImplementationBuilder

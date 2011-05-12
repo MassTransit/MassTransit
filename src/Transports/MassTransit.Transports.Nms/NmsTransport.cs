@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,22 +14,26 @@ namespace MassTransit.Transports.Nms
 {
 	using System;
 	using System.Diagnostics;
+	using System.IO;
+	using System.Text;
 	using Apache.NMS;
 	using Apache.NMS.ActiveMQ;
+	using Context;
 	using Exceptions;
 	using log4net;
+	using Magnum;
 	using Util;
 
 	[DebuggerDisplay("{Address}")]
 	public class NmsTransport :
 		IDuplexTransport
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (NmsTransport));
+		static readonly ILog _log = LogManager.GetLogger(typeof (NmsTransport));
 
-		private readonly IEndpointAddress _address;
-		private IConnection _connection;
-		private bool _disposed;
-		private IConnectionFactory _factory;
+		readonly IEndpointAddress _address;
+		IConnection _connection;
+		bool _disposed;
+		IConnectionFactory _factory;
 
 		public NmsTransport(IEndpointAddress address)
 		{
@@ -41,6 +45,57 @@ namespace MassTransit.Transports.Nms
 		public IEndpointAddress Address
 		{
 			get { return _address; }
+		}
+
+
+		public void Send(ISendContext context)
+		{
+			if (_disposed) throw NewDisposedException();
+
+			try
+			{
+				using (ISession session = _connection.CreateSession(AcknowledgementMode.Transactional))
+				{
+					IQueue destination = session.GetQueue(Address.Path);
+
+					using (IMessageProducer producer = session.CreateProducer(destination))
+					{
+						producer.DeliveryMode = MsgDeliveryMode.Persistent;
+
+						string messageBody;
+						using (var body = new MemoryStream())
+						{
+							context.SerializeTo(body);
+
+							messageBody = Encoding.UTF8.GetString(body.ToArray());
+						}
+
+						ITextMessage message = producer.CreateTextMessage(messageBody);
+						message.NMSDeliveryMode = MsgDeliveryMode.Persistent;
+						message.Properties["message-type"] = context.MessageType;
+
+						if (context.ExpirationTime.HasValue)
+						{
+							DateTime value = context.ExpirationTime.Value;
+							message.NMSTimeToLive = value.Kind == DateTimeKind.Utc ? value - SystemUtil.UtcNow : value - SystemUtil.Now;
+						}
+
+						producer.Send(message);
+
+						session.Commit();
+
+						if (SpecialLoggers.Messages.IsInfoEnabled)
+							SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, message.NMSMessageId);
+					}
+				}
+			}
+			catch (InvalidOperationException ex)
+			{
+				if (_log.IsErrorEnabled)
+					_log.Error("A problem occurred communicating with the queue", ex);
+
+				Reconnect();
+			}
 		}
 
 		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
@@ -77,8 +132,12 @@ namespace MassTransit.Transports.Nms
 							}
 							else
 							{
-								using (var context = new NmsReceiveContext(textMessage))
+								using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(textMessage.Text), false))
 								{
+									var context = new ConsumeContext(bodyStream);
+									context.SetMessageId(textMessage.NMSMessageId);
+									context.SetInputAddress(_address);
+
 									Action<IReceiveContext> receive = callback(context);
 									if (receive == null)
 									{
@@ -110,49 +169,23 @@ namespace MassTransit.Transports.Nms
 		}
 
 
-		public virtual void Send(Action<ISendContext> callback)
-		{
-			if (_disposed) throw NewDisposedException();
-
-			try
-			{
-				using (ISession session = _connection.CreateSession(AcknowledgementMode.Transactional))
-				{
-					IQueue destination = session.GetQueue(Address.Path);
-
-					using (IMessageProducer producer = session.CreateProducer(destination))
-					{
-						using (var context = new NmsSendContext(producer))
-						{
-							callback(context);
-
-							context.Send();
-
-							session.Commit();
-
-							if (SpecialLoggers.Messages.IsInfoEnabled)
-								SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, context.Message.NMSMessageId);
-						}
-					}
-				}
-			}
-			catch (InvalidOperationException ex)
-			{
-				if (_log.IsErrorEnabled)
-					_log.Error("A problem occurred communicating with the queue", ex);
-
-				Reconnect();
-			}
-		}
-
-
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
-		protected virtual void Dispose(bool disposing)
+		public IOutboundTransport OutboundTransport
+		{
+			get { return this; }
+		}
+
+		public IInboundTransport InboundTransport
+		{
+			get { return this; }
+		}
+
+		void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
@@ -163,12 +196,12 @@ namespace MassTransit.Transports.Nms
 			_disposed = true;
 		}
 
-		private Uri GenerateServerUri()
+		Uri GenerateServerUri()
 		{
 			return new UriBuilder("tcp", Address.Uri.Host, Address.Uri.Port).Uri;
 		}
 
-		private void Initialize()
+		void Initialize()
 		{
 			try
 			{
@@ -182,7 +215,7 @@ namespace MassTransit.Transports.Nms
 			}
 		}
 
-		private void Connect()
+		void Connect()
 		{
 			Disconnect();
 
@@ -192,7 +225,7 @@ namespace MassTransit.Transports.Nms
 			_connection.Start();
 		}
 
-		private void Disconnect()
+		void Disconnect()
 		{
 			if (_connection == null) return;
 
@@ -210,7 +243,7 @@ namespace MassTransit.Transports.Nms
 			}
 		}
 
-		private void Reconnect()
+		void Reconnect()
 		{
 			try
 			{
@@ -226,14 +259,14 @@ namespace MassTransit.Transports.Nms
 			}
 		}
 
-		private void ConnectionExceptionListener(Exception ex)
+		void ConnectionExceptionListener(Exception ex)
 		{
 			_log.Error("An exception occurred on the endpoint: " + Address, ex);
 
 			Reconnect();
 		}
 
-		private ObjectDisposedException NewDisposedException()
+		ObjectDisposedException NewDisposedException()
 		{
 			return new ObjectDisposedException("The transport has already been disposed: " + Address);
 		}
@@ -241,16 +274,6 @@ namespace MassTransit.Transports.Nms
 		~NmsTransport()
 		{
 			Dispose(false);
-		}
-
-		public IOutboundTransport OutboundTransport
-		{
-			get { return this; }
-		}
-
-		public IInboundTransport InboundTransport
-		{
-			get { return this; }
 		}
 	}
 }

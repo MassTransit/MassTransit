@@ -28,7 +28,7 @@ namespace MassTransit
 							x.Register(new RabbitMqSubscriptionBinder(bus.Endpoint.InboundTransport));
 						});
 
-					var interceptorConfigurator = new MessageInterceptorConfigurator(bus.OutboundPipeline);
+					var interceptorConfigurator = new OutboundMessageInterceptorConfigurator(bus.OutboundPipeline);
 
 					interceptorConfigurator.Create(new PublishEndpointInterceptor(bus));
 				});

@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
 	using System;
+	using Context;
 
 	public class NullTransport :
 		TransportBase
@@ -22,15 +23,15 @@ namespace MassTransit.Transports
 		{
 		}
 
-		public override void OnDisposing()
-		{
-		}
-
-		public override void Send(Action<ISendContext> callback)
+		public override void Send(ISendContext context)
 		{
 		}
 
 		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+		{
+		}
+
+		protected override void OnDisposing()
 		{
 		}
 	}

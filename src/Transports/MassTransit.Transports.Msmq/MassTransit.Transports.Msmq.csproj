@@ -110,10 +110,8 @@
     <Compile Include="MsmqEndpointAddress.cs" />
     <Compile Include="MsmqEndpointManagement.cs" />
     <Compile Include="MsmqReceiveContext.cs" />
-    <Compile Include="MsmqSendContext.cs" />
     <Compile Include="MsmqTransportFactory.cs" />
     <Compile Include="MsmqUriExtensions.cs" />
-    <Compile Include="NonTransactionalMsmqTransport.cs" />
     <Compile Include="MulticastSubscriptionClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransactionalInboundMsmqTransport.cs" />

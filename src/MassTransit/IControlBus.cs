@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+	using System;
+
 	/// <summary>
 	///	Extends the IServiceBus interface to include additional methods for
 	/// services that extend the service bus

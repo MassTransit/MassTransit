@@ -24,10 +24,10 @@ namespace MassTransit.Tests.Pipeline
 		[SetUp]
 		public void Setup()
 		{
-            _pipeline = MessagePipelineConfigurator.CreateDefault(null);
+            _pipeline = InboundPipelineConfigurator.CreateDefault(null);
 		}
 
-		private MessagePipeline _pipeline;
+		private IInboundMessagePipeline _pipeline;
 
 		[Test]
 		public void I_want_to_display_the_entire_flow_through_the_pipeline()
@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Pipeline
 	    [Test]
 	    public void I_want_to_display_a_more_detailed_flow()
 	    {
-            _pipeline.Filter<object>(m => true);
+           // _pipeline.Filter<object>(m => true);
             _pipeline.ConnectHandler<PingMessage>(m => { }, x => { return true; });
 	        
             PipelineViewer.Trace(_pipeline);

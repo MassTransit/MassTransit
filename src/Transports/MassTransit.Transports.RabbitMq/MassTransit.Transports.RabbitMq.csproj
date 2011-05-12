@@ -94,7 +94,6 @@
     <Compile Include="RabbitMqConfigurationExtensions.cs" />
     <Compile Include="RabbitMqHelper.cs" />
     <Compile Include="RabbitMqReceiveContext.cs" />
-    <Compile Include="RabbitMqSendContext.cs" />
     <Compile Include="LoopbackRabbitMqTransport.cs" />
     <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />

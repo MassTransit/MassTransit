@@ -19,6 +19,7 @@ namespace MassTransit.Services.Subscriptions.Client
 	using System.Reflection;
 	using log4net;
 	using Magnum;
+	using Magnum.Extensions;
 	using Messages;
 	using Pipeline;
 	using Util;

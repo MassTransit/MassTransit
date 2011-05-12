@@ -26,7 +26,7 @@ namespace MassTransit.SubscriptionConnectors
 
 	public interface ConsumerConnector
 	{
-		UnsubscribeAction Connect(IPipelineConfigurator configurator);
+		UnsubscribeAction Connect(IInboundPipelineConfigurator configurator);
 	}
 
 	public class ConsumerConnector<T> :
@@ -66,7 +66,7 @@ namespace MassTransit.SubscriptionConnectors
 			get { return _connectors; }
 		}
 
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
 		{
 			return _connectors.Select(x => x.Connect(configurator))
 				.Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x());

@@ -19,10 +19,9 @@ namespace MassTransit.Services.Subscriptions
 		IEndpointSubscriptionEvent,
 		IBusService
 	{
+		readonly ISubscriptionService _service;
 		IServiceBus _bus;
-		bool _disposed;
-		IMessagePipeline _pipeline;
-		ISubscriptionService _service;
+		IOutboundMessagePipeline _pipeline;
 		UnregisterAction _unregisterAction;
 
 		public SubscriptionConsumer(ISubscriptionService service)
@@ -32,8 +31,6 @@ namespace MassTransit.Services.Subscriptions
 
 		public void Dispose()
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public void Start(IServiceBus bus)
@@ -48,44 +45,26 @@ namespace MassTransit.Services.Subscriptions
 			_unregisterAction();
 		}
 
-		public UnsubscribeAction SubscribedTo<T>(Uri endpointUri)
-			where T : class
+		public UnsubscribeAction SubscribedTo<TMessage>(Uri endpointUri)
+			where TMessage : class
 		{
 			if (endpointUri == _bus.Endpoint.Uri)
 				return () => true;
 
 			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
-			return _pipeline.ConnectEndpoint<T>(endpoint);
+			return _pipeline.ConnectEndpoint<TMessage>(endpoint);
 		}
 
-		public UnsubscribeAction SubscribedTo<T, K>(K correlationId, Uri endpointUri)
-			where T : class, CorrelatedBy<K>
+		public UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId, Uri endpointUri)
+			where TMessage : class, CorrelatedBy<TKey>
 		{
 			if (endpointUri == _bus.Endpoint.Uri)
 				return () => true;
 
 			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
-			return _pipeline.ConnectEndpoint<T, K>(correlationId, endpoint);
-		}
-
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_pipeline = null;
-				_bus = null;
-				_service = null;
-			}
-
-			_disposed = true;
-		}
-
-		~SubscriptionConsumer()
-		{
-			Dispose(false);
+			return _pipeline.ConnectEndpoint<TMessage, TKey>(correlationId, endpoint);
 		}
 	}
 }

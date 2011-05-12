@@ -167,9 +167,8 @@ namespace MassTransit.Tests
 
 			LocalBus.Publish(ping, x =>
 				{
-					x.IfNoSubscribers<PingMessage>(message =>
+					x.IfNoSubscribers(message =>
 						{
-							Assert.IsInstanceOf<PingMessage>(message);
 							noConsumers = true;
 						});
 				});
@@ -184,7 +183,7 @@ namespace MassTransit.Tests
 
 			int hitCount = 0;
 
-			LocalBus.Publish(ping, x => x.IfNoSubscribers<PingMessage>(message => hitCount++));
+			LocalBus.Publish(ping, x => x.IfNoSubscribers(message => hitCount++));
 			LocalBus.Publish(ping);
 
 			Assert.AreEqual(1, hitCount, "There should have been no consumers");
@@ -204,7 +203,7 @@ namespace MassTransit.Tests
 
 			var consumers = new List<Uri>();
 
-			LocalBus.Publish(ping, x => { x.ForEachSubscriber<PingMessage>((message, endpoint) => consumers.Add(endpoint.Uri)); });
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber((message, endpoint) => consumers.Add(endpoint.Uri)); });
 
 			Assert.AreEqual(1, consumers.Count);
 			Assert.AreEqual(LocalBus.Endpoint.Uri, consumers[0]);
@@ -220,7 +219,7 @@ namespace MassTransit.Tests
 
 			var consumers = new List<Uri>();
 
-			LocalBus.Publish(ping, x => { x.ForEachSubscriber<PingMessage>((message, endpoint) => consumers.Add(endpoint.Uri)); });
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber((message, endpoint) => consumers.Add(endpoint.Uri)); });
 
 			Assert.AreEqual(2, consumers.Count);
 			Assert.IsTrue(consumers.Contains(LocalBus.Endpoint.Uri));
@@ -234,7 +233,7 @@ namespace MassTransit.Tests
 
 			var consumers = new List<Uri>();
 
-			LocalBus.Publish(ping, x => { x.ForEachSubscriber<PingMessage>((message, consumer) => consumers.Add(consumer.Uri)); });
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber((message, consumer) => consumers.Add(consumer.Uri)); });
 
 			Assert.AreEqual(0, consumers.Count);
 		}
@@ -246,7 +245,7 @@ namespace MassTransit.Tests
 
 			var consumers = new List<Uri>();
 
-			LocalBus.Publish(ping, x => { x.ForEachSubscriber<PingMessage>((message, endpoint) => consumers.Add(endpoint.Uri)); });
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber((message, endpoint) => consumers.Add(endpoint.Uri)); });
 
 			LocalBus.SubscribeHandler<PingMessage>(x => { });
 

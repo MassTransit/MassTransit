@@ -72,7 +72,29 @@ namespace MassTransit.TestFramework
 				.Where(sink => ((ISagaMessageSink<TSaga,TMessage>)sink).Policy.GetType().GetGenericTypeDefinition() == policyType);
 		}
 
-		public static IEnumerable<IPipelineSink<TMessage>> ShouldHaveSubscriptionFor<TMessage>(this IMessagePipeline pipeline) 
+		public static IEnumerable<IPipelineSink<TMessage>> ShouldHaveSubscriptionFor<TMessage>(this IOutboundMessagePipeline pipeline) 
+			where TMessage : class
+		{
+			DateTime giveUpAt = DateTime.Now + Timeout;
+
+			while (DateTime.Now < giveUpAt)
+			{
+				var inspector = new PipelineSinkLocator<TMessage>();
+
+				pipeline.Inspect(inspector);
+
+				if (inspector.Result.Count() > 0)
+					return inspector.Result;
+
+				Thread.Sleep(10);
+			}
+
+			Assert.Fail("A subscription for " + typeof (TMessage).ToFriendlyName() + " was not found on the pipeline");
+
+			return null;
+		}
+
+		public static IEnumerable<IPipelineSink<TMessage>> ShouldHaveSubscriptionFor<TMessage>(this IInboundMessagePipeline pipeline) 
 			where TMessage : class
 		{
 			DateTime giveUpAt = DateTime.Now + Timeout;

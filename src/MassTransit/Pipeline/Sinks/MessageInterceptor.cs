@@ -15,32 +15,34 @@ namespace MassTransit.Pipeline.Sinks
 	using System;
 	using System.Collections.Generic;
 
-	public class MessageInterceptor :
-		PipelineSinkBase<object, object>
+	public class MessageInterceptor<T> :
+		IPipelineSink<T>
+		where T : class
 	{
 		readonly IMessageInterceptor _interceptor;
+		readonly IPipelineSink<T> _output;
 
-		public MessageInterceptor(IMessageInterceptor interceptor)
-			: base(null)
+		public MessageInterceptor(Func<IPipelineSink<T>, IPipelineSink<T>> insertAfter,
+		                          IMessageInterceptor interceptor)
 		{
 			_interceptor = interceptor;
+
+			_output = insertAfter(this);
 		}
 
-		public override IEnumerable<Action<object>> Enumerate(object message)
+		public IEnumerable<Action<T>> Enumerate(T message)
 		{
 			_interceptor.PreDispatch(message);
 
-			foreach (var consumer in _outputSink.Enumerate(message))
-			{
+			foreach (var consumer in _output.Enumerate(message))
 				yield return consumer;
-			}
 
 			_interceptor.PostDispatch(message);
 		}
 
-		public override bool Inspect(IPipelineInspector inspector)
+		public bool Inspect(IPipelineInspector inspector)
 		{
-			return inspector.Inspect(this) && _outputSink.Inspect(inspector);
+			return inspector.Inspect(this) && _output.Inspect(inspector);
 		}
 	}
 }

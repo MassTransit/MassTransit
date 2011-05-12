@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,16 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit
 {
 	using System;
-	using System.IO;
+	using Context;
 
-	public interface IReceiveContext :
-		IDisposable
+	public static class EndpointExtensions
 	{
-		Stream Body { get; }
+		public static void Send<T>(this IEndpoint endpoint, T message)
+			where T : class
+		{
+			var context = new SendContext<T>(message);
 
-		string MessageId { get; }
+			endpoint.Send(context);
+		}
+
+		public static void Send<T>(this IEndpoint endpoint, T message, Action<ISendContext<T>> contextCallback)
+			where T : class
+		{
+			var context = new SendContext<T>(message);
+
+			contextCallback(context);
+
+			endpoint.Send(context);
+		}
 	}
 }

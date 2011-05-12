@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,17 +14,17 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using MessageHeaders;
+	using Context;
 
 	/// <summary>
 	/// A message sink that sends to an endpoint
 	/// </summary>
 	/// <typeparam name="TMessage"></typeparam>
 	public class EndpointMessageSink<TMessage> :
-		IPipelineSink<TMessage>
+		OutboundPipelineSink<TMessage>
 		where TMessage : class
 	{
-		private readonly IEndpoint _endpoint;
+		readonly IEndpoint _endpoint;
 
 		public EndpointMessageSink(IEndpoint endpoint)
 		{
@@ -36,48 +36,23 @@ namespace MassTransit.Pipeline.Sinks
 			get { return _endpoint.Uri; }
 		}
 
-		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
+		public IEnumerable<Action<IBusPublishContext<TMessage>>> Enumerate(IBusPublishContext<TMessage> context)
 		{
 			yield return x =>
 				{
-					if(OutboundMessage.Context.WasEndpointAlreadySent(_endpoint.Uri))
+					if (x.WasEndpointAlreadySent(_endpoint.Uri))
 						return;
 
 					_endpoint.Send(x);
 
-					OutboundMessage.Context.NotifyForMessageConsumer(message, _endpoint);
-				}; 
+					x.NotifyForMessageConsumer(x.Message, _endpoint);
+				};
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
 		{
 			inspector.Inspect(this);
-
-			// since this is the end of the line, we don't visit this one I suppose
 			return true;
 		}
-
-		bool _disposed;
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		~EndpointMessageSink()
-		{
-			Dispose(false);
-		}
-
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				
-			}
-
-			_disposed = true;
-		}	}
+	}
 }

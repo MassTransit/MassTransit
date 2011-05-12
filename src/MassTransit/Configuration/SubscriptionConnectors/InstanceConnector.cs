@@ -26,7 +26,7 @@ namespace MassTransit.SubscriptionConnectors
 
 	public interface InstanceConnector
 	{
-		UnsubscribeAction Connect(IPipelineConfigurator configurator, object instance);
+		UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance);
 	}
 
 	public class InstanceConnector<T> :
@@ -62,7 +62,7 @@ namespace MassTransit.SubscriptionConnectors
 			get { return _connectors; }
 		}
 
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator, object instance)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
 		{
 			return _connectors.Select(x => x.Connect(configurator, instance))
 				.Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x());

@@ -14,7 +14,6 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 {
 	using System;
 	using MassTransit.Pipeline;
-	using MassTransit.Pipeline.Configuration;
 	using MassTransit.SubscriptionConnectors;
 	using Pipeline;
 
@@ -27,7 +26,7 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 			get { return typeof (TMessage); }
 		}
 
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator, object instance)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
 		{
 			var distributor = instance as IDistributor<TMessage>;
 			var sink = new DistributorMessageSink<TMessage>(message =>

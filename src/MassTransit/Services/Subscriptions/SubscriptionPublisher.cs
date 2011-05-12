@@ -12,22 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Subscriptions
 {
-	using System;
 	using Pipeline;
 
 	public class SubscriptionPublisher :
 		ISubscriptionEvent,
 		IBusService
 	{
+		readonly ISubscriptionService _service;
 		IServiceBus _bus;
-		bool _disposed;
-		ISubscriptionService _service;
-		UnregisterAction _unregisterAction;
+		UnsubscribeAction _unregisterAction;
 
-		/// <summary>
-		/// Publishes subscription events to the ISubscriptionService
-		/// </summary>
-		/// <param name="service">The service that is handling the event subscriptions</param>
 		public SubscriptionPublisher(ISubscriptionService service)
 		{
 			_service = service;
@@ -35,14 +29,17 @@ namespace MassTransit.Services.Subscriptions
 
 		public void Dispose()
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public void Start(IServiceBus bus)
 		{
 			_bus = bus;
-			_unregisterAction = _bus.InboundPipeline.Configure(x => x.Register(this));
+			_unregisterAction = _bus.Configure(x =>
+				{
+					UnregisterAction unregisterAction = x.Register(this);
+
+					return () => unregisterAction();
+				});
 		}
 
 		public void Stop()
@@ -50,33 +47,16 @@ namespace MassTransit.Services.Subscriptions
 			_unregisterAction();
 		}
 
-		public UnsubscribeAction SubscribedTo<T>()
-			where T : class
+		public UnsubscribeAction SubscribedTo<TMessage>()
+			where TMessage : class
 		{
-			return _service.SubscribedTo<T>(_bus.Endpoint.Uri);
+			return _service.SubscribedTo<TMessage>(_bus.Endpoint.Uri);
 		}
 
-		public UnsubscribeAction SubscribedTo<T, K>(K correlationId)
-			where T : class, CorrelatedBy<K>
+		public UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId)
+			where TMessage : class, CorrelatedBy<TKey>
 		{
-			return _service.SubscribedTo<T, K>(correlationId, _bus.Endpoint.Uri);
-		}
-
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_bus = null;
-				_service = null;
-			}
-
-			_disposed = true;
-		}
-
-		~SubscriptionPublisher()
-		{
-			Dispose(false);
+			return _service.SubscribedTo<TMessage, TKey>(correlationId, _bus.Endpoint.Uri);
 		}
 	}
 }

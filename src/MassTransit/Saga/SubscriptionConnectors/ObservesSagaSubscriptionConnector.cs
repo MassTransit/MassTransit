@@ -16,7 +16,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using System.Linq.Expressions;
 	using Exceptions;
 	using Magnum.Reflection;
-	using MassTransit.Pipeline;
 	using Pipeline;
 
 	public class ObservesSagaSubscriptionConnector<TSaga, TMessage> :
@@ -34,10 +33,10 @@ namespace MassTransit.Saga.SubscriptionConnectors
 			_selector = instance.GetBindExpression();
 		}
 
-		protected override IPipelineSink<TMessage> CreateSink(IServiceBus bus, ISagaRepository<TSaga> repository,
-		                                                      ISagaPolicy<TSaga, TMessage> policy)
+		protected override ISagaMessageSink<TSaga, TMessage> CreateSink(ISagaRepository<TSaga> repository,
+		                                                                ISagaPolicy<TSaga, TMessage> policy)
 		{
-			var sink = new PropertySagaMessageSink<TSaga, TMessage>(bus, repository, policy, _selector);
+			var sink = new PropertySagaMessageSink<TSaga, TMessage>(repository, policy, _selector);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the message sink for " + typeof (TSaga).FullName);
 

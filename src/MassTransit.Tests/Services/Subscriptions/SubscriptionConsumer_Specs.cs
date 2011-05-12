@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Services.Subscriptions
 			_bus = MockRepository.GenerateMock<IServiceBus>();
 			_bus.Stub(x => x.Endpoint).Return(_endpoint);
 
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_bus);
+			_pipeline = new OutboundPipelineConfigurator(_bus).Pipeline;
 			_bus.Stub(x => x.OutboundPipeline).Return(_pipeline);
 
 			_consumer = new SubscriptionConsumer(_service);
@@ -62,7 +62,7 @@ namespace MassTransit.Tests.Services.Subscriptions
 		private IServiceBus _bus;
 		private IEndpoint _endpoint;
 		private readonly Uri _remoteUri = new Uri("loopback://localhost/remote");
-		private IMessagePipeline _pipeline;
+		private IOutboundMessagePipeline _pipeline;
 		private IEndpoint _remoteEndpoint;
 
 		[Test, Explicit]

@@ -15,12 +15,12 @@ namespace MassTransit.Transports
 	using System;
 	using System.IO;
 
-	public interface ISendContext :
-		IDisposable
-	{
-		Stream Body { get; }
-		void MarkRecoverable();
-		void SetLabel(string label);
-		void SetMessageExpiration(DateTime d);
-	}
+//	public interface ISendContext :
+//		IDisposable
+//	{
+//		Stream Body { get; }
+//		void MarkRecoverable();
+//		void SetLabel(string label);
+//		void SetMessageExpiration(DateTime d);
+//	}
 }

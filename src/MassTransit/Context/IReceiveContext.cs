@@ -10,48 +10,40 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.MulticastUdp
+namespace MassTransit.Context
 {
 	using System;
 	using System.IO;
+	using Serialization;
 
-	public class MulticastUdpSendContext :
-		ISendContext
+	public interface IReceiveContext :
+		IConsumeContext
 	{
-		bool _disposed;
-		public Stream Body { get; set; }
+		void SetMessageId(string value);
 
-		public void MarkRecoverable()
-		{
-		}
+		void SetInputAddress(Uri uri);
 
-		public void SetLabel(string label)
-		{
-		}
+		void SetEndpoint(IEndpoint endpoint);
 
-		public void SetMessageExpiration(DateTime d)
-		{
-		}
+		void SetBus(IServiceBus bus);
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+		void SetSourceAddress(Uri uri);
 
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-			}
+		void SetDestinationAddress(Uri uri);
 
-			_disposed = true;
-		}
+		void SetResponseAddress(Uri uri);
 
-		~MulticastUdpSendContext()
-		{
-			Dispose(false);
-		}
+		void SetFaultAddress(Uri uri);
+
+		void SetRetryCount(int retryCount);
+
+		void SetExpirationTime(DateTime value);
+
+		void SetMessageType(string messageType);
+
+
+		void CopyBodyTo(Stream stream);
+
+		void SetSerializer(IMessageSerializer serializer);
 	}
 }

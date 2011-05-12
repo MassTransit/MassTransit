@@ -16,6 +16,7 @@ namespace MassTransit.Tests.TextFixtures
 	using System.Collections.Generic;
 	using BusConfigurators;
 	using Distributor;
+	using Magnum.Extensions;
 	using MassTransit.Saga;
 	using MassTransit.Services.Subscriptions.Server;
 	using MassTransit.Transports;

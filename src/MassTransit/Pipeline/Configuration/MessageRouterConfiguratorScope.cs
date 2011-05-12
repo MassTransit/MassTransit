@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,29 +12,32 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
+	using Context;
 	using Inspectors;
 	using Sinks;
+	using Util;
 
-	public class MessageRouterConfiguratorScope<TMessage> :
-		PipelineInspectorBase<MessageRouterConfiguratorScope<TMessage>>
-		where TMessage : class
+	public class InboundMessageRouterConfiguratorScope<TOutput> :
+		PipelineInspectorBase<InboundMessageRouterConfiguratorScope<TOutput>>
+		where TOutput : class
 	{
-		public MessageRouter<object> ObjectRouter { get; private set; }
-		public MessageRouter<TMessage> Router { get; private set; }
+		public MessageRouter<IConsumeContext> InputRouter { get; private set; }
+		public MessageRouter<TOutput> OutputRouter { get; private set; }
 
-		protected bool Inspect<TRoutedMessage>(MessageRouter<TRoutedMessage> element)
-			where TRoutedMessage : class
+		[UsedImplicitly]
+		protected bool Inspect<T>(MessageRouter<T> router)
+			where T : class
 		{
-			if (typeof (TRoutedMessage) == typeof (TMessage))
+			if (typeof (T) == typeof (TOutput))
 			{
-				Router = element.TranslateTo<MessageRouter<TMessage>>();
+				OutputRouter = router.TranslateTo<MessageRouter<TOutput>>();
 
 				return false;
 			}
 
-			if (typeof (TRoutedMessage) == typeof (object))
+			if (typeof (T) == typeof (IConsumeContext))
 			{
-				ObjectRouter = element.TranslateTo<MessageRouter<object>>();
+				InputRouter = router.TranslateTo<MessageRouter<IConsumeContext>>();
 			}
 
 			return true;

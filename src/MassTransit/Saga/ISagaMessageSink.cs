@@ -12,10 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga
 {
+	using Context;
 	using MassTransit.Pipeline;
 
 	public interface ISagaMessageSink<TSaga, TMessage> :
-		IPipelineSink<TMessage>
+		IPipelineSink<IConsumeContext<TMessage>>
 		where TMessage : class
 		where TSaga : class, ISaga
 	{

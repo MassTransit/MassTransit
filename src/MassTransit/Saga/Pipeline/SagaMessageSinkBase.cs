@@ -16,6 +16,7 @@ namespace MassTransit.Saga.Pipeline
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Linq.Expressions;
+	using Context;
 	using MassTransit.Pipeline;
 
 	public abstract class SagaMessageSinkBase<TSaga, TMessage> :
@@ -23,40 +24,28 @@ namespace MassTransit.Saga.Pipeline
 		where TSaga : class, ISaga
 		where TMessage : class
 	{
-		bool _disposed;
-
-		protected SagaMessageSinkBase(IServiceBus bus,
-		                              ISagaRepository<TSaga> repository,
-		                              ISagaPolicy<TSaga, TMessage> policy)
+		protected SagaMessageSinkBase(ISagaRepository<TSaga> repository, ISagaPolicy<TSaga, TMessage> policy)
 		{
-			Bus = bus;
 			Repository = repository;
 			Policy = policy;
 		}
 
-		public ISagaPolicy<TSaga, TMessage> Policy { get; private set; }
-		public ISagaRepository<TSaga> Repository { get; private set; }
-		public IServiceBus Bus { get; private set; }
-
 		protected abstract Expression<Func<TSaga, TMessage, bool>> FilterExpression { get; }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+		public ISagaPolicy<TSaga, TMessage> Policy { get; private set; }
+		public ISagaRepository<TSaga> Repository { get; private set; }
 
-		public IEnumerable<Action<TMessage>> Enumerate(TMessage itemxxx)
+		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> acceptContext)
 		{
-			yield return message =>
+			yield return context =>
 				{
-					Expression<Func<TSaga, bool>> filter = CreateFilterExpressionForMessage(message);
+					Expression<Func<TSaga, bool>> filter = CreateFilterExpressionForMessage(context.Message);
 
-					Repository.Send(filter, Policy, message, saga =>
+					Repository.Send(filter, Policy, context.Message, saga =>
 						{
-							saga.Bus = Bus;
+							saga.Bus = context.Bus;
 
-							ConsumerAction(saga, message);
+							ConsumerAction(saga, context.Message);
 						});
 				};
 		}
@@ -67,16 +56,6 @@ namespace MassTransit.Saga.Pipeline
 		}
 
 		protected abstract void ConsumerAction(TSaga saga, TMessage message);
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-			}
-
-			_disposed = true;
-		}
 
 		protected Expression<Func<TSaga, TMessage, bool>> CreateCorrelatedSelector()
 		{
@@ -96,11 +75,6 @@ namespace MassTransit.Saga.Pipeline
 		Expression<Func<TSaga, bool>> CreateFilterExpressionForMessage(TMessage message)
 		{
 			return new SagaFilterExpressionConverter<TSaga, TMessage>(message).Convert(FilterExpression);
-		}
-
-		~SagaMessageSinkBase()
-		{
-			Dispose(false);
 		}
 	}
 }

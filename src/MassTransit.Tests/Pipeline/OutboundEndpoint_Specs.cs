@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -26,22 +26,22 @@ namespace MassTransit.Tests.Pipeline
 		[SetUp]
 		public void Setup()
 		{
-			_pipeline = MessagePipelineConfigurator.CreateDefault(null);
+			_pipeline = new OutboundPipelineConfigurator(MockRepository.GenerateMock<IServiceBus>()).Pipeline;
 		}
 
-		private MessagePipeline _pipeline;
+		IOutboundMessagePipeline _pipeline;
 
 		[Test]
 		public void The_endpoint_consumer_should_be_returned()
 		{
-			IEndpoint endpoint = MockRepository.GenerateMock<IEndpoint>();
+			var endpoint = MockRepository.GenerateMock<IEndpoint>();
 			endpoint.Stub(x => x.Uri).Return(new Uri("msmq://localhost/queue_name"));
 
 			_pipeline.ConnectEndpoint<PingMessage>(endpoint);
 
 			PipelineViewer.Trace(_pipeline);
 
-			PingMessage message = new PingMessage();
+			var message = new PingMessage();
 
 			endpoint.Expect(x => x.Send(message));
 

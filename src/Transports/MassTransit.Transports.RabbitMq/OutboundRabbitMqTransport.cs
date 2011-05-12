@@ -1,6 +1,9 @@
 ﻿namespace MassTransit.Transports.RabbitMq
 {
 	using System;
+	using System.IO;
+	using Context;
+	using Magnum;
 	using RabbitMQ.Client;
 	using Util;
 
@@ -23,18 +26,27 @@
 			get { return _address; }
 		}
 
-		public void Send(Action<ISendContext> callback)
+		public void Send(ISendContext context)
 		{
 			DeclareBindings();
 
-			using (var context = new RabbitMqSendContext(_channel))
-			{
-				callback(context);
+			IBasicProperties properties = _channel.CreateBasicProperties();
 
-				_channel.BasicPublish(_address.Name, "", context.Properties, context.GetBytes());
+			properties.SetPersistent(true);
+			if(context.ExpirationTime.HasValue)
+			{
+				var value = context.ExpirationTime.Value;
+				properties.Expiration = (value.Kind == DateTimeKind.Utc ? value - SystemUtil.UtcNow : value - SystemUtil.Now).ToString();
+			}
+
+			using(var body = new MemoryStream())
+			{
+				context.SerializeTo(body);
+
+				_channel.BasicPublish(_address.Name, "", properties, body.ToArray());
 
 				if (SpecialLoggers.Messages.IsInfoEnabled)
-					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, context.Properties.MessageId);
+					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, context.MessageId);
 			}
 		}
 

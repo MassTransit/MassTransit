@@ -22,10 +22,8 @@ namespace MassTransit.Saga.Pipeline
 	{
 		readonly Expression<Func<TSaga, TMessage, bool>> _selector;
 
-		public CorrelatedSagaMessageSink(IServiceBus bus,
-		                                 ISagaRepository<TSaga> repository,
-		                                 ISagaPolicy<TSaga, TMessage> policy)
-			: base(bus, repository, policy)
+		public CorrelatedSagaMessageSink(ISagaRepository<TSaga> repository, ISagaPolicy<TSaga, TMessage> policy)
+			: base(repository, policy)
 		{
 			_selector = CreateCorrelatedSelector();
 		}

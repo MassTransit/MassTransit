@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,67 +14,54 @@ namespace MassTransit.Distributor.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
+	using Context;
 	using MassTransit.Pipeline;
-	using MessageHeaders;
 	using Messages;
 	using Saga;
 
 	public class SagaWorkerMessageSink<TSaga, TMessage> :
-		IPipelineSink<Distributed<TMessage>>
+		IPipelineSink<IConsumeContext<Distributed<TMessage>>>
 		where TSaga : class, ISaga
 		where TMessage : class
 	{
-		private readonly ISagaWorker<TSaga> _worker;
-		private IPipelineSink<TMessage> _sink;
+		readonly ISagaWorker<TSaga> _worker;
+		ISagaMessageSink<TSaga, TMessage> _sink;
 
-		public SagaWorkerMessageSink(ISagaWorker<TSaga> worker, IPipelineSink<TMessage> sink)
+		public SagaWorkerMessageSink(ISagaWorker<TSaga> worker, ISagaMessageSink<TSaga, TMessage> sink)
 		{
 			_worker = worker;
 			_sink = sink;
 		}
 
-		public void Dispose()
+		public IEnumerable<Action<IConsumeContext<Distributed<TMessage>>>> Enumerate(
+			IConsumeContext<Distributed<TMessage>> context)
 		{
-			_sink.Dispose();
-			_sink = null;
-		}
+			if (!_worker.CanAcceptMessage(context.Message))
+				return Enumerable.Empty<Action<IConsumeContext<Distributed<TMessage>>>>();
 
-		public IEnumerable<Action<Distributed<TMessage>>> Enumerate(Distributed<TMessage> item)
-		{
-			if (!_worker.CanAcceptMessage(item))
-				yield break;
+			var payloadContext = new ConsumeContext<TMessage>(context, context.Message.Payload);
+			payloadContext.SetResponseAddress(context.Message.ResponseAddress);
 
-			RewriteResponseAddress(item.ResponseAddress);
-
-			foreach (var sinkAction in _sink.Enumerate(item.Payload))
-			{
-				Action<TMessage> action = sinkAction;
-
-				yield return message =>
+			return _sink.Enumerate(payloadContext).Select(action => (Action<IConsumeContext<Distributed<TMessage>>>) (m =>
+				{
+					_worker.IncrementInProgress();
+					try
 					{
-						_worker.IncrementInProgress();
-						try
-						{
-							_worker.ConsumingMessage(message);
+						_worker.ConsumingMessage(context.Message);
 
-							action(message.Payload);
-						}
-						finally
-						{
-							_worker.DecrementInProgress();
-						}
-					};
-			}
+						action(payloadContext);
+					}
+					finally
+					{
+						_worker.DecrementInProgress();
+					}
+				}));
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
 		{
 			return inspector.Inspect(this, () => _sink.Inspect(inspector));
-		}
-
-		private static void RewriteResponseAddress(Uri responseAddress)
-		{
-			InboundMessageHeaders.SetCurrent(x => x.SetResponseAddress(responseAddress));
 		}
 	}
 }

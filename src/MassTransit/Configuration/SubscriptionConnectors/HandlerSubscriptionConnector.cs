@@ -13,6 +13,7 @@
 namespace MassTransit.SubscriptionConnectors
 {
 	using System;
+	using Context;
 	using Pipeline;
 	using Pipeline.Configuration;
 	using Pipeline.Sinks;
@@ -20,11 +21,11 @@ namespace MassTransit.SubscriptionConnectors
 	public class HandlerSubscriptionConnector<TMessage>
 		where TMessage : class
 	{
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator, Func<TMessage, Action<TMessage>> handler)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, Func<TMessage, Action<TMessage>> handler)
 		{
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(configurator.Pipeline);
+			var routerConfigurator = new InboundMessageRouterConfigurator(configurator.Pipeline);
 
-			MessageRouter<TMessage> router = routerConfigurator.FindOrCreate<TMessage>();
+			MessageRouter<IConsumeContext<TMessage>> router = routerConfigurator.FindOrCreate<TMessage>();
 
 			var sink = new InstanceMessageSink<TMessage>(handler);
 

@@ -14,7 +14,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 {
 	using System;
 	using Exceptions;
-	using MassTransit.Pipeline;
 	using Pipeline;
 
 	public class OrchestratesSagaSubscriptionConnector<TSaga, TMessage> :
@@ -27,10 +26,10 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		{
 		}
 
-		protected override IPipelineSink<TMessage> CreateSink(IServiceBus bus, ISagaRepository<TSaga> repository,
-		                                                      ISagaPolicy<TSaga, TMessage> policy)
+		protected override ISagaMessageSink<TSaga, TMessage> CreateSink(ISagaRepository<TSaga> repository,
+		                                                                ISagaPolicy<TSaga, TMessage> policy)
 		{
-			var sink = new CorrelatedSagaMessageSink<TSaga, TMessage>(bus, repository, policy);
+			var sink = new CorrelatedSagaMessageSink<TSaga, TMessage>(repository, policy);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the orchestrating message sink for " + typeof (TSaga).FullName);
 
