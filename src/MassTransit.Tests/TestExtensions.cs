@@ -16,6 +16,7 @@ namespace MassTransit.Tests
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Reflection;
+	using Magnum.Extensions;
 	using NUnit.Framework;
 
 	public static class TestExtensions

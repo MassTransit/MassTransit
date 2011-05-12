@@ -28,11 +28,10 @@ namespace MassTransit.Saga.Pipeline
 		readonly DataEvent<TSaga, TMessage> _dataEvent;
 		readonly Expression<Func<TSaga, TMessage, bool>> _selector;
 
-		public CorrelatedSagaStateMachineMessageSink(IServiceBus bus,
-		                                             ISagaRepository<TSaga> repository,
+		public CorrelatedSagaStateMachineMessageSink(ISagaRepository<TSaga> repository,
 		                                             ISagaPolicy<TSaga, TMessage> policy,
 		                                             DataEvent<TSaga, TMessage> dataEvent)
-			: base(bus, repository, policy)
+			: base(repository, policy)
 		{
 			_dataEvent = dataEvent;
 

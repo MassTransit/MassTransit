@@ -17,6 +17,7 @@ namespace MassTransit.Transports.Msmq.Management
 	using System.Diagnostics;
 	using System.Linq;
 	using Exceptions;
+	using Magnum.Extensions;
 	using Microsoft.Win32;
 
 	/// <summary>
@@ -30,11 +31,11 @@ namespace MassTransit.Transports.Msmq.Management
 
 		public MsDtcManagement()
 		{
-			_registryValues = new []
+			_registryValues = new[]
 				{
 					"NetworkDtcAccess",
 					"NetworkDtcAccessOutbound",
-					"NetworkDtcAccessTransactions", 
+					"NetworkDtcAccessTransactions",
 					"XaTransactions"
 				};
 		}
@@ -59,9 +60,9 @@ namespace MassTransit.Transports.Msmq.Management
 			try
 			{
 				RegistryKey registryKey = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\MSDTC\Security", allowChanges);
-				if(registryKey == null)
+				if (registryKey == null)
 				{
-					if(allowInstall)
+					if (allowInstall)
 					{
 						Install();
 
@@ -73,10 +74,10 @@ namespace MassTransit.Transports.Msmq.Management
 						throw new NotSupportedException("The MSDTC is not installed.");
 				}
 
-				using(registryKey)
+				using (registryKey)
 				{
 					var incorrectValues = _registryValues
-						.Select(key => new { Key = key, Value = (int) registryKey.GetValue(key)})
+						.Select(key => new {Key = key, Value = (int) registryKey.GetValue(key)})
 						.Where(x => x.Value == 0);
 
 					if (!incorrectValues.Any())
@@ -96,7 +97,7 @@ namespace MassTransit.Transports.Msmq.Management
 			}
 		}
 
-		void Restart()
+		static void Restart()
 		{
 			using (var service = new WindowsService("MSDTC"))
 			{
@@ -104,12 +105,16 @@ namespace MassTransit.Transports.Msmq.Management
 			}
 		}
 
-		void Install()
+		static void Install()
 		{
-			using (var process = Process.Start("MSDTC.EXE", "-install"))
+			Process process = Process.Start("MSDTC.EXE", "-install");
+			if (process == null)
+				throw new InvalidOperationException("Failed to start MSDTC.EXE for installation");
+
+			using (process)
 			{
 				process.WaitForExit();
 			}
 		}
-	}		
+	}
 }

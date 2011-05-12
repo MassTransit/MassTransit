@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.IO;
+	using Context;
 	using log4net;
 	using Magnum.Extensions;
 	using Management;
@@ -47,8 +48,9 @@
 				if (result == null)
 					return;
 
-				using (var context = new RabbitMqReceiveContext(result.BasicProperties, result.Body))
+				using(var body = new MemoryStream(result.Body, false))
 				{
+					var context = new ConsumeContext(body);
 					Action<IReceiveContext> receive = callback(context);
 					if (receive == null)
 					{
@@ -66,7 +68,7 @@
 
 				_channel.BasicAck(result.DeliveryTag, false);
 			}
-			catch (EndOfStreamException ex)
+			catch (EndOfStreamException)
 			{
 				return;
 			}

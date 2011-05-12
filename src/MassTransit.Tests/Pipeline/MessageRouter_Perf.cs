@@ -1,7 +1,9 @@
 namespace MassTransit.Tests.Pipeline
 {
 	using System.Diagnostics;
+	using System.IO;
 	using System.Threading;
+	using Context;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Sinks;
 	using Messages;
@@ -43,7 +45,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test, Explicit]
 		public void Router_performance_measurement()
 		{
-			IPipelineSink<PingMessage> router = SetupRouterOnly();
+			MessageRouter<IConsumeContext<PingMessage>> router = SetupRouterOnly();
 
 			const int primeLoopCount = 10;
 			SendMessages(router, primeLoopCount);
@@ -62,7 +64,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test, Explicit]
 		public void Nested_router_performance_measurement()
 		{
-			IPipelineSink<object> router = SetupTwoRoutersOnly();
+			MessageRouter<IConsumeContext> router = SetupTwoRoutersOnly();
 
 			const int primeLoopCount = 10;
 			SendMessages(router, primeLoopCount);
@@ -78,54 +80,60 @@ namespace MassTransit.Tests.Pipeline
 			Trace.WriteLine("Messages Per Second: " + loopCount*1000/timer.ElapsedMilliseconds);
 		}
 
-		private static IPipelineSink<PingMessage> SetupRouterOnly()
+		private static MessageRouter<IConsumeContext<PingMessage>> SetupRouterOnly()
 		{
 			_consumer = new PerformantConsumer<PingMessage>(1500000);
 
 			var messageSink = new InstanceMessageSink<PingMessage>(message => _consumer.Consume);
 
-			var router = new MessageRouter<PingMessage>();
+			var router = new MessageRouter<IConsumeContext<PingMessage>>();
 			router.Connect(messageSink);
 			return router;
 		}
 
-		private static IPipelineSink<object> SetupTwoRoutersOnly()
+		private static MessageRouter<IConsumeContext> SetupTwoRoutersOnly()
 		{
 			_consumer = new PerformantConsumer<PingMessage>(1500000);
 
 			var messageSink = new InstanceMessageSink<PingMessage>(message => _consumer.Consume);
 
-			var router = new MessageRouter<PingMessage>();
+			var router = new MessageRouter<IConsumeContext<PingMessage>>();
 			router.Connect(messageSink);
 
-			var translater = new MessageTranslator<object, PingMessage>(router);
+			var translater = new InboundConvertMessageSink<PingMessage>(router);
 
-			var nextRouter = new MessageRouter<object>();
+			var nextRouter = new MessageRouter<IConsumeContext>();
 			nextRouter.Connect(translater);
 
 			return nextRouter;
 		}
 
-		private static void SendMessages(IPipelineSink<PingMessage> sink, int primeLoopCount)
+		private static void SendMessages(IPipelineSink<IConsumeContext<PingMessage>> sink, int primeLoopCount)
 		{
+			var message = new PingMessage();
+			var consumeContext = new ConsumeContext(new MemoryStream());
+			var context = new ConsumeContext<PingMessage>(consumeContext, message);
+
 			for (int i = 0; i < primeLoopCount; i++)
 			{
-				var message = new PingMessage();
-				foreach (var item in sink.Enumerate(message))
+				foreach (var item in sink.Enumerate(context))
 				{
-					item(message);
+					item(context);
 				}
 			}
 		}
 
-		private static void SendMessages(IPipelineSink<object> sink, int primeLoopCount)
+		private static void SendMessages(IPipelineSink<IConsumeContext> sink, int primeLoopCount)
 		{
+			var message = new PingMessage();
+			var consumeContext = new ConsumeContext(new MemoryStream());
+			var context = new ConsumeContext<PingMessage>(consumeContext, message);
+
 			for (int i = 0; i < primeLoopCount; i++)
 			{
-				var message = new PingMessage();
-				foreach (var item in sink.Enumerate(message))
+				foreach (var item in sink.Enumerate(context))
 				{
-					item(message);
+					item(context);
 				}
 			}
 		}
@@ -143,21 +151,23 @@ namespace MassTransit.Tests.Pipeline
 
             var messageSink = new InstanceMessageSink<ClaimModified>(m => msg => { count++; });
             var messageSink2 = new InstanceMessageSink<ClaimModified>(m => msg => { count2++; });
-            var router = new MessageRouter<ClaimModified>();
+            var router = new MessageRouter<IConsumeContext<ClaimModified>>();
             router.Connect(messageSink);
             router.Connect(messageSink2);
 
 
-            var translater = new MessageTranslator<object, ClaimModified>(router);
-            var objectRouter = new MessageRouter<object>();
+            var translater = new InboundConvertMessageSink<ClaimModified>(router);
+            var objectRouter = new MessageRouter<IConsumeContext>();
             objectRouter.Connect(translater);
-            var pipeline = new MessagePipeline(objectRouter, MockRepository.GenerateMock<IPipelineConfigurator>());
+            var pipeline = new InboundMessagePipeline(objectRouter, MockRepository.GenerateMock<IInboundPipelineConfigurator>());
 
             var message = new ClaimModified();
+			var consumeContext = new ConsumeContext(new MemoryStream());
+			var context = new ConsumeContext<ClaimModified>(consumeContext, message);
 
             for (int i = 0; i < 100; i++)
             {
-                pipeline.Dispatch(message);
+				pipeline.Dispatch(consumeContext);
             }
 
             count = 0;
@@ -167,7 +177,7 @@ namespace MassTransit.Tests.Pipeline
 
             for (int i = 0; i < limit; i++)
             {
-                pipeline.Dispatch(message);
+				pipeline.Dispatch(context);
             }
 
             timer.Stop();

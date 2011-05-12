@@ -13,11 +13,12 @@
 namespace MassTransit.Pipeline
 {
 	using System;
+	using Context;
 
 	public interface IMessagePipeline :
-		IPipelineSink<object>
+		IPipelineSink<IMessageContext>
 	{
-		void Configure(Action<IPipelineConfigurator> configurePipeline);
-		V Configure<V>(Func<IPipelineConfigurator, V> configurePipeline);
+		void Configure(Action<IInboundPipelineConfigurator> configurePipeline);
+		V Configure<V>(Func<IInboundPipelineConfigurator, V> configurePipeline);
 	}
 }

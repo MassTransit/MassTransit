@@ -23,10 +23,10 @@ namespace MassTransit.Tests.Pipeline
 		[SetUp]
 		public void Setup()
 		{
-			_pipeline = MessagePipelineConfigurator.CreateDefault(null);
+			_pipeline = InboundPipelineConfigurator.CreateDefault(null);
 		}
 
-		MessagePipeline _pipeline;
+		IInboundMessagePipeline _pipeline;
 
 		[Test]
 		public void The_pipeline_should_be_happy()

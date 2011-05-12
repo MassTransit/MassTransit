@@ -28,7 +28,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			var transport = MockRepository.GenerateStub<IDuplexTransport>();
 			transport.Stub(x => x.Receive(null,TimeSpan.Zero))
-				.Callback(new Func<Func<IReceiveContext, Action<IReceiveContext>>, bool>(Forwarder));
+				.Callback(new Func<Func<IOldCrapyContext, Action<IOldCrapyContext>>, bool>(Forwarder));
 
 			var address = MockRepository.GenerateMock<IEndpointAddress>();
 
@@ -49,11 +49,11 @@ namespace MassTransit.Transports.Msmq.Tests
             Assert.IsTrue(future.IsCompleted, "Receive was not called");
 		}
 
-		private bool Forwarder(Func<IReceiveContext, Action<IReceiveContext>> arg)
+		private bool Forwarder(Func<IOldCrapyContext, Action<IOldCrapyContext>> arg)
 		{
 			using (Message message = CreateSimpleMessage())
 			{
-				Action<IReceiveContext> func = arg(new MsmqReceiveContext(message));
+				Action<IOldCrapyContext> func = arg(new MsmqReceiveContext(message));
 				if (func == null)
 					return true;
 

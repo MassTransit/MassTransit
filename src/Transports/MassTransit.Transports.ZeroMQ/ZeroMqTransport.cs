@@ -1,5 +1,5 @@
-// Copyright 2007-2011 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,33 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.ZeroMQ
 {
-    using System;
-    using log4net;
+	using System;
+	using Context;
+	using log4net;
 
-    public class ZeroMqTransport :
-        TransportBase
-    {
-        static readonly ILog _log = LogManager.GetLogger(typeof (ZeroMqTransport));
+	public class ZeroMqTransport :
+		TransportBase
+	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (ZeroMqTransport));
 
-        public ZeroMqTransport(IEndpointAddress address) :
-            base(address)
-        {
+		public ZeroMqTransport(IEndpointAddress address)
+			: base(address)
+		{
+		}
 
-        }
+		public override void Send(ISendContext context)
+		{
+			throw new NotImplementedException();
+		}
 
-        public override void Send(Action<ISendContext> callback)
-        {
-            throw new NotImplementedException();
-        }
+		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+		{
+			throw new NotImplementedException();
+		}
 
-        public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void OnDisposing()
-        {
-            throw new NotImplementedException();
-        }
-    }
+		protected override void OnDisposing()
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

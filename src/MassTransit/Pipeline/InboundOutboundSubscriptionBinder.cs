@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,10 +15,10 @@ namespace MassTransit.Pipeline
 	public class InboundOutboundSubscriptionBinder :
 		ISubscriptionEvent
 	{
-		private readonly IEndpoint _localEndpoint;
-		private readonly IMessagePipeline _outbound;
+		readonly IEndpoint _localEndpoint;
+		readonly IOutboundMessagePipeline _outbound;
 
-		public InboundOutboundSubscriptionBinder(IMessagePipeline outbound, IEndpoint localEndpoint)
+		public InboundOutboundSubscriptionBinder(IOutboundMessagePipeline outbound, IEndpoint localEndpoint)
 		{
 			_outbound = outbound;
 			_localEndpoint = localEndpoint;

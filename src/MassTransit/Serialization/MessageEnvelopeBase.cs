@@ -60,7 +60,7 @@ namespace MassTransit.Serialization
 
 		/// <summary>
 		/// Identifies a specific network to which this message belongs and is used to filter
-		/// out messages that mighte be from untrusted networks
+		/// out messages that might be from untrusted networks
 		/// </summary>
 		public string Network { get; set; }
 

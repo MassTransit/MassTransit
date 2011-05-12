@@ -32,7 +32,7 @@ namespace MassTransit.SubscriptionBuilders
 			_consumerConnector = ConsumerConnectorCache.GetConsumerConnector(consumerFactory);
 		}
 
-		public ISubscriptionReference Subscribe(IPipelineConfigurator configurator)
+		public ISubscriptionReference Subscribe(IInboundPipelineConfigurator configurator)
 		{
 			UnsubscribeAction unsubscribe = _consumerConnector.Connect(configurator);
 

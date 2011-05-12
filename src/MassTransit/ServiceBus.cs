@@ -14,6 +14,7 @@ namespace MassTransit
 {
 	using System;
 	using System.Diagnostics;
+	using Context;
 	using Events;
 	using Exceptions;
 	using log4net;
@@ -48,6 +49,7 @@ namespace MassTransit
 		IServiceContainer _serviceContainer;
 		volatile bool _started;
 		UnregisterAction _unsubscribeEventDispatchers = () => true;
+		IContextProvider _contextProvider;
 
 		static ServiceBus()
 		{
@@ -78,14 +80,16 @@ namespace MassTransit
 			Endpoint = endpointToListenOn;
 			EndpointCache = endpointCache;
 
+			_contextProvider = null;
+
 			_eventAggregator = PipeSegment.New();
 			_eventAggregatorScope = _eventAggregator.NewSubscriptionScope();
 
 			_serviceContainer = new ServiceContainer(this);
 
-			OutboundPipeline = MessagePipelineConfigurator.CreateDefault(this);
+			OutboundPipeline = new OutboundPipelineConfigurator(this).Pipeline;
 
-			InboundPipeline = MessagePipelineConfigurator.CreateDefault(this);
+			InboundPipeline = InboundPipelineConfigurator.CreateDefault(this);
 			InboundPipeline.Configure(
 				x => { _unsubscribeEventDispatchers += x.Register(new InboundOutboundSubscriptionBinder(OutboundPipeline, Endpoint)); });
 
@@ -153,22 +157,24 @@ namespace MassTransit
 		/// </summary>
 		/// <typeparam name="T">The type of the message</typeparam>
 		/// <param name="message">The messages to be published</param>
-		public void Publish<T>(T message)
+		/// <param name="contextCallback">The callback to perform operations on the context</param>
+		public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
 			where T : class
 		{
 			Stopwatch publishDuration = Stopwatch.StartNew();
 
-			IOutboundMessageContext context = OutboundMessage.Context;
+			var context = new PublishContext<T>(message);
 
 			context.SetSourceAddress(Endpoint.Uri);
-			context.SetMessageType(typeof (T));
+
+			contextCallback(context);
 
 			int publishedCount = 0;
-			foreach (var consumer in OutboundPipeline.Enumerate(message))
+			foreach (var consumer in OutboundPipeline.Enumerate(context))
 			{
 				try
 				{
-					consumer(message);
+					consumer(context);
 					publishedCount++;
 				}
 				catch (Exception ex)
@@ -191,27 +197,23 @@ namespace MassTransit
 					ConsumerCount = publishedCount,
 					Duration = publishDuration.Elapsed,
 				});
-
-			context.Reset();
 		}
-
-		//		endpoint.Send(message, info.TimeToLive);
 
 		public TService GetService<TService>() where TService : IBusService
 		{
 			return _serviceContainer.GetService<TService>();
 		}
 
-		public IMessagePipeline OutboundPipeline { get; private set; }
+		public IOutboundMessagePipeline OutboundPipeline { get; private set; }
 
-		public IMessagePipeline InboundPipeline { get; private set; }
+		public IInboundMessagePipeline InboundPipeline { get; private set; }
 
 		/// <summary>
 		/// The endpoint associated with this instance
 		/// </summary>
 		public IEndpoint Endpoint { get; private set; }
 
-		public UnsubscribeAction Configure(Func<IPipelineConfigurator, UnsubscribeAction> configure)
+		public UnsubscribeAction Configure(Func<IInboundPipelineConfigurator, UnsubscribeAction> configure)
 		{
 			return InboundPipeline.Configure(configure);
 		}
@@ -267,12 +269,6 @@ namespace MassTransit
 					ControlBus.Dispose();
 
 				RemoveLoopbackSubsciber();
-
-				InboundPipeline.Dispose();
-				InboundPipeline = null;
-
-				OutboundPipeline.Dispose();
-				OutboundPipeline = null;
 
 				if (_eventAggregatorScope != null)
 				{
@@ -340,6 +336,19 @@ namespace MassTransit
 		{
 			_unsubscribeEventDispatchers();
 			_unsubscribeEventDispatchers = () => true;
+		}
+
+		public TContext ReceiveContext<TContext>(Action<TContext> contextAction) 
+			where TContext : IReceiveContext
+		{
+			return _contextProvider.ReceiveContext(contextAction);
+		}
+
+		public TContext SendContext<TContext, TMessage>(TMessage message, Action<TContext> contextAction)
+			where TContext : ISendContext<TMessage> 
+			where TMessage : class
+		{
+			return _contextProvider.SendContext(message, contextAction);
 		}
 	}
 }

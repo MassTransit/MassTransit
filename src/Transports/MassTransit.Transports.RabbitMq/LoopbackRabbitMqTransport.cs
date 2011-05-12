@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq
 {
 	using System;
+	using Context;
 
 	public class LoopbackRabbitMqTransport :
 		IDuplexTransport
@@ -40,9 +41,9 @@ namespace MassTransit.Transports.RabbitMq
 			_inbound.Receive(callback, timeout);
 		}
 
-		public void Send(Action<ISendContext> callback)
+		public void Send(ISendContext context)
 		{
-			_outbound.Send(callback);
+			_outbound.Send(context);
 		}
 
 		public IOutboundTransport OutboundTransport

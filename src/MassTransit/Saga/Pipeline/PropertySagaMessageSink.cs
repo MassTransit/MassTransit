@@ -20,11 +20,10 @@ namespace MassTransit.Saga.Pipeline
 		where TSaga : class, ISaga, CorrelatedBy<Guid>, Consumes<TMessage>.All
 		where TMessage : class
 	{
-		public PropertySagaMessageSink(IServiceBus bus,
-		                               ISagaRepository<TSaga> repository,
+		public PropertySagaMessageSink(ISagaRepository<TSaga> repository,
 		                               ISagaPolicy<TSaga, TMessage> policy,
 		                               Expression<Func<TSaga, TMessage, bool>> selector)
-			: base(bus, repository, policy)
+			: base(repository, policy)
 		{
 			Selector = selector;
 		}

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,55 +14,30 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
+	using Context;
 
 	public class InstanceMessageSinkBase<TMessage> :
-		IPipelineSink<TMessage>
+		IPipelineSink<IConsumeContext<TMessage>>
 		where TMessage : class
 	{
-		private Func<TMessage, Action<TMessage>> _acceptor;
+		readonly Func<TMessage, Action<TMessage>> _acceptor;
 
 		public InstanceMessageSinkBase(Func<TMessage, Action<TMessage>> acceptor)
 		{
 			_acceptor = acceptor;
 		}
 
-		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
+		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
 		{
-			var consumer = _acceptor(message);
+			Action<TMessage> consumer = _acceptor(context.Message);
 			if (consumer != null)
-				yield return consumer;
+				yield return x => consumer(context.Message);
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
 		{
 			inspector.Inspect(this);
-
-			// since this is the end of the line, we don't visit this one I suppose
 			return true;
-		}
-
-		bool _disposed;
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		~InstanceMessageSinkBase()
-		{
-			Dispose(false);
-		}
-
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				
-			}
-
-			_disposed = true;
 		}
 	}
 }

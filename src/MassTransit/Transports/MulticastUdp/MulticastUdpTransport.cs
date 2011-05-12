@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,141 +12,140 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
-    using System.IO;
-    using System.Net;
-    using System.Net.Sockets;
-    using Exceptions;
-    using MulticastUdp;
+	using System;
+	using System.IO;
+	using System.Net;
+	using System.Net.Sockets;
+	using Context;
+	using Exceptions;
 
 	public class MulticastUdpTransport :
-        TransportBase
-    {
-        private IPAddress _groupAddress;
-        private UdpClient _receiveClient;
-        private UdpClient _sendClient;
-        private IPEndPoint _sendIpEndPoint;
+		TransportBase
+	{
+		IPAddress _groupAddress;
+		UdpClient _receiveClient;
+		UdpClient _sendClient;
+		IPEndPoint _sendIpEndPoint;
 
-        public MulticastUdpTransport(IEndpointAddress address) : base(address)
-        {
-            Initialize();
-        }
+		public MulticastUdpTransport(IEndpointAddress address)
+			: base(address)
+		{
+			Initialize();
+		}
 
-        public override void Send(Action<ISendContext> cxt)
-        {
-            GuardAgainstDisposed();
+		public override void Send(ISendContext context)
+		{
+			GuardAgainstDisposed();
 
-            using (var bodyStream = new MemoryStream())
-            {
-                var context = new MulticastUdpSendContext();
-                context.Body = bodyStream;
-                cxt(context);
+			using (var bodyStream = new MemoryStream())
+			{
+				context.SerializeTo(bodyStream);
 
-                try
-                {
-                    byte[] data = bodyStream.ToArray();
-                    _sendClient.Send(data, data.Length, _sendIpEndPoint);
-                }
-                catch (Exception ex)
-                {
-                    throw new TransportException(Address.Uri, "Unable to send to transport: " + _sendIpEndPoint, ex);
-                }
-            }
-        }
+				try
+				{
+					byte[] data = bodyStream.ToArray();
+					_sendClient.Send(data, data.Length, _sendIpEndPoint);
+				}
+				catch (Exception ex)
+				{
+					throw new TransportException(Address.Uri, "Unable to send to transport: " + _sendIpEndPoint, ex);
+				}
+			}
+		}
 
-        public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
-        {
-            GuardAgainstDisposed();
+		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+		{
+			GuardAgainstDisposed();
 
-            var endPoint = new IPEndPoint(IPAddress.Any, Address.Uri.Port);
+			var endPoint = new IPEndPoint(IPAddress.Any, Address.Uri.Port);
 
-            byte[] data = _receiveClient.Receive(ref endPoint);
-            if (data == null || data.Length <= 0)
-                return;
+			byte[] data = _receiveClient.Receive(ref endPoint);
+			if (data == null || data.Length <= 0)
+				return;
 
-            using (var bodyStream = new MemoryStream(data))
-            {
-                var cxt = new MulticastUdpReceiveContext();
-                cxt.Body = bodyStream;
-                Action<IReceiveContext> receive = callback(cxt);
-                if (receive == null)
-                {
-                    // SKIPPED
-                    return;
-                }
+			using (var bodyStream = new MemoryStream(data))
+			{
+				var context = new ConsumeContext(bodyStream);
 
-                receive(cxt);
-            }
-        }
+				Action<IReceiveContext> receive = callback(context);
+				if (receive == null)
+				{
+					// SKIPPED
+					return;
+				}
 
-        private void Initialize()
-        {
-            _groupAddress = IPAddress.Parse(Address.Uri.Host);
-            if (_groupAddress == null)
-                throw new TransportException(Address.Uri, "The multicast address could not be determined");
+				receive(context);
+			}
+		}
 
-            if (_groupAddress.AddressFamily != AddressFamily.InterNetwork)
-                throw new TransportException(Address.Uri, "The specified address is not a valid multicast address");
+		protected override void OnDisposing()
+		{
+			StopSender();
+			StopReceiver();
+		}
 
-            StartSender();
-            StartReceiver();
-        }
+		void Initialize()
+		{
+			_groupAddress = IPAddress.Parse(Address.Uri.Host);
+			if (_groupAddress == null)
+				throw new TransportException(Address.Uri, "The multicast address could not be determined");
 
-        private void StartSender()
-        {
-            _sendIpEndPoint = new IPEndPoint(_groupAddress, Address.Uri.Port);
+			if (_groupAddress.AddressFamily != AddressFamily.InterNetwork)
+				throw new TransportException(Address.Uri, "The specified address is not a valid multicast address");
 
-            const int port = 0;
-            _sendClient = new UdpClient(port, AddressFamily.InterNetwork);
-            _sendClient.DontFragment = true;
-            _sendClient.Ttl = 2; // 0 = host, 1 = subnet, <32 = same company 
-            _sendClient.Client.SendBufferSize = 256*1024;
+			StartSender();
+			StartReceiver();
+		}
 
-            _sendClient.JoinMulticastGroup(_groupAddress);
-        }
+		void StartSender()
+		{
+			_sendIpEndPoint = new IPEndPoint(_groupAddress, Address.Uri.Port);
 
-        private void StartReceiver()
-        {
-            _receiveClient = new UdpClient();
+			const int port = 0;
+			_sendClient = new UdpClient(port, AddressFamily.InterNetwork);
+			_sendClient.DontFragment = true;
+			_sendClient.Ttl = 2; // 0 = host, 1 = subnet, <32 = same company 
+			_sendClient.Client.SendBufferSize = 256*1024;
 
-            Socket s = _receiveClient.Client;
+			_sendClient.JoinMulticastGroup(_groupAddress);
+		}
 
-            const int optionValue = 1;
-            s.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, optionValue);
+		void StartReceiver()
+		{
+			_receiveClient = new UdpClient();
 
-            s.ReceiveBufferSize = 256*1024;
-            s.ReceiveTimeout = 2000;
-            s.Bind(new IPEndPoint(IPAddress.Any, Address.Uri.Port));
+			Socket s = _receiveClient.Client;
 
-            _receiveClient.JoinMulticastGroup(_groupAddress, 2); // 0 = host, 1 = subnet, <32 = same company
-        }
+			const int optionValue = 1;
+			s.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, optionValue);
 
-        private void StopSender()
-        {
-            if (_sendClient != null)
-            {
-                using (_sendClient)
-                    _sendClient.Close();
-            }
-        	_sendClient = null;
-        }
+			s.ReceiveBufferSize = 256*1024;
+			s.ReceiveTimeout = 2000;
+			s.Bind(new IPEndPoint(IPAddress.Any, Address.Uri.Port));
 
-        private void StopReceiver()
-        {
-            if (_receiveClient != null)
-            {
-                using (_receiveClient)
-                {
-                    _receiveClient.Close();
-                }
-            	_receiveClient = null;
-            }
-        }
+			_receiveClient.JoinMulticastGroup(_groupAddress, 2); // 0 = host, 1 = subnet, <32 = same company
+		}
 
-        public override void OnDisposing()
-        {
-            StopSender();
-            StopReceiver();
-        }
-    }
+		void StopSender()
+		{
+			if (_sendClient != null)
+			{
+				using (_sendClient)
+					_sendClient.Close();
+			}
+			_sendClient = null;
+		}
+
+		void StopReceiver()
+		{
+			if (_receiveClient != null)
+			{
+				using (_receiveClient)
+				{
+					_receiveClient.Close();
+				}
+				_receiveClient = null;
+			}
+		}
+	}
 }

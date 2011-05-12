@@ -13,6 +13,7 @@
 namespace MassTransit.Util
 {
 	using System;
+	using Context;
 	using Pipeline;
 
 	public class NullServiceBus :
@@ -31,13 +32,14 @@ namespace MassTransit.Util
 			get { return Transports.Endpoint.Null; }
 		}
 
-		public UnsubscribeAction Configure(Func<IPipelineConfigurator, UnsubscribeAction> configure)
+		public UnsubscribeAction Configure(Func<IInboundPipelineConfigurator, UnsubscribeAction> configure)
 		{
 			return () => true;
 		}
 
-		public void Publish<T>(T message) where T : class
+		public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback) where T : class
 		{
+			throw new NotImplementedException();
 		}
 
 		public TService GetService<TService>() where TService : IBusService
@@ -45,12 +47,12 @@ namespace MassTransit.Util
 			throw new NotImplementedException();
 		}
 
-		public IMessagePipeline OutboundPipeline
+		IOutboundMessagePipeline IServiceBus.OutboundPipeline
 		{
 			get { throw new NotImplementedException(); }
 		}
 
-		public IMessagePipeline InboundPipeline
+		IInboundMessagePipeline IServiceBus.InboundPipeline
 		{
 			get { throw new NotImplementedException(); }
 		}
@@ -68,6 +70,21 @@ namespace MassTransit.Util
 		public IEndpoint GetEndpoint(Uri address)
 		{
 			return Transports.Endpoint.Null;
+		}
+
+		public TContext ReceiveContext<TContext>(Action<TContext> contextAction) where TContext : IReceiveContext
+		{
+			throw new NotImplementedException();
+		}
+
+		public TContext SendContext<TContext, TMessage>(TMessage message, Action<TContext> contextAction)
+			where TContext : ISendContext<TMessage> where TMessage : class
+		{
+			throw new NotImplementedException();
+		}
+
+		public void Publish<T>(T message) where T : class
+		{
 		}
 
 		void Dispose(bool disposing)

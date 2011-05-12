@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,21 +15,21 @@ namespace MassTransit.Transports.Msmq
 	using System;
 	using System.Messaging;
 	using System.Threading;
+	using Context;
 	using Exceptions;
 	using log4net;
 	using Magnum.Extensions;
 
-
 	public abstract class InboundMsmqTransport :
 		IInboundTransport
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (InboundMsmqTransport));
-		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");
-		
-		private readonly IMsmqEndpointAddress _address;
-		private bool _disposed;
+		static readonly ILog _log = LogManager.GetLogger(typeof (InboundMsmqTransport));
+		static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");
 
-		private MessageQueueConnection _connection;
+		readonly IMsmqEndpointAddress _address;
+
+		MessageQueueConnection _connection;
+		bool _disposed;
 
 		protected InboundMsmqTransport(IMsmqEndpointAddress address)
 		{
@@ -60,10 +60,9 @@ namespace MassTransit.Transports.Msmq
 			GC.SuppressFinalize(this);
 		}
 
-		protected bool EnumerateQueue(Func<IReceiveContext, Action<IReceiveContext>> receiver,
-		                              TimeSpan timeout)
+		protected bool EnumerateQueue(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout)
 		{
-			if (_disposed) 
+			if (_disposed)
 				throw new ObjectDisposedException("The transport has been disposed: '{0}'".FormatWith(Address));
 
 			bool received = false;
@@ -83,41 +82,43 @@ namespace MassTransit.Transports.Msmq
 						continue;
 					}
 
-					string acceptedMessageId;
+					IBusContext context;
 					Action<IReceiveContext> receive;
-					using (var context = new MsmqReceiveContext(enumerator.Current))
+					using (Message message = enumerator.Current)
 					{
+						context = new ConsumeContext(message.BodyStream);
+						context.SetMessageId(message.Id);
+						context.SetInputAddress(_address);
+
 						receive = receiver(context);
 						if (receive == null)
 						{
 							if (_log.IsDebugEnabled)
-								_log.DebugFormat("SKIP:{0}:{1}", Address, context.MessageId);
+								_log.DebugFormat("SKIP:{0}:{1}", Address, message.Id);
 
 							if (_messageLog.IsDebugEnabled)
-								_messageLog.DebugFormat("SKIP:{0}:{1}:{2}", _address.InboundFormatName, context.Message.Label, context.MessageId);
+								_messageLog.DebugFormat("SKIP:{0}:{1}:{2}", _address.InboundFormatName, message.Label, message.Id);
 
 							continue;
 						}
-
-						acceptedMessageId = context.MessageId;
 					}
 
 					ReceiveMessage(enumerator, timeout, receiveCurrent =>
 						{
-							using (var context = new MsmqReceiveContext(receiveCurrent()))
+							using (Message message = receiveCurrent())
 							{
-								if (context.Message == null)
+								if (message == null)
 									throw new TransportException(Address.Uri,
-										"Unable to remove message from queue: " + acceptedMessageId);
+										"Unable to remove message from queue: " + context.MessageId);
 
-								if (context.MessageId != acceptedMessageId)
+								if (message.Id != context.MessageId)
 									throw new TransportException(Address.Uri,
 										string.Format(
 											"Received message does not match current message: ({0} != {1})",
-											context.MessageId, acceptedMessageId));
+											message.Id, context.MessageId));
 
 								if (_messageLog.IsDebugEnabled)
-									_messageLog.DebugFormat("RECV:{0}:{1}:{2}", _address.InboundFormatName, context.Message.Label, context.Message.Id);
+									_messageLog.DebugFormat("RECV:{0}:{1}:{2}", _address.InboundFormatName, message.Label, message.Id);
 
 								receive(context);
 
@@ -198,7 +199,7 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
-		private void Dispose(bool disposing)
+		void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)

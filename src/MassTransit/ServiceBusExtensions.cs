@@ -13,12 +13,10 @@
 namespace MassTransit
 {
 	using System;
-	using System.Collections.Generic;
-	using MessageHeaders;
 	using RequestResponse;
 	using Util;
 
-	public static class ExtensionsToServiceBus
+	public static class ServiceBusExtensions
 	{
 		/// <summary>
 		/// Make a request to a service and wait for the response to be received, built
@@ -43,43 +41,15 @@ namespace MassTransit
 			return new DisposableUnsubscribeAction(action);
 		}
 
-		public static UnsubscribeAction Combine(this IEnumerable<UnsubscribeAction> actions)
-		{
-			UnsubscribeAction unsub = null;
-
-			actions.Each(x =>
-				{
-					if (x == null)
-						return;
-
-					if (unsub == null)
-						unsub = x;
-					else
-						unsub += x;
-				});
-
-			return unsub ?? (() => false);
-		}
-
 		public static Uri AppendToPath(this Uri uri, string value)
 		{
 			return new UriBuilder(uri.Scheme, uri.Host, uri.Port, uri.AbsolutePath + value, uri.Query).Uri;
 		}
 
-		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessage> messageHeaderAction)
+		public static void Publish<T>(this IServiceBus bus, T message)
 			where T : class
 		{
-			OutboundMessage.Set(messageHeaderAction);
-
-			bus.Publish(message);
-		}
-
-		public static void Send<T>(this IEndpoint endpoint, T message, Action<IOutboundMessage> messageHeaderAction)
-			where T : class
-		{
-			OutboundMessage.Set(messageHeaderAction);
-
-			endpoint.Send(message);
+			bus.Publish(message, x => { });
 		}
 
 		public static string ToMessageName(this Type messageType)
@@ -154,14 +124,5 @@ namespace MassTransit
 			return result;
 		}
 
-		public static IEnumerable<T> Each<T>(this IEnumerable<T> collection, Action<T> action)
-		{
-			foreach (T item in collection)
-			{
-				action(item);
-			}
-
-			return collection;
-		}
 	}
 }

@@ -13,6 +13,7 @@
 namespace MassTransit
 {
 	using System;
+	using Context;
 	using MessageHeaders;
 
 	public static class CurrentMessage
@@ -69,7 +70,7 @@ namespace MassTransit
 		/// <typeparam name="T"></typeparam>
 		/// <param name="message">The message to send/publish</param>
 		/// <param name="contextAction">The action to setup the context on the outbound message</param>
-		public static void Respond<T>(T message, Action<IOutboundMessage> contextAction)
+		public static void Respond<T>(T message, Action<ISendContext<T>> contextAction)
 			where T : class
 		{
 			var context = InboundMessageHeaders.Current;

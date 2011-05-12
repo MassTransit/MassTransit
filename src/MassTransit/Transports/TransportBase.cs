@@ -14,6 +14,7 @@ namespace MassTransit.Transports
 {
 	using System;
 	using System.Diagnostics;
+	using Context;
 
 	[DebuggerDisplay("{Address}")]
 	public abstract class TransportBase :
@@ -28,8 +29,7 @@ namespace MassTransit.Transports
 
 		public IEndpointAddress Address { get; private set; }
 
-		public abstract void Send(Action<ISendContext> callback);
-
+		public abstract void Send(ISendContext context);
 
 		public abstract void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout);
 
@@ -39,14 +39,7 @@ namespace MassTransit.Transports
 			GC.SuppressFinalize(this);
 		}
 
-		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback)
-		{
-			GuardAgainstDisposed();
-
-			Receive(callback, TimeSpan.Zero);
-		}
-
-		public abstract void OnDisposing();
+		protected abstract void OnDisposing();
 
 		protected void GuardAgainstDisposed()
 		{

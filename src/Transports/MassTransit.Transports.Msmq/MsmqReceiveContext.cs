@@ -16,7 +16,7 @@ namespace MassTransit.Transports.Msmq
 	using System.Messaging;
 
 	public class MsmqReceiveContext :
-		IReceiveContext
+		IOldCrapyContext
 	{
 		private Message _message;
 

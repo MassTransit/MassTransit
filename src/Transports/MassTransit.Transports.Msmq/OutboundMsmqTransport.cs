@@ -2,7 +2,9 @@
 {
 	using System;
 	using System.Messaging;
+	using Context;
 	using log4net;
+	using Magnum;
 
 	public abstract class OutboundMsmqTransport :
 		IOutboundTransport
@@ -25,18 +27,27 @@
 			get { return _address; }
 		}
 
-		public void Send(Action<ISendContext> callback)
+		public void Send(ISendContext context)
 		{
-			using (var context = new MsmqSendContext())
+			using (var message = new Message())
 			{
-				callback(context);
+				message.Label = context.MessageType.Substring(0, 250);
+				message.Recoverable = true;
+
+				if (context.ExpirationTime.HasValue)
+				{
+					var value = context.ExpirationTime.Value;
+					message.TimeToBeReceived = value.Kind == DateTimeKind.Utc ? value - SystemUtil.UtcNow : value - SystemUtil.Now;
+				}
+
+				context.SerializeTo(message.BodyStream);
 
 				try
 				{
-					SendMessage(_connection.Queue, context.Message);
+					SendMessage(_connection.Queue, message);
 
 					if (_messageLog.IsDebugEnabled)
-						_messageLog.DebugFormat("SEND:{0}:{1}:{2}", _address.OutboundFormatName, context.Message.Label, context.Message.Id);
+						_messageLog.DebugFormat("SEND:{0}:{1}:{2}", _address.OutboundFormatName, message.Label, message.Id);
 				}
 				catch (MessageQueueException ex)
 				{

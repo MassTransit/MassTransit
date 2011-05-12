@@ -16,7 +16,7 @@ namespace MassTransit.Transports.Loopback
 	using System.IO;
 
 	public class LoopbackReceiveContext :
-		IReceiveContext
+		IOldCrapyContext
 	{
 		bool _disposed;
 		LoopbackMessage _message;

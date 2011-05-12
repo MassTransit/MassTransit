@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,54 +10,43 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Configuration
+namespace MassTransit
 {
 	using System;
-	using Sinks;
+	using Context;
+	using Pipeline;
+	using Pipeline.Configuration;
+	using Pipeline.Sinks;
 
 	public static class ExtensionsForPipelineConfiguration
 	{
-		public static UnsubscribeAction ConnectToRouter<T>(this IMessagePipeline pipeline, IPipelineSink<T> sink)
-			where T : class
+		public static UnsubscribeAction ConnectToRouter<TOutput>(this IPipelineSink<ISendContext> pipeline,
+																 IPipelineSink<IBusPublishContext<TOutput>> sink)
+			where TOutput : class
 		{
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(pipeline);
+			var routerConfigurator = new OutboundMessageRouterConfigurator(pipeline);
 
-			MessageRouter<T> router = routerConfigurator.FindOrCreate<T>();
+			MessageRouter<IBusPublishContext<TOutput>> router = routerConfigurator.FindOrCreate<TOutput>();
 
 			UnsubscribeAction result = router.Connect(sink);
 
 			return () => result() && (router.SinkCount == 0);
 		}
 
-		private static UnsubscribeAction ConnectToRouter<T, V>(this IPipelineSink<V> pipeline, IPipelineSink<T> sink)
-			where T : class
-			where V : class
+		public static UnsubscribeAction ConnectToRouter<TOutput>(this IInboundMessagePipeline pipeline,
+		                                                         IPipelineSink<IConsumeContext<TOutput>> sink,
+		                                                         Func<UnsubscribeAction> subscribedTo)
+			where TOutput : class
 		{
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(pipeline);
+			var routerConfigurator = new InboundMessageRouterConfigurator(pipeline);
 
-			MessageRouter<T> router = routerConfigurator.FindOrCreate<T>();
+			MessageRouter<IConsumeContext<TOutput>> router = routerConfigurator.FindOrCreate<TOutput>();
 
 			UnsubscribeAction result = router.Connect(sink);
-
-			return () => result() && (router.SinkCount == 0);
-		}
-
-		public static UnsubscribeAction ConnectToRouter<T>(this IMessagePipeline pipeline, IPipelineSink<T> sink, Func<UnsubscribeAction> subscribedTo)
-			where T : class
-		{
-			UnsubscribeAction result = pipeline.ConnectToRouter(sink);
 
 			UnsubscribeAction remove = subscribedTo();
 
-			return () => result() && remove();
-		}
-
-		public static UnsubscribeAction ConnectToRouter<T>(this IPipelineSink<T> pipeline, IPipelineSink<T> sink, Func<bool> unsubscribe)
-			where T : class
-		{
-			UnsubscribeAction result = pipeline.ConnectToRouter(sink);
-
-			return () => result() && unsubscribe();
+			return () => result() && (router.SinkCount == 0) && remove();
 		}
 	}
 }

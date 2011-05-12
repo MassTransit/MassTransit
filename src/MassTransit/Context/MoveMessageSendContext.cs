@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,41 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Nms
+namespace MassTransit.Context
 {
+	using System;
 	using System.IO;
-	using System.Text;
-	using Apache.NMS;
 
-	public class NmsReceiveContext :
-		IReceiveContext
+	public class MoveMessageSendContext :
+		MessageContext,
+		ISendContext
 	{
-		private Stream _body;
-		private readonly ITextMessage _message;
+		readonly Action<Stream> _bodyWriter;
 
-		public NmsReceiveContext(ITextMessage message)
+		public MoveMessageSendContext(IReceiveContext context)
 		{
-			_message = message;
-			_body = new MemoryStream(Encoding.UTF8.GetBytes(message.Text), false);
+			SetUsing(context);
+
+			_bodyWriter = stream => context.CopyBodyTo(stream);
 		}
 
-		public string MessageId
+		public void SerializeTo(Stream stream)
 		{
-			get { return _message.NMSMessageId; }
+			_bodyWriter(stream);
 		}
 
-		public Stream Body
+		public bool TryGetContext<T>(out IBusPublishContext<T> context) 
+			where T : class
 		{
-			get { return _body; }
-		}
-
-		public void Dispose()
-		{
-			if (_body != null)
-			{
-				_body.Dispose();
-				_body = null;
-			}
+			throw new NotImplementedException("The message type is unknown and can not be type-cast");
 		}
 	}
 }

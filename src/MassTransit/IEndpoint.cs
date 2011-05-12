@@ -13,6 +13,7 @@
 namespace MassTransit
 {
 	using System;
+	using Context;
 	using Serialization;
 	using Transports;
 
@@ -56,8 +57,8 @@ namespace MassTransit
 		/// Send to the endpoint
 		/// </summary>
 		/// <typeparam name="T">The type of the message to send</typeparam>
-		/// <param name="message">The message to send</param>
-		void Send<T>(T message)
+		/// <param name="context"></param>
+		void Send<T>(ISendContext<T> context)
 			where T : class;
 
 		/// <summary>
@@ -68,6 +69,6 @@ namespace MassTransit
 		/// </summary>
 		/// <param name="receiver">The function to preview/consume the message</param>
 		/// <param name="timeout">The time to wait for a message to be available</param>
-		void Receive(Func<object, Action<object>> receiver, TimeSpan timeout);
+		void Receive(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout);
 	}
 }

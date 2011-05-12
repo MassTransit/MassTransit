@@ -16,7 +16,7 @@ namespace MassTransit.Events
 
 	public class MessageReceived
 	{
-		public Type MessageType { get; set; }
+		public string MessageType { get; set; }
 
 		public TimeSpan ReceiveDuration { get; set; }
 

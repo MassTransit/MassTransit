@@ -34,7 +34,7 @@ namespace MassTransit.SubscriptionBuilders
 			_connector = new HandlerSubscriptionConnector<TMessage>();
 		}
 
-		public ISubscriptionReference Subscribe(IPipelineConfigurator configurator)
+		public ISubscriptionReference Subscribe(IInboundPipelineConfigurator configurator)
 		{
 			UnsubscribeAction unsubscribe = _connector.Connect(configurator, _handler);
 

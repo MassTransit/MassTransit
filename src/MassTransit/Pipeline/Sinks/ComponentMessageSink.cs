@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
+	using Context;
 
 	/// <summary>
 	/// Routes messages to instances of subscribed components. A new instance of the component
@@ -22,47 +23,29 @@ namespace MassTransit.Pipeline.Sinks
 	/// <typeparam name="TComponent">The component type to handle the message</typeparam>
 	/// <typeparam name="TMessage">The message to handle</typeparam>
 	public class ComponentMessageSink<TComponent, TMessage> :
-		IPipelineSink<TMessage>
+		IPipelineSink<IConsumeContext<TMessage>>
 		where TMessage : class
 		where TComponent : class, Consumes<TMessage>.All
 	{
 		readonly IConsumerFactory<TComponent> _consumerFactory;
-		bool _disposed;
 
 		public ComponentMessageSink(IConsumerFactory<TComponent> consumerFactory)
 		{
 			_consumerFactory = consumerFactory;
 		}
 
-		public void Dispose()
+		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
-		{
-			return _consumerFactory.GetConsumer<TMessage>(consumer => consumer.Consume);
+			foreach (var consumer in _consumerFactory.GetConsumer<TMessage>(consumer => consumer.Consume))
+			{
+				var c = consumer;
+				yield return x => c(context.Message);
+			}
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
 		{
 			return inspector.Inspect(this);
-		}
-
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-			}
-
-			_disposed = true;
-		}
-
-		~ComponentMessageSink()
-		{
-			Dispose(false);
 		}
 	}
 }

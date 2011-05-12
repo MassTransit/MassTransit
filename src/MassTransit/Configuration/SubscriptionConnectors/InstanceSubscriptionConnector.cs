@@ -14,7 +14,6 @@ namespace MassTransit.SubscriptionConnectors
 {
 	using System;
 	using Pipeline;
-	using Pipeline.Configuration;
 	using Pipeline.Sinks;
 
 	public interface InstanceSubscriptionConnector :
@@ -33,7 +32,7 @@ namespace MassTransit.SubscriptionConnectors
 			get { return typeof (TMessage); }
 		}
 
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator, object instance)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
 		{
 			var consumer = instance as TConsumer;
 			if (consumer == null)

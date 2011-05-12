@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.TestFramework.Transports
 {
 	using System;
 	using System.Transactions;
+	using Context;
 	using MassTransit.Transports;
 	using Messages;
 	using NUnit.Framework;
@@ -36,9 +37,9 @@ namespace MassTransit.TestFramework.Transports
 			_transport.Dispose();
 		}
 
-		private IOutboundTransport _transport;
-		private readonly ITransportFactory _factory;
-		private IMessageSerializer _serializer;
+		IOutboundTransport _transport;
+		readonly ITransportFactory _factory;
+		IMessageSerializer _serializer;
 
 		public Uri Address { get; set; }
 		public Uri AddressToCheck { get; set; }
@@ -56,24 +57,31 @@ namespace MassTransit.TestFramework.Transports
 			_factory = factory;
 		}
 
-		public void VerifyMessageIsInQueue(ITransport ep)
+		public void VerifyMessageIsInQueue()
 		{
-			IInboundTransport tr = _factory.BuildInbound(new TransportSettings(new EndpointAddress(AddressToCheck)));
-			tr.ShouldContain<DeleteMessage>(_serializer);
+			IInboundTransport transport = _factory.BuildInbound(new TransportSettings(new EndpointAddress(AddressToCheck)));
+			transport.ShouldContain<DeleteMessage>(_serializer);
 		}
 
+		void SendMessage()
+		{
+			var context = new SendContext<DeleteMessage>(new DeleteMessage());
+			context.SetBodyWriter(stream => _serializer.Serialize(stream, context.Message));
+
+			_transport.Send(context);
+		}
 
 		[Test]
 		public void While_sending_it_should_perisist_even_on_rollback()
 		{
 			using (var trx = new TransactionScope())
 			{
-				_transport.Send(context => { _serializer.Serialize(context.Body, new DeleteMessage()); });
+				SendMessage();
 
 				//no complete
 			}
 
-			VerifyMessageIsInQueue(_transport);
+			VerifyMessageIsInQueue();
 		}
 
 		[Test]
@@ -81,21 +89,21 @@ namespace MassTransit.TestFramework.Transports
 		{
 			using (var trx = new TransactionScope())
 			{
-				_transport.Send(context => { _serializer.Serialize(context.Body, new DeleteMessage()); });
+				SendMessage();
 
 				trx.Complete();
 			}
 
 
-			VerifyMessageIsInQueue(_transport);
+			VerifyMessageIsInQueue();
 		}
 
 		[Test]
 		public void While_writing_it_should_persist()
 		{
-			_transport.Send(context => { _serializer.Serialize(context.Body, new DeleteMessage()); });
+			SendMessage();
 
-			VerifyMessageIsInQueue(_transport);
+			VerifyMessageIsInQueue();
 		}
 	}
 }

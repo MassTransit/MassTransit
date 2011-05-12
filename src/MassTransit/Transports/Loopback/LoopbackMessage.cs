@@ -19,6 +19,7 @@ namespace MassTransit.Transports.Loopback
 	public class LoopbackMessage :
 		IDisposable
 	{
+		Stream _body;
 		bool _disposed;
 
 		public LoopbackMessage()
@@ -27,8 +28,18 @@ namespace MassTransit.Transports.Loopback
 			MessageId = CombGuid.Generate().ToString();
 		}
 
+		public Stream Body
+		{
+			get
+			{
+				_body.Seek(0, SeekOrigin.Begin);
+				return _body;
+			}
+			private set { _body = value; }
+		}
+
+		public DateTime? ExpirationTime { get; set; }
 		public string MessageId { get; private set; }
-		public Stream Body { get; private set; }
 
 		public void Dispose()
 		{

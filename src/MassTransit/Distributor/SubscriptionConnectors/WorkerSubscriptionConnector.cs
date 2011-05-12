@@ -15,7 +15,6 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 	using System;
 	using Exceptions;
 	using MassTransit.Pipeline;
-	using MassTransit.Pipeline.Configuration;
 	using MassTransit.SubscriptionConnectors;
 	using Messages;
 	using Pipeline;
@@ -31,7 +30,7 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 			get { return typeof (Distributed<TMessage>); }
 		}
 
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator, object instance)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
 		{
 			var worker = instance as IWorker<TMessage>;
 			if (worker == null)

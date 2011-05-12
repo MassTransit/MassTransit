@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
 	using System;
+	using Context;
 
 	public class Transport :
 		IDuplexTransport
@@ -38,16 +39,18 @@ namespace MassTransit.Transports
 			get { return _inbound.Address; }
 		}
 
-		public void Send(Action<ISendContext> callback)
+		public void Send(ISendContext context)
 		{
-			GuardAgainstDisposed();
+			if (_disposed)
+				throw new ObjectDisposedException("The transport has already been disposed: " + Address);
 
-			_outbound.Send(callback);
+			_outbound.Send(context);
 		}
 
 		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
 		{
-			GuardAgainstDisposed();
+			if (_disposed)
+				throw new ObjectDisposedException("The transport has already been disposed: " + Address);
 
 			_inbound.Receive(callback, timeout);
 		}
@@ -60,12 +63,6 @@ namespace MassTransit.Transports
 		public IInboundTransport InboundTransport
 		{
 			get { return _inbound; }
-		}
-
-		void GuardAgainstDisposed()
-		{
-			if (_disposed)
-				throw new ObjectDisposedException("The transport has already been disposed: " + Address);
 		}
 
 		void Dispose(bool disposing)

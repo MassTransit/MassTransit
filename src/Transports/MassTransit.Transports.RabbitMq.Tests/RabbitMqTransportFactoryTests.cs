@@ -15,6 +15,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 	using System;
 	using System.IO;
 	using System.Text;
+	using Context;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using Management;
@@ -93,11 +94,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
 			}
 
 			IOutboundTransport t = _factory.BuildOutbound(new TransportSettings(_exchange));
-			t.Send((s) =>
+			var context = new SendContext<string>("dru");
+			context.SetBodyWriter(stream =>
 				{
-					byte[] b = Encoding.UTF8.GetBytes("dru");
-					s.Body.Write(b, 0, b.Length);
+					var buffer = Encoding.UTF8.GetBytes(context.Message);
+					stream.Write(buffer, 0, buffer.Length);
 				});
+			t.Send(context);
 
 			IInboundTransport i = _factory.BuildInbound(new TransportSettings(_queue));
 
@@ -105,9 +108,14 @@ namespace MassTransit.Transports.RabbitMq.Tests
 				{
 					return ss =>
 						{
-							var buff = new byte[3];
-							ss.Body.Read(buff, 0, buff.Length);
-							string name = Encoding.UTF8.GetString(buff);
+							string name;
+							using(var stream = new MemoryStream())
+							{
+								ss.CopyBodyTo(stream);
+
+								name = Encoding.UTF8.GetString(stream.ToArray());
+							}
+							
 							Assert.AreEqual("dru", name);
 							Console.WriteLine(name);
 						};

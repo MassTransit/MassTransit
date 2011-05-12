@@ -90,8 +90,6 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="NmsReceiveContext.cs" />
-    <Compile Include="NmsSendContext.cs" />
     <Compile Include="NmsTransport.cs" />
     <Compile Include="NmsTransportFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

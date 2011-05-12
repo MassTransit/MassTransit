@@ -13,7 +13,9 @@
 namespace MassTransit.Pipeline
 {
 	using System;
+	using System.IO;
 	using Configuration;
+	using Context;
 	using Magnum.Reflection;
 	using Sinks;
 	using SubscriptionConnectors;
@@ -25,7 +27,14 @@ namespace MassTransit.Pipeline
 		/// </summary>
 		/// <param name="pipeline">The pipeline instance</param>
 		/// <param name="message">The message to dispatch</param>
-		public static bool Dispatch(this IMessagePipeline pipeline, object message)
+		public static bool Dispatch<T>(this IInboundMessagePipeline pipeline, T message)
+			where T : class
+		{
+			return pipeline.Dispatch(message, x => true);
+		}
+
+		public static bool Dispatch<T>(this IOutboundMessagePipeline pipeline, T message)
+			where T : class
 		{
 			return pipeline.Dispatch(message, x => true);
 		}
@@ -37,11 +46,15 @@ namespace MassTransit.Pipeline
 		/// <param name="pipeline">The pipeline instance</param>
 		/// <param name="message">The message to dispatch</param>
 		/// <param name="acknowledge">The function to call if the message will be consumed by the pipeline</param>
-		public static bool Dispatch(this IMessagePipeline pipeline, object message, Func<object, bool> acknowledge)
+		public static bool Dispatch<T>(this IInboundMessagePipeline pipeline, T message, Func<T, bool> acknowledge)
+			where T : class
 		{
 			bool consumed = false;
 
-			foreach (var consumer in pipeline.Enumerate(message))
+			var consumeContext = new ConsumeContext(new MemoryStream());
+			var context = new ConsumeContext<T>(consumeContext, message);
+
+			foreach (var consumer in pipeline.Enumerate(context))
 			{
 				if (!acknowledge(message))
 					return false;
@@ -50,7 +63,29 @@ namespace MassTransit.Pipeline
 
 				consumed = true;
 
-				consumer(message);
+				consumer(context);
+			}
+
+			return consumed;
+		}
+
+		public static bool Dispatch<T>(this IOutboundMessagePipeline pipeline, T message, Func<T, bool> acknowledge)
+			where T : class
+		{
+			bool consumed = false;
+
+			var context = new SendContext<T>(message);
+
+			foreach (var consumer in pipeline.Enumerate(context))
+			{
+				if (!acknowledge(message))
+					return false;
+
+				acknowledge = x => true;
+
+				consumed = true;
+
+				consumer(context);
 			}
 
 			return consumed;
@@ -62,7 +97,7 @@ namespace MassTransit.Pipeline
 		/// <typeparam name="TComponent"></typeparam>
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <returns></returns>
-		public static UnsubscribeAction ConnectConsumer<TComponent>(this IMessagePipeline pipeline)
+		public static UnsubscribeAction ConnectConsumer<TComponent>(this IInboundMessagePipeline pipeline)
 			where TComponent : class, new()
 		{
 			return pipeline.Configure(x =>
@@ -81,7 +116,7 @@ namespace MassTransit.Pipeline
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <param name="consumerFactory"></param>
 		/// <returns></returns>
-		public static UnsubscribeAction ConnectConsumer<TConsumer>(this IMessagePipeline pipeline,
+		public static UnsubscribeAction ConnectConsumer<TConsumer>(this IInboundMessagePipeline pipeline,
 		                                                           Func<TConsumer> consumerFactory)
 			where TConsumer : class
 		{
@@ -101,7 +136,7 @@ namespace MassTransit.Pipeline
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <param name="instance">The instance that will handle the messages</param>
 		/// <returns></returns>
-		public static UnsubscribeAction ConnectInstance<TComponent>(this IMessagePipeline pipeline, TComponent instance)
+		public static UnsubscribeAction ConnectInstance<TComponent>(this IInboundMessagePipeline pipeline, TComponent instance)
 			where TComponent : class
 		{
 			return pipeline.Configure(x =>
@@ -111,7 +146,8 @@ namespace MassTransit.Pipeline
 				});
 		}
 
-		public static UnsubscribeAction ConnectHandler<TMessage>(this IMessagePipeline pipeline, Action<TMessage> handler,
+		public static UnsubscribeAction ConnectHandler<TMessage>(this IInboundMessagePipeline pipeline,
+		                                                         Action<TMessage> handler,
 		                                                         Predicate<TMessage> condition)
 			where TMessage : class
 		{
@@ -123,7 +159,7 @@ namespace MassTransit.Pipeline
 				});
 		}
 
-		public static UnsubscribeAction ConnectEndpoint<TMessage>(this IMessagePipeline pipeline, IEndpoint endpoint)
+		public static UnsubscribeAction ConnectEndpoint<TMessage>(this IOutboundMessagePipeline pipeline, IEndpoint endpoint)
 			where TMessage : class
 		{
 			var sink = new EndpointMessageSink<TMessage>(endpoint);
@@ -139,34 +175,17 @@ namespace MassTransit.Pipeline
 			return pipeline.FastInvoke<IMessagePipeline, UnsubscribeAction>("ConnectToRouter", sink);
 		}
 
-		public static UnsubscribeAction ConnectEndpoint<TMessage, TKey>(this IMessagePipeline pipeline, TKey correlationId,
+		public static UnsubscribeAction ConnectEndpoint<TMessage, TKey>(this IOutboundMessagePipeline pipeline,
+		                                                                TKey correlationId,
 		                                                                IEndpoint endpoint)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
-			CorrelatedMessageRouterConfigurator correlatedConfigurator = CorrelatedMessageRouterConfigurator.For(pipeline);
+			var correlatedConfigurator = new OutboundCorrelatedMessageRouterConfigurator(pipeline);
 
-			CorrelatedMessageRouter<TMessage, TKey> router = correlatedConfigurator.FindOrCreate<TMessage, TKey>();
+			CorrelatedMessageRouter<IBusPublishContext<TMessage>, TMessage, TKey> router =
+				correlatedConfigurator.FindOrCreate<TMessage, TKey>();
 
 			UnsubscribeAction result = router.Connect(correlationId, new EndpointMessageSink<TMessage>(endpoint));
-
-			return result;
-		}
-
-		public static UnregisterAction Filter<TMessage>(this IMessagePipeline pipeline, Func<TMessage, bool> allow)
-			where TMessage : class
-		{
-			return Filter(pipeline, "", allow);
-		}
-
-		public static UnregisterAction Filter<TMessage>(this IMessagePipeline pipeline, string description,
-		                                                Func<TMessage, bool> allow)
-			where TMessage : class
-		{
-			MessageFilterConfigurator configurator = MessageFilterConfigurator.For(pipeline);
-
-			MessageFilter<TMessage> filter = configurator.Create(description, allow);
-
-			UnregisterAction result = () => { throw new NotSupportedException("Removal of filters not yet supported"); };
 
 			return result;
 		}

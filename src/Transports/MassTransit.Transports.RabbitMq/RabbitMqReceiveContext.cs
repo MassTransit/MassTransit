@@ -4,7 +4,7 @@
 	using RabbitMQ.Client;
 
 	public class RabbitMqReceiveContext :
-		IReceiveContext
+		IOldCrapyContext
 	{
 		readonly IBasicProperties _basicProperties;
 		MemoryStream _body;

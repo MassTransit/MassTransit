@@ -13,6 +13,7 @@
 namespace MassTransit.Saga.SubscriptionConnectors
 {
 	using System;
+	using Context;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Sinks;
@@ -48,13 +49,13 @@ namespace MassTransit.Saga.SubscriptionConnectors
 			get { return typeof (TSaga); }
 		}
 
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
 		{
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(configurator.Pipeline);
+			InboundMessageRouterConfigurator routerConfigurator = new InboundMessageRouterConfigurator(configurator.Pipeline);
 
-			MessageRouter<TMessage> router = routerConfigurator.FindOrCreate<TMessage>();
+			MessageRouter<IConsumeContext<TMessage>> router = routerConfigurator.FindOrCreate<TMessage>();
 
-			IPipelineSink<TMessage> sink = CreateSink(configurator);
+			ISagaMessageSink<TSaga, TMessage> sink = CreateSink();
 
 			UnsubscribeAction result = router.Connect(sink);
 
@@ -63,12 +64,12 @@ namespace MassTransit.Saga.SubscriptionConnectors
 			return () => result() && (router.SinkCount == 0) && remove();
 		}
 
-		public IPipelineSink<TMessage> CreateSink(IPipelineConfigurator configurator)
+		public ISagaMessageSink<TSaga, TMessage> CreateSink()
 		{
-			return CreateSink(configurator.Bus, _sagaRepository, _policy);
+			return CreateSink(_sagaRepository, _policy);
 		}
 
-		protected abstract IPipelineSink<TMessage> CreateSink(IServiceBus bus, ISagaRepository<TSaga> repository,
-		                                                      ISagaPolicy<TSaga, TMessage> policy);
+		protected abstract ISagaMessageSink<TSaga, TMessage> CreateSink(ISagaRepository<TSaga> repository,
+		                                                                ISagaPolicy<TSaga, TMessage> policy);
 	}
 }

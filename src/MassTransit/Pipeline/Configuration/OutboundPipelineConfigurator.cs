@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,19 +12,32 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
-    using System;
-    using Inspectors;
+	using Context;
+	using Sinks;
 
-    public class MessageInterceptorConfiguratorScope :
-        PipelineInspectorBase<MessageInterceptorConfiguratorScope>
-    {
-        public Func<IPipelineSink<object>, IPipelineSink<object>> InsertAfter { get; private set; }
+	public class OutboundPipelineConfigurator :
+		IOutboundPipelineConfigurator
+	{
+		readonly IServiceBus _bus;
+		readonly IOutboundMessagePipeline _pipeline;
 
-        protected bool Inspect(MessagePipeline element)
-        {
-            InsertAfter = (sink => element.ReplaceOutputSink(sink.TranslateTo<IPipelineSink<object>>()));
+		public OutboundPipelineConfigurator(IServiceBus bus)
+		{
+			_bus = bus;
 
-            return false;
-        }
-    }
+			var router = new MessageRouter<ISendContext>();
+
+			_pipeline = new OutboundMessagePipeline(router, this);
+		}
+
+		public IOutboundMessagePipeline Pipeline
+		{
+			get { return _pipeline; }
+		}
+
+		public IServiceBus Bus
+		{
+			get { return _bus; }
+		}
+	}
 }

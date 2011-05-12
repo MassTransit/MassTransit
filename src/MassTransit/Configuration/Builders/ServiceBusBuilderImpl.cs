@@ -172,7 +172,7 @@ namespace MassTransit.Builders
 		{
 			if (_settings.BeforeConsume != null || _settings.AfterConsume != null)
 			{
-				var configurator = new MessageInterceptorConfigurator(bus.InboundPipeline);
+				var configurator = new InboundMessageInterceptorConfigurator(bus.InboundPipeline);
 
 				var interceptor = new DelegateMessageInterceptor(_settings.BeforeConsume, _settings.AfterConsume);
 

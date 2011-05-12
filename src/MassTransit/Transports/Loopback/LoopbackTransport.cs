@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,34 +15,39 @@ namespace MassTransit.Transports
 	using System;
 	using System.Collections.Generic;
 	using System.Threading;
+	using Context;
 	using Loopback;
+	using Magnum.Extensions;
 
 	public class LoopbackTransport :
 		TransportBase
 	{
-		private readonly object _messageLock = new object();
-		private AutoResetEvent _messageReady = new AutoResetEvent(false);
-		private LinkedList<LoopbackMessage> _messages = new LinkedList<LoopbackMessage>();
+		readonly object _messageLock = new object();
+		AutoResetEvent _messageReady = new AutoResetEvent(false);
+		LinkedList<LoopbackMessage> _messages = new LinkedList<LoopbackMessage>();
 
 		public LoopbackTransport(IEndpointAddress address)
 			: base(address)
 		{
 		}
 
-		public override void Send(Action<ISendContext> callback)
+		public override void Send(ISendContext context)
 		{
 			GuardAgainstDisposed();
 
-			using (var context = new LoopbackSendContext())
+			var message = new LoopbackMessage();
+
+			if (context.ExpirationTime.HasValue)
 			{
-				callback(context);
+				message.ExpirationTime = context.ExpirationTime.Value;
+			}
 
-				lock (_messageLock)
-				{
-					GuardAgainstDisposed();
+			context.SerializeTo(message.Body);
+			lock (_messageLock)
+			{
+				GuardAgainstDisposed();
 
-					_messages.AddLast(context.GetMessage());
-				}
+				_messages.AddLast(message);
 			}
 
 			_messageReady.Set();
@@ -78,14 +83,15 @@ namespace MassTransit.Transports
 				{
 					if (iterator.Value != null)
 					{
-						var context = new LoopbackReceiveContext(iterator.Value);
+						LoopbackMessage message = iterator.Value;
+						var context = new ConsumeContext(message.Body);
 						Action<IReceiveContext> receive = callback(context);
 						if (receive == null)
 							continue;
 
 						_messages.Remove(iterator);
 
-						using (context)
+						using (message)
 						{
 							Monitor.Exit(_messageLock);
 							monitorExitNeeded = false;
@@ -110,7 +116,7 @@ namespace MassTransit.Transports
 			}
 		}
 
-		public override void OnDisposing()
+		protected override void OnDisposing()
 		{
 			lock (_messageLock)
 			{
@@ -120,6 +126,9 @@ namespace MassTransit.Transports
 			}
 
 			_messageReady.Close();
+			using (_messageReady)
+			{
+			}
 			_messageReady = null;
 		}
 	}

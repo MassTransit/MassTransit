@@ -16,7 +16,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using Exceptions;
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
-	using MassTransit.Pipeline.Configuration;
 	using Pipeline;
 
 	public class CorrelatedSagaSubscriptionConnector<TSaga, TMessage> :
@@ -46,16 +45,16 @@ namespace MassTransit.Saga.SubscriptionConnectors
 			get { return typeof (TSaga); }
 		}
 
-		public UnsubscribeAction Connect(IPipelineConfigurator configurator)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
 		{
-			IPipelineSink<TMessage> sink = CreateSink(configurator);
+			ISagaMessageSink<TSaga, TMessage> sink = CreateSink();
 
 			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
 		}
 
-		public IPipelineSink<TMessage> CreateSink(IPipelineConfigurator configurator)
+		public ISagaMessageSink<TSaga, TMessage> CreateSink()
 		{
-			var sink = new CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>(configurator.Bus, _sagaRepository, _policy,
+			var sink = new CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>(_sagaRepository, _policy,
 				_dataEvent);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the message sink: " +
