@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Serialization
 			var serializer = new XmlMessageSerializer();
 			using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(Version4Message)))
 			{
-				object obj = serializer.Deserialize(bodyStream);
+				object obj = serializer.Deserialize(bodyStream.ToReceiveContext());
 
 				Assert.IsNotNull(obj);
 				Assert.IsInstanceOf<ComplaintAdded>(obj);
@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Serialization
 			var serializer = new XmlMessageSerializer();
 			using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(AnotherVersion4Message)))
 			{
-				object obj = serializer.Deserialize(bodyStream);
+				object obj = serializer.Deserialize(bodyStream.ToReceiveContext());
 
 				Assert.IsNotNull(obj);
 				Assert.IsInstanceOf<ComplaintAdded>(obj);

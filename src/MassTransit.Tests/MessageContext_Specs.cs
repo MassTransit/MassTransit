@@ -92,7 +92,7 @@ namespace MassTransit.Tests
 
 			LocalBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.DestinationAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Uri, LocalBus.Context().DestinationAddress);
 
 					received.Set(message);
 				});
@@ -109,7 +109,7 @@ namespace MassTransit.Tests
 
 			LocalBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.FaultAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Uri, LocalBus.Context().FaultAddress);
 
 					received.Set(message);
 				});
@@ -126,7 +126,7 @@ namespace MassTransit.Tests
 
 			LocalBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.ResponseAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Uri, LocalBus.Context().ResponseAddress);
 
 					received.Set(message);
 				});
@@ -143,7 +143,7 @@ namespace MassTransit.Tests
 
 			LocalBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.SourceAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Uri, LocalBus.Context().SourceAddress);
 
 					received.Set(message);
 				});

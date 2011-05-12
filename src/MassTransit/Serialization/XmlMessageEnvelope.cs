@@ -1,5 +1,5 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,35 +12,37 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-    using System;
-    using System.Xml.Serialization;
-    using MessageHeaders;
+	using System;
+	using System.Xml.Serialization;
+	using Context;
 
 	/// <summary>
-    ///   The envelope that is used to wrap messages serialized using Xml
-    /// </summary>
-    [XmlRoot(ElementName = "MessageEnvelope")]
-    public class XmlMessageEnvelope :
-        MessageEnvelopeBase
-    {
-        protected XmlMessageEnvelope()
-        {
-        }
+	///   The envelope that is used to wrap messages serialized using Xml
+	/// </summary>
+	[XmlRoot(ElementName = "MessageEnvelope")]
+	public class XmlMessageEnvelope :
+		MessageEnvelopeBase
+	{
+		protected XmlMessageEnvelope()
+		{
+		}
 
-        XmlMessageEnvelope(Type messageType, object message)
-        {
-            Message = message;
+		XmlMessageEnvelope(Type messageType, object message)
+		{
+			Message = message;
 
-            MessageType = messageType.ToMessageName();
+			MessageType = messageType.ToMessageName();
+		}
 
-            this.CopyFrom(OutboundMessage.Headers);
-        }
+		public object Message { get; set; }
 
-        public object Message { get; set; }
+		public static XmlMessageEnvelope Create<T>(ISendContext<T> context)
+			where T : class
+		{
+			var envelope = new XmlMessageEnvelope(typeof (T), context.Message);
+			envelope.SetUsingContext(context);
 
-        public static XmlMessageEnvelope Create<T>(T message)
-        {
-            return new XmlMessageEnvelope(typeof (T), message);
-        }
-    }
+			return envelope;
+		}
+	}
 }

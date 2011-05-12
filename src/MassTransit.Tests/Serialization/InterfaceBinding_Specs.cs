@@ -21,7 +21,7 @@ namespace MassTransit.Tests.Serialization
 
 			using(var buffer = new MemoryStream())
 			{
-				_serializer.Serialize<A>(buffer, message);
+				_serializer.Serialize<A>(buffer, message.ToSendContext());
 
 				_message = Encoding.UTF8.GetString(buffer.ToArray());
 
@@ -34,7 +34,7 @@ namespace MassTransit.Tests.Serialization
 		{
 			using (var buffer = new MemoryStream(Encoding.UTF8.GetBytes(_message)))
 			{
-				object message = _serializer.Deserialize(buffer);
+				object message = _serializer.Deserialize(buffer.ToReceiveContext());
 
 				message.ShouldBeAnInstanceOf<A>();
 			}

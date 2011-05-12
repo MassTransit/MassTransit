@@ -89,7 +89,7 @@ namespace MassTransit.Transports
 				throw new ObjectDisposedException(_disposedMessage);
 
 			context.SetDestinationAddress(Uri);
-			context.SetBodyWriter(stream => _serializer.Serialize(stream, context.Message));
+			context.SetBodyWriter(stream => _serializer.Serialize(stream, context));
 
 			_transport.Send(context);
 

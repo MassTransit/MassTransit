@@ -22,7 +22,6 @@ namespace MassTransit
 	using Magnum.Extensions;
 	using Magnum.Pipeline;
 	using Magnum.Pipeline.Segments;
-	using MessageHeaders;
 	using Monitoring;
 	using Pipeline;
 	using Pipeline.Configuration;
@@ -49,7 +48,6 @@ namespace MassTransit
 		IServiceContainer _serviceContainer;
 		volatile bool _started;
 		UnregisterAction _unsubscribeEventDispatchers = () => true;
-		IContextProvider _contextProvider;
 
 		static ServiceBus()
 		{
@@ -79,8 +77,6 @@ namespace MassTransit
 
 			Endpoint = endpointToListenOn;
 			EndpointCache = endpointCache;
-
-			_contextProvider = null;
 
 			_eventAggregator = PipeSegment.New();
 			_eventAggregatorScope = _eventAggregator.NewSubscriptionScope();
@@ -336,19 +332,6 @@ namespace MassTransit
 		{
 			_unsubscribeEventDispatchers();
 			_unsubscribeEventDispatchers = () => true;
-		}
-
-		public TContext ReceiveContext<TContext>(Action<TContext> contextAction) 
-			where TContext : IReceiveContext
-		{
-			return _contextProvider.ReceiveContext(contextAction);
-		}
-
-		public TContext SendContext<TContext, TMessage>(TMessage message, Action<TContext> contextAction)
-			where TContext : ISendContext<TMessage> 
-			where TMessage : class
-		{
-			return _contextProvider.SendContext(message, contextAction);
 		}
 	}
 }

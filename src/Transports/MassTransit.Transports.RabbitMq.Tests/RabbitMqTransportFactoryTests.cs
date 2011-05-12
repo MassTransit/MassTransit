@@ -64,11 +64,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
 			var message = new BugsBunny {Food = "Carrot"};
 
-			using (var stream = new MemoryStream())
-			{
-				serializer.Serialize(stream, message);
-			}
-
 			IDuplexTransport transport = _factory.BuildLoopback(new TransportSettings(_exchange));
 			var sendEndpoint = new Endpoint(_exchange, serializer, transport, null);
 			sendEndpoint.Send(message);

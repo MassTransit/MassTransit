@@ -43,7 +43,7 @@ namespace MassTransit.Context
 				if (_message == null)
 				{
 					_bodyStream.Seek(0, SeekOrigin.Begin);
-					_message = _serializer.Deserialize(_bodyStream);
+					_message = _serializer.Deserialize(this);
 				}
 
 				return _message;
@@ -71,6 +71,15 @@ namespace MassTransit.Context
 		{
 			_bodyStream.Seek(0, SeekOrigin.Begin);
 			_bodyStream.CopyTo(stream);
+		}
+
+		public Stream BodyStream
+		{
+			get
+			{
+				_bodyStream.Seek(0, SeekOrigin.Begin);
+				return _bodyStream;
+			}
 		}
 
 		public void SetSerializer(IMessageSerializer serializer)

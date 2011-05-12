@@ -1,5 +1,5 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,88 +12,95 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-    using System;
-    using System.IO;
-    using System.Runtime.Serialization;
-    using log4net;
-    using Magnum.Cryptography;
+	using System;
+	using System.IO;
+	using System.Runtime.Serialization;
+	using Context;
+	using log4net;
+	using Magnum.Cryptography;
 
-    public class PreSharedKeyEncryptedMessageSerializer :
-        IMessageSerializer
-    {
-        readonly string _key;
-        static readonly ILog _log = LogManager.GetLogger(typeof (PreSharedKeyEncryptedMessageSerializer));
-        readonly IMessageSerializer _wrappedSerializer;
+	public class PreSharedKeyEncryptedMessageSerializer :
+		IMessageSerializer
+	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (PreSharedKeyEncryptedMessageSerializer));
+		readonly string _key;
+		readonly IMessageSerializer _wrappedSerializer;
 
-        public PreSharedKeyEncryptedMessageSerializer(string key, IMessageSerializer serializer)
-        {
-            _key = key;
-            _wrappedSerializer = serializer;
-        }
+		public PreSharedKeyEncryptedMessageSerializer(string key, IMessageSerializer serializer)
+		{
+			_key = key;
+			_wrappedSerializer = serializer;
+		}
 
-        public void Serialize<T>(Stream output, T message)
-        {
-            try
-            {
-                using (var clearStream = new MemoryStream())
-                {
-                    _wrappedSerializer.Serialize(clearStream, message);
+		public void Serialize<T>(Stream output, ISendContext<T> context)
+			where T : class
+		{
+			try
+			{
+				using (var clearStream = new MemoryStream())
+				{
+					_wrappedSerializer.Serialize(clearStream, context);
 
-                    clearStream.Seek(0, SeekOrigin.Begin);
+					clearStream.Seek(0, SeekOrigin.Begin);
 
-                    using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
-                    {
-                        EncryptedStream encryptedStream = cryptographyService.Encrypt(clearStream);
+					using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
+					{
+						EncryptedStream encryptedStream = cryptographyService.Encrypt(clearStream);
 
-                        var encryptedMessage = new EncryptedMessageEnvelope
-                            {
-                                CipheredMessage = Convert.ToBase64String(encryptedStream.GetBytes()),
-                                Iv = Convert.ToBase64String(encryptedStream.Iv),
-                            };
+						var encryptedMessage = new EncryptedMessageEnvelope
+							{
+								CipheredMessage = Convert.ToBase64String(encryptedStream.GetBytes()),
+								Iv = Convert.ToBase64String(encryptedStream.Iv),
+							};
 
-                        _wrappedSerializer.Serialize(output, encryptedMessage);
-                    }
-                }
-            }
-            catch (SerializationException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new SerializationException("Failed to serialize message", ex);
-            }
-        }
+						var encryptedContext = new SendContext<EncryptedMessageEnvelope>(encryptedMessage);
+						encryptedContext.SetUsing(context);
 
-        public object Deserialize(Stream input)
-        {
-            object message = _wrappedSerializer.Deserialize(input);
-            if (message == null)
-                throw new SerializationException("Could not deserialize message.");
+						_wrappedSerializer.Serialize(output, encryptedContext);
+					}
+				}
+			}
+			catch (SerializationException)
+			{
+				throw;
+			}
+			catch (Exception ex)
+			{
+				throw new SerializationException("Failed to serialize message", ex);
+			}
+		}
 
-            if (message is EncryptedMessageEnvelope)
-            {
-                var envelope = message as EncryptedMessageEnvelope;
+		public object Deserialize(IReceiveContext context)
+		{
+			object message = _wrappedSerializer.Deserialize(context);
+			if (message == null)
+				throw new SerializationException("Could not deserialize message.");
 
-                var cipherBytes = Convert.FromBase64String(envelope.CipheredMessage);
-                var iv = Convert.FromBase64String(envelope.Iv);
+			if (message is EncryptedMessageEnvelope)
+			{
+				var envelope = message as EncryptedMessageEnvelope;
 
-                var cipherStream = new EncryptedStream(cipherBytes, iv);
-                using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
-                {
-                    var clearStream = cryptographyService.Decrypt(cipherStream);
+				byte[] cipherBytes = Convert.FromBase64String(envelope.CipheredMessage);
+				byte[] iv = Convert.FromBase64String(envelope.Iv);
 
-                    return _wrappedSerializer.Deserialize(clearStream);
-                }
-            }
-            return message;
-        }
-    }
+				var cipherStream = new EncryptedStream(cipherBytes, iv);
+				using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
+				{
+					Stream clearStream = cryptographyService.Decrypt(cipherStream);
 
-    [Serializable]
-    public class EncryptedMessageEnvelope
-    {
-        public string CipheredMessage { get; set; }
-        public string Iv { get; set; }
-    }
+					var encryptedContext = new ConsumeContext(clearStream);
+
+					return _wrappedSerializer.Deserialize(encryptedContext);
+				}
+			}
+			return message;
+		}
+	}
+
+	[Serializable]
+	public class EncryptedMessageEnvelope
+	{
+		public string CipheredMessage { get; set; }
+		public string Iv { get; set; }
+	}
 }

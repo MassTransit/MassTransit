@@ -10,33 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Serialization
+namespace MassTransit.Context
 {
 	using System;
-	using Context;
+	using System.Runtime.Serialization;
+	using Util;
 
-	public class JsonMessageEnvelope :
-		MessageEnvelopeBase
+	[Serializable]
+	public class ContextException :
+		Exception
 	{
-		public JsonMessageEnvelope()
+		public ContextException()
 		{
 		}
 
-		JsonMessageEnvelope(Type messageType, object message)
+		public ContextException(string message)
+			: base(message)
 		{
-			Message = message;
-			MessageType = messageType.ToMessageName();
 		}
 
-		public object Message { get; set; }
-
-		public static JsonMessageEnvelope Create<T>(ISendContext<T> context)
-			where T : class
+		public ContextException(string message, Exception innerException)
+			: base(message, innerException)
 		{
-			var envelope = new JsonMessageEnvelope(typeof (T), context.Message);
-			envelope.SetUsingContext(context);
+		}
 
-			return envelope;
+		protected ContextException([NotNull] SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
 		}
 	}
 }

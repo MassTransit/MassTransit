@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,99 +17,97 @@ namespace MassTransit.Serialization
 	using System.IO;
 	using System.Runtime.Remoting.Messaging;
 	using System.Runtime.Serialization.Formatters.Binary;
+	using Context;
 	using log4net;
-	using MessageHeaders;
 	using Util;
 
 	/// <summary>
 	/// The binary message serializer used the .NET BinaryFormatter to serialize
 	/// message content. 
 	/// </summary>
-	public class BinaryMessageSerializer
-		: IMessageSerializer
+	public class BinaryMessageSerializer :
+		IMessageSerializer
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (BinaryMessageSerializer));
+		const string ConversationIdKey = "ConversationId";
+		const string CorrelationIdKey = "CorrelationId";
+		const string DestinationAddressKey = "DestinationAddress";
+		const string ExpirationTimeKey = "Expiration";
+		const string FaultAddressKey = "FaultAddress";
+		const string MessageIdKey = "MessageId";
+		const string MessageTypeKey = "MessageType";
+		const string NetworkKey = "Network";
+		const string ResponseAddressKey = "ResponseAddress";
+		const string RetryCountKey = "RetryCount";
+		const string SourceAddressKey = "SourceAddress";
 
-		private const string ConversationIdKey = "ConversationId";
-		private const string CorrelationIdKey = "CorrelationId";
-		private const string DestinationAddressKey = "DestinationAddress";
-		private const string FaultAddressKey = "FaultAddress";
-		private const string MessageIdKey = "MessageId";
-		private const string MessageTypeKey = "MessageType";
-		private const string ResponseAddressKey = "ResponseAddress";
-		private const string RetryCountKey = "RetryCount";
-		private const string SourceAddressKey = "SourceAddress";
+		static readonly BinaryFormatter _formatter = new BinaryFormatter();
+		static readonly ILog _log = LogManager.GetLogger(typeof (BinaryMessageSerializer));
 
-		private static readonly BinaryFormatter _formatter = new BinaryFormatter();
-
-		public void Serialize<T>(Stream output, T message)
+		public void Serialize<T>(Stream output, ISendContext<T> context)
+			where T : class
 		{
-			CheckConvention.EnsureSerializable(message);
+			CheckConvention.EnsureSerializable(context.Message);
 
-			_formatter.Serialize(output, message, GetHeaders());
+			_formatter.Serialize(output, context.Message, GetHeaders(context));
 		}
 
-		public object Deserialize(Stream input)
+		public object Deserialize(IReceiveContext context)
 		{
-			object obj = _formatter.Deserialize(input, DeserializeHeaderHandler);
+			object obj = _formatter.Deserialize(context.BodyStream, headers => DeserializeHeaderHandler(headers, context));
 
 			return obj;
 		}
 
-		private static Header[] GetHeaders()
+		static Header[] GetHeaders(ISendContext context)
 		{
-			var context = OutboundMessage.Headers;
+			var headers = new List<Header>();
 
-			List<Header> headers = new List<Header>();
+			headers.Add(MessageTypeKey, context.MessageType);
 
 			headers.Add(SourceAddressKey, context.SourceAddress);
 			headers.Add(DestinationAddressKey, context.DestinationAddress);
 			headers.Add(ResponseAddressKey, context.ResponseAddress);
 			headers.Add(FaultAddressKey, context.FaultAddress);
-
-			headers.Add(MessageTypeKey, context.MessageType);
-
+			headers.Add(NetworkKey, context.Network);
 			headers.Add(RetryCountKey, context.RetryCount);
+
+			if (context.ExpirationTime.HasValue)
+				headers.Add(ExpirationTimeKey, context.ExpirationTime.Value);
 
 			return headers.ToArray();
 		}
 
-		private static object DeserializeHeaderHandler(Header[] headers)
+		static object DeserializeHeaderHandler(Header[] headers, IReceiveContext context)
 		{
 			if (headers == null)
 				return null;
 
-			InboundMessageHeaders.SetCurrent(context =>
-				{
-					context.Reset();
-
-					for (int i = 0; i < headers.Length; i++)
-					{
-						MapNameValuePair(context, headers[i]);
-					}
-				});
+			for (int i = 0; i < headers.Length; i++)
+			{
+				MapNameValuePair(context, headers[i]);
+			}
 
 			return null;
 		}
 
-		private static void MapNameValuePair(ISetMessageHeaders context, Header header)
+		static void MapNameValuePair(IReceiveContext context, Header header)
 		{
 			switch (header.Name)
 			{
 				case SourceAddressKey:
-					context.SetSourceAddress(ConvertUriToString(header.Value));
+					context.SetSourceAddress(GetAsUri(header.Value));
 					break;
 
 				case ResponseAddressKey:
-					context.SetResponseAddress(ConvertUriToString(header.Value));
+					context.SetResponseAddress(GetAsUri(header.Value));
 					break;
 
 				case DestinationAddressKey:
-					context.SetDestinationAddress(ConvertUriToString(header.Value));
+					context.SetDestinationAddress(GetAsUri(header.Value));
 					break;
 
 				case FaultAddressKey:
-					context.SetFaultAddress(ConvertUriToString(header.Value));
+					context.SetFaultAddress(GetAsUri(header.Value));
 					break;
 
 				case RetryCountKey:
@@ -120,8 +118,16 @@ namespace MassTransit.Serialization
 					context.SetMessageType((string) header.Value);
 					break;
 
+				case NetworkKey:
+					context.SetNetwork((string) header.Value);
+					break;
+
+				case ExpirationTimeKey:
+					context.SetExpirationTime((DateTime) header.Value);
+					break;
+
 				default:
-					if(header.MustUnderstand)
+					if (header.MustUnderstand)
 					{
 						_log.WarnFormat("The header was not understood: " + header.Name);
 					}
@@ -129,42 +135,15 @@ namespace MassTransit.Serialization
 			}
 		}
 
-		public static string ConvertUriToString(object value)
+		static Uri GetAsUri(object value)
 		{
-			if(value == null)
-				return string.Empty;
+			if (value == null)
+				return null;
 
-			if (value.GetType() != typeof(Uri))
-				return string.Empty;
+			if (value.GetType() != typeof (Uri))
+				return null;
 
-			return value.ToString();
-		}
-	}
-
-	public static class ExtensionsForBinaryMessageSerializer
-	{
-		public static void Add(this List<Header> headers, string key, Uri uri)
-		{
-			if (uri == null)
-				return;
-
-			headers.Add(new Header(key, uri));
-		}
-
-		public static void Add(this List<Header> headers, string key, string value)
-		{
-			if (string.IsNullOrEmpty(value))
-				return;
-
-			headers.Add(new Header(key, value));
-		}
-
-		public static void Add(this List<Header> headers, string key, int value)
-		{
-			if (value == 0)
-				return;
-
-			headers.Add(new Header(key, value));
+			return (Uri) value;
 		}
 	}
 }

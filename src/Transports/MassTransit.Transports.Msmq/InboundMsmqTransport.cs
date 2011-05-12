@@ -90,17 +90,20 @@ namespace MassTransit.Transports.Msmq
 						context.SetMessageId(message.Id);
 						context.SetInputAddress(_address);
 
-						receive = receiver(context);
-						if (receive == null)
-						{
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("SKIP:{0}:{1}", Address, message.Id);
+						using(ContextStorage.CreateContextScope(context))
+							{
+								receive = receiver(context);
+								if (receive == null)
+								{
+									if (_log.IsDebugEnabled)
+										_log.DebugFormat("SKIP:{0}:{1}", Address, message.Id);
 
-							if (_messageLog.IsDebugEnabled)
-								_messageLog.DebugFormat("SKIP:{0}:{1}:{2}", _address.InboundFormatName, message.Label, message.Id);
+									if (_messageLog.IsDebugEnabled)
+										_messageLog.DebugFormat("SKIP:{0}:{1}:{2}", _address.InboundFormatName, message.Label, message.Id);
 
-							continue;
-						}
+									continue;
+								}
+							};
 					}
 
 					ReceiveMessage(enumerator, timeout, receiveCurrent =>
@@ -120,7 +123,8 @@ namespace MassTransit.Transports.Msmq
 								if (_messageLog.IsDebugEnabled)
 									_messageLog.DebugFormat("RECV:{0}:{1}:{2}", _address.InboundFormatName, message.Label, message.Id);
 
-								receive(context);
+								using (ContextStorage.CreateContextScope(context))
+									receive(context);
 
 								received = true;
 							}

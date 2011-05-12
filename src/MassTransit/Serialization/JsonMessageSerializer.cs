@@ -15,14 +15,14 @@ namespace MassTransit.Serialization
 	using System;
 	using System.IO;
 	using System.Text;
+	using Context;
 	using Magnum.Extensions;
-	using MessageHeaders;
 	using Newtonsoft.Json;
 
 	public class JsonMessageSerializer :
 		IMessageSerializer
 	{
-		JsonSerializerSettings _settings;
+		readonly JsonSerializerSettings _settings;
 
 		public JsonMessageSerializer()
 		{
@@ -35,9 +35,10 @@ namespace MassTransit.Serialization
 				};
 		}
 
-		public void Serialize<T>(Stream output, T message)
+		public void Serialize<T>(Stream output, ISendContext<T> context) 
+			where T : class
 		{
-			JsonMessageEnvelope envelope = JsonMessageEnvelope.Create<T>(message);
+			JsonMessageEnvelope envelope = JsonMessageEnvelope.Create(context);
 
 			string strOut = JsonConvert.SerializeObject(envelope, Formatting.Indented, _settings);
 			byte[] buff = Encoding.UTF8.GetBytes(strOut);
@@ -45,13 +46,13 @@ namespace MassTransit.Serialization
 			output.Write(buff, 0, buff.Length);
 		}
 
-		public object Deserialize(Stream input)
+		public object Deserialize(IReceiveContext context)
 		{
-			string text = input.ReadToEndAsText();
+			string text = context.BodyStream.ReadToEndAsText();
 
 			var envelope = JsonConvert.DeserializeObject<JsonMessageEnvelope>(text, _settings);
 
-			InboundMessageHeaders.SetCurrent(envelope.GetMessageHeadersSetAction());
+			context.SetUsingMessageEnvelope(envelope);
 
 			Type messageType = Type.GetType(envelope.MessageType, false, true);
 			if (messageType == null)

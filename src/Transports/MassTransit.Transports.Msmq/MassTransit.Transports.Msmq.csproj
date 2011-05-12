@@ -109,7 +109,6 @@
     <Compile Include="Configuration\MsmqBusConfigurationExtensions.cs" />
     <Compile Include="MsmqEndpointAddress.cs" />
     <Compile Include="MsmqEndpointManagement.cs" />
-    <Compile Include="MsmqReceiveContext.cs" />
     <Compile Include="MsmqTransportFactory.cs" />
     <Compile Include="MsmqUriExtensions.cs" />
     <Compile Include="MulticastSubscriptionClient.cs" />

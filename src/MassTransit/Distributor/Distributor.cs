@@ -63,7 +63,7 @@ namespace MassTransit.Distributor
 
 			IEndpoint endpoint = _bus.GetEndpoint(worker.DataUri);
 
-			var distributed = new Distributed<T>(message, CurrentMessage.Headers.ResponseAddress);
+			var distributed = new Distributed<T>(message, _bus.Context().ResponseAddress);
 
 			endpoint.Send(distributed);
 		}

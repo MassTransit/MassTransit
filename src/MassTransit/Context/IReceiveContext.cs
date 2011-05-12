@@ -35,14 +35,17 @@ namespace MassTransit.Context
 
 		void SetFaultAddress(Uri uri);
 
+		void SetNetwork(string value);
+
 		void SetRetryCount(int retryCount);
 
 		void SetExpirationTime(DateTime value);
 
 		void SetMessageType(string messageType);
 
-
 		void CopyBodyTo(Stream stream);
+
+		Stream BodyStream { get; }
 
 		void SetSerializer(IMessageSerializer serializer);
 	}

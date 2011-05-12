@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Serialization
 	using System.Diagnostics;
 	using System.IO;
 	using System.Text;
+	using Context;
 	using Magnum.Extensions;
 	using MassTransit.Serialization;
 	using MessageHeaders;
@@ -95,18 +96,19 @@ namespace MassTransit.Tests.Serialization
 			VerifyMessageHeaderIsPassed(x => x.ExpiresAt(expiration), x => { Assert.AreEqual(expiration.ToUniversalTime(), x.ExpirationTime); });
 		}
 
-		private void VerifyMessageHeaderIsPassed(Action<IOutboundMessage> setHeaderAction, Action<IInboundMessageHeaders> checkHeaderAction)
+		private void VerifyMessageHeaderIsPassed(Action<ISendContext<PingMessage>> setHeaderAction, Action<IConsumeContext> checkHeaderAction)
 		{
 			byte[] data;
 			var serializer = new XmlMessageSerializer();
-
-			OutboundMessage.Set(setHeaderAction);
 
 			var message = new PingMessage();
 
 			using (MemoryStream output = new MemoryStream())
 			{
-				serializer.Serialize(output, message);
+				var sendContext = new SendContext<PingMessage>(message);
+				setHeaderAction(sendContext);
+
+				serializer.Serialize(output, sendContext);
 
 				data = output.ToArray();
 			}
@@ -117,9 +119,10 @@ namespace MassTransit.Tests.Serialization
 
 			using (MemoryStream input = new MemoryStream(data))
 			{
-				serializer.Deserialize(input);
+				var receiveContext = new ConsumeContext(input);
+				serializer.Deserialize(receiveContext);
 
-				checkHeaderAction(CurrentMessage.Headers);
+				checkHeaderAction(receiveContext);
 			}
 		}
 	}

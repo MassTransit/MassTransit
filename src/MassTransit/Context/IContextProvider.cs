@@ -19,19 +19,8 @@ namespace MassTransit.Context
 	/// </summary>
 	public interface IContextProvider
 	{
-		TContext ReceiveContext<TContext>(Action<TContext> contextAction)
-			where TContext : IReceiveContext;
+		void Context(Action<IConsumeContext> contextCallback);
 
-		/// <summary>
-		/// Access the send context
-		/// </summary>
-		/// <typeparam name="TContext"></typeparam>
-		/// <typeparam name="TMessage"></typeparam>
-		/// <param name="message"></param>
-		/// <param name="contextAction"></param>
-		/// <returns></returns>
-		TContext SendContext<TContext, TMessage>(TMessage message, Action<TContext> contextAction)
-			where TContext : ISendContext<TMessage>
-			where TMessage : class;
+		TResult Context<TResult>(Func<IConsumeContext, TResult> contextCallback);
 	}
 }

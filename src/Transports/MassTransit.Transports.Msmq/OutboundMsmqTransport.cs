@@ -31,7 +31,7 @@
 		{
 			using (var message = new Message())
 			{
-				message.Label = context.MessageType.Substring(0, 250);
+				message.Label = context.MessageType.Length > 250 ? context.MessageType.Substring(0, 250) : context.MessageType;
 				message.Recoverable = true;
 
 				if (context.ExpirationTime.HasValue)

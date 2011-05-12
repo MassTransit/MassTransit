@@ -52,7 +52,7 @@ namespace MassTransit.Tests.Serialization
 
             using (var output = new MemoryStream())
             {
-                serializer.Serialize(output, _message);
+                serializer.Serialize(output, _message.ToSendContext());
 
                 serializedMessageData = output.ToArray();
 
@@ -63,7 +63,7 @@ namespace MassTransit.Tests.Serialization
 
             using (var input = new MemoryStream(serializedMessageData))
             {
-                var receivedMessage = deserializer.Deserialize(input) as PartialSerializationTestMessage;
+                var receivedMessage = deserializer.Deserialize(input.ToReceiveContext()) as PartialSerializationTestMessage;
 
                 Assert.AreEqual(_message, receivedMessage);
             }

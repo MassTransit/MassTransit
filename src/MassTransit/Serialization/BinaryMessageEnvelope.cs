@@ -15,6 +15,7 @@ namespace MassTransit.Serialization
 	using System;
 	using System.Collections.Generic;
 	using System.Runtime.Remoting.Messaging;
+	using Context;
 	using MessageHeaders;
 
 	public class BinaryMessageEnvelope :
@@ -119,11 +120,11 @@ namespace MassTransit.Serialization
 			}
 		}
 
-		public static BinaryMessageEnvelope From(IOutboundMessage context)
+		public static BinaryMessageEnvelope From(ISendContext context)
 		{
 			var envelope = new BinaryMessageEnvelope();
 
-			envelope.CopyFrom(context);
+			envelope.SetUsingContext(context);
 
 			return envelope;
 		}

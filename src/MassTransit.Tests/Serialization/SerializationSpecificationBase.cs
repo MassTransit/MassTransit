@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Serialization
     using System.Diagnostics;
     using System.IO;
     using System.Text;
+    using Context;
     using MassTransit.Serialization;
     using MessageHeaders;
     using NUnit.Framework;
@@ -30,6 +31,7 @@ namespace MassTransit.Tests.Serialization
         int _retryCount;
 
         protected void TestSerialization<T>(T message)
+			where T : class
         {
             byte[] data;
             var serializer = new TSerializer();
@@ -51,7 +53,7 @@ namespace MassTransit.Tests.Serialization
 
             using (MemoryStream output = new MemoryStream())
             {
-                serializer.Serialize(output, message);
+                serializer.Serialize(output, message.ToSendContext());
 
                 data = output.ToArray();
             }
@@ -62,16 +64,18 @@ namespace MassTransit.Tests.Serialization
 
             using (MemoryStream input = new MemoryStream(data))
             {
-                object receivedMessage = serializer.Deserialize(input);
+            	IReceiveContext context = input.ToReceiveContext();
+
+            	object receivedMessage = serializer.Deserialize(context);
 
                 Assert.AreEqual(message, receivedMessage);
                 Assert.AreNotSame(message, receivedMessage);
 
-                Assert.AreEqual(_retryCount, CurrentMessage.Headers.RetryCount);
-                Assert.AreEqual(_sourceUri, CurrentMessage.Headers.SourceAddress);
-                Assert.AreEqual(_responseUri, CurrentMessage.Headers.ResponseAddress);
-                Assert.AreEqual(_faultUri, CurrentMessage.Headers.FaultAddress);
-                Assert.AreEqual(_destinationUri, CurrentMessage.Headers.DestinationAddress);
+				Assert.AreEqual(_retryCount, context.RetryCount);
+				Assert.AreEqual(_sourceUri, context.SourceAddress);
+				Assert.AreEqual(_responseUri, context.ResponseAddress);
+				Assert.AreEqual(_faultUri, context.FaultAddress);
+				Assert.AreEqual(_destinationUri, context.DestinationAddress);
                 //			Assert.AreEqual(message.GetType().ToMessageName(), CurrentMessage.Headers.MessageType);
             }
         }

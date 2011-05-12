@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,26 +12,28 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-    using System.IO;
+	using System.IO;
+	using Context;
 
-    /// <summary>
-    /// Message Serialization Methods 
-    /// </summary>
-    public interface IMessageSerializer
-    {
-        /// <summary>
-        /// Serialize the message to the stream
-        /// </summary>
-        /// <typeparam name="T">The implicit type of the message to serialize</typeparam>
-        /// <param name="output">The stream where the output should be directed</param>
-        /// <param name="message">The message to serialize</param>
-        void Serialize<T>(Stream output, T message);
+	/// <summary>
+	/// Message Serialization Methods 
+	/// </summary>
+	public interface IMessageSerializer
+	{
+		/// <summary>
+		/// Serialize the message to the stream
+		/// </summary>
+		/// <typeparam name="T">The implicit type of the message to serialize</typeparam>
+		/// <param name="stream"></param>
+		/// <param name="context"></param>
+		void Serialize<T>(Stream stream, ISendContext<T> context)
+			where T : class;
 
-        /// <summary>
-        /// Deserialize a message from the stream
-        /// </summary>
-        /// <param name="input">The input stream where the serializer should read from</param>
-        /// <returns>An object that was deserialized</returns>
-        object Deserialize(Stream input);
-    }
+		/// <summary>
+		/// Deserialize a message from the stream
+		/// </summary>
+		/// <param name="context"></param>
+		/// <returns>An object that was deserialized</returns>
+		object Deserialize(IReceiveContext context);
+	}
 }

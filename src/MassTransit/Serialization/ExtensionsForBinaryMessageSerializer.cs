@@ -13,30 +13,38 @@
 namespace MassTransit.Serialization
 {
 	using System;
-	using Context;
+	using System.Collections.Generic;
+	using System.Runtime.Remoting.Messaging;
 
-	public class JsonMessageEnvelope :
-		MessageEnvelopeBase
+	public static class ExtensionsForBinaryMessageSerializer
 	{
-		public JsonMessageEnvelope()
+		public static void Add(this List<Header> headers, string key, Uri uri)
 		{
+			if (uri == null)
+				return;
+
+			headers.Add(new Header(key, uri));
 		}
 
-		JsonMessageEnvelope(Type messageType, object message)
+		public static void Add(this List<Header> headers, string key, string value)
 		{
-			Message = message;
-			MessageType = messageType.ToMessageName();
+			if (string.IsNullOrEmpty(value))
+				return;
+
+			headers.Add(new Header(key, value));
 		}
 
-		public object Message { get; set; }
-
-		public static JsonMessageEnvelope Create<T>(ISendContext<T> context)
-			where T : class
+		public static void Add(this List<Header> headers, string key, int value)
 		{
-			var envelope = new JsonMessageEnvelope(typeof (T), context.Message);
-			envelope.SetUsingContext(context);
+			if (value == 0)
+				return;
 
-			return envelope;
+			headers.Add(new Header(key, value));
+		}
+
+		public static void Add(this List<Header> headers, string key, DateTime value)
+		{
+			headers.Add(new Header(key, value));
 		}
 	}
 }

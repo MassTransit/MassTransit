@@ -58,5 +58,4 @@ namespace MassTransit.Context
 		void GenerateFault<T>(T message)
 			where T : class;
 	}
-
 }
