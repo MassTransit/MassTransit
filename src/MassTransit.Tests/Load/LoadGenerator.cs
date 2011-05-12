@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Load
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading;
+	using Context;
 	using Magnum;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
@@ -46,7 +47,7 @@ namespace MassTransit.Tests.Load
 
 			instance.ResponseCreatedAt = message.CreatedAt;
 			instance.ResponseReceivedAt = SystemUtil.UtcNow;
-			instance.Worker = CurrentMessage.Headers.SourceAddress;
+			instance.Worker = ContextStorage.Context().SourceAddress;
 			Interlocked.Increment(ref _responseCount);
 
 			_received.Set();

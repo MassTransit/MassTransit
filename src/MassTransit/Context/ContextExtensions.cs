@@ -17,6 +17,23 @@ namespace MassTransit
 
 	public static class ContextExtensions
 	{
+		public static IConsumeContext Context(this IServiceBus bus)
+		{
+			return ContextStorage.Context();
+		}
+
+		public static void Context(this IServiceBus bus, Action<IConsumeContext> contextCallback)
+		{
+			ContextStorage.Context(contextCallback);
+		}
+
+		public static TResult Context<TResult>(this IServiceBus bus, Func<IConsumeContext, TResult> contextCallback)
+		{
+			return ContextStorage.Context(contextCallback);
+		}
+
+
+
 //		public static TResult ConsumeContext<TResult>(this IServiceBus bus, Func<IConsumeContext, TResult> accessor)
 //		{
 //			if (bus == null)

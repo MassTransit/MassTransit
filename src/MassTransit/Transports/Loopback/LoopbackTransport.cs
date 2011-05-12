@@ -85,19 +85,23 @@ namespace MassTransit.Transports
 					{
 						LoopbackMessage message = iterator.Value;
 						var context = new ConsumeContext(message.Body);
-						Action<IReceiveContext> receive = callback(context);
-						if (receive == null)
-							continue;
 
-						_messages.Remove(iterator);
-
-						using (message)
+						using (ContextStorage.CreateContextScope(context))
 						{
-							Monitor.Exit(_messageLock);
-							monitorExitNeeded = false;
+							Action<IReceiveContext> receive = callback(context);
+							if (receive == null)
+								continue;
 
-							receive(context);
-							return;
+							_messages.Remove(iterator);
+
+							using (message)
+							{
+								Monitor.Exit(_messageLock);
+								monitorExitNeeded = false;
+
+								receive(context);
+								return;
+							}
 						}
 					}
 				}

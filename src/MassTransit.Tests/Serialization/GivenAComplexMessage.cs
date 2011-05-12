@@ -4,6 +4,7 @@
     using System.Diagnostics;
     using System.IO;
     using System.Text;
+    using Context;
     using Magnum.Extensions;
     using MassTransit.Serialization;
     using Messages;
@@ -41,7 +42,7 @@
 
             using (var output = new MemoryStream())
             {
-                serializer.Serialize(output, Message);
+                serializer.Serialize(output, new SendContext<SerializationTestMessage>(Message));
 
                 serializedMessageData = output.ToArray();
 
@@ -50,7 +51,9 @@
 
             using (var input = new MemoryStream(serializedMessageData))
             {
-                var receivedMessage = serializer.Deserialize(input) as SerializationTestMessage;
+            	var receiveContext = new ConsumeContext(input);
+
+				var receivedMessage = serializer.Deserialize(receiveContext) as SerializationTestMessage;
 
                 Assert.AreEqual(Message, receivedMessage);
             }

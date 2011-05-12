@@ -14,6 +14,7 @@ namespace MassTransit.Distributor
 {
 	using System;
 	using System.Threading;
+	using Context;
 	using Magnum.Extensions;
 	using MessageHeaders;
 	using Messages;
@@ -240,7 +241,11 @@ namespace MassTransit.Distributor
 
 		private static void RewriteResponseAddress(Uri responseAddress)
 		{
-			InboundMessageHeaders.SetCurrent(x => x.SetResponseAddress(responseAddress));
+			var context = ContextStorage.Context() as ConsumeContext<Distributed<T>>;
+			if (context != null)
+			{
+				context.SetResponseAddress(responseAddress);
+			}
 		}
 	}
 }

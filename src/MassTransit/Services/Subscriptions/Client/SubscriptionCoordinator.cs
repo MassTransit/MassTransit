@@ -225,15 +225,15 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		bool ShouldIgnoreMessage<T>(T message)
 		{
-			if (CurrentMessage.Headers.SourceAddress == _bus.Endpoint.Address.Uri)
+			if (_bus.Context().SourceAddress == _bus.Endpoint.Address.Uri)
 			{
 			   _log.Debug("Ignoring subscription because its source address equals the busses address"); 
 				return true;
 			}
 
-			if (!string.Equals(CurrentMessage.Headers.Network, _network))
+			if (!string.Equals(_bus.Context().Network, _network))
 			{
-			   _log.DebugFormat("Ignoring subscription because the network '{0}' != ours '{1}1",CurrentMessage.Headers.Network, _network); 
+				_log.DebugFormat("Ignoring subscription because the network '{0}' != ours '{1}1", _bus.Context().Network, _network); 
 				return true;
 			}
 

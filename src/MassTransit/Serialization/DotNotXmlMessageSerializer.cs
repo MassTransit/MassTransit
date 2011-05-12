@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,8 +17,8 @@ namespace MassTransit.Serialization
 	using System.Runtime.Serialization;
 	using System.Xml;
 	using System.Xml.Serialization;
+	using Context;
 	using Magnum.Threading;
-	using MessageHeaders;
 	using Util;
 
 	/// <summary>
@@ -28,10 +28,10 @@ namespace MassTransit.Serialization
 	public class DotNotXmlMessageSerializer :
 		IMessageSerializer
 	{
-		private static readonly XmlAttributes _attributes;
-		private static readonly ReaderWriterLockedDictionary<Type, XmlSerializer> _deserializers;
-		private static readonly XmlSerializerNamespaces _namespaces;
-		private static readonly ReaderWriterLockedDictionary<Type, XmlSerializer> _serializers;
+		static readonly XmlAttributes _attributes;
+		static readonly ReaderWriterLockedDictionary<Type, XmlSerializer> _deserializers;
+		static readonly XmlSerializerNamespaces _namespaces;
+		static readonly ReaderWriterLockedDictionary<Type, XmlSerializer> _serializers;
 
 		static DotNotXmlMessageSerializer()
 		{
@@ -49,21 +49,22 @@ namespace MassTransit.Serialization
 			_attributes.XmlRoot = new XmlRootAttribute("Message");
 		}
 
-		public void Serialize<T>(Stream output, T message)
+		public void Serialize<T>(Stream stream, ISendContext<T> context)
+			where T : class
 		{
-			CheckConvention.EnsureSerializable(message);
-			var envelope = XmlMessageEnvelope.Create(message);
+			CheckConvention.EnsureSerializable(context.Message);
+			XmlMessageEnvelope envelope = XmlMessageEnvelope.Create(context);
 
-			GetSerializerFor<T>().Serialize(output, envelope);
+			GetSerializerFor<T>().Serialize(stream, envelope);
 		}
 
-		public object Deserialize(Stream input)
+		public object Deserialize(IReceiveContext context)
 		{
-			object obj = GetDeserializerFor(typeof (XmlReceiveMessageEnvelope)).Deserialize(input);
+			object obj = GetDeserializerFor(typeof (XmlReceiveMessageEnvelope)).Deserialize(context.BodyStream);
 			if (obj.GetType() != typeof (XmlReceiveMessageEnvelope))
 				throw new SerializationException("An unknown message type was received: " + obj.GetType().FullName);
 
-			XmlReceiveMessageEnvelope envelope = (XmlReceiveMessageEnvelope) obj;
+			var envelope = (XmlReceiveMessageEnvelope) obj;
 
 			if (string.IsNullOrEmpty(envelope.MessageType))
 				throw new SerializationException("No message type found on envelope");
@@ -75,23 +76,23 @@ namespace MassTransit.Serialization
 				obj = GetDeserializerFor(t).Deserialize(reader);
 			}
 
-			InboundMessageHeaders.SetCurrent(envelope.GetMessageHeadersSetAction());
+			context.SetUsingMessageEnvelope(envelope);
 
 			return obj;
 		}
 
-		private static XmlSerializer GetSerializerFor<T>()
+		static XmlSerializer GetSerializerFor<T>()
 		{
 			Type type = typeof (T);
 
 			return _serializers.Retrieve(type, () => new XmlSerializer(typeof (XmlMessageEnvelope), new[] {type}));
 		}
 
-		private static XmlSerializer GetDeserializerFor(Type type)
+		static XmlSerializer GetDeserializerFor(Type type)
 		{
 			return _deserializers.Retrieve(type, () =>
 				{
-					XmlAttributeOverrides overrides = new XmlAttributeOverrides();
+					var overrides = new XmlAttributeOverrides();
 					overrides.Add(type, _attributes);
 
 					return new XmlSerializer(type, overrides);

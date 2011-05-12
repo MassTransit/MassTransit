@@ -49,12 +49,12 @@ namespace MassTransit.Tests.Serialization
 				byte[] data;
 				using (var output = new MemoryStream())
 				{
-					serializer.Serialize(output, message);
+					serializer.Serialize(output, message.ToSendContext());
 					data = output.ToArray();
 				}
 				using (var input = new MemoryStream(data))
 				{
-					serializer.Deserialize(input);
+					serializer.Deserialize(input.ToReceiveContext());
 				}
 			}
 
@@ -66,7 +66,7 @@ namespace MassTransit.Tests.Serialization
 			{
 				using (var output = new MemoryStream())
 				{
-					serializer.Serialize(output, message);
+					serializer.Serialize(output, message.ToSendContext());
 				}
 			}
 
@@ -80,7 +80,7 @@ namespace MassTransit.Tests.Serialization
 			byte[] sample;
 			using (var output = new MemoryStream())
 			{
-				serializer.Serialize(output, message);
+				serializer.Serialize(output, message.ToSendContext());
 				sample = output.ToArray();
 			}
 
@@ -90,7 +90,7 @@ namespace MassTransit.Tests.Serialization
 			{
 				using (var input = new MemoryStream(sample))
 				{
-					serializer.Deserialize(input);
+					serializer.Deserialize(input.ToReceiveContext());
 				}
 			}
 
