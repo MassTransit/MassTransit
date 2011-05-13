@@ -132,7 +132,11 @@ namespace MassTransit.Context
 			}
 			else
 			{
-				Bus.Publish(message, contextCallback);
+				Bus.Publish(message, context =>
+					{
+						// don't roll this up or it breaks the 3.5 build
+						contextCallback(context);
+					});
 			}
 		}
 
