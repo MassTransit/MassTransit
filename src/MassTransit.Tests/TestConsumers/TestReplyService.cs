@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TestConsumers
 {
+	using Context;
 	using Magnum.Reflection;
 
 	public class TestReplyService<TMessage, TKey, TReplyMessage> :
@@ -25,7 +26,7 @@ namespace MassTransit.Tests.TestConsumers
 			base.Consume(message);
 
 			var reply = FastActivator<TReplyMessage>.Create(message.CorrelationId);
-			CurrentMessage.Respond(reply);
+			ContextStorage.Context().Respond(reply);
 		}
 	}
 }

@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Distributor
 				});
 		}
 
-		static Action<FirstCommand> FirstCommandConsumer(FirstCommand message)
+		Action<FirstCommand> FirstCommandConsumer(FirstCommand message)
 		{
 			return command =>
 				{
@@ -47,7 +47,7 @@ namespace MassTransit.Tests.Distributor
 
 					var response = new FirstResponse(command.CorrelationId);
 
-					CurrentMessage.Respond(response);
+					LocalBus.Context().Respond(response);
 				};
 		}
 	}

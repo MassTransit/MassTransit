@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Examples
 			PingService = new ConsumerOf<Ping>(ping =>
 				{
 					// Response with a pong to the ping
-					CurrentMessage.Respond(new Pong(ping.CorrelationId));
+					RemoteBus.Context().Respond(new Pong(ping.CorrelationId));
 				});
 			RemoteBus.SubscribeInstance(PingService);
 		}

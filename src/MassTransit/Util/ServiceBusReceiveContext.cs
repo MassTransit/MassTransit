@@ -125,8 +125,6 @@ namespace MassTransit.Util
 
 						atLeastOneConsumerFailed = true;
 						lastException = ex;
-
-						CreateAndPublishFault(context, ex);
 					}
 				} while (_consumers.MoveNext());
 
@@ -147,21 +145,6 @@ namespace MassTransit.Util
 				ReportConsumerTime(context.MessageType, _receiveTime.Elapsed, _consumeTime.Elapsed);
 				ReportConsumerCount(context.MessageType, _consumeCount);
 			}
-		}
-
-		void CreateAndPublishFault(object message, Exception ex)
-		{
-			// todo rip this stuff and use the context to publish
-			if (message.Implements(typeof (CorrelatedBy<>)))
-				this.FastInvoke("PublishFault", FastActivator.Create(typeof (Fault<,>), message, ex));
-			else
-				this.FastInvoke("PublishFault", FastActivator.Create(typeof (Fault<>), message, ex));
-		}
-
-		[UsedImplicitly]
-		void PublishFault<T>(T message) where T : class
-		{
-			CurrentMessage.GenerateFault(message);
 		}
 
 		void ReportConsumerTime(string messageType, TimeSpan receiveTime, TimeSpan consumeTime)
