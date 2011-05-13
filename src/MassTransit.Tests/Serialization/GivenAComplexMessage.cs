@@ -46,7 +46,7 @@
 
                 serializedMessageData = output.ToArray();
 
-                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+           //     Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
             }
 
             using (var input = new MemoryStream(serializedMessageData))

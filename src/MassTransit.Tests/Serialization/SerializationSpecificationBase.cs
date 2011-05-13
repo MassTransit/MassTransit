@@ -18,7 +18,6 @@ namespace MassTransit.Tests.Serialization
     using System.Text;
     using Context;
     using MassTransit.Serialization;
-    using MessageHeaders;
     using NUnit.Framework;
 
     public class SerializationSpecificationBase<TSerializer> 
@@ -42,25 +41,21 @@ namespace MassTransit.Tests.Serialization
             _destinationUri = new Uri("loopback://localhost/destination");
             _retryCount = 69;
 
-            OutboundMessage.Set(x =>
+            using (var output = new MemoryStream())
             {
-                x.SetSourceAddress(_sourceUri);
-                x.SendResponseTo(_responseUri);
-                x.SendFaultTo(_faultUri);
-                x.SetDestinationAddress(_destinationUri);
-                x.SetRetryCount(_retryCount);
-            });
+            	ISendContext<T> context = message.ToSendContext();
+				context.SetSourceAddress(_sourceUri);
+				context.SendResponseTo(_responseUri);
+				context.SendFaultTo(_faultUri);
+				context.SetDestinationAddress(_destinationUri);
+				context.SetRetryCount(_retryCount);
 
-            using (MemoryStream output = new MemoryStream())
-            {
-                serializer.Serialize(output, message.ToSendContext());
+            	serializer.Serialize(output, context);
 
                 data = output.ToArray();
             }
 
-            Trace.WriteLine(OutboundMessage.Headers.MessageType);
-
-            Trace.WriteLine(Encoding.UTF8.GetString(data));
+   //         Trace.WriteLine(Encoding.UTF8.GetString(data));
 
             using (MemoryStream input = new MemoryStream(data))
             {

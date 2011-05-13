@@ -56,7 +56,7 @@ namespace MassTransit.Tests.Serialization
 
                 serializedMessageData = output.ToArray();
 
-                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+      //          Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
             }
 
             var deserializer = new PreSharedKeyEncryptedMessageSerializer(key, new TSerializer());

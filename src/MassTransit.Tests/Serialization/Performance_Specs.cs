@@ -26,6 +26,7 @@ namespace MassTransit.Tests.Serialization
 		[Test, Category("Integration")]
 		public void Just_how_fast_are_you()
 		{
+			Trace.WriteLine("Serializer: " + typeof(TSerializer).Name);
 			var message = new SerializationTestMessage
 				{
 					DecimalValue = 123.45m,

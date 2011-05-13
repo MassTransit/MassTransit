@@ -254,7 +254,14 @@ namespace MassTransit.Context
 		public bool TryGetContext<T>(out IConsumeContext<T> context)
 			where T : class
 		{
-			return _context.TryGetContext(out context);
+			if (typeof (T).IsAssignableFrom(Message.GetType()))
+			{
+				context = new ConsumeContext<T>(this, Message as T);
+				return true;
+			}
+
+			context = null;
+			return false;
 		}
 
 		public void RetryLater()
