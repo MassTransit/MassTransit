@@ -326,7 +326,6 @@
     <Compile Include="Transports\ITransportSettings.cs" />
     <Compile Include="Transports\Loopback\LoopbackMessage.cs" />
     <Compile Include="Transports\Loopback\LoopbackTransportFactory.cs" />
-    <Compile Include="Transports\MulticastUdp\MulticastUdpTransportFactory.cs" />
     <Compile Include="Transports\Transport.cs" />
     <Compile Include="Util\CheckConvention.cs" />
     <Compile Include="Util\ConsumerPool.cs" />
@@ -499,7 +498,6 @@
     <Compile Include="Transports\EndpointSettings.cs" />
     <Compile Include="Transports\Loopback\LoopbackTransport.cs" />
     <Compile Include="Transports\MessageRetryTracker.cs" />
-    <Compile Include="Transports\MulticastUdp\MulticastUdpTransport.cs" />
     <Compile Include="Transports\NullTransport.cs" />
     <Compile Include="Transports\TransportBase.cs" />
     <Compile Include="Util\ExpressionVisitor.cs" />
