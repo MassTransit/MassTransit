@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2010 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,29 +17,29 @@ namespace MassTransit.Util
 	using Events;
 	using log4net;
 	using Magnum.Extensions;
-	using Magnum.Pipeline;
+	using Stact;
 
 	public class ThreadPoolConsumerPool :
 		ConsumerPool
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (ThreadPoolConsumerPool));
+		static readonly ILog _log = LogManager.GetLogger(typeof (ThreadPoolConsumerPool));
 
-		private readonly IServiceBus _bus;
-		private readonly Pipe _eventAggregator;
-		private int _consumerCount;
-		private bool _disposed;
-		private bool _enabled;
-		private int _maximumThreadCount = 25;
-		private int _receiverCount;
-		private ISubscriptionScope _scope;
-		private readonly TimeSpan _receiveTimeout;
-		private readonly object _locker = new object();
+		readonly IServiceBus _bus;
+		readonly UntypedChannel _eventChannel;
+		readonly object _locker = new object();
+		readonly TimeSpan _receiveTimeout;
+		int _consumerCount;
+		bool _disposed;
+		bool _enabled;
+		ChannelConnection _eventConnection;
+		int _maximumThreadCount = 25;
+		int _receiverCount;
 
-		public ThreadPoolConsumerPool(IServiceBus bus, Pipe eventAggregator, TimeSpan receiveTimeout)
+		public ThreadPoolConsumerPool(IServiceBus bus, UntypedChannel eventChannel, TimeSpan receiveTimeout)
 		{
 			_receiveTimeout = receiveTimeout;
-			_eventAggregator = eventAggregator;
 			_bus = bus;
+			_eventChannel = eventChannel;
 		}
 
 		public int MaximumConsumerCount
@@ -56,9 +56,16 @@ namespace MassTransit.Util
 
 		public void Start()
 		{
-			_scope = _eventAggregator.NewSubscriptionScope();
-			_scope.Subscribe<ReceiveCompleted>(Handle);
-			_scope.Subscribe<ConsumeCompleted>(Handle);
+			_eventConnection = _eventChannel.Connect(x =>
+				{
+					x.AddConsumerOf<ReceiveCompleted>()
+						.UsingConsumer(Handle)
+						.HandleOnCallingThread();
+
+					x.AddConsumerOf<ConsumeCompleted>()
+						.UsingConsumer(Handle)
+						.HandleOnCallingThread();
+				});
 
 			_enabled = true;
 
@@ -75,20 +82,26 @@ namespace MassTransit.Util
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Stopping Consumer Pool for {0}", _bus.Endpoint.Uri);
 
-			if(_consumerCount == 0)
+			if (_consumerCount == 0)
 				return;
 
 			var completed = new AutoResetEvent(true);
 
-			_scope.Subscribe<ConsumeCompleted>(x => completed.Set());
-
-			while (completed.WaitOne(60.Seconds(), true))
+			using (_eventChannel.Connect(x =>
+				{
+					x.AddConsumerOf<ConsumeCompleted>()
+						.UsingConsumer(message => completed.Set())
+						.HandleOnCallingThread();
+				}))
 			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Consumer Pool stopped for {0}", _bus.Endpoint.Uri);
+				while (completed.WaitOne(60.Seconds(), true))
+				{
+					if (_log.IsDebugEnabled)
+						_log.DebugFormat("Consumer Pool stopped for {0}", _bus.Endpoint.Uri);
 
-				if (_consumerCount == 0)
-					return;
+					if (_consumerCount == 0)
+						return;
+				}
 			}
 
 			if (_log.IsDebugEnabled)
@@ -101,36 +114,36 @@ namespace MassTransit.Util
 			GC.SuppressFinalize(this);
 		}
 
-		private void Dispose(bool disposing)
+		void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
 			{
-				if (_scope != null)
+				if (_eventConnection != null)
 				{
-					_scope.Dispose();
-					_scope = null;
+					_eventConnection.Dispose();
+					_eventConnection = null;
 				}
 			}
 
 			_disposed = true;
 		}
 
-		private void Handle(ReceiveCompleted message)
+		void Handle(ReceiveCompleted message)
 		{
 			Interlocked.Decrement(ref _receiverCount);
 
 			QueueReceiver();
 		}
 
-		private void Handle(ConsumeCompleted message)
+		void Handle(ConsumeCompleted message)
 		{
 			Interlocked.Decrement(ref _consumerCount);
 
 			QueueReceiver();
 		}
 
-		private void QueueReceiver()
+		void QueueReceiver()
 		{
 			if (_enabled == false)
 				return;
@@ -146,7 +159,7 @@ namespace MassTransit.Util
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("Queueing receiver for {0}", _bus.Endpoint.Uri);
 
-				var context = new ServiceBusReceiveContext(_bus, _eventAggregator, _receiveTimeout);
+				var context = new ServiceBusReceiveContext(_bus, _eventChannel, _receiveTimeout);
 
 				Interlocked.Increment(ref _receiverCount);
 				Interlocked.Increment(ref _consumerCount);
@@ -164,7 +177,7 @@ namespace MassTransit.Util
 				}
 			}
 
-			_eventAggregator.Send(new ReceiverQueued
+			_eventChannel.Send(new ReceiverQueued
 				{
 					ReceiverCount = _receiverCount,
 					ConsumerCount = _consumerCount,

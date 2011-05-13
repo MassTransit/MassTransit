@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -43,19 +43,9 @@ namespace MassTransit
 		}
 
 		/// <summary>
-		/// When the exception occurred
+		/// The exception that was caught
 		/// </summary>
-		public DateTime OccurredAt { get; set; }
-
-		/// <summary>
-		/// Messages associated with the exception
-		/// </summary>
-		public List<string> Messages { get; set; }
-
-		/// <summary>
-		/// A stack trace related to the exception
-		/// </summary>
-		public List<string> StackTrace { get; set; }
+		public Exception CaughtException { get; set; }
 
 		/// <summary>
 		/// The message that failed to be consumed
@@ -63,13 +53,23 @@ namespace MassTransit
 		public TMessage FailedMessage { get; set; }
 
 		/// <summary>
-		/// The exception that was caught
+		/// Messages associated with the exception
 		/// </summary>
-		public Exception CaughtException { get; set; }
+		public List<string> Messages { get; set; }
 
-		private static List<string> GetStackTrace(Exception ex)
+		/// <summary>
+		/// When the exception occurred
+		/// </summary>
+		public DateTime OccurredAt { get; set; }
+
+		/// <summary>
+		/// A stack trace related to the exception
+		/// </summary>
+		public List<string> StackTrace { get; set; }
+
+		static List<string> GetStackTrace(Exception ex)
 		{
-			List<string> result = new List<string>();
+			var result = new List<string>();
 
 			result.Add(string.IsNullOrEmpty(ex.StackTrace) ? "Stack Trace" : ex.StackTrace);
 
@@ -85,9 +85,9 @@ namespace MassTransit
 			return result;
 		}
 
-		private static List<string> GetExceptionMessages(Exception ex)
+		static List<string> GetExceptionMessages(Exception ex)
 		{
-			List<string> result = new List<string>();
+			var result = new List<string>();
 
 			result.Add(ex.Message);
 
@@ -119,8 +119,9 @@ namespace MassTransit
 		/// </summary>
 		/// <param name="ex"></param>
 		/// <param name="message"></param>
-		public Fault(TMessage message, Exception ex) :
-			base(message, ex)
+		public Fault(TMessage message, Exception ex)
+			:
+				base(message, ex)
 		{
 			CorrelationId = message.CorrelationId;
 		}

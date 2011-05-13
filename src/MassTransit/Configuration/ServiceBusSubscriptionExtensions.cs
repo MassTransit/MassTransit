@@ -15,6 +15,7 @@ namespace MassTransit
 	using System;
 	using Magnum;
 	using SubscriptionConnectors;
+	using Util;
 
 	public static class ServiceBusSubscriptionExtensions
 	{

@@ -20,9 +20,7 @@ namespace MassTransit.Util
 	using Events;
 	using Exceptions;
 	using log4net;
-	using Magnum.Extensions;
-	using Magnum.Pipeline;
-	using Magnum.Reflection;
+	using Stact;
 
 	public class ServiceBusReceiveContext
 	{
@@ -30,7 +28,7 @@ namespace MassTransit.Util
 
 		readonly IServiceBus _bus;
 		readonly Stopwatch _consumeTime;
-		readonly Pipe _eventAggregator;
+		readonly UntypedChannel _eventChannel;
 		readonly Stopwatch _receiveTime;
 		readonly TimeSpan _receiveTimeout;
 		int _consumeCount;
@@ -38,11 +36,11 @@ namespace MassTransit.Util
 		IEnumerator<Action<IConsumeContext>> _consumers;
 		bool _receiveNotified;
 
-		public ServiceBusReceiveContext(IServiceBus bus, Pipe eventAggregator, TimeSpan receiveTimeout)
+		public ServiceBusReceiveContext(IServiceBus bus, UntypedChannel eventChannel, TimeSpan receiveTimeout)
 		{
 			_bus = bus;
+			_eventChannel = eventChannel;
 			_receiveTimeout = receiveTimeout;
-			_eventAggregator = eventAggregator;
 			_receiveTime = new Stopwatch();
 			_consumeTime = new Stopwatch();
 			_consumeCount = 0;
@@ -156,7 +154,7 @@ namespace MassTransit.Util
 					ConsumeDuration = consumeTime,
 				};
 
-			_eventAggregator.Send(message);
+			_eventChannel.Send(message);
 		}
 
 		void ReportConsumerCount(string messageType, int count)
@@ -167,7 +165,7 @@ namespace MassTransit.Util
 					ConsumeCount = count,
 				};
 
-			_eventAggregator.Send(message);
+			_eventChannel.Send(message);
 		}
 
 		void NotifyReceiveCompleted()
@@ -175,7 +173,7 @@ namespace MassTransit.Util
 			if (_receiveNotified)
 				return;
 
-			_eventAggregator.Send(new ReceiveCompleted());
+			_eventChannel.Send(new ReceiveCompleted());
 			_receiveNotified = true;
 		}
 
@@ -184,7 +182,7 @@ namespace MassTransit.Util
 			if (_consumeNotified)
 				return;
 
-			_eventAggregator.Send(new ConsumeCompleted());
+			_eventChannel.Send(new ConsumeCompleted());
 			_consumeNotified = true;
 		}
 	}
