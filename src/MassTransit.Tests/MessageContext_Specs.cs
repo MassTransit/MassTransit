@@ -42,7 +42,7 @@ namespace MassTransit.Tests
 				{
 					pong.Set(new PongMessage(message.CorrelationId));
 
-					CurrentMessage.Respond(pong.Message);
+					RemoteBus.Context().Respond(pong.Message);
 				});
 
 			LocalBus.Publish(ping);
@@ -70,7 +70,7 @@ namespace MassTransit.Tests
 				{
 					pong.Set(new PongMessage(message.CorrelationId));
 
-					CurrentMessage.Respond(pong.Message);
+					RemoteBus.Context().Respond(pong.Message);
 				});
 
 			RemoteBus.ShouldHaveRemoteSubscriptionFor<PongMessage>();

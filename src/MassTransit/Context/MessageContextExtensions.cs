@@ -93,5 +93,11 @@ namespace MassTransit
 		{
 			context.SetInputAddress(address.Uri);
 		}
+
+		public static void Respond<T>(this IConsumeContext context, T message)
+			where T : class
+		{
+			context.Respond(message, x => { });
+		}
 	}
 }

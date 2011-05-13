@@ -18,6 +18,7 @@ namespace MassTransit.Saga
 	using System.Linq.Expressions;
 	using System.Runtime.Serialization;
 	using Configuration;
+	using Context;
 	using Magnum.Extensions;
 	using Magnum.StateMachine;
 
@@ -82,7 +83,7 @@ namespace MassTransit.Saga
 			where TData : class 
 			where TMessage : class
 		{
-			eventAction.Call((saga, message) => CurrentMessage.Respond(action(saga, message)));
+			eventAction.Call((saga, message) => ContextStorage.Context().Respond(action(saga, message)));
 			return eventAction;
 		}
 
@@ -90,7 +91,7 @@ namespace MassTransit.Saga
 			where T : SagaStateMachine<T>, ISaga
 			where TData : class
 		{
-			eventAction.Call((saga, message) => CurrentMessage.RetryLater());
+			eventAction.Call((saga, message) => ContextStorage.Context().RetryLater());
 			return eventAction;
 		}
 

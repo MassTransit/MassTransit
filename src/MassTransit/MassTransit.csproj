@@ -341,7 +341,6 @@
     <Compile Include="Util\ThreadPoolConsumerPool.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CurrentMessage.cs" />
     <Compile Include="Distributor\IPendingMessageCount.cs" />
     <Compile Include="Distributor\IPendingMessageTracker.cs" />
     <Compile Include="Distributor\Messages\ConfigureWorker.cs" />
