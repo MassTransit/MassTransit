@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "..\..\MassTr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq", "..\..\Transports\MassTransit.Transports.MSMQ\MassTransit.Transports.Msmq.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Nms", "..\..\Transports\MassTransit.Transports.NMS\MassTransit.Transports.Nms.csproj", "{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.RabbitMq", "..\..\Transports\MassTransit.Transports.RabbitMq\MassTransit.Transports.RabbitMq.csproj", "{6C7149D7-4D97-45DF-A05D-61EC7374491D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "..\..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
@@ -33,10 +31,6 @@ Global
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6C7149D7-4D97-45DF-A05D-61EC7374491D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6C7149D7-4D97-45DF-A05D-61EC7374491D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C7149D7-4D97-45DF-A05D-61EC7374491D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -52,7 +46,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273} = {825EF0A3-C810-42FB-9D73-24BAE6DF0571}
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {825EF0A3-C810-42FB-9D73-24BAE6DF0571}
-		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B} = {825EF0A3-C810-42FB-9D73-24BAE6DF0571}
 		{6C7149D7-4D97-45DF-A05D-61EC7374491D} = {825EF0A3-C810-42FB-9D73-24BAE6DF0571}
 		{F5E67502-2B30-484C-88C3-97710291F5AA} = {825EF0A3-C810-42FB-9D73-24BAE6DF0571}
 	EndGlobalSection
