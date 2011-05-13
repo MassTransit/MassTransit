@@ -6,12 +6,14 @@
 
 	public static class PipelineViewerExtensions
 	{
-		public static void Trace(this IMessagePipeline pipeline)
+		public static void Trace<T>(this IPipelineSink<T> pipeline)
+			where T : class
 		{
 			PipelineViewer.Trace(pipeline);
 		}
 
-		public static void View(this IMessagePipeline pipeline, Action<string> callback)
+		public static void View<T>(this IPipelineSink<T> pipeline, Action<string> callback)
+			where T : class
 		{
 			PipelineViewer.Trace(pipeline, callback);
 		}
