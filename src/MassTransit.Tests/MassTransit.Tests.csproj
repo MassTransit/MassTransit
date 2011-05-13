@@ -228,7 +228,6 @@
     <Compile Include="TextFixtures\EndpointCacheProxy.cs" />
     <Compile Include="TextFixtures\SubscriptionServiceTestFixture.cs" />
     <Compile Include="Transports\LoopbackTransportContract.cs" />
-    <Compile Include="Transports\Multicast_Specs.cs" />
     <Compile Include="Saga\InitiateSaga_Specs.cs" />
     <Compile Include="Pipeline\MessageFilter_Specs.cs" />
     <Compile Include="Pipeline\OutboundEndpoint_Specs.cs" />
@@ -273,7 +272,6 @@
     <Compile Include="TextFixtures\EndpointTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackLocalAndRemoteTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackTestFixture.cs" />
-    <Compile Include="TextFixtures\MulticastUdpTestFixture.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />
     <Compile Include="Transports\TransactionalEndpointContract.cs" />
   </ItemGroup>
