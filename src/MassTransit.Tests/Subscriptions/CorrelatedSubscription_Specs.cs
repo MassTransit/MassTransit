@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Subscriptions
 {
-	using MassTransit.Transports;
 	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
 	using TestFramework;

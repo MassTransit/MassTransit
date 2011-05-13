@@ -51,6 +51,7 @@ namespace MassTransit.Tests
 			LocalBus.SubscribeHandler<SecondMessageContract>(second.Complete);
 
 			PipelineViewer.Trace(RemoteBus.InboundPipeline);
+			PipelineViewer.Trace(LocalBus.InboundPipeline);
 
 			var message = new SomeMessageContract("Joe", 27);
 

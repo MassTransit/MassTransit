@@ -14,8 +14,10 @@ namespace MassTransit.Context
 {
 	using System;
 	using System.IO;
+	using Magnum.Extensions;
 	using Magnum.Reflection;
 	using Serialization;
+	using Util;
 
 	public class ConsumeContext :
 		MessageContext,
@@ -122,7 +124,7 @@ namespace MassTransit.Context
 		{
 			if (ResponseAddress != null)
 			{
-				GetResponseEndpoint().Send(message, context =>
+				Bus.GetEndpoint(ResponseAddress).Send(message, context =>
 					{
 						context.SetSourceAddress(Bus.Endpoint.Uri);
 						contextCallback(context);
@@ -134,17 +136,28 @@ namespace MassTransit.Context
 			}
 		}
 
-		/// <summary>
-		/// Send a fault to either via publishing or to the Fault Endpoint
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="message">The message to send/publish</param>
-		public void GenerateFault<T>(T message)
+		public void GenerateFault(Exception ex)
+		{
+			if (Message == null)
+				throw new InvalidOperationException("A fault cannot be generated when no message is present");
+
+			object message = FastActivator.Create(Message.Implements(typeof(CorrelatedBy<>)) ? typeof (Fault<,>) : typeof(Fault<>),
+					Message, ex);
+
+			this.FastInvoke("SendFault", message);
+		}
+
+		[UsedImplicitly]
+		void SendFault<T>(T message)
 			where T : class
 		{
-			if (ResponseAddress != null)
+			if (FaultAddress != null)
 			{
-				GetFaultEndpoint().Send(message, context => context.SetSourceAddress(Bus.Endpoint.Uri));
+				Bus.GetEndpoint(FaultAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Uri));
+			}
+			else if (ResponseAddress != null)
+			{
+				Bus.GetEndpoint(ResponseAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Uri));
 			}
 			else
 			{
@@ -155,22 +168,11 @@ namespace MassTransit.Context
 		void RetryLater<T>(T message)
 			where T : class
 		{
-			if (Message == null)
-				throw new InvalidOperationException("No message is available to retry later");
-
 			Bus.Endpoint.Send(message, x =>
 				{
 					x.SetUsing(this);
 					x.SetRetryCount(RetryCount + 1);
 				});
-		}
-
-		IEndpoint GetFaultEndpoint()
-		{
-			if (FaultAddress == null)
-				throw new InvalidOperationException("No fault address was contained in the message");
-
-			return Bus.GetEndpoint(FaultAddress);
 		}
 
 		IEndpoint GetResponseEndpoint()
@@ -184,6 +186,7 @@ namespace MassTransit.Context
 
 	public class ConsumeContext<TMessage> :
 		IConsumeContext<TMessage>
+		where TMessage : class
 	{
 		readonly IConsumeContext _context;
 		readonly TMessage _message;
@@ -266,7 +269,11 @@ namespace MassTransit.Context
 
 		public void RetryLater()
 		{
-			_context.RetryLater();
+			Bus.Endpoint.Send(Message, x =>
+			{
+				x.SetUsing(this);
+				x.SetRetryCount(RetryCount + 1);
+			});
 		}
 
 		public void Respond<T>(T message, Action<ISendContext<T>> contextCallback)
@@ -275,10 +282,33 @@ namespace MassTransit.Context
 			_context.Respond(message, contextCallback);
 		}
 
-		public void GenerateFault<T>(T message)
+		public void GenerateFault(Exception ex)
+		{
+			if (Message == null)
+				throw new InvalidOperationException("A fault cannot be generated when no message is present");
+
+			object message = FastActivator.Create(Message.Implements(typeof(CorrelatedBy<>)) ? typeof(Fault<,>) : typeof(Fault<>),
+					Message, ex);
+
+			this.FastInvoke("SendFault", message);
+		}
+
+		[UsedImplicitly]
+		void SendFault<T>(T message)
 			where T : class
 		{
-			_context.GenerateFault(message);
+			if (FaultAddress != null)
+			{
+				Bus.GetEndpoint(FaultAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Uri));
+			}
+			else if (ResponseAddress != null)
+			{
+				Bus.GetEndpoint(ResponseAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Uri));
+			}
+			else
+			{
+				Bus.Publish(message);
+			}
 		}
 
 		public void SetResponseAddress(Uri value)

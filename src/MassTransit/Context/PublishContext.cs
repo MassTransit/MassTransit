@@ -31,6 +31,27 @@ namespace MassTransit.Context
 			_eachSubscriberAction = Ignore;
 		}
 
+		public PublishContext(T message, ISendContext context)
+			: base(message, context)
+		{
+			_noSubscribersAction = Ignore;
+			_eachSubscriberAction = Ignore;
+		}
+
+		public override bool TryGetContext<TMessage>(out IBusPublishContext<TMessage> context)
+		{
+			context = null;
+
+			if (typeof(TMessage).IsAssignableFrom(typeof(T)))
+			{
+				context = new PublishContext<TMessage>(Message as TMessage, this);
+				context.IfNoSubscribers(x => NotifyNoSubscribers(Message));
+				context.ForEachSubscriber((x,e) => NotifyForMessageConsumer(Message, e));
+			}
+
+			return context != null;
+		}
+
 		public void NotifyForMessageConsumer(T message, IEndpoint endpoint)
 		{
 			_endpoints.Add(endpoint.Uri);

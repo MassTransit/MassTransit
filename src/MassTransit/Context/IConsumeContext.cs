@@ -53,9 +53,6 @@ namespace MassTransit.Context
 		/// <summary>
 		/// Sends the message to either the fault address if specified or publishes the fault
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="message"></param>
-		void GenerateFault<T>(T message)
-			where T : class;
+		void GenerateFault(Exception ex);
 	}
 }

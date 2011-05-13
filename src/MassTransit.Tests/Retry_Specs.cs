@@ -38,7 +38,7 @@ namespace MassTransit.Tests
 					{
 						Assert.AreEqual(0, LocalBus.Context().RetryCount);
 
-						CurrentMessage.RetryLater();
+						LocalBus.Context().RetryLater();
 
 						first = false;
 					}
@@ -56,28 +56,5 @@ namespace MassTransit.Tests
 
 			Assert.IsTrue(future.IsAvailable(15.Seconds()));
 		}
-
-	    [Test]
-	    public void Should_do_something_nicely()
-	    {
-	        var ding = new PingMessage();
-
-            var future = new FutureMessage<PingMessage>();
-
-	        var bus = MockRepository.GenerateMock<IServiceBus>();
-	        bus.Stub(x => x.Publish<PingMessage>(null)).Callback<PingMessage>(message =>
-	            {
-                    if(message != ding )
-                        Assert.Fail("Bugger me");
-
-	                future.Set(message);
-
-	                return true;
-	            });
-
-	        bus.Publish(ding);
-
-	        future.IsAvailable(TimeSpan.Zero).ShouldBeTrue();
-	    }
 	}
 }

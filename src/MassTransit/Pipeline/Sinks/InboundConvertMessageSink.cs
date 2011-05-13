@@ -31,10 +31,24 @@ namespace MassTransit.Pipeline.Sinks
 		public IEnumerable<Action<IConsumeContext>> Enumerate(IConsumeContext context)
 		{
 			IConsumeContext<TMessage> outputContext;
-			if(!context.TryGetContext(out outputContext))
+			if (!context.TryGetContext(out outputContext))
 				return Enumerable.Empty<Action<IConsumeContext>>();
 
-			return _output.Enumerate(outputContext).Select(consumer => (Action<IConsumeContext>)(x => consumer(outputContext)));
+			using (ContextStorage.CreateContextScope(outputContext))
+			{
+				return _output.Enumerate(outputContext).Select(consumer => (Action<IConsumeContext>) (x =>
+					{
+						try
+						{
+							consumer(outputContext);
+						}
+						catch (Exception ex)
+						{
+							outputContext.GenerateFault(ex);
+							throw;
+						}
+					}));
+			}
 		}
 
 		public bool Inspect(IPipelineInspector inspector)

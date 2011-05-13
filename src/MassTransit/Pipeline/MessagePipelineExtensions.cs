@@ -52,18 +52,22 @@ namespace MassTransit.Pipeline
 			bool consumed = false;
 
 			var consumeContext = new ConsumeContext(new MemoryStream());
+			pipeline.Configure(x => consumeContext.SetBus(x.Bus));
 			var context = new ConsumeContext<T>(consumeContext, message);
 
-			foreach (var consumer in pipeline.Enumerate(context))
+			using (ContextStorage.CreateContextScope(context))
 			{
-				if (!acknowledge(message))
-					return false;
+				foreach (var consumer in pipeline.Enumerate(context))
+				{
+					if (!acknowledge(message))
+						return false;
 
-				acknowledge = x => true;
+					acknowledge = x => true;
 
-				consumed = true;
+					consumed = true;
 
-				consumer(context);
+					consumer(context);
+				}
 			}
 
 			return consumed;

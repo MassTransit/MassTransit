@@ -124,8 +124,9 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
-		public bool Inspect<TMessage, TKey>(CorrelatedMessageSinkRouter<TMessage, TKey> sink)
-			where TMessage : class, CorrelatedBy<TKey>
+		public bool Inspect<T, TMessage, TKey>(CorrelatedMessageSinkRouter<T, TMessage, TKey> sink)
+			where T : class
+			where TMessage : class, CorrelatedBy<TKey> 
 		{
 			Append(string.Format("Routed for Correlation Id {1} ({0})", typeof (TMessage).Name, sink.CorrelationId));
 
@@ -133,6 +134,14 @@ namespace MassTransit.Pipeline.Inspectors
 		}
 
 		public bool Inspect<TMessage>(InboundConvertMessageSink<TMessage> converter) 
+			where TMessage : class
+		{
+			Append(string.Format("Translated to {0}", typeof (TMessage).ToFriendlyName()));
+
+			return true;
+		}
+
+		public bool Inspect<TMessage>(OutboundConvertMessageSink<TMessage> converter) 
 			where TMessage : class
 		{
 			Append(string.Format("Translated to {0}", typeof (TMessage).ToFriendlyName()));

@@ -81,7 +81,7 @@ namespace MassTransit.Transports
 				}
 				catch (Exception ex)
 				{
-					_log.Error("An exception was thrown while disposing of an endpoint: " + endpoint.Address);
+					_log.Error("An exception was thrown while disposing of an endpoint: " + endpoint.Address, ex);
 				}
 			}
 

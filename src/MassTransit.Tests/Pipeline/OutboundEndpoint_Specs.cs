@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
 	using System;
+	using Context;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
@@ -43,7 +44,8 @@ namespace MassTransit.Tests.Pipeline
 
 			var message = new PingMessage();
 
-			endpoint.Expect(x => x.Send(message));
+			var context = MockRepository.GenerateMock<ISendContext<PingMessage>>();
+			endpoint.Expect(x => x.Send(context)).IgnoreArguments();
 
 			_pipeline.Dispatch(message);
 
