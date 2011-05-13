@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,9 +16,9 @@ namespace MassTransit.Monitoring
 
 	public class RuntimePerformanceCounter
 	{
-		private readonly string _name;
-		private readonly string _help;
-		private readonly PerformanceCounterType _counterType;
+		readonly PerformanceCounterType _counterType;
+		readonly string _help;
+		readonly string _name;
 
 		public RuntimePerformanceCounter(string name, string help, PerformanceCounterType counterType)
 		{
@@ -27,19 +27,19 @@ namespace MassTransit.Monitoring
 			_counterType = counterType;
 		}
 
+		public string Name
+		{
+			get { return _name; }
+		}
+
 		public void AddCounterToCollection(CounterCreationDataCollection counterData)
 		{
-			CounterCreationData counterCreationData = new CounterCreationData(
+			var counterCreationData = new CounterCreationData(
 				_name,
 				_help,
 				_counterType);
 
 			counterData.Add(counterCreationData);
-		}
-
-		public string Name
-		{
-			get { return _name; }
 		}
 
 		public static implicit operator CounterCreationData(RuntimePerformanceCounter counter)

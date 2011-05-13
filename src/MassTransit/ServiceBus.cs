@@ -20,11 +20,10 @@ namespace MassTransit
 	using log4net;
 	using Magnum;
 	using Magnum.Extensions;
-	using Magnum.Pipeline;
-	using Magnum.Pipeline.Segments;
 	using Monitoring;
 	using Pipeline;
 	using Pipeline.Configuration;
+	using Stact;
 	using Util;
 
 	/// <summary>
@@ -41,8 +40,8 @@ namespace MassTransit
 		int _consumerThreadLimit = Environment.ProcessorCount*4;
 		ServiceBusInstancePerformanceCounters _counters;
 		volatile bool _disposed;
-		Pipe _eventAggregator;
-		ISubscriptionScope _eventAggregatorScope;
+		UntypedChannel _eventChannel;
+		ChannelConnection _performanceCounterConnection;
 		int _receiveThreadLimit = 1;
 		TimeSpan _receiveTimeout = 3.Seconds();
 		IServiceContainer _serviceContainer;
@@ -78,8 +77,7 @@ namespace MassTransit
 			Endpoint = endpointToListenOn;
 			EndpointCache = endpointCache;
 
-			_eventAggregator = PipeSegment.New();
-			_eventAggregatorScope = _eventAggregator.NewSubscriptionScope();
+			_eventChannel = new ChannelAdapter();
 
 			_serviceContainer = new ServiceContainer(this);
 
@@ -96,21 +94,16 @@ namespace MassTransit
 
 		public static IServiceBus Null { get; private set; }
 
-		[UsedImplicitly]
-		protected string DebugDisplay
+		public int ConcurrentReceiveThreads
 		{
-			get { return string.Format("{0}: ", Endpoint.Address); }
-		}
-
-		public TimeSpan ReceiveTimeout
-		{
-			get { return _receiveTimeout; }
+			get { return _receiveThreadLimit; }
 			set
 			{
 				if (_started)
-					throw new ConfigurationException("The receive timeout cannot be changed once the bus is in motion. Beep! Beep!");
+					throw new ConfigurationException(
+						"The receive thread limit cannot be changed once the bus is in motion. Beep! Beep!");
 
-				_receiveTimeout = value;
+				_receiveThreadLimit = value;
 			}
 		}
 
@@ -127,17 +120,22 @@ namespace MassTransit
 			}
 		}
 
-		public int ConcurrentReceiveThreads
+		public TimeSpan ReceiveTimeout
 		{
-			get { return _receiveThreadLimit; }
+			get { return _receiveTimeout; }
 			set
 			{
 				if (_started)
-					throw new ConfigurationException(
-						"The receive thread limit cannot be changed once the bus is in motion. Beep! Beep!");
+					throw new ConfigurationException("The receive timeout cannot be changed once the bus is in motion. Beep! Beep!");
 
-				_receiveThreadLimit = value;
+				_receiveTimeout = value;
 			}
+		}
+
+		[UsedImplicitly]
+		protected string DebugDisplay
+		{
+			get { return string.Format("{0}: ", Endpoint.Address); }
 		}
 
 		public IEndpointCache EndpointCache { get; private set; }
@@ -188,7 +186,7 @@ namespace MassTransit
 					context.NotifyNoSubscribers(message);
 				}
 
-				_eventAggregator.Send(new MessagePublished
+				_eventChannel.Send(new MessagePublished
 					{
 						MessageType = typeof (T),
 						ConsumerCount = publishedCount,
@@ -228,7 +226,7 @@ namespace MassTransit
 			if (_started)
 				return;
 
-			_consumerPool = new ThreadPoolConsumerPool(this, _eventAggregator, _receiveTimeout)
+			_consumerPool = new ThreadPoolConsumerPool(this, _eventChannel, _receiveTimeout)
 				{
 					MaximumConsumerCount = MaximumConsumerThreads,
 				};
@@ -242,6 +240,12 @@ namespace MassTransit
 		public void AddService(Type serviceType, IBusService service)
 		{
 			_serviceContainer.AddService(serviceType, service);
+		}
+
+		public void RemoveLoopbackSubsciber()
+		{
+			_unsubscribeEventDispatchers();
+			_unsubscribeEventDispatchers = () => true;
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -268,13 +272,13 @@ namespace MassTransit
 
 				RemoveLoopbackSubsciber();
 
-				if (_eventAggregatorScope != null)
+				if (_performanceCounterConnection != null)
 				{
-					_eventAggregatorScope.Dispose();
-					_eventAggregatorScope = null;
+					_performanceCounterConnection.Dispose();
+					_performanceCounterConnection = null;
 				}
 
-				_eventAggregator = null;
+				_eventChannel = null;
 
 				Endpoint = null;
 
@@ -297,43 +301,43 @@ namespace MassTransit
 
 				_counters = new ServiceBusInstancePerformanceCounters(instanceName);
 
-				_eventAggregatorScope.Subscribe<MessageReceived>(message =>
+				_performanceCounterConnection = _eventChannel.Connect(x =>
 					{
-						_counters.ReceiveCount.Increment();
-						_counters.ReceiveRate.Increment();
-						_counters.ReceiveDuration.IncrementBy((long) message.ReceiveDuration.TotalMilliseconds);
-						_counters.ReceiveDurationBase.Increment();
-						_counters.ConsumerDuration.IncrementBy((long) message.ConsumeDuration.TotalMilliseconds);
-						_counters.ConsumerDurationBase.Increment();
-					});
+						x.AddConsumerOf<MessageReceived>()
+							.UsingConsumer(message =>
+								{
+									_counters.ReceiveCount.Increment();
+									_counters.ReceiveRate.Increment();
+									_counters.ReceiveDuration.IncrementBy((long) message.ReceiveDuration.TotalMilliseconds);
+									_counters.ReceiveDurationBase.Increment();
+									_counters.ConsumerDuration.IncrementBy((long) message.ConsumeDuration.TotalMilliseconds);
+									_counters.ConsumerDurationBase.Increment();
+								});
 
-				_eventAggregatorScope.Subscribe<MessagePublished>(message =>
-					{
-						_counters.PublishCount.Increment();
-						_counters.PublishRate.Increment();
-						_counters.PublishDuration.IncrementBy((long) message.Duration.TotalMilliseconds);
-						_counters.PublishDurationBase.Increment();
+						x.AddConsumerOf<MessagePublished>()
+							.UsingConsumer(message =>
+								{
+									_counters.PublishCount.Increment();
+									_counters.PublishRate.Increment();
+									_counters.PublishDuration.IncrementBy((long) message.Duration.TotalMilliseconds);
+									_counters.PublishDurationBase.Increment();
 
-						_counters.SentCount.IncrementBy(message.ConsumerCount);
-						_counters.SendRate.IncrementBy(message.ConsumerCount);
-					});
+									_counters.SentCount.IncrementBy(message.ConsumerCount);
+									_counters.SendRate.IncrementBy(message.ConsumerCount);
+								});
 
-				_eventAggregatorScope.Subscribe<ThreadPoolEvent>(message =>
-					{
-						_counters.ReceiveThreadCount.Set(message.ReceiverCount);
-						_counters.ConsumerThreadCount.Set(message.ConsumerCount);
+						x.AddConsumerOf<ThreadPoolEvent>()
+							.UsingConsumer(message =>
+								{
+									_counters.ReceiveThreadCount.Set(message.ReceiverCount);
+									_counters.ConsumerThreadCount.Set(message.ConsumerCount);
+								});
 					});
 			}
 			catch (Exception ex)
 			{
 				_log.Warn("The performance counters could not be created", ex);
 			}
-		}
-
-		public void RemoveLoopbackSubsciber()
-		{
-			_unsubscribeEventDispatchers();
-			_unsubscribeEventDispatchers = () => true;
 		}
 	}
 }

@@ -17,6 +17,7 @@ namespace MassTransit
 	using Magnum.Extensions;
 	using Magnum.Reflection;
 	using SubscriptionConnectors;
+	using Util;
 
 	public class ConsumerConnectorCache
 	{

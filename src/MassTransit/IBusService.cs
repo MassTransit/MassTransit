@@ -16,7 +16,7 @@ namespace MassTransit
 
 	/// <summary>
 	/// A bus service is an extension to the service bus, and is used to create services that
-	/// add funtionality to the service bus, such as subscription managers, distributors, etc.
+	/// add functionality to the service bus, such as subscription managers, distributors, etc.
 	/// 
 	/// This interface should not be used in most situations and is typically an internal
 	/// use thing.

@@ -19,6 +19,7 @@ namespace MassTransit.Pipeline
 	using Magnum.Reflection;
 	using Sinks;
 	using SubscriptionConnectors;
+	using Util;
 
 	public static class MessagePipelineExtensions
 	{

@@ -32,21 +32,23 @@ namespace MassTransit
 				});
 		}
 
-		public static IServiceBus Instance()
+		public static IServiceBus Instance
 		{
-			if (_instance == null)
-				throw new ConfigurationException("You must call Initialize before accessing Bus.Instance.");
+			get
+			{
+				if (_instance == null)
+					throw new ConfigurationException("You must call Bus.Initialize before accessing Bus.Instance.");
 
-			return _instance;
+				return _instance;
+			}
 		}
 
 		public static void Shutdown()
 		{
-			if (_instance != null)
-			{
-				_instance.Dispose();
-				_instance = null;
-			}
+			if (_instance == null) return;
+
+			_instance.Dispose();
+			_instance = null;
 		}
 	}
 }

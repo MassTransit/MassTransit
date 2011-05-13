@@ -198,14 +198,11 @@
     <Compile Include="Context\MoveMessageSendContext.cs" />
     <Compile Include="Context\SendContext.cs" />
     <Compile Include="Context\ContextStorage.cs" />
-    <Compile Include="DelegateConsumerFactory.cs" />
-    <Compile Include="DelegateMessageInterceptor.cs" />
     <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
     <Compile Include="EndpointExtensions.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
-    <Compile Include="Extensions.cs" />
     <Compile Include="Fault.cs" />
     <Compile Include="IBusService.cs" />
     <Compile Include="IConsumer.cs" />
@@ -214,7 +211,6 @@
     <Compile Include="IMessageInterceptor.cs" />
     <Compile Include="IServiceContainer.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderImpl.cs" />
-    <Compile Include="ObjectConsumerFactory.cs" />
     <Compile Include="Pipeline\Configuration\InboundMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorExtensions.cs" />
     <Compile Include="Pipeline\Configuration\OutboundCorrelatedMessageRouterConfigurator.cs" />
@@ -329,11 +325,14 @@
     <Compile Include="Transports\Transport.cs" />
     <Compile Include="Util\CheckConvention.cs" />
     <Compile Include="Util\ConsumerPool.cs" />
+    <Compile Include="Util\DelegateConsumerFactory.cs" />
+    <Compile Include="Util\DelegateMessageInterceptor.cs" />
     <Compile Include="Util\DisposableUnsubscribeAction.cs" />
     <Compile Include="Util\IdempotentHashtable.cs" />
     <Compile Include="Util\IUnsubscribeAction.cs" />
     <Compile Include="Util\LambdaEqualityComparer.cs" />
     <Compile Include="Util\NullServiceBus.cs" />
+    <Compile Include="Util\ObjectConsumerFactory.cs" />
     <Compile Include="Util\ReSharperStaticAnalysis.cs" />
     <Compile Include="Util\ServiceBusReceiveContext.cs" />
     <Compile Include="Util\SpecialLoggers.cs" />

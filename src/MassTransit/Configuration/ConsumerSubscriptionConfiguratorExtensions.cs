@@ -16,6 +16,7 @@ namespace MassTransit
 	using Magnum.Reflection;
 	using SubscriptionBuilders;
 	using SubscriptionConfigurators;
+	using Util;
 
 	public static class ConsumerSubscriptionConfiguratorExtensions
 	{
