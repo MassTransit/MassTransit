@@ -14,6 +14,8 @@ namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
 	using System.Messaging;
+	using Context;
+	using Magnum.TestFramework;
 	using MassTransit.Tests.Messages;
 	using NUnit.Framework;
 	using TestFixtures;
@@ -33,8 +35,11 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			try
 			{
-				Endpoint.Receive(message =>
+				Endpoint.Receive(context =>
 					{
+						IConsumeContext<PingMessage> pingContext;
+						context.TryGetContext(out pingContext);
+
 						Assert.Fail("Receive should have thrown a serialization exception");
 
 						return null;
@@ -55,9 +60,11 @@ namespace MassTransit.Transports.Msmq.Tests
 			Endpoint.Send(new PingMessage());
 
 			int count = 0;
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
-					Assert.IsInstanceOf<PingMessage>(message);
+					IConsumeContext<PingMessage> pingContext;
+					context.TryGetContext(out pingContext).ShouldBeTrue();
+					
 					count++;
 
 					return null;
@@ -70,7 +77,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		public void Reading_from_an_empty_queue_should_just_return_an_empty_enumerator()
 		{
 			int count = 0;
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
 					count++;
 
@@ -86,18 +93,20 @@ namespace MassTransit.Transports.Msmq.Tests
 			Endpoint.Send(new PingMessage());
 
 			int count = 0;
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
-					Assert.IsInstanceOf<PingMessage>(message);
+					IConsumeContext<PingMessage> pingContext;
+					context.TryGetContext(out pingContext).ShouldBeTrue();
 					count++;
 
 					return null;
 				}, TimeSpan.Zero);
 
 			int secondCount = 0;
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
-					Assert.IsInstanceOf<PingMessage>(message);
+					IConsumeContext<PingMessage> pingContext;
+					context.TryGetContext(out pingContext).ShouldBeTrue();
 					secondCount++;
 
 					return null;
@@ -112,17 +121,19 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			Endpoint.Send(new PingMessage());
 
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
-					Assert.IsInstanceOf<PingMessage>(message);
+					IConsumeContext<PingMessage> pingContext;
+					context.TryGetContext(out pingContext).ShouldBeTrue();
 
 					return m => { };
 				}, TimeSpan.Zero);
 
 			int count = 0;
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
-					Assert.IsInstanceOf<PingMessage>(message);
+					IConsumeContext<PingMessage> pingContext;
+					context.TryGetContext(out pingContext).ShouldBeTrue();
 					count++;
 
 					return null;
