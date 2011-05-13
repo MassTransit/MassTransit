@@ -40,7 +40,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	[TestFixture]
 	public class When_verify_the_msdtc_installation
 	{
-		[Test]
+		[Test, Explicit]
 		public void Should_install_and_configure()
 		{
 			var msdtc = new MsDtcManagement();
