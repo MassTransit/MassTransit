@@ -29,16 +29,16 @@ namespace MassTransit.Pipeline.Sinks
 		where TMessage : class, CorrelatedBy<TKey>
 		where T : class, IMessageContext<TMessage>
 	{
-		readonly Atomic<Dictionary<TKey, MessageRouter<T>>> _output;
+		readonly Atomic<Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>> _output;
 
 		public CorrelatedMessageRouter()
 		{
-			_output = Atomic.Create(new Dictionary<TKey, MessageRouter<T>>());
+			_output = Atomic.Create(new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage,TKey>>());
 		}
 
 		public int SinkCount(TKey key)
 		{
-			MessageRouter<T> router;
+			CorrelatedMessageSinkRouter<T,TMessage,TKey> router;
 			if (!_output.Value.TryGetValue(key, out router))
 				return 0;
 
@@ -49,7 +49,7 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			TKey key = context.Message.CorrelationId;
 
-			MessageRouter<T> output;
+			CorrelatedMessageSinkRouter<T,TMessage, TKey> output;
 			if (!_output.Value.TryGetValue(key, out output))
 				return Enumerable.Empty<Action<T>>();
 
@@ -65,18 +65,18 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			_output.Set(sinks =>
 				{
-					MessageRouter<T> keySink;
+					CorrelatedMessageSinkRouter<T, TMessage, TKey> keySink;
 					if (sinks.TryGetValue(correlationId, out keySink) == false)
 					{
-						keySink = new MessageRouter<T>();
+						keySink = new CorrelatedMessageSinkRouter<T,TMessage, TKey>(correlationId);
 						keySink.Connect(sink);
 
-						return new Dictionary<TKey, MessageRouter<T>>(sinks) { { correlationId, keySink } };
+						return new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>(sinks) { { correlationId, keySink } };
 					}
 
-					var result = new Dictionary<TKey, MessageRouter<T>>(sinks);
+					var result = new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>(sinks);
 
-					keySink = new MessageRouter<T>(keySink.Sinks);
+					keySink = new CorrelatedMessageSinkRouter<T, TMessage, TKey>(correlationId, keySink.Sinks);
 					keySink.Connect(sink);
 					result[correlationId] = keySink;
 
@@ -90,17 +90,17 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			return _output.Set(sinks =>
 				{
-					MessageRouter<T> keySink;
+					CorrelatedMessageSinkRouter<T, TMessage, TKey> keySink;
 					if (sinks.TryGetValue(correlationId, out keySink) == false)
 						return sinks;
 
-					var result = new Dictionary<TKey, MessageRouter<T>>(sinks);
+					var result = new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>(sinks);
 
 					List<IPipelineSink<T>> outputSinks = keySink.Sinks.Where(x => x != sink).ToList();
 					if (outputSinks.Count == 0)
 						result.Remove(correlationId);
 					else
-						result[correlationId] = new MessageRouter<T>(outputSinks);
+						result[correlationId] = new CorrelatedMessageSinkRouter<T, TMessage, TKey>(correlationId, outputSinks);
 
 					return result;
 				}) != null;

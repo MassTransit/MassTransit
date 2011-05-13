@@ -21,18 +21,22 @@ namespace MassTransit
 			where T : class
 		{
 			var context = new SendContext<T>(message);
-
-			endpoint.Send(context);
+			using (ContextStorage.CreateContextScope(context))
+			{
+				endpoint.Send(context);
+			}
 		}
 
 		public static void Send<T>(this IEndpoint endpoint, T message, Action<ISendContext<T>> contextCallback)
 			where T : class
 		{
 			var context = new SendContext<T>(message);
+			using (ContextStorage.CreateContextScope(context))
+			{
+				contextCallback(context);
 
-			contextCallback(context);
-
-			endpoint.Send(context);
+				endpoint.Send(context);
+			}
 		}
 	}
 }

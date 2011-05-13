@@ -16,23 +16,18 @@ namespace MassTransit.Context
 	using System.Collections;
 	using System.Web;
 
-
 	/// <summary>
 	/// The default context provider using thread local storage
 	/// </summary>
 	public static class ContextStorage
 	{
 		const string InboundContextKey = "InboundContext";
-
-		[ThreadStatic]
-		static Hashtable _threadStorage;
+		const string OutboundContextKey = "OutboundContext";
 
 		static readonly object _hashKey = new object();
 
-		static bool RunningInWeb
-		{
-			get { return HttpContext.Current != null; }
-		}
+		[ThreadStatic]
+		static Hashtable _threadStorage;
 
 		static Hashtable ContextCache
 		{
@@ -53,9 +48,14 @@ namespace MassTransit.Context
 			}
 		}
 
+		static bool RunningInWeb
+		{
+			get { return HttpContext.Current != null; }
+		}
+
 		public static IDisposable CreateContextScope(IConsumeContext context)
 		{
-			IConsumeContext previousContext = Retrieve<IConsumeContext>(InboundContextKey);
+			var previousContext = Retrieve<IConsumeContext>(InboundContextKey);
 
 			Store(InboundContextKey, context);
 
@@ -89,6 +89,26 @@ namespace MassTransit.Context
 			return contextCallback(context);
 		}
 
+		public static IDisposable CreateContextScope<T>(IBusPublishContext<T> context) 
+			where T : class
+		{
+			var previousContext = Retrieve<ISendContext>(OutboundContextKey);
+
+			Store(OutboundContextKey, context);
+
+			return new PreviousContext<ISendContext>(OutboundContextKey, previousContext);
+		}	
+		
+		public static IDisposable CreateContextScope<T>(ISendContext<T> context) 
+			where T : class
+		{
+			var previousContext = Retrieve<ISendContext>(OutboundContextKey);
+
+			Store(OutboundContextKey, context);
+
+			return new PreviousContext<ISendContext>(OutboundContextKey, previousContext);
+		}
+
 		internal static void Store<TValue>(string key, TValue value)
 		{
 			Hashtable cache = ContextCache;
@@ -101,7 +121,7 @@ namespace MassTransit.Context
 			Hashtable cache = ContextCache;
 
 			if (cache.ContainsKey(key))
-				return (TValue)cache[key];
+				return (TValue) cache[key];
 
 			return default(TValue);
 		}
@@ -111,8 +131,8 @@ namespace MassTransit.Context
 			var hashtable = new Hashtable();
 
 			hashtable[InboundContextKey] = new InvalidConsumeContext();
-//			hashtable["OutboundContext"] = new InvalidPublishContext();
-			
+			hashtable[OutboundContextKey] = new InvalidSendContext();
+
 			return hashtable;
 		}
 	}

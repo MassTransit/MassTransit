@@ -26,8 +26,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		InstanceConnector
 	{
 		Type SagaType { get; }
-
-		UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance);
 	}
 
 	public class SagaWorkerConnector<T> :

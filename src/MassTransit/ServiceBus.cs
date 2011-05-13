@@ -160,39 +160,41 @@ namespace MassTransit
 			Stopwatch publishDuration = Stopwatch.StartNew();
 
 			var context = new PublishContext<T>(message);
-
-			context.SetSourceAddress(Endpoint.Uri);
-
-			contextCallback(context);
-
-			int publishedCount = 0;
-			foreach (var consumer in OutboundPipeline.Enumerate(context))
+			using (ContextStorage.CreateContextScope(context))
 			{
-				try
+				context.SetSourceAddress(Endpoint.Uri);
+
+				contextCallback(context);
+
+				int publishedCount = 0;
+				foreach (var consumer in OutboundPipeline.Enumerate(context))
 				{
-					consumer(context);
-					publishedCount++;
+					try
+					{
+						consumer(context);
+						publishedCount++;
+					}
+					catch (Exception ex)
+					{
+						_log.Error(string.Format("'{0}' threw an exception publishing message '{1}'",
+							consumer.GetType().FullName, message.GetType().FullName), ex);
+					}
 				}
-				catch (Exception ex)
+
+				publishDuration.Stop();
+
+				if (publishedCount == 0)
 				{
-					_log.Error(string.Format("'{0}' threw an exception publishing message '{1}'",
-						consumer.GetType().FullName, message.GetType().FullName), ex);
+					context.NotifyNoSubscribers(message);
 				}
+
+				_eventAggregator.Send(new MessagePublished
+					{
+						MessageType = typeof (T),
+						ConsumerCount = publishedCount,
+						Duration = publishDuration.Elapsed,
+					});
 			}
-
-			publishDuration.Stop();
-
-			if (publishedCount == 0)
-			{
-				context.NotifyNoSubscribers(message);
-			}
-
-			_eventAggregator.Send(new MessagePublished
-				{
-					MessageType = typeof (T),
-					ConsumerCount = publishedCount,
-					Duration = publishDuration.Elapsed,
-				});
 		}
 
 		public TService GetService<TService>() where TService : IBusService

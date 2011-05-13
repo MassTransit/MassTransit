@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline
 		ISubscriptionEvent
 	{
 		IInboundMessagePipeline Pipeline { get; }
-
+		IServiceBus Bus { get; }
 		UnregisterAction Register(ISubscriptionEvent subscriptionEventHandler);
 	}
 }

@@ -188,6 +188,7 @@
     <Compile Include="Context\IContextProvider.cs" />
     <Compile Include="Context\IMessageContext.cs" />
     <Compile Include="Context\InvalidConsumeContext.cs" />
+    <Compile Include="Context\InvalidSendContext.cs" />
     <Compile Include="Context\IPublishContext.cs" />
     <Compile Include="Context\IReceiveContext.cs" />
     <Compile Include="Context\ISendContext.cs" />

@@ -13,10 +13,10 @@
 namespace MassTransit.Context
 {
 	using System;
+	using System.IO;
 
-
-	public class InvalidConsumeContext :
-		IConsumeContext
+	public class InvalidSendContext :
+		ISendContext
 	{
 		public string MessageId
 		{
@@ -63,29 +63,12 @@ namespace MassTransit.Context
 			get { throw CreateException(); }
 		}
 
-		public IServiceBus Bus
-		{
-			get { throw CreateException(); }
-		}
-
-		public bool TryGetContext<T>(out IConsumeContext<T> context) 
-			where T : class
+		public void SerializeTo(Stream stream)
 		{
 			throw CreateException();
 		}
 
-		public void RetryLater()
-		{
-			throw CreateException();
-		}
-
-		public void Respond<T>(T message, Action<ISendContext<T>> contextCallback)
-			where T : class
-		{
-			throw CreateException();
-		}
-
-		public void GenerateFault(Exception ex)
+		public bool TryGetContext<T>(out IBusPublishContext<T> context) where T : class
 		{
 			throw CreateException();
 		}

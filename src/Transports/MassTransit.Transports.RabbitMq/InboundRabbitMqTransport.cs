@@ -51,18 +51,21 @@
 				using(var body = new MemoryStream(result.Body, false))
 				{
 					var context = new ConsumeContext(body);
-					Action<IReceiveContext> receive = callback(context);
-					if (receive == null)
+					using (ContextStorage.CreateContextScope(context))
 					{
-						if (_log.IsDebugEnabled)
-							_log.DebugFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
+						Action<IReceiveContext> receive = callback(context);
+						if (receive == null)
+						{
+							if (_log.IsDebugEnabled)
+								_log.DebugFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
 
-						if (SpecialLoggers.Messages.IsInfoEnabled)
-							SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
-					}
-					else
-					{
-						receive(context);
+							if (SpecialLoggers.Messages.IsInfoEnabled)
+								SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
+						}
+						else
+						{
+							receive(context);
+						}
 					}
 				}
 

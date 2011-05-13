@@ -135,21 +135,24 @@ namespace MassTransit.Transports.Nms
 								using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(textMessage.Text), false))
 								{
 									var context = new ConsumeContext(bodyStream);
-									context.SetMessageId(textMessage.NMSMessageId);
-									context.SetInputAddress(_address);
-
-									Action<IReceiveContext> receive = callback(context);
-									if (receive == null)
+									using (ContextStorage.CreateContextScope(context))
 									{
-										if (_log.IsDebugEnabled)
-											_log.DebugFormat("SKIP:{0}:{1}", Address, message.NMSMessageId);
+										context.SetMessageId(textMessage.NMSMessageId);
+										context.SetInputAddress(_address);
 
-										if (SpecialLoggers.Messages.IsInfoEnabled)
-											SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, message.NMSMessageId);
-									}
-									else
-									{
-										receive(context);
+										Action<IReceiveContext> receive = callback(context);
+										if (receive == null)
+										{
+											if (_log.IsDebugEnabled)
+												_log.DebugFormat("SKIP:{0}:{1}", Address, message.NMSMessageId);
+
+											if (SpecialLoggers.Messages.IsInfoEnabled)
+												SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, message.NMSMessageId);
+										}
+										else
+										{
+											receive(context);
+										}
 									}
 								}
 							}

@@ -66,15 +66,17 @@ namespace MassTransit.Transports
 			using (var bodyStream = new MemoryStream(data))
 			{
 				var context = new ConsumeContext(bodyStream);
-
-				Action<IReceiveContext> receive = callback(context);
-				if (receive == null)
+				using (ContextStorage.CreateContextScope(context))
 				{
-					// SKIPPED
-					return;
-				}
+					Action<IReceiveContext> receive = callback(context);
+					if (receive == null)
+					{
+						// SKIPPED
+						return;
+					}
 
-				receive(context);
+					receive(context);
+				}
 			}
 		}
 

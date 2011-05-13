@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Monitoring
 {
-	using System;
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Security;
@@ -26,7 +25,6 @@ namespace MassTransit.Monitoring
 		public const string CategoryHelp = "MassTransit Performance Counters";
 		public const string CategoryName = "MassTransit";
 		private static readonly ServiceBusPerformanceCounters _instance;
-		private RuntimePerformanceCounter[] _counters;
 
 		static ServiceBusPerformanceCounters()
 		{
