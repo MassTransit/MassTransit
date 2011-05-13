@@ -55,6 +55,7 @@ namespace MassTransit.Serialization
 
 						var encryptedContext = new SendContext<EncryptedMessageEnvelope>(encryptedMessage);
 						encryptedContext.SetUsing(context);
+						encryptedContext.SetMessageType(typeof (EncryptedMessageEnvelope));
 
 						_wrappedSerializer.Serialize(output, encryptedContext);
 					}

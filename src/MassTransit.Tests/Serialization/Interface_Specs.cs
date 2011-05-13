@@ -68,7 +68,7 @@ namespace MassTransit.Tests.Serialization
 
 			pipeline.Dispatch(complaint);
 
-			PipelineViewer.Trace(pipeline);
+	//		PipelineViewer.Trace(pipeline);
 
 			consumer.ShouldHaveReceivedMessage(complaint);
 		}

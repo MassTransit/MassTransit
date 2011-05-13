@@ -212,14 +212,6 @@
     <Compile Include="MessageUrn.cs" />
     <Compile Include="IMessageInterceptor.cs" />
     <Compile Include="IServiceContainer.cs" />
-    <Compile Include="MessageHeaders\IInboundMessageHeaders.cs" />
-    <Compile Include="MessageHeaders\IMessageHeaders.cs" />
-    <Compile Include="MessageHeaders\InboundMessage.cs" />
-    <Compile Include="MessageHeaders\IOutboundMessage.cs" />
-    <Compile Include="MessageHeaders\ISetInboundMessageHeaders.cs" />
-    <Compile Include="MessageHeaders\ISetMessageHeaders.cs" />
-    <Compile Include="MessageHeaders\MessageHeadersBase.cs" />
-    <Compile Include="MessageHeaders\OutboundMessage.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderImpl.cs" />
     <Compile Include="ObjectConsumerFactory.cs" />
     <Compile Include="Pipeline\Configuration\InboundMessageRouterConfigurator.cs" />
@@ -550,7 +542,6 @@
     <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
-    <Compile Include="Serialization\BinaryMessageEnvelope.cs" />
     <Compile Include="Serialization\ExtensionsToMessageEnvelope.cs" />
     <Compile Include="ServiceBusExtensions.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionInformation.cs" />
@@ -586,6 +577,7 @@
     <Compile Include="Util\SequenceNumberGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="MessageHeaders\" />
     <Folder Include="Pipeline\Configuration\Subscribers\" />
     <Folder Include="Services\HealthMonitoring\Client\" />
   </ItemGroup>

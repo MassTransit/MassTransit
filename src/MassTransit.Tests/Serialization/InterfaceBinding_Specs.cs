@@ -25,7 +25,7 @@ namespace MassTransit.Tests.Serialization
 
 				_message = Encoding.UTF8.GetString(buffer.ToArray());
 
-				Trace.WriteLine(_message);
+			//	Trace.WriteLine(_message);
 			}
 		}
 
