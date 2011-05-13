@@ -54,7 +54,7 @@ namespace Grid.Distributor.Worker
 			return m =>
 				{
 					_log.InfoFormat("Responding to {0}", m.CorrelationId);
-					CurrentMessage.Respond(new CompletedSimpleWorkItem(m.CorrelationId, m.CreatedAt));
+					DataBus.Context().Respond(new CompletedSimpleWorkItem(m.CorrelationId, m.CreatedAt));
 				};
 		}
 	}
