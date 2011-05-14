@@ -149,7 +149,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void TheQueue()
         {
-            _addr.Path.ShouldEqual("the_queue");
+            _addr.Name.ShouldEqual("the_queue");
         }
     }
 
