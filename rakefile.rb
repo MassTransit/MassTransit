@@ -1,6 +1,7 @@
 COPYRIGHT = "Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al. - All rights reserved."
 
 require File.dirname(__FILE__) + "/build_support/BuildUtils.rb"
+require File.dirname(__FILE__) + "/build_support/util.rb"
 
 include FileTest
 require 'albacore'
@@ -316,25 +317,6 @@ def project_outputs(props)
 		find_all{ |path| exists?(path) }
 end
 
-def get_commit_hash_and_date
-	begin
-		commit = `git log -1 --pretty=format:%H`
-		git_date = `git log -1 --date=iso --pretty=format:%ad`
-		commit_date = DateTime.parse( git_date ).strftime("%Y-%m-%d %H%M%S")
-	rescue
-		commit = "git unavailable"
-	end
-	
-	[commit, commit_date]
-end
 
-def waitfor(&block)
-	checks = 0
-	
-	until block.call || checks >10 
-		sleep 0.5
-		checks += 1
-	end
-	
-	raise 'Waitfor timeout expired. Make sure that you aren\'t running something from the build output folders, or that you have browsed to it through Explorer.' if checks > 10
-end
+
+
