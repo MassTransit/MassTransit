@@ -17,6 +17,7 @@ namespace MassTransit.SystemView.Core.ViewModel
     using System.Collections.Generic;
     using System.Collections.Specialized;
     using System.Linq;
+    using Exceptions;
 
     public class KeyedCollectionBase<T, K> :
         NotifyCollectionChangedBase<T>,
@@ -107,7 +108,7 @@ namespace MassTransit.SystemView.Core.ViewModel
         public virtual T this[int index]
         {
             get { return Items.Values.ToList()[index]; }
-            set { throw new NotImplementedException(); }
+            set { throw new NotImplementedByDesignException(); }
         }
 
         public virtual T this[K key] { get { return Get(key); } }

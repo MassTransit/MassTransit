@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	using Magnum.StateMachine;
 	using MassTransit.Saga;
 	using NUnit.Framework;
+	using TestFramework;
 	using TextFixtures;
 
 	[TestFixture]
@@ -132,7 +133,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 
@@ -140,7 +141,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 
@@ -148,7 +149,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 
@@ -156,7 +157,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 
@@ -166,7 +167,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 
@@ -174,7 +175,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 }

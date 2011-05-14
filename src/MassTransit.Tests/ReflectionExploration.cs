@@ -7,6 +7,7 @@ namespace MassTransit.Tests
     using NUnit.Framework;
     using Magnum.TestFramework;
     using Magnum.Extensions;
+    using TestFramework;
 
     [TestFixture]
     public class ReflectionExploration
@@ -62,12 +63,12 @@ namespace MassTransit.Tests
         {
             public void Consume(Y message)
             {
-                throw new NotImplementedException();
+                throw new ATestException();
             }
 
             public void Consume(X message)
             {
-                throw new NotImplementedException();
+                throw new ATestException();
             }
         }
 

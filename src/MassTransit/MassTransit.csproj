@@ -203,6 +203,7 @@
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
     <Compile Include="EndpointExtensions.cs" />
+    <Compile Include="Exceptions\NotImplementedByDesignException.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="Fault.cs" />
     <Compile Include="IBusService.cs" />

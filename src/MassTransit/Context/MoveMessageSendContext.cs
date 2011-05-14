@@ -14,8 +14,9 @@ namespace MassTransit.Context
 {
 	using System;
 	using System.IO;
+	using Exceptions;
 
-	public class MoveMessageSendContext :
+    public class MoveMessageSendContext :
 		MessageContext,
 		ISendContext
 	{
@@ -36,7 +37,7 @@ namespace MassTransit.Context
 		public bool TryGetContext<T>(out IBusPublishContext<T> context) 
 			where T : class
 		{
-			throw new NotImplementedException("The message type is unknown and can not be type-cast");
+			throw new MessageException(typeof(T), "The message type is unknown and can not be type-cast");
 		}
 	}
 }
