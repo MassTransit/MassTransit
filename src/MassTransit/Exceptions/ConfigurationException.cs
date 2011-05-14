@@ -18,7 +18,7 @@ namespace MassTransit.Exceptions
 
 	[Serializable]
 	public class ConfigurationException :
-		Exception
+		MassTransitException
 	{
 		public ConfigurationException()
 		{
