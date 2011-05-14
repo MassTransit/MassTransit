@@ -19,6 +19,7 @@ namespace MassTransit.Util
 	using Magnum.Extensions;
 	using Stact;
 
+    //REVIEW: consider moving to 'Threading'
 	public class ThreadPoolConsumerPool :
 		ConsumerPool
 	{

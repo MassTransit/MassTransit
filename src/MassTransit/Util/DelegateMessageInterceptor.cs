@@ -14,6 +14,7 @@ namespace MassTransit.Util
 {
 	using System;
 
+    //REVIEW: consider moving to Configuration - its only use point
 	public class DelegateMessageInterceptor :
 		IMessageInterceptor
 	{
