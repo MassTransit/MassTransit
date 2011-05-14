@@ -26,8 +26,6 @@ namespace MassTransit
         /// </summary>
         bool IsLocal { get; }
 
-        string Path { get; }
-
         /// <summary>
         /// Was transactional requested by the Uri
         /// </summary>

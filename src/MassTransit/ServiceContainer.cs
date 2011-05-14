@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,74 +12,77 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using System;
-	using System.Collections.Generic;
+    using System;
+    using System.Collections.Generic;
+    using Magnum.Extensions;
 
-	public class ServiceContainer :
-		IServiceContainer
-	{
-		private readonly IServiceBus _bus;
-		private readonly Dictionary<Type, IBusService> _services;
-		private bool _disposed;
+    public class ServiceContainer :
+        IServiceContainer
+    {
+        readonly IServiceBus _bus;
+        readonly Dictionary<Type, IBusService> _services;
+        bool _disposed;
 
-		public ServiceContainer(IServiceBus bus)
-		{
-			_bus = bus;
-			_services = new Dictionary<Type, IBusService>();
-		}
+        public ServiceContainer(IServiceBus bus)
+        {
+            _bus = bus;
+            _services = new Dictionary<Type, IBusService>();
+        }
 
-		public TService GetService<TService>()
-		{
-			if (_services.ContainsKey(typeof(TService)))
-				return (TService)_services[typeof (TService)];
+        public TService GetService<TService>()
+        {
+            var type = typeof(TService);
 
-			throw new InvalidOperationException("The service is not registered on the bus");
-		}
+            if (_services.ContainsKey(type))
+                return (TService) _services[type];
 
-		public void AddService(Type serviceType, IBusService service)
-		{
-			_services.Add(serviceType, service);
-		}
+            throw new InvalidOperationException("The service '{0}' is not registered on the bus".FormatWith(type.Name));
+        }
 
-		public void Start()
-		{
-			foreach (var service in _services.Values)
-			{
-				service.Start(_bus);
-			}
-		}
+        public void AddService(Type serviceType, IBusService service)
+        {
+            _services.Add(serviceType, service);
+        }
 
-		public void Stop()
-		{
-			foreach (var service in _services.Values)
-			{
-				service.Stop();
-			}
-		}
+        public void Start()
+        {
+            foreach (var service in _services.Values)
+            {
+                service.Start(_bus);
+            }
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public void Stop()
+        {
+            foreach (var service in _services.Values)
+            {
+                service.Stop();
+            }
+        }
 
-		protected virtual void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				foreach (var service in _services.Values)
-				{
-					service.Dispose();
-				}
-				_services.Clear();
-			}
-			_disposed = true;
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		~ServiceContainer()
-		{
-			Dispose(false);
-		}
-	}
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                foreach (var service in _services.Values)
+                {
+                    service.Dispose();
+                }
+                _services.Clear();
+            }
+            _disposed = true;
+        }
+
+        ~ServiceContainer()
+        {
+            Dispose(false);
+        }
+    }
 }

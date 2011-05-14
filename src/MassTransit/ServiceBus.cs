@@ -297,7 +297,7 @@ namespace MassTransit
 		{
 			try
 			{
-				string instanceName = string.Format("{0}_{1}_{2}", Endpoint.Address.Path, Endpoint.Uri.Scheme, Endpoint.Uri.Host);
+				string instanceName = string.Format("{0}", Endpoint.Address.Uri);
 
 				_counters = new ServiceBusInstancePerformanceCounters(instanceName);
 
@@ -336,7 +336,7 @@ namespace MassTransit
 			}
 			catch (Exception ex)
 			{
-				_log.Warn("The performance counters could not be created", ex);
+				_log.Warn("The performance counters could not be created, try running the program in the Administrator role. Just once.", ex);
 			}
 		}
 	}

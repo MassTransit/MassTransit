@@ -52,6 +52,7 @@ namespace MassTransit
 			bus.Publish(message, x => { });
 		}
 
+        //REVIEW: this should be delegating to a MessageName class
 		public static string ToMessageName(this Type messageType)
 		{
 			string messageName;
@@ -85,32 +86,32 @@ namespace MassTransit
 			return string.Format("{0}{1}", messageName, assembly);
 		}
 
-		public static string ToFriendlyName(this Type type)
-		{
-			if (type.IsGenericType)
-			{
-				string name = type.GetGenericTypeDefinition().FullName;
-				name = name.Substring(0, name.IndexOf('`'));
-				name += "<";
+        public static string ToFriendlyName(this Type type)
+        {
+            if (!type.IsGenericType)
+            {
+                return type.FullName;
+            }
 
-				Type[] arguments = type.GetGenericArguments();
-				for (int i = 0; i < arguments.Length; i++)
-				{
-					if (i > 0)
-						name += ",";
+            string name = type.GetGenericTypeDefinition().FullName;
+            name = name.Substring(0, name.IndexOf('`'));
+            name += "<";
 
-					name += arguments[i].Name;
-				}
+            Type[] arguments = type.GetGenericArguments();
+            for (int i = 0; i < arguments.Length; i++)
+            {
+                if (i > 0)
+                    name += ",";
 
-				name += ">";
+                name += arguments[i].Name;
+            }
 
-				return name;
-			}
+            name += ">";
 
-			return type.FullName;
-		}
+            return name;
+        }
 
-		public static T TranslateTo<T>(this object input)
+	    public static T TranslateTo<T>(this object input)
 			where T : class
 		{
 			if (input == null)

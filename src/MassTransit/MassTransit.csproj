@@ -279,7 +279,6 @@
     <Compile Include="Services\Timeout\Messages\ScheduleTimeout.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
-    <Compile Include="StreamExtensions.cs" />
     <Compile Include="Subscriptions\ISubscriptionReference.cs" />
     <Compile Include="Subscriptions\PermanentSubscriptionReference.cs" />
     <Compile Include="Subscriptions\SubscriptionBusService.cs" />
