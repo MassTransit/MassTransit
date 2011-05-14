@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,54 +12,54 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Util
 {
-	using System;
-	using System.Linq;
+    using System;
+    using System.Linq;
 
     public static class QueryStringExtensions
-	{
-		public static string GetValueFromQueryString(this string queryString, string key)
-		{
-			if (string.IsNullOrEmpty(queryString) || queryString.Length <= 1)
-				return null;
+    {
+        public static string GetValueFromQueryString(this string queryString, string key)
+        {
+            if (string.IsNullOrEmpty(queryString) || queryString.Length <= 1)
+                return null;
 
-			return queryString.Substring(1)
-				.Split('&')
-				.Select(x =>
-					{
-						string[] values = x.Split('=');
+            return queryString.Substring(1)
+                .Split('&')
+                .Select(x =>
+                    {
+                        string[] values = x.Split('=');
 
-						return new {Key = values[0], Value = values[1]};
-					})
-				.Where(x => string.Compare(x.Key, key, true) == 0)
-				.Select(x => x.Value)
-				.DefaultIfEmpty(null)
-				.SingleOrDefault();
-		}
+                        return new {Key = values[0], Value = values[1]};
+                    })
+                .Where(x => string.Compare(x.Key, key, true) == 0)
+                .Select(x => x.Value)
+                .DefaultIfEmpty(null)
+                .SingleOrDefault();
+        }
 
-		public static T GetValueFromQueryString<T>(this string queryString, string key, T defaultValue)
-			where T : struct
-		{
-			if (string.IsNullOrEmpty(queryString))
-				return defaultValue;
+        public static T GetValueFromQueryString<T>(this string queryString, string key, T defaultValue)
+            where T : struct
+        {
+            if (string.IsNullOrEmpty(queryString))
+                return defaultValue;
 
-			try
-			{
-				string value = GetValueFromQueryString(queryString, key);
-				if (string.IsNullOrEmpty(value))
-					return defaultValue;
+            try
+            {
+                string value = GetValueFromQueryString(queryString, key);
+                if (string.IsNullOrEmpty(value))
+                    return defaultValue;
 
-				return (T) Convert.ChangeType(value, typeof (T));
-			}
-			catch
-			{
-				return defaultValue;
-			}
-		}
+                return (T) Convert.ChangeType(value, typeof (T));
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
 
-		public static T GetValueFromQueryString<T>(this string queryString, string key)
-			where T : struct
-		{
-			return queryString.GetValueFromQueryString(key, default(T));
-		}
-	}
+        public static T GetValueFromQueryString<T>(this string queryString, string key)
+            where T : struct
+        {
+            return queryString.GetValueFromQueryString(key, default(T));
+        }
+    }
 }
