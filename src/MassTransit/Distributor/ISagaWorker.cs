@@ -12,21 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-	using Messages;
-	using Saga;
+    using Messages;
+    using Saga;
 
-	public interface ISagaWorker :
-		IBusService
-	{
-	}
+    public interface ISagaWorker :
+        IBusService
+    {
+    }
 
-	public interface ISagaWorker<T> :
-		ISagaWorker
-		where T : class, ISaga
-	{
-		bool CanAcceptMessage<TMessage>(Distributed<TMessage> message);
-		void ConsumingMessage<TMessage>(Distributed<TMessage> message);
-		void IncrementInProgress();
-		void DecrementInProgress();
-	}
+    public interface ISagaWorker<T> :
+        ISagaWorker
+        where T : class, ISaga
+    {
+        bool CanAcceptMessage<TMessage>(Distributed<TMessage> message);
+        void ConsumingMessage<TMessage>(Distributed<TMessage> message);
+        void IncrementInProgress();
+        void DecrementInProgress();
+    }
 }
