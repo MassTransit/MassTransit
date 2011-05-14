@@ -14,6 +14,7 @@ namespace MassTransit.Util
 {
 	using System;
 	using System.Threading;
+	using Context;
 	using Events;
 	using log4net;
 	using Magnum.Extensions;
