@@ -72,7 +72,7 @@ namespace MassTransit.Util
 			_enabled = true;
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Starting Consumer Pool for {0}", _bus.Endpoint.Uri);
+				_log.DebugFormat("Starting Consumer Pool for {0}", _bus.Endpoint.Address.Uri);
 
 			QueueReceiver();
 		}
@@ -82,7 +82,7 @@ namespace MassTransit.Util
 			_enabled = false;
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Stopping Consumer Pool for {0}", _bus.Endpoint.Uri);
+				_log.DebugFormat("Stopping Consumer Pool for {0}", _bus.Endpoint.Address.Uri);
 
 			if (_consumerCount == 0)
 				return;
@@ -99,7 +99,7 @@ namespace MassTransit.Util
 				while (completed.WaitOne(60.Seconds(), true))
 				{
 					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Consumer Pool stopped for {0}", _bus.Endpoint.Uri);
+						_log.DebugFormat("Consumer Pool stopped for {0}", _bus.Endpoint.Address.Uri);
 
 					if (_consumerCount == 0)
 						return;
@@ -107,7 +107,7 @@ namespace MassTransit.Util
 			}
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Timeout stopping Consumer Pool for {0}", _bus.Endpoint.Uri);
+				_log.DebugFormat("Timeout stopping Consumer Pool for {0}", _bus.Endpoint.Address.Uri);
 		}
 
 		public void Dispose()
@@ -159,7 +159,7 @@ namespace MassTransit.Util
 					return;
 
 				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Queueing receiver for {0}", _bus.Endpoint.Uri);
+					_log.DebugFormat("Queueing receiver for {0}", _bus.Endpoint.Address.Uri);
 
 				var context = new ServiceBusReceiveContext(_bus, _eventChannel, _receiveTimeout);
 

@@ -163,7 +163,7 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		public void Stop()
 		{
-			var message = new RemoveSubscriptionClient(_clientId, _bus.ControlBus.Endpoint.Uri, _bus.Endpoint.Uri);
+			var message = new RemoveSubscriptionClient(_clientId, _bus.ControlBus.Endpoint.Address.Uri, _bus.Endpoint.Address.Uri);
 			Send(message);
 
 			_unsubscribeAction();
@@ -252,7 +252,7 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		void SendAddSubscriptionClient(IServiceBus bus)
 		{
-			var message = new AddSubscriptionClient(_clientId, bus.ControlBus.Endpoint.Uri, bus.Endpoint.Uri);
+			var message = new AddSubscriptionClient(_clientId, bus.ControlBus.Endpoint.Address.Uri, bus.Endpoint.Address.Uri);
 			Send(message);
 		}
 

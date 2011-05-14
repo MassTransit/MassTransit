@@ -56,7 +56,7 @@ namespace MassTransit.Tests.Subscriptions
 		{
 			Guid clientId = CombGuid.Generate();
 
-			var subscription = new SubscriptionInformation(clientId, 1, typeof (PingMessage), RemoteBus.Endpoint.Uri);
+			var subscription = new SubscriptionInformation(clientId, 1, typeof (PingMessage), RemoteBus.Endpoint.Address.Uri);
 
 			LocalControlBus.Endpoint.Send(new AddSubscription(subscription));
 			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();

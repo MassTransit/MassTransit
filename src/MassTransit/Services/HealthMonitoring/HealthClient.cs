@@ -13,7 +13,6 @@
 namespace MassTransit.Services.HealthMonitoring
 {
 	using System;
-	using Context;
 	using Magnum;
 	using Magnum.Extensions;
 	using Messages;
@@ -74,8 +73,9 @@ namespace MassTransit.Services.HealthMonitoring
 		{
 			_bus = bus;
 
-			_controlUri = _bus.ControlBus.Endpoint.Uri;
-			_dataUri = _bus.Endpoint.Uri;
+            //REVIEW: should these be IEndpoint?
+			_controlUri = _bus.ControlBus.Endpoint.Address.Uri;
+			_dataUri = _bus.Endpoint.Address.Uri;
 
 			_unsubscribe = _bus.ControlBus.SubscribeInstance(this);
 

@@ -38,13 +38,13 @@ namespace MassTransit
 		public static void SendResponseTo<T>(this ISendContext<T> context, IServiceBus bus)
 			where T : class
 		{
-			context.SetResponseAddress(bus.Endpoint.Uri);
+			context.SetResponseAddress(bus.Endpoint.Address.Uri);
 		}
 
 		public static void SendResponseTo<T>(this ISendContext<T> context, IEndpoint endpoint)
 			where T : class
 		{
-			context.SetResponseAddress(endpoint.Uri);
+			context.SetResponseAddress(endpoint.Address.Uri);
 		}
 
 		public static void SendResponseTo<T>(this ISendContext<T> context, Uri uri)
@@ -62,13 +62,13 @@ namespace MassTransit
 		public static void SendFaultTo<T>(this ISendContext<T> context, IServiceBus bus)
 			where T : class
 		{
-			context.SetFaultAddress(bus.Endpoint.Uri);
+			context.SetFaultAddress(bus.Endpoint.Address.Uri);
 		}
 
 		public static void SendFaultTo<T>(this ISendContext<T> context, IEndpoint endpoint)
 			where T : class
 		{
-			context.SetFaultAddress(endpoint.Uri);
+			context.SetFaultAddress(endpoint.Address.Uri);
 		}
 
 		public static void SendFaultTo<T>(this ISendContext<T> context, Uri uri)

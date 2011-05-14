@@ -50,13 +50,13 @@ namespace MassTransit.Services.Subscriptions
 		public UnsubscribeAction SubscribedTo<TMessage>()
 			where TMessage : class
 		{
-			return _service.SubscribedTo<TMessage>(_bus.Endpoint.Uri);
+			return _service.SubscribedTo<TMessage>(_bus.Endpoint.Address.Uri);
 		}
 
 		public UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
-			return _service.SubscribedTo<TMessage, TKey>(correlationId, _bus.Endpoint.Uri);
+			return _service.SubscribedTo<TMessage, TKey>(correlationId, _bus.Endpoint.Address.Uri);
 		}
 	}
 }

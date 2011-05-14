@@ -122,7 +122,7 @@ namespace MassTransit.SystemView
 
 		protected override void OnClosing(CancelEventArgs e)
 		{
-			_subscriptionServiceEndpoint.Send(new RemoveSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
+			_subscriptionServiceEndpoint.Send(new RemoveSubscriptionClient(_clientId, _bus.Endpoint.Address.Uri, _bus.Endpoint.Address.Uri));
 			
 			_unsubscribe();
 
@@ -184,7 +184,7 @@ namespace MassTransit.SystemView
 		{
 			_subscriptionServiceEndpoint = _bus.GetEndpoint(_container.GetInstance<IConfiguration>().SubscriptionServiceUri);
 
-			_subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
+			_subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Address.Uri, _bus.Endpoint.Address.Uri));
 		}
 
 		private void BootstrapServiceBus()
