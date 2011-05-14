@@ -14,6 +14,7 @@ namespace MassTransit.Util
 {
 	using System;
 	using Context;
+	using Exceptions;
 	using Pipeline;
 
     //REVIEW: move into core and mark internal?
@@ -40,22 +41,22 @@ namespace MassTransit.Util
 
 		public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback) where T : class
 		{
-			throw new NotImplementedException();
+			throw new NotImplementedByDesignException();
 		}
 
 		public TService GetService<TService>() where TService : IBusService
 		{
-			throw new NotImplementedException();
+			throw new NotImplementedByDesignException();
 		}
 
 		IOutboundMessagePipeline IServiceBus.OutboundPipeline
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new NotImplementedByDesignException(); }
 		}
 
 		IInboundMessagePipeline IServiceBus.InboundPipeline
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new NotImplementedByDesignException(); }
 		}
 
 		public IServiceBus ControlBus
@@ -75,13 +76,13 @@ namespace MassTransit.Util
 
 		public TContext ReceiveContext<TContext>(Action<TContext> contextAction) where TContext : IReceiveContext
 		{
-			throw new NotImplementedException();
+			throw new NotImplementedByDesignException();
 		}
 
 		public TContext SendContext<TContext, TMessage>(TMessage message, Action<TContext> contextAction)
 			where TContext : ISendContext<TMessage> where TMessage : class
 		{
-			throw new NotImplementedException();
+			throw new NotImplementedByDesignException();
 		}
 
 		public void Publish<T>(T message) where T : class

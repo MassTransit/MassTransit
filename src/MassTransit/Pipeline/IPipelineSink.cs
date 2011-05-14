@@ -39,7 +39,7 @@ namespace MassTransit.Pipeline
 		/// <summary>
 		/// Walks the pipeline from the current sink forward, calling back to the inspector for each
 		/// sink in the pipeline.
-		/// NOTE: Visitor Pattern merit badge awarded
+		/// DING: Visitor Pattern merit badge awarded
 		/// </summary>
 		/// <param name="inspector">The inspector to call back to for each sink</param>
 		/// <returns>True if the inspection should continue, false to stop</returns>
