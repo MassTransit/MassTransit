@@ -14,21 +14,21 @@ namespace MassTransit.RequestResponse
 {
     using System;
 
-    public class CorrelatedResponseActionBuilder<T, K>
-        where T : class
+    public class CorrelatedResponseActionBuilder<TMessage, TKey>
+        where TMessage : class
     {
-        readonly K _correlationId;
+        readonly TKey _correlationId;
         readonly RequestResponseScope _scope;
 
-        public CorrelatedResponseActionBuilder(RequestResponseScope scope, K correlationId)
+        public CorrelatedResponseActionBuilder(RequestResponseScope scope, TKey correlationId)
         {
             _scope = scope;
             _correlationId = correlationId;
         }
 
-        public RequestResponseScope IsReceived(Action<T> action)
+        public RequestResponseScope IsReceived(Action<TMessage> action)
         {
-            _scope.AddResponseAction(new CorrelatedResponseAction<T, K>(_scope, _correlationId, action));
+            _scope.AddResponseAction(new CorrelatedResponseAction<TMessage, TKey>(_scope, _correlationId, action));
 
             return _scope;
         }

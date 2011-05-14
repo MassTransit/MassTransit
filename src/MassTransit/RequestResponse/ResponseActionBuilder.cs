@@ -14,8 +14,8 @@ namespace MassTransit.RequestResponse
 {
     using System;
 
-    public class ResponseActionBuilder<T>
-        where T : class
+    public class ResponseActionBuilder<TMessage>
+        where TMessage : class
     {
         readonly RequestResponseScope _scope;
 
@@ -24,19 +24,19 @@ namespace MassTransit.RequestResponse
             _scope = scope;
         }
 
-        public CorrelatedResponseActionBuilder<T, K> RelatedTo<K>(K correlationId)
+        public CorrelatedResponseActionBuilder<TMessage, TKey> RelatedTo<TKey>(TKey correlationId)
         {
-            return new CorrelatedResponseActionBuilder<T, K>(_scope, correlationId);
+            return new CorrelatedResponseActionBuilder<TMessage, TKey>(_scope, correlationId);
         }
 
-        public ConditionalResponseActionBuilder<T> And(Func<T, bool> accept)
+        public ConditionalResponseActionBuilder<TMessage> And(Func<TMessage, bool> accept)
         {
-            return new ConditionalResponseActionBuilder<T>(_scope, accept);
+            return new ConditionalResponseActionBuilder<TMessage>(_scope, accept);
         }
 
-        public RequestResponseScope IsReceived(Action<T> action)
+        public RequestResponseScope IsReceived(Action<TMessage> action)
         {
-            _scope.AddResponseAction(new ResponseAction<T>(_scope, action));
+            _scope.AddResponseAction(new ResponseAction<TMessage>(_scope, action));
 
             return _scope;
         }

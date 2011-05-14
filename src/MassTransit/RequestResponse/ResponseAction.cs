@@ -14,21 +14,21 @@ namespace MassTransit.RequestResponse
 {
     using System;
 
-    public class ResponseAction<T> :
+    public class ResponseAction<TMessage> :
         IResponseAction,
-        Consumes<T>.All
-        where T : class
+        Consumes<TMessage>.All
+        where TMessage : class
     {
-        readonly Action<T> _responseAction;
+        readonly Action<TMessage> _responseAction;
         readonly RequestResponseScope _scope;
 
-        public ResponseAction(RequestResponseScope scope, Action<T> responseAction)
+        public ResponseAction(RequestResponseScope scope, Action<TMessage> responseAction)
         {
             _scope = scope;
             _responseAction = responseAction;
         }
 
-        public void Consume(T message)
+        public void Consume(TMessage message)
         {
             _responseAction(message);
 

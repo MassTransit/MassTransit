@@ -14,30 +14,30 @@ namespace MassTransit.RequestResponse
 {
     using System;
 
-    public class ConditionalResponseAction<T> :
+    public class ConditionalResponseAction<TMessage> :
         IResponseAction,
-        Consumes<T>.Selected
-        where T : class
+        Consumes<TMessage>.Selected
+        where TMessage : class
     {
-        readonly Func<T, bool> _accept;
-        readonly Action<T> _responseAction;
+        readonly Func<TMessage, bool> _accept;
+        readonly Action<TMessage> _responseAction;
         readonly RequestResponseScope _scope;
 
-        public ConditionalResponseAction(RequestResponseScope scope, Func<T, bool> accept, Action<T> action)
+        public ConditionalResponseAction(RequestResponseScope scope, Func<TMessage, bool> accept, Action<TMessage> action)
         {
             _scope = scope;
             _accept = accept;
             _responseAction = action;
         }
 
-        public void Consume(T message)
+        public void Consume(TMessage message)
         {
             _responseAction(message);
 
             _scope.SetResponseReceived(message);
         }
 
-        public bool Accept(T message)
+        public bool Accept(TMessage message)
         {
             return _accept(message);
         }

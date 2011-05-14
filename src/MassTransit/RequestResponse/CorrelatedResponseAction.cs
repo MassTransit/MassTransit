@@ -14,30 +14,30 @@ namespace MassTransit.RequestResponse
 {
     using System;
 
-    public class CorrelatedResponseAction<T, K> :
+    public class CorrelatedResponseAction<TMessage, TKey> :
         IResponseAction,
-        Consumes<T>.For<K>
-        where T : class
+        Consumes<TMessage>.For<TKey>
+        where TMessage : class
     {
-        readonly K _correlationId;
-        readonly Action<T> _responseAction;
+        readonly TKey _correlationId;
+        readonly Action<TMessage> _responseAction;
         readonly RequestResponseScope _scope;
 
-        public CorrelatedResponseAction(RequestResponseScope scope, K correlationId, Action<T> responseAction)
+        public CorrelatedResponseAction(RequestResponseScope scope, TKey correlationId, Action<TMessage> responseAction)
         {
             _scope = scope;
             _correlationId = correlationId;
             _responseAction = responseAction;
         }
 
-        public void Consume(T message)
+        public void Consume(TMessage message)
         {
             _responseAction(message);
 
             _scope.SetResponseReceived(message);
         }
 
-        public K CorrelationId
+        public TKey CorrelationId
         {
             get { return _correlationId; }
         }
