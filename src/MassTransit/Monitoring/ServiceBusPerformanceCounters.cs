@@ -16,12 +16,13 @@ namespace MassTransit.Monitoring
 	using System.Linq;
 	using System.Security;
 	using log4net;
+	using Magnum.Extensions;
 
-	public class ServiceBusPerformanceCounters
+    public class ServiceBusPerformanceCounters
 	{
-		public const string CategoryHelp = "MassTransit Performance Counters";
-		public const string CategoryName = "MassTransit";
-		static readonly ServiceBusPerformanceCounters _instance;
+	    public const string CategoryName = "MassTransit";
+	    const string CategoryHelp = "MassTransit Performance Counters";
+	    static readonly ServiceBusPerformanceCounters _instance;
 		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusPerformanceCounters));
 
 		static ServiceBusPerformanceCounters()
@@ -163,7 +164,7 @@ namespace MassTransit.Monitoring
 			}
 			catch (SecurityException ex)
 			{
-				_log.Error("Unable to create performance counter category", ex);
+				_log.Error("Unable to create performance counter category (Category: {0})\nTry running the program in the Administrator role to set these up.".FormatWith(CategoryName), ex);
 			}
 		}
 	}
