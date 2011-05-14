@@ -1,10 +1,10 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
-//   http://www.apache.org/licenses/LICENSE-2.0 
+//     http://www.apache.org/licenses/LICENSE-2.0 
 // 
 // Unless required by applicable law or agreed to in writing, software distributed 
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
@@ -15,9 +15,10 @@ namespace MassTransit.Util
     using System;
     using Exceptions;
     using Magnum;
+    using Magnum.Extensions;
 
     /// <summary>
-    /// Check class for verifying the condition of items included in interface contracts
+    ///   Check class for verifying the condition of items included in interface contracts
     /// </summary>
     public static class CheckConvention
     {
@@ -28,9 +29,8 @@ namespace MassTransit.Util
             Type t = message.GetType();
             if (!t.IsSerializable)
             {
-                throw new ConventionException("Messages must be marked with the 'Serializable' attribute!");
+                throw new ConventionException("Whoa, slow down buddy. The message '{0}' must be marked with the 'Serializable' attribute!".FormatWith(t.FullName));
             }
         }
-
     }
 }
