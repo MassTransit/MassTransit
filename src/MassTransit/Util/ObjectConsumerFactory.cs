@@ -16,6 +16,7 @@ namespace MassTransit.Util
 	using System.Collections.Generic;
 	using Exceptions;
 
+    //REVIEW: consider moving this and other factory bits into a 'ConsumerFactory' type namespace
 	public class ObjectConsumerFactory<TConsumer> :
 		IConsumerFactory<TConsumer>
 		where TConsumer : class

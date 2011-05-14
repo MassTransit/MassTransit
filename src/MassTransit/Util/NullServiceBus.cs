@@ -16,6 +16,7 @@ namespace MassTransit.Util
 	using Context;
 	using Pipeline;
 
+    //REVIEW: move into core and mark internal?
 	public class NullServiceBus :
 		IServiceBus
 	{

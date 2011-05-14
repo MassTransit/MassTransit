@@ -22,6 +22,7 @@ namespace MassTransit.Util
 	using log4net;
 	using Stact;
 
+    //REVIEW: consider moving to transports?
 	public class ServiceBusReceiveContext
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusReceiveContext));

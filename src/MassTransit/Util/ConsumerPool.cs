@@ -14,6 +14,7 @@ namespace MassTransit.Util
 {
 	using System;
 
+    //REVIEW: move to threading too?
 	public interface ConsumerPool :
 		IDisposable
 	{
