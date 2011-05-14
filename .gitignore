@@ -3,6 +3,8 @@ build_artifacts/*
 *.suo
 *.user
 
+NDependOut/*
+
 src/logs/*
 
 **/*.sln*
