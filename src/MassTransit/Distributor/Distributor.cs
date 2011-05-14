@@ -21,12 +21,12 @@ namespace MassTransit.Distributor
 	using Stact;
 	using Stact.Internal;
 
-	public class Distributor<T> :
-		IDistributor<T>
-		where T : class
+	public class Distributor<TMessage> :
+		IDistributor<TMessage>
+		where TMessage : class
 	{
 		readonly int _pingTimeout = (int) 1.Minutes().TotalMilliseconds;
-		readonly IWorkerSelectionStrategy<T> _selectionStrategy;
+		readonly IWorkerSelectionStrategy<TMessage> _selectionStrategy;
 
 		readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers =
 			new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
@@ -37,7 +37,7 @@ namespace MassTransit.Distributor
 		UnsubscribeAction _unsubscribeAction = () => false;
 		IServiceBus _bus;
 
-		public Distributor(IWorkerSelectionStrategy<T> workerSelectionStrategy)
+		public Distributor(IWorkerSelectionStrategy<TMessage> workerSelectionStrategy)
 		{
 			_selectionStrategy = workerSelectionStrategy;
 
@@ -46,11 +46,11 @@ namespace MassTransit.Distributor
 		}
 
 		public Distributor()
-			: this(new DefaultWorkerSelectionStrategy<T>())
+			: this(new DefaultWorkerSelectionStrategy<TMessage>())
 		{
 		}
 
-		public void Consume(T message)
+		public void Consume(TMessage message)
 		{
 			WorkerDetails worker = _selectionStrategy.SelectWorker(_workers.Values, message);
 			if (worker == null)
@@ -63,12 +63,12 @@ namespace MassTransit.Distributor
 
 			IEndpoint endpoint = _bus.GetEndpoint(worker.DataUri);
 
-			var distributed = new Distributed<T>(message, _bus.Context().ResponseAddress);
+			var distributed = new Distributed<TMessage>(message, _bus.Context().ResponseAddress);
 
 			endpoint.Send(distributed);
 		}
 
-		public bool Accept(T message)
+		public bool Accept(TMessage message)
 		{
 			return _selectionStrategy.HasAvailableWorker(_workers.Values, message);
 		}
@@ -104,7 +104,7 @@ namespace MassTransit.Distributor
 		{
 			_bus = bus;
 
-			_unsubscribeAction = bus.SubscribeHandler<WorkerAvailable<T>>(Consume);
+			_unsubscribeAction = bus.SubscribeHandler<WorkerAvailable<TMessage>>(Consume);
 
 			// don't plan to unsubscribe this since it's an important thing
 			bus.SubscribeInstance(this);
@@ -122,7 +122,7 @@ namespace MassTransit.Distributor
 			_unsubscribeAction();
 		}
 
-		public void Consume(WorkerAvailable<T> message)
+		public void Consume(WorkerAvailable<TMessage> message)
 		{
 			WorkerDetails worker = _workers.Retrieve(message.ControlUri, () =>
 				{
