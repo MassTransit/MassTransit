@@ -16,35 +16,25 @@ namespace MassTransit.Exceptions
     using System.Runtime.Serialization;
 
     [Serializable]
-    public abstract class AbstractUriException :
-        MassTransitException
+    public class MassTransitException : Exception
     {
-        protected AbstractUriException()
+        public MassTransitException()
         {
         }
 
-        protected AbstractUriException(Uri uri)
+        public MassTransitException(string message)
+            : base(message)
         {
-            Uri = uri;
         }
 
-        protected AbstractUriException(Uri uri, string message)
-            : base(uri + " => " + message)
+        public MassTransitException(string message, Exception innerException)
+            : base(message, innerException)
         {
-            Uri = uri;
         }
 
-        protected AbstractUriException(Uri uri, string message, Exception innerException)
-            : base(uri + " => " + message, innerException)
-        {
-            Uri = uri;
-        }
-
-        protected AbstractUriException(SerializationInfo info, StreamingContext context)
+        protected MassTransitException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-
-        public Uri Uri { get; protected set; }
     }
 }

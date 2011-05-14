@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,30 +12,32 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Exceptions
 {
-	using System;
-	using System.Runtime.Serialization;
+    using System;
+    using System.Runtime.Serialization;
 
     [Serializable]
-	public class PipelineException :
-		Exception
-	{
-		public PipelineException()
-		{
-		}
+    public class PipelineException :
+        MassTransitException
+    {
+        public PipelineException()
+        {
+        }
 
-		public PipelineException(string message)
-			: base(message)
-		{
-		}
+        public PipelineException(string message)
+            : base(message)
+        {
+        }
 
-		public PipelineException(string message, Exception innerException) :
-			base(message, innerException)
-		{
-		}
+        public PipelineException(string message, Exception innerException)
+            :
+                base(message, innerException)
+        {
+        }
 
-		protected PipelineException(SerializationInfo info, StreamingContext context) :
-			base(info, context)
-		{
-		}
-	}
+        protected PipelineException(SerializationInfo info, StreamingContext context)
+            :
+                base(info, context)
+        {
+        }
+    }
 }
