@@ -5,6 +5,7 @@
       <ALIGN_MULTILINE_ARRAY_AND_OBJECT_INITIALIZER>False</ALIGN_MULTILINE_ARRAY_AND_OBJECT_INITIALIZER>
       <ALIGN_MULTILINE_EXTENDS_LIST>False</ALIGN_MULTILINE_EXTENDS_LIST>
       <ALIGN_MULTLINE_TYPE_PARAMETER_CONSTRAINS>False</ALIGN_MULTLINE_TYPE_PARAMETER_CONSTRAINS>
+      <EXPLICIT_PRIVATE_MODIFIER>False</EXPLICIT_PRIVATE_MODIFIER>
       <INDENT_ANONYMOUS_METHOD_BLOCK>False</INDENT_ANONYMOUS_METHOD_BLOCK>
       <INDENT_EMBRACED_INITIALIZER_BLOCK>False</INDENT_EMBRACED_INITIALIZER_BLOCK>
       <MODIFIERS_ORDER IsNull="False">
@@ -291,7 +292,7 @@ II.2.12 <HandlesEvent />
   <XML>
     <FormatSettings />
   </XML>
-  <FileHeader><![CDATA[Copyright 2007-2010 The Apache Software Foundation.
+  <FileHeader><![CDATA[Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
  
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 this file except in compliance with the License. You may obtain a copy of the 
