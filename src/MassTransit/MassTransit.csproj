@@ -198,6 +198,7 @@
     <Compile Include="Context\MoveMessageSendContext.cs" />
     <Compile Include="Context\SendContext.cs" />
     <Compile Include="Context\ContextStorage.cs" />
+    <Compile Include="Context\ServiceBusReceiveContext.cs" />
     <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
@@ -333,7 +334,6 @@
     <Compile Include="Util\NullServiceBus.cs" />
     <Compile Include="Util\ObjectConsumerFactory.cs" />
     <Compile Include="Util\ReSharperStaticAnalysis.cs" />
-    <Compile Include="Util\ServiceBusReceiveContext.cs" />
     <Compile Include="Util\SpecialLoggers.cs" />
     <Compile Include="Util\ThreadPoolConsumerPool.cs" />
   </ItemGroup>
