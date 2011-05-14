@@ -67,11 +67,6 @@ namespace MassTransit.Transports
 			get { return _address; }
 		}
 
-		public Uri Uri
-		{
-			get { return Address.Uri; }
-		}
-
 		public IInboundTransport InboundTransport
 		{
 			get { return _transport.InboundTransport; }
@@ -88,7 +83,7 @@ namespace MassTransit.Transports
 			if (_disposed) 
 				throw new ObjectDisposedException(_disposedMessage);
 
-			context.SetDestinationAddress(Uri);
+			context.SetDestinationAddress(Address.Uri);
 			context.SetBodyWriter(stream => _serializer.Serialize(stream, context));
 
 			_transport.Send(context);

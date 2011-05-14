@@ -75,7 +75,7 @@ namespace MassTransit.SystemView.Core.Consumer
 					MessageType = type,
 					InProgressLimit = inProgressLimit,
 					PendingLimit = pendingLimit
-				}, context => context.SetSourceAddress(_bus.Endpoint.Uri));
+				}, context => context.SetSourceAddress(_bus.Endpoint.Address.Uri));
 		}
 
 		public void RemoveSubscription(Guid clientId, string messageName, string correlationId, Uri endpointUri)
@@ -89,7 +89,7 @@ namespace MassTransit.SystemView.Core.Consumer
 		{
 			_subscriptionServiceEndpoint = _bus.GetEndpoint(_subscriptionServiceUri);
 
-			_subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
+			_subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Address.Uri, _bus.Endpoint.Address.Uri));
 		}
 	}
 }

@@ -143,7 +143,7 @@ namespace MassTransit.Services.Subscriptions.Server
 					{
 						IEndpoint endpoint = _bus.GetEndpoint(client.ControlUri);
 
-						endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
+						endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
 					});
 		}
 
@@ -157,7 +157,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			IEndpoint endpoint = _bus.GetEndpoint(uri);
 
-			endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Uri));
+			endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
 		}
 
 		~SubscriptionService()

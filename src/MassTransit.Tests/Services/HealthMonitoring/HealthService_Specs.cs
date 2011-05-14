@@ -40,7 +40,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 		public void MakeSagaSuspect()
 		{
-			LocalBus.Publish(new EndpointCameOnline(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
+			LocalBus.Publish(new EndpointCameOnline(_id, LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri, 0));
 
 			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
@@ -66,7 +66,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		{
 			MakeSagaSuspect();
 
-			LocalBus.Publish(new Heartbeat(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
+			LocalBus.Publish(new Heartbeat(_id, LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri, 0));
 
 			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
@@ -90,7 +90,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		{
 			MakeSagaSuspect();
 
-			LocalBus.Publish(new PingEndpointResponse(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
+			LocalBus.Publish(new PingEndpointResponse(_id, LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri, 0));
 
 			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
@@ -102,7 +102,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		{
 			MakeSagaDown();
 
-			LocalBus.Publish(new Heartbeat(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
+			LocalBus.Publish(new Heartbeat(_id, LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri, 0));
 
 			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();
@@ -112,7 +112,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		[Test]
 		public void Should_publish_heartbeats_to_the_service()
 		{
-			LocalBus.Publish(new EndpointCameOnline(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
+			LocalBus.Publish(new EndpointCameOnline(_id, LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri, 0));
 
 			HealthSaga saga = HealthSagaRepository.ShouldContainSaga(_id);
 			saga.ShouldNotBeNull();

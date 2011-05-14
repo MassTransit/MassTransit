@@ -50,7 +50,7 @@ namespace MassTransit.Context
 			try
 			{
 				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Calling Receive on {0} from thread {1} ({2})", _bus.Endpoint.Uri,
+					_log.DebugFormat("Calling Receive on {0} from thread {1} ({2})", _bus.Endpoint.Address.Uri,
 						Thread.CurrentThread.ManagedThreadId, _receiveTimeout);
 
 				_receiveTime.Start();
@@ -58,7 +58,7 @@ namespace MassTransit.Context
 				_bus.Endpoint.Receive(context =>
 					{
 						if (_log.IsDebugEnabled)
-							_log.DebugFormat("Enumerating pipeline on {0} from thread {1}", _bus.Endpoint.Uri,
+							_log.DebugFormat("Enumerating pipeline on {0} from thread {1}", _bus.Endpoint.Address.Uri,
 								Thread.CurrentThread.ManagedThreadId);
 
 						context.SetBus(_bus);
@@ -100,7 +100,7 @@ namespace MassTransit.Context
 				_consumeTime.Start();
 
 				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Dispatching message on {0} from thread {1}", _bus.Endpoint.Uri,
+					_log.DebugFormat("Dispatching message on {0} from thread {1}", _bus.Endpoint.Address.Uri,
 						Thread.CurrentThread.ManagedThreadId);
 
 				bool atLeastOneConsumerFailed = false;

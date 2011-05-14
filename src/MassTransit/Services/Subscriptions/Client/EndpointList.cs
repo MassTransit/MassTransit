@@ -19,11 +19,12 @@ namespace MassTransit.Services.Subscriptions.Client
 	public class EndpointList : 
 		IEnumerable<Uri>
 	{
+        //REVIEW: should this be a list of IEndpoints instead?
 		private readonly List<Uri> _endpoints = new List<Uri>();
 
 		public void Add(IEndpoint endpoint)
 		{
-			_endpoints.Add(endpoint.Uri);
+			_endpoints.Add(endpoint.Address.Uri);
 		}
 
 		public void Add(Uri uri)
@@ -33,7 +34,7 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		public bool Contains(IEndpoint endpoint)
 		{
-			return _endpoints.Contains(endpoint.Uri);
+			return _endpoints.Contains(endpoint.Address.Uri);
 		}
 
 		public bool Contains(Uri uri)

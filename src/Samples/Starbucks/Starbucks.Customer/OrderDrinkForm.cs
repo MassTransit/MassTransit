@@ -92,7 +92,7 @@
 					Size = size,
 				};
 
-			Bus.Publish(message, x=> x.SetResponseAddress(Bus.Endpoint.Uri));
+			Bus.Publish(message, x=> x.SetResponseAddress(Bus.Endpoint.Address.Uri));
 		}
 
 		protected override void OnClosing(CancelEventArgs e)

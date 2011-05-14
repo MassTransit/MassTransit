@@ -37,7 +37,7 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(RemoteBus.Endpoint.Uri, LocalBus.Context().DestinationAddress);
+					Assert.AreEqual(RemoteBus.Endpoint.Address.Uri, LocalBus.Context().DestinationAddress);
 
 					received.Set(message);
 				});
@@ -56,12 +56,12 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, LocalBus.Context().FaultAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Address.Uri, LocalBus.Context().FaultAddress);
 
 					received.Set(message);
 				});
 
-			LocalBus.Publish(ping, context => context.SendFaultTo(LocalBus.Endpoint.Uri));
+			LocalBus.Publish(ping, context => context.SendFaultTo(LocalBus.Endpoint.Address.Uri));
 
 			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
@@ -94,12 +94,12 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, LocalBus.Context().ResponseAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Address.Uri, LocalBus.Context().ResponseAddress);
 
 					received.Set(message);
 				});
 
-			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus.Endpoint.Uri));
+			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus.Endpoint.Address.Uri));
 
 			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
@@ -133,7 +133,7 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, LocalBus.Context().SourceAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Address.Uri, LocalBus.Context().SourceAddress);
 
 					received.Set(message);
 				});

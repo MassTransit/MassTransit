@@ -27,7 +27,7 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_endpoint = MockRepository.GenerateMock<IEndpoint>();
-			_endpoint.Stub(x => x.Uri).Return(_uri);
+			_endpoint.Stub(x => x.Address.Uri).Return(_uri);
 
 			_bus = MockRepository.GenerateMock<IServiceBus>();
 			_bus.Stub(x => x.Endpoint).Return(_endpoint);
@@ -130,7 +130,7 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_endpoint = MockRepository.GenerateMock<IEndpoint>();
-			_endpoint.Stub(x => x.Uri).Return(_uri);
+			_endpoint.Stub(x => x.Address.Uri).Return(_uri);
 
 			_unsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
 

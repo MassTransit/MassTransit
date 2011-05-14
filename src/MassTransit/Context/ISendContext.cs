@@ -22,6 +22,7 @@ namespace MassTransit.Context
 	{
 		void SetMessageType(string messageType);
 
+        //REVIEW: should these be IEndpoint address?
 		void SetSourceAddress(Uri uri);
 
 		void SetDestinationAddress(Uri uri);

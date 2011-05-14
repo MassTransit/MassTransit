@@ -126,7 +126,7 @@ namespace MassTransit.Context
 			{
 				Bus.GetEndpoint(ResponseAddress).Send(message, context =>
 					{
-						context.SetSourceAddress(Bus.Endpoint.Uri);
+						context.SetSourceAddress(Bus.Endpoint.Address.Uri);
 						contextCallback(context);
 					});
 			}
@@ -157,11 +157,11 @@ namespace MassTransit.Context
 		{
 			if (FaultAddress != null)
 			{
-				Bus.GetEndpoint(FaultAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Uri));
+				Bus.GetEndpoint(FaultAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Address.Uri));
 			}
 			else if (ResponseAddress != null)
 			{
-				Bus.GetEndpoint(ResponseAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Uri));
+				Bus.GetEndpoint(ResponseAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Address.Uri));
 			}
 			else
 			{
@@ -303,11 +303,11 @@ namespace MassTransit.Context
 		{
 			if (FaultAddress != null)
 			{
-				Bus.GetEndpoint(FaultAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Uri));
+				Bus.GetEndpoint(FaultAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Address.Uri));
 			}
 			else if (ResponseAddress != null)
 			{
-				Bus.GetEndpoint(ResponseAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Uri));
+				Bus.GetEndpoint(ResponseAddress).Send(message, context => context.SetSourceAddress(Bus.Endpoint.Address.Uri));
 			}
 			else
 			{
@@ -320,4 +320,24 @@ namespace MassTransit.Context
 			_responseAddress = value;
 		}
 	}
+
+    //MOVE TO MAGNUM
+    public static class StreamExtensions
+    {
+        public static void CopyTo(this Stream from, Stream to)
+        {
+
+            from.Seek(0, SeekOrigin.Begin);
+
+            var buffer = new byte[4096];
+
+            int read = from.Read(buffer, 0, 4096);
+            while (read > 0)
+            {
+                to.Write(buffer, 0, read);
+
+                read = from.Read(buffer, 0, 4096);
+            }
+        }
+    }
 }

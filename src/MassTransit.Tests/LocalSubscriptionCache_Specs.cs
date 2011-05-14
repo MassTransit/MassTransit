@@ -13,7 +13,6 @@
 namespace MassTransit.Tests
 {
 	using MassTransit.Services.Subscriptions;
-	using MassTransit.Transports;
 	using MassTransit.Transports.Loopback;
 	using Messages;
 	using NUnit.Framework;
@@ -64,7 +63,7 @@ namespace MassTransit.Tests
 
 			LocalBus.SubscribeInstance(consumer);
 
-			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Uri));
+			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Address.Uri));
 		}
 
 
@@ -75,7 +74,7 @@ namespace MassTransit.Tests
 
 			LocalBus.SubscribeInstance(consumer);
 
-			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Uri));
+			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Address.Uri));
 		}
 
 		[Test]
@@ -83,7 +82,7 @@ namespace MassTransit.Tests
 		{
 			LocalBus.SubscribeHandler<PingMessage>(delegate { });
 
-			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Uri));
+			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Address.Uri));
 		}
 	}
 }

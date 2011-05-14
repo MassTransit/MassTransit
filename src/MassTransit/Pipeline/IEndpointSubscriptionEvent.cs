@@ -16,9 +16,11 @@ namespace MassTransit.Pipeline
 
 	public interface IEndpointSubscriptionEvent
 	{
+        //REVIEW: should this be IEndpoint instead?
 		UnsubscribeAction SubscribedTo<TMessage>(Uri endpointUri)
 			where TMessage : class;
 
+        //REVIEW: should this be IEndpoint instead?
 		UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId, Uri endpointUri)
 			where TMessage : class, CorrelatedBy<TKey>;
 	}

@@ -20,6 +20,7 @@ namespace MassTransit.Context
 		IBusPublishContext<T>
 		where T : class
 	{
+        //REVIEW: should this be of IEndpoint
 		readonly HashSet<Uri> _endpoints = new HashSet<Uri>();
 		Action<T, IEndpoint> _eachSubscriberAction = Ignore;
 		Action<T> _noSubscribersAction = Ignore;
@@ -54,7 +55,7 @@ namespace MassTransit.Context
 
 		public void NotifyForMessageConsumer(T message, IEndpoint endpoint)
 		{
-			_endpoints.Add(endpoint.Uri);
+			_endpoints.Add(endpoint.Address.Uri);
 
 			_eachSubscriberAction(message, endpoint);
 		}

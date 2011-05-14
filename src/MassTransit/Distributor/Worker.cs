@@ -136,8 +136,9 @@ namespace MassTransit.Distributor
 			_bus = bus;
 			_controlBus = bus.ControlBus;
 
-			_dataUri = _bus.Endpoint.Uri;
-			_controlUri = _controlBus.Endpoint.Uri;
+            //REVIEW: should these be IEndpoint?
+			_dataUri = _bus.Endpoint.Address.Uri;
+			_controlUri = _controlBus.Endpoint.Address.Uri;
 
 			_unsubscribeAction = bus.ControlBus.SubscribeHandler<ConfigureWorker>(Consume, Accept);
 			_unsubscribeAction += bus.ControlBus.SubscribeHandler<PingWorker>(Consume);

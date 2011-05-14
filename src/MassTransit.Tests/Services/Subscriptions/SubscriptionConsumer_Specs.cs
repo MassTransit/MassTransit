@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Services.Subscriptions
 			_endpointCache = MockRepository.GenerateMock<IEndpointCache>();
 			
 			_endpoint = MockRepository.GenerateMock<IEndpoint>();
-			_endpoint.Stub(x => x.Uri).Return(_testUri);
+			_endpoint.Stub(x => x.Address.Uri).Return(_testUri);
 
 			_bus = MockRepository.GenerateMock<IServiceBus>();
 			_bus.Stub(x => x.Endpoint).Return(_endpoint);

@@ -49,7 +49,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		public void Start(IServiceBus bus)
 		{
 			if (_log.IsInfoEnabled)
-				_log.InfoFormat("Starting SubscriptionClient on {0}", bus.Endpoint.Uri);
+				_log.InfoFormat("Starting SubscriptionClient on {0}", bus.Endpoint.Address.Uri);
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Getting endpoint for subscription service at {0}", SubscriptionServiceUri);
@@ -105,11 +105,11 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		private void VerifyClientAndServiceNotOnSameEndpoint(IServiceBus bus)
 		{
-			if (!bus.ControlBus.Endpoint.Uri.Equals(_subscriptionServiceEndpoint.Uri))
+			if (!bus.ControlBus.Endpoint.Address.Uri.Equals(_subscriptionServiceEndpoint.Address.Uri))
 				return;
 
-			string message = "The service bus and subscription service cannot use the same endpoint: " + bus.ControlBus.Endpoint.Uri;
-			throw new EndpointException(bus.ControlBus.Endpoint.Uri, message);
+			string message = "The service bus and subscription service cannot use the same endpoint: " + bus.ControlBus.Endpoint.Address.Uri;
+			throw new EndpointException(bus.ControlBus.Endpoint.Address.Uri, message);
 		}
 
 		~SubscriptionClient()

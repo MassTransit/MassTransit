@@ -150,7 +150,7 @@ namespace MassTransit.Distributor
 				.ForEach(x =>
 					{
 						_bus.GetEndpoint(x.ControlUri).Send(new PingWorker(),
-							context => context.SetResponseAddress(_bus.Endpoint.Uri));
+							context => context.SetResponseAddress(_bus.Endpoint.Address.Uri));
 					});
 		}
 	}

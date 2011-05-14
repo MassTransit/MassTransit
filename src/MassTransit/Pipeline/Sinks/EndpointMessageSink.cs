@@ -31,16 +31,18 @@ namespace MassTransit.Pipeline.Sinks
 			_endpoint = endpoint;
 		}
 
+        //REVIEW: should this be IEndpoint instead?
 		public Uri Address
 		{
-			get { return _endpoint.Uri; }
+			get { return _endpoint.Address.Uri; }
 		}
 
 		public IEnumerable<Action<IBusPublishContext<TMessage>>> Enumerate(IBusPublishContext<TMessage> context)
 		{
 			yield return x =>
 				{
-					if (x.WasEndpointAlreadySent(_endpoint.Uri))
+                    //REVIEW: should this be using IEndpoint instead?
+					if (x.WasEndpointAlreadySent(_endpoint.Address.Uri))
 						return;
 
 					_endpoint.Send(x);

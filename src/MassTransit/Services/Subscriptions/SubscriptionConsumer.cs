@@ -48,7 +48,7 @@ namespace MassTransit.Services.Subscriptions
 		public UnsubscribeAction SubscribedTo<TMessage>(Uri endpointUri)
 			where TMessage : class
 		{
-			if (endpointUri == _bus.Endpoint.Uri)
+			if (endpointUri == _bus.Endpoint.Address.Uri)
 				return () => true;
 
 			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
@@ -59,7 +59,7 @@ namespace MassTransit.Services.Subscriptions
 		public UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId, Uri endpointUri)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
-			if (endpointUri == _bus.Endpoint.Uri)
+			if (endpointUri == _bus.Endpoint.Address.Uri)
 				return () => true;
 
 			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);

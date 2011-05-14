@@ -160,7 +160,7 @@ namespace MassTransit
 			var context = new PublishContext<T>(message);
 			using (ContextStorage.CreateContextScope(context))
 			{
-				context.SetSourceAddress(Endpoint.Uri);
+				context.SetSourceAddress(Endpoint.Address.Uri);
 
 				contextCallback(context);
 

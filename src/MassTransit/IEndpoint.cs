@@ -29,11 +29,6 @@ namespace MassTransit
 		IEndpointAddress Address { get; }
 
 		/// <summary>
-		/// The URI of the endpoint
-		/// </summary>
-		Uri Uri { get; }
-
-		/// <summary>
 		/// The inbound transport for the endpoint
 		/// </summary>
 		IInboundTransport InboundTransport { get; }
