@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,25 +12,25 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse
 {
-	using System;
+    using System;
 
-	public class ConditionalResponseActionBuilder<T>
-		where T : class
-	{
-		private readonly Func<T, bool> _accept;
-		private readonly RequestResponseScope _scope;
+    public class ConditionalResponseActionBuilder<T>
+        where T : class
+    {
+        readonly Func<T, bool> _accept;
+        readonly RequestResponseScope _scope;
 
-		public ConditionalResponseActionBuilder(RequestResponseScope scope, Func<T, bool> accept)
-		{
-			_scope = scope;
-			_accept = accept;
-		}
+        public ConditionalResponseActionBuilder(RequestResponseScope scope, Func<T, bool> accept)
+        {
+            _scope = scope;
+            _accept = accept;
+        }
 
-		public RequestResponseScope IsReceived(Action<T> action)
-		{
-			_scope.AddResponseAction(new ConditionalResponseAction<T>(_scope, _accept, action));
+        public RequestResponseScope IsReceived(Action<T> action)
+        {
+            _scope.AddResponseAction(new ConditionalResponseAction<T>(_scope, _accept, action));
 
-			return _scope;
-		}
-	}
+            return _scope;
+        }
+    }
 }

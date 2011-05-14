@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,31 +12,32 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse
 {
-	using System;
+    using System;
 
-	public class ResponseAction<T> :
-		IResponseAction,
-		Consumes<T>.All where T : class
-	{
-		private readonly Action<T> _responseAction;
-		private readonly RequestResponseScope _scope;
+    public class ResponseAction<T> :
+        IResponseAction,
+        Consumes<T>.All
+        where T : class
+    {
+        readonly Action<T> _responseAction;
+        readonly RequestResponseScope _scope;
 
-		public ResponseAction(RequestResponseScope scope, Action<T> responseAction)
-		{
-			_scope = scope;
-			_responseAction = responseAction;
-		}
+        public ResponseAction(RequestResponseScope scope, Action<T> responseAction)
+        {
+            _scope = scope;
+            _responseAction = responseAction;
+        }
 
-		public void Consume(T message)
-		{
-			_responseAction(message);
+        public void Consume(T message)
+        {
+            _responseAction(message);
 
-			_scope.SetResponseReceived(message);
-		}
+            _scope.SetResponseReceived(message);
+        }
 
-		public UnsubscribeAction SubscribeTo(IServiceBus bus)
-		{
-			return bus.SubscribeInstance(this);
-		}
-	}
+        public UnsubscribeAction SubscribeTo(IServiceBus bus)
+        {
+            return bus.SubscribeInstance(this);
+        }
+    }
 }

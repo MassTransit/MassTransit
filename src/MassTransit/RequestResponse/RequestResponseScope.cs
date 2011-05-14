@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,149 +12,150 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading;
 
-	public class RequestResponseScope :
-		IAsyncResult
-	{
-		private readonly IServiceBus _bus;
-		private readonly Action<IServiceBus> _requestAction;
-		private readonly List<IResponseAction> _responseActions = new List<IResponseAction>();
-		private readonly ManualResetEvent _responseReceived = new ManualResetEvent(false);
-		private TimeSpan _responseTimeout = TimeSpan.MaxValue;
-		private object _state;
-		private Action _timeoutAction;
-		private RegisteredWaitHandle _waitHandle;
+    public class RequestResponseScope :
+        IAsyncResult
+    {
+        readonly IServiceBus _bus;
+        readonly Action<IServiceBus> _requestAction;
+        readonly List<IResponseAction> _responseActions = new List<IResponseAction>();
+        readonly ManualResetEvent _responseReceived = new ManualResetEvent(false);
+        TimeSpan _responseTimeout = TimeSpan.MaxValue;
+        object _state;
+        Action _timeoutAction;
+        RegisteredWaitHandle _waitHandle;
 
-		public RequestResponseScope(IServiceBus bus, Action<IServiceBus> requestAction)
-		{
-			_bus = bus;
-			_requestAction = requestAction;
-		}
+        public RequestResponseScope(IServiceBus bus, Action<IServiceBus> requestAction)
+        {
+            _bus = bus;
+            _requestAction = requestAction;
+        }
 
-		public bool IsCompleted
-		{
-			get { return _responseReceived.WaitOne(0, false); }
-		}
+        public bool IsCompleted
+        {
+            get { return _responseReceived.WaitOne(0, false); }
+        }
 
-		public WaitHandle AsyncWaitHandle
-		{
-			get { return _responseReceived; }
-		}
+        public WaitHandle AsyncWaitHandle
+        {
+            get { return _responseReceived; }
+        }
 
-		public object AsyncState
-		{
-			get { return _state; }
-		}
+        public object AsyncState
+        {
+            get { return _state; }
+        }
 
-		public bool CompletedSynchronously
-		{
-			get { return false; }
-		}
+        public bool CompletedSynchronously
+        {
+            get { return false; }
+        }
 
-		public void AddResponseAction(IResponseAction responseAction)
-		{
-			_responseActions.Add(responseAction);
-		}
+        public void AddResponseAction(IResponseAction responseAction)
+        {
+            _responseActions.Add(responseAction);
+        }
 
-		public void Send()
-		{
-			UnsubscribeAction unsubscribeToken = () => true;
-			try
-			{
-				unsubscribeToken = SubscribeToResponseMessages(unsubscribeToken);
+        public void Send()
+        {
+            UnsubscribeAction unsubscribeToken = () => true;
+            try
+            {
+                unsubscribeToken = SubscribeToResponseMessages(unsubscribeToken);
 
-				InvokeRequestAction();
+                InvokeRequestAction();
 
-				if (WaitForResponseAction() == false)
-				{
-					if (_timeoutAction != null)
-						_timeoutAction();
-				}
-			}
-			finally
-			{
-				unsubscribeToken();
-			}
-		}
+                if (WaitForResponseAction() == false)
+                {
+                    if (_timeoutAction != null)
+                        _timeoutAction();
+                }
+            }
+            finally
+            {
+                unsubscribeToken();
+            }
+        }
 
-		public RequestResponseScope TimeoutAfter(TimeSpan span)
-		{
-			_responseTimeout = span;
+        public RequestResponseScope TimeoutAfter(TimeSpan span)
+        {
+            _responseTimeout = span;
 
-			return this;
-		}
+            return this;
+        }
 
-		public void SetResponseReceived<TMessage>(TMessage message)
-			where TMessage : class
-		{
-			_responseReceived.Set();
-		}
+        public void SetResponseReceived<TMessage>(TMessage message)
+            where TMessage : class
+        {
+            _responseReceived.Set();
+        }
 
-		public RequestResponseScope OnTimeout(Action action)
-		{
-			_timeoutAction = action;
+        public RequestResponseScope OnTimeout(Action action)
+        {
+            _timeoutAction = action;
 
-			return this;
-		}
+            return this;
+        }
 
-		public IAsyncResult BeginSend(AsyncCallback callback, object state)
-		{
-			_state = state;
+        public IAsyncResult BeginSend(AsyncCallback callback, object state)
+        {
+            _state = state;
 
-			UnsubscribeAction unsubscribeToken = () => true;
-			unsubscribeToken = SubscribeToResponseMessages(unsubscribeToken);
+            UnsubscribeAction unsubscribeToken = () => true;
+            unsubscribeToken = SubscribeToResponseMessages(unsubscribeToken);
 
-			WaitOrTimerCallback timerCallback = (s, timedOut) =>
-				{
-					unsubscribeToken();
+            WaitOrTimerCallback timerCallback = (s, timedOut) =>
+                {
+                    unsubscribeToken();
 
-					if (timedOut)
-					{
-						if (_timeoutAction != null)
-							_timeoutAction();
-					}
+                    if (timedOut)
+                    {
+                        if (_timeoutAction != null)
+                            _timeoutAction();
+                    }
 
-					callback(this);
-				};
+                    callback(this);
+                };
 
-			_waitHandle = ThreadPool.RegisterWaitForSingleObject(_responseReceived, timerCallback, state, _responseTimeout, true);
+            _waitHandle = ThreadPool.RegisterWaitForSingleObject(_responseReceived, timerCallback, state, _responseTimeout, true);
 
-			InvokeRequestAction();
+            InvokeRequestAction();
 
-			return this;
-		}
+            return this;
+        }
 
-		private bool WaitForResponseAction()
-		{
-			return _responseReceived.WaitOne(_responseTimeout, true);
-		}
+        bool WaitForResponseAction()
+        {
+            return _responseReceived.WaitOne(_responseTimeout, true);
+        }
 
-		private void InvokeRequestAction()
-		{
-			_requestAction(_bus);
-		}
+        void InvokeRequestAction()
+        {
+            _requestAction(_bus);
+        }
 
-		private UnsubscribeAction SubscribeToResponseMessages(UnsubscribeAction unsubscribeToken)
-		{
-			for (int i = 0; i < _responseActions.Count; i++)
-			{
-				unsubscribeToken += _responseActions[i].SubscribeTo(_bus);
-			}
-			return unsubscribeToken;
-		}
+        UnsubscribeAction SubscribeToResponseMessages(UnsubscribeAction unsubscribeToken)
+        {
+            //REVIEW: why aren't we using a foreach?
+            for (int i = 0; i < _responseActions.Count; i++)
+            {
+                unsubscribeToken += _responseActions[i].SubscribeTo(_bus);
+            }
+            return unsubscribeToken;
+        }
 
-		~RequestResponseScope()
-		{
-			if (_waitHandle != null)
-			{
-				_waitHandle.Unregister(_responseReceived);
-				_waitHandle = null;
-			}
+        ~RequestResponseScope()
+        {
+            if (_waitHandle != null)
+            {
+                _waitHandle.Unregister(_responseReceived);
+                _waitHandle = null;
+            }
 
-			_responseReceived.Close();
-		}
-	}
+            _responseReceived.Close();
+        }
+    }
 }
