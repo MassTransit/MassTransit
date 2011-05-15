@@ -17,9 +17,8 @@ Transport Choices
 MassTransit sits on top of a communication layer like MSMQ, or RabbitMQ. So you
 will need to have one of those installed. We currently support:
 
- * MSMQ - just needs to be turned on.
- * Loopback - a transport for in-memory use, ideal for testing.
+.. toctree::
 
-And we are working to support:
-
- * RabbitMQ - http://rabbitmq.com
+    transports/loopback.rst
+    transports/msmq.rst
+    transports/rabbitmq.rst
