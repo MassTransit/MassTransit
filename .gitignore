@@ -26,3 +26,4 @@ tests/*
 SolutionVersion.cs
 src/SolutionVersion.cs
 tests
+doc/build/*

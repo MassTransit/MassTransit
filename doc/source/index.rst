@@ -15,6 +15,7 @@ Contents:
    
    installation/index.rst
    configuration/index.rst
+   overview/index.rst
 
 
 Indices and tables
