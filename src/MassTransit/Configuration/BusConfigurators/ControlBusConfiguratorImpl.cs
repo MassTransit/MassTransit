@@ -44,6 +44,11 @@ namespace MassTransit.BusConfigurators
 
 					settings.InputAddress = _uri ?? builder.Settings.InputAddress.AppendToPath("_control");
 
+					// the endpoint factory is already created, so we can't set the endpoint here
+					// we really need this to be part of another step, but i don't have a clue how yet.
+					//_configurator.ConfigureEndpoint(_uri, x => x.PurgeExistingMessages());
+
+
 					if (_log.IsDebugEnabled)
 						_log.DebugFormat("Configuring control bus for {0} at {1}", builder.Settings.InputAddress, settings.InputAddress);
 
@@ -66,8 +71,6 @@ namespace MassTransit.BusConfigurators
 
 		public IEnumerable<ValidationResult> Validate()
 		{
-			_configurator.ConfigureEndpoint(_uri, x => x.PurgeExistingMessages());
-
 			return from configurator in _configurators 
 				   from result in configurator.Validate() 
 				   select result.WithParentKey("ControlBus");

@@ -75,7 +75,8 @@ namespace MassTransit.Advanced
 		{
 			string environmentName = DefaultTypeNameConvention(typeof (TEnvironment));
 
-			configurator.Add(environmentName, environmentFactory);
+			// do not collapse or 3.5 won't build
+			configurator.Add(environmentName, () => environmentFactory());
 		}
 
 		/// <summary>
