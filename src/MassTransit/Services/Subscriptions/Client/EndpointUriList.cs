@@ -16,10 +16,9 @@ namespace MassTransit.Services.Subscriptions.Client
 	using System.Collections;
 	using System.Collections.Generic;
 
-	public class EndpointList : 
+	public class EndpointUriList : 
 		IEnumerable<Uri>
 	{
-        //REVIEW: should this be a list of IEndpoints instead?
 		private readonly List<Uri> _endpoints = new List<Uri>();
 
 		public void Add(IEndpoint endpoint)

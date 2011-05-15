@@ -36,8 +36,8 @@ namespace MassTransit.Context
 		/// <summary>
 		/// Determines if the endpoint was already sent to during this publish
 		/// </summary>
-		/// <param name="endpointUri"></param>
+		/// <param name="endpoint"></param>
 		/// <returns></returns>
-		bool WasEndpointAlreadySent(Uri endpointUri);
+		bool WasEndpointAlreadySent(IEndpoint endpoint);
 	}
 }

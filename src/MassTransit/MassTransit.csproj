@@ -285,7 +285,7 @@
     <Compile Include="Saga\Orchestrates.cs" />
     <Compile Include="Saga\InitiatedBy.cs" />
     <Compile Include="Services\Routing\Configuration\RouteTo.cs" />
-    <Compile Include="Services\Subscriptions\Client\EndpointList.cs" />
+    <Compile Include="Services\Subscriptions\Client\EndpointUriList.cs" />
     <Compile Include="Services\Subscriptions\Client\SubscriptionCoordinator.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfiguratorExtensions.cs" />
     <Compile Include="Services\Timeout\Messages\CancelTimeout.cs" />
