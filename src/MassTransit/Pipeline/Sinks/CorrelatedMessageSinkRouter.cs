@@ -18,7 +18,8 @@ namespace MassTransit.Pipeline.Sinks
 	/// Routes a message to all of the connected message sinks without modification
 	/// </summary>
 	/// <typeparam name="TMessage">The type of the message to be routed</typeparam>
-	/// <typeparam name="TKey"></typeparam>
+	/// <typeparam name="TKey">The correlation key type</typeparam>
+	/// <typeparam name="T">The input type of the router</typeparam>
 	public class CorrelatedMessageSinkRouter<T, TMessage, TKey> :
 		MessageRouter<T>
 		where TMessage : class, CorrelatedBy<TKey>
