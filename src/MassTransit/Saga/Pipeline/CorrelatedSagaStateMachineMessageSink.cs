@@ -16,6 +16,7 @@ namespace MassTransit.Saga.Pipeline
 	using System.Linq.Expressions;
 	using log4net;
 	using Magnum.StateMachine;
+	using Util;
 
 	public class CorrelatedSagaStateMachineMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>

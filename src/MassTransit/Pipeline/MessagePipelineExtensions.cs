@@ -17,6 +17,7 @@ namespace MassTransit.Pipeline
 	using Configuration;
 	using Context;
 	using Magnum.Reflection;
+	using MassTransit.Configuration;
 	using Sinks;
 	using SubscriptionConnectors;
 	using Util;

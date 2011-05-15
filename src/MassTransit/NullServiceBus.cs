@@ -10,15 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Util
+namespace MassTransit
 {
 	using System;
-	using Context;
 	using Exceptions;
 	using Pipeline;
 
-    //REVIEW: move into core and mark internal?
-	public class NullServiceBus :
+	class NullServiceBus :
 		IServiceBus
 	{
 		bool _disposed;
@@ -39,7 +37,8 @@ namespace MassTransit.Util
 			return () => true;
 		}
 
-		public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback) where T : class
+		public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback) 
+			where T : class
 		{
 			throw new NotImplementedByDesignException();
 		}
@@ -72,21 +71,6 @@ namespace MassTransit.Util
 		public IEndpoint GetEndpoint(Uri address)
 		{
 			return Transports.Endpoint.Null;
-		}
-
-		public TContext ReceiveContext<TContext>(Action<TContext> contextAction) where TContext : IReceiveContext
-		{
-			throw new NotImplementedByDesignException();
-		}
-
-		public TContext SendContext<TContext, TMessage>(TMessage message, Action<TContext> contextAction)
-			where TContext : ISendContext<TMessage> where TMessage : class
-		{
-			throw new NotImplementedByDesignException();
-		}
-
-		public void Publish<T>(T message) where T : class
-		{
 		}
 
 		void Dispose(bool disposing)

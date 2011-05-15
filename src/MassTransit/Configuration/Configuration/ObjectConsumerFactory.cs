@@ -10,12 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionConfigurators
+namespace MassTransit.Configuration
 {
-	public enum ConsumerType
+	using System;
+	using System.Collections.Generic;
+
+	public class ObjectConsumerFactory<TConsumer> :
+		IConsumerFactory<TConsumer>
+		where TConsumer : class
 	{
-		All,
-		Selected,
-		Correlated
+		readonly IConsumerFactory<TConsumer> _delegate;
+
+		public ObjectConsumerFactory(Func<Type, object> objectFactory)
+		{
+			_delegate = new DelegateConsumerFactory<TConsumer>(() => (TConsumer) objectFactory(typeof (TConsumer)));
+		}
+
+		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback)
+		{
+			return _delegate.GetConsumer(callback);
+		}
 	}
 }

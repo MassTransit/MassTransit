@@ -14,7 +14,6 @@ namespace MassTransit
 {
 	using System;
 	using RequestResponse;
-	using Util;
 
 	public static class ServiceBusExtensions
 	{
@@ -36,23 +35,7 @@ namespace MassTransit
 			return new ResponseActionBuilder<T>(scope);
 		}
 
-		public static IUnsubscribeAction Disposable(this UnsubscribeAction action)
-		{
-			return new DisposableUnsubscribeAction(action);
-		}
-
-		public static Uri AppendToPath(this Uri uri, string value)
-		{
-			return new UriBuilder(uri.Scheme, uri.Host, uri.Port, uri.AbsolutePath + value, uri.Query).Uri;
-		}
-
-		public static void Publish<T>(this IServiceBus bus, T message)
-			where T : class
-		{
-			bus.Publish(message, x => { });
-		}
-
-        //REVIEW: this should be delegating to a MessageName class
+		//REVIEW: this should be delegating to a MessageName class
 		public static string ToMessageName(this Type messageType)
 		{
 			string messageName;
@@ -85,45 +68,5 @@ namespace MassTransit
 
 			return string.Format("{0}{1}", messageName, assembly);
 		}
-
-        public static string ToFriendlyName(this Type type)
-        {
-            if (!type.IsGenericType)
-            {
-                return type.FullName;
-            }
-
-            string name = type.GetGenericTypeDefinition().FullName;
-            name = name.Substring(0, name.IndexOf('`'));
-            name += "<";
-
-            Type[] arguments = type.GetGenericArguments();
-            for (int i = 0; i < arguments.Length; i++)
-            {
-                if (i > 0)
-                    name += ",";
-
-                name += arguments[i].Name;
-            }
-
-            name += ">";
-
-            return name;
-        }
-
-	    public static T TranslateTo<T>(this object input)
-			where T : class
-		{
-			if (input == null)
-				throw new ArgumentNullException("input");
-
-			var result = input as T;
-			if (result == null)
-				throw new InvalidOperationException("Unable to convert from " + input.GetType().FullName + " to " +
-				                                    typeof (T).FullName);
-
-			return result;
-		}
-
 	}
 }

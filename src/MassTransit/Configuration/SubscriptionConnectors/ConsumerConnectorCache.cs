@@ -14,6 +14,7 @@ namespace MassTransit.SubscriptionConnectors
 {
 	using System;
 	using System.Collections.Generic;
+	using Configuration;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
 	using Util;

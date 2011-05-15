@@ -12,25 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Util
 {
-    using System;
-    using Exceptions;
-    using Magnum;
-    using Magnum.Extensions;
+	using System;
+	using Exceptions;
+	using Magnum;
+	using Magnum.Extensions;
 
-    /// <summary>
-    ///   Check class for verifying the condition of items included in interface contracts
-    /// </summary>
-    public static class CheckConvention
-    {
-        public static void EnsureSerializable(object message)
-        {
-            Guard.AgainstNull(message, "message cannot be null");
+	/// <summary>
+	///   Check class for verifying the condition of items included in interface contracts
+	/// </summary>
+	public static class CheckConvention
+	{
+		public static void EnsureSerializable(object message)
+		{
+			Guard.AgainstNull(message, "message cannot be null");
 
-            Type t = message.GetType();
-            if (!t.IsSerializable)
-            {
-                throw new ConventionException("Whoa, slow down buddy. The message '{0}' must be marked with the 'Serializable' attribute!".FormatWith(t.FullName));
-            }
-        }
-    }
+			Type t = message.GetType();
+			if (!t.IsSerializable)
+			{
+				throw new ConventionException(
+					"Whoa, slow down buddy. The message '{0}' must be marked with the 'Serializable' attribute!".FormatWith(t.FullName));
+			}
+		}
+	}
 }

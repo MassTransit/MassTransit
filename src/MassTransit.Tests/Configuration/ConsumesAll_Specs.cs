@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Configuration
 	using System;
 	using System.Linq;
 	using Magnum.TestFramework;
+	using MassTransit.Configuration;
 	using SubscriptionConnectors;
 	using Util;
 

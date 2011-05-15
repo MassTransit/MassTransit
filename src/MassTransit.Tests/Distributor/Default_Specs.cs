@@ -26,6 +26,7 @@ namespace MassTransit.Tests.Distributor
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using TestFramework;
+	using Util;
 
 	[TestFixture]
 	public class Default_distributor_specifications :

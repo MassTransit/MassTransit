@@ -17,6 +17,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
 	using Pipeline;
+	using Util;
 
 	public class CorrelatedSagaSubscriptionConnector<TSaga, TMessage> :
 		SagaSubscriptionConnector

@@ -19,8 +19,7 @@ namespace MassTransit.Builders
 	using Util;
 
 	public class ControlBusBuilderImpl :
-		BusBuilder,
-		IDisposable
+		ControlBusBuilder
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (ControlBusBuilderImpl));
 
@@ -31,11 +30,6 @@ namespace MassTransit.Builders
 			Guard.AgainstNull(settings, "settings");
 
 			_settings = settings;
-		}
-
-		public IEndpointCache EndpointCache
-		{
-			get { return _settings.EndpointCache; }
 		}
 
 		public BusSettings Settings
@@ -63,30 +57,10 @@ namespace MassTransit.Builders
 		public void Match<T>(Action<T> callback)
 			where T : class, BusBuilder
 		{
-		}
+			Guard.AgainstNull(callback);
 
-		bool _disposed;
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		~ControlBusBuilderImpl()
-		{
-			Dispose(false);
-		}
-
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				
-			}
-
-			_disposed = true;
+			if (typeof(T).IsAssignableFrom(GetType()))
+				callback(this as T);
 		}
 
 		ServiceBus CreateServiceBus()

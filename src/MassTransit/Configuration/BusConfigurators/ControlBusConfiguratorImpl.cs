@@ -18,6 +18,7 @@ namespace MassTransit.BusConfigurators
 	using Builders;
 	using Configurators;
 	using log4net;
+	using Util;
 
 	public class ControlBusConfiguratorImpl :
 		ControlBusConfigurator,

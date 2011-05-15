@@ -15,6 +15,7 @@ namespace MassTransit.Serialization.Custom
 	using System.Xml;
 	using log4net;
 	using Magnum.Reflection;
+	using Util;
 
 	public class ObjectDeserializer<T> :
 		IObjectDeserializer<T>

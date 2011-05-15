@@ -18,21 +18,21 @@ namespace MassTransit.SubscriptionBuilders
 	public class SubscriptionBusServiceBuilderImpl :
 		SubscriptionBusServiceBuilder
 	{
-		IList<SubscriptionBuilder> _builders;
+		readonly IList<SubscriptionBuilder> _builders;
 
 		public SubscriptionBusServiceBuilderImpl()
 		{
 			_builders = new List<SubscriptionBuilder>();
 		}
 
-		public IBusService Build()
-		{
-			return new SubscriptionBusService(_builders);
-		}
-
 		public void AddSubscriptionBuilder(SubscriptionBuilder builder)
 		{
 			_builders.Add(builder);
+		}
+
+		public IBusService Build()
+		{
+			return new SubscriptionBusService(_builders);
 		}
 	}
 }

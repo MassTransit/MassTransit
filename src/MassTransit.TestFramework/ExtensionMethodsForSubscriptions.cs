@@ -24,6 +24,7 @@ namespace MassTransit.TestFramework
 	using Pipeline.Inspectors;
 	using Saga;
 	using Saga.Pipeline;
+	using Util;
 
 	public static class ExtensionMethodsForSubscriptions
 	{

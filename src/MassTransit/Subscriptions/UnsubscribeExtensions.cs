@@ -10,15 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionBuilders
+namespace MassTransit
 {
-	public interface SubscriptionBusServiceBuilder
+	using Subscriptions;
+	using Util;
+
+	public static class UnsubscribeExtensions
 	{
-		/// <summary>
-		/// Add a subscription builder to the service so that it is subscribed when
-		/// the bus is started.
-		/// </summary>
-		/// <param name="builder"></param>
-		void AddSubscriptionBuilder(SubscriptionBuilder builder);
+		public static IUnsubscribeAction Disposable([NotNull] this UnsubscribeAction action)
+		{
+			return new DisposableUnsubscribeAction(action);
+		}
 	}
 }
