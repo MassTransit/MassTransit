@@ -12,27 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using SubscriptionBuilders;
-	using SubscriptionConfigurators;
+	using System;
+	using EndpointConfigurators;
 
-	public static class InstanceSubscriptionConfiguratorExtensions
+	public static class TransactionConfigurationExtensions
 	{
 		/// <summary>
-		/// Subscribes an object instance to the bus
+		/// Sets the default transaction timeout for transactional transports
 		/// </summary>
+		/// <typeparam name="T"></typeparam>
 		/// <param name="configurator"></param>
-		/// <param name="instance"></param>
+		/// <param name="timeout"></param>
 		/// <returns></returns>
-		public static InstanceSubscriptionConfigurator Instance(this SubscriptionBusServiceConfigurator configurator,
-		                                                        object instance)
+		public static T SetDefaultTransactionTimeout<T>(this T configurator, TimeSpan timeout)
+			where T : EndpointFactoryConfigurator
 		{
-			var instanceConfigurator = new InstanceSubscriptionConfiguratorImpl(instance);
+			var builderConfigurator = new DelegateEndpointFactoryBuilderConfigurator(x => x.SetDefaultTransactionTimeout(timeout));
 
-			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(instanceConfigurator);
+			configurator.AddEndpointFactoryConfigurator(builderConfigurator);
 
-			configurator.AddConfigurator(busServiceConfigurator);
-
-			return instanceConfigurator;
+			return configurator;
 		}
 	}
 }

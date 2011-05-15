@@ -1,4 +1,4 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,12 +13,33 @@
 namespace MassTransit
 {
 	using System;
-	using Magnum;
+	using SubscriptionBuilders;
+	using SubscriptionConfigurators;
 	using SubscriptionConnectors;
-	using Util;
 
-	public static class ServiceBusSubscriptionExtensions
+	public static class HandlerSubscriptionExtensions
 	{
+		/// <summary>
+		/// Subscribes a message handler (which can be any delegate of the message type,
+		/// such as a class instance method, a delegate, or a lambda expression)
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="configurator"></param>
+		/// <param name="handler"></param>
+		/// <returns></returns>
+		public static HandlerSubscriptionConfigurator<T> Handler<T>(this SubscriptionBusServiceConfigurator configurator,
+		                                                            Action<T> handler)
+			where T : class
+		{
+			var handlerConfigurator = new HandlerSubscriptionConfiguratorImpl<T>(handler);
+
+			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(handlerConfigurator);
+
+			configurator.AddConfigurator(busServiceConfigurator);
+
+			return handlerConfigurator;
+		}
+
 		/// <summary>
 		/// Adds a message handler to the service bus for handling a specific type of message
 		/// </summary>
@@ -56,64 +77,6 @@ namespace MassTransit
 			var connector = new HandlerSubscriptionConnector<T>();
 
 			return bus.Configure(x => connector.Connect(x, handler));
-		}
-
-		/// <summary>
-		/// Connects any consumers for the component to the message dispatcher
-		/// </summary>
-		/// <param name="bus"></param>
-		/// <param name="instance"></param>
-		public static UnsubscribeAction SubscribeInstance(this IServiceBus bus, object instance)
-		{
-			Guard.AgainstNull(instance, "instance", "A null instance cannot be subscribed");
-
-			InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
-
-			return bus.Configure(x => connector.Connect(x, instance));
-		}
-
-		/// <summary>
-		/// Connects any consumers for the component to the message dispatcher
-		/// </summary>
-		/// <typeparam name="T">The consumer type</typeparam>
-		/// <param name="bus"></param>
-		/// <param name="instance"></param>
-		public static UnsubscribeAction SubscribeInstance<T>(this IServiceBus bus, T instance)
-			where T : class
-		{
-			Guard.AgainstNull(instance, "instance", "A null instance cannot be subscribed");
-
-			InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();
-
-			return bus.Configure(x => connector.Connect(x, instance));
-		}
-
-		public static UnsubscribeAction SubscribeConsumer<TConsumer>(this IServiceBus bus)
-			where TConsumer : class, new()
-		{
-			var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(() => new TConsumer());
-
-			ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector(delegateConsumerFactory);
-
-			return bus.Configure(connector.Connect);
-		}
-
-		public static UnsubscribeAction SubscribeConsumer<TConsumer>(this IServiceBus bus, Func<TConsumer> consumerFactory)
-			where TConsumer : class
-		{
-			var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactory);
-
-			ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector(delegateConsumerFactory);
-
-			return bus.Configure(connector.Connect);
-		}
-
-		public static UnsubscribeAction SubscribeConsumer(this IServiceBus bus, Type consumerType,
-		                                                  Func<Type, object> consumerFactory)
-		{
-			ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector(consumerType, consumerFactory);
-
-			return bus.Configure(connector.Connect);
 		}
 	}
 }

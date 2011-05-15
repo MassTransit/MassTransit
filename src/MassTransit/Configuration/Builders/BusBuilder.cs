@@ -13,6 +13,7 @@
 namespace MassTransit.Builders
 {
 	using System;
+	using Configuration;
 
 	/// <summary>
 	/// A BusBuilder is the base interface for building service, and includes things like

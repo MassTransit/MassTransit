@@ -15,6 +15,7 @@ namespace MassTransit
 	using System;
 	using BusConfigurators;
 	using Services.Subscriptions.Configuration;
+	using Util;
 
 	public static class SubscriptionClientConfiguratorExtensions
 	{
@@ -25,10 +26,12 @@ namespace MassTransit
 
 		public static void UseSubscriptionService(this ServiceBusConfigurator configurator, Uri subscriptionServiceUri)
 		{
-			configurator.ConfigureService<SubscriptionClientConfigurator>(x => x.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
+			configurator.ConfigureService<SubscriptionClientConfigurator>(
+				x => x.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
 		}
 
-		public static void SetSubscriptionServiceEndpoint(this SubscriptionClientConfigurator configurator, string subscriptionServiceUri)
+		public static void SetSubscriptionServiceEndpoint(this SubscriptionClientConfigurator configurator,
+		                                                  string subscriptionServiceUri)
 		{
 			configurator.SetSubscriptionServiceEndpoint(subscriptionServiceUri.ToUri());
 		}

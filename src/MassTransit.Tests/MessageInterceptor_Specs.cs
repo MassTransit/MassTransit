@@ -13,10 +13,7 @@
 namespace MassTransit.Tests
 {
     using System.Threading;
-    using BusConfigurators;
-    using Configuration;
     using Magnum.TestFramework;
-    using MassTransit.Transports;
     using MassTransit.Transports.Loopback;
     using Messages;
     using NUnit.Framework;

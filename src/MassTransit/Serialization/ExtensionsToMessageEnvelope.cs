@@ -14,6 +14,7 @@ namespace MassTransit.Serialization
 {
 	using System;
 	using Context;
+	using Util;
 
 	public static class ExtensionsToMessageEnvelope
 	{

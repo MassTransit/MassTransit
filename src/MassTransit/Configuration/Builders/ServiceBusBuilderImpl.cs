@@ -15,6 +15,7 @@ namespace MassTransit.Builders
 	using System;
 	using System.Collections.Generic;
 	using BusServiceConfigurators;
+	using Configuration;
 	using Exceptions;
 	using log4net;
 	using Magnum;

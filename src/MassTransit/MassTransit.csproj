@@ -101,18 +101,17 @@
     <Compile Include="Configuration\Builders\ServiceBusBuilder.cs" />
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
+    <Compile Include="Configuration\Configuration\BusSettings.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationResult.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationResultImpl.cs" />
     <Compile Include="Configuration\Configurators\ConfiguratorExtensions.cs" />
     <Compile Include="Configuration\Configurators\ValidationResult.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultDisposition.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultImpl.cs" />
-    <Compile Include="Configuration\ConsumerConnectorCache.cs" />
-    <Compile Include="Configuration\ConsumerSubscriptionConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\HandlerSubscriptionConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\InstanceConnectorCache.cs" />
-    <Compile Include="Configuration\InstanceSubscriptionConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\ServiceBusSubscriptionExtensions.cs" />
+    <Compile Include="Configuration\ConsumerSubscriptionExtensions.cs" />
+    <Compile Include="Configuration\EndpointConfigurationExtensions.cs" />
+    <Compile Include="Configuration\HandlerSubscriptionExtensions.cs" />
+    <Compile Include="Configuration\InstanceSubscriptionExtensions.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\ConsumerSubscriptionBuilder.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\InstanceSubscriptionBuilder.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\SubscriptionBuilder.cs" />
@@ -145,14 +144,14 @@
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettingsConfiguratorImpl.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IEndpointFactoryDefaultSettings.cs" />
     <Compile Include="Configuration\EndpointConfigurators\TransportFactoryEndpointFactoryConfigurator.cs" />
-    <Compile Include="Configuration\ControlBusConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\ControlBusConfigurationExtensions.cs" />
     <Compile Include="Configuration\EndpointConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\EndpointFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SerializerConfigurationExtensions.cs" />
-    <Compile Include="Configuration\BusSettings.cs" />
     <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ServiceBusFactory.cs" />
-    <Compile Include="Configuration\BusConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnectorCache.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\InstanceConnectorCache.cs" />
+    <Compile Include="Configuration\ThreadConfigurationExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerSubscriptionConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerSubscriptionConfiguratorImpl.cs" />
@@ -176,6 +175,9 @@
     <Compile Include="Configuration\SubscriptionConnectors\InstanceSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\SelectedConsumerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\SelectedInstanceSubscriptionConnector.cs" />
+    <Compile Include="Configuration\TransactionConfigurationExtensions.cs" />
+    <Compile Include="Configuration\TransportConfigurationExtensions.cs" />
+    <Compile Include="Configuration\TransportFactoryConfigurationExtensions.cs" />
     <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
     <Compile Include="Configuration\Xml\SettingsOptions.cs" />
     <Compile Include="Context\ConsumeContext.cs" />
@@ -286,6 +288,8 @@
     <Compile Include="Subscriptions\PermanentSubscriptionReference.cs" />
     <Compile Include="Subscriptions\SubscriptionBusService.cs" />
     <Compile Include="Subscriptions\TransientSubscriptionReference.cs" />
+    <Compile Include="Threading\ConsumerPool.cs" />
+    <Compile Include="Threading\ThreadPoolConsumerPool.cs" />
     <Compile Include="Transports\IDuplexTransport.cs" />
     <Compile Include="Transports\IInboundTransport.cs" />
     <Compile Include="Transports\IOutboundTransport.cs" />
@@ -326,7 +330,6 @@
     <Compile Include="Transports\Loopback\LoopbackTransportFactory.cs" />
     <Compile Include="Transports\Transport.cs" />
     <Compile Include="Util\CheckConvention.cs" />
-    <Compile Include="Util\ConsumerPool.cs" />
     <Compile Include="Util\DelegateConsumerFactory.cs" />
     <Compile Include="Util\DelegateMessageInterceptor.cs" />
     <Compile Include="Util\DisposableUnsubscribeAction.cs" />
@@ -337,7 +340,7 @@
     <Compile Include="Util\ObjectConsumerFactory.cs" />
     <Compile Include="Util\ReSharperStaticAnalysis.cs" />
     <Compile Include="Util\SpecialLoggers.cs" />
-    <Compile Include="Util\ThreadPoolConsumerPool.cs" />
+    <Compile Include="Util\UriConversionExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Distributor\IPendingMessageCount.cs" />
@@ -531,7 +534,6 @@
     <Compile Include="Services\Subscriptions\SubscriptionPublisher.cs" />
     <Compile Include="IEndpointCache.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryConfigurator.cs" />
-    <Compile Include="Configuration\Configuration\IServiceBusConfiguratorDefaults.cs" />
     <Compile Include="Configuration\BusServiceConfigurators\BusServiceConfigurator.cs" />
     <Compile Include="Pipeline\IMessagePipeline.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfigurator.cs" />

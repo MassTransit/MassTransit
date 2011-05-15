@@ -25,7 +25,8 @@ namespace MassTransit.Advanced
 		/// <param name="concurrentReceiverLimit"></param>
 		public static void SetConcurrentReceiverLimit(this ServiceBusConfigurator configurator, int concurrentReceiverLimit)
 		{
-			var controlBusConfigurator = new PostCreateBusBuilderConfiguratorImpl(bus => { bus.ConcurrentReceiveThreads = concurrentReceiverLimit; });
+			var controlBusConfigurator =
+				new PostCreateBusBuilderConfiguratorImpl(bus => { bus.ConcurrentReceiveThreads = concurrentReceiverLimit; });
 
 			configurator.AddBusConfigurator(controlBusConfigurator);
 		}

@@ -36,11 +36,6 @@ namespace MassTransit.Builders
 			_defaults = new EndpointFactoryDefaultSettings(defaults);
 		}
 
-		public IEndpointFactoryDefaultSettings Defaults
-		{
-			get { return _defaults; }
-		}
-
 		public IEndpointFactory Build()
 		{
 			var endpointFactory = new EndpointFactory(_transportFactories, _endpointBuilders, _defaults);

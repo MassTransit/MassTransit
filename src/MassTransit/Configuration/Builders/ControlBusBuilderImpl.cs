@@ -13,6 +13,7 @@
 namespace MassTransit.Builders
 {
 	using System;
+	using Configuration;
 	using log4net;
 	using Magnum;
 	using Util;

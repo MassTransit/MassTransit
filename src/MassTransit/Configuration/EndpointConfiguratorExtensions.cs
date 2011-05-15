@@ -17,6 +17,7 @@ namespace MassTransit
 	using Magnum.Reflection;
 	using Serialization;
 	using Transports;
+	using Util;
 
 	public static class EndpointConfiguratorExtensions
 	{
