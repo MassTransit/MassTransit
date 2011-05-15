@@ -10,29 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Util
+namespace MassTransit.Configuration
 {
 	using System;
 	using System.Collections.Generic;
 	using Exceptions;
 
-    //REVIEW: consider moving this and other factory bits into a 'ConsumerFactory' type namespace
-	public class ObjectConsumerFactory<TConsumer> :
+	public class DelegateConsumerFactory<TConsumer> :
 		IConsumerFactory<TConsumer>
 		where TConsumer : class
 	{
-		readonly Func<Type, object> _objectFactory;
+		readonly Func<TConsumer> _factoryMethod;
 
-		public ObjectConsumerFactory(Func<Type, object> objectFactory)
+		public DelegateConsumerFactory(Func<TConsumer> factoryMethod)
 		{
-			_objectFactory = objectFactory;
+			_factoryMethod = factoryMethod;
 		}
 
 		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback)
 		{
-			var consumer = (TConsumer) _objectFactory(typeof (TConsumer));
+			TConsumer consumer = _factoryMethod();
 			if (consumer == null)
-				throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ", typeof (TConsumer)));
+				throw new ConfigurationException(string.Format("Unable to resolve consumer type '{0}'.", typeof(TConsumer)));
 
 			try
 			{

@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Configurators
 {
-	public static class ConfiguratorExtensions
+	public static class ValidationResultExtensions
 	{
 		public static ValidationResult Failure(this Configurator configurator, string message)
 		{

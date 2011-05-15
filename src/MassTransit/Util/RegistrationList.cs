@@ -12,59 +12,59 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Util
 {
-    using System;
-    using System.Collections.Generic;
-    using Magnum.Threading;
+	using System;
+	using System.Collections.Generic;
+	using Magnum.Threading;
 
-    /// <summary>
-    ///   A locked list implementation of IRegistrationList
-    /// </summary>
-    /// <typeparam name = "T"></typeparam>
-    public class RegistrationList<T> :
-        IRegistrationList<T>
-    {
-        volatile bool _disposed;
-        ReaderWriterLockedObject<List<T>> _items = new ReaderWriterLockedObject<List<T>>(new List<T>());
+	/// <summary>
+	///   A locked list implementation of IRegistrationList
+	/// </summary>
+	/// <typeparam name = "T"></typeparam>
+	public class RegistrationList<T> :
+		IDisposable
+	{
+		volatile bool _disposed;
+		ReaderWriterLockedObject<List<T>> _items = new ReaderWriterLockedObject<List<T>>(new List<T>());
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-        public UnregisterAction Register(T item)
-        {
-            _items.WriteLock(x => x.Insert(0, item));
+		public UnregisterAction Register(T item)
+		{
+			_items.WriteLock(x => x.Insert(0, item));
 
-            return () =>
-                {
-                    bool removed = false;
+			return () =>
+				{
+					bool removed = false;
 
-                    _items.WriteLock(x => { removed = x.Remove(item); });
+					_items.WriteLock(x => { removed = x.Remove(item); });
 
-                    return removed;
-                };
-        }
+					return removed;
+				};
+		}
 
-        public void Each(Action<T> action)
-        {
-            _items.ReadLock(x => x.ForEach(action));
-        }
+		public void Each(Action<T> action)
+		{
+			_items.ReadLock(x => x.ForEach(action));
+		}
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposing || _disposed) return;
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposing || _disposed) return;
 
-            if (_items != null)
-                _items.Dispose();
+			if (_items != null)
+				_items.Dispose();
 
-            _items = null;
-            _disposed = true;
-        }
+			_items = null;
+			_disposed = true;
+		}
 
-        ~RegistrationList()
-        {
-            Dispose(false);
-        }
-    }
+		~RegistrationList()
+		{
+			Dispose(false);
+		}
+	}
 }

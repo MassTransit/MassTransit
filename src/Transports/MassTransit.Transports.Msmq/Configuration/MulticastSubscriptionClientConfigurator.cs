@@ -20,6 +20,7 @@ namespace MassTransit.Transports.Msmq.Configuration
 	using Exceptions;
 	using Magnum;
 	using Magnum.Extensions;
+	using Util;
 
 	public class MulticastSubscriptionClientConfigurator :
 		IMulticastSubscriptionClientConfigurator,

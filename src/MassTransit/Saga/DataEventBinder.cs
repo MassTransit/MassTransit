@@ -14,6 +14,7 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Linq.Expressions;
+	using Util;
 
 	public class DataEventBinder<TSaga, TMessage> :
 		EventBinder<TSaga, TMessage>

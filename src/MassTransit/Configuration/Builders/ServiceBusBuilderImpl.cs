@@ -17,22 +17,17 @@ namespace MassTransit.Builders
 	using BusServiceConfigurators;
 	using Configuration;
 	using Exceptions;
-	using log4net;
 	using Magnum;
 	using Magnum.Extensions;
 	using Pipeline.Configuration;
 	using Util;
 
 	public class ServiceBusBuilderImpl :
-		ServiceBusBuilder,
-		IDisposable
+		ServiceBusBuilder
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusBuilderImpl));
-
 		readonly IList<BusServiceConfigurator> _busServiceConfigurators;
 		readonly IList<Action<ServiceBus>> _postCreateActions;
 		readonly BusSettings _settings;
-		bool _disposed;
 
 		public ServiceBusBuilderImpl(BusSettings settings)
 		{
@@ -44,12 +39,6 @@ namespace MassTransit.Builders
 
 			_postCreateActions = new List<Action<ServiceBus>>();
 			_busServiceConfigurators = new List<BusServiceConfigurator>();
-		}
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public BusSettings Settings
@@ -99,19 +88,6 @@ namespace MassTransit.Builders
 
 			if (typeof (T).IsAssignableFrom(GetType()))
 				callback(this as T);
-		}
-
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (_disposed)
-				return;
-
-			if (disposing)
-			{
-			}
-
-			_disposed = true;
 		}
 
 		void RunBusServiceConfigurators(ServiceBus bus)

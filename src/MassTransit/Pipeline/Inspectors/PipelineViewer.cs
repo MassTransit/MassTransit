@@ -20,6 +20,7 @@ namespace MassTransit.Pipeline.Inspectors
 	using Saga;
 	using Saga.Pipeline;
 	using Sinks;
+	using Util;
 
 	public class PipelineViewer :
 		PipelineInspectorBase<PipelineViewer>

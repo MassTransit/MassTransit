@@ -15,8 +15,13 @@ namespace MassTransit.Util
 	using System;
 	using Exceptions;
 
-	static class UriConversionExtensions
+	public static class UriExtensions
 	{
+		public static Uri AppendToPath(this Uri uri, string value)
+		{
+			return new UriBuilder(uri.Scheme, uri.Host, uri.Port, uri.AbsolutePath + value, uri.Query).Uri;
+		}
+
 		internal static Uri ToUri(this string uriString)
 		{
 			try

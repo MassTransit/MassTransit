@@ -20,6 +20,7 @@ namespace MassTransit.NHibernateIntegration.Saga
 	using MassTransit.Saga;
 	using NHibernate;
 	using NHibernate.Linq;
+	using Util;
 
 	public class NHibernateSagaRepository<T> :
 		AbstractSagaRepository<T>,

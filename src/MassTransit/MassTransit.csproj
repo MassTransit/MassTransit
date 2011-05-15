@@ -93,6 +93,7 @@
     </Compile>
     <Compile Include="Bus.cs" />
     <Compile Include="Configuration\Builders\BusBuilder.cs" />
+    <Compile Include="Configuration\Builders\ControlBusBuilder.cs" />
     <Compile Include="Configuration\Builders\ControlBusBuilderImpl.cs" />
     <Compile Include="Configuration\Builders\EndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\EndpointBuilderImpl.cs" />
@@ -102,9 +103,12 @@
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
     <Compile Include="Configuration\Configuration\BusSettings.cs" />
+    <Compile Include="Configuration\Configuration\DelegateConsumerFactory.cs" />
+    <Compile Include="Configuration\Configuration\DelegateMessageInterceptor.cs" />
+    <Compile Include="Configuration\Configuration\ObjectConsumerFactory.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationResult.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationResultImpl.cs" />
-    <Compile Include="Configuration\Configurators\ConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\Configurators\ValidationResultExtensions.cs" />
     <Compile Include="Configuration\Configurators\ValidationResult.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultDisposition.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultImpl.cs" />
@@ -160,10 +164,7 @@
     <Compile Include="Configuration\SubscriptionConfigurators\InstanceSubscriptionConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\InstanceSubscriptionConfiguratorImpl.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionBusServiceConfiguratorImpl.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionLifeCycle.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\ConsumerType.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionBusServiceConfigurator.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfiguration.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfiguratorImpl.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\UntypedConsumerSubscriptionConfigurator.cs" />
@@ -204,7 +205,8 @@
     <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
-    <Compile Include="EndpointExtensions.cs" />
+    <Compile Include="PublishExtensions.cs" />
+    <Compile Include="SendExtensions.cs" />
     <Compile Include="Exceptions\MassTransitException.cs" />
     <Compile Include="Exceptions\NotImplementedByDesignException.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
@@ -216,6 +218,7 @@
     <Compile Include="IMessageInterceptor.cs" />
     <Compile Include="IServiceContainer.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderImpl.cs" />
+    <Compile Include="NullServiceBus.cs" />
     <Compile Include="Pipeline\Configuration\InboundMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorExtensions.cs" />
     <Compile Include="Pipeline\Configuration\OutboundCorrelatedMessageRouterConfigurator.cs" />
@@ -284,10 +287,13 @@
     <Compile Include="Services\Timeout\Messages\ScheduleTimeout.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
+    <Compile Include="Subscriptions\DisposableUnsubscribeAction.cs" />
     <Compile Include="Subscriptions\ISubscriptionReference.cs" />
+    <Compile Include="Subscriptions\IUnsubscribeAction.cs" />
     <Compile Include="Subscriptions\PermanentSubscriptionReference.cs" />
     <Compile Include="Subscriptions\SubscriptionBusService.cs" />
     <Compile Include="Subscriptions\TransientSubscriptionReference.cs" />
+    <Compile Include="Subscriptions\UnsubscribeExtensions.cs" />
     <Compile Include="Threading\ConsumerPool.cs" />
     <Compile Include="Threading\ThreadPoolConsumerPool.cs" />
     <Compile Include="Transports\IDuplexTransport.cs" />
@@ -330,17 +336,12 @@
     <Compile Include="Transports\Loopback\LoopbackTransportFactory.cs" />
     <Compile Include="Transports\Transport.cs" />
     <Compile Include="Util\CheckConvention.cs" />
-    <Compile Include="Util\DelegateConsumerFactory.cs" />
-    <Compile Include="Util\DelegateMessageInterceptor.cs" />
-    <Compile Include="Util\DisposableUnsubscribeAction.cs" />
     <Compile Include="Util\IdempotentHashtable.cs" />
-    <Compile Include="Util\IUnsubscribeAction.cs" />
     <Compile Include="Util\LambdaEqualityComparer.cs" />
-    <Compile Include="Util\NullServiceBus.cs" />
-    <Compile Include="Util\ObjectConsumerFactory.cs" />
+    <Compile Include="Util\ObjectExtensions.cs" />
     <Compile Include="Util\ReSharperStaticAnalysis.cs" />
     <Compile Include="Util\SpecialLoggers.cs" />
-    <Compile Include="Util\UriConversionExtensions.cs" />
+    <Compile Include="Util\UriExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Distributor\IPendingMessageCount.cs" />
@@ -551,7 +552,6 @@
     <Compile Include="Saga\InMemorySagaRepository.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Sinks\ComponentMessageSink.cs" />
-    <Compile Include="Util\IRegistrationList.cs" />
     <Compile Include="Pipeline\IInboundPipelineConfigurator.cs" />
     <Compile Include="Pipeline\IPipelineSink.cs" />
     <Compile Include="Pipeline\IPipelineInspector.cs" />
@@ -577,7 +577,6 @@
     <Compile Include="Util\SequenceNumberGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="MessageHeaders\" />
     <Folder Include="Pipeline\Configuration\Subscribers\" />
     <Folder Include="Services\HealthMonitoring\Client\" />
   </ItemGroup>

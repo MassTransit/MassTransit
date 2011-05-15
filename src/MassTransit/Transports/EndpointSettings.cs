@@ -15,6 +15,7 @@ namespace MassTransit.Transports
 	using System;
 	using Magnum;
 	using Serialization;
+	using Util;
 
 	public class EndpointSettings :
 		TransportSettings,

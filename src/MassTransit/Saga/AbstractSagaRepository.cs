@@ -16,6 +16,7 @@ namespace MassTransit.Saga
 	using System.Collections.Generic;
 	using Exceptions;
 	using log4net;
+	using Util;
 
 	public class AbstractSagaRepository<TSaga>
 		where TSaga : class, ISaga
