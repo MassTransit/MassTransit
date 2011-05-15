@@ -16,12 +16,13 @@ namespace MassTransit
 	using Magnum.Reflection;
 	using SubscriptionBuilders;
 	using SubscriptionConfigurators;
+	using SubscriptionConnectors;
 	using Util;
 
-	public static class ConsumerSubscriptionConfiguratorExtensions
+	public static class ConsumerSubscriptionExtensions
 	{
 		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-			this SubscriptionBusServiceConfigurator configurator, IConsumerFactory<TConsumer> consumerFactory)
+			[NotNull] this SubscriptionBusServiceConfigurator configurator, [NotNull] IConsumerFactory<TConsumer> consumerFactory)
 			where TConsumer : class
 		{
 			var consumerConfigurator = new ConsumerSubscriptionConfiguratorImpl<TConsumer>(consumerFactory);
@@ -34,7 +35,7 @@ namespace MassTransit
 		}
 
 		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-			this SubscriptionBusServiceConfigurator configurator)
+			[NotNull] this SubscriptionBusServiceConfigurator configurator)
 			where TConsumer : class, new()
 		{
 			var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(() => new TConsumer());
@@ -49,7 +50,7 @@ namespace MassTransit
 		}
 
 		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-			this SubscriptionBusServiceConfigurator configurator, Func<TConsumer> consumerFactory)
+			[NotNull] this SubscriptionBusServiceConfigurator configurator, [NotNull] Func<TConsumer> consumerFactory)
 			where TConsumer : class
 		{
 			var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactory);
@@ -63,9 +64,10 @@ namespace MassTransit
 			return consumerConfigurator;
 		}
 
-		public static ConsumerSubscriptionConfigurator Consumer(this SubscriptionBusServiceConfigurator configurator,
-		                                                        Type consumerType,
-		                                                        Func<Type, object> consumerFactory)
+		public static ConsumerSubscriptionConfigurator Consumer(
+			[NotNull] this SubscriptionBusServiceConfigurator configurator,
+			[NotNull] Type consumerType,
+			[NotNull] Func<Type, object> consumerFactory)
 		{
 			var consumerConfigurator =
 				(SubscriptionBuilderConfigurator) FastActivator.Create(typeof (UntypedConsumerSubscriptionConfigurator<>),
@@ -76,6 +78,35 @@ namespace MassTransit
 			configurator.AddConfigurator(busServiceConfigurator);
 
 			return consumerConfigurator as ConsumerSubscriptionConfigurator;
+		}
+
+		public static UnsubscribeAction SubscribeConsumer<TConsumer>([NotNull] this IServiceBus bus)
+			where TConsumer : class, new()
+		{
+			var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(() => new TConsumer());
+
+			ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector(delegateConsumerFactory);
+
+			return bus.Configure(connector.Connect);
+		}
+
+		public static UnsubscribeAction SubscribeConsumer<TConsumer>([NotNull] this IServiceBus bus,
+		                                                             [NotNull] Func<TConsumer> consumerFactory)
+			where TConsumer : class
+		{
+			var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactory);
+
+			ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector(delegateConsumerFactory);
+
+			return bus.Configure(connector.Connect);
+		}
+
+		public static UnsubscribeAction SubscribeConsumer([NotNull] this IServiceBus bus, [NotNull] Type consumerType,
+		                                                  [NotNull] Func<Type, object> consumerFactory)
+		{
+			ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector(consumerType, consumerFactory);
+
+			return bus.Configure(connector.Connect);
 		}
 	}
 }

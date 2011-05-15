@@ -14,6 +14,7 @@ namespace MassTransit.BusConfigurators
 {
 	using System;
 	using Builders;
+	using Configuration;
 	using EndpointConfigurators;
 
 	public interface ServiceBusConfigurator :

@@ -16,6 +16,7 @@ namespace MassTransit.BusConfigurators
 	using System.Collections.Generic;
 	using System.Linq;
 	using Builders;
+	using Configuration;
 	using Configurators;
 	using EndpointConfigurators;
 	using log4net;

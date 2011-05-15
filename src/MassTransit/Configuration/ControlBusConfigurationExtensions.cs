@@ -15,7 +15,7 @@ namespace MassTransit
 	using System;
 	using BusConfigurators;
 
-	public static class ControlBusConfiguratorExtensions
+	public static class ControlBusConfigurationExtensions
 	{
 		/// <summary>
 		/// Create a control bus using the default settings and associate it with the ServiceBus being configured.

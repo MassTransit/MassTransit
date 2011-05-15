@@ -15,8 +15,8 @@ namespace MassTransit.Services.Routing.Configuration
 	using System;
 	using System.Collections.Generic;
 	using BusServiceConfigurators;
-	using Configurators;
 	using Pipeline;
+	using Util;
 
 	public class RoutingConfigurator :
 		BusServiceConfigurator

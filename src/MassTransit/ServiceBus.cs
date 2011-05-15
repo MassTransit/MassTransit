@@ -24,6 +24,7 @@ namespace MassTransit
 	using Pipeline;
 	using Pipeline.Configuration;
 	using Stact;
+	using Threading;
 	using Util;
 
 	/// <summary>
