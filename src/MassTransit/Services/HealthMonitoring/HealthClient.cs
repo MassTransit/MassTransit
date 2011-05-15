@@ -73,7 +73,6 @@ namespace MassTransit.Services.HealthMonitoring
 		{
 			_bus = bus;
 
-            //REVIEW: should these be IEndpoint?
 			_controlUri = _bus.ControlBus.Endpoint.Address.Uri;
 			_dataUri = _bus.Endpoint.Address.Uri;
 

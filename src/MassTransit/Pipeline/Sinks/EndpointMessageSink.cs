@@ -31,10 +31,9 @@ namespace MassTransit.Pipeline.Sinks
 			_endpoint = endpoint;
 		}
 
-        //REVIEW: should this be IEndpoint instead?
-		public Uri Address
+		public IEndpoint Endpoint
 		{
-			get { return _endpoint.Address.Uri; }
+			get { return _endpoint; }
 		}
 
 		public IEnumerable<Action<IBusPublishContext<TMessage>>> Enumerate(IBusPublishContext<TMessage> context)

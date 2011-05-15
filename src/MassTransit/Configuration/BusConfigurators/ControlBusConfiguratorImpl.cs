@@ -24,6 +24,7 @@ namespace MassTransit.BusConfigurators
 		ControlBusConfigurator,
 		BusBuilderConfigurator
 	{
+		readonly ServiceBusConfigurator _configurator;
 		static readonly ILog _log = LogManager.GetLogger(typeof (ControlBusConfiguratorImpl));
 
 		readonly IList<BusBuilderConfigurator> _configurators;
@@ -31,6 +32,7 @@ namespace MassTransit.BusConfigurators
 
 		public ControlBusConfiguratorImpl(ServiceBusConfigurator configurator)
 		{
+			_configurator = configurator;
 			_configurators = new List<BusBuilderConfigurator>();
 		}
 
@@ -49,8 +51,6 @@ namespace MassTransit.BusConfigurators
 					settings.ConcurrentReceiverLimit = 1;
 					settings.AutoStart = true;
 
-					// TODO need to ConfigureEndpoint to purge messages on startup!
-
 					BusBuilder controlBusBuilder = new ControlBusBuilderImpl(settings);
 
 					controlBusBuilder = _configurators
@@ -66,6 +66,8 @@ namespace MassTransit.BusConfigurators
 
 		public IEnumerable<ValidationResult> Validate()
 		{
+			_configurator.ConfigureEndpoint(_uri, x => x.PurgeExistingMessages());
+
 			return from configurator in _configurators 
 				   from result in configurator.Validate() 
 				   select result.WithParentKey("ControlBus");

@@ -55,7 +55,6 @@ namespace MassTransit.Visualizers
 			}
 		}
 
-		// TODO: Add the following to your testing code to test the visualizer:
 		// 
 		//    ServiceBusVisualizer.TestShowVisualizer(new SomeType());
 		// 

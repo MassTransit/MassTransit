@@ -134,8 +134,6 @@ namespace MassTransit.Builders
 
 		void ConfigureBusSettings(ServiceBus bus)
 		{
-			// TODO validate these to ensure sane values are present
-
 			if (_settings.ConcurrentConsumerLimit > 0)
 				bus.MaximumConsumerThreads = _settings.ConcurrentConsumerLimit;
 

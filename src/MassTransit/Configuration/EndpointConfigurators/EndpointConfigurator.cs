@@ -44,5 +44,11 @@ namespace MassTransit.EndpointConfigurators
 		/// </summary>
 		/// <param name="errorTransportFactory"></param>
 		EndpointConfigurator SetErrorTransportFactory(Func<ITransportFactory, ITransportSettings, IOutboundTransport> errorTransportFactory);
+
+		/// <summary>
+		/// Remove any existing messages from the endpoint when it is created
+		/// </summary>
+		/// <returns></returns>
+		EndpointConfigurator PurgeExistingMessages();
 	}
 }
