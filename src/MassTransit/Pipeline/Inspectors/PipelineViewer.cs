@@ -102,7 +102,7 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink) 
 			where TMessage : class
 		{
-			Append(string.Format("Send {0} to Endpoint {1}", typeof (TMessage).ToFriendlyName(), sink.Address));
+			Append(string.Format("Send {0} to Endpoint {1}", typeof (TMessage).ToFriendlyName(), sink.Endpoint.Address));
 
 			return true;
 		}

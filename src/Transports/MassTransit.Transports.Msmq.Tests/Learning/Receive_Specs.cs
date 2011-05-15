@@ -18,7 +18,7 @@ namespace MassTransit.Transports.Msmq.Tests.Learning
     using Magnum.Extensions;
     using NUnit.Framework;
 
-    //TODO: Remove?
+    //TODO: Move to an Assumptions test section like we did for RabbitMQ
     [TestFixture, Category("Integration")]
     public class When_receiving_from_a_transactional_queue
     {

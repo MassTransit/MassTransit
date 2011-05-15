@@ -35,7 +35,6 @@ namespace MassTransit
 			return new ResponseActionBuilder<T>(scope);
 		}
 
-		//REVIEW: this should be delegating to a MessageName class
 		public static string ToMessageName(this Type messageType)
 		{
 			string messageName;

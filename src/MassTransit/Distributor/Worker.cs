@@ -137,7 +137,6 @@ namespace MassTransit.Distributor
             _bus = bus;
             _controlBus = bus.ControlBus;
 
-            //REVIEW: should these be IEndpoint?
             _dataUri = _bus.Endpoint.Address.Uri;
             _controlUri = _controlBus.Endpoint.Address.Uri;
 

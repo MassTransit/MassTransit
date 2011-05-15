@@ -88,7 +88,6 @@ namespace MassTransit.Advanced
 			string value = ConfigurationManager.AppSettings[settingName];
 			if (string.IsNullOrEmpty(value))
 			{
-				// TODO this need to be lazy, add configurators to environments
 				throw new Exceptions.ConfigurationException("The application setting was not found: " + settingName);
 			}
 
@@ -105,7 +104,6 @@ namespace MassTransit.Advanced
 			string value = Environment.GetEnvironmentVariable(valueName);
 			if (string.IsNullOrEmpty(value))
 			{
-				// TODO this need to be lazy, add configurators to environments
 				throw new Exceptions.ConfigurationException("The application setting was not found: " + valueName);
 			}
 

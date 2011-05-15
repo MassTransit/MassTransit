@@ -14,6 +14,7 @@ namespace MassTransit.RequestResponse
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
 
     public class RequestResponseScope :
@@ -139,15 +140,10 @@ namespace MassTransit.RequestResponse
 
         UnsubscribeAction SubscribeToResponseMessages(UnsubscribeAction unsubscribeToken)
         {
-            //REVIEW: why aren't we using a foreach?
-            for (int i = 0; i < _responseActions.Count; i++)
-            {
-                unsubscribeToken += _responseActions[i].SubscribeTo(_bus);
-            }
-            return unsubscribeToken;
+        	return _responseActions.Aggregate(unsubscribeToken, (current, t) => current + t.SubscribeTo(_bus));
         }
 
-        ~RequestResponseScope()
+    	~RequestResponseScope()
         {
             if (_waitHandle != null)
             {

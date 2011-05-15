@@ -33,7 +33,7 @@ namespace MassTransit.Transports.RabbitMq
 		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink) 
 			where TMessage : class
 		{
-			if (typeof (TMessage) == _messageType && _endpointAddress.Uri == sink.Address)
+			if (typeof (TMessage) == _messageType && _endpointAddress.Uri == sink.Endpoint.Address.Uri)
 			{
 				Found = true;
 

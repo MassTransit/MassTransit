@@ -51,7 +51,7 @@ namespace MassTransit.Transports.Msmq.Configuration
 				{
 					ConcurrentConsumerLimit = 1,
 					ConcurrentReceiverLimit = 1,
-					// TODO get rid of this damn thing!
+					// REVIEW get rid of this damn thing (what thing, I don't get it, if Dru doesn't than remove this todo)
 					AutoStart = true,
 					EndpointCache = bus.EndpointCache,
 					InputAddress = clientUri,

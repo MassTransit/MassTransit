@@ -66,6 +66,13 @@ namespace MassTransit.EndpointConfigurators
 			return this;
 		}
 
+		public EndpointConfigurator PurgeExistingMessages()
+		{
+			_settings.PurgeExistingMessages = true;
+
+			return this;
+		}
+
 		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_errorAddress != null)

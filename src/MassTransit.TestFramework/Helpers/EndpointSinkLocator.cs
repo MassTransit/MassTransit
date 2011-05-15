@@ -32,7 +32,7 @@ namespace MassTransit.TestFramework.Helpers
 		{
 			if (typeof(TMessage) == _messageType)
 			{
-				DestinationAddress = sink.Address;
+				DestinationAddress = sink.Endpoint.Address.Uri;
 				return false;
 			}
 
