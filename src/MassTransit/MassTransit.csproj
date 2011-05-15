@@ -92,6 +92,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Bus.cs" />
+    <Compile Include="Configuration\Advanced\EnvironmentExtensions.cs" />
     <Compile Include="Configuration\Builders\BusBuilder.cs" />
     <Compile Include="Configuration\Builders\ControlBusBuilder.cs" />
     <Compile Include="Configuration\Builders\ControlBusBuilderImpl.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Configuration\Configuration\BusSettings.cs" />
     <Compile Include="Configuration\Configuration\DelegateConsumerFactory.cs" />
     <Compile Include="Configuration\Configuration\DelegateMessageInterceptor.cs" />
+    <Compile Include="Configuration\Configuration\IServiceBusEnvironment.cs" />
     <Compile Include="Configuration\Configuration\ObjectConsumerFactory.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationResult.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationResultImpl.cs" />
@@ -114,6 +116,9 @@
     <Compile Include="Configuration\Configurators\ValidationResultImpl.cs" />
     <Compile Include="Configuration\ConsumerSubscriptionExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurationExtensions.cs" />
+    <Compile Include="Configuration\EnvironmentConfigurators\DelegateEnvironmentConfigurator.cs" />
+    <Compile Include="Configuration\EnvironmentConfigurators\EnvironmentsConfigurator.cs" />
+    <Compile Include="Configuration\EnvironmentConfigurators\EnvironmentsConfiguratorImpl.cs" />
     <Compile Include="Configuration\HandlerSubscriptionExtensions.cs" />
     <Compile Include="Configuration\InstanceSubscriptionExtensions.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\ConsumerSubscriptionBuilder.cs" />
