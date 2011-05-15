@@ -95,8 +95,6 @@ namespace MassTransit.Services.Subscriptions.Server
 			_unsubscribeToken += _bus.SubscribeSaga<SubscriptionClientSaga>(_subscriptionClientSagas);
 			_unsubscribeToken += _bus.SubscribeSaga<SubscriptionSaga>(_subscriptionSagas);
 
-			// TODO may need to load/prime the subscription repository at this point?
-
 			_log.Info("Subscription Service Started");
 		}
 
