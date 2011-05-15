@@ -40,8 +40,7 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			yield return x =>
 				{
-                    //REVIEW: should this be using IEndpoint instead?
-					if (x.WasEndpointAlreadySent(_endpoint.Address.Uri))
+					if (x.WasEndpointAlreadySent(_endpoint))
 						return;
 
 					_endpoint.Send(x);

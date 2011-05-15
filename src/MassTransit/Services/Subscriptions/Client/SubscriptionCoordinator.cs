@@ -38,7 +38,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		static readonly ClientSubscriptionInfoMapper _mapper = new ClientSubscriptionInfoMapper();
 		readonly IServiceBus _bus;
 		readonly HashSet<string> _ignoredSubscriptions;
-		readonly EndpointList _localEndpoints;
+		readonly EndpointUriList _localEndpoints;
 		readonly string _network;
 		readonly IEndpoint _outboundEndpoint;
 		readonly SequenceNumberGenerator _sequence;
@@ -71,7 +71,7 @@ namespace MassTransit.Services.Subscriptions.Client
 					typeof (SubscriptionRefresh).ToMessageName(),
 					typeof (RemoveSubscriptionClient).ToMessageName(),
 				};
-			_localEndpoints = new EndpointList();
+			_localEndpoints = new EndpointUriList();
 			_services = new List<IBusService>();
 			_sequence = new SequenceNumberGenerator();
 			_subscriptions = new IdempotentHashtable<Guid, ClientSubscriptionInformation>();
