@@ -3,7 +3,9 @@ namespace MassTransit.Transports.RabbitMq.Management
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using Context;
 	using log4net;
+	using Magnum.Extensions;
 	using RabbitMQ.Client;
 
 	public class RabbitMqEndpointManagement :
@@ -82,6 +84,11 @@ namespace MassTransit.Transports.RabbitMq.Management
 
 		public IEnumerable<Type> BindExchangesForPublisher(Type messageType)
 		{
+			if (messageType.Implements(typeof(IMessageContext<>)))
+			{
+				messageType = messageType.GetGenericTypeDeclarations(typeof (IMessageContext<>)).Single();
+			}
+
 			var messageName = new MessageName(messageType);
 
 			using (IModel model = _connection.CreateModel())

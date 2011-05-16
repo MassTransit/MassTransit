@@ -11,6 +11,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 	{
 		Future<A> _received;
 		Future<B> _receivedB;
+		UnsubscribeAction _unsubscribe;
 
 		[When]
 		public void A_message_is_published()
@@ -18,14 +19,20 @@ namespace MassTransit.Transports.RabbitMq.Tests
 			_received = new Future<A>();
 			_receivedB = new Future<B>();
 
-			LocalBus.SubscribeHandler<A>(message => _received.Complete(message));
-			LocalBus.SubscribeHandler<B>(message => _receivedB.Complete(message));
+			var unsub = LocalBus.SubscribeHandler<A>(message => _received.Complete(message));
+			_unsubscribe = unsub += LocalBus.SubscribeHandler<B>(message => _receivedB.Complete(message));
 
 			LocalBus.Publish(new A
 				{
 					StringA = "ValueA",
 					StringB = "ValueB",
 				});
+		}
+
+		[Finally]
+		public void Final()
+		{
+			_unsubscribe();
 		}
 
 		[Then]
