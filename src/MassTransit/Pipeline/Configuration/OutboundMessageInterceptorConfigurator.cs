@@ -26,7 +26,7 @@ namespace MassTransit.Pipeline.Configuration
 			_sink = sink;
 		}
 
-		public MessageInterceptor<ISendContext> Create(IMessageInterceptor messageInterceptor)
+		public OutboundMessageInterceptor Create(IOutboundMessageInterceptor messageInterceptor)
 		{
 			var scope = new OutboundMessageInterceptorConfiguratorScope();
 			_sink.Inspect(scope);
@@ -34,14 +34,14 @@ namespace MassTransit.Pipeline.Configuration
 			return ConfigureInterceptor(scope.InsertAfter, messageInterceptor);
 		}
 
-		static MessageInterceptor<ISendContext> ConfigureInterceptor(
+		static OutboundMessageInterceptor ConfigureInterceptor(
 			Func<IPipelineSink<ISendContext>, IPipelineSink<ISendContext>> insertAfter,
-			IMessageInterceptor messageInterceptor)
+			IOutboundMessageInterceptor messageInterceptor)
 		{
 			if (insertAfter == null)
 				throw new PipelineException("Unable to insert filter into pipeline for message type " + typeof (object).FullName);
 
-			var interceptor = new MessageInterceptor<ISendContext>(insertAfter, messageInterceptor);
+			var interceptor = new OutboundMessageInterceptor(insertAfter, messageInterceptor);
 
 			return interceptor;
 		}

@@ -29,7 +29,12 @@ namespace MassTransit.Context
 			_bodyWriter = stream => context.CopyBodyTo(stream);
 		}
 
-		public void SerializeTo(Stream stream)
+    	public Type DeclaringMessageType
+    	{
+			get { return typeof (object); }
+    	}
+
+    	public void SerializeTo(Stream stream)
 		{
 			_bodyWriter(stream);
 		}

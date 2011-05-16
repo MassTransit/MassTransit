@@ -55,8 +55,14 @@ namespace MassTransit.Pipeline.Inspectors
 //			return true;
 //		}
 
-		public bool Inspect<T>(MessageInterceptor<T> element) 
-			where T : class
+		public bool Inspect(InboundMessageInterceptor element) 
+		{
+			Append(string.Format("Interceptor"));
+
+			return true;
+		}
+
+		public bool Inspect(OutboundMessageInterceptor element) 
 		{
 			Append(string.Format("Interceptor"));
 

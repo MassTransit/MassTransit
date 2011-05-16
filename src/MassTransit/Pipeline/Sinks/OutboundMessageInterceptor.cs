@@ -1,4 +1,4 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,21 +16,21 @@ namespace MassTransit.Pipeline.Sinks
 	using System.Collections.Generic;
 	using Context;
 
-	public class InboundMessageInterceptor :
-		IPipelineSink<IConsumeContext>
+	public class OutboundMessageInterceptor :
+		IPipelineSink<ISendContext>
 	{
-		readonly IInboundMessageInterceptor _interceptor;
-		readonly IPipelineSink<IConsumeContext> _output;
+		readonly IOutboundMessageInterceptor _interceptor;
+		readonly IPipelineSink<ISendContext> _output;
 
-		public InboundMessageInterceptor(Func<IPipelineSink<IConsumeContext>, IPipelineSink<IConsumeContext>> insertAfter,
-								  IInboundMessageInterceptor interceptor)
+		public OutboundMessageInterceptor(Func<IPipelineSink<ISendContext>, IPipelineSink<ISendContext>> insertAfter,
+		                                  IOutboundMessageInterceptor interceptor)
 		{
 			_interceptor = interceptor;
 
 			_output = insertAfter(this);
 		}
 
-		public IEnumerable<Action<IConsumeContext>> Enumerate(IConsumeContext context)
+		public IEnumerable<Action<ISendContext>> Enumerate(ISendContext context)
 		{
 			_interceptor.PreDispatch(context);
 

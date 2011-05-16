@@ -28,6 +28,7 @@ namespace MassTransit.Context
 			_message = message;
 
 			this.SetMessageType(typeof (T));
+			DeclaringMessageType = typeof (T);
 		}
 
 		protected SendContext(T message, ISendContext context)
@@ -38,6 +39,8 @@ namespace MassTransit.Context
 			this.SetMessageType(typeof (T));
 		}
 
+		public Type DeclaringMessageType { get; private set; }
+
 		public void SerializeTo(Stream stream)
 		{
 			if (_bodyWriter == null)
@@ -46,12 +49,12 @@ namespace MassTransit.Context
 			_bodyWriter(stream);
 		}
 
-		public virtual bool TryGetContext<TMessage>(out IBusPublishContext<TMessage> context) 
+		public virtual bool TryGetContext<TMessage>(out IBusPublishContext<TMessage> context)
 			where TMessage : class
 		{
 			context = null;
 
-			if (typeof(TMessage).IsAssignableFrom(typeof(T)))
+			if (typeof (TMessage).IsAssignableFrom(typeof (T)))
 			{
 				context = new PublishContext<TMessage>(_message as TMessage, this);
 			}
