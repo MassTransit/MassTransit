@@ -210,6 +210,8 @@
     <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
+    <Compile Include="IOutboundMessageInterceptor.cs" />
+    <Compile Include="Pipeline\Sinks\OutboundMessageInterceptor.cs" />
     <Compile Include="PublishExtensions.cs" />
     <Compile Include="SendExtensions.cs" />
     <Compile Include="Exceptions\MassTransitException.cs" />
@@ -220,7 +222,7 @@
     <Compile Include="IConsumer.cs" />
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="MessageUrn.cs" />
-    <Compile Include="IMessageInterceptor.cs" />
+    <Compile Include="IInboundMessageInterceptor.cs" />
     <Compile Include="IServiceContainer.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderImpl.cs" />
     <Compile Include="NullServiceBus.cs" />

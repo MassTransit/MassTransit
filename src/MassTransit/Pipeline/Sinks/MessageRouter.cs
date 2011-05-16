@@ -46,9 +46,9 @@ namespace MassTransit.Pipeline.Sinks
 			get { return _output.Value; }
 		}
 
-		public IEnumerable<Action<T>> Enumerate(T message)
+		public IEnumerable<Action<T>> Enumerate(T context)
 		{
-			return _output.Value.SelectMany(x => x.Enumerate(message));
+			return _output.Value.SelectMany(x => x.Enumerate(context));
 		}
 
 		public bool Inspect(IPipelineInspector inspector)

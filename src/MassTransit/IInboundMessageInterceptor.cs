@@ -12,14 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+	using Context;
+
 	/// <summary>
 	/// A generic interceptor for handling messages before and after it is
 	/// handled by downstream handlers
 	/// </summary>
-	public interface IMessageInterceptor
+	public interface IInboundMessageInterceptor
 	{
-		void PreDispatch(object message);
+		void PreDispatch(IConsumeContext context);
 
-		void PostDispatch(object message);
+		void PostDispatch(IConsumeContext context);
 	}
 }

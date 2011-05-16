@@ -46,6 +46,8 @@ namespace MassTransit.Context
 	public interface ISendContext :
 		IMessageContext
 	{
+		Type DeclaringMessageType { get; }
+
 		void SerializeTo(Stream stream);
 
 		bool TryGetContext<T>(out IBusPublishContext<T> context)

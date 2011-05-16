@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq
 {
 	using System;
 	using System.Collections.Generic;
+	using Context;
 	using Exceptions;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
@@ -22,7 +23,7 @@ namespace MassTransit.Transports.RabbitMq
 	using Util;
 
 	public class PublishEndpointInterceptor :
-		IMessageInterceptor
+		IOutboundMessageInterceptor
 	{
 		readonly IDictionary<Type, UnsubscribeAction> _added;
 		readonly IServiceBus _bus;
@@ -42,11 +43,11 @@ namespace MassTransit.Transports.RabbitMq
 			_added = new Dictionary<Type, UnsubscribeAction>();
 		}
 
-		public void PreDispatch(object message)
+		public void PreDispatch(ISendContext context)
 		{
 			lock (_added)
 			{
-				Type messageType = message.GetType();
+				Type messageType = context.DeclaringMessageType;
 
 				if (_added.ContainsKey(messageType))
 					return;
@@ -55,7 +56,7 @@ namespace MassTransit.Transports.RabbitMq
 			}
 		}
 
-		public void PostDispatch(object message)
+		public void PostDispatch(ISendContext context)
 		{
 		}
 

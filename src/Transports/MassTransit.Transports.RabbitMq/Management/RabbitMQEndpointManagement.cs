@@ -84,11 +84,6 @@ namespace MassTransit.Transports.RabbitMq.Management
 
 		public IEnumerable<Type> BindExchangesForPublisher(Type messageType)
 		{
-			if (messageType.Implements(typeof(IMessageContext<>)))
-			{
-				messageType = messageType.GetGenericTypeDeclarations(typeof (IMessageContext<>)).Single();
-			}
-
 			var messageName = new MessageName(messageType);
 
 			using (IModel model = _connection.CreateModel())
