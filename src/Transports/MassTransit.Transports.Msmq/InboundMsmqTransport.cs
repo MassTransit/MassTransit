@@ -14,6 +14,7 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Messaging;
+	using System.Text;
 	using System.Threading;
 	using Context;
 	using Exceptions;
@@ -89,6 +90,14 @@ namespace MassTransit.Transports.Msmq
 						context = new ConsumeContext(message.BodyStream);
 						context.SetMessageId(message.Id);
 						context.SetInputAddress(_address);
+
+						var extension = message.Extension;
+						if (extension.Length > 0)
+						{
+							var headers = TransportMessageHeaders.Create(extension);
+
+							context.SetContentType(headers["Content-Type"]);
+						}
 
 						using(ContextStorage.CreateContextScope(context))
 							{

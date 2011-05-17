@@ -16,16 +16,18 @@ namespace MassTransit.Tests.Saga.StateMachine
 	using System.Linq;
 	using System.Threading;
 	using Magnum;
+	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using MassTransit.Pipeline.Inspectors;
 	using MassTransit.Saga;
 	using Messages;
 	using NUnit.Framework;
 	using TextFixtures;
+	using TestFramework;
 
 	[TestFixture]
 	public class AutoStateMachine_Specs :
-		LoopbackLocalAndRemoteTestFixture
+		LoopbackTestFixture
 	{
 		private ISagaRepository<AutoStateMachineSaga> _repository;
 
@@ -36,8 +38,8 @@ namespace MassTransit.Tests.Saga.StateMachine
 			_repository = SetupSagaRepository<AutoStateMachineSaga>();
 
 			// this just shows that you can easily respond to the message
-			RemoteBus.SubscribeHandler<SendUserVerificationEmail>(
-				x => RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email)));
+			LocalBus.SubscribeHandler<SendUserVerificationEmail>(
+				x => LocalBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email)));
 
 			_transactionId = CombGuid.Generate();
 			_username = "jblow";
@@ -55,53 +57,21 @@ namespace MassTransit.Tests.Saga.StateMachine
 		[Test]
 		public void A_state_machine_based_saga_should_automatically_wire_up_subscriptions()
 		{
-			RemoteBus.SubscribeSaga<AutoStateMachineSaga>(_repository);
+			LocalBus.SubscribeSaga<AutoStateMachineSaga>(_repository);
 
-			PipelineViewer.Trace(RemoteBus.InboundPipeline);
+			PipelineViewer.Trace(LocalBus.InboundPipeline);
+			PipelineViewer.Trace(LocalBus.OutboundPipeline);
 
-			PipelineViewer.Trace(RemoteBus.OutboundPipeline);
+			LocalBus.Publish(new RegisterUser(_transactionId, _username, _password, _displayName, _email));
+
+			var saga = _repository.ShouldContainSaga(_transactionId, 8.Seconds());
+
+			saga.CurrentState.ShouldEqual(AutoStateMachineSaga.WaitingForEmailValidation);
+
+			LocalBus.Publish(new UserValidated(_transactionId));
 
 
-			Assert.AreEqual(0, _repository.Where(x => true).Count());
-
-			RemoteBus.Publish(new RegisterUser(_transactionId, _username, _password, _displayName, _email));
-
-			for (int i = 0; i < 20; i++)
-			{
-				if (_repository.Where(x=>true).Count() == 1)
-					break;
-
-				Thread.Sleep(100);
-			}
-
-			Assert.AreEqual(1, _repository.Where(x=>true).Count());
-
-			foreach (AutoStateMachineSaga saga in _repository.Where(x=>true))
-			{
-				saga.CurrentState.ShouldEqual(AutoStateMachineSaga.WaitingForEmailValidation);
-			}
-
-			_repository
-				.Where(x => x.CorrelationId == _transactionId)
-				.Select(x => x.CurrentState)
-				.First()
-				.ShouldEqual(AutoStateMachineSaga.WaitingForEmailValidation);
-
-			RemoteBus.Publish(new UserValidated(_transactionId));
-
-			for (int i = 0; i < 20; i++)
-			{
-				if (_repository.Where(x => x.CorrelationId == _transactionId).Select(x => x.CurrentState).First() == AutoStateMachineSaga.Completed)
-					break;
-
-				Thread.Sleep(100);
-			}
-
-			_repository
-				.Where(x => x.CorrelationId == _transactionId)
-				.Select(x => x.CurrentState)
-				.First()
-				.ShouldEqual(AutoStateMachineSaga.Completed);
+			saga.ShouldBeInState(AutoStateMachineSaga.Completed, 8.Seconds());
 		}
 	}
 }

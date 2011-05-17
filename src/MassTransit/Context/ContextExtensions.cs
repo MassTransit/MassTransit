@@ -22,6 +22,11 @@ namespace MassTransit
 			return ContextStorage.Context();
 		}
 
+		public static IConsumeContext<T> MessageContext<T>(this IServiceBus bus)
+		{
+			return ContextStorage.MessageContext<T>();
+		}
+
 		public static void Context(this IServiceBus bus, Action<IConsumeContext> contextCallback)
 		{
 			ContextStorage.Context(contextCallback);

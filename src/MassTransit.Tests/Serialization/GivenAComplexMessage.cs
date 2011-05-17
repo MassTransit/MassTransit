@@ -6,6 +6,7 @@
     using System.Text;
     using Context;
     using Magnum.Extensions;
+    using Magnum.TestFramework;
     using MassTransit.Serialization;
     using Messages;
     using NUnit.Framework;
@@ -52,10 +53,14 @@
             using (var input = new MemoryStream(serializedMessageData))
             {
             	var receiveContext = new ConsumeContext(input);
+            	serializer.Deserialize(receiveContext);
 
-				var receivedMessage = serializer.Deserialize(receiveContext) as SerializationTestMessage;
+            	IConsumeContext<SerializationTestMessage> context;
+            	receiveContext.TryGetContext<SerializationTestMessage>(out context).ShouldBeTrue();
 
-                Assert.AreEqual(Message, receivedMessage);
+            	context.ShouldNotBeNull();
+
+            	context.Message.ShouldEqual(Message);
             }
         }
     }

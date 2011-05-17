@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Transports.RabbitMq
 {
 	using System;
+	using System.Collections;
 	using System.IO;
 	using Context;
 	using Magnum;
@@ -42,6 +43,7 @@
 			using(var body = new MemoryStream())
 			{
 				context.SerializeTo(body);
+				properties.Headers = new Hashtable {{"Content-Type", context.ContentType}};
 
 				_channel.BasicPublish(_address.Name, "", properties, body.ToArray());
 

@@ -28,6 +28,8 @@ namespace MassTransit.Serialization
 	public class BinaryMessageSerializer :
 		IMessageSerializer
 	{
+		const string ContentTypeHeaderValue = "application/vnd.masstransit+binary";
+
 		const string ConversationIdKey = "ConversationId";
 		const string CorrelationIdKey = "CorrelationId";
 		const string DestinationAddressKey = "DestinationAddress";
@@ -43,19 +45,28 @@ namespace MassTransit.Serialization
 		static readonly BinaryFormatter _formatter = new BinaryFormatter();
 		static readonly ILog _log = LogManager.GetLogger(typeof (BinaryMessageSerializer));
 
+		public string ContentType
+		{
+			get { return ContentTypeHeaderValue; }
+		}
+
 		public void Serialize<T>(Stream output, ISendContext<T> context)
 			where T : class
 		{
 			CheckConvention.EnsureSerializable(context.Message);
 
 			_formatter.Serialize(output, context.Message, GetHeaders(context));
+
+			context.SetContentType(ContentTypeHeaderValue);
 		}
 
-		public object Deserialize(IReceiveContext context)
+		public void Deserialize(IReceiveContext context)
 		{
 			object obj = _formatter.Deserialize(context.BodyStream, headers => DeserializeHeaderHandler(headers, context));
 
-			return obj;
+			context.SetContentType(ContentTypeHeaderValue);
+			context.SetMessageTypeConverter(new StaticMessageTypeConverter(obj));
+
 		}
 
 		static Header[] GetHeaders(ISendContext context)

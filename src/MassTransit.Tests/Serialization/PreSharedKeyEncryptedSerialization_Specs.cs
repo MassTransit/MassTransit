@@ -16,7 +16,9 @@ namespace MassTransit.Tests.Serialization
     using System.Diagnostics;
     using System.IO;
     using System.Text;
+    using Context;
     using Magnum.Extensions;
+    using Magnum.TestFramework;
     using MassTransit.Serialization;
     using Messages;
     using NUnit.Framework;
@@ -59,13 +61,17 @@ namespace MassTransit.Tests.Serialization
       //          Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
             }
 
-            var deserializer = new PreSharedKeyEncryptedMessageSerializer(key, new TSerializer());
-
             using (var input = new MemoryStream(serializedMessageData))
             {
-                var receivedMessage = deserializer.Deserialize(input.ToReceiveContext()) as PartialSerializationTestMessage;
+            	var receiveContext = input.ToReceiveContext();
+				serializer.Deserialize(receiveContext);
 
-                Assert.AreEqual(_message, receivedMessage);
+				IConsumeContext<PartialSerializationTestMessage> context;
+				receiveContext.TryGetContext<PartialSerializationTestMessage>(out context).ShouldBeTrue();
+
+				context.ShouldNotBeNull();
+
+				context.Message.ShouldEqual(_message);
             }
         }
     }

@@ -68,8 +68,11 @@
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\lib\Newtonsoft.Json\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\lib\Newtonsoft.Json\net35\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\lib\Newtonsoft.Json\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Stact" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\lib\Stact\net-3.5\Stact.dll</HintPath>
@@ -207,6 +210,7 @@
     <Compile Include="Context\SendContext.cs" />
     <Compile Include="Context\ContextStorage.cs" />
     <Compile Include="Context\ServiceBusReceiveContext.cs" />
+    <Compile Include="Context\TransportMessageHeaders.cs" />
     <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
@@ -276,9 +280,15 @@
     <Compile Include="Saga\SubscriptionConnectors\SagaWorkerEventConnectorFactory.cs" />
     <Compile Include="Saga\SubscriptionConnectors\StateMachineSagaConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\StateMachineSagaWorkerConnector.cs" />
+    <Compile Include="Serialization\EncryptedMessageEnvelope.cs" />
+    <Compile Include="Serialization\Envelope.cs" />
     <Compile Include="Serialization\ExtensionsForBinaryMessageSerializer.cs" />
-    <Compile Include="Serialization\JsonMessageEnvelope.cs" />
+    <Compile Include="Serialization\IMessageTypeConverter.cs" />
+    <Compile Include="Serialization\InterfaceProxyConverter.cs" />
+    <Compile Include="Serialization\JsonContractResolver.cs" />
     <Compile Include="Serialization\JsonMessageSerializer.cs" />
+    <Compile Include="Serialization\JsonMessageTypeConverter.cs" />
+    <Compile Include="Serialization\StaticMessageTypeConverter.cs" />
     <Compile Include="ServiceContainer.cs" />
     <Compile Include="Services\HealthMonitoring\Configuration\HealthClientConfiguratorExtensions.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthInformation.cs" />

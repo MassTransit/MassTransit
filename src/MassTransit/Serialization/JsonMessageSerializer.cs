@@ -12,55 +12,72 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System;
+	using System.Collections.Generic;
 	using System.IO;
-	using System.Text;
 	using Context;
-	using Magnum.Extensions;
 	using Newtonsoft.Json;
+	using Newtonsoft.Json.Linq;
 
 	public class JsonMessageSerializer :
 		IMessageSerializer
 	{
+		const string ContentTypeHeaderValue = "application/vnd.masstransit+json";
+
 		readonly JsonSerializerSettings _settings;
+		JsonSerializer _serializer;
 
 		public JsonMessageSerializer()
 		{
 			_settings = new JsonSerializerSettings
 				{
-					MissingMemberHandling = MissingMemberHandling.Ignore,
 					NullValueHandling = NullValueHandling.Ignore,
+					DefaultValueHandling = DefaultValueHandling.Ignore,
+					MissingMemberHandling = MissingMemberHandling.Ignore,
 					ObjectCreationHandling = ObjectCreationHandling.Auto,
-					DefaultValueHandling = DefaultValueHandling.Ignore
+					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+					ContractResolver = new JsonContractResolver(),
+					Converters = new List<JsonConverter>(new[] {new InterfaceProxyConverter()})
 				};
+
+			_serializer = JsonSerializer.Create(_settings);
 		}
 
-		public void Serialize<T>(Stream output, ISendContext<T> context) 
+		public string ContentType
+		{
+			get { return ContentTypeHeaderValue; }
+		}
+
+		public void Serialize<T>(Stream output, ISendContext<T> context)
 			where T : class
 		{
-			JsonMessageEnvelope envelope = JsonMessageEnvelope.Create(context);
+			context.SetContentType(ContentTypeHeaderValue);
 
-			string strOut = JsonConvert.SerializeObject(envelope, Formatting.Indented, _settings);
-			byte[] buff = Encoding.UTF8.GetBytes(strOut);
+			Envelope envelope = Envelope.Create(context);
 
-			output.Write(buff, 0, buff.Length);
+			using (var writer = new StreamWriter(output))
+			using (var jsonWriter = new JsonTextWriter(writer))
+			{
+				jsonWriter.Formatting = Formatting.Indented;
+
+				_serializer.Serialize(jsonWriter, envelope);
+
+				jsonWriter.Flush();
+				writer.Flush();
+			}
 		}
 
-		public object Deserialize(IReceiveContext context)
+		public void Deserialize(IReceiveContext context)
 		{
-			string text = context.BodyStream.ReadToEndAsText();
+			Envelope result;
+			using (var reader = new StreamReader(context.BodyStream))
+			using (var jsonReader = new JsonTextReader(reader))
+			{
+				result = _serializer.Deserialize<Envelope>(jsonReader);
+			}
 
-			var envelope = JsonConvert.DeserializeObject<JsonMessageEnvelope>(text, _settings);
-
-			context.SetUsingMessageEnvelope(envelope);
-
-			Type messageType = Type.GetType(envelope.MessageType, false, true);
-			if (messageType == null)
-				return envelope.Message;
-
-			object obj = JsonConvert.DeserializeObject(envelope.Message.ToString(), messageType);
-			
-			return obj;
+			context.SetUsingEnvelope(result);
+			context.SetMessageTypeConverter(new JsonMessageTypeConverter(_serializer, result.Message as JToken,
+				result.MessageType));
 		}
 	}
 }

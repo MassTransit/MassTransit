@@ -50,7 +50,10 @@ namespace MassTransit.Distributor.Pipeline
 					{
 						_worker.ConsumingMessage(context.Message);
 
-						action(payloadContext);
+						using (ContextStorage.CreateContextScope(payloadContext))
+						{
+							action(payloadContext);
+						}
 					}
 					finally
 					{

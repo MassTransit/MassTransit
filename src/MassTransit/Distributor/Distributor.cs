@@ -55,7 +55,7 @@ namespace MassTransit.Distributor
 			WorkerDetails worker = _selectionStrategy.SelectWorker(_workers.Values, message);
 			if (worker == null)
 			{
-				_bus.Context().RetryLater();
+				_bus.MessageContext<TMessage>().RetryLater();
 				return;
 			}
 

@@ -19,6 +19,7 @@ namespace MassTransit.Context
 	{
 		public string MessageId { get; private set; }
 		public string MessageType { get; private set; }
+		public string ContentType { get; private set; }
 		public Uri SourceAddress { get; private set; }
 		public Uri InputAddress { get; private set; }
 		public Uri DestinationAddress { get; private set; }
@@ -78,6 +79,11 @@ namespace MassTransit.Context
 			RetryCount = value;
 		}
 
+		public void SetContentType(string value)
+		{
+			ContentType = value;
+		}
+
 		public void SetUsing(IMessageContext context)
 		{
 			SetMessageType(context.MessageType);
@@ -90,6 +96,7 @@ namespace MassTransit.Context
 			if (context.ExpirationTime.HasValue)
 				SetExpirationTime(context.ExpirationTime.Value);
 			SetRetryCount(context.RetryCount);
+			SetContentType(context.ContentType);
 		}
 	}
 }

@@ -91,7 +91,7 @@ namespace MassTransit.Saga
 			where T : SagaStateMachine<T>, ISaga
 			where TData : class
 		{
-			eventAction.Call((saga, message) => ContextStorage.Context().RetryLater());
+			eventAction.Call((saga, message) => ContextStorage.MessageContext<TData>().RetryLater());
 			return eventAction;
 		}
 

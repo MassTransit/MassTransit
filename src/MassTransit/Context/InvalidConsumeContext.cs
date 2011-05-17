@@ -28,6 +28,11 @@ namespace MassTransit.Context
 			get { throw CreateException(); }
 		}
 
+		public string ContentType
+		{
+			get { throw CreateException(); }
+		}
+
 		public Uri SourceAddress
 		{
 			get { throw CreateException(); }

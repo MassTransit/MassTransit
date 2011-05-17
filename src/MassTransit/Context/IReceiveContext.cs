@@ -19,6 +19,12 @@ namespace MassTransit.Context
 	public interface IReceiveContext :
 		IConsumeContext
 	{
+		/// <summary>
+		/// Set the content type that was indicated by the transport message header
+		/// </summary>
+		/// <param name="value"></param>
+		void SetContentType(string value);
+
 		void SetMessageId(string value);
 
 		void SetInputAddress(Uri uri);
@@ -43,10 +49,13 @@ namespace MassTransit.Context
 
 		void SetMessageType(string messageType);
 
+
+		void SetBodyStream(Stream stream);
+
 		void CopyBodyTo(Stream stream);
 
 		Stream BodyStream { get; }
 
-		void SetSerializer(IMessageSerializer serializer);
+		void SetMessageTypeConverter(IMessageTypeConverter messageTypeConverter);
 	}
 }

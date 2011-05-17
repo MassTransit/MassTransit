@@ -77,6 +77,12 @@
     <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\lib\Magnum\net-4.0\TestFramework\Magnum.TestFramework.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\lib\Newtonsoft.Json\net35\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\lib\Newtonsoft.Json\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\NUnit\net-2.0\nunit.framework.dll</HintPath>
@@ -110,6 +116,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Environment_Specs.cs" />
@@ -210,12 +217,14 @@
     <Compile Include="Serialization\Header_Specs.cs" />
     <Compile Include="Serialization\InterfaceBinding_Specs.cs" />
     <Compile Include="Serialization\Interface_Specs.cs" />
+    <Compile Include="Serialization\JsonSerialization_Specs.cs" />
     <Compile Include="Serialization\MoreSerialization_Specs.cs" />
     <Compile Include="Serialization\Performance_Specs.cs" />
     <Compile Include="Serialization\PreSharedKeyEncryptedSerialization_Specs.cs" />
     <Compile Include="Serialization\PropertyType_Specs.cs" />
     <Compile Include="Serialization\SerializationSpecificationBase.cs" />
     <Compile Include="Serialization\SerializationTest.cs" />
+    <Compile Include="Serialization\TransportContentType_Specs.cs" />
     <Compile Include="Serialization\Version_Specs.cs" />
     <Compile Include="Services\HealthMonitoring\HealthServiceTestFixture.cs" />
     <Compile Include="Services\HealthMonitoring\HealthService_Specs.cs" />
