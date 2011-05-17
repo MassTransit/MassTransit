@@ -82,7 +82,6 @@
     <Compile Include="Load\ActiveMQLoadTest.cs" />
     <Compile Include="Load\LoopbackConsumerLoadTest.cs" />
     <Compile Include="Load\RabbitMqHandlerLoadTest.cs" />
-    <Compile Include="Load\RabbitMQLoadTest.cs" />
     <Compile Include="Load\LocalLoadTest.cs" />
     <Compile Include="Load\LoopbackHandlerLoadTest.cs" />
     <Compile Include="Load\StructureMapConsumerLoadTest.cs" />

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
+	using System;
 	using System.Collections.Generic;
 	using System.IO;
 	using Context;
@@ -24,36 +25,11 @@ namespace MassTransit.Serialization
 	{
 		const string ContentTypeHeaderValue = "application/vnd.masstransit+json";
 
-		readonly JsonSerializer _deserializer;
-		readonly JsonSerializer _serializer;
+		[ThreadStatic]
+		static JsonSerializer _deserializer;
 
-		public JsonMessageSerializer()
-		{
-			_serializer = JsonSerializer.Create(new JsonSerializerSettings
-				{
-					NullValueHandling = NullValueHandling.Ignore,
-					DefaultValueHandling = DefaultValueHandling.Ignore,
-					MissingMemberHandling = MissingMemberHandling.Ignore,
-					ObjectCreationHandling = ObjectCreationHandling.Auto,
-					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-					ContractResolver = new JsonContractResolver(),
-				});
-
-			_deserializer = JsonSerializer.Create(new JsonSerializerSettings
-				{
-					NullValueHandling = NullValueHandling.Ignore,
-					DefaultValueHandling = DefaultValueHandling.Ignore,
-					MissingMemberHandling = MissingMemberHandling.Ignore,
-					ObjectCreationHandling = ObjectCreationHandling.Auto,
-					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-					ContractResolver = new JsonContractResolver(),
-					Converters = new List<JsonConverter>(new JsonConverter[]
-						{
-							new InterfaceProxyConverter(),
-							new MessageTypeConverter(),
-						})
-				});
-		}
+		[ThreadStatic]
+		static JsonSerializer _serializer;
 
 		public string ContentType
 		{
@@ -73,7 +49,7 @@ namespace MassTransit.Serialization
 			{
 				jsonWriter.Formatting = Formatting.Indented;
 
-				_serializer.Serialize(jsonWriter, envelope);
+				Serializer.Serialize(jsonWriter, envelope);
 
 				jsonWriter.Flush();
 				writer.Flush();
@@ -87,12 +63,49 @@ namespace MassTransit.Serialization
 			using (var reader = new StreamReader(nonClosingStream))
 			using (var jsonReader = new JsonTextReader(reader))
 			{
-				result = _deserializer.Deserialize<Envelope>(jsonReader);
+				result = Deserializer.Deserialize<Envelope>(jsonReader);
 			}
 
 			context.SetUsingEnvelope(result);
-			context.SetMessageTypeConverter(new JsonMessageTypeConverter(_deserializer, result.Message as JToken,
+			context.SetMessageTypeConverter(new JsonMessageTypeConverter(Deserializer, result.Message as JToken,
 				result.MessageType));
+		}
+
+		static JsonSerializer Serializer
+		{
+			get
+			{
+				return _serializer ?? (_serializer = JsonSerializer.Create(new JsonSerializerSettings
+					{
+						NullValueHandling = NullValueHandling.Ignore,
+						DefaultValueHandling = DefaultValueHandling.Ignore,
+						MissingMemberHandling = MissingMemberHandling.Ignore,
+						ObjectCreationHandling = ObjectCreationHandling.Auto,
+						ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+						ContractResolver = new JsonContractResolver(),
+					}));
+			}
+		}
+
+		static JsonSerializer Deserializer
+		{
+			get
+			{
+				return _deserializer ?? (_deserializer = JsonSerializer.Create(new JsonSerializerSettings
+					{
+						NullValueHandling = NullValueHandling.Ignore,
+						DefaultValueHandling = DefaultValueHandling.Ignore,
+						MissingMemberHandling = MissingMemberHandling.Ignore,
+						ObjectCreationHandling = ObjectCreationHandling.Auto,
+						ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+						ContractResolver = new JsonContractResolver(),
+						Converters = new List<JsonConverter>(new JsonConverter[]
+							{
+								new MessageTypeConverter(),
+								new InterfaceProxyConverter(),
+							})
+					}));
+			}
 		}
 	}
 }

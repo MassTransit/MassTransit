@@ -24,18 +24,18 @@ namespace HeavyLoad
 			Console.WriteLine();
 
 			RunLoopbackHandlerLoadTest();
-
-			RunLoopbackConsumerLoadTest();
-
-			RunStructureMapLoadTest();
-
-			RunLocalMsmqLoadTest();
-
-			RunTransactionLoadTest();
-
-			RunCorrelatedMessageTest();
-
-			RunRabbitMqLoadTest();
+//
+//			RunLoopbackConsumerLoadTest();
+//
+//			RunStructureMapLoadTest();
+//
+//			RunLocalMsmqLoadTest();
+//
+//			RunTransactionLoadTest();
+//
+//			RunCorrelatedMessageTest();
+//
+//			RunRabbitMqLoadTest();
 
 			//RunLocalActiveMqLoadTest();
 

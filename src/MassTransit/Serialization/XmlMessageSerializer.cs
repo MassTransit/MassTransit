@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.IO;
@@ -29,55 +30,15 @@ namespace MassTransit.Serialization
 	{
 		const string ContentTypeHeaderValue = "application/vnd.masstransit+xml";
 
-		readonly JsonSerializer _serializer;
-		readonly JsonSerializer _xmlSerializer;
-		readonly JsonSerializer _deserializer;
 
-		public XmlMessageSerializer()
-		{
-			_serializer = JsonSerializer.Create(new JsonSerializerSettings
-				{
-					NullValueHandling = NullValueHandling.Ignore,
-					DefaultValueHandling = DefaultValueHandling.Ignore,
-					MissingMemberHandling = MissingMemberHandling.Ignore,
-					ObjectCreationHandling = ObjectCreationHandling.Auto,
-					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-					ContractResolver = new JsonContractResolver(),
-				});
+		[ThreadStatic]
+		static JsonSerializer _deserializer;
 
-			_deserializer = JsonSerializer.Create(new JsonSerializerSettings
-				{
-					NullValueHandling = NullValueHandling.Ignore,
-					DefaultValueHandling = DefaultValueHandling.Ignore,
-					MissingMemberHandling = MissingMemberHandling.Ignore,
-					ObjectCreationHandling = ObjectCreationHandling.Auto,
-					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-					ContractResolver = new JsonContractResolver(),
-					Converters = new List<JsonConverter>(new JsonConverter[]
-						{
-							new InterfaceProxyConverter(),
-							new MessageTypeConverter(),
-						})
-				});
+		[ThreadStatic]
+		static JsonSerializer _serializer;
 
-			_xmlSerializer = JsonSerializer.Create(new JsonSerializerSettings
-				{
-					NullValueHandling = NullValueHandling.Ignore,
-					DefaultValueHandling = DefaultValueHandling.Ignore,
-					MissingMemberHandling = MissingMemberHandling.Ignore,
-					ObjectCreationHandling = ObjectCreationHandling.Auto,
-					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-					Converters = new List<JsonConverter>(new[]
-						{
-							new XmlNodeConverter
-								{
-									DeserializeRootElementName = "envelope",
-									WriteArrayAttribute = false,
-									OmitRootObject = true,
-								}
-						})
-				});
-		}
+		[ThreadStatic]
+		static JsonSerializer _xmlSerializer;
 
 		public string ContentType
 		{
@@ -91,14 +52,14 @@ namespace MassTransit.Serialization
 
 			Envelope envelope = Envelope.Create(context);
 
-			var json = new StringBuilder(256);
+			var json = new StringBuilder(1024);
 
 			using(var stringWriter = new StringWriter(json, CultureInfo.InvariantCulture))
 			using (var jsonWriter = new JsonTextWriter(stringWriter))
 			{
 				jsonWriter.Formatting = Newtonsoft.Json.Formatting.None;
 
-				_serializer.Serialize(jsonWriter, envelope);
+				Serializer.Serialize(jsonWriter, envelope);
 
 				jsonWriter.Flush();
 				stringWriter.Flush();
@@ -107,7 +68,7 @@ namespace MassTransit.Serialization
 			using(var stringReader = new StringReader(json.ToString()))
 			using (var jsonReader = new JsonTextReader(stringReader))
 			{
-				var document = (XDocument) _xmlSerializer.Deserialize(jsonReader, typeof (XDocument));
+				var document = (XDocument) XmlSerializer.Deserialize(jsonReader, typeof (XDocument));
 
 				using (var nonClosingStream = new NonClosingStream(output))
 				using (var streamWriter = new StreamWriter(nonClosingStream))
@@ -125,26 +86,87 @@ namespace MassTransit.Serialization
 			using (var xmlReader = new XmlTextReader(nonClosingStream))
 				document = XDocument.Load(xmlReader);
 
-			var json = new StringBuilder(256);
+			var json = new StringBuilder(1024);
 
 			using(var stringWriter = new StringWriter(json, CultureInfo.InvariantCulture))
 			using (var jsonWriter = new JsonTextWriter(stringWriter))
 			{
 				jsonWriter.Formatting = Newtonsoft.Json.Formatting.None;
 
-				_xmlSerializer.Serialize(jsonWriter, document.Root);
+				XmlSerializer.Serialize(jsonWriter, document.Root);
 			}
 
 			Envelope result;
 			using(var stringReader = new StringReader(json.ToString()))
 			using (var jsonReader = new JsonTextReader(stringReader))
 			{
-				result = _deserializer.Deserialize<Envelope>(jsonReader);
+				result = Deserializer.Deserialize<Envelope>(jsonReader);
 			}
 
 			context.SetUsingEnvelope(result);
-			context.SetMessageTypeConverter(new JsonMessageTypeConverter(_deserializer, result.Message as JToken,
+			context.SetMessageTypeConverter(new JsonMessageTypeConverter(Deserializer, result.Message as JToken,
 				result.MessageType));
+		}
+
+		static JsonSerializer Serializer
+		{
+			get
+			{
+				return _serializer ?? (_serializer = JsonSerializer.Create(new JsonSerializerSettings
+				{
+					NullValueHandling = NullValueHandling.Ignore,
+					DefaultValueHandling = DefaultValueHandling.Ignore,
+					MissingMemberHandling = MissingMemberHandling.Ignore,
+					ObjectCreationHandling = ObjectCreationHandling.Auto,
+					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+					ContractResolver = new JsonContractResolver(),
+				}));
+			}
+		}
+
+		static JsonSerializer XmlSerializer
+		{
+			get
+			{
+				return _xmlSerializer ?? (_xmlSerializer = JsonSerializer.Create(new JsonSerializerSettings
+					{
+						NullValueHandling = NullValueHandling.Ignore,
+						DefaultValueHandling = DefaultValueHandling.Ignore,
+						MissingMemberHandling = MissingMemberHandling.Ignore,
+						ObjectCreationHandling = ObjectCreationHandling.Auto,
+						ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+						Converters = new List<JsonConverter>(new[]
+							{
+								new XmlNodeConverter
+									{
+										DeserializeRootElementName = "envelope",
+										WriteArrayAttribute = false,
+										OmitRootObject = true,
+									}
+							})
+					}));
+			}
+		}
+
+		static JsonSerializer Deserializer
+		{
+			get
+			{
+				return _deserializer ?? (_deserializer = JsonSerializer.Create(new JsonSerializerSettings
+				{
+					NullValueHandling = NullValueHandling.Ignore,
+					DefaultValueHandling = DefaultValueHandling.Ignore,
+					MissingMemberHandling = MissingMemberHandling.Ignore,
+					ObjectCreationHandling = ObjectCreationHandling.Auto,
+					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+					ContractResolver = new JsonContractResolver(),
+					Converters = new List<JsonConverter>(new JsonConverter[]
+							{
+								new MessageTypeConverter(),
+								new InterfaceProxyConverter(),
+							})
+				}));
+			}
 		}
 	}
 }
