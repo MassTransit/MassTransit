@@ -21,6 +21,7 @@ namespace MassTransit.Tests.Serialization
 	using System.Xml.Linq;
 	using Magnum.Reflection;
 	using Magnum.TestFramework;
+	using MassTransit.Serialization;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Converters;
 	using Newtonsoft.Json.Linq;
@@ -34,9 +35,9 @@ namespace MassTransit.Tests.Serialization
 		Envelope _envelope;
 		TestMessage _message;
 		JsonSerializer _serializer;
-		JsonSerializerSettings _settings;
 		XDocument _xml;
 		static Type _proxyType = InterfaceImplementationBuilder.GetProxyFor(typeof(MessageA));
+		JsonSerializer _deserializer;
 
 
 		[When]
@@ -61,7 +62,7 @@ namespace MassTransit.Tests.Serialization
 			_envelope.MessageType.Add(typeof (MessageA).ToMessageName());
 			_envelope.MessageType.Add(typeof (MessageB).ToMessageName());
 
-			_settings = new JsonSerializerSettings
+			_serializer = JsonSerializer.Create(new JsonSerializerSettings
 				{
 					NullValueHandling = NullValueHandling.Ignore,
 					DefaultValueHandling = DefaultValueHandling.Ignore,
@@ -69,10 +70,18 @@ namespace MassTransit.Tests.Serialization
 					ObjectCreationHandling = ObjectCreationHandling.Auto,
 					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
 					ContractResolver = new CamelCasePropertyNamesContractResolver(),
-				};
-
-
-			_serializer = JsonSerializer.Create(_settings);
+				});
+			
+			_deserializer = JsonSerializer.Create(new JsonSerializerSettings
+				{
+					Converters = new List<JsonConverter>(new JsonConverter[] { new MessageTypeConverter() }),
+					NullValueHandling = NullValueHandling.Ignore,
+					DefaultValueHandling = DefaultValueHandling.Ignore,
+					MissingMemberHandling = MissingMemberHandling.Ignore,
+					ObjectCreationHandling = ObjectCreationHandling.Auto,
+					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+					ContractResolver = new CamelCasePropertyNamesContractResolver(),
+				});
 
 			using (var memoryStream = new MemoryStream())
 			using (var writer = new StreamWriter(memoryStream))
@@ -109,7 +118,7 @@ namespace MassTransit.Tests.Serialization
 			using (var reader = new StreamReader(memoryStream))
 			using (var jsonReader = new JsonTextReader(reader))
 			{
-				result = _serializer.Deserialize<Envelope>(jsonReader);
+				result = _deserializer.Deserialize<Envelope>(jsonReader);
 			}
 
 			object obj = ConvertJson((JToken) result.Message);
@@ -129,7 +138,7 @@ namespace MassTransit.Tests.Serialization
 			using (var reader = new StreamReader(memoryStream))
 			using (var jsonReader = new JsonTextReader(reader))
 			{
-				result = _serializer.Deserialize<Envelope>(jsonReader);
+				result = _deserializer.Deserialize<Envelope>(jsonReader);
 			}
 
 			using(var jsonReader = new JTokenReader(result.Message as JToken))
@@ -151,7 +160,7 @@ namespace MassTransit.Tests.Serialization
 			using (var reader = new StreamReader(memoryStream))
 			using (var jsonReader = new JsonTextReader(reader))
 			{
-				result = _serializer.Deserialize<Envelope>(jsonReader);
+				result = _deserializer.Deserialize<Envelope>(jsonReader);
 			}
 
 			using(var jsonReader = new JTokenReader(result.Message as JToken))
@@ -166,9 +175,20 @@ namespace MassTransit.Tests.Serialization
 		[Then]
 		public void Should_be_able_to_ressurect_the_message_from_xml()
 		{
-			string body = JsonConvert.SerializeXNode(_xml, Formatting.None, true);
+			XDocument document = XDocument.Parse(_xml.ToString());
+			Trace.WriteLine(_xml.ToString());
+			string body = JsonConvert.SerializeXNode(document, Formatting.None, true);
 			Trace.WriteLine(body);
-			var result = JsonConvert.DeserializeObject<Envelope>(body, _settings);
+			var result = JsonConvert.DeserializeObject<Envelope>(body, new JsonSerializerSettings
+				{
+					Converters = new List<JsonConverter>(new JsonConverter[]{new MessageTypeConverter()}),
+					NullValueHandling = NullValueHandling.Ignore,
+					DefaultValueHandling = DefaultValueHandling.Ignore,
+					MissingMemberHandling = MissingMemberHandling.Ignore,
+					ObjectCreationHandling = ObjectCreationHandling.Auto,
+					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+					ContractResolver = new CamelCasePropertyNamesContractResolver(),
+				});
 
 			result.MessageType.Count.ShouldEqual(3);
 			result.MessageType[0].ShouldEqual(typeof (TestMessage).ToMessageName());
@@ -239,7 +259,7 @@ namespace MassTransit.Tests.Serialization
 			using (var reader = new StreamReader(memoryStream))
 			using (var jsonReader = new JsonTextReader(reader))
 			{
-				result = _serializer.Deserialize<Envelope>(jsonReader);
+				result = _deserializer.Deserialize<Envelope>(jsonReader);
 			}
 
 			using (var jsonReader = new JTokenReader(result.Message as JToken))

@@ -25,7 +25,7 @@ namespace MassTransit.Tests.Serialization
 		[Test]
 		public void Should_not_cause_fatal_explosions_of_the_fiery_death_kind()
 		{
-			var serializer = new XmlMessageSerializer();
+			var serializer = new VersionOneXmlMessageSerializer();
 			using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(Version4Message)))
 			{
 				var receiveContext = bodyStream.ToReceiveContext();
@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Serialization
 		[Test]
 		public void Should_handle_the_uri_type()
 		{
-			var serializer = new XmlMessageSerializer();
+			var serializer = new VersionOneXmlMessageSerializer();
 			using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(AnotherVersion4Message)))
 			{
 				var receiveContext = bodyStream.ToReceiveContext();

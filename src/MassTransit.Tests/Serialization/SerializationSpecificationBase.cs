@@ -56,7 +56,7 @@ namespace MassTransit.Tests.Serialization
                 data = output.ToArray();
             }
 
-           Trace.WriteLine(Encoding.UTF8.GetString(data));
+          // Trace.WriteLine(Encoding.UTF8.GetString(data));
 
             using (MemoryStream input = new MemoryStream(data))
             {
@@ -67,8 +67,8 @@ namespace MassTransit.Tests.Serialization
 				context.TryGetContext<T>(out messageContext).ShouldBeTrue();
 
 				messageContext.ShouldNotBeNull();
-            	messageContext.Message.ShouldEqual(message);
-            	messageContext.Message.ShouldNotBeTheSameAs(message);
+            	message.Equals(messageContext.Message).ShouldBeTrue();
+				message.ShouldNotBeTheSameAs(messageContext.Message);
 
 			
 				Assert.AreEqual(_retryCount, context.RetryCount);

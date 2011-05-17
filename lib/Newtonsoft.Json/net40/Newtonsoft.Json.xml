@@ -5419,6 +5419,22 @@
             <param name="objectType">Type of the object.</param>
             <returns>A <see cref="T:Newtonsoft.Json.Serialization.JsonObjectContract"/> for the given type.</returns>
         </member>
+        <member name="M:Newtonsoft.Json.Serialization.DefaultContractResolver.CreateConstructorParameters(System.Reflection.ConstructorInfo,Newtonsoft.Json.Serialization.JsonPropertyCollection)">
+            <summary>
+            Creates the constructor parameters.
+            </summary>
+            <param name="constructor">The constructor to create properties for.</param>
+            <param name="memberProperties">The type's member properties.</param>
+            <returns>Properties for the given <see cref="T:System.Reflection.ConstructorInfo"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Serialization.DefaultContractResolver.CreatePropertyFromConstructorParameter(Newtonsoft.Json.Serialization.JsonProperty,System.Reflection.ParameterInfo)">
+            <summary>
+            Creates a <see cref="T:Newtonsoft.Json.Serialization.JsonProperty"/> for the given <see cref="T:System.Reflection.ParameterInfo"/>.
+            </summary>
+            <param name="matchingMemberProperty">The matching member property.</param>
+            <param name="parameterInfo">The constructor parameter.</param>
+            <returns>A created <see cref="T:Newtonsoft.Json.Serialization.JsonProperty"/> for the given <see cref="T:System.Reflection.ParameterInfo"/>.</returns>
+        </member>
         <member name="M:Newtonsoft.Json.Serialization.DefaultContractResolver.ResolveContractConverter(System.Type)">
             <summary>
             Resolves the default <see cref="T:Newtonsoft.Json.JsonConverter"/> for the contract.
@@ -5621,7 +5637,7 @@
         </member>
         <member name="T:Newtonsoft.Json.Serialization.JsonProperty">
             <summary>
-            Maps a JSON property to a .NET member.
+            Maps a JSON property to a .NET member or constructor parameter.
             </summary>
         </member>
         <member name="M:Newtonsoft.Json.Serialization.JsonProperty.ToString">
@@ -5634,9 +5650,15 @@
         </member>
         <member name="P:Newtonsoft.Json.Serialization.JsonProperty.PropertyName">
             <summary>
-            Gets the name of the property.
+            Gets or sets the name of the property.
             </summary>
             <value>The name of the property.</value>
+        </member>
+        <member name="P:Newtonsoft.Json.Serialization.JsonProperty.UnderlyingName">
+            <summary>
+            Gets or sets the name of the underlying member or parameter.
+            </summary>
+            <value>The name of the underlying member or parameter.</value>
         </member>
         <member name="P:Newtonsoft.Json.Serialization.JsonProperty.ValueProvider">
             <summary>
@@ -5657,6 +5679,12 @@
             </summary>
             <value>The converter.</value>
         </member>
+        <member name="P:Newtonsoft.Json.Serialization.JsonProperty.MemberConverter">
+            <summary>
+            Gets the member converter.
+            </summary>
+            <value>The member converter.</value>
+        </member>
         <member name="P:Newtonsoft.Json.Serialization.JsonProperty.Ignored">
             <summary>
             Gets a value indicating whether this <see cref="T:Newtonsoft.Json.Serialization.JsonProperty"/> is ignored.
@@ -5674,12 +5702,6 @@
             Gets a value indicating whether this <see cref="T:Newtonsoft.Json.Serialization.JsonProperty"/> is writable.
             </summary>
             <value><c>true</c> if writable; otherwise, <c>false</c>.</value>
-        </member>
-        <member name="P:Newtonsoft.Json.Serialization.JsonProperty.MemberConverter">
-            <summary>
-            Gets the member converter.
-            </summary>
-            <value>The member converter.</value>
         </member>
         <member name="P:Newtonsoft.Json.Serialization.JsonProperty.DefaultValue">
             <summary>
@@ -6202,6 +6224,11 @@
             Gets the object's properties.
             </summary>
             <value>The object's properties.</value>
+        </member>
+        <member name="P:Newtonsoft.Json.Serialization.JsonObjectContract.ConstructorParameters">
+            <summary>
+            Gets the constructor parameters required for any non-default constructor
+            </summary>
         </member>
         <member name="P:Newtonsoft.Json.Serialization.JsonObjectContract.OverrideConstructor">
             <summary>

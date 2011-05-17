@@ -89,6 +89,7 @@
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
@@ -288,7 +289,9 @@
     <Compile Include="Serialization\JsonContractResolver.cs" />
     <Compile Include="Serialization\JsonMessageSerializer.cs" />
     <Compile Include="Serialization\JsonMessageTypeConverter.cs" />
+    <Compile Include="Serialization\MessageTypeConverter.cs" />
     <Compile Include="Serialization\StaticMessageTypeConverter.cs" />
+    <Compile Include="Serialization\VersionOneXmlMessageSerializer.cs" />
     <Compile Include="ServiceContainer.cs" />
     <Compile Include="Services\HealthMonitoring\Configuration\HealthClientConfiguratorExtensions.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthInformation.cs" />

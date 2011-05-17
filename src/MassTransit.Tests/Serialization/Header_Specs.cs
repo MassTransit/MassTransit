@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Serialization
 	using System.IO;
 	using System.Text;
 	using Context;
+	using Magnum;
 	using Magnum.Extensions;
 	using MassTransit.Serialization;
 	using Messages;
@@ -76,7 +77,9 @@ namespace MassTransit.Tests.Serialization
 		[Test]
 		public void Should_carry_through_the_message_headers()
 		{
-			DateTime expiration = 5.Minutes().FromNow();
+			DateTime now = 5.Minutes().FromNow();
+
+			DateTime expiration = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, now.Millisecond);
 
 			VerifyMessageHeaderIsPassed(x => x.ExpiresAt(expiration),
 				x => { Assert.AreEqual(expiration.ToUniversalTime(), x.ExpirationTime); });

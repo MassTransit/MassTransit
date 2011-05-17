@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,17 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-	using System.Diagnostics;
 	using System.IO;
-	using System.Text;
 	using Context;
 	using Magnum.TestFramework;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
 
-	public abstract class SerializationTest<TSerializer> where TSerializer : IMessageSerializer, new()
+	public abstract class SerializationTest<TSerializer>
+		where TSerializer : IMessageSerializer, new()
 	{
-		private IMessageSerializer _serializer;
+		IMessageSerializer _serializer;
 
 		[TestFixtureSetUp]
 		public void Setup()
@@ -41,16 +40,16 @@ namespace MassTransit.Tests.Serialization
 
 				serializedMessageData = output.ToArray();
 
-		//		Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+				//		Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
 			}
 
 			using (var input = new MemoryStream(serializedMessageData))
 			{
-				var receiveContext = input.ToReceiveContext();
+				IReceiveContext receiveContext = input.ToReceiveContext();
 				_serializer.Deserialize(receiveContext);
 
 				IConsumeContext<T> context;
-				receiveContext.TryGetContext<T>(out context).ShouldBeTrue();
+				receiveContext.TryGetContext(out context).ShouldBeTrue();
 
 				context.ShouldNotBeNull();
 
