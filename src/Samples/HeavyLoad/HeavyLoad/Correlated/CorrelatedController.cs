@@ -25,7 +25,7 @@ namespace HeavyLoad.Correlated
 
 		public void SimulateRequestResponse()
 		{
-			_bus.MakeRequest(x => x.Publish(new SimpleRequestMessage(_id), y => y.SetResponseAddress(_bus.Endpoint.Uri)))
+			_bus.MakeRequest(x => x.Publish(new SimpleRequestMessage(_id), y => y.SendResponseTo(_bus.Endpoint)))
 				.When<SimpleResponseMessage>().RelatedTo(_id).IsReceived(message =>
 					{
 						if (message.CorrelationId != _id)

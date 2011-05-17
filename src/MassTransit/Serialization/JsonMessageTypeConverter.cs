@@ -25,17 +25,26 @@ namespace MassTransit.Serialization
 		readonly JsonSerializer _serializer;
 		readonly IEnumerable<string> _supportedTypes;
 		readonly JToken _token;
+		readonly IDictionary<Type, object> _mapped;
 
 		public JsonMessageTypeConverter(JsonSerializer serializer, JToken token, IEnumerable<string> supportedTypes)
 		{
 			_token = token;
 			_supportedTypes = supportedTypes;
 			_serializer = serializer;
+			_mapped = new Dictionary<Type, object>();
 		}
 
 		public bool TryConvert<T>(out T message)
 			where T : class
 		{
+			object existing;
+			if (_mapped.TryGetValue(typeof(T), out existing))
+			{
+				message = (T) existing;
+				return message != null;
+			}
+
 			string typeUrn = new MessageUrn(typeof (T)).ToString();
 
 			if (_supportedTypes.Any(typeUrn.Equals))
@@ -56,9 +65,13 @@ namespace MassTransit.Serialization
 					UsingReader(jsonReader => _serializer.Populate(jsonReader, obj));
 				}
 
+				_mapped[typeof (T)] = obj;
+
 				message = (T) obj;
 				return true;
 			}
+
+			_mapped[typeof (T)] = null;
 
 			message = null;
 			return false;

@@ -7,7 +7,7 @@ namespace HeavyLoad.Load
 	public class LoopbackHandlerLoadTest :
 		IDisposable
 	{
-		const int _repeatCount = 50000;
+		const int _repeatCount = 5000;
 		readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
 		readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
 
@@ -26,6 +26,8 @@ namespace HeavyLoad.Load
 							s.Handler<GeneralMessage>(Handle);
 							s.Handler<SimpleResponse>(Handler);
 						});
+
+					x.UseJsonSerializer();
 				});
 		}
 
