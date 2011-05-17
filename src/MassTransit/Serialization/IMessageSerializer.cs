@@ -21,6 +21,11 @@ namespace MassTransit.Serialization
 	public interface IMessageSerializer
 	{
 		/// <summary>
+		/// The content type that identifies the message serializer
+		/// </summary>
+		string ContentType { get; }
+
+		/// <summary>
 		/// Serialize the message to the stream
 		/// </summary>
 		/// <typeparam name="T">The implicit type of the message to serialize</typeparam>
@@ -34,6 +39,6 @@ namespace MassTransit.Serialization
 		/// </summary>
 		/// <param name="context"></param>
 		/// <returns>An object that was deserialized</returns>
-		object Deserialize(IReceiveContext context);
+		void Deserialize(IReceiveContext context);
 	}
 }

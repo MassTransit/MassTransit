@@ -31,7 +31,7 @@ namespace MassTransit.TestFramework
 					context.ShouldNotBeNull();
 					context.ShouldBeAnInstanceOf<IReceiveContext>();
 
-					context.SetSerializer(serializer);
+					serializer.Deserialize(context);
 
 					IConsumeContext<TMessage> messageContext;
 					if (context.TryGetContext(out messageContext))

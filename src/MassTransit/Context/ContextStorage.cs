@@ -62,6 +62,25 @@ namespace MassTransit.Context
 			return new PreviousContext<IConsumeContext>(InboundContextKey, previousContext);
 		}
 
+		public static IDisposable CreateContextScope<T>(IConsumeContext<T> context)
+			where T : class
+		{
+			var previousContext = Retrieve<IConsumeContext>(InboundContextKey);
+
+			Store(InboundContextKey, context);
+
+			return new PreviousContext<IConsumeContext>(InboundContextKey, previousContext);
+		}	
+
+		public static IConsumeContext<T> MessageContext<T>()
+		{
+			var context = Retrieve<IConsumeContext<T>>(InboundContextKey);
+			if (context == null)
+				throw new InvalidOperationException("The specified consumer context type was not found");
+
+			return context;
+		}
+
 		public static IConsumeContext Context()
 		{
 			var context = Retrieve<IConsumeContext>(InboundContextKey);

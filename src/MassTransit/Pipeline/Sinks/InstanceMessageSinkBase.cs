@@ -29,9 +29,20 @@ namespace MassTransit.Pipeline.Sinks
 
 		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
 		{
-			Action<TMessage> consumer = _acceptor(context.Message);
+			Action<TMessage> consumer;
+			using (ContextStorage.CreateContextScope(context))
+			{
+				consumer = _acceptor(context.Message);
+			}
+
 			if (consumer != null)
-				yield return x => consumer(context.Message);
+				yield return x =>
+					{
+						using (ContextStorage.CreateContextScope(context))
+						{
+							consumer(context.Message);
+						}
+					};
 		}
 
 		public bool Inspect(IPipelineInspector inspector)

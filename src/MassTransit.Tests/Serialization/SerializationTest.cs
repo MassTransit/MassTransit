@@ -15,6 +15,8 @@ namespace MassTransit.Tests.Serialization
 	using System.Diagnostics;
 	using System.IO;
 	using System.Text;
+	using Context;
+	using Magnum.TestFramework;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
 
@@ -44,9 +46,15 @@ namespace MassTransit.Tests.Serialization
 
 			using (var input = new MemoryStream(serializedMessageData))
 			{
-				var result = _serializer.Deserialize(input.ToReceiveContext()) as T;
+				var receiveContext = input.ToReceiveContext();
+				_serializer.Deserialize(receiveContext);
 
-				return result;
+				IConsumeContext<T> context;
+				receiveContext.TryGetContext<T>(out context).ShouldBeTrue();
+
+				context.ShouldNotBeNull();
+
+				return context.Message;
 			}
 		}
 	}

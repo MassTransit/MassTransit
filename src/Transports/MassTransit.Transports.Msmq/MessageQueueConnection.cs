@@ -103,6 +103,10 @@ namespace MassTransit.Transports.Msmq
 				_queue.MulticastAddress = _multicastAddress;
 			}
 
+			var filter = new MessagePropertyFilter();
+			filter.SetAll();
+			_queue.MessageReadPropertyFilter = filter;
+
 			_needReconnect = false;
 		}
 

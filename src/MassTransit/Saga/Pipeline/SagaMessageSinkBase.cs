@@ -45,7 +45,10 @@ namespace MassTransit.Saga.Pipeline
 						{
 							saga.Bus = context.Bus;
 
-							ConsumerAction(saga, context.Message);
+							using (ContextStorage.CreateContextScope(context))
+							{
+								ConsumerAction(saga, context.Message);
+							}
 						});
 				};
 		}

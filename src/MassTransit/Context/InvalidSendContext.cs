@@ -68,6 +68,11 @@ namespace MassTransit.Context
 			get { throw CreateException(); }
 		}
 
+		public string ContentType
+		{
+			get { throw CreateException(); }
+		}
+
 		public void SerializeTo(Stream stream)
 		{
 			throw CreateException();

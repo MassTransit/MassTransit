@@ -13,7 +13,6 @@
 namespace MassTransit.Tests.TextFixtures
 {
 	using BusConfigurators;
-	using MassTransit.Transports;
 	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
 

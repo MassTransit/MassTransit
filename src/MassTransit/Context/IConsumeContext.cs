@@ -18,6 +18,15 @@ namespace MassTransit.Context
 		IConsumeContext,
 		IMessageContext<T>
 	{
+		/// <summary>
+		/// Send the message to the end of the input queue so that it can be processed again later
+		/// </summary>
+		void RetryLater();
+
+		/// <summary>
+		/// Sends the message to either the fault address if specified or publishes the fault
+		/// </summary>
+		void GenerateFault(Exception ex);
 	}
 
 	/// <summary>
@@ -36,11 +45,6 @@ namespace MassTransit.Context
 			where T : class;
 
 		/// <summary>
-		/// Send the message to the end of the input queue so that it can be processed again later
-		/// </summary>
-		void RetryLater();
-
-		/// <summary>
 		/// Respond to the current message, sending directly to the ResponseAddress if specified
 		/// otherwise publishing the message
 		/// </summary>
@@ -49,10 +53,5 @@ namespace MassTransit.Context
 		/// <param name="contextCallback">The context action for specifying additional context information</param>
 		void Respond<T>(T message, Action<ISendContext<T>> contextCallback)
 			where T : class;
-
-		/// <summary>
-		/// Sends the message to either the fault address if specified or publishes the fault
-		/// </summary>
-		void GenerateFault(Exception ex);
 	}
 }

@@ -37,6 +37,11 @@ namespace MassTransit.Context
 		string MessageType { get; }
 
 		/// <summary>
+		/// The content type of the message from the transport
+		/// </summary>
+		string ContentType { get; }
+
+		/// <summary>
 		/// The address from which this message originated
 		/// </summary>
 		Uri SourceAddress { get; }

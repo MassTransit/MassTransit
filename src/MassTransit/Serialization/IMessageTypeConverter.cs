@@ -12,31 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System;
-	using Context;
-
-	public class JsonMessageEnvelope :
-		MessageEnvelopeBase
+	public interface IMessageTypeConverter
 	{
-		public JsonMessageEnvelope()
-		{
-		}
-
-		JsonMessageEnvelope(Type messageType, object message)
-		{
-			Message = message;
-			MessageType = messageType.ToMessageName();
-		}
-
-		public object Message { get; set; }
-
-		public static JsonMessageEnvelope Create<T>(ISendContext<T> context)
-			where T : class
-		{
-			var envelope = new JsonMessageEnvelope(typeof (T), context.Message);
-			envelope.SetUsingContext(context);
-
-			return envelope;
-		}
+		bool TryConvert<T>(out T message)
+			where T : class;
 	}
 }

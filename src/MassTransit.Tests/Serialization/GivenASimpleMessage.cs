@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Serialization
     using System.IO;
     using System.Text;
     using Context;
+    using Magnum.TestFramework;
     using MassTransit.Serialization;
     using Messages;
     using NUnit.Framework;
@@ -49,9 +50,14 @@ namespace MassTransit.Tests.Serialization
             using (var input = new MemoryStream(serializedMessageData))
             {
 				var receiveContext = new ConsumeContext(input);
-				var receivedMessage = serializer.Deserialize(receiveContext) as PingMessage;
+				serializer.Deserialize(receiveContext);
 
-                Assert.AreEqual(Message, receivedMessage);
+				IConsumeContext<PingMessage> context;
+				receiveContext.TryGetContext<PingMessage>(out context).ShouldBeTrue();
+
+				context.ShouldNotBeNull();
+
+				context.Message.ShouldEqual(Message);
             }
         }
     }

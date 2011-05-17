@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Serialization
     using System.IO;
     using System.Text;
     using Context;
+    using Magnum.TestFramework;
     using MassTransit.Serialization;
     using NUnit.Framework;
 
@@ -55,17 +56,21 @@ namespace MassTransit.Tests.Serialization
                 data = output.ToArray();
             }
 
-   //         Trace.WriteLine(Encoding.UTF8.GetString(data));
+           Trace.WriteLine(Encoding.UTF8.GetString(data));
 
             using (MemoryStream input = new MemoryStream(data))
             {
             	IReceiveContext context = input.ToReceiveContext();
+				serializer.Deserialize(context);
 
-            	object receivedMessage = serializer.Deserialize(context);
+				IConsumeContext<T> messageContext;
+				context.TryGetContext<T>(out messageContext).ShouldBeTrue();
 
-                Assert.AreEqual(message, receivedMessage);
-                Assert.AreNotSame(message, receivedMessage);
+				messageContext.ShouldNotBeNull();
+            	messageContext.Message.ShouldEqual(message);
+            	messageContext.Message.ShouldNotBeTheSameAs(message);
 
+			
 				Assert.AreEqual(_retryCount, context.RetryCount);
 				Assert.AreEqual(_sourceUri, context.SourceAddress);
 				Assert.AreEqual(_responseUri, context.ResponseAddress);

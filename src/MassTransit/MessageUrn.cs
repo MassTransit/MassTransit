@@ -18,6 +18,7 @@ namespace MassTransit
     using System.Runtime.Serialization;
     using System.Text;
 
+
     [Serializable]
 	public class MessageUrn :
 		Uri

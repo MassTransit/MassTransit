@@ -3,6 +3,7 @@ namespace MassTransit.Tests.Serialization
 	using System.Diagnostics;
 	using System.IO;
 	using System.Text;
+	using Context;
 	using Magnum.TestFramework;
 	using MassTransit.Serialization;
 
@@ -34,9 +35,13 @@ namespace MassTransit.Tests.Serialization
 		{
 			using (var buffer = new MemoryStream(Encoding.UTF8.GetBytes(_message)))
 			{
-				object message = _serializer.Deserialize(buffer.ToReceiveContext());
+				IReceiveContext receiveContext = buffer.ToReceiveContext();
+				_serializer.Deserialize(receiveContext);
 
-				message.ShouldBeAnInstanceOf<A>();
+				IConsumeContext<A> context;
+				receiveContext.TryGetContext<A>(out context).ShouldBeTrue();
+
+				context.ShouldNotBeNull();
 			}
 		}
 

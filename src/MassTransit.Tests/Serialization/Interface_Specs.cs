@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Serialization
 	using System.IO;
 	using System.Text;
 	using Context;
+	using Magnum.TestFramework;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
@@ -45,9 +46,14 @@ namespace MassTransit.Tests.Serialization
 			var serializer = new TSerializer();
 			using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(InterfaceBasedMessageXml)))
 			{
-				object obj = serializer.Deserialize(new ConsumeContext(bodyStream));
+				IReceiveContext receiveContext = bodyStream.ToReceiveContext();
+				serializer.Deserialize(receiveContext);
 
-				Assert.IsNotNull(obj);
+				IConsumeContext<ComplaintAdded> context;
+				receiveContext.TryGetContext<ComplaintAdded>(out context).ShouldBeTrue();
+
+				context.ShouldNotBeNull();
+				context.Message.ShouldNotBeNull();
 			}
 		}
 

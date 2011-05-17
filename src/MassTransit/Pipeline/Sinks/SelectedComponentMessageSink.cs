@@ -38,8 +38,11 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			IEnumerable<Action<TMessage>> consumers = _consumerFactory.GetConsumer<TMessage>(consumer =>
 				{
-					if (consumer.Accept(context.Message))
-						return consumer.Consume;
+					using (ContextStorage.CreateContextScope(context))
+					{
+						if (consumer.Accept(context.Message))
+							return consumer.Consume;
+					}
 
 					return null;
 				});
@@ -50,7 +53,13 @@ namespace MassTransit.Pipeline.Sinks
 					continue;
 
 				Action<TMessage> c = consumer;
-				yield return x => c(context.Message);
+				yield return x =>
+					{
+						using (ContextStorage.CreateContextScope(context))
+						{
+							c(context.Message);
+						}
+					};
 			}
 		}
 

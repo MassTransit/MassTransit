@@ -40,6 +40,13 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
+		public bool Inspect(OutboundMessagePipeline pipeline)
+		{
+			Append("Pipeline");
+
+			return true;
+		}
+
 		public bool Inspect<TMessage>(MessageRouter<TMessage> router)
 			where TMessage : class
 		{

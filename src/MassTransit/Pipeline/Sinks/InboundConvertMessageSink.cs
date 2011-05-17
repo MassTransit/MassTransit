@@ -34,8 +34,6 @@ namespace MassTransit.Pipeline.Sinks
 			if (!context.TryGetContext(out outputContext))
 				return Enumerable.Empty<Action<IConsumeContext>>();
 
-			using (ContextStorage.CreateContextScope(outputContext))
-			{
 				return _output.Enumerate(outputContext).Select(consumer => (Action<IConsumeContext>) (x =>
 					{
 						try
@@ -48,7 +46,6 @@ namespace MassTransit.Pipeline.Sinks
 							throw;
 						}
 					}));
-			}
 		}
 
 		public bool Inspect(IPipelineInspector inspector)

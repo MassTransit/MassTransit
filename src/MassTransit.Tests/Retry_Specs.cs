@@ -35,7 +35,7 @@ namespace MassTransit.Tests
 					{
 						Assert.AreEqual(0, LocalBus.Context().RetryCount);
 
-						LocalBus.Context().RetryLater();
+						LocalBus.MessageContext<PingMessage>().RetryLater();
 
 						first = false;
 					}

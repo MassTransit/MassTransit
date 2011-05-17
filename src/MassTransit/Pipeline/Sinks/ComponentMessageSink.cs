@@ -39,7 +39,13 @@ namespace MassTransit.Pipeline.Sinks
 			foreach (var consumer in _consumerFactory.GetConsumer<TMessage>(consumer => consumer.Consume))
 			{
 				var c = consumer;
-				yield return x => c(context.Message);
+				yield return x =>
+					{
+						using (ContextStorage.CreateContextScope(context))
+						{
+							c(context.Message);
+						}
+					};
 			}
 		}
 

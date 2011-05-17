@@ -25,9 +25,12 @@ namespace MassTransit.Serialization
 	/// Serializes messages using the .NET Xml Serializer
 	/// As such, limitations of that serializer apply to this one
 	/// </summary>
+	[Obsolete("Don't know of anyone using, and it's falling behind in features")]
 	public class DotNotXmlMessageSerializer :
 		IMessageSerializer
 	{
+		const string ContentTypeHeaderValue = "application/vnd.masstransit+dotnetxml";
+
 		static readonly XmlAttributes _attributes;
 		static readonly ReaderWriterLockedDictionary<Type, XmlSerializer> _deserializers;
 		static readonly XmlSerializerNamespaces _namespaces;
@@ -49,16 +52,22 @@ namespace MassTransit.Serialization
 			_attributes.XmlRoot = new XmlRootAttribute("Message");
 		}
 
+		public string ContentType
+		{
+			get { return ContentTypeHeaderValue; }
+		}
+
 		public void Serialize<T>(Stream stream, ISendContext<T> context)
 			where T : class
 		{
 			CheckConvention.EnsureSerializable(context.Message);
 			XmlMessageEnvelope envelope = XmlMessageEnvelope.Create(context);
+			context.SetContentType(ContentTypeHeaderValue);
 
 			GetSerializerFor<T>().Serialize(stream, envelope);
 		}
 
-		public object Deserialize(IReceiveContext context)
+		public void Deserialize(IReceiveContext context)
 		{
 			object obj = GetDeserializerFor(typeof (XmlReceiveMessageEnvelope)).Deserialize(context.BodyStream);
 			if (obj.GetType() != typeof (XmlReceiveMessageEnvelope))
@@ -76,9 +85,9 @@ namespace MassTransit.Serialization
 				obj = GetDeserializerFor(t).Deserialize(reader);
 			}
 
+			context.SetContentType(ContentTypeHeaderValue);
 			context.SetUsingMessageEnvelope(envelope);
-
-			return obj;
+			context.SetMessageTypeConverter(new StaticMessageTypeConverter(obj));
 		}
 
 		static XmlSerializer GetSerializerFor<T>()

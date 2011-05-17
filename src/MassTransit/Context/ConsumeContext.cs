@@ -23,10 +23,9 @@ namespace MassTransit.Context
 		MessageContext,
 		IBusContext
 	{
-		readonly Stream _bodyStream;
+		Stream _bodyStream;
 
-		object _message;
-		IMessageSerializer _serializer;
+		IMessageTypeConverter _typeConverter;
 
 		public ConsumeContext(Stream bodyStream)
 		{
@@ -37,21 +36,6 @@ namespace MassTransit.Context
 		/// The endpoint from which the message was received
 		/// </summary>
 		public IEndpoint Endpoint { get; private set; }
-
-		object Message
-		{
-			get
-			{
-				if (_message == null)
-				{
-					_bodyStream.Seek(0, SeekOrigin.Begin);
-					_message = _serializer.Deserialize(this);
-				}
-
-				return _message;
-			}
-		}
-
 
 		/// <summary>
 		/// The bus on which the message was received
@@ -69,6 +53,11 @@ namespace MassTransit.Context
 			Endpoint = endpoint;
 		}
 
+		public void SetBodyStream(Stream stream)
+		{
+			_bodyStream = stream;
+		}
+
 		public void CopyBodyTo(Stream stream)
 		{
 			_bodyStream.Seek(0, SeekOrigin.Begin);
@@ -84,33 +73,23 @@ namespace MassTransit.Context
 			}
 		}
 
-		public void SetSerializer(IMessageSerializer serializer)
+		public void SetMessageTypeConverter(IMessageTypeConverter serializer)
 		{
-			_serializer = serializer;
+			_typeConverter = serializer;
 		}
 
 		public bool TryGetContext<T>(out IConsumeContext<T> context)
 			where T : class
 		{
-			if (typeof (T).IsAssignableFrom(Message.GetType()))
+			T message;
+			if (_typeConverter.TryConvert<T>(out message))
 			{
-				context = new ConsumeContext<T>(this, Message as T);
+				context = new ConsumeContext<T>(this, message);
 				return true;
 			}
 
 			context = null;
 			return false;
-		}
-
-		/// <summary>
-		/// Puts the message back on the queue to be retried later
-		/// </summary>
-		public void RetryLater()
-		{
-			if (Message == null)
-				throw new InvalidOperationException("RetryLater can only be called when a message is being consumed");
-
-			this.FastInvoke(x => x.RetryLater(Message), Message);
 		}
 
 		/// <summary>
@@ -140,17 +119,6 @@ namespace MassTransit.Context
 			}
 		}
 
-		public void GenerateFault(Exception ex)
-		{
-			if (Message == null)
-				throw new InvalidOperationException("A fault cannot be generated when no message is present");
-
-			object message = FastActivator.Create(Message.Implements(typeof(CorrelatedBy<>)) ? typeof (Fault<,>) : typeof(Fault<>),
-					Message, ex);
-
-			this.FastInvoke("SendFault", message);
-		}
-
 		[UsedImplicitly]
 		void SendFault<T>(T message)
 			where T : class
@@ -167,24 +135,6 @@ namespace MassTransit.Context
 			{
 				Bus.Publish(message);
 			}
-		}
-
-		void RetryLater<T>(T message)
-			where T : class
-		{
-			Bus.Endpoint.Send(message, x =>
-				{
-					x.SetUsing(this);
-					x.SetRetryCount(RetryCount + 1);
-				});
-		}
-
-		IEndpoint GetResponseEndpoint()
-		{
-			if (ResponseAddress == null)
-				throw new InvalidOperationException("No response address was contained in the message");
-
-			return Bus.GetEndpoint(ResponseAddress);
 		}
 	}
 
@@ -211,6 +161,11 @@ namespace MassTransit.Context
 		public string MessageType
 		{
 			get { return typeof (TMessage).ToMessageName(); }
+		}
+
+		public string ContentType
+		{
+			get { return _context.ContentType; }
 		}
 
 		public Uri SourceAddress
@@ -320,24 +275,4 @@ namespace MassTransit.Context
 			_responseAddress = value;
 		}
 	}
-
-    //MOVE TO MAGNUM
-    public static class StreamExtensions
-    {
-        public static void CopyTo(this Stream from, Stream to)
-        {
-
-            from.Seek(0, SeekOrigin.Begin);
-
-            var buffer = new byte[4096];
-
-            int read = from.Read(buffer, 0, 4096);
-            while (read > 0)
-            {
-                to.Write(buffer, 0, read);
-
-                read = from.Read(buffer, 0, 4096);
-            }
-        }
-    }
 }

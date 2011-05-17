@@ -44,6 +44,14 @@
 
 				context.SerializeTo(message.BodyStream);
 
+				if (context.ContentType != null)
+				{
+					var headers = new TransportMessageHeaders();
+					headers.Add("Content-Type", context.ContentType);
+
+					message.Extension = headers.GetBytes();
+				}
+
 				try
 				{
 					SendMessage(_connection.Queue, message);

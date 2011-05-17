@@ -16,13 +16,13 @@ namespace MassTransit.Serialization
 	using System.IO;
 	using System.Runtime.Serialization;
 	using Context;
-	using log4net;
 	using Magnum.Cryptography;
 
 	public class PreSharedKeyEncryptedMessageSerializer :
 		IMessageSerializer
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (PreSharedKeyEncryptedMessageSerializer));
+		const string ContentTypeHeaderValue = "application/vnd.masstransit+psk";
+
 		readonly string _key;
 		readonly IMessageSerializer _wrappedSerializer;
 
@@ -30,6 +30,11 @@ namespace MassTransit.Serialization
 		{
 			_key = key;
 			_wrappedSerializer = serializer;
+		}
+
+		public string ContentType
+		{
+			get { return ContentTypeHeaderValue; }
 		}
 
 		public void Serialize<T>(Stream output, ISendContext<T> context)
@@ -41,23 +46,25 @@ namespace MassTransit.Serialization
 				{
 					_wrappedSerializer.Serialize(clearStream, context);
 
-					clearStream.Seek(0, SeekOrigin.Begin);
-
-					using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
+					using (var readStream = new MemoryStream(clearStream.ToArray(), false))
 					{
-						EncryptedStream encryptedStream = cryptographyService.Encrypt(clearStream);
+						using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
+						{
+							EncryptedStream encryptedStream = cryptographyService.Encrypt(readStream);
 
-						var encryptedMessage = new EncryptedMessageEnvelope
-							{
-								CipheredMessage = Convert.ToBase64String(encryptedStream.GetBytes()),
-								Iv = Convert.ToBase64String(encryptedStream.Iv),
-							};
+							var encryptedMessage = new EncryptedMessageEnvelope
+								{
+									CipheredMessage = Convert.ToBase64String(encryptedStream.GetBytes()),
+									Iv = Convert.ToBase64String(encryptedStream.Iv),
+								};
 
-						var encryptedContext = new SendContext<EncryptedMessageEnvelope>(encryptedMessage);
-						encryptedContext.SetUsing(context);
-						encryptedContext.SetMessageType(typeof (EncryptedMessageEnvelope));
+							var encryptedContext = new SendContext<EncryptedMessageEnvelope>(encryptedMessage);
+							encryptedContext.SetUsing(context);
+							encryptedContext.SetMessageType(typeof (EncryptedMessageEnvelope));
+							encryptedContext.SetContentType(ContentTypeHeaderValue);
 
-						_wrappedSerializer.Serialize(output, encryptedContext);
+							_wrappedSerializer.Serialize(output, encryptedContext);
+						}
 					}
 				}
 			}
@@ -71,37 +78,28 @@ namespace MassTransit.Serialization
 			}
 		}
 
-		public object Deserialize(IReceiveContext context)
+		public void Deserialize(IReceiveContext context)
 		{
-			object message = _wrappedSerializer.Deserialize(context);
-			if (message == null)
+			_wrappedSerializer.Deserialize(context);
+			IConsumeContext<EncryptedMessageEnvelope> encryptedContext;
+			context.TryGetContext(out encryptedContext);
+
+			if (encryptedContext == null)
 				throw new SerializationException("Could not deserialize message.");
 
-			if (message is EncryptedMessageEnvelope)
+
+			byte[] cipherBytes = Convert.FromBase64String(encryptedContext.Message.CipheredMessage);
+			byte[] iv = Convert.FromBase64String(encryptedContext.Message.Iv);
+
+			var cipherStream = new EncryptedStream(cipherBytes, iv);
+			using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
 			{
-				var envelope = message as EncryptedMessageEnvelope;
+				Stream clearStream = cryptographyService.Decrypt(cipherStream);
 
-				byte[] cipherBytes = Convert.FromBase64String(envelope.CipheredMessage);
-				byte[] iv = Convert.FromBase64String(envelope.Iv);
+				context.SetBodyStream(clearStream);
 
-				var cipherStream = new EncryptedStream(cipherBytes, iv);
-				using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
-				{
-					Stream clearStream = cryptographyService.Decrypt(cipherStream);
-
-					var encryptedContext = new ConsumeContext(clearStream);
-
-					return _wrappedSerializer.Deserialize(encryptedContext);
-				}
+				_wrappedSerializer.Deserialize(context);
 			}
-			return message;
 		}
-	}
-
-	[Serializable]
-	public class EncryptedMessageEnvelope
-	{
-		public string CipheredMessage { get; set; }
-		public string Iv { get; set; }
 	}
 }

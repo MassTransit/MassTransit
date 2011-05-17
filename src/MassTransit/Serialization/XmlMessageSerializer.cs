@@ -21,13 +21,22 @@ namespace MassTransit.Serialization
     public class XmlMessageSerializer :
         IMessageSerializer
     {
-        static readonly IXmlSerializer _serializer = new CustomXmlSerializer();
+    	const string ContentTypeHeaderValue = "application/vnd.masstransit+xmlv1";
 
-        public void Serialize<T>(Stream stream, ISendContext<T> context)
+    	static readonly IXmlSerializer _serializer = new CustomXmlSerializer();
+
+    	public string ContentType
+    	{
+			get { return ContentTypeHeaderValue; }
+    	}
+
+    	public void Serialize<T>(Stream stream, ISendContext<T> context)
             where T : class
         {
             try
             {
+				context.SetContentType(ContentTypeHeaderValue);
+
                 var envelope = XmlMessageEnvelope.Create(context);
 
                 _serializer.Serialize(stream, envelope, (declaringType, propertyType, value) =>
@@ -51,7 +60,7 @@ namespace MassTransit.Serialization
             }
         }
 
-        public object Deserialize(IReceiveContext context)
+        public void Deserialize(IReceiveContext context)
         {
             try
             {
@@ -60,16 +69,18 @@ namespace MassTransit.Serialization
                 if (message == null)
                     throw new SerializationException("Could not deserialize message.");
 
+				context.SetContentType(ContentTypeHeaderValue);
+
                 if (message is XmlMessageEnvelope)
                 {
                     var envelope = message as XmlMessageEnvelope;
 
                     context.SetUsingMessageEnvelope(envelope);
-
-                    return envelope.Message;
+					context.SetMessageTypeConverter(new StaticMessageTypeConverter(envelope.Message));
+                	return;
                 }
 
-                return message;
+				context.SetMessageTypeConverter(new StaticMessageTypeConverter(message));
             }
             catch (SerializationException)
             {
