@@ -14,10 +14,12 @@ namespace MassTransit.Tests.Serialization
 {
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using Context;
     using Magnum.TestFramework;
     using MassTransit.Serialization;
+    using MassTransit.Services.Subscriptions.Messages;
     using Messages;
     using NUnit.Framework;
 
@@ -44,7 +46,7 @@ namespace MassTransit.Tests.Serialization
 
                 serializedMessageData = output.ToArray();
 
-       //         Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
             }
 
             using (var input = new MemoryStream(serializedMessageData))

@@ -15,6 +15,7 @@ namespace MassTransit.Serialization
 	using System.Collections.Generic;
 	using System.IO;
 	using Context;
+	using Custom;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
@@ -23,12 +24,12 @@ namespace MassTransit.Serialization
 	{
 		const string ContentTypeHeaderValue = "application/vnd.masstransit+json";
 
-		readonly JsonSerializerSettings _settings;
-		JsonSerializer _serializer;
+		readonly JsonSerializer _deserializer;
+		readonly JsonSerializer _serializer;
 
 		public JsonMessageSerializer()
 		{
-			_settings = new JsonSerializerSettings
+			_serializer = JsonSerializer.Create(new JsonSerializerSettings
 				{
 					NullValueHandling = NullValueHandling.Ignore,
 					DefaultValueHandling = DefaultValueHandling.Ignore,
@@ -36,10 +37,22 @@ namespace MassTransit.Serialization
 					ObjectCreationHandling = ObjectCreationHandling.Auto,
 					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
 					ContractResolver = new JsonContractResolver(),
-					Converters = new List<JsonConverter>(new[] {new InterfaceProxyConverter()})
-				};
+				});
 
-			_serializer = JsonSerializer.Create(_settings);
+			_deserializer = JsonSerializer.Create(new JsonSerializerSettings
+				{
+					NullValueHandling = NullValueHandling.Ignore,
+					DefaultValueHandling = DefaultValueHandling.Ignore,
+					MissingMemberHandling = MissingMemberHandling.Ignore,
+					ObjectCreationHandling = ObjectCreationHandling.Auto,
+					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+					ContractResolver = new JsonContractResolver(),
+					Converters = new List<JsonConverter>(new JsonConverter[]
+						{
+							new InterfaceProxyConverter(),
+							new MessageTypeConverter(),
+						})
+				});
 		}
 
 		public string ContentType
@@ -54,7 +67,8 @@ namespace MassTransit.Serialization
 
 			Envelope envelope = Envelope.Create(context);
 
-			using (var writer = new StreamWriter(output))
+			using (var nonClosingStream = new NonClosingStream(output))
+			using (var writer = new StreamWriter(nonClosingStream))
 			using (var jsonWriter = new JsonTextWriter(writer))
 			{
 				jsonWriter.Formatting = Formatting.Indented;
@@ -69,14 +83,15 @@ namespace MassTransit.Serialization
 		public void Deserialize(IReceiveContext context)
 		{
 			Envelope result;
-			using (var reader = new StreamReader(context.BodyStream))
+			using (var nonClosingStream = new NonClosingStream(context.BodyStream))
+			using (var reader = new StreamReader(nonClosingStream))
 			using (var jsonReader = new JsonTextReader(reader))
 			{
-				result = _serializer.Deserialize<Envelope>(jsonReader);
+				result = _deserializer.Deserialize<Envelope>(jsonReader);
 			}
 
 			context.SetUsingEnvelope(result);
-			context.SetMessageTypeConverter(new JsonMessageTypeConverter(_serializer, result.Message as JToken,
+			context.SetMessageTypeConverter(new JsonMessageTypeConverter(_deserializer, result.Message as JToken,
 				result.MessageType));
 		}
 	}

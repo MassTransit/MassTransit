@@ -40,28 +40,39 @@ namespace MassTransit.Serialization
 
 			if (_supportedTypes.Any(typeUrn.Equals))
 			{
-				using (var jsonReader = new JTokenReader(_token))
+				object obj;
+				if (typeof (T).IsInterface && typeof (T).IsAllowedMessageType())
 				{
-					if (typeof(T).IsInterface && typeof(T).IsAllowedMessageType())
-					{
-						Type proxyType = InterfaceImplementationBuilder.GetProxyFor(typeof (T));
+					Type proxyType = InterfaceImplementationBuilder.GetProxyFor(typeof (T));
 
-						object obj = FastActivator.Create(proxyType);
-						_serializer.Populate(jsonReader, obj);
+					obj = FastActivator.Create(proxyType);
 
-						message = (T) obj;
-					}
-					else
-					{
-						message = _serializer.Deserialize<T>(jsonReader);
-					}
-
-					return true;
+					UsingReader(jsonReader => _serializer.Populate(jsonReader, obj));
 				}
+				else
+				{
+					obj = FastActivator<T>.Create();
+
+					UsingReader(jsonReader => _serializer.Populate(jsonReader, obj));
+				}
+
+				message = (T) obj;
+				return true;
 			}
 
 			message = null;
 			return false;
+		}
+
+		void UsingReader(Action<JsonReader> callback)
+		{
+			if (_token == null)
+				return;
+
+			using (var jsonReader = new JTokenReader(_token))
+			{
+				callback(jsonReader);
+			}
 		}
 	}
 }
