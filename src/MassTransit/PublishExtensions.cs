@@ -12,11 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using Util;
-
 	public static class PublishExtensions
 	{
-		public static void Publish<T>([NotNull] this IServiceBus bus, [NotNull] T message)
+		public static void Publish<T>(this IServiceBus bus, T message)
 			where T : class
 		{
 			bus.Publish(message, x => { });

@@ -23,12 +23,14 @@ namespace MassTransit.Context
 		readonly HashSet<IEndpoint> _endpoints = new HashSet<IEndpoint>();
 		Action<T, IEndpoint> _eachSubscriberAction = Ignore;
 		Action<T> _noSubscribersAction = Ignore;
+		Func<IEndpoint, bool> _wasEndpointAlreadySent;
 
 		public PublishContext(T message)
 			: base(message)
 		{
 			_noSubscribersAction = Ignore;
 			_eachSubscriberAction = Ignore;
+			_wasEndpointAlreadySent = _endpoints.Contains;
 		}
 
 		public PublishContext(T message, ISendContext context)
@@ -44,9 +46,12 @@ namespace MassTransit.Context
 
 			if (typeof(TMessage).IsAssignableFrom(typeof(T)))
 			{
-				context = new PublishContext<TMessage>(Message as TMessage, this);
-				context.IfNoSubscribers(x => NotifyNoSubscribers(Message));
-				context.ForEachSubscriber((x,e) => NotifyForMessageConsumer(Message, e));
+				var busPublishContext =  new PublishContext<TMessage>(Message as TMessage, this);
+				busPublishContext._wasEndpointAlreadySent = _wasEndpointAlreadySent;
+				busPublishContext.IfNoSubscribers(x => NotifyNoSubscribers(Message));
+				busPublishContext.ForEachSubscriber((x, e) => NotifyForMessageConsumer(Message, e));
+
+				context = busPublishContext;
 			}
 
 			return context != null;
@@ -61,7 +66,7 @@ namespace MassTransit.Context
 
 		public bool WasEndpointAlreadySent(IEndpoint endpoint)
 		{
-			return _endpoints.Contains(endpoint);
+			return _wasEndpointAlreadySent(endpoint);
 		}
 
 		public void NotifyNoSubscribers(T message)
