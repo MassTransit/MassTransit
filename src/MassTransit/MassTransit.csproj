@@ -31,6 +31,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <BuildConfigKey Condition=" '$(BuildConfigKey)' == '' ">NET40</BuildConfigKey>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
   </PropertyGroup>
@@ -39,7 +40,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;$(BuildConfigKey)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>3009,3001,3008</NoWarn>
@@ -49,7 +50,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;$(BuildConfigKey)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\MassTransit.XML</DocumentationFile>
@@ -289,7 +290,7 @@
     <Compile Include="Serialization\JsonContractResolver.cs" />
     <Compile Include="Serialization\JsonMessageSerializer.cs" />
     <Compile Include="Serialization\JsonMessageTypeConverter.cs" />
-    <Compile Include="Serialization\MessageTypeConverter.cs" />
+    <Compile Include="Serialization\ListJsonConverter.cs" />
     <Compile Include="Serialization\StaticMessageTypeConverter.cs" />
     <Compile Include="Serialization\VersionOneXmlMessageSerializer.cs" />
     <Compile Include="ServiceContainer.cs" />
@@ -361,6 +362,7 @@
     <Compile Include="Util\ObjectExtensions.cs" />
     <Compile Include="Util\ReSharperStaticAnalysis.cs" />
     <Compile Include="Util\SpecialLoggers.cs" />
+    <Compile Include="Util\StreamExtensions.cs" />
     <Compile Include="Util\UriExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

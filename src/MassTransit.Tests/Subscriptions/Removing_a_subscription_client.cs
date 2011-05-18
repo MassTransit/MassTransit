@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Subscriptions
 {
+	using Magnum;
+	using Magnum.Extensions;
 	using MassTransit.Transports;
 	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
@@ -31,6 +33,8 @@ namespace MassTransit.Tests.Subscriptions
 		{
 			RemoteBus.SubscribeHandler<A>(x => { });
 			RemoteBus.Dispose();
+
+			ThreadUtil.Sleep(2.Seconds());
 
 			LocalBus.ShouldHaveRemoteSubscriptionFor<A>();
 		}
@@ -52,6 +56,8 @@ namespace MassTransit.Tests.Subscriptions
 			LocalBus.ShouldHaveRemoteSubscriptionFor<A>();
 
 			RemoteBus.Dispose();
+
+			ThreadUtil.Sleep(2.Seconds());
 
 			SetupRemoteBus();
 

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>Newtonsoft.Json.Net35</name>
+        <name>Newtonsoft.Json</name>
     </assembly>
     <members>
         <member name="T:Newtonsoft.Json.Bson.BsonReader">
