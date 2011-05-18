@@ -37,18 +37,32 @@ namespace MassTransit.EndpointConfigurators
 		/// Overrides the transport factory when the error transport is created, to modify the behavior
 		/// </summary>
 		/// <param name="transportFactory"></param>
-		EndpointConfigurator SetTransportFactory(Func<ITransportFactory, ITransportSettings, IDuplexTransport> transportFactory);
+		EndpointConfigurator SetTransportFactory(
+			Func<ITransportFactory, ITransportSettings, IDuplexTransport> transportFactory);
 
 		/// <summary>
 		/// Overrides the transport factory when the error transport is created, to modify the behavior
 		/// </summary>
 		/// <param name="errorTransportFactory"></param>
-		EndpointConfigurator SetErrorTransportFactory(Func<ITransportFactory, ITransportSettings, IOutboundTransport> errorTransportFactory);
+		EndpointConfigurator SetErrorTransportFactory(
+			Func<ITransportFactory, ITransportSettings, IOutboundTransport> errorTransportFactory);
 
 		/// <summary>
 		/// Remove any existing messages from the endpoint when it is created
 		/// </summary>
 		/// <returns></returns>
 		EndpointConfigurator PurgeExistingMessages();
+
+		/// <summary>
+		/// Creates the endpoint as transactional if it needs to be created
+		/// </summary>
+		/// <returns></returns>
+		EndpointConfigurator CreateTransactional();
+
+		/// <summary>
+		/// Creates the endpoint if it is missing
+		/// </summary>
+		/// <returns></returns>
+		EndpointConfigurator CreateIfMissing();
 	}
 }
