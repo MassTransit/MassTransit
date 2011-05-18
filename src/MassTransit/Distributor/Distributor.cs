@@ -13,7 +13,9 @@
 namespace MassTransit.Distributor
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
+	using log4net;
 	using Magnum;
 	using Magnum.Extensions;
 	using Magnum.Threading;
@@ -25,11 +27,10 @@ namespace MassTransit.Distributor
 		IDistributor<TMessage>
 		where TMessage : class
 	{
-		readonly int _pingTimeout = (int) 1.Minutes().TotalMilliseconds;
+		readonly int _pingTimeout = (int) 5.Seconds().TotalMilliseconds;
 		readonly IWorkerSelectionStrategy<TMessage> _selectionStrategy;
 
-		readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers =
-			new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
+		IDictionary<Uri,WorkerDetails> _workers = new Dictionary<Uri,WorkerDetails>();
 
 		Fiber _fiber;
 		ScheduledOperation _scheduled;
@@ -52,14 +53,18 @@ namespace MassTransit.Distributor
 
 		public void Consume(TMessage message)
 		{
-			WorkerDetails worker = _selectionStrategy.SelectWorker(_workers.Values, message);
-			if (worker == null)
+			WorkerDetails worker;
+			lock (_workers)
 			{
-				_bus.MessageContext<TMessage>().RetryLater();
-				return;
-			}
+				worker = _selectionStrategy.SelectWorker(_workers.Values, message);
+				if (worker == null)
+				{
+					_bus.MessageContext<TMessage>().RetryLater();
+					return;
+				}
 
-			worker.Add();
+				worker.Add();
+			}
 
 			IEndpoint endpoint = _bus.GetEndpoint(worker.DataUri);
 
@@ -70,7 +75,8 @@ namespace MassTransit.Distributor
 
 		public bool Accept(TMessage message)
 		{
-			return _selectionStrategy.HasAvailableWorker(_workers.Values, message);
+			lock(_workers)
+				return _selectionStrategy.HasAvailableWorker(_workers.Values, message);
 		}
 
 		bool _disposed;
@@ -110,6 +116,8 @@ namespace MassTransit.Distributor
 			bus.SubscribeInstance(this);
 
 			_scheduled = _scheduler.Schedule(_pingTimeout, _pingTimeout, _fiber, PingWorkers);
+
+			_bus.Publish(new PingWorker());
 		}
 
 		public void Stop()
@@ -117,37 +125,52 @@ namespace MassTransit.Distributor
 			_scheduled.Cancel();
 			_scheduled = null;
 
-			_workers.Clear();
+			lock(_workers)
+				_workers.Clear();
 
 			_unsubscribeAction();
 		}
 
 		public void Consume(WorkerAvailable<TMessage> message)
 		{
-			WorkerDetails worker = _workers.Retrieve(message.ControlUri, () =>
-				{
-					return new WorkerDetails
-						{
-							ControlUri = message.ControlUri,
-							DataUri = message.DataUri,
-							InProgress = message.InProgress,
-							InProgressLimit = message.InProgressLimit,
-							Pending = message.Pending,
-							PendingLimit = message.PendingLimit,
-							LastUpdate = message.Updated,
-						};
-				});
+			WorkerDetails worker;
+			lock (_workers)
+			{
+				worker = _workers.Retrieve(message.ControlUri, () =>
+					{
+						return new WorkerDetails
+							{
+								ControlUri = message.ControlUri,
+								DataUri = message.DataUri,
+								InProgress = message.InProgress,
+								InProgressLimit = message.InProgressLimit,
+								Pending = message.Pending,
+								PendingLimit = message.PendingLimit,
+								LastUpdate = message.Updated,
+							};
+					});
+			}
 
 			worker.UpdateInProgress(message.InProgress, message.InProgressLimit, message.Pending, message.PendingLimit,
 				message.Updated);
+
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Worker {0}: {1} in progress, {2} pending", message.DataUri, message.InProgress, message.Pending);
 		}
+
+		static readonly ILog _log = LogManager.GetLogger(typeof (Distributor<TMessage>));
 
 		void PingWorkers()
 		{
-			_workers.Values
-				.Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(_pingTimeout.Milliseconds()))
-				.ToList()
-				.ForEach(x =>
+			List<WorkerDetails> expired;
+			lock(_workers)
+			{
+				expired = _workers.Values
+					.Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(_pingTimeout.Milliseconds()))
+					.ToList();
+			}
+
+			expired.ForEach(x =>
 					{
 						_bus.GetEndpoint(x.ControlUri).Send(new PingWorker(),
 							context => context.SetResponseAddress(_bus.Endpoint.Address.Uri));

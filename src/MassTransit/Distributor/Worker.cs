@@ -241,7 +241,7 @@ namespace MassTransit.Distributor
 
         static void RewriteResponseAddress(Uri responseAddress)
         {
-            var context = ContextStorage.Context() as ConsumeContext<Distributed<TMessage>>;
+            var context = ContextStorage.MessageContext<Distributed<TMessage>>() as ConsumeContext<Distributed<TMessage>>;
             if (context != null)
             {
                 context.SetResponseAddress(responseAddress);

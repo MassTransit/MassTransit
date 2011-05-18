@@ -14,6 +14,7 @@ namespace MassTransit.Context
 {
 	using System;
 	using System.IO;
+	using log4net;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
 	using Serialization;
@@ -142,6 +143,8 @@ namespace MassTransit.Context
 		IConsumeContext<TMessage>
 		where TMessage : class
 	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (ConsumeContext));
+
 		readonly IConsumeContext _context;
 		readonly TMessage _message;
 		Uri _responseAddress;
@@ -190,7 +193,7 @@ namespace MassTransit.Context
 
 		public string Network
 		{
-			get { return _context.MessageId; }
+			get { return _context.Network; }
 		}
 
 		public DateTime? ExpirationTime
@@ -228,6 +231,9 @@ namespace MassTransit.Context
 
 		public void RetryLater()
 		{
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Retrying message of type {0} later", typeof (TMessage));
+
 			Bus.Endpoint.Send(Message, x =>
 			{
 				x.SetUsing(this);

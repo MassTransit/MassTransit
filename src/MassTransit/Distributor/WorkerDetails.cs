@@ -38,9 +38,6 @@ namespace MassTransit.Distributor
 		{
 			lock (this)
 			{
-				if (updated < LastUpdate)
-					return;
-
 				InProgress = inProgress;
 				InProgressLimit = inProgressLimit;
 
