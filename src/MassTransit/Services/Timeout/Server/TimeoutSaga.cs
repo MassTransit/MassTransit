@@ -67,6 +67,8 @@ namespace MassTransit.Services.Timeout.Server
 
 									saga.NotifyTimeoutScheduled();
 								}).TransitionTo(WaitingForTime));
+
+					RemoveWhen(x => x.CurrentState == Completed);
 				});
 		}
 
