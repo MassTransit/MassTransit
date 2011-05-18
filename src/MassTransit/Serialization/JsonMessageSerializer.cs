@@ -101,7 +101,7 @@ namespace MassTransit.Serialization
 						ContractResolver = new JsonContractResolver(),
 						Converters = new List<JsonConverter>(new JsonConverter[]
 							{
-								new MessageTypeConverter(),
+								new ListJsonConverter(),
 								new InterfaceProxyConverter(),
 							})
 					}));

@@ -74,7 +74,7 @@ namespace MassTransit.Tests.Serialization
 			
 			_deserializer = JsonSerializer.Create(new JsonSerializerSettings
 				{
-					Converters = new List<JsonConverter>(new JsonConverter[] { new MessageTypeConverter() }),
+					Converters = new List<JsonConverter>(new JsonConverter[] { new ListJsonConverter() }),
 					NullValueHandling = NullValueHandling.Ignore,
 					DefaultValueHandling = DefaultValueHandling.Ignore,
 					MissingMemberHandling = MissingMemberHandling.Ignore,
@@ -181,7 +181,7 @@ namespace MassTransit.Tests.Serialization
 			Trace.WriteLine(body);
 			var result = JsonConvert.DeserializeObject<Envelope>(body, new JsonSerializerSettings
 				{
-					Converters = new List<JsonConverter>(new JsonConverter[]{new MessageTypeConverter()}),
+					Converters = new List<JsonConverter>(new JsonConverter[]{new ListJsonConverter()}),
 					NullValueHandling = NullValueHandling.Ignore,
 					DefaultValueHandling = DefaultValueHandling.Ignore,
 					MissingMemberHandling = MissingMemberHandling.Ignore,
