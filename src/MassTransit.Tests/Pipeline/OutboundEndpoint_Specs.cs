@@ -44,7 +44,8 @@ namespace MassTransit.Tests.Pipeline
 
 			var message = new PingMessage();
 
-			var context = MockRepository.GenerateMock<ISendContext<PingMessage>>();
+			var context = new SendContext<PingMessage>(message);
+
 			endpoint.Expect(x => x.Send(context)).IgnoreArguments();
 
 			_pipeline.Dispatch(message);
