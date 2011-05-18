@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.TestFramework.Fixtures
 	using System;
 	using Magnum;
 	using Magnum.Reflection;
-	using MassTransit.Transports;
 	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
 	using Saga;
@@ -25,7 +24,7 @@ namespace MassTransit.TestFramework.Fixtures
 		LocalTestFixture<LoopbackTransportFactory>
 		where TSaga : class, ISaga
 	{
-		private InMemorySagaRepository<TSaga> _repository;
+		InMemorySagaRepository<TSaga> _repository;
 
 		public InMemorySagaRepository<TSaga> Repository
 		{

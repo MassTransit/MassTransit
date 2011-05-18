@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.Services.HealthMonitoring
 	using log4net;
 	using Magnum.Extensions;
 	using Messages;
-	using Pipeline.Inspectors;
 	using Saga;
 	using Server;
 
@@ -25,10 +24,10 @@ namespace MassTransit.Services.HealthMonitoring
 		Consumes<HealthUpdateRequest>.All,
 		IDisposable
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (HealthService));
-		private readonly ISagaRepository<HealthSaga> _healthSagas;
-		private IServiceBus _bus;
-		private UnsubscribeAction _unsubscribeToken = () => false;
+		static readonly ILog _log = LogManager.GetLogger(typeof (HealthService));
+		readonly IServiceBus _bus;
+		readonly ISagaRepository<HealthSaga> _healthSagas;
+		UnsubscribeAction _unsubscribeToken = () => false;
 
 		public HealthService(IServiceBus bus, ISagaRepository<HealthSaga> healthSagas)
 		{
@@ -51,9 +50,7 @@ namespace MassTransit.Services.HealthMonitoring
 			_log.Info("Health Service Starting");
 
 			_unsubscribeToken += _bus.SubscribeInstance(this);
-			_unsubscribeToken += _bus.SubscribeSaga<HealthSaga>(_healthSagas);
-
-			//PipelineViewer.Trace(_bus.InboundPipeline);
+			_unsubscribeToken += _bus.SubscribeSaga(_healthSagas);
 
 			_log.Info("Health Service Started");
 		}
@@ -67,7 +64,7 @@ namespace MassTransit.Services.HealthMonitoring
 			_log.Info("Health Service Stopped");
 		}
 
-		public void UpdateSubscribers()
+		void UpdateSubscribers()
 		{
 			var message = new HealthUpdate();
 

@@ -19,7 +19,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using Magnum.Extensions;
 	using Magnum.Reflection;
 	using Magnum.StateMachine;
-	using MassTransit.SubscriptionConnectors;
 
 	public interface SagaWorkerEventConnectorFactory
 	{

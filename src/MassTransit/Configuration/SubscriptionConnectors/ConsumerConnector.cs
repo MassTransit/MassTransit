@@ -23,7 +23,6 @@ namespace MassTransit.SubscriptionConnectors
 	using Saga;
 	using Util;
 
-
 	public interface ConsumerConnector
 	{
 		UnsubscribeAction Connect(IInboundPipelineConfigurator configurator);
@@ -33,8 +32,8 @@ namespace MassTransit.SubscriptionConnectors
 		ConsumerConnector
 		where T : class
 	{
+		readonly object[] _args;
 		readonly IEnumerable<ConsumerSubscriptionConnector> _connectors;
-		object[] _args;
 
 		public ConsumerConnector(IConsumerFactory<T> consumerFactory)
 		{
@@ -50,9 +49,9 @@ namespace MassTransit.SubscriptionConnectors
 			    || interfaces.Implements(typeof (Observes<,>)))
 				throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
 
-			if (interfaces.Implements(typeof(IDistributor<>))
-				|| interfaces.Implements(typeof(IWorker<>))
-				|| interfaces.Implements(typeof(ISagaWorker<>)))
+			if (interfaces.Implements(typeof (IDistributor<>))
+			    || interfaces.Implements(typeof (IWorker<>))
+			    || interfaces.Implements(typeof (ISagaWorker<>)))
 				throw new ConfigurationException("Distributor classes can only be subscribed as instances");
 
 			_connectors = ConsumesSelected()

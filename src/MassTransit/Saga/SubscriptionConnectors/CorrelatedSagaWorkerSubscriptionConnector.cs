@@ -18,14 +18,13 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using Distributor.Pipeline;
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
-	using MassTransit.Pipeline.Configuration;
 
 	public class CorrelatedSagaWorkerSubscriptionConnector<TSaga, TMessage> :
 		SagaWorkerSubscriptionConnector
 		where TSaga : SagaStateMachine<TSaga>, ISaga
 		where TMessage : class, CorrelatedBy<Guid>
 	{
-		CorrelatedSagaSubscriptionConnector<TSaga, TMessage> _connector;
+		readonly CorrelatedSagaSubscriptionConnector<TSaga, TMessage> _connector;
 
 		public CorrelatedSagaWorkerSubscriptionConnector(ISagaRepository<TSaga> sagaRepository,
 		                                                 DataEvent<TSaga, TMessage> dataEvent,

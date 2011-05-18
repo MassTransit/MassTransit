@@ -15,7 +15,9 @@ namespace MassTransit.RuntimeServices.Model
 	using FluentNHibernate.Mapping;
 	using NHibernateIntegration;
 	using Services.Subscriptions.Server;
+	using Util;
 
+	[UsedImplicitly]
 	public class SubscriptionClientSagaMap :
 		ClassMap<SubscriptionClientSaga>
 	{
@@ -30,7 +32,6 @@ namespace MassTransit.RuntimeServices.Model
 
 			Map(x => x.ControlUri).CustomType<UriUserType>();
 			Map(x => x.DataUri).CustomType<UriUserType>();
-			;
 		}
 	}
 }

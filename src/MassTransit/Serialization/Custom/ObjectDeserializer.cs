@@ -75,7 +75,7 @@ namespace MassTransit.Serialization.Custom
 					_log.Debug("No property " + context.LocalName + " in class " + typeof (T).ToFriendlyName() + " for deserialization");
 				}
 
-				object discardValue = context.Deserialize(context.Namespace);
+				context.Deserialize(context.Namespace);
 			}
 		}
 	}

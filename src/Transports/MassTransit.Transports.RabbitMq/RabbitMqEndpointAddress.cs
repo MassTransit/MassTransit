@@ -32,9 +32,9 @@ namespace MassTransit.Transports.RabbitMq
 		readonly ConnectionFactory _connectionFactory;
 
 		readonly bool _isTransactional;
+		readonly string _name;
 		readonly Uri _uri;
 		Func<bool> _isLocal;
-		string _name;
 
 
 		public RabbitMqEndpointAddress(Uri uri, ConnectionFactory connectionFactory, string name)
@@ -73,11 +73,6 @@ namespace MassTransit.Transports.RabbitMq
 		public bool IsLocal
 		{
 			get { return _isLocal(); }
-		}
-
-		public string Path
-		{
-			get { return _uri.AbsolutePath.Substring(1); }
 		}
 
 		public bool IsTransactional
@@ -142,12 +137,6 @@ namespace MassTransit.Transports.RabbitMq
 			}
 
 			VerifyQueueOrExchangeNameIsLegal(name);
-
-			var builder = new UriBuilder(address.Scheme, address.Host, address.Port, address.PathAndQuery)
-				{
-					UserName = connectionFactory.UserName,
-					Password = connectionFactory.Password
-				};
 
 			return new RabbitMqEndpointAddress(address, connectionFactory, name);
 		}

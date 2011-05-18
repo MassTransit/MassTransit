@@ -35,19 +35,28 @@ namespace MassTransit.Transports
 		{
 			GuardAgainstDisposed();
 
-			var message = new LoopbackMessage();
-
-			if (context.ExpirationTime.HasValue)
+			LoopbackMessage message = null;
+			try
 			{
-				message.ExpirationTime = context.ExpirationTime.Value;
+				message = new LoopbackMessage();
+
+				if (context.ExpirationTime.HasValue)
+				{
+					message.ExpirationTime = context.ExpirationTime.Value;
+				}
+
+				context.SerializeTo(message.Body);
+				lock (_messageLock)
+				{
+					GuardAgainstDisposed();
+
+					_messages.AddLast(message);
+				}
 			}
-
-			context.SerializeTo(message.Body);
-			lock (_messageLock)
+			catch (Exception)
 			{
-				GuardAgainstDisposed();
-
-				_messages.AddLast(message);
+				if(message != null)
+					message.Dispose();
 			}
 
 			_messageReady.Set();

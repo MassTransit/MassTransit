@@ -25,11 +25,11 @@ namespace MassTransit.SystemView.Core.Consumer
 		Consumes<IWorkerAvailable>.All,
 		IDisposable
 	{
+		readonly IServiceBus _bus;
 		readonly Guid _clientId = CombGuid.Generate();
 		readonly Uri _subscriptionServiceUri;
-		IServiceBus _bus;
+		readonly UnsubscribeAction _unsubscribe;
 		IEndpoint _subscriptionServiceEndpoint;
-		UnsubscribeAction _unsubscribe;
 
 		public SubscriptionDataConsumer(IServiceBus bus, Uri subscriptionServiceUri)
 		{
@@ -89,7 +89,8 @@ namespace MassTransit.SystemView.Core.Consumer
 		{
 			_subscriptionServiceEndpoint = _bus.GetEndpoint(_subscriptionServiceUri);
 
-			_subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Address.Uri, _bus.Endpoint.Address.Uri));
+			_subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Address.Uri,
+				_bus.Endpoint.Address.Uri));
 		}
 	}
 }

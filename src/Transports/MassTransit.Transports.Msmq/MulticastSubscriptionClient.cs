@@ -20,10 +20,10 @@ namespace MassTransit.Transports.Msmq
 		IBusService
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (MulticastSubscriptionClient));
+		readonly string _networkKey;
 		readonly Uri _uri;
 		SubscriptionCoordinator _coordinator;
 		bool _disposed;
-		string _networkKey;
 		IServiceBus _subscriptionBus;
 
 		public MulticastSubscriptionClient(IServiceBus subscriptionBus, Uri uri, string networkKey)

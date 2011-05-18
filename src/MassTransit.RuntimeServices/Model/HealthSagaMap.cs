@@ -15,7 +15,9 @@ namespace MassTransit.RuntimeServices.Model
 	using FluentNHibernate.Mapping;
 	using NHibernateIntegration;
 	using Services.HealthMonitoring.Server;
+	using Util;
 
+	[UsedImplicitly]
 	public class HealthSagaMap :
 		ClassMap<HealthSaga>
 	{

@@ -3,9 +3,7 @@ namespace MassTransit.Transports.RabbitMq.Management
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Context;
 	using log4net;
-	using Magnum.Extensions;
 	using RabbitMQ.Client;
 
 	public class RabbitMqEndpointManagement :
@@ -92,14 +90,7 @@ namespace MassTransit.Transports.RabbitMq.Management
 
 				yield return messageType;
 
-				IEnumerable<Type> interfaces = messageType
-					.GetInterfaces()
-					.Where(x => !(x.IsGenericType && x.GetGenericTypeDefinition() == typeof(CorrelatedBy<>)))
-					.Where(x => x.Namespace != null)
-					.Where(x => x.Namespace != "System")
-					.Where(x => !x.Namespace.StartsWith("System."));
-
-				foreach (Type type in interfaces)
+				foreach (var type in messageType.GetMessageTypes().Skip(1))
 				{
 					var interfaceName = new MessageName(type);
 
@@ -107,21 +98,6 @@ namespace MassTransit.Transports.RabbitMq.Management
 					model.ExchangeBind(interfaceName.ToString(), messageName.ToString(), "");
 
 					yield return type;
-				}
-
-				Type baseType = messageType.BaseType;
-				while ((baseType != null) &&
-				       (baseType != typeof (object) && baseType.Namespace != null && baseType.Namespace != "System" &&
-				        baseType.Namespace.StartsWith("System.") == false))
-				{
-					var baseTypeName = new MessageName(baseType);
-
-					model.ExchangeDeclare(baseTypeName.ToString(), ExchangeType.Fanout, true, false, null);
-					model.ExchangeBind(baseTypeName.ToString(), messageName.ToString(), "");
-
-					yield return baseType;
-
-					baseType = baseType.BaseType;
 				}
 
 				model.Close(200, "ok");

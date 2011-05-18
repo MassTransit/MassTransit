@@ -23,8 +23,8 @@ namespace MassTransit.Transports.Msmq.Management
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (WindowsService));
 
+		readonly TimeSpan _timeout;
 		ServiceController _controller;
-		TimeSpan _timeout;
 
 		public WindowsService(string serviceName)
 		{

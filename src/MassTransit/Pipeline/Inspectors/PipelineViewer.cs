@@ -267,7 +267,7 @@ namespace MassTransit.Pipeline.Inspectors
 			_depth--;
 		}
 
-		string GetPolicy<TComponent, TMessage>(ISagaPolicy<TComponent, TMessage> policy)
+		static string GetPolicy<TComponent, TMessage>(ISagaPolicy<TComponent, TMessage> policy)
 			where TComponent : class, ISaga
 		{
 			string description;

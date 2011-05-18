@@ -74,7 +74,7 @@ namespace MassTransit.TestFramework.Transports
 		[Test]
 		public void While_sending_it_should_perisist_even_on_rollback()
 		{
-			using (var trx = new TransactionScope())
+			using (new TransactionScope())
 			{
 				SendMessage();
 

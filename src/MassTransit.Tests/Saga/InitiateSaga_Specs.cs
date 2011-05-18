@@ -153,7 +153,7 @@ namespace MassTransit.Tests.Saga
 
 			_repository = SetupSagaRepository<SimpleSaga>();
 
-			var remove = LocalBus.SubscribeSaga<SimpleSaga>(_repository);
+			LocalBus.SubscribeSaga(_repository);
 		}
 
 		private Guid _sagaId;

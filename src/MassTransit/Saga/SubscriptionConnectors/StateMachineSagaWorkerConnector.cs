@@ -18,7 +18,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using System.Linq;
 	using Configuration;
 	using Magnum.Reflection;
-	using MassTransit.SubscriptionConnectors;
 
 	public class StateMachineSagaWorkerConnector<T> :
 		IEnumerable<SagaWorkerSubscriptionConnector>

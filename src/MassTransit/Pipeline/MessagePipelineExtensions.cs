@@ -20,7 +20,6 @@ namespace MassTransit.Pipeline
 	using MassTransit.Configuration;
 	using Sinks;
 	using SubscriptionConnectors;
-	using Util;
 
 	public static class MessagePipelineExtensions
 	{
@@ -53,22 +52,26 @@ namespace MassTransit.Pipeline
 		{
 			bool consumed = false;
 
-			var consumeContext = new ConsumeContext(new MemoryStream());
-			pipeline.Configure(x => consumeContext.SetBus(x.Bus));
-			var context = new ConsumeContext<T>(consumeContext, message);
-
-			using (ContextStorage.CreateContextScope(context))
+			ConsumeContext consumeContext;
+			using (var bodyStream = new MemoryStream())
 			{
-				foreach (var consumer in pipeline.Enumerate(context))
+				consumeContext = new ConsumeContext(bodyStream);
+				pipeline.Configure(x => consumeContext.SetBus(x.Bus));
+				var context = new ConsumeContext<T>(consumeContext, message);
+
+				using (ContextStorage.CreateContextScope(context))
 				{
-					if (!acknowledge(message))
-						return false;
+					foreach (var consumer in pipeline.Enumerate(context))
+					{
+						if (!acknowledge(message))
+							return false;
 
-					acknowledge = x => true;
+						acknowledge = x => true;
 
-					consumed = true;
+						consumed = true;
 
-					consumer(context);
+						consumer(context);
+					}
 				}
 			}
 

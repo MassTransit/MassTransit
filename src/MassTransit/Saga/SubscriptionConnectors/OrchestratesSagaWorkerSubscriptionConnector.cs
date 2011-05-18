@@ -23,7 +23,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		where TSaga : class, ISaga, Orchestrates<TMessage>
 		where TMessage : class, CorrelatedBy<Guid>
 	{
-		OrchestratesSagaSubscriptionConnector<TSaga, TMessage> _connector;
+		readonly OrchestratesSagaSubscriptionConnector<TSaga, TMessage> _connector;
 
 		public OrchestratesSagaWorkerSubscriptionConnector(ISagaRepository<TSaga> sagaRepository)
 		{

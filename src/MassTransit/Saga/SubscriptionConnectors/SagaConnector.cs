@@ -23,8 +23,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 
 	public interface SagaConnector
 	{
-		Type SagaType { get; }
-
 		UnsubscribeAction Connect(IInboundPipelineConfigurator configurator);
 	}
 
@@ -34,7 +32,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		where T : class, ISaga
 	{
 		readonly IEnumerable<SagaSubscriptionConnector> _connectors;
-		object[] _args;
+		readonly object[] _args;
 
 		public SagaConnector(ISagaRepository<T> sagaRepository)
 		{
@@ -63,11 +61,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		public IEnumerable<SagaSubscriptionConnector> Connectors
 		{
 			get { return _connectors; }
-		}
-
-		public Type SagaType
-		{
-			get { return typeof (T); }
 		}
 
 		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)

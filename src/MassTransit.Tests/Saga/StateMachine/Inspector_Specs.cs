@@ -30,19 +30,19 @@ namespace MassTransit.Tests.Saga.StateMachine
 		[Test]
 		public void Should_contain_the_initiate_event()
 		{
-			var initiate = Results.Where(x => x.SagaEvent.Event == TestSaga.Initiate).Single();
+			Results.Where(x => x.SagaEvent.Event == TestSaga.Initiate).Single();
 		}
 
 		[Test]
 		public void Should_contain_the_complete_event()
 		{
-			var complete = Results.Where(x => x.SagaEvent.Event == TestSaga.Complete).Single();
+			Results.Where(x => x.SagaEvent.Event == TestSaga.Complete).Single();
 		}
 
 		[Test]
 		public void Should_contain_the_observation_event()
 		{
-			var observation = Results.Where(x => x.SagaEvent.Event == TestSaga.Observation).Single();
+			Results.Where(x => x.SagaEvent.Event == TestSaga.Observation).Single();
 		}
 
 		[Test]

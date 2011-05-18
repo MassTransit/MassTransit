@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-	using System;
-
 	public interface IBusPublishContext<T> :
 		IPublishContext<T>
 		where T : class

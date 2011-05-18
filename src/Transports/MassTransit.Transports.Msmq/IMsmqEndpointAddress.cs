@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq
 {
-	using System.Net;
-
 	public interface IMsmqEndpointAddress :
 		IEndpointAddress
 	{
@@ -23,9 +21,9 @@ namespace MassTransit.Transports.Msmq
 		string InboundFormatName { get; }
 
 		/// <summary>
-		/// The format name used to send messages (may be different if multicast MSMQ is used)
+		/// The name of the queue in local format (.\private$\name)
 		/// </summary>
-		string OutboundFormatName { get; }
+		string LocalName { get; }
 
 		/// <summary>
 		/// If specified, the multicast address to bind to the queue
@@ -33,8 +31,8 @@ namespace MassTransit.Transports.Msmq
 		string MulticastAddress { get; }
 
 		/// <summary>
-		/// The name of the queue in local format (.\private$\name)
+		/// The format name used to send messages (may be different if multicast MSMQ is used)
 		/// </summary>
-		string LocalName { get; }
+		string OutboundFormatName { get; }
 	}
 }

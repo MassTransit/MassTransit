@@ -18,7 +18,6 @@ namespace MassTransit.Distributor
 	using log4net;
 	using Magnum;
 	using Magnum.Extensions;
-	using Magnum.Threading;
 	using Messages;
 	using Stact;
 	using Stact.Internal;
@@ -30,7 +29,7 @@ namespace MassTransit.Distributor
 		readonly int _pingTimeout = (int) 5.Seconds().TotalMilliseconds;
 		readonly IWorkerSelectionStrategy<TMessage> _selectionStrategy;
 
-		IDictionary<Uri,WorkerDetails> _workers = new Dictionary<Uri,WorkerDetails>();
+		readonly IDictionary<Uri,WorkerDetails> _workers = new Dictionary<Uri,WorkerDetails>();
 
 		Fiber _fiber;
 		ScheduledOperation _scheduled;
@@ -131,7 +130,7 @@ namespace MassTransit.Distributor
 			_unsubscribeAction();
 		}
 
-		public void Consume(WorkerAvailable<TMessage> message)
+		void Consume(WorkerAvailable<TMessage> message)
 		{
 			WorkerDetails worker;
 			lock (_workers)

@@ -25,7 +25,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	public interface SagaWorkerConnector :
 		InstanceConnector
 	{
-		Type SagaType { get; }
 	}
 
 	public class SagaWorkerConnector<T> :
@@ -33,7 +32,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		where T : class, ISaga
 	{
 		readonly IEnumerable<SagaWorkerSubscriptionConnector> _connectors;
-		object[] _args;
+		readonly object[] _args;
 
 		public SagaWorkerConnector(ISagaRepository<T> sagaRepository)
 		{
@@ -57,11 +56,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 			{
 				throw new ConfigurationException("Failed to create the saga distributor connector for " + typeof (T).FullName, ex);
 			}
-		}
-
-		public Type SagaType
-		{
-			get { return typeof (T); }
 		}
 
 

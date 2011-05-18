@@ -176,7 +176,7 @@ namespace MassTransit.Transports.Msmq
 				var management = new MsmqEndpointManagement(address);
 				action(management);
 			}
-			catch (EndpointException ex)
+			catch (EndpointException)
 			{
 				throw;
 			}

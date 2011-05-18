@@ -12,20 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Exceptions
 {
-    using System;
+	using System;
+	using System.Runtime.Serialization;
 
-    [Serializable]
-    public class ConventionException :
-        MassTransitException
-    {
-        public ConventionException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+	[Serializable]
+	public class ConventionException :
+		MassTransitException
+	{
+		public ConventionException()
+		{
+		}
 
-        public ConventionException(string message)
-            : base(message)
-        {
-        }
-    }
+		public ConventionException(string message)
+			: base(message)
+		{
+		}
+
+		public ConventionException(string message, Exception innerException)
+			: base(message, innerException)
+		{
+		}
+
+		protected ConventionException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+		}
+	}
 }

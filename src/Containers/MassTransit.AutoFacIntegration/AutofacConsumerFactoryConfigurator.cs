@@ -16,11 +16,12 @@ namespace MassTransit.AutofacIntegration
 	using Autofac;
 	using Magnum.Reflection;
 	using SubscriptionConfigurators;
+	using Util;
 
 	public class AutofacConsumerFactoryConfigurator
 	{
+		readonly SubscriptionBusServiceConfigurator _configurator;
 		readonly IContainer _container;
-		SubscriptionBusServiceConfigurator _configurator;
 
 		public AutofacConsumerFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IContainer container)
 		{
@@ -33,6 +34,7 @@ namespace MassTransit.AutofacIntegration
 			this.FastInvoke(new[] {messageType}, "Configure");
 		}
 
+		[UsedImplicitly]
 		public void Configure<T>()
 			where T : class
 		{

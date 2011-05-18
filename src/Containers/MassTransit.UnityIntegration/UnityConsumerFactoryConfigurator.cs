@@ -16,11 +16,12 @@ namespace MassTransit.UnityIntegration
 	using Magnum.Reflection;
 	using Microsoft.Practices.Unity;
 	using SubscriptionConfigurators;
+	using Util;
 
 	public class UnityConsumerFactoryConfigurator
 	{
+		readonly SubscriptionBusServiceConfigurator _configurator;
 		readonly IUnityContainer _container;
-		SubscriptionBusServiceConfigurator _configurator;
 
 		public UnityConsumerFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IUnityContainer container)
 		{
@@ -33,6 +34,7 @@ namespace MassTransit.UnityIntegration
 			this.FastInvoke(new[] {messageType}, "Configure");
 		}
 
+		[UsedImplicitly]
 		public void Configure<T>()
 			where T : class
 		{
