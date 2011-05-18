@@ -55,6 +55,8 @@ namespace MassTransit.Services.Subscriptions.Server
 						When(DuplicateClientAdded)
 							.Then((saga, message) => saga.NotifyDuplicateSubscriptionClientRemoved())
 							.Complete());
+
+					RemoveWhen(x => x.CurrentState == Completed);
 				});
 		}
 

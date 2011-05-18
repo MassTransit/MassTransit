@@ -73,6 +73,8 @@ namespace MassTransit.Services.Subscriptions.Server
 							.Then((saga, message) => saga.NotifySubscriptionRemoved())
 							.Complete()
 						);
+
+					RemoveWhen(x => x.CurrentState == Completed);
 				});
 		}
 
