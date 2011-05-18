@@ -49,7 +49,7 @@ namespace MassTransit.Serialization
 		public static Envelope Create<T>(ISendContext<T> context)
 			where T : class
 		{
-			var envelope = new Envelope(context.Message, typeof (T).GetMessageTypes());
+			var envelope = new Envelope(context.Message, context.Message.GetType().GetMessageTypes());
 			envelope.SetUsingContext(context);
 
 			return envelope;

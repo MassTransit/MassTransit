@@ -15,7 +15,6 @@ namespace MassTransit.Tests
 	using System;
 	using Messages;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using TestConsumers;
 	using TextFixtures;
 
