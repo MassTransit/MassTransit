@@ -73,6 +73,20 @@ namespace MassTransit.EndpointConfigurators
 			return this;
 		}
 
+		public EndpointConfigurator CreateTransactional()
+		{
+			_settings.Transactional = true;
+
+			return this;
+		}
+
+		public EndpointConfigurator CreateIfMissing()
+		{
+			_settings.CreateIfMissing = true;
+
+			return this;
+		}
+
 		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_errorAddress != null)
