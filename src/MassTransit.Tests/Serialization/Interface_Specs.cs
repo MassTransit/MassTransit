@@ -13,13 +13,8 @@
 namespace MassTransit.Tests.Serialization
 {
 	using System;
-	using System.IO;
-	using System.Text;
-	using Context;
-	using Magnum.TestFramework;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
-	using MassTransit.Pipeline.Inspectors;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
 	using TestConsumers;
@@ -47,7 +42,7 @@ namespace MassTransit.Tests.Serialization
 
 			var consumer = new TestMessageConsumer<ComplaintAdded>();
 
-			var unsubscribeAction = pipeline.ConnectInstance(consumer);
+			pipeline.ConnectInstance(consumer);
 
 			var user = new UserImpl("Chris", "noone@nowhere.com");
 			ComplaintAdded complaint = new ComplaintAddedImpl(user, "No toilet paper", BusinessArea.Appearance)

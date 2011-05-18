@@ -13,6 +13,7 @@
 namespace MassTransit.Distributor.SubscriptionConnectors
 {
 	using System;
+	using Exceptions;
 	using MassTransit.Pipeline;
 	using MassTransit.SubscriptionConnectors;
 	using Pipeline;
@@ -29,6 +30,9 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
 		{
 			var distributor = instance as IDistributor<TMessage>;
+			if (distributor == null)
+				throw new ConfigurationException("The connected instance is not a distributor");
+
 			var sink = new DistributorMessageSink<TMessage>(message =>
 				{
 					// rock it

@@ -15,13 +15,21 @@ namespace MassTransit
 	using Context;
 
 	/// <summary>
-	/// A generic interceptor for handling messages before and after it is
-	/// handled by downstream handlers
+	/// Implementations can be added to the inbound message pipeline to intercept
+	/// messages before they are delivered to any consumers.
 	/// </summary>
 	public interface IInboundMessageInterceptor
 	{
+		/// <summary>
+		/// Called before the message is dispatched to the next handler in the pipeline
+		/// </summary>
+		/// <param name="context">The context of the message being dispatched</param>
 		void PreDispatch(IConsumeContext context);
 
+		/// <summary>
+		/// Calls after the message has been dispatched through the pipeline
+		/// </summary>
+		/// <param name="context">The context of the message being dispatched</param>
 		void PostDispatch(IConsumeContext context);
 	}
 }

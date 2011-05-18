@@ -14,10 +14,22 @@ namespace MassTransit
 {
 	using Context;
 
+	/// <summary>
+	/// Implementations can be added to the outbound message pipeline to intercept
+	/// messages before they are delivered to any endpoints.
+	/// </summary>
 	public interface IOutboundMessageInterceptor
 	{
+		/// <summary>
+		/// Called before the message is dispatched to the next handler in the pipeline
+		/// </summary>
+		/// <param name="context">The context of the message being dispatched</param>
 		void PreDispatch(ISendContext context);
 
+		/// <summary>
+		/// Calls after the message has been dispatched through the pipeline
+		/// </summary>
+		/// <param name="context">The context of the message being dispatched</param>
 		void PostDispatch(ISendContext context);
 	}
 }

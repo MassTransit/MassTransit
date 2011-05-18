@@ -16,13 +16,38 @@ namespace MassTransit
 	using BusConfigurators;
 	using Exceptions;
 
+	/// <summary>
+	/// This is a static singleton instance of an IServiceBus. While it goes
+	/// against my very soul, it is here to ensure consistent usage of MassTransit
+	/// as a singleton. It is highly recommended that ServiceBusFactory.New() be
+	/// used instead and the application maintain the reference to the IServiceBus.
+	/// </summary>
 	public static class Bus
 	{
 		static IServiceBus _instance;
 
+		/// <summary>
+		/// The configured instance of the service bus.
+		/// </summary>
+		public static IServiceBus Instance
+		{
+			get
+			{
+				if (_instance == null)
+					throw new InvalidOperationException("You must call Bus.Initialize before accessing Bus.Instance.");
+
+				return _instance;
+			}
+		}
+
+		/// <summary>
+		/// Call to initialize the service bus instance, including any configuration
+		/// </summary>
+		/// <param name="configure"></param>
 		public static void Initialize(Action<ServiceBusConfigurator> configure)
 		{
-			Shutdown();
+			if (_instance != null)
+				throw new ConfigurationException("Bus.Instance has already been initialized. Call Shutdown first.");
 
 			_instance = ServiceBusFactory.New(configurator =>
 				{
@@ -32,20 +57,13 @@ namespace MassTransit
 				});
 		}
 
-		public static IServiceBus Instance
-		{
-			get
-			{
-				if (_instance == null)
-					throw new ConfigurationException("You must call Bus.Initialize before accessing Bus.Instance.");
-
-				return _instance;
-			}
-		}
-
+		/// <summary>
+		/// Shuts down the service bus and disposes any used resources
+		/// </summary>
 		public static void Shutdown()
 		{
-			if (_instance == null) return;
+			if (_instance == null)
+				return;
 
 			_instance.Dispose();
 			_instance = null;

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,12 +14,11 @@ namespace MassTransit.Saga.Pipeline
 {
 	using System;
 	using System.Linq.Expressions;
-	using Util;
 
 	public class SagaFilterExpressionConverter<TSaga, TMessage> :
-		MassTransit.Util.ExpressionVisitor
+		Util.ExpressionVisitor
 	{
-		private TMessage _message;
+		readonly TMessage _message;
 
 		public SagaFilterExpressionConverter(TMessage message)
 		{
@@ -35,10 +34,11 @@ namespace MassTransit.Saga.Pipeline
 
 		protected override Expression VisitMemberAccess(MemberExpression m)
 		{
-			if(m == null)
+			if (m == null)
 				return null;
 
-			if (m.Expression != null && (m.Expression.NodeType == ExpressionType.Parameter && m.Expression.Type == typeof (TMessage)))
+			if (m.Expression != null &&
+			    (m.Expression.NodeType == ExpressionType.Parameter && m.Expression.Type == typeof (TMessage)))
 			{
 				return EvaluateMemberAccess(m);
 			}
@@ -46,18 +46,19 @@ namespace MassTransit.Saga.Pipeline
 			return base.VisitMemberAccess(m);
 		}
 
-		private Expression<Func<TSaga, bool>> RemoveMessageParameter(LambdaExpression lambda)
+		static Expression<Func<TSaga, bool>> RemoveMessageParameter(LambdaExpression lambda)
 		{
 			var parameters = new[] {lambda.Parameters[0]};
 
 			return Expression.Lambda<Func<TSaga, bool>>(lambda.Body, parameters);
 		}
 
-		private Expression EvaluateMemberAccess(MemberExpression exp)
+		Expression EvaluateMemberAccess(MemberExpression exp)
 		{
 			var parameter = exp.Expression as ParameterExpression;
 
-			Delegate fn = Expression.Lambda(typeof (Func<,>).MakeGenericType(typeof (TMessage), exp.Type), exp, new[] {parameter}).Compile();
+			Delegate fn =
+				Expression.Lambda(typeof (Func<,>).MakeGenericType(typeof (TMessage), exp.Type), exp, new[] {parameter}).Compile();
 
 			return Expression.Constant(fn.DynamicInvoke(_message), exp.Type);
 		}

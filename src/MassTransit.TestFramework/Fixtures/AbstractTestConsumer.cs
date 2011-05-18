@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,15 +21,15 @@ namespace MassTransit.TestFramework.Fixtures
 	public abstract class AbstractTestConsumer<TMessage>
 		where TMessage : class
 	{
-		private static readonly List<TMessage> _allMessages = new List<TMessage>();
-		private static readonly Semaphore _allReceived = new Semaphore(0, 100);
-		private static int _allReceivedCount;
+		static readonly List<TMessage> _allMessages = new List<TMessage>();
+		static readonly Semaphore _allReceived = new Semaphore(0, 100);
+		static int _allReceivedCount;
+		readonly Action<TMessage> _consumerAction;
 
-		private readonly List<TMessage> _messages = new List<TMessage>();
-		private readonly Semaphore _received = new Semaphore(0, 100);
+		readonly List<TMessage> _messages = new List<TMessage>();
+		readonly Semaphore _received = new Semaphore(0, 100);
 
-		private Action<TMessage> _consumerAction;
-		private int _receivedMessageCount;
+		int _receivedMessageCount;
 
 		protected AbstractTestConsumer()
 		{
@@ -92,7 +92,7 @@ namespace MassTransit.TestFramework.Fixtures
 			Assert.That(ReceivedMessage(message, timeout), Is.False, "Message should not have been received");
 		}
 
-		private bool ReceivedMessage(TMessage message, TimeSpan timeout)
+		bool ReceivedMessage(TMessage message, TimeSpan timeout)
 		{
 			while (_messages.Contains(message) == false)
 			{
@@ -113,7 +113,7 @@ namespace MassTransit.TestFramework.Fixtures
 			Assert.That(AnyReceivedMessage(message, timeout), Is.True, "Message should have been received");
 		}
 
-		private static bool AnyReceivedMessage(TMessage message, TimeSpan timeout)
+		static bool AnyReceivedMessage(TMessage message, TimeSpan timeout)
 		{
 			while (_allMessages.Contains(message) == false)
 			{

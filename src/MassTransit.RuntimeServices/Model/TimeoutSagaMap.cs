@@ -15,7 +15,9 @@ namespace MassTransit.RuntimeServices.Model
 	using FluentNHibernate.Mapping;
 	using NHibernateIntegration;
 	using Services.Timeout.Server;
+	using Util;
 
+	[UsedImplicitly]
 	public class TimeoutSagaMap :
 		ClassMap<TimeoutSaga>
 	{

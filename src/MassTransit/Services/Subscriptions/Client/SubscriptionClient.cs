@@ -26,7 +26,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		private SubscriptionCoordinator _coordinator;
 		private volatile bool _disposed;
 		private IEndpoint _subscriptionServiceEndpoint;
-		string _network;
+		readonly string _network;
 
 
 		public SubscriptionClient(Uri subscriptionServiceUri)
@@ -73,7 +73,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			_coordinator.OnRefresh -= CoordinatorOnRefresh;
 		}
 
-		public virtual void Dispose(bool disposing)
+		protected virtual void Dispose(bool disposing)
 		{
 			if (!disposing || _disposed) return;
 

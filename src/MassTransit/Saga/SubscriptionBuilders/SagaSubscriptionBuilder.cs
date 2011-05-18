@@ -22,8 +22,8 @@ namespace MassTransit.Saga.SubscriptionBuilders
 		SubscriptionBuilder
 		where TSaga : class, ISaga
 	{
+		readonly SagaConnector<TSaga> _connector;
 		readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
-		SagaConnector<TSaga> _connector;
 
 		public SagaSubscriptionBuilder(ISagaRepository<TSaga> sagaRepository,
 		                               Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)

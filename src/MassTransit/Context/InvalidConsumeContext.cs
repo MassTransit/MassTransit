@@ -73,6 +73,16 @@ namespace MassTransit.Context
 			get { throw CreateException(); }
 		}
 
+		public IEndpoint Endpoint
+		{
+			get { throw CreateException(); }
+		}
+
+		public Uri InputAddress
+		{
+			get { throw CreateException(); }
+		}
+
 		public bool TryGetContext<T>(out IConsumeContext<T> context) 
 			where T : class
 		{

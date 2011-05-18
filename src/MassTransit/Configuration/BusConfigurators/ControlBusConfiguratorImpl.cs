@@ -24,15 +24,13 @@ namespace MassTransit.BusConfigurators
 		ControlBusConfigurator,
 		BusBuilderConfigurator
 	{
-		readonly ServiceBusConfigurator _configurator;
 		static readonly ILog _log = LogManager.GetLogger(typeof (ControlBusConfiguratorImpl));
 
 		readonly IList<BusBuilderConfigurator> _configurators;
 		Uri _uri;
 
-		public ControlBusConfiguratorImpl(ServiceBusConfigurator configurator)
+		public ControlBusConfiguratorImpl()
 		{
-			_configurator = configurator;
 			_configurators = new List<BusBuilderConfigurator>();
 		}
 

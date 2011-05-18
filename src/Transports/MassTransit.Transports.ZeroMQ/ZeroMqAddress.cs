@@ -6,8 +6,8 @@
     [DebuggerDisplay("ZMQ: {RebuiltUri}")]
     public class ZeroMqAddress
     {
-        Uri _rawUri;
-        Uri _rebuiltUri;
+    	readonly Uri _rawUri;
+    	readonly Uri _rebuiltUri;
 
         public ZeroMqAddress(Uri uri)
         {

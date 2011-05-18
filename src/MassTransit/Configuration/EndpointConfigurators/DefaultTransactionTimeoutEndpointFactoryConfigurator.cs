@@ -16,7 +16,6 @@ namespace MassTransit.EndpointConfigurators
 	using System.Collections.Generic;
 	using Builders;
 	using Configurators;
-	using Exceptions;
 
 	public class DelegateEndpointFactoryBuilderConfigurator :
 		EndpointFactoryBuilderConfigurator

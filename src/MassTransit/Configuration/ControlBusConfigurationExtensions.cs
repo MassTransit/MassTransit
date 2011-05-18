@@ -34,7 +34,7 @@ namespace MassTransit
 		/// <param name="configure"></param>
 		public static void UseControlBus(this ServiceBusConfigurator configurator, Action<ControlBusConfigurator> configure)
 		{
-			var controlBusConfigurator = new ControlBusConfiguratorImpl(configurator);
+			var controlBusConfigurator = new ControlBusConfiguratorImpl();
 
 			configure(controlBusConfigurator);
 

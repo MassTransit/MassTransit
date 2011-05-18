@@ -50,7 +50,7 @@ namespace MassTransit.Tests.Load
 				LocalBus.Publish(new PingMessage());
 			}
 
-			bool success = completed.WaitOne(60.Seconds(), true);
+			completed.WaitOne(60.Seconds(), true);
 
 			stopwatch.Stop();
 

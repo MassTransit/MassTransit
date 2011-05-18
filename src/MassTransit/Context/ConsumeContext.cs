@@ -25,7 +25,6 @@ namespace MassTransit.Context
 		IBusContext
 	{
 		Stream _bodyStream;
-
 		IMessageTypeConverter _typeConverter;
 
 		public ConsumeContext(Stream bodyStream)
@@ -83,7 +82,7 @@ namespace MassTransit.Context
 			where T : class
 		{
 			T message;
-			if (_typeConverter.TryConvert<T>(out message))
+			if (_typeConverter.TryConvert(out message))
 			{
 				context = new ConsumeContext<T>(this, message);
 				return true;
@@ -211,6 +210,16 @@ namespace MassTransit.Context
 			get { return _context.Bus; }
 		}
 
+		public IEndpoint Endpoint
+		{
+			get { return _context.Endpoint; }
+		}
+
+		public Uri InputAddress
+		{
+			get { return _context.InputAddress; }
+		}
+
 		public TMessage Message
 		{
 			get { return _message; }
@@ -235,10 +244,10 @@ namespace MassTransit.Context
 				_log.DebugFormat("Retrying message of type {0} later", typeof (TMessage));
 
 			Bus.Endpoint.Send(Message, x =>
-			{
-				x.SetUsing(this);
-				x.SetRetryCount(RetryCount + 1);
-			});
+				{
+					x.SetUsing(this);
+					x.SetRetryCount(RetryCount + 1);
+				});
 		}
 
 		public void Respond<T>(T message, Action<ISendContext<T>> contextCallback)
@@ -252,10 +261,16 @@ namespace MassTransit.Context
 			if (Message == null)
 				throw new InvalidOperationException("A fault cannot be generated when no message is present");
 
-			object message = FastActivator.Create(Message.Implements(typeof(CorrelatedBy<>)) ? typeof(Fault<,>) : typeof(Fault<>),
+			object message =
+				FastActivator.Create(Message.Implements(typeof (CorrelatedBy<>)) ? typeof (Fault<,>) : typeof (Fault<>),
 					Message, ex);
 
 			this.FastInvoke("SendFault", message);
+		}
+
+		public void SetResponseAddress(Uri value)
+		{
+			_responseAddress = value;
 		}
 
 		[UsedImplicitly]
@@ -274,11 +289,6 @@ namespace MassTransit.Context
 			{
 				Bus.Publish(message);
 			}
-		}
-
-		public void SetResponseAddress(Uri value)
-		{
-			_responseAddress = value;
 		}
 	}
 }

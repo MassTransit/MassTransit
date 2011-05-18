@@ -227,13 +227,23 @@ namespace MassTransit
 			if (_started)
 				return;
 
-			_consumerPool = new ThreadPoolConsumerPool(this, _eventChannel, _receiveTimeout)
-				{
-					MaximumConsumerCount = MaximumConsumerThreads,
-				};
-			_consumerPool.Start();
+			try
+			{
+				_consumerPool = new ThreadPoolConsumerPool(this, _eventChannel, _receiveTimeout)
+					{
+						MaximumConsumerCount = MaximumConsumerThreads,
+					};
+				_consumerPool.Start();
 
-			_serviceContainer.Start();
+				_serviceContainer.Start();
+			}
+			catch (Exception)
+			{
+				if(_consumerPool != null)
+					_consumerPool.Dispose();
+
+				throw;
+			}
 
 			_started = true;
 		}

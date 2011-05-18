@@ -31,7 +31,7 @@ namespace MassTransit.Context
 			DeclaringMessageType = typeof (T);
 		}
 
-		protected SendContext(T message, ISendContext context)
+		protected SendContext(T message, IMessageContext context)
 		{
 			_message = message;
 			SetUsing(context);

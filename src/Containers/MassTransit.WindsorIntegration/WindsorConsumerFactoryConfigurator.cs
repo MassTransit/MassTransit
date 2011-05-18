@@ -16,11 +16,12 @@ namespace MassTransit.WindsorIntegration
 	using Castle.Windsor;
 	using Magnum.Reflection;
 	using SubscriptionConfigurators;
+	using Util;
 
 	public class WindsorConsumerFactoryConfigurator
 	{
+		readonly SubscriptionBusServiceConfigurator _configurator;
 		readonly IWindsorContainer _container;
-		SubscriptionBusServiceConfigurator _configurator;
 
 		public WindsorConsumerFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IWindsorContainer container)
 		{
@@ -33,6 +34,7 @@ namespace MassTransit.WindsorIntegration
 			this.FastInvoke(new[] {messageType}, "Configure");
 		}
 
+		[UsedImplicitly]
 		public void Configure<T>()
 			where T : class
 		{

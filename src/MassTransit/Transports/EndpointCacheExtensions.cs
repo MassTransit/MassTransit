@@ -20,6 +20,7 @@ namespace MassTransit
 		/// Returns an IEndpoint for the Uri string specified. If the endpoint has not yet been created,
 		/// the factory will attempt to create an endpoint for the Uri string.
 		/// </summary>
+		/// <param name="cache"></param>
 		/// <param name="uriString">The Uri string to resolve to an endpoint (will be checked for valid Uri syntax)</param>
 		/// <returns>An IEndpoint instance</returns>
 		public static IEndpoint GetEndpoint(this IEndpointCache cache, string uriString)

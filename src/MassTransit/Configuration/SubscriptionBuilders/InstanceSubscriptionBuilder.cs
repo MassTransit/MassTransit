@@ -20,9 +20,9 @@ namespace MassTransit.SubscriptionBuilders
 	public class InstanceSubscriptionBuilder :
 		SubscriptionBuilder
 	{
+		readonly InstanceConnector _connector;
 		readonly object _instance;
 		readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
-		InstanceConnector _connector;
 
 		public InstanceSubscriptionBuilder(object instance,
 		                                   Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)

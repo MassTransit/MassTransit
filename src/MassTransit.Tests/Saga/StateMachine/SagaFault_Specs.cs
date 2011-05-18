@@ -13,7 +13,6 @@
 namespace MassTransit.Tests.Saga.StateMachine
 {
 	using System;
-	using log4net;
 	using Magnum.StateMachine;
 	using MassTransit.Saga;
 	using NUnit.Framework;
@@ -48,9 +47,6 @@ namespace MassTransit.Tests.Saga.StateMachine
 		SagaStateMachine<CreateCustomerSaga>,
 		ISaga
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (CreateCustomerSaga));
-
-
 		static CreateCustomerSaga()
 		{
 			Define(() =>

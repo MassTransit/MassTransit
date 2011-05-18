@@ -52,7 +52,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		volatile bool _disposed;
 
 		UnsubscribeAction _unsubscribeAction;
-		bool _multicast;
+		readonly bool _multicast;
 
 		public SubscriptionCoordinator(IServiceBus bus, IEndpoint outboundEndpoint, string network, bool multicast)
 		{
@@ -204,7 +204,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			_services.Add(consumer);
 		}
 
-		public virtual void Dispose(bool disposing)
+		protected virtual void Dispose(bool disposing)
 		{
 			if (!disposing || _disposed) return;
 
@@ -401,6 +401,7 @@ namespace MassTransit.Services.Subscriptions.Client
 				};
 		}
 
+		[UsedImplicitly]
 		UnsubscribeAction AddToClients<T>(Uri endpointUri)
 			where T : class
 		{
@@ -411,6 +412,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			return result;
 		}
 
+		[UsedImplicitly]
 		UnsubscribeAction AddToClientsWithCorrelation<T, K>(K key, Uri endpointUri)
 			where T : class, CorrelatedBy<K>
 		{

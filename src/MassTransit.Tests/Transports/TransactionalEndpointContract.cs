@@ -57,7 +57,7 @@ namespace MassTransit.Tests.Transports
 		[Test]
 		public void While_writing_it_should_not_perisist_on_rollback()
 		{
-			using (var trx = new TransactionScope())
+			using (new TransactionScope())
 			{
 				_endpoint.Send(new DeleteMessage());
 				//no complete

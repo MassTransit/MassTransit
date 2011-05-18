@@ -41,6 +41,22 @@ namespace MassTransit.Context
 		/// </summary>
 		IServiceBus Bus { get; }
 
+		/// <summary>
+		/// The endpoint from which the message was received
+		/// </summary>
+		IEndpoint Endpoint { get; }
+
+		/// <summary>
+		/// The input address on which the message was received
+		/// </summary>
+		Uri InputAddress { get; }
+
+		/// <summary>
+		/// Retrieves a specified message type from the consumer context, if available
+		/// </summary>
+		/// <typeparam name="T">The message type requested</typeparam>
+		/// <param name="context">The message context for the requested message type</param>
+		/// <returns>True if the message type is available, otherwise false.</returns>
 		bool TryGetContext<T>(out IConsumeContext<T> context)
 			where T : class;
 

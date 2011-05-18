@@ -93,13 +93,7 @@ namespace MassTransit.Tests.Serialization
 				writer.Flush();
 				_body = Encoding.UTF8.GetString(memoryStream.ToArray());
 			}
-
-			var xmlConverter = new XmlNodeConverter
-				{
-					DeserializeRootElementName = "envelope"
-				};
-
-//			_body = JsonConvert.SerializeObject(_envelope, Formatting.Indented, _settings);
+			
 			_xml = JsonConvert.DeserializeXNode(_body, "envelope");
 		}
 
@@ -120,8 +114,6 @@ namespace MassTransit.Tests.Serialization
 			{
 				result = _deserializer.Deserialize<Envelope>(jsonReader);
 			}
-
-			object obj = ConvertJson((JToken) result.Message);
 
 			result.MessageType.Count.ShouldEqual(3);
 			result.MessageType[0].ShouldEqual(typeof (TestMessage).ToMessageName());
@@ -144,7 +136,7 @@ namespace MassTransit.Tests.Serialization
 			using(var jsonReader = new JTokenReader(result.Message as JToken))
 			{
 				Type proxyType = InterfaceImplementationBuilder.GetProxyFor(typeof (MessageA));
-				MessageA message = (MessageA) FastActivator.Create(proxyType);
+				var message = (MessageA) FastActivator.Create(proxyType);
 
 				_serializer.Populate(jsonReader, message);
 
@@ -238,7 +230,7 @@ namespace MassTransit.Tests.Serialization
 			Trace.WriteLine(msg);
 		}
 
-		public void DoSerialize()
+		void DoSerialize()
 		{
 			using (var memoryStream = new MemoryStream())
 			using (var writer = new StreamWriter(memoryStream))
@@ -252,7 +244,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
-		public void DoDeserialize()
+		void DoDeserialize()
 		{
 			Envelope result;
 			using (var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(_body), false))
@@ -264,7 +256,7 @@ namespace MassTransit.Tests.Serialization
 
 			using (var jsonReader = new JTokenReader(result.Message as JToken))
 			{
-				MessageA message = (MessageA)FastActivator.Create(_proxyType);
+				var message = (MessageA)FastActivator.Create(_proxyType);
 
 				_serializer.Populate(jsonReader, message);
 
@@ -297,24 +289,6 @@ namespace MassTransit.Tests.Serialization
 			public IList<TestMessageDetail> Details { get; set; }
 			public int Level { get; set; }
 			public string Name { get; set; }
-		}
-
-		class ObjectConverter : JsonConverter
-		{
-			public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-			{
-				throw new NotImplementedException();
-			}
-
-			public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-			{
-				throw new NotImplementedException();
-			}
-
-			public override bool CanConvert(Type objectType)
-			{
-				return (objectType == typeof (object));
-			}
 		}
 
 

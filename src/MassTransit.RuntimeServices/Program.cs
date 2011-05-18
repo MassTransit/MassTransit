@@ -16,7 +16,6 @@ namespace MassTransit.RuntimeServices
 	using System.IO;
 	using log4net;
 	using log4net.Config;
-	using Magnum.Reflection;
 	using Services.HealthMonitoring;
 	using Services.Subscriptions.Server;
 	using Services.Timeout;
@@ -55,7 +54,7 @@ namespace MassTransit.RuntimeServices
 					if (serviceConfiguration.SubscriptionServiceEnabled)
 					{
 						config.ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(
-							c => new SubscriptionServiceRegistry(c),start => start.Start(), stop => stop.Stop());
+							c => new SubscriptionServiceRegistry(c), start => start.Start(), stop => stop.Stop());
 					}
 
 					if (serviceConfiguration.HealthServiceEnabled)
@@ -87,7 +86,8 @@ namespace MassTransit.RuntimeServices
 
 	public static class ConfigureServiceExtension
 	{
-		public static void ConfigureService<TService, TRegistry>(this HostConfigurator configurator, Func<IContainer, TRegistry> registry,
+		public static void ConfigureService<TService, TRegistry>(this HostConfigurator configurator,
+		                                                         Func<IContainer, TRegistry> registry,
 		                                                         Action<TService> start, Action<TService> stop)
 			where TRegistry : Registry
 			where TService : class

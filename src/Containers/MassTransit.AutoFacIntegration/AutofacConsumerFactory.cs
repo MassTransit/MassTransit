@@ -30,7 +30,7 @@ namespace MassTransit.AutofacIntegration
 
 		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<T, Action<TMessage>> callback)
 		{
-			using (ILifetimeScope scope = _container.BeginLifetimeScope())
+			using (_container.BeginLifetimeScope())
 			{
 				var consumer = _container.Resolve<T>();
 				if (consumer == null)

@@ -69,7 +69,7 @@ namespace MassTransit.Serialization
 
 		}
 
-		static Header[] GetHeaders(ISendContext context)
+		static Header[] GetHeaders(IMessageContext context)
 		{
 			var headers = new List<Header>();
 

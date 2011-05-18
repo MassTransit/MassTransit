@@ -25,8 +25,8 @@ namespace MassTransit.Distributor.Pipeline
 		where TSaga : class, ISaga
 		where TMessage : class
 	{
+		readonly ISagaMessageSink<TSaga, TMessage> _sink;
 		readonly ISagaWorker<TSaga> _worker;
-		ISagaMessageSink<TSaga, TMessage> _sink;
 
 		public SagaWorkerMessageSink(ISagaWorker<TSaga> worker, ISagaMessageSink<TSaga, TMessage> sink)
 		{

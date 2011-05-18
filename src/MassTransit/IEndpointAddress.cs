@@ -14,6 +14,9 @@ namespace MassTransit
 {
     using System;
 
+	/// <summary>
+	/// Identifies an endpoint
+	/// </summary>
     public interface IEndpointAddress
     {
         /// <summary>

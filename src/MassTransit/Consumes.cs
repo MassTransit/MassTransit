@@ -15,6 +15,10 @@ namespace MassTransit
 	using log4net;
 	using Magnum.Extensions;
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <typeparam name="TMessage"></typeparam>
 	public class Consumes<TMessage>
 		where TMessage : class
 	{
@@ -52,21 +56,56 @@ namespace MassTransit
 			}
 		}
 
+		/// <summary>
+		/// Declares a Consume method for the message type TMessage which is called
+		/// whenever a a message is received of the specified type.
+		/// </summary>
 		public interface All :
 			IConsumer
 		{
+			/// <summary>
+			/// Called by the framework when a message is available to be consumed. This
+			/// is called by a framework thread, so care should be used when accessing
+			/// any shared objects.
+			/// </summary>
+			/// <param name="message">The message to consume.</param>
 			void Consume(TMessage message);
 		}
 
+		/// <summary>
+		/// Called by the framework when a message is available to be consumed that
+		/// matches the correlationId of the consumer object instance (exposed by the
+		/// CorrelationId property). This is called by a framework thread, so care
+		/// should be used when accessing any shared objects.
+		/// </summary>
+		/// <typeparam name="TCorrelationId">The type of the CorrelationId to match</typeparam>
 		public interface For<TCorrelationId> :
 			All,
 			CorrelatedBy<TCorrelationId>
 		{
 		}
 
+		/// <summary>
+		/// Declares a selective consumer method for the message type TMessage. In addition
+		/// to the Consume(TMessage) method, an additional Accept method is used to allow
+		/// the consumer object to accept or ignore the message before it is delivered to
+		/// the consumer.
+		/// </summary>
 		public interface Selected : 
 			All
 		{
+			/// <summary>
+			/// Called by the framework when a message is available. If the consumer is
+			/// interested in the message, returning true will result in the Consume method
+			/// being called once the message has been read from the transport.
+			/// 
+			/// It is important that no actual processing of the message is done during the
+			/// accept method, as there is no guarantee that the Consume method will be called
+			/// for an accepted message. Therefore, any allocation of resources or locks should
+			/// be acquired only once the message is delivered via the Consume method.
+			/// </summary>
+			/// <param name="message">The message to accept or ignore</param>
+			/// <returns>True if the consumer wants to Consume the message, otherwise false to ignore it.</returns>
 			bool Accept(TMessage message);
 		}
 	}

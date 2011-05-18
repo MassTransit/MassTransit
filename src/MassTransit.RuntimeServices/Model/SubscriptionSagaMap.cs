@@ -15,7 +15,9 @@ namespace MassTransit.RuntimeServices.Model
 	using FluentNHibernate.Mapping;
 	using NHibernateIntegration;
 	using Services.Subscriptions.Server;
+	using Util;
 
+	[UsedImplicitly]
 	public class SubscriptionSagaMap :
 		ClassMap<SubscriptionSaga>
 	{

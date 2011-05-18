@@ -16,11 +16,12 @@ namespace MassTransit.StructureMapIntegration
 	using Magnum.Reflection;
 	using StructureMap;
 	using SubscriptionConfigurators;
+	using Util;
 
 	public class StructureMapConsumerFactoryConfigurator
 	{
+		readonly SubscriptionBusServiceConfigurator _configurator;
 		readonly IContainer _container;
-		SubscriptionBusServiceConfigurator _configurator;
 
 		public StructureMapConsumerFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IContainer container)
 		{
@@ -33,6 +34,7 @@ namespace MassTransit.StructureMapIntegration
 			this.FastInvoke(new[] {messageType}, "Configure");
 		}
 
+		[UsedImplicitly]
 		public void Configure<T>()
 			where T : class
 		{

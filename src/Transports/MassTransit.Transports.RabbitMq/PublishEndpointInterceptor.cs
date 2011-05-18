@@ -26,9 +26,9 @@ namespace MassTransit.Transports.RabbitMq
 		IOutboundMessageInterceptor
 	{
 		readonly IDictionary<Type, UnsubscribeAction> _added;
+		readonly IRabbitMqEndpointAddress _address;
 		readonly IServiceBus _bus;
 		readonly InboundRabbitMqTransport _inboundTransport;
-		IRabbitMqEndpointAddress _address;
 
 		public PublishEndpointInterceptor(IServiceBus bus)
 		{
