@@ -38,6 +38,7 @@ namespace MassTransit.Context
 		{
 			_noSubscribersAction = Ignore;
 			_eachSubscriberAction = Ignore;
+			_wasEndpointAlreadySent = _endpoints.Contains;
 		}
 
 		public override bool TryGetContext<TMessage>(out IBusPublishContext<TMessage> context)
