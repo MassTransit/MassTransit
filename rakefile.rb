@@ -301,6 +301,7 @@ task :nuget do
 	sh "lib/nuget.exe pack nugets/MassTransit.Unity.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack nugets/MassTransit.CastleWindsor.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack nugets/MassTransit.NHibernate.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack nugets/MassTransit.RabbitMQ.nuspec -o build_artifacts"
 end
 
 def project_outputs(props)
