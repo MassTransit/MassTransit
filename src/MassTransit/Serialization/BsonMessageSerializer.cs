@@ -1,4 +1,4 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,12 +18,13 @@ namespace MassTransit.Serialization
 	using Context;
 	using Custom;
 	using Newtonsoft.Json;
+	using Newtonsoft.Json.Bson;
 	using Newtonsoft.Json.Linq;
 
-	public class JsonMessageSerializer :
+	public class BsonMessageSerializer :
 		IMessageSerializer
 	{
-		const string ContentTypeHeaderValue = "application/vnd.masstransit+json";
+		const string ContentTypeHeaderValue = "application/vnd.masstransit+bson";
 
 		[ThreadStatic]
 		static JsonSerializer _deserializer;
@@ -80,25 +81,22 @@ namespace MassTransit.Serialization
 
 			Envelope envelope = Envelope.Create(context);
 
-			using (var nonClosingStream = new NonClosingStream(output))
-			using (var writer = new StreamWriter(nonClosingStream))
-			using (var jsonWriter = new JsonTextWriter(writer))
+			using (var outputStream = new NonClosingStream(output))
+			using (var jsonWriter = new BsonWriter(outputStream))
 			{
 				jsonWriter.Formatting = Formatting.Indented;
 
 				Serializer.Serialize(jsonWriter, envelope);
 
 				jsonWriter.Flush();
-				writer.Flush();
 			}
 		}
 
 		public void Deserialize(IReceiveContext context)
 		{
 			Envelope result;
-			using (var nonClosingStream = new NonClosingStream(context.BodyStream))
-			using (var reader = new StreamReader(nonClosingStream))
-			using (var jsonReader = new JsonTextReader(reader))
+			using (var inputStream = new NonClosingStream(context.BodyStream))
+			using (var jsonReader = new BsonReader(inputStream))
 			{
 				result = Deserializer.Deserialize<Envelope>(jsonReader);
 			}

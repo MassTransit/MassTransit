@@ -36,10 +36,26 @@ namespace MassTransit
 			return configurator;
 		}
 
+		public static T UseBsonSerializer<T>(this T configurator)
+			where T : EndpointFactoryConfigurator
+		{
+			configurator.SetDefaultSerializer<BsonMessageSerializer>();
+
+			return configurator;
+		}
+
 		public static T UseXmlSerializer<T>(this T configurator)
 			where T : EndpointFactoryConfigurator
 		{
 			configurator.SetDefaultSerializer<XmlMessageSerializer>();
+
+			return configurator;
+		}
+
+		public static T UseVersionOneXmlSerializer<T>(this T configurator)
+			where T : EndpointFactoryConfigurator
+		{
+			configurator.SetDefaultSerializer<VersionOneXmlMessageSerializer>();
 
 			return configurator;
 		}

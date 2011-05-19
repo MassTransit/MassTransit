@@ -171,4 +171,11 @@ namespace MassTransit.Tests.Serialization
 		When_sending_a_message_using_the_specified_serializer<JsonMessageSerializer>
 	{
 	}
+
+	[TestFixture]
+	[Explicit]
+	public class For_the_bson_message_serializer :
+		When_sending_a_message_using_the_specified_serializer<BsonMessageSerializer>
+	{
+	}
 }

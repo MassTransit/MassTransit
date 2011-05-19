@@ -94,4 +94,11 @@
     {
 
     }
+
+	[TestFixture]
+    public class WhenUsingBsonOnComplexMessage :
+        GivenAComplexMessage<BsonMessageSerializer>
+    {
+
+    }
 }

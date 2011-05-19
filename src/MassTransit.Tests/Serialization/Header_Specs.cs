@@ -138,4 +138,10 @@ namespace MassTransit.Tests.Serialization
 		Setting_the_message_expiration<JsonMessageSerializer>
 	{
 	}
+
+	[TestFixture]
+	public class WhenUsingBsonAndHeaders :
+		Setting_the_message_expiration<BsonMessageSerializer>
+	{
+	}
 }
