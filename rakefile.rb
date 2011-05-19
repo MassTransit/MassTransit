@@ -20,6 +20,7 @@ OUTPUT_PATH = (BUILD_CONFIG_KEY == "NET40" ? 'net-4.0' : 'net-3.5')
 
 props = { 
   :src => File.expand_path("src"),
+  :lib => File.expand_path("lib"),
   :build_support => File.expand_path("build_support"),
   :stage => File.expand_path("build_output"),
   :output => File.join( File.expand_path("build_output"), OUTPUT_PATH ),
@@ -152,6 +153,11 @@ task :copy_services => [:compile] do
      	copyOutputFiles src, "Iesi.Collections.dll", targ	
      	copyOutputFiles src, "StructureMap.dll", targ	
      	copyOutputFiles src, "Topshelf.dll", targ	
+	copyOutputFiles File.join(props[:lib], 'SqlCe'), '*', targ
+	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86'), '*', targ
+	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86', 'Microsoft.VC90.CRT'), '*', targ
+	copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64'), '*', targ
+	copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64', 'Microsoft.VC90.CRT'), '*', targ
 
 	targ = File.join(props[:stage], 'Services', 'SystemView')
 	src = File.join(props[:src], "MassTransit.SystemView/bin/#{BUILD_CONFIG}")
