@@ -75,9 +75,16 @@ namespace MassTransit.Tests.Serialization
     {
     }
 
-    [TestFixture][Ignore("the current impl of json serilaization doesn't support this feature")]
+    [TestFixture]
     public class WhenUsingJson :
         Deserializing_an_interface<JsonMessageSerializer>
+    {
+        
+    }
+
+	[TestFixture]
+    public class WhenUsingBson :
+        Deserializing_an_interface<BsonMessageSerializer>
     {
         
     }

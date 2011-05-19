@@ -134,4 +134,11 @@ namespace MassTransit.Tests.Serialization
     {
         
     }
+
+	[TestFixture]
+    public class WhenUsingBsonInPerfTest :
+        Performance_Specs<BsonMessageSerializer>
+    {
+        
+    }
 }

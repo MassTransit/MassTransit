@@ -96,4 +96,9 @@ namespace MassTransit.Tests.Serialization
         PreSharedKeyEncryptedSerialization_Specs<JsonMessageSerializer>
     {
     }
+    [TestFixture]
+    public class WhenUsingBsonWithEncryption : 
+        PreSharedKeyEncryptedSerialization_Specs<BsonMessageSerializer>
+    {
+    }
 }

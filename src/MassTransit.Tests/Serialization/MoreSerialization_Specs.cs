@@ -36,6 +36,12 @@ namespace MassTransit.Tests.Serialization
     {
     }
 	
+    [TestFixture]
+    public class MoreSerializationForBson :
+        MoreSerialization_Specs<BsonMessageSerializer>
+    {
+    }
+	
 	[TestFixture]
     public class MoreSerializationForVersionOneXml :
         MoreSerialization_Specs<VersionOneXmlMessageSerializer>

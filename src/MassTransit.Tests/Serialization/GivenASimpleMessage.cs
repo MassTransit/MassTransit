@@ -91,4 +91,11 @@ namespace MassTransit.Tests.Serialization
     {
         
     }
+
+	[TestFixture]
+    public class WhenUsingBsonOnSimpleMessage :
+        GivenASimpleMessage<BsonMessageSerializer>
+    {
+        
+    }
 }
