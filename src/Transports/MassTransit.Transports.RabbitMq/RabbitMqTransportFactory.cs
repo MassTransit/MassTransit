@@ -18,6 +18,7 @@ namespace MassTransit.Transports.RabbitMq
 	using log4net;
 	using Magnum.Extensions;
 	using Magnum.Threading;
+	using Management;
 	using RabbitMQ.Client;
 
 	public class RabbitMqTransportFactory :
@@ -72,7 +73,26 @@ namespace MassTransit.Transports.RabbitMq
 
 		public IOutboundTransport BuildError(ITransportSettings settings)
 		{
-			return BuildOutbound(settings);
+			var address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+
+			EnsureProtocolIsCorrect(address.Uri);
+
+			IConnection connection = GetConnection(address);
+
+			BindErrorExchangeToQueue(address, connection);
+
+			return new OutboundRabbitMqTransport(address, connection);
+		}
+
+		static void BindErrorExchangeToQueue(IRabbitMqEndpointAddress address, IConnection connection)
+		{
+			// we need to go ahead and bind a durable queue for the error transport, since
+			// there is probably not a listener for it.
+
+			using (var management = new RabbitMqEndpointManagement(address, connection))
+			{
+				management.BindQueue(address.Name, address.Name, ExchangeType.Fanout, "");
+			}
 		}
 
 		public int ConnectionCount()

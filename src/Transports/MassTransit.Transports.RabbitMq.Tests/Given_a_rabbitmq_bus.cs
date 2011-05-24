@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq.Tests
 {
 	using System;
+	using BusConfigurators;
 	using Magnum.TestFramework;
 	using TestFramework.Fixtures;
 
@@ -23,17 +24,17 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		protected Given_a_rabbitmq_bus()
 		{
 			LocalUri = new Uri("rabbitmq://localhost:5672/test_queue");
+			LocalErrorUri = new Uri("rabbitmq://localhost:5672/test_queue_error");
 
-			ConfigureEndpointFactory(x =>
-				{
-					x.UseJsonSerializer();
-				});
+			ConfigureEndpointFactory(x => { x.UseRabbitMq(); });
 		}
 
-		protected override void ConfigureServiceBus(Uri uri, BusConfigurators.ServiceBusConfigurator configurator)
+		protected Uri LocalErrorUri { get; set; }
+
+		protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
 		{
 			base.ConfigureServiceBus(uri, configurator);
-		
+
 			configurator.UseRabbitMqRouting();
 		}
 	}
