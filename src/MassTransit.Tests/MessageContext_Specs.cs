@@ -15,6 +15,7 @@ namespace MassTransit.Tests
 	using System;
 	using System.Collections.Generic;
 	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using Messages;
 	using NUnit.Framework;
 	using TestConsumers;
@@ -47,10 +48,10 @@ namespace MassTransit.Tests
 
 			LocalBus.Publish(ping);
 
-			Assert.IsTrue(pong.IsAvailable(3.Seconds()), "No pong generated");
+			pong.IsAvailable(8.Seconds()).ShouldBeTrue("No pong generated");
 
-			consumer.ShouldHaveReceivedMessage(pong.Message, 3.Seconds());
-			otherConsumer.ShouldHaveReceivedMessage(pong.Message, 1.Seconds());
+			consumer.ShouldHaveReceivedMessage(pong.Message, 8.Seconds());
+			otherConsumer.ShouldHaveReceivedMessage(pong.Message, 8.Seconds());
 		}
 
 		[Test]
