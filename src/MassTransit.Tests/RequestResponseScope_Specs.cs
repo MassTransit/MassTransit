@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
 	using System.Threading;
 	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using Messages;
 	using NUnit.Framework;
 	using TextFixtures;
@@ -107,7 +108,7 @@ namespace MassTransit.Tests
 				.TimeoutAfter(5.Seconds())
 				.Send();
 
-			Assert.IsTrue(ponged.IsAvailable(1.Seconds()), "No response received");
+			ponged.IsAvailable(8.Seconds()).ShouldBeTrue("No response received");
 		}
 
 		[Test]
@@ -130,8 +131,8 @@ namespace MassTransit.Tests
 
 			LocalBus.SubscribeHandler<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
 
-			Assert.IsTrue(mre.WaitOne(5.Seconds(), true));
-			Assert.IsTrue(ponged.IsAvailable(1.Seconds()));
+			Assert.IsTrue(mre.WaitOne(8.Seconds(), true));
+			Assert.IsTrue(ponged.IsAvailable(8.Seconds()));
 		}
 
 		[Test]
