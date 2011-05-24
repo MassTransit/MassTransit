@@ -39,7 +39,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 			_factory = null;
 		}
 
-		readonly IRabbitMqEndpointAddress _queue = RabbitMqEndpointAddress.Parse("rabbitmq://localhost/queue/dru");
+		readonly IRabbitMqEndpointAddress _queue = RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/custom-vhost/mt-unit-tests");
 		readonly IRabbitMqEndpointAddress _exchange = RabbitMqEndpointAddress.Parse("rabbitmq://localhost/exchange/dru");
 
 		RabbitMqTransportFactory _factory;
