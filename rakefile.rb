@@ -299,7 +299,7 @@ end
 # TODO: create tasks for installing and running samples!
 
 desc "Builds the nuget package"
-task :nuget do
+task :nuget => [:compile, :ilmerge] do
 	sh "lib/nuget.exe pack nugets/MassTransit.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack nugets/MassTransit.StructureMap.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack nugets/MassTransit.Autofac.nuspec -o build_artifacts"

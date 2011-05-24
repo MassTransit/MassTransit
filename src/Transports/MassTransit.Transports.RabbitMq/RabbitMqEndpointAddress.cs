@@ -62,7 +62,7 @@ namespace MassTransit.Transports.RabbitMq
 			string uri = _uri.ToString();
 			uri = uri.Remove(uri.Length - _name.Length);
 
-			return new RabbitMqEndpointAddress(new Uri(uri).AppendPath(name), _connectionFactory, name);
+			return new RabbitMqEndpointAddress(new Uri(uri).AppendToPath(name), _connectionFactory, name);
 		}
 
 		public Uri Uri

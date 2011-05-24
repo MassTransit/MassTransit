@@ -89,11 +89,14 @@
     <Compile Include="Assumptions\RoutingAssumptions.cs" />
     <Compile Include="Assumptions\TransactionAssumptions.cs" />
     <Compile Include="Given_a_rabbitmq_bus.cs" />
+    <Compile Include="Given_a_rabbitmq_bus_with_vhost_mt_and_credentials.cs" />
     <Compile Include="MessageName_Specs.cs" />
-    <Compile Include="Publish_Specs.cs" />
+    <Compile Include="When_a_message_is_published.cs" />
     <Compile Include="RabbitMqTransportFactoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMqAddress_Specs.cs" />
+    <Compile Include="When_a_message_is_published_to_as_custom_user.cs" />
+    <Compile Include="When_a_message_is_published_to_a_subclass.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">

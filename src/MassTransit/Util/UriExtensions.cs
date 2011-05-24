@@ -19,7 +19,7 @@ namespace MassTransit.Util
 	{
 		public static Uri AppendToPath(this Uri uri, string value)
 		{
-			return new UriBuilder(uri.Scheme, uri.Host, uri.Port, uri.AbsolutePath + value, uri.Query).Uri;
+			return new Uri(uri.ToString().Replace(uri.AbsolutePath, uri.AbsolutePath + value));
 		}
 
 		internal static Uri ToUri(this string uriString)
