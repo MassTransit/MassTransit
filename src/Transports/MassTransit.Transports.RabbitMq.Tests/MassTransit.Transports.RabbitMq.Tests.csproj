@@ -91,6 +91,7 @@
     <Compile Include="Given_a_rabbitmq_bus.cs" />
     <Compile Include="Given_a_rabbitmq_bus_with_vhost_mt_and_credentials.cs" />
     <Compile Include="MessageName_Specs.cs" />
+    <Compile Include="When_a_message_consumer_throws_an_exception.cs" />
     <Compile Include="When_a_message_is_published.cs" />
     <Compile Include="RabbitMqTransportFactoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

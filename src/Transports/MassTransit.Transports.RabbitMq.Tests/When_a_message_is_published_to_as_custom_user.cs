@@ -12,17 +12,24 @@ namespace MassTransit.Transports.RabbitMq.Tests
 	{
 		Future<A> _received;
 		Future<B> _receivedB;
-		UnsubscribeAction _unsubscribe;
+
+		protected override void ConfigureServiceBus(System.Uri uri, BusConfigurators.ServiceBusConfigurator configurator)
+		{
+			base.ConfigureServiceBus(uri, configurator);
+
+			_received = new Future<A>();
+			_receivedB = new Future<B>();
+
+			configurator.Subscribe(s =>
+				{
+					s.Handler<A>(message => _received.Complete(message));
+					s.Handler<B>(message => _receivedB.Complete(message));
+				});
+		}
 
 		[When]
 		public void A_message_is_published()
 		{
-			_received = new Future<A>();
-			_receivedB = new Future<B>();
-
-			var unsub = LocalBus.SubscribeHandler<A>(message => _received.Complete(message));
-			_unsubscribe = unsub += LocalBus.SubscribeHandler<B>(message => _receivedB.Complete(message));
-
 			LocalBus.Publish(new A
 			{
 				StringA = "ValueA",
@@ -48,12 +55,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		{
 			_received.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
 			_received.Value.StringA.ShouldEqual("ValueA");
-		}
-
-		[Finally]
-		public void Final()
-		{
-			_unsubscribe();
 		}
 
 		class A :
