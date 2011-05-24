@@ -23,7 +23,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 	using RabbitMQ.Client;
 	using Serialization;
 
-	[TestFixture]
+	[TestFixture, Explicit("integration tests and require custom configuration")]
 	public class RabbitMqTransportFactoryTests
 	{
 		[SetUp]
@@ -39,12 +39,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
 			_factory = null;
 		}
 
-		readonly IRabbitMqEndpointAddress _queue = RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/custom-vhost/mt-unit-tests");
+		// need to configure mt vhost for this:
+		readonly IRabbitMqEndpointAddress _queue = RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/mt/mt-unit-tests");
 		readonly IRabbitMqEndpointAddress _exchange = RabbitMqEndpointAddress.Parse("rabbitmq://localhost/exchange/dru");
 
 		RabbitMqTransportFactory _factory;
 
-		[Test, Explicit]
+		[Test]
 		public void CanConnect()
 		{
 			IDuplexTransport t = _factory.BuildLoopback(new TransportSettings(_queue));
@@ -52,7 +53,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		}
 
 
-		[Test, Explicit]
+		[Test]
 		public void EndpointSendAndReceive()
 		{
 			using (var management = new RabbitMqEndpointManagement(_queue))
@@ -80,7 +81,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 				}, TimeSpan.Zero);
 		}
 
-		[Test, Explicit]
+		[Test]
 		public void TransportSendAndReceive()
 		{
 			using (var management = new RabbitMqEndpointManagement(_queue))
