@@ -19,14 +19,14 @@ namespace MassTransit.Tests
 	using Magnum.Extensions;
 
 	[Scenario]
-	public class Uri_Specs
+	public class Advanced_Uri_Specs
 	{
 		Uri _baseUri;
 
 		[When]
 		public void There_s_an_advanced_uri()
 		{
-			_baseUri = new Uri("rabbitmq://testUser:topSecret@localhost:5672/mt/test_queue");
+			_baseUri = new Uri("rabbitmq://testUser:topSecret@localhost:5672/mt/test_queue?a_query=23");
 		}
 
 		[Then]
@@ -34,7 +34,35 @@ namespace MassTransit.Tests
 		{
 			Assert.That(
 				_baseUri.AppendToPath("_error")
-					.ToString(), Is.EqualTo("rabbitmq://testUser:topSecret@localhost:5672/mt/test_queue_error"));
+					.ToString(), Is.EqualTo("rabbitmq://testUser:topSecret@localhost:5672/mt/test_queue_error?a_query=23"));
+		}
+	}
+	[Scenario]
+	public class Simple_Uri_Specs
+	{
+		Uri _baseUri;
+
+		[When]
+		public void There_s_a_simple_uri()
+		{
+			_baseUri = new Uri("rabbitmq://a:5672/");
+		}
+
+		[Then]
+		public void Can_append_to_path()
+		{
+			Assert.That(
+				_baseUri.AppendToPath("q")
+					.ToString(), Is.EqualTo("rabbitmq://a:5672/q"));
+		}
+
+		[Then]
+		public void Can_append_to_path2()
+		{
+			Assert.That(
+				new Uri("rabbitmq://a:5672?354")
+					.AppendToPath("q").ToString(),
+				Is.EqualTo("rabbitmq://a:5672/q?354"));
 		}
 	}
 }
