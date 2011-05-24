@@ -49,10 +49,10 @@ end
 
 
 desc "Cleans, compiles, il-merges, unit tests, prepares examples, packages zip and runs MoMA"
-task :all => [:default, :package, :moma]
+task :all => [:clean, :compile, :compile_samples, :ilmerge, :copy_services, :tests]
 
 desc "**Default**, compiles and runs tests"
-task :default => [:clean, :compile, :compile_samples, :ilmerge, :copy_services, :tests]
+task :default => [:clean, :compile, :compile_samples, :ilmerge, :copy_services]
 
 desc "**DOOES NOT CLEAR OUTPUT FOLDER**, compiles and runs tests"
 task :unclean => [:compile, :ilmerge, :tests]
