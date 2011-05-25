@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,6 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.ContextBuilders
+namespace MassTransit.Testing
 {
+	using System;
+	using Context;
+
+	public interface ISentMessage
+	{
+		Exception Exception { get; }
+
+		Type MessageType { get; }
+	}
+
+	public interface ISentMessage<T> :
+		ISentMessage
+		where T : class
+	{
+		ISendContext<T> Context { get; }
+	}
 }

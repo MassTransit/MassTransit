@@ -19,20 +19,18 @@ namespace MassTransit.Testing.Subjects
 	using System.Threading;
 	using Magnum.Extensions;
 
-
-	public class ReceivedMessagesList<T> :
-		ReceivedMessages<T>,
+	public class ReceivedMessageList :
+		IReceivedMessageList,
 		IDisposable
-		where T : class
 	{
-		readonly IList<T> _messages;
+		readonly IList<IReceivedMessage> _messages;
 		readonly ManualResetEvent _received;
 		TimeSpan _timeout = 8.Seconds();
 
-		public ReceivedMessagesList()
+		public ReceivedMessageList()
 		{
+			_messages = new List<IReceivedMessage>();
 			_received = new ManualResetEvent(false);
-			_messages = new List<T>(1);
 		}
 
 		public void Dispose()
@@ -42,9 +40,10 @@ namespace MassTransit.Testing.Subjects
 			}
 		}
 
-		public IEnumerator<T> GetEnumerator()
+		public IEnumerator<IReceivedMessage> GetEnumerator()
 		{
-			return _messages.GetEnumerator();
+			lock (_messages)
+				return _messages.ToList().GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -54,18 +53,27 @@ namespace MassTransit.Testing.Subjects
 
 		public bool Any()
 		{
-			while (_messages.Any() == false)
+			bool any;
+			lock (_messages)
+				any = _messages.Any();
+
+			while (any == false)
 			{
 				if (_received.WaitOne(_timeout, true) == false)
 					return false;
+
+				lock (_messages)
+					any = _messages.Any();
 			}
 
 			return true;
 		}
 
-		public void Add(T message)
+		public void Add(IReceivedMessage message)
 		{
-			_messages.Add(message);
+			lock (_messages)
+				_messages.Add(message);
+
 			_received.Set();
 		}
 	}

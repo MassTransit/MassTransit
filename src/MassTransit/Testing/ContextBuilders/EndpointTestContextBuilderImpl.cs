@@ -29,14 +29,15 @@ namespace MassTransit.Testing.ContextBuilders
 
 		public EndpointTestContextBuilderImpl()
 		{
-			var settings = new EndpointFactoryDefaultSettings();
-
-			settings.CreateMissingQueues = true;
-			settings.CreateTransactionalQueues = false;
-			settings.PurgeOnStartup = true;
-			settings.RequireTransactional = false;
-			settings.Serializer = new XmlMessageSerializer();
-			settings.TransactionTimeout = 30.Seconds();
+			var settings = new EndpointFactoryDefaultSettings
+				{
+					CreateMissingQueues = true,
+					CreateTransactionalQueues = false,
+					PurgeOnStartup = true,
+					RequireTransactional = false,
+					Serializer = new XmlMessageSerializer(),
+					TransactionTimeout = 30.Seconds()
+				};
 
 			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(settings);
 

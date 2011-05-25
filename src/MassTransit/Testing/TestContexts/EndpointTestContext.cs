@@ -13,23 +13,34 @@
 namespace MassTransit.Testing.TestContexts
 {
 	using System;
+	using System.Collections.Generic;
 	using BusConfigurators;
 	using Magnum.Extensions;
 	using Saga;
 	using Services.Subscriptions;
+	using Subjects;
+	using TestDecorators;
 	using Transports;
 
 	public class EndpointTestContext :
 		IEndpointTestContext
 	{
 		readonly EndpointCache _endpointCache;
+		readonly IDictionary<Uri, EndpointTestDecorator> _endpoints;
 		bool _disposed;
+		readonly ReceivedMessageList _received;
+		readonly SentMessageList _sent;
 
 		public EndpointTestContext(IEndpointFactory endpointFactory)
 		{
-			EndpointFactory = endpointFactory;
+			_received = new ReceivedMessageList();
+			_sent = new SentMessageList();
 
-			_endpointCache = new EndpointCache(endpointFactory);
+			_endpoints = new Dictionary<Uri, EndpointTestDecorator>();
+
+			EndpointFactory = new EndpointFactoryTestDecorator(endpointFactory, this);
+
+			_endpointCache = new EndpointCache(EndpointFactory);
 
 			EndpointCache = new EndpointCacheProxy(_endpointCache);
 
@@ -46,12 +57,26 @@ namespace MassTransit.Testing.TestContexts
 		public IEndpointCache EndpointCache { get; private set; }
 		public IEndpointFactory EndpointFactory { get; private set; }
 
+		public ISentMessageList Sent
+		{
+			get { return _sent; }
+		}
+
+		public IReceivedMessageList Received
+		{
+			get { return _received; }
+		}
+
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
+		public void AddEndpoint(EndpointTestDecorator endpoint)
+		{
+			_endpoints.Add(endpoint.Address.Uri, endpoint);
+		}
 
 		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator,
 		                                          ISubscriptionService subscriptionService)
@@ -86,6 +111,9 @@ namespace MassTransit.Testing.TestContexts
 			if (_disposed) return;
 			if (disposing)
 			{
+				_sent.Dispose();
+				_received.Dispose();
+
 				_endpointCache.Clear();
 
 				if (EndpointCache != null)
@@ -111,6 +139,16 @@ namespace MassTransit.Testing.TestContexts
 			var sagaRepository = new InMemorySagaRepository<TSaga>();
 
 			return sagaRepository;
+		}
+
+		public void Add(ISentMessage sentMessage)
+		{
+			_sent.Add(sentMessage);
+		}
+
+		public void Add(IReceivedMessage sentMessage)
+		{
+			_received.Add(sentMessage);
 		}
 	}
 }

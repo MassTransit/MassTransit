@@ -14,12 +14,11 @@ namespace MassTransit.Tests.Testing
 {
 	using Magnum.TestFramework;
 	using MassTransit.Testing;
-	using NUnit.Framework;
 
-	[TestFixture]
+	[Scenario]
 	public class Using_the_handler_test_factory
 	{
-		[SetUp]
+		[When]
 		public void Setup()
 		{
 			_test = TestFactory.ForHandler<A>()
@@ -28,7 +27,7 @@ namespace MassTransit.Tests.Testing
 			_test.Execute();
 		}
 
-		[TearDown]
+		[Finally]
 		public void Teardown()
 		{
 			_test.Dispose();
@@ -41,7 +40,19 @@ namespace MassTransit.Tests.Testing
 		{
 		}
 
-		[Test]
+		[Then]
+		public void Should_have_received_a_message_of_type_a()
+		{
+			_test.Received.Any().ShouldBeTrue();
+		}
+
+		[Then]
+		public void Should_have_sent_a_message_of_type_a()
+		{
+			_test.Sent.Any<A>().ShouldBeTrue();
+		}
+
+		[Then]
 		public void Should_support_a_simple_handler()
 		{
 			_test.Handler.ReceivedMessages.Any().ShouldBeTrue();
