@@ -23,26 +23,37 @@ namespace MassTransit.Testing.Builders
 		where TMessage : class
 	{
 		readonly IBusTestContext _testContext;
+		Action<IServiceBus, TMessage> _handler;
 		IList<TestAction> _actions;
 
 
 		public HandlerTestBuilderImpl(IBusTestContext testContext)
 		{
 			_testContext = testContext;
+			_handler = DefaultHandler;
 
 			_actions = new List<TestAction>();
 		}
 
 		public HandlerTest<TMessage> Build()
 		{
-			var test = new HandlerTestInstance<TMessage>(_testContext, _actions);
+			var test = new HandlerTestInstance<TMessage>(_testContext, _actions, _handler);
 
 			return test;
+		}
+
+		public void SetHandler(Action<IServiceBus, TMessage> handler)
+		{
+			_handler = handler;
 		}
 
 		public void AddTestAction(TestAction testAction)
 		{
 			_actions.Add(testAction);
+		}
+
+		static void DefaultHandler(IServiceBus bus, TMessage message)
+		{
 		}
 	}
 }

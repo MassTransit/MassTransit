@@ -23,5 +23,8 @@ namespace MassTransit.Testing.Configurators
 		void UseBuilder(Func<IBusTestContext, HandlerTestBuilder<TMessage>> builderFactory);
 
 		void AddConfigurator(HandlerTestBuilderConfigurator<TMessage> configurator);
+
+
+		void Handler(Action<IServiceBus, TMessage> handler);
 	}
 }

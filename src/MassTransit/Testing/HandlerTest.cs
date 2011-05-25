@@ -13,11 +13,15 @@
 namespace MassTransit.Testing
 {
 	using Subjects;
+	using TestContexts;
 
 	public interface HandlerTest<TMessage> :
 		TestInstance
 		where TMessage : class
 	{
+
 		HandlerTestSubject<TMessage> Handler { get; }
+
+		IBusTestContext TestContext { get; }
 	}
 }

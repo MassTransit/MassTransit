@@ -12,19 +12,28 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.ActionConfigurators
 {
+	using System;
 	using System.Collections.Generic;
 	using Builders;
 	using Configurators;
+	using Context;
 
 	public class SendMessageTestActionConfigurator<TMessage> :
 		TestActionConfigurator<TMessage>
 		where TMessage : class
 	{
 		readonly TMessage _message;
+		readonly Action<ISendContext<TMessage>> _callback;
 
 		public SendMessageTestActionConfigurator(TMessage message)
 		{
 			_message = message;
+		}
+
+		public SendMessageTestActionConfigurator(TMessage message, Action<ISendContext<TMessage>> callback)
+		{
+			_message = message;
+			_callback = callback;
 		}
 
 		public IEnumerable<TestConfiguratorResult> Validate()
@@ -35,7 +44,7 @@ namespace MassTransit.Testing.ActionConfigurators
 
 		public void Configure(TestInstanceBuilder builder)
 		{
-			var action = new SendMessageTestAction<TMessage>(_message);
+			var action = new SendMessageTestAction<TMessage>(_message, _callback);
 
 			builder.AddTestAction(action);
 		}

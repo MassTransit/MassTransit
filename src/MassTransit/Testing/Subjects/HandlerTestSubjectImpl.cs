@@ -18,13 +18,15 @@ namespace MassTransit.Testing.Subjects
 		HandlerTestSubject<T>
 		where T : class
 	{
+		readonly Action<IServiceBus, T> _handler;
 		readonly ReceivedMessageList<T> _received;
 		IServiceBus _bus;
 		bool _disposed;
 		UnsubscribeAction _unsubscribe;
 
-		public HandlerTestSubjectImpl()
+		public HandlerTestSubjectImpl(Action<IServiceBus, T> handler)
 		{
+			_handler = handler;
 			_received = new ReceivedMessageList<T>();
 		}
 
@@ -67,7 +69,18 @@ namespace MassTransit.Testing.Subjects
 		{
 			var received = new ReceivedMessage<T>(_bus.MessageContext<T>(), message);
 
-			_received.Add(received);
+			try
+			{
+				_handler(_bus, message);
+			}
+			catch (Exception ex)
+			{
+				received.SetException(ex);
+			}
+			finally
+			{
+				_received.Add(received);
+			}
 		}
 
 		~HandlerTestSubjectImpl()
