@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Contexts
+namespace MassTransit.Testing.TestContexts
 {
 	using System;
 	using BusConfigurators;
@@ -20,10 +20,10 @@ namespace MassTransit.Testing.Contexts
 	using Transports;
 
 	public class EndpointTestContext :
-		ITestContext
+		IEndpointTestContext
 	{
-		bool _disposed;
 		readonly EndpointCache _endpointCache;
+		bool _disposed;
 
 		public EndpointTestContext(IEndpointFactory endpointFactory)
 		{

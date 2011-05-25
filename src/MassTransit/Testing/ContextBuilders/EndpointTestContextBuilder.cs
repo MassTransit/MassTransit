@@ -10,34 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.ContextBuilders
 {
 	using System;
-	using System.Collections.Generic;
-	using Configurators;
-	using ContextBuilders;
 	using EndpointConfigurators;
+	using TestContexts;
 
-	public class EndpointFactoryTestContextBuilderConfigurator :
-		TestContextBuilderConfigurator
+	public interface EndpointTestContextBuilder :
+		TestContextBuilder
 	{
-		readonly Action<EndpointFactoryConfigurator> _configureAction;
+		void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configureCallback);
 
-		public EndpointFactoryTestContextBuilderConfigurator(Action<EndpointFactoryConfigurator> configureAction)
-		{
-			_configureAction = configureAction;
-		}
-
-		public IEnumerable<TestConfiguratorResult> Validate()
-		{
-			yield break;
-		}
-
-		public TestContextBuilder Configure(TestContextBuilder builder)
-		{
-			builder.ConfigureEndpointFactory(_configureAction);
-
-			return builder;
-		}
+		IEndpointTestContext Build();
 	}
 }

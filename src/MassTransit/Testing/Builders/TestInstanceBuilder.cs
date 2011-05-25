@@ -10,14 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.Builders
 {
-	using Builders;
 	using Configurators;
 
-	public interface TestBuilderConfigurator :
-		TestConfigurator
+	public interface TestInstanceBuilder :
+		TestBuilder
 	{
-		TestBuilder Configure(TestBuilder builder);
+		void AddTestAction(TestAction testAction);
+	}
+
+	public interface TestInstanceBuilder<TMessage> : 
+		TestInstanceBuilder
+		where TMessage : class
+	{
 	}
 }

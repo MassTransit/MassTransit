@@ -10,12 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Contexts
+namespace MassTransit.Testing.Subjects
 {
-	using ContextBuilders;
+	using System.Collections.Generic;
 
-	public interface EndpointTestContextBuilder :
-		TestContextBuilder
+	public interface ReceivedMessages<T> :
+		IEnumerable<T>
+		where T : class
 	{
+		bool Any();
 	}
 }

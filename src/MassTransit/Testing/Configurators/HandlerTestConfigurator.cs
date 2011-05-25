@@ -14,13 +14,13 @@ namespace MassTransit.Testing.Configurators
 {
 	using System;
 	using Builders;
-	using Contexts;
+	using TestContexts;
 
 	public interface HandlerTestConfigurator<TMessage> :
-		TestConfigurator<TMessage>
+		TestInstanceConfigurator<TMessage>
 		where TMessage : class
 	{
-		void UseBuilder(Func<ITestContext, HandlerTestBuilder<TMessage>> builderFactory);
+		void UseBuilder(Func<IBusTestContext, HandlerTestBuilder<TMessage>> builderFactory);
 
 		void AddConfigurator(HandlerTestBuilderConfigurator<TMessage> configurator);
 	}

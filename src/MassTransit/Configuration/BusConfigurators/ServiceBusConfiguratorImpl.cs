@@ -145,5 +145,10 @@ namespace MassTransit.BusConfigurators
 		{
 			return new ServiceBusBuilderImpl(settings);
 		}
+
+		public void ChangeSettings(Action<ServiceBusSettings> callback)
+		{
+			callback(_settings);
+		}
 	}
 }

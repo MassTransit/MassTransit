@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
-	using System;
-	using Configurators;
-	using Contexts;
 	using Factories;
 
 	public static class TestFactory
@@ -25,15 +22,6 @@ namespace MassTransit.Testing
 			var factory = new HandlerTestFactoryImpl<TMessage>();
 
 			return factory;
-		}
-
-		public static ITestContext NewContext(Action<TestContextConfigurator> configure)
-		{
-			var configurator = new TestContextConfiguratorImpl();
-
-			configure(configurator);
-
-			return configurator.Build();
 		}
 	}
 }

@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Subjects
 {
-	using System.Collections.Generic;
-
 	public interface HandlerTestSubject<T> :
 		TestSubject<T>
 		where T : class
@@ -22,6 +20,6 @@ namespace MassTransit.Testing.Subjects
 		/// <summary>
 		/// The messages that were received by the handler
 		/// </summary>
-		IEnumerable<T> Received { get; }
+		ReceivedMessages<T> ReceivedMessages { get; }
 	}
 }

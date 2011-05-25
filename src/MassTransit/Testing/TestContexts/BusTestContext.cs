@@ -10,26 +10,37 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Subjects
+namespace MassTransit.Testing.TestContexts
 {
 	using System;
+	using Transports;
 
-	public class HandlerTestSubjectImpl<T> :
-		HandlerTestSubject<T>
-		where T : class
+	public class BusTestContext :
+		IBusTestContext
 	{
-		readonly ReceivedMessagesList<T> _received;
+		IServiceBus _bus;
 		bool _disposed;
-		UnsubscribeAction _unsubscribe;
+		IEndpointTestContext _testContext;
 
-		public HandlerTestSubjectImpl()
+		public BusTestContext(IEndpointTestContext testContext, IServiceBus bus)
 		{
-			_received = new ReceivedMessagesList<T>();
+			_testContext = testContext;
+			_bus = bus;
 		}
 
-		public ReceivedMessages<T> ReceivedMessages
+		public IEndpointCache EndpointCache
 		{
-			get { return _received; }
+			get { return _testContext.EndpointCache; }
+		}
+
+		public IEndpointFactory EndpointFactory
+		{
+			get { return _testContext.EndpointFactory; }
+		}
+
+		public IServiceBus Bus
+		{
+			get { return _bus; }
 		}
 
 		public void Dispose()
@@ -38,34 +49,21 @@ namespace MassTransit.Testing.Subjects
 			GC.SuppressFinalize(this);
 		}
 
-		public void Prepare(IServiceBus bus)
-		{
-			_unsubscribe = bus.SubscribeHandler<T>(HandleMessage);
-		}
-
 		void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
 			{
-				if (_unsubscribe != null)
-				{
-					_unsubscribe();
-					_unsubscribe = null;
-				}
+				if (_bus != null)
+					_bus.Dispose();
 
-				_received.Dispose();
+				_testContext.Dispose();
 			}
 
 			_disposed = true;
 		}
 
-		void HandleMessage(T obj)
-		{
-			_received.Add(obj);
-		}
-
-		~HandlerTestSubjectImpl()
+		~BusTestContext()
 		{
 			Dispose(false);
 		}

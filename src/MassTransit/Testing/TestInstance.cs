@@ -17,6 +17,6 @@ namespace MassTransit.Testing
 	public interface TestInstance :
 		IDisposable
 	{
-
+		void Execute();
 	}
 }
