@@ -43,6 +43,11 @@ namespace MassTransit.Testing.Instances
 			GC.SuppressFinalize(this);
 		}
 
+		public IReceivedMessageList Skipped
+		{
+			get { return _testContext.Skipped; }
+		}
+
 		public void Execute()
 		{
 			_subject.Prepare(_testContext.Bus);

@@ -44,6 +44,11 @@ namespace MassTransit.Testing.TestContexts
 			get { return _testContext.Sent; }
 		}
 
+		public IReceivedMessageList Skipped
+		{
+			get { return _testContext.Skipped; }
+		}
+
 		public IReceivedMessageList Received
 		{
 			get { return _testContext.Received; }

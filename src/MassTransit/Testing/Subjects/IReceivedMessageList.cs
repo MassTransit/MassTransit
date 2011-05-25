@@ -12,10 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Subjects
 {
+	using System;
 	using System.Collections.Generic;
 
 	public interface IReceivedMessageList :
 		IEnumerable<IReceivedMessage>
+	{
+		bool Any();
+
+		bool Any<T>()
+			where T : class;
+
+		bool Any<T>(Func<T, bool> filter)
+			where T : class;
+	}
+
+	public interface IReceivedMessageList<T> :
+		IEnumerable<IReceivedMessage<T>>
 	{
 		bool Any();
 	}

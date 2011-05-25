@@ -13,6 +13,7 @@
 namespace MassTransit.Testing.TestContexts
 {
 	using System.Collections.Generic;
+	using Subjects;
 
 	public interface IBusTestContext :
 		IEndpointTestContext

@@ -27,14 +27,16 @@ namespace MassTransit.Testing.TestContexts
 	{
 		readonly EndpointCache _endpointCache;
 		readonly IDictionary<Uri, EndpointTestDecorator> _endpoints;
-		bool _disposed;
 		readonly ReceivedMessageList _received;
 		readonly SentMessageList _sent;
+		readonly ReceivedMessageList _skipped;
+		bool _disposed;
 
 		public EndpointTestContext(IEndpointFactory endpointFactory)
 		{
 			_received = new ReceivedMessageList();
 			_sent = new SentMessageList();
+			_skipped = new ReceivedMessageList();
 
 			_endpoints = new Dictionary<Uri, EndpointTestDecorator>();
 
@@ -62,6 +64,11 @@ namespace MassTransit.Testing.TestContexts
 			get { return _sent; }
 		}
 
+		public IReceivedMessageList Skipped
+		{
+			get { return _skipped; }
+		}
+
 		public IReceivedMessageList Received
 		{
 			get { return _received; }
@@ -76,6 +83,23 @@ namespace MassTransit.Testing.TestContexts
 		public void AddEndpoint(EndpointTestDecorator endpoint)
 		{
 			_endpoints.Add(endpoint.Address.Uri, endpoint);
+		}
+
+		public void AddSent(ISentMessage message)
+		{
+			_sent.Add(message);
+		}
+
+		public void AddReceived(IReceivedMessage message)
+		{
+			_received.Add(message);
+
+			_skipped.Remove(message);
+		}
+
+		public void AddSkipped(IReceivedMessage message)
+		{
+			_skipped.Add(message);
 		}
 
 		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator,
@@ -139,16 +163,6 @@ namespace MassTransit.Testing.TestContexts
 			var sagaRepository = new InMemorySagaRepository<TSaga>();
 
 			return sagaRepository;
-		}
-
-		public void Add(ISentMessage sentMessage)
-		{
-			_sent.Add(sentMessage);
-		}
-
-		public void Add(IReceivedMessage sentMessage)
-		{
-			_received.Add(sentMessage);
 		}
 	}
 }

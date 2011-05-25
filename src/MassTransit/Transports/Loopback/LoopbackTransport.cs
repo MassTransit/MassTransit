@@ -93,7 +93,16 @@ namespace MassTransit.Transports
 					if (iterator.Value != null)
 					{
 						LoopbackMessage message = iterator.Value;
+						if(message.ExpirationTime.HasValue && message.ExpirationTime <= DateTime.UtcNow)
+						{
+							_messages.Remove(iterator);
+							return;
+						}
+
 						var context = new ConsumeContext(message.Body);
+						context.SetMessageId(message.MessageId);
+						if(message.ExpirationTime.HasValue)
+							context.SetExpirationTime(message.ExpirationTime.Value);
 
 						using (ContextStorage.CreateContextScope(context))
 						{

@@ -15,11 +15,10 @@ namespace MassTransit.Testing.Subjects
 	public interface HandlerTestSubject<T> :
 		TestSubject<T>
 		where T : class
-
 	{
 		/// <summary>
 		/// The messages that were received by the handler
 		/// </summary>
-		ReceivedMessages<T> ReceivedMessages { get; }
+		IReceivedMessageList<T> Received { get; }
 	}
 }

@@ -18,11 +18,17 @@ namespace MassTransit.Tests.Testing
 	[Scenario]
 	public class Using_the_handler_test_factory
 	{
+		HandlerTest<A> _test;
+
 		[When]
 		public void Setup()
 		{
 			_test = TestFactory.ForHandler<A>()
-				.New(x => x.Send(new A()));
+				.New(x =>
+					{
+						x.Send(new A());
+						x.Send(new B());
+					});
 
 			_test.Execute();
 		}
@@ -34,16 +40,22 @@ namespace MassTransit.Tests.Testing
 			_test = null;
 		}
 
-		HandlerTest<A> _test;
-
-		class A
-		{
-		}
-
 		[Then]
 		public void Should_have_received_a_message_of_type_a()
 		{
-			_test.Received.Any().ShouldBeTrue();
+			_test.Received.Any<A>().ShouldBeTrue();
+		}
+
+		[Then]
+		public void Should_have_skipped_a_message_of_type_b()
+		{
+			_test.Skipped.Any<B>().ShouldBeTrue();
+		}
+
+		[Then]
+		public void Should_not_have_skipped_a_message_of_type_a()
+		{
+			_test.Skipped.Any<A>().ShouldBeFalse();
 		}
 
 		[Then]
@@ -53,9 +65,23 @@ namespace MassTransit.Tests.Testing
 		}
 
 		[Then]
+		public void Should_have_sent_a_message_of_type_b()
+		{
+			_test.Sent.Any<B>().ShouldBeTrue();
+		}
+
+		[Then]
 		public void Should_support_a_simple_handler()
 		{
-			_test.Handler.ReceivedMessages.Any().ShouldBeTrue();
+			_test.Handler.Received.Any().ShouldBeTrue();
+		}
+
+		class A
+		{
+		}
+
+		class B
+		{
 		}
 	}
 }

@@ -93,7 +93,7 @@ namespace MassTransit.Testing.TestDecorators
 			finally
 			{
 				_sent.Add(send);
-				_testContext.Add(send);
+				_testContext.AddSent(send);
 			}
 		}
 
@@ -103,7 +103,12 @@ namespace MassTransit.Testing.TestDecorators
 				{
 					Action<IReceiveContext> receive = receiver(receiveContext);
 					if (receive == null)
+					{
+						var skipped = new ReceivedMessage(receiveContext);
+						_testContext.AddSkipped(skipped);
+
 						return null;
+					}
 
 					return context =>
 						{
@@ -120,7 +125,7 @@ namespace MassTransit.Testing.TestDecorators
 							finally
 							{
 								_received.Add(received);
-								_testContext.Add(received);
+								_testContext.AddReceived(received);
 							}
 						};
 				}, timeout);
