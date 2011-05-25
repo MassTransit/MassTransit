@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Testing
 {
-	using System.Linq;
 	using Magnum.TestFramework;
 	using MassTransit.Testing;
 	using NUnit.Framework;
@@ -20,20 +19,32 @@ namespace MassTransit.Tests.Testing
 	[TestFixture]
 	public class Using_the_handler_test_factory
 	{
+		[SetUp]
+		public void Setup()
+		{
+			_test = TestFactory.ForHandler<A>()
+				.New(x => x.Send(new A()));
+
+			_test.Execute();
+		}
+
+		[TearDown]
+		public void Teardown()
+		{
+			_test.Dispose();
+			_test = null;
+		}
+
+		HandlerTest<A> _test;
+
+		class A
+		{
+		}
+
 		[Test]
 		public void Should_support_a_simple_handler()
 		{
-			using (var test = TestFactory.ForHandler<A>().New(x =>
-				{
-					x.Send(new A());
-				}))
-			{
-				test.Handler.Received.Count().ShouldEqual(1);
-			}
-		}
-
-		class A
-		{ 
+			_test.Handler.ReceivedMessages.Any().ShouldBeTrue();
 		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,20 +13,64 @@
 namespace MassTransit.Testing.Instances
 {
 	using System;
+	using System.Collections.Generic;
+	using Configurators;
+	using Magnum.Extensions;
 	using Subjects;
+	using TestContexts;
 
 	public class HandlerTestInstance<TMessage> :
 		HandlerTest<TMessage>
 		where TMessage : class
 	{
+		readonly IList<TestAction> _actions;
+		readonly HandlerTestSubject<TMessage> _subject;
+		readonly IBusTestContext _testContext;
+
+		bool _disposed;
+
+		public HandlerTestInstance(IBusTestContext testContext, IList<TestAction> actions)
+		{
+			_testContext = testContext;
+			_actions = actions;
+
+			_subject = new HandlerTestSubjectImpl<TMessage>();
+		}
+
 		public void Dispose()
 		{
-			throw new NotImplementedException();
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		public void Execute()
+		{
+			_subject.Prepare(_testContext.Bus);
+
+			_actions.Each(x => x.Act(_testContext.Bus));
 		}
 
 		public HandlerTestSubject<TMessage> Handler
 		{
-			get { throw new NotImplementedException(); }
+			get { return _subject; }
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_subject.Dispose();
+
+				_testContext.Dispose();
+			}
+
+			_disposed = true;
+		}
+
+		~HandlerTestInstance()
+		{
+			Dispose(false);
 		}
 	}
 }

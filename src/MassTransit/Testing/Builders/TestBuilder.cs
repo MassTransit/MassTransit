@@ -12,13 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Builders
 {
-	using System;
-	using ContextBuilders;
-
 	public interface TestBuilder
 	{
-		void UseContextBuilder(Func<TestContextBuilder> builderFactory);
-
-		void AddContextConfigurator(TestContextBuilderConfigurator configurator);
 	}
 }

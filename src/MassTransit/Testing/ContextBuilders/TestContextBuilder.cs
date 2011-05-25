@@ -12,14 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.ContextBuilders
 {
-	using System;
-	using Contexts;
-	using EndpointConfigurators;
-
 	public interface TestContextBuilder
 	{
-		void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configureCallback);
-		
-		ITestContext Build();
 	}
 }

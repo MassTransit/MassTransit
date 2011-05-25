@@ -12,16 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Configurators
 {
-	using System.Collections.Generic;
-
-	public interface TestConfigurator
+	public interface TestAction
 	{
-		IEnumerable<TestConfiguratorResult> Validate();
-	}
-
-	public interface TestConfigurator<TMessage> :
-		TestConfigurator
-		where TMessage : class
-	{
+		void Act(IServiceBus bus);
 	}
 }

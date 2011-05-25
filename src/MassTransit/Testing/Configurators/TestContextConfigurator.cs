@@ -14,12 +14,13 @@ namespace MassTransit.Testing.Configurators
 {
 	using System;
 	using ContextBuilders;
+	using ContextConfigurators;
 
 	public interface TestContextConfigurator :
 		TestConfigurator
 	{
-		void UseBuilder(Func<TestContextBuilder> builderFactory);
+		void UseBuilder(Func<EndpointTestContextBuilder> builderFactory);
 
-		void AddConfigurator(TestContextBuilderConfigurator configurator);
+		void AddConfigurator(EndpointTestContextBuilderConfigurator configurator);
 	}
 }

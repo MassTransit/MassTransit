@@ -10,39 +10,34 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Builders
+namespace MassTransit.Testing.ContextConfigurators
 {
 	using System;
 	using System.Collections.Generic;
 	using Configurators;
-	using Instances;
-	using TestContexts;
+	using ContextBuilders;
+	using EndpointConfigurators;
 
-	public class HandlerTestBuilderImpl<TMessage> :
-		HandlerTestBuilder<TMessage>
-		where TMessage : class
+	public class EndpointTestContextBuilderConfiguratorImpl :
+		EndpointTestContextBuilderConfigurator
 	{
-		readonly IBusTestContext _testContext;
-		IList<TestAction> _actions;
+		readonly Action<EndpointFactoryConfigurator> _configureAction;
 
-
-		public HandlerTestBuilderImpl(IBusTestContext testContext)
+		public EndpointTestContextBuilderConfiguratorImpl(Action<EndpointFactoryConfigurator> configureAction)
 		{
-			_testContext = testContext;
-
-			_actions = new List<TestAction>();
+			_configureAction = configureAction;
 		}
 
-		public HandlerTest<TMessage> Build()
+		public IEnumerable<TestConfiguratorResult> Validate()
 		{
-			var test = new HandlerTestInstance<TMessage>(_testContext, _actions);
-
-			return test;
+			yield break;
 		}
 
-		public void AddTestAction(TestAction testAction)
+		public EndpointTestContextBuilder Configure(EndpointTestContextBuilder builder)
 		{
-			_actions.Add(testAction);
+			builder.ConfigureEndpointFactory(_configureAction);
+
+			return builder;
 		}
 	}
 }

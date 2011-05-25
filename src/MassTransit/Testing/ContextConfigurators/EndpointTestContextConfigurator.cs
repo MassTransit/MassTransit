@@ -10,24 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.ContextConfigurators
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using Configurators;
 	using ContextBuilders;
-	using Contexts;
+	using TestContexts;
 
-	public class TestContextConfiguratorImpl :
+	public class EndpointTestContextConfigurator :
 		TestContextConfigurator
 	{
-		Func<TestContextBuilder> _builderFactory;
-		IList<TestContextBuilderConfigurator> _configurators;
+		Func<EndpointTestContextBuilder> _builderFactory;
+		IList<EndpointTestContextBuilderConfigurator> _configurators;
 
-		public TestContextConfiguratorImpl()
+		public EndpointTestContextConfigurator()
 		{
-			_configurators = new List<TestContextBuilderConfigurator>();
+			_configurators = new List<EndpointTestContextBuilderConfigurator>();
 		}
 
 		public IEnumerable<TestConfiguratorResult> Validate()
@@ -36,19 +36,19 @@ namespace MassTransit.Testing
 				yield return this.Failure("BuilderFactory", "A builder factory was not configured.");
 		}
 
-		public void UseBuilder(Func<TestContextBuilder> builderFactory)
+		public void UseBuilder(Func<EndpointTestContextBuilder> builderFactory)
 		{
 			_builderFactory = builderFactory;
 		}
 
-		public void AddConfigurator(TestContextBuilderConfigurator configurator)
+		public void AddConfigurator(EndpointTestContextBuilderConfigurator configurator)
 		{
 			_configurators.Add(configurator);
 		}
 
-		public ITestContext Build()
+		public IEndpointTestContext Build()
 		{
-			TestContextBuilder builder = _builderFactory();
+			EndpointTestContextBuilder builder = _builderFactory();
 
 			builder = _configurators.Aggregate(builder, (current, configurator) => configurator.Configure(current));
 

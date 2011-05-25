@@ -10,15 +10,34 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.ActionConfigurators
 {
+	using System.Collections.Generic;
 	using Builders;
 	using Configurators;
-	using ContextBuilders;
 
-	public interface TestContextBuilderConfigurator :
-		TestConfigurator
+	public class SendMessageTestActionConfigurator<TMessage> :
+		TestActionConfigurator<TMessage>
+		where TMessage : class
 	{
-		TestContextBuilder Configure(TestContextBuilder builder);
+		readonly TMessage _message;
+
+		public SendMessageTestActionConfigurator(TMessage message)
+		{
+			_message = message;
+		}
+
+		public IEnumerable<TestConfiguratorResult> Validate()
+		{
+			if (_message == null)
+				yield return this.Failure("Message", "The message instance to send must not be null.");
+		}
+
+		public void Configure(TestInstanceBuilder builder)
+		{
+			var action = new SendMessageTestAction<TMessage>(_message);
+
+			builder.AddTestAction(action);
+		}
 	}
 }

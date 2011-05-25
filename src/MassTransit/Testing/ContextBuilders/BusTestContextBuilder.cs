@@ -10,18 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Configurators
+namespace MassTransit.Testing.ContextBuilders
 {
-	using System.Collections.Generic;
+	using System;
+	using BusConfigurators;
+	using TestContexts;
 
-	public interface TestConfigurator
+	public interface BusTestContextBuilder :
+		EndpointTestContextBuilder
 	{
-		IEnumerable<TestConfiguratorResult> Validate();
-	}
+		void ConfigureServiceBus(Action<ServiceBusConfigurator> configureCallback);
 
-	public interface TestConfigurator<TMessage> :
-		TestConfigurator
-		where TMessage : class
-	{
+		new IBusTestContext Build();
 	}
 }

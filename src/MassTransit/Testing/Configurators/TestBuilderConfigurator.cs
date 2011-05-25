@@ -10,17 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.Configurators
 {
-	public class SendMessageTestStep<TMessage> :
-		TestStepConfigurator<TMessage>
-		where TMessage : class
-	{
-		readonly TMessage _message;
+	using Builders;
 
-		public SendMessageTestStep(TMessage message)
-		{
-			_message = message;
-		}
+	public interface TestBuilderConfigurator :
+		TestConfigurator
+	{
+		TestBuilder Configure(TestBuilder builder);
 	}
 }

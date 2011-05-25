@@ -17,25 +17,29 @@ namespace MassTransit.Testing.Configurators
 	using System.Linq;
 	using Builders;
 	using ContextBuilders;
-	using Contexts;
+	using ContextConfigurators;
+	using Magnum.Extensions;
+	using TestContexts;
 
 	public class HandlerTestConfiguratorImpl<TMessage> :
 		HandlerTestConfigurator<TMessage>
 		where TMessage : class
 	{
 		readonly IList<HandlerTestBuilderConfigurator<TMessage>> _configurators;
-		readonly IList<TestContextBuilderConfigurator> _contextConfigurators;
-		Func<ITestContext, HandlerTestBuilder<TMessage>> _builderFactory;
+		readonly IList<BusTestContextBuilderConfigurator> _contextConfigurators;
 
-		Func<TestContextBuilder> _contextBuilderFactory;
+		Func<IBusTestContext, HandlerTestBuilder<TMessage>> _builderFactory;
+		Func<BusTestContextBuilder> _contextBuilderFactory;
+		IList<TestActionConfigurator> _actionConfigurators;
 
 		public HandlerTestConfiguratorImpl()
 		{
 			_configurators = new List<HandlerTestBuilderConfigurator<TMessage>>();
-			_contextConfigurators = new List<TestContextBuilderConfigurator>();
+			_contextConfigurators = new List<BusTestContextBuilderConfigurator>();
+			_actionConfigurators = new List<TestActionConfigurator>();
 
 			_builderFactory = testContext => new HandlerTestBuilderImpl<TMessage>(testContext);
-			_contextBuilderFactory = () => new EndpointTestContextBuilderImpl();
+			_contextBuilderFactory = () => new LoopbackBusTestContextBuilderImpl();
 		}
 
 		public IEnumerable<TestConfiguratorResult> Validate()
@@ -43,7 +47,7 @@ namespace MassTransit.Testing.Configurators
 			return _configurators.SelectMany(x => x.Validate());
 		}
 
-		public void UseBuilder(Func<ITestContext, HandlerTestBuilder<TMessage>> builderFactory)
+		public void UseBuilder(Func<IBusTestContext, HandlerTestBuilder<TMessage>> builderFactory)
 		{
 			_builderFactory = builderFactory;
 		}
@@ -53,25 +57,32 @@ namespace MassTransit.Testing.Configurators
 			_configurators.Add(configurator);
 		}
 
-		public void UseContextBuilder(Func<TestContextBuilder> contextBuilderFactory)
+		public void UseContextBuilder(Func<BusTestContextBuilder> contextBuilderFactory)
 		{
 			_contextBuilderFactory = contextBuilderFactory;
 		}
 
 		public HandlerTest<TMessage> Build()
 		{
-			TestContextBuilder contextBuilder = _contextBuilderFactory();
+			BusTestContextBuilder contextBuilder = _contextBuilderFactory();
 
 			contextBuilder = _contextConfigurators.Aggregate(contextBuilder,
 				(current, configurator) => configurator.Configure(current));
 
-			ITestContext context = contextBuilder.Build();
+			IBusTestContext context = contextBuilder.Build();
 
 			HandlerTestBuilder<TMessage> builder = _builderFactory(context);
 
 			builder = _configurators.Aggregate(builder, (current, configurator) => configurator.Configure(current));
 
+			_actionConfigurators.Each(x => x.Configure(builder));
+
 			return builder.Build();
+		}
+
+		public void AddActionConfigurator(TestActionConfigurator action)
+		{
+			_actionConfigurators.Add(action);
 		}
 	}
 }
