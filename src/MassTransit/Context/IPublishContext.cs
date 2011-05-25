@@ -13,7 +13,6 @@
 namespace MassTransit
 {
 	using System;
-	using Context;
 
 	public interface IPublishContext<T> :
 		ISendContext<T>
