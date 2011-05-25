@@ -18,6 +18,7 @@ namespace MassTransit
 	public interface IConsumerFactory<TConsumer>
 		where TConsumer : class
 	{
-		IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback);
+		IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback)
+			where TMessage : class;
 	}
 }

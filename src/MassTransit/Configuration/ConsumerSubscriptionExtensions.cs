@@ -102,6 +102,15 @@ namespace MassTransit
 			return bus.Configure(connector.Connect);
 		}
 
+		public static UnsubscribeAction SubscribeConsumer<TConsumer>([NotNull] this IServiceBus bus,
+		                                                             [NotNull] IConsumerFactory<TConsumer> consumerFactory)
+			where TConsumer : class
+		{
+			ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector(consumerFactory);
+
+			return bus.Configure(connector.Connect);
+		}
+
 		public static UnsubscribeAction SubscribeConsumer([NotNull] this IServiceBus bus, [NotNull] Type consumerType,
 		                                                  [NotNull] Func<Type, object> consumerFactory)
 		{

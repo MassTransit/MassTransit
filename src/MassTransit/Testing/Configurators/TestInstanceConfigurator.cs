@@ -16,10 +16,4 @@ namespace MassTransit.Testing.Configurators
 	{
 		void AddActionConfigurator(TestActionConfigurator action);
 	}
-
-	public interface TestInstanceConfigurator<TMessage> :
-		TestInstanceConfigurator
-	{
-		
-	}
 }

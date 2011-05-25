@@ -23,5 +23,13 @@ namespace MassTransit.Testing
 
 			return factory;
 		}
+
+		public static ConsumerTestFactory<TConsumer> ForConsumer<TConsumer>()
+			where TConsumer : class
+		{
+			var factory = new ConsumerTestFactoryImpl<TConsumer>();
+
+			return factory;
+		}
 	}
 }

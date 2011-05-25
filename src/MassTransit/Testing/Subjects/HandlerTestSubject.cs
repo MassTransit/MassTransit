@@ -12,13 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Subjects
 {
-	public interface HandlerTestSubject<T> :
-		TestSubject<T>
-		where T : class
+	public interface HandlerTestSubject<TMessage> :
+		TestSubject<TMessage>
+		where TMessage : class
 	{
 		/// <summary>
 		/// The messages that were received by the handler
 		/// </summary>
-		IReceivedMessageList<T> Received { get; }
+		IReceivedMessageList<TMessage> Received { get; }
 	}
 }

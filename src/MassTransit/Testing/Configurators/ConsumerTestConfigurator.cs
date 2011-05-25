@@ -10,13 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Builders
+namespace MassTransit.Testing.Configurators
 {
-	using Configurators;
+	using System;
+	using Builders;
+	using TestContexts;
 
-	public interface TestInstanceBuilder :
-		TestBuilder
+	public interface ConsumerTestConfigurator<TConsumer> :
+		TestInstanceConfigurator
+		where TConsumer : class
 	{
-		void AddTestAction(TestAction testAction);
+		void UseBuilder(Func<IBusTestContext, ConsumerTestBuilder<TConsumer>> builderFactory);
+
+		void AddConfigurator(ConsumerTestBuilderConfigurator<TConsumer> configurator);
+
+		void UseConsumerFactory(IConsumerFactory<TConsumer> consumerFactory);
 	}
 }

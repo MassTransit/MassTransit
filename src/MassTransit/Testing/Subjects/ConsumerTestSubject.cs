@@ -10,13 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Builders
+namespace MassTransit.Testing.Subjects
 {
-	using Configurators;
-
-	public interface TestInstanceBuilder :
-		TestBuilder
+	public interface ConsumerTestSubject<TConsumer> :
+		TestSubject<TConsumer>
+		where TConsumer : class
 	{
-		void AddTestAction(TestAction testAction);
+		/// <summary>
+		/// The messages that were received by the handler
+		/// </summary>
+		IReceivedMessageList Received { get; }
 	}
 }

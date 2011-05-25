@@ -18,9 +18,24 @@ namespace MassTransit.Testing
 	public interface TestInstance :
 		IDisposable
 	{
+		/// <summary>
+		/// Messages that were received by any endpoint during the execution of the test
+		/// </summary>
 		IReceivedMessageList Received { get; }
+
+		/// <summary>
+		/// Messages that were send by any endpoint during the execution of the test
+		/// </summary>
 		ISentMessageList Sent { get; }
+
+		/// <summary>
+		/// Messages that were not received by any handler, consumer, or instance during the execution of the test
+		/// </summary>
 		IReceivedMessageList Skipped { get; }
+
+		/// <summary>
+		/// Execute the test actions
+		/// </summary>
 		void Execute();
 	}
 }

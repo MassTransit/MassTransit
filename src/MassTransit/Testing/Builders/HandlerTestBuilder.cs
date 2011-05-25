@@ -15,7 +15,7 @@ namespace MassTransit.Testing.Builders
 	using System;
 
 	public interface HandlerTestBuilder<TMessage> :
-		TestInstanceBuilder<TMessage>
+		TestInstanceBuilder
 		where TMessage : class
 	{
 		HandlerTest<TMessage> Build();
