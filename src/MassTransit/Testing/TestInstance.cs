@@ -20,6 +20,7 @@ namespace MassTransit.Testing
 	{
 		IReceivedMessageList Received { get; }
 		ISentMessageList Sent { get; }
+		IReceivedMessageList Skipped { get; }
 		void Execute();
 	}
 }

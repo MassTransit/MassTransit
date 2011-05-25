@@ -238,6 +238,11 @@ namespace MassTransit.Context
 			return false;
 		}
 
+		public IConsumeContext BaseContext
+		{
+			get { return _context; }
+		}
+
 		public void RetryLater()
 		{
 			if (_log.IsDebugEnabled)

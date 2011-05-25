@@ -20,12 +20,13 @@ namespace MassTransit.Testing
 		Exception Exception { get; }
 
 		Type MessageType { get; }
+		ISendContext Context { get; }
 	}
 
 	public interface ISentMessage<T> :
 		ISentMessage
 		where T : class
 	{
-		ISendContext<T> Context { get; }
+		new ISendContext<T> Context { get; }
 	}
 }

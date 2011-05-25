@@ -23,14 +23,14 @@ namespace MassTransit.Testing.Subjects
 		ISentMessageList,
 		IDisposable
 	{
-		readonly IList<ISentMessage> _messages;
-		readonly ManualResetEvent _received;
+		readonly HashSet<ISentMessage> _messages;
+		readonly AutoResetEvent _received;
 		TimeSpan _timeout = 8.Seconds();
 
 		public SentMessageList()
 		{
-			_messages = new List<ISentMessage>();
-			_received = new ManualResetEvent(false);
+			_messages = new HashSet<ISentMessage>(new MessageIdEqualityComparer());
+			_received = new AutoResetEvent(false);
 		}
 
 		public void Dispose()
@@ -82,9 +82,24 @@ namespace MassTransit.Testing.Subjects
 		public void Add(ISentMessage message)
 		{
 			lock (_messages)
-				_messages.Add(message);
+			{
+				if (_messages.Add(message))
+					_received.Set();
+			}
+		}
 
-			_received.Set();
+		class MessageIdEqualityComparer :
+			IEqualityComparer<ISentMessage>
+		{
+			public bool Equals(ISentMessage x, ISentMessage y)
+			{
+				return x.Equals(y);
+			}
+
+			public int GetHashCode(ISentMessage message)
+			{
+				return message.Context.GetHashCode();
+			}
 		}
 	}
 }

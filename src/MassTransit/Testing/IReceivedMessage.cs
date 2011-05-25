@@ -13,9 +13,17 @@
 namespace MassTransit.Testing
 {
 	using System;
+	using Context;
 
 	public interface IReceivedMessage
 	{
 		Exception Exception { get; }
+
+		IReceiveContext Context { get; }
+	}
+
+	public interface IReceivedMessage<T> :
+		IReceivedMessage
+	{
 	}
 }

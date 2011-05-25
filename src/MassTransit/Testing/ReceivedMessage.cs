@@ -31,6 +31,41 @@ namespace MassTransit.Testing
 			get { return _exception; }
 		}
 
+		public IReceiveContext Context
+		{
+			get { return _context; }
+		}
+
+		public void SetException(Exception exception)
+		{
+			_exception = exception;
+		}
+	}
+
+	public class ReceivedMessage<T> :
+		IReceivedMessage<T>
+		where T : class
+	{
+		readonly IConsumeContext<T> _context;
+		readonly T _message;
+		Exception _exception;
+
+		public ReceivedMessage(IConsumeContext<T> context, T message)
+		{
+			_context = context;
+			_message = message;
+		}
+
+		public Exception Exception
+		{
+			get { return _exception; }
+		}
+
+		public IReceiveContext Context
+		{
+			get { return _context.BaseContext as IReceiveContext; }
+		}
+
 		public void SetException(Exception exception)
 		{
 			_exception = exception;

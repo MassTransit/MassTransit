@@ -18,6 +18,7 @@ namespace MassTransit.Context
 		IConsumeContext,
 		IMessageContext<T>
 	{
+		IConsumeContext BaseContext { get; }
 		/// <summary>
 		/// Send the message to the end of the input queue so that it can be processed again later
 		/// </summary>

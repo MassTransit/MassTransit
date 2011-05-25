@@ -42,9 +42,34 @@ namespace MassTransit.Testing
 			get { return typeof (T); }
 		}
 
+		ISendContext ISentMessage.Context
+		{
+			get { return Context; }
+		}
+
 		public void SetException(Exception exception)
 		{
 			_exception = exception;
+		}
+
+		public override int GetHashCode()
+		{
+			return (_context != null ? _context.GetHashCode() : 0);
+		}
+
+		public bool Equals(SentMessage<T> other)
+		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			return Equals(other._context.Message, _context.Message);
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			if (obj.GetType() != typeof (SentMessage<T>)) return false;
+			return Equals((SentMessage<T>) obj);
 		}
 	}
 }

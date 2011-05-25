@@ -24,5 +24,6 @@ namespace MassTransit.Testing.TestContexts
 
 		IReceivedMessageList Received { get; }
 		ISentMessageList Sent { get; }
+		IReceivedMessageList Skipped { get; }
 	}
 }
