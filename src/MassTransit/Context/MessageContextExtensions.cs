@@ -13,7 +13,6 @@
 namespace MassTransit
 {
 	using System;
-	using Context;
 	using Util;
 
 	public static class MessageContextExtensions

@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Context
+namespace MassTransit
 {
 	using System;
 	using System.IO;
@@ -47,7 +47,7 @@ namespace MassTransit.Context
 		IMessageContext
 	{
 		Type DeclaringMessageType { get; }
-		
+
 		void SerializeTo(Stream stream);
 
 		bool TryGetContext<T>(out IBusPublishContext<T> context)
