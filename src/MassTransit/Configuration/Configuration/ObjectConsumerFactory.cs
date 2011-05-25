@@ -26,7 +26,8 @@ namespace MassTransit.Configuration
 			_delegate = new DelegateConsumerFactory<TConsumer>(() => (TConsumer) objectFactory(typeof (TConsumer)));
 		}
 
-		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback)
+		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback) 
+			where TMessage : class
 		{
 			return _delegate.GetConsumer(callback);
 		}

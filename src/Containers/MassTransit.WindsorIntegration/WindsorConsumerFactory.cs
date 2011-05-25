@@ -28,7 +28,8 @@ namespace MassTransit.WindsorIntegration
 			_container = container;
 		}
 
-		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<T, Action<TMessage>> callback)
+		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<T, Action<TMessage>> callback) 
+			where TMessage : class
 		{
 			var consumer = _container.Resolve<T>();
 			if (consumer == null)

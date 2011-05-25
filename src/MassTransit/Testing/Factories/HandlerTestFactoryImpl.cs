@@ -28,4 +28,18 @@ namespace MassTransit.Testing.Factories
 			return configurator.Build();
 		}
 	}
+
+	public class ConsumerTestFactoryImpl<TConsumer> :
+		ConsumerTestFactory<TConsumer>
+		where TConsumer : class
+	{
+		public ConsumerTest<TConsumer> New(Action<ConsumerTestConfigurator<TConsumer>> configureTest)
+		{
+			var configurator = new ConsumerTestConfiguratorImpl<TConsumer>();
+
+			configureTest(configurator);
+
+			return configurator.Build();
+		}
+	}
 }

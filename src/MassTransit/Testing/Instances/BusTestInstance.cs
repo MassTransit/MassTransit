@@ -15,51 +15,65 @@ namespace MassTransit.Testing.Instances
 	using System;
 	using System.Collections.Generic;
 	using Configurators;
+	using Magnum.Extensions;
 	using Subjects;
 	using TestContexts;
 
-	public class HandlerTestInstance<TMessage> :
-		BusTestInstance,
-		HandlerTest<TMessage>
-		where TMessage : class
+	public abstract class BusTestInstance
 	{
-		readonly HandlerTestSubject<TMessage> _subject;
-
+		readonly IList<TestAction> _actions;
+		readonly IBusTestContext _testContext;
 		bool _disposed;
 
-		public HandlerTestInstance(IBusTestContext testContext, IList<TestAction> actions,
-		                           Action<IServiceBus, TMessage> handler)
-			: base(testContext, actions)
+		protected BusTestInstance(IBusTestContext testContext, IList<TestAction> actions)
 		{
-			_subject = new HandlerTestSubjectImpl<TMessage>(handler);
+			_testContext = testContext;
+			_actions = actions;
 		}
 
-		public void Execute()
+		public IReceivedMessageList Received
 		{
-			_subject.Prepare(TestContext.Bus);
-
-			ExecuteTestActions();
+			get { return _testContext.Received; }
 		}
 
-		public HandlerTestSubject<TMessage> Handler
+		public ISentMessageList Sent
 		{
-			get { return _subject; }
+			get { return _testContext.Sent; }
 		}
 
-		protected override void Dispose(bool disposing)
+		public IReceivedMessageList Skipped
 		{
-			base.Dispose(disposing);
+			get { return _testContext.Skipped; }
+		}
 
+		public IBusTestContext TestContext
+		{
+			get { return _testContext; }
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
 			if (_disposed) return;
 			if (disposing)
 			{
-				_subject.Dispose();
+				_testContext.Dispose();
 			}
 
 			_disposed = true;
 		}
 
-		~HandlerTestInstance()
+		protected void ExecuteTestActions()
+		{
+			_actions.Each(x => x.Act(_testContext.Bus));
+		}
+
+		~BusTestInstance()
 		{
 			Dispose(false);
 		}

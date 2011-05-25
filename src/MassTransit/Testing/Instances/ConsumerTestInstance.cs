@@ -12,26 +12,25 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Instances
 {
-	using System;
 	using System.Collections.Generic;
 	using Configurators;
 	using Subjects;
 	using TestContexts;
 
-	public class HandlerTestInstance<TMessage> :
+
+	public class ConsumerTestInstance<TConsumer> :
 		BusTestInstance,
-		HandlerTest<TMessage>
-		where TMessage : class
+		ConsumerTest<TConsumer>
+		where TConsumer : class
 	{
-		readonly HandlerTestSubject<TMessage> _subject;
+		readonly ConsumerTestSubjectImpl<TConsumer> _subject;
 
 		bool _disposed;
 
-		public HandlerTestInstance(IBusTestContext testContext, IList<TestAction> actions,
-		                           Action<IServiceBus, TMessage> handler)
+		public ConsumerTestInstance(IBusTestContext testContext, IList<TestAction> actions, IConsumerFactory<TConsumer> consumerFactory)
 			: base(testContext, actions)
 		{
-			_subject = new HandlerTestSubjectImpl<TMessage>(handler);
+			_subject = new ConsumerTestSubjectImpl<TConsumer>(consumerFactory);
 		}
 
 		public void Execute()
@@ -41,7 +40,7 @@ namespace MassTransit.Testing.Instances
 			ExecuteTestActions();
 		}
 
-		public HandlerTestSubject<TMessage> Handler
+		public ConsumerTestSubject<TConsumer> Consumer
 		{
 			get { return _subject; }
 		}
@@ -59,7 +58,7 @@ namespace MassTransit.Testing.Instances
 			_disposed = true;
 		}
 
-		~HandlerTestInstance()
+		~ConsumerTestInstance()
 		{
 			Dispose(false);
 		}

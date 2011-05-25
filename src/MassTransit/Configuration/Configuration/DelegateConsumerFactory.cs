@@ -27,7 +27,8 @@ namespace MassTransit.Configuration
 			_factoryMethod = factoryMethod;
 		}
 
-		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback)
+		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback) 
+			where TMessage : class
 		{
 			TConsumer consumer = _factoryMethod();
 			if (consumer == null)
