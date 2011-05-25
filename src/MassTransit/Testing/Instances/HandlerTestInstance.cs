@@ -29,12 +29,18 @@ namespace MassTransit.Testing.Instances
 
 		bool _disposed;
 
-		public HandlerTestInstance(IBusTestContext testContext, IList<TestAction> actions)
+		public HandlerTestInstance(IBusTestContext testContext, IList<TestAction> actions,
+		                           Action<IServiceBus, TMessage> handler)
 		{
 			_testContext = testContext;
 			_actions = actions;
 
-			_subject = new HandlerTestSubjectImpl<TMessage>();
+			_subject = new HandlerTestSubjectImpl<TMessage>(handler);
+		}
+
+		public IBusTestContext TestContext
+		{
+			get { return _testContext; }
 		}
 
 		public void Dispose()

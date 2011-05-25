@@ -12,22 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.ActionConfigurators
 {
+	using System;
 	using Configurators;
+	using Context;
 
 	public class SendMessageTestAction<TMessage> :
 		TestAction
 		where TMessage : class
 	{
+		readonly Action<ISendContext<TMessage>> _callback;
 		readonly TMessage _message;
 
-		public SendMessageTestAction(TMessage message)
+		public SendMessageTestAction(TMessage message, Action<ISendContext<TMessage>> callback)
 		{
 			_message = message;
+			_callback = callback ?? DefaultCallback;
 		}
 
 		public void Act(IServiceBus bus)
 		{
-			bus.Endpoint.Send(_message);
+			bus.Endpoint.Send(_message, _callback);
+		}
+
+		static void DefaultCallback(ISendContext<TMessage> context)
+		{
 		}
 	}
 }

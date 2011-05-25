@@ -12,10 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Builders
 {
+	using System;
+
 	public interface HandlerTestBuilder<TMessage> :
 		TestInstanceBuilder<TMessage>
 		where TMessage : class
 	{
 		HandlerTest<TMessage> Build();
+
+		void SetHandler(Action<IServiceBus, TMessage> handler);
 	}
 }

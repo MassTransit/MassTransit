@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
+	using System;
 	using ActionConfigurators;
 	using Configurators;
+	using Context;
 
 	public static class SendTestExtensions
 	{
@@ -21,6 +23,15 @@ namespace MassTransit.Testing
 			where TMessage : class
 		{
 			var actionConfigurator = new SendMessageTestActionConfigurator<TMessage>(message);
+
+			configurator.AddActionConfigurator(actionConfigurator);
+		}
+
+		public static void Send<TMessage>(this TestInstanceConfigurator configurator, TMessage message,
+		                                  Action<ISendContext<TMessage>> callback)
+			where TMessage : class
+		{
+			var actionConfigurator = new SendMessageTestActionConfigurator<TMessage>(message, callback);
 
 			configurator.AddActionConfigurator(actionConfigurator);
 		}

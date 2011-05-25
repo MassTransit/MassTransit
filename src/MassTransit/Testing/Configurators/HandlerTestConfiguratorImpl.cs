@@ -27,10 +27,11 @@ namespace MassTransit.Testing.Configurators
 	{
 		readonly IList<HandlerTestBuilderConfigurator<TMessage>> _configurators;
 		readonly IList<BusTestContextBuilderConfigurator> _contextConfigurators;
+		IList<TestActionConfigurator> _actionConfigurators;
 
 		Func<IBusTestContext, HandlerTestBuilder<TMessage>> _builderFactory;
 		Func<BusTestContextBuilder> _contextBuilderFactory;
-		IList<TestActionConfigurator> _actionConfigurators;
+		Action<IServiceBus, TMessage> _handler;
 
 		public HandlerTestConfiguratorImpl()
 		{
@@ -42,11 +43,6 @@ namespace MassTransit.Testing.Configurators
 			_contextBuilderFactory = () => new LoopbackBusTestContextBuilderImpl();
 		}
 
-		public IEnumerable<TestConfiguratorResult> Validate()
-		{
-			return _configurators.SelectMany(x => x.Validate());
-		}
-
 		public void UseBuilder(Func<IBusTestContext, HandlerTestBuilder<TMessage>> builderFactory)
 		{
 			_builderFactory = builderFactory;
@@ -55,6 +51,21 @@ namespace MassTransit.Testing.Configurators
 		public void AddConfigurator(HandlerTestBuilderConfigurator<TMessage> configurator)
 		{
 			_configurators.Add(configurator);
+		}
+
+		public void Handler(Action<IServiceBus, TMessage> handler)
+		{
+			_handler = handler;
+		}
+
+		public void AddActionConfigurator(TestActionConfigurator action)
+		{
+			_actionConfigurators.Add(action);
+		}
+
+		public IEnumerable<TestConfiguratorResult> Validate()
+		{
+			return _configurators.SelectMany(x => x.Validate());
 		}
 
 		public void UseContextBuilder(Func<BusTestContextBuilder> contextBuilderFactory)
@@ -73,16 +84,14 @@ namespace MassTransit.Testing.Configurators
 
 			HandlerTestBuilder<TMessage> builder = _builderFactory(context);
 
+			if (_handler != null)
+				builder.SetHandler(_handler);
+
 			builder = _configurators.Aggregate(builder, (current, configurator) => configurator.Configure(current));
 
 			_actionConfigurators.Each(x => x.Configure(builder));
 
 			return builder.Build();
-		}
-
-		public void AddActionConfigurator(TestActionConfigurator action)
-		{
-			_actionConfigurators.Add(action);
 		}
 	}
 }
