@@ -53,7 +53,7 @@ namespace MassTransit.Tests.Testing
 		[Then]
 		public void Should_have_sent_the_response_from_the_consumer()
 		{
-			_test.Sent.Any<A>().ShouldBeTrue();
+			_test.Sent.Any<B>().ShouldBeTrue();
 		}
 
 		[Then]
