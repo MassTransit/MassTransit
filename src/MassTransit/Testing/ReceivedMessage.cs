@@ -10,13 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.TestContexts
+namespace MassTransit.Testing
 {
-	using System.Collections.Generic;
+	using System;
+	using Context;
 
-	public interface IBusTestContext :
-		IEndpointTestContext
+	public class ReceivedMessage :
+		IReceivedMessage
 	{
-		IServiceBus Bus { get; }
+		readonly IReceiveContext _context;
+		Exception _exception;
+
+		public ReceivedMessage(IReceiveContext context)
+		{
+			_context = context;
+		}
+
+		public Exception Exception
+		{
+			get { return _exception; }
+		}
+
+		public void SetException(Exception exception)
+		{
+			_exception = exception;
+		}
 	}
 }

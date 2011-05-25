@@ -13,6 +13,7 @@
 namespace MassTransit.Testing.TestContexts
 {
 	using System;
+	using Subjects;
 	using Transports;
 
 	public class BusTestContext :
@@ -36,6 +37,16 @@ namespace MassTransit.Testing.TestContexts
 		public IEndpointFactory EndpointFactory
 		{
 			get { return _testContext.EndpointFactory; }
+		}
+
+		public ISentMessageList Sent
+		{
+			get { return _testContext.Sent; }
+		}
+
+		public IReceivedMessageList Received
+		{
+			get { return _testContext.Received; }
 		}
 
 		public IServiceBus Bus

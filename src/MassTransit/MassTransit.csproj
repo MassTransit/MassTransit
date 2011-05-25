@@ -342,7 +342,6 @@
     <Compile Include="Testing\ContextBuilders\BusTestContextBuilder.cs" />
     <Compile Include="Testing\ContextBuilders\EndpointTestContextBuilder.cs" />
     <Compile Include="Testing\ContextBuilders\EndpointTestContextBuilderImpl.cs" />
-    <Compile Include="Testing\ContextBuilders\LoopbackBusTestContextBuilder.cs" />
     <Compile Include="Testing\ContextBuilders\LoopbackBusTestContextBuilderImpl.cs" />
     <Compile Include="Testing\ContextBuilders\TestContextBuilder.cs" />
     <Compile Include="Testing\ContextConfigurators\BusTestContextBuilderConfigurator.cs" />
@@ -350,6 +349,16 @@
     <Compile Include="Testing\ContextConfigurators\EndpointTestContextBuilderConfigurator.cs" />
     <Compile Include="Testing\ContextConfigurators\EndpointTestContextBuilderConfiguratorImpl.cs" />
     <Compile Include="Testing\ContextConfigurators\EndpointTestContextConfigurator.cs" />
+    <Compile Include="Testing\IReceivedMessage.cs" />
+    <Compile Include="Testing\ISentMessage.cs" />
+    <Compile Include="Testing\ReceivedMessage.cs" />
+    <Compile Include="Testing\SentMessage.cs" />
+    <Compile Include="Testing\Subjects\IReceivedMessageList.cs" />
+    <Compile Include="Testing\Subjects\ISentMessageList.cs" />
+    <Compile Include="Testing\Subjects\ReceivedMessageList.cs" />
+    <Compile Include="Testing\Subjects\SentMessageList.cs" />
+    <Compile Include="Testing\TestDecorators\EndpointFactoryTestDecorator.cs" />
+    <Compile Include="Testing\TestDecorators\EndpointTestDecorator.cs" />
     <Compile Include="Testing\Instances\HandlerTestInstance.cs" />
     <Compile Include="Testing\TestContexts\BusTestContext.cs" />
     <Compile Include="Testing\TestContexts\IBusTestContext.cs" />

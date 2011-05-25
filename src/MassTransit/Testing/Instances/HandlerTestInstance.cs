@@ -50,6 +50,16 @@ namespace MassTransit.Testing.Instances
 			_actions.Each(x => x.Act(_testContext.Bus));
 		}
 
+		public ISentMessageList Sent
+		{
+			get { return _testContext.Sent; }
+		}
+
+		public IReceivedMessageList Received
+		{
+			get { return _testContext.Received; }
+		}
+
 		public HandlerTestSubject<TMessage> Handler
 		{
 			get { return _subject; }

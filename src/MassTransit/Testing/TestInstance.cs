@@ -13,10 +13,13 @@
 namespace MassTransit.Testing
 {
 	using System;
+	using Subjects;
 
 	public interface TestInstance :
 		IDisposable
 	{
+		IReceivedMessageList Received { get; }
+		ISentMessageList Sent { get; }
 		void Execute();
 	}
 }

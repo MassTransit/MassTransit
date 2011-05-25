@@ -13,6 +13,7 @@
 namespace MassTransit.Testing.TestContexts
 {
 	using System;
+	using Subjects;
 	using Transports;
 
 	public interface IEndpointTestContext :
@@ -20,5 +21,8 @@ namespace MassTransit.Testing.TestContexts
 	{
 		IEndpointCache EndpointCache { get; }
 		IEndpointFactory EndpointFactory { get; }
+
+		IReceivedMessageList Received { get; }
+		ISentMessageList Sent { get; }
 	}
 }
