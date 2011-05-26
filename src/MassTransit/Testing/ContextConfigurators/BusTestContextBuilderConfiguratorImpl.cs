@@ -35,7 +35,7 @@ namespace MassTransit.Testing.ContextConfigurators
 
 		public BusTestContextBuilder Configure(BusTestContextBuilder builder)
 		{
-			builder.ConfigureServiceBus(_configureAction);
+			builder.ConfigureBus(_configureAction);
 
 			return builder;
 		}

@@ -49,22 +49,25 @@ namespace MassTransit.Testing.ContextBuilders
 			configureCallback(_endpointFactoryConfigurator);
 		}
 
-		public IEndpointTestContext Build()
+		public EndpointTestContext Build()
+		{
+			return new EndpointTestContextImpl(BuildEndpointFactory());
+		}
+
+		protected IEndpointFactory BuildEndpointFactory()
 		{
 			ConfigurationResult result = ConfigurationResultImpl.CompileResults(_endpointFactoryConfigurator.Validate());
 
+			IEndpointFactory endpointFactory;
 			try
 			{
-				IEndpointFactory endpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
-
-				var context = new EndpointTestContext(endpointFactory);
-
-				return context;
+				endpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
 			}
 			catch (Exception ex)
 			{
 				throw new ConfigurationException(result, "An exception was thrown during endpoint cache creation", ex);
 			}
+			return endpointFactory;
 		}
 	}
 }

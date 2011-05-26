@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Subjects
+namespace MassTransit.Testing
 {
 	using System;
 	using System.Collections;
@@ -19,17 +19,17 @@ namespace MassTransit.Testing.Subjects
 	using System.Threading;
 	using Magnum.Extensions;
 
-	public class SentMessageList :
-		ISentMessageList,
+	public class SentMessageListImpl :
+		SentMessageList,
 		IDisposable
 	{
-		readonly HashSet<ISentMessage> _messages;
+		readonly HashSet<SentMessage> _messages;
 		readonly AutoResetEvent _received;
 		TimeSpan _timeout = 8.Seconds();
 
-		public SentMessageList()
+		public SentMessageListImpl()
 		{
-			_messages = new HashSet<ISentMessage>(new MessageIdEqualityComparer());
+			_messages = new HashSet<SentMessage>(new MessageIdEqualityComparer());
 			_received = new AutoResetEvent(false);
 		}
 
@@ -40,7 +40,7 @@ namespace MassTransit.Testing.Subjects
 			}
 		}
 
-		public IEnumerator<ISentMessage> GetEnumerator()
+		public IEnumerator<SentMessage> GetEnumerator()
 		{
 			lock (_messages)
 				return _messages.ToList().GetEnumerator();
@@ -61,7 +61,7 @@ namespace MassTransit.Testing.Subjects
 			return Any(x => x.MessageType == typeof (T));
 		}
 
-		public bool Any(Func<ISentMessage, bool> filter)
+		public bool Any(Func<SentMessage, bool> filter)
 		{
 			bool any;
 			lock (_messages)
@@ -79,7 +79,7 @@ namespace MassTransit.Testing.Subjects
 			return true;
 		}
 
-		public void Add(ISentMessage message)
+		public void Add(SentMessage message)
 		{
 			lock (_messages)
 			{
@@ -89,14 +89,14 @@ namespace MassTransit.Testing.Subjects
 		}
 
 		class MessageIdEqualityComparer :
-			IEqualityComparer<ISentMessage>
+			IEqualityComparer<SentMessage>
 		{
-			public bool Equals(ISentMessage x, ISentMessage y)
+			public bool Equals(SentMessage x, SentMessage y)
 			{
 				return x.Equals(y);
 			}
 
-			public int GetHashCode(ISentMessage message)
+			public int GetHashCode(SentMessage message)
 			{
 				return message.Context.GetHashCode();
 			}

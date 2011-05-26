@@ -21,6 +21,6 @@ namespace MassTransit.Testing.ContextBuilders
 	{
 		void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configureCallback);
 
-		IEndpointTestContext Build();
+		EndpointTestContext Build();
 	}
 }

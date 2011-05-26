@@ -46,7 +46,7 @@ namespace MassTransit.Testing.ContextConfigurators
 			_configurators.Add(configurator);
 		}
 
-		public IEndpointTestContext Build()
+		public EndpointTestContext Build()
 		{
 			EndpointTestContextBuilder builder = _builderFactory();
 

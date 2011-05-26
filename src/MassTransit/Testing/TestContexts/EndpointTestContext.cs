@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,156 +13,17 @@
 namespace MassTransit.Testing.TestContexts
 {
 	using System;
-	using System.Collections.Generic;
-	using BusConfigurators;
-	using Magnum.Extensions;
-	using Saga;
-	using Services.Subscriptions;
 	using Subjects;
-	using TestDecorators;
 	using Transports;
 
-	public class EndpointTestContext :
-		IEndpointTestContext
+	public interface EndpointTestContext :
+		IDisposable
 	{
-		readonly EndpointCache _endpointCache;
-		readonly IDictionary<Uri, EndpointTestDecorator> _endpoints;
-		readonly ReceivedMessageList _received;
-		readonly SentMessageList _sent;
-		readonly ReceivedMessageList _skipped;
-		bool _disposed;
+		IEndpointCache EndpointCache { get; }
+		IEndpointFactory EndpointFactory { get; }
 
-		public EndpointTestContext(IEndpointFactory endpointFactory)
-		{
-			_received = new ReceivedMessageList();
-			_sent = new SentMessageList();
-			_skipped = new ReceivedMessageList();
-
-			_endpoints = new Dictionary<Uri, EndpointTestDecorator>();
-
-			EndpointFactory = new EndpointFactoryTestDecorator(endpointFactory, this);
-
-			_endpointCache = new EndpointCache(EndpointFactory);
-
-			EndpointCache = new EndpointCacheProxy(_endpointCache);
-
-			ServiceBusFactory.ConfigureDefaultSettings(x =>
-				{
-					x.SetEndpointCache(EndpointCache);
-					x.SetConcurrentConsumerLimit(4);
-					x.SetConcurrentReceiverLimit(1);
-					x.SetReceiveTimeout(50.Milliseconds());
-					x.EnableAutoStart();
-				});
-		}
-
-		public IEndpointCache EndpointCache { get; private set; }
-		public IEndpointFactory EndpointFactory { get; private set; }
-
-		public ISentMessageList Sent
-		{
-			get { return _sent; }
-		}
-
-		public IReceivedMessageList Skipped
-		{
-			get { return _skipped; }
-		}
-
-		public IReceivedMessageList Received
-		{
-			get { return _received; }
-		}
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		public void AddEndpoint(EndpointTestDecorator endpoint)
-		{
-			_endpoints.Add(endpoint.Address.Uri, endpoint);
-		}
-
-		public void AddSent(ISentMessage message)
-		{
-			_sent.Add(message);
-		}
-
-		public void AddReceived(IReceivedMessage message)
-		{
-			_received.Add(message);
-
-			_skipped.Remove(message);
-		}
-
-		public void AddSkipped(IReceivedMessage message)
-		{
-			_skipped.Add(message);
-		}
-
-		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator,
-		                                          ISubscriptionService subscriptionService)
-		{
-			configurator.AddService(() => new SubscriptionPublisher(subscriptionService));
-			configurator.AddService(() => new SubscriptionConsumer(subscriptionService));
-		}
-
-		class EndpointCacheProxy :
-			IEndpointCache
-		{
-			readonly IEndpointCache _endpointCache;
-
-			public EndpointCacheProxy(IEndpointCache endpointCache)
-			{
-				_endpointCache = endpointCache;
-			}
-
-			public void Dispose()
-			{
-				// we don't dispose, since we're in testing
-			}
-
-			public IEndpoint GetEndpoint(Uri uri)
-			{
-				return _endpointCache.GetEndpoint(uri);
-			}
-		}
-
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_sent.Dispose();
-				_received.Dispose();
-
-				_endpointCache.Clear();
-
-				if (EndpointCache != null)
-				{
-					EndpointCache.Dispose();
-					EndpointCache = null;
-				}
-
-				ServiceBusFactory.ConfigureDefaultSettings(x => x.SetEndpointCache(null));
-			}
-
-			_disposed = true;
-		}
-
-		~EndpointTestContext()
-		{
-			Dispose(false);
-		}
-
-		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
-			where TSaga : class, ISaga
-		{
-			var sagaRepository = new InMemorySagaRepository<TSaga>();
-
-			return sagaRepository;
-		}
+		ReceivedMessageList Received { get; }
+		SentMessageList Sent { get; }
+		ReceivedMessageList Skipped { get; }
 	}
 }

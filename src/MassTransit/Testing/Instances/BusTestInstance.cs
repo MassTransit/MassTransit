@@ -17,36 +17,37 @@ namespace MassTransit.Testing.Instances
 	using Configurators;
 	using Magnum.Extensions;
 	using Subjects;
+	using TestActions;
 	using TestContexts;
 
 	public abstract class BusTestInstance
 	{
 		readonly IList<TestAction> _actions;
-		readonly IBusTestContext _testContext;
+		readonly BusTestContext _testContext;
 		bool _disposed;
 
-		protected BusTestInstance(IBusTestContext testContext, IList<TestAction> actions)
+		protected BusTestInstance(BusTestContext testContext, IList<TestAction> actions)
 		{
 			_testContext = testContext;
 			_actions = actions;
 		}
 
-		public IReceivedMessageList Received
+		public ReceivedMessageList Received
 		{
 			get { return _testContext.Received; }
 		}
 
-		public ISentMessageList Sent
+		public SentMessageList Sent
 		{
 			get { return _testContext.Sent; }
 		}
 
-		public IReceivedMessageList Skipped
+		public ReceivedMessageList Skipped
 		{
 			get { return _testContext.Skipped; }
 		}
 
-		public IBusTestContext TestContext
+		public BusTestContext TestContext
 		{
 			get { return _testContext; }
 		}

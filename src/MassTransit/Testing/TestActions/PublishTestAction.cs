@@ -10,20 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.TestActions
 {
 	using System;
-	using Context;
+	using Configurators;
 
-	public interface IReceivedMessage
+	public class PublishTestAction<TMessage> :
+		TestAction
+		where TMessage : class
 	{
-		Exception Exception { get; }
+		readonly Action<IPublishContext<TMessage>> _callback;
+		readonly TMessage _message;
 
-		IReceiveContext Context { get; }
-	}
+		public PublishTestAction(TMessage message, Action<IPublishContext<TMessage>> callback)
+		{
+			_message = message;
+			_callback = callback ?? DefaultCallback;
+		}
 
-	public interface IReceivedMessage<T> :
-		IReceivedMessage
-	{
+		public void Act(IServiceBus bus)
+		{
+			bus.Publish(_message, _callback);
+		}
+
+		static void DefaultCallback(IPublishContext<TMessage> context)
+		{
+		}
 	}
 }

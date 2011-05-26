@@ -12,76 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.TestContexts
 {
-	using System;
-	using Subjects;
-	using Transports;
-
-	public class BusTestContext :
-		IBusTestContext
+	public interface BusTestContext :
+		EndpointTestContext
 	{
-		IServiceBus _bus;
-		bool _disposed;
-		IEndpointTestContext _testContext;
-
-		public BusTestContext(IEndpointTestContext testContext, IServiceBus bus)
-		{
-			_testContext = testContext;
-			_bus = bus;
-		}
-
-		public IEndpointCache EndpointCache
-		{
-			get { return _testContext.EndpointCache; }
-		}
-
-		public IEndpointFactory EndpointFactory
-		{
-			get { return _testContext.EndpointFactory; }
-		}
-
-		public ISentMessageList Sent
-		{
-			get { return _testContext.Sent; }
-		}
-
-		public IReceivedMessageList Skipped
-		{
-			get { return _testContext.Skipped; }
-		}
-
-		public IReceivedMessageList Received
-		{
-			get { return _testContext.Received; }
-		}
-
-		public IServiceBus Bus
-		{
-			get { return _bus; }
-		}
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				if (_bus != null)
-					_bus.Dispose();
-
-				_testContext.Dispose();
-			}
-
-			_disposed = true;
-		}
-
-		~BusTestContext()
-		{
-			Dispose(false);
-		}
+		IServiceBus Bus { get; }
 	}
 }

@@ -10,26 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Subjects
+namespace MassTransit.Testing
 {
 	using System;
 	using System.Collections.Generic;
 
-	public interface IReceivedMessageList :
-		IEnumerable<IReceivedMessage>
+	public interface SentMessageList :
+		IEnumerable<SentMessage>
 	{
 		bool Any();
-
+		bool Any(Func<SentMessage, bool> filter);
 		bool Any<T>()
 			where T : class;
-
-		bool Any<T>(Func<T, bool> filter)
-			where T : class;
-	}
-
-	public interface IReceivedMessageList<T> :
-		IEnumerable<IReceivedMessage<T>>
-	{
-		bool Any();
 	}
 }

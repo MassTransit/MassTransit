@@ -10,33 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Configurators
+namespace MassTransit.Testing.BuilderConfigurators
 {
-	using System;
-	using Builders;
+	using Configurators;
 
-	public class DelegateTestBuilderFactory<TFactory> :
-		TestBuilderFactory
-		where TFactory : TestBuilder
+	public interface TestBuilderConfigurator :
+		TestConfigurator
 	{
-		Func<TFactory> _factory;
-
-		public DelegateTestBuilderFactory(Func<TFactory> factory)
-		{
-			_factory = factory;
-		}
-
-		public TResult Create<TResult>()
-			where TResult : class, TestBuilder
-		{
-			if (typeof (TResult) == typeof (TFactory))
-			{
-				TFactory factory = _factory();
-
-				return factory as TResult;
-			}
-
-			throw new InvalidOperationException("Unable to create the requested factory");
-		}
 	}
 }

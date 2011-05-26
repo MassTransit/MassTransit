@@ -22,6 +22,6 @@ namespace MassTransit.Testing
 
 		HandlerTestSubject<TMessage> Handler { get; }
 
-		IBusTestContext TestContext { get; }
+		BusTestContext TestContext { get; }
 	}
 }

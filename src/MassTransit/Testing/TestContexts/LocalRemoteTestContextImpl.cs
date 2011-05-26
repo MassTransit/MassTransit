@@ -10,31 +10,44 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.ActionConfigurators
+namespace MassTransit.Testing.TestContexts
 {
-	using System;
-	using Configurators;
+	using Transports;
 
-	public class PublishTestAction<TMessage> :
-		TestAction
-		where TMessage : class
+	public class LocalRemoteTestContextImpl :
+		EndpointTestContextImpl,
+		LocalRemoteTestContext
 	{
-		readonly Action<IPublishContext<TMessage>> _callback;
-		readonly TMessage _message;
+		bool _disposed;
 
-		public PublishTestAction(TMessage message, Action<IPublishContext<TMessage>> callback)
+		public LocalRemoteTestContextImpl(IEndpointFactory endpointFactory)
+			: base(endpointFactory)
 		{
-			_message = message;
-			_callback = callback ?? DefaultCallback;
 		}
 
-		public void Act(IServiceBus bus)
+		public IServiceBus LocalBus { get; set; }
+		public IServiceBus RemoteBus { get; set; }
+
+		protected override void Dispose(bool disposing)
 		{
-			bus.Publish(_message, _callback);
+			if (_disposed) return;
+			if (disposing)
+			{
+				if (RemoteBus != null)
+					RemoteBus.Dispose();
+
+				if (LocalBus != null)
+					LocalBus.Dispose();
+
+				base.Dispose(true);
+			}
+
+			_disposed = true;
 		}
 
-		static void DefaultCallback(IPublishContext<TMessage> context)
+		~LocalRemoteTestContextImpl()
 		{
+			Dispose(false);
 		}
 	}
 }

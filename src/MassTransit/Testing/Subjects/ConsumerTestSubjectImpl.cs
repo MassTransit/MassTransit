@@ -19,7 +19,7 @@ namespace MassTransit.Testing.Subjects
 		ConsumerTestSubject<T>
 		where T : class
 	{
-		readonly ReceivedMessageList _received;
+		readonly ReceivedMessageListImpl _received;
 		IServiceBus _bus;
 		IConsumerFactory<T> _consumerFactory;
 		bool _disposed;
@@ -29,10 +29,10 @@ namespace MassTransit.Testing.Subjects
 		{
 			_consumerFactory = consumerFactory;
 
-			_received = new ReceivedMessageList();
+			_received = new ReceivedMessageListImpl();
 		}
 
-		public IReceivedMessageList Received
+		public ReceivedMessageList Received
 		{
 			get { return _received; }
 		}
