@@ -15,23 +15,22 @@ namespace MassTransit.Testing
 	using System;
 	using ActionConfigurators;
 	using Configurators;
-	using Context;
 
-	public static class SendTestExtensions
+	public static class PublishTestActionExtensions
 	{
-		public static void Send<TMessage>(this TestInstanceConfigurator configurator, TMessage message)
+		public static void Publish<TMessage>(this TestInstanceConfigurator configurator, TMessage message)
 			where TMessage : class
 		{
-			var actionConfigurator = new SendMessageTestActionConfigurator<TMessage>(message);
+			var actionConfigurator = new PublishTestActionConfigurator<TMessage>(message);
 
 			configurator.AddActionConfigurator(actionConfigurator);
 		}
 
-		public static void Send<TMessage>(this TestInstanceConfigurator configurator, TMessage message,
-		                                  Action<ISendContext<TMessage>> callback)
+		public static void Publish<TMessage>(this TestInstanceConfigurator configurator, TMessage message,
+		                                     Action<IPublishContext<TMessage>> callback)
 			where TMessage : class
 		{
-			var actionConfigurator = new SendMessageTestActionConfigurator<TMessage>(message, callback);
+			var actionConfigurator = new PublishTestActionConfigurator<TMessage>(message, callback);
 
 			configurator.AddActionConfigurator(actionConfigurator);
 		}
