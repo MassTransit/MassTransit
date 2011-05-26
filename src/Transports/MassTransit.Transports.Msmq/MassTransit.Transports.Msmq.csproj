@@ -71,6 +71,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Management" />
     <Reference Include="System.Messaging" />
     <Reference Include="System.Net">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -90,10 +91,12 @@
     <Compile Include="IMsmqEndpointAddress.cs" />
     <Compile Include="InboundMsmqTransport.cs" />
     <Compile Include="InboundMulticastMsmqTransport.cs" />
+    <Compile Include="Management\OSHelperExtensions.cs" />
     <Compile Include="Management\ManagementExtensions.cs" />
     <Compile Include="Management\MsDtcManagement.cs" />
     <Compile Include="Management\MsmqInstaller.cs" />
     <Compile Include="Management\MsmqManagement.cs" />
+    <Compile Include="Management\Windows7Installer.cs" />
     <Compile Include="Management\WindowsServer2003Installer.cs" />
     <Compile Include="Management\WindowsServer2008Installer.cs" />
     <Compile Include="Management\WindowsServer2008R2Installer.cs" />
