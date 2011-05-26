@@ -10,6 +10,8 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+using System.Management;
+
 namespace MassTransit.Transports.Msmq.Management
 {
 	using System;
@@ -77,9 +79,12 @@ namespace MassTransit.Transports.Msmq.Management
 					installer = new WindowsServer2008Installer();
 					break;
 
-				case WindowsVersion.Windows7:
 				case WindowsVersion.Windows2008R2:
 					installer = new WindowsServer2008R2Installer();
+					break;
+
+				case WindowsVersion.Windows7:
+					installer = new Windows7Installer();
 					break;
 
 				default:
@@ -106,6 +111,16 @@ namespace MassTransit.Transports.Msmq.Management
 		{
 			OperatingSystem osInfo = Environment.OSVersion;
 			Version version = osInfo.Version;
+
+			// Windows 7 cannot be distinguished from Server 2008 R2 by looking at the
+			// version number, so we resort to using the friendly name of the OS
+			string osName = (new ManagementObjectSearcher("SELECT * FROM Win32_OperatingSystem").Get()
+			                	.OfType<ManagementObject>()
+			                	.Select(x => x.GetPropertyValue("Caption") as string))
+			                	.FirstOrDefault() ?? "";
+
+			if (osName.Contains("Windows 7"))
+				return WindowsVersion.Windows7;
 
 			if (osInfo.Platform == PlatformID.Win32Windows)
 				return WindowsVersion.TooOldToCare;
