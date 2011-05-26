@@ -317,8 +317,10 @@
     <Compile Include="Subscriptions\SubscriptionBusService.cs" />
     <Compile Include="Subscriptions\TransientSubscriptionReference.cs" />
     <Compile Include="Subscriptions\UnsubscribeExtensions.cs" />
-    <Compile Include="Testing\ActionConfigurators\SendMessageTestAction.cs" />
-    <Compile Include="Testing\ActionConfigurators\SendMessageTestActionConfigurator.cs" />
+    <Compile Include="Testing\ActionConfigurators\PublishTestAction.cs" />
+    <Compile Include="Testing\ActionConfigurators\PublishTestActionConfigurator.cs" />
+    <Compile Include="Testing\ActionConfigurators\SendTestAction.cs" />
+    <Compile Include="Testing\ActionConfigurators\SendTestActionConfigurator.cs" />
     <Compile Include="Testing\Builders\ConsumerTestBuilder.cs" />
     <Compile Include="Testing\Builders\ConsumerTestBuilderImpl.cs" />
     <Compile Include="Testing\Builders\HandlerTestBuilder.cs" />
@@ -361,6 +363,7 @@
     <Compile Include="Testing\Instances\ConsumerTestInstance.cs" />
     <Compile Include="Testing\IReceivedMessage.cs" />
     <Compile Include="Testing\ISentMessage.cs" />
+    <Compile Include="Testing\PublishTestActionExtensions.cs" />
     <Compile Include="Testing\ReceivedMessage.cs" />
     <Compile Include="Testing\SentMessage.cs" />
     <Compile Include="Testing\Subjects\ConsumerTestSubject.cs" />
@@ -380,7 +383,7 @@
     <Compile Include="Testing\Factories\HandlerTestFactory.cs" />
     <Compile Include="Testing\Factories\HandlerTestFactoryImpl.cs" />
     <Compile Include="Testing\HandlerTest.cs" />
-    <Compile Include="Testing\SendTestExtensions.cs" />
+    <Compile Include="Testing\SendTestActionExtensions.cs" />
     <Compile Include="Testing\Subjects\HandlerTestSubject.cs" />
     <Compile Include="Testing\Subjects\HandlerTestSubjectImpl.cs" />
     <Compile Include="Testing\Subjects\ReceivedMessages.cs" />

@@ -13,29 +13,39 @@
 namespace MassTransit.Testing.ActionConfigurators
 {
 	using System;
+	using System.Collections.Generic;
+	using Builders;
 	using Configurators;
-	using Context;
 
-	public class SendMessageTestAction<TMessage> :
-		TestAction
+	public class PublishTestActionConfigurator<TMessage> :
+		TestActionConfigurator<TMessage>
 		where TMessage : class
 	{
-		readonly Action<ISendContext<TMessage>> _callback;
+		readonly Action<IPublishContext<TMessage>> _callback;
 		readonly TMessage _message;
 
-		public SendMessageTestAction(TMessage message, Action<ISendContext<TMessage>> callback)
+		public PublishTestActionConfigurator(TMessage message)
 		{
 			_message = message;
-			_callback = callback ?? DefaultCallback;
 		}
 
-		public void Act(IServiceBus bus)
+		public PublishTestActionConfigurator(TMessage message, Action<IPublishContext<TMessage>> callback)
 		{
-			bus.Endpoint.Send(_message, _callback);
+			_message = message;
+			_callback = callback;
 		}
 
-		static void DefaultCallback(ISendContext<TMessage> context)
+		public IEnumerable<TestConfiguratorResult> Validate()
 		{
+			if (_message == null)
+				yield return this.Failure("Message", "The message instance to send must not be null.");
+		}
+
+		public void Configure(TestInstanceBuilder builder)
+		{
+			var action = new PublishTestAction<TMessage>(_message, _callback);
+
+			builder.AddTestAction(action);
 		}
 	}
 }
