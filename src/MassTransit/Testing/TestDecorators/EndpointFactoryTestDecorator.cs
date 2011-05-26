@@ -20,9 +20,9 @@ namespace MassTransit.Testing.TestDecorators
 		IEndpointFactory
 	{
 		readonly IEndpointFactory _endpointFactory;
-		readonly EndpointTestContext _testContext;
+		readonly EndpointTestContextImpl _testContext;
 
-		public EndpointFactoryTestDecorator(IEndpointFactory endpointFactory, EndpointTestContext testContext)
+		public EndpointFactoryTestDecorator(IEndpointFactory endpointFactory, EndpointTestContextImpl testContext)
 		{
 			_endpointFactory = endpointFactory;
 			_testContext = testContext;

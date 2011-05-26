@@ -13,62 +13,16 @@
 namespace MassTransit.Testing
 {
 	using System;
-	using Context;
 
-	public class ReceivedMessage :
-		IReceivedMessage
+	public interface ReceivedMessage
 	{
-		readonly IReceiveContext _context;
-		Exception _exception;
-
-		public ReceivedMessage(IReceiveContext context)
-		{
-			_context = context;
-		}
-
-		public Exception Exception
-		{
-			get { return _exception; }
-		}
-
-		public IReceiveContext Context
-		{
-			get { return _context; }
-		}
-
-		public void SetException(Exception exception)
-		{
-			_exception = exception;
-		}
+		IReceiveContext Context { get; }
+		Exception Exception { get; }
 	}
 
-	public class ReceivedMessage<T> :
-		IReceivedMessage<T>
-		where T : class
+	public interface ReceivedMessage<T> :
+		ReceivedMessage
 	{
-		readonly IConsumeContext<T> _context;
-		readonly T _message;
-		Exception _exception;
-
-		public ReceivedMessage(IConsumeContext<T> context, T message)
-		{
-			_context = context;
-			_message = message;
-		}
-
-		public Exception Exception
-		{
-			get { return _exception; }
-		}
-
-		public IReceiveContext Context
-		{
-			get { return _context.BaseContext as IReceiveContext; }
-		}
-
-		public void SetException(Exception exception)
-		{
-			_exception = exception;
-		}
+		T Message { get; }
 	}
 }

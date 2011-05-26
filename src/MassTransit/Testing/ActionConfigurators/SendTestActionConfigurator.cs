@@ -16,9 +16,10 @@ namespace MassTransit.Testing.ActionConfigurators
 	using System.Collections.Generic;
 	using Builders;
 	using Configurators;
+	using TestActions;
 
 	public class SendTestActionConfigurator<TMessage> :
-		TestActionConfigurator<TMessage>
+		TestActionConfigurator
 		where TMessage : class
 	{
 		readonly Action<ISendContext<TMessage>> _callback;

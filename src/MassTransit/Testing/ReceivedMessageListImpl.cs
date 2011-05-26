@@ -10,27 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Subjects
+namespace MassTransit.Testing
 {
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Threading;
-	using Context;
 	using Magnum.Extensions;
 
-	public class ReceivedMessageList :
-		IReceivedMessageList,
+	public class ReceivedMessageListImpl :
+		ReceivedMessageList,
 		IDisposable
 	{
-		readonly HashSet<IReceivedMessage> _messages;
+		readonly HashSet<ReceivedMessage> _messages;
 		readonly AutoResetEvent _received;
 		TimeSpan _timeout = 8.Seconds();
 
-		public ReceivedMessageList()
+		public ReceivedMessageListImpl()
 		{
-			_messages = new HashSet<IReceivedMessage>(new MessageIdEqualityComparer());
+			_messages = new HashSet<ReceivedMessage>(new MessageIdEqualityComparer());
 			_received = new AutoResetEvent(false);
 		}
 
@@ -41,7 +40,7 @@ namespace MassTransit.Testing.Subjects
 			}
 		}
 
-		public IEnumerator<IReceivedMessage> GetEnumerator()
+		public IEnumerator<ReceivedMessage> GetEnumerator()
 		{
 			lock (_messages)
 				return _messages.ToList().GetEnumerator();
@@ -82,7 +81,7 @@ namespace MassTransit.Testing.Subjects
 			bool any;
 			IConsumeContext<T> consumeContext;
 
-			Func<IReceivedMessage, bool> predicate =
+			Func<ReceivedMessage, bool> predicate =
 				x => x.Context.TryGetContext(out consumeContext) && filter(consumeContext.Message);
 
 			lock (_messages)
@@ -102,7 +101,7 @@ namespace MassTransit.Testing.Subjects
 			return true;
 		}
 
-		public void Add(IReceivedMessage message)
+		public void Add(ReceivedMessage message)
 		{
 			lock (_messages)
 			{
@@ -111,38 +110,38 @@ namespace MassTransit.Testing.Subjects
 			}
 		}
 
-		public void Remove(IReceivedMessage message)
+		public void Remove(ReceivedMessage message)
 		{
 			lock (_messages)
 				_messages.Remove(message);
 		}
 
 		class MessageIdEqualityComparer :
-			IEqualityComparer<IReceivedMessage>
+			IEqualityComparer<ReceivedMessage>
 		{
-			public bool Equals(IReceivedMessage x, IReceivedMessage y)
+			public bool Equals(ReceivedMessage x, ReceivedMessage y)
 			{
 				return string.Equals(x.Context.MessageId, y.Context.MessageId);
 			}
 
-			public int GetHashCode(IReceivedMessage message)
+			public int GetHashCode(ReceivedMessage message)
 			{
 				return message.Context.MessageId.GetHashCode();
 			}
 		}
 	}
 
-	public class ReceivedMessageList<T> :
-		IReceivedMessageList<T>,
+	public class ReceivedMessageListImpl<T> :
+		ReceivedMessageList<T>,
 		IDisposable
 	{
-		readonly HashSet<IReceivedMessage<T>> _messages;
+		readonly HashSet<ReceivedMessage<T>> _messages;
 		readonly AutoResetEvent _received;
 		TimeSpan _timeout = 8.Seconds();
 
-		public ReceivedMessageList()
+		public ReceivedMessageListImpl()
 		{
-			_messages = new HashSet<IReceivedMessage<T>>(new MessageIdEqualityComparer());
+			_messages = new HashSet<ReceivedMessage<T>>(new MessageIdEqualityComparer());
 			_received = new AutoResetEvent(false);
 		}
 
@@ -153,7 +152,7 @@ namespace MassTransit.Testing.Subjects
 			}
 		}
 
-		public IEnumerator<IReceivedMessage<T>> GetEnumerator()
+		public IEnumerator<ReceivedMessage<T>> GetEnumerator()
 		{
 			lock (_messages)
 				return _messages.ToList().GetEnumerator();
@@ -182,7 +181,7 @@ namespace MassTransit.Testing.Subjects
 			return true;
 		}
 
-		public void Add(IReceivedMessage<T> message)
+		public void Add(ReceivedMessage<T> message)
 		{
 			lock (_messages)
 			{
@@ -192,14 +191,14 @@ namespace MassTransit.Testing.Subjects
 		}
 
 		class MessageIdEqualityComparer :
-			IEqualityComparer<IReceivedMessage<T>>
+			IEqualityComparer<ReceivedMessage<T>>
 		{
-			public bool Equals(IReceivedMessage<T> x, IReceivedMessage<T> y)
+			public bool Equals(ReceivedMessage<T> x, ReceivedMessage<T> y)
 			{
 				return string.Equals(x.Context.MessageId, y.Context.MessageId);
 			}
 
-			public int GetHashCode(IReceivedMessage<T> message)
+			public int GetHashCode(ReceivedMessage<T> message)
 			{
 				return message.Context.MessageId.GetHashCode();
 			}

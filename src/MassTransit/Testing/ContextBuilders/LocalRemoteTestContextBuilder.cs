@@ -10,20 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Configurators
+namespace MassTransit.Testing.ContextBuilders
 {
 	using System;
-	using Builders;
+	using BusConfigurators;
 	using TestContexts;
 
-	public interface HandlerTestConfigurator<TMessage> :
-		TestInstanceConfigurator
-		where TMessage : class
+	public interface LocalRemoteTestContextBuilder :
+		EndpointTestContextBuilder
 	{
-		void UseBuilder(Func<IBusTestContext, HandlerTestBuilder<TMessage>> builderFactory);
+		void ConfigureLocalBus(Action<ServiceBusConfigurator> configureCallback);
+		void ConfigureRemoteBus(Action<ServiceBusConfigurator> configureCallback);
 
-		void AddConfigurator(HandlerTestBuilderConfigurator<TMessage> configurator);
-
-		void Handler(Action<IServiceBus, TMessage> handler);
+		new LocalRemoteTestContext Build();
 	}
 }

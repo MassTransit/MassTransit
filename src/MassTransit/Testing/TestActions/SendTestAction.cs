@@ -10,13 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Configurators
+namespace MassTransit.Testing.TestActions
 {
-	using Builders;
+	using System;
+	using Configurators;
 
-	public interface TestBuilderConfigurator :
-		TestConfigurator
+	public class SendTestAction<TMessage> :
+		TestAction
+		where TMessage : class
 	{
-		TestBuilder Configure(TestBuilder builder);
+		readonly Action<ISendContext<TMessage>> _callback;
+		readonly TMessage _message;
+
+		public SendTestAction(TMessage message, Action<ISendContext<TMessage>> callback)
+		{
+			_message = message;
+			_callback = callback ?? DefaultCallback;
+		}
+
+		public void Act(IServiceBus bus)
+		{
+			bus.Endpoint.Send(_message, _callback);
+		}
+
+		static void DefaultCallback(ISendContext<TMessage> context)
+		{
+		}
 	}
 }

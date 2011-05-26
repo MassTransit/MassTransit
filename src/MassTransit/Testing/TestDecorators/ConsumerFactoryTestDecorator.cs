@@ -22,10 +22,10 @@ namespace MassTransit.Testing.TestDecorators
 	{
 		readonly IServiceBus _bus;
 		readonly IConsumerFactory<TConsumer> _consumerFactory;
-		readonly ReceivedMessageList _received;
+		readonly ReceivedMessageListImpl _received;
 
 		public ConsumerFactoryTestDecorator(IConsumerFactory<TConsumer> consumerFactory, IServiceBus bus,
-		                                    ReceivedMessageList received)
+		                                    ReceivedMessageListImpl received)
 		{
 			_consumerFactory = consumerFactory;
 			_bus = bus;
@@ -43,7 +43,7 @@ namespace MassTransit.Testing.TestDecorators
 
 				yield return message =>
 					{
-						var received = new ReceivedMessage<TMessage>(_bus.MessageContext<TMessage>(), message);
+						var received = new ReceivedMessageImpl<TMessage>(_bus.MessageContext<TMessage>(), message);
 
 						try
 						{

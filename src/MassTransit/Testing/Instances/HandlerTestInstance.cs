@@ -16,6 +16,7 @@ namespace MassTransit.Testing.Instances
 	using System.Collections.Generic;
 	using Configurators;
 	using Subjects;
+	using TestActions;
 	using TestContexts;
 
 	public class HandlerTestInstance<TMessage> :
@@ -27,7 +28,7 @@ namespace MassTransit.Testing.Instances
 
 		bool _disposed;
 
-		public HandlerTestInstance(IBusTestContext testContext, IList<TestAction> actions,
+		public HandlerTestInstance(BusTestContext testContext, IList<TestAction> actions,
 		                           Action<IServiceBus, TMessage> handler)
 			: base(testContext, actions)
 		{

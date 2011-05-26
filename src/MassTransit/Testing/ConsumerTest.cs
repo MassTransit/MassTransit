@@ -21,6 +21,6 @@ namespace MassTransit.Testing
 	{
 		ConsumerTestSubject<TConsumer> Consumer { get; }
 
-		IBusTestContext TestContext { get; }
+		BusTestContext TestContext { get; }
 	}
 }

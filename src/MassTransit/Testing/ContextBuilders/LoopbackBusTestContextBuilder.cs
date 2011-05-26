@@ -14,60 +14,42 @@ namespace MassTransit.Testing.ContextBuilders
 {
 	using System;
 	using BusConfigurators;
-	using EndpointConfigurators;
 	using Magnum.Extensions;
 	using TestContexts;
+	using Transports;
 
-	public class LoopbackBusTestContextBuilderImpl :
+	public class LoopbackBusTestContextBuilder :
+		EndpointTestContextBuilderImpl,
 		BusTestContextBuilder
 	{
 		const string DefaultUri = "loopback://localhost/mt_client";
 		readonly ServiceBusConfiguratorImpl _configurator;
-		readonly EndpointTestContextBuilder _endpointBuilder;
 		readonly ServiceBusDefaultSettings _settings;
 
-
-		public LoopbackBusTestContextBuilderImpl()
+		public LoopbackBusTestContextBuilder()
 		{
-			_endpointBuilder = new EndpointTestContextBuilderImpl();
-
 			_settings = new ServiceBusDefaultSettings();
 			_settings.ConcurrentConsumerLimit = 4;
 			_settings.ReceiveTimeout = 50.Milliseconds();
 
 			_configurator = new ServiceBusConfiguratorImpl(_settings);
-
 			_configurator.ReceiveFrom(DefaultUri);
 		}
 
-		public void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configureCallback)
-		{
-			_endpointBuilder.ConfigureEndpointFactory(configureCallback);
-		}
-
-		IEndpointTestContext EndpointTestContextBuilder.Build()
-		{
-			IEndpointTestContext endpointContext = _endpointBuilder.Build();
-
-			return endpointContext;
-		}
-
-		public void ConfigureServiceBus(Action<ServiceBusConfigurator> configureCallback)
+		public void ConfigureBus(Action<ServiceBusConfigurator> configureCallback)
 		{
 			configureCallback(_configurator);
 		}
 
-		public IBusTestContext Build()
+		BusTestContext BusTestContextBuilder.Build()
 		{
-			IEndpointTestContext endpointContext = _endpointBuilder.Build();
+			IEndpointFactory endpointFactory = BuildEndpointFactory();
 
-			_settings.EndpointCache = endpointContext.EndpointCache;
+			var context = new BusTestContextImpl(endpointFactory);
 
-			_configurator.ChangeSettings(x => { x.EndpointCache = endpointContext.EndpointCache; });
+			_configurator.ChangeSettings(x => { x.EndpointCache = context.EndpointCache; });
 
-			IServiceBus bus = _configurator.CreateServiceBus();
-
-			var context = new BusTestContext(endpointContext, bus);
+			context.Bus = _configurator.CreateServiceBus();
 
 			return context;
 		}

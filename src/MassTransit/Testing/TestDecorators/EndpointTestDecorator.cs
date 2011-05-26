@@ -23,25 +23,25 @@ namespace MassTransit.Testing.TestDecorators
 		IEndpoint
 	{
 		readonly IEndpoint _endpoint;
-		readonly ReceivedMessageList _received;
-		readonly SentMessageList _sent;
-		EndpointTestContext _testContext;
+		readonly ReceivedMessageListImpl _received;
+		readonly SentMessageListImpl _sent;
+		EndpointTestContextImpl _testContext;
 
-		public EndpointTestDecorator(IEndpoint endpoint, EndpointTestContext testContext)
+		public EndpointTestDecorator(IEndpoint endpoint, EndpointTestContextImpl testContext)
 		{
 			_endpoint = endpoint;
 			_testContext = testContext;
 
-			_sent = new SentMessageList();
-			_received = new ReceivedMessageList();
+			_sent = new SentMessageListImpl();
+			_received = new ReceivedMessageListImpl();
 		}
 
-		public IReceivedMessageList Received
+		public ReceivedMessageList Received
 		{
 			get { return _received; }
 		}
 
-		public ISentMessageList Sent
+		public SentMessageList Sent
 		{
 			get { return _sent; }
 		}
@@ -80,7 +80,7 @@ namespace MassTransit.Testing.TestDecorators
 
 		public void Send<T>(ISendContext<T> context) where T : class
 		{
-			var send = new SentMessage<T>(context);
+			var send = new SentMessageImpl<T>(context);
 			try
 			{
 				_endpoint.Send(context);
@@ -104,7 +104,7 @@ namespace MassTransit.Testing.TestDecorators
 					Action<IReceiveContext> receive = receiver(receiveContext);
 					if (receive == null)
 					{
-						var skipped = new ReceivedMessage(receiveContext);
+						var skipped = new ReceivedMessageImpl(receiveContext);
 						_testContext.AddSkipped(skipped);
 
 						return null;
@@ -112,7 +112,7 @@ namespace MassTransit.Testing.TestDecorators
 
 					return context =>
 						{
-							var received = new ReceivedMessage(context);
+							var received = new ReceivedMessageImpl(context);
 							try
 							{
 								receive(context);

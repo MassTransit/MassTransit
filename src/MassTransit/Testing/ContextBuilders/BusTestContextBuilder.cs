@@ -19,8 +19,8 @@ namespace MassTransit.Testing.ContextBuilders
 	public interface BusTestContextBuilder :
 		EndpointTestContextBuilder
 	{
-		void ConfigureServiceBus(Action<ServiceBusConfigurator> configureCallback);
+		void ConfigureBus(Action<ServiceBusConfigurator> configureCallback);
 
-		new IBusTestContext Build();
+		new BusTestContext Build();
 	}
 }

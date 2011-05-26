@@ -15,6 +15,7 @@ namespace MassTransit.Testing.Instances
 	using System.Collections.Generic;
 	using Configurators;
 	using Subjects;
+	using TestActions;
 	using TestContexts;
 
 
@@ -27,7 +28,7 @@ namespace MassTransit.Testing.Instances
 
 		bool _disposed;
 
-		public ConsumerTestInstance(IBusTestContext testContext, IList<TestAction> actions, IConsumerFactory<TConsumer> consumerFactory)
+		public ConsumerTestInstance(BusTestContext testContext, IList<TestAction> actions, IConsumerFactory<TConsumer> consumerFactory)
 			: base(testContext, actions)
 		{
 			_subject = new ConsumerTestSubjectImpl<TConsumer>(consumerFactory);

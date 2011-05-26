@@ -13,7 +13,6 @@
 namespace MassTransit.Testing
 {
 	using System;
-	using Subjects;
 
 	public interface TestInstance :
 		IDisposable
@@ -21,17 +20,17 @@ namespace MassTransit.Testing
 		/// <summary>
 		/// Messages that were received by any endpoint during the execution of the test
 		/// </summary>
-		IReceivedMessageList Received { get; }
+		ReceivedMessageList Received { get; }
 
 		/// <summary>
 		/// Messages that were send by any endpoint during the execution of the test
 		/// </summary>
-		ISentMessageList Sent { get; }
+		SentMessageList Sent { get; }
 
 		/// <summary>
 		/// Messages that were not received by any handler, consumer, or instance during the execution of the test
 		/// </summary>
-		IReceivedMessageList Skipped { get; }
+		ReceivedMessageList Skipped { get; }
 
 		/// <summary>
 		/// Execute the test actions
