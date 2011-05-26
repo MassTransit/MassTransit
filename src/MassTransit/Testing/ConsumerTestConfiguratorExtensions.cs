@@ -15,10 +15,11 @@ namespace MassTransit.Testing
 	using System;
 	using Configuration;
 	using Configurators;
+	using TestInstanceConfigurators;
 
 	public static class ConsumerTestConfiguratorExtensions
 	{
-		public static void ConstructUsing<TConsumer>(this ConsumerTestConfigurator<TConsumer> configurator,
+		public static void ConstructUsing<TConsumer>(this ConsumerTestInstanceConfigurator<TConsumer> configurator,
 		                                             Func<TConsumer> consumer)
 			where TConsumer : class
 		{

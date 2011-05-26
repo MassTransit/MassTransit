@@ -329,12 +329,6 @@
     <Compile Include="Testing\Builders\HandlerTestBuilderImpl.cs" />
     <Compile Include="Testing\Builders\TestBuilder.cs" />
     <Compile Include="Testing\Builders\TestInstanceBuilder.cs" />
-    <Compile Include="Testing\Configurators\BusTestInstanceConfiguratorImpl.cs" />
-    <Compile Include="Testing\Configurators\BusTestInstanceConfigurator.cs" />
-    <Compile Include="Testing\Configurators\ConsumerTestConfigurator.cs" />
-    <Compile Include="Testing\Configurators\ConsumerTestConfiguratorImpl.cs" />
-    <Compile Include="Testing\Configurators\HandlerTestConfigurator.cs" />
-    <Compile Include="Testing\Configurators\HandlerTestConfiguratorImpl.cs" />
     <Compile Include="Testing\Configurators\TestConfigurator.cs" />
     <Compile Include="Testing\Configurators\TestConfiguratorResult.cs" />
     <Compile Include="Testing\Configurators\TestConfiguratorResultDisposition.cs" />
@@ -392,6 +386,12 @@
     <Compile Include="Testing\Subjects\HandlerTestSubjectImpl.cs" />
     <Compile Include="Testing\TestFactory.cs" />
     <Compile Include="Testing\TestInstance.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\BusTestInstanceConfigurator.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\BusTestInstanceConfiguratorImpl.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\ConsumerTestInstanceConfigurator.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\ConsumerTestInstanceConfiguratorImpl.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\HandlerTestInstanceConfigurator.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\HandlerTestInstanceConfiguratorImpl.cs" />
     <Compile Include="Testing\TestSubject.cs" />
     <Compile Include="Testing\TransportFactoryTestExtensions.cs" />
     <Compile Include="Threading\ConsumerPool.cs" />

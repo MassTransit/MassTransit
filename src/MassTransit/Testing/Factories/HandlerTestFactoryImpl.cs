@@ -14,14 +14,15 @@ namespace MassTransit.Testing.Factories
 {
 	using System;
 	using Configurators;
+	using TestInstanceConfigurators;
 
 	public class HandlerTestFactoryImpl<TMessage> :
 		HandlerTestFactory<TMessage>
 		where TMessage : class
 	{
-		public HandlerTest<TMessage> New(Action<HandlerTestConfigurator<TMessage>> configureTest)
+		public HandlerTest<TMessage> New(Action<HandlerTestInstanceConfigurator<TMessage>> configureTest)
 		{
-			var configurator = new HandlerTestConfiguratorImpl<TMessage>();
+			var configurator = new HandlerTestInstanceConfiguratorImpl<TMessage>();
 
 			configureTest(configurator);
 
