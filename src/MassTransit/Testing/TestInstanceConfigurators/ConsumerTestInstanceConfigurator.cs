@@ -15,13 +15,13 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	using System;
 	using BuilderConfigurators;
 	using Builders;
-	using TestContexts;
+	using Scenarios;
 
 	public interface ConsumerTestInstanceConfigurator<TConsumer> :
 		BusTestInstanceConfigurator
 		where TConsumer : class
 	{
-		void UseBuilder(Func<BusTestContext, ConsumerTestBuilder<TConsumer>> builderFactory);
+		void UseBuilder(Func<BusTestScenario, ConsumerTestBuilder<TConsumer>> builderFactory);
 		void AddConfigurator(ConsumerTestBuilderConfigurator<TConsumer> configurator);
 
 		void UseConsumerFactory(IConsumerFactory<TConsumer> consumerFactory);

@@ -13,10 +13,8 @@
 namespace MassTransit.Testing.TestDecorators
 {
 	using System;
-	using Context;
+	using Scenarios;
 	using Serialization;
-	using Subjects;
-	using TestContexts;
 	using Transports;
 
 	public class EndpointTestDecorator :
@@ -25,9 +23,9 @@ namespace MassTransit.Testing.TestDecorators
 		readonly IEndpoint _endpoint;
 		readonly ReceivedMessageListImpl _received;
 		readonly SentMessageListImpl _sent;
-		EndpointTestContextImpl _testContext;
+		EndpointTestScenarioImpl _testContext;
 
-		public EndpointTestDecorator(IEndpoint endpoint, EndpointTestContextImpl testContext)
+		public EndpointTestDecorator(IEndpoint endpoint, EndpointTestScenarioImpl testContext)
 		{
 			_endpoint = endpoint;
 			_testContext = testContext;

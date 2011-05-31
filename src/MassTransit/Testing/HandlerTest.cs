@@ -12,16 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
+	using Scenarios;
 	using Subjects;
-	using TestContexts;
 
 	public interface HandlerTest<TMessage> :
 		TestInstance
 		where TMessage : class
 	{
-
 		HandlerTestSubject<TMessage> Handler { get; }
 
-		BusTestContext TestContext { get; }
+		BusTestScenario Scenario { get; }
 	}
 }

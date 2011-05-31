@@ -14,7 +14,6 @@ namespace MassTransit.Testing
 {
 	using System;
 	using Configuration;
-	using Configurators;
 	using TestInstanceConfigurators;
 
 	public static class ConsumerTestConfiguratorExtensions

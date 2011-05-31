@@ -10,24 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.ContextBuilders
+namespace MassTransit.Testing.ScenarioBuilders
 {
 	using System;
 	using EndpointConfigurators;
 	using Exceptions;
 	using Magnum.Extensions;
 	using MassTransit.Configurators;
+	using Scenarios;
 	using Serialization;
-	using TestContexts;
 	using Transports;
 	using Transports.Loopback;
 
-	public class EndpointTestContextBuilderImpl :
-		EndpointTestContextBuilder
+	public class EndpointScenarioBuilderImpl :
+		EndpointScenarioBuilder
 	{
 		readonly EndpointFactoryConfigurator _endpointFactoryConfigurator;
 
-		public EndpointTestContextBuilderImpl()
+		public EndpointScenarioBuilderImpl()
 		{
 			var settings = new EndpointFactoryDefaultSettings
 				{
@@ -49,9 +49,9 @@ namespace MassTransit.Testing.ContextBuilders
 			configureCallback(_endpointFactoryConfigurator);
 		}
 
-		public EndpointTestContext Build()
+		public EndpointTestScenario Build()
 		{
-			return new EndpointTestContextImpl(BuildEndpointFactory());
+			return new EndpointTestScenarioImpl(BuildEndpointFactory());
 		}
 
 		protected IEndpointFactory BuildEndpointFactory()

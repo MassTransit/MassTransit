@@ -10,27 +10,35 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Testing
+namespace MassTransit.Transports.Msmq.Tests.Testing
 {
 	using Magnum.TestFramework;
 	using MassTransit.Testing;
 
 	[Scenario]
-	public class When_a_handler_responds_to_a_message
+	public class Using_the_handler_test_factory
 	{
 		HandlerTest<A> _test;
 
 		[When]
-		public void A_handler_responds_to_a_message()
+		public void Setup()
 		{
+			//			_test = TestFactory
+			//				.UsingContext<LoopbackBusTestContext>()
+			//				.ForHandler<A>()
+			//				.New(x =>
+			//					{
+			//						x.Send(context => context.Bus, new A());
+			//					});
+
 			_test = TestFactory.ForHandler<A>()
 				.New(x =>
 					{
-						x.Handler((bus, message) => bus.MessageContext<A>().Respond(new B()));
+						x.UseMsmqBusScenario();
 
-						x.Send(new A(), c => c.SendResponseTo(_test.Scenario.Bus));
+						x.Send(new A());
+						x.Send(new B());
 					});
-
 			_test.Execute();
 		}
 
@@ -39,6 +47,30 @@ namespace MassTransit.Tests.Testing
 		{
 			_test.Dispose();
 			_test = null;
+		}
+
+		[Then]
+		public void Should_have_received_a_message_of_type_a()
+		{
+			_test.Received.Any<A>().ShouldBeTrue();
+		}
+
+		[Then]
+		public void Should_have_skipped_a_message_of_type_b()
+		{
+			_test.Skipped.Any<B>().ShouldBeTrue();
+		}
+
+		[Then]
+		public void Should_not_have_skipped_a_message_of_type_a()
+		{
+			_test.Skipped.Any<A>().ShouldBeFalse();
+		}
+
+		[Then]
+		public void Should_have_sent_a_message_of_type_a()
+		{
+			_test.Sent.Any<A>().ShouldBeTrue();
 		}
 
 		[Then]

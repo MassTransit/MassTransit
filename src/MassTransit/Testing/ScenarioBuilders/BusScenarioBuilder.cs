@@ -10,9 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.ContextBuilders
+namespace MassTransit.Testing.ScenarioBuilders
 {
-	public interface TestContextBuilder
+	using System;
+	using BusConfigurators;
+	using Scenarios;
+
+	public interface BusScenarioBuilder :
+		EndpointScenarioBuilder
 	{
+		void ConfigureBus(Action<ServiceBusConfigurator> configureCallback);
+
+		new BusTestScenario Build();
 	}
 }

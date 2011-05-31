@@ -13,16 +13,16 @@
 namespace MassTransit.Testing
 {
 	using Configurators;
-	using ContextConfigurators;
+	using ScenarioConfigurators;
 	using Transports;
 
 	public static class TransportFactoryTestExtensions
 	{
-		public static void AddTransportFactory<TTransportFactory>(this TestContextConfigurator configurator)
+		public static void AddTransportFactory<TTransportFactory>(this ScenarioConfigurator configurator)
 			where TTransportFactory : ITransportFactory, new()
 		{
 			var endpointFactoryConfigurator =
-				new EndpointTestContextBuilderConfiguratorImpl(x => x.AddTransportFactory<TTransportFactory>());
+				new EndpointTestScenarioBuilderConfiguratorImpl(x => x.AddTransportFactory<TTransportFactory>());
 
 			configurator.AddConfigurator(endpointFactoryConfigurator);
 		}

@@ -16,19 +16,19 @@ namespace MassTransit.Testing.Builders
 	using System.Collections.Generic;
 	using Configurators;
 	using Instances;
+	using Scenarios;
 	using TestActions;
-	using TestContexts;
 
 	public class HandlerTestBuilderImpl<TMessage> :
 		HandlerTestBuilder<TMessage>
 		where TMessage : class
 	{
-		readonly BusTestContext _testContext;
+		readonly BusTestScenario _testContext;
 		Action<IServiceBus, TMessage> _handler;
 		IList<TestAction> _actions;
 
 
-		public HandlerTestBuilderImpl(BusTestContext testContext)
+		public HandlerTestBuilderImpl(BusTestScenario testContext)
 		{
 			_testContext = testContext;
 			_handler = DefaultHandler;

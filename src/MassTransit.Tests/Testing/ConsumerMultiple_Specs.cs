@@ -16,8 +16,8 @@ namespace MassTransit.Tests.Testing
 				{
 					x.ConstructUsing(() => new Testsumer());
 
-					x.Send(new A(), c => c.SendResponseTo(_test.TestContext.Bus));
-					x.Send(new B(), c => c.SendResponseTo(_test.TestContext.Bus));
+					x.Send(new A(), c => c.SendResponseTo(_test.Scenario.Bus));
+					x.Send(new B(), c => c.SendResponseTo(_test.Scenario.Bus));
 				});
 
 			_test.Execute();

@@ -10,34 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.ContextConfigurators
+namespace MassTransit.Testing.ScenarioBuilders
 {
 	using System;
-	using System.Collections.Generic;
-	using BusConfigurators;
-	using Configurators;
-	using ContextBuilders;
 
-	public class BusTestContextBuilderConfiguratorImpl :
-		BusTestContextBuilderConfigurator
+	public class LoopbackBusScenarioBuilder :
+		BusScenarioBuilderImpl
 	{
-		readonly Action<ServiceBusConfigurator> _configureAction;
+		const string DefaultUri = "loopback://localhost/mt_client";
 
-		public BusTestContextBuilderConfiguratorImpl(Action<ServiceBusConfigurator> configureAction)
+		public LoopbackBusScenarioBuilder()
+			: base(new Uri(DefaultUri))
 		{
-			_configureAction = configureAction;
-		}
-
-		public IEnumerable<TestConfiguratorResult> Validate()
-		{
-			yield break;
-		}
-
-		public BusTestContextBuilder Configure(BusTestContextBuilder builder)
-		{
-			builder.ConfigureBus(_configureAction);
-
-			return builder;
 		}
 	}
 }

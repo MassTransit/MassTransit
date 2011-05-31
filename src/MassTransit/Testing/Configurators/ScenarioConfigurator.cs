@@ -1,4 +1,4 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,20 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.TestContexts
+namespace MassTransit.Testing.Configurators
 {
 	using System;
-	using Subjects;
-	using Transports;
+	using ScenarioBuilders;
+	using ScenarioConfigurators;
 
-	public interface EndpointTestContext :
-		IDisposable
+	public interface ScenarioConfigurator :
+		TestConfigurator
 	{
-		IEndpointCache EndpointCache { get; }
-		IEndpointFactory EndpointFactory { get; }
+		void UseBuilder(Func<EndpointScenarioBuilder> builderFactory);
 
-		ReceivedMessageList Received { get; }
-		SentMessageList Sent { get; }
-		ReceivedMessageList Skipped { get; }
+		void AddConfigurator(EndpointTestScenarioBuilderConfigurator configurator);
 	}
 }

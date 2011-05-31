@@ -113,6 +113,8 @@
     <Compile Include="MsmqUriExtensions.cs" />
     <Compile Include="MulticastSubscriptionClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Testing\BusTestScenarioExtensions.cs" />
+    <Compile Include="Testing\MsmqBusScenarioBuilder.cs" />
     <Compile Include="TransactionalInboundMsmqTransport.cs" />
     <Compile Include="TransactionalOutboundMsmqTransport.cs" />
   </ItemGroup>

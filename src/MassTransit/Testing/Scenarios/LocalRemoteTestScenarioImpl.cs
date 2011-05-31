@@ -10,23 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.TestContexts
+namespace MassTransit.Testing.Scenarios
 {
 	using Transports;
 
-	public class LocalRemoteTestContextImpl :
-		EndpointTestContextImpl,
-		LocalRemoteTestContext
+	public class LocalRemoteTestScenarioImpl :
+		EndpointTestScenarioImpl,
+		LocalRemoteTestScenario
 	{
 		bool _disposed;
 
-		public LocalRemoteTestContextImpl(IEndpointFactory endpointFactory)
+		public LocalRemoteTestScenarioImpl(IEndpointFactory endpointFactory)
 			: base(endpointFactory)
 		{
 		}
 
 		public IServiceBus LocalBus { get; set; }
 		public IServiceBus RemoteBus { get; set; }
+
+		public IServiceBus Bus
+		{
+			get { return LocalBus; }
+		}
 
 		protected override void Dispose(bool disposing)
 		{
@@ -45,7 +50,7 @@ namespace MassTransit.Testing.TestContexts
 			_disposed = true;
 		}
 
-		~LocalRemoteTestContextImpl()
+		~LocalRemoteTestScenarioImpl()
 		{
 			Dispose(false);
 		}

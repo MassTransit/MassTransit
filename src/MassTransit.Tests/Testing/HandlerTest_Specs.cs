@@ -15,6 +15,25 @@ namespace MassTransit.Tests.Testing
 	using Magnum.TestFramework;
 	using MassTransit.Testing;
 
+//
+//	public class MySuperFlyContext :
+//		ContextFactory<BusTestContext>
+//	{
+//		BusTestContext CreateContext()
+//		{
+//		}
+//	}
+//
+//	public class MyHandlerScenario<T> :
+//		HandlerScenarioFactory
+//	{
+//		HandlerTest<T> CreateScenario<TContext>(TContext context)
+//			where TContext  : BusTestContext
+//		{
+//		}
+//	}
+//
+
 	[Scenario]
 	public class Using_the_handler_test_factory
 	{
@@ -23,6 +42,14 @@ namespace MassTransit.Tests.Testing
 		[When]
 		public void Setup()
 		{
+//			_test = TestFactory
+//				.UsingContext<LoopbackBusTestContext>()
+//				.ForHandler<A>()
+//				.New(x =>
+//					{
+//						x.Send(context => context.Bus, new A());
+//					});
+
 			_test = TestFactory.ForHandler<A>()
 				.New(x =>
 					{

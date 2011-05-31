@@ -15,13 +15,13 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	using System;
 	using BuilderConfigurators;
 	using Builders;
-	using TestContexts;
+	using Scenarios;
 
 	public interface HandlerTestInstanceConfigurator<TMessage> :
 		BusTestInstanceConfigurator
 		where TMessage : class
 	{
-		void UseBuilder(Func<BusTestContext, HandlerTestBuilder<TMessage>> builderFactory);
+		void UseBuilder(Func<BusTestScenario, HandlerTestBuilder<TMessage>> builderFactory);
 		void AddConfigurator(HandlerTestBuilderConfigurator<TMessage> configurator);
 
 		void Handler(Action<IServiceBus, TMessage> handler);

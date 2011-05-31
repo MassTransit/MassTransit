@@ -10,17 +10,40 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.ContextBuilders
+namespace MassTransit.Testing.Scenarios
 {
-	using System;
-	using BusConfigurators;
-	using TestContexts;
+	using Transports;
 
-	public interface BusTestContextBuilder :
-		EndpointTestContextBuilder
+	public class BusTestScenarioImpl :
+		EndpointTestScenarioImpl,
+		BusTestScenario
 	{
-		void ConfigureBus(Action<ServiceBusConfigurator> configureCallback);
+		bool _disposed;
 
-		new BusTestContext Build();
+		public BusTestScenarioImpl(IEndpointFactory endpointFactory)
+			: base(endpointFactory)
+		{
+		}
+
+		public IServiceBus Bus { get; set; }
+
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				if (Bus != null)
+					Bus.Dispose();
+
+				base.Dispose(true);
+			}
+
+			_disposed = true;
+		}
+
+		~BusTestScenarioImpl()
+		{
+			Dispose(false);
+		}
 	}
 }
