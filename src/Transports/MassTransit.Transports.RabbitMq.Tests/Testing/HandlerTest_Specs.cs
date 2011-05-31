@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq.Tests.Testing
+namespace MassTransit.Transports.RabbitMq.Tests.Testing
 {
 	using Magnum.TestFramework;
 	using MassTransit.Testing;
@@ -26,7 +26,7 @@ namespace MassTransit.Transports.Msmq.Tests.Testing
 			_test = TestFactory.ForHandler<A>()
 				.New(x =>
 					{
-						x.UseMsmqBusScenario();
+						x.UseRabbitMqBusScenario();
 
 						x.Send(new A());
 						x.Send(new B());

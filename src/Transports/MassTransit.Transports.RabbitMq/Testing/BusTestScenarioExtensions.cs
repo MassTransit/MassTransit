@@ -13,13 +13,12 @@
 namespace MassTransit.Testing
 {
 	using TestInstanceConfigurators;
-	using Transports.Msmq.Testing;
 
 	public static class BusTestScenarioExtensions
 	{
-		public static void UseMsmqBusScenario(this BusTestInstanceConfigurator configurator)
+		public static void UseRabbitMqBusScenario(this BusTestInstanceConfigurator configurator)
 		{
-			configurator.UseScenarioBuilder(() => new MsmqBusScenarioBuilder());
+			configurator.UseScenarioBuilder(() => new RabbitMqBusScenarioBuilder());
 		}
 	}
 }

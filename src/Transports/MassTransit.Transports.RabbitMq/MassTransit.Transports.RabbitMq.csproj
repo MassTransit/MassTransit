@@ -97,6 +97,8 @@
     <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
     <Compile Include="Configuration\RabbitMqServiceBusExtensions.cs" />
+    <Compile Include="Testing\BusTestScenarioExtensions.cs" />
+    <Compile Include="Testing\RabbitMqBusScenarioBuilder.cs" />
     <Compile Include="TransactionalBehavior.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -32,15 +32,6 @@
 			return null;
 		}
 
-		public static ServiceBusConfigurator UseRabbitMq(this ServiceBusConfigurator configurator)
-		{
-			EndpointFactoryConfigurator endpointFactoryConfigurator = configurator;
-
-			endpointFactoryConfigurator.UseRabbitMq();
-
-			return configurator;
-		}
-
 		public static T UseRabbitMq<T>(this T configurator)
 			where T : EndpointFactoryConfigurator
 		{

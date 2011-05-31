@@ -10,16 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Transports.RabbitMq.Tests
 {
-	using TestInstanceConfigurators;
-	using Transports.Msmq.Testing;
+	using System.IO;
+	using System.Reflection;
+	using log4net.Config;
+	using NUnit.Framework;
 
-	public static class BusTestScenarioExtensions
+	[SetUpFixture]
+	public class ContextSetup
 	{
-		public static void UseMsmqBusScenario(this BusTestInstanceConfigurator configurator)
+		[SetUp]
+		public void Before_any()
 		{
-			configurator.UseScenarioBuilder(() => new MsmqBusScenarioBuilder());
+			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+			string file = Path.Combine(path, "test.log4net.xml");
+
+			XmlConfigurator.Configure(new FileInfo(file));
 		}
 	}
 }

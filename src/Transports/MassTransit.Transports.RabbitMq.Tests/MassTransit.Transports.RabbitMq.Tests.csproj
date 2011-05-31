@@ -80,6 +80,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assumptions\BasicExchangePerformanceDifferences.cs" />
@@ -88,9 +89,11 @@
     <Compile Include="Assumptions\PerformanceAssumptions.cs" />
     <Compile Include="Assumptions\RoutingAssumptions.cs" />
     <Compile Include="Assumptions\TransactionAssumptions.cs" />
+    <Compile Include="ContextSetup.cs" />
     <Compile Include="Given_a_rabbitmq_bus.cs" />
     <Compile Include="Given_a_rabbitmq_bus_with_vhost_mt_and_credentials.cs" />
     <Compile Include="MessageName_Specs.cs" />
+    <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="When_a_message_consumer_throws_an_exception.cs" />
     <Compile Include="When_a_message_is_published.cs" />
     <Compile Include="RabbitMqTransportFactoryTests.cs" />
@@ -130,7 +133,11 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="test.log4net.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
