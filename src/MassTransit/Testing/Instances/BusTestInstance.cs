@@ -14,42 +14,40 @@ namespace MassTransit.Testing.Instances
 {
 	using System;
 	using System.Collections.Generic;
-	using Configurators;
 	using Magnum.Extensions;
-	using Subjects;
+	using Scenarios;
 	using TestActions;
-	using TestContexts;
 
 	public abstract class BusTestInstance
 	{
 		readonly IList<TestAction> _actions;
-		readonly BusTestContext _testContext;
+		readonly BusTestScenario _scenario;
 		bool _disposed;
 
-		protected BusTestInstance(BusTestContext testContext, IList<TestAction> actions)
+		protected BusTestInstance(BusTestScenario scenario, IList<TestAction> actions)
 		{
-			_testContext = testContext;
+			_scenario = scenario;
 			_actions = actions;
 		}
 
 		public ReceivedMessageList Received
 		{
-			get { return _testContext.Received; }
+			get { return _scenario.Received; }
 		}
 
 		public SentMessageList Sent
 		{
-			get { return _testContext.Sent; }
+			get { return _scenario.Sent; }
 		}
 
 		public ReceivedMessageList Skipped
 		{
-			get { return _testContext.Skipped; }
+			get { return _scenario.Skipped; }
 		}
 
-		public BusTestContext TestContext
+		public BusTestScenario Scenario
 		{
-			get { return _testContext; }
+			get { return _scenario; }
 		}
 
 		public void Dispose()
@@ -63,7 +61,7 @@ namespace MassTransit.Testing.Instances
 			if (_disposed) return;
 			if (disposing)
 			{
-				_testContext.Dispose();
+				_scenario.Dispose();
 			}
 
 			_disposed = true;
@@ -71,7 +69,7 @@ namespace MassTransit.Testing.Instances
 
 		protected void ExecuteTestActions()
 		{
-			_actions.Each(x => x.Act(_testContext.Bus));
+			_actions.Each(x => x.Act(_scenario.Bus));
 		}
 
 		~BusTestInstance()

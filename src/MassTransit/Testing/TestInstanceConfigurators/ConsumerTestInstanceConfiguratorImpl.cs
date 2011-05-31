@@ -18,7 +18,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	using BuilderConfigurators;
 	using Builders;
 	using Configurators;
-	using TestContexts;
+	using Scenarios;
 
 	public class ConsumerTestInstanceConfiguratorImpl<TConsumer> :
 		BusTestInstanceConfiguratorImpl,
@@ -27,7 +27,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	{
 		readonly IList<ConsumerTestBuilderConfigurator<TConsumer>> _configurators;
 
-		Func<BusTestContext, ConsumerTestBuilder<TConsumer>> _builderFactory;
+		Func<BusTestScenario, ConsumerTestBuilder<TConsumer>> _builderFactory;
 		IConsumerFactory<TConsumer> _consumerFactory;
 
 		public ConsumerTestInstanceConfiguratorImpl()
@@ -37,7 +37,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 			_builderFactory = testContext => new ConsumerTestBuilderImpl<TConsumer>(testContext);
 		}
 
-		public void UseBuilder(Func<BusTestContext, ConsumerTestBuilder<TConsumer>> builderFactory)
+		public void UseBuilder(Func<BusTestScenario, ConsumerTestBuilder<TConsumer>> builderFactory)
 		{
 			_builderFactory = builderFactory;
 		}
@@ -59,7 +59,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 
 		public ConsumerTest<TConsumer> Build()
 		{
-			BusTestContext context = BuildBusTextContext();
+			BusTestScenario context = BuildBusTestScenario();
 
 			ConsumerTestBuilder<TConsumer> builder = _builderFactory(context);
 

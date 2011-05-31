@@ -18,7 +18,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	using BuilderConfigurators;
 	using Builders;
 	using Configurators;
-	using TestContexts;
+	using Scenarios;
 
 	public class HandlerTestInstanceConfiguratorImpl<TMessage> :
 		BusTestInstanceConfiguratorImpl,
@@ -27,7 +27,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	{
 		readonly IList<HandlerTestBuilderConfigurator<TMessage>> _configurators;
 
-		Func<BusTestContext, HandlerTestBuilder<TMessage>> _builderFactory;
+		Func<BusTestScenario, HandlerTestBuilder<TMessage>> _builderFactory;
 		Action<IServiceBus, TMessage> _handler;
 
 		public HandlerTestInstanceConfiguratorImpl()
@@ -37,7 +37,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 			_builderFactory = testContext => new HandlerTestBuilderImpl<TMessage>(testContext);
 		}
 
-		public void UseBuilder(Func<BusTestContext, HandlerTestBuilder<TMessage>> builderFactory)
+		public void UseBuilder(Func<BusTestScenario, HandlerTestBuilder<TMessage>> builderFactory)
 		{
 			_builderFactory = builderFactory;
 		}
@@ -59,7 +59,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 
 		public HandlerTest<TMessage> Build()
 		{
-			BusTestContext context = BuildBusTextContext();
+			BusTestScenario context = BuildBusTestScenario();
 
 			HandlerTestBuilder<TMessage> builder = _builderFactory(context);
 

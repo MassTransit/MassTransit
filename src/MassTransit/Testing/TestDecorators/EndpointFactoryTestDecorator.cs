@@ -13,16 +13,16 @@
 namespace MassTransit.Testing.TestDecorators
 {
 	using System;
-	using TestContexts;
+	using Scenarios;
 	using Transports;
 
 	public class EndpointFactoryTestDecorator :
 		IEndpointFactory
 	{
 		readonly IEndpointFactory _endpointFactory;
-		readonly EndpointTestContextImpl _testContext;
+		readonly EndpointTestScenarioImpl _testContext;
 
-		public EndpointFactoryTestDecorator(IEndpointFactory endpointFactory, EndpointTestContextImpl testContext)
+		public EndpointFactoryTestDecorator(IEndpointFactory endpointFactory, EndpointTestScenarioImpl testContext)
 		{
 			_endpointFactory = endpointFactory;
 			_testContext = testContext;

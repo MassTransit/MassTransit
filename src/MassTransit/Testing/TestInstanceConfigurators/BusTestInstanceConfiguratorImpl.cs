@@ -18,23 +18,23 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	using ActionConfigurators;
 	using Builders;
 	using Configurators;
-	using ContextBuilders;
-	using ContextConfigurators;
 	using Magnum.Extensions;
-	using TestContexts;
+	using ScenarioBuilders;
+	using ScenarioConfigurators;
+	using Scenarios;
 
 	public abstract class BusTestInstanceConfiguratorImpl
 	{
 		readonly IList<TestActionConfigurator> _actionConfigurators;
-		readonly IList<BusTestContextBuilderConfigurator> _configurators;
-		Func<BusTestContextBuilder> _builderFactory;
+		readonly IList<BusTestScenarioBuilderConfigurator> _configurators;
+		Func<BusScenarioBuilder> _builderFactory;
 
 		protected BusTestInstanceConfiguratorImpl()
 		{
-			_configurators = new List<BusTestContextBuilderConfigurator>();
+			_configurators = new List<BusTestScenarioBuilderConfigurator>();
 			_actionConfigurators = new List<TestActionConfigurator>();
 
-			_builderFactory = () => new LoopbackBusTestContextBuilder();
+			_builderFactory = () => new LoopbackBusScenarioBuilder();
 		}
 
 		public void AddActionConfigurator(TestActionConfigurator action)
@@ -42,12 +42,12 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 			_actionConfigurators.Add(action);
 		}
 
-		public void UseContextBuilder(Func<BusTestContextBuilder> contextBuilderFactory)
+		public void UseScenarioBuilder(Func<BusScenarioBuilder> contextBuilderFactory)
 		{
 			_builderFactory = contextBuilderFactory;
 		}
 
-		public void AddConfigurator(BusTestContextBuilderConfigurator configurator)
+		public void AddConfigurator(BusTestScenarioBuilderConfigurator configurator)
 		{
 			_configurators.Add(configurator);
 		}
@@ -58,14 +58,14 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 				.Concat(_actionConfigurators.SelectMany(x => x.Validate()));
 		}
 
-		protected BusTestContext BuildBusTextContext()
+		protected BusTestScenario BuildBusTestScenario()
 		{
-			BusTestContextBuilder contextBuilder = _builderFactory();
+			BusScenarioBuilder scenarioBuilder = _builderFactory();
 
-			contextBuilder = _configurators.Aggregate(contextBuilder,
+			scenarioBuilder = _configurators.Aggregate(scenarioBuilder,
 				(current, configurator) => configurator.Configure(current));
 
-			BusTestContext context = contextBuilder.Build();
+			BusTestScenario context = scenarioBuilder.Build();
 
 			return context;
 		}

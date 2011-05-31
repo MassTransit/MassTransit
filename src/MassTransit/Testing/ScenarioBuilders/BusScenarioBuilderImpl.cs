@@ -10,30 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.ContextBuilders
+namespace MassTransit.Testing.ScenarioBuilders
 {
 	using System;
 	using BusConfigurators;
 	using Magnum.Extensions;
-	using TestContexts;
+	using Scenarios;
 	using Transports;
 
-	public class LoopbackBusTestContextBuilder :
-		EndpointTestContextBuilderImpl,
-		BusTestContextBuilder
+	public class BusScenarioBuilderImpl :
+		EndpointScenarioBuilderImpl,
+		BusScenarioBuilder
 	{
-		const string DefaultUri = "loopback://localhost/mt_client";
 		readonly ServiceBusConfiguratorImpl _configurator;
 		readonly ServiceBusDefaultSettings _settings;
 
-		public LoopbackBusTestContextBuilder()
+		protected BusScenarioBuilderImpl(Uri uri)
 		{
 			_settings = new ServiceBusDefaultSettings();
 			_settings.ConcurrentConsumerLimit = 4;
 			_settings.ReceiveTimeout = 50.Milliseconds();
 
 			_configurator = new ServiceBusConfiguratorImpl(_settings);
-			_configurator.ReceiveFrom(DefaultUri);
+			_configurator.ReceiveFrom(uri);
 		}
 
 		public void ConfigureBus(Action<ServiceBusConfigurator> configureCallback)
@@ -41,11 +40,11 @@ namespace MassTransit.Testing.ContextBuilders
 			configureCallback(_configurator);
 		}
 
-		BusTestContext BusTestContextBuilder.Build()
+		BusTestScenario BusScenarioBuilder.Build()
 		{
 			IEndpointFactory endpointFactory = BuildEndpointFactory();
 
-			var context = new BusTestContextImpl(endpointFactory);
+			var context = new BusTestScenarioImpl(endpointFactory);
 
 			_configurator.ChangeSettings(x => { x.EndpointCache = context.EndpointCache; });
 

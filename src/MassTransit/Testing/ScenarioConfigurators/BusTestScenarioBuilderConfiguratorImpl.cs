@@ -10,22 +10,34 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Factories
+namespace MassTransit.Testing.ScenarioConfigurators
 {
 	using System;
-	using TestInstanceConfigurators;
+	using System.Collections.Generic;
+	using BusConfigurators;
+	using Configurators;
+	using ScenarioBuilders;
 
-	public class HandlerTestFactoryImpl<TMessage> :
-		HandlerTestFactory<TMessage>
-		where TMessage : class
+	public class BusTestScenarioBuilderConfiguratorImpl :
+		BusTestScenarioBuilderConfigurator
 	{
-		public HandlerTest<TMessage> New(Action<HandlerTestInstanceConfigurator<TMessage>> configureTest)
+		readonly Action<ServiceBusConfigurator> _configureAction;
+
+		public BusTestScenarioBuilderConfiguratorImpl(Action<ServiceBusConfigurator> configureAction)
 		{
-			var configurator = new HandlerTestInstanceConfiguratorImpl<TMessage>();
+			_configureAction = configureAction;
+		}
 
-			configureTest(configurator);
+		public IEnumerable<TestConfiguratorResult> Validate()
+		{
+			yield break;
+		}
 
-			return configurator.Build();
+		public BusScenarioBuilder Configure(BusScenarioBuilder builder)
+		{
+			builder.ConfigureBus(_configureAction);
+
+			return builder;
 		}
 	}
 }

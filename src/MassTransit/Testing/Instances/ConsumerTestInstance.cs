@@ -13,11 +13,9 @@
 namespace MassTransit.Testing.Instances
 {
 	using System.Collections.Generic;
-	using Configurators;
+	using Scenarios;
 	using Subjects;
 	using TestActions;
-	using TestContexts;
-
 
 	public class ConsumerTestInstance<TConsumer> :
 		BusTestInstance,
@@ -28,7 +26,8 @@ namespace MassTransit.Testing.Instances
 
 		bool _disposed;
 
-		public ConsumerTestInstance(BusTestContext testContext, IList<TestAction> actions, IConsumerFactory<TConsumer> consumerFactory)
+		public ConsumerTestInstance(BusTestScenario testContext, IList<TestAction> actions,
+		                            IConsumerFactory<TConsumer> consumerFactory)
 			: base(testContext, actions)
 		{
 			_subject = new ConsumerTestSubjectImpl<TConsumer>(consumerFactory);
@@ -36,7 +35,7 @@ namespace MassTransit.Testing.Instances
 
 		public void Execute()
 		{
-			_subject.Prepare(TestContext.Bus);
+			_subject.Prepare(Scenario.Bus);
 
 			ExecuteTestActions();
 		}

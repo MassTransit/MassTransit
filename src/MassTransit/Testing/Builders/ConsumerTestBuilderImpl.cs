@@ -14,19 +14,19 @@ namespace MassTransit.Testing.Builders
 {
 	using System.Collections.Generic;
 	using Instances;
+	using Scenarios;
 	using TestActions;
-	using TestContexts;
 
 	public class ConsumerTestBuilderImpl<TConsumer> :
 		ConsumerTestBuilder<TConsumer>
 		where TConsumer : class
 	{
-		readonly BusTestContext _testContext;
+		readonly BusTestScenario _testContext;
 		IList<TestAction> _actions;
 		IConsumerFactory<TConsumer> _consumerFactory;
 
 
-		public ConsumerTestBuilderImpl(BusTestContext testContext)
+		public ConsumerTestBuilderImpl(BusTestScenario testContext)
 		{
 			_testContext = testContext;
 

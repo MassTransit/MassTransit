@@ -10,24 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.ContextConfigurators
+namespace MassTransit.Testing.ScenarioConfigurators
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using Configurators;
-	using ContextBuilders;
-	using TestContexts;
+	using ScenarioBuilders;
+	using Scenarios;
 
-	public class EndpointTestContextConfigurator :
-		TestContextConfigurator
+	public class EndpointScenarioConfigurator :
+		ScenarioConfigurator
 	{
-		Func<EndpointTestContextBuilder> _builderFactory;
-		IList<EndpointTestContextBuilderConfigurator> _configurators;
+		Func<EndpointScenarioBuilder> _builderFactory;
+		IList<EndpointTestScenarioBuilderConfigurator> _configurators;
 
-		public EndpointTestContextConfigurator()
+		public EndpointScenarioConfigurator()
 		{
-			_configurators = new List<EndpointTestContextBuilderConfigurator>();
+			_configurators = new List<EndpointTestScenarioBuilderConfigurator>();
 		}
 
 		public IEnumerable<TestConfiguratorResult> Validate()
@@ -36,19 +36,19 @@ namespace MassTransit.Testing.ContextConfigurators
 				yield return this.Failure("BuilderFactory", "A builder factory was not configured.");
 		}
 
-		public void UseBuilder(Func<EndpointTestContextBuilder> builderFactory)
+		public void UseBuilder(Func<EndpointScenarioBuilder> builderFactory)
 		{
 			_builderFactory = builderFactory;
 		}
 
-		public void AddConfigurator(EndpointTestContextBuilderConfigurator configurator)
+		public void AddConfigurator(EndpointTestScenarioBuilderConfigurator configurator)
 		{
 			_configurators.Add(configurator);
 		}
 
-		public EndpointTestContext Build()
+		public EndpointTestScenario Build()
 		{
-			EndpointTestContextBuilder builder = _builderFactory();
+			EndpointScenarioBuilder builder = _builderFactory();
 
 			builder = _configurators.Aggregate(builder, (current, configurator) => configurator.Configure(current));
 

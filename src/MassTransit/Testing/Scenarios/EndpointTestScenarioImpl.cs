@@ -10,18 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.TestContexts
+namespace MassTransit.Testing.Scenarios
 {
 	using System;
 	using System.Collections.Generic;
 	using Magnum.Extensions;
-	using Saga;
-	using Subjects;
 	using TestDecorators;
 	using Transports;
 
-	public class EndpointTestContextImpl :
-		EndpointTestContext
+	public class EndpointTestScenarioImpl :
+		EndpointTestScenario
 	{
 		readonly EndpointCache _endpointCache;
 		readonly IDictionary<Uri, EndpointTestDecorator> _endpoints;
@@ -30,7 +28,7 @@ namespace MassTransit.Testing.TestContexts
 		readonly ReceivedMessageListImpl _skipped;
 		bool _disposed;
 
-		public EndpointTestContextImpl(IEndpointFactory endpointFactory)
+		public EndpointTestScenarioImpl(IEndpointFactory endpointFactory)
 		{
 			_received = new ReceivedMessageListImpl();
 			_sent = new SentMessageListImpl();
@@ -100,27 +98,6 @@ namespace MassTransit.Testing.TestContexts
 			_skipped.Add(message);
 		}
 
-		class EndpointCacheProxy :
-			IEndpointCache
-		{
-			readonly IEndpointCache _endpointCache;
-
-			public EndpointCacheProxy(IEndpointCache endpointCache)
-			{
-				_endpointCache = endpointCache;
-			}
-
-			public void Dispose()
-			{
-				// we don't dispose, since we're in testing
-			}
-
-			public IEndpoint GetEndpoint(Uri uri)
-			{
-				return _endpointCache.GetEndpoint(uri);
-			}
-		}
-
 		protected virtual void Dispose(bool disposing)
 		{
 			if (_disposed) return;
@@ -143,17 +120,30 @@ namespace MassTransit.Testing.TestContexts
 			_disposed = true;
 		}
 
-		~EndpointTestContextImpl()
+		class EndpointCacheProxy :
+			IEndpointCache
 		{
-			Dispose(false);
+			readonly IEndpointCache _endpointCache;
+
+			public EndpointCacheProxy(IEndpointCache endpointCache)
+			{
+				_endpointCache = endpointCache;
+			}
+
+			public void Dispose()
+			{
+				// we don't dispose, since we're in testing
+			}
+
+			public IEndpoint GetEndpoint(Uri uri)
+			{
+				return _endpointCache.GetEndpoint(uri);
+			}
 		}
 
-		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
-			where TSaga : class, ISaga
+		~EndpointTestScenarioImpl()
 		{
-			var sagaRepository = new InMemorySagaRepository<TSaga>();
-
-			return sagaRepository;
+			Dispose(false);
 		}
 	}
 }

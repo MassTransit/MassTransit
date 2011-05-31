@@ -13,7 +13,6 @@
 namespace MassTransit.Testing.Factories
 {
 	using System;
-	using Configurators;
 	using TestInstanceConfigurators;
 
 	public interface HandlerTestFactory<TMessage>

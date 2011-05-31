@@ -12,15 +12,18 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using BusConfigurators;
+	using EndpointConfigurators;
 	using Transports.Msmq;
 
 	public static class MsmqBusConfigurationExtensions
 	{
-		public static ServiceBusConfigurator UseMsmq(this ServiceBusConfigurator configurator)
+		public static T UseMsmq<T>(this T configurator)
+			where T : EndpointFactoryConfigurator
 		{
-			return configurator.AddTransportFactory<MsmqTransportFactory>()
+			configurator.AddTransportFactory<MsmqTransportFactory>()
 				.AddTransportFactory<MulticastMsmqTransportFactory>();
+
+			return configurator;
 		}
 	}
 }

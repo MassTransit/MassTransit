@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.ContextBuilders
+namespace MassTransit.Testing.ScenarioBuilders
 {
 	using System;
 	using BusConfigurators;
 	using Magnum.Extensions;
+	using Scenarios;
 	using Services.Subscriptions;
-	using TestContexts;
 	using Transports;
 
-	public class LoopbackLocalRemoteBusTestContextBuilder :
-		EndpointTestContextBuilderImpl,
-		LocalRemoteTestContextBuilder
+	public class LoopbackLocalRemoteBusScenarioBuilder :
+		EndpointScenarioBuilderImpl,
+		LocalRemoteScenarioBuilder
 	{
 		const string DefaultLocalUri = "loopback://localhost/mt_client";
 		const string DefaultRemoteUri = "loopback://localhost/mt_server";
@@ -30,7 +30,7 @@ namespace MassTransit.Testing.ContextBuilders
 		readonly ServiceBusConfiguratorImpl _remoteConfigurator;
 		readonly ServiceBusDefaultSettings _settings;
 
-		public LoopbackLocalRemoteBusTestContextBuilder()
+		public LoopbackLocalRemoteBusScenarioBuilder()
 		{
 			_settings = new ServiceBusDefaultSettings();
 			_settings.ConcurrentConsumerLimit = 4;
@@ -53,11 +53,11 @@ namespace MassTransit.Testing.ContextBuilders
 			configureCallback(_remoteConfigurator);
 		}
 
-		LocalRemoteTestContext LocalRemoteTestContextBuilder.Build()
+		LocalRemoteTestScenario LocalRemoteScenarioBuilder.Build()
 		{
 			IEndpointFactory endpointFactory = BuildEndpointFactory();
 
-			var context = new LocalRemoteTestContextImpl(endpointFactory);
+			var context = new LocalRemoteTestScenarioImpl(endpointFactory);
 
 			AddSubscriptionService();
 
