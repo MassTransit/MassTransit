@@ -1,7 +1,20 @@
-﻿namespace MassTransit.Transports.RabbitMq
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Transports.RabbitMq
 {
 	using System;
 	using System.IO;
+	using System.Text;
 	using Context;
 	using log4net;
 	using Magnum.Extensions;
@@ -48,9 +61,19 @@
 				if (result == null)
 					return;
 
-				using(var body = new MemoryStream(result.Body, false))
+				using (var body = new MemoryStream(result.Body, false))
 				{
 					var context = new ConsumeContext(body);
+					context.SetMessageId(result.BasicProperties.MessageId ?? result.ConsumerTag + ":" + result.DeliveryTag);
+					context.SetInputAddress(_address);
+
+					byte[] contentType = result.BasicProperties.IsHeadersPresent()
+					                     	? (byte[])result.BasicProperties.Headers["Content-Type"] : null;
+					if (contentType != null)
+					{
+						context.SetContentType(Encoding.UTF8.GetString(contentType));
+					}
+
 					using (ContextStorage.CreateContextScope(context))
 					{
 						Action<IReceiveContext> receive = callback(context);
@@ -121,11 +144,6 @@
 			}
 		}
 
-		~InboundRabbitMqTransport()
-		{
-			Dispose(false);
-		}
-
 		void Dispose(bool disposing)
 		{
 			if (_disposed) return;
@@ -148,6 +166,11 @@
 			}
 
 			_declared = true;
+		}
+
+		~InboundRabbitMqTransport()
+		{
+			Dispose(false);
 		}
 	}
 }

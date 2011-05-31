@@ -12,14 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
-	using TestInstanceConfigurators;
-	using Transports.Msmq.Testing;
+	using System;
+	using Advanced;
+	using Magnum.Extensions;
+	using ScenarioBuilders;
 
-	public static class BusTestScenarioExtensions
+	public class RabbitMqBusScenarioBuilder :
+		BusScenarioBuilderImpl
 	{
-		public static void UseMsmqBusScenario(this BusTestInstanceConfigurator configurator)
+		const string DefaultUri = "rabbitmq://localhost/mt_client";
+
+		public RabbitMqBusScenarioBuilder()
+			: base(new Uri(DefaultUri))
 		{
-			configurator.UseScenarioBuilder(() => new MsmqBusScenarioBuilder());
+			ConfigureEndpointFactory(x =>
+				{
+					x.UseRabbitMq();
+				});
+
+			ConfigureBus(x =>
+				{
+					x.UseRabbitMqRouting();
+					x.SetReceiveTimeout(100.Milliseconds());
+				});
 		}
 	}
 }
