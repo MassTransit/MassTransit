@@ -16,6 +16,7 @@ namespace MassTransit.Testing.ScenarioBuilders
 	using BusConfigurators;
 	using Magnum.Extensions;
 	using Scenarios;
+	using SubscriptionConfigurators;
 	using Transports;
 
 	public class BusScenarioBuilderImpl :
@@ -38,6 +39,11 @@ namespace MassTransit.Testing.ScenarioBuilders
 		public void ConfigureBus(Action<ServiceBusConfigurator> configureCallback)
 		{
 			configureCallback(_configurator);
+		}
+
+		public void ConfigureSubscriptions(Action<SubscriptionBusServiceConfigurator> configureCallback)
+		{
+			_configurator.Subscribe(configureCallback);
 		}
 
 		BusTestScenario BusScenarioBuilder.Build()

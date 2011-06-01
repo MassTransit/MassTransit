@@ -59,9 +59,9 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 
 		public HandlerTest<TMessage> Build()
 		{
-			BusTestScenario context = BuildBusTestScenario();
+			BusTestScenario scenario = BuildBusTestScenario();
 
-			HandlerTestBuilder<TMessage> builder = _builderFactory(context);
+			HandlerTestBuilder<TMessage> builder = _builderFactory(scenario);
 
 			if (_handler != null)
 				builder.SetHandler(_handler);
