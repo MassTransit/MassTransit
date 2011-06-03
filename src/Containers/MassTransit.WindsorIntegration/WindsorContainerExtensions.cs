@@ -24,7 +24,7 @@ namespace MassTransit
 		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IWindsorContainer container)
 		{
 			IList<Type> concreteTypes = container.Kernel
-				.GetHandlers(typeof (IConsumer))
+				.GetAssignableHandlers(typeof (IConsumer))
 				.Select(h => h.ComponentModel.Implementation)
 				.ToList();
 
