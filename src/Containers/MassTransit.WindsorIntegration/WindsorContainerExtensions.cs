@@ -16,7 +16,9 @@ namespace MassTransit
 	using System.Collections.Generic;
 	using System.Linq;
 	using Castle.Windsor;
+	using Magnum.Extensions;
 	using Saga;
+	using Saga.SubscriptionConfigurators;
 	using SubscriptionConfigurators;
 	using WindsorIntegration;
 
@@ -24,39 +26,52 @@ namespace MassTransit
 	{
 		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IWindsorContainer container)
 		{
-			IList<Type> consumerTypes = container.Kernel
-				.GetAssignableHandlers(typeof (IConsumer))
-				.Select(h => h.ComponentModel.Implementation)
-				.ToList();
-
-			var consumerConfigurator = new WindsorConsumerFactoryConfigurator(configurator, container);
-
-			foreach (Type concreteType in consumerTypes)
+			IList<Type> consumerTypes = FindTypes<IConsumer>(container, x => !x.Implements<ISaga>());
+			if (consumerTypes.Count > 0)
 			{
-				consumerConfigurator.ConfigureConsumer(concreteType);
+				var consumerConfigurator = new WindsorConsumerFactoryConfigurator(configurator, container);
+
+				foreach (Type type in consumerTypes)
+				{
+					consumerConfigurator.ConfigureConsumer(type);
+				}
 			}
 
-		    var sagaTypes = container.Kernel
-		        .GetAssignableHandlers(typeof (ISaga))
-		        .Select(h => h.ComponentModel.Implementation)
-		        .ToList();
+			IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
+			if (sagaTypes.Count > 0)
+			{
+				var sagaConfigurator = new WindsorSagaFactoryConfigurator(configurator, container);
 
-            var sagaConfigurator = new WindsorSagaFactoryConfigurator(configurator,container);
-
-            foreach (var concreteType in sagaTypes)
-            {
-                sagaConfigurator.ConfigureSaga(concreteType);
-            }
-
+				foreach (Type type in sagaTypes)
+				{
+					sagaConfigurator.ConfigureSaga(type);
+				}
+			}
 		}
 
 		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-			this SubscriptionBusServiceConfigurator configurator, IWindsorContainer kernel)
+			this SubscriptionBusServiceConfigurator configurator, IWindsorContainer container)
 			where TConsumer : class
 		{
-			var consumerFactory = new WindsorConsumerFactory<TConsumer>(kernel);
+			var consumerFactory = new WindsorConsumerFactory<TConsumer>(container);
 
 			return configurator.Consumer(consumerFactory);
+		}
+
+		public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
+			this SubscriptionBusServiceConfigurator configurator, IWindsorContainer container)
+			where TSaga : class, ISaga
+		{
+			return configurator.Saga(container.Resolve<ISagaRepository<TSaga>>());
+		}
+
+		static IList<Type> FindTypes<T>(IWindsorContainer container, Func<Type, bool> filter)
+		{
+			return container.Kernel
+				.GetAssignableHandlers(typeof (T))
+				.Select(h => h.ComponentModel.Implementation)
+				.Where(filter)
+				.ToList();
 		}
 	}
 }

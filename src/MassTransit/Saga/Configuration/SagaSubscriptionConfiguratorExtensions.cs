@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+	using log4net;
 	using Magnum;
 	using Saga;
 	using Saga.SubscriptionConfigurators;
@@ -21,6 +22,8 @@ namespace MassTransit
 
 	public static class SagaSubscriptionConfiguratorExtensions
 	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (SagaSubscriptionConfiguratorExtensions));
+
 		/// <summary>
 		/// Configure a saga subscription
 		/// </summary>
@@ -32,6 +35,9 @@ namespace MassTransit
 			this SubscriptionBusServiceConfigurator configurator, ISagaRepository<TSaga> sagaRepository)
 			where TSaga : class, ISaga
 		{
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
+
 			var sagaConfigurator = new SagaSubscriptionConfiguratorImpl<TSaga>(sagaRepository);
 
 			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(sagaConfigurator);
@@ -44,15 +50,18 @@ namespace MassTransit
 		/// <summary>
 		/// Connects the saga to the service bus
 		/// </summary>
-		/// <typeparam name="T">The consumer type</typeparam>
+		/// <typeparam name="TSaga">The consumer type</typeparam>
 		/// <param name="bus"></param>
 		/// <param name="sagaRepository"></param>
-		public static UnsubscribeAction SubscribeSaga<T>(this IServiceBus bus, ISagaRepository<T> sagaRepository)
-			where T : class, ISaga
+		public static UnsubscribeAction SubscribeSaga<TSaga>(this IServiceBus bus, ISagaRepository<TSaga> sagaRepository)
+			where TSaga : class, ISaga
 		{
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
+
 			Guard.AgainstNull(sagaRepository, "sagaRepository", "A saga repository must be specified");
 
-			var connector = new SagaConnector<T>(sagaRepository);
+			var connector = new SagaConnector<TSaga>(sagaRepository);
 
 			return bus.Configure(x => connector.Connect(x));
 		}
