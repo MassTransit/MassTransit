@@ -80,6 +80,7 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="WindsorSagaFactoryConfigurator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WindsorContainerExtensions.cs" />
     <Compile Include="WindsorConsumerFactory.cs" />
