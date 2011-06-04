@@ -30,7 +30,7 @@ namespace MassTransit.Serialization
 		[ThreadStatic]
 		static JsonSerializer _serializer;
 
-		static JsonSerializer Deserializer
+		public static JsonSerializer Deserializer
 		{
 			get
 			{
@@ -51,7 +51,7 @@ namespace MassTransit.Serialization
 			}
 		}
 
-		static JsonSerializer Serializer
+		public static JsonSerializer Serializer
 		{
 			get
 			{
@@ -107,4 +107,4 @@ namespace MassTransit.Serialization
 				result.MessageType));
 		}
 	}
-}
+}   
