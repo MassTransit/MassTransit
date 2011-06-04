@@ -29,6 +29,7 @@ namespace Starbucks.Cashier
 
 		public void Start()
 		{
+			// ninject doesn't have the brains for this one
 			_unsubscribeAction = _bus.SubscribeSaga(_sagaRepository);
 		}
 

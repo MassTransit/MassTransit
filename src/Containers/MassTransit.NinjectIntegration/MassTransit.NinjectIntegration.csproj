@@ -78,6 +78,7 @@
     </Compile>
     <Compile Include="NinjectExtensions.cs" />
     <Compile Include="NinjectConsumerFactory.cs" />
+    <Compile Include="NinjectSagaFactoryConfigurator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

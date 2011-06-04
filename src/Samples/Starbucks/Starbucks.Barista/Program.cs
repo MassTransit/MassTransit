@@ -39,6 +39,7 @@ namespace Starbucks.Barista
 				Component.For(typeof (ISagaRepository<>))
 					.ImplementedBy(typeof (InMemorySagaRepository<>))
 					.LifeStyle.Singleton,
+				Component.For<DrinkPreparationSaga>(),
 				Component.For<BaristaService>()
 					.LifeStyle.Singleton,
 				Component.For<IServiceBus>().UsingFactoryMethod(() =>
