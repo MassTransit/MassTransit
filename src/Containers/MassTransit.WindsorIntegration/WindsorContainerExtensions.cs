@@ -16,6 +16,7 @@ namespace MassTransit
 	using System.Collections.Generic;
 	using System.Linq;
 	using Castle.Windsor;
+	using Saga;
 	using SubscriptionConfigurators;
 	using WindsorIntegration;
 
@@ -23,20 +24,30 @@ namespace MassTransit
 	{
 		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IWindsorContainer container)
 		{
-			IList<Type> concreteTypes = container.Kernel
+			IList<Type> consumerTypes = container.Kernel
 				.GetAssignableHandlers(typeof (IConsumer))
 				.Select(h => h.ComponentModel.Implementation)
 				.ToList();
 
-			if (concreteTypes.Count == 0)
-				return;
-
 			var consumerConfigurator = new WindsorConsumerFactoryConfigurator(configurator, container);
 
-			foreach (Type concreteType in concreteTypes)
+			foreach (Type concreteType in consumerTypes)
 			{
 				consumerConfigurator.ConfigureConsumer(concreteType);
 			}
+
+		    var sagaTypes = container.Kernel
+		        .GetAssignableHandlers(typeof (ISaga))
+		        .Select(h => h.ComponentModel.Implementation)
+		        .ToList();
+
+            var sagaConfigurator = new WindsorSagaFactoryConfigurator(configurator,container);
+
+            foreach (var concreteType in sagaTypes)
+            {
+                sagaConfigurator.ConfigureSaga(concreteType);
+            }
+
 		}
 
 		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
