@@ -13,28 +13,22 @@
 namespace Starbucks.Barista
 {
 	using MassTransit;
-	using MassTransit.Saga;
 
 	public class BaristaService
 	{
 		private readonly IServiceBus _bus;
-		private ISagaRepository<DrinkPreparationSaga> _sagaRepository;
-		private UnsubscribeAction _unsubscribeAction;
 
-		public BaristaService(IServiceBus bus, ISagaRepository<DrinkPreparationSaga> sagaRepository)
+		public BaristaService(IServiceBus bus)
 		{
 			_bus = bus;
-			_sagaRepository = sagaRepository;
 		}
 
 		public void Start()
 		{
-			_unsubscribeAction = _bus.SubscribeSaga(_sagaRepository);
 		}
 
 		public void Stop()
 		{
-			_unsubscribeAction();
 			_bus.Dispose();
 		}
 	}
