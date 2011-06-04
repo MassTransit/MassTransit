@@ -62,26 +62,8 @@ namespace MassTransit.Tests.Serialization
 			_envelope.MessageType.Add(typeof (MessageA).ToMessageName());
 			_envelope.MessageType.Add(typeof (MessageB).ToMessageName());
 
-			_serializer = JsonSerializer.Create(new JsonSerializerSettings
-				{
-					NullValueHandling = NullValueHandling.Ignore,
-					DefaultValueHandling = DefaultValueHandling.Ignore,
-					MissingMemberHandling = MissingMemberHandling.Ignore,
-					ObjectCreationHandling = ObjectCreationHandling.Auto,
-					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-					ContractResolver = new CamelCasePropertyNamesContractResolver(),
-				});
-			
-			_deserializer = JsonSerializer.Create(new JsonSerializerSettings
-				{
-					Converters = new List<JsonConverter>(new JsonConverter[] { new ListJsonConverter() }),
-					NullValueHandling = NullValueHandling.Ignore,
-					DefaultValueHandling = DefaultValueHandling.Ignore,
-					MissingMemberHandling = MissingMemberHandling.Ignore,
-					ObjectCreationHandling = ObjectCreationHandling.Auto,
-					ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-					ContractResolver = new CamelCasePropertyNamesContractResolver(),
-				});
+		    _serializer = JsonMessageSerializer.Serializer;
+            _deserializer = JsonMessageSerializer.Deserializer;
 
 			using (var memoryStream = new MemoryStream())
 			using (var writer = new StreamWriter(memoryStream))
