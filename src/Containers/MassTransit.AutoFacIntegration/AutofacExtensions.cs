@@ -18,25 +18,34 @@ namespace MassTransit
 	using Autofac;
 	using AutofacIntegration;
 	using Magnum.Extensions;
+	using Saga;
+	using Saga.SubscriptionConfigurators;
 	using SubscriptionConfigurators;
 
 	public static class AutofacExtensions
 	{
 		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IContainer container)
 		{
-			IList<Type> concreteTypes = container.ComponentRegistry.Registrations
-				.Where(r => r.Services.Any(s => s.Implements<IConsumer>()))
-				.Select(r => r.Activator.LimitType)
-				.ToList();
-
-			if (concreteTypes.Count == 0)
-				return;
-
-			var consumerConfigurator = new AutofacConsumerFactoryConfigurator(configurator, container);
-
-			foreach (Type concreteType in concreteTypes)
+			IList<Type> concreteTypes = FindTypes<IConsumer>(container, r => !r.Implements<ISaga>());
+			if (concreteTypes.Count != 0)
 			{
-				consumerConfigurator.ConfigureConsumer(concreteType);
+				var consumerConfigurator = new AutofacConsumerFactoryConfigurator(configurator, container);
+
+				foreach (Type concreteType in concreteTypes)
+				{
+					consumerConfigurator.ConfigureConsumer(concreteType);
+				}
+			}
+
+			IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
+			if (sagaTypes.Count > 0)
+			{
+				var sagaConfigurator = new AutofacSagaRepositoryFactoryConfigurator(configurator, container);
+
+				foreach (Type type in sagaTypes)
+				{
+					sagaConfigurator.ConfigureSaga(type);
+				}
 			}
 		}
 
@@ -47,6 +56,22 @@ namespace MassTransit
 			var consumerFactory = new AutofacConsumerFactory<TConsumer>(kernel);
 
 			return configurator.Consumer(consumerFactory);
+		}
+
+		public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
+			this SubscriptionBusServiceConfigurator configurator, IContainer kernel)
+			where TSaga : class, ISaga
+		{
+			return configurator.Saga(kernel.Resolve<ISagaRepository<TSaga>>());
+		}
+
+		static IList<Type> FindTypes<T>(IContainer container, Func<Type, bool> filter)
+		{
+			return container.ComponentRegistry.Registrations
+				.Where(r => r.Services.Any(s => s.Implements<T>()))
+				.Select(r => r.Activator.LimitType)
+				.Where(filter)
+				.ToList();
 		}
 	}
 }
