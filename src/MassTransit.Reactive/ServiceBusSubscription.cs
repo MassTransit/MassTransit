@@ -13,6 +13,7 @@
 namespace MassTransit.Reactive
 {
 	using System;
+	using Pipeline;
 
 	public class ServiceBusSubscription<T> :
 		IDisposable
@@ -22,23 +23,17 @@ namespace MassTransit.Reactive
 
 		public ServiceBusSubscription(IServiceBus bus, IObserver<T> observer, Predicate<T> condition)
 		{
-			_unsubscribeAction = bus.SubscribeSelectiveHandler<T>(message =>
+			_unsubscribeAction = bus.SubscribeHandlerSelector(HandlerSelector.ForSelectiveHandler(condition, m =>
 				{
-					if (condition != null && !condition(message))
-						return null;
-
-					return m =>
-						{
-							try
-							{
-								observer.OnNext(m);
-							}
-							catch (Exception ex)
-							{
-								observer.OnError(ex);
-							}
-						};
-				});
+					try
+					{
+						observer.OnNext(m);
+					}
+					catch (Exception ex)
+					{
+						observer.OnError(ex);
+					}
+				}));
 		}
 
 		public void Dispose()

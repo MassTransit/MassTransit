@@ -84,7 +84,9 @@ namespace MassTransit.Tests.Pipeline
 		{
 			_consumer = new PerformantConsumer<PingMessage>(1500000);
 
-			var messageSink = new InstanceMessageSink<PingMessage>(message => _consumer.Consume);
+			var selector = new ConcurrentInstanceHandlerSelector<PingMessage>(m => c => _consumer.Consume(c.Message));
+
+			var messageSink = new InstanceMessageSink<PingMessage>(selector);
 
 			var router = new MessageRouter<IConsumeContext<PingMessage>>();
 			router.Connect(messageSink);
@@ -95,7 +97,9 @@ namespace MassTransit.Tests.Pipeline
 		{
 			_consumer = new PerformantConsumer<PingMessage>(1500000);
 
-			var messageSink = new InstanceMessageSink<PingMessage>(message => _consumer.Consume);
+			var selector = new ConcurrentInstanceHandlerSelector<PingMessage>(m => c => _consumer.Consume(c.Message));
+
+			var messageSink = new InstanceMessageSink<PingMessage>(selector);
 
 			var router = new MessageRouter<IConsumeContext<PingMessage>>();
 			router.Connect(messageSink);
@@ -149,8 +153,11 @@ namespace MassTransit.Tests.Pipeline
             long count2 = 0;
             long limit = 2500000;
 
-            var messageSink = new InstanceMessageSink<ClaimModified>(m => msg => { count++; });
-            var messageSink2 = new InstanceMessageSink<ClaimModified>(m => msg => { count2++; });
+        	var selector = new ConcurrentInstanceHandlerSelector<ClaimModified>(m => msg => { count++; });
+        	var selector2 = new ConcurrentInstanceHandlerSelector<ClaimModified>(m => msg => { count2++; });
+
+            var messageSink = new InstanceMessageSink<ClaimModified>(selector);
+            var messageSink2 = new InstanceMessageSink<ClaimModified>(selector2);
             var router = new MessageRouter<IConsumeContext<ClaimModified>>();
             router.Connect(messageSink);
             router.Connect(messageSink2);

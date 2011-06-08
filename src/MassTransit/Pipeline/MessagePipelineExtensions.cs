@@ -164,7 +164,7 @@ namespace MassTransit.Pipeline
 				{
 					var connector = new HandlerSubscriptionConnector<TMessage>();
 
-					return connector.Connect(x, message => condition(message) ? handler : null);
+					return connector.Connect(x, HandlerSelector.ForSelectiveHandler(condition, handler));
 				});
 		}
 

@@ -33,11 +33,10 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 			if (distributor == null)
 				throw new ConfigurationException("The connected instance is not a distributor");
 
-			var sink = new DistributorMessageSink<TMessage>(message =>
-				{
-					// rock it
-					return distributor.Accept(message) ? (Action<TMessage>) distributor.Consume : null;
-				});
+			var selector = new ConcurrentInstanceHandlerSelector<TMessage>(
+				HandlerSelector.ForSelectiveHandler<TMessage>(distributor.Accept, distributor.Consume));
+
+			var sink = new DistributorMessageSink<TMessage>(selector);
 
 			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
 		}

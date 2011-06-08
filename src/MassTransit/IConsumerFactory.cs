@@ -15,9 +15,22 @@ namespace MassTransit
 	using System;
 	using System.Collections.Generic;
 
+	/// <summary>
+	/// Maps an instance of a consumer to one or more Consume methods for the specified message type
+	/// 
+	/// The whole purpose for this interface is to allow the creator of the consumer to manage the lifecycle
+	/// of the consumer, along with anything else that needs to be managed by the factory, container, etc.
+	/// </summary>
+	/// <typeparam name="TConsumer">The Consumer type</typeparam>
 	public interface IConsumerFactory<TConsumer>
 		where TConsumer : class
 	{
+		/// <summary>
+		/// Returns the Consume actions for the Consumer that should handle the specified message type
+		/// </summary>
+		/// <typeparam name="TMessage">The type of message being handled</typeparam>
+		/// <param name="callback">The callback to return the action methods</param>
+		/// <returns></returns>
 		IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback)
 			where TMessage : class;
 	}

@@ -217,6 +217,9 @@
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
     <Compile Include="IOutboundMessageInterceptor.cs" />
+    <Compile Include="Pipeline\ConcurrentInstanceHandlerSelector.cs" />
+    <Compile Include="Pipeline\HandlerSelector.cs" />
+    <Compile Include="Pipeline\InstanceHandlerSelector.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageInterceptor.cs" />
     <Compile Include="PublishExtensions.cs" />
     <Compile Include="SendExtensions.cs" />

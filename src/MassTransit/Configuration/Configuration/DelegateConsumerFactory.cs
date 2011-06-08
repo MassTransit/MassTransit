@@ -37,10 +37,8 @@ namespace MassTransit.Configuration
 			try
 			{
 				Action<TMessage> result = callback(consumer);
-				if (result == null)
-					yield break;
-
-				yield return result;
+				if (result != null)
+					yield return result;
 			}
 			finally
 			{

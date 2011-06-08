@@ -15,6 +15,7 @@ namespace MassTransit.SubscriptionConfigurators
 	using System;
 	using System.Collections.Generic;
 	using Configurators;
+	using Pipeline;
 	using SubscriptionBuilders;
 
 	public class HandlerSubscriptionConfiguratorImpl<TMessage> :
@@ -23,23 +24,23 @@ namespace MassTransit.SubscriptionConfigurators
 		SubscriptionBuilderConfigurator
 		where TMessage : class
 	{
-		Func<TMessage, Action<TMessage>> _handler;
+		HandlerSelector<TMessage> _handler;
 
 		public HandlerSubscriptionConfiguratorImpl(Action<TMessage> handler)
 		{
-			_handler = message => handler;
+			_handler = message => x => handler(x.Message);
 		}
 
 		public HandlerSubscriptionConfigurator<TMessage> Where(Predicate<TMessage> condition)
 		{
-			Func<TMessage, Action<TMessage>> previousHandler = _handler;
+			HandlerSelector<TMessage> previousHandler = _handler;
 
-			_handler = message =>
+			_handler = context =>
 				{
-					if (!condition(message))
+					if (!condition(context.Message))
 						return null;
 
-					return previousHandler(message);
+					return previousHandler(context);
 				};
 
 			return this;
