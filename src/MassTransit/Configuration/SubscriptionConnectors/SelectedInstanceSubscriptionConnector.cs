@@ -21,8 +21,6 @@ namespace MassTransit.SubscriptionConnectors
 		where TConsumer : class, Consumes<TMessage>.Selected
 		where TMessage : class
 	{
-		static readonly Action<TMessage> _ignore;
-
 		public Type MessageType
 		{
 			get { return typeof (TMessage); }
@@ -34,7 +32,10 @@ namespace MassTransit.SubscriptionConnectors
 			if (consumer == null)
 				throw new NullReferenceException("The consumer instance cannot be null.");
 
-			var sink = new InstanceMessageSink<TMessage>(message => consumer.Accept(message) ? consumer.Consume : _ignore);
+			var selector = new ConcurrentInstanceHandlerSelector<TMessage>(
+				HandlerSelector.ForSelectiveHandler<TMessage>(consumer.Accept, consumer.Consume));
+
+			var sink = new InstanceMessageSink<TMessage>(selector);
 
 			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
 		}

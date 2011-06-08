@@ -23,8 +23,6 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 		InstanceSubscriptionConnector
 		where TMessage : class
 	{
-		static Action<Distributed<TMessage>> NullConsumer;
-
 		public Type MessageType
 		{
 			get { return typeof (Distributed<TMessage>); }
@@ -36,11 +34,10 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 			if (worker == null)
 				throw new ConfigurationException("The instance is not a distributor worker");
 
-			var sink = new WorkerMessageSink<Distributed<TMessage>>(message =>
-				{
-					// rock it
-					return worker.Accept(message) ? worker.Consume : NullConsumer;
-				});
+			var selector = new ConcurrentInstanceHandlerSelector<Distributed<TMessage>>(
+				HandlerSelector.ForSelectiveHandler<Distributed<TMessage>>(worker.Accept, worker.Consume));
+
+			var sink = new WorkerMessageSink<Distributed<TMessage>>(selector);
 
 			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<Distributed<TMessage>>());
 		}

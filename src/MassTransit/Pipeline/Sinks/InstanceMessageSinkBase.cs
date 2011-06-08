@@ -14,35 +14,21 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Context;
 
 	public class InstanceMessageSinkBase<TMessage> :
 		IPipelineSink<IConsumeContext<TMessage>>
 		where TMessage : class
 	{
-		readonly Func<TMessage, Action<TMessage>> _acceptor;
+		readonly InstanceHandlerSelector<TMessage> _selector;
 
-		public InstanceMessageSinkBase(Func<TMessage, Action<TMessage>> acceptor)
+		public InstanceMessageSinkBase(InstanceHandlerSelector<TMessage> selector)
 		{
-			_acceptor = acceptor;
+			_selector = selector;
 		}
 
 		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
 		{
-			Action<TMessage> consumer;
-			using (ContextStorage.CreateContextScope(context))
-			{
-				consumer = _acceptor(context.Message);
-			}
-
-			if (consumer != null)
-				yield return x =>
-					{
-						using (ContextStorage.CreateContextScope(context))
-						{
-							consumer(context.Message);
-						}
-					};
+			return _selector.GetHandlers(context);
 		}
 
 		public bool Inspect(IPipelineInspector inspector)

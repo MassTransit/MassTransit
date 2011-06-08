@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConnectors
 {
-	using System;
-	using Context;
 	using Pipeline;
 	using Pipeline.Configuration;
 	using Pipeline.Sinks;
@@ -21,13 +19,15 @@ namespace MassTransit.SubscriptionConnectors
 	public class HandlerSubscriptionConnector<TMessage>
 		where TMessage : class
 	{
-		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, Func<TMessage, Action<TMessage>> handler)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, HandlerSelector<TMessage> handler)
 		{
 			var routerConfigurator = new InboundMessageRouterConfigurator(configurator.Pipeline);
 
 			MessageRouter<IConsumeContext<TMessage>> router = routerConfigurator.FindOrCreate<TMessage>();
 
-			var sink = new InstanceMessageSink<TMessage>(handler);
+			var selector = new ConcurrentInstanceHandlerSelector<TMessage>(handler);
+
+			var sink = new InstanceMessageSink<TMessage>(selector);
 
 			UnsubscribeAction result = router.Connect(sink);
 

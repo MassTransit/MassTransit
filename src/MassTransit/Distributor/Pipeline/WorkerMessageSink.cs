@@ -12,15 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.Pipeline
 {
-	using System;
+	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Sinks;
 
 	public class WorkerMessageSink<TMessage> :
 		InstanceMessageSinkBase<TMessage>
 		where TMessage : class
 	{
-		public WorkerMessageSink(Func<TMessage, Action<TMessage>> acceptor)
-			: base(acceptor)
+		public WorkerMessageSink(InstanceHandlerSelector<TMessage> selector)
+			: base(selector)
 		{
 		}
 	}

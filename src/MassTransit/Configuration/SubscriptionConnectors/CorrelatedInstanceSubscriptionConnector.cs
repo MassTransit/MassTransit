@@ -13,7 +13,6 @@
 namespace MassTransit.SubscriptionConnectors
 {
 	using System;
-	using Context;
 	using Pipeline;
 	using Pipeline.Configuration;
 	using Pipeline.Sinks;
@@ -39,7 +38,9 @@ namespace MassTransit.SubscriptionConnectors
 			CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey> router =
 				correlatedConfigurator.FindOrCreate<TMessage, TKey>();
 
-			var sink = new InstanceMessageSink<TMessage>(message => consumer.Consume);
+			var selector = new ConcurrentInstanceHandlerSelector<TMessage>(HandlerSelector.ForHandler<TMessage>(consumer.Consume));
+
+			var sink = new InstanceMessageSink<TMessage>(selector);
 
 			TKey correlationId = consumer.CorrelationId;
 
@@ -47,7 +48,7 @@ namespace MassTransit.SubscriptionConnectors
 
 			UnsubscribeAction remove = configurator.SubscribedTo<TMessage, TKey>(correlationId);
 
-			return () => result() && (router.SinkCount(correlationId) == 0)  && remove();
+			return () => result() && (router.SinkCount(correlationId) == 0) && remove();
 		}
 	}
 }

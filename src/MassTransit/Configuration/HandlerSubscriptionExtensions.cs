@@ -13,6 +13,7 @@
 namespace MassTransit
 {
 	using System;
+	using Pipeline;
 	using SubscriptionBuilders;
 	using SubscriptionConfigurators;
 	using SubscriptionConnectors;
@@ -49,7 +50,7 @@ namespace MassTransit
 		public static UnsubscribeAction SubscribeHandler<T>(this IServiceBus bus, Action<T> handler)
 			where T : class
 		{
-			return SubscribeSelectiveHandler<T>(bus, message => handler);
+			return SubscribeHandlerSelector<T>(bus, message => x => handler(x.Message));
 		}
 
 		/// <summary>
@@ -62,7 +63,8 @@ namespace MassTransit
 		public static UnsubscribeAction SubscribeHandler<T>(this IServiceBus bus, Action<T> handler, Predicate<T> condition)
 			where T : class
 		{
-			return SubscribeSelectiveHandler<T>(bus, message => condition(message) ? handler : null);
+			return SubscribeHandlerSelector<T>(bus,
+				context => condition(context.Message) ? (Action<IConsumeContext<T>>) (x => handler(x.Message)) : null);
 		}
 
 		/// <summary>
@@ -71,7 +73,7 @@ namespace MassTransit
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="bus"></param>
 		/// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		public static UnsubscribeAction SubscribeSelectiveHandler<T>(this IServiceBus bus, Func<T, Action<T>> handler)
+		public static UnsubscribeAction SubscribeHandlerSelector<T>(this IServiceBus bus, HandlerSelector<T> handler)
 			where T : class
 		{
 			var connector = new HandlerSubscriptionConnector<T>();
