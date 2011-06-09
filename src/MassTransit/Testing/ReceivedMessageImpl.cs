@@ -46,13 +46,11 @@ namespace MassTransit.Testing
 		where T : class
 	{
 		readonly IConsumeContext<T> _context;
-		readonly T _message;
 		Exception _exception;
 
-		public ReceivedMessageImpl(IConsumeContext<T> context, T message)
+		public ReceivedMessageImpl(IConsumeContext<T> context)
 		{
 			_context = context;
-			_message = message;
 		}
 
 		public Exception Exception
@@ -67,7 +65,7 @@ namespace MassTransit.Testing
 
 		public T Message
 		{
-			get { return _message; }
+			get { return _context.Message; }
 		}
 
 		public void SetException(Exception exception)

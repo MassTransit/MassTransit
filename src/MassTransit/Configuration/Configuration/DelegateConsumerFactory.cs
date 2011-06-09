@@ -15,6 +15,7 @@ namespace MassTransit.Configuration
 	using System;
 	using System.Collections.Generic;
 	using Exceptions;
+	using Pipeline;
 
 	public class DelegateConsumerFactory<TConsumer> :
 		IConsumerFactory<TConsumer>
@@ -27,18 +28,20 @@ namespace MassTransit.Configuration
 			_factoryMethod = factoryMethod;
 		}
 
-		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback) 
+		public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
+			IConsumeContext<TMessage> context, InstanceHandlerSelector<TConsumer, TMessage> selector)
 			where TMessage : class
 		{
 			TConsumer consumer = _factoryMethod();
 			if (consumer == null)
-				throw new ConfigurationException(string.Format("Unable to resolve consumer type '{0}'.", typeof(TConsumer)));
+				throw new ConfigurationException(string.Format("Unable to resolve consumer type '{0}'.", typeof (TConsumer)));
 
 			try
 			{
-				Action<TMessage> result = callback(consumer);
-				if (result != null)
-					yield return result;
+				foreach (var handler in selector(consumer, context))
+				{
+					yield return handler;
+				}
 			}
 			finally
 			{

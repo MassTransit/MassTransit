@@ -13,6 +13,7 @@
 namespace MassTransit.Testing.Subjects
 {
 	using System;
+	using Context;
 
 	public class HandlerTestSubjectImpl<T> :
 		HandlerTestSubject<T>
@@ -45,7 +46,7 @@ namespace MassTransit.Testing.Subjects
 		{
 			_bus = bus;
 
-			_unsubscribe = bus.SubscribeHandler<T>(HandleMessage);
+			_unsubscribe = bus.SubscribeContextHandler<T>(HandleMessage);
 		}
 
 		void Dispose(bool disposing)
@@ -65,13 +66,16 @@ namespace MassTransit.Testing.Subjects
 			_disposed = true;
 		}
 
-		void HandleMessage(T message)
+		void HandleMessage(IConsumeContext<T> context)
 		{
-			var received = new ReceivedMessageImpl<T>(_bus.MessageContext<T>(), message);
+			var received = new ReceivedMessageImpl<T>(context);
 
 			try
 			{
-				_handler(_bus, message);
+				using (ContextStorage.CreateContextScope(context))
+				{
+					_handler(_bus, context.Message);
+				}
 			}
 			catch (Exception ex)
 			{

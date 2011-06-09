@@ -34,10 +34,8 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 			if (worker == null)
 				throw new ConfigurationException("The instance is not a distributor worker");
 
-			var selector = new ConcurrentInstanceHandlerSelector<Distributed<TMessage>>(
-				HandlerSelector.ForSelectiveHandler<Distributed<TMessage>>(worker.Accept, worker.Consume));
-
-			var sink = new WorkerMessageSink<Distributed<TMessage>>(selector);
+			var sink = new WorkerMessageSink<Distributed<TMessage>>(MultipleHandlerSelector.ForHandler(
+				HandlerSelector.ForSelectiveHandler<Distributed<TMessage>>(worker.Accept, worker.Consume)));
 
 			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<Distributed<TMessage>>());
 		}

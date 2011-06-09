@@ -14,6 +14,7 @@ namespace MassTransit
 {
 	using System;
 	using System.Collections.Generic;
+	using Pipeline;
 
 	/// <summary>
 	/// Maps an instance of a consumer to one or more Consume methods for the specified message type
@@ -29,9 +30,11 @@ namespace MassTransit
 		/// Returns the Consume actions for the Consumer that should handle the specified message type
 		/// </summary>
 		/// <typeparam name="TMessage">The type of message being handled</typeparam>
-		/// <param name="callback">The callback to return the action methods</param>
+		/// <param name="selector">The selector to obtain the handlers from the consumer instance</param>
 		/// <returns></returns>
-		IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback)
+		IEnumerable<Action<IConsumeContext<TMessage>>>
+			GetConsumer<TMessage>(IConsumeContext<TMessage> context,
+			                      InstanceHandlerSelector<TConsumer, TMessage> selector)
 			where TMessage : class;
 	}
 }

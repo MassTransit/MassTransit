@@ -19,16 +19,16 @@ namespace MassTransit.Pipeline.Sinks
 		IPipelineSink<IConsumeContext<TMessage>>
 		where TMessage : class
 	{
-		readonly InstanceHandlerSelector<TMessage> _selector;
+		readonly MultipleHandlerSelector<TMessage> _selector;
 
-		public InstanceMessageSinkBase(InstanceHandlerSelector<TMessage> selector)
+		public InstanceMessageSinkBase(MultipleHandlerSelector<TMessage> selector)
 		{
 			_selector = selector;
 		}
 
 		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
 		{
-			return _selector.GetHandlers(context);
+			return _selector(context);
 		}
 
 		public bool Inspect(IPipelineInspector inspector)

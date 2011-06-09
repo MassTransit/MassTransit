@@ -50,7 +50,19 @@ namespace MassTransit
 		public static UnsubscribeAction SubscribeHandler<T>(this IServiceBus bus, Action<T> handler)
 			where T : class
 		{
-			return SubscribeHandlerSelector<T>(bus, message => x => handler(x.Message));
+			return SubscribeHandlerSelector(bus, HandlerSelector.ForHandler(handler));
+		}
+
+		/// <summary>
+		/// Adds a message handler to the service bus for handling a specific type of message
+		/// </summary>
+		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
+		/// <param name="bus"></param>
+		/// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
+		public static UnsubscribeAction SubscribeContextHandler<T>(this IServiceBus bus, Action<IConsumeContext<T>> handler)
+			where T : class
+		{
+			return SubscribeHandlerSelector(bus, HandlerSelector.ForContextHandler(handler));
 		}
 
 		/// <summary>
@@ -63,8 +75,7 @@ namespace MassTransit
 		public static UnsubscribeAction SubscribeHandler<T>(this IServiceBus bus, Action<T> handler, Predicate<T> condition)
 			where T : class
 		{
-			return SubscribeHandlerSelector<T>(bus,
-				context => condition(context.Message) ? (Action<IConsumeContext<T>>) (x => handler(x.Message)) : null);
+			return SubscribeHandlerSelector(bus, HandlerSelector.ForSelectiveHandler(condition, handler));
 		}
 
 		/// <summary>

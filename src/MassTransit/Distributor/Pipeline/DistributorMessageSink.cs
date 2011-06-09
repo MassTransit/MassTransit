@@ -19,7 +19,7 @@ namespace MassTransit.Distributor.Pipeline
 		InstanceMessageSinkBase<TMessage>
 		where TMessage : class
 	{
-		public DistributorMessageSink(InstanceHandlerSelector<TMessage> selector)
+		public DistributorMessageSink(MultipleHandlerSelector<TMessage> selector)
 			: base(selector)
 		{
 		}

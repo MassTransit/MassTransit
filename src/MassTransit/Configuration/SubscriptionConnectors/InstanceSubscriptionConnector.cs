@@ -38,9 +38,8 @@ namespace MassTransit.SubscriptionConnectors
 			if (consumer == null)
 				throw new NullReferenceException("The consumer instance cannot be null.");
 
-			var selector = new ConcurrentInstanceHandlerSelector<TMessage>(HandlerSelector.ForHandler<TMessage>(consumer.Consume));
-
-			var sink = new InstanceMessageSink<TMessage>(selector);
+			var sink = new InstanceMessageSink<TMessage>(MultipleHandlerSelector.ForHandler(
+				HandlerSelector.ForHandler<TMessage>(consumer.Consume)));
 
 			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
 		}

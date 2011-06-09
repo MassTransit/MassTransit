@@ -14,7 +14,6 @@ namespace MassTransit.Testing.Builders
 {
 	using System;
 	using System.Collections.Generic;
-	using Configurators;
 	using Instances;
 	using Scenarios;
 	using TestActions;
@@ -24,8 +23,8 @@ namespace MassTransit.Testing.Builders
 		where TMessage : class
 	{
 		readonly BusTestScenario _testContext;
-		Action<IServiceBus, TMessage> _handler;
 		IList<TestAction> _actions;
+		Action<IServiceBus, TMessage> _handler;
 
 
 		public HandlerTestBuilderImpl(BusTestScenario testContext)
