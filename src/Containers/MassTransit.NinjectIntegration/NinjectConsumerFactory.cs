@@ -16,6 +16,7 @@ namespace MassTransit.NinjectIntegration
 	using System.Collections.Generic;
 	using Exceptions;
 	using Ninject;
+	using Pipeline;
 
 	public class NinjectConsumerFactory<T> :
 		IConsumerFactory<T>
@@ -28,7 +29,8 @@ namespace MassTransit.NinjectIntegration
 			_kernel = kernel;
 		}
 
-		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<T, Action<TMessage>> callback) 
+		public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
+			IConsumeContext<TMessage> context, InstanceHandlerSelector<T, TMessage> selector)
 			where TMessage : class
 		{
 			var consumer = _kernel.Get<T>();
@@ -37,11 +39,12 @@ namespace MassTransit.NinjectIntegration
 
 			try
 			{
-				Action<TMessage> result = callback(consumer);
-				if (result == null)
-					yield break;
+				IEnumerable<Action<IConsumeContext<TMessage>>> result = selector(consumer, context);
 
-				yield return result;
+				foreach (var handler in result)
+				{
+					yield return handler;
+				}
 			}
 			finally
 			{

@@ -25,9 +25,7 @@ namespace MassTransit.SubscriptionConnectors
 
 			MessageRouter<IConsumeContext<TMessage>> router = routerConfigurator.FindOrCreate<TMessage>();
 
-			var selector = new ConcurrentInstanceHandlerSelector<TMessage>(handler);
-
-			var sink = new InstanceMessageSink<TMessage>(selector);
+			var sink = new InstanceMessageSink<TMessage>(MultipleHandlerSelector.ForHandler(handler));
 
 			UnsubscribeAction result = router.Connect(sink);
 

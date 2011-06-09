@@ -16,6 +16,7 @@ namespace MassTransit.WindsorIntegration
 	using System.Collections.Generic;
 	using Castle.Windsor;
 	using Exceptions;
+	using Pipeline;
 
 	public class WindsorConsumerFactory<T> :
 		IConsumerFactory<T>
@@ -28,7 +29,8 @@ namespace MassTransit.WindsorIntegration
 			_container = container;
 		}
 
-		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<T, Action<TMessage>> callback) 
+		public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
+			IConsumeContext<TMessage> context, InstanceHandlerSelector<T, TMessage> selector)
 			where TMessage : class
 		{
 			var consumer = _container.Resolve<T>();
@@ -37,11 +39,10 @@ namespace MassTransit.WindsorIntegration
 
 			try
 			{
-				Action<TMessage> result = callback(consumer);
-				if (result == null)
-					yield break;
-
-				yield return result;
+				foreach (var handler in selector(consumer, context))
+				{
+					yield return handler;
+				}
 			}
 			finally
 			{

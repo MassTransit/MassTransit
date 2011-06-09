@@ -42,6 +42,12 @@ namespace MassTransit.Pipeline
 				};
 		}
 
+		public static HandlerSelector<TMessage> ForContextHandler<TMessage>(Action<IConsumeContext<TMessage>> handler)
+			where TMessage : class
+		{
+			return context => handler;
+		}
+
 		public static HandlerSelector<TMessage> ForSelectiveHandler<TMessage>(Predicate<TMessage> condition,
 		                                                                      Action<TMessage> handler)
 			where TMessage : class

@@ -16,6 +16,7 @@ namespace MassTransit.AutofacIntegration
 	using System.Collections.Generic;
 	using Autofac;
 	using Exceptions;
+	using Pipeline;
 
 	public class AutofacConsumerFactory<T> :
 		IConsumerFactory<T>
@@ -28,7 +29,8 @@ namespace MassTransit.AutofacIntegration
 			_container = container;
 		}
 
-		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<T, Action<TMessage>> callback) 
+		public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
+			IConsumeContext<TMessage> context, InstanceHandlerSelector<T, TMessage> selector)
 			where TMessage : class
 		{
 			using (_container.BeginLifetimeScope())
@@ -37,11 +39,10 @@ namespace MassTransit.AutofacIntegration
 				if (consumer == null)
 					throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ", typeof (T)));
 
-				Action<TMessage> result = callback(consumer);
-				if (result == null)
-					yield break;
-
-				yield return result;
+				foreach (var handler in selector(consumer, context))
+				{
+					yield return handler;
+				}
 			}
 		}
 	}

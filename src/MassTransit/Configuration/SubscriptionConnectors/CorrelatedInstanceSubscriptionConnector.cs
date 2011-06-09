@@ -38,9 +38,8 @@ namespace MassTransit.SubscriptionConnectors
 			CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey> router =
 				correlatedConfigurator.FindOrCreate<TMessage, TKey>();
 
-			var selector = new ConcurrentInstanceHandlerSelector<TMessage>(HandlerSelector.ForHandler<TMessage>(consumer.Consume));
-
-			var sink = new InstanceMessageSink<TMessage>(selector);
+			var sink = new InstanceMessageSink<TMessage>(MultipleHandlerSelector.ForHandler(
+				HandlerSelector.ForHandler<TMessage>(consumer.Consume)));
 
 			TKey correlationId = consumer.CorrelationId;
 

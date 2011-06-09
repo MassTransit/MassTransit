@@ -16,6 +16,7 @@ namespace MassTransit
 	using System.Collections.Generic;
 	using Exceptions;
 	using Microsoft.Practices.Unity;
+	using Pipeline;
 
 	public class UnityConsumerFactory<T> :
 		IConsumerFactory<T>
@@ -28,7 +29,8 @@ namespace MassTransit
 			_container = container;
 		}
 
-		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<T, Action<TMessage>> callback) 
+		public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
+			IConsumeContext<TMessage> context, InstanceHandlerSelector<T, TMessage> selector)
 			where TMessage : class
 		{
 			using (IUnityContainer childContainer = _container.CreateChildContainer())
@@ -37,11 +39,10 @@ namespace MassTransit
 				if (consumer == null)
 					throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ", typeof (T)));
 
-				Action<TMessage> result = callback(consumer);
-				if (result == null)
-					yield break;
-
-				yield return result;
+				foreach (var handler in selector(consumer, context))
+				{
+					yield return handler;
+				}
 			}
 		}
 	}

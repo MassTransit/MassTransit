@@ -14,6 +14,7 @@ namespace MassTransit.Configuration
 {
 	using System;
 	using System.Collections.Generic;
+	using Pipeline;
 
 	public class ObjectConsumerFactory<TConsumer> :
 		IConsumerFactory<TConsumer>
@@ -26,10 +27,11 @@ namespace MassTransit.Configuration
 			_delegate = new DelegateConsumerFactory<TConsumer>(() => (TConsumer) objectFactory(typeof (TConsumer)));
 		}
 
-		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback) 
+		public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
+			IConsumeContext<TMessage> context, InstanceHandlerSelector<TConsumer, TMessage> selector)
 			where TMessage : class
 		{
-			return _delegate.GetConsumer(callback);
+			return _delegate.GetConsumer(context, selector);
 		}
 	}
 }

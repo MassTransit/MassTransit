@@ -36,36 +36,29 @@ namespace MassTransit.Pipeline.Sinks
 
 		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
 		{
-			IEnumerable<Action<TMessage>> consumers = _consumerFactory.GetConsumer<TMessage>(consumer =>
-				{
-					using (ContextStorage.CreateContextScope(context))
-					{
-						if (consumer.Accept(context.Message))
-							return consumer.Consume;
-					}
-
-					return null;
-				});
-
-			foreach (var consumer in consumers)
-			{
-				if (consumer == null)
-					continue;
-
-				Action<TMessage> c = consumer;
-				yield return x =>
-					{
-						using (ContextStorage.CreateContextScope(context))
-						{
-							c(context.Message);
-						}
-					};
-			}
+			return _consumerFactory.GetConsumer(context, Selector);
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
 		{
 			return inspector.Inspect(this);
+		}
+
+		IEnumerable<Action<IConsumeContext<TMessage>>> Selector(TComponent instance, IConsumeContext<TMessage> messageContext)
+		{
+			using (ContextStorage.CreateContextScope(messageContext))
+			{
+				if (instance.Accept(messageContext.Message))
+				{
+					yield return context =>
+						{
+							using (ContextStorage.CreateContextScope(context))
+							{
+								instance.Consume(context.Message);
+							}
+						};
+				}
+			}
 		}
 	}
 }

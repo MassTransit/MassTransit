@@ -14,7 +14,7 @@ namespace MassTransit.Testing.TestDecorators
 {
 	using System;
 	using System.Collections.Generic;
-	using Subjects;
+	using Pipeline;
 
 	public class ConsumerFactoryTestDecorator<TConsumer> :
 		IConsumerFactory<TConsumer>
@@ -32,18 +32,20 @@ namespace MassTransit.Testing.TestDecorators
 			_received = received;
 		}
 
-		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<TConsumer, Action<TMessage>> callback)
+		public IEnumerable<Action<IConsumeContext<TMessage>>>
+			GetConsumer<TMessage>(IConsumeContext<TMessage> context,
+			                      InstanceHandlerSelector<TConsumer, TMessage> selector)
 			where TMessage : class
 		{
-			IEnumerable<Action<TMessage>> consumers = _consumerFactory.GetConsumer(callback);
+			IEnumerable<Action<IConsumeContext<TMessage>>> consumers = _consumerFactory.GetConsumer(context, selector);
 
 			foreach (var action in consumers)
 			{
-				Action<TMessage> consumer = action;
+				Action<IConsumeContext<TMessage>> consumer = action;
 
 				yield return message =>
 					{
-						var received = new ReceivedMessageImpl<TMessage>(_bus.MessageContext<TMessage>(), message);
+						var received = new ReceivedMessageImpl<TMessage>(message);
 
 						try
 						{

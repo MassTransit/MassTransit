@@ -15,22 +15,6 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 
-	/// <summary>
-	/// Given an instance and a message, returns the handlers for the message
-	/// </summary>
-	/// <typeparam name="TInstance">The instance type</typeparam>
-	/// <typeparam name="TMessage">The message type</typeparam>
-	/// <param name="instance">The instance to return the handlers for</param>
-	/// <returns></returns>
-	public delegate Action<TMessage> InstanceHandlerSelector<TInstance, TMessage>(TInstance instance);
-
-	/// <summary>
-	/// An instance handler selector
-	/// </summary>
-	/// <typeparam name="TMessage"></typeparam>
-	public interface InstanceHandlerSelector<TMessage>
-		where TMessage : class
-	{
-		IEnumerable<Action<IConsumeContext<TMessage>>> GetHandlers(IConsumeContext<TMessage> context);
-	}
+	public delegate IEnumerable<Action<IConsumeContext<TMessage>>> InstanceHandlerSelector<TInstance, TMessage>(
+		TInstance instance, IConsumeContext<TMessage> context);
 }

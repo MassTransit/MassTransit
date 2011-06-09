@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline.Sinks
 		InstanceMessageSinkBase<TMessage>
 		where TMessage : class
 	{
-		public InstanceMessageSink(InstanceHandlerSelector<TMessage> acceptor)
+		public InstanceMessageSink(MultipleHandlerSelector<TMessage> acceptor)
 			: base(acceptor)
 		{
 		}
