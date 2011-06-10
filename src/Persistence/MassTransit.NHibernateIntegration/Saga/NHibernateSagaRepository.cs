@@ -16,10 +16,12 @@ namespace MassTransit.NHibernateIntegration.Saga
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Linq.Expressions;
+	using System.Transactions;
 	using log4net;
 	using MassTransit.Saga;
 	using NHibernate;
 	using NHibernate.Linq;
+	using Pipeline;
 	using Util;
 
 	public class NHibernateSagaRepository<T> :
@@ -71,12 +73,14 @@ namespace MassTransit.NHibernateIntegration.Saga
 
 		public IEnumerable<T> Where(Expression<Func<T, bool>> filter)
 		{
+			using(var transactionScope = new TransactionScope(TransactionScopeOption.RequiresNew))
 			using (ISession session = _sessionFactory.OpenSession())
 			using (ITransaction transaction = session.BeginTransaction())
 			{
 				List<T> result = session.Query<T>().Where(filter).ToList();
 
 				transaction.Commit();
+				transactionScope.Complete();
 
 				return result;
 			}
@@ -95,6 +99,38 @@ namespace MassTransit.NHibernateIntegration.Saga
 		~NHibernateSagaRepository()
 		{
 			Dispose(false);
+		}
+	}
+
+
+	public class SuperFlySagaMessageSink<TSaga, TMessage> :
+		IPipelineSink<IConsumeContext<TMessage>>
+		where TSaga : class, ISaga
+		where TMessage : class
+	{
+		readonly MultipleHandlerSelector<TMessage> _selector;
+
+		public SuperFlySagaMessageSink(MultipleHandlerSelector<TMessage> selector)
+		{
+			_selector = selector;
+		}
+
+		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
+		{
+			// we want to see if there are any instances ready to process before accepting the message
+
+			// this is totally just another instance message sink sadly...
+
+			// i really just want to separate the correlated one-to-one sagas from the locator ones by having
+			// the locator ones pre-process the list of matching sagas and then returning an action for each guid that needs
+			// processed via the regular one-to-one match, including the creation of a new saga if necessary.
+
+			throw new NotImplementedException();
+		}
+
+		public bool Inspect(IPipelineInspector inspector)
+		{
+			return inspector.Inspect(this);
 		}
 	}
 }

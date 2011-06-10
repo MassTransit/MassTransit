@@ -274,7 +274,7 @@ namespace MassTransit.Pipeline.Inspectors
 			Type policyType = policy.GetType().GetGenericTypeDefinition();
 			if (policyType == typeof (InitiatingSagaPolicy<,>))
 				description = "Initiates New";
-			else if (policyType == typeof (ExistingSagaPolicy<,>))
+			else if (policyType == typeof (ExistingOrIgnoreSagaPolicy<,>))
 				description = "Orchestrates Existing";
 			else if (policyType == typeof (CreateOrUseExistingSagaPolicy<,>))
 				description = "Initiates New Or Orchestrates Existing";

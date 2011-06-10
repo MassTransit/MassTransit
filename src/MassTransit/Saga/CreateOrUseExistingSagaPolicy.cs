@@ -32,6 +32,26 @@ namespace MassTransit.Saga
 			_shouldBeRemoved = shouldBeRemoved.Compile();
 		}
 
+		public bool CanCreateInstance(IConsumeContext<TMessage> context)
+		{
+			return true;
+		}
+
+		public TSaga CreateInstance(IConsumeContext<TMessage> context, Guid sagaId)
+		{
+			return FastActivator<TSaga>.Create(sagaId);
+		}
+
+		public bool CanUseExistingInstance(IConsumeContext<TMessage> context)
+		{
+			return true;
+		}
+
+		public bool CanRemoveInstance(TSaga instance)
+		{
+			return _shouldBeRemoved(instance);
+		}
+
 		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)
 		{
 			Guid sagaId;
