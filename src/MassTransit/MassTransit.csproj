@@ -513,7 +513,6 @@
     <Compile Include="Saga\Observes.cs" />
     <Compile Include="Saga\Pipeline\CorrelatedSagaMessageSink.cs" />
     <Compile Include="Saga\Pipeline\CorrelatedSagaStateMachineMessageSink.cs" />
-    <Compile Include="Saga\ExistingSagaPolicy.cs" />
     <Compile Include="Saga\InitiatingSagaPolicy.cs" />
     <Compile Include="Saga\ISagaMessageSink.cs" />
     <Compile Include="Saga\ISagaPolicy.cs" />

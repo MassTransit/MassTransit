@@ -14,6 +14,7 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Linq.Expressions;
+	using Exceptions;
 	using log4net;
 
 	public class ExistingOrIgnoreSagaPolicy<TSaga, TMessage> :
@@ -27,6 +28,26 @@ namespace MassTransit.Saga
 		public ExistingOrIgnoreSagaPolicy(Expression<Func<TSaga, bool>> shouldBeRemoved)
 		{
 			_shouldBeRemoved = shouldBeRemoved.Compile();
+		}
+
+		public bool CanCreateInstance(IConsumeContext<TMessage> context)
+		{
+			return false;
+		}
+
+		public TSaga CreateInstance(IConsumeContext<TMessage> context, Guid sagaId)
+		{
+			throw new SagaException("The policy does not allow saga creation", typeof (TSaga), typeof (TMessage));
+		}
+
+		public bool CanUseExistingInstance(IConsumeContext<TMessage> context)
+		{
+			return true;
+		}
+
+		public bool CanRemoveInstance(TSaga instance)
+		{
+			return _shouldBeRemoved(instance);
 		}
 
 		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)

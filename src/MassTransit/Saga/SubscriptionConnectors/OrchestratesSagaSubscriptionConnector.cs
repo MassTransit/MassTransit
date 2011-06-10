@@ -22,7 +22,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		where TMessage : class, CorrelatedBy<Guid>
 	{
 		public OrchestratesSagaSubscriptionConnector(ISagaRepository<TSaga> sagaRepository)
-			: base(sagaRepository, new ExistingSagaPolicy<TSaga, TMessage>(x => false))
+			: base(sagaRepository, new ExistingOrIgnoreSagaPolicy<TSaga, TMessage>(x => false))
 		{
 		}
 

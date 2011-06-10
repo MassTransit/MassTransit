@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga
 {
+	using System;
+
 	/// <summary>
 	/// A saga policy defines how the pipeline should handle messages when being routed 
 	/// to the saga. Checks are made for the existence of a saga, whether the message should
@@ -22,6 +24,37 @@ namespace MassTransit.Saga
 	public interface ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
 	{
+		/// <summary>
+		/// Determines if the message is able to create a new instance of the saga
+		/// </summary>
+		/// <param name="context">The consumer context of the message</param>
+		/// <returns>True if a new instance of the saga can be created, otherwise false</returns>
+		bool CanCreateInstance(IConsumeContext<TMessage> context);
+
+		/// <summary>
+		/// Creates a new instance of the saga using the data in the message context
+		/// </summary>
+		/// <param name="context">The consumer context of the message</param>
+		/// <param name="sagaId"></param>
+		/// <returns>A newly created saga instance</returns>
+		TSaga CreateInstance(IConsumeContext<TMessage> context, Guid sagaId);
+
+
+		/// <summary>
+		/// Determines if the message can be delivered to an existing saga instance
+		/// </summary>
+		/// <param name="context">The consumer context of the message</param>
+		/// <returns>True if the message can be delivered to the saga instance, otherwise false</returns>
+		bool CanUseExistingInstance(IConsumeContext<TMessage> context);
+
+
+		/// <summary>
+		/// Determines if the saga instance can be removed, using the saga configuration information
+		/// </summary>
+		/// <param name="instance">The saga instance to check</param>
+		/// <returns>True if the saga instance can be removed, otherwise false</returns>
+		bool CanRemoveInstance(TSaga instance);
+
 		/// <summary>
 		/// Determines if the message should result in the creation of a new instance of the saga
 		/// </summary>
