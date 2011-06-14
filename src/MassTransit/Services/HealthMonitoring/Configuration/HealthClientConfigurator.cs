@@ -25,6 +25,11 @@ namespace MassTransit.Services.HealthMonitoring.Configuration
 			get { return typeof (HealthClient); }
 		}
 
+		public BusServiceLayer Layer
+		{
+			get { return BusServiceLayer.Session; }
+		}
+
 		public IBusService Create(IServiceBus bus)
 		{
 			var service = new HealthClient(_intervalInSeconds);

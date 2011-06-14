@@ -26,6 +26,11 @@ namespace MassTransit.Services.Subscriptions.Configuration
 			get { return typeof (SubscriptionClient); }
 		}
 
+		public BusServiceLayer Layer
+		{
+			get { return BusServiceLayer.Session; }
+		}
+
 		public IBusService Create(IServiceBus bus)
 		{
 			return new SubscriptionClient(_subscriptionServiceUri);

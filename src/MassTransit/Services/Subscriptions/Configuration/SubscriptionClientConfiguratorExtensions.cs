@@ -26,7 +26,7 @@ namespace MassTransit
 
 		public static void UseSubscriptionService(this ServiceBusConfigurator configurator, Uri subscriptionServiceUri)
 		{
-			configurator.ConfigureService<SubscriptionClientConfigurator>(
+			configurator.ConfigureService<SubscriptionClientConfigurator>(BusServiceLayer.Session,
 				x => x.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
 		}
 

@@ -108,6 +108,7 @@
     <Compile Include="Configuration\Builders\ServiceBusBuilder.cs" />
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
+    <Compile Include="Configuration\BusServiceLayer.cs" />
     <Compile Include="Configuration\Configuration\BusSettings.cs" />
     <Compile Include="Configuration\Configuration\DelegateConsumerFactory.cs" />
     <Compile Include="Configuration\Configuration\DelegateMessageInterceptor.cs" />
@@ -305,6 +306,7 @@
     <Compile Include="Serialization\ListJsonConverter.cs" />
     <Compile Include="Serialization\StaticMessageTypeConverter.cs" />
     <Compile Include="Serialization\VersionOneXmlMessageSerializer.cs" />
+    <Compile Include="ServiceCatalog.cs" />
     <Compile Include="ServiceContainer.cs" />
     <Compile Include="Services\HealthMonitoring\Configuration\HealthClientConfiguratorExtensions.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthInformation.cs" />

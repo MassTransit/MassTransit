@@ -20,14 +20,14 @@ namespace MassTransit
 	{
 		public static void UseMulticastSubscriptionClient(this ServiceBusConfigurator configurator)
 		{
-			configurator.ConfigureService<MulticastSubscriptionClientConfigurator>(x => { });
+			configurator.ConfigureService<MulticastSubscriptionClientConfigurator>(BusServiceLayer.Session, x => { });
 		}
 
 
 		public static void UseMulticastSubscriptionClient(this ServiceBusConfigurator configurator,
 		                                                  Action<MulticastSubscriptionClientConfigurator> configureCallback)
 		{
-			configurator.ConfigureService(configureCallback);
+			configurator.ConfigureService(BusServiceLayer.Session, configureCallback);
 		}
 	}
 }

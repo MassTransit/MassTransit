@@ -76,8 +76,8 @@ namespace MassTransit.Testing.ScenarioBuilders
 
 			Action<ServiceBusConfigurator> bindSubscriptions = configurator =>
 				{
-					configurator.AddService(() => new SubscriptionPublisher(subscriptionService));
-					configurator.AddService(() => new SubscriptionConsumer(subscriptionService));
+					configurator.AddService(BusServiceLayer.Session, () => new SubscriptionPublisher(subscriptionService));
+					configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(subscriptionService));
 				};
 
 			bindSubscriptions(_localConfigurator);

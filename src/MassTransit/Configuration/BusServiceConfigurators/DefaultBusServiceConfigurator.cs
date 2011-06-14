@@ -25,10 +25,12 @@ namespace MassTransit.BusServiceConfigurators
 		where TService : IBusService
 	{
 		readonly Func<IServiceBus, TService> _serviceFactory;
+		BusServiceLayer _layer;
 
-		public DefaultBusServiceConfigurator(Func<IServiceBus, TService> serviceFactory)
+		public DefaultBusServiceConfigurator(BusServiceLayer layer, Func<IServiceBus, TService> serviceFactory)
 		{
 			_serviceFactory = serviceFactory;
+			_layer = layer;
 		}
 
 		public IEnumerable<ValidationResult> Validate()
@@ -48,6 +50,11 @@ namespace MassTransit.BusServiceConfigurators
 		public Type ServiceType
 		{
 			get { return typeof (TService); }
+		}
+
+		public BusServiceLayer Layer
+		{
+			get { return _layer; }
 		}
 
 		public IBusService Create(IServiceBus bus)

@@ -98,7 +98,7 @@ namespace MassTransit.Builders
 				{
 					IBusService busService = busServiceConfigurator.Create(bus);
 
-					bus.AddService(busServiceConfigurator.ServiceType, busService);
+					bus.AddService(busServiceConfigurator.Layer, busService);
 				}
 				catch (Exception ex)
 				{

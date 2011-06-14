@@ -48,6 +48,12 @@ namespace MassTransit.Saga
 				{
 					if (policy.CanCreateInstance(context))
 					{
+						instance = policy.CreateInstance(context, sagaId);
+						_sagas.Add(instance);
+
+						Monitor.Exit(_sagas);
+						needToLeave = false;
+
 						yield return x =>
 							{
 								if (_log.IsDebugEnabled)
@@ -56,19 +62,16 @@ namespace MassTransit.Saga
 
 								try
 								{
-									instance = policy.CreateInstance(x, sagaId);
-									_sagas.Add(instance);
-
-									Monitor.Exit(_sagas);
-									needToLeave = false;
-
-									foreach (var callback in selector(instance, x))
+									lock (instance)
 									{
-										callback(x);
-									}
+										foreach (var callback in selector(instance, x))
+										{
+											callback(x);
+										}
 
-									if (policy.CanRemoveInstance(instance))
-										_sagas.Remove(instance);
+										if (policy.CanRemoveInstance(instance))
+											_sagas.Remove(instance);
+									}
 								}
 								catch (Exception ex)
 								{
@@ -102,14 +105,16 @@ namespace MassTransit.Saga
 
 								try
 								{
-									foreach (var callback in selector(instance, x))
+									lock (instance)
 									{
-										lock (instance)
+										foreach (var callback in selector(instance, x))
+										{
 											callback(x);
-									}
+										}
 
-									if (policy.CanRemoveInstance(instance))
-										_sagas.Remove(instance);
+										if (policy.CanRemoveInstance(instance))
+											_sagas.Remove(instance);
+									}
 								}
 								catch (Exception ex)
 								{

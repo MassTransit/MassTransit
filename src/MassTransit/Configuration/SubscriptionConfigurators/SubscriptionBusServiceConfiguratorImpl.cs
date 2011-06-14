@@ -62,6 +62,11 @@ namespace MassTransit.SubscriptionConfigurators
 			get { return typeof (SubscriptionBusService); }
 		}
 
+		public BusServiceLayer Layer
+		{
+			get { return BusServiceLayer.Application; }
+		}
+
 		public IBusService Create(IServiceBus bus)
 		{
 			var subscriptionServiceBuilder = new SubscriptionBusServiceBuilderImpl();

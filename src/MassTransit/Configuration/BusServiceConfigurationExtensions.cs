@@ -18,7 +18,7 @@ namespace MassTransit
 
 	public static class BusServiceConfigurationExtensions
 	{
-		public static void ConfigureService<TServiceConfigurator>(this ServiceBusConfigurator configurator,
+		public static void ConfigureService<TServiceConfigurator>(this ServiceBusConfigurator configurator, BusServiceLayer layer,
 		                                                          Action<TServiceConfigurator> configure)
 			where TServiceConfigurator : BusServiceConfigurator, new()
 		{
@@ -31,27 +31,19 @@ namespace MassTransit
 			configurator.AddBusConfigurator(busConfigurator);
 		}
 
-		public static void AddService<TService>(this ServiceBusConfigurator configurator)
-			where TService : IBusService, new()
-		{
-			var serviceConfigurator = new DefaultBusServiceConfigurator<TService>(bus => new TService());
-
-			configurator.AddBusConfigurator(serviceConfigurator);
-		}
-
-		public static void AddService<TService>(this ServiceBusConfigurator configurator, Func<TService> serviceFactory)
+		public static void AddService<TService>(this ServiceBusConfigurator configurator, BusServiceLayer layer, Func<TService> serviceFactory)
 			where TService : IBusService
 		{
-			var serviceConfigurator = new DefaultBusServiceConfigurator<TService>(bus => serviceFactory());
+			var serviceConfigurator = new DefaultBusServiceConfigurator<TService>(layer, bus => serviceFactory());
 
 			configurator.AddBusConfigurator(serviceConfigurator);
 		}
 
-		public static void AddService<TService>(this ServiceBusConfigurator configurator,
+		public static void AddService<TService>(this ServiceBusConfigurator configurator, BusServiceLayer layer,
 		                                        Func<IServiceBus, TService> serviceFactory)
 			where TService : IBusService
 		{
-			var serviceConfigurator = new DefaultBusServiceConfigurator<TService>(serviceFactory);
+			var serviceConfigurator = new DefaultBusServiceConfigurator<TService>(layer, serviceFactory);
 
 			configurator.AddBusConfigurator(serviceConfigurator);
 		}
