@@ -168,8 +168,6 @@ namespace MassTransit.Tests.Saga.StateMachine
 			try
 			{
 				LocalBus.InboundPipeline.Dispatch(message);
-
-				Assert.Fail("Exception should have been thrown");
 			}
 			catch (SagaException sex)
 			{

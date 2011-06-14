@@ -39,10 +39,13 @@ namespace MassTransit.Tests.Saga
 		Orchestrates<UserValidated>,
 		ISaga
 	{
-		private string _displayName;
-		private string _email;
-		private string _password;
-		private string _username;
+		public string DisplayName { get; set; }
+
+		public string Email { get; set; }
+
+		public string Password { get; set; }
+
+		public string Username { get; set; }
 
 		protected RegisterUserSaga()
 		{
@@ -61,12 +64,12 @@ namespace MassTransit.Tests.Saga
 		public void Consume(RegisterUser message)
 		{
 			CorrelationId = message.CorrelationId;
-			_displayName = message.DisplayName;
-			_username = message.Username;
-			_password = message.Password;
-			_email = message.Email;
+			DisplayName = message.DisplayName;
+			Username = message.Username;
+			Password = message.Password;
+			Email = message.Email;
 
-			Bus.Publish(new SendUserVerificationEmail(CorrelationId, _email));
+			Bus.Publish(new SendUserVerificationEmail(CorrelationId, Email));
 		}
 
 		// The bus that received the message
@@ -89,7 +92,7 @@ namespace MassTransit.Tests.Saga
 			// once the verification e-mail has been sent, we allow 24 hours to pass before we 
 			// remove this transaction from the registration queue
 
-			if (_email != message.Email)
+			if (Email != message.Email)
 				throw new ArgumentException("The email address was not properly loaded.");
 
 			Bus.Publish(new UserRegistrationPending(CorrelationId));

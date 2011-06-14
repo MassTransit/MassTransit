@@ -14,20 +14,25 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq.Expressions;
+	using MassTransit.Pipeline;
 
 	/// <summary>
 	/// A saga repository is used by the service bus to dispatch messages to sagas
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	public interface ISagaRepository<T> :
-		IDisposable
-		where T : class, ISaga
+	/// <typeparam name="TSaga"></typeparam>
+	public interface ISagaRepository<TSaga>
+		where TSaga : class, ISaga
 	{
-		void Send<TMessage>(Expression<Func<T, bool>> filter, ISagaPolicy<T, TMessage> policy, TMessage message,
-		                    Action<T> consumerAction)
+		IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
+																		 InstanceHandlerSelector<TSaga, TMessage> selector,
+																		 ISagaPolicy<TSaga, TMessage> policy)
 			where TMessage : class;
 
-		IEnumerable<T> Where(Expression<Func<T, bool>> filter);
+		IEnumerable<Guid> Find(ISagaFilter<TSaga> filter);
+
+		IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter);
+
+		IEnumerable<TResult> Where<TResult>(ISagaFilter<TSaga> filter, Func<TSaga, TResult> transformer);
+		IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer);
 	}
 }

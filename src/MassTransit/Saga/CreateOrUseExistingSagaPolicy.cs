@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,8 +23,8 @@ namespace MassTransit.Saga
 		ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
 	{
-		private readonly bool _useMessageIdForSagaId;
-		private readonly Func<TSaga, bool> _shouldBeRemoved;
+		readonly Func<TSaga, bool> _shouldBeRemoved;
+		readonly bool _useMessageIdForSagaId;
 
 		public CreateOrUseExistingSagaPolicy(Expression<Func<TSaga, bool>> shouldBeRemoved)
 		{
@@ -52,36 +52,19 @@ namespace MassTransit.Saga
 			return _shouldBeRemoved(instance);
 		}
 
-		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)
+		public Guid GetNewSagaId(IConsumeContext<TMessage> context)
 		{
 			Guid sagaId;
-			if (!UseMessageIdForSaga(message, out sagaId))
+			if (!UseMessageIdForSaga(context.Message, out sagaId))
 			{
 				if (!GenerateNewIdForSaga(out sagaId))
 					throw new InvalidOperationException("Could not generate id for new saga " + typeof (TSaga).Name);
 			}
 
-			saga = FastActivator<TSaga>.Create(sagaId);
-
-			return saga != null;
+			return sagaId;
 		}
 
-		public void ForExistingSaga(TMessage message)
-		{
-			// do nothing, we are fine if we have an existing saga
-		}
-
-		public void ForMissingSaga(TMessage message)
-		{
-			// do nothing, we dont' care if the saga is missing
-		}
-
-		public bool ShouldSagaBeRemoved(TSaga saga)
-		{
-			return _shouldBeRemoved(saga);
-		}
-
-		private bool UseMessageIdForSaga(TMessage message, out Guid sagaId)
+		bool UseMessageIdForSaga(TMessage message, out Guid sagaId)
 		{
 			if (_useMessageIdForSagaId)
 			{
@@ -96,7 +79,7 @@ namespace MassTransit.Saga
 			return false;
 		}
 
-		private static bool GenerateNewIdForSaga(out Guid sagaId)
+		static bool GenerateNewIdForSaga(out Guid sagaId)
 		{
 			sagaId = CombGuid.Generate();
 			return true;

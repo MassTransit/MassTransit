@@ -13,7 +13,8 @@
 namespace MassTransit.Saga.Pipeline
 {
 	using System;
-	using System.Linq.Expressions;
+	using System.Collections.Generic;
+	using Context;
 	using log4net;
 	using Magnum.StateMachine;
 	using Util;
@@ -26,30 +27,28 @@ namespace MassTransit.Saga.Pipeline
 		static readonly ILog _log =
 			LogManager.GetLogger(typeof (CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
 
-		readonly DataEvent<TSaga, TMessage> _dataEvent;
-		readonly Expression<Func<TSaga, TMessage, bool>> _selector;
-
 		public CorrelatedSagaStateMachineMessageSink(ISagaRepository<TSaga> repository,
 		                                             ISagaPolicy<TSaga, TMessage> policy,
 		                                             DataEvent<TSaga, TMessage> dataEvent)
-			: base(repository, policy)
+			: base(repository, policy, new CorrelatedSagaLocator<TMessage>(), (s, c) => GetHandlers(s, c, dataEvent))
 		{
-			_dataEvent = dataEvent;
-
-			_selector = CreateCorrelatedSelector();
 		}
 
-		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
+		static IEnumerable<Action<IConsumeContext<TMessage>>> GetHandlers(TSaga instance, IConsumeContext<TMessage> context,
+		                                                                  DataEvent<TSaga, TMessage> dataEvent)
 		{
-			get { return _selector; }
-		}
+			yield return x =>
+				{
+					instance.Bus = context.Bus;
 
-		protected override void ConsumerAction(TSaga saga, TMessage message)
-		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof (TSaga).Name, _dataEvent.Name, saga.CorrelationId);
+					using (ContextStorage.CreateContextScope(x))
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof (TSaga).Name, dataEvent.Name, instance.CorrelationId);
 
-			saga.RaiseEvent(_dataEvent, message);
+						instance.RaiseEvent(dataEvent, x.Message);
+					}
+				};
 		}
 	}
 }

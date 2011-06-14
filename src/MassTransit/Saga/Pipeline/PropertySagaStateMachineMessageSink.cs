@@ -13,7 +13,9 @@
 namespace MassTransit.Saga.Pipeline
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq.Expressions;
+	using Context;
 	using log4net;
 	using Magnum.StateMachine;
 	using Util;
@@ -26,31 +28,33 @@ namespace MassTransit.Saga.Pipeline
 		static readonly ILog _log =
 			LogManager.GetLogger(typeof (PropertySagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
 
-		readonly DataEvent<TSaga, TMessage> _dataEvent;
-
 		public PropertySagaStateMachineMessageSink(ISagaRepository<TSaga> repository,
 		                                           ISagaPolicy<TSaga, TMessage> policy,
 		                                           Expression<Func<TSaga, TMessage, bool>> selector,
 		                                           DataEvent<TSaga, TMessage> dataEvent)
-			: base(repository, policy)
+			: base(repository, policy, new PropertySagaLocator<TSaga, TMessage>(repository, policy, selector),
+				(i, c) => GetHandlers(i, c, dataEvent))
 		{
 			Selector = selector;
-			_dataEvent = dataEvent;
 		}
 
 		public Expression<Func<TSaga, TMessage, bool>> Selector { get; private set; }
 
-		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
+		static IEnumerable<Action<IConsumeContext<TMessage>>> GetHandlers(TSaga instance, IConsumeContext<TMessage> context,
+		                                                                  DataEvent<TSaga, TMessage> dataEvent)
 		{
-			get { return Selector; }
-		}
+			yield return x =>
+				{
+					instance.Bus = context.Bus;
 
-		protected override void ConsumerAction(TSaga saga, TMessage message)
-		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof (TSaga).Name, _dataEvent.Name, saga.CorrelationId);
+					using (ContextStorage.CreateContextScope(x))
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof (TSaga).Name, dataEvent.Name, instance.CorrelationId);
 
-			saga.RaiseEvent(_dataEvent, message);
+						instance.RaiseEvent(dataEvent, x.Message);
+					}
+				};
 		}
 	}
 }

@@ -13,29 +13,30 @@
 namespace MassTransit.Saga.Pipeline
 {
 	using System;
-	using System.Linq.Expressions;
+	using System.Collections.Generic;
+	using Context;
 
 	public class CorrelatedSagaMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
 		where TMessage : class, CorrelatedBy<Guid>
 		where TSaga : class, ISaga, Consumes<TMessage>.All
 	{
-		readonly Expression<Func<TSaga, TMessage, bool>> _selector;
-
 		public CorrelatedSagaMessageSink(ISagaRepository<TSaga> repository, ISagaPolicy<TSaga, TMessage> policy)
-			: base(repository, policy)
+			: base(repository, policy, new CorrelatedSagaLocator<TMessage>(), GetHandlers)
 		{
-			_selector = CreateCorrelatedSelector();
 		}
 
-		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
+		static IEnumerable<Action<IConsumeContext<TMessage>>> GetHandlers(TSaga instance, IConsumeContext<TMessage> context)
 		{
-			get { return _selector; }
-		}
+			yield return x =>
+				{
+					instance.Bus = context.Bus;
 
-		protected override void ConsumerAction(TSaga saga, TMessage message)
-		{
-			saga.Consume(message);
+					using (ContextStorage.CreateContextScope(x))
+					{
+						instance.Consume(x.Message);
+					}
+				};
 		}
 	}
 }

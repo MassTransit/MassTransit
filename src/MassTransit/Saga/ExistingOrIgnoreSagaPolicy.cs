@@ -40,6 +40,11 @@ namespace MassTransit.Saga
 			throw new SagaException("The policy does not allow saga creation", typeof (TSaga), typeof (TMessage));
 		}
 
+		public Guid GetNewSagaId(IConsumeContext<TMessage> context)
+		{
+			throw new SagaException("The policy does not allow saga creation", typeof(TSaga), typeof(TMessage));
+		}
+
 		public bool CanUseExistingInstance(IConsumeContext<TMessage> context)
 		{
 			return true;
@@ -48,29 +53,6 @@ namespace MassTransit.Saga
 		public bool CanRemoveInstance(TSaga instance)
 		{
 			return _shouldBeRemoved(instance);
-		}
-
-		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)
-		{
-			saga = null;
-
-			if(_log.IsDebugEnabled)
-				_log.DebugFormat("Matching {0} not found, ignoring {1}", typeof(TSaga).Name, typeof (TMessage).Name);
-
-			return false;
-		}
-
-		public void ForExistingSaga(TMessage message)
-		{
-		}
-
-		public void ForMissingSaga(TMessage message)
-		{
-		}
-
-		public bool ShouldSagaBeRemoved(TSaga saga)
-		{
-			return _shouldBeRemoved(saga);
 		}
 	}
 }

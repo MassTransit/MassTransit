@@ -15,8 +15,8 @@ namespace MassTransit.NHibernateIntegration.Saga
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Linq.Expressions;
 	using System.Transactions;
+	using Exceptions;
 	using log4net;
 	using MassTransit.Saga;
 	using NHibernate;
@@ -24,113 +24,148 @@ namespace MassTransit.NHibernateIntegration.Saga
 	using Pipeline;
 	using Util;
 
-	public class NHibernateSagaRepository<T> :
-		AbstractSagaRepository<T>,
-		ISagaRepository<T>
-		where T : class, ISaga
+	public class NHibernateSagaRepository<TSaga> :
+		ISagaRepository<TSaga>
+		where TSaga : class, ISaga
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepository<T>).ToFriendlyName());
-		volatile bool _disposed;
-		ISessionFactory _sessionFactory;
+		static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepository<TSaga>).ToFriendlyName());
+
+		readonly ISessionFactory _sessionFactory;
 
 		public NHibernateSagaRepository(ISessionFactory sessionFactory)
 		{
 			_sessionFactory = sessionFactory;
 		}
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		public void Send<TMessage>(Expression<Func<T, bool>> filter, ISagaPolicy<T, TMessage> policy, TMessage message,
-		                           Action<T> consumerAction)
+		public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
+		                                                                        InstanceHandlerSelector<TSaga, TMessage>
+		                                                                        	selector,
+		                                                                        ISagaPolicy<TSaga, TMessage> policy)
 			where TMessage : class
 		{
 			using (ISession session = _sessionFactory.OpenSession())
 			using (ITransaction transaction = session.BeginTransaction())
 			{
-				T[] existingSagas = session.Query<T>()
-					.Where(filter).ToArray();
-
-				bool foundExistingSagas = SendMessageToExistingSagas(existingSagas, policy, consumerAction, message, session.Delete);
-				if (foundExistingSagas)
+				var instance = session.Get<TSaga>(sagaId, LockMode.Upgrade);
+				if (instance == null)
 				{
-					transaction.Commit();
-					return;
-				}
-
-				SendMessageToNewSaga(policy, message, saga =>
+					if (policy.CanCreateInstance(context))
 					{
-						consumerAction(saga);
-						session.Save(saga);
-					}, session.Delete);
+						yield return x =>
+							{
+								if (_log.IsDebugEnabled)
+									_log.DebugFormat("SAGA: {0} Creating New {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+										typeof (TMessage).ToFriendlyName());
+
+								try
+								{
+									instance = policy.CreateInstance(x, sagaId);
+
+									foreach (var callback in selector(instance, x))
+									{
+										callback(x);
+									}
+
+									if (!policy.CanRemoveInstance(instance))
+										session.Save(instance);
+								}
+								catch (Exception ex)
+								{
+									var sex = new SagaException("Create Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
+									if (_log.IsErrorEnabled)
+										_log.Error(sex);
+
+									throw sex;
+								}
+							};
+					}
+					else
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("SAGA: {0} Ignoring Missing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+								typeof (TMessage).ToFriendlyName());
+					}
+				}
+				else
+				{
+					if (policy.CanUseExistingInstance(context))
+					{
+						yield return x =>
+							{
+								if (_log.IsDebugEnabled)
+									_log.DebugFormat("SAGA: {0} Using Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+										typeof (TMessage).ToFriendlyName());
+
+								try
+								{
+									foreach (var callback in selector(instance, x))
+									{
+										callback(x);
+									}
+
+									if (policy.CanRemoveInstance(instance))
+										session.Delete(instance);
+								}
+								catch (Exception ex)
+								{
+									var sex = new SagaException("Existing Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
+									if (_log.IsErrorEnabled)
+										_log.Error(sex);
+
+									throw sex;
+								}
+							};
+					}
+					else
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("SAGA: {0} Ignoring Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+								typeof (TMessage).ToFriendlyName());
+					}
+				}
 
 				transaction.Commit();
 			}
 		}
 
-		public IEnumerable<T> Where(Expression<Func<T, bool>> filter)
+		public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
 		{
-			using(var transactionScope = new TransactionScope(TransactionScopeOption.RequiresNew))
-			using (ISession session = _sessionFactory.OpenSession())
-			using (ITransaction transaction = session.BeginTransaction())
-			{
-				List<T> result = session.Query<T>().Where(filter).ToList();
+			return Where(filter, x => x.CorrelationId);
+		}
 
-				transaction.Commit();
-				transactionScope.Complete();
+		public IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter)
+		{
+			using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
+			using (ISession session = _sessionFactory.OpenSession())
+			{
+				List<TSaga> result = session.Query<TSaga>()
+					.Where(filter.FilterExpression)
+					.ToList();
+
+				scope.Complete();
 
 				return result;
 			}
 		}
 
-		public void Dispose(bool disposing)
+		public IEnumerable<TResult> Where<TResult>(ISagaFilter<TSaga> filter, Func<TSaga, TResult> transformer)
 		{
-			if (_disposed) return;
-			if (disposing)
+			return Where(filter).Select(transformer);
+		}
+
+		public IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer)
+		{
+			using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
+			using (ISession session = _sessionFactory.OpenSession())
 			{
-				_sessionFactory = null;
+				List<TResult> result = session.Query<TSaga>()
+					.Select(transformer)
+					.ToList();
+
+				scope.Complete();
+
+				return result;
 			}
-			_disposed = true;
-		}
-
-		~NHibernateSagaRepository()
-		{
-			Dispose(false);
-		}
-	}
-
-
-	public class SuperFlySagaMessageSink<TSaga, TMessage> :
-		IPipelineSink<IConsumeContext<TMessage>>
-		where TSaga : class, ISaga
-		where TMessage : class
-	{
-		readonly MultipleHandlerSelector<TMessage> _selector;
-
-		public SuperFlySagaMessageSink(MultipleHandlerSelector<TMessage> selector)
-		{
-			_selector = selector;
-		}
-
-		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
-		{
-			// we want to see if there are any instances ready to process before accepting the message
-
-			// this is totally just another instance message sink sadly...
-
-			// i really just want to separate the correlated one-to-one sagas from the locator ones by having
-			// the locator ones pre-process the list of matching sagas and then returning an action for each guid that needs
-			// processed via the regular one-to-one match, including the creation of a new saga if necessary.
-
-			throw new NotImplementedException();
-		}
-
-		public bool Inspect(IPipelineInspector inspector)
-		{
-			return inspector.Inspect(this);
 		}
 	}
 }

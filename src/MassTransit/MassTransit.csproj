@@ -222,6 +222,13 @@
     <Compile Include="Pipeline\MultipleHandlerSelector.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageInterceptor.cs" />
     <Compile Include="PublishExtensions.cs" />
+    <Compile Include="Saga\CorrelatedSagaLocator.cs" />
+    <Compile Include="Saga\ISagaFilter.cs" />
+    <Compile Include="Saga\ISagaLocator.cs" />
+    <Compile Include="Saga\PropertySagaLocator.cs" />
+    <Compile Include="Saga\SagaFilter.cs" />
+    <Compile Include="Saga\SagaFilterExtensions.cs" />
+    <Compile Include="Saga\SagaRepositoryQuery.cs" />
     <Compile Include="SendExtensions.cs" />
     <Compile Include="Exceptions\MassTransitException.cs" />
     <Compile Include="Exceptions\NotImplementedByDesignException.cs" />
@@ -440,6 +447,7 @@
     <Compile Include="Transports\Transport.cs" />
     <Compile Include="Util\CheckConvention.cs" />
     <Compile Include="Util\IdempotentHashtable.cs" />
+    <Compile Include="Util\IndexedSagaProperty.cs" />
     <Compile Include="Util\LambdaEqualityComparer.cs" />
     <Compile Include="Util\ObjectExtensions.cs" />
     <Compile Include="Util\ReSharperStaticAnalysis.cs" />
@@ -498,7 +506,6 @@
     <Compile Include="Pipeline\Configuration\InboundMessageInterceptorConfiguratorScope.cs" />
     <Compile Include="Pipeline\Sinks\InstanceMessageSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\MessageInterceptor.cs" />
-    <Compile Include="Saga\AbstractSagaRepository.cs" />
     <Compile Include="Saga\Configuration\EventInspectorResult.cs" />
     <Compile Include="Saga\Configuration\ExtensionsForSagas.cs" />
     <Compile Include="Saga\Configuration\ISagaPolicyFactory.cs" />
@@ -606,9 +613,8 @@
     <Compile Include="Transports\NullTransport.cs" />
     <Compile Include="Transports\TransportBase.cs" />
     <Compile Include="Util\ExpressionVisitor.cs" />
-    <Compile Include="Util\ExtensionsForIndexedCollection.cs" />
     <Compile Include="Util\IndexedAttribute.cs" />
-    <Compile Include="Util\IndexedCollection.cs" />
+    <Compile Include="Util\IndexedSagaDictionary.cs" />
     <Compile Include="Saga\Pipeline\PropertySagaMessageSink.cs" />
     <Compile Include="Saga\Pipeline\PropertySagaStateMachineMessageSink.cs" />
     <Compile Include="Saga\Pipeline\SagaMessageSinkBase.cs" />

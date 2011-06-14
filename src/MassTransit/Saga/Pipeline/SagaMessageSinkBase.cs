@@ -14,9 +14,6 @@ namespace MassTransit.Saga.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Linq.Expressions;
-	using Context;
 	using MassTransit.Pipeline;
 
 	public abstract class SagaMessageSinkBase<TSaga, TMessage> :
@@ -24,60 +21,44 @@ namespace MassTransit.Saga.Pipeline
 		where TSaga : class, ISaga
 		where TMessage : class
 	{
-		protected SagaMessageSinkBase(ISagaRepository<TSaga> repository, ISagaPolicy<TSaga, TMessage> policy)
+		readonly ISagaLocator<TMessage> _locator;
+		readonly InstanceHandlerSelector<TSaga, TMessage> _selector;
+
+		protected SagaMessageSinkBase(ISagaRepository<TSaga> repository, ISagaPolicy<TSaga, TMessage> policy,
+		                              ISagaLocator<TMessage> locator, InstanceHandlerSelector<TSaga, TMessage> selector)
 		{
+			_selector = selector;
+			_locator = locator;
 			Repository = repository;
 			Policy = policy;
 		}
-
-		protected abstract Expression<Func<TSaga, TMessage, bool>> FilterExpression { get; }
 
 		public ISagaPolicy<TSaga, TMessage> Policy { get; private set; }
 		public ISagaRepository<TSaga> Repository { get; private set; }
 
 		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> acceptContext)
 		{
-			yield return context =>
+			foreach (Guid sagaId in _locator.Find(acceptContext))
+			{
+				foreach (var action in Repository.GetSaga(acceptContext, sagaId, _selector, Policy))
 				{
-					Expression<Func<TSaga, bool>> filter = CreateFilterExpressionForMessage(context.Message);
+					yield return action;
+				}
+			}
 
-					Repository.Send(filter, Policy, context.Message, saga =>
-						{
-							saga.Bus = context.Bus;
-
-							using (ContextStorage.CreateContextScope(context))
-							{
-								ConsumerAction(saga, context.Message);
-							}
-						});
-				};
+//						{
+//							saga.Bus = context.Bus;
+//
+//							using (ContextStorage.CreateContextScope(context))
+//							{
+//								ConsumerAction(saga, context.Message);
+//							}
+//						});
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
 		{
 			return inspector.Inspect(this);
-		}
-
-		protected abstract void ConsumerAction(TSaga saga, TMessage message);
-
-		protected Expression<Func<TSaga, TMessage, bool>> CreateCorrelatedSelector()
-		{
-			ParameterExpression saga = Expression.Parameter(typeof (TSaga), "saga");
-			ParameterExpression message = Expression.Parameter(typeof (TMessage), "message");
-
-			MemberExpression sagaId = Expression.Property(saga,
-				typeof (TSaga).GetProperties().Where(x => x.Name == "CorrelationId").First());
-			MemberExpression messageId = Expression.Property(message,
-				typeof (TMessage).GetProperties().Where(x => x.Name == "CorrelationId").First());
-
-			BinaryExpression comparison = Expression.Equal(sagaId, messageId);
-
-			return Expression.Lambda<Func<TSaga, TMessage, bool>>(comparison, new[] {saga, message});
-		}
-
-		Expression<Func<TSaga, bool>> CreateFilterExpressionForMessage(TMessage message)
-		{
-			return new SagaFilterExpressionConverter<TSaga, TMessage>(message).Convert(FilterExpression);
 		}
 	}
 }

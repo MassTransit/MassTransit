@@ -10,21 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.NHibernateIntegration.Saga
+namespace MassTransit.Saga
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
-	using MassTransit.Saga;
 
-	public interface ISagaLocator<TSaga>
-		where TSaga : class, ISaga
+	public static class SagaFilterExtensions
 	{
-		/// <summary>
-		/// Finds existing sagas that match the specified filter expression
-		/// </summary>
-		/// <param name="expression">The filter expression to apply to the query</param>
-		/// <returns>The matching saga identifiers</returns>
-		IEnumerable<Guid> Find(Expression<Func<TSaga, bool>> expression);
+		public static IEnumerable<TSaga> Where<TSaga>(this ISagaRepository<TSaga> source, Expression<Func<TSaga, bool>> filter)
+			where TSaga : class, ISaga
+		{
+			return source.Where(new SagaFilter<TSaga>(filter));
+		}
 	}
 }
