@@ -14,7 +14,42 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
+	using Context;
+	using Magnum.StateMachine;
+	using Saga;
 
 	public delegate IEnumerable<Action<IConsumeContext<TMessage>>> InstanceHandlerSelector<TInstance, TMessage>(
 		TInstance instance, IConsumeContext<TMessage> context);
+
+
+	public static class InstanceHandlerSelector
+	{
+		public static IEnumerable<Action<IConsumeContext<TMessage>>> ForInitiatedBy<TInstance, TMessage>(TInstance instance)
+			where TInstance : InitiatedBy<TMessage>
+			where TMessage : class, CorrelatedBy<Guid>
+		{
+			yield return x =>
+				{
+					using(ContextStorage.CreateContextScope(x))
+					{
+						instance.Consume(x.Message);
+					}
+				};
+
+		}
+
+		public static IEnumerable<Action<IConsumeContext<TMessage>>> ForDataEvent<TInstance, TMessage>(TInstance instance, Event<TMessage> eevent)
+			where TInstance : SagaStateMachine<TInstance>
+			where TMessage : class, CorrelatedBy<Guid>
+		{
+			yield return x =>
+				{
+					using(ContextStorage.CreateContextScope(x))
+					{
+						instance.RaiseEvent(eevent, x.Message);
+					}
+				};
+
+		}
+	}
 }

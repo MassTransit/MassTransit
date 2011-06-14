@@ -97,11 +97,7 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Saga\ISagaLocator.cs" />
-    <Compile Include="Saga\ISagaStorage.cs" />
-    <Compile Include="Saga\NHibernateSagaLocator.cs" />
     <Compile Include="Saga\NHibernateSagaRepository.cs" />
-    <Compile Include="Saga\NHibernateSagaStorage.cs" />
     <Compile Include="StateMachineUserType.cs" />
     <Compile Include="StateMachineUserTypeConvention.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

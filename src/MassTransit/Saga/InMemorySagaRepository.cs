@@ -15,80 +15,157 @@ namespace MassTransit.Saga
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Linq.Expressions;
+	using System.Threading;
+	using Exceptions;
+	using log4net;
+	using MassTransit.Pipeline;
 	using Util;
 
 	public class InMemorySagaRepository<TSaga> :
-		AbstractSagaRepository<TSaga>,
 		ISagaRepository<TSaga>
 		where TSaga : class, ISaga
 	{
-		IndexedCollection<TSaga> _collection;
-		bool _disposed;
+		static readonly ILog _log = LogManager.GetLogger(typeof (InMemorySagaRepository<TSaga>));
+		IndexedSagaDictionary<TSaga> _sagas;
 
 		public InMemorySagaRepository()
 		{
-			_collection = new IndexedCollection<TSaga>();
+			_sagas = new IndexedSagaDictionary<TSaga>();
 		}
 
-		public void Send<TMessage>(Expression<Func<TSaga, bool>> filter, ISagaPolicy<TSaga, TMessage> policy, TMessage message,
-		                           Action<TSaga> consumerAction)
+		public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
+		                                                                        InstanceHandlerSelector<TSaga, TMessage>
+		                                                                        	selector, ISagaPolicy<TSaga, TMessage> policy)
 			where TMessage : class
 		{
-			IEnumerable<TSaga> existingSagas;
-			lock (_collection)
-				existingSagas = _collection.Where(filter).ToList();
+			bool needToLeave = true;
+			Monitor.Enter(_sagas);
+			try
+			{
+				TSaga instance = _sagas[sagaId];
 
-			if (SendMessageToExistingSagas(existingSagas, policy, consumerAction, message, RemoveSaga))
-				return;
-
-			SendMessageToNewSaga(policy, message, saga =>
+				if (instance == null)
 				{
-					lock (_collection)
-						_collection.Add(saga);
+					if (policy.CanCreateInstance(context))
+					{
+						yield return x =>
+							{
+								if (_log.IsDebugEnabled)
+									_log.DebugFormat("SAGA: {0} Creating New {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+										typeof (TMessage).ToFriendlyName());
 
-					consumerAction(saga);
-				}, RemoveSaga);
+								try
+								{
+									instance = policy.CreateInstance(x, sagaId);
+									_sagas.Add(instance);
+
+									Monitor.Exit(_sagas);
+									needToLeave = false;
+
+									foreach (var callback in selector(instance, x))
+									{
+										callback(x);
+									}
+
+									if (policy.CanRemoveInstance(instance))
+										_sagas.Remove(instance);
+								}
+								catch (Exception ex)
+								{
+									var sex = new SagaException("Create Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
+									if (_log.IsErrorEnabled)
+										_log.Error(sex);
+
+									throw sex;
+								}
+							};
+					}
+					else
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("SAGA: {0} Ignoring Missing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+								typeof (TMessage).ToFriendlyName());
+					}
+				}
+				else
+				{
+					if (policy.CanUseExistingInstance(context))
+					{
+						Monitor.Exit(_sagas);
+						needToLeave = false;
+
+						yield return x =>
+							{
+								if (_log.IsDebugEnabled)
+									_log.DebugFormat("SAGA: {0} Using Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+										typeof (TMessage).ToFriendlyName());
+
+								try
+								{
+									foreach (var callback in selector(instance, x))
+									{
+										lock (instance)
+											callback(x);
+									}
+
+									if (policy.CanRemoveInstance(instance))
+										_sagas.Remove(instance);
+								}
+								catch (Exception ex)
+								{
+									var sex = new SagaException("Existing Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
+									if (_log.IsErrorEnabled)
+										_log.Error(sex);
+
+									throw sex;
+								}
+							};
+					}
+					else
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("SAGA: {0} Ignoring Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+								typeof (TMessage).ToFriendlyName());
+					}
+				}
+			}
+			finally
+			{
+				if(needToLeave)
+					Monitor.Exit(_sagas);
+			}
 		}
 
-		public IEnumerable<TSaga> Where(Expression<Func<TSaga, bool>> filter)
+		public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
 		{
-			lock (_collection)
-				return _collection.Where(filter).ToList();
+			return _sagas.Where(filter).Select(x => x.CorrelationId);
 		}
 
-		public void Dispose()
+		public IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter)
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
+			return _sagas.Where(filter);
+		}
+
+		public IEnumerable<TResult> Where<TResult>(ISagaFilter<TSaga> filter, Func<TSaga, TResult> transformer)
+		{
+			return _sagas.Where(filter).Select(transformer);
+		}
+
+		public IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer)
+		{
+			return _sagas.Select(transformer);
 		}
 
 		public void Add(TSaga newSaga)
 		{
-			lock (_collection)
-				_collection.Add(newSaga);
+			lock (_sagas)
+				_sagas.Add(newSaga);
 		}
 
-		void RemoveSaga(TSaga saga)
+		public void Remove(TSaga saga)
 		{
-			lock (_collection)
-				_collection.Remove(saga);
-		}
-
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_collection = null;
-			}
-
-			_disposed = true;
-		}
-
-		~InMemorySagaRepository()
-		{
-			Dispose(false);
+			lock (_sagas)
+				_sagas.Remove(saga);
 		}
 	}
 }

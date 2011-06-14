@@ -68,7 +68,7 @@ namespace MassTransit.Services.HealthMonitoring
 		{
 			var message = new HealthUpdate();
 
-			_healthSagas.Where(x => true)
+			_healthSagas
 				.Select(x => new HealthInformation(x.CorrelationId, x.ControlUri, x.DataUri, x.LastHeartbeat, x.CurrentState.Name))
 				.Each(x => message.Information.Add(x));
 

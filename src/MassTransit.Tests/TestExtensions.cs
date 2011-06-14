@@ -52,6 +52,12 @@ namespace MassTransit.Tests
 			return new SendContext<T>(obj);
 		}
 
+		public static IConsumeContext<T> ToConsumeContext<T>(this T message) 
+			where T : class
+		{
+			return new ConsumeContext<T>(new ConsumeContext(null), message);
+		}
+
 		public static IReceiveContext ToReceiveContext(this Stream stream)
 		{
 			return new ConsumeContext(stream);

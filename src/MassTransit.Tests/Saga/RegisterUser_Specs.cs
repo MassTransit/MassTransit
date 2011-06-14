@@ -13,7 +13,6 @@
 namespace MassTransit.Tests.Saga
 {
 	using System.Diagnostics;
-	using MassTransit.Pipeline.Inspectors;
 	using Messages;
 	using NUnit.Framework;
 	using TextFixtures;

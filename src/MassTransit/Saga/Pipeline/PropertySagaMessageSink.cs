@@ -13,7 +13,9 @@
 namespace MassTransit.Saga.Pipeline
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq.Expressions;
+	using Context;
 
 	public class PropertySagaMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
@@ -23,21 +25,24 @@ namespace MassTransit.Saga.Pipeline
 		public PropertySagaMessageSink(ISagaRepository<TSaga> repository,
 		                               ISagaPolicy<TSaga, TMessage> policy,
 		                               Expression<Func<TSaga, TMessage, bool>> selector)
-			: base(repository, policy)
+			: base(repository, policy, new PropertySagaLocator<TSaga, TMessage>(repository, policy, selector), GetHandlers)
 		{
 			Selector = selector;
 		}
 
 		public Expression<Func<TSaga, TMessage, bool>> Selector { get; private set; }
 
-		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
+		static IEnumerable<Action<IConsumeContext<TMessage>>> GetHandlers(TSaga instance, IConsumeContext<TMessage> context)
 		{
-			get { return Selector; }
-		}
+			yield return x =>
+				{
+					instance.Bus = context.Bus;
 
-		protected override void ConsumerAction(TSaga saga, TMessage message)
-		{
-			saga.Consume(message);
+					using (ContextStorage.CreateContextScope(x))
+					{
+						instance.Consume(x.Message);
+					}
+				};
 		}
 	}
 }
