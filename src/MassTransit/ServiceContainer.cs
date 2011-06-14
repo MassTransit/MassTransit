@@ -12,77 +12,101 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using System.Collections.Generic;
-    using Magnum.Extensions;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using log4net;
+	using Util;
 
-    public class ServiceContainer :
-        IServiceContainer
-    {
-        readonly IServiceBus _bus;
-        readonly Dictionary<Type, IBusService> _services;
-        bool _disposed;
+	public class ServiceContainer :
+		IServiceContainer
+	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceContainer));
+		readonly IServiceBus _bus;
+		readonly ServiceCatalog _catalog;
+		bool _disposed;
 
-        public ServiceContainer(IServiceBus bus)
-        {
-            _bus = bus;
-            _services = new Dictionary<Type, IBusService>();
-        }
+		public ServiceContainer(IServiceBus bus)
+		{
+			_bus = bus;
+			_catalog = new ServiceCatalog();
+		}
 
-        public TService GetService<TService>()
-        {
-            var type = typeof(TService);
+		public void AddService(BusServiceLayer layer, IBusService service)
+		{
+			_catalog.Add(layer, service);
+		}
 
-            if (_services.ContainsKey(type))
-                return (TService) _services[type];
+		public void Start()
+		{
+			IList<IBusService> started = new List<IBusService>();
 
-            throw new InvalidOperationException("The service '{0}' is not registered on the bus".FormatWith(type.Name));
-        }
+			foreach (IBusService service in _catalog.Services)
+			{
+				try
+				{
+					_log.DebugFormat("Starting bus service: {0}", service.GetType().ToFriendlyName());
 
-        public void AddService(Type serviceType, IBusService service)
-        {
-            _services.Add(serviceType, service);
-        }
+					service.Start(_bus);
+					started.Add(service);
+				}
+				catch (Exception ex)
+				{
+					_log.Error("Failed to start bus service: " + service.GetType().ToFriendlyName(), ex);
 
-        public void Start()
-        {
-            foreach (var service in _services.Values)
-            {
-                service.Start(_bus);
-            }
-        }
+					foreach (IBusService stopService in started)
+					{
+						try
+						{
+							stopService.Stop();
+						}
+						catch (Exception stopEx)
+						{
+							_log.Warn("Failed to stop a service that was started during a failed bus startup: " +
+							          stopService.GetType().ToFriendlyName(), stopEx);
+						}
+					}
+				}
+			}
+		}
 
-        public void Stop()
-        {
-            foreach (var service in _services.Values)
-            {
-                service.Stop();
-            }
-        }
+		public void Stop()
+		{
+			foreach (IBusService service in _catalog.Services.Reverse())
+			{
+				try
+				{
+					service.Stop();
+				}
+				catch (Exception ex)
+				{
+					_log.Error("Failed to stop service: " + service.GetType().ToFriendlyName(), ex);
+				}
+			}
+		}
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-            if (disposing)
-            {
-                foreach (var service in _services.Values)
-                {
-                    service.Dispose();
-                }
-                _services.Clear();
-            }
-            _disposed = true;
-        }
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				foreach (IBusService service in _catalog.Services.Reverse())
+				{
+					service.Dispose();
+				}
+			}
+			_disposed = true;
+		}
 
-        ~ServiceContainer()
-        {
-            Dispose(false);
-        }
-    }
+		~ServiceContainer()
+		{
+			Dispose(false);
+		}
+	}
 }

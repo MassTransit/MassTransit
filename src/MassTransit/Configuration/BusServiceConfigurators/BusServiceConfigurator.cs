@@ -21,6 +21,8 @@ namespace MassTransit.BusServiceConfigurators
 		/// </summary>
 		Type ServiceType { get; }
 
+		BusServiceLayer Layer { get; }
+
 		/// <summary>
 		/// Creates the service
 		/// </summary>

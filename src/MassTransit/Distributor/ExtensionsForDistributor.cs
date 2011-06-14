@@ -31,7 +31,7 @@ namespace MassTransit.Distributor
 		public static void UseDistributorFor<T>(this ServiceBusConfigurator configurator)
 			where T : class
 		{
-			configurator.AddService(() => new Distributor<T>());
+			configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<T>());
 
 			configurator.SetReceiveTimeout(50.Milliseconds());
 		}
@@ -47,7 +47,7 @@ namespace MassTransit.Distributor
 			where TMessage : class
 			where TSelectionStrategy : class, IWorkerSelectionStrategy<TMessage>, new()
 		{
-			configurator.AddService(() => new Distributor<TMessage>(new TSelectionStrategy()));
+			configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<TMessage>(new TSelectionStrategy()));
 
 			configurator.SetReceiveTimeout(50.Milliseconds());
 		}
@@ -63,7 +63,7 @@ namespace MassTransit.Distributor
 		                                        IWorkerSelectionStrategy<TMessage> workerSelectionStrategy)
 			where TMessage : class
 		{
-			configurator.AddService(() => new Distributor<TMessage>(workerSelectionStrategy));
+			configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<TMessage>(workerSelectionStrategy));
 
 			configurator.SetReceiveTimeout(50.Milliseconds());
 		}
@@ -72,7 +72,7 @@ namespace MassTransit.Distributor
 		                                                 Func<TMessage, Action<TMessage>> getConsumer)
 			where TMessage : class
 		{
-			configurator.AddService(() => new Worker<TMessage>(getConsumer));
+			configurator.AddService(BusServiceLayer.Presentation, () => new Worker<TMessage>(getConsumer));
 		}
 
 		public static void ImplementDistributorWorker<TMessage>(this ServiceBusConfigurator configurator,
@@ -85,7 +85,7 @@ namespace MassTransit.Distributor
 					PendingLimit = pendingLimit
 				};
 
-			configurator.AddService(() => new Worker<TMessage>(getConsumer, settings));
+			configurator.AddService(BusServiceLayer.Presentation, () => new Worker<TMessage>(getConsumer, settings));
 		}
 
 		public static void UseSagaDistributorFor<T>(this ServiceBusConfigurator configurator)
@@ -102,7 +102,7 @@ namespace MassTransit.Distributor
 		                                                     ISagaRepository<T> repository)
 			where T : SagaStateMachine<T>, ISaga
 		{
-			configurator.AddService(bus => new SagaWorker<T>(repository));
+			configurator.AddService(BusServiceLayer.Presentation, bus => new SagaWorker<T>(repository));
 		}
 	}
 }

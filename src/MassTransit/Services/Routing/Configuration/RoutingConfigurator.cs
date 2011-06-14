@@ -28,6 +28,11 @@ namespace MassTransit.Services.Routing.Configuration
 			get { return typeof (RoutingService); }
 		}
 
+		public BusServiceLayer Layer
+		{
+			get { return BusServiceLayer.Presentation; }
+		}
+
 		public IBusService Create(IServiceBus bus)
 		{
 			return new RoutingService(_routes);

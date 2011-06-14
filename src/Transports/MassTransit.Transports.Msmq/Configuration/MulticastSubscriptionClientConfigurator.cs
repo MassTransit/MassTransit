@@ -40,6 +40,11 @@ namespace MassTransit.Transports.Msmq.Configuration
 			get { return typeof (MulticastSubscriptionClient); }
 		}
 
+		public BusServiceLayer Layer
+		{
+			get { return BusServiceLayer.Session; }
+		}
+
 		public IBusService Create(IServiceBus bus)
 		{
 			string path = bus.ControlBus.Endpoint.Address.Uri.AbsolutePath;

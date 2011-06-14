@@ -196,11 +196,6 @@ namespace MassTransit
 			}
 		}
 
-		public TService GetService<TService>() where TService : IBusService
-		{
-			return _serviceContainer.GetService<TService>();
-		}
-
 		public IOutboundMessagePipeline OutboundPipeline { get; private set; }
 
 		public IInboundMessagePipeline InboundPipeline { get; private set; }
@@ -248,9 +243,9 @@ namespace MassTransit
 			_started = true;
 		}
 
-		public void AddService(Type serviceType, IBusService service)
+		public void AddService(BusServiceLayer layer, IBusService service)
 		{
-			_serviceContainer.AddService(serviceType, service);
+			_serviceContainer.AddService(layer, service);
 		}
 
 		public void RemoveLoopbackSubsciber()

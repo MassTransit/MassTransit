@@ -17,9 +17,7 @@ namespace MassTransit
     public interface IServiceContainer :
         IDisposable
     {
-        TService GetService<TService>();
-
-        void AddService(Type serviceType, IBusService service);
+        void AddService(BusServiceLayer layer, IBusService service);
 
         void Start();
         void Stop();
