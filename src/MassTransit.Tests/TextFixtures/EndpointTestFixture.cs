@@ -120,8 +120,8 @@ namespace MassTransit.Tests.TextFixtures
 		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator,
 		                                          ISubscriptionService subscriptionService)
 		{
-			configurator.AddService(() => new SubscriptionPublisher(subscriptionService));
-			configurator.AddService(() => new SubscriptionConsumer(subscriptionService));
+			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionPublisher(subscriptionService));
+			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(subscriptionService));
 		}
 
 		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()

@@ -55,8 +55,8 @@ namespace MassTransit.TestFramework.Fixtures
 
 			base.ConfigureServiceBus(uri, configurator);
 
-			configurator.AddService(() => new SubscriptionPublisher(SubscriptionService));
-			configurator.AddService(() => new SubscriptionConsumer(SubscriptionService));
+			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionPublisher(SubscriptionService));
+			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(SubscriptionService));
 		}
 
 		void SetupSubscriptionService()
