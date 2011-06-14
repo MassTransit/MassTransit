@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Saga
 			configurator.UseSagaDistributorFor<TestSaga>();
 
 			IList<object[]> calls =
-				configurator.GetArgumentsForCallsMadeOn(x => x.AddService(() => new Distributor<InitiateSimpleSaga>()));
+				configurator.GetArgumentsForCallsMadeOn(x => x.AddService(BusServiceLayer.Presentation, () => new Distributor<InitiateSimpleSaga>()));
 
 			calls.Count.ShouldEqual(3, "Not enough calls were made to configure the saga");
 
