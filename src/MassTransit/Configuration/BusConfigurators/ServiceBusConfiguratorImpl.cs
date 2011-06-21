@@ -47,8 +47,14 @@ namespace MassTransit.BusConfigurators
 		{
 			if (_builderFactory == null)
 				yield return this.Failure("BuilderFactory", "The builder factory cannot be null.");
+
 			if (_settings.InputAddress == null)
-				yield return this.Failure("InputAddress", "The input address cannot be null.");
+			{
+			    var msg = "The 'InputAddress' is null. #sadpanda I was expecting an address to be set like 'msmq://localhost/queue'";
+			    msg += "or 'rabbitmq://localhost/queue'. The InputAddress is a 'Uri' by the way.";
+
+				yield return this.Failure("InputAddress", msg);
+			}
 
 			foreach (var result in _endpointFactoryConfigurator.Validate())
 				yield return result.WithParentKey("EndpointFactory");

@@ -34,7 +34,7 @@ namespace MassTransit.Saga.SubscriptionConfigurators
 		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_sagaRepository == null)
-				yield return this.Failure("The saga repository cannot be null.");
+				yield return this.Failure("The saga repository cannot be null. How else are we going to save stuff? #facetopalm");
 		}
 
 		public SubscriptionBuilder Configure()

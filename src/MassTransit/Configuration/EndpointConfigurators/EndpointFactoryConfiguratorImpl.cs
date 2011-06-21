@@ -36,7 +36,7 @@ namespace MassTransit.EndpointConfigurators
 		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_endpointFactoryBuilderFactory == null)
-				yield return this.Failure("BuilderFactory", "The builder factory was null.");
+				yield return this.Failure("BuilderFactory", "The builder factory was null. Since this came from a 'Default' this is spooky.");
 
 			foreach (var result in _endpointFactoryConfigurators.SelectMany(configurator => configurator.Validate()))
 				yield return result.WithParentKey("EndpointFactory");
