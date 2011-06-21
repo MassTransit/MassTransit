@@ -19,8 +19,9 @@ namespace MassTransit.EndpointConfigurators
 	using Magnum;
 	using Serialization;
 	using Transports;
+	using Magnum.Extensions;
 
-	public class EndpointConfiguratorImpl :
+    public class EndpointConfiguratorImpl :
 		EndpointConfigurator,
 		EndpointFactoryBuilderConfigurator
 	{
@@ -93,7 +94,8 @@ namespace MassTransit.EndpointConfigurators
 			{
 				if (string.Compare(_errorAddress.Uri.Scheme, _settings.Address.Uri.Scheme, true) != 0)
 					yield return this.Failure("ErrorAddress", _errorAddress.ToString(),
-						"The error address must use the same scheme as the endpoint address");
+						"The error address ('{0}') must use the same scheme as the endpoint address ('{1}')"
+                        .FormatWith(_errorAddress.Uri, _settings.Address.Uri.Scheme));
 				else
 					yield return this.Success("ErrorAddress", "Using specified error address: " + _errorAddress);
 			}

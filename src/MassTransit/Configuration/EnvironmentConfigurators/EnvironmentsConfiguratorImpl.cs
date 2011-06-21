@@ -16,8 +16,10 @@ namespace MassTransit.EnvironmentConfigurators
 	using System.Collections.Generic;
 	using Configuration;
 	using Configurators;
+	using System.Linq;
+	using Magnum.Extensions;
 
-	public class EnvironmentsConfiguratorImpl :
+    public class EnvironmentsConfiguratorImpl :
 		EnvironmentsConfigurator
 	{
 		readonly IDictionary<string, Func<IServiceBusEnvironment>> _environments;
@@ -31,7 +33,12 @@ namespace MassTransit.EnvironmentConfigurators
 		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_currentEnvironment == null)
-				yield return this.Failure("Current", "A current environment was not specified.");
+			{
+			    var msg = "A current enviroment was not specified. Known options are '{0}'";
+			    var knownEnvironments = _environments.Select(kvp => kvp.Key).Aggregate((l, r) => l + ", " + r);
+			    
+				yield return this.Failure("Current", msg.FormatWith(knownEnvironments));
+			}
 		}
 
 

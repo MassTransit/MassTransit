@@ -31,7 +31,7 @@ namespace MassTransit.SubscriptionConfigurators
 		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_instance == null)
-				yield return this.Failure("The instance cannot be null.");
+				yield return this.Failure("The instance cannot be null. This should have come in the ctor.");
 		}
 
 		public SubscriptionBuilder Configure()

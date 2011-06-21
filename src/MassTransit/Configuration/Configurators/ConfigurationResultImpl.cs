@@ -33,11 +33,16 @@ namespace MassTransit.Configurators
 			get { return _results; }
 		}
 
+	    public bool ContainsFailure
+	    {
+	        get { return _results.Any(x => x.Disposition == ValidationResultDisposition.Failure); }
+	    }
+
 		public static ConfigurationResult CompileResults(IEnumerable<ValidationResult> results)
 		{
 			var result = new ConfigurationResultImpl(results);
 
-			if (result.Results.Any(x => x.Disposition == ValidationResultDisposition.Failure))
+			if (result.ContainsFailure)
 			{
 				string message = "The service bus was not properly configured:" +
 				                 Environment.NewLine +

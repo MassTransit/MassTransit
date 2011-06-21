@@ -49,7 +49,7 @@ namespace MassTransit.SubscriptionConfigurators
 		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_handler == null)
-				yield return this.Failure("The handler cannot be null.");
+				yield return this.Failure("The handler cannot be null. This should have come from the ctor.");
 		}
 
 		public SubscriptionBuilder Configure()

@@ -18,13 +18,14 @@ namespace MassTransit.EndpointConfigurators
 	using Configurators;
 	using Exceptions;
 	using Transports;
+	using Util;
 
-	public class TransportFactoryEndpointFactoryConfigurator :
+    public class TransportFactoryEndpointFactoryConfigurator :
 		EndpointFactoryBuilderConfigurator
 	{
 		readonly Func<ITransportFactory> _transportFactory;
 
-		public TransportFactoryEndpointFactoryConfigurator(Func<ITransportFactory> transportFactory)
+		public TransportFactoryEndpointFactoryConfigurator([NotNull] Func<ITransportFactory> transportFactory)
 		{
 			_transportFactory = transportFactory;
 		}
@@ -32,12 +33,13 @@ namespace MassTransit.EndpointConfigurators
 		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_transportFactory == null)
-				yield return this.Failure("TransportFactory", "The transport factory was null.");
+				yield return this.Failure("TransportFactory", "The transport factory was null. This should have been in the ctor.");
 		}
 
 		public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
 		{
-			ITransportFactory transportFactory = _transportFactory();
+			var transportFactory = _transportFactory();
+
 			if (transportFactory == null)
 				throw new ConfigurationException("A transport factory was not created");
 

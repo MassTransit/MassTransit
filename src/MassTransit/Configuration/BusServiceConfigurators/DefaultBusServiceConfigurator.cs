@@ -25,7 +25,7 @@ namespace MassTransit.BusServiceConfigurators
 		where TService : IBusService
 	{
 		readonly Func<IServiceBus, TService> _serviceFactory;
-		BusServiceLayer _layer;
+	    readonly BusServiceLayer _layer;
 
 		public DefaultBusServiceConfigurator(BusServiceLayer layer, Func<IServiceBus, TService> serviceFactory)
 		{
@@ -36,7 +36,7 @@ namespace MassTransit.BusServiceConfigurators
 		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_serviceFactory == null)
-				yield return this.Failure("BusServiceFactory", "The bus service factory for {0} was null."
+				yield return this.Failure("BusServiceFactory", "The bus service factory for '{0}' was null."
 					.FormatWith(typeof (TService).Name));
 		}
 

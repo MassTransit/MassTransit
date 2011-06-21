@@ -30,7 +30,7 @@ namespace MassTransit.EndpointConfigurators
 		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_builderCallback == null)
-				yield return this.Failure("BuilderCallback", "was not configured");
+				yield return this.Failure("BuilderCallback", "was not configured. This should have been passed in via the ctor.");
 		}
 
 		public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
