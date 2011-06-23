@@ -16,31 +16,31 @@ namespace MassTransit.Transports.Msmq
 	using System.Diagnostics;
 	using System.Messaging;
 	using System.Transactions;
-	using Context;
 	using log4net;
-	using Magnum.Extensions;
 
 	[DebuggerDisplay("IN:TX:{Address}")]
 	public class TransactionalInboundMsmqTransport :
 		InboundMsmqTransport
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (TransactionalInboundMsmqTransport));
-		TimeSpan _transactionTimeout;
+		readonly IsolationLevel _isolationLevel;
+		readonly TimeSpan _transactionTimeout;
 
-		public TransactionalInboundMsmqTransport(IMsmqEndpointAddress address, TimeSpan transactionTimeout)
+		public TransactionalInboundMsmqTransport(IMsmqEndpointAddress address, TimeSpan transactionTimeout,
+		                                         IsolationLevel isolationLevel)
 			: base(address)
 		{
 			_transactionTimeout = transactionTimeout;
+			_isolationLevel = isolationLevel;
 		}
 
 		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
 		{
 			try
 			{
-				_transactionTimeout = 30.Seconds();
 				var options = new TransactionOptions
 					{
-						IsolationLevel = IsolationLevel.Serializable,
+						IsolationLevel = _isolationLevel,
 						Timeout = _transactionTimeout,
 					};
 

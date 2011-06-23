@@ -12,16 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Threading;
-    using Events;
-    using Exceptions;
-    using log4net;
-    using Stact;
+	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.Threading;
+	using Events;
+	using Exceptions;
+	using log4net;
+	using Magnum;
+	using Stact;
 
-    public class ServiceBusReceiveContext
+	public class ServiceBusReceiveContext
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusReceiveContext));
 
@@ -34,6 +35,8 @@ namespace MassTransit.Context
 		bool _consumeNotified;
 		IEnumerator<Action<IConsumeContext>> _consumers;
 		bool _receiveNotified;
+		DateTime _startTime;
+		Guid _id;
 
 		public ServiceBusReceiveContext(IServiceBus bus, UntypedChannel eventChannel, TimeSpan receiveTimeout)
 		{
@@ -53,6 +56,7 @@ namespace MassTransit.Context
 					_log.DebugFormat("Calling Receive on {0} from thread {1} ({2})", _bus.Endpoint.Address.Uri,
 						Thread.CurrentThread.ManagedThreadId, _receiveTimeout);
 
+				_startTime = SystemUtil.UtcNow;
 				_receiveTime.Start();
 
 				_bus.Endpoint.Receive(context =>
@@ -62,6 +66,9 @@ namespace MassTransit.Context
 								Thread.CurrentThread.ManagedThreadId);
 
 						context.SetBus(_bus);
+						
+						_id = CombGuid.Generate();
+						context.SetId(_id);
 
 						IEnumerable<Action<IConsumeContext>> enumerable = _bus.InboundPipeline.Enumerate(context);
 
@@ -139,28 +146,31 @@ namespace MassTransit.Context
 				_consumers.Dispose();
 				_consumers = null;
 
-				ReportConsumerTime(context.MessageType, _receiveTime.Elapsed, _consumeTime.Elapsed);
-				ReportConsumerCount(context.MessageType, _consumeCount);
+				ReportConsumerTime(_id, _startTime, _receiveTime.Elapsed, _consumeTime.Elapsed, context);
+				ReportConsumerCount(context, _consumeCount);
 			}
 		}
 
-		void ReportConsumerTime(string messageType, TimeSpan receiveTime, TimeSpan consumeTime)
+		void ReportConsumerTime(Guid id, DateTime startTime, TimeSpan receiveDuration, TimeSpan consumeDuration,
+		                        IConsumeContext context)
 		{
 			var message = new MessageReceived
 				{
-					MessageType = messageType,
-					ReceiveDuration = receiveTime,
-					ConsumeDuration = consumeTime,
+					Id = id,
+					Context = context,
+					ReceivedAt = startTime,
+					ReceiveDuration = receiveDuration,
+					ConsumeDuration = consumeDuration,
 				};
 
 			_eventChannel.Send(message);
 		}
 
-		void ReportConsumerCount(string messageType, int count)
+		void ReportConsumerCount(IConsumeContext context, int count)
 		{
 			var message = new MessageConsumed
 				{
-					MessageType = messageType,
+					Context = context,
 					ConsumeCount = count,
 				};
 

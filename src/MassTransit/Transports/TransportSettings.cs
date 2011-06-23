@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
 	using System;
+	using System.Transactions;
 	using Magnum;
 	using Magnum.Extensions;
 
@@ -28,6 +29,7 @@ namespace MassTransit.Transports
 			Transactional = Address.IsTransactional;
 			RequireTransactional = false;
 			TransactionTimeout = 30.Seconds();
+			IsolationLevel = IsolationLevel.Serializable;
 
 			CreateIfMissing = true;
 			PurgeExistingMessages = false;
@@ -43,6 +45,7 @@ namespace MassTransit.Transports
 			Transactional = source.Transactional;
 			RequireTransactional = source.RequireTransactional;
 			TransactionTimeout = source.TransactionTimeout;
+			IsolationLevel = source.IsolationLevel;
 
 			CreateIfMissing = source.CreateIfMissing;
 			PurgeExistingMessages = source.PurgeExistingMessages;
@@ -79,5 +82,10 @@ namespace MassTransit.Transports
 		/// If the transport should purge any existing messages before reading from the queue
 		/// </summary>
 		public bool PurgeExistingMessages { get; set; }
+
+		/// <summary>
+		/// The isolation level to use with the transaction if a transactional transport is used
+		/// </summary>
+		public IsolationLevel IsolationLevel { get; set; }
 	}
 }

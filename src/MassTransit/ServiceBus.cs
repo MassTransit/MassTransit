@@ -212,6 +212,14 @@ namespace MassTransit
 
 		public IServiceBus ControlBus { get; set; }
 
+		public UntypedChannel EventChannel
+		{
+			get
+			{
+				return _eventChannel;
+			}
+		}
+
 		public IEndpoint GetEndpoint(Uri address)
 		{
 			return EndpointCache.GetEndpoint(address);

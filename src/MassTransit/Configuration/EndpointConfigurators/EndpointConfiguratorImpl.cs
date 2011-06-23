@@ -14,6 +14,7 @@ namespace MassTransit.EndpointConfigurators
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Transactions;
 	using Builders;
 	using Configurators;
 	using Magnum;
@@ -74,7 +75,21 @@ namespace MassTransit.EndpointConfigurators
 			return this;
 		}
 
-		public EndpointConfigurator CreateTransactional()
+		public EndpointConfigurator SetTransactionTimeout(TimeSpan timeout)
+		{
+			_settings.TransactionTimeout = timeout;
+
+			return this;
+		}
+
+		public EndpointConfigurator SetIsolationLevel(IsolationLevel isolationLevel)
+		{
+			_settings.IsolationLevel = isolationLevel;
+
+			return this;
+		}
+
+    	public EndpointConfigurator CreateTransactional()
 		{
 			_settings.Transactional = true;
 
