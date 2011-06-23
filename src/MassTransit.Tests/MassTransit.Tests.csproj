@@ -182,6 +182,8 @@
     <Compile Include="Performance\EndpointLoadTest.cs" />
     <Compile Include="Performance\LoadedRequest.cs" />
     <Compile Include="Performance\LoadedResponse.cs" />
+    <Compile Include="Saga\StateMachine\CombineSaga.cs" />
+    <Compile Include="Saga\StateMachine\CombineSaga_Specs.cs" />
     <Compile Include="Testing\ConsumerMultiple_Specs.cs" />
     <Compile Include="Testing\ConsumerTest_Specs.cs" />
     <Compile Include="Testing\HandlerRespond_Specs.cs" />
