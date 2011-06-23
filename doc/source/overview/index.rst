@@ -5,3 +5,4 @@ How MassTransit Works
 
     publishing.rst
     sending.rst
+	terms.rst
