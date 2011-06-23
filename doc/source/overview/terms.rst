@@ -2,11 +2,7 @@ Some MassTransit Terminology
 ===================================================
 
 Receiver is anything that receives a message. MassTransit
-currently has 4 receiver types
-
-However, both transports do their message routing dynamically. There is, 
-by default, no static way to set routes. The routes are all interpreted
-at run time and deployed to the system.
+currently has 4 receiver types.
 
 Handlers
 --------
