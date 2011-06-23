@@ -57,5 +57,7 @@ namespace MassTransit
 		Stream BodyStream { get; }
 
 		void SetMessageTypeConverter(IMessageTypeConverter messageTypeConverter);
+
+		void SetId(Guid id);
 	}
 }

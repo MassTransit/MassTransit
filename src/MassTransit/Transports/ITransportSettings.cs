@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
 	using System;
+	using System.Transactions;
 
 	public interface ITransportSettings
 	{
@@ -47,5 +48,10 @@ namespace MassTransit.Transports
 		/// If the transport should purge any existing messages before reading from the queue
 		/// </summary>
 		bool PurgeExistingMessages { get; }
+
+		/// <summary>
+		/// The isolation level to use with the transaction if a transactional transport is used
+		/// </summary>
+		IsolationLevel IsolationLevel { get; }
 	}
 }

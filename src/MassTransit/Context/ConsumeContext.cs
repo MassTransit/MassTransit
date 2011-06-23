@@ -15,6 +15,7 @@ namespace MassTransit.Context
 	using System;
 	using System.IO;
 	using log4net;
+	using Magnum;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
 	using Serialization;
@@ -26,10 +27,12 @@ namespace MassTransit.Context
 	{
 		Stream _bodyStream;
 		IMessageTypeConverter _typeConverter;
+		DateTime _createdAt;
 
 		public ConsumeContext(Stream bodyStream)
 		{
 			_bodyStream = bodyStream;
+			_createdAt = SystemUtil.UtcNow;
 		}
 
 		/// <summary>

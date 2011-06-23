@@ -54,7 +54,7 @@ namespace MassTransit.Transports.Msmq
 
 				if (msmqSettings.Transactional)
 					return new TransactionalInboundMsmqTransport(msmqSettings.MsmqAddress(),
-						msmqSettings.TransactionTimeout);
+						msmqSettings.TransactionTimeout, msmqSettings.IsolationLevel);
 
 				return new NonTransactionalInboundMsmqTransport(msmqSettings.MsmqAddress());
 			}

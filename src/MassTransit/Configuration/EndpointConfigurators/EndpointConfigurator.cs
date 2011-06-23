@@ -13,6 +13,7 @@
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
+	using System.Transactions;
 	using Serialization;
 	using Transports;
 
@@ -64,5 +65,19 @@ namespace MassTransit.EndpointConfigurators
 		/// </summary>
 		/// <returns></returns>
 		EndpointConfigurator CreateIfMissing();
+
+		/// <summary>
+		/// Sets the transaction timeout for the endpoint
+		/// </summary>
+		/// <param name="timeout"></param>
+		/// <returns></returns>
+		EndpointConfigurator SetTransactionTimeout(TimeSpan timeout);
+
+		/// <summary>
+		/// Sets the isolation level for the endpoint if it is transactional
+		/// </summary>
+		/// <param name="isolationLevel"></param>
+		/// <returns></returns>
+		EndpointConfigurator SetIsolationLevel(IsolationLevel isolationLevel);
 	}
 }

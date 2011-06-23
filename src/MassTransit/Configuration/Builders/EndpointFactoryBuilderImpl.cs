@@ -14,6 +14,7 @@ namespace MassTransit.Builders
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Transactions;
 	using EndpointConfigurators;
 	using Serialization;
 	using Transports;
@@ -51,6 +52,11 @@ namespace MassTransit.Builders
 		public void SetDefaultTransactionTimeout(TimeSpan transactionTimeout)
 		{
 			_defaults.TransactionTimeout = transactionTimeout;
+		}
+
+		public void SetDefaultIsolationLevel(IsolationLevel isolationLevel)
+		{
+			_defaults.IsolationLevel = isolationLevel;
 		}
 
 		public void SetCreateMissingQueues(bool createMissingQueues)

@@ -13,6 +13,7 @@
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
+	using System.Transactions;
 	using Magnum.Extensions;
 	using Serialization;
 	using Transports;
@@ -27,6 +28,7 @@ namespace MassTransit.EndpointConfigurators
 			RequireTransactional = false;
 			Serializer = new XmlMessageSerializer();
 			TransactionTimeout = 30.Seconds();
+			IsolationLevel = IsolationLevel.Serializable;
 		}
 
 		public EndpointFactoryDefaultSettings(IEndpointFactoryDefaultSettings defaults)
@@ -40,6 +42,8 @@ namespace MassTransit.EndpointConfigurators
 		}
 
 		public TimeSpan TransactionTimeout { get; set; }
+
+		public IsolationLevel IsolationLevel { get; set; }
 
 		public IMessageSerializer Serializer { get; set; }
 

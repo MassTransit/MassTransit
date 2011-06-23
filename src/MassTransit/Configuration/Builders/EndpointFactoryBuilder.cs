@@ -13,6 +13,7 @@
 namespace MassTransit.Builders
 {
 	using System;
+	using System.Transactions;
 	using Serialization;
 	using Transports;
 
@@ -65,5 +66,7 @@ namespace MassTransit.Builders
 		/// </summary>
 		/// <param name="transportFactory"></param>
 		void AddTransportFactory(ITransportFactory transportFactory);
+
+		void SetDefaultIsolationLevel(IsolationLevel isolationLevel);
 	}
 }
