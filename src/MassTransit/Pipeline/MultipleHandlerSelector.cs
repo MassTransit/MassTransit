@@ -23,7 +23,8 @@ namespace MassTransit.Pipeline
 	/// <param name="context"></param>
 	/// <returns></returns>
 	public delegate IEnumerable<Action<IConsumeContext<TMessage>>> MultipleHandlerSelector<TMessage>(
-		IConsumeContext<TMessage> context);
+		IConsumeContext<TMessage> context)
+		where TMessage : class;
 
 	/// <summary>
 	/// A static class to create delegates easily

@@ -34,6 +34,7 @@ namespace MassTransit
 		}
 
 		public static IConsumeContext<T> MessageContext<T>(this IServiceBus bus)
+			where T : class
 		{
 			return ContextStorage.MessageContext<T>();
 		}

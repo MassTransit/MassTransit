@@ -113,8 +113,7 @@ namespace MassTransit.Tests.Pipeline
 		private static void SendMessages(IPipelineSink<IConsumeContext<PingMessage>> sink, int primeLoopCount)
 		{
 			var message = new PingMessage();
-			var consumeContext = new ConsumeContext(new MemoryStream());
-			var context = new ConsumeContext<PingMessage>(consumeContext, message);
+			var context = new ConsumeContext<PingMessage>(ReceiveContext.Empty(), message);
 
 			for (int i = 0; i < primeLoopCount; i++)
 			{
@@ -128,8 +127,7 @@ namespace MassTransit.Tests.Pipeline
 		private static void SendMessages(IPipelineSink<IConsumeContext> sink, int primeLoopCount)
 		{
 			var message = new PingMessage();
-			var consumeContext = new ConsumeContext(new MemoryStream());
-			var context = new ConsumeContext<PingMessage>(consumeContext, message);
+			var context = new ConsumeContext<PingMessage>(ReceiveContext.Empty(), message);
 
 			for (int i = 0; i < primeLoopCount; i++)
 			{
@@ -168,12 +166,11 @@ namespace MassTransit.Tests.Pipeline
             var pipeline = new InboundMessagePipeline(objectRouter, MockRepository.GenerateMock<IInboundPipelineConfigurator>());
 
             var message = new ClaimModified();
-			var consumeContext = new ConsumeContext(new MemoryStream());
-			var context = new ConsumeContext<ClaimModified>(consumeContext, message);
+			var context = new ConsumeContext<ClaimModified>(ReceiveContext.Empty(), message);
 
             for (int i = 0; i < 100; i++)
             {
-				pipeline.Dispatch(consumeContext);
+				pipeline.Dispatch(context);
             }
 
             count = 0;

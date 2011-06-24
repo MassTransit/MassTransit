@@ -107,7 +107,7 @@ namespace MassTransit.Context
 
 		static ContextException CreateException()
 		{
-			return new ContextException("The inbound context is only available when consuming a message");
+			return new ContextException("Consume context is only available when consuming a message");
 		}
 	}
 }

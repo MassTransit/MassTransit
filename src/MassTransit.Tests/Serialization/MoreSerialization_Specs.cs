@@ -334,7 +334,7 @@ namespace MassTransit.Tests.Serialization
 
 			using (var input = new MemoryStream(serializedMessageData))
 			{
-				var receiveContext = new ConsumeContext(input);
+				var receiveContext = ReceiveContext.FromBodyStream(input);
 				serializer.Deserialize(receiveContext);
 
 				IConsumeContext<SubscriptionRefresh> context;
@@ -365,7 +365,7 @@ namespace MassTransit.Tests.Serialization
 
 			using (var input = new MemoryStream(serializedMessageData))
 			{
-				var receiveContext = new ConsumeContext(input);
+				var receiveContext = ReceiveContext.FromBodyStream(input);
 				serializer.Deserialize(receiveContext);
 
 				IConsumeContext<SubscriptionRefresh> context;

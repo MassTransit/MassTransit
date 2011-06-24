@@ -17,16 +17,17 @@ namespace MassTransit.Diagnostics
 	using System.Linq;
 	using Context;
 	using Events;
+	using log4net;
 	using Stact;
 
 	public class MessageTraceBusService :
 		IBusService,
-		Consumes<GetMessageTrace>.All
+		Consumes<GetMessageTraceList>.All
 	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (MessageTraceBusService));
 		readonly ChannelConnection _connection;
 		readonly UntypedChannel _eventChannel;
 		readonly LinkedList<MessageTraceDetail> _messageList;
-		readonly IDictionary<Guid, MessageTraceDetail> _messageIndex;
 		IServiceBus _controlBus;
 		int _detailLimit;
 		Fiber _fiber;
@@ -37,7 +38,6 @@ namespace MassTransit.Diagnostics
 			_eventChannel = eventChannel;
 			_fiber = new PoolFiber();
 			_messageList = new LinkedList<MessageTraceDetail>();
-			_messageIndex = new Dictionary<Guid, MessageTraceDetail>();
 			_detailLimit = 100;
 
 			_connection = _eventChannel.Connect(x =>
@@ -45,16 +45,12 @@ namespace MassTransit.Diagnostics
 					x.AddConsumerOf<MessageReceived>()
 						.UsingConsumer(Handle)
 						.HandleOnFiber(_fiber);
-
-					x.AddConsumerOf<MessagePublished>()
-						.UsingConsumer(Handle)
-						.HandleOnFiber(_fiber);
 				});
 		}
 
-		public void Consume(GetMessageTrace message)
+		public void Consume(GetMessageTraceList message)
 		{
-			IConsumeContext<GetMessageTrace> context = ContextStorage.MessageContext<GetMessageTrace>();
+			IConsumeContext<GetMessageTraceList> context = ContextStorage.MessageContext<GetMessageTraceList>();
 
 			Uri responseAddress = context.ResponseAddress;
 			if (responseAddress == null)
@@ -89,7 +85,17 @@ namespace MassTransit.Diagnostics
 			MessageTraceDetail detail = new MessageTraceDetailImpl
 				{
 					Id = message.Id,
-					Context = message.Context,
+					MessageId = message.Context.MessageId,
+					MessageType = message.Context.MessageType,
+					ContentType = message.Context.ContentType,
+					SourceAddress = message.Context.SourceAddress,
+					InputAddress = message.Context.InputAddress,
+					DestinationAddress = message.Context.DestinationAddress,
+					ResponseAddress = message.Context.ResponseAddress,
+					FaultAddress = message.Context.FaultAddress,
+					Network = message.Context.Network,
+					ExpirationTime = message.Context.ExpirationTime,
+					RetryCount = message.Context.RetryCount,
 					ReceivedAt = message.ReceivedAt,
 					Duration = message.ReceiveDuration,
 				};
@@ -99,11 +105,6 @@ namespace MassTransit.Diagnostics
 			_messageList.AddLast(node);
 
 			RemoveExtraDetailFromList();
-		}
-
-		void Handle(MessagePublished message)
-		{
-			
 		}
 
 		void RemoveExtraDetailFromList()
@@ -120,11 +121,18 @@ namespace MassTransit.Diagnostics
 
 		void SendLastTraceMessagesTo(IEndpoint endpoint, int count)
 		{
-			IList<MessageTraceDetail> details = _messageList.Reverse().Take(count).ToList();
+			try
+			{
+				IList<MessageTraceDetail> details = _messageList.Reverse().Take(count).ToList();
 
-			var message = new MessageTraceListImpl {Messages = details};
+				var message = new MessageTraceListImpl {Messages = details};
 
-			endpoint.Send<MessageTraceList>(message);
+				endpoint.Send<MessageTraceList>(message);
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Failed to send message", ex);
+			}
 		}
 	}
 }

@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Serialization
 	using System;
 	using System.Diagnostics;
 	using System.IO;
+	using Context;
 	using Magnum.Extensions;
 	using MassTransit.Serialization;
 	using Messages;
@@ -55,7 +56,7 @@ namespace MassTransit.Tests.Serialization
 				}
 				using (var input = new MemoryStream(data))
 				{
-					serializer.Deserialize(input.ToReceiveContext());
+					serializer.Deserialize(ReceiveContext.FromBodyStream(input));
 				}
 			}
 
@@ -91,7 +92,7 @@ namespace MassTransit.Tests.Serialization
 			{
 				using (var input = new MemoryStream(sample))
 				{
-					serializer.Deserialize(input.ToReceiveContext());
+					serializer.Deserialize(ReceiveContext.FromBodyStream(input));
 				}
 			}
 

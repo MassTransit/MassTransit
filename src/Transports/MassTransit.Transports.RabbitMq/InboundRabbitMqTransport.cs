@@ -63,7 +63,7 @@ namespace MassTransit.Transports.RabbitMq
 
 				using (var body = new MemoryStream(result.Body, false))
 				{
-					var context = new ConsumeContext(body);
+					var context = ReceiveContext.FromBodyStream(body);
 					context.SetMessageId(result.BasicProperties.MessageId ?? result.ConsumerTag + ":" + result.DeliveryTag);
 					context.SetInputAddress(_address);
 
@@ -74,7 +74,7 @@ namespace MassTransit.Transports.RabbitMq
 						context.SetContentType(Encoding.UTF8.GetString(contentType));
 					}
 
-					using (ContextStorage.CreateContextScope(context))
+					using (context.CreateScope())
 					{
 						Action<IReceiveContext> receive = callback(context);
 						if (receive == null)

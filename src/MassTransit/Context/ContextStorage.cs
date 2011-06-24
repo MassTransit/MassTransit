@@ -14,15 +14,17 @@ namespace MassTransit.Context
 {
 	using System;
 	using System.Collections;
+	using System.IO;
 	using System.Web;
+
 
 	/// <summary>
 	/// The default context provider using thread local storage
 	/// </summary>
 	public static class ContextStorage
 	{
-		const string InboundContextKey = "InboundContext";
-		const string OutboundContextKey = "OutboundContext";
+		internal const string InboundContextKey = "InboundContext";
+		public const string OutboundContextKey = "OutboundContext";
 
 		static readonly object _hashKey = new object();
 
@@ -53,7 +55,7 @@ namespace MassTransit.Context
 			get { return HttpContext.Current != null; }
 		}
 
-		public static IDisposable CreateContextScope(IConsumeContext context)
+		static IDisposable SetReceiveContext(IConsumeContext context)
 		{
 			var previousContext = Retrieve<IConsumeContext>(InboundContextKey);
 
@@ -62,7 +64,7 @@ namespace MassTransit.Context
 			return new PreviousContext<IConsumeContext>(InboundContextKey, previousContext);
 		}
 
-		public static IDisposable CreateContextScope<T>(IConsumeContext<T> context)
+		static IDisposable SetReceiveContext<T>(IConsumeContext<T> context)
 			where T : class
 		{
 			var previousContext = Retrieve<IConsumeContext>(InboundContextKey);
@@ -73,6 +75,7 @@ namespace MassTransit.Context
 		}	
 
 		public static IConsumeContext<T> MessageContext<T>()
+			where T : class
 		{
 			var context = Retrieve<IConsumeContext<T>>(InboundContextKey);
 			if (context == null)
@@ -108,17 +111,20 @@ namespace MassTransit.Context
 			return contextCallback(context);
 		}
 
-		public static IDisposable CreateContextScope<T>(IBusPublishContext<T> context) 
+		public static IDisposable SetSendContext<T>(IBusPublishContext<T> context) 
 			where T : class
 		{
 			var previousContext = Retrieve<ISendContext>(OutboundContextKey);
 
 			Store(OutboundContextKey, context);
 
+			var receiveContext = Retrieve<IReceiveContext>(InboundContextKey);
+			context.SetReceiveContext(receiveContext);
+
 			return new PreviousContext<ISendContext>(OutboundContextKey, previousContext);
 		}	
 		
-		public static IDisposable CreateContextScope<T>(ISendContext<T> context) 
+		public static IDisposable SetSendContext<T>(ISendContext<T> context) 
 			where T : class
 		{
 			var previousContext = Retrieve<ISendContext>(OutboundContextKey);
@@ -135,7 +141,7 @@ namespace MassTransit.Context
 			cache[key] = value;
 		}
 
-		static TValue Retrieve<TValue>(string key)
+		internal static TValue Retrieve<TValue>(string key)
 		{
 			Hashtable cache = ContextCache;
 
@@ -153,6 +159,11 @@ namespace MassTransit.Context
 			hashtable[OutboundContextKey] = new InvalidSendContext();
 
 			return hashtable;
+		}
+
+		public static ReceiveContext CreateInboundContext(Stream bodyStream)
+		{
+			return ReceiveContext.FromBodyStream(bodyStream);
 		}
 	}
 }

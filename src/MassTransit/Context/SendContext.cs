@@ -52,12 +52,7 @@ namespace MassTransit.Context
 		public virtual bool TryGetContext<TMessage>(out IBusPublishContext<TMessage> context)
 			where TMessage : class
 		{
-			context = null;
-
-			if (typeof (TMessage).IsAssignableFrom(typeof (T)))
-			{
-				context = new PublishContext<TMessage>(_message as TMessage, this);
-			}
+			context = PublishContext<TMessage>.FromMessage(_message, this);
 
 			return context != null;
 		}

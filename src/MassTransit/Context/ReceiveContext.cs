@@ -13,26 +13,32 @@
 namespace MassTransit.Context
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
+	using Diagnostics;
 	using log4net;
-	using Magnum;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
 	using Serialization;
 	using Util;
 
-	public class ConsumeContext :
+	public class ReceiveContext :
 		MessageContext,
-		IBusContext
+		IReceiveContext
 	{
 		Stream _bodyStream;
 		IMessageTypeConverter _typeConverter;
-		DateTime _createdAt;
+		readonly IList<Type> _receiverTypes;
 
-		public ConsumeContext(Stream bodyStream)
+		ReceiveContext()
+		{
+			_receiverTypes = new List<Type>();
+		}
+
+		ReceiveContext(Stream bodyStream)
+			: this()
 		{
 			_bodyStream = bodyStream;
-			_createdAt = SystemUtil.UtcNow;
 		}
 
 		/// <summary>
@@ -81,6 +87,14 @@ namespace MassTransit.Context
 			_typeConverter = serializer;
 		}
 
+		public void AddSend<T>(ISendContext<T> sendContext, IEndpoint endpoint) where T : class
+		{
+		}
+
+		public void AddPublish<T>(IPublishContext<T> publishContext) where T : class
+		{
+		}
+
 		public bool TryGetContext<T>(out IConsumeContext<T> context)
 			where T : class
 		{
@@ -88,6 +102,7 @@ namespace MassTransit.Context
 			if (_typeConverter.TryConvert(out message))
 			{
 				context = new ConsumeContext<T>(this, message);
+				_receiverTypes.Add(typeof (T));
 				return true;
 			}
 
@@ -139,13 +154,23 @@ namespace MassTransit.Context
 				Bus.Publish(message);
 			}
 		}
+
+		public static ReceiveContext FromBodyStream(Stream bodyStream)
+		{
+			return new ReceiveContext(bodyStream);
+		}
+
+		public static ReceiveContext Empty()
+		{
+			return new ReceiveContext(null);
+		}
 	}
 
 	public class ConsumeContext<TMessage> :
 		IConsumeContext<TMessage>
 		where TMessage : class
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ConsumeContext));
+		static readonly ILog _log = LogManager.GetLogger(typeof (ReceiveContext));
 
 		readonly IConsumeContext _context;
 		readonly TMessage _message;

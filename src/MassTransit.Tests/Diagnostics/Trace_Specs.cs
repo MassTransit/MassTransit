@@ -4,7 +4,6 @@ namespace MassTransit.Tests.Diagnostics
 	using Magnum.TestFramework;
 	using MassTransit.Diagnostics;
 	using MassTransit.Testing;
-	using NUnit.Framework;
 
 	[Scenario]
 	public class When_tracing_messages_on_the_bus
@@ -29,10 +28,13 @@ namespace MassTransit.Tests.Diagnostics
 
 			_test.Execute();
 
+			_test.Received.Any<InputMessage>().ShouldBeTrue();
+			_test.Sent.Any<OutputMessage>().ShouldBeTrue();
+
 			_future = new FutureMessage<MessageTraceList>();
 			_test.Scenario.Bus.SubscribeHandler<MessageTraceList>(_future.Set);
 
-			_test.Scenario.Bus.ControlBus.Endpoint.Send<GetMessageTrace>(new GetMessageTraceImpl { Count = 1 }, x =>
+			_test.Scenario.Bus.ControlBus.Endpoint.Send<GetMessageTraceList>(new GetMessageTraceListImpl { Count = 1 }, x =>
 			{
 				x.SendResponseTo(_test.Scenario.Bus);
 			});
@@ -48,18 +50,19 @@ namespace MassTransit.Tests.Diagnostics
 			_test = null;
 		}
 
-		[Then, Explicit]
+		[Then]
 		public void Should_have_handled_one_message_in_the_trace_log()
 		{
 			_list.ShouldNotBeNull();
 			_list.Messages.ShouldNotBeNull();
 			_list.Messages.Count.ShouldEqual(1);
+		}
 
-
-
-
-
-
+		[Then]
+		public void Should_have_had_one_receiver_in_the_trace_log()
+		{
+			_list.Messages[0].Receivers.ShouldNotBeNull();
+			_list.Messages[0].Receivers.Count.ShouldEqual(1);
 		}
 
 

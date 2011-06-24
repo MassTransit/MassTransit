@@ -48,7 +48,7 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			yield return context =>
 				{
-					using (ContextStorage.CreateContextScope(context))
+					using (context.CreateScope())
 					{
 						instance.Consume(context.Message);
 					}

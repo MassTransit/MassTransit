@@ -33,6 +33,11 @@ namespace MassTransit.Context
 			get { throw CreateException(); }
 		}
 
+		public Uri InputAddress
+		{
+			get { throw CreateException(); }
+		}
+
 		public Uri DestinationAddress
 		{
 			get { throw CreateException(); }
@@ -85,7 +90,7 @@ namespace MassTransit.Context
 
 		static ContextException CreateException()
 		{
-			return new ContextException("The inbound context is only available when consuming a message");
+			return new ContextException("Send/Publish context is only available when consuming a message");
 		}
 	}
 }

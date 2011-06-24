@@ -21,7 +21,7 @@ namespace MassTransit
 			where T : class
 		{
 			var context = new SendContext<T>(message);
-			using (ContextStorage.CreateContextScope(context))
+			using (ContextStorage.SetSendContext(context))
 			{
 				endpoint.Send(context);
 			}
@@ -31,7 +31,7 @@ namespace MassTransit
 			where T : class
 		{
 			var context = new SendContext<T>(message);
-			using (ContextStorage.CreateContextScope(context))
+			using (ContextStorage.SetSendContext(context))
 			{
 				contextCallback(context);
 

@@ -10,17 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Context
+namespace MassTransit
 {
 	using System;
+	using Context;
 
-	/// <summary>
-	/// A context provider is used to obtain context information about the message
-	/// </summary>
-	public interface IContextProvider
+	public static class ContextScopeExtensions
 	{
-		void Context(Action<IConsumeContext> contextCallback);
+		public static IDisposable CreateScope<T>(this IBusPublishContext<T> context)
+			where T : class
+		{
+			return ContextScope.FromPublishContext(context);
+		}
 
-		TResult Context<TResult>(Func<IConsumeContext, TResult> contextCallback);
+		public static IDisposable CreateScope(this IReceiveContext context)
+		{
+			return ContextScope.FromReceiveContext(context);
+		}
+
+		public static IDisposable CreateScope<T>(this IConsumeContext<T> context)
+			where T : class
+		{
+			return ContextScope.FromConsumeContext(context);
+		}
 	}
 }

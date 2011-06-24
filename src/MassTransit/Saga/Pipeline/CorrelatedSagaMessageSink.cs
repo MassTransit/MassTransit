@@ -14,7 +14,6 @@ namespace MassTransit.Saga.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
-	using Context;
 
 	public class CorrelatedSagaMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
@@ -32,7 +31,7 @@ namespace MassTransit.Saga.Pipeline
 				{
 					instance.Bus = context.Bus;
 
-					using (ContextStorage.CreateContextScope(x))
+					using (x.CreateScope())
 					{
 						instance.Consume(x.Message);
 					}

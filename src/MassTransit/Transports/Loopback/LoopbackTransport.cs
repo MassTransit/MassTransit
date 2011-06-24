@@ -53,10 +53,12 @@ namespace MassTransit.Transports
 					_messages.AddLast(message);
 				}
 			}
-			catch (Exception)
+			catch
 			{
 				if(message != null)
 					message.Dispose();
+
+				throw;
 			}
 
 			_messageReady.Set();
@@ -99,12 +101,13 @@ namespace MassTransit.Transports
 							return;
 						}
 
-						var context = new ConsumeContext(message.Body);
+						var context = ContextStorage.CreateInboundContext(message.Body);
+
 						context.SetMessageId(message.MessageId);
 						if(message.ExpirationTime.HasValue)
 							context.SetExpirationTime(message.ExpirationTime.Value);
 
-						using (ContextStorage.CreateContextScope(context))
+						using (context.CreateScope())
 						{
 							Action<IReceiveContext> receive = callback(context);
 							if (receive == null)
