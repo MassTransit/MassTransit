@@ -17,6 +17,7 @@ namespace MassTransit
 
 	public interface IMessageContext<T> :
 		IMessageContext
+		where T : class
 	{
 		T Message { get; }
 	}
@@ -45,6 +46,11 @@ namespace MassTransit
 		/// The address from which this message originated
 		/// </summary>
 		Uri SourceAddress { get; }
+
+		/// <summary>
+		/// The address from which this message was most recently read
+		/// </summary>
+		Uri InputAddress { get; }
 
 		/// <summary>
 		/// The address to which the message was originally sent

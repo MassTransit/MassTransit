@@ -15,7 +15,6 @@ namespace MassTransit.Saga.Pipeline
 	using System;
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
-	using Context;
 
 	public class PropertySagaMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
@@ -38,7 +37,7 @@ namespace MassTransit.Saga.Pipeline
 				{
 					instance.Bus = context.Bus;
 
-					using (ContextStorage.CreateContextScope(x))
+					using (x.CreateScope())
 					{
 						instance.Consume(x.Message);
 					}

@@ -23,6 +23,7 @@ namespace MassTransit.Saga
 	/// <typeparam name="TMessage">The message that will be handled by the saga</typeparam>
 	public interface ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
+		where TMessage : class
 	{
 		/// <summary>
 		/// Determines if the message is able to create a new instance of the saga

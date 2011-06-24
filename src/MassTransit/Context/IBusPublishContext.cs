@@ -37,5 +37,11 @@ namespace MassTransit
 		/// <param name="endpoint"></param>
 		/// <returns></returns>
 		bool WasEndpointAlreadySent(IEndpoint endpoint);
+
+		/// <summary>
+		/// Sets the consume context that the publish was created in for tracing
+		/// </summary>
+		/// <param name="receiveContext"></param>
+		void SetReceiveContext(IReceiveContext receiveContext);
 	}
 }

@@ -13,7 +13,6 @@
 namespace MassTransit.Pipeline
 {
 	using System;
-	using Context;
 
 	/// <summary>
 	/// Given a message, returns the handler for that message, or null if the message
@@ -35,7 +34,7 @@ namespace MassTransit.Pipeline
 		{
 			return context => x =>
 				{
-					using (ContextStorage.CreateContextScope(x))
+					using (x.CreateScope())
 					{
 						handler(x.Message);
 					}
@@ -56,7 +55,7 @@ namespace MassTransit.Pipeline
 				{
 					if (condition != null)
 					{
-						using (ContextStorage.CreateContextScope(context))
+						using (context.CreateScope())
 						{
 							if (!condition(context.Message))
 								return null;
@@ -65,7 +64,7 @@ namespace MassTransit.Pipeline
 
 					return x =>
 						{
-							using (ContextStorage.CreateContextScope(x))
+							using (x.CreateScope())
 							{
 								handler(x.Message);
 							}

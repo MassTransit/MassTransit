@@ -19,6 +19,7 @@ namespace MassTransit.Saga
 	public class InitiatingSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
+		where TMessage : class
 	{
 		readonly Func<TMessage, Guid> _getNewSagaId;
 		readonly Func<TSaga, bool> _canRemoveInstance;

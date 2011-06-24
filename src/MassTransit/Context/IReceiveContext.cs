@@ -49,7 +49,6 @@ namespace MassTransit
 
 		void SetMessageType(string messageType);
 
-
 		void SetBodyStream(Stream stream);
 
 		void CopyBodyTo(Stream stream);
@@ -57,7 +56,11 @@ namespace MassTransit
 		Stream BodyStream { get; }
 
 		void SetMessageTypeConverter(IMessageTypeConverter messageTypeConverter);
+		
+		void AddSend<T>(ISendContext<T> sendContext, IEndpoint endpoint)
+			where T : class;
 
-		void SetId(Guid id);
+		void AddPublish<T>(IPublishContext<T> publishContext)
+			where T : class;
 	}
 }

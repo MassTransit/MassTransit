@@ -82,61 +82,61 @@ namespace MassTransit.Transports.Msmq
 						continue;
 					}
 
-					IBusContext context;
 					Action<IReceiveContext> receive;
-					using (Message message = enumerator.Current)
+					Message message = enumerator.Current;
+
+					IReceiveContext context = ReceiveContext.FromBodyStream(message.BodyStream);
+					context.SetMessageId(message.Id);
+					context.SetInputAddress(_address);
+
+					using (context.CreateScope())
 					{
-						context = new ConsumeContext(message.BodyStream);
-						context.SetMessageId(message.Id);
-						context.SetInputAddress(_address);
-
-						var extension = message.Extension;
-						if (extension.Length > 0)
+						using (message)
 						{
-							var headers = TransportMessageHeaders.Create(extension);
-
-							context.SetContentType(headers["Content-Type"]);
-						}
-
-						using(ContextStorage.CreateContextScope(context))
+							byte[] extension = message.Extension;
+							if (extension.Length > 0)
 							{
-								receive = receiver(context);
-								if (receive == null)
-								{
-									if (_log.IsDebugEnabled)
-										_log.DebugFormat("SKIP:{0}:{1}", Address, message.Id);
+								TransportMessageHeaders headers = TransportMessageHeaders.Create(extension);
 
-									if (_messageLog.IsDebugEnabled)
-										_messageLog.DebugFormat("SKIP:{0}:{1}:{2}", _address.InboundFormatName, message.Label, message.Id);
+								context.SetContentType(headers["Content-Type"]);
+							}
 
-									continue;
-								}
-							};
-					}
-
-					ReceiveMessage(enumerator, timeout, receiveCurrent =>
-						{
-							using (Message message = receiveCurrent())
+							receive = receiver(context);
+							if (receive == null)
 							{
-								if (message == null)
-									throw new TransportException(Address.Uri,
-										"Unable to remove message from queue: " + context.MessageId);
-
-								if (message.Id != context.MessageId)
-									throw new TransportException(Address.Uri,
-										string.Format(
-											"Received message does not match current message: ({0} != {1})",
-											message.Id, context.MessageId));
+								if (_log.IsDebugEnabled)
+									_log.DebugFormat("SKIP:{0}:{1}", Address, message.Id);
 
 								if (_messageLog.IsDebugEnabled)
-									_messageLog.DebugFormat("RECV:{0}:{1}:{2}", _address.InboundFormatName, message.Label, message.Id);
+									_messageLog.DebugFormat("SKIP:{0}:{1}:{2}", _address.InboundFormatName, message.Label, message.Id);
 
-								using (ContextStorage.CreateContextScope(context))
+								continue;
+							}
+						}
+
+						ReceiveMessage(enumerator, timeout, receiveCurrent =>
+							{
+								using (message = receiveCurrent())
+								{
+									if (message == null)
+										throw new TransportException(Address.Uri,
+											"Unable to remove message from queue: " + context.MessageId);
+
+									if (message.Id != context.MessageId)
+										throw new TransportException(Address.Uri,
+											string.Format(
+												"Received message does not match current message: ({0} != {1})",
+												message.Id, context.MessageId));
+
+									if (_messageLog.IsDebugEnabled)
+										_messageLog.DebugFormat("RECV:{0}:{1}:{2}", _address.InboundFormatName, message.Label, message.Id);
+
 									receive(context);
 
-								received = true;
-							}
-						});
+									received = true;
+								}
+							});
+					}
 				}
 			}
 

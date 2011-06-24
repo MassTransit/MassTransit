@@ -193,14 +193,14 @@
     <Compile Include="Configuration\TransportFactoryConfigurationExtensions.cs" />
     <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
     <Compile Include="Configuration\Xml\SettingsOptions.cs" />
-    <Compile Include="Context\ConsumeContext.cs" />
-    <Compile Include="Context\Context.cs" />
+    <Compile Include="Context\ContextScopeExtensions.cs" />
+    <Compile Include="Context\ContextScope.cs" />
+    <Compile Include="Context\ReceiveContext.cs" />
+    <Compile Include="Context\MessageContext.cs" />
     <Compile Include="Context\ContextException.cs" />
     <Compile Include="Context\ContextExtensions.cs" />
-    <Compile Include="Context\IBusContext.cs" />
     <Compile Include="Context\IBusPublishContext.cs" />
     <Compile Include="Context\IConsumeContext.cs" />
-    <Compile Include="Context\IContextProvider.cs" />
     <Compile Include="Context\IMessageContext.cs" />
     <Compile Include="Context\InvalidConsumeContext.cs" />
     <Compile Include="Context\InvalidSendContext.cs" />
@@ -215,7 +215,7 @@
     <Compile Include="Context\ContextStorage.cs" />
     <Compile Include="Context\ServiceBusReceiveContext.cs" />
     <Compile Include="Context\TransportMessageHeaders.cs" />
-    <Compile Include="Diagnostics\GetMessageTrace.cs" />
+    <Compile Include="Diagnostics\GetMessageTraceList.cs" />
     <Compile Include="Diagnostics\MessageTraceBusService.cs" />
     <Compile Include="Diagnostics\MessageTraceDetail.cs" />
     <Compile Include="Diagnostics\MessageTraceList.cs" />
@@ -223,7 +223,7 @@
     <Compile Include="Diagnostics\MessageTraceListImpl.cs" />
     <Compile Include="Diagnostics\ReceiverTraceDetail.cs" />
     <Compile Include="Diagnostics\ReceiverTraceDetailImpl.cs" />
-    <Compile Include="Diagnostics\RequestTraceHistory.cs" />
+    <Compile Include="Diagnostics\GetMessageTraceListImpl.cs" />
     <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />

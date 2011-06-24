@@ -72,7 +72,7 @@ namespace MassTransit.Testing.Subjects
 
 			try
 			{
-				using (ContextStorage.CreateContextScope(context))
+				using (context.CreateScope())
 				{
 					_handler(_bus, context.Message);
 				}

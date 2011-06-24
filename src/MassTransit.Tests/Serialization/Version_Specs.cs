@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Serialization
 			var serializer = new VersionOneXmlMessageSerializer();
 			using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(Version4Message)))
 			{
-				var receiveContext = bodyStream.ToReceiveContext();
+				var receiveContext = ReceiveContext.FromBodyStream(bodyStream);
 				serializer.Deserialize(receiveContext);
 
 				IConsumeContext<ComplaintAdded> context;
@@ -44,7 +44,7 @@ namespace MassTransit.Tests.Serialization
 			var serializer = new VersionOneXmlMessageSerializer();
 			using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(AnotherVersion4Message)))
 			{
-				var receiveContext = bodyStream.ToReceiveContext();
+				var receiveContext = ReceiveContext.FromBodyStream(bodyStream);
 				serializer.Deserialize(receiveContext);
 
 				IConsumeContext<ComplaintAdded> context;

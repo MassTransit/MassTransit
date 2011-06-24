@@ -55,12 +55,7 @@ namespace MassTransit.Tests
 		public static IConsumeContext<T> ToConsumeContext<T>(this T message) 
 			where T : class
 		{
-			return new ConsumeContext<T>(new ConsumeContext(null), message);
-		}
-
-		public static IReceiveContext ToReceiveContext(this Stream stream)
-		{
-			return new ConsumeContext(stream);
+			return new ConsumeContext<T>(ReceiveContext.Empty(), message);
 		}
 
 		static void CompareObjects(object target, object expected, Type targetType, string parentPrefix)

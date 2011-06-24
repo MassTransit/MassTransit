@@ -156,10 +156,8 @@ namespace MassTransit
 		public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
 			where T : class
 		{
-			Stopwatch publishDuration = Stopwatch.StartNew();
-
-			var context = new PublishContext<T>(message);
-			using (ContextStorage.CreateContextScope(context))
+			var context = PublishContext.FromMessage(message);
+			using (context.CreateScope())
 			{
 				context.SetSourceAddress(Endpoint.Address.Uri);
 
@@ -180,7 +178,7 @@ namespace MassTransit
 					}
 				}
 
-				publishDuration.Stop();
+				context.Complete();
 
 				if (publishedCount == 0)
 				{
@@ -191,7 +189,7 @@ namespace MassTransit
 					{
 						MessageType = typeof (T),
 						ConsumerCount = publishedCount,
-						Duration = publishDuration.Elapsed,
+						Duration = context.Duration,
 					});
 			}
 		}

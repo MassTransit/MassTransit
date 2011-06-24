@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Context;
 
 	/// <summary>
 	/// Routes messages to instances of subscribed components. A new instance of the component
@@ -46,18 +45,21 @@ namespace MassTransit.Pipeline.Sinks
 
 		IEnumerable<Action<IConsumeContext<TMessage>>> Selector(TComponent instance, IConsumeContext<TMessage> messageContext)
 		{
-			using (ContextStorage.CreateContextScope(messageContext))
+			bool accept;
+			using (messageContext.CreateScope())
 			{
-				if (instance.Accept(messageContext.Message))
-				{
-					yield return context =>
+				accept = instance.Accept(messageContext.Message);
+			}
+
+			if (accept)
+			{
+				yield return context =>
+					{
+						using (context.CreateScope())
 						{
-							using (ContextStorage.CreateContextScope(context))
-							{
-								instance.Consume(context.Message);
-							}
-						};
-				}
+							instance.Consume(context.Message);
+						}
+					};
 			}
 		}
 	}

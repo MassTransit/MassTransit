@@ -24,14 +24,21 @@ namespace MassTransit.Diagnostics
 		}
 
 		/// <summary>
-		/// The context of the received message, as it was deserialized from the message
-		/// </summary>
-		public IMessageContext Context { get; set; }
-
-		/// <summary>
 		/// The amount of time spent processing the message
 		/// </summary>
 		public TimeSpan Duration { get; set; }
+
+		public string MessageId { get; set; }
+		public string MessageType { get; set; }
+		public string ContentType { get; set; }
+		public Uri SourceAddress { get; set; }
+		public Uri InputAddress { get; set; }
+		public Uri DestinationAddress { get; set; }
+		public Uri ResponseAddress { get; set; }
+		public Uri FaultAddress { get; set; }
+		public string Network { get; set; }
+		public DateTime? ExpirationTime { get; set; }
+		public int RetryCount { get; set; }
 
 		/// <summary>
 		/// The trace identifier for this message receive

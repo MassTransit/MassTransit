@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.Inspectors
 	using System;
 	using System.Linq;
 	using System.Text;
-	using Context;
 	using Distributor.Pipeline;
 	using Saga;
 	using Saga.Pipeline;
@@ -62,14 +61,14 @@ namespace MassTransit.Pipeline.Inspectors
 //			return true;
 //		}
 
-		public bool Inspect(InboundMessageInterceptor element) 
+		public bool Inspect(InboundMessageInterceptor element)
 		{
 			Append(string.Format("Interceptor"));
 
 			return true;
 		}
 
-		public bool Inspect(OutboundMessageInterceptor element) 
+		public bool Inspect(OutboundMessageInterceptor element)
 		{
 			Append(string.Format("Interceptor"));
 
@@ -112,7 +111,7 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
-		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink) 
+		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink)
 			where TMessage : class
 		{
 			Append(string.Format("Send {0} to Endpoint {1}", typeof (TMessage).ToFriendlyName(), sink.Endpoint.Address));
@@ -130,7 +129,7 @@ namespace MassTransit.Pipeline.Inspectors
 		}
 
 		public bool Inspect<T, TMessage, TKey>(CorrelatedMessageRouter<T, TMessage, TKey> sink)
-			where TMessage : class, CorrelatedBy<TKey> 
+			where TMessage : class, CorrelatedBy<TKey>
 			where T : class, IMessageContext<TMessage>
 		{
 			Append(string.Format("Correlated by {1} ({0})", typeof (TMessage).ToFriendlyName(), typeof (TKey).ToFriendlyName()));
@@ -140,14 +139,14 @@ namespace MassTransit.Pipeline.Inspectors
 
 		public bool Inspect<T, TMessage, TKey>(CorrelatedMessageSinkRouter<T, TMessage, TKey> sink)
 			where T : class
-			where TMessage : class, CorrelatedBy<TKey> 
+			where TMessage : class, CorrelatedBy<TKey>
 		{
 			Append(string.Format("Routed for Correlation Id {1} ({0})", typeof (TMessage).Name, sink.CorrelationId));
 
 			return true;
 		}
 
-		public bool Inspect<TMessage>(InboundConvertMessageSink<TMessage> converter) 
+		public bool Inspect<TMessage>(InboundConvertMessageSink<TMessage> converter)
 			where TMessage : class
 		{
 			Append(string.Format("Translated to {0}", typeof (TMessage).ToFriendlyName()));
@@ -155,7 +154,7 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
-		public bool Inspect<TMessage>(OutboundConvertMessageSink<TMessage> converter) 
+		public bool Inspect<TMessage>(OutboundConvertMessageSink<TMessage> converter)
 			where TMessage : class
 		{
 			Append(string.Format("Translated to {0}", typeof (TMessage).ToFriendlyName()));
@@ -267,22 +266,6 @@ namespace MassTransit.Pipeline.Inspectors
 			_depth--;
 		}
 
-		static string GetPolicy<TComponent, TMessage>(ISagaPolicy<TComponent, TMessage> policy)
-			where TComponent : class, ISaga
-		{
-			string description;
-			Type policyType = policy.GetType().GetGenericTypeDefinition();
-			if (policyType == typeof (InitiatingSagaPolicy<,>))
-				description = "Initiates New";
-			else if (policyType == typeof (ExistingOrIgnoreSagaPolicy<,>))
-				description = "Orchestrates Existing";
-			else if (policyType == typeof (CreateOrUseExistingSagaPolicy<,>))
-				description = "Initiates New Or Orchestrates Existing";
-			else
-				description = policyType.ToFriendlyName();
-			return description;
-		}
-
 		void Pad()
 		{
 			_text.Append(new string('\t', _depth));
@@ -313,6 +296,23 @@ namespace MassTransit.Pipeline.Inspectors
 			pipeline.Inspect(viewer);
 
 			callback(viewer.Text);
+		}
+
+		static string GetPolicy<TComponent, TMessage>(ISagaPolicy<TComponent, TMessage> policy)
+			where TComponent : class, ISaga
+			where TMessage : class
+		{
+			string description;
+			Type policyType = policy.GetType().GetGenericTypeDefinition();
+			if (policyType == typeof (InitiatingSagaPolicy<,>))
+				description = "Initiates New";
+			else if (policyType == typeof (ExistingOrIgnoreSagaPolicy<,>))
+				description = "Orchestrates Existing";
+			else if (policyType == typeof (CreateOrUseExistingSagaPolicy<,>))
+				description = "Initiates New Or Orchestrates Existing";
+			else
+				description = policyType.ToFriendlyName();
+			return description;
 		}
 	}
 }

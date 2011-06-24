@@ -14,7 +14,6 @@ namespace MassTransit.Saga.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
-	using Context;
 	using log4net;
 	using Magnum.StateMachine;
 	using Util;
@@ -41,7 +40,7 @@ namespace MassTransit.Saga.Pipeline
 				{
 					instance.Bus = context.Bus;
 
-					using (ContextStorage.CreateContextScope(x))
+					using (x.CreateScope())
 					{
 						if (_log.IsDebugEnabled)
 							_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof (TSaga).Name, dataEvent.Name, instance.CorrelationId);

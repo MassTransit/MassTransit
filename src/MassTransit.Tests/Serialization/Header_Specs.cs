@@ -107,7 +107,7 @@ namespace MassTransit.Tests.Serialization
 
 			using (var input = new MemoryStream(data))
 			{
-				var receiveContext = new ConsumeContext(input);
+				var receiveContext = ReceiveContext.FromBodyStream(input);
 				serializer.Deserialize(receiveContext);
 
 				checkHeaderAction(receiveContext);

@@ -36,7 +36,6 @@ namespace MassTransit.Context
 		IEnumerator<Action<IConsumeContext>> _consumers;
 		bool _receiveNotified;
 		DateTime _startTime;
-		Guid _id;
 
 		public ServiceBusReceiveContext(IServiceBus bus, UntypedChannel eventChannel, TimeSpan receiveTimeout)
 		{
@@ -67,9 +66,6 @@ namespace MassTransit.Context
 
 						context.SetBus(_bus);
 						
-						_id = CombGuid.Generate();
-						context.SetId(_id);
-
 						IEnumerable<Action<IConsumeContext>> enumerable = _bus.InboundPipeline.Enumerate(context);
 
 						_consumers = enumerable.GetEnumerator();
@@ -146,7 +142,7 @@ namespace MassTransit.Context
 				_consumers.Dispose();
 				_consumers = null;
 
-				ReportConsumerTime(_id, _startTime, _receiveTime.Elapsed, _consumeTime.Elapsed, context);
+				ReportConsumerTime(CombGuid.Generate(), _startTime, _receiveTime.Elapsed, _consumeTime.Elapsed, context);
 				ReportConsumerCount(context, _consumeCount);
 			}
 		}

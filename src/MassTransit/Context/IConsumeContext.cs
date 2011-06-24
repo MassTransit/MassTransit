@@ -17,6 +17,7 @@ namespace MassTransit
 	public interface IConsumeContext<T> :
 		IConsumeContext,
 		IMessageContext<T>
+		where T : class
 	{
 		IConsumeContext BaseContext { get; }
 
@@ -47,11 +48,6 @@ namespace MassTransit
 		/// The endpoint from which the message was received
 		/// </summary>
 		IEndpoint Endpoint { get; }
-
-		/// <summary>
-		/// The input address on which the message was received
-		/// </summary>
-		Uri InputAddress { get; }
 
 		/// <summary>
 		/// Retrieves a specified message type from the consumer context, if available

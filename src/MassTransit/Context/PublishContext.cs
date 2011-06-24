@@ -14,6 +14,17 @@ namespace MassTransit.Context
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
+
+
+	public static class PublishContext
+	{
+		public static PublishContext<T> FromMessage<T>(T message)
+			where T : class
+		{
+			return PublishContext<T>.FromMessage(message);
+		}
+	}
 
 	public class PublishContext<T> :
 		SendContext<T>,
@@ -24,21 +35,42 @@ namespace MassTransit.Context
 		Action<T, IEndpoint> _eachSubscriberAction = Ignore;
 		Action<T> _noSubscribersAction = Ignore;
 		Func<IEndpoint, bool> _wasEndpointAlreadySent;
+		IReceiveContext _receiveContext;
+		Stopwatch _timer;
 
-		public PublishContext(T message)
+		PublishContext(T message)
 			: base(message)
 		{
-			_noSubscribersAction = Ignore;
-			_eachSubscriberAction = Ignore;
 			_wasEndpointAlreadySent = _endpoints.Contains;
+			_timer = Stopwatch.StartNew();
 		}
 
-		public PublishContext(T message, ISendContext context)
+		PublishContext(T message, ISendContext context)
 			: base(message, context)
 		{
-			_noSubscribersAction = Ignore;
-			_eachSubscriberAction = Ignore;
 			_wasEndpointAlreadySent = _endpoints.Contains;
+			_timer = Stopwatch.StartNew();
+		}
+
+		public TimeSpan Duration
+		{
+			get { return _timer.Elapsed; }
+		}
+
+		public static PublishContext<T> FromMessage(T message)
+		{
+			return new PublishContext<T>(message);
+		}
+
+		public static PublishContext<T> FromMessage<TMessage>(TMessage message, ISendContext context)
+			where TMessage : class
+		{
+			if (typeof (TMessage).IsAssignableFrom(typeof (T)))
+			{
+				return new PublishContext<T>(message as T, context);
+			}
+
+			return null;
 		}
 
 		public override bool TryGetContext<TMessage>(out IBusPublishContext<TMessage> context)
@@ -62,12 +94,23 @@ namespace MassTransit.Context
 		{
 			_endpoints.Add(endpoint);
 
+			if (_receiveContext != null)
+				_receiveContext.AddSend(this, endpoint);
+
 			_eachSubscriberAction(message, endpoint);
 		}
 
 		public bool WasEndpointAlreadySent(IEndpoint endpoint)
 		{
 			return _wasEndpointAlreadySent(endpoint);
+		}
+
+		public void SetReceiveContext(IReceiveContext receiveContext)
+		{
+			_receiveContext = receiveContext;
+
+			if (_receiveContext != null)
+				_receiveContext.AddPublish(this);
 		}
 
 		public void NotifyNoSubscribers(T message)
@@ -91,6 +134,11 @@ namespace MassTransit.Context
 
 		static void Ignore(T message, IEndpoint endpoint)
 		{
+		}
+
+		public void Complete()
+		{
+			_timer.Stop();
 		}
 	}
 }
