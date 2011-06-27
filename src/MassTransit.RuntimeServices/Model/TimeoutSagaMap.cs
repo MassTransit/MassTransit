@@ -23,9 +23,10 @@ namespace MassTransit.RuntimeServices.Model
 	{
 		public TimeoutSagaMap()
 		{
-			CompositeId()
-				.KeyProperty(x => x.CorrelationId)
-				.KeyProperty(x => x.Tag);
+			Id(x => x.CorrelationId);
+
+			Map(x => x.TimeoutId);
+			Map(x => x.Tag);
 
 			Map(x => x.CurrentState)
 				.Access.ReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)

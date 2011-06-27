@@ -27,6 +27,7 @@ CREATE TABLE [SubscriptionSaga] (
 GO
 CREATE TABLE [TimeoutSaga] (
   [CorrelationId] uniqueidentifier NOT NULL
+, [TimeoutId] uniqueidentifier NOT NULL
 , [Tag] int NOT NULL
 , [CurrentState] nvarchar(255) NULL
 , [TimeoutAt] datetime NULL
@@ -38,7 +39,7 @@ ALTER TABLE [SubscriptionClientSaga] ADD CONSTRAINT [PK__SubscriptionClientSaga_
 GO
 ALTER TABLE [SubscriptionSaga] ADD CONSTRAINT [PK__SubscriptionSaga__0000000000000024] PRIMARY KEY ([CorrelationId]);
 GO
-ALTER TABLE [TimeoutSaga] ADD CONSTRAINT [PK__TimeoutSaga__0000000000000040] PRIMARY KEY ([CorrelationId],[Tag]);
+ALTER TABLE [TimeoutSaga] ADD CONSTRAINT [PK__TimeoutSaga__0000000000000040] PRIMARY KEY ([CorrelationId]);
 GO
 CREATE INDEX [IX_Health_ControlUri] ON [HealthSaga] ([ControlUri] ASC,[CorrelationId] ASC);
 GO
@@ -49,4 +50,6 @@ GO
 CREATE INDEX [IX_Subscription_Endpoint] ON [SubscriptionSaga] ([EndpointUri] ASC,[CurrentState] ASC,[ClientId] ASC);
 GO
 CREATE INDEX [IX_Subscription_Full] ON [SubscriptionSaga] ([EndpointUri] ASC,[MessageName] ASC,[CurrentState] ASC,[ClientId] ASC);
+GO
+CREATE UNIQUE INDEX [IX_Timeout_TimeoutIdTag] ON [TimeoutSaga] ([TimeoutId] ASC,[Tag] ASC);
 GO
