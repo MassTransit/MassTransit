@@ -17,31 +17,17 @@ namespace MassTransit
 		where T : class
 	{
 		/// <summary>
-		/// Called for each subscriber of the published message
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="message"></param>
-		/// <param name="endpoint"></param>
-		void NotifyForMessageConsumer(T message, IEndpoint endpoint);
-
-		/// <summary>
 		/// Called if there are no subscribers for the message
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="message"></param>
-		void NotifyNoSubscribers(T message);
+		void NotifyNoSubscribers();
 
 		/// <summary>
 		/// Determines if the endpoint was already sent to during this publish
 		/// </summary>
-		/// <param name="endpoint"></param>
-		/// <returns></returns>
-		bool WasEndpointAlreadySent(IEndpoint endpoint);
-
-		/// <summary>
-		/// Sets the consume context that the publish was created in for tracing
-		/// </summary>
-		/// <param name="receiveContext"></param>
-		void SetReceiveContext(IReceiveContext receiveContext);
+		/// <param name="address">The address of the endpoint to check</param>
+		/// <returns>True if the message was already sent to the specified endpoint address</returns>
+		bool WasEndpointAlreadySent(IEndpointAddress address);
 	}
 }

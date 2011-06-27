@@ -21,10 +21,13 @@ namespace MassTransit.Context
 		ISendContext
 	{
 		readonly Action<Stream> _bodyWriter;
+    	Action<IEndpointAddress> _notifySend;
 
 		public MoveMessageSendContext(IReceiveContext context)
 		{
 			SetUsing(context);
+
+			_notifySend = address => context.NotifySend(this, address);
 
 			_bodyWriter = stream => context.CopyBodyTo(stream);
 		}
@@ -44,5 +47,10 @@ namespace MassTransit.Context
 		{
 			throw new MessageException(typeof(T), "The message type is unknown and can not be type-cast");
 		}
+
+    	public void NotifySend(IEndpointAddress address)
+    	{
+    		_notifySend(address);
+    	}
 	}
 }

@@ -56,11 +56,14 @@ namespace MassTransit
 		Stream BodyStream { get; }
 
 		void SetMessageTypeConverter(IMessageTypeConverter messageTypeConverter);
-		
-		void AddSend<T>(ISendContext<T> sendContext, IEndpoint endpoint)
+
+
+		void NotifySend(ISendContext context, IEndpointAddress address);
+
+		void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address)
 			where T : class;
 
-		void AddPublish<T>(IPublishContext<T> publishContext)
+		void NotifyPublish<T>(IPublishContext<T> publishContext)
 			where T : class;
 	}
 }

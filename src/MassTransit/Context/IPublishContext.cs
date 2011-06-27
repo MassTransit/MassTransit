@@ -21,15 +21,13 @@ namespace MassTransit
 		/// <summary>
 		/// Defines an action to be called if there are no subscribers for the message
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="action"></param>
-		void IfNoSubscribers(Action<T> action);
+		/// <param name="callback">The action to call if there are no subscribers registered</param>
+		void IfNoSubscribers(Action callback);
 
 		/// <summary>
 		/// Defines an action to be called for each subscriber of the message
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="action"></param>
-		void ForEachSubscriber(Action<T, IEndpoint> action);
+		/// <param name="callback">The action to call for each subscriber, including the endpoint address of the destination endpoint</param>
+		void ForEachSubscriber(Action<IEndpointAddress> callback);
 	}
 }

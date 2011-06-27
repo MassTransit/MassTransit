@@ -15,7 +15,8 @@ namespace MassTransit.Exceptions
     using System;
     using System.Runtime.Serialization;
 
-    [Serializable]
+
+	[Serializable]
     public class EndpointException :
         AbstractUriException
     {

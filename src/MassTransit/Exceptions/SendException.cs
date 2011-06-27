@@ -10,34 +10,42 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Exceptions
 {
 	using System;
-	using Context;
+	using System.Runtime.Serialization;
 
-	public static class ContextScopeExtensions
+	[Serializable]
+	public class SendException :
+		AbstractUriException
 	{
-		public static IDisposable CreateScope<T>(this IBusPublishContext<T> context)
-			where T : class
+		public SendException()
 		{
-			return ContextScope.FromPublishContext(context);
 		}
 
-		public static IDisposable CreateScope<T>(this ISendContext<T> context)
-			where T : class
+		public SendException(Type messageType, Uri uri)
+			: base(uri)
 		{
-			return ContextScope.FromSendContext(context);
+			MessageType = messageType;
 		}
 
-		public static IDisposable CreateScope(this IReceiveContext context)
+		public SendException(Type messageType, Uri uri, string message)
+			: base(uri, message)
 		{
-			return ContextScope.FromReceiveContext(context);
+			MessageType = messageType;
 		}
 
-		public static IDisposable CreateScope<T>(this IConsumeContext<T> context)
-			where T : class
+		public SendException(Type messageType, Uri uri, string message, Exception innerException)
+			: base(uri, message, innerException)
 		{
-			return ContextScope.FromConsumeContext(context);
+			MessageType = messageType;
 		}
+
+		protected SendException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+		}
+
+		public Type MessageType { get; protected set; }
 	}
 }

@@ -16,6 +16,7 @@ namespace MassTransit.Transports
 	using System.Diagnostics;
 	using System.Runtime.Serialization;
 	using Context;
+	using Exceptions;
 	using log4net;
 	using Serialization;
 	using Util;
@@ -83,13 +84,22 @@ namespace MassTransit.Transports
 			if (_disposed) 
 				throw new ObjectDisposedException(_disposedMessage);
 
-			context.SetDestinationAddress(Address.Uri);
-			context.SetBodyWriter(stream => _serializer.Serialize(stream, context));
+			try
+			{
+				context.SetDestinationAddress(Address.Uri);
+				context.SetBodyWriter(stream => _serializer.Serialize(stream, context));
 
-			_transport.Send(context);
+				_transport.Send(context);
 
-			if (SpecialLoggers.Messages.IsInfoEnabled)
-				SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, typeof (T).Name);
+				context.NotifySend(_address);
+
+				if (SpecialLoggers.Messages.IsInfoEnabled)
+					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, typeof (T).Name);
+			}
+			catch (Exception ex)
+			{
+				throw new SendException(typeof (T), _address.Uri, "An exception was thrown during Send", ex);
+			}
 		}
 
 		public void Dispose()

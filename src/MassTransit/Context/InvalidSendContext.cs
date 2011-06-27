@@ -88,6 +88,11 @@ namespace MassTransit.Context
 			throw CreateException();
 		}
 
+		public void NotifySend(IEndpointAddress address)
+		{
+			throw CreateException();
+		}
+
 		static ContextException CreateException()
 		{
 			return new ContextException("Send/Publish context is only available when consuming a message");
