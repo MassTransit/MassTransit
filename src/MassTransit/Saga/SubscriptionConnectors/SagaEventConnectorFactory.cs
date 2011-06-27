@@ -31,9 +31,11 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		where TMessage : class
 	{
 		readonly DataEvent<TSaga, TMessage> _dataEvent;
+		readonly IEnumerable<State> _states;
 		readonly ISagaRepository<TSaga> _sagaRepository;
 		readonly ISagaPolicy<TSaga, TMessage> _policy;
 		readonly ISagaPolicyFactory _policyFactory;
+		readonly Expression<Func<TSaga, bool>> _removeExpression;
 
 		public SagaEventConnectorFactory(ISagaRepository<TSaga> sagaRepository, ISagaPolicyFactory policyFactory,
 		                                 DataEvent<TSaga, TMessage> dataEvent, IEnumerable<State> states)
@@ -41,10 +43,9 @@ namespace MassTransit.Saga.SubscriptionConnectors
 			_sagaRepository = sagaRepository;
 			_policyFactory = policyFactory;
 			_dataEvent = dataEvent;
+			_states = states;
 
-			Expression<Func<TSaga, bool>> removeExpression = SagaStateMachine<TSaga>.GetCompletedExpression();
-
-			_policy = _policyFactory.GetPolicy<TSaga, TMessage>(states, removeExpression);
+			_removeExpression = SagaStateMachine<TSaga>.GetCompletedExpression();
 		}
 
 		public IEnumerable<SagaSubscriptionConnector> Create()
@@ -54,13 +55,13 @@ namespace MassTransit.Saga.SubscriptionConnectors
 			{
 				yield return (SagaSubscriptionConnector) FastActivator.Create(typeof (PropertySagaSubscriptionConnector<,>),
 					new[] {typeof (TSaga), typeof (TMessage)},
-					new object[] {_sagaRepository, _dataEvent, _policy, expression});
+					new object[] {_sagaRepository, _dataEvent, _states, _policyFactory, _removeExpression, expression});
 			}
 			else if (typeof (TMessage).Implements<CorrelatedBy<Guid>>())
 			{
-				yield return (SagaSubscriptionConnector) FastActivator.Create(typeof (CorrelatedSagaSubscriptionConnector<,>),
+				yield return (SagaSubscriptionConnector)FastActivator.Create(typeof(CorrelatedSagaSubscriptionConnector<,>),
 					new[] {typeof (TSaga), typeof (TMessage)},
-					new object[] {_sagaRepository, _dataEvent, _policy});
+					new object[] {_sagaRepository, _dataEvent, _states, _policyFactory, _removeExpression});
 			}
 			else
 				throw new NotSupportedException("No method to connect to event was found for " + typeof (TMessage).FullName);

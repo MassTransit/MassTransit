@@ -13,23 +13,20 @@
 namespace MassTransit.Saga
 {
 	using System;
-	using System.Linq;
 	using System.Linq.Expressions;
-	using Magnum;
 	using Magnum.Reflection;
-	using Util;
 
 	public class CreateOrUseExistingSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
 	{
-		readonly Func<TSaga, bool> _shouldBeRemoved;
-		readonly bool _useMessageIdForSagaId;
+		readonly Func<TMessage, Guid> _getNewSagaId;
+		readonly Func<TSaga, bool> _canRemoveInstance;
 
-		public CreateOrUseExistingSagaPolicy(Expression<Func<TSaga, bool>> shouldBeRemoved)
+		public CreateOrUseExistingSagaPolicy(Func<TMessage, Guid> getNewSagaId, Expression<Func<TSaga, bool>> removeExpression)
 		{
-			_useMessageIdForSagaId = typeof (TMessage).GetInterfaces().Where(x => x == typeof (CorrelatedBy<Guid>)).Any();
-			_shouldBeRemoved = shouldBeRemoved.Compile();
+			_getNewSagaId = getNewSagaId;
+			_canRemoveInstance = removeExpression.Compile();
 		}
 
 		public bool CanCreateInstance(IConsumeContext<TMessage> context)
@@ -49,40 +46,14 @@ namespace MassTransit.Saga
 
 		public bool CanRemoveInstance(TSaga instance)
 		{
-			return _shouldBeRemoved(instance);
+			return _canRemoveInstance(instance);
 		}
 
 		public Guid GetNewSagaId(IConsumeContext<TMessage> context)
 		{
-			Guid sagaId;
-			if (!UseMessageIdForSaga(context.Message, out sagaId))
-			{
-				if (!GenerateNewIdForSaga(out sagaId))
-					throw new InvalidOperationException("Could not generate id for new saga " + typeof (TSaga).Name);
-			}
+			Guid sagaId = _getNewSagaId(context.Message);
 
 			return sagaId;
-		}
-
-		bool UseMessageIdForSaga(TMessage message, out Guid sagaId)
-		{
-			if (_useMessageIdForSagaId)
-			{
-				var correlator = message.TranslateTo<CorrelatedBy<Guid>>();
-
-				sagaId = correlator.CorrelationId;
-
-				return true;
-			}
-
-			sagaId = Guid.Empty;
-			return false;
-		}
-
-		static bool GenerateNewIdForSaga(out Guid sagaId)
-		{
-			sagaId = CombGuid.Generate();
-			return true;
 		}
 	}
 }

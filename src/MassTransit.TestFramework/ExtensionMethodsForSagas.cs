@@ -13,7 +13,9 @@
 namespace MassTransit.TestFramework
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
+	using System.Linq.Expressions;
 	using System.Reflection;
 	using System.Threading;
 	using Magnum.Extensions;
@@ -48,6 +50,31 @@ namespace MassTransit.TestFramework
 				{
 					return saga;
 				}
+
+				Thread.Sleep(30);
+			}
+
+			return null;
+		}
+
+		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter)
+			where TSaga : class, ISaga
+		{
+			return ShouldContainSaga(repository, filter, Timeout);
+		}
+
+		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter, TimeSpan timeout)
+			where TSaga : class, ISaga
+		{
+			DateTime giveUpAt = DateTime.Now + timeout;
+
+			var sagaFilter = new SagaFilter<TSaga>(filter);
+
+			while (DateTime.Now < giveUpAt)
+			{
+				List<TSaga> sagas = repository.Where(sagaFilter).ToList();
+				if (sagas.Count > 0)
+					return sagas.Single();
 
 				Thread.Sleep(30);
 			}

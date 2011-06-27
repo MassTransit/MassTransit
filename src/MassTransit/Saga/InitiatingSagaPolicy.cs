@@ -13,24 +13,21 @@
 namespace MassTransit.Saga
 {
 	using System;
-	using System.Linq;
 	using System.Linq.Expressions;
-	using Magnum;
 	using Magnum.Reflection;
-	using Util;
 
 	public class InitiatingSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
 	{
-		readonly Func<TSaga, bool> _shouldBeRemoved;
-		readonly bool _useMessageIdForSagaId;
+		readonly Func<TMessage, Guid> _getNewSagaId;
+		readonly Func<TSaga, bool> _canRemoveInstance;
 
 
-		public InitiatingSagaPolicy(Expression<Func<TSaga, bool>> shouldBeRemoved)
+		public InitiatingSagaPolicy(Func<TMessage, Guid> getNewSagaId, Expression<Func<TSaga, bool>> shouldBeRemoved)
 		{
-			_useMessageIdForSagaId = typeof (TMessage).GetInterfaces().Where(x => x == typeof (CorrelatedBy<Guid>)).Any();
-			_shouldBeRemoved = shouldBeRemoved.Compile();
+			_getNewSagaId = getNewSagaId;
+			_canRemoveInstance = shouldBeRemoved.Compile();
 		}
 
 		public bool CanCreateInstance(IConsumeContext<TMessage> context)
@@ -45,12 +42,7 @@ namespace MassTransit.Saga
 
 		public Guid GetNewSagaId(IConsumeContext<TMessage> context)
 		{
-			Guid sagaId;
-			if (!UseMessageIdForSaga(context.Message, out sagaId))
-			{
-				if (!GenerateNewIdForSaga(out sagaId))
-					throw new InvalidOperationException("Could not generate id for new saga " + typeof (TSaga).Name);
-			}
+			Guid sagaId = _getNewSagaId(context.Message);
 
 			return sagaId;
 		}
@@ -62,28 +54,7 @@ namespace MassTransit.Saga
 
 		public bool CanRemoveInstance(TSaga instance)
 		{
-			return _shouldBeRemoved(instance);
-		}
-
-		bool UseMessageIdForSaga(TMessage message, out Guid sagaId)
-		{
-			if (_useMessageIdForSagaId)
-			{
-				var correlator = message.TranslateTo<CorrelatedBy<Guid>>();
-
-				sagaId = correlator.CorrelationId;
-
-				return true;
-			}
-
-			sagaId = CombGuid.Generate();
-			return true;
-		}
-
-		static bool GenerateNewIdForSaga(out Guid sagaId)
-		{
-			sagaId = CombGuid.Generate();
-			return true;
+			return _canRemoveInstance(instance);
 		}
 	}
 }

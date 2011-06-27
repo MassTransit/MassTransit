@@ -68,7 +68,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 			var repository = new NHibernateSagaRepository<TestSaga>(_sessionFactory);
 			var ping = new PingMessage(_sagaId);
 
-			var initiatePolicy = new InitiatingSagaPolicy<TestSaga, InitiateSimpleSaga>(x => false);
+			var initiatePolicy = new InitiatingSagaPolicy<TestSaga, InitiateSimpleSaga>(x => x.CorrelationId, x => false);
 
 			var message = new InitiateSimpleSaga(_sagaId);
 			var context = message.ToConsumeContext();

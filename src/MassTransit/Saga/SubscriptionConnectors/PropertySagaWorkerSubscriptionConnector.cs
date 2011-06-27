@@ -13,7 +13,9 @@
 namespace MassTransit.Saga.SubscriptionConnectors
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq.Expressions;
+	using Configuration;
 	using Distributor;
 	using Distributor.Messages;
 	using Distributor.Pipeline;
@@ -29,10 +31,13 @@ namespace MassTransit.Saga.SubscriptionConnectors
 
 		public PropertySagaWorkerSubscriptionConnector(ISagaRepository<TSaga> sagaRepository,
 		                                               DataEvent<TSaga, TMessage> dataEvent,
-		                                               ISagaPolicy<TSaga, TMessage> policy,
+		                                               IEnumerable<State> states,
+		                                               ISagaPolicyFactory policyFactory,
+		                                               Expression<Func<TSaga, bool>> removeExpression,
 		                                               Expression<Func<TSaga, TMessage, bool>> selector)
 		{
-			_connector = new PropertySagaSubscriptionConnector<TSaga, TMessage>(sagaRepository, dataEvent, policy, selector);
+			_connector = new PropertySagaSubscriptionConnector<TSaga, TMessage>(sagaRepository, dataEvent, states, policyFactory,
+				removeExpression, selector);
 		}
 
 		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
