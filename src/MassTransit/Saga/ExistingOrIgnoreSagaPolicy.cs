@@ -23,11 +23,11 @@ namespace MassTransit.Saga
 	{
 		static readonly ILog _log = LogManager.GetLogger("MassTransit.Saga.ExistingOrIgnoreSagaPolicy");
 
-		private readonly Func<TSaga, bool> _shouldBeRemoved;
+		private readonly Func<TSaga, bool> _canRemoveInstance;
 
 		public ExistingOrIgnoreSagaPolicy(Expression<Func<TSaga, bool>> shouldBeRemoved)
 		{
-			_shouldBeRemoved = shouldBeRemoved.Compile();
+			_canRemoveInstance = shouldBeRemoved.Compile();
 		}
 
 		public bool CanCreateInstance(IConsumeContext<TMessage> context)
@@ -52,7 +52,7 @@ namespace MassTransit.Saga
 
 		public bool CanRemoveInstance(TSaga instance)
 		{
-			return _shouldBeRemoved(instance);
+			return _canRemoveInstance(instance);
 		}
 	}
 }

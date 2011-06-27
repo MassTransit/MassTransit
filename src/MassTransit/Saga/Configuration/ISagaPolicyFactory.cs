@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,7 +19,8 @@ namespace MassTransit.Saga.Configuration
 
 	public interface ISagaPolicyFactory
 	{
-		ISagaPolicy<TSaga, TMessage> GetPolicy<TSaga, TMessage>(IEnumerable<State> states, Expression<Func<TSaga, bool>> removeExpression)
+		ISagaPolicy<TSaga, TMessage> GetPolicy<TSaga, TMessage>(IEnumerable<State> states, Func<TMessage, Guid> getNewSagaId,
+		                                                        Expression<Func<TSaga, bool>> removeExpression)
 			where TSaga : SagaStateMachine<TSaga>, ISaga
 			where TMessage : class;
 	}

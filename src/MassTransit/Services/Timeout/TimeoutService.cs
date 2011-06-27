@@ -118,7 +118,7 @@ namespace MassTransit.Services.Timeout
 				{
 					TimeoutSaga instance = saga;
 
-					_fiber.Add(() => PublishTimeoutExpired(instance.CorrelationId, instance.Tag));
+					_fiber.Add(() => PublishTimeoutExpired(instance.TimeoutId, instance.Tag));
 				}
 			}
 			catch (Exception ex)

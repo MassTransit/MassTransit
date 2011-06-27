@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Saga.Locator
 
 			_repository = new InMemorySagaRepository<TestSaga>();
 
-			var initiatePolicy = new InitiatingSagaPolicy<TestSaga, InitiateSimpleSaga>(x => false);
+			var initiatePolicy = new InitiatingSagaPolicy<TestSaga, InitiateSimpleSaga>(x => x.CorrelationId, x => false);
 
 
 			var message = new InitiateSimpleSaga(_sagaId);

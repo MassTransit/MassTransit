@@ -31,7 +31,7 @@ namespace MassTransit.Tests.Saga.Locator
 		public void Setup()
 		{
 			_repository = new InMemorySagaRepository<SimpleSaga>();
-			var initiatePolicy = new InitiatingSagaPolicy<SimpleSaga, InitiateSimpleSaga>(x => false);
+			var initiatePolicy = new InitiatingSagaPolicy<SimpleSaga, InitiateSimpleSaga>(x => x.CorrelationId, x => false);
 
 			_sagaId = CombGuid.Generate();
 			_initiateSaga = new InitiateSimpleSaga {CorrelationId = _sagaId, Name = "Chris"};

@@ -99,7 +99,7 @@ namespace MassTransit.Services.Timeout.Server
 		{
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
-			return obj.Tag == Tag && obj.CorrelationId.Equals(CorrelationId);
+			return obj.TimeoutId.Equals(TimeoutId) &&  obj.Tag == Tag;
 		}
 
 		public override bool Equals(object obj)
@@ -114,7 +114,7 @@ namespace MassTransit.Services.Timeout.Server
 		{
 			unchecked
 			{
-				return (Tag*397) ^ CorrelationId.GetHashCode();
+				return (Tag * 397) ^ TimeoutId.GetHashCode();
 			}
 		}
 
@@ -122,7 +122,7 @@ namespace MassTransit.Services.Timeout.Server
 		{
 			Bus.Publish(new TimeoutScheduled
 				{
-					CorrelationId = CorrelationId,
+					CorrelationId = TimeoutId,
 					TimeoutAt = TimeoutAt,
 					Tag = Tag,
 				});
@@ -132,7 +132,7 @@ namespace MassTransit.Services.Timeout.Server
 		{
 			Bus.Publish(new TimeoutRescheduled
 				{
-					CorrelationId = CorrelationId,
+					CorrelationId = TimeoutId,
 					TimeoutAt = TimeoutAt,
 					Tag = Tag,
 				});
@@ -142,7 +142,7 @@ namespace MassTransit.Services.Timeout.Server
 		{
 			Bus.Publish(new TimeoutCancelled
 				{
-					CorrelationId = CorrelationId,
+					CorrelationId = TimeoutId,
 					Tag = Tag,
 				});
 		}

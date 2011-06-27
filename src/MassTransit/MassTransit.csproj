@@ -226,6 +226,7 @@
     <Compile Include="Saga\CorrelatedSagaLocator.cs" />
     <Compile Include="Saga\ISagaFilter.cs" />
     <Compile Include="Saga\ISagaLocator.cs" />
+    <Compile Include="Saga\Pipeline\CorrelationExpressionToSagaIdVisitor.cs" />
     <Compile Include="Saga\PropertySagaLocator.cs" />
     <Compile Include="Saga\SagaFilter.cs" />
     <Compile Include="Saga\SagaFilterExtensions.cs" />

@@ -13,6 +13,9 @@
 namespace MassTransit.Saga.SubscriptionConnectors
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq.Expressions;
+	using Configuration;
 	using Exceptions;
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
@@ -29,21 +32,24 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		readonly ISagaRepository<TSaga> _sagaRepository;
 
 		public CorrelatedSagaSubscriptionConnector(ISagaRepository<TSaga> sagaRepository, DataEvent<TSaga, TMessage> dataEvent,
-		                                           ISagaPolicy<TSaga, TMessage> policy)
+		                                           IEnumerable<State> states,
+		                                           ISagaPolicyFactory policyFactory,
+		                                           Expression<Func<TSaga, bool>> removeExpression)
 		{
 			_sagaRepository = sagaRepository;
 			_dataEvent = dataEvent;
-			_policy = policy;
-		}
 
-		public Type MessageType
-		{
-			get { return typeof (TMessage); }
+			_policy = policyFactory.GetPolicy<TSaga, TMessage>(states, x => x.CorrelationId, removeExpression);
 		}
 
 		public Type SagaType
 		{
 			get { return typeof (TSaga); }
+		}
+
+		public Type MessageType
+		{
+			get { return typeof (TMessage); }
 		}
 
 		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
