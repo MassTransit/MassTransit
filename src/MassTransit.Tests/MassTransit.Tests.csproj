@@ -184,6 +184,7 @@
     <Compile Include="Performance\LoadedResponse.cs" />
     <Compile Include="Saga\StateMachine\CombineSaga.cs" />
     <Compile Include="Saga\StateMachine\CombineSaga_Specs.cs" />
+    <Compile Include="Services\Timeout\TimeoutService_Specs.cs" />
     <Compile Include="Testing\ConsumerMultiple_Specs.cs" />
     <Compile Include="Testing\ConsumerTest_Specs.cs" />
     <Compile Include="Testing\HandlerRespond_Specs.cs" />
