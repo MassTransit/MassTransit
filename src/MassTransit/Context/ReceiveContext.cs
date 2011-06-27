@@ -14,8 +14,8 @@ namespace MassTransit.Context
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.IO;
-	using Diagnostics;
 	using log4net;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
@@ -29,9 +29,11 @@ namespace MassTransit.Context
 		Stream _bodyStream;
 		IMessageTypeConverter _typeConverter;
 		readonly IList<Type> _receiverTypes;
+		long _createTimestamp;
 
 		ReceiveContext()
 		{
+			_createTimestamp = Stopwatch.GetTimestamp();
 			_receiverTypes = new List<Type>();
 		}
 
@@ -87,11 +89,17 @@ namespace MassTransit.Context
 			_typeConverter = serializer;
 		}
 
-		public void AddSend<T>(ISendContext<T> sendContext, IEndpoint endpoint) where T : class
+		public void NotifySend(ISendContext context, IEndpointAddress address)
 		{
 		}
 
-		public void AddPublish<T>(IPublishContext<T> publishContext) where T : class
+		public void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address)
+			where T : class
+		{
+		}
+
+		public void NotifyPublish<T>(IPublishContext<T> publishContext)
+			where T : class
 		{
 		}
 

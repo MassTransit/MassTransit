@@ -168,7 +168,7 @@ namespace MassTransit.Tests
 
 			LocalBus.Publish(ping, x =>
 				{
-					x.IfNoSubscribers(message =>
+					x.IfNoSubscribers(() =>
 						{
 							noConsumers = true;
 						});
@@ -184,7 +184,7 @@ namespace MassTransit.Tests
 
 			int hitCount = 0;
 
-			LocalBus.Publish(ping, x => x.IfNoSubscribers(message => hitCount++));
+			LocalBus.Publish(ping, x => x.IfNoSubscribers(() => hitCount++));
 			LocalBus.Publish(ping);
 
 			Assert.AreEqual(1, hitCount, "There should have been no consumers");
@@ -204,7 +204,7 @@ namespace MassTransit.Tests
 
 			var consumers = new List<Uri>();
 
-			LocalBus.Publish(ping, x => { x.ForEachSubscriber((message, endpoint) => consumers.Add(endpoint.Address.Uri)); });
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber(address => consumers.Add(address.Uri)); });
 
 			Assert.AreEqual(1, consumers.Count);
 			Assert.AreEqual(LocalBus.Endpoint.Address.Uri, consumers[0]);
@@ -220,7 +220,7 @@ namespace MassTransit.Tests
 
 			var consumers = new List<Uri>();
 
-			LocalBus.Publish(ping, x => { x.ForEachSubscriber((message, endpoint) => consumers.Add(endpoint.Address.Uri)); });
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber(address => consumers.Add(address.Uri)); });
 
 			Assert.AreEqual(2, consumers.Count);
 			Assert.IsTrue(consumers.Contains(LocalBus.Endpoint.Address.Uri));
@@ -234,7 +234,7 @@ namespace MassTransit.Tests
 
 			var consumers = new List<Uri>();
 
-			LocalBus.Publish(ping, x => { x.ForEachSubscriber((message, consumer) => consumers.Add(consumer.Address.Uri)); });
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber(address => consumers.Add(address.Uri)); });
 
 			Assert.AreEqual(0, consumers.Count);
 		}
@@ -246,7 +246,7 @@ namespace MassTransit.Tests
 
 			var consumers = new List<Uri>();
 
-			LocalBus.Publish(ping, x => { x.ForEachSubscriber((message, endpoint) => consumers.Add(endpoint.Address.Uri)); });
+			LocalBus.Publish(ping, x => { x.ForEachSubscriber(address => consumers.Add(address.Uri)); });
 
 			LocalBus.SubscribeHandler<PingMessage>(x => { });
 

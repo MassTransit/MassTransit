@@ -22,6 +22,7 @@ namespace MassTransit.Context
 	{
 		readonly T _message;
 		Action<Stream> _bodyWriter;
+		IReceiveContext _receiveContext;
 
 		public SendContext(T message)
 		{
@@ -57,6 +58,12 @@ namespace MassTransit.Context
 			return context != null;
 		}
 
+		public virtual void NotifySend(IEndpointAddress address)
+		{
+			if(_receiveContext != null)
+				_receiveContext.NotifySend(this, address);
+		}
+
 		public T Message
 		{
 			get { return _message; }
@@ -65,6 +72,11 @@ namespace MassTransit.Context
 		public void SetBodyWriter(Action<Stream> bodyWriter)
 		{
 			_bodyWriter = bodyWriter;
+		}
+
+		public void SetReceiveContext(IReceiveContext receiveContext)
+		{
+			_receiveContext = receiveContext;
 		}
 	}
 }

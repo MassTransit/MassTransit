@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Context;
 
 	/// <summary>
 	/// A message sink that sends to an endpoint
@@ -40,12 +39,12 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			yield return x =>
 				{
-					if (x.WasEndpointAlreadySent(_endpoint))
+					if (x.WasEndpointAlreadySent(_endpoint.Address))
 						return;
 
 					_endpoint.Send(x);
 
-					x.NotifyForMessageConsumer(x.Message, _endpoint);
+					x.NotifySend(_endpoint.Address);
 				};
 		}
 

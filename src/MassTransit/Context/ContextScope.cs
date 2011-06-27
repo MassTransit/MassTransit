@@ -42,6 +42,23 @@ namespace MassTransit.Context
 			return new ContextScope(restore);
 		}
 
+		public static IDisposable FromSendContext<T>(ISendContext<T> context)
+			where T : class
+		{
+			var previousContext = ContextStorage.Retrieve<ISendContext>(ContextStorage.OutboundContextKey);
+
+			Debug.Assert(!ReferenceEquals(previousContext, context));
+
+			Action restore = () => ContextStorage.Store(ContextStorage.OutboundContextKey, previousContext);
+
+			var receiveContext = ContextStorage.Retrieve<IReceiveContext>(ContextStorage.InboundContextKey);
+			context.SetReceiveContext(receiveContext);
+
+			ContextStorage.Store(ContextStorage.OutboundContextKey, context);
+
+			return new ContextScope(restore);
+		}
+
 		public static IDisposable FromReceiveContext(IReceiveContext context)
 		{
 			var previousContext = ContextStorage.Retrieve<IConsumeContext>(ContextStorage.InboundContextKey);

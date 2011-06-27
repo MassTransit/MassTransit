@@ -23,7 +23,7 @@ namespace MassTransit.Context
 	/// </summary>
 	public static class ContextStorage
 	{
-		internal const string InboundContextKey = "InboundContext";
+		public const string InboundContextKey = "InboundContext";
 		public const string OutboundContextKey = "OutboundContext";
 
 		static readonly object _hashKey = new object();
@@ -54,25 +54,6 @@ namespace MassTransit.Context
 		{
 			get { return HttpContext.Current != null; }
 		}
-
-		static IDisposable SetReceiveContext(IConsumeContext context)
-		{
-			var previousContext = Retrieve<IConsumeContext>(InboundContextKey);
-
-			Store(InboundContextKey, context);
-
-			return new PreviousContext<IConsumeContext>(InboundContextKey, previousContext);
-		}
-
-		static IDisposable SetReceiveContext<T>(IConsumeContext<T> context)
-			where T : class
-		{
-			var previousContext = Retrieve<IConsumeContext>(InboundContextKey);
-
-			Store(InboundContextKey, context);
-
-			return new PreviousContext<IConsumeContext>(InboundContextKey, previousContext);
-		}	
 
 		public static IConsumeContext<T> MessageContext<T>()
 			where T : class
@@ -111,29 +92,6 @@ namespace MassTransit.Context
 			return contextCallback(context);
 		}
 
-		public static IDisposable SetSendContext<T>(IBusPublishContext<T> context) 
-			where T : class
-		{
-			var previousContext = Retrieve<ISendContext>(OutboundContextKey);
-
-			Store(OutboundContextKey, context);
-
-			var receiveContext = Retrieve<IReceiveContext>(InboundContextKey);
-			context.SetReceiveContext(receiveContext);
-
-			return new PreviousContext<ISendContext>(OutboundContextKey, previousContext);
-		}	
-		
-		public static IDisposable SetSendContext<T>(ISendContext<T> context) 
-			where T : class
-		{
-			var previousContext = Retrieve<ISendContext>(OutboundContextKey);
-
-			Store(OutboundContextKey, context);
-
-			return new PreviousContext<ISendContext>(OutboundContextKey, previousContext);
-		}
-
 		internal static void Store<TValue>(string key, TValue value)
 		{
 			Hashtable cache = ContextCache;
@@ -142,11 +100,18 @@ namespace MassTransit.Context
 		}
 
 		internal static TValue Retrieve<TValue>(string key)
+			where TValue : class
 		{
 			Hashtable cache = ContextCache;
 
 			if (cache.ContainsKey(key))
-				return (TValue) cache[key];
+			{
+				var value = cache[key];
+				if(typeof(TValue).IsAssignableFrom(value.GetType()))
+					return (TValue) value;
+
+				return null;
+			}
 
 			return default(TValue);
 		}

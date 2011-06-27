@@ -31,11 +31,10 @@ namespace MassTransit.Context
 		IBusPublishContext<T>
 		where T : class
 	{
-		readonly HashSet<IEndpoint> _endpoints = new HashSet<IEndpoint>();
-		Action<T, IEndpoint> _eachSubscriberAction = Ignore;
-		Action<T> _noSubscribersAction = Ignore;
-		Func<IEndpoint, bool> _wasEndpointAlreadySent;
-		IReceiveContext _receiveContext;
+		readonly HashSet<IEndpointAddress> _endpoints = new HashSet<IEndpointAddress>();
+		Action<IEndpointAddress> _eachSubscriberAction = Ignore;
+		Action _noSubscribersAction = Ignore;
+		Func<IEndpointAddress, bool> _wasEndpointAlreadySent;
 		Stopwatch _timer;
 
 		PublishContext(T message)
@@ -79,10 +78,10 @@ namespace MassTransit.Context
 
 			if (typeof(TMessage).IsAssignableFrom(typeof(T)))
 			{
-				var busPublishContext =  new PublishContext<TMessage>(Message as TMessage, this);
+				var busPublishContext = new PublishContext<TMessage>(Message as TMessage, this);
 				busPublishContext._wasEndpointAlreadySent = _wasEndpointAlreadySent;
-				busPublishContext.IfNoSubscribers(x => NotifyNoSubscribers(Message));
-				busPublishContext.ForEachSubscriber((x, e) => NotifyForMessageConsumer(Message, e));
+				busPublishContext.IfNoSubscribers(NotifyNoSubscribers);
+				busPublishContext.ForEachSubscriber(NotifySend);
 
 				context = busPublishContext;
 			}
@@ -90,49 +89,40 @@ namespace MassTransit.Context
 			return context != null;
 		}
 
-		public void NotifyForMessageConsumer(T message, IEndpoint endpoint)
+		public override void NotifySend(IEndpointAddress address)
 		{
-			_endpoints.Add(endpoint);
+			base.NotifySend(address);
 
-			if (_receiveContext != null)
-				_receiveContext.AddSend(this, endpoint);
+			_endpoints.Add(address);
 
-			_eachSubscriberAction(message, endpoint);
+			_eachSubscriberAction(address);
 		}
 
-		public bool WasEndpointAlreadySent(IEndpoint endpoint)
+		public bool WasEndpointAlreadySent(IEndpointAddress address)
 		{
-			return _wasEndpointAlreadySent(endpoint);
+			return _wasEndpointAlreadySent(address);
 		}
 
-		public void SetReceiveContext(IReceiveContext receiveContext)
+		public void NotifyNoSubscribers()
 		{
-			_receiveContext = receiveContext;
-
-			if (_receiveContext != null)
-				_receiveContext.AddPublish(this);
+			_noSubscribersAction();
 		}
 
-		public void NotifyNoSubscribers(T message)
-		{
-			_noSubscribersAction(message);
-		}
-
-		public void IfNoSubscribers(Action<T> action)
+		public void IfNoSubscribers(Action action)
 		{
 			_noSubscribersAction = action;
 		}
 
-		public void ForEachSubscriber(Action<T, IEndpoint> action)
+		public void ForEachSubscriber(Action<IEndpointAddress> action)
 		{
 			_eachSubscriberAction = action;
 		}
 
-		static void Ignore(T message)
+		static void Ignore()
 		{
 		}
 
-		static void Ignore(T message, IEndpoint endpoint)
+		static void Ignore(IEndpointAddress endpoint)
 		{
 		}
 

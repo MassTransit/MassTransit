@@ -182,7 +182,7 @@ namespace MassTransit
 
 				if (publishedCount == 0)
 				{
-					context.NotifyNoSubscribers(message);
+					context.NotifyNoSubscribers();
 				}
 
 				_eventChannel.Send(new MessagePublished
