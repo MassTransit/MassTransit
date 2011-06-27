@@ -50,7 +50,9 @@ namespace MassTransit.RuntimeServices
 								sbc.UseSubscriptionService(configuration.SubscriptionServiceUri);
 
 								sbc.SetConcurrentConsumerLimit(1);
-								sbc.UseHealthMonitoring(10);
+
+								if(configuration.HealthServiceEnabled)
+									sbc.UseHealthMonitoring(10);
 							});
 					});
 		}

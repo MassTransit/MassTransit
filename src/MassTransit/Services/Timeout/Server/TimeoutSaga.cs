@@ -28,16 +28,17 @@ namespace MassTransit.Services.Timeout.Server
 			Define(() =>
 				{
 					Correlate(SchedulingTimeout).By(
-						(saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
+						(saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag);
 					Correlate(CancellingTimeout).By(
-						(saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
+						(saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag);
 					Correlate(CompletingTimeout).By(
-						(saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
+						(saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag);
 
 					Initially(
 						When(SchedulingTimeout)
 							.Then((saga, message) =>
 								{
+									saga.TimeoutId = message.CorrelationId;
 									saga.Tag = message.Tag;
 									saga.TimeoutAt = message.TimeoutAt;
 
@@ -58,15 +59,6 @@ namespace MassTransit.Services.Timeout.Server
 						When(CompletingTimeout)
 							.Complete()
 						);
-
-					During(Completed,
-						When(SchedulingTimeout)
-							.Then((saga, message) =>
-								{
-									saga.TimeoutAt = message.TimeoutAt;
-
-									saga.NotifyTimeoutScheduled();
-								}).TransitionTo(WaitingForTime));
 
 					RemoveWhen(x => x.CurrentState == Completed);
 				});
@@ -91,15 +83,17 @@ namespace MassTransit.Services.Timeout.Server
 		public static Event<CancelTimeout> CancellingTimeout { get; set; }
 		public static Event<TimeoutExpired> CompletingTimeout { get; set; }
 
-		public virtual DateTime TimeoutAt { get; set; }
-		public virtual int Tag { get; set; }
-		public virtual IServiceBus Bus { get; set; }
-
 		public virtual Guid CorrelationId
 		{
 			get { return _correlationId; }
 			set { _correlationId = value; }
 		}
+
+		public virtual IServiceBus Bus { get; set; }
+
+		public virtual Guid TimeoutId { get; set; }
+		public virtual int Tag { get; set; }
+		public virtual DateTime TimeoutAt { get; set; }
 
 		public virtual bool Equals(TimeoutSaga obj)
 		{
