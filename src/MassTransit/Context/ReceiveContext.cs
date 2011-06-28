@@ -28,13 +28,17 @@ namespace MassTransit.Context
 	{
 		Stream _bodyStream;
 		IMessageTypeConverter _typeConverter;
-		readonly IList<Type> _receiverTypes;
-		long _createTimestamp;
+		readonly HashSet<Type> _receiverTypes;
+		readonly IList<ISent> _sent;
+		readonly IList<IPublished> _published;
+		Stopwatch _timer;
 
 		ReceiveContext()
 		{
-			_createTimestamp = Stopwatch.GetTimestamp();
-			_receiverTypes = new List<Type>();
+			_timer = Stopwatch.StartNew();
+			_receiverTypes = new HashSet<Type>();
+			_sent = new List<ISent>();
+			_published = new List<IPublished>();
 		}
 
 		ReceiveContext(Stream bodyStream)
@@ -47,6 +51,11 @@ namespace MassTransit.Context
 		/// The endpoint from which the message was received
 		/// </summary>
 		public IEndpoint Endpoint { get; private set; }
+
+		public IReceiveContext BaseContext
+		{
+			get { return this; }
+		}
 
 		/// <summary>
 		/// The bus on which the message was received
@@ -91,16 +100,24 @@ namespace MassTransit.Context
 
 		public void NotifySend(ISendContext context, IEndpointAddress address)
 		{
+			_sent.Add(new Sent(context, address, _timer.ElapsedMilliseconds));
 		}
 
 		public void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address)
 			where T : class
 		{
+			_sent.Add(new Sent<T>(sendContext, address, _timer.ElapsedMilliseconds));
 		}
 
 		public void NotifyPublish<T>(IPublishContext<T> publishContext)
 			where T : class
 		{
+			_published.Add(new Published<T>(publishContext));
+		}
+
+		public IEnumerable<ISent> Sent
+		{
+			get { return _sent; }
 		}
 
 		public bool TryGetContext<T>(out IConsumeContext<T> context)
@@ -180,11 +197,11 @@ namespace MassTransit.Context
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (ReceiveContext));
 
-		readonly IConsumeContext _context;
+		readonly IReceiveContext _context;
 		readonly TMessage _message;
 		Uri _responseAddress;
 
-		public ConsumeContext(IConsumeContext context, TMessage message)
+		public ConsumeContext(IReceiveContext context, TMessage message)
 		{
 			_context = context;
 			_message = message;
@@ -266,7 +283,7 @@ namespace MassTransit.Context
 		{
 			if (typeof (T).IsAssignableFrom(Message.GetType()))
 			{
-				context = new ConsumeContext<T>(this, Message as T);
+				context = new ConsumeContext<T>(_context, Message as T);
 				return true;
 			}
 
@@ -274,7 +291,7 @@ namespace MassTransit.Context
 			return false;
 		}
 
-		public IConsumeContext BaseContext
+		public IReceiveContext BaseContext
 		{
 			get { return _context; }
 		}

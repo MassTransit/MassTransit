@@ -46,6 +46,8 @@ namespace MassTransit.Transports
 				}
 
 				context.SerializeTo(message.Body);
+				message.ContentType = context.ContentType;
+
 				lock (_messageLock)
 				{
 					GuardAgainstDisposed();
@@ -101,9 +103,9 @@ namespace MassTransit.Transports
 							return;
 						}
 
-						var context = ContextStorage.CreateInboundContext(message.Body);
-
+						var context = ReceiveContext.FromBodyStream(message.Body);
 						context.SetMessageId(message.MessageId);
+						context.SetContentType(message.ContentType);
 						if(message.ExpirationTime.HasValue)
 							context.SetExpirationTime(message.ExpirationTime.Value);
 

@@ -13,8 +13,6 @@
 namespace MassTransit.Context
 {
 	using System;
-	using System.Collections;
-	using System.IO;
 	using System.Web;
 
 
@@ -23,51 +21,72 @@ namespace MassTransit.Context
 	/// </summary>
 	public static class ContextStorage
 	{
-		public const string InboundContextKey = "InboundContext";
-		public const string OutboundContextKey = "OutboundContext";
+		static ContextStorageProvider _provider;
 
-		static readonly object _hashKey = new object();
+		static ContextStorageProvider Provider
+		{
+			get { return _provider ?? (_provider = GetDefaultProvider()); }
+		}
 
-		[ThreadStatic]
-		static Hashtable _threadStorage;
+		static ContextStorageProvider GetDefaultProvider()
+		{
+			if (HttpContext.Current != null)
+				return new HttpContextContextStorageProvider();
 
-		static Hashtable ContextCache
+			return new ThreadStaticContextStorageProvider();
+		}
+
+		public static ISendContext CurrentSendContext
 		{
 			get
 			{
-				if (!RunningInWeb)
-				{
-					return _threadStorage ?? (_threadStorage = CreateContext());
-				}
-
-				var hashtable = HttpContext.Current.Items[_hashKey] as Hashtable;
-				if (hashtable == null)
-				{
-					HttpContext.Current.Items[_hashKey] = hashtable = CreateContext();
-				}
-
-				return hashtable;
+				return Provider.SendContext;
+			}
+			set
+			{
+				if (value == null || value.GetType() == typeof(InvalidSendContext))
+					Provider.SendContext = null;
+				else
+					Provider.SendContext = value;
 			}
 		}
 
-		static bool RunningInWeb
+		public static IConsumeContext CurrentConsumeContext
 		{
-			get { return HttpContext.Current != null; }
+			get
+			{
+				return Provider.ConsumeContext;
+			}
+			set
+			{
+				if (value == null || value.GetType() == typeof(InvalidConsumeContext))
+					Provider.ConsumeContext = null;
+				else
+					Provider.ConsumeContext = value;
+			}
 		}
 
 		public static IConsumeContext<T> MessageContext<T>()
 			where T : class
 		{
-			var context = Retrieve<IConsumeContext<T>>(InboundContextKey);
+			var context = CurrentConsumeContext as IConsumeContext<T>;
 			if (context == null)
 				throw new InvalidOperationException("The specified consumer context type was not found");
 
 			return context;
 		}
 
+		public static PublishContext<T> CreatePublishContext<T>(T message)
+			where T : class
+		{
+			var publishContext = PublishContext<T>.FromMessage(message);
+
+			return publishContext;
+		}
+
 		public static IConsumeContext Context()
 		{
-			var context = Retrieve<IConsumeContext>(InboundContextKey);
+			var context = CurrentConsumeContext;
 			if (context == null)
 				throw new InvalidOperationException("No consumer context was found");
 
@@ -76,7 +95,7 @@ namespace MassTransit.Context
 
 		public static void Context(Action<IConsumeContext> contextCallback)
 		{
-			var context = Retrieve<IConsumeContext>(InboundContextKey);
+			var context = CurrentConsumeContext;
 			if (context == null)
 				throw new InvalidOperationException("No consumer context was found");
 
@@ -85,50 +104,11 @@ namespace MassTransit.Context
 
 		public static TResult Context<TResult>(Func<IConsumeContext, TResult> contextCallback)
 		{
-			var context = Retrieve<IConsumeContext>(InboundContextKey);
+			var context = CurrentConsumeContext;
 			if (context == null)
 				throw new InvalidOperationException("No consumer context was found");
 
 			return contextCallback(context);
-		}
-
-		internal static void Store<TValue>(string key, TValue value)
-		{
-			Hashtable cache = ContextCache;
-
-			cache[key] = value;
-		}
-
-		internal static TValue Retrieve<TValue>(string key)
-			where TValue : class
-		{
-			Hashtable cache = ContextCache;
-
-			if (cache.ContainsKey(key))
-			{
-				var value = cache[key];
-				if(typeof(TValue).IsAssignableFrom(value.GetType()))
-					return (TValue) value;
-
-				return null;
-			}
-
-			return default(TValue);
-		}
-
-		static Hashtable CreateContext()
-		{
-			var hashtable = new Hashtable();
-
-			hashtable[InboundContextKey] = new InvalidConsumeContext();
-			hashtable[OutboundContextKey] = new InvalidSendContext();
-
-			return hashtable;
-		}
-
-		public static ReceiveContext CreateInboundContext(Stream bodyStream)
-		{
-			return ReceiveContext.FromBodyStream(bodyStream);
 		}
 	}
 }

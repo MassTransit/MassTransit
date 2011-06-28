@@ -13,7 +13,9 @@
 namespace MassTransit
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
+	using Context;
 	using Serialization;
 
 	public interface IReceiveContext :
@@ -65,5 +67,7 @@ namespace MassTransit
 
 		void NotifyPublish<T>(IPublishContext<T> publishContext)
 			where T : class;
+
+		IEnumerable<ISent> Sent { get; }
 	}
 }

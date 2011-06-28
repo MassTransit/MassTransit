@@ -18,6 +18,8 @@ namespace MassTransit.Diagnostics
 	using Context;
 	using Events;
 	using log4net;
+	using Magnum.Collections;
+	using Magnum.Extensions;
 	using Stact;
 
 	public class MessageTraceBusService :
@@ -27,7 +29,9 @@ namespace MassTransit.Diagnostics
 		static readonly ILog _log = LogManager.GetLogger(typeof (MessageTraceBusService));
 		readonly ChannelConnection _connection;
 		readonly UntypedChannel _eventChannel;
-		readonly LinkedList<MessageTraceDetail> _messageList;
+
+		readonly Magnum.Collections.Deque<ReceivedMessageTraceDetail> _messages;
+
 		IServiceBus _controlBus;
 		int _detailLimit;
 		Fiber _fiber;
@@ -37,7 +41,7 @@ namespace MassTransit.Diagnostics
 		{
 			_eventChannel = eventChannel;
 			_fiber = new PoolFiber();
-			_messageList = new LinkedList<MessageTraceDetail>();
+			_messages = new Deque<ReceivedMessageTraceDetail>();
 			_detailLimit = 100;
 
 			_connection = _eventChannel.Connect(x =>
@@ -82,7 +86,9 @@ namespace MassTransit.Diagnostics
 
 		void Handle(MessageReceived message)
 		{
-			MessageTraceDetail detail = new MessageTraceDetailImpl
+			var startTime = message.ReceivedAt;
+
+			var detail = new ReceivedMessageTraceDetailImpl
 				{
 					Id = message.Id,
 					MessageId = message.Context.MessageId,
@@ -96,26 +102,38 @@ namespace MassTransit.Diagnostics
 					Network = message.Context.Network,
 					ExpirationTime = message.Context.ExpirationTime,
 					RetryCount = message.Context.RetryCount,
-					ReceivedAt = message.ReceivedAt,
+					StartTime = message.ReceivedAt,
 					Duration = message.ReceiveDuration,
 				};
 
-			var node = new LinkedListNode<MessageTraceDetail>(detail);
+			detail.SentMessages = message.Context.Sent.Select(x => (SentMessageTraceDetail)new SentMessageTraceDetailImpl
+				{
+					MessageId = x.Context.MessageId,
+					MessageType = x.Context.MessageType,
+					ContentType = x.Context.ContentType,
+					SourceAddress = x.Context.SourceAddress,
+					InputAddress = x.Context.InputAddress,
+					DestinationAddress = x.Context.DestinationAddress,
+					ResponseAddress = x.Context.ResponseAddress,
+					FaultAddress = x.Context.FaultAddress,
+					Network = x.Context.Network,
+					ExpirationTime = x.Context.ExpirationTime,
+					RetryCount = x.Context.RetryCount,
+					StartTime = startTime + TimeSpan.FromMilliseconds(x.Timestamp),
+					
+				}).ToList();
 
-			_messageList.AddLast(node);
+			_messages.AddToBack(detail);
 
 			RemoveExtraDetailFromList();
 		}
 
 		void RemoveExtraDetailFromList()
 		{
-			int removeCount = _messageList.Count - _detailLimit;
+			int removeCount = _messages.Count - _detailLimit;
 			if (removeCount > 0)
 			{
-				for (int i = 0; i < removeCount; i++)
-				{
-					_messageList.RemoveFirst();
-				}
+				_messages.RemoveRange(0, removeCount);
 			}
 		}
 
@@ -123,11 +141,11 @@ namespace MassTransit.Diagnostics
 		{
 			try
 			{
-				IList<MessageTraceDetail> details = _messageList.Reverse().Take(count).ToList();
+				IList<ReceivedMessageTraceDetail> details = _messages.Reverse().Take(count).ToList();
 
-				var message = new MessageTraceListImpl {Messages = details};
+				var message = new ReceivedMessageTraceListImpl {Messages = details};
 
-				endpoint.Send<MessageTraceList>(message);
+				endpoint.Send<ReceivedMessageTraceList>(message);
 			}
 			catch (Exception ex)
 			{

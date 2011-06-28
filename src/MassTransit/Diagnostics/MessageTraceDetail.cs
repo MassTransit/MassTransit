@@ -13,19 +13,18 @@
 namespace MassTransit.Diagnostics
 {
 	using System;
-	using System.Collections.Generic;
 
 	public interface MessageTraceDetail
 	{
 		/// <summary>
-		/// The trace identifier for this message receive
+		/// The trace identifier for this message
 		/// </summary>
 		Guid Id { get; }
 
 		/// <summary>
 		/// The date/time the message was received from the transport
 		/// </summary>
-		DateTime ReceivedAt { get; }
+		DateTime StartTime { get; }
 
 		/// <summary>
 		/// The amount of time spent processing the message
@@ -87,10 +86,5 @@ namespace MassTransit.Diagnostics
 		/// The number of times this message has been delivered to the consumer
 		/// </summary>
 		int RetryCount { get; }
-
-		/// <summary>
-		/// The receivers that processed the message
-		/// </summary>
-		IList<ReceiverTraceDetail> Receivers { get; }
 	}
 }

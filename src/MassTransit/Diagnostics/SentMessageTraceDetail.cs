@@ -10,25 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Context
+namespace MassTransit.Diagnostics
 {
-	using System;
-
-	public class PreviousContext<T> :
-		IDisposable
+	/// <summary>
+	/// A message that was sent while a message was being received
+	/// </summary>
+	public interface SentMessageTraceDetail :
+		MessageTraceDetail
 	{
-		readonly string _key;
-		readonly T _value;
-
-		public PreviousContext(string key, T value)
-		{
-			_key = key;
-			_value = value;
-		}
-		
-		public void Dispose()
-		{
-			ContextStorage.Store(_key, _value);
-		}
 	}
 }

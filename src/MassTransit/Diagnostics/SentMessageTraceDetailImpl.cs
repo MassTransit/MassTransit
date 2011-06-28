@@ -12,10 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Diagnostics
 {
-	using System.Collections.Generic;
-
-	public interface MessageTraceList
+	public class SentMessageTraceDetailImpl :
+		MessageTraceDetailImpl,
+		SentMessageTraceDetail
 	{
-		IList<MessageTraceDetail> Messages { get; }
 	}
 }

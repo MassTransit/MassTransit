@@ -25,70 +25,57 @@ namespace MassTransit.Context
 			_restore = restore;
 		}
 
-		public static IDisposable FromPublishContext<T>(IBusPublishContext<T> context)
-			where T : class
+		public void Dispose()
 		{
-			var previousContext = ContextStorage.Retrieve<ISendContext>(ContextStorage.OutboundContextKey);
-
-			Debug.Assert(!ReferenceEquals(previousContext, context));
-
-			Action restore = () => ContextStorage.Store(ContextStorage.OutboundContextKey, previousContext);
-
-			var receiveContext = ContextStorage.Retrieve<IReceiveContext>(ContextStorage.InboundContextKey);
-			context.SetReceiveContext(receiveContext);
-
-			ContextStorage.Store(ContextStorage.OutboundContextKey, context);
-
-			return new ContextScope(restore);
+			_restore();
 		}
 
 		public static IDisposable FromSendContext<T>(ISendContext<T> context)
 			where T : class
 		{
-			var previousContext = ContextStorage.Retrieve<ISendContext>(ContextStorage.OutboundContextKey);
+			ISendContext previousContext = ContextStorage.CurrentSendContext;
 
 			Debug.Assert(!ReferenceEquals(previousContext, context));
 
-			Action restore = () => ContextStorage.Store(ContextStorage.OutboundContextKey, previousContext);
+			var currentConsumeContext = ContextStorage.CurrentConsumeContext;
+			if (currentConsumeContext != null)
+			{
+				var receiveContext = currentConsumeContext as IReceiveContext;
+				if (receiveContext != null)
+					context.SetReceiveContext(receiveContext);
+				else if (currentConsumeContext.BaseContext != null)
+				{
+					context.SetReceiveContext(currentConsumeContext.BaseContext);
+				}
+			}
+			ContextStorage.CurrentSendContext = context;
 
-			var receiveContext = ContextStorage.Retrieve<IReceiveContext>(ContextStorage.InboundContextKey);
-			context.SetReceiveContext(receiveContext);
+			return new ContextScope(() => ContextStorage.CurrentSendContext = previousContext);
+		}
 
-			ContextStorage.Store(ContextStorage.OutboundContextKey, context);
-
-			return new ContextScope(restore);
+		public static IDisposable FromPublishContext<T>(IBusPublishContext<T> context)
+			where T : class
+		{
+			return FromSendContext(context);
 		}
 
 		public static IDisposable FromReceiveContext(IReceiveContext context)
 		{
-			var previousContext = ContextStorage.Retrieve<IConsumeContext>(ContextStorage.InboundContextKey);
+			ContextStorage.CurrentConsumeContext = context;
 
-			Debug.Assert(!ReferenceEquals(previousContext, context));
-
-			Action restore = () => ContextStorage.Store(ContextStorage.InboundContextKey, previousContext);
-
-			ContextStorage.Store(ContextStorage.InboundContextKey, context);
-
-			return new ContextScope(restore);
+			return new ContextScope(() => ContextStorage.CurrentConsumeContext = null);
 		}
 
 		public static IDisposable FromConsumeContext<T>(IConsumeContext<T> context)
 			where T : class
 		{
-			var previousContext = ContextStorage.Retrieve<IConsumeContext>(ContextStorage.InboundContextKey);
+			IConsumeContext previousContext = ContextStorage.CurrentConsumeContext;
 
 			Debug.Assert(!ReferenceEquals(previousContext, context));
 
-			Action restore = () => ContextStorage.Store(ContextStorage.InboundContextKey, previousContext);
+			ContextStorage.CurrentConsumeContext = context;
 
-			ContextStorage.Store(ContextStorage.InboundContextKey, context);
-
-			return new ContextScope(restore);
-		}
-
-		public void Dispose()
-		{
-			_restore();
+			return new ContextScope(() => ContextStorage.CurrentConsumeContext = previousContext);
 		}
 	}
 }

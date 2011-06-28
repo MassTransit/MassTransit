@@ -93,7 +93,7 @@ namespace MassTransit.Context
 			}
 		}
 
-		void DeliverMessageToConsumers(IConsumeContext context)
+		void DeliverMessageToConsumers(IReceiveContext context)
 		{
 			try
 			{
@@ -148,7 +148,7 @@ namespace MassTransit.Context
 		}
 
 		void ReportConsumerTime(Guid id, DateTime startTime, TimeSpan receiveDuration, TimeSpan consumeDuration,
-		                        IConsumeContext context)
+		                        IReceiveContext context)
 		{
 			var message = new MessageReceived
 				{

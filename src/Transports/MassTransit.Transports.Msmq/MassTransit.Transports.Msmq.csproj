@@ -90,7 +90,6 @@
     <Compile Include="IEndpointManagement.cs" />
     <Compile Include="IMsmqEndpointAddress.cs" />
     <Compile Include="InboundMsmqTransport.cs" />
-    <Compile Include="InboundMulticastMsmqTransport.cs" />
     <Compile Include="Management\OSHelperExtensions.cs" />
     <Compile Include="Management\ManagementExtensions.cs" />
     <Compile Include="Management\MsDtcManagement.cs" />

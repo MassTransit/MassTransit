@@ -13,16 +13,10 @@
 namespace MassTransit.Diagnostics
 {
 	using System;
-	using System.Collections.Generic;
 
-	public class MessageTraceDetailImpl : 
+	public class MessageTraceDetailImpl :
 		MessageTraceDetail
 	{
-		public MessageTraceDetailImpl()
-		{
-			Receivers = new List<ReceiverTraceDetail>();
-		}
-
 		/// <summary>
 		/// The amount of time spent processing the message
 		/// </summary>
@@ -48,9 +42,6 @@ namespace MassTransit.Diagnostics
 		/// <summary>
 		/// The date/time the message was received from the transport
 		/// </summary>
-		public DateTime ReceivedAt { get; set; }
-
-
-		public IList<ReceiverTraceDetail> Receivers { get; set; }
+		public DateTime StartTime { get; set; }
 	}
 }

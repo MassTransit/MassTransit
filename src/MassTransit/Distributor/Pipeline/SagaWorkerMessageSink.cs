@@ -40,7 +40,7 @@ namespace MassTransit.Distributor.Pipeline
 			if (!_worker.CanAcceptMessage(context.Message))
 				return Enumerable.Empty<Action<IConsumeContext<Distributed<TMessage>>>>();
 
-			var payloadContext = new ConsumeContext<TMessage>(context, context.Message.Payload);
+			var payloadContext = new ConsumeContext<TMessage>(context.BaseContext, context.Message.Payload);
 			payloadContext.SetResponseAddress(context.Message.ResponseAddress);
 
 			return _sink.Enumerate(payloadContext).Select(action => (Action<IConsumeContext<Distributed<TMessage>>>) (m =>

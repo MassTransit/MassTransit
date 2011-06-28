@@ -38,8 +38,9 @@ namespace MassTransit.Transports.Loopback
 			private set { _body = value; }
 		}
 
-		public DateTime? ExpirationTime { get; set; }
 		public string MessageId { get; private set; }
+		public string ContentType { get; set; }
+		public DateTime? ExpirationTime { get; set; }
 
 		public void Dispose()
 		{
