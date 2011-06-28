@@ -68,6 +68,11 @@ namespace MassTransit.Context
 			get { throw CreateException(); }
 		}
 
+		public IReceiveContext BaseContext
+		{
+			get { throw CreateException(); }
+		}
+
 		public IServiceBus Bus
 		{
 			get { throw CreateException(); }

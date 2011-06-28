@@ -156,7 +156,7 @@ namespace MassTransit
 		public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
 			where T : class
 		{
-			var context = PublishContext.FromMessage(message);
+			var context = ContextStorage.CreatePublishContext(message);
 			using (context.CreateScope())
 			{
 				context.SetSourceAddress(Endpoint.Address.Uri);

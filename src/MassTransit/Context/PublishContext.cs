@@ -17,15 +17,6 @@ namespace MassTransit.Context
 	using System.Diagnostics;
 
 
-	public static class PublishContext
-	{
-		public static PublishContext<T> FromMessage<T>(T message)
-			where T : class
-		{
-			return PublishContext<T>.FromMessage(message);
-		}
-	}
-
 	public class PublishContext<T> :
 		SendContext<T>,
 		IBusPublishContext<T>

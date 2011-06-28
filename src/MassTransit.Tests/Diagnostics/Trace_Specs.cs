@@ -9,8 +9,8 @@ namespace MassTransit.Tests.Diagnostics
 	public class When_tracing_messages_on_the_bus
 	{
 		HandlerTest<InputMessage> _test;
-		FutureMessage<MessageTraceList> _future;
-		MessageTraceList _list;
+		FutureMessage<ReceivedMessageTraceList> _future;
+		ReceivedMessageTraceList _list;
 
 		[When]
 		public void A_consumer_is_being_tested()
@@ -31,8 +31,8 @@ namespace MassTransit.Tests.Diagnostics
 			_test.Received.Any<InputMessage>().ShouldBeTrue();
 			_test.Sent.Any<OutputMessage>().ShouldBeTrue();
 
-			_future = new FutureMessage<MessageTraceList>();
-			_test.Scenario.Bus.SubscribeHandler<MessageTraceList>(_future.Set);
+			_future = new FutureMessage<ReceivedMessageTraceList>();
+			_test.Scenario.Bus.SubscribeHandler<ReceivedMessageTraceList>(_future.Set);
 
 			_test.Scenario.Bus.ControlBus.Endpoint.Send<GetMessageTraceList>(new GetMessageTraceListImpl { Count = 1 }, x =>
 			{
@@ -56,6 +56,12 @@ namespace MassTransit.Tests.Diagnostics
 			_list.ShouldNotBeNull();
 			_list.Messages.ShouldNotBeNull();
 			_list.Messages.Count.ShouldEqual(1);
+
+			MessageTraceDetail message = _list.Messages[0];
+
+			message.ContentType.ShouldEqual("application/vnd.masstransit+xml");
+			message.DestinationAddress.ShouldEqual(_test.Scenario.Bus.Endpoint.Address.Uri);
+			message.ResponseAddress.ShouldEqual(_test.Scenario.Bus.Endpoint.Address.Uri);
 		}
 
 		[Then]
@@ -63,6 +69,12 @@ namespace MassTransit.Tests.Diagnostics
 		{
 			_list.Messages[0].Receivers.ShouldNotBeNull();
 			_list.Messages[0].Receivers.Count.ShouldEqual(1);
+		}
+
+		[Then]
+		public void Should_have_sent_messages_in_the_trace_log()
+		{
+			_list.Messages[0].SentMessages.ShouldNotBeNull();
 		}
 
 

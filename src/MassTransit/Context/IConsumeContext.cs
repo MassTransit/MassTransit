@@ -19,8 +19,6 @@ namespace MassTransit
 		IMessageContext<T>
 		where T : class
 	{
-		IConsumeContext BaseContext { get; }
-
 		/// <summary>
 		/// Send the message to the end of the input queue so that it can be processed again later
 		/// </summary>
@@ -39,6 +37,8 @@ namespace MassTransit
 	public interface IConsumeContext :
 		IMessageContext
 	{
+		IReceiveContext BaseContext { get; }
+
 		/// <summary>
 		/// The bus on which the message was received
 		/// </summary>
