@@ -228,7 +228,6 @@
     <Compile Include="Diagnostics\MessageTraceClient.cs" />
     <Compile Include="Diagnostics\MessageTraceClientExtensions.cs" />
     <Compile Include="Diagnostics\MessageTraceDetail.cs" />
-    <Compile Include="Diagnostics\ReceivedMessageTraceDetailFormatter.cs" />
     <Compile Include="Diagnostics\ReceivedMessageTraceList.cs" />
     <Compile Include="Diagnostics\MessageTraceDetailImpl.cs" />
     <Compile Include="Diagnostics\ReceivedMessageTraceListImpl.cs" />

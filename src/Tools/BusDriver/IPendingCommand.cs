@@ -10,15 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Diagnostics
+namespace BusDriver
 {
 	using System;
 
-	public static class MessageTraceClientExtensions
+	interface IPendingCommand
 	{
-		public static void GetMessageTrace(this IServiceBus bus, IEndpoint endpoint, Action<ReceivedMessageTraceList> callback)
-		{
-			new MessageTraceClient(bus, endpoint, 100, callback);
-		}
+		void WaitUntilComplete(TimeSpan timeout);
 	}
 }

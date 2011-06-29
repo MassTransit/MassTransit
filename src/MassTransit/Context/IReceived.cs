@@ -19,5 +19,6 @@ namespace MassTransit.Context
 		string MessageType { get; }
 		string ReceiverType { get; }
 		long Timestamp { get; }
+		string CorrelationId { get; }
 	}
 }

@@ -10,15 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Diagnostics
+namespace BusDriver.Formatting
 {
-	using System;
+	using System.Collections.Generic;
 
-	public static class MessageTraceClientExtensions
+	public interface ITextBlock
 	{
-		public static void GetMessageTrace(this IServiceBus bus, IEndpoint endpoint, Action<ReceivedMessageTraceList> callback)
-		{
-			new MessageTraceClient(bus, endpoint, 100, callback);
-		}
+		int Width { get; }
+		ITextBlock Body(string text);
+		ITextBlock BodyFormat(string format, params object[] args);
+		ITextBlock Break();
+		ITextBlock Separator();
+		ITextBlock BeginBlock(object left, object right);
+		ITextBlock EndBlock();
+		ITextBlock Table(IDictionary<string, string> values, params string[] extra);
 	}
 }

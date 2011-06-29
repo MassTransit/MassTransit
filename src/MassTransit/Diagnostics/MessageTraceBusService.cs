@@ -112,6 +112,7 @@ namespace MassTransit.Diagnostics
 				{
 					MessageType = x.MessageType,
 					ReceiverType = x.ReceiverType,
+					CorrelationId = x.CorrelationId,
 					StartTime = startTime + TimeSpan.FromMilliseconds(x.Timestamp),
 					Duration = TimeSpan.Zero,
 				}).ToList();

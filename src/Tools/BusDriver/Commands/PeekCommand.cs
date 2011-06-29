@@ -14,6 +14,7 @@ namespace BusDriver.Commands
 {
 	using System;
 	using System.Text;
+	using Formatting;
 	using log4net;
 	using Magnum.Extensions;
 	using MassTransit.Transports;
@@ -37,21 +38,27 @@ namespace BusDriver.Commands
 
 			IInboundTransport fromTransport = Program.Transports.GetTransport(uri);
 
+			var text = new TextBlock()
+				.BeginBlock("Peek URI: " + uri, "");
+
 			int peekCount = 0;
 			fromTransport.Receive(receiveContext =>
 				{
 					if (peekCount >= _count)
 						return null;
 
-					_log.InfoFormat("{0} - {1}", peekCount, receiveContext.MessageId);
-
 					var body = Encoding.UTF8.GetString(receiveContext.BodyStream.ReadToEnd());
-					_log.Info(body);
+
+					text.BeginBlock("MessageId: " + receiveContext.MessageId ?? "", peekCount)
+						.Body(body)
+						.EndBlock();
 
 					peekCount++;
 
 					return null;
 				}, TimeSpan.Zero);
+
+			_log.Info(text.ToString());
 
 			return true;
 		}

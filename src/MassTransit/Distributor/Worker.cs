@@ -67,6 +67,11 @@ namespace MassTransit.Distributor
                 RewriteResponseAddress(message.ResponseAddress);
 
                 consumer(message.Payload);
+
+            	var consumeContext = _bus.MessageContext<Distributed<TMessage>>();
+
+            	consumeContext.BaseContext.NotifyConsume(consumeContext, typeof (Worker<TMessage>).ToShortTypeName(),
+            		message.CorrelationId.ToString());
             }
             finally
             {

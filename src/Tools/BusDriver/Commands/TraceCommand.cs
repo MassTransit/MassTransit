@@ -13,22 +13,31 @@
 namespace BusDriver.Commands
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Threading;
+	using Formatting;
 	using log4net;
+	using Magnum.Extensions;
 	using MassTransit;
 	using MassTransit.Diagnostics;
 
 	public class TraceCommand :
-		Command
+		Consumes<ReceivedMessageTraceList>.All,
+		Command,
+		IPendingCommand
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (TraceCommand));
-
+		readonly ManualResetEvent _complete;
 		readonly int _count;
 		readonly string _uriString;
+		UnsubscribeAction _unsubscribe;
 
 		public TraceCommand(string uriString, int count)
 		{
 			_uriString = uriString;
 			_count = count;
+			_complete = new ManualResetEvent(false);
 		}
 
 		public bool Execute()
@@ -37,20 +46,139 @@ namespace BusDriver.Commands
 
 			IServiceBus bus = Program.Bus;
 
-			var endpoint = bus.GetEndpoint(uri);
+			IEndpoint endpoint = bus.GetEndpoint(uri);
 
-			_log.InfoFormat("Sending trace request to {0} for {1} message{2}", uri, _count, _count == 1 ? "" : "s");
-			var client = new MessageTraceClient(bus, endpoint, _count, x =>
-				{
-					string result = x.ToConsoleString();
+			_log.DebugFormat("Sending trace request to {0} for {1} message{2}", uri, _count, _count == 1 ? "" : "s");
 
-					_log.Info("");
-					_log.InfoFormat("Trace Response from {0} contained {1} message{2}", uri, x.Messages.Count, x.Messages.Count == 1 ? "" : "s");
-					_log.Info(result);
-					_log.Info("");
-				});
+			_unsubscribe = bus.SubscribeInstance(this);
+
+			endpoint.Send<GetMessageTraceList>(new GetMessageTraceListImpl {Count = _count}, x => x.SendResponseTo(bus));
+
+			Program.AddPendingCommand(this);
 
 			return true;
+		}
+
+		public void Consume(ReceivedMessageTraceList list)
+		{
+			if (_unsubscribe != null)
+				_unsubscribe();
+			_unsubscribe = null;
+
+			ITextBlock text = new TextBlock()
+				.BeginBlock("Trace URI: " + _uriString,
+					string.Format("{0} message{1}", list.Messages.Count, list.Messages.Count == 1 ? "" : "s"))
+					.Break();
+
+			foreach (ReceivedMessageTraceDetail message in list.Messages)
+			{
+				text.BeginBlock("Received: " + message.Id, Format(message.StartTime));
+
+				text.Table(GetMessageHeaderDictionary(message),
+					"Duration (ms)", ((int)message.Duration.TotalMilliseconds).ToString("N0"));
+
+				text.Break();
+
+				if (message.Receivers != null)
+				{
+					foreach (ReceiverTraceDetail receiver in message.Receivers)
+					{
+						text.BeginBlock(receiver.ReceiverType, Format(receiver.StartTime));
+						text.Table(GetReceiverDictionary(receiver));
+						text.EndBlock();
+					}
+				}
+
+				if (message.SentMessages != null)
+				{
+					foreach (SentMessageTraceDetail sent in message.SentMessages)
+					{
+						text.BeginBlock("Sent: " + sent.Id, Format(sent.StartTime));
+
+						text.Table(GetMessageHeaderDictionary(sent),
+							"Endpoint Address", sent.Address.ToString());
+						text.EndBlock();
+					}
+				}
+
+				text.EndBlock();
+			}
+
+			_log.Info(text.ToString());
+			_complete.Set();
+		}
+
+		public void WaitUntilComplete(TimeSpan timeout)
+		{
+			if (_complete.WaitOne(timeout) == false)
+				throw new TimeoutException("Timeout waiting for pending trace command to complete");
+		}
+
+		string Format(DateTime value)
+		{
+			return value.ToString("yyyy-MM-dd hh:mm:ss.fff");
+		}
+
+
+
+		IDictionary<string, string> GetReceiverDictionary(ReceiverTraceDetail detail)
+		{
+			return GetReceiverValues(detail).ToDictionary(x => x.Key, x => x.Value);
+		}
+
+		IEnumerable<KeyValuePair<string, string>> GetReceiverValues(ReceiverTraceDetail detail)
+		{
+			if(detail.MessageType.IsNotEmpty())
+				yield return new KeyValuePair<string, string>("Message Type", detail.MessageType);
+
+			if(detail.CorrelationId.IsNotEmpty())
+				yield return new KeyValuePair<string, string>("Correlation Id", detail.CorrelationId);
+
+			if(detail.Duration != TimeSpan.Zero)
+				yield return new KeyValuePair<string, string>("Duration (ms)", ((int)detail.Duration.TotalMilliseconds).ToString("N0"));
+		}
+
+		IDictionary<string, string> GetMessageHeaderDictionary(MessageTraceDetail detail)
+		{
+			return GetMessageHeaderValues(detail).ToDictionary(x => x.Key, x => x.Value);
+		}
+
+		IEnumerable<KeyValuePair<string, string>> GetMessageHeaderValues(MessageTraceDetail detail)
+		{
+			if (detail.MessageId.IsNotEmpty())
+				yield return new KeyValuePair<string, string>("Message Id", detail.MessageId);
+
+			if (detail.SourceAddress != null)
+				yield return new KeyValuePair<string, string>("Source Address", detail.SourceAddress.ToString());
+
+			if (detail.InputAddress != null)
+				yield return new KeyValuePair<string, string>("Input Address", detail.InputAddress.ToString());
+
+			if (detail.DestinationAddress != null)
+				yield return new KeyValuePair<string, string>("Destination Address", detail.DestinationAddress.ToString());
+
+			if (detail.ResponseAddress != null)
+				yield return new KeyValuePair<string, string>("Response Address", detail.ResponseAddress.ToString());
+
+			if (detail.FaultAddress != null)
+				yield return new KeyValuePair<string, string>("Fault Address", detail.FaultAddress.ToString());
+
+			if (detail.Network.IsNotEmpty())
+				yield return new KeyValuePair<string, string>("Network", detail.Network);
+
+			if (detail.ContentType.IsNotEmpty())
+				yield return new KeyValuePair<string, string>("Content Type", detail.ContentType);
+
+			if (detail.MessageType.IsNotEmpty())
+				yield return new KeyValuePair<string, string>("Message Type", detail.MessageType);
+
+			if (detail.ExpirationTime.HasValue)
+				yield return
+					new KeyValuePair<string, string>("Expiration Time",
+						detail.ExpirationTime.Value.ToString("yyyy-MM-dd hh:mm:ss.ffff"));
+
+			if (detail.RetryCount != 0)
+				yield return new KeyValuePair<string, string>("Retry Count", detail.RetryCount.ToString());
 		}
 	}
 }

@@ -68,7 +68,7 @@ namespace MassTransit
 		void NotifyPublish<T>(IPublishContext<T> publishContext)
 			where T : class;
 
-		void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType)
+		void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
 			where T : class;
 
 		IEnumerable<ISent> Sent { get; }

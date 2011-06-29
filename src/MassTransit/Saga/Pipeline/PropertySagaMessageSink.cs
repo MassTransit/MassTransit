@@ -38,7 +38,7 @@ namespace MassTransit.Saga.Pipeline
 				{
 					instance.Bus = context.Bus;
 
-					context.BaseContext.NotifyConsume(context, string.Format("{0} - {1}", typeof(TSaga).ToShortTypeName(), instance.CorrelationId));
+					context.BaseContext.NotifyConsume(context, typeof(TSaga).ToShortTypeName(), instance.CorrelationId.ToString());
 					
 					using (x.CreateScope())
 					{

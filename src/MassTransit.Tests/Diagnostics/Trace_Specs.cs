@@ -1,6 +1,5 @@
 namespace MassTransit.Tests.Diagnostics
 {
-	using System.Diagnostics;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using MassTransit.Diagnostics;
@@ -59,8 +58,6 @@ namespace MassTransit.Tests.Diagnostics
 			message.ContentType.ShouldEqual("application/vnd.masstransit+xml");
 			message.DestinationAddress.ShouldEqual(_test.Scenario.Bus.Endpoint.Address.Uri);
 			message.ResponseAddress.ShouldEqual(_test.Scenario.Bus.Endpoint.Address.Uri);
-
-			Trace.WriteLine(_list.ToConsoleString());
 		}
 
 		[Then]

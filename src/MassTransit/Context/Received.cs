@@ -17,14 +17,21 @@ namespace MassTransit.Context
 		where T : class
 	{
 		readonly IConsumeContext<T> _context;
+		readonly string _correlationId;
 		string _consumerType;
 		long _timestamp;
 
-		public Received(IConsumeContext<T> context, string consumerType, long timestamp)
+		public Received(IConsumeContext<T> context, string consumerType, string correlationId, long timestamp)
 		{
 			_timestamp = timestamp;
 			_consumerType = consumerType;
+			_correlationId = correlationId;
 			_context = context;
+		}
+
+		public string CorrelationId
+		{
+			get { return _correlationId; }
 		}
 
 		public long Timestamp
