@@ -82,6 +82,9 @@
     <Compile Include="Commands\MoveCommand.cs" />
     <Compile Include="Commands\PeekCommand.cs" />
     <Compile Include="Commands\TraceCommand.cs" />
+    <Compile Include="Formatting\ITextBlock.cs" />
+    <Compile Include="Formatting\TextBlock.cs" />
+    <Compile Include="IPendingCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="TransportCache.cs" />
     <Compile Include="UriExtensions.cs" />

@@ -35,10 +35,13 @@ namespace BusDriver
 		static ConsoleAppender _appender;
 		static IServiceBus _bus;
 		static Uri _driverUri = new Uri("msmq://localhost/masstransit_busdriver");
+		static IList<IPendingCommand> _pending;
 
 		static void Main()
 		{
 			BootstrapLogger();
+			
+			_pending = new List<IPendingCommand>();
 
 			try
 			{
@@ -60,6 +63,8 @@ namespace BusDriver
 			}
 			finally
 			{
+				WaitForPendingCommands();
+
 				if (_bus != null)
 				{
 					_bus.Dispose();
@@ -70,6 +75,23 @@ namespace BusDriver
 				Transports = null;
 
 				_log.Debug("End of Line.");
+			}
+		}
+
+		static void WaitForPendingCommands()
+		{
+			foreach (var command in _pending)
+			{
+				try
+				{
+					_log.Debug("Waiting for command to complete");
+
+					command.WaitUntilComplete(30.Seconds());
+				}
+				catch (Exception ex)
+				{
+					_log.Error("Exception while waiting for pending command", ex);
+				}
 			}
 		}
 
@@ -90,6 +112,11 @@ namespace BusDriver
 
 				return _bus;
 			}
+		}
+
+		public static void AddPendingCommand(IPendingCommand command)
+		{
+			_pending.Add(command);
 		}
 
 		static void RunInteractiveConsole()

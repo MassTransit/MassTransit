@@ -42,7 +42,7 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			foreach (var result in _selector(messageContext))
 			{
-				messageContext.BaseContext.NotifyConsume(messageContext, typeof(Action<TMessage>).ToShortTypeName());
+				messageContext.BaseContext.NotifyConsume(messageContext, typeof (Action<TMessage>).ToShortTypeName(), null);
 
 				yield return result;
 			}

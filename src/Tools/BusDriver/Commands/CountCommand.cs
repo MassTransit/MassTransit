@@ -13,6 +13,7 @@
 namespace BusDriver.Commands
 {
 	using System;
+	using Formatting;
 	using log4net;
 	using MassTransit.Transports.Msmq;
 
@@ -37,7 +38,11 @@ namespace BusDriver.Commands
 
 				long count = management.Count();
 
-				_log.InfoFormat("{0} contains {1} message{2}", uri, count, count != 1 ? "s" : "");
+				_log.Info(new TextBlock()
+					.BeginBlock("Count URI: " + uri, "")
+					.BodyFormat("{0} message{1}", count, count != 1 ? "s" : "")
+					.EndBlock()
+					.ToString());
 
 				return true;
 			}

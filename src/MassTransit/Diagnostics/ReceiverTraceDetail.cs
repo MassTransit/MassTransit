@@ -27,6 +27,11 @@ namespace MassTransit.Diagnostics
 		string ReceiverType { get; }
 
 		/// <summary>
+		/// Correlation information related to the receiver (saga Id, etc.)
+		/// </summary>
+		string CorrelationId { get; }
+
+		/// <summary>
 		/// The time the receiver started processing the message, relative to the receive time
 		/// </summary>
 		DateTime StartTime { get; }

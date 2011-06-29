@@ -21,5 +21,7 @@ namespace MassTransit.Diagnostics
 		public string ReceiverType { get; set; }
 		public DateTime StartTime { get; set; }
 		public TimeSpan Duration { get; set; }
+
+		public string CorrelationId { get; set; }
 	}
 }

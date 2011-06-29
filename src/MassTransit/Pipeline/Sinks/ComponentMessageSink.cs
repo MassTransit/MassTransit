@@ -48,7 +48,7 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			yield return context =>
 				{
-					context.BaseContext.NotifyConsume(context, typeof(TComponent).ToShortTypeName());
+					context.BaseContext.NotifyConsume(context, typeof (TComponent).ToShortTypeName(), null);
 
 					using (context.CreateScope())
 					{

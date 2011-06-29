@@ -117,10 +117,10 @@ namespace MassTransit.Context
 			_published.Add(new Published<T>(publishContext));
 		}
 
-		public void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType) 
+		public void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId) 
 			where T : class
 		{
-			_received.Add(new Received<T>(consumeContext, consumerType, _timer.ElapsedMilliseconds));
+			_received.Add(new Received<T>(consumeContext, consumerType, correlationId, _timer.ElapsedMilliseconds));
 		}
 
 		public IEnumerable<ISent> Sent

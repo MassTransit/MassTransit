@@ -31,7 +31,6 @@ namespace MassTransit.Services.Subscriptions.Server
 		IDisposable
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
-		readonly Fiber _fiber = new PoolFiber();
 		readonly ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagas;
 		readonly ISagaRepository<SubscriptionSaga> _subscriptionSagas;
 		IServiceBus _bus;
@@ -54,7 +53,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var add = new AddSubscription(message.Subscription);
 
-			_fiber.Add(() => SendToClients(add));
+			SendToClients(add);
 		}
 
 		public void Consume(SubscriptionClientAdded message)
@@ -62,7 +61,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			if (_log.IsInfoEnabled)
 				_log.InfoFormat("Subscription Client Added: {0} [{1}]", message.ControlUri, message.ClientId);
 
-			_fiber.Add(() => SendCacheUpdateToClient(message.ControlUri));
+			SendCacheUpdateToClient(message.ControlUri);
 		}
 
 		public void Consume(SubscriptionClientRemoved message)
@@ -78,7 +77,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var remove = new RemoveSubscription(message.Subscription);
 
-			_fiber.Add(() => SendToClients(remove));
+			SendToClients(remove);
 		}
 
 		public void Dispose()
@@ -114,8 +113,6 @@ namespace MassTransit.Services.Subscriptions.Server
 			{
 				try
 				{
-					_fiber.Shutdown(60.Seconds());
-
 					_bus.Dispose();
 					_bus = null;
 				}
