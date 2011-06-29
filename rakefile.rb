@@ -8,10 +8,14 @@ require 'albacore'
 require File.dirname(__FILE__) + "/build_support/ilmergeconfig.rb"
 require File.dirname(__FILE__) + "/build_support/ilmerge.rb"
 
-BUILD_NUMBER_BASE = '2.0.0'
 PRODUCT = 'MassTransit'
 CLR_TOOLS_VERSION = 'v4.0.30319'
 
+build_number_base = '2.0.0'
+tc_build_number = '0'
+tc_build_number = ENV["BUILD_NUMBER"] unless ENV['BUILD_NUMBER'].nil?
+BUILD_NUMBER = "#{build_number_base}.#{tc_build_number}"
+  
 BUILD_CONFIG = ENV['BUILD_CONFIG'] || "Release"
 BUILD_CONFIG_KEY = ENV['BUILD_CONFIG_KEY'] || 'NET40'
 BUILD_PLATFORM = ''
@@ -60,19 +64,18 @@ task :unclean => [:compile, :ilmerge, :tests]
 
 desc "Update the common version information for the build. You can call this task without building."
 assemblyinfo :global_version do |asm|
-  asm_version = BUILD_NUMBER_BASE + ".0"
+  asm_version = BUILD_NUMBER
+  
   commit_data = get_commit_hash_and_date
   commit = commit_data[0]
   commit_date = commit_data[1]
-  build_number = "#{BUILD_NUMBER_BASE}.#{Date.today.strftime('%y%j')}"
-  tc_build_number = ENV["BUILD_NUMBER"]
-  puts "##teamcity[buildNumber '#{build_number}-#{tc_build_number}']" unless tc_build_number.nil?
+  puts "##teamcity[buildNumber '#{BUILD_NUMBER}']"
   
   # Assembly file config
   asm.product_name = PRODUCT
   asm.description = "Git commit hash: #{commit} - #{commit_date} - MassTransit is a distributed application framework for .NET  http://masstransit-project.com"
   asm.version = asm_version
-  asm.file_version = build_number
+  asm.file_version = BUILD_NUMBER
   asm.custom_attributes :AssemblyInformationalVersion => "#{asm_version}",
 	:ComVisibleAttribute => false,
 	:CLSCompliantAttribute => false
@@ -286,7 +289,7 @@ task :ci => [:default, :package, :moma]
 desc "ZIPs up the build results and runs the MoMA analyzer."
 zip :package do |zip|
 	zip.directories_to_zip = [props[:stage]]
-	zip.output_file = "MassTransit-#{BUILD_NUMBER_BASE}.zip"
+	zip.output_file = "MassTransit-#{BUILD_NUMBER}.zip"
 	zip.output_path = [props[:artifacts]]
 end
 
@@ -301,14 +304,14 @@ end
 
 desc "Builds the nuget package"
 task :nuget => [:compile, :ilmerge] do
-	sh "lib/nuget.exe pack nugets/MassTransit.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack nugets/MassTransit.StructureMap.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack nugets/MassTransit.Autofac.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack nugets/MassTransit.Ninject.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack nugets/MassTransit.Unity.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack nugets/MassTransit.CastleWindsor.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack nugets/MassTransit.NHibernate.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack nugets/MassTransit.RabbitMQ.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack nugets/MassTransit.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
+	sh "lib/nuget.exe pack nugets/MassTransit.StructureMap.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
+	sh "lib/nuget.exe pack nugets/MassTransit.Autofac.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
+	sh "lib/nuget.exe pack nugets/MassTransit.Ninject.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
+	sh "lib/nuget.exe pack nugets/MassTransit.Unity.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
+	sh "lib/nuget.exe pack nugets/MassTransit.CastleWindsor.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
+	sh "lib/nuget.exe pack nugets/MassTransit.NHibernate.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
+	sh "lib/nuget.exe pack nugets/MassTransit.RabbitMQ.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
 end
 
 def project_outputs(props)
