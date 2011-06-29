@@ -30,11 +30,11 @@ namespace MassTransit.Diagnostics
 		readonly ChannelConnection _connection;
 		readonly UntypedChannel _eventChannel;
 
-		readonly Magnum.Collections.Deque<ReceivedMessageTraceDetail> _messages;
+		readonly Deque<ReceivedMessageTraceDetail> _messages;
 
 		IServiceBus _controlBus;
-		int _detailLimit;
-		Fiber _fiber;
+		readonly int _detailLimit;
+		readonly Fiber _fiber;
 		UnsubscribeAction _unsubscribe;
 
 		public MessageTraceBusService(UntypedChannel eventChannel)
@@ -82,11 +82,13 @@ namespace MassTransit.Diagnostics
 		{
 			_unsubscribe();
 			_connection.Disconnect();
+
+			_fiber.Shutdown(30.Seconds());
 		}
 
 		void Handle(MessageReceived message)
 		{
-			var startTime = message.ReceivedAt;
+			DateTime startTime = message.ReceivedAt;
 
 			var detail = new ReceivedMessageTraceDetailImpl
 				{
@@ -132,7 +134,6 @@ namespace MassTransit.Diagnostics
 					RetryCount = x.Context.RetryCount,
 					StartTime = startTime + TimeSpan.FromMilliseconds(x.Timestamp),
 					Duration = TimeSpan.Zero,
-					
 				}).ToList();
 
 			_messages.AddToBack(detail);

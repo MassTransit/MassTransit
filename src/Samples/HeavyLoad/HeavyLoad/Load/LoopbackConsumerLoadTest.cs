@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Threading;
 	using MassTransit;
+	using MassTransit.Pipeline;
 
 	public class LoopbackConsumerLoadTest :
 		IConsumerFactory<LoopbackConsumerLoadTest.RequestConsumer>,
@@ -22,13 +23,25 @@
 			_bus = ServiceBusFactory.New(x =>
 				{
 					x.ReceiveFrom("loopback://localhost/heavy_load");
+					x.UseJsonSerializer();
 
 					x.Subscribe(s =>
 						{
-							s.Consumer<RequestConsumer>(this);
+							s.Consumer(this);
 							s.Consumer<ResponseConsumer>();
 						});
 				});
+		}
+
+		public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(IConsumeContext<TMessage> context,
+		                                                                            InstanceHandlerSelector
+		                                                                            	<RequestConsumer, TMessage> selector)
+			where TMessage : class
+		{
+			var consumer = new RequestConsumer(_bus);
+
+			IEnumerable<Action<IConsumeContext<TMessage>>> result = selector(consumer, context);
+			return result;
 		}
 
 		public void Dispose()
@@ -87,17 +100,6 @@
 				if (_responseCounter == _repeatCount)
 					_responseEvent.Set();
 			}
-		}
-
-		public IEnumerable<Action<TMessage>> GetConsumer<TMessage>(Func<RequestConsumer, Action<TMessage>> callback)
-		{
-			var consumer = new RequestConsumer(_bus);
-
-			Action<TMessage> result = callback(consumer);
-			if (result == null)
-				yield break;
-
-			yield return result;
 		}
 	}
 }
