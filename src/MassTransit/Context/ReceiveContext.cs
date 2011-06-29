@@ -17,6 +17,7 @@ namespace MassTransit.Context
 	using System.Diagnostics;
 	using System.IO;
 	using log4net;
+	using Magnum;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
 	using Serialization;
@@ -28,17 +29,18 @@ namespace MassTransit.Context
 	{
 		Stream _bodyStream;
 		IMessageTypeConverter _typeConverter;
-		readonly HashSet<Type> _receiverTypes;
 		readonly IList<ISent> _sent;
 		readonly IList<IPublished> _published;
+		readonly IList<IReceived> _received;
 		Stopwatch _timer;
 
 		ReceiveContext()
 		{
+			Id = CombGuid.Generate();
 			_timer = Stopwatch.StartNew();
-			_receiverTypes = new HashSet<Type>();
 			_sent = new List<ISent>();
 			_published = new List<IPublished>();
+			_received = new List<IReceived>();
 		}
 
 		ReceiveContext(Stream bodyStream)
@@ -115,10 +117,23 @@ namespace MassTransit.Context
 			_published.Add(new Published<T>(publishContext));
 		}
 
+		public void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType) 
+			where T : class
+		{
+			_received.Add(new Received<T>(consumeContext, consumerType, _timer.ElapsedMilliseconds));
+		}
+
 		public IEnumerable<ISent> Sent
 		{
 			get { return _sent; }
 		}
+
+		public IEnumerable<IReceived> Received
+		{
+			get { return _received; }
+		}
+
+		public Guid Id { get; private set; }
 
 		public bool TryGetContext<T>(out IConsumeContext<T> context)
 			where T : class
@@ -127,7 +142,7 @@ namespace MassTransit.Context
 			if (_typeConverter.TryConvert(out message))
 			{
 				context = new ConsumeContext<T>(this, message);
-				_receiverTypes.Add(typeof (T));
+				//_receiverTypes.Add(typeof (T));
 				return true;
 			}
 

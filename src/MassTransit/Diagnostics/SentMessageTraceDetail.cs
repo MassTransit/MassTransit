@@ -12,11 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Diagnostics
 {
+	using System;
+
 	/// <summary>
 	/// A message that was sent while a message was being received
 	/// </summary>
 	public interface SentMessageTraceDetail :
 		MessageTraceDetail
 	{
+		Uri Address { get; }
+
+		string DeclaringMessageType { get; }
 	}
 }

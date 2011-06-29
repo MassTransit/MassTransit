@@ -142,17 +142,16 @@ namespace MassTransit.Context
 				_consumers.Dispose();
 				_consumers = null;
 
-				ReportConsumerTime(CombGuid.Generate(), _startTime, _receiveTime.Elapsed, _consumeTime.Elapsed, context);
+				ReportConsumerTime(_startTime, _receiveTime.Elapsed, _consumeTime.Elapsed, context);
 				ReportConsumerCount(context, _consumeCount);
 			}
 		}
 
-		void ReportConsumerTime(Guid id, DateTime startTime, TimeSpan receiveDuration, TimeSpan consumeDuration,
+		void ReportConsumerTime(DateTime startTime, TimeSpan receiveDuration, TimeSpan consumeDuration,
 		                        IReceiveContext context)
 		{
 			var message = new MessageReceived
 				{
-					Id = id,
 					Context = context,
 					ReceivedAt = startTime,
 					ReceiveDuration = receiveDuration,

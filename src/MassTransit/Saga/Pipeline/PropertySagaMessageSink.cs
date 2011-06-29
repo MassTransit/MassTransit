@@ -15,6 +15,7 @@ namespace MassTransit.Saga.Pipeline
 	using System;
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
+	using Magnum.Extensions;
 
 	public class PropertySagaMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
@@ -37,6 +38,8 @@ namespace MassTransit.Saga.Pipeline
 				{
 					instance.Bus = context.Bus;
 
+					context.BaseContext.NotifyConsume(context, typeof(TSaga).ToShortTypeName());
+					
 					using (x.CreateScope())
 					{
 						instance.Consume(x.Message);

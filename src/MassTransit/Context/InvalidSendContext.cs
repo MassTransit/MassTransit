@@ -68,6 +68,11 @@ namespace MassTransit.Context
 			get { throw CreateException(); }
 		}
 
+		public Guid Id
+		{
+			get { throw CreateException(); }
+		}
+
 		public Type DeclaringMessageType
 		{
 			get { throw CreateException(); }

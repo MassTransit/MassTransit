@@ -16,6 +16,7 @@ namespace MassTransit.Saga.Pipeline
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
 	using log4net;
+	using Magnum.Extensions;
 	using Magnum.StateMachine;
 	using Util;
 
@@ -45,6 +46,8 @@ namespace MassTransit.Saga.Pipeline
 			yield return x =>
 				{
 					instance.Bus = context.Bus;
+
+					context.BaseContext.NotifyConsume(context, typeof(TSaga).ToShortTypeName());
 
 					using (x.CreateScope())
 					{

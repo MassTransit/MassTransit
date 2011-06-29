@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
+	using Magnum.Extensions;
 
 	/// <summary>
 	/// Routes messages to instances of subscribed components. A new instance of the component
@@ -55,6 +56,8 @@ namespace MassTransit.Pipeline.Sinks
 			{
 				yield return context =>
 					{
+						context.BaseContext.NotifyConsume(context, typeof(TComponent).ToShortTypeName());
+
 						using (context.CreateScope())
 						{
 							instance.Consume(context.Message);

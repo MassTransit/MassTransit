@@ -1,5 +1,6 @@
 namespace MassTransit.Tests.Diagnostics
 {
+	using System.Diagnostics;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using MassTransit.Diagnostics;
@@ -24,6 +25,7 @@ namespace MassTransit.Tests.Diagnostics
 							});
 
 					x.Send(new InputMessage(), c => c.SendResponseTo(_test.Scenario.Bus));
+					x.Send(new InputMessage(), c => c.SendResponseTo(_test.Scenario.Bus));
 				});
 
 			_test.Execute();
@@ -32,12 +34,7 @@ namespace MassTransit.Tests.Diagnostics
 			_test.Sent.Any<OutputMessage>().ShouldBeTrue();
 
 			_future = new FutureMessage<ReceivedMessageTraceList>();
-			_test.Scenario.Bus.SubscribeHandler<ReceivedMessageTraceList>(_future.Set);
-
-			_test.Scenario.Bus.ControlBus.Endpoint.Send<GetMessageTraceList>(new GetMessageTraceListImpl { Count = 1 }, x =>
-			{
-				x.SendResponseTo(_test.Scenario.Bus);
-			});
+			_test.Scenario.Bus.GetMessageTrace(_test.Scenario.Bus.ControlBus.Endpoint, _future.Set);
 
 			_future.IsAvailable(8.Seconds()).ShouldBeTrue();
 			_list = _future.Message;
@@ -55,13 +52,15 @@ namespace MassTransit.Tests.Diagnostics
 		{
 			_list.ShouldNotBeNull();
 			_list.Messages.ShouldNotBeNull();
-			_list.Messages.Count.ShouldEqual(1);
+			_list.Messages.Count.ShouldEqual(2);
 
-			MessageTraceDetail message = _list.Messages[0];
+			ReceivedMessageTraceDetail message = _list.Messages[0];
 
 			message.ContentType.ShouldEqual("application/vnd.masstransit+xml");
 			message.DestinationAddress.ShouldEqual(_test.Scenario.Bus.Endpoint.Address.Uri);
 			message.ResponseAddress.ShouldEqual(_test.Scenario.Bus.Endpoint.Address.Uri);
+
+			Trace.WriteLine(_list.ToConsoleString());
 		}
 
 		[Then]

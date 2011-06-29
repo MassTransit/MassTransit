@@ -27,10 +27,14 @@ namespace MassTransit.Context
 		{
 			SetUsing(context);
 
+			Id = context.Id;
+
 			_notifySend = address => context.NotifySend(this, address);
 
 			_bodyWriter = stream => context.CopyBodyTo(stream);
 		}
+
+    	public Guid Id { get; set; }
 
     	public Type DeclaringMessageType
     	{

@@ -13,13 +13,30 @@
 namespace MassTransit.Diagnostics
 {
 	using System;
+	using System.Text;
 
-	public class SentMessageTraceDetailImpl :
-		MessageTraceDetailImpl,
-		SentMessageTraceDetail
+	public static class MessageTraceClientExtensions
 	{
-		public Uri Address { get; set; }
+		public static void GetMessageTrace(this IServiceBus bus, IEndpoint endpoint, Action<ReceivedMessageTraceList> callback)
+		{
+			new MessageTraceClient(bus, endpoint, 100, callback);
+		}
 
-		public string DeclaringMessageType { get; set; }
+		public static string ToConsoleString(this ReceivedMessageTraceList messages)
+		{
+			var sb = new StringBuilder();
+
+			foreach (ReceivedMessageTraceDetail message in messages.Messages)
+			{
+				sb.Append(message.ToConsoleString());
+			}
+
+			return sb.ToString();
+		}
+
+		public static string ToConsoleString(this ReceivedMessageTraceDetail message)
+		{
+			return new ReceivedMessageTraceDetailFormatter(message).ToString();
+		}
 	}
 }

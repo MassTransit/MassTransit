@@ -19,7 +19,7 @@ namespace MassTransit.Diagnostics
 	{
 		public string MessageType { get; set; }
 		public string ReceiverType { get; set; }
-		public TimeSpan StartTime { get; set; }
-		public TimeSpan StopTime { get; set; }
+		public DateTime StartTime { get; set; }
+		public TimeSpan Duration { get; set; }
 	}
 }

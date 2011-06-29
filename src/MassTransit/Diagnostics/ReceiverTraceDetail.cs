@@ -29,11 +29,11 @@ namespace MassTransit.Diagnostics
 		/// <summary>
 		/// The time the receiver started processing the message, relative to the receive time
 		/// </summary>
-		TimeSpan StartTime { get; }
+		DateTime StartTime { get; }
 
 		/// <summary>
 		/// The time at which the receiver was done processing the message
 		/// </summary>
-		TimeSpan StopTime { get; }
+		TimeSpan Duration { get; }
 	}
 }
