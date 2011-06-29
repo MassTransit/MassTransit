@@ -71,8 +71,8 @@ namespace MassTransit.Context
 			{
 				var busPublishContext = new PublishContext<TMessage>(Message as TMessage, this);
 				busPublishContext._wasEndpointAlreadySent = _wasEndpointAlreadySent;
-				busPublishContext.IfNoSubscribers(NotifyNoSubscribers);
-				busPublishContext.ForEachSubscriber(NotifySend);
+				busPublishContext.IfNoSubscribers(_noSubscribersAction);
+				busPublishContext.ForEachSubscriber(_eachSubscriberAction);
 
 				context = busPublishContext;
 			}
