@@ -57,7 +57,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum">
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -78,6 +81,7 @@
     <Compile Include="Commands\ExitCommand.cs" />
     <Compile Include="Commands\MoveCommand.cs" />
     <Compile Include="Commands\PeekCommand.cs" />
+    <Compile Include="Commands\TraceCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="TransportCache.cs" />
     <Compile Include="UriExtensions.cs" />
