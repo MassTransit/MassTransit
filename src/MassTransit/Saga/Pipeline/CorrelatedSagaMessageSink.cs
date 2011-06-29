@@ -14,6 +14,7 @@ namespace MassTransit.Saga.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
+	using Magnum.Extensions;
 
 	public class CorrelatedSagaMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
@@ -30,6 +31,8 @@ namespace MassTransit.Saga.Pipeline
 			yield return x =>
 				{
 					instance.Bus = context.Bus;
+
+					context.BaseContext.NotifyConsume(context, typeof(TSaga).ToShortTypeName());
 
 					using (x.CreateScope())
 					{

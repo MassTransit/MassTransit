@@ -19,7 +19,6 @@ namespace MassTransit.Events
 		public TimeSpan ConsumeDuration { get; set; }
 		public IReceiveContext Context { get; set; }
 
-		public Guid Id { get; set; }
 		public TimeSpan ReceiveDuration { get; set; }
 
 		public DateTime ReceivedAt { get; set; }

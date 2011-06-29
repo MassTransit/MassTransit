@@ -45,15 +45,6 @@ namespace MassTransit.Saga.Pipeline
 					yield return action;
 				}
 			}
-
-//						{
-//							saga.Bus = context.Bus;
-//
-//							using (ContextStorage.CreateContextScope(context))
-//							{
-//								ConsumerAction(saga, context.Message);
-//							}
-//						});
 		}
 
 		public bool Inspect(IPipelineInspector inspector)

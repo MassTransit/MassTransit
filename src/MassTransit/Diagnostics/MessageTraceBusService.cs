@@ -90,7 +90,7 @@ namespace MassTransit.Diagnostics
 
 			var detail = new ReceivedMessageTraceDetailImpl
 				{
-					Id = message.Id,
+					Id = message.Context.Id,
 					MessageId = message.Context.MessageId,
 					MessageType = message.Context.MessageType,
 					ContentType = message.Context.ContentType,
@@ -106,11 +106,22 @@ namespace MassTransit.Diagnostics
 					Duration = message.ReceiveDuration,
 				};
 
-			detail.SentMessages = message.Context.Sent.Select(x => (SentMessageTraceDetail)new SentMessageTraceDetailImpl
+			detail.Receivers = message.Context.Received.Select(x => (ReceiverTraceDetail) new ReceiverTraceDetailImpl
 				{
+					MessageType = x.MessageType,
+					ReceiverType = x.ReceiverType,
+					StartTime = startTime + TimeSpan.FromMilliseconds(x.Timestamp),
+					Duration = TimeSpan.Zero,
+				}).ToList();
+
+			detail.SentMessages = message.Context.Sent.Select(x => (SentMessageTraceDetail) new SentMessageTraceDetailImpl
+				{
+					Id = x.Context.Id,
 					MessageId = x.Context.MessageId,
 					MessageType = x.Context.MessageType,
+					DeclaringMessageType = x.Context.DeclaringMessageType.ToShortTypeName(),
 					ContentType = x.Context.ContentType,
+					Address = x.Address.Uri,
 					SourceAddress = x.Context.SourceAddress,
 					InputAddress = x.Context.InputAddress,
 					DestinationAddress = x.Context.DestinationAddress,
@@ -120,6 +131,7 @@ namespace MassTransit.Diagnostics
 					ExpirationTime = x.Context.ExpirationTime,
 					RetryCount = x.Context.RetryCount,
 					StartTime = startTime + TimeSpan.FromMilliseconds(x.Timestamp),
+					Duration = TimeSpan.Zero,
 					
 				}).ToList();
 

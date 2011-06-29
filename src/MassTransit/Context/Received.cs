@@ -10,16 +10,36 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Diagnostics
+namespace MassTransit.Context
 {
-	using System;
-
-	public class SentMessageTraceDetailImpl :
-		MessageTraceDetailImpl,
-		SentMessageTraceDetail
+	public class Received<T> :
+		IReceived
+		where T : class
 	{
-		public Uri Address { get; set; }
+		readonly IConsumeContext<T> _context;
+		string _consumerType;
+		long _timestamp;
 
-		public string DeclaringMessageType { get; set; }
+		public Received(IConsumeContext<T> context, string consumerType, long timestamp)
+		{
+			_timestamp = timestamp;
+			_consumerType = consumerType;
+			_context = context;
+		}
+
+		public long Timestamp
+		{
+			get { return _timestamp; }
+		}
+
+		public string MessageType
+		{
+			get { return typeof (T).ToMessageName(); }
+		}
+
+		public string ReceiverType
+		{
+			get { return _consumerType; }
+		}
 	}
 }

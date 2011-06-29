@@ -16,6 +16,7 @@ namespace MassTransit.Distributor.Pipeline
 	using System.Collections.Generic;
 	using System.Linq;
 	using Context;
+	using Magnum.Extensions;
 	using MassTransit.Pipeline;
 	using Messages;
 	using Saga;
@@ -49,6 +50,8 @@ namespace MassTransit.Distributor.Pipeline
 					try
 					{
 						_worker.ConsumingMessage(context.Message);
+
+						context.BaseContext.NotifyConsume(context, typeof(TSaga).ToShortTypeName());
 
 						using (payloadContext.CreateScope())
 						{

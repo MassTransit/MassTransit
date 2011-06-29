@@ -68,6 +68,13 @@ namespace MassTransit
 		void NotifyPublish<T>(IPublishContext<T> publishContext)
 			where T : class;
 
+		void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType)
+			where T : class;
+
 		IEnumerable<ISent> Sent { get; }
+
+		IEnumerable<IReceived> Received { get; }
+
+		Guid Id { get; }
 	}
 }

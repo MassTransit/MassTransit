@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.Sinks
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Context;
 
 	public class InboundConvertMessageSink<TMessage> :
 		IPipelineSink<IConsumeContext>
@@ -34,18 +33,18 @@ namespace MassTransit.Pipeline.Sinks
 			if (!context.TryGetContext(out outputContext))
 				return Enumerable.Empty<Action<IConsumeContext>>();
 
-				return _output.Enumerate(outputContext).Select(consumer => (Action<IConsumeContext>) (x =>
+			return _output.Enumerate(outputContext).Select(consumer => (Action<IConsumeContext>) (x =>
+				{
+					try
 					{
-						try
-						{
-							consumer(outputContext);
-						}
-						catch (Exception ex)
-						{
-							outputContext.GenerateFault(ex);
-							throw;
-						}
-					}));
+						consumer(outputContext);
+					}
+					catch (Exception ex)
+					{
+						outputContext.GenerateFault(ex);
+						throw;
+					}
+				}));
 		}
 
 		public bool Inspect(IPipelineInspector inspector)

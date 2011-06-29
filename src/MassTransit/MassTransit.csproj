@@ -197,6 +197,7 @@
     <Compile Include="Context\ContextScopeExtensions.cs" />
     <Compile Include="Context\ContextScope.cs" />
     <Compile Include="Context\IPublished.cs" />
+    <Compile Include="Context\IReceived.cs" />
     <Compile Include="Context\ISent.cs" />
     <Compile Include="Context\Published.cs" />
     <Compile Include="Context\ReceiveContext.cs" />
@@ -214,6 +215,7 @@
     <Compile Include="Context\MessageContextExtensions.cs" />
     <Compile Include="Context\PublishContext.cs" />
     <Compile Include="Context\MoveMessageSendContext.cs" />
+    <Compile Include="Context\Received.cs" />
     <Compile Include="Context\SendContext.cs" />
     <Compile Include="Context\ContextStorage.cs" />
     <Compile Include="Context\Sent.cs" />
@@ -223,7 +225,10 @@
     <Compile Include="Context\HttpContextContextStorageProvider.cs" />
     <Compile Include="Diagnostics\GetMessageTraceList.cs" />
     <Compile Include="Diagnostics\MessageTraceBusService.cs" />
+    <Compile Include="Diagnostics\MessageTraceClient.cs" />
+    <Compile Include="Diagnostics\MessageTraceClientExtensions.cs" />
     <Compile Include="Diagnostics\MessageTraceDetail.cs" />
+    <Compile Include="Diagnostics\ReceivedMessageTraceDetailFormatter.cs" />
     <Compile Include="Diagnostics\ReceivedMessageTraceList.cs" />
     <Compile Include="Diagnostics\MessageTraceDetailImpl.cs" />
     <Compile Include="Diagnostics\ReceivedMessageTraceListImpl.cs" />

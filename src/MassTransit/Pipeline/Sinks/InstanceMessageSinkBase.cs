@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
+	using Magnum.Extensions;
 
 	public class InstanceMessageSinkBase<TMessage> :
 		IPipelineSink<IConsumeContext<TMessage>>
@@ -28,13 +29,23 @@ namespace MassTransit.Pipeline.Sinks
 
 		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
 		{
-			return _selector(context);
+			return Selector(context);
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
 		{
 			inspector.Inspect(this);
 			return true;
+		}
+
+		IEnumerable<Action<IConsumeContext<TMessage>>> Selector(IConsumeContext<TMessage> messageContext)
+		{
+			foreach (var result in _selector(messageContext))
+			{
+				messageContext.BaseContext.NotifyConsume(messageContext, typeof(Action<TMessage>).ToShortTypeName());
+
+				yield return result;
+			}
 		}
 	}
 }

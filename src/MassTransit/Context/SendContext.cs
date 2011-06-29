@@ -14,6 +14,7 @@ namespace MassTransit.Context
 {
 	using System;
 	using System.IO;
+	using Magnum;
 
 	public class SendContext<T> :
 		MessageContext,
@@ -23,21 +24,31 @@ namespace MassTransit.Context
 		readonly T _message;
 		Action<Stream> _bodyWriter;
 		IReceiveContext _receiveContext;
+		Guid _id;
 
 		public SendContext(T message)
 		{
+			_id = CombGuid.Generate();
 			_message = message;
 
 			this.SetMessageType(typeof (T));
 			DeclaringMessageType = typeof (T);
 		}
 
-		protected SendContext(T message, IMessageContext context)
+		protected SendContext(T message, ISendContext context)
 		{
+			_id = context.Id;
 			_message = message;
+
 			SetUsing(context);
 
 			this.SetMessageType(typeof (T));
+			DeclaringMessageType = context.DeclaringMessageType;
+		}
+
+		public Guid Id
+		{
+			get { return _id; }
 		}
 
 		public Type DeclaringMessageType { get; private set; }

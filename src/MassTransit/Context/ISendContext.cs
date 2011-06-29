@@ -52,6 +52,14 @@ namespace MassTransit
 	public interface ISendContext :
 		IMessageContext
 	{
+		/// <summary>
+		/// The identifier for this message publish/send
+		/// </summary>
+		Guid Id { get; }
+
+		/// <summary>
+		/// The original message type that was sent/published
+		/// </summary>
 		Type DeclaringMessageType { get; }
 
 		/// <summary>
