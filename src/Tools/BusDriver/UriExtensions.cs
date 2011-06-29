@@ -10,13 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace BusDriver
 {
 	using System;
 
-	public interface IInboundTransport :
-		ITransport
+	static class UriExtensions
 	{
-		void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout);
+		internal static Uri ToUri(this string uriString, string message)
+		{
+			try
+			{
+				return new Uri(uriString);
+			}
+			catch (UriFormatException ex)
+			{
+				throw new ApplicationException(string.Format("{0}: {1}", message, uriString), ex);
+			}
+		}
 	}
 }

@@ -131,16 +131,7 @@ namespace MassTransit.Transports
 					{
 						receive = receiver(acceptContext);
 						if (receive == null)
-						{
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("SKIP:{0}:{1}", Address, acceptContext.MessageType);
-
-							if (SpecialLoggers.Messages.IsInfoEnabled)
-								SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}:{2}", Address, acceptContext.MessageType,
-									acceptContext.MessageId);
-
 							return null;
-						}
 					}
 					catch (SerializationException sex)
 					{
