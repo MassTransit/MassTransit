@@ -23,6 +23,7 @@ namespace BusDriver
 	using log4net.Layout;
 	using Magnum.CommandLineParser;
 	using Magnum.Extensions;
+	using MassTransit;
 	using MassTransit.Transports.Loopback;
 	using MassTransit.Transports.Msmq;
 	using MassTransit.Transports.RabbitMq;
@@ -32,6 +33,8 @@ namespace BusDriver
 		static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 		static readonly MonadicCommandLineParser _parser = new MonadicCommandLineParser();
 		static ConsoleAppender _appender;
+		static IServiceBus _bus;
+		static Uri _driverUri = new Uri("msmq://localhost/masstransit_busdriver");
 
 		static void Main()
 		{
@@ -57,6 +60,12 @@ namespace BusDriver
 			}
 			finally
 			{
+				if (_bus != null)
+				{
+					_bus.Dispose();
+					_bus = null;
+				}
+
 				Transports.Dispose();
 				Transports = null;
 
@@ -65,6 +74,23 @@ namespace BusDriver
 		}
 
 		public static TransportCache Transports { get; private set; }
+
+		public static IServiceBus Bus
+		{
+			get
+			{
+				if(_bus == null)
+				{
+					_bus = ServiceBusFactory.New(x =>
+						{
+							x.UseMsmq();
+							x.ReceiveFrom(_driverUri);
+						});
+				}
+
+				return _bus;
+			}
+		}
 
 		static void RunInteractiveConsole()
 		{

@@ -24,14 +24,28 @@
 			return value.ToString("yyyy-MM-dd hh:mm:ss.fff");
 		}
 
+		void Box(StringBuilder sb, int width, string left, string right)
+		{
+			sb.Append(' ').Append('_', width - 2).Append(' ').AppendLine();
+
+			int padding = width - 4 - left.Length - right.Length;
+
+			sb.Append("| ");
+			sb.Append(left);
+			sb.Append(' ', padding);
+			sb.Append(right);
+			sb.AppendLine(" |");
+
+			sb.Append('|').Append('_', width - 2).Append('|').AppendLine();
+		}
+
 		string Format()
 		{
 			var sb = new StringBuilder();
 
-			sb.Append('=', 120).AppendLine();
-			sb.AppendFormat("== Received: {0,-60}{1,44} ==", _detail.Id, Format(_detail.StartTime)).AppendLine();
-			sb.Append('=', 120).AppendLine();
+			Box(sb, 120, "Received: " + _detail.Id, Format(_detail.StartTime));
 
+			Append(sb, "Duration (ms)", (int)_detail.Duration.TotalMilliseconds);
 			AppendMessageHeaders(sb, _detail);
 			sb.AppendLine();
 
@@ -39,9 +53,7 @@
 			{
 				foreach (var receiver in _detail.Receivers)
 				{
-					sb.Append("  ").Append('+', 118).AppendLine();
-					sb.Append("  ").AppendFormat("++ {0,-66}{1,46} ++", receiver.ReceiverType, Format(receiver.StartTime)).AppendLine();
-					sb.Append("  ").Append('+', 118).AppendLine();
+					Box(sb, 120, receiver.ReceiverType, Format(receiver.StartTime));
 
 					Append(sb, "Message Type", receiver.MessageType);
 
@@ -53,9 +65,7 @@
 			{
 				foreach (var sent in _detail.SentMessages)
 				{
-					sb.Append("  ").Append('-', 118).AppendLine();
-					sb.Append("  ").AppendFormat("-- Sent: {0,-60}{1,46} --", sent.Id, Format(sent.StartTime)).AppendLine();
-					sb.Append("  ").Append('-', 118).AppendLine();
+					Box(sb, 120, "Sent: " + sent.Id, Format(sent.StartTime));
 
 					Append(sb, "Endpoint Address", sent.Address);
 					AppendMessageHeaders(sb, sent);
