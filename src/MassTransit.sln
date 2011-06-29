@@ -49,6 +49,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AutofacIntegrat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.ZeroMQ", "Transports\MassTransit.Transports.ZeroMQ\MassTransit.Transports.ZeroMQ.csproj", "{93575983-0B24-42FB-BD53-1BFCB1BD40A7}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{02C3B269-A00C-42D9-B4E8-EA7E6C233EBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusDriver", "Tools\BusDriver\BusDriver.csproj", "{910594A6-E942-4985-B248-6DDB17D316B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -139,6 +143,10 @@ Global
 		{93575983-0B24-42FB-BD53-1BFCB1BD40A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93575983-0B24-42FB-BD53-1BFCB1BD40A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93575983-0B24-42FB-BD53-1BFCB1BD40A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{910594A6-E942-4985-B248-6DDB17D316B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{910594A6-E942-4985-B248-6DDB17D316B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{910594A6-E942-4985-B248-6DDB17D316B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{910594A6-E942-4985-B248-6DDB17D316B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -156,5 +164,6 @@ Global
 		{8AB71E2F-3210-45AF-982F-FC782D9C06B7} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{A31F2C6B-C806-46FD-A4F3-C54209DD495C} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
+		{910594A6-E942-4985-B248-6DDB17D316B6} = {02C3B269-A00C-42D9-B4E8-EA7E6C233EBB}
 	EndGlobalSection
 EndGlobal

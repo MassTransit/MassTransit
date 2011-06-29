@@ -10,13 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace BusDriver.Commands
 {
-	using System;
+	using log4net;
 
-	public interface IInboundTransport :
-		ITransport
+	public class ExitCommand :
+		Command
 	{
-		void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout);
+		static readonly ILog _log = LogManager.GetLogger(typeof (ExitCommand));
+
+		public bool Execute()
+		{
+			_log.Info("Exit Requested");
+
+			return false;
+		}
 	}
 }
