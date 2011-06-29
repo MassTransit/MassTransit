@@ -43,8 +43,6 @@ namespace MassTransit.Pipeline.Sinks
 						return;
 
 					_endpoint.Send(x);
-
-					x.NotifySend(_endpoint.Address);
 				};
 		}
 

@@ -146,7 +146,7 @@ namespace MassTransit.Distributor
             _unsubscribeAction += bus.SubscribeInstance(this);
 
             _scheduler = new TimerScheduler(new PoolFiber());
-            _scheduled = _scheduler.Schedule(3.Seconds(), 1.Minutes(), _fiber, PublishWorkerAvailability);
+            _scheduled = _scheduler.Schedule(3.Seconds(), 3.Seconds(), _fiber, PublishWorkerAvailability);
         }
 
         public void Stop()
