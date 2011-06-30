@@ -82,6 +82,7 @@
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\MoveCommand.cs" />
     <Compile Include="Commands\PeekCommand.cs" />
+    <Compile Include="Commands\SetUriCommand.cs" />
     <Compile Include="Commands\TraceCommand.cs" />
     <Compile Include="Formatting\ITextBlock.cs" />
     <Compile Include="Formatting\TextBlock.cs" />

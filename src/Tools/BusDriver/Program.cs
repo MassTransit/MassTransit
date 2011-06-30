@@ -58,6 +58,7 @@ namespace BusDriver
 			}
 		}
 
+		public static string CurrentUri { get; set; }
 		public static TransportCache Transports { get; private set; }
 
 		public static void AddPendingCommand(IPendingCommand command)
@@ -129,17 +130,17 @@ namespace BusDriver
 				{
 					try
 					{
-						_log.Debug("Waiting for command to complete");
+						_log.DebugFormat("Waiting for {0} to complete", command.Description);
 
 						var handles = new[] {exit, command.WaitHandle};
 
 						int result = WaitHandle.WaitAny(handles, 30.Seconds());
 						if (result == WaitHandle.WaitTimeout)
-							throw new TimeoutException("Timeout waiting for pending command to complete");
+							throw new TimeoutException("Timeout waiting for " + command.Description);
 					}
 					catch (Exception ex)
 					{
-						_log.Error("Exception while waiting for pending command", ex);
+						_log.Error("Exception while waiting for " + command.Description, ex);
 					}
 				}
 			}

@@ -108,6 +108,11 @@ namespace BusDriver.Commands
 			_complete.Set();
 		}
 
+		public string Description
+		{
+			get { return string.Format("trace on {0}", _uriString); }
+		}
+
 		public WaitHandle WaitHandle
 		{
 			get { return _complete; }

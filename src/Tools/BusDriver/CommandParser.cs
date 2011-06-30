@@ -37,8 +37,12 @@ namespace BusDriver
 				    select (Command) new ExitCommand())
 				.Or(from arg in x.Argument("help")
 				    select (Command) new HelpCommand())
+				.Or(from arg in x.Argument("set")
+				    from arg2 in x.Argument("uri")
+				    from uri in x.Argument()
+				    select (Command) new SetUriCommand(uri.Id))
 				.Or(from arg in x.Argument("count")
-				    from uri in x.Definition("uri")
+				    from uri in (from d in x.Definition("uri") select d).Optional("uri", Program.CurrentUri)
 				    select (Command) new CountCommand(uri.Value))
 				.Or(from arg in x.Argument("move")
 				    from fromUri in x.Definition("from")
@@ -47,10 +51,12 @@ namespace BusDriver
 				    	(from d in x.Definition("count") select d).Optional("count", "100")
 				    select (Command) new MoveCommand(fromUri.Value, toUri.Value, int.Parse(count.Value)))
 				.Or(from arg in x.Argument("peek")
-				    from uri in x.Definition("uri")
+				    from uri in
+				    	(from d in x.Definition("uri") select d).Optional("uri", Program.CurrentUri)
 				    select (Command) new PeekCommand(uri.Value, 1))
 				.Or(from arg in x.Argument("trace")
-				    from uri in x.Definition("uri")
+				    from uri in
+				    	(from d in x.Definition("uri") select d).Optional("uri", Program.CurrentUri)
 				    from count in
 				    	(from d in x.Definition("count") select d).Optional("count", "100")
 				    select (Command) new TraceCommand(uri.Value, int.Parse(count.Value)))
