@@ -172,6 +172,16 @@ task :copy_services => [:compile] do
      	copyOutputFiles src, "Magnum.dll", targ	
      	copyOutputFiles src, "StructureMap.dll", targ	
 
+  targ = File.join(props[:stage], 'Services', 'BusDriver')
+  src = File.join(props[:src], "Tools/BusDriver/bin/#{BUILD_CONFIG}")
+  
+  copyOutputFiles src, "BusDriver.{exe}", targ
+	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
+	copyOutputFiles src, "RabbitMQ.Client.{dll}", targ
+	copyOutputFiles props[:output], 'MassTransit.dll', targ
+     	copyOutputFiles src, "log4net.dll", targ	
+     	copyOutputFiles src, "Magnum.dll", targ	
+
 	targ = File.join(props[:stage], 'Services', 'SystemView2')
 	src = File.join(props[:src], "MassTransit.SystemView2/bin/#{BUILD_CONFIG}")
 

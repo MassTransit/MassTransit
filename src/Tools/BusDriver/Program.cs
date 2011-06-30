@@ -168,7 +168,7 @@ namespace BusDriver
 				string line = "";
 				try
 				{
-					Console.Write(">");
+					Console.Write("> ");
 					Console.Out.Flush();
 
 					line = Console.ReadLine();
