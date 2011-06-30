@@ -13,6 +13,7 @@
 namespace BusDriver.Commands
 {
 	using System;
+	using Formatting;
 	using log4net;
 	using MassTransit.Context;
 	using MassTransit.Transports;
@@ -40,6 +41,9 @@ namespace BusDriver.Commands
 			IInboundTransport fromTransport = Program.Transports.GetTransport(fromUri);
 			IOutboundTransport toTransport = Program.Transports.GetTransport(toUri);
 
+			ITextBlock text = new TextBlock()
+				.BeginBlock("Move messages from " + fromUri + " to " + toUri, "");
+
 			int moveCount = 0;
 			for (int i = 0; i < _count; i++)
 			{
@@ -51,11 +55,14 @@ namespace BusDriver.Commands
 
 								toTransport.Send(moveContext);
 
+								text.BodyFormat("Message-Id: {0}", context.MessageId);
+
 								moveCount++;
 							};
 					}, TimeSpan.Zero);
 			}
 
+			_log.Info(text);
 			_log.InfoFormat("{0} message{1} moved from {2} to {3}", moveCount, moveCount == 1 ? "" : "s", fromUri, toUri);
 
 			return true;

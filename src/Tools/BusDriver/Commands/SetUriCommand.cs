@@ -13,6 +13,7 @@
 namespace BusDriver.Commands
 {
 	using System;
+	using log4net;
 
 	public class SetUriCommand :
 		Command
@@ -30,7 +31,11 @@ namespace BusDriver.Commands
 
 			Program.CurrentUri = uri.ToString();
 
+			_log.InfoFormat("Default URI set to: {0}", uri);
+
 			return true;
 		}
+
+		static readonly ILog _log = LogManager.GetLogger(typeof (SetUriCommand));
 	}
 }

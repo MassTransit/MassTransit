@@ -80,8 +80,11 @@
     <Compile Include="Commands\CountCommand.cs" />
     <Compile Include="Commands\ExitCommand.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
+    <Compile Include="Commands\LoadCommand.cs" />
     <Compile Include="Commands\MoveCommand.cs" />
     <Compile Include="Commands\PeekCommand.cs" />
+    <Compile Include="Commands\RequeueCommand.cs" />
+    <Compile Include="Commands\SaveCommand.cs" />
     <Compile Include="Commands\SetUriCommand.cs" />
     <Compile Include="Commands\TraceCommand.cs" />
     <Compile Include="Formatting\ITextBlock.cs" />

@@ -22,7 +22,29 @@ Command-Line Reference
 
       -from             The URI of the source queue
       -to               The URI of the destination queue
-      -count            The number of message to move
+      -count            The number of messages to move
+
+    requeue             Requeue messages from one queue to another
+
+      -uri              The URI of the queue
+      -count            The number of messages to move
+
+    save                Save messages from a queue to a set of files
+      
+      -uri              The URI of the source queue
+      -file             The name of the file to write to (will have .1, .2
+                        appended automatically for each message)
+      -count            The number of messages to save
+      --remove          If set, the messages will be removed from the queue
+
+    load                Load messages from a set of files into a queue
+
+      -uri              The URI of the destination queue
+      -file             The name of the file to read from (will have .1, .2
+                        appended automatically for each message)
+      -count            The number of messages to load
+      --remove          If set, the message file will be removed once the
+                        message has been loaded
 
     trace               Request a trace of messages that have been received
                         by a service bus
