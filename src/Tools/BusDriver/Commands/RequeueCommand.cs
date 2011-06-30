@@ -13,20 +13,19 @@
 namespace BusDriver.Commands
 {
 	using System;
-	using System.Text;
 	using Formatting;
 	using log4net;
-	using Magnum.Extensions;
+	using MassTransit.Context;
 	using MassTransit.Transports;
 
-	public class PeekCommand :
+	public class RequeueCommand :
 		Command
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof(PeekCommand));
+		static readonly ILog _log = LogManager.GetLogger(typeof(RequeueCommand));
 		readonly int _count;
 		readonly string _uriString;
 
-		public PeekCommand(string uriString, int count)
+		public RequeueCommand(string uriString, int count)
 		{
 			_uriString = uriString;
 			_count = count;
@@ -34,31 +33,34 @@ namespace BusDriver.Commands
 
 		public bool Execute()
 		{
-			Uri uri = _uriString.ToUri("The from URI was invalid");
+			Uri uri = _uriString.ToUri("The URI was invalid");
 
-			IInboundTransport fromTransport = Program.Transports.GetTransport(uri);
+			IDuplexTransport transport = Program.Transports.GetTransport(uri);
 
-			var text = new TextBlock()
-				.BeginBlock("Peek URI: " + uri, "");
+			ITextBlock text = new TextBlock()
+				.BeginBlock("Requeue messages to " + uri, "");
 
-			int peekCount = 0;
-			fromTransport.Receive(receiveContext =>
-				{
-					if (peekCount >= _count)
-						return null;
 
-					var body = Encoding.UTF8.GetString(receiveContext.BodyStream.ReadToEnd());
+			int requeueCount = 0;
+			for (int i = 0; i < _count; i++)
+			{
+				transport.Receive(receiveContext =>
+					{
+						return context =>
+							{
+								var moveContext = new MoveMessageSendContext(context);
 
-					text.BeginBlock("MessageId: " + receiveContext.MessageId ?? "", peekCount)
-						.Body(body)
-						.EndBlock();
+								transport.Send(moveContext);
 
-					peekCount++;
+								text.BodyFormat("Message-Id: {0}", context.MessageId);
 
-					return null;
-				}, TimeSpan.Zero);
+								requeueCount++;
+							};
+					}, TimeSpan.Zero);
+			}
 
-			_log.Info(text.ToString());
+			_log.Info(text);
+			_log.InfoFormat("{0} message{1} requeued to {2}", requeueCount, requeueCount == 1 ? "" : "s", uri);
 
 			return true;
 		}
