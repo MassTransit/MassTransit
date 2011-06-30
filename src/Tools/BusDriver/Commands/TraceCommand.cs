@@ -68,14 +68,14 @@ namespace BusDriver.Commands
 			ITextBlock text = new TextBlock()
 				.BeginBlock("Trace URI: " + _uriString,
 					string.Format("{0} message{1}", list.Messages.Count, list.Messages.Count == 1 ? "" : "s"))
-					.Break();
+				.Break();
 
 			foreach (ReceivedMessageTraceDetail message in list.Messages)
 			{
 				text.BeginBlock("Received: " + message.Id, Format(message.StartTime));
 
 				text.Table(GetMessageHeaderDictionary(message),
-					"Duration (ms)", ((int)message.Duration.TotalMilliseconds).ToString("N0"));
+					"Duration (ms)", ((int) message.Duration.TotalMilliseconds).ToString("N0"));
 
 				text.Break();
 
@@ -108,17 +108,15 @@ namespace BusDriver.Commands
 			_complete.Set();
 		}
 
-		public void WaitUntilComplete(TimeSpan timeout)
+		public WaitHandle WaitHandle
 		{
-			if (_complete.WaitOne(timeout) == false)
-				throw new TimeoutException("Timeout waiting for pending trace command to complete");
+			get { return _complete; }
 		}
 
 		string Format(DateTime value)
 		{
 			return value.ToString("yyyy-MM-dd hh:mm:ss.fff");
 		}
-
 
 
 		IDictionary<string, string> GetReceiverDictionary(ReceiverTraceDetail detail)
@@ -128,14 +126,15 @@ namespace BusDriver.Commands
 
 		IEnumerable<KeyValuePair<string, string>> GetReceiverValues(ReceiverTraceDetail detail)
 		{
-			if(detail.MessageType.IsNotEmpty())
+			if (detail.MessageType.IsNotEmpty())
 				yield return new KeyValuePair<string, string>("Message Type", detail.MessageType);
 
-			if(detail.CorrelationId.IsNotEmpty())
+			if (detail.CorrelationId.IsNotEmpty())
 				yield return new KeyValuePair<string, string>("Correlation Id", detail.CorrelationId);
 
-			if(detail.Duration != TimeSpan.Zero)
-				yield return new KeyValuePair<string, string>("Duration (ms)", ((int)detail.Duration.TotalMilliseconds).ToString("N0"));
+			if (detail.Duration != TimeSpan.Zero)
+				yield return
+					new KeyValuePair<string, string>("Duration (ms)", ((int) detail.Duration.TotalMilliseconds).ToString("N0"));
 		}
 
 		IDictionary<string, string> GetMessageHeaderDictionary(MessageTraceDetail detail)

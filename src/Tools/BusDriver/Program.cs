@@ -14,12 +14,12 @@ namespace BusDriver
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using Commands;
+	using System.Threading;
 	using log4net;
 	using log4net.Appender;
 	using log4net.Config;
 	using log4net.Core;
+	using log4net.Filter;
 	using log4net.Layout;
 	using Magnum.CommandLineParser;
 	using Magnum.Extensions;
@@ -37,10 +37,38 @@ namespace BusDriver
 		static Uri _driverUri = new Uri("msmq://localhost/masstransit_busdriver");
 		static IList<IPendingCommand> _pending;
 
+		public static IServiceBus Bus
+		{
+			get
+			{
+				if (_bus == null)
+				{
+					_log.DebugFormat("Starting service bus instance on {0}", _driverUri);
+
+					_bus = ServiceBusFactory.New(x =>
+						{
+							x.UseMsmq();
+							x.UseRabbitMq();
+							x.UseXmlSerializer();
+							x.ReceiveFrom(_driverUri);
+						});
+				}
+
+				return _bus;
+			}
+		}
+
+		public static TransportCache Transports { get; private set; }
+
+		public static void AddPendingCommand(IPendingCommand command)
+		{
+			_pending.Add(command);
+		}
+
 		static void Main()
 		{
 			BootstrapLogger();
-			
+
 			_pending = new List<IPendingCommand>();
 
 			try
@@ -67,6 +95,7 @@ namespace BusDriver
 
 				if (_bus != null)
 				{
+					_log.Debug("Disposing of service bus instance");
 					_bus.Dispose();
 					_bus = null;
 				}
@@ -80,43 +109,48 @@ namespace BusDriver
 
 		static void WaitForPendingCommands()
 		{
-			foreach (var command in _pending)
-			{
-				try
-				{
-					_log.Debug("Waiting for command to complete");
+			var exit = new ManualResetEvent(false);
 
-					command.WaitUntilComplete(30.Seconds());
-				}
-				catch (Exception ex)
+			try
+			{
+				Console.CancelKeyPress += (sender, args) =>
+					{
+						if (args.SpecialKey == ConsoleSpecialKey.ControlBreak)
+							return;
+
+						args.Cancel = true;
+
+						_log.Info("Control+C detected, exiting without waiting");
+
+						exit.Set();
+					};
+
+				foreach (IPendingCommand command in _pending)
 				{
-					_log.Error("Exception while waiting for pending command", ex);
+					try
+					{
+						_log.Debug("Waiting for command to complete");
+
+						var handles = new[] {exit, command.WaitHandle};
+
+						int result = WaitHandle.WaitAny(handles, 30.Seconds());
+						if (result == WaitHandle.WaitTimeout)
+							throw new TimeoutException("Timeout waiting for pending command to complete");
+					}
+					catch (Exception ex)
+					{
+						_log.Error("Exception while waiting for pending command", ex);
+					}
 				}
 			}
-		}
-
-		public static TransportCache Transports { get; private set; }
-
-		public static IServiceBus Bus
-		{
-			get
+			catch (Exception ex)
 			{
-				if(_bus == null)
-				{
-					_bus = ServiceBusFactory.New(x =>
-						{
-							x.UseMsmq();
-							x.ReceiveFrom(_driverUri);
-						});
-				}
-
-				return _bus;
+				_log.Error("Exception while waiting for pending commands to complete", ex);
 			}
-		}
-
-		public static void AddPendingCommand(IPendingCommand command)
-		{
-			_pending.Add(command);
+			finally
+			{
+				exit.Close();
+			}
 		}
 
 		static void RunInteractiveConsole()
@@ -124,7 +158,8 @@ namespace BusDriver
 			_log.DebugFormat("BusDriver v{0}, .NET Framework v{1}", typeof (Program).Assembly.GetName().Version,
 				Environment.Version);
 
-			_log.DebugFormat("Starting interactive console, enter exit to, uh, exit.");
+			_log.Debug("Starting interactive console");
+			_log.Debug("Enter help for a list of commands, or exit to, well, to exit.");
 
 			bool keepGoing = true;
 			do
@@ -159,7 +194,7 @@ namespace BusDriver
 			_appender.Threshold = Level.Info;
 			_appender.Layout = new PatternLayout("%m%n");
 
-			var filter = new log4net.Filter.LoggerMatchFilter();
+			var filter = new LoggerMatchFilter();
 			filter.AcceptOnMatch = false;
 			filter.LoggerToMatch = "MassTransit";
 

@@ -79,6 +79,7 @@
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\CountCommand.cs" />
     <Compile Include="Commands\ExitCommand.cs" />
+    <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\MoveCommand.cs" />
     <Compile Include="Commands\PeekCommand.cs" />
     <Compile Include="Commands\TraceCommand.cs" />
@@ -122,6 +123,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="HelpText.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

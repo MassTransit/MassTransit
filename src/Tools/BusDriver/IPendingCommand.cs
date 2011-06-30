@@ -12,10 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace BusDriver
 {
-	using System;
+	using System.Threading;
 
 	interface IPendingCommand
 	{
-		void WaitUntilComplete(TimeSpan timeout);
+		WaitHandle WaitHandle { get; }
 	}
 }
