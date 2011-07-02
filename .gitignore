@@ -29,3 +29,6 @@ SolutionVersion.cs
 src/SolutionVersion.cs
 tests
 doc/build/*
+
+# osx noise
+.DS_Store
