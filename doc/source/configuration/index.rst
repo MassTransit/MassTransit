@@ -10,3 +10,4 @@ which will be followed up with a few configuration examples.
     quickstart.rst
     keyideas.rst
     interfaces.rst
+    gotchas.rst
