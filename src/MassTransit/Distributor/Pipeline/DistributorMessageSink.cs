@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,15 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.Pipeline
 {
-	using System;
+	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Sinks;
 
 	public class DistributorMessageSink<TMessage> :
 		InstanceMessageSinkBase<TMessage>
 		where TMessage : class
 	{
-		public DistributorMessageSink(Func<TMessage, Action<TMessage>> acceptor)
-			: base(acceptor)
+		public DistributorMessageSink(MultipleHandlerSelector<TMessage> selector)
+			: base(selector)
 		{
 		}
 	}

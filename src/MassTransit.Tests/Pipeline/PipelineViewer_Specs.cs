@@ -17,7 +17,6 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline.Inspectors;
 	using Messages;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 
 	[TestFixture]
 	public class When_working_with_an_existing_pipeline
@@ -25,12 +24,10 @@ namespace MassTransit.Tests.Pipeline
 		[SetUp]
 		public void Setup()
 		{
-            _builder = MockRepository.GenerateMock<IObjectBuilder>();
-            _pipeline = MessagePipelineConfigurator.CreateDefault(_builder, null);
+            _pipeline = InboundPipelineConfigurator.CreateDefault(null);
 		}
 
-		private IObjectBuilder _builder;
-		private MessagePipeline _pipeline;
+		private IInboundMessagePipeline _pipeline;
 
 		[Test]
 		public void I_want_to_display_the_entire_flow_through_the_pipeline()
@@ -41,8 +38,8 @@ namespace MassTransit.Tests.Pipeline
 	    [Test]
 	    public void I_want_to_display_a_more_detailed_flow()
 	    {
-            _pipeline.Filter<object>(m => true);
-            _pipeline.Subscribe<PingMessage>(m => { }, x => { return true; });
+           // _pipeline.Filter<object>(m => true);
+            _pipeline.ConnectHandler<PingMessage>(m => { }, x => { return true; });
 	        
             PipelineViewer.Trace(_pipeline);
 	    }

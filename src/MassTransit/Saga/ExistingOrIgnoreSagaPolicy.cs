@@ -14,36 +14,46 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Linq.Expressions;
+	using Exceptions;
+	using log4net;
 
 	public class ExistingOrIgnoreSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
+		where TMessage : class
 	{
-		private readonly Func<TSaga, bool> _shouldBeRemoved;
+		static readonly ILog _log = LogManager.GetLogger("MassTransit.Saga.ExistingOrIgnoreSagaPolicy");
+
+		private readonly Func<TSaga, bool> _canRemoveInstance;
 
 		public ExistingOrIgnoreSagaPolicy(Expression<Func<TSaga, bool>> shouldBeRemoved)
 		{
-			_shouldBeRemoved = shouldBeRemoved.Compile();
+			_canRemoveInstance = shouldBeRemoved.Compile();
 		}
 
-		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)
+		public bool CanCreateInstance(IConsumeContext<TMessage> context)
 		{
-			saga = null;
-
 			return false;
 		}
 
-		public void ForExistingSaga(TMessage message)
+		public TSaga CreateInstance(IConsumeContext<TMessage> context, Guid sagaId)
 		{
+			throw new SagaException("The policy does not allow saga creation", typeof (TSaga), typeof (TMessage));
 		}
 
-		public void ForMissingSaga(TMessage message)
+		public Guid GetNewSagaId(IConsumeContext<TMessage> context)
 		{
+			throw new SagaException("The policy does not allow saga creation", typeof(TSaga), typeof(TMessage));
 		}
 
-		public bool ShouldSagaBeRemoved(TSaga saga)
+		public bool CanUseExistingInstance(IConsumeContext<TMessage> context)
 		{
-			return _shouldBeRemoved(saga);
+			return true;
+		}
+
+		public bool CanRemoveInstance(TSaga instance)
+		{
+			return _canRemoveInstance(instance);
 		}
 	}
 }

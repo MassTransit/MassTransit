@@ -20,7 +20,7 @@ namespace MassTransit.SystemView
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App
     {
         public static SubscriptionDataConsumer SubscriptionDataConsumer { get; set; }
 
@@ -40,7 +40,7 @@ namespace MassTransit.SystemView
                         .Singleton()
                         .Add(context => configuration);
 
-                    config.AddRegistry(new SystemViewRegistry(configuration, ObjectFactory.Container));
+                    config.AddRegistry(new SystemViewRegistry(configuration));
                 });
 
             SubscriptionDataConsumer = ObjectFactory.GetInstance<SubscriptionDataConsumer>();

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,20 +13,16 @@
 namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
-	using System.Collections.Generic;
-	using Configuration;
+	using BusConfigurators;
+	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using Saga;
-	using Services.Subscriptions;
-	using Services.Subscriptions.Client;
-	using Services.Subscriptions.Configuration;
 	using Services.Subscriptions.Server;
 
 	[TestFixture]
-	public class SubscriptionServiceTestFixture<TEndpoint> :
-		EndpointTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+	public class SubscriptionServiceTestFixture<TTransportFactory> :
+		EndpointTestFixture<TTransportFactory>
+		where TTransportFactory : ITransportFactory, new()
 	{
 		[TestFixtureSetUp]
 		public void LocalAndRemoteTestFixtureSetup()
@@ -37,32 +33,23 @@ namespace MassTransit.TestFramework.Fixtures
 			RemoteBus = SetupServiceBus(RemoteUri);
 		}
 
-		private void SetupSubscriptionService()
+		void SetupSubscriptionService()
 		{
-			SetupSubscriptionRepository();
-
-			ObjectBuilder.SetupSagaRepository<SubscriptionClientSaga>();
-			ObjectBuilder.SetupSagaRepository<SubscriptionSaga>();
+			SubscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>();
+			SubscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>();
 
 			SubscriptionBus = SetupServiceBus(SubscriptionUri, x => { x.SetConcurrentConsumerLimit(1); });
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus,
-				ObjectBuilder.GetInstance<ISubscriptionRepository>(),
-				EndpointFactory,
-				ObjectBuilder.GetInstance<ISagaRepository<SubscriptionSaga>>(),
-				ObjectBuilder.GetInstance<ISagaRepository<SubscriptionClientSaga>>());
+				SubscriptionSagaRepository,
+				SubscriptionClientSagaRepository);
 
 			SubscriptionService.Start();
-
-			ObjectBuilder.Construct(() => new SubscriptionClient(EndpointFactory));
 		}
 
-		private void SetupSubscriptionRepository()
-		{
-			var subscriptionRepository = MockRepository.GenerateMock<ISubscriptionRepository>();
-			subscriptionRepository.Stub(x => x.List()).Return(new List<Subscription>());
-			ObjectBuilder.Add(subscriptionRepository);
-		}
+		protected InMemorySagaRepository<SubscriptionSaga> SubscriptionSagaRepository { get; private set; }
+
+		protected InMemorySagaRepository<SubscriptionClientSaga> SubscriptionClientSagaRepository { get; private set; }
 
 		[TestFixtureTearDown]
 		public void LocalAndRemoteTestFixtureTeardown()
@@ -82,29 +69,12 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected SubscriptionService SubscriptionService { get; private set; }
 
-		protected override void ConfigureServiceBus(Uri uri, IServiceBusConfigurator configurator)
+		protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
 		{
 			base.ConfigureServiceBus(uri, configurator);
 
-			IControlBus controlBus = ControlBusConfigurator.New(x =>
-				{
-					x.ReceiveFrom(GetControlBusUri(uri));
-
-					x.PurgeBeforeStarting();
-				});
-
-			configurator.ConfigureService<SubscriptionClientConfigurator>(y =>
-				{
-					// Subscription Endpoint
-					y.SetSubscriptionServiceEndpoint(SubscriptionUri);
-				});
-
-			configurator.UseControlBus(controlBus);
-		}
-
-		protected Uri GetControlBusUri(Uri uri)
-		{
-			return uri.AppendToPath("_control");
+			configurator.UseControlBus();
+			configurator.UseSubscriptionService(SubscriptionUri);
 		}
 	}
 }

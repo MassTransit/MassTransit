@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,7 @@ namespace MassTransit.Tests.Performance
 {
 	using System.Diagnostics;
 	using System.Threading;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
 	using NUnit.Framework;
 
 	public class EndpointLoadTest
@@ -35,8 +35,8 @@ namespace MassTransit.Tests.Performance
 
 		public void Run()
 		{
-			_bus.Subscribe<LoadedRequest>(HandleLoadedRequest);
-			_bus.Subscribe<LoadedResponse>(HandleLoadedResponse);
+			_bus.SubscribeHandler<LoadedRequest>(HandleLoadedRequest);
+			_bus.SubscribeHandler<LoadedResponse>(HandleLoadedResponse);
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 

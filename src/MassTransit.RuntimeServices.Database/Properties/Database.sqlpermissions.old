@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Permissions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="urn:Microsoft.VisualStudio.Data.Schema.Permissions" Version="1.0">
+  <!--  $permissionsComment$
+        
+        $permissionsComment_GrantDatabase$
+        
+        <PermissionStatement Action ="GRANT">
+          <Permission>CREATE TABLE</Permission>
+          <Grantee>User1</Grantee>
+        </PermissionStatement>
+        
+        $permissionsComment_GrantObject$
+        
+        <PermissionStatement Action ="GRANT">
+          <Permission>SELECT</Permission>
+          <Grantee>User1</Grantee>
+          <Object Name ="Table1" Schema ="User1" Type ="OBJECT"/>
+        </PermissionStatement>
+
+        $permissionsComment_DenyObject$
+        
+        <PermissionStatement Action ="DENY">
+          <Permission>DELETE</Permission>
+          <Grantee>User1</Grantee>
+          <Object Name ="Table1" Schema ="User1" Type ="OBJECT"/>
+        </PermissionStatement>
+
+        $permissionsComment_GrantObjectColumn$
+        
+        <PermissionStatement Action ="GRANT">
+          <Permission>SELECT</Permission>
+          <Grantee>User1</Grantee>
+          <Object Name ="Table1" Schema ="User1" Type ="OBJECT">
+            <Columns Treatment ="INCLUDE">
+              <Column Name="Col1"/>
+              <Column Name="Col2"/>
+              <Column Name="…"/>
+            </Columns>
+          </Object>
+        </PermissionStatement>
+  -->
+</Permissions>

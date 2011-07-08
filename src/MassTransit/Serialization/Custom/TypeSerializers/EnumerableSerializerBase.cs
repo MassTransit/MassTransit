@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,18 +20,17 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 	public class EnumerableSerializerBase<T> :
 		IObjectSerializer
 	{
-		private Type _containerType;
-		private string _ns;
-		private Type _type;
+		readonly Type _containerType;
+		readonly string _ns;
 
 		protected EnumerableSerializerBase(Type containerType)
 		{
 			_containerType = containerType;
-			_type = typeof (T);
-			_ns = _containerType.AssemblyQualifiedName;//.ToMessageName();
+			_ns = _containerType.AssemblyQualifiedName; //.ToMessageName();
 		}
 
-		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
+		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName,
+		                                                                 object value)
 		{
 			if (value == null)
 				yield break;
@@ -60,7 +59,7 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 		{
 			foreach (T obj in ((IEnumerable<T>) value))
 			{
-				var enumerable = context.SerializeObject(obj.GetType().Name, obj.GetType(), obj);
+				IEnumerable<K<Action<XmlWriter>>> enumerable = context.SerializeObject(obj.GetType().Name, obj.GetType(), obj);
 				foreach (var action in enumerable)
 				{
 					yield return action;

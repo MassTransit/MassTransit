@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,9 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Examples
 {
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using Messages;
-	using TestFramework;
 
 	[Scenario]
 	public class When_a_message_is_published_via_the_local_bus :
@@ -31,7 +31,7 @@ namespace MassTransit.Tests.Examples
 		[Then]
 		public void The_consumer_should_receive_the_message()
 		{
-			Consumer.ShouldHaveReceived(Message, 1.Seconds());
+			Consumer.ShouldHaveReceived(Message, 3.Seconds());
 		}
 
 		protected SimpleMessage Message { get; private set; }

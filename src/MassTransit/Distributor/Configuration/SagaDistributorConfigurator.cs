@@ -13,18 +13,17 @@
 namespace MassTransit.Distributor.Configuration
 {
 	using System;
+	using BusConfigurators;
 	using Magnum.Reflection;
-	using MassTransit.Configuration;
+	using Util;
 
 	public class SagaDistributorConfigurator
 	{
-		private readonly IServiceBusConfigurator _configurator;
-		private readonly IEndpointFactory _endpointFactory;
+		private readonly ServiceBusConfigurator _configurator;
 
-		public SagaDistributorConfigurator(IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
+		public SagaDistributorConfigurator(ServiceBusConfigurator configurator)
 		{
 			_configurator = configurator;
-			_endpointFactory = endpointFactory;
 		}
 
 		public void AddService(Type type)
@@ -32,12 +31,11 @@ namespace MassTransit.Distributor.Configuration
 			this.FastInvoke(new[] {type}, "AddServiceForDataEvent");
 		}
 
-// ReSharper disable UnusedMember.Local
+		[UsedImplicitly]
 		private void AddServiceForDataEvent<TMessage>()
-// ReSharper restore UnusedMember.Local
 			where TMessage : class
 		{
-			_configurator.AddService(() => new Distributor<TMessage>(_endpointFactory));
+			_configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<TMessage>());
 		}
 	}
 }

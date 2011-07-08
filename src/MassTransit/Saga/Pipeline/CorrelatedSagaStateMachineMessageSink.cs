@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,44 +13,44 @@
 namespace MassTransit.Saga.Pipeline
 {
 	using System;
-	using System.Linq.Expressions;
+	using System.Collections.Generic;
 	using log4net;
+	using Magnum.Extensions;
 	using Magnum.StateMachine;
-	using MassTransit.Pipeline;
+	using Util;
 
 	public class CorrelatedSagaStateMachineMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
 		where TMessage : class, CorrelatedBy<Guid>
 		where TSaga : SagaStateMachine<TSaga>, ISaga
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof(CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
+		static readonly ILog _log =
+			LogManager.GetLogger(typeof (CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
 
-		private readonly DataEvent<TSaga, TMessage> _dataEvent;
-		private readonly Expression<Func<TSaga, TMessage, bool>> _selector;
-
-		public CorrelatedSagaStateMachineMessageSink(ISubscriberContext context,
-		                                             IServiceBus bus,
-		                                             ISagaRepository<TSaga> repository,
+		public CorrelatedSagaStateMachineMessageSink(ISagaRepository<TSaga> repository,
 		                                             ISagaPolicy<TSaga, TMessage> policy,
 		                                             DataEvent<TSaga, TMessage> dataEvent)
-			: base(context, bus, repository, policy)
+			: base(repository, policy, new CorrelatedSagaLocator<TMessage>(), (s, c) => GetHandlers(s, c, dataEvent))
 		{
-			_dataEvent = dataEvent;
-
-			_selector = CreateCorrelatedSelector();
 		}
 
-		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
+		static IEnumerable<Action<IConsumeContext<TMessage>>> GetHandlers(TSaga instance, IConsumeContext<TMessage> context,
+		                                                                  DataEvent<TSaga, TMessage> dataEvent)
 		{
-			get { return _selector; }
-		}
+			yield return x =>
+				{
+					instance.Bus = context.Bus;
 
-		protected override void ConsumerAction(TSaga saga, TMessage message)
-		{
-			if(_log.IsDebugEnabled)
-				_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof(TSaga).Name, _dataEvent.Name, saga.CorrelationId);
+					context.BaseContext.NotifyConsume(context, typeof(TSaga).ToShortTypeName(), instance.CorrelationId.ToString());
 
-			saga.RaiseEvent(_dataEvent, message);
+					using (x.CreateScope())
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof (TSaga).Name, dataEvent.Name, instance.CorrelationId);
+
+						instance.RaiseEvent(dataEvent, x.Message);
+					}
+				};
 		}
 	}
 }

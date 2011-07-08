@@ -12,9 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests
 {
+	using System.Linq;
 	using MassTransit.Tests.Load;
 	using MassTransit.Tests.Load.Messages;
 	using NUnit.Framework;
+	using TestFixtures;
 
 	[TestFixture, Category("Integration")]
 	public class Default_distributor_specifications :
@@ -34,7 +36,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
 
-			generator.Run(RemoteBus, 100, x => new FirstCommand(x));
+			generator.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
 		}
 	}
 }

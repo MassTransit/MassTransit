@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,45 +13,50 @@
 namespace MassTransit.Saga.Pipeline
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq.Expressions;
 	using log4net;
+	using Magnum.Extensions;
 	using Magnum.StateMachine;
-	using MassTransit.Pipeline;
+	using Util;
 
 	public class PropertySagaStateMachineMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
 		where TSaga : SagaStateMachine<TSaga>, ISaga, CorrelatedBy<Guid>
 		where TMessage : class
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (PropertySagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
+		static readonly ILog _log =
+			LogManager.GetLogger(typeof (PropertySagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
 
-		public PropertySagaStateMachineMessageSink(ISubscriberContext context,
-		                                           IServiceBus bus,
-		                                           ISagaRepository<TSaga> repository,
+		public PropertySagaStateMachineMessageSink(ISagaRepository<TSaga> repository,
 		                                           ISagaPolicy<TSaga, TMessage> policy,
 		                                           Expression<Func<TSaga, TMessage, bool>> selector,
 		                                           DataEvent<TSaga, TMessage> dataEvent)
-			: base(context, bus, repository, policy)
+			: base(repository, policy, new PropertySagaLocator<TSaga, TMessage>(repository, policy, selector),
+				(i, c) => GetHandlers(i, c, dataEvent))
 		{
 			Selector = selector;
-			DataEvent = dataEvent;
 		}
-
-		public DataEvent<TSaga, TMessage> DataEvent { get; private set; }
 
 		public Expression<Func<TSaga, TMessage, bool>> Selector { get; private set; }
 
-		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
+		static IEnumerable<Action<IConsumeContext<TMessage>>> GetHandlers(TSaga instance, IConsumeContext<TMessage> context,
+		                                                                  DataEvent<TSaga, TMessage> dataEvent)
 		{
-			get { return Selector; }
-		}
+			yield return x =>
+				{
+					instance.Bus = context.Bus;
 
-		protected override void ConsumerAction(TSaga saga, TMessage message)
-		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof(TSaga).Name, DataEvent.Name, saga.CorrelationId);
+					context.BaseContext.NotifyConsume(context, typeof(TSaga).ToShortTypeName(), instance.CorrelationId.ToString());
 
-			saga.RaiseEvent(DataEvent, message);
+					using (x.CreateScope())
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof (TSaga).Name, dataEvent.Name, instance.CorrelationId);
+
+						instance.RaiseEvent(dataEvent, x.Message);
+					}
+				};
 		}
 	}
 }

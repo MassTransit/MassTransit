@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,8 +14,7 @@ namespace MassTransit.Tests.Load
 {
 	using System.Diagnostics;
 	using System.Threading;
-	using Magnum.DateTimeExtensions;
-	using Messages;
+	using Magnum.Extensions;
 	using NUnit.Framework;
 	using Tests.Messages;
 	using TextFixtures;
@@ -33,8 +32,8 @@ namespace MassTransit.Tests.Load
 
 			ManualResetEvent completed = new ManualResetEvent(false);
 
-			LocalBus.Subscribe<PingMessage>(x => CurrentMessage.Respond(new PongMessage(x.CorrelationId)));
-			LocalBus.Subscribe<PongMessage>(x =>
+			LocalBus.SubscribeHandler<PingMessage>(x => LocalBus.Context().Respond(new PongMessage(x.CorrelationId)));
+			LocalBus.SubscribeHandler<PongMessage>(x =>
 				{
 					if (Interlocked.Increment(ref responsesReceived) == repeatCount)
 					{
@@ -51,7 +50,7 @@ namespace MassTransit.Tests.Load
 				LocalBus.Publish(new PingMessage());
 			}
 
-			bool success = completed.WaitOne(60.Seconds(), true);
+			completed.WaitOne(60.Seconds(), true);
 
 			stopwatch.Stop();
 

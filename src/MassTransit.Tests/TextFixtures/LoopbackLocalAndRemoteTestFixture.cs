@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,16 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TextFixtures
 {
-	using Configuration;
-	using MassTransit.Internal;
+	using BusConfigurators;
 	using MassTransit.Services.Subscriptions;
-	using MassTransit.Transports;
+	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 
 	[TestFixture]
 	public class LoopbackLocalAndRemoteTestFixture :
-		EndpointTestFixture<LoopbackEndpoint>
+		EndpointTestFixture<LoopbackTransportFactory>
 	{
 		public ISubscriptionService SubscriptionService { get; private set; }
 		public IServiceBus LocalBus { get; private set; }
@@ -33,42 +31,34 @@ namespace MassTransit.Tests.TextFixtures
 
 			SetupSubscriptionService();
 
-			LocalBus = ServiceBusConfigurator.New(x =>
+			LocalBus = ServiceBusFactory.New(x =>
 				{
-					x.AddService<SubscriptionPublisher>();
-					x.AddService<SubscriptionConsumer>();
+					ConnectSubscriptionService(x, SubscriptionService);
 					x.ReceiveFrom("loopback://localhost/mt_client");
+
+					ConfigureLocalBus(x);
 				});
 
-			RemoteBus = ServiceBusConfigurator.New(x =>
+			RemoteBus = ServiceBusFactory.New(x =>
 				{
-					x.AddService<SubscriptionPublisher>();
-					x.AddService<SubscriptionConsumer>();
+					ConnectSubscriptionService(x, SubscriptionService);
 					x.ReceiveFrom("loopback://localhost/mt_server");
+
+					ConfigureRemoteBus(x);
 				});
 		}
 
-		private void SetupSubscriptionService()
+		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
+		{
+		}
+
+		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
+		{
+		}
+
+		void SetupSubscriptionService()
 		{
 			SubscriptionService = new LocalSubscriptionService();
-			ObjectBuilder.Stub(x => x.GetInstance<IEndpointSubscriptionEvent>())
-				.Return(SubscriptionService);
-
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionPublisher>())
-				.Return(null)
-				.WhenCalled(invocation =>
-					{
-						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionPublisher(SubscriptionService);
-					});
-
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionConsumer>())
-				.Return(null)
-				.WhenCalled(invocation =>
-					{
-						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointFactory);
-					});
 		}
 
 		protected override void TeardownContext()

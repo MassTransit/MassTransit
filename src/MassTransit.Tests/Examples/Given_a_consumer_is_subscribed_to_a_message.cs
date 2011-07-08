@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Examples
 {
+	using Magnum.TestFramework;
 	using Messages;
 	using TestFramework;
 
@@ -23,7 +24,7 @@ namespace MassTransit.Tests.Examples
 		public void A_consumer_is_subscribed_to_a_message()
 		{
 			Consumer = new ConsumerOf<SimpleMessage>();
-			LocalBus.Subscribe(Consumer);
+			LocalBus.SubscribeInstance(Consumer);
 		}
 
 		protected ConsumerOf<SimpleMessage> Consumer { get; private set; }

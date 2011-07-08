@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,68 +14,53 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Magnum.Threading;
+	using System.Linq;
+	using Magnum.Concurrency;
 
 	/// <summary>
 	/// Routes a message to all of the connected message sinks without modification
 	/// </summary>
-	/// <typeparam name="TMessage">The type of the message to be routed</typeparam>
-	public class MessageRouter<TMessage> :
-		IPipelineSink<TMessage>
-		where TMessage : class
+	public class MessageRouter<T> :
+		IPipelineSink<T>
+		where T : class
 	{
-		private readonly ReaderWriterLockedObject<List<IPipelineSink<TMessage>>> _sinks;
+		readonly Atomic<List<IPipelineSink<T>>> _output;
 
 		public MessageRouter()
 		{
-			_sinks = new ReaderWriterLockedObject<List<IPipelineSink<TMessage>>>(new List<IPipelineSink<TMessage>>());
+			_output = Atomic.Create(new List<IPipelineSink<T>>());
 		}
 
-		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
+		public MessageRouter(IEnumerable<IPipelineSink<T>> sinks)
 		{
-			foreach (var sink in _sinks.ReadLock(x => x.ToArray()))
-			{
-				foreach (var consumer in sink.Enumerate(message))
-				{
-					yield return consumer;
-				}
-			}
-		}
-
-		public bool Inspect(IPipelineInspector inspector)
-		{
-			return inspector.Inspect(this, () =>
-				{
-					foreach (IPipelineSink<TMessage> sink in _sinks.ReadLock(x => x.ToArray()))
-					{
-						if (sink.Inspect(inspector) == false)
-							return false;
-					}
-
-					return true;
-				});
+			_output = Atomic.Create(new List<IPipelineSink<T>>(sinks));
 		}
 
 		public int SinkCount
 		{
-			get { return _sinks.ReadLock(x => x.Count); }
+			get { return _output.Value.Count; }
 		}
 
-		/// <summary>
-		/// Connects a message sink to the router
-		/// </summary>
-		/// <param name="sink">The sink to be connected</param>
-		/// <returns>A function to disconnect the sink from the router</returns>
-		public UnsubscribeAction Connect(IPipelineSink<TMessage> sink)
+		public IList<IPipelineSink<T>> Sinks
 		{
-			_sinks.WriteLock(sinks => sinks.Add(sink));
-
-            return () => _sinks.WriteLock(sinks => sinks.Remove(sink));
+			get { return _output.Value; }
 		}
 
-	    public void Dispose()
+		public IEnumerable<Action<T>> Enumerate(T context)
 		{
-			_sinks.Dispose();
+			return _output.Value.SelectMany(x => x.Enumerate(context));
+		}
+
+		public bool Inspect(IPipelineInspector inspector)
+		{
+			return inspector.Inspect(this, () => _output.Value.All(x => x.Inspect(inspector)));
+		}
+
+		public UnsubscribeAction Connect(IPipelineSink<T> sink)
+		{
+			_output.Set(sinks => new List<IPipelineSink<T>>(sinks) {sink});
+
+			return () => _output.Set(sinks => sinks.Where(x => x != sink).ToList()) != null;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,37 +13,38 @@
 namespace MassTransit.Saga.Pipeline
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq.Expressions;
-	using log4net;
-	using MassTransit.Pipeline;
+	using Magnum.Extensions;
 
 	public class PropertySagaMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
 		where TSaga : class, ISaga, CorrelatedBy<Guid>, Consumes<TMessage>.All
 		where TMessage : class
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (PropertySagaMessageSink<TSaga, TMessage>).ToFriendlyName());
-
-		public PropertySagaMessageSink(ISubscriberContext context,
-		                               IServiceBus bus,
-		                               ISagaRepository<TSaga> repository,
+		public PropertySagaMessageSink(ISagaRepository<TSaga> repository,
 		                               ISagaPolicy<TSaga, TMessage> policy,
 		                               Expression<Func<TSaga, TMessage, bool>> selector)
-			: base(context, bus, repository, policy)
+			: base(repository, policy, new PropertySagaLocator<TSaga, TMessage>(repository, policy, selector), GetHandlers)
 		{
 			Selector = selector;
 		}
 
 		public Expression<Func<TSaga, TMessage, bool>> Selector { get; private set; }
 
-		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
+		static IEnumerable<Action<IConsumeContext<TMessage>>> GetHandlers(TSaga instance, IConsumeContext<TMessage> context)
 		{
-			get { return Selector; }
-		}
+			yield return x =>
+				{
+					instance.Bus = context.Bus;
 
-		protected override void ConsumerAction(TSaga saga, TMessage message)
-		{
-			saga.Consume(message);
+					context.BaseContext.NotifyConsume(context, typeof(TSaga).ToShortTypeName(), instance.CorrelationId.ToString());
+					
+					using (x.CreateScope())
+					{
+						instance.Consume(x.Message);
+					}
+				};
 		}
 	}
 }

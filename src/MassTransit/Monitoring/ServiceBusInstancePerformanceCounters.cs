@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,9 +18,9 @@ namespace MassTransit.Monitoring
 	public class ServiceBusInstancePerformanceCounters :
 		IDisposable
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusInstancePerformanceCounters));
+		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusInstancePerformanceCounters));
 
-		private bool _disposed;
+		bool _disposed;
 
 		public ServiceBusInstancePerformanceCounters(string instanceName)
 		{
@@ -42,27 +42,24 @@ namespace MassTransit.Monitoring
 			PublishDurationBase = CreateCounter(ServiceBusPerformanceCounters.Instance.PublishDurationBase);
 		}
 
-		public string InstanceName { get; private set; }
-
-		public IPerformanceCounter ConsumerThreadCount { get; private set; }
-		public IPerformanceCounter ReceiveThreadCount { get; private set; }
-
-		public IPerformanceCounter ReceiveRate { get; private set; }
-		public IPerformanceCounter PublishRate { get; private set; }
-		public IPerformanceCounter SendRate { get; private set; }
-
-		public IPerformanceCounter ReceiveCount { get; private set; }
-		public IPerformanceCounter PublishCount { get; private set; }
-		public IPerformanceCounter SentCount { get; private set; }
-
 		public IPerformanceCounter ConsumerDuration { get; private set; }
 		public IPerformanceCounter ConsumerDurationBase { get; private set; }
 
-		public IPerformanceCounter ReceiveDuration { get; private set; }
-		public IPerformanceCounter ReceiveDurationBase { get; private set; }
-
+		public IPerformanceCounter ConsumerThreadCount { get; private set; }
+		public string InstanceName { get; private set; }
+		public IPerformanceCounter PublishCount { get; private set; }
 		public IPerformanceCounter PublishDuration { get; private set; }
 		public IPerformanceCounter PublishDurationBase { get; private set; }
+		public IPerformanceCounter PublishRate { get; private set; }
+
+		public IPerformanceCounter ReceiveCount { get; private set; }
+
+		public IPerformanceCounter ReceiveDuration { get; private set; }
+		public IPerformanceCounter ReceiveDurationBase { get; private set; }
+		public IPerformanceCounter ReceiveRate { get; private set; }
+		public IPerformanceCounter ReceiveThreadCount { get; private set; }
+		public IPerformanceCounter SendRate { get; private set; }
+		public IPerformanceCounter SentCount { get; private set; }
 
 		public void Dispose()
 		{
@@ -144,7 +141,7 @@ namespace MassTransit.Monitoring
 			}
 		}
 
-		private IPerformanceCounter CreateCounter(RuntimePerformanceCounter counter)
+		IPerformanceCounter CreateCounter(RuntimePerformanceCounter counter)
 		{
 			try
 			{
@@ -160,7 +157,7 @@ namespace MassTransit.Monitoring
 			}
 		}
 
-		private void Dispose(bool disposing)
+		void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)

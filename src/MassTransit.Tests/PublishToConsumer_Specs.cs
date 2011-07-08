@@ -15,7 +15,6 @@ namespace MassTransit.Tests
 	using System;
 	using Messages;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using TestConsumers;
 	using TextFixtures;
 
@@ -36,9 +35,7 @@ namespace MassTransit.Tests
 		[Test]
 		public void It_should_be_received_by_a_component()
 		{
-			ObjectBuilder.Stub(x => x.GetInstance<TestMessageConsumer<PingMessage>>()).Return(new TestMessageConsumer<PingMessage>());
-
-			RemoteBus.Subscribe<TestMessageConsumer<PingMessage>>();
+			RemoteBus.SubscribeConsumer<TestMessageConsumer<PingMessage>>();
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
@@ -52,7 +49,7 @@ namespace MassTransit.Tests
 			PingMessage message = new PingMessage();
 
 			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
-			RemoteBus.Subscribe(consumer);
+			RemoteBus.SubscribeInstance(consumer);
 
 			LocalBus.Publish(message);
 
@@ -63,10 +60,10 @@ namespace MassTransit.Tests
 		public void It_should_be_received_by_multiple_subscribed_consumers()
 		{
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.Subscribe(consumer);
+			RemoteBus.SubscribeInstance(consumer);
 
 			TestMessageConsumer<PingMessage> messageConsumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.Subscribe<PingMessage>(messageConsumer.MessageHandler);
+			RemoteBus.SubscribeHandler<PingMessage>(messageConsumer.MessageHandler);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
@@ -79,7 +76,7 @@ namespace MassTransit.Tests
 		public void It_should_be_received_by_one_subscribed_consumer()
 		{
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.Subscribe(consumer);
+			RemoteBus.SubscribeInstance(consumer);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
@@ -93,7 +90,7 @@ namespace MassTransit.Tests
 		public void It_should_be_received_by_one_subscribed_message_handler()
 		{
 			TestMessageConsumer<PingMessage> messageConsumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.Subscribe<PingMessage>(messageConsumer.MessageHandler);
+			RemoteBus.SubscribeHandler<PingMessage>(messageConsumer.MessageHandler);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
@@ -105,10 +102,10 @@ namespace MassTransit.Tests
 		public void It_should_not_be_received_by_an_uninterested_consumer()
 		{
 			TestMessageConsumer<PingMessage> messageConsumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.Subscribe<PingMessage>(messageConsumer.MessageHandler, x => false);
+			RemoteBus.SubscribeHandler<PingMessage>(messageConsumer.MessageHandler, x => false);
 
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.Subscribe(consumer);
+			RemoteBus.SubscribeInstance(consumer);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
@@ -121,7 +118,7 @@ namespace MassTransit.Tests
 		public void It_should_not_be_received_by_an_uninterested_correlated_consumer()
 		{
 			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(Guid.NewGuid());
-			RemoteBus.Subscribe(consumer);
+			RemoteBus.SubscribeInstance(consumer);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);

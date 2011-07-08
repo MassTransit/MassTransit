@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,74 +13,49 @@
 namespace MassTransit.Saga
 {
 	using System;
-	using System.Linq;
 	using System.Linq.Expressions;
-	using Exceptions;
-	using Magnum;
 	using Magnum.Reflection;
 
 	public class InitiatingSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
+		where TMessage : class
 	{
-		private readonly bool _useMessageIdForSagaId;
-		private readonly Func<TSaga, bool> _shouldBeRemoved;
+		readonly Func<TMessage, Guid> _getNewSagaId;
+		readonly Func<TSaga, bool> _canRemoveInstance;
 
 
-		public InitiatingSagaPolicy(Expression<Func<TSaga, bool>> shouldBeRemoved)
+		public InitiatingSagaPolicy(Func<TMessage, Guid> getNewSagaId, Expression<Func<TSaga, bool>> shouldBeRemoved)
 		{
-			_useMessageIdForSagaId = typeof (TMessage).GetInterfaces().Where(x => x == typeof (CorrelatedBy<Guid>)).Any();
-			_shouldBeRemoved = shouldBeRemoved.Compile();
+			_getNewSagaId = getNewSagaId;
+			_canRemoveInstance = shouldBeRemoved.Compile();
 		}
 
-		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)
+		public bool CanCreateInstance(IConsumeContext<TMessage> context)
 		{
-			Guid sagaId;
-			if (!UseMessageIdForSaga(message, out sagaId))
-			{
-				if (!GenerateNewIdForSaga(out sagaId))
-					throw new InvalidOperationException("Could not generate id for new saga " + typeof(TSaga).Name);
-			}
-
-			saga = FastActivator<TSaga>.Create(sagaId);
-
-			return saga != null;
-		}
-
-		public void ForExistingSaga(TMessage message)
-		{
-			throw new SagaException("Saga already exists and cannot be initiated: " + message, typeof (TSaga), typeof (TMessage));
-		}
-
-		public void ForMissingSaga(TMessage message)
-		{
-			// good, no saga exists yet
-		}
-
-		public bool ShouldSagaBeRemoved(TSaga saga)
-		{
-			return _shouldBeRemoved(saga);
-		}
-
-		private bool UseMessageIdForSaga(TMessage message, out Guid sagaId)
-		{
-			if (_useMessageIdForSagaId)
-			{
-				var correlator = message.TranslateTo<CorrelatedBy<Guid>>();
-
-				sagaId = correlator.CorrelationId;
-
-				return true;
-			}
-
-			sagaId = CombGuid.Generate();
 			return true;
 		}
 
-		private bool GenerateNewIdForSaga(out Guid sagaId)
+		public TSaga CreateInstance(IConsumeContext<TMessage> context, Guid sagaId)
 		{
-			sagaId = CombGuid.Generate();
-			return true;
+			return FastActivator<TSaga>.Create(sagaId);
+		}
+
+		public Guid GetNewSagaId(IConsumeContext<TMessage> context)
+		{
+			Guid sagaId = _getNewSagaId(context.Message);
+
+			return sagaId;
+		}
+
+		public bool CanUseExistingInstance(IConsumeContext<TMessage> context)
+		{
+			return false;
+		}
+
+		public bool CanRemoveInstance(TSaga instance)
+		{
+			return _canRemoveInstance(instance);
 		}
 	}
 }

@@ -1,7 +1,9 @@
 build_output/*
-code_drop/*
+build_artifacts/*
 *.suo
 *.user
+
+NDependOut/*
 
 src/logs/*
 
@@ -22,5 +24,11 @@ _ReSharper*
 
 TestResult.xml
 submit.xml
-src/tests/*
+tests/*
 SolutionVersion.cs
+src/SolutionVersion.cs
+tests
+doc/build/*
+
+# osx noise
+.DS_Store

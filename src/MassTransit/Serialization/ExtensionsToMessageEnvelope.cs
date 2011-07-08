@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,41 +13,45 @@
 namespace MassTransit.Serialization
 {
 	using System;
-	using Internal;
+	using Context;
+	using Util;
 
 	public static class ExtensionsToMessageEnvelope
 	{
-		public static Action<ISetInboundMessageHeaders> GetMessageHeadersSetAction(this MessageEnvelopeBase envelope)
+		public static void SetUsingMessageEnvelope(this IReceiveContext context, MessageEnvelopeBase envelope)
 		{
-			return headers =>
-				{
-					headers.Reset();
-					headers.SetSourceAddress(envelope.SourceAddress);
-					headers.SetDestinationAddress(envelope.DestinationAddress);
-					headers.SetResponseAddress(envelope.ResponseAddress);
-					headers.SetFaultAddress(envelope.FaultAddress);
-					headers.SetRetryCount(envelope.RetryCount);
-					headers.SetMessageType(envelope.MessageType);
-					if(envelope.ExpirationTime.HasValue)
-						headers.SetExpirationTime(envelope.ExpirationTime.Value);
-				};
+			context.SetSourceAddress(envelope.SourceAddress.ToUriOrNull());
+			context.SetDestinationAddress(envelope.DestinationAddress.ToUriOrNull());
+			context.SetResponseAddress(envelope.ResponseAddress.ToUriOrNull());
+			context.SetFaultAddress(envelope.FaultAddress.ToUriOrNull());
+			context.SetNetwork(envelope.Network);
+			context.SetRetryCount(envelope.RetryCount);
+			context.SetMessageType(envelope.MessageType);
+			if (envelope.ExpirationTime.HasValue)
+				context.SetExpirationTime(envelope.ExpirationTime.Value);
 		}
 
-		public static void CopyFrom(this MessageEnvelopeBase envelope, IMessageHeaders headers)
+		public static void SetUsingContext(this MessageEnvelopeBase envelope, ISendContext headers)
 		{
 			envelope.SourceAddress = headers.SourceAddress.ToStringOrNull() ?? envelope.SourceAddress;
 			envelope.DestinationAddress = headers.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
 			envelope.ResponseAddress = headers.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
 			envelope.FaultAddress = headers.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
+			envelope.Network = headers.Network;
 			envelope.RetryCount = headers.RetryCount;
 			envelope.MessageType = headers.MessageType ?? envelope.MessageType;
-			if(headers.ExpirationTime.HasValue)
+			if (headers.ExpirationTime.HasValue)
 				envelope.ExpirationTime = headers.ExpirationTime.Value;
 		}
 
 		public static string ToStringOrNull(this Uri uri)
 		{
 			return uri == null ? null : uri.ToString();
+		}
+
+		public static Uri ToUriOrNull(this string uriString)
+		{
+			return string.IsNullOrEmpty(uriString) ? null : uriString.ToUri();
 		}
 	}
 }

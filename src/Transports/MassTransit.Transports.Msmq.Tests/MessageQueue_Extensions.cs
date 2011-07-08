@@ -3,7 +3,6 @@ namespace MassTransit.Transports.Msmq.Tests
     using System;
     using System.Messaging;
     using System.Transactions;
-    using Internal;
 
 	public static class MessageQueue_Extensions
     {
@@ -30,7 +29,7 @@ namespace MassTransit.Transports.Msmq.Tests
             }
         }
 
-		public static long GetMessageCount(this IMsmqEndpointAddress address)
+		public static long GetMsmqMessageCount(this IEndpointAddress address)
 		{
 			IEndpointManagement management = MsmqEndpointManagement.New(address.Uri);
 			return management.Count();

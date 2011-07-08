@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,127 +14,193 @@ namespace BusDriver
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using Commands;
+	using System.Threading;
 	using log4net;
 	using log4net.Appender;
 	using log4net.Config;
+	using log4net.Core;
+	using log4net.Filter;
 	using log4net.Layout;
 	using Magnum.CommandLineParser;
+	using Magnum.Extensions;
+	using MassTransit;
+	using MassTransit.Transports.Loopback;
+	using MassTransit.Transports.Msmq;
+	using MassTransit.Transports.RabbitMq;
 
-	internal class Program
+	class Program
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
-		private static readonly MonadicCommandLineParser _parser = new MonadicCommandLineParser();
-		private static ConsoleAppender _appender;
+		static readonly ILog _log = LogManager.GetLogger(typeof (Program));
+		static readonly MonadicCommandLineParser _parser = new MonadicCommandLineParser();
+		static ConsoleAppender _appender;
+		static IServiceBus _bus;
+		static Uri _driverUri = new Uri("msmq://localhost/masstransit_busdriver");
+		static IList<IPendingCommand> _pending;
 
-		private static void Main(string[] args)
+		public static IServiceBus Bus
 		{
+			get
+			{
+				if (_bus == null)
+				{
+					_log.DebugFormat("Starting service bus instance on {0}", _driverUri);
+
+					_bus = ServiceBusFactory.New(x =>
+						{
+							x.UseMsmq();
+							x.UseRabbitMq();
+							x.UseXmlSerializer();
+							x.ReceiveFrom(_driverUri);
+						});
+				}
+
+				return _bus;
+			}
+		}
+
+		public static string CurrentUri { get; set; }
+		public static TransportCache Transports { get; private set; }
+
+		public static void AddPendingCommand(IPendingCommand command)
+		{
+			_pending.Add(command);
+		}
+
+		static void Main()
+		{
+			BootstrapLogger();
+
+			_pending = new List<IPendingCommand>();
+
 			try
 			{
-				BootstrapLogger();
+				Transports = new TransportCache();
+				Transports.AddTransportFactory(new LoopbackTransportFactory());
+				Transports.AddTransportFactory(new MsmqTransportFactory());
+				Transports.AddTransportFactory(new RabbitMqTransportFactory());
 
-				_log.Info("Starting up ");
-
-				if (args.Length > 1)
+				string line = CommandLine.GetUnparsedCommandLine();
+				if (line.IsNotEmpty())
 				{
-					string line = GetUnparsedCommandLine();
-
 					ProcessLine(line);
 				}
 				else
 				{
+					_appender.Threshold = Level.All;
 					RunInteractiveConsole();
 				}
 			}
 			finally
 			{
-				Console.WriteLine("Shutting down...");
+				WaitForPendingCommands();
 
-				TransportCache.Clear();
+				if (_bus != null)
+				{
+					_log.Debug("Disposing of service bus instance");
+					_bus.Dispose();
+					_bus = null;
+				}
+
+				Transports.Dispose();
+				Transports = null;
+
+				_log.Debug("End of Line.");
 			}
 		}
 
-		private static string GetUnparsedCommandLine()
+		static void WaitForPendingCommands()
 		{
-			string line = Environment.CommandLine;
+			var exit = new ManualResetEvent(false);
 
-			string applicationPath = Environment.GetCommandLineArgs()[0];
+			try
+			{
+				Console.CancelKeyPress += (sender, args) =>
+					{
+						if (args.SpecialKey == ConsoleSpecialKey.ControlBreak)
+							return;
 
-			string quotedApplicationPath = "\"" + applicationPath + "\" ";
+						args.Cancel = true;
 
-			if (line.Substring(0, applicationPath.Length) == applicationPath)
-				line = line.Substring(applicationPath.Length + 1);
-			else if (line.Substring(0, quotedApplicationPath.Length) == quotedApplicationPath)
-				line = line.Substring(quotedApplicationPath.Length);
-			return line;
+						_log.Info("Control+C detected, exiting without waiting");
+
+						exit.Set();
+					};
+
+				foreach (IPendingCommand command in _pending)
+				{
+					try
+					{
+						_log.DebugFormat("Waiting for {0} to complete", command.Description);
+
+						var handles = new[] {exit, command.WaitHandle};
+
+						int result = WaitHandle.WaitAny(handles, 30.Seconds());
+						if (result == WaitHandle.WaitTimeout)
+							throw new TimeoutException("Timeout waiting for " + command.Description);
+					}
+					catch (Exception ex)
+					{
+						_log.Error("Exception while waiting for " + command.Description, ex);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Exception while waiting for pending commands to complete", ex);
+			}
+			finally
+			{
+				exit.Close();
+			}
 		}
 
-		private static void RunInteractiveConsole()
+		static void RunInteractiveConsole()
 		{
-            _log.Info("Starting interactive console.");
+			_log.DebugFormat("BusDriver v{0}, .NET Framework v{1}", typeof (Program).Assembly.GetName().Version,
+				Environment.Version);
+
+			_log.Debug("Starting interactive console");
+			_log.Debug("Enter help for a list of commands, or exit to, well, to exit.");
 
 			bool keepGoing = true;
 			do
 			{
+				string line = "";
 				try
 				{
-					Console.Write("$ ");
+					Console.Write("> ");
+					Console.Out.Flush();
 
-					string line = Console.ReadLine();
-					if(line.Trim().Length == 0)
+					line = Console.ReadLine();
+					if (line.Trim().Length == 0)
 						continue;
 
 					keepGoing = ProcessLine(line);
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine(ex);
+					_log.Error("Exception processing: " + (line ?? ""), ex);
 				}
 			} while (keepGoing);
 		}
 
-		private static bool ProcessLine(string line)
+		static bool ProcessLine(string line)
 		{
-			IEnumerable<ICommandLineElement> elements = _parser.Parse(line);
-
-			_log.Debug("Parsed: " + string.Join(", ", elements.Select(x => x.ToString()).ToArray()));
-
-			ICommandLineElement element = elements.First();
-
-			if (element is IArgumentElement)
-			{
-				var argument = element as IArgumentElement;
-
-				if (argument.Id == "quit" || argument.Id == "exit")
-					return false;
-
-				if (argument.Id == "create")
-					new CreateCommand(elements.Skip(1));
-				
-				if (argument.Id == "count")
-					new CountEndpointCommand(elements.Skip(1));
-				
-				if (argument.Id == "send")
-					new SendTextCommand(elements.Skip(1));
-				
-				if (argument.Id == "receive")
-					new ReceiveCommand(elements.Skip(1));
-				
-				if (argument.Id == "move")
-					new MoveCommand(elements.Skip(1));
-
-                if (argument.Id == "moven")
-                    new MoveNCommand(elements.Skip(1));
-            }
-
-			return true;
+			return CommandParser.Parse(line);
 		}
 
-		private static void BootstrapLogger()
+		static void BootstrapLogger()
 		{
 			_appender = new ConsoleAppender();
-			_appender.Layout = new SimpleLayout();
+			_appender.Threshold = Level.Info;
+			_appender.Layout = new PatternLayout("%m%n");
+
+			var filter = new LoggerMatchFilter();
+			filter.AcceptOnMatch = false;
+			filter.LoggerToMatch = "MassTransit";
+
+			_appender.AddFilter(filter);
+
 
 			BasicConfigurator.Configure(_appender);
 		}

@@ -5,10 +5,9 @@
       <ALIGN_MULTILINE_ARRAY_AND_OBJECT_INITIALIZER>False</ALIGN_MULTILINE_ARRAY_AND_OBJECT_INITIALIZER>
       <ALIGN_MULTILINE_EXTENDS_LIST>False</ALIGN_MULTILINE_EXTENDS_LIST>
       <ALIGN_MULTLINE_TYPE_PARAMETER_CONSTRAINS>False</ALIGN_MULTLINE_TYPE_PARAMETER_CONSTRAINS>
+      <EXPLICIT_PRIVATE_MODIFIER>False</EXPLICIT_PRIVATE_MODIFIER>
       <INDENT_ANONYMOUS_METHOD_BLOCK>False</INDENT_ANONYMOUS_METHOD_BLOCK>
       <INDENT_EMBRACED_INITIALIZER_BLOCK>False</INDENT_EMBRACED_INITIALIZER_BLOCK>
-      <INDENT_SIZE>4</INDENT_SIZE>
-      <INSERT_TABS>True</INSERT_TABS>
       <MODIFIERS_ORDER IsNull="False">
         <Item>public</Item>
         <Item>protected</Item>
@@ -38,6 +37,8 @@
       <AddImportsToDeepestScope>True</AddImportsToDeepestScope>
     </UsingsSettings>
     <Naming2>
+      <EventHandlerPatternLong>$object$_On$event$</EventHandlerPatternLong>
+      <EventHandlerPatternShort>$event$Handler</EventHandlerPatternShort>
       <ExceptionName IsNull="False">
       </ExceptionName>
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="TypesAndNamespaces" />
@@ -275,13 +276,23 @@ II.2.12 <HandlesEvent />
 ]]></CustomMemberReorderingPatterns>
   </CSharp>
   <VB>
-    <FormatSettings>
-      <INDENT_SIZE>4</INDENT_SIZE>
-    </FormatSettings>
+    <FormatSettings />
     <ImportsSettings />
-    <Naming2 />
+    <Naming2>
+      <EventHandlerPatternLong>$object$_On$event$</EventHandlerPatternLong>
+      <EventHandlerPatternShort>$event$Handler</EventHandlerPatternShort>
+    </Naming2>
   </VB>
-  <FileHeader><![CDATA[Copyright 2007-2008 The Apache Software Foundation.
+  <Web>
+    <Naming2 />
+  </Web>
+  <Xaml>
+    <Naming2 />
+  </Xaml>
+  <XML>
+    <FormatSettings />
+  </XML>
+  <FileHeader><![CDATA[Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
  
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 this file except in compliance with the License. You may obtain a copy of the 
@@ -296,6 +307,8 @@ specific language governing permissions and limitations under the License.
 ]]></FileHeader>
   <GenerateMemberBody />
   <Naming2>
+    <EventHandlerPatternLong>$object$_On$event$</EventHandlerPatternLong>
+    <EventHandlerPatternShort>$event$Handler</EventHandlerPatternShort>
     <ExceptionName IsNull="False">
     </ExceptionName>
     <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="MethodPropertyEvent" />

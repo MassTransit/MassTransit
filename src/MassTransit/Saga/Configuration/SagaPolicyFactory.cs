@@ -20,7 +20,7 @@ namespace MassTransit.Saga.Configuration
 	public class SagaPolicyFactory :
 		ISagaPolicyFactory
 	{
-		public ISagaPolicy<TSaga, TMessage> GetPolicy<TSaga, TMessage>(IEnumerable<State> states, Expression<Func<TSaga, bool>> removeExpression)
+		public ISagaPolicy<TSaga, TMessage> GetPolicy<TSaga, TMessage>(IEnumerable<State> states, Func<TMessage,Guid> getNewSagaId, Expression<Func<TSaga, bool>> removeExpression)
 			where TSaga : SagaStateMachine<TSaga>, ISaga
 			where TMessage : class
 		{
@@ -38,10 +38,10 @@ namespace MassTransit.Saga.Configuration
 			}
 
 			if (includesInitial && includesOther)
-				return new CreateOrUseExistingSagaPolicy<TSaga, TMessage>(removeExpression);
+				return new CreateOrUseExistingSagaPolicy<TSaga, TMessage>(getNewSagaId, removeExpression);
 
 			if (includesInitial)
-				return new InitiatingSagaPolicy<TSaga, TMessage>(removeExpression);
+				return new InitiatingSagaPolicy<TSaga, TMessage>(getNewSagaId, removeExpression);
 
 			return new ExistingOrIgnoreSagaPolicy<TSaga, TMessage>(removeExpression);
 		}

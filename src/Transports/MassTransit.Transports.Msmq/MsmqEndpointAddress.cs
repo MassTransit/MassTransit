@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,8 +14,6 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Messaging;
-	using System.Net;
-	using Util;
 
 	public class MsmqEndpointAddress :
 		EndpointAddress,
@@ -26,25 +24,41 @@ namespace MassTransit.Transports.Msmq
 		{
 			PublicQueuesNotAllowed();
 
-			FormatName = BuildQueueFormatName();
+			InboundFormatName = uri.GetInboundFormatName();
 
-			IsTransactional = CheckForTransactionalHint();
-		
-			if (IsLocal)
+			OutboundFormatName = uri.GetOutboundFormatName();
+
+			IsTransactional = CheckForTransactionalHint(uri);
+
+			MulticastAddress = uri.GetMulticastAddress();
+			if(MulticastAddress != null)
+			{
+				IsTransactional = false;
+				LocalName = uri.GetLocalName();
+			}
+			else if (IsLocal)
 			{
 				IsTransactional = IsLocalQueueTransactional();
 
-				LocalName = @".\private$\" + Path;
+				LocalName = uri.GetLocalName();
 
 				Uri = SetUriHostToLocalMachineName();
 			}
 		}
 
+		public string InboundFormatName { get; private set; }
+
+		public string OutboundFormatName { get; private set; }
+
+		public string LocalName { get; private set; }
+
+		public string MulticastAddress { get; private set; }
+
 		private bool IsLocalQueueTransactional()
 		{
 			try
 			{
-				using(var queue = new MessageQueue(FormatName, QueueAccessMode.PeekAndAdmin))
+				using (var queue = new MessageQueue(InboundFormatName, QueueAccessMode.PeekAndAdmin))
 				{
 					return queue.Transactional;
 				}
@@ -56,21 +70,6 @@ namespace MassTransit.Transports.Msmq
 			return IsTransactional;
 		}
 
-		public string FormatName { get; private set; }
-
-		public string LocalName { get; private set; }
-
-		public bool IsTransactional { get; private set; }
-
-		private string BuildQueueFormatName()
-		{
-			string hostName = Uri.Host;
-
-			if (IsIpAddress(hostName))
-				return string.Format(@"FormatName:DIRECT=TCP:{0}\private$\{1}", hostName, Path);
-
-			return string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, Path);
-		}
 
 		private void PublicQueuesNotAllowed()
 		{
@@ -87,15 +86,12 @@ namespace MassTransit.Transports.Msmq
 				"Bad: msmq://machinename/round_file/queue_name");
 		}
 
-		private static bool IsIpAddress(string hostName)
+		protected override bool DetermineIfEndpointIsLocal(Uri uri)
 		{
-			IPAddress address;
-			return IPAddress.TryParse(hostName, out address);
-		}
+			if (uri.Scheme.ToLowerInvariant() == "msmq-pgm")
+				return true;
 
-		private bool CheckForTransactionalHint()
-		{
-			return Uri.Query.GetValueFromQueryString("tx", false);
+			return base.DetermineIfEndpointIsLocal(uri);
 		}
 
 		private Uri SetUriHostToLocalMachineName()

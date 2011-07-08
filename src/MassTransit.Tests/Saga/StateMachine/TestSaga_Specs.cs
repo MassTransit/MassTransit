@@ -16,12 +16,13 @@ namespace MassTransit.Tests.Saga.StateMachine
 	using System.Linq;
 	using Exceptions;
 	using Locator;
-	using MassTransit.Internal;
+	using Magnum.TestFramework;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Inspectors;
 	using MassTransit.Saga;
 	using NUnit.Framework;
 	using Rhino.Mocks;
+	using TestFramework;
 	using TextFixtures;
 
 	[TestFixture]
@@ -34,7 +35,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			_sagaId = Guid.NewGuid();
 
-			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
+			_repository = SetupSagaRepository<TestSaga>();
 
 		    _initiateSimpleSagaUnsubscribeCalled = false;
 		    _completeSimpleSagaUnsubscribeCalled = false;
@@ -47,7 +48,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			LocalBus.InboundPipeline.Configure(x => x.Register(_subscriptionEvent));
 
-			_remove = LocalBus.Subscribe<TestSaga>();
+			_remove = LocalBus.SubscribeSaga<TestSaga>(_repository);
 
 			PipelineViewer.Trace(LocalBus.InboundPipeline);
 		}
@@ -89,9 +90,9 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			_sagaId = Guid.NewGuid();
 
-			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
+			_repository = SetupSagaRepository<TestSaga>();
 
-			_remove = LocalBus.Subscribe<TestSaga>();
+			_remove = LocalBus.SubscribeSaga<TestSaga>(_repository);
 
 			PipelineViewer.Trace(LocalBus.InboundPipeline);
 		}
@@ -149,9 +150,9 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			_sagaId = Guid.NewGuid();
 
-			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
+			_repository = SetupSagaRepository<TestSaga>();
 
-			LocalBus.Subscribe<TestSaga>();
+			LocalBus.SubscribeSaga<TestSaga>(_repository);
 		}
 
 		private Guid _sagaId;
@@ -167,28 +168,11 @@ namespace MassTransit.Tests.Saga.StateMachine
 			try
 			{
 				LocalBus.InboundPipeline.Dispatch(message);
-
-				Assert.Fail("Exception should have been thrown");
 			}
 			catch (SagaException sex)
 			{
 				Assert.AreEqual(sex.MessageType, typeof (InitiateSimpleSaga));
 			}
-		}
-	}
-
-	public static class SagaTestExtensions
-	{
-		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId)
-			where TSaga : class, ISaga
-		{
-			var sagas = repository.Where(x => x.CorrelationId == sagaId);
-
-			var count = sagas.Count();
-
-			Assert.AreEqual(1, count, "The saga does not exist");
-
-			return sagas.First();
 		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,37 +16,43 @@ namespace MassTransit.Distributor
 	using System.Collections.Generic;
 	using System.Threading;
 	using Magnum;
+	using Magnum.Extensions;
 	using Magnum.Reflection;
-	using Magnum.Actors;
-	using Magnum.Actors.CommandQueues;
 	using Messages;
 	using Saga;
+	using Stact;
+	using Stact.Internal;
+	using Util;
 
 	public class SagaWorker<TSaga> :
 		ISagaWorker<TSaga>,
 		Consumes<WakeUpWorker>.All
 		where TSaga : SagaStateMachine<TSaga>, ISaga
 	{
-		private readonly IList<Type> _messageTypes = new List<Type>();
-		private readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
-		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
-		private IServiceBus _bus;
-		private IServiceBus _controlBus;
-		private Uri _controlUri;
-		private Uri _dataUri;
-		private int _inProgress;
-		private int _inProgressLimit = 4;
-		private int _pendingLimit = 16;
-		private UnsubscribeAction _unsubscribeAction = () => false;
-		private bool _updatePending;
+		readonly Fiber _fiber = new PoolFiber();
+		readonly IList<Type> _messageTypes = new List<Type>();
+		readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
+		readonly ISagaRepository<TSaga> _sagaRepository;
+		IServiceBus _bus;
+		IServiceBus _controlBus;
+		Uri _controlUri;
+		Uri _dataUri;
+		int _inProgress;
+		int _inProgressLimit = 4;
+		int _pendingLimit = 16;
+		ScheduledOperation _scheduled;
+		Scheduler _scheduler;
+		UnsubscribeAction _unsubscribeAction = () => false;
+		bool _updatePending;
 
-		public SagaWorker()
-			: this(new WorkerSettings())
+		public SagaWorker(ISagaRepository<TSaga> sagaRepository)
+			: this(sagaRepository, new WorkerSettings())
 		{
 		}
 
-		public SagaWorker(WorkerSettings settings)
+		public SagaWorker(ISagaRepository<TSaga> sagaRepository, WorkerSettings settings)
 		{
+			_sagaRepository = sagaRepository;
 			_inProgress = 0;
 			_inProgressLimit = settings.InProgressLimit;
 			_pendingLimit = settings.PendingLimit;
@@ -58,6 +64,10 @@ namespace MassTransit.Distributor
 
 		public void Dispose()
 		{
+			Stop();
+
+			_fiber.Stop();
+
 			_controlBus = null;
 		}
 
@@ -66,20 +76,43 @@ namespace MassTransit.Distributor
 			_bus = bus;
 			_controlBus = bus.ControlBus;
 
-			_dataUri = _bus.Endpoint.Uri;
-			_controlUri = _controlBus.Endpoint.Uri;
+			_dataUri = _bus.Endpoint.Address.Uri;
+			_controlUri = _controlBus.Endpoint.Address.Uri;
 
-			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker>(Consume, Accept);
-			_unsubscribeAction += bus.Subscribe(this);
+			_unsubscribeAction = bus.ControlBus.SubscribeHandler<ConfigureWorker>(Consume, Accept);
+			_unsubscribeAction += bus.SubscribeInstance(this);
+			_unsubscribeAction += bus.SubscribeSagaWorker(this, _sagaRepository);
 
 			CacheMessageTypesForSaga();
 
-			PublishWorkerAvailability();
+			_scheduler = new TimerScheduler(new PoolFiber());
+			_scheduled = _scheduler.Schedule(3.Seconds(), 3.Seconds(), _fiber, PublishWorkerAvailability);
 		}
 
 		public void Stop()
 		{
-			_unsubscribeAction();
+			if (_scheduled != null)
+			{
+				_scheduled.Cancel();
+				_scheduled = null;
+			}
+
+			if (_scheduler != null)
+			{
+				_scheduler.Stop(60.Seconds());
+				_scheduler = null;
+			}
+
+			if (_fiber != null)
+			{
+				_fiber.Shutdown(60.Seconds());
+			}
+
+			if (_unsubscribeAction != null)
+			{
+				_unsubscribeAction();
+				_unsubscribeAction = null;
+			}
 		}
 
 		public bool CanAcceptMessage<TMessage>(Distributed<TMessage> message)
@@ -114,19 +147,19 @@ namespace MassTransit.Distributor
 			PublishWorkerAvailability();
 		}
 
-		private void CacheMessageTypesForSaga()
+		void CacheMessageTypesForSaga()
 		{
 			TSaga saga = FastActivator<TSaga>.Create(CombGuid.Generate());
 
 			saga.EnumerateDataEvents(type => _messageTypes.Add(type));
 		}
 
-        private bool Accept(ConfigureWorker message)
-        {
-            return typeof(TSaga).GetType().FullName == message.MessageType;
-        }
+		bool Accept(ConfigureWorker message)
+		{
+			return typeof (TSaga).GetType().FullName == message.MessageType;
+		}
 
-		private void Consume(ConfigureWorker message)
+		void Consume(ConfigureWorker message)
 		{
 			if (message.InProgressLimit >= 0)
 				_inProgressLimit = message.InProgressLimit;
@@ -134,28 +167,36 @@ namespace MassTransit.Distributor
 			if (message.PendingLimit >= 0)
 				_pendingLimit = message.PendingLimit;
 
-			PublishWorkerAvailability();
+			ScheduleUpdate();
 		}
 
-		private void ScheduleUpdate()
+		void ScheduleUpdate()
 		{
 			if (!_updatePending)
 			{
 				_updatePending = true;
-				_queue.Enqueue(PublishWorkerAvailability);
+				_fiber.Add(PublishWorkerAvailability);
 			}
 		}
 
-		private void PublishWorkerAvailability()
+		void PublishWorkerAvailability()
 		{
-			_updatePending = false;
+			try
+			{
+				_updatePending = false;
 
-			_messageTypes.Each(type => { this.FastInvoke(new[] {type}, "PublishWorkerAvailable"); });
+				_messageTypes.Each(type => this.FastInvoke(new[] {type}, "PublishWorkerAvailable"));
+			}
+			catch
+			{
+			}
 		}
 
-		private void PublishWorkerAvailable<TMessage>()
+		[UsedImplicitly]
+		void PublishWorkerAvailable<TMessage>()
 		{
-			_bus.Publish(new WorkerAvailable<TMessage>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pendingMessages.PendingMessageCount(), _pendingLimit));
+			_bus.Publish(new WorkerAvailable<TMessage>(_controlUri, _dataUri, _inProgress, _inProgressLimit,
+				_pendingMessages.PendingMessageCount(), _pendingLimit));
 		}
 	}
 }

@@ -1,15 +1,3 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace HeavyLoad
 {
 	using System;
@@ -17,23 +5,22 @@ namespace HeavyLoad
 	using System.Diagnostics;
 	using System.Threading;
 	using log4net;
-	using Magnum;
 
 	/// <summary>
 	/// A managed collection of threads for handling tasks
 	/// </summary>
 	public class ManagedThreadPool<T> : IDisposable
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (ManagedThreadPool<T>));
-		private readonly Action<T> _handler;
-		private readonly AutoResetEvent _queueActivity = new AutoResetEvent(true);
-		private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
-		private readonly List<Thread> _threads = new List<Thread>();
-		private readonly Semaphore _workAvailable = new Semaphore(0, int.MaxValue);
-		private readonly Queue<T> _workItems = new Queue<T>();
-		private int _maxThreads;
-		private int _minThreads;
-		private int _maxQueueDepth = 5000;
+		static readonly ILog _log = LogManager.GetLogger(typeof (ManagedThreadPool<T>));
+		readonly Action<T> _handler;
+		readonly AutoResetEvent _queueActivity = new AutoResetEvent(true);
+		readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
+		readonly List<Thread> _threads = new List<Thread>();
+		readonly Semaphore _workAvailable = new Semaphore(0, int.MaxValue);
+		readonly Queue<T> _workItems = new Queue<T>();
+		int _maxQueueDepth = 5000;
+		int _maxThreads;
+		int _minThreads;
 
 		public ManagedThreadPool(Action<T> handler)
 			: this(handler, 1, 10)
@@ -42,13 +29,51 @@ namespace HeavyLoad
 
 		public ManagedThreadPool(Action<T> handler, int minThreads, int maxThreads)
 		{
-			Check.Ensure(minThreads > 0, "The minimum thread count must be greater than zero");
-			Check.Ensure(maxThreads >= minThreads, "The maximum thread count must be at least equal to the minimum thread count");
-			Check.Parameter(handler).WithMessage("The handler must not be null").IsNotNull();
-
 			_handler = handler;
 			_minThreads = minThreads;
 			_maxThreads = maxThreads;
+		}
+
+		/// <summary>
+		/// The maximum depth of the queue
+		/// </summary>
+		public int MaxQueueDepth
+		{
+			[DebuggerStepThrough]
+			get { return _maxQueueDepth; }
+		}
+
+		public int MaxThreads
+		{
+			[DebuggerStepThrough]
+			get { return _maxThreads; }
+			set
+			{
+				_maxThreads = value;
+			}
+		}
+
+		public int MinThreads
+		{
+			[DebuggerStepThrough]
+			get { return _minThreads; }
+			set
+			{
+
+				_minThreads = value;
+			}
+		}
+
+		public int CurrentThreadCount
+		{
+			[DebuggerStepThrough]
+			get { lock (_threads) return _threads.Count; }
+		}
+
+		public int QueueDepth
+		{
+			[DebuggerStepThrough]
+			get { lock (_workItems) return _workItems.Count; }
 		}
 
 		public void Dispose()
@@ -77,52 +102,6 @@ namespace HeavyLoad
 			_threads.Clear();
 		}
 
-		/// <summary>
-		/// The maximum depth of the queue
-		/// </summary>
-		public int MaxQueueDepth
-		{
-			[DebuggerStepThrough]
-			get { return _maxQueueDepth; }
-		}
-
-		public int MaxThreads
-		{
-			[DebuggerStepThrough]
-			get { return _maxThreads; }
-			set
-			{
-				Check.Ensure(value >= _minThreads, "The maximum thread count must be at least equal to the minimum thread count");
-
-				_maxThreads = value;
-			}
-		}
-
-		public int MinThreads
-		{
-			[DebuggerStepThrough]
-			get { return _minThreads; }
-			set
-			{
-				Check.Ensure(value >= 0, "The minimum thread count must be greater than zero");
-				Check.Ensure(_maxThreads >= value, "The maximum thread count must be at least equal to the minimum thread count");
-
-				_minThreads = value;
-			}
-		}
-
-		public int CurrentThreadCount
-		{
-			[DebuggerStepThrough]
-			get { lock (_threads) return _threads.Count; }
-		}
-
-		public int QueueDepth
-		{
-			[DebuggerStepThrough]
-			get { lock (_workItems) return _workItems.Count; }
-		}
-
 		public void Enqueue(T item)
 		{
 			WaitForRoomInQueue();
@@ -134,7 +113,7 @@ namespace HeavyLoad
 			AdjustQueueCount();
 		}
 
-		private T Dequeue()
+		T Dequeue()
 		{
 			T item;
 			lock (_workItems)
@@ -145,7 +124,7 @@ namespace HeavyLoad
 			return item;
 		}
 
-		private void WaitForRoomInQueue()
+		void WaitForRoomInQueue()
 		{
 			while (QueueDepth >= MaxQueueDepth)
 			{
@@ -153,7 +132,7 @@ namespace HeavyLoad
 			}
 		}
 
-		private void AdjustQueueCount()
+		void AdjustQueueCount()
 		{
 			int queueCount = QueueDepth;
 
@@ -170,9 +149,9 @@ namespace HeavyLoad
 			}
 		}
 
-		private void AddThread()
+		void AddThread()
 		{
-			Thread thread = new Thread(RunThread);
+			var thread = new Thread(RunThread);
 
 			lock (_threads)
 				_threads.Add(thread);
@@ -183,14 +162,14 @@ namespace HeavyLoad
 				_log.DebugFormat("Created Thread {0}, Total Threads = {1}", thread.ManagedThreadId, CurrentThreadCount);
 		}
 
-		private void RunThread(object obj)
+		void RunThread(object obj)
 		{
 			int threadId = Thread.CurrentThread.ManagedThreadId;
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Starting Thread {0}", threadId);
 
-			WaitHandle[] handles = new WaitHandle[] {_shutdown, _workAvailable};
+			var handles = new WaitHandle[] {_shutdown, _workAvailable};
 
 			int result;
 			while ((result = WaitHandle.WaitAny(handles, TimeSpan.FromSeconds(5), true)) != 0)

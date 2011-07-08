@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,13 +13,14 @@
 namespace MassTransit.Services.Subscriptions.Server
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using Exceptions;
 	using log4net;
-	using Magnum.Actors;
-	using Magnum.Actors.CommandQueues;
+	using Magnum.Extensions;
 	using Messages;
 	using Saga;
+	using Stact;
 	using Subscriptions.Messages;
 
 	public class SubscriptionService :
@@ -29,24 +30,18 @@ namespace MassTransit.Services.Subscriptions.Server
 		Consumes<SubscriptionRemoved>.All,
 		IDisposable
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
-		private readonly IEndpointFactory _endpointFactory;
-		private readonly ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagas;
-		private readonly ISagaRepository<SubscriptionSaga> _subscriptionSagas;
-		private IServiceBus _bus;
-		private ISubscriptionRepository _repository;
-		private UnsubscribeAction _unsubscribeToken = () => false;
-		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
+		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
+		readonly ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagas;
+		readonly ISagaRepository<SubscriptionSaga> _subscriptionSagas;
+		IServiceBus _bus;
+		bool _disposed;
+		UnsubscribeAction _unsubscribeToken = () => false;
 
 		public SubscriptionService(IServiceBus bus,
-		                           ISubscriptionRepository subscriptionRepository,
-		                           IEndpointFactory endpointFactory,
 		                           ISagaRepository<SubscriptionSaga> subscriptionSagas,
 		                           ISagaRepository<SubscriptionClientSaga> subscriptionClientSagas)
 		{
 			_bus = bus;
-			_repository = subscriptionRepository;
-			_endpointFactory = endpointFactory;
 			_subscriptionSagas = subscriptionSagas;
 			_subscriptionClientSagas = subscriptionClientSagas;
 		}
@@ -58,7 +53,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var add = new AddSubscription(message.Subscription);
 
-			_queue.Enqueue(() => SendToClients(add));
+			SendToClients(add);
 		}
 
 		public void Consume(SubscriptionClientAdded message)
@@ -66,7 +61,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			if (_log.IsInfoEnabled)
 				_log.InfoFormat("Subscription Client Added: {0} [{1}]", message.ControlUri, message.ClientId);
 
-			_queue.Enqueue(() => SendCacheUpdateToClient(message.ControlUri));
+			SendCacheUpdateToClient(message.ControlUri);
 		}
 
 		public void Consume(SubscriptionClientRemoved message)
@@ -82,37 +77,22 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var remove = new RemoveSubscription(message.Subscription);
 
-			_queue.Enqueue(()=>SendToClients(remove));
+			SendToClients(remove);
 		}
 
 		public void Dispose()
 		{
-			try
-			{
-				_bus.Dispose();
-				_bus = null;
-
-				_repository.Dispose();
-				_repository = null;
-			}
-			catch (Exception ex)
-			{
-				string message = "Error in shutting down the SubscriptionService: " + ex.Message;
-				ShutDownException exp = new ShutDownException(message, ex);
-				_log.Error(message, exp);
-				throw exp;
-			}
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public void Start()
 		{
-			_log.Info("Subscription Service Starting");
-			_unsubscribeToken += _bus.Subscribe(this);
+			_log.InfoFormat("Subscription Service Starting: {0}", _bus.Endpoint.Address);
+			_unsubscribeToken += _bus.SubscribeInstance(this);
 
-			_unsubscribeToken += _bus.Subscribe<SubscriptionClientSaga>();
-			_unsubscribeToken += _bus.Subscribe<SubscriptionSaga>();
-
-			// TODO may need to load/prime the subscription repository at this point?
+			_unsubscribeToken += _bus.SubscribeSaga<SubscriptionClientSaga>(_subscriptionClientSagas);
+			_unsubscribeToken += _bus.SubscribeSaga<SubscriptionSaga>(_subscriptionSagas);
 
 			_log.Info("Subscription Service Started");
 		}
@@ -126,28 +106,58 @@ namespace MassTransit.Services.Subscriptions.Server
 			_log.Info("Subscription Service Stopped");
 		}
 
-		private void SendToClients<T>(T message)
-			where T : class
+		void Dispose(bool disposing)
 		{
-			_subscriptionClientSagas.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
-				.Each(client =>
-					{
-						IEndpoint endpoint = _endpointFactory.GetEndpoint(client.ControlUri);
+			if (_disposed) return;
+			if (disposing)
+			{
+				try
+				{
+					_bus.Dispose();
+					_bus = null;
+				}
+				catch (Exception ex)
+				{
+					string message = "Error in shutting down the SubscriptionService: " + ex.Message;
+					var exp = new ShutDownException(message, ex);
+					_log.Error(message, exp);
+					throw exp;
+				}
+			}
 
-						endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
+			_disposed = true;
+		}
+
+		void SendToClients<T>(T message)
+			where T : SubscriptionChange
+		{
+			IEnumerable<SubscriptionClientSaga> sagas = _subscriptionClientSagas.Where(x => x.CurrentState == SubscriptionClientSaga.Active);
+
+			_log.DebugFormat("Sending {0}:{1} to {2} clients", typeof (T).Name, message.Subscription.MessageName, sagas.Count());
+			sagas.Each(client =>
+					{
+						IEndpoint endpoint = _bus.GetEndpoint(client.ControlUri);
+
+						endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
 					});
 		}
 
-		private void SendCacheUpdateToClient(Uri uri)
+		void SendCacheUpdateToClient(Uri uri)
 		{
-			var subscriptions = _subscriptionSagas.Where(x => x.CurrentState == SubscriptionSaga.Active)
+			IEnumerable<SubscriptionInformation> subscriptions = _subscriptionSagas.Where(
+				x => x.CurrentState == SubscriptionSaga.Active)
 				.Select(x => x.SubscriptionInfo);
 
 			var response = new SubscriptionRefresh(subscriptions);
 
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(uri);
+			IEndpoint endpoint = _bus.GetEndpoint(uri);
 
-			endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Uri));
+			endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
+		}
+
+		~SubscriptionService()
+		{
+			Dispose(false);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,46 +13,46 @@
 namespace MassTransit.Tests.Services.HealthMonitoring
 {
 	using System;
-	using System.Linq;
-	using System.Threading;
-	using Magnum.DateTimeExtensions;
+	using Magnum.TestFramework;
 	using MassTransit.Services.HealthMonitoring.Messages;
 	using MassTransit.Services.HealthMonitoring.Server;
 	using MassTransit.Services.Timeout.Messages;
 	using NUnit.Framework;
+	using TestFramework;
 
 	[TestFixture]
-	public class HealthService_Specs :
+	public class When_using_the_health_service :
 		HealthServiceTestFixture
 	{
-		private readonly Guid _id = Guid.NewGuid();
-
-		private void MakeSagaDown()
+		void MakeSagaDown()
 		{
 			MakeSagaSuspect();
-			var fm = new FutureMessage<TimeoutExpired>();
-			RemoteBus.Subscribe<TimeoutExpired>(fm.Set);
-			Thread.Sleep(500);
-			LocalBus.Publish(new TimeoutExpired {CorrelationId = _id, Tag = 2});
-			fm.IsAvailable(1.Seconds()).ShouldBeTrue();
 
-			var saga = Repository.Where(x => x.CorrelationId == _id).First();
-			saga.CurrentState.ShouldEqual(HealthSaga.Down, "MakeSagaDown failed");
+			HealthSaga saga = GetSaga();
+			LocalBus.Publish(new TimeoutExpired { CorrelationId = saga.CorrelationId, Tag = 2 });
+
+			saga.ShouldNotBeNull();
+			saga.ShouldBeInState(HealthSaga.Down);
 		}
 
 
 		public void MakeSagaSuspect()
 		{
-			LocalBus.Publish(new EndpointCameOnline(_id, LocalBus.ControlBus.Endpoint.Uri,LocalBus.Endpoint.Uri, 0));
-			var fm = new FutureMessage<TimeoutExpired>();
-			RemoteBus.Subscribe<TimeoutExpired>(fm.Set);
-			Thread.Sleep(5000);
-			LocalBus.Publish(new TimeoutExpired {CorrelationId = _id, Tag = 1});
-			fm.IsAvailable(5.Seconds()).ShouldBeTrue();
+			LocalBus.Publish(new EndpointCameOnline(Guid.NewGuid(), LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri,
+				0));
 
-			var saga = Repository.Where(x => x.CorrelationId == _id).FirstOrDefault();
+			HealthSaga saga = GetSaga();
 			saga.ShouldNotBeNull();
-			saga.CurrentState.ShouldEqual(HealthSaga.Suspect, "MakeSagaSuspect failed");
+			saga.ShouldBeInState(HealthSaga.Healthy);
+
+			LocalBus.Publish(new TimeoutExpired {CorrelationId = saga.CorrelationId, Tag = 1});
+
+			saga.ShouldBeInState(HealthSaga.Suspect);
+		}
+
+		HealthSaga GetSaga()
+		{
+			return HealthSagaRepository.ShouldContainSaga(x => x.ControlUri == LocalBus.ControlBus.Endpoint.Address.Uri);
 		}
 
 		[Test]
@@ -60,7 +60,9 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		{
 			MakeSagaSuspect();
 
-			Repository.Where(x => x.CurrentState == HealthSaga.Suspect).Count().ShouldEqual(1);
+			HealthSaga saga = GetSaga();
+			saga.ShouldNotBeNull();
+			saga.ShouldBeInState(HealthSaga.Suspect);
 		}
 
 		[Test]
@@ -68,10 +70,11 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		{
 			MakeSagaSuspect();
 
-			LocalBus.Publish(new Heartbeat(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
+			HealthSaga saga = GetSaga();
+			LocalBus.Publish(new Heartbeat(saga.CorrelationId, LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri, 0));
 
-			Thread.Sleep(500);
-			Repository.Where(x => x.CurrentState == HealthSaga.Healthy).Count().ShouldEqual(1);
+			saga.ShouldNotBeNull();
+			saga.ShouldBeInState(HealthSaga.Healthy);
 		}
 
 		[Test]
@@ -79,15 +82,11 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		{
 			MakeSagaSuspect();
 
-			var fm = new FutureMessage<TimeoutExpired>();
-			RemoteBus.Subscribe<TimeoutExpired>(fm.Set);
-			Thread.Sleep(250);
-			LocalBus.Publish(new TimeoutExpired {CorrelationId = _id, Tag = 2});
+			HealthSaga saga = GetSaga();
+			LocalBus.Publish(new TimeoutExpired {CorrelationId = saga.CorrelationId, Tag = 2});
 
-			fm.IsAvailable(100.Seconds()).ShouldBeTrue("never got message");
-			Thread.Sleep(100000);
-			var saga = Repository.Where(x => x.CorrelationId == _id).First();
-			saga.CurrentState.ShouldEqual(HealthSaga.Down);
+			saga.ShouldNotBeNull();
+			saga.ShouldBeInState(HealthSaga.Down);
 		}
 
 		[Test]
@@ -95,30 +94,41 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		{
 			MakeSagaSuspect();
 
-			LocalBus.Publish(new PingEndpointResponse(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
-			Thread.Sleep(500);
-			Repository.Where(x => x.CurrentState == HealthSaga.Healthy).Count().ShouldEqual(1);
+			HealthSaga saga = GetSaga();
+			LocalBus.Publish(new PingEndpointResponse(saga.CorrelationId, LocalBus.ControlBus.Endpoint.Address.Uri,
+				LocalBus.Endpoint.Address.Uri, 0));
+
+			saga.ShouldNotBeNull();
+			saga.ShouldBeInState(HealthSaga.Healthy);
 		}
 
 		[Test]
 		public void If_endpoint_down_a_heartbeat_should_revive()
 		{
 			MakeSagaDown();
-			Repository.Where(x => x.CurrentState == HealthSaga.Down).Count().ShouldEqual(1);
-			LocalBus.Publish(new Heartbeat(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
-			Thread.Sleep(1500);
-			Repository.Where(x => x.CurrentState == HealthSaga.Healthy).Count().ShouldEqual(1);
+
+			HealthSaga saga = GetSaga();
+			LocalBus.Publish(new Heartbeat(saga.CorrelationId, LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri, 0));
+
+			saga.ShouldNotBeNull();
+			saga.ShouldBeInState(HealthSaga.Healthy);
 		}
 
 		[Test]
-		public void The_HealthClient_should_publish_heartbeats()
+		public void Should_mark_an_endpoint_suspect_after_timeout()
 		{
-			LocalBus.Publish(new EndpointCameOnline(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
-			Thread.Sleep(500);
+			MakeSagaSuspect();
+		}
 
-			HealthSaga saga = Repository.Where(x => x.CorrelationId == _id).FirstOrDefault();
+		[Test]
+		public void Should_publish_heartbeats_to_the_service()
+		{
+			LocalBus.Publish(new EndpointCameOnline(Guid.NewGuid(), LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri,
+				0));
+
+			HealthSaga saga = GetSaga();
 			saga.ShouldNotBeNull();
-			saga.CurrentState.ShouldEqual(HealthSaga.Healthy);
+			saga.ShouldBeInState(HealthSaga.Healthy);
 		}
 	}
 }

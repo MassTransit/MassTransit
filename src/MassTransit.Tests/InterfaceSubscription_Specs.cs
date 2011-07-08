@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,26 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using System;
-	using Magnum.Actors;
-	using Magnum.DateTimeExtensions;
-	using MassTransit.Pipeline.Inspectors;
+	using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using MassTransit.Pipeline.Inspectors;
 	using NUnit.Framework;
-	using TestConsumers;
-	using TextFixtures;
+    using TestFramework;
+    using TextFixtures;
 
 	[TestFixture]
 	public class Sending_a_message_that_implements_an_interface :
 		LoopbackLocalAndRemoteTestFixture
 	{
-		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
-
-		[Test]
+	    [Test]
 		public void Should_deliver_the_message_to_an_interested_consumer()
 		{
 			var first = new Future<FirstMessageContract>();
 
-			RemoteBus.Subscribe<FirstMessageContract>(first.Complete);
+			RemoteBus.SubscribeHandler<FirstMessageContract>(first.Complete);
 
 			PipelineViewer.Trace(RemoteBus.InboundPipeline);
 
@@ -39,7 +36,7 @@ namespace MassTransit.Tests
 
 			LocalBus.Publish(message);
 
-			first.IsAvailable(1.Seconds()).ShouldBeTrue();
+			first.WaitUntilCompleted(1.Seconds()).ShouldBeTrue();
 		}
 
 		[Test]
@@ -50,17 +47,18 @@ namespace MassTransit.Tests
 
 			// These can't be on the same bus, because we only send a message to an endpoint once
 			// maybe we can do something here by changing the outbound context to keep track of tmessage/endpoint uri
-			RemoteBus.Subscribe<FirstMessageContract>(first.Complete);
-			LocalBus.Subscribe<SecondMessageContract>(second.Complete);
+			RemoteBus.SubscribeHandler<FirstMessageContract>(first.Complete);
+			LocalBus.SubscribeHandler<SecondMessageContract>(second.Complete);
 
 			PipelineViewer.Trace(RemoteBus.InboundPipeline);
+			PipelineViewer.Trace(LocalBus.InboundPipeline);
 
 			var message = new SomeMessageContract("Joe", 27);
 
 			LocalBus.Publish(message);
 
-			first.IsAvailable(1.Seconds()).ShouldBeTrue();
-			second.IsAvailable(1.Seconds()).ShouldBeTrue();
+            first.WaitUntilCompleted(1.Seconds()).ShouldBeTrue();
+            second.WaitUntilCompleted(1.Seconds()).ShouldBeTrue();
 		}
 
 

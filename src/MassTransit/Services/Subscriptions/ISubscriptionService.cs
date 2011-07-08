@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Subscriptions
 {
-	using Internal;
+	using Pipeline;
 
 	public interface ISubscriptionService :
 		IEndpointSubscriptionEvent

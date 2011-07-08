@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,155 +12,170 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-	using Configuration;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
 	using MassTransit.Serialization;
-	using MassTransit.Serialization.Custom;
 	using Messages;
 	using NUnit.Framework;
 	using TextFixtures;
 
-	[TestFixture, Explicit]
-	public class When_sending_a_message_using_the_specified_serializer<TSerializer> :
+	[TestFixture]
+	public abstract class When_sending_a_message_using_the_specified_serializer<TSerializer> :
 		LoopbackLocalAndRemoteTestFixture
-		where TSerializer : IMessageSerializer
+		where TSerializer : IMessageSerializer, new()
 	{
-		protected override void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
+		protected When_sending_a_message_using_the_specified_serializer()
 		{
-			x.SetDefaultSerializer<TSerializer>();
+			ConfigureEndpointFactory(x => x.SetDefaultSerializer<TSerializer>());
 		}
 
 		[Test]
 		public void The_destination_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
-			RemoteBus.Subscribe<PingMessage>(message =>
+			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(RemoteBus.Endpoint.Uri, CurrentMessage.Headers.DestinationAddress);
+					Assert.AreEqual(RemoteBus.Endpoint.Address.Uri, LocalBus.Context().DestinationAddress);
 
 					received.Set(message);
 				});
 
 			LocalBus.Publish(ping);
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 
 		[Test]
 		public void The_fault_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
-			RemoteBus.Subscribe<PingMessage>(message =>
+			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.FaultAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Address.Uri, LocalBus.Context().FaultAddress);
 
 					received.Set(message);
 				});
 
-			LocalBus.Publish(ping, context => context.SendFaultTo(LocalBus.Endpoint.Uri));
+			LocalBus.Publish(ping, context => context.SendFaultTo(LocalBus.Endpoint.Address.Uri));
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 
 		[Test]
 		public void The_message_type_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
-			RemoteBus.Subscribe<PingMessage>(message =>
+			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(typeof (PingMessage).ToMessageName(), CurrentMessage.Headers.MessageType);
+					Assert.AreEqual(typeof(PingMessage).ToMessageName(), LocalBus.Context().MessageType);
 
 					received.Set(message);
 				});
 
 			LocalBus.Publish(ping);
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 
 		[Test]
 		public void The_response_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
-			RemoteBus.Subscribe<PingMessage>(message =>
+			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.ResponseAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Address.Uri, LocalBus.Context().ResponseAddress);
 
 					received.Set(message);
 				});
 
-			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus.Endpoint.Uri));
+			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus.Endpoint.Address.Uri));
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 
 		[Test]
 		public void The_retry_count_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
-			var retryCount = 69;
-			RemoteBus.Subscribe<PingMessage>(message =>
+			int retryCount = 69;
+			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(retryCount, CurrentMessage.Headers.RetryCount);
+					Assert.AreEqual(retryCount, LocalBus.Context().RetryCount);
 
 					received.Set(message);
 				});
 
 			LocalBus.Publish(ping, context => context.SetRetryCount(retryCount));
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 
 		[Test]
 		public void The_source_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
-			RemoteBus.Subscribe<PingMessage>(message =>
+			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.SourceAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Address.Uri, LocalBus.Context().SourceAddress);
 
 					received.Set(message);
 				});
 
 			LocalBus.Publish(ping);
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 	}
 
 	[TestFixture]
+	[Explicit]
 	public class For_the_binary_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<BinaryMessageSerializer>
 	{
 	}
 
 	[TestFixture]
+	[Explicit]
 	public class For_the_XML_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<DotNotXmlMessageSerializer>
 	{
 	}
 
 	[TestFixture]
+	[Explicit]
 	public class For_the_custom_xml_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<XmlMessageSerializer>
 	{
-	}	
+	}
+
+	[TestFixture]
+	[Explicit]
+	public class For_the_json_message_serializer :
+		When_sending_a_message_using_the_specified_serializer<JsonMessageSerializer>
+	{
+	}
+
+	[TestFixture]
+	[Explicit]
+	public class For_the_bson_message_serializer :
+		When_sending_a_message_using_the_specified_serializer<BsonMessageSerializer>
+	{
+	}
 }

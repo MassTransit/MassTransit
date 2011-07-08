@@ -12,122 +12,58 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Services.HealthMonitoring
 {
-	using System.Collections.Generic;
 	using System.Threading;
-	using Configuration;
 	using MassTransit.Saga;
 	using MassTransit.Services.HealthMonitoring;
+	using MassTransit.Services.HealthMonitoring.Messages;
 	using MassTransit.Services.HealthMonitoring.Server;
-	using MassTransit.Services.Subscriptions;
-	using MassTransit.Services.Subscriptions.Client;
-	using MassTransit.Services.Subscriptions.Configuration;
-	using MassTransit.Services.Subscriptions.Server;
-	using MassTransit.Transports;
+	using MassTransit.Services.Timeout.Messages;
+	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using TextFixtures;
+	using TestFramework;
 
 	[TestFixture]
 	public class HealthServiceTestFixture :
-		EndpointTestFixture<LoopbackEndpoint>
+		SubscriptionServiceTestFixture<LoopbackTransportFactory>
 	{
-		private ISagaRepository<HealthSaga> _healthSagaRepository;
-		private ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;
-		public ISubscriptionRepository SubscriptionRepository { get; private set; }
-		private ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
-		public IServiceBus SubscriptionBus { get; private set; }
-		public SubscriptionService SubscriptionService { get; private set; }
+		private ISagaRepository<HealthSaga> _healthSagaHealthSagaRepository;
 		public HealthService HealthService { get; private set; }
-		public IServiceBus LocalBus { get; private set; }
-		public IServiceBus RemoteBus { get; private set; }
 
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
-			const string subscriptionServiceEndpointAddress = "loopback://localhost/mt_subscriptions";
-
-			SubscriptionBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom(subscriptionServiceEndpointAddress); });
-
-			SetupSubscriptionService();
-
-			LocalBus = ServiceBusConfigurator.New(x =>
-				{
-					x.ConfigureService<SubscriptionClientConfigurator>(y =>
-						{
-							// setup endpoint
-							y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
-						});
-					x.ReceiveFrom("loopback://localhost/mt_client");
-				});
-
-			RemoteBus = ServiceBusConfigurator.New(x =>
-				{
-					x.ConfigureService<SubscriptionClientConfigurator>(y =>
-						{
-							// setup endpoint
-							y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
-						});
-					x.ReceiveFrom("loopback://localhost/mt_server");
-				});
-
 			SetupHealthService();
-
-			Thread.Sleep(1000);
-		}
-
-		private void SetupSubscriptionService()
-		{
-			//SubscriptionRepository = new InMemorySubscriptionRepository();
-			SubscriptionRepository = MockRepository.GenerateMock<ISubscriptionRepository>();
-			SubscriptionRepository.Expect(x => x.List()).Return(new List<Subscription>());
-			ObjectBuilder.Stub(x => x.GetInstance<ISubscriptionRepository>())
-				.Return(SubscriptionRepository);
-
-			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>(ObjectBuilder);
-
-			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(ObjectBuilder);
-
-			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
-
-			SubscriptionService.Start();
-
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionClient>())
-				.Return(null)
-				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(EndpointFactory); });
 		}
 
 		private void SetupHealthService()
 		{
-			_healthSagaRepository = SetupSagaRepository<HealthSaga>(ObjectBuilder);
+			_healthSagaHealthSagaRepository = SetupSagaRepository<HealthSaga>();
 
-			HealthService = new HealthService(RemoteBus, _healthSagaRepository);
+			HealthService = new HealthService(RemoteBus, _healthSagaHealthSagaRepository);
 
 			HealthService.Start();
+
+			Thread.Sleep(500);
+
+			LocalBus.ShouldHaveRemoteSubscriptionFor<EndpointCameOnline>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<Heartbeat>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<EndpointWentOffline>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<TimeoutExpired>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingEndpointResponse>();
 		}
 
-		public ISagaRepository<HealthSaga> Repository
+		public ISagaRepository<HealthSaga> HealthSagaRepository
 		{
-			get { return _healthSagaRepository; }
+			get { return _healthSagaHealthSagaRepository; }
 		}
 
 		protected override void TeardownContext()
 		{
-			RemoteBus.Dispose();
-			RemoteBus = null;
-
-			LocalBus.Dispose();
-			LocalBus = null;
-
-			Thread.Sleep(500);
-
 			HealthService.Stop();
 			HealthService.Dispose();
 			HealthService = null;
-
-			SubscriptionService.Stop();
-			SubscriptionService.Dispose();
-			SubscriptionService = null;
 
 			base.TeardownContext();
 		}

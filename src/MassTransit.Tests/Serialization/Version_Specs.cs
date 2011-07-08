@@ -14,6 +14,8 @@ namespace MassTransit.Tests.Serialization
 {
 	using System.IO;
 	using System.Text;
+	using Context;
+	using Magnum.TestFramework;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
 
@@ -23,26 +25,32 @@ namespace MassTransit.Tests.Serialization
 		[Test]
 		public void Should_not_cause_fatal_explosions_of_the_fiery_death_kind()
 		{
-			var serializer = new XmlMessageSerializer();
+			var serializer = new VersionOneXmlMessageSerializer();
 			using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(Version4Message)))
 			{
-				object obj = serializer.Deserialize(bodyStream);
+				var receiveContext = ReceiveContext.FromBodyStream(bodyStream);
+				serializer.Deserialize(receiveContext);
 
-				Assert.IsNotNull(obj);
-				Assert.IsInstanceOf<ComplaintAdded>(obj);
+				IConsumeContext<ComplaintAdded> context;
+				receiveContext.TryGetContext<ComplaintAdded>(out context).ShouldBeTrue();
+
+				context.ShouldNotBeNull();
 			}
 		}
 
 		[Test]
 		public void Should_handle_the_uri_type()
 		{
-			var serializer = new XmlMessageSerializer();
+			var serializer = new VersionOneXmlMessageSerializer();
 			using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(AnotherVersion4Message)))
 			{
-				object obj = serializer.Deserialize(bodyStream);
+				var receiveContext = ReceiveContext.FromBodyStream(bodyStream);
+				serializer.Deserialize(receiveContext);
 
-				Assert.IsNotNull(obj);
-				Assert.IsInstanceOf<ComplaintAdded>(obj);
+				IConsumeContext<ComplaintAdded> context;
+				receiveContext.TryGetContext<ComplaintAdded>(out context).ShouldBeTrue();
+
+				context.ShouldNotBeNull();
 			}
 		}
 

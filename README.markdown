@@ -15,16 +15,32 @@ MassTransit is lean service bus implementation for building loosely coupled appl
 
 ## Getting started with Mass Transit
 ### Documentation
-Documentation is located at [http://masstransit.pbworks.com/](http://masstransit.pbworks.com/).
-### Downloads
 
- Download Binaries from [TeamCity](http://teamcity.codebetter.com/viewType.html?buildTypeId=bt8&tab=buildTypeStatusDiv).
+Documentation is located at [http://docs.masstransit-project.com/](http://docs.masstransit-project.com/).
+
+### Downloads
+ Download straight from NuGet 'MassTransit' [Search NuGet for MassTransit](http://nuget.org/List/Search?packageType=Packages&searchCategory=All+Categories&searchTerm=MassTransit&sortOrder=package-download-count&pageSize=10)
+ 
+ Download officially released builds from 
+ [Github](http://github.com/masstransit/masstransit/downloads/).
+ 
+ Download Nightly Binaries from [TeamCity](http://teamcity.codebetter.com/viewType.html?buildTypeId=bt8&tab=buildTypeStatusDiv).
+
+### Mailing List
+
+[MassTransit Discuss](http://groups.google.com/group/masstransit-discuss)
 
 ### Source
 
 1. Clone the source down to your machine. 
-  `git clone git://github.com/phatboyg/masstransit.git`
+  `git clone git://github.com/MassTransit/MassTransit.git`
 2. Run `build.bat`. NOTE: You must have git on the path (open a regular command line and type git).
+
+### Contributing 
+
+1. `git config --global core.autoclrf false`
+2. Shared ReSharper settings are under src/MassTransit.resharper.xml
+3. Make a pull request
 
  
 # REQUIREMENTS

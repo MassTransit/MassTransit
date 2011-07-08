@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,18 +12,28 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
+	using System.Collections.Generic;
+
 	/// <summary>
 	/// Routes a message to all of the connected message sinks without modification
 	/// </summary>
 	/// <typeparam name="TMessage">The type of the message to be routed</typeparam>
-	/// <typeparam name="TKey"></typeparam>
-	public class CorrelatedMessageSinkRouter<TMessage, TKey> :
-		MessageRouter<TMessage>
+	/// <typeparam name="TKey">The correlation key type</typeparam>
+	/// <typeparam name="T">The input type of the router</typeparam>
+	public class CorrelatedMessageSinkRouter<T, TMessage, TKey> :
+		MessageRouter<T>
 		where TMessage : class, CorrelatedBy<TKey>
+		where T : class
 	{
-		private readonly TKey _correlationId;
+		readonly TKey _correlationId;
 
 		public CorrelatedMessageSinkRouter(TKey correlationId)
+		{
+			_correlationId = correlationId;
+		}
+
+		public CorrelatedMessageSinkRouter(TKey correlationId, IEnumerable<IPipelineSink<T>> sinks)
+			: base(sinks)
 		{
 			_correlationId = correlationId;
 		}

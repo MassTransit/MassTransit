@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,13 +13,12 @@
 namespace MassTransit.Tests.Saga.Locator
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Linq.Expressions;
 	using Magnum;
+	using Magnum.Extensions;
+	using MassTransit.Pipeline;
 	using MassTransit.Saga;
 	using NUnit.Framework;
-	using Tests.Messages;
+	using TestFramework;
 
 	[TestFixture]
 	public class When_using_the_state_machine_with_noncorrelated_messages
@@ -31,29 +30,36 @@ namespace MassTransit.Tests.Saga.Locator
 
 			_repository = new InMemorySagaRepository<TestSaga>();
 
-			var initiatePolicy = new InitiatingSagaPolicy<TestSaga, PingMessage>(x => false);
+			var initiatePolicy = new InitiatingSagaPolicy<TestSaga, InitiateSimpleSaga>(x => x.CorrelationId, x => false);
 
 
-			var message = new PingMessage(_sagaId);
-			_repository.Send(x => x.CorrelationId == message.CorrelationId, initiatePolicy, message, saga => saga.Name = "Joe");
-			
-			message = new PingMessage(CombGuid.Generate());
-			_repository.Send(x => x.CorrelationId == message.CorrelationId, initiatePolicy, message, saga => saga.Name = "Chris");
+			var message = new InitiateSimpleSaga(_sagaId);
+
+			IConsumeContext<InitiateSimpleSaga> context = message.ToConsumeContext();
+			_repository.GetSaga(context, message.CorrelationId,
+				(i, c) => InstanceHandlerSelector.ForDataEvent(i, TestSaga.Initiate), initiatePolicy)
+				.Each(x => x(context));
+
+			message = new InitiateSimpleSaga(CombGuid.Generate());
+			context = message.ToConsumeContext();
+			_repository.GetSaga(context, message.CorrelationId,
+				(i, c) => InstanceHandlerSelector.ForDataEvent(i, TestSaga.Initiate), initiatePolicy)
+				.Each(x => x(context));
 		}
 
 		[TearDown]
 		public void Teardown()
 		{
-			_repository.Dispose();
 			_repository = null;
 		}
 
-		private Guid _sagaId;
-		private InMemorySagaRepository<TestSaga> _repository;
-        
+		Guid _sagaId;
+		InMemorySagaRepository<TestSaga> _repository;
+
 		[Test]
 		public void A_nice_interface_should_be_available_for_defining_saga_locators()
 		{
+			_repository.ShouldContainSaga(_sagaId);
 		}
 	}
 

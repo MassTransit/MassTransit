@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,18 +14,17 @@ namespace MassTransit.Serialization.Custom
 {
 	using System;
 	using System.Collections.Generic;
-	using Magnum.ObjectExtensions;
 
 	public class NamespaceTable
 	{
-		private int _counter = 1;
-		private Dictionary<string, string> _mapNamespaceToPrefix = new Dictionary<string, string>();
-		private HashSet<string> _prefixes = new HashSet<string>();
+		readonly Dictionary<string, string> _mapNamespaceToPrefix = new Dictionary<string, string>();
+		readonly HashSet<string> _prefixes = new HashSet<string>();
+		int _counter = 1;
 
 
 		public void Each(Action<string, string> action)
 		{
-			foreach (KeyValuePair<string, string> pair in _mapNamespaceToPrefix)
+			foreach (var pair in _mapNamespaceToPrefix)
 			{
 				action(pair.Key, pair.Value);
 			}
@@ -45,9 +44,9 @@ namespace MassTransit.Serialization.Custom
 			return result;
 		}
 
-		private string GeneratePrefix(string localName, string ns)
+		string GeneratePrefix(string localName, string ns)
 		{
-			string prefix = localName.IsNullOrEmpty() ? "o" : char.ToLower(localName[0]).ToString();
+			string prefix = string.IsNullOrEmpty(localName) ? "o" : char.ToLower(localName[0]).ToString();
 
 			if (_prefixes.Contains(prefix))
 				prefix += _counter++;

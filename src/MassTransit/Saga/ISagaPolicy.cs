@@ -23,32 +23,43 @@ namespace MassTransit.Saga
 	/// <typeparam name="TMessage">The message that will be handled by the saga</typeparam>
 	public interface ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
+		where TMessage : class
 	{
 		/// <summary>
-		/// Determines if the message should result in the creation of a new instance of the saga
+		/// Determines if the message is able to create a new instance of the saga
 		/// </summary>
-		/// <param name="message">The message that triggered the action</param>
-		/// <param name="saga">The saga that was created</param>
-		/// <returns>True if the saga should be created, otherwise false</returns>
-		bool CreateSagaWhenMissing(TMessage message, out TSaga saga);
+		/// <param name="context">The consumer context of the message</param>
+		/// <returns>True if a new instance of the saga can be created, otherwise false</returns>
+		bool CanCreateInstance(IConsumeContext<TMessage> context);
 
 		/// <summary>
-		/// Called when an instance of the saga associated with the message already exists
+		/// Creates a new instance of the saga using the data in the message context
 		/// </summary>
-		/// <param name="message">The message to correlate to the saga</param>
-		void ForExistingSaga(TMessage message);
+		/// <param name="context">The consumer context of the message</param>
+		/// <param name="sagaId"></param>
+		/// <returns>A newly created saga instance</returns>
+		TSaga CreateInstance(IConsumeContext<TMessage> context, Guid sagaId);
 
 		/// <summary>
-		/// Called when there are no matching instances of the saga available
+		/// Returns the saga id that should be used for a newly created saga instance, based on the policy
 		/// </summary>
-		/// <param name="message">The message to correlate to the saga</param>
-		void ForMissingSaga(TMessage message);
-
-		/// <summary>
-		/// Checks to see if the saga should be removed based on the current state
-		/// </summary>
-		/// <param name="saga"></param>
+		/// <param name="context"></param>
 		/// <returns></returns>
-		bool ShouldSagaBeRemoved(TSaga saga);
+		Guid GetNewSagaId(IConsumeContext<TMessage> context);
+
+		/// <summary>
+		/// Determines if the message can be delivered to an existing saga instance
+		/// </summary>
+		/// <param name="context">The consumer context of the message</param>
+		/// <returns>True if the message can be delivered to the saga instance, otherwise false</returns>
+		bool CanUseExistingInstance(IConsumeContext<TMessage> context);
+
+
+		/// <summary>
+		/// Determines if the saga instance can be removed, using the saga configuration information
+		/// </summary>
+		/// <param name="instance">The saga instance to check</param>
+		/// <returns>True if the saga instance can be removed, otherwise false</returns>
+		bool CanRemoveInstance(TSaga instance);
 	}
 }

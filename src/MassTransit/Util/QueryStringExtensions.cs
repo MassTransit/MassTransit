@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,13 +14,12 @@ namespace MassTransit.Util
 {
 	using System;
 	using System.Linq;
-	using Magnum.ObjectExtensions;
 
 	public static class QueryStringExtensions
 	{
 		public static string GetValueFromQueryString(this string queryString, string key)
 		{
-			if (queryString.IsNullOrEmpty() || queryString.Length <= 1)
+			if (String.IsNullOrEmpty(queryString) || queryString.Length <= 1)
 				return null;
 
 			return queryString.Substring(1)
@@ -31,7 +30,7 @@ namespace MassTransit.Util
 
 						return new {Key = values[0], Value = values[1]};
 					})
-				.Where(x => string.Compare(x.Key, key, true) == 0)
+				.Where(x => String.Compare(x.Key, key, true) == 0)
 				.Select(x => x.Value)
 				.DefaultIfEmpty(null)
 				.SingleOrDefault();
@@ -40,13 +39,13 @@ namespace MassTransit.Util
 		public static T GetValueFromQueryString<T>(this string queryString, string key, T defaultValue)
 			where T : struct
 		{
-			if (queryString.IsNullOrEmpty())
+			if (String.IsNullOrEmpty(queryString))
 				return defaultValue;
 
 			try
 			{
 				string value = GetValueFromQueryString(queryString, key);
-				if (value.IsNullOrEmpty())
+				if (String.IsNullOrEmpty(value))
 					return defaultValue;
 
 				return (T) Convert.ChangeType(value, typeof (T));

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,16 +17,19 @@ namespace MassTransit.Services.Subscriptions.Server
 	using Messages;
 	using Saga;
 	using Subscriptions.Messages;
+	using Util;
 
 	public class SubscriptionClientSaga :
 		SagaStateMachine<SubscriptionClientSaga>,
 		ISaga
 	{
+		Guid _correlationId;
+
 		static SubscriptionClientSaga()
 		{
 			Define(() =>
 				{
-				    Correlate(ClientRemoved)
+					Correlate(ClientRemoved)
 						.By((saga, message) => saga.CorrelationId == message.CorrelationId && saga.CurrentState == Active);
 
 					Correlate(DuplicateClientAdded)
@@ -46,20 +49,24 @@ namespace MassTransit.Services.Subscriptions.Server
 							.TransitionTo(Active));
 
 					During(Active,
-					       When(ClientRemoved)
-					       	.Then((saga, message) => saga.NotifySubscriptionClientRemoved())
-					       	.Complete(),
-					       When(DuplicateClientAdded)
-					       	.Then((saga, message) => saga.NotifyDuplicateSubscriptionClientRemoved())
-					       	.Complete());
+						When(ClientRemoved)
+							.Then((saga, message) => saga.NotifySubscriptionClientRemoved())
+							.Complete(),
+						When(DuplicateClientAdded)
+							.Then((saga, message) => saga.NotifyDuplicateSubscriptionClientRemoved())
+							.Complete());
+
+					RemoveWhen(x => x.CurrentState == Completed);
 				});
 		}
 
+		[UsedImplicitly]
 		public SubscriptionClientSaga(Guid correlationId)
 		{
-			CorrelationId = correlationId;
+			_correlationId = correlationId;
 		}
 
+		[UsedImplicitly]
 		protected SubscriptionClientSaga()
 		{
 		}
@@ -75,10 +82,15 @@ namespace MassTransit.Services.Subscriptions.Server
 		public virtual Uri ControlUri { get; set; }
 		public virtual Uri DataUri { get; set; }
 
-		public virtual Guid CorrelationId { get; set; }
+		public virtual Guid CorrelationId
+		{
+			get { return _correlationId; }
+			set { _correlationId = value; }
+		}
+
 		public virtual IServiceBus Bus { get; set; }
 
-		private void NotifySubscriptionClientAdded()
+		void NotifySubscriptionClientAdded()
 		{
 			var message = new SubscriptionClientAdded
 				{
@@ -90,7 +102,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			Bus.Publish(message);
 		}
 
-		private void NotifySubscriptionClientRemoved()
+		void NotifySubscriptionClientRemoved()
 		{
 			var message = new SubscriptionClientRemoved
 				{
@@ -102,7 +114,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			Bus.Publish(message);
 		}
 
-		private void NotifyDuplicateSubscriptionClientRemoved()
+		void NotifyDuplicateSubscriptionClientRemoved()
 		{
 			var message = new DuplicateSubscriptionClientRemoved
 				{

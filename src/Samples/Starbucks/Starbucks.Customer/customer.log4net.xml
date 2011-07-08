@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<log4net>
+  <appender name="RollingFile"
+			      type="log4net.Appender.FileAppender">
+    <file value="..\logs\sample.starbucks.customer.log" />
+    <appendToFile value="false" />
+
+    <layout type="log4net.Layout.PatternLayout">
+      <conversionPattern value="%-5p %d{hh:mm:ss} %message%newline" />
+    </layout>
+  </appender>
+
+  <!-- Set root logger level to DEBUG and its only appender to Console -->
+  <root>
+    <level value="INFO" />
+    <appender-ref ref="RollingFile" />
+  </root>
+
+  <!-- Standard MassTransit Logging Settings -->
+  <logger name="MassTransit">
+    <level value="INFO" />
+  </logger>
+</log4net>

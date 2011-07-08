@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,102 +12,55 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using Pipeline;
-    using Saga;
+	using System;
+	using Pipeline;
 
 	/// <summary>
-	/// The action to call to unsubscribe a previously subscribed consumer
+	///   The action to call to unsubscribe a previously subscribed consumer
 	/// </summary>
 	/// <returns></returns>
 	public delegate bool UnsubscribeAction();
 
 	/// <summary>
-	/// The action to call to unregister a previously registered component
+	///   The action to call to unregister a previously registered component
 	/// </summary>
 	/// <returns></returns>
 	public delegate bool UnregisterAction();
 
-    /// <summary>
-    /// The base service bus interface
-    /// </summary>
-    public interface IServiceBus :
-        IDisposable
-    {
-        /// <summary>
-        /// The endpoint from which messages are received
-        /// </summary>
-        IEndpoint Endpoint { get; }
+	/// <summary>
+	///   The base service bus interface
+	/// </summary>
+	public interface IServiceBus :
+		IDisposable
+	{
+		/// <summary>
+		///   The endpoint from which messages are received
+		/// </summary>
+		IEndpoint Endpoint { get; }
 
-        /// <summary>
-        /// The poison endpoint associated with this instance where messages that cannot be processed are sent
-        /// </summary>
-        IEndpoint PoisonEndpoint { get; }
+		IInboundMessagePipeline InboundPipeline { get; }
 
-        /// <summary>
-        /// Adds a message handler to the service bus for handling a specific type of message
-        /// </summary>
-        /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
-        /// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		UnsubscribeAction Subscribe<T>(Action<T> callback) where T : class;
+		IOutboundMessagePipeline OutboundPipeline { get; }
 
-        /// <summary>
-        /// Adds a message handler to the service bus for handling a specific type of message
-        /// </summary>
-        /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
-        /// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        /// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		UnsubscribeAction Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class;
+		IServiceBus ControlBus { get; }
 
-        /// <summary>
-        /// Connects any consumers for the component to the message dispatcher
-        /// </summary>
-        /// <typeparam name="T">The consumer type</typeparam>
-        /// <param name="consumer">The component</param>
-		UnsubscribeAction Subscribe<T>(T consumer) where T : class;
-
-    	/// <summary>
-        /// Adds a component to the dispatcher that will be created on demand to handle messages
-        /// </summary>
-        /// <typeparam name="TConsumer">The type of the component to add</typeparam>
-		UnsubscribeAction Subscribe<TConsumer>() where TConsumer : class;
-
-        /// <summary>
-        /// Adds a component to the dispatcher that will be created on demand to handle messages
-        /// </summary>
-        /// <param name="consumerType">The type of component to add</param>
-		UnsubscribeAction Subscribe(Type consumerType);
-
+		IEndpointCache EndpointCache { get; }
 
 		/// <summary>
-		/// Subscribe to a message that has a consumer that is retrieved from the specified expression
+		///   Publishes a message to all subscribed consumers for the message type
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="getConsumerAction"></param>
-		/// <returns></returns>
-    	UnsubscribeAction SubscribeConsumer<T>(Func<T,Action<T>> getConsumerAction) where T : class;
+		/// <typeparam name = "T">The type of the message</typeparam>
+		/// <param name = "message">The messages to be published</param>
+		/// <param name = "contextCallback"></param>
+		void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
+			where T : class;
 
+		IEndpoint GetEndpoint(Uri address);
 
-    	/// <summary>
-        /// Publishes a message to all subscribed consumers for the message type
-        /// </summary>
-        /// <typeparam name="T">The type of the message</typeparam>
-        /// <param name="message">The messages to be published</param>
-        void Publish<T>(T message) where T : class;
-
-    	/// <summary>
-		/// Returns the service for the requested interface if it was registered with the service bus
+		/// <summary>
+		///   Not sure this is going to make it, but trying a new approach.
 		/// </summary>
-		/// <typeparam name="TService"></typeparam>
-		/// <returns></returns>
-    	TService GetService<TService>();
-
-		IMessagePipeline OutboundPipeline { get; }
-
-		IMessagePipeline InboundPipeline { get; }
-
-    	IServiceBus ControlBus { get; }
-    }
-
-	public delegate Action<T> GetConsumerAction<T>(T message);
+		/// <param name = "configure"></param>
+		UnsubscribeAction Configure(Func<IInboundPipelineConfigurator, UnsubscribeAction> configure);
+	}
 }

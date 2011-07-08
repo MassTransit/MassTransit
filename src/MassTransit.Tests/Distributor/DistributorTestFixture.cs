@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,32 +13,33 @@
 namespace MassTransit.Tests.Distributor
 {
 	using System;
-	using Configuration;
+	using BusConfigurators;
 	using Load.Messages;
 	using Magnum;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
 	using MassTransit.Distributor;
+	using MassTransit.Transports;
 	using TextFixtures;
 
-	public class DistributorTestFixture<TEndpoint> :
-		SubscriptionServiceTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+	public class DistributorTestFixture<TTransportFactory> :
+		SubscriptionServiceTestFixture<TTransportFactory>
+		where TTransportFactory : ITransportFactory, new()
 	{
-		protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
+		protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
-			configurator.UseDistributorFor<FirstCommand>(EndpointFactory);
+			configurator.UseDistributorFor<FirstCommand>();
 		}
 
 		protected void AddFirstCommandInstance(string instanceName, string queueName)
 		{
-			AddInstance(instanceName, queueName, builder => { }, x =>
+			AddInstance(instanceName, queueName, x =>
 				{
 					// setup our worker on the service instance
 					x.ImplementDistributorWorker<FirstCommand>(FirstCommandConsumer);
 				});
 		}
 
-		private static Action<FirstCommand> FirstCommandConsumer(FirstCommand message)
+		Action<FirstCommand> FirstCommandConsumer(FirstCommand message)
 		{
 			return command =>
 				{
@@ -46,7 +47,7 @@ namespace MassTransit.Tests.Distributor
 
 					var response = new FirstResponse(command.CorrelationId);
 
-					CurrentMessage.Respond(response);
+					LocalBus.Context().Respond(response);
 				};
 		}
 	}

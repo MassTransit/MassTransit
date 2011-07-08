@@ -1,4 +1,5 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -11,43 +12,77 @@
     <AssemblyName>MassTransit</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
-    <OldToolsVersion>2.0</OldToolsVersion>
+    <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <BuildConfigKey Condition=" '$(BuildConfigKey)' == '' ">NET40</BuildConfigKey>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;$(BuildConfigKey)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>3009,3001,3008</NoWarn>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;$(BuildConfigKey)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\bin\MassTransit.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\MassTransit.XML</DocumentationFile>
     <NoWarn>1587,1591,3008,3001</NoWarn>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\log4net.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Magnum, Version=0.1.0.275, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Magnum.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\lib\Newtonsoft.Json\net35\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\lib\Newtonsoft.Json\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Stact" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\lib\Stact\net-3.5\Stact.dll</HintPath>
+    </Reference>
+    <Reference Include="Stact" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\lib\Stact\net-4.0\Stact.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -55,49 +90,361 @@
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="AllowMessageTypeAttribute.cs" />
-    <Compile Include="Batch\BatchedBy.cs" />
-    <Compile Include="Batch\BatchTimeout.cs" />
+    <Compile Include="Bus.cs" />
+    <Compile Include="Configuration\Advanced\EnvironmentExtensions.cs" />
+    <Compile Include="Configuration\Builders\BusBuilder.cs" />
+    <Compile Include="Configuration\Builders\ControlBusBuilder.cs" />
+    <Compile Include="Configuration\Builders\ControlBusBuilderImpl.cs" />
+    <Compile Include="Configuration\Builders\EndpointBuilder.cs" />
+    <Compile Include="Configuration\Builders\EndpointBuilderImpl.cs" />
+    <Compile Include="Configuration\Builders\EndpointFactoryBuilder.cs" />
+    <Compile Include="Configuration\Builders\EndpointFactoryBuilderImpl.cs" />
+    <Compile Include="Configuration\Builders\ServiceBusBuilder.cs" />
+    <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\BusConfigurators\DiagnosticsConfigurationExtensions.cs" />
+    <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
+    <Compile Include="Configuration\BusServiceLayer.cs" />
+    <Compile Include="Configuration\Configuration\BusSettings.cs" />
+    <Compile Include="Configuration\Configuration\DelegateConsumerFactory.cs" />
+    <Compile Include="Configuration\Configuration\DelegateMessageInterceptor.cs" />
+    <Compile Include="Configuration\Configuration\IServiceBusEnvironment.cs" />
+    <Compile Include="Configuration\Configuration\ObjectConsumerFactory.cs" />
+    <Compile Include="Configuration\Configurators\ConfigurationResult.cs" />
+    <Compile Include="Configuration\Configurators\ConfigurationResultImpl.cs" />
+    <Compile Include="Configuration\Configurators\ValidationResultExtensions.cs" />
+    <Compile Include="Configuration\Configurators\ValidationResult.cs" />
+    <Compile Include="Configuration\Configurators\ValidationResultDisposition.cs" />
+    <Compile Include="Configuration\Configurators\ValidationResultImpl.cs" />
+    <Compile Include="Configuration\ConsumerSubscriptionExtensions.cs" />
+    <Compile Include="Configuration\EndpointConfigurationExtensions.cs" />
+    <Compile Include="Configuration\EnvironmentConfigurators\DelegateEnvironmentConfigurator.cs" />
+    <Compile Include="Configuration\EnvironmentConfigurators\EnvironmentsConfigurator.cs" />
+    <Compile Include="Configuration\EnvironmentConfigurators\EnvironmentsConfiguratorImpl.cs" />
+    <Compile Include="Configuration\HandlerSubscriptionExtensions.cs" />
+    <Compile Include="Configuration\InstanceSubscriptionExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionBuilders\ConsumerSubscriptionBuilder.cs" />
+    <Compile Include="Configuration\SubscriptionBuilders\InstanceSubscriptionBuilder.cs" />
+    <Compile Include="Configuration\SubscriptionBuilders\SubscriptionBuilder.cs" />
+    <Compile Include="Configuration\SubscriptionBuilders\SubscriptionBuilderConfigurator.cs" />
+    <Compile Include="Configuration\SubscriptionBuilders\HandlerSubscriptionBuilder.cs" />
+    <Compile Include="Configuration\SubscriptionBuilders\SubscriptionBusServiceBuilder.cs" />
+    <Compile Include="Configuration\SubscriptionBuilders\SubscriptionBusServiceBuilderConfigurator.cs" />
+    <Compile Include="Configuration\SubscriptionBuilders\SubscriptionBusServiceBuilderConfiguratorImpl.cs" />
+    <Compile Include="Configuration\SubscriptionBuilders\SubscriptionBusServiceBuilderImpl.cs" />
+    <Compile Include="Configuration\EndpointCacheFactory.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettings.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettingsConfigurator.cs" />
+    <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettings.cs" />
+    <Compile Include="Configuration\BusConfigurators\PostCreateBusBuilderConfiguratorImpl.cs" />
+    <Compile Include="Configuration\Configurators\Configurator.cs" />
+    <Compile Include="Configuration\BusConfigurators\ControlBusConfigurator.cs" />
+    <Compile Include="Configuration\BusConfigurators\ControlBusConfiguratorImpl.cs" />
+    <Compile Include="Configuration\BusConfigurators\BusBuilderConfigurator.cs" />
+    <Compile Include="Configuration\BusServiceConfigurators\CustomBusServiceConfigurator.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\DefaultSerializerEndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\DefaultTransactionTimeoutEndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EndpointConfiguratorImpl.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryBuilderConfigurator.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryConfiguratorImpl.cs" />
+    <Compile Include="Configuration\BusConfigurators\ServiceBusConfigurator.cs" />
+    <Compile Include="Configuration\BusConfigurators\ServiceBusConfiguratorImpl.cs" />
+    <Compile Include="Configuration\BusConfigurators\ServiceBusSettings.cs" />
+    <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettingsConfigurator.cs" />
+    <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettingsConfiguratorImpl.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettingsConfiguratorImpl.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\IEndpointFactoryDefaultSettings.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\TransportFactoryEndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\ControlBusConfigurationExtensions.cs" />
+    <Compile Include="Configuration\EndpointConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\SerializerConfigurationExtensions.cs" />
+    <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\ServiceBusFactory.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnectorCache.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\InstanceConnectorCache.cs" />
+    <Compile Include="Configuration\ThreadConfigurationExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\ConsumerSubscriptionConfigurator.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\ConsumerSubscriptionConfiguratorImpl.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\HandlerSubscriptionConfigurator.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\HandlerSubscriptionConfiguratorImpl.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\InstanceSubscriptionConfigurator.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\InstanceSubscriptionConfiguratorImpl.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionBusServiceConfiguratorImpl.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionBusServiceConfigurator.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfigurator.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfiguratorImpl.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\UntypedConsumerSubscriptionConfigurator.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ConsumerSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\CorrelatedInstanceSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\HandlerSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\InstanceConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\InstanceSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\SelectedConsumerSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\SelectedInstanceSubscriptionConnector.cs" />
+    <Compile Include="Configuration\TransactionConfigurationExtensions.cs" />
+    <Compile Include="Configuration\TransportConfigurationExtensions.cs" />
+    <Compile Include="Configuration\TransportFactoryConfigurationExtensions.cs" />
+    <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
+    <Compile Include="Configuration\Xml\SettingsOptions.cs" />
+    <Compile Include="Context\ContextStorageProvider.cs" />
+    <Compile Include="Context\ContextScopeExtensions.cs" />
+    <Compile Include="Context\ContextScope.cs" />
+    <Compile Include="Context\IPublished.cs" />
+    <Compile Include="Context\IReceived.cs" />
+    <Compile Include="Context\ISent.cs" />
+    <Compile Include="Context\Published.cs" />
+    <Compile Include="Context\ReceiveContext.cs" />
+    <Compile Include="Context\MessageContext.cs" />
+    <Compile Include="Context\ContextException.cs" />
+    <Compile Include="Context\ContextExtensions.cs" />
+    <Compile Include="Context\IBusPublishContext.cs" />
+    <Compile Include="Context\IConsumeContext.cs" />
+    <Compile Include="Context\IMessageContext.cs" />
+    <Compile Include="Context\InvalidConsumeContext.cs" />
+    <Compile Include="Context\InvalidSendContext.cs" />
+    <Compile Include="Context\IPublishContext.cs" />
+    <Compile Include="Context\IReceiveContext.cs" />
+    <Compile Include="Context\ISendContext.cs" />
+    <Compile Include="Context\MessageContextExtensions.cs" />
+    <Compile Include="Context\PublishContext.cs" />
+    <Compile Include="Context\MoveMessageSendContext.cs" />
+    <Compile Include="Context\Received.cs" />
+    <Compile Include="Context\SendContext.cs" />
+    <Compile Include="Context\ContextStorage.cs" />
+    <Compile Include="Context\Sent.cs" />
+    <Compile Include="Context\ServiceBusReceiveContext.cs" />
+    <Compile Include="Context\ThreadStaticContextStorageProvider.cs" />
+    <Compile Include="Context\TransportMessageHeaders.cs" />
+    <Compile Include="Context\HttpContextContextStorageProvider.cs" />
+    <Compile Include="Diagnostics\GetMessageTraceList.cs" />
+    <Compile Include="Diagnostics\MessageTraceBusService.cs" />
+    <Compile Include="Diagnostics\MessageTraceClient.cs" />
+    <Compile Include="Diagnostics\MessageTraceClientExtensions.cs" />
+    <Compile Include="Diagnostics\MessageTraceDetail.cs" />
+    <Compile Include="Diagnostics\ReceivedMessageTraceList.cs" />
+    <Compile Include="Diagnostics\MessageTraceDetailImpl.cs" />
+    <Compile Include="Diagnostics\ReceivedMessageTraceListImpl.cs" />
+    <Compile Include="Diagnostics\ReceivedMessageTraceDetail.cs" />
+    <Compile Include="Diagnostics\ReceivedMessageTraceDetailImpl.cs" />
+    <Compile Include="Diagnostics\ReceiverTraceDetail.cs" />
+    <Compile Include="Diagnostics\ReceiverTraceDetailImpl.cs" />
+    <Compile Include="Diagnostics\GetMessageTraceListImpl.cs" />
+    <Compile Include="Diagnostics\SentMessageTraceDetail.cs" />
+    <Compile Include="Diagnostics\SentMessageTraceDetailImpl.cs" />
+    <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
+    <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
+    <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
+    <Compile Include="Exceptions\SendException.cs" />
+    <Compile Include="IOutboundMessageInterceptor.cs" />
+    <Compile Include="Pipeline\HandlerSelector.cs" />
+    <Compile Include="Pipeline\InstanceHandlerSelector.cs" />
+    <Compile Include="Pipeline\MultipleHandlerSelector.cs" />
+    <Compile Include="Pipeline\Sinks\OutboundMessageInterceptor.cs" />
+    <Compile Include="PublishExtensions.cs" />
+    <Compile Include="Saga\CorrelatedSagaLocator.cs" />
+    <Compile Include="Saga\ISagaFilter.cs" />
+    <Compile Include="Saga\ISagaLocator.cs" />
+    <Compile Include="Saga\Pipeline\CorrelationExpressionToSagaIdVisitor.cs" />
+    <Compile Include="Saga\PropertySagaLocator.cs" />
+    <Compile Include="Saga\SagaFilter.cs" />
+    <Compile Include="Saga\SagaFilterExtensions.cs" />
+    <Compile Include="Saga\SagaRepositoryQuery.cs" />
+    <Compile Include="SendExtensions.cs" />
+    <Compile Include="Exceptions\MassTransitException.cs" />
+    <Compile Include="Exceptions\NotImplementedByDesignException.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
-    <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
-    <Compile Include="Parallel\DistributedTaskController.cs" />
-    <Compile Include="Parallel\IDistributedTask.cs" />
-    <Compile Include="Parallel\ISubTaskWorker.cs" />
-    <Compile Include="Parallel\Messages\EnlistSubTaskWorkers.cs" />
-    <Compile Include="Parallel\Messages\ExecuteSubTask.cs" />
-    <Compile Include="Parallel\Messages\SubTaskComplete.cs" />
-    <Compile Include="Parallel\Messages\SubTaskWorkerAvailable.cs" />
-    <Compile Include="Parallel\SubTaskWorker.cs" />
+    <Compile Include="IBusService.cs" />
+    <Compile Include="IConsumer.cs" />
+    <Compile Include="IConsumerFactory.cs" />
+    <Compile Include="MessageUrn.cs" />
+    <Compile Include="IInboundMessageInterceptor.cs" />
+    <Compile Include="IServiceContainer.cs" />
+    <Compile Include="Configuration\Builders\ServiceBusBuilderImpl.cs" />
+    <Compile Include="NullServiceBus.cs" />
+    <Compile Include="Pipeline\Configuration\InboundMessageRouterConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorExtensions.cs" />
+    <Compile Include="Pipeline\Configuration\OutboundCorrelatedMessageRouterConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\OutboundCorrelatedMessageRouterConfiguratorScope.cs" />
+    <Compile Include="Pipeline\Configuration\OutboundMessageInterceptorConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\OutboundMessageInterceptorConfiguratorScope.cs" />
+    <Compile Include="Pipeline\Configuration\OutboundMessageRouterConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\OutboundMessageRouterConfiguratorScope.cs" />
+    <Compile Include="Pipeline\Configuration\OutboundPipelineConfigurator.cs" />
+    <Compile Include="Pipeline\IEndpointSubscriptionEvent.cs" />
+    <Compile Include="Pipeline\IInboundMessagePipeline.cs" />
+    <Compile Include="Pipeline\InboundOutboundSubscriptionBinder.cs" />
+    <Compile Include="Pipeline\Inspectors\PipelineViewerExtensions.cs" />
+    <Compile Include="Pipeline\IOutboundMessagePipeline.cs" />
+    <Compile Include="Pipeline\IOutboundPipelineConfigurator.cs" />
+    <Compile Include="Pipeline\ISubscriptionEvent.cs" />
+    <Compile Include="Pipeline\IOutboundPipelineSink.cs" />
+    <Compile Include="Pipeline\OutboundMessagePipeline.cs" />
+    <Compile Include="Pipeline\Sinks\MessageRouter.cs" />
+    <Compile Include="Pipeline\Sinks\OutboundConvertMessageSink.cs" />
+    <Compile Include="RequestResponse\ConditionalResponseAction.cs" />
+    <Compile Include="RequestResponse\ConditionalResponseActionBuilder.cs" />
+    <Compile Include="RequestResponse\CorrelatedResponseAction.cs" />
+    <Compile Include="RequestResponse\CorrelatedResponseActionBuilder.cs" />
+    <Compile Include="RequestResponse\IResponseAction.cs" />
+    <Compile Include="RequestResponse\RequestResponseScope.cs" />
+    <Compile Include="RequestResponse\ResponseAction.cs" />
+    <Compile Include="RequestResponse\ResponseActionBuilder.cs" />
+    <Compile Include="Saga\Configuration\SagaSubscriptionConfiguratorExtensions.cs" />
+    <Compile Include="Saga\SubscriptionBuilders\SagaSubscriptionBuilder.cs" />
+    <Compile Include="Saga\SubscriptionConfigurators\SagaSubscriptionConfigurator.cs" />
+    <Compile Include="Saga\SubscriptionConfigurators\SagaSubscriptionConfiguratorImpl.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\CorrelatedSagaSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\CorrelatedSagaWorkerSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\InitiatedBySagaWorkerSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\InitiatedBySagaSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\ObservesSagaSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\ObservesSagaWorkerSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\OrchestratesSagaSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\OrchestratesSagaWorkerSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\PropertySagaSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\PropertySagaWorkerSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\SagaConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\SagaWorkerConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\SagaWorkerSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\SagaEventConnectorFactory.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\SagaSubscriptionConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\SagaWorkerEventConnectorFactory.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\StateMachineSagaConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\StateMachineSagaWorkerConnector.cs" />
+    <Compile Include="Serialization\BsonMessageSerializer.cs" />
+    <Compile Include="Serialization\EncryptedMessageEnvelope.cs" />
+    <Compile Include="Serialization\Envelope.cs" />
+    <Compile Include="Serialization\EnvelopeExtensions.cs" />
+    <Compile Include="Serialization\ExtensionsForBinaryMessageSerializer.cs" />
+    <Compile Include="Serialization\IMessageTypeConverter.cs" />
+    <Compile Include="Serialization\InterfaceProxyConverter.cs" />
+    <Compile Include="Serialization\JsonContractResolver.cs" />
+    <Compile Include="Serialization\JsonMessageSerializer.cs" />
+    <Compile Include="Serialization\JsonMessageTypeConverter.cs" />
+    <Compile Include="Serialization\ListJsonConverter.cs" />
+    <Compile Include="Serialization\StaticMessageTypeConverter.cs" />
+    <Compile Include="Serialization\VersionOneXmlMessageSerializer.cs" />
+    <Compile Include="ServiceCatalog.cs" />
+    <Compile Include="ServiceContainer.cs" />
+    <Compile Include="Services\HealthMonitoring\Configuration\HealthClientConfiguratorExtensions.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthInformation.cs" />
-    <Compile Include="Internal\IdempotentHashtable.cs" />
-    <Compile Include="Internal\IdempotentList.cs" />
     <Compile Include="Saga\ISagaRepository.cs" />
-    <Compile Include="Internal\NullEndpoint.cs" />
-    <Compile Include="Internal\PoisonEndpointDecorator.cs" />
     <Compile Include="Saga\ISaga.cs" />
     <Compile Include="Saga\Orchestrates.cs" />
     <Compile Include="Saga\InitiatedBy.cs" />
-    <Compile Include="Services\MessageDeferral\DeferMessageConsumer.cs" />
-    <Compile Include="Services\MessageDeferral\DeferredMessage.cs" />
-    <Compile Include="Services\MessageDeferral\MessageDeferralService.cs" />
-    <Compile Include="Services\MessageDeferral\IDeferredMessageRepository.cs" />
-    <Compile Include="Services\MessageDeferral\InMemoryDeferredMessageRepository.cs" />
-    <Compile Include="Services\MessageDeferral\Messages\DeferMessage.cs" />
-    <Compile Include="Services\MessageDeferral\TimeoutExpiredConsumer.cs" />
-    <Compile Include="MessageGroup.cs" />
-    <Compile Include="ReliableAttribute.cs" />
+    <Compile Include="Services\Routing\Configuration\RouteTo.cs" />
+    <Compile Include="Services\Subscriptions\Client\EndpointUriList.cs" />
+    <Compile Include="Services\Subscriptions\Client\SubscriptionCoordinator.cs" />
+    <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfiguratorExtensions.cs" />
     <Compile Include="Services\Timeout\Messages\CancelTimeout.cs" />
     <Compile Include="Services\Timeout\Messages\ScheduleTimeout.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
-    <Compile Include="Transports\LoopbackEndpoint.cs" />
-    <Compile Include="Internal\SpecialLoggers.cs" />
+    <Compile Include="Subscriptions\DisposableUnsubscribeAction.cs" />
+    <Compile Include="Subscriptions\ISubscriptionReference.cs" />
+    <Compile Include="Subscriptions\IUnsubscribeAction.cs" />
+    <Compile Include="Subscriptions\PermanentSubscriptionReference.cs" />
+    <Compile Include="Subscriptions\SubscriptionBusService.cs" />
+    <Compile Include="Subscriptions\TransientSubscriptionReference.cs" />
+    <Compile Include="Subscriptions\UnsubscribeExtensions.cs" />
+    <Compile Include="Testing\ActionConfigurators\PublishTestActionConfigurator.cs" />
+    <Compile Include="Testing\ActionConfigurators\SendTestActionConfigurator.cs" />
+    <Compile Include="Testing\ActionConfigurators\TestActionConfigurator.cs" />
+    <Compile Include="Testing\BuilderConfigurators\ConsumerTestBuilderConfigurator.cs" />
+    <Compile Include="Testing\BuilderConfigurators\HandlerTestBuilderConfigurator.cs" />
+    <Compile Include="Testing\BuilderConfigurators\TestBuilderConfigurator.cs" />
+    <Compile Include="Testing\Builders\ConsumerTestBuilder.cs" />
+    <Compile Include="Testing\Builders\ConsumerTestBuilderImpl.cs" />
+    <Compile Include="Testing\Builders\HandlerTestBuilder.cs" />
+    <Compile Include="Testing\Builders\HandlerTestBuilderImpl.cs" />
+    <Compile Include="Testing\Builders\TestBuilder.cs" />
+    <Compile Include="Testing\Builders\TestInstanceBuilder.cs" />
+    <Compile Include="Testing\Configurators\TestConfigurator.cs" />
+    <Compile Include="Testing\Configurators\TestConfiguratorResult.cs" />
+    <Compile Include="Testing\Configurators\TestConfiguratorResultDisposition.cs" />
+    <Compile Include="Testing\Configurators\TestConfiguratorResultImpl.cs" />
+    <Compile Include="Testing\Configurators\ScenarioConfigurator.cs" />
+    <Compile Include="Testing\Configurators\TestInstanceConfigurator.cs" />
+    <Compile Include="Testing\ConsumerTest.cs" />
+    <Compile Include="Testing\ConsumerTestConfiguratorExtensions.cs" />
+    <Compile Include="Testing\ScenarioBuilders\BusScenarioBuilder.cs" />
+    <Compile Include="Testing\ScenarioBuilders\BusScenarioBuilderImpl.cs" />
+    <Compile Include="Testing\ScenarioBuilders\EndpointScenarioBuilder.cs" />
+    <Compile Include="Testing\ScenarioBuilders\EndpointScenarioBuilderImpl.cs" />
+    <Compile Include="Testing\ScenarioBuilders\LocalRemoteScenarioBuilder.cs" />
+    <Compile Include="Testing\ScenarioBuilders\LoopbackBusScenarioBuilder.cs" />
+    <Compile Include="Testing\ScenarioBuilders\LoopbackLocalRemoteBusScenarioBuilder.cs" />
+    <Compile Include="Testing\ScenarioBuilders\ScenarioBuilder.cs" />
+    <Compile Include="Testing\Factories\ConsumerTestFactory.cs" />
+    <Compile Include="Testing\Factories\ConsumerTestFactoryImpl.cs" />
+    <Compile Include="Testing\Instances\BusTestInstance.cs" />
+    <Compile Include="Testing\Instances\ConsumerTestInstance.cs" />
+    <Compile Include="Testing\ReceivedMessage.cs" />
+    <Compile Include="Testing\ScenarioConfigurators\BusTestScenarioBuilderConfigurator.cs" />
+    <Compile Include="Testing\ScenarioConfigurators\BusTestScenarioBuilderConfiguratorImpl.cs" />
+    <Compile Include="Testing\ScenarioConfigurators\EndpointTestScenarioBuilderConfigurator.cs" />
+    <Compile Include="Testing\ScenarioConfigurators\EndpointTestScenarioBuilderConfiguratorImpl.cs" />
+    <Compile Include="Testing\ScenarioConfigurators\EndpointScenarioConfigurator.cs" />
+    <Compile Include="Testing\Scenarios\BusTestScenario.cs" />
+    <Compile Include="Testing\Scenarios\BusTestScenarioImpl.cs" />
+    <Compile Include="Testing\Scenarios\EndpointTestScenario.cs" />
+    <Compile Include="Testing\Scenarios\EndpointTestScenarioImpl.cs" />
+    <Compile Include="Testing\Scenarios\LocalRemoteTestScenario.cs" />
+    <Compile Include="Testing\Scenarios\LocalRemoteTestScenarioImpl.cs" />
+    <Compile Include="Testing\SentMessage.cs" />
+    <Compile Include="Testing\PublishTestActionExtensions.cs" />
+    <Compile Include="Testing\ReceivedMessageImpl.cs" />
+    <Compile Include="Testing\ReceivedMessageList.cs" />
+    <Compile Include="Testing\ReceivedMessageListImpl.cs" />
+    <Compile Include="Testing\SentMessageImpl.cs" />
+    <Compile Include="Testing\SentMessageList.cs" />
+    <Compile Include="Testing\SentMessageListImpl.cs" />
+    <Compile Include="Testing\Subjects\ConsumerTestSubject.cs" />
+    <Compile Include="Testing\Subjects\ConsumerTestSubjectImpl.cs" />
+    <Compile Include="Testing\TestActions\PublishTestAction.cs" />
+    <Compile Include="Testing\TestActions\SendTestAction.cs" />
+    <Compile Include="Testing\TestActions\TestAction.cs" />
+    <Compile Include="Testing\TestConfiguratorResultExtensions.cs" />
+    <Compile Include="Testing\TestDecorators\ConsumerFactoryTestDecorator.cs" />
+    <Compile Include="Testing\TestDecorators\EndpointFactoryTestDecorator.cs" />
+    <Compile Include="Testing\TestDecorators\EndpointTestDecorator.cs" />
+    <Compile Include="Testing\Instances\HandlerTestInstance.cs" />
+    <Compile Include="Testing\Factories\HandlerTestFactory.cs" />
+    <Compile Include="Testing\Factories\HandlerTestFactoryImpl.cs" />
+    <Compile Include="Testing\HandlerTest.cs" />
+    <Compile Include="Testing\SendTestActionExtensions.cs" />
+    <Compile Include="Testing\Subjects\HandlerTestSubject.cs" />
+    <Compile Include="Testing\Subjects\HandlerTestSubjectImpl.cs" />
+    <Compile Include="Testing\TestFactory.cs" />
+    <Compile Include="Testing\TestInstance.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\BusTestInstanceConfigurator.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\BusTestInstanceConfiguratorImpl.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\ConsumerTestInstanceConfigurator.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\ConsumerTestInstanceConfiguratorImpl.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\HandlerTestInstanceConfigurator.cs" />
+    <Compile Include="Testing\TestInstanceConfigurators\HandlerTestInstanceConfiguratorImpl.cs" />
+    <Compile Include="Testing\TestSubject.cs" />
+    <Compile Include="Testing\TransportFactoryTestExtensions.cs" />
+    <Compile Include="Threading\ConsumerPool.cs" />
+    <Compile Include="Threading\ThreadPoolConsumerPool.cs" />
+    <Compile Include="Transports\IDuplexTransport.cs" />
+    <Compile Include="Transports\IInboundTransport.cs" />
+    <Compile Include="Transports\IOutboundTransport.cs" />
+    <Compile Include="Transports\ITransport.cs" />
+    <Compile Include="Transports\TransportSettings.cs" />
+    <Compile Include="Transports\EndpointCacheExtensions.cs" />
+    <Compile Include="Transports\EndpointFactory.cs" />
+    <Compile Include="Transports\IEndpointFactory.cs" />
+    <Compile Include="Transports\IEndpointSettings.cs" />
+    <Compile Include="Transports\ITransportFactory.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
     <Compile Include="Exceptions\ConventionException.cs" />
@@ -111,31 +458,32 @@
     <Compile Include="Services\HealthMonitoring\HealthClient.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="IEndpoint.cs" />
-    <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
-    <Compile Include="MessageFilter.cs" />
-    <Compile Include="Services\Subscriptions\Server\InMemorySubscriptionRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
-    <Compile Include="Services\Subscriptions\Server\ISubscriptionRepository.cs" />
     <Compile Include="Services\Subscriptions\Messages\AddSubscription.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionRefresh.cs" />
     <Compile Include="Services\Subscriptions\Messages\AddSubscriptionClient.cs" />
     <Compile Include="Services\Subscriptions\Messages\RemoveSubscriptionClient.cs" />
     <Compile Include="Services\Subscriptions\Messages\RemoveSubscription.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionChange.cs" />
-    <Compile Include="Services\Subscriptions\Subscription.cs" />
     <Compile Include="Services\Subscriptions\Client\SubscriptionClient.cs" />
     <Compile Include="Services\Subscriptions\Server\SubscriptionService.cs" />
-    <Compile Include="TimeoutAttribute.cs" />
-    <Compile Include="Transports\MulticastUdpEndpoint.cs" />
+    <Compile Include="Transports\ITransportSettings.cs" />
+    <Compile Include="Transports\Loopback\LoopbackMessage.cs" />
+    <Compile Include="Transports\Loopback\LoopbackTransportFactory.cs" />
+    <Compile Include="Transports\Transport.cs" />
     <Compile Include="Util\CheckConvention.cs" />
-    <Compile Include="Util\Tuple.cs" />
+    <Compile Include="Util\IdempotentHashtable.cs" />
+    <Compile Include="Util\IndexedSagaProperty.cs" />
+    <Compile Include="Util\LambdaEqualityComparer.cs" />
+    <Compile Include="Util\ObjectExtensions.cs" />
+    <Compile Include="Util\ReSharperStaticAnalysis.cs" />
+    <Compile Include="Util\SpecialLoggers.cs" />
+    <Compile Include="Util\StreamExtensions.cs" />
+    <Compile Include="Util\UriExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CurrentMessage.cs" />
-    <Compile Include="Distributor\Configuration\DistributorSubscriber.cs" />
-    <Compile Include="Distributor\Configuration\SagaDistributorSubscriber.cs" />
     <Compile Include="Distributor\IPendingMessageCount.cs" />
     <Compile Include="Distributor\IPendingMessageTracker.cs" />
     <Compile Include="Distributor\Messages\ConfigureWorker.cs" />
@@ -167,54 +515,32 @@
     <Compile Include="Events\ThreadPoolEvent.cs" />
     <Compile Include="Exceptions\AbstractUriException.cs" />
     <Compile Include="Exceptions\TransportException.cs" />
-    <Compile Include="FutureMessage.cs" />
     <Compile Include="IEndpointAddress.cs" />
-    <Compile Include="Internal\AbstractEndpoint.cs" />
+    <Compile Include="Transports\Endpoint.cs" />
     <Compile Include="Events\ConsumeCompleted.cs" />
     <Compile Include="Events\ReceiveCompleted.cs" />
-    <Compile Include="Internal\ConsumerThread.cs" />
-    <Compile Include="Internal\ConsumerPool.cs" />
-    <Compile Include="Internal\IEndpointManagement.cs" />
     <Compile Include="Events\MessageConsumed.cs" />
     <Compile Include="Events\MessageReceived.cs" />
-    <Compile Include="Internal\ServiceBusReceiveContext.cs" />
-    <Compile Include="Internal\ThreadPoolConsumerPool.cs" />
-    <Compile Include="ITransport.cs" />
     <Compile Include="Monitoring\InstancePerformanceCounter.cs" />
     <Compile Include="Monitoring\IPerformanceCounter.cs" />
     <Compile Include="Monitoring\NullPerformanceCounter.cs" />
     <Compile Include="Monitoring\RuntimePerformanceCounter.cs" />
     <Compile Include="Monitoring\ServiceBusInstancePerformanceCounters.cs" />
     <Compile Include="Monitoring\ServiceBusPerformanceCounters.cs" />
-    <Compile Include="Parallel\ITask.cs" />
     <Compile Include="IControlBus.cs" />
-    <Compile Include="Internal\DisposableUnsubscribeAction.cs" />
-    <Compile Include="Internal\IEndpointSubscriptionEvent.cs" />
-    <Compile Include="Internal\IInboundMessageHeaders.cs" />
-    <Compile Include="Internal\IMessageHeaders.cs" />
-    <Compile Include="Internal\InboundMessage.cs" />
-    <Compile Include="Configuration\EndpointFactoryConfigurator.cs" />
-    <Compile Include="Internal\IBusService.cs" />
-    <Compile Include="Configuration\IEndpointConfigurator.cs" />
-    <Compile Include="Internal\IOutboundMessage.cs" />
-    <Compile Include="Internal\ISetInboundMessageHeaders.cs" />
-    <Compile Include="Internal\ISetMessageHeaders.cs" />
-    <Compile Include="Configuration\DefaultBusServiceConfigurator.cs" />
-    <Compile Include="Pipeline\Configuration\MessageInterceptorConfigurator.cs" />
-    <Compile Include="Pipeline\Configuration\MessageInterceptorConfiguratorScope.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EndpointConfigurator.cs" />
+    <Compile Include="Configuration\BusServiceConfigurators\DefaultBusServiceConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\InboundMessageInterceptorConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\InboundMessageInterceptorConfiguratorScope.cs" />
     <Compile Include="Pipeline\Sinks\InstanceMessageSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\MessageInterceptor.cs" />
-    <Compile Include="Saga\AbstractSagaRepository.cs" />
     <Compile Include="Saga\Configuration\EventInspectorResult.cs" />
     <Compile Include="Saga\Configuration\ExtensionsForSagas.cs" />
     <Compile Include="Saga\Configuration\ISagaPolicyFactory.cs" />
-    <Compile Include="Saga\Configuration\ObservesSubscriber.cs" />
     <Compile Include="Pipeline\Configuration\ExtensionsForPipelineConfiguration.cs" />
     <Compile Include="Saga\Configuration\SagaEvent.cs" />
-    <Compile Include="Saga\Configuration\SagaEventSubscriber.cs" />
     <Compile Include="Saga\Configuration\SagaPolicyFactory.cs" />
     <Compile Include="Saga\Configuration\SagaStateMachineEventInspector.cs" />
-    <Compile Include="Saga\Configuration\SagaStateMachineMessageSinkFactory.cs" />
     <Compile Include="Saga\CreateOrUseExistingSagaPolicy.cs" />
     <Compile Include="Saga\DataEventBinder.cs" />
     <Compile Include="Saga\EventBinder.cs" />
@@ -222,7 +548,6 @@
     <Compile Include="Saga\Observes.cs" />
     <Compile Include="Saga\Pipeline\CorrelatedSagaMessageSink.cs" />
     <Compile Include="Saga\Pipeline\CorrelatedSagaStateMachineMessageSink.cs" />
-    <Compile Include="Saga\ExistingSagaPolicy.cs" />
     <Compile Include="Saga\InitiatingSagaPolicy.cs" />
     <Compile Include="Saga\ISagaMessageSink.cs" />
     <Compile Include="Saga\ISagaPolicy.cs" />
@@ -241,8 +566,6 @@
     <Compile Include="Serialization\Custom\NamespaceTable.cs" />
     <Compile Include="Serialization\Custom\NonClosingStream.cs" />
     <Compile Include="Serialization\Custom\ObjectDeserializer.cs" />
-    <Compile Include="Serialization\Custom\ObjectField.cs" />
-    <Compile Include="Serialization\Custom\ObjectFieldCache.cs" />
     <Compile Include="Serialization\Custom\DeserializeObjectProperty.cs" />
     <Compile Include="Serialization\Custom\ObjectPropertyBase.cs" />
     <Compile Include="Serialization\Custom\DeserializeObjectPropertyCache.cs" />
@@ -312,29 +635,16 @@
     <Compile Include="Services\Timeout\Messages\TimeoutRescheduled.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutScheduled.cs" />
     <Compile Include="Services\Timeout\Server\TimeoutSaga.cs" />
-    <Compile Include="Transports\CreateEndpointSettings.cs" />
-    <Compile Include="Transports\LoopbackEndpointFactory.cs" />
-    <Compile Include="Transports\LoopbackTransport.cs" />
+    <Compile Include="Transports\EndpointSettings.cs" />
+    <Compile Include="Transports\Loopback\LoopbackTransport.cs" />
     <Compile Include="Transports\MessageRetryTracker.cs" />
-    <Compile Include="Transports\MulticastUdpEndpointFactory.cs" />
-    <Compile Include="Transports\MulticastUdpTransport.cs" />
     <Compile Include="Transports\NullTransport.cs" />
-    <Compile Include="Transports\StreamEndpoint.cs" />
     <Compile Include="Transports\TransportBase.cs" />
-    <Compile Include="Util\BranchEvaluator.cs" />
-    <Compile Include="Util\EvaluationCandidateSelector.cs" />
     <Compile Include="Util\ExpressionVisitor.cs" />
-    <Compile Include="Util\ExtensionsForIndexedCollection.cs" />
-    <Compile Include="Util\IEvaluationCandidateSelector.cs" />
-    <Compile Include="Util\IExpressionEvaluator.cs" />
     <Compile Include="Util\IndexedAttribute.cs" />
-    <Compile Include="Util\IndexedCollection.cs" />
-    <Compile Include="Util\LocalExpressionEvaluator.cs" />
-    <Compile Include="Util\MemberAccessEvaluator.cs" />
-    <Compile Include="Util\PredicateBuilder.cs" />
+    <Compile Include="Util\IndexedSagaDictionary.cs" />
     <Compile Include="Saga\Pipeline\PropertySagaMessageSink.cs" />
     <Compile Include="Saga\Pipeline\PropertySagaStateMachineMessageSink.cs" />
-    <Compile Include="Saga\Configuration\SagaStateMachineSubscriber.cs" />
     <Compile Include="Saga\Pipeline\SagaMessageSinkBase.cs" />
     <Compile Include="Saga\SagaStateMachine.cs" />
     <Compile Include="Serialization\XmlMessageSerializer.cs" />
@@ -358,101 +668,39 @@
     <Compile Include="Services\Subscriptions\Server\SubscriptionSaga.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionConsumer.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionPublisher.cs" />
-    <Compile Include="Internal\MessageHeadersBase.cs" />
-    <Compile Include="Internal\OutboundMessage.cs" />
-    <Compile Include="IEndpointFactory.cs" />
-    <Compile Include="Configuration\IEndpointFactoryConfigurator.cs" />
-    <Compile Include="Configuration\IServiceBusConfigurator.cs" />
-    <Compile Include="Configuration\IServiceBusConfiguratorDefaults.cs" />
-    <Compile Include="Configuration\IServiceConfigurator.cs" />
-    <Compile Include="Configuration\ServiceBusConfigurator.cs" />
-    <Compile Include="Configuration\ServiceBusConfiguratorDefaults.cs" />
-    <Compile Include="Internal\InboundOutboundSubscriptionBinder.cs" />
+    <Compile Include="IEndpointCache.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\BusServiceConfigurators\BusServiceConfigurator.cs" />
     <Compile Include="Pipeline\IMessagePipeline.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfigurator.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
-    <Compile Include="Internal\IMessageSelector.cs" />
-    <Compile Include="Internal\EndpointFactory.cs" />
-    <Compile Include="Internal\RequestResponse\ConditionalResponseAction.cs" />
-    <Compile Include="Internal\RequestResponse\ConditionalResponseActionBuilder.cs" />
-    <Compile Include="Internal\RequestResponse\CorrelatedResponseAction.cs" />
-    <Compile Include="Internal\RequestResponse\CorrelatedResponseActionBuilder.cs" />
-    <Compile Include="Internal\RequestResponse\IResponseAction.cs" />
-    <Compile Include="Internal\RequestResponse\RequestResponseScope.cs" />
-    <Compile Include="Internal\RequestResponse\ResponseAction.cs" />
-    <Compile Include="Internal\RequestResponse\ResponseActionBuilder.cs" />
-    <Compile Include="Batch\Batch.cs" />
-    <Compile Include="Batch\Pipeline\BatchMessageRouterConfigurator.cs" />
-    <Compile Include="Batch\Pipeline\BatchMessageRouterConfiguratorScope.cs" />
-    <Compile Include="Internal\IUnsubscribeAction.cs" />
-    <Compile Include="Internal\IServiceContainer.cs" />
+    <Compile Include="Transports\EndpointCache.cs" />
     <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfiguratorScope.cs" />
-    <Compile Include="Pipeline\Configuration\MessageFilterConfigurator.cs" />
-    <Compile Include="Pipeline\Configuration\MessageFilterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
-    <Compile Include="Serialization\BinaryMessageEnvelope.cs" />
     <Compile Include="Serialization\ExtensionsToMessageEnvelope.cs" />
-    <Compile Include="ExtensionsToServiceBus.cs" />
-    <Compile Include="Internal\ServiceContainer.cs" />
-    <Compile Include="Services\Metadata\Client\MessageModelFilter.cs" />
-    <Compile Include="Services\Metadata\Domain\IMetadataRepository.cs" />
-    <Compile Include="Services\Metadata\Domain\MessageMetadata.cs" />
-    <Compile Include="Services\Metadata\Messages\MessageDefinition.cs" />
-    <Compile Include="Services\Metadata\Messages\MetadataSearch.cs" />
-    <Compile Include="Services\Metadata\Messages\MetadataSearchResult.cs" />
-    <Compile Include="Services\Metadata\MetadataClient.cs" />
-    <Compile Include="Services\Metadata\MetadataExtracter.cs" />
-    <Compile Include="Services\Metadata\MetadataService.cs" />
-    <Compile Include="Services\Metadata\Server\MessageDefinitionConsumer.cs" />
-    <Compile Include="Services\Metadata\Server\MetadataSearchConsumer.cs" />
-    <Compile Include="Services\Metadata\WireTap.cs" />
-    <Compile Include="Internal\EndpointList.cs" />
+    <Compile Include="ServiceBusExtensions.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionInformation.cs" />
     <Compile Include="Services\Subscriptions\LocalSubscriptionService.cs" />
     <Compile Include="Services\Timeout\ScheduledTimeout.cs" />
-    <Compile Include="Transports\EndpointConfiguratorBase.cs" />
-    <Compile Include="Transports\LoopbackEndpointConfigurator.cs" />
-    <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />
-    <Compile Include="Internal\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />
     <Compile Include="Saga\InMemorySagaRepository.cs" />
-    <Compile Include="Batch\Pipeline\BatchSubscriber.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\ConsumesForSubscriber.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorScope.cs" />
-    <Compile Include="Saga\Configuration\InitiatesSubscriber.cs" />
-    <Compile Include="Saga\Configuration\OrchestratesSubscriber.cs" />
-    <Compile Include="Batch\Pipeline\BatchCombiner.cs" />
-    <Compile Include="Batch\Pipeline\BatchMessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\ComponentMessageSink.cs" />
-    <Compile Include="Pipeline\Configuration\SubscriberContext.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\ConsumesAllSubscriber.cs" />
-    <Compile Include="Pipeline\Configuration\MessageRouterConfigurator.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\ConsumesSubscriberBase.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\ConsumesSelectedSubscriber.cs" />
-    <Compile Include="Util\IRegistrationList.cs" />
-    <Compile Include="Pipeline\IPipelineConfigurator.cs" />
+    <Compile Include="Pipeline\IInboundPipelineConfigurator.cs" />
     <Compile Include="Pipeline\IPipelineSink.cs" />
     <Compile Include="Pipeline\IPipelineInspector.cs" />
-    <Compile Include="Pipeline\ISubscriberContext.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\IPipelineSubscriber.cs" />
     <Compile Include="Util\QueryStringExtensions.cs" />
-    <Compile Include="Util\ReflectiveMethodInvoker.cs" />
     <Compile Include="Util\RegistrationList.cs" />
-    <Compile Include="Pipeline\MessagePipeline.cs" />
+    <Compile Include="Pipeline\InboundMessagePipeline.cs" />
     <Compile Include="Pipeline\MessagePipelineExtensions.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\EndpointMessageSink.cs" />
-    <Compile Include="Pipeline\Sinks\MessageFilter.cs" />
-    <Compile Include="Pipeline\Sinks\MessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\InstanceMessageSink.cs" />
-    <Compile Include="Pipeline\Sinks\MessageRouterBase.cs" />
-    <Compile Include="Pipeline\Sinks\PipelineSinkBase.cs" />
-    <Compile Include="Pipeline\Sinks\MessageTranslator.cs" />
+    <Compile Include="Pipeline\Sinks\InboundConvertMessageSink.cs" />
     <Compile Include="Exceptions\PipelineException.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\PipelineSubscriberBase.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineViewer.cs" />
-    <Compile Include="Pipeline\Configuration\MessagePipelineConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\InboundPipelineConfigurator.cs" />
     <Compile Include="Pipeline\Sinks\SelectedComponentMessageSink.cs" />
     <Compile Include="Serialization\MessageEnvelopeBase.cs" />
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />
@@ -460,18 +708,29 @@
     <Compile Include="Serialization\XmlMessageEnvelope.cs" />
     <Compile Include="Serialization\DotNotXmlMessageSerializer.cs" />
     <Compile Include="Serialization\XmlReceiveMessageEnvelope.cs" />
-    <Compile Include="Internal\NullServiceBus.cs" />
-    <Compile Include="Services\MessageDeferral\RemoteMessageDeferralViewer.cs" />
-    <Compile Include="Services\MessageDeferral\Messages\DeferedMessageRepublished.cs" />
-    <Compile Include="Services\MessageDeferral\Messages\NewDeferMessageReceived.cs" />
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
     <Compile Include="Util\SequenceNumberGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Transports\_readme.txt" />
+    <Folder Include="Pipeline\Configuration\Subscribers\" />
+    <Folder Include="Services\HealthMonitoring\Client\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Services\HealthMonitoring\Client\" />
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

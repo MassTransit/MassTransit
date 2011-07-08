@@ -1,13 +1,13 @@
 ﻿namespace PostalService
 {
 	using System.IO;
+	using Castle.Windsor;
 	using Host;
 	using log4net.Config;
-	using MassTransit.WindsorIntegration;
 	using Topshelf;
-	using Topshelf.Configuration;
+	using Topshelf.Configuration.Dsl;
 
-	internal class Program
+    internal class Program
 	{
 		private static void Main(string[] args)
 		{
@@ -24,12 +24,12 @@
 
 					c.BeforeStartingServices(a =>
 						{
-							var container = new DefaultMassTransitContainer("postal-castle.xml");
+							var container = new WindsorContainer("postal-castle.xml");
 							container.AddComponent<SendEmailConsumer>("sec");
 							container.AddComponent<PostalService>();
 						});
 
-					c.ConfigureService<PostalService>(typeof(PostalService).Name, a =>
+					c.ConfigureService<PostalService>(a =>
 						{
 							a.WhenStarted(o => o.Start());
 							a.WhenStopped(o => o.Stop());

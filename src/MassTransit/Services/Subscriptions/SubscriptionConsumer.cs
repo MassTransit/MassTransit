@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,31 +13,24 @@
 namespace MassTransit.Services.Subscriptions
 {
 	using System;
-	using Internal;
 	using Pipeline;
 
 	public class SubscriptionConsumer :
 		IEndpointSubscriptionEvent,
 		IBusService
 	{
-		private IServiceBus _bus;
-		private IEndpointFactory _endpointFactory;
-		private IMessagePipeline _pipeline;
-		private ISubscriptionService _service;
-		private UnregisterAction _unregisterAction;
+		readonly ISubscriptionService _service;
+		IServiceBus _bus;
+		IOutboundMessagePipeline _pipeline;
+		UnregisterAction _unregisterAction;
 
-		public SubscriptionConsumer(ISubscriptionService service, IEndpointFactory endpointFactory)
+		public SubscriptionConsumer(ISubscriptionService service)
 		{
 			_service = service;
-			_endpointFactory = endpointFactory;
 		}
 
 		public void Dispose()
 		{
-			_pipeline = null;
-			_bus = null;
-			_service = null;
-			_endpointFactory = null;
 		}
 
 		public void Start(IServiceBus bus)
@@ -52,26 +45,26 @@ namespace MassTransit.Services.Subscriptions
 			_unregisterAction();
 		}
 
-		public UnsubscribeAction SubscribedTo<T>(Uri endpointUri)
-			where T : class
+		public UnsubscribeAction SubscribedTo<TMessage>(Uri endpointUri)
+			where TMessage : class
 		{
-			if (endpointUri == _bus.Endpoint.Uri)
+			if (endpointUri == _bus.Endpoint.Address.Uri)
 				return () => true;
 
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(endpointUri);
+			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
-			return _pipeline.Subscribe<T>(endpoint);
+			return _pipeline.ConnectEndpoint<TMessage>(endpoint);
 		}
 
-		public UnsubscribeAction SubscribedTo<T, K>(K correlationId, Uri endpointUri)
-			where T : class, CorrelatedBy<K>
+		public UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId, Uri endpointUri)
+			where TMessage : class, CorrelatedBy<TKey>
 		{
-			if (endpointUri == _bus.Endpoint.Uri)
+			if (endpointUri == _bus.Endpoint.Address.Uri)
 				return () => true;
 
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(endpointUri);
+			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
-			return _pipeline.Subscribe<T, K>(correlationId, endpoint);
+			return _pipeline.ConnectEndpoint<TMessage, TKey>(correlationId, endpoint);
 		}
 	}
 }

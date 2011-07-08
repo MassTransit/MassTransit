@@ -26,25 +26,23 @@ namespace MassTransit.Tests.Services.Subscriptions
 		[SetUp]
 		public void Setup()
 		{
-			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-
 			_service = MockRepository.GenerateMock<ISubscriptionService>();
-			_endpointFactory = MockRepository.GenerateMock<IEndpointFactory>();
+			_endpointCache = MockRepository.GenerateMock<IEndpointCache>();
 			
 			_endpoint = MockRepository.GenerateMock<IEndpoint>();
-			_endpoint.Stub(x => x.Uri).Return(_testUri);
+			_endpoint.Stub(x => x.Address.Uri).Return(_testUri);
 
 			_bus = MockRepository.GenerateMock<IServiceBus>();
 			_bus.Stub(x => x.Endpoint).Return(_endpoint);
 
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _bus);
+			_pipeline = new OutboundPipelineConfigurator(_bus).Pipeline;
 			_bus.Stub(x => x.OutboundPipeline).Return(_pipeline);
 
-			_consumer = new SubscriptionConsumer(_service, _endpointFactory);
+			_consumer = new SubscriptionConsumer(_service);
 			_consumer.Start(_bus);
 
 			_remoteEndpoint = MockRepository.GenerateMock<IEndpoint>();
-			_endpointFactory.Stub(x => x.GetEndpoint(_remoteUri)).Return(_remoteEndpoint);
+			_endpointCache.Stub(x => x.GetEndpoint(_remoteUri)).Return(_remoteEndpoint);
 
 			_service.AssertWasCalled(x => x.Register(_consumer));
 		}
@@ -53,19 +51,18 @@ namespace MassTransit.Tests.Services.Subscriptions
 		public void Teardown()
 		{
 			_consumer = null;
-			_endpointFactory = null;
+			_endpointCache = null;
 			_service = null;
 		}
 
 		private ISubscriptionService _service;
-		private IEndpointFactory _endpointFactory;
+		private IEndpointCache _endpointCache;
 		private SubscriptionConsumer _consumer;
 		private readonly Uri _testUri = new Uri("loopback://localhost/queue");
 		private IServiceBus _bus;
 		private IEndpoint _endpoint;
 		private readonly Uri _remoteUri = new Uri("loopback://localhost/remote");
-		private IMessagePipeline _pipeline;
-		private IObjectBuilder _builder;
+		private IOutboundMessagePipeline _pipeline;
 		private IEndpoint _remoteEndpoint;
 
 		[Test, Explicit]

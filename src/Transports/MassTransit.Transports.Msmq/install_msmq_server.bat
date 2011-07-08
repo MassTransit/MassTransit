@@ -1,0 +1,1 @@
+ServerManagerCmd.exe -install MSMQ-Services MSMQ-Server MSMQ-Multicasting

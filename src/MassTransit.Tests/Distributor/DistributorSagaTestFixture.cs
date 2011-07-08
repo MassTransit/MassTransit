@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,16 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Distributor
 {
-	using Configuration;
+	using BusConfigurators;
 	using Load.Sagas;
 	using MassTransit.Distributor;
 	using MassTransit.Saga;
+	using MassTransit.Transports;
 	using TestFramework;
 	using TextFixtures;
 
-	public class DistributorSagaTestFixture<TEndpoint> :
-		SubscriptionServiceTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+	public class DistributorSagaTestFixture<TTransportFactory> :
+		SubscriptionServiceTestFixture<TTransportFactory>
+		where TTransportFactory : ITransportFactory, new()
 	{
 		protected ISagaRepository<FirstSaga> FirstSagaRepository { get; private set; }
 
@@ -29,12 +30,12 @@ namespace MassTransit.Tests.Distributor
 		{
 			base.EstablishContext();
 
-			FirstSagaRepository = ObjectBuilder.SetupSagaRepository<FirstSaga>();
+			FirstSagaRepository = SetupSagaRepository<FirstSaga>();
 		}
 
-		protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
+		protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
-			configurator.UseSagaDistributorFor<FirstSaga>(EndpointFactory);
+			configurator.UseSagaDistributorFor<FirstSaga>();
 		}
 	}
 }

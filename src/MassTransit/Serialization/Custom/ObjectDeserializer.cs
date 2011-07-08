@@ -15,6 +15,7 @@ namespace MassTransit.Serialization.Custom
 	using System.Xml;
 	using log4net;
 	using Magnum.Reflection;
+	using Util;
 
 	public class ObjectDeserializer<T> :
 		IObjectDeserializer<T>
@@ -74,7 +75,7 @@ namespace MassTransit.Serialization.Custom
 					_log.Debug("No property " + context.LocalName + " in class " + typeof (T).ToFriendlyName() + " for deserialization");
 				}
 
-				object discardValue = context.Deserialize(context.Namespace);
+				context.Deserialize(context.Namespace);
 			}
 		}
 	}

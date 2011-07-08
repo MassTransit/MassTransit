@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,18 +14,17 @@ namespace MassTransit.RuntimeServices
 {
 	using System.IO;
 	using FluentNHibernate.Cfg;
-	using Infrastructure.Saga;
-	using Infrastructure.Subscriptions;
 	using Model;
 	using NHibernate;
 	using NHibernate.Tool.hbm2ddl;
+	using NHibernateIntegration.Saga;
 	using Saga;
 	using Services.Subscriptions.Server;
 	using StructureMap;
-	using StructureMapIntegration;
+	using StructureMap.Configuration.DSL;
 
 	public class SubscriptionServiceRegistry :
-		MassTransitRegistryBase
+		Registry
 	{
 		public SubscriptionServiceRegistry(IContainer container)
 		{
@@ -36,14 +35,24 @@ namespace MassTransit.RuntimeServices
 				.Use(context => CreateSessionFactory());
 
 			For(typeof (ISagaRepository<>))
-				.Add(typeof (NHibernateSagaRepositoryForContainers<>));
-			For<ISubscriptionRepository>()
-				.Add<PersistantSubscriptionRepository>();
+				.Add(typeof (NHibernateSagaRepository<>));
 
-			RegisterServiceBus(configuration.SubscriptionServiceUri, x => { x.SetConcurrentConsumerLimit(1); });
+			For<IServiceBus>()
+				.Singleton()
+				.Use(context =>
+				{
+					return ServiceBusFactory.New(sbc =>
+					{
+						sbc.ReceiveFrom(configuration.SubscriptionServiceUri);
+
+						sbc.UseMsmq();
+
+						sbc.SetConcurrentConsumerLimit(1);
+					});
+				});
 		}
 
-		private static ISessionFactory CreateSessionFactory()
+		static ISessionFactory CreateSessionFactory()
 		{
 			return Fluently.Configure()
 				.Mappings(m =>
@@ -55,11 +64,12 @@ namespace MassTransit.RuntimeServices
 				.BuildSessionFactory();
 		}
 
-		private static void BuildSchema(NHibernate.Cfg.Configuration config)
+		static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
 			new SchemaUpdate(config).Execute(false, true);
 
-			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (SubscriptionService).Assembly.Location), typeof (SubscriptionService).Name + ".sql");
+			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (SubscriptionService).Assembly.Location),
+				typeof (SubscriptionService).Name + ".sql");
 
 			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
 		}

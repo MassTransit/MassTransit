@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,18 +15,19 @@ namespace MassTransit.Tests.Serialization
 	using System;
 	using System.Diagnostics;
 	using System.IO;
-	using Magnum.DateTimeExtensions;
+	using Context;
+	using Magnum.Extensions;
 	using MassTransit.Serialization;
-	using MassTransit.Serialization.Custom;
 	using Messages;
 	using NUnit.Framework;
 
-	[TestFixture]
-	public class Performance_Specs
+
+	public abstract class Performance_Specs<TSerializer> where TSerializer : IMessageSerializer, new()
 	{
-		[Test, Explicit]
-		public void Just_how_fast_is_the_custom_xml_serializer()
+		[Test, Category("Integration")]
+		public void Just_how_fast_are_you()
 		{
+			Trace.WriteLine("Serializer: " + typeof(TSerializer).Name);
 			var message = new SerializationTestMessage
 				{
 					DecimalValue = 123.45m,
@@ -41,24 +42,21 @@ namespace MassTransit.Tests.Serialization
 					DoubleValue = 1823.172,
 				};
 
-//			var message = new PingMessage
-//				{
-//					CorrelationId = CombGuid.Generate()
-//				};
 
-			var serializer = new XmlMessageSerializer();
+			var serializer = new TSerializer();
 
+            //warm it up
 			for (int i = 0; i < 10; i++)
 			{
 				byte[] data;
-				using (MemoryStream output = new MemoryStream())
+				using (var output = new MemoryStream())
 				{
-					serializer.Serialize(output, message);
+					serializer.Serialize(output, message.ToSendContext());
 					data = output.ToArray();
 				}
-				using (MemoryStream input = new MemoryStream(data))
+				using (var input = new MemoryStream(data))
 				{
-					//		serializer.Deserialize(input);
+					serializer.Deserialize(ReceiveContext.FromBodyStream(input));
 				}
 			}
 
@@ -68,9 +66,9 @@ namespace MassTransit.Tests.Serialization
 
 			for (int i = 0; i < iterations; i++)
 			{
-				using (MemoryStream output = new MemoryStream())
+				using (var output = new MemoryStream())
 				{
-					serializer.Serialize(output, message);
+					serializer.Serialize(output, message.ToSendContext());
 				}
 			}
 
@@ -82,9 +80,9 @@ namespace MassTransit.Tests.Serialization
 			Trace.WriteLine(msg);
 
 			byte[] sample;
-			using (MemoryStream output = new MemoryStream())
+			using (var output = new MemoryStream())
 			{
-				serializer.Serialize(output, message);
+				serializer.Serialize(output, message.ToSendContext());
 				sample = output.ToArray();
 			}
 
@@ -92,9 +90,9 @@ namespace MassTransit.Tests.Serialization
 
 			for (int i = 0; i < 50000; i++)
 			{
-				using (MemoryStream input = new MemoryStream(sample))
+				using (var input = new MemoryStream(sample))
 				{
-					serializer.Deserialize(input);
+					serializer.Deserialize(ReceiveContext.FromBodyStream(input));
 				}
 			}
 
@@ -106,4 +104,42 @@ namespace MassTransit.Tests.Serialization
 			Trace.WriteLine(msg);
 		}
 	}
+
+    [TestFixture]
+    public class WhenUsingVersionOneXmlInPerfTest:
+        Performance_Specs<VersionOneXmlMessageSerializer>
+    {
+    }
+
+    [TestFixture]
+    public class WhenUsingCustomXmlInPerfTest:
+        Performance_Specs<XmlMessageSerializer>
+    {
+    }
+
+    [TestFixture]
+    public class WhenUsingDotNotXmlInPerfTest :
+        Performance_Specs<DotNotXmlMessageSerializer>
+    {
+    }
+
+    [TestFixture]
+    public class WhenUsingBinaryInPerfTest :
+        Performance_Specs<BinaryMessageSerializer>
+    {
+    }
+
+    [TestFixture]
+    public class WhenUsingJsonInPerfTest :
+        Performance_Specs<JsonMessageSerializer>
+    {
+        
+    }
+
+	[TestFixture]
+    public class WhenUsingBsonInPerfTest :
+        Performance_Specs<BsonMessageSerializer>
+    {
+        
+    }
 }

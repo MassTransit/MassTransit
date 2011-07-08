@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,32 +20,32 @@ namespace MassTransit.SystemView
 	public class Configuration :
 		IConfiguration
 	{
-		private const string _subscriptionServiceUriKey = "SubscriptionServiceUri";
-		private const string _systemViewControlUriKey = "SystemViewControlUri";
-		private const string _systemViewDataUriKey = "SystemViewDataUri";
+		const string SubscriptionServiceUriKey = "SubscriptionServiceUri";
+		const string SystemViewControlUriKey = "SystemViewControlUri";
+		const string SystemViewDataUriKey = "SystemViewDataUri";
 
-		private static readonly ILog _log = LogManager.GetLogger(typeof (Configuration));
+		static readonly ILog _log = LogManager.GetLogger(typeof (Configuration));
 
 		public Uri SubscriptionServiceUri
 		{
-			get { return GetUriApplicationSetting(_subscriptionServiceUriKey); }
+			get { return GetUriApplicationSetting(SubscriptionServiceUriKey); }
 		}
 
 		public Uri SystemViewControlUri
 		{
-			get { return GetUriApplicationSetting(_systemViewControlUriKey); }
+			get { return GetUriApplicationSetting(SystemViewControlUriKey); }
 		}
 
 		public Uri SystemViewDataUri
 		{
-			get { return GetUriApplicationSetting(_systemViewDataUriKey); }
+			get { return GetUriApplicationSetting(SystemViewDataUriKey); }
 		}
 
-		private static Uri GetUriApplicationSetting(string key)
+		static Uri GetUriApplicationSetting(string key)
 		{
 			try
 			{
-				Uri value = new Uri(GetApplicationSetting(key));
+				var value = new Uri(GetApplicationSetting(key));
 
 				return value;
 			}
@@ -63,7 +63,7 @@ namespace MassTransit.SystemView
 			}
 		}
 
-		private static string GetApplicationSetting(string key)
+		static string GetApplicationSetting(string key)
 		{
 			string value = ConfigurationManager.AppSettings[key] ?? LocateConfiguration().AppSettings.Settings[key].Value;
 
@@ -73,9 +73,9 @@ namespace MassTransit.SystemView
 			return value;
 		}
 
-		private static System.Configuration.Configuration LocateConfiguration()
+		static System.Configuration.Configuration LocateConfiguration()
 		{
-			ExeConfigurationFileMap map = new ExeConfigurationFileMap
+			var map = new ExeConfigurationFileMap
 				{
 					ExeConfigFilename = Assembly.GetExecutingAssembly().Location + ".config"
 				};

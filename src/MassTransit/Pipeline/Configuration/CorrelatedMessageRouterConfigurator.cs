@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,49 +12,44 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
+	using Context;
 	using Exceptions;
 	using Sinks;
 
-	public class CorrelatedMessageRouterConfigurator
+	public class InboundCorrelatedMessageRouterConfigurator
 	{
-		private readonly IPipelineSink<object> _sink;
+		readonly IPipelineSink<IConsumeContext> _sink;
 
-		private CorrelatedMessageRouterConfigurator(IPipelineSink<object> sink)
+		internal InboundCorrelatedMessageRouterConfigurator(IPipelineSink<IConsumeContext> sink)
 		{
 			_sink = sink;
 		}
 
-		public CorrelatedMessageRouter<TMessage, TKey> FindOrCreate<TMessage, TKey>()
+		public CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey> FindOrCreate<TMessage, TKey>()
 			where TMessage : class, CorrelatedBy<TKey>
 		{
-			MessageRouterConfigurator configurator = MessageRouterConfigurator.For(_sink);
+			var configurator = new InboundMessageRouterConfigurator(_sink);
 
-			MessageRouter<TMessage> router = configurator.FindOrCreate<TMessage>();
+			MessageRouter<IConsumeContext<TMessage>> router = configurator.FindOrCreate<TMessage>();
 
-			var scope = new CorrelatedMessageRouterConfiguratorScope<TMessage, TKey>();
-
-			router.Inspect(scope);
+			var scope = new InboundCorrelatedMessageRouterConfiguratorScope<TMessage, TKey>();
+			_sink.Inspect(scope);
 
 			return scope.Router ?? ConfigureRouter<TMessage, TKey>(router);
 		}
 
-		public static CorrelatedMessageRouterConfigurator For<TMessage>(IPipelineSink<TMessage> sink)
-			where TMessage : class
-		{
-			return new CorrelatedMessageRouterConfigurator(sink.TranslateTo<IPipelineSink<object>>());
-		}
-
-		private static CorrelatedMessageRouter<TMessage, TKey> ConfigureRouter<TMessage, TKey>(MessageRouter<TMessage> messageRouter)
+		static CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey> ConfigureRouter<TMessage, TKey>(
+			MessageRouter<IConsumeContext<TMessage>> inputRouter)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
-			if (messageRouter == null)
-				throw new PipelineException("The base object router was not found");
+			if (inputRouter == null)
+				throw new PipelineException("The input router was not found");
 
-			var router = new CorrelatedMessageRouter<TMessage, TKey>();
+			var outputRouter = new CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey>();
 
-			messageRouter.Connect(router);
+			inputRouter.Connect(outputRouter);
 
-			return router;
+			return outputRouter;
 		}
 	}
 }

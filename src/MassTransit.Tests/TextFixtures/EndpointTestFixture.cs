@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,40 +13,48 @@
 namespace MassTransit.Tests.TextFixtures
 {
 	using System;
-	using Configuration;
-	using Magnum.DateTimeExtensions;
+	using BusConfigurators;
+	using Configurators;
+	using EndpointConfigurators;
+	using Exceptions;
+	using Magnum.Extensions;
 	using MassTransit.Saga;
-	using MassTransit.Serialization;
+	using MassTransit.Services.Subscriptions;
+	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 
 	[TestFixture]
-	public abstract class EndpointTestFixture<TTransport>
-		where TTransport : IEndpoint
+	public abstract class EndpointTestFixture<TTransportFactory>
+		where TTransportFactory : ITransportFactory, new()
 	{
 		[SetUp]
 		public void Setup()
 		{
-			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
+			if (_endpointFactoryConfigurator != null)
+			{
+				ConfigurationResult result = ConfigurationResultImpl.CompileResults(_endpointFactoryConfigurator.Validate());
 
-			XmlMessageSerializer serializer = new XmlMessageSerializer();
-			ObjectBuilder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(serializer);
-
-			EndpointFactory = EndpointFactoryConfigurator.New(x =>
+				try
 				{
-					x.SetObjectBuilder(ObjectBuilder);
-					x.RegisterTransport<TTransport>();
-					x.SetDefaultSerializer<XmlMessageSerializer>();
+					EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
+					_endpointFactoryConfigurator = null;
 
-					AdditionalEndpointFactoryConfiguration(x);
-				});
-			ObjectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(EndpointFactory);
+					_endpointCache = new EndpointCache(EndpointFactory);
 
-			ServiceBusConfigurator.Defaults(x =>
+					EndpointCache = new EndpointCacheProxy(_endpointCache);
+				}
+				catch (Exception ex)
 				{
-					x.SetObjectBuilder(ObjectBuilder);
-					x.SetReceiveTimeout(500.Milliseconds());
-					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
+					throw new ConfigurationException(result, "An exception was thrown during endpoint cache creation", ex);
+				}
+			}
+
+			ServiceBusFactory.ConfigureDefaultSettings(x =>
+				{
+					x.SetEndpointCache(EndpointCache);
+					x.SetConcurrentConsumerLimit(4);
+					x.SetReceiveTimeout(50.Milliseconds());
+					x.EnableAutoStart();
 				});
 
 			EstablishContext();
@@ -57,17 +65,41 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			TeardownContext();
 
-			EndpointFactory.Dispose();
-			EndpointFactory = null;
+			_endpointCache.Clear();
 		}
 
-		protected virtual void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
+		[TestFixtureTearDown]
+		public void FixtureTeardown()
 		{
+			if (EndpointCache != null)
+			{
+				EndpointCache.Dispose();
+				EndpointCache = null;
+			}
+
+			ServiceBusFactory.ConfigureDefaultSettings(x => { x.SetEndpointCache(null); });
 		}
 
-		protected IEndpointFactory EndpointFactory { get; set; }
+		EndpointFactoryConfiguratorImpl _endpointFactoryConfigurator;
+		EndpointCache _endpointCache;
 
-		protected IObjectBuilder ObjectBuilder { get; private set; }
+		protected EndpointTestFixture()
+		{
+			var defaultSettings = new EndpointFactoryDefaultSettings();
+
+			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(defaultSettings);
+			_endpointFactoryConfigurator.AddTransportFactory<TTransportFactory>();
+			_endpointFactoryConfigurator.SetPurgeOnStartup(true);
+		}
+
+		protected void AddTransport<T>()
+			where T : ITransportFactory, new()
+		{
+			_endpointFactoryConfigurator.AddTransportFactory<T>();
+		}
+
+		protected IEndpointFactory EndpointFactory { get; private set; }
+		protected IEndpointCache EndpointCache { get; set; }
 
 		protected virtual void EstablishContext()
 		{
@@ -77,13 +109,25 @@ namespace MassTransit.Tests.TextFixtures
 		{
 		}
 
-		public static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>(IObjectBuilder builder)
+		protected void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configure)
+		{
+			if (_endpointFactoryConfigurator == null)
+				throw new ConfigurationException("The endpoint factory configurator has already been executed.");
+
+			configure(_endpointFactoryConfigurator);
+		}
+
+		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator,
+		                                          ISubscriptionService subscriptionService)
+		{
+			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionPublisher(subscriptionService));
+			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(subscriptionService));
+		}
+
+		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
 			where TSaga : class, ISaga
 		{
 			var sagaRepository = new InMemorySagaRepository<TSaga>();
-
-			builder.Stub(x => x.GetInstance<ISagaRepository<TSaga>>())
-				.Return(sagaRepository);
 
 			return sagaRepository;
 		}
