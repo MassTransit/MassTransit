@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,7 @@ namespace MassTransit.Tests.Timeouts
     using System.Diagnostics;
     using System.Threading;
     using Magnum;
-    using Magnum.DateTimeExtensions;
+    using Magnum.Extensions;
     using MassTransit.Saga;
     using MassTransit.Services.Timeout;
     using MassTransit.Services.Timeout.Messages;
@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Timeouts
 
             _correlationId = CombGuid.Generate();
 
-        	_timeoutSagaRepository = SetupSagaRepository<TimeoutSaga>(ObjectBuilder);
+        	_timeoutSagaRepository = SetupSagaRepository<TimeoutSaga>();
 
             _timeoutService = new TimeoutService(LocalBus, _timeoutSagaRepository);
             _timeoutService.Start();
@@ -57,13 +57,13 @@ namespace MassTransit.Tests.Timeouts
         {
             var _timedOut = new ManualResetEvent(false);
 
-            LocalBus.Subscribe<TimeoutExpired>(x => _timedOut.Set());
+            LocalBus.SubscribeHandler<TimeoutExpired>(x => _timedOut.Set());
 
             LocalBus.Publish(new ScheduleTimeout(_correlationId, 1.Seconds()));
 
             Stopwatch watch = Stopwatch.StartNew();
 
-            Assert.IsTrue(_timedOut.WaitOne(TimeSpan.FromSeconds(5), true));
+            Assert.IsTrue(_timedOut.WaitOne(TimeSpan.FromSeconds(10), true));
 
             watch.Stop();
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,23 +14,25 @@ namespace MassTransit.Services.HealthMonitoring.Server
 {
 	using System;
 	using log4net;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
 	using Magnum.StateMachine;
 	using Messages;
 	using Saga;
 	using Timeout.Messages;
+	using Util;
 
 	public class HealthSaga :
 		SagaStateMachine<HealthSaga>,
 		ISaga
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (HealthSaga));
+		static readonly ILog _log = LogManager.GetLogger(typeof (HealthSaga));
+		Guid _correlationId;
 
 		static HealthSaga()
 		{
 			Define(() =>
 				{
-					Correlate(EndpointComesOnline).By((saga,message) => saga.ControlUri == message.ControlUri);
+					Correlate(EndpointComesOnline).By((saga, message) => saga.ControlUri == message.ControlUri);
 					Correlate(EndpointHeartBeats).By((saga, message) => saga.ControlUri == message.ControlUri);
 					Correlate(EndpointGoesOffline).By((saga, message) => saga.ControlUri == message.ControlUri);
 					Correlate(EndpointRespondsToPing).By((saga, message) => saga.ControlUri == message.ControlUri);
@@ -84,11 +86,13 @@ namespace MassTransit.Services.HealthMonitoring.Server
 				});
 		}
 
+		[UsedImplicitly]
 		public HealthSaga(Guid correlationId)
 		{
-			CorrelationId = correlationId;
+			_correlationId = correlationId;
 		}
 
+		[UsedImplicitly]
 		public HealthSaga()
 		{
 		}
@@ -110,41 +114,47 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		public virtual Uri DataUri { get; set; }
 		public virtual int HeartbeatIntervalInSeconds { get; set; }
 
-		public virtual Guid CorrelationId { get; set; }
+		public virtual Guid CorrelationId
+		{
+			get { return _correlationId; }
+			set { _correlationId = value; }
+		}
+
 		public virtual IServiceBus Bus { get; set; }
-		public virtual IObjectBuilder Builder { get; set; }
 
-		private void NotifyEndpointIsDown()
+		void NotifyEndpointIsDown()
 		{
-			Bus.Publish(new EndpointIsDown(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat, Down.Name));
+			Bus.Publish(new EndpointIsDown(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat,
+				Down.Name));
 		}
 
-		private void NotifyEndpointIsSuspect()
+		void NotifyEndpointIsSuspect()
 		{
-			Bus.Publish(new EndpointIsSuspect(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat, Suspect.Name));
+			Bus.Publish(new EndpointIsSuspect(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat,
+				Suspect.Name));
 		}
 
-		private void NotifyEndpointIsOffline()
+		void NotifyEndpointIsOffline()
 		{
-			Bus.Publish(new EndpointIsOffline(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat, "Off Line"));
+			Bus.Publish(new EndpointIsOffline(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat,
+				"Off Line"));
 		}
 
-		private void NotifyEndpointIsHealthy()
+		void NotifyEndpointIsHealthy()
 		{
-			Bus.Publish(new EndpointIsHealthy(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat, Healthy.Name));
+			Bus.Publish(new EndpointIsHealthy(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat,
+				Healthy.Name));
 		}
 
-		private void PingUnresponsiveEndpoint()
+		void PingUnresponsiveEndpoint()
 		{
 			Bus.Publish(new ScheduleTimeout(CorrelationId, HeartbeatIntervalInSeconds.Seconds(), (int) Timeouts.PingTimeout));
 
-			Builder
-				.GetInstance<IEndpointFactory>()
-				.GetEndpoint(ControlUri)
+			Bus.GetEndpoint(ControlUri)
 				.Send(new PingEndpoint(CorrelationId));
 		}
 
-		private void ResetHeartbeatTimeout()
+		void ResetHeartbeatTimeout()
 		{
 			LastHeartbeat = DateTime.UtcNow;
 
@@ -153,7 +163,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
 			Bus.Publish(new ScheduleTimeout(CorrelationId, timeoutIn, (int) Timeouts.HeartBeatTimeout));
 		}
 
-		private static void Initialize(HealthSaga saga, EndpointMessageBase message)
+		static void Initialize(HealthSaga saga, EndpointMessageBase message)
 		{
 			saga.ControlUri = message.ControlUri;
 			saga.DataUri = message.DataUri;
@@ -162,7 +172,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
 			saga.ResetHeartbeatTimeout();
 		}
 
-		private enum Timeouts
+		enum Timeouts
 		{
 			HeartBeatTimeout = 1,
 			PingTimeout = 2

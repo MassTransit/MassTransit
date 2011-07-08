@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,10 +13,12 @@
 namespace MassTransit.TestFramework
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
+	using System.Linq.Expressions;
 	using System.Reflection;
 	using System.Threading;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
 	using Magnum.StateMachine;
 	using NUnit.Framework;
 	using Saga;
@@ -27,23 +29,19 @@ namespace MassTransit.TestFramework
 
 		static ExtensionMethodsForSagas()
 		{
-			Timeout = 2.Seconds();
-		}
-
-		public static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>(this IObjectBuilder builder)
-			where TSaga : class, ISaga
-		{
-			var repository = new InMemorySagaRepository<TSaga>();
-
-			builder.Add<ISagaRepository<TSaga>>(repository);
-
-			return repository;
+			Timeout = 8.Seconds();
 		}
 
 		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId)
 			where TSaga : class, ISaga
 		{
-			DateTime giveUpAt = DateTime.Now + Timeout;
+			return ShouldContainSaga(repository, sagaId, Timeout);
+		}
+
+		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
+			where TSaga : class, ISaga
+		{
+			DateTime giveUpAt = DateTime.Now + timeout;
 
 			while (DateTime.Now < giveUpAt)
 			{
@@ -53,7 +51,32 @@ namespace MassTransit.TestFramework
 					return saga;
 				}
 
-				Thread.Sleep(10);
+				Thread.Sleep(30);
+			}
+
+			return null;
+		}
+
+		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter)
+			where TSaga : class, ISaga
+		{
+			return ShouldContainSaga(repository, filter, Timeout);
+		}
+
+		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter, TimeSpan timeout)
+			where TSaga : class, ISaga
+		{
+			DateTime giveUpAt = DateTime.Now + timeout;
+
+			var sagaFilter = new SagaFilter<TSaga>(filter);
+
+			while (DateTime.Now < giveUpAt)
+			{
+				List<TSaga> sagas = repository.Where(sagaFilter).ToList();
+				if (sagas.Count > 0)
+					return sagas.Single();
+
+				Thread.Sleep(30);
 			}
 
 			return null;
@@ -62,14 +85,20 @@ namespace MassTransit.TestFramework
 		public static void ShouldBeInState<TSaga>(this TSaga saga, State state)
 			where TSaga : SagaStateMachine<TSaga>
 		{
-			DateTime giveUpAt = DateTime.Now + Timeout;
+			ShouldBeInState(saga, state, Timeout);
+		}
+
+		public static void ShouldBeInState<TSaga>(this TSaga saga, State state, TimeSpan timeout)
+			where TSaga : SagaStateMachine<TSaga>
+		{
+			DateTime giveUpAt = DateTime.Now + timeout;
 
 			while (DateTime.Now < giveUpAt)
 			{
 				if (saga.CurrentState == state)
 					return;
 
-				Thread.Sleep(10);
+				Thread.Sleep(30);
 			}
 
 			Assert.Fail("The saga was not in the expected state: " + state.Name + " (" + saga.CurrentState.Name + ")");

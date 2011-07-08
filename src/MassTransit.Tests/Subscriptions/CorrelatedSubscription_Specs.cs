@@ -1,61 +1,31 @@
-using System;
-using System.Threading;
-using MassTransit.Pipeline.Inspectors;
-using MassTransit.Pipeline.Sinks;
-using MassTransit.Tests.TextFixtures;
-using MassTransit.Transports;
-using NUnit.Framework;
-
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Subscriptions
 {
+	using MassTransit.Transports.Loopback;
+	using NUnit.Framework;
+	using TestFramework;
+	using TextFixtures;
+
 	[TestFixture]
-	public class Adding_a_correlated_subscription_via_the_subscription_client: //Not bdd style.
-		SubscriptionServiceTestFixture<LoopbackEndpoint>
+	public class Adding_a_correlated_subscription_via_the_subscription_client :
+		SubscriptionServiceTestFixture<LoopbackTransportFactory>
 	{
-        
-		[Test]
-		public void Should_properly_register_the_consumers_for_each_endpoint()
-		{
-			var firstSub = new FirstSybsystem();
-			var secondSub = new SecondSubsystem();
-			LocalBus.Subscribe(firstSub);
-			LocalBus.Subscribe(secondSub);
-			Thread.Sleep(2500);
-			var inspector = new CorrelatedRouterPipelineInspector();
-			RemoteBus.OutboundPipeline.Inspect(inspector);
-			inspector.PipelineHasRightRoutings.ShouldBeTrue("OutboundPipeline on publisher should contains 'CorrelatedMessageSinkRouter' for IncomingMessage with 'FirstSybsystemCorrelationId' and 'SecondSubsystemCorrelationId' correlations id's.");
-		}
+		const string FirstCorrelationId = "FirstSybsystemCorrelationId";
+		const string SecondCorrelationId = "SecondSubsystemCorrelationId";
 
-
-		public class CorrelatedRouterPipelineInspector : PipelineInspectorBase<CorrelatedRouterPipelineInspector>
-		{
-			private bool firstSubSystemRouteDefined;
-			private bool secondSubSystemRouteDefined;
-
-			public virtual bool PipelineHasRightRoutings
-			{
-				get { return firstSubSystemRouteDefined && secondSubSystemRouteDefined; }
-			}
-
-			public bool Inspect<TMessage, TKey>(CorrelatedMessageSinkRouter<TMessage, TKey> sink)
-				where TMessage : class, CorrelatedBy<TKey>
-			{
-
-				if (sink.CorrelationId.ToString() == "FirstSybsystemCorrelationId")
-				{
-					firstSubSystemRouteDefined = true;   
-				}
-
-				if (sink.CorrelationId.ToString() == "SecondSubsystemCorrelationId")
-				{
-					secondSubSystemRouteDefined = true;
-				}
-
-				return true;
-			}
-		}
-
-		public class FirstSybsystem : Consumes<IncomingMessage>.For<string>
+		public class FirstComponent :
+			Consumes<IncomingMessage>.For<string>
 		{
 			public void Consume(IncomingMessage message)
 			{
@@ -63,11 +33,12 @@ namespace MassTransit.Tests.Subscriptions
 
 			public string CorrelationId
 			{
-				get { return "FirstSybsystemCorrelationId"; }
+				get { return FirstCorrelationId; }
 			}
 		}
 
-		public class SecondSubsystem : Consumes<IncomingMessage>.For<string>
+		public class SecondComponent :
+			Consumes<IncomingMessage>.For<string>
 		{
 			public void Consume(IncomingMessage message)
 			{
@@ -75,29 +46,36 @@ namespace MassTransit.Tests.Subscriptions
 
 			public string CorrelationId
 			{
-				get { return "SecondSubsystemCorrelationId"; }
+				get { return SecondCorrelationId; }
 			}
 		}
 
-		[Serializable]
-		public class IncomingMessage : CorrelatedBy<string>
+		public class IncomingMessage :
+			CorrelatedBy<string>
 		{
-			private string correlationId;
-
 			protected IncomingMessage()
 			{
 			}
 
 			public IncomingMessage(string correlationId)
 			{
-				this.correlationId = correlationId;
+				CorrelationId = correlationId;
 			}
 
-			public virtual string CorrelationId
-			{
-				get { return correlationId; }
-				protected set { correlationId = value; }
-			}
+			public string CorrelationId { get; protected set; }
+		}
+
+		[Test]
+		public void Should_properly_register_the_consumers_for_each_endpoint()
+		{
+			var firstComponent = new FirstComponent();
+			LocalBus.SubscribeInstance(firstComponent);
+
+			var secondComponent = new SecondComponent();
+			LocalBus.SubscribeInstance(secondComponent);
+
+			RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(FirstCorrelationId);
+			RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(SecondCorrelationId);
 		}
 	}
 }

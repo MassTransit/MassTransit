@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,173 +12,245 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-	using System;
-	using System.Threading;
-	using Internal;
-	using Magnum.Actors;
-	using Magnum.Actors.CommandQueues;
-	using Magnum.Actors.Schedulers;
-	using Magnum.DateTimeExtensions;
-	using Messages;
+    using System;
+    using System.Threading;
+    using Context;
+    using Magnum.Extensions;
+    using Messages;
+    using Stact;
+    using Stact.Internal;
 
-	public class Worker<T> :
-		IWorker<T>,
-		Consumes<WakeUpWorker>.All,
-		Consumes<PingWorker>.All,
-		Consumes<Distributed<T>>.Selected
-		where T : class
-	{
-		private readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
-		private IServiceBus _bus;
-		private IServiceBus _controlBus;
-		private Uri _controlUri;
-		private Uri _dataUri;
-		private Func<T, Action<T>> _getConsumer;
-		private int _inProgress;
-		private int _inProgressLimit = 4;
-		private int _pendingLimit = 16;
-		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
-		private UnsubscribeAction _unsubscribeAction = () => false;
-		private bool _updatePending;
-		private bool _wakeUpPending;
-	    private ThreadPoolScheduler _threadPoolScheduler;
+    public class Worker<TMessage> :
+        IWorker<TMessage>,
+        Consumes<WakeUpWorker>.All
+        where TMessage : class
+    {
+        readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
+        IServiceBus _bus;
+        IServiceBus _controlBus;
+        Uri _controlUri;
+        Uri _dataUri;
+        Func<TMessage, Action<TMessage>> _getConsumer;
+        int _inProgress;
+        int _inProgressLimit = 4;
+        int _pendingLimit = 16;
+        readonly Fiber _fiber = new PoolFiber();
+        UnsubscribeAction _unsubscribeAction = () => false;
+        bool _updatePending;
+        bool _wakeUpPending;
+        Scheduler _scheduler;
+        ScheduledOperation _scheduled;
 
-		public Worker(Func<T, Action<T>> getConsumer)
-			: this(getConsumer, new WorkerSettings())
-		{
-		}
+        public Worker(Func<TMessage, Action<TMessage>> getConsumer)
+            : this(getConsumer, new WorkerSettings())
+        {
+        }
 
-		public Worker(Func<T, Action<T>> getConsumer, WorkerSettings settings)
-		{
-			_getConsumer = getConsumer;
+        public Worker(Func<TMessage, Action<TMessage>> getConsumer, WorkerSettings settings)
+        {
+            _getConsumer = getConsumer;
 
-			_inProgress = 0;
-			_inProgressLimit = settings.InProgressLimit;
-			_pendingLimit = settings.PendingLimit;
-		}
+            _inProgress = 0;
+            _inProgressLimit = settings.InProgressLimit;
+            _pendingLimit = settings.PendingLimit;
+        }
 
-		public void Consume(Distributed<T> message)
-		{
-			_pendingMessages.Consumed(message.CorrelationId);
+        public void Consume(Distributed<TMessage> message)
+        {
+            _pendingMessages.Consumed(message.CorrelationId);
 
-			Action<T> consumer = _getConsumer(message.Payload);
+            Action<TMessage> consumer = _getConsumer(message.Payload);
 
-			Interlocked.Increment(ref _inProgress);
-			try
-			{
-				RewriteResponseAddress(message.ResponseAddress);
+            Interlocked.Increment(ref _inProgress);
+            try
+            {
+                RewriteResponseAddress(message.ResponseAddress);
 
-				consumer(message.Payload);
-			}
-			finally
-			{
-				Interlocked.Decrement(ref _inProgress);
+                consumer(message.Payload);
 
-				ScheduleUpdate();
-				ScheduleWakeUp();
+            	var consumeContext = _bus.MessageContext<Distributed<TMessage>>();
 
-				var disposal = consumer as IDisposable;
-				if (disposal != null)
-				{
-					disposal.Dispose();
-				}
-			}
-		}
+            	consumeContext.BaseContext.NotifyConsume(consumeContext, typeof (Worker<TMessage>).ToShortTypeName(),
+            		message.CorrelationId.ToString());
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _inProgress);
 
-		public bool Accept(Distributed<T> message)
-		{
-			if (_inProgress >= _inProgressLimit)
-			{
-				_pendingMessages.Viewed(message.CorrelationId);
-				return false;
-			}
+                ScheduleUpdate();
+                ScheduleWakeUp();
 
-			return true;
-		}
+                var disposal = consumer as IDisposable;
+                if (disposal != null)
+                {
+                    disposal.Dispose();
+                }
+            }
+        }
 
-		public void Consume(PingWorker message)
-		{
-			PublishWorkerAvailability();
-		}
+        public bool Accept(Distributed<TMessage> message)
+        {
+            if (_inProgress >= _inProgressLimit)
+            {
+                _pendingMessages.Viewed(message.CorrelationId);
+                return false;
+            }
 
-		public void Consume(WakeUpWorker message)
-		{
-			_wakeUpPending = false;
-		}
+            return true;
+        }
 
-		public void Dispose()
-		{
-			_controlBus = null;
-			_getConsumer = null;
-		}
+        void Consume(PingWorker message)
+        {
+            PublishWorkerAvailability();
+        }
 
-		public void Start(IServiceBus bus)
-		{
-			_bus = bus;
-			_controlBus = bus.ControlBus;
+        public void Consume(WakeUpWorker message)
+        {
+            _wakeUpPending = false;
+        }
 
-			_dataUri = _bus.Endpoint.Uri;
-			_controlUri = _controlBus.Endpoint.Uri;
+        bool _disposed;
 
-			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker>(Consume, Accept);
-			_unsubscribeAction += bus.ControlBus.Subscribe<PingWorker>(Consume);
-			_unsubscribeAction += bus.Subscribe(this);
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-            _threadPoolScheduler = new ThreadPoolScheduler();
+        ~Worker()
+        {
+            Dispose(false);
+        }
 
-		    _threadPoolScheduler.Schedule((int) 3.Seconds().TotalMilliseconds, (int) 1.Minutes().TotalMilliseconds, PublishWorkerAvailability);
-		}
+        void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                Stop();
+                _fiber.Stop();
 
-	    public void Stop()
-		{
-	        _threadPoolScheduler.Dispose();
-			_unsubscribeAction();
-		}
+                _controlBus = null;
+                _getConsumer = null;
+            }
 
-        private bool Accept(ConfigureWorker message)
+            _disposed = true;
+        }
+
+        public void Start(IServiceBus bus)
+        {
+            _bus = bus;
+            _controlBus = bus.ControlBus;
+
+            _dataUri = _bus.Endpoint.Address.Uri;
+            _controlUri = _controlBus.Endpoint.Address.Uri;
+
+            _unsubscribeAction = bus.ControlBus.SubscribeHandler<ConfigureWorker>(Consume, Accept);
+            _unsubscribeAction += bus.ControlBus.SubscribeHandler<PingWorker>(Consume);
+
+            _unsubscribeAction += bus.SubscribeInstance(this);
+
+            _scheduler = new TimerScheduler(new PoolFiber());
+            _scheduled = _scheduler.Schedule(3.Seconds(), 3.Seconds(), _fiber, PublishWorkerAvailability);
+        }
+
+        public void Stop()
+        {
+            if (_scheduled != null)
+            {
+                _scheduled.Cancel();
+                _scheduled = null;
+            }
+
+            if (_scheduler != null)
+            {
+                _scheduler.Stop(60.Seconds());
+                _scheduler = null;
+            }
+
+            if (_fiber != null)
+            {
+                _fiber.Shutdown(60.Seconds());
+            }
+
+            if (_unsubscribeAction != null)
+            {
+                _unsubscribeAction();
+                _unsubscribeAction = null;
+            }
+        }
+
+        bool Accept(ConfigureWorker message)
         {
             return GetType().GetGenericArguments()[0].FullName == message.MessageType;
         }
 
-		private void Consume(ConfigureWorker message)
-		{
-			if (message.InProgressLimit >= 0)
-				_inProgressLimit = message.InProgressLimit;
+        void Consume(ConfigureWorker message)
+        {
+            if (message.InProgressLimit >= 0)
+                _inProgressLimit = message.InProgressLimit;
 
-			if (message.PendingLimit >= 0)
-				_pendingLimit = message.PendingLimit;
+            if (message.PendingLimit >= 0)
+                _pendingLimit = message.PendingLimit;
 
-			PublishWorkerAvailability();
-		}
+            ScheduleUpdate();
+        }
 
-		private void ScheduleWakeUp()
-		{
-			if (!_wakeUpPending)
-			{
-				_wakeUpPending = true;
-				_queue.Enqueue(() => _bus.Endpoint.Send(new WakeUpWorker()));
-			}
-		}
+        void ScheduleWakeUp()
+        {
+            if (!_wakeUpPending)
+            {
+                _wakeUpPending = true;
+                _fiber.Add(() =>
+                    {
+                        try
+                        {
+                            _bus.Endpoint.Send(new WakeUpWorker());
+                        }
+                        catch
+                        {
+                        }
+                    });
+            }
+        }
 
-		private void ScheduleUpdate()
-		{
-			if (!_updatePending)
-			{
-				_updatePending = true;
-				_queue.Enqueue(PublishWorkerAvailability);
-			}
-		}
+        void ScheduleUpdate()
+        {
+            if (!_updatePending)
+            {
+                _updatePending = true;
+                try
+                {
+                    _fiber.Add(PublishWorkerAvailability);
+                }
+                catch
+                {
+                }
+            }
+        }
 
-		private void PublishWorkerAvailability()
-		{
-			_updatePending = false;
+        void PublishWorkerAvailability()
+        {
+            try
+            {
+                var message = new WorkerAvailable<TMessage>(_controlUri, _dataUri, _inProgress, _inProgressLimit,
+                    _pendingMessages.PendingMessageCount(), _pendingLimit);
+                _updatePending = false;
 
-			_bus.Publish(new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pendingMessages.PendingMessageCount(), _pendingLimit));
-		}
+                _bus.Publish(message);
+            }
+            catch
+            {
+            }
+        }
 
-		private static void RewriteResponseAddress(Uri responseAddress)
-		{
-			InboundMessageHeaders.SetCurrent(x => x.SetResponseAddress(responseAddress));
-		}
-	}
+        static void RewriteResponseAddress(Uri responseAddress)
+        {
+            var context = ContextStorage.MessageContext<Distributed<TMessage>>() as ConsumeContext<Distributed<TMessage>>;
+            if (context != null)
+            {
+                context.SetResponseAddress(responseAddress);
+            }
+        }
+    }
 }

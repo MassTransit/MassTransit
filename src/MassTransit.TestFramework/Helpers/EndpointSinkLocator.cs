@@ -30,9 +30,9 @@ namespace MassTransit.TestFramework.Helpers
 
 		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink) where TMessage : class
 		{
-			if (typeof (TMessage) == _messageType)
+			if (typeof(TMessage) == _messageType)
 			{
-				DestinationAddress = sink.Address;
+				DestinationAddress = sink.Endpoint.Address.Uri;
 				return false;
 			}
 

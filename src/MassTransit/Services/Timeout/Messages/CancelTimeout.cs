@@ -21,7 +21,45 @@ namespace MassTransit.Services.Timeout.Messages
     public class CancelTimeout :
         CorrelatedBy<Guid>
     {
-    	public Guid CorrelationId { get; set; }
-		public int Tag { get; set; }
+        /*
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CancelTimeout"/> class.
+        /// </summary>
+	    protected CancelTimeout()
+	    {
+	    }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CancelTimeout"/> class.
+        /// </summary>
+        /// <param name="correlationId">The correlation id.</param>
+	    public CancelTimeout(Guid correlationId)
+	    {
+	        CorrelationId = correlationId;
+	    }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CancelTimeout"/> class.
+        /// </summary>
+        /// <param name="correlationId">The correlation id.</param>
+        /// <param name="tag">The tag.</param>
+	    public CancelTimeout(Guid correlationId, int tag)
+	    {
+	        CorrelationId = correlationId;
+	        Tag = tag;
+	    }
+        */
+        /// <summary>
+        /// Gets the correlation id.
+        /// </summary>
+	    public Guid CorrelationId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tag.
+        /// </summary>
+        /// <value>
+        /// The tag.
+        /// </value>
+        public int Tag { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,42 +12,37 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
-    using System;
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
+	using Context;
 
-    public class MessageInterceptor :
-        PipelineSinkBase<object, object>
-    {
-        public Action BeforeConsume { get; private set; }
-        public Action AfterConsume { get; private set; }
+	public class InboundMessageInterceptor :
+		IPipelineSink<IConsumeContext>
+	{
+		readonly IInboundMessageInterceptor _interceptor;
+		readonly IPipelineSink<IConsumeContext> _output;
 
-        public MessageInterceptor(Func<IPipelineSink<object>, IPipelineSink<object>> insertAfter, Action beforeConsume, Action afterConsume)
-            : base(null)
-        {
-            BeforeConsume = beforeConsume ?? Noop;
-            AfterConsume = afterConsume ?? Noop;
-            ReplaceOutputSink(insertAfter(this));
-        }
+		public InboundMessageInterceptor(Func<IPipelineSink<IConsumeContext>, IPipelineSink<IConsumeContext>> insertAfter,
+								  IInboundMessageInterceptor interceptor)
+		{
+			_interceptor = interceptor;
 
-        private static void Noop()
-        {
-        }
+			_output = insertAfter(this);
+		}
 
-        public override IEnumerable<Action<object>> Enumerate(object message)
-        {
-            BeforeConsume();
+		public IEnumerable<Action<IConsumeContext>> Enumerate(IConsumeContext context)
+		{
+			_interceptor.PreDispatch(context);
 
-            foreach (Action<object> consumer in _outputSink.Enumerate(message))
-            {
-                yield return consumer;
-            }
+			foreach (var consumer in _output.Enumerate(context))
+				yield return consumer;
 
-            AfterConsume();
-        }
+			_interceptor.PostDispatch(context);
+		}
 
-        public override bool Inspect(IPipelineInspector inspector)
-        {
-            return inspector.Inspect(this) && _outputSink.Inspect(inspector);
-        }
-    }
+		public bool Inspect(IPipelineInspector inspector)
+		{
+			return inspector.Inspect(this) && _output.Inspect(inspector);
+		}
+	}
 }

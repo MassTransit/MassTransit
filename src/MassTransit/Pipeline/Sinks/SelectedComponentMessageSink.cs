@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
+	using Magnum.Extensions;
 
 	/// <summary>
 	/// Routes messages to instances of subscribed components. A new instance of the component
@@ -22,36 +23,20 @@ namespace MassTransit.Pipeline.Sinks
 	/// <typeparam name="TComponent">The component type to handle the message</typeparam>
 	/// <typeparam name="TMessage">The message to handle</typeparam>
 	public class SelectedComponentMessageSink<TComponent, TMessage> :
-		IPipelineSink<TMessage>
+		IPipelineSink<IConsumeContext<TMessage>>
 		where TMessage : class
 		where TComponent : class, Consumes<TMessage>.Selected
 	{
-		private readonly IObjectBuilder _builder;
+		readonly IConsumerFactory<TComponent> _consumerFactory;
 
-		public SelectedComponentMessageSink(ISubscriberContext context)
+		public SelectedComponentMessageSink(IConsumerFactory<TComponent> consumerFactory)
 		{
-			_builder = context.Builder;
+			_consumerFactory = consumerFactory;
 		}
 
-		public void Dispose()
+		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
 		{
-		}
-
-		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
-		{
-			Consumes<TMessage>.Selected consumer = BuildConsumer();
-
-			try
-			{
-				if (consumer.Accept(message) == false)
-					yield break;
-
-				yield return consumer.Consume;
-			}
-			finally
-			{
-				Release(consumer);
-			}
+			return _consumerFactory.GetConsumer(context, Selector);
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
@@ -59,18 +44,26 @@ namespace MassTransit.Pipeline.Sinks
 			return inspector.Inspect(this);
 		}
 
-		private void Release(Consumes<TMessage>.Selected consumer)
+		IEnumerable<Action<IConsumeContext<TMessage>>> Selector(TComponent instance, IConsumeContext<TMessage> messageContext)
 		{
-			_builder.Release(consumer.TranslateTo<TComponent>());
-		}
+			bool accept;
+			using (messageContext.CreateScope())
+			{
+				accept = instance.Accept(messageContext.Message);
+			}
 
-		private Consumes<TMessage>.Selected BuildConsumer()
-		{
-			TComponent component = _builder.GetInstance<TComponent>();
+			if (accept)
+			{
+				yield return context =>
+					{
+						context.BaseContext.NotifyConsume(context, typeof (TComponent).ToShortTypeName(), null);
 
-			Consumes<TMessage>.Selected consumer = component.TranslateTo<Consumes<TMessage>.Selected>();
-
-			return consumer;
+						using (context.CreateScope())
+						{
+							instance.Consume(context.Message);
+						}
+					};
+			}
 		}
 	}
 }

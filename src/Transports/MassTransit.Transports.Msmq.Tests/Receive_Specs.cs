@@ -14,6 +14,8 @@ namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
 	using System.Messaging;
+	using Context;
+	using Magnum.TestFramework;
 	using MassTransit.Tests.Messages;
 	using NUnit.Framework;
 	using TestFixtures;
@@ -25,27 +27,31 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void An_undecipherable_blob_should_be_discarded()
 		{
-			using (var queue = new MessageQueue(EndpointAddress.FormatName, QueueAccessMode.Send))
+			var formatName = Endpoint.Address.Uri.GetInboundFormatName();
+			using (var queue = new MessageQueue(formatName, QueueAccessMode.Send))
 			{
 				queue.Send("This is just crap, it will cause pain");
 			}
 
 			try
 			{
-				Endpoint.Receive(message =>
+				Endpoint.Receive(context =>
 					{
+						IConsumeContext<PingMessage> pingContext;
+						context.TryGetContext(out pingContext);
+
 						Assert.Fail("Receive should have thrown a serialization exception");
 
 						return null;
-					});
+					}, TimeSpan.Zero);
 			}
 			catch (Exception ex)
 			{
 				Assert.Fail("Did not expect " + ex.GetType() + " = " + ex.Message);
 			}
 
-			Assert.AreEqual(0, EndpointAddress.GetMessageCount(), "Endpoint was not empty");
-			Assert.AreEqual(1, ErrorEndpointAddress.GetMessageCount(), "Error endpoint did not contain bogus message");
+			Assert.AreEqual(0, EndpointAddress.GetMsmqMessageCount(), "Endpoint was not empty");
+			Assert.AreEqual(1, ErrorEndpointAddress.GetMsmqMessageCount(), "Error endpoint did not contain bogus message");
 		}
 
 		[Test]
@@ -54,13 +60,15 @@ namespace MassTransit.Transports.Msmq.Tests
 			Endpoint.Send(new PingMessage());
 
 			int count = 0;
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
-					Assert.IsInstanceOf<PingMessage>(message);
+					IConsumeContext<PingMessage> pingContext;
+					context.TryGetContext(out pingContext).ShouldBeTrue();
+					
 					count++;
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 
 			Assert.AreEqual(1, count);
 		}
@@ -69,12 +77,12 @@ namespace MassTransit.Transports.Msmq.Tests
 		public void Reading_from_an_empty_queue_should_just_return_an_empty_enumerator()
 		{
 			int count = 0;
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
 					count++;
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 
 			Assert.AreEqual(0, count);
 		}
@@ -85,22 +93,24 @@ namespace MassTransit.Transports.Msmq.Tests
 			Endpoint.Send(new PingMessage());
 
 			int count = 0;
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
-					Assert.IsInstanceOf<PingMessage>(message);
+					IConsumeContext<PingMessage> pingContext;
+					context.TryGetContext(out pingContext).ShouldBeTrue();
 					count++;
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 
 			int secondCount = 0;
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
-					Assert.IsInstanceOf<PingMessage>(message);
+					IConsumeContext<PingMessage> pingContext;
+					context.TryGetContext(out pingContext).ShouldBeTrue();
 					secondCount++;
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 
 			Assert.AreEqual(1, count);
 			Assert.AreEqual(1, secondCount);
@@ -111,21 +121,23 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			Endpoint.Send(new PingMessage());
 
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
-					Assert.IsInstanceOf<PingMessage>(message);
+					IConsumeContext<PingMessage> pingContext;
+					context.TryGetContext(out pingContext).ShouldBeTrue();
 
 					return m => { };
-				});
+				}, TimeSpan.Zero);
 
 			int count = 0;
-			Endpoint.Receive(message =>
+			Endpoint.Receive(context =>
 				{
-					Assert.IsInstanceOf<PingMessage>(message);
+					IConsumeContext<PingMessage> pingContext;
+					context.TryGetContext(out pingContext).ShouldBeTrue();
 					count++;
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 
 			Assert.AreEqual(0, count);
 		}

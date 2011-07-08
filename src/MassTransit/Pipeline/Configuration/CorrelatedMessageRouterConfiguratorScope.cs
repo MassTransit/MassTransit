@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,22 +12,25 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
-	using MassTransit;
+	using Context;
 	using Inspectors;
 	using Sinks;
+	using Util;
 
-	public class CorrelatedMessageRouterConfiguratorScope<TMessage, TKey> : 
-		PipelineInspectorBase<CorrelatedMessageRouterConfiguratorScope<TMessage, TKey>>
+	public class InboundCorrelatedMessageRouterConfiguratorScope<TMessage, TKey> :
+		PipelineInspectorBase<InboundCorrelatedMessageRouterConfiguratorScope<TMessage, TKey>>
 		where TMessage : class, CorrelatedBy<TKey>
 	{
-		public CorrelatedMessageRouter<TMessage, TKey> Router { get; private set; }
+		public CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey> Router { get; private set; }
 
-		public bool Inspect<TRoutedMessage, TRoutedKey>(CorrelatedMessageRouter<TRoutedMessage, TRoutedKey> element)
-			where TRoutedMessage : class, CorrelatedBy<TRoutedKey>
+		[UsedImplicitly]
+		public bool Inspect<T, TM, TK>(CorrelatedMessageRouter<T, TM, TK> router)
+			where T : class, IMessageContext<TM>
+			where TM : class, CorrelatedBy<TK>
 		{
-			if (typeof (TRoutedMessage) == typeof (TMessage))
+			if (typeof (T) == typeof (IConsumeContext<TMessage>) && typeof (TM) == typeof (TMessage) && typeof (TK) == typeof (TKey))
 			{
-				Router = element.TranslateTo<CorrelatedMessageRouter<TMessage, TKey>>();
+				Router = router.TranslateTo<CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey>>();
 
 				return false;
 			}

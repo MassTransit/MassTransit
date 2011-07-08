@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,30 +13,39 @@
 namespace MassTransit.Tests
 {
 	using System;
+	using BusConfigurators;
 	using Messages;
 	using NUnit.Framework;
 	using TestConsumers;
 	using TextFixtures;
-	using Rhino.Mocks;
+	using TestFramework;
 
 	[TestFixture]
 	public class When_a_request_message_is_published :
 		LoopbackLocalAndRemoteTestFixture
 	{
-		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
+		static readonly TimeSpan _timeout = TimeSpan.FromSeconds(8);
+
+
+		protected override void ConfigureRemoteBus(ServiceBusConfigurator configurator)
+		{
+			base.ConfigureRemoteBus(configurator);
+
+			configurator.Subscribe(x => x.Consumer<TestReplyService<PingMessage, Guid, PongMessage>>());
+		}
 
 		[Test]
 		public void A_reply_should_be_received_by_the_requestor()
 		{
-			ObjectBuilder.Stub(x => x.GetInstance<TestReplyService<PingMessage, Guid, PongMessage>>())
-				.Return(new TestReplyService<PingMessage, Guid, PongMessage> {Bus = RemoteBus});
+			RemoteBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
-			RemoteBus.Subscribe<TestReplyService<PingMessage, Guid, PongMessage>>();
+			var message = new PingMessage();
 
-			PingMessage message = new PingMessage();
+			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(message.CorrelationId);
+			LocalBus.SubscribeInstance(consumer);
 
-			TestCorrelatedConsumer<PongMessage, Guid> consumer = new TestCorrelatedConsumer<PongMessage, Guid>(message.CorrelationId);
-			LocalBus.Subscribe(consumer);
+			RemoteBus.ShouldHaveRemoteSubscriptionFor<PongMessage>();
 
 			LocalBus.Publish(message);
 

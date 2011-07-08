@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,7 @@
 namespace MassTransit.Tests
 {
 	using System.Collections;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -51,7 +51,7 @@ namespace MassTransit.Tests
 			FutureMessage<PingMessage> fm = new FutureMessage<PingMessage>();
 			PingHandler handler = new PingHandler(fm);
 
-			LocalBus.Subscribe(handler);
+			LocalBus.SubscribeInstance(handler);
 
 			int old = PingHandler.Pinged;
 
@@ -63,14 +63,9 @@ namespace MassTransit.Tests
 		[Test]
 		public void A_consumer_type_should_be_created_to_receive_the_message()
 		{
-			FutureMessage<PingMessage> fm = new FutureMessage<PingMessage>();
-			PingHandler ph = new PingHandler(fm);
+			var fm = new FutureMessage<PingMessage>();
 
-			ObjectBuilder.Stub(x => x.GetInstance<PingHandler>()).Return(ph);
-			ObjectBuilder.Stub(x => x.GetInstance<PingHandler>(new Hashtable())).IgnoreArguments().Return(ph);
-
-
-			LocalBus.Subscribe<PingHandler>();
+			LocalBus.SubscribeConsumer<PingHandler>(() => new PingHandler(fm));
 
 			int old = PingHandler.Pinged;
 

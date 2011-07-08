@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TestConsumers
 {
+	using Context;
 	using Magnum.Reflection;
 
 	public class TestReplyService<TMessage, TKey, TReplyMessage> :
@@ -20,14 +21,12 @@ namespace MassTransit.Tests.TestConsumers
 		where TMessage : class, CorrelatedBy<TKey>
 		where TReplyMessage : class, CorrelatedBy<TKey>
 	{
-		public IServiceBus Bus { get; set; }
-
 		public override void Consume(TMessage message)
 		{
 			base.Consume(message);
 
 			var reply = FastActivator<TReplyMessage>.Create(message.CorrelationId);
-			Bus.Publish(reply);
+			ContextStorage.Context().Respond(reply);
 		}
 	}
 }

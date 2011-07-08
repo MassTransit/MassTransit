@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,13 +13,13 @@
 namespace MassTransit
 {
 	/// <summary>
-	/// Used to identify a message as correlated so that the CorrelationId can be returned
+	///   Used to identify a message as correlated so that the CorrelationId can be returned
 	/// </summary>
-	/// <typeparam name="TKey">The type of the CorrelationId used</typeparam>
+	/// <typeparam name = "TKey">The type of the CorrelationId used</typeparam>
 	public interface CorrelatedBy<TKey>
 	{
 		/// <summary>
-		/// Returns the CorrelationId for the message
+		///   Returns the CorrelationId for the message
 		/// </summary>
 		TKey CorrelationId { get; }
 	}

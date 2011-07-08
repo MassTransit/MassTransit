@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,12 +15,11 @@ namespace MassTransit.Transports.Msmq.Tests
 	using System;
 	using System.Linq;
 	using System.Threading;
-	using Infrastructure.Saga;
-	using Infrastructure.Tests.Sagas;
 	using log4net;
 	using Magnum;
+	using NHibernateIntegration.Saga;
+	using NHibernateIntegration.Tests.Sagas;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using Saga;
 	using TestFixtures;
 
@@ -28,16 +27,15 @@ namespace MassTransit.Transports.Msmq.Tests
 	public class Sending_multiple_initiating_messages_should_not_fail_badly :
 		MsmqConcurrentSagaTestFixtureBase
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (Sending_multiple_initiating_messages_should_not_fail_badly));
+		static readonly ILog _log = LogManager.GetLogger(typeof (Sending_multiple_initiating_messages_should_not_fail_badly));
 
-		private ISagaRepository<ConcurrentLegacySaga> _sagaRepository;
+		ISagaRepository<ConcurrentLegacySaga> _sagaRepository;
 
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
-			_sagaRepository = new NHibernateSagaRepositoryForContainers<ConcurrentLegacySaga>(SessionFactory);
-			ObjectBuilder.Stub(x => x.GetInstance<ISagaRepository<ConcurrentLegacySaga>>()).Return(_sagaRepository);
+			_sagaRepository = new NHibernateSagaRepository<ConcurrentLegacySaga>(SessionFactory);
 		}
 
 		[Test]
@@ -56,9 +54,9 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			_log.Info("Just published the start message");
 
-			UnsubscribeAction unsubscribeAction = LocalBus.Subscribe<ConcurrentLegacySaga>();
+			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga(_sagaRepository);
 
-			Thread.Sleep(1500);
+			Thread.Sleep(3000);
 
 			const int nextValue = 2;
 			var continueConcurrentSaga = new ContinueConcurrentSaga {CorrelationId = transactionId, Value = nextValue};

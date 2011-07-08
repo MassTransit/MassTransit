@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,29 +12,27 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
-    using System.IO;
+	using System;
+	using Context;
 
-    public class NullTransport :
-        TransportBase
-    {
-        public NullTransport(IEndpointAddress address) : base(address)
-        {
-        }
+	public class NullTransport :
+		TransportBase
+	{
+		public NullTransport(IEndpointAddress address)
+			: base(address)
+		{
+		}
 
-        public override void OnDisposing()
-        {
-            //no-op
-        }
+		public override void Send(ISendContext context)
+		{
+		}
 
-        public override void Send(Action<Stream> sender)
-        {
-            //no-op
-        }
+		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+		{
+		}
 
-        public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
-        {
-            //no-op
-        }
-    }
+		protected override void OnDisposing()
+		{
+		}
+	}
 }

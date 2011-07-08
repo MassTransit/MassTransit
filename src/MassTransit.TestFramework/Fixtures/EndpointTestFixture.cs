@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,82 +15,113 @@ namespace MassTransit.TestFramework.Fixtures
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Configuration;
-	using Magnum.DateTimeExtensions;
+	using BusConfigurators;
+	using Configurators;
+	using EndpointConfigurators;
+	using Exceptions;
+	using Magnum.Extensions;
+	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Rhino.Mocks;
-	using Serialization;
+	using Saga;
+	using Services.Subscriptions;
 
 	[TestFixture]
-	public class EndpointTestFixture<TEndpoint> :
+	public class EndpointTestFixture<TTransportFactory> :
 		AbstractTestFixture
-		where TEndpoint : IEndpoint
+		where TTransportFactory : ITransportFactory, new()
 	{
 		[TestFixtureSetUp]
-		public void EndpointTestFixtureSetup()
+		public void Setup()
 		{
-			SetupObjectBuilder();
+			if (_endpointFactoryConfigurator != null)
+			{
+				ConfigurationResult result = ConfigurationResultImpl.CompileResults(_endpointFactoryConfigurator.Validate());
 
-			SetupMessageSerializer();
+				try
+				{
+					EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
+					_endpointFactoryConfigurator = null;
 
-			SetupEndpointFactory();
+					_endpointCache = new EndpointCache(EndpointFactory);
+					EndpointCache = new EndpointCacheProxy(_endpointCache);
+				}
+				catch (Exception ex)
+				{
+					throw new ConfigurationException(result, "An exception was thrown during endpoint cache creation", ex);
+				}
+			}
 
-			SetupServiceBusDefaults();
+			ServiceBusFactory.ConfigureDefaultSettings(x =>
+				{
+					x.SetEndpointCache(EndpointCache);
+					x.SetConcurrentConsumerLimit(4);
+					x.SetReceiveTimeout(150.Milliseconds());
+					x.EnableAutoStart();
+				});
 		}
 
 		[TestFixtureTearDown]
-		public void EndpointTestFixtureTeardown()
+		public void FixtureTeardown()
 		{
 			TeardownBuses();
 
-			EndpointFactory.Dispose();
-			EndpointFactory = null;
+			if (EndpointCache != null)
+			{
+				_endpointCache.Dispose();
+				_endpointCache = null;
+				EndpointCache = null;
+			}
+
+			ServiceBusFactory.ConfigureDefaultSettings(x => { x.SetEndpointCache(null); });
 		}
 
 		protected EndpointTestFixture()
 		{
 			Buses = new List<IServiceBus>();
+
+			var defaultSettings = new EndpointFactoryDefaultSettings();
+
+			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(defaultSettings);
+			_endpointFactoryConfigurator.AddTransportFactory<TTransportFactory>();
+			_endpointFactoryConfigurator.SetPurgeOnStartup(true);
 		}
 
-		protected virtual void SetupObjectBuilder()
+		protected void AddTransport<T>()
+			where T : ITransportFactory, new()
 		{
-			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
+			_endpointFactoryConfigurator.AddTransportFactory<T>();
 		}
 
-		protected virtual void SetupMessageSerializer()
+		protected IEndpointFactory EndpointFactory { get; private set; }
+
+		protected void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configure)
 		{
-			ObjectBuilder.Add(new XmlMessageSerializer());
+			if (_endpointFactoryConfigurator == null)
+				throw new ConfigurationException("The endpoint factory configurator has already been executed.");
+
+			configure(_endpointFactoryConfigurator);
 		}
 
-		protected virtual void SetupEndpointFactory()
+		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator,
+		                                          ISubscriptionService subscriptionService)
 		{
-			EndpointFactory = EndpointFactoryConfigurator.New(x =>
-				{
-					x.SetObjectBuilder(ObjectBuilder);
-					x.RegisterTransport<TEndpoint>();
-					x.SetDefaultSerializer<XmlMessageSerializer>();
-
-					ConfigureEndpointFactory(x);
-				});
-
-			ObjectBuilder.Add(EndpointFactory);
+			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionPublisher(subscriptionService));
+			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(subscriptionService));
 		}
 
-		protected virtual void ConfigureEndpointFactory(IEndpointFactoryConfigurator x)
+		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
+			where TSaga : class, ISaga
 		{
+			var sagaRepository = new InMemorySagaRepository<TSaga>();
+
+			return sagaRepository;
 		}
 
-		protected virtual void SetupServiceBusDefaults()
-		{
-			ServiceBusConfigurator.Defaults(x =>
-				{
-					x.SetObjectBuilder(ObjectBuilder);
-					x.SetReceiveTimeout(50.Milliseconds());
-					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
-				});
-		}
 
-		private void TeardownBuses()
+		EndpointFactoryConfigurator _endpointFactoryConfigurator;
+		EndpointCache _endpointCache;
+
+		void TeardownBuses()
 		{
 			Buses.Reverse().Each(bus => { bus.Dispose(); });
 			Buses.Clear();
@@ -98,13 +129,11 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected IList<IServiceBus> Buses { get; private set; }
 
-		protected IEndpointFactory EndpointFactory { get; private set; }
+		protected IEndpointCache EndpointCache { get; private set; }
 
-		protected IObjectBuilder ObjectBuilder { get; private set; }
-
-		protected virtual IServiceBus SetupServiceBus(Uri uri, Action<IServiceBusConfigurator> configure)
+		protected virtual IServiceBus SetupServiceBus(Uri uri, Action<ServiceBusConfigurator> configure)
 		{
-			IServiceBus bus = ServiceBusConfigurator.New(x =>
+			IServiceBus bus = ServiceBusFactory.New(x =>
 				{
 					x.ReceiveFrom(uri);
 
@@ -121,7 +150,7 @@ namespace MassTransit.TestFramework.Fixtures
 			return SetupServiceBus(uri, x => ConfigureServiceBus(uri, x));
 		}
 
-		protected virtual void ConfigureServiceBus(Uri uri, IServiceBusConfigurator configurator)
+		protected virtual void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
 		{
 		}
 	}

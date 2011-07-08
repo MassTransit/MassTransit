@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,18 +21,24 @@ namespace MassTransit.Services.Timeout.Server
 		SagaStateMachine<TimeoutSaga>,
 		ISaga
 	{
+		Guid _correlationId;
+
 		static TimeoutSaga()
 		{
 			Define(() =>
 				{
-					Correlate(SchedulingTimeout).By((saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
-					Correlate(CancellingTimeout).By((saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
-					Correlate(CompletingTimeout).By((saga, message) => saga.CorrelationId == message.CorrelationId && saga.Tag == message.Tag);
+					Correlate(SchedulingTimeout).By(
+						(saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag);
+					Correlate(CancellingTimeout).By(
+						(saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag);
+					Correlate(CompletingTimeout).By(
+						(saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag);
 
 					Initially(
 						When(SchedulingTimeout)
 							.Then((saga, message) =>
 								{
+									saga.TimeoutId = message.CorrelationId;
 									saga.Tag = message.Tag;
 									saga.TimeoutAt = message.TimeoutAt;
 
@@ -54,20 +60,13 @@ namespace MassTransit.Services.Timeout.Server
 							.Complete()
 						);
 
-					During(Completed,
-						When(SchedulingTimeout)
-							.Then((saga, message) =>
-								{
-									saga.TimeoutAt = message.TimeoutAt;
-
-									saga.NotifyTimeoutScheduled();
-								}).TransitionTo(WaitingForTime));
+					RemoveWhen(x => x.CurrentState == Completed);
 				});
 		}
 
 		public TimeoutSaga(Guid correlationId)
 		{
-			CorrelationId = correlationId;
+			_correlationId = correlationId;
 		}
 
 		protected TimeoutSaga()
@@ -84,16 +83,23 @@ namespace MassTransit.Services.Timeout.Server
 		public static Event<CancelTimeout> CancellingTimeout { get; set; }
 		public static Event<TimeoutExpired> CompletingTimeout { get; set; }
 
-		public virtual DateTime TimeoutAt { get; set; }
-		public virtual int Tag { get; set; }
+		public virtual Guid CorrelationId
+		{
+			get { return _correlationId; }
+			set { _correlationId = value; }
+		}
+
 		public virtual IServiceBus Bus { get; set; }
-		public virtual Guid CorrelationId { get; set; }
+
+		public virtual Guid TimeoutId { get; set; }
+		public virtual int Tag { get; set; }
+		public virtual DateTime TimeoutAt { get; set; }
 
 		public virtual bool Equals(TimeoutSaga obj)
 		{
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
-			return obj.Tag == Tag && obj.CorrelationId.Equals(CorrelationId);
+			return obj.TimeoutId.Equals(TimeoutId) &&  obj.Tag == Tag;
 		}
 
 		public override bool Equals(object obj)
@@ -108,35 +114,35 @@ namespace MassTransit.Services.Timeout.Server
 		{
 			unchecked
 			{
-				return (Tag*397) ^ CorrelationId.GetHashCode();
+				return (Tag * 397) ^ TimeoutId.GetHashCode();
 			}
 		}
 
-		private void NotifyTimeoutScheduled()
+		void NotifyTimeoutScheduled()
 		{
 			Bus.Publish(new TimeoutScheduled
 				{
-					CorrelationId = CorrelationId,
+					CorrelationId = TimeoutId,
 					TimeoutAt = TimeoutAt,
 					Tag = Tag,
 				});
 		}
 
-		private void NotifyTimeoutRescheduled()
+		void NotifyTimeoutRescheduled()
 		{
 			Bus.Publish(new TimeoutRescheduled
 				{
-					CorrelationId = CorrelationId,
+					CorrelationId = TimeoutId,
 					TimeoutAt = TimeoutAt,
 					Tag = Tag,
 				});
 		}
 
-		private void NotifyTimeoutCancelled()
+		void NotifyTimeoutCancelled()
 		{
 			Bus.Publish(new TimeoutCancelled
 				{
-					CorrelationId = CorrelationId,
+					CorrelationId = TimeoutId,
 					Tag = Tag,
 				});
 		}

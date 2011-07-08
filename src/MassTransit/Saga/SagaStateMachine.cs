@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,7 +18,8 @@ namespace MassTransit.Saga
 	using System.Linq.Expressions;
 	using System.Runtime.Serialization;
 	using Configuration;
-	using Magnum.CollectionExtensions;
+	using Context;
+	using Magnum.Extensions;
 	using Magnum.StateMachine;
 
 	[DebuggerDisplay("{CurrentState} - {typeof(T).Name}")]
@@ -82,7 +83,7 @@ namespace MassTransit.Saga
 			where TData : class 
 			where TMessage : class
 		{
-			eventAction.Call((saga, message) => CurrentMessage.Respond(action(saga, message)));
+			eventAction.Call((saga, message) => ContextStorage.Context().Respond(action(saga, message)));
 			return eventAction;
 		}
 
@@ -90,7 +91,7 @@ namespace MassTransit.Saga
 			where T : SagaStateMachine<T>, ISaga
 			where TData : class
 		{
-			eventAction.Call((saga, message) => CurrentMessage.RetryLater());
+			eventAction.Call((saga, message) => ContextStorage.MessageContext<TData>().RetryLater());
 			return eventAction;
 		}
 

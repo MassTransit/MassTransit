@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
+	using System;
 	using System.Collections.Generic;
-	using log4net;
 	using Magnum.Threading;
 
 	/// <summary>
@@ -23,7 +23,9 @@ namespace MassTransit.Distributor
 	public class WorkerPendingMessageTracker<T> :
 		IPendingMessageTracker<T>
 	{
-		private readonly ReaderWriterLockedObject<HashSet<T>> _messages = new ReaderWriterLockedObject<HashSet<T>>(new HashSet<T>());
+		readonly ReaderWriterLockedObject<HashSet<T>> _messages = new ReaderWriterLockedObject<HashSet<T>>(new HashSet<T>());
+
+		bool _disposed;
 
 		public void Viewed(T item)
 		{
@@ -34,6 +36,12 @@ namespace MassTransit.Distributor
 						_messages.WriteLock(y => y.Add(item));
 					}
 				});
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public void Consumed(T item)
@@ -50,6 +58,22 @@ namespace MassTransit.Distributor
 		public int PendingMessageCount()
 		{
 			return _messages.ReadLock(x => x.Count);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_messages.Dispose();
+			}
+
+			_disposed = true;
+		}
+
+		~WorkerPendingMessageTracker()
+		{
+			Dispose(false);
 		}
 	}
 }

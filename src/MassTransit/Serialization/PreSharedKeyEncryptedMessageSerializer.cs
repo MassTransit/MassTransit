@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,88 +12,94 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-    using System;
-    using System.IO;
-    using System.Runtime.Serialization;
-    using log4net;
-    using Magnum.Cryptography;
+	using System;
+	using System.IO;
+	using System.Runtime.Serialization;
+	using Context;
+	using Magnum.Cryptography;
 
-    public class PreSharedKeyEncryptedMessageSerializer :
-        IMessageSerializer
-    {
-        private readonly string _key;
-        private static readonly ILog _log = LogManager.GetLogger(typeof (PreSharedKeyEncryptedMessageSerializer));
-        private readonly IMessageSerializer _xmlSerializer;
+	public class PreSharedKeyEncryptedMessageSerializer :
+		IMessageSerializer
+	{
+		const string ContentTypeHeaderValue = "application/vnd.masstransit+psk";
 
-        public PreSharedKeyEncryptedMessageSerializer(string key)
-        {
-            _key = key;
-            _xmlSerializer = new XmlMessageSerializer();
-        }
+		readonly string _key;
+		readonly IMessageSerializer _wrappedSerializer;
 
-        public void Serialize<T>(Stream output, T message)
-        {
-            try
-            {
-                using (var clearStream = new MemoryStream())
-                {
-                    _xmlSerializer.Serialize(clearStream, message);
+		public PreSharedKeyEncryptedMessageSerializer(string key, IMessageSerializer serializer)
+		{
+			_key = key;
+			_wrappedSerializer = serializer;
+		}
 
-                    clearStream.Seek(0, SeekOrigin.Begin);
+		public string ContentType
+		{
+			get { return ContentTypeHeaderValue; }
+		}
 
-                    using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
-                    {
-                        EncryptedStream encryptedStream = cryptographyService.Encrypt(clearStream);
+		public void Serialize<T>(Stream output, ISendContext<T> context)
+			where T : class
+		{
+			try
+			{
+				using (var clearStream = new MemoryStream())
+				{
+					_wrappedSerializer.Serialize(clearStream, context);
 
-                        var encryptedMessage = new EncryptedMessageEnvelope
-                            {
-                                CipheredMessage = Convert.ToBase64String(encryptedStream.GetBytes()),
-                                Iv = Convert.ToBase64String(encryptedStream.Iv),
-                            };
+					using (var readStream = new MemoryStream(clearStream.ToArray(), false))
+					{
+						using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
+						{
+							EncryptedStream encryptedStream = cryptographyService.Encrypt(readStream);
 
-                        _xmlSerializer.Serialize(output, encryptedMessage);
-                    }
-                }
-            }
-            catch (SerializationException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new SerializationException("Failed to serialize message", ex);
-            }
-        }
+							var encryptedMessage = new EncryptedMessageEnvelope
+								{
+									CipheredMessage = Convert.ToBase64String(encryptedStream.GetBytes()),
+									Iv = Convert.ToBase64String(encryptedStream.Iv),
+								};
 
-        public object Deserialize(Stream input)
-        {
-            object message = _xmlSerializer.Deserialize(input);
-            if (message == null)
-                throw new SerializationException("Could not deserialize message.");
+							var encryptedContext = new SendContext<EncryptedMessageEnvelope>(encryptedMessage);
+							encryptedContext.SetUsing(context);
+							encryptedContext.SetMessageType(typeof (EncryptedMessageEnvelope));
+							encryptedContext.SetContentType(ContentTypeHeaderValue);
 
-            if (message is EncryptedMessageEnvelope)
-            {
-                var envelope = message as EncryptedMessageEnvelope;
+							_wrappedSerializer.Serialize(output, encryptedContext);
+						}
+					}
+				}
+			}
+			catch (SerializationException)
+			{
+				throw;
+			}
+			catch (Exception ex)
+			{
+				throw new SerializationException("Failed to serialize message", ex);
+			}
+		}
 
-                var cipherBytes = Convert.FromBase64String(envelope.CipheredMessage);
-                var iv = Convert.FromBase64String(envelope.Iv);
+		public void Deserialize(IReceiveContext context)
+		{
+			_wrappedSerializer.Deserialize(context);
+			IConsumeContext<EncryptedMessageEnvelope> encryptedContext;
+			context.TryGetContext(out encryptedContext);
 
-                var cipherStream = new EncryptedStream(cipherBytes, iv);
-                using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
-                {
-                    var clearStream = cryptographyService.Decrypt(cipherStream);
+			if (encryptedContext == null)
+				throw new SerializationException("Could not deserialize message.");
 
-                    return _xmlSerializer.Deserialize(clearStream);
-                }
-            }
-            return message;
-        }
-    }
 
-    [Serializable]
-    public class EncryptedMessageEnvelope
-    {
-        public string CipheredMessage { get; set; }
-        public string Iv { get; set; }
-    }
+			byte[] cipherBytes = Convert.FromBase64String(encryptedContext.Message.CipheredMessage);
+			byte[] iv = Convert.FromBase64String(encryptedContext.Message.Iv);
+
+			var cipherStream = new EncryptedStream(cipherBytes, iv);
+			using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
+			{
+				Stream clearStream = cryptographyService.Decrypt(cipherStream);
+
+				context.SetBodyStream(clearStream);
+
+				_wrappedSerializer.Deserialize(context);
+			}
+		}
+	}
 }

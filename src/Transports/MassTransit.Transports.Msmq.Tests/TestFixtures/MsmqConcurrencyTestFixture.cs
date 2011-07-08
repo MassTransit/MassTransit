@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,10 +15,10 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 	using System.Data;
 	using FluentNHibernate.Cfg;
 	using FluentNHibernate.Cfg.Db;
-	using Infrastructure.Tests.Sagas;
 	using NHibernate;
 	using NHibernate.Cfg;
 	using NHibernate.Tool.hbm2ddl;
+	using NHibernateIntegration.Tests.Sagas;
 	using NUnit.Framework;
 
 	[TestFixture, Category("Integration")]
@@ -33,13 +33,13 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 			SessionFactory = Fluently.Configure()
 				.Database(
-				MsSqlConfiguration.MsSql2005
-					.AdoNetBatchSize(100)
-					.ConnectionString(s => s.Is("Server=(local);initial catalog=test;Trusted_Connection=yes"))
-					.DefaultSchema("dbo")
-					.ShowSql()
-					.ProxyFactoryFactory("NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle")
-					.Raw(Environment.Isolation, IsolationLevel.RepeatableRead.ToString()))
+					MsSqlConfiguration.MsSql2005
+						.AdoNetBatchSize(100)
+						.ConnectionString(s => s.Is("Server=(local);initial catalog=test;Trusted_Connection=yes"))
+						.DefaultSchema("dbo")
+						.ShowSql()
+						.ProxyFactoryFactory("NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle")
+						.Raw(Environment.Isolation, IsolationLevel.RepeatableRead.ToString()))
 				.Mappings(m =>
 					{
 						m.FluentMappings.Add<ConcurrentSagaMap>();
@@ -49,7 +49,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 				.BuildSessionFactory();
 		}
 
-		private static void BuildSchema(Configuration config)
+		static void BuildSchema(Configuration config)
 		{
 			new SchemaExport(config).Create(false, true);
 		}

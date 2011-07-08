@@ -1,9 +1,9 @@
 namespace CodeCamp.Domain
 {
     using System;
+    using Magnum;
     using Magnum.Data;
     using Messages;
-    using Magnum.ObjectExtensions;
 
     public class User : 
         IAggregateRoot<Guid>
@@ -44,8 +44,8 @@ namespace CodeCamp.Domain
 
         public bool CheckPassword(string password)
         {
-            password.MustNotBeNull();
-            password.MustNotBeEmpty();
+            Guard.AgainstNull(password, "password");
+            Guard.AgainstEmpty(password,"password");
 
             password = password.Trim();
 

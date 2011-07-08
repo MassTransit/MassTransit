@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,89 +12,85 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView.Core.Consumer
 {
-    using System;
-    using Distributor.Messages;
-    using Magnum;
-    using Services.Subscriptions.Messages;
-    using Transports.Msmq;
-    using ViewModel;
+	using System;
+	using Distributor.Messages;
+	using Magnum;
+	using Services.Subscriptions.Messages;
+	using ViewModel;
 
-    public class SubscriptionDataConsumer :
-        Consumes<SubscriptionRefresh>.All,
-        Consumes<AddSubscription>.All,
-        Consumes<RemoveSubscription>.All,
-        Consumes<IWorkerAvailable>.All,
-        IDisposable
-    {
-        private IServiceBus _bus;
-        private readonly Guid _clientId = CombGuid.Generate();
-        private IEndpoint _subscriptionServiceEndpoint;
-        private UnsubscribeAction _unsubscribe;
-        private readonly IObjectBuilder _objectBuilder;
+	public class SubscriptionDataConsumer :
+		Consumes<SubscriptionRefresh>.All,
+		Consumes<AddSubscription>.All,
+		Consumes<RemoveSubscription>.All,
+		Consumes<IWorkerAvailable>.All,
+		IDisposable
+	{
+		readonly IServiceBus _bus;
+		readonly Guid _clientId = CombGuid.Generate();
+		readonly Uri _subscriptionServiceUri;
+		readonly UnsubscribeAction _unsubscribe;
+		IEndpoint _subscriptionServiceEndpoint;
 
-        public SubscriptionDataConsumer(IObjectBuilder objectBuilder)
-        {
-            _objectBuilder = objectBuilder;
+		public SubscriptionDataConsumer(IServiceBus bus, Uri subscriptionServiceUri)
+		{
+			_bus = bus;
+			_subscriptionServiceUri = subscriptionServiceUri;
 
-            BootstrapServiceBus();
+			_unsubscribe = _bus.SubscribeInstance(this);
 
-            ConnectToSubscriptionService();
-        }
+			ConnectToSubscriptionService();
+		}
 
-        private void ConnectToSubscriptionService()
-        {
-            _subscriptionServiceEndpoint = _objectBuilder.GetInstance<IEndpointFactory>()
-                .GetEndpoint(_objectBuilder.GetInstance<IConfiguration>().SubscriptionServiceUri);
+		public void Consume(AddSubscription message)
+		{
+			LocalSubscriptionCache.Endpoints.Update(message.Subscription);
+		}
 
-            _subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
-        }
+		public void Consume(IWorkerAvailable message)
+		{
+			LocalSubscriptionCache.Endpoints.Update(message);
+		}
 
-        private void BootstrapServiceBus()
-        {
-            MsmqEndpointConfigurator.Defaults(x =>
-                {
-                    x.CreateMissingQueues = true;
-                });
+		public void Consume(RemoveSubscription message)
+		{
+			LocalSubscriptionCache.Endpoints.Remove(message.Subscription.EndpointUri, message.Subscription.MessageName);
+		}
 
-            _bus = _objectBuilder.GetInstance<IServiceBus>();
-            _unsubscribe = _bus.Subscribe(this);
-        }
+		public void Consume(SubscriptionRefresh message)
+		{
+			LocalSubscriptionCache.Endpoints.Update(message.Subscriptions);
+		}
 
-        public void Consume(SubscriptionRefresh message)
-        {
-            LocalSubscriptionCache.Endpoints.Update(message.Subscriptions);
-        }
+		public void Dispose()
+		{
+			_unsubscribe();
+		}
 
-        public void Consume(AddSubscription message)
-        {
-            LocalSubscriptionCache.Endpoints.Update(message.Subscription);
-        }
+		public void UpdateWorker(Uri controlUri, string type, int pendingLimit, int inProgressLimit)
+		{
+			IEndpoint endpoint = _bus.GetEndpoint(controlUri);
 
-        public void Consume(RemoveSubscription message)
-        {
-            LocalSubscriptionCache.Endpoints.Remove(message.Subscription.EndpointUri, message.Subscription.MessageName);
-        }
+			endpoint.Send(new ConfigureWorker
+				{
+					MessageType = type,
+					InProgressLimit = inProgressLimit,
+					PendingLimit = pendingLimit
+				}, context => context.SetSourceAddress(_bus.Endpoint.Address.Uri));
+		}
 
-        public void Consume(IWorkerAvailable message)
-        {
-            LocalSubscriptionCache.Endpoints.Update(message);
-        }
+		public void RemoveSubscription(Guid clientId, string messageName, string correlationId, Uri endpointUri)
+		{
+			var subscription = new SubscriptionInformation(clientId, 0, messageName, correlationId, endpointUri);
 
-        public void UpdateWorker(Uri controlUri, string type, int pendingLimit, int inProgressLimit)
-        {
-            var endpoint = _objectBuilder.GetInstance<IEndpointFactory>().GetEndpoint(controlUri);
+			_subscriptionServiceEndpoint.Send(new RemoveSubscription(subscription));
+		}
 
-            endpoint.Send(new ConfigureWorker() { InProgressLimit = inProgressLimit, MessageType = type, PendingLimit = pendingLimit });
-        }
+		void ConnectToSubscriptionService()
+		{
+			_subscriptionServiceEndpoint = _bus.GetEndpoint(_subscriptionServiceUri);
 
-        public void RemoveSubscription(Guid clientId, string messageName, string correlationId, Uri endpointUri)
-        {
-            _bus.Publish(new RemoveSubscription(new SubscriptionInformation(clientId, 0, messageName, correlationId, endpointUri)));
-        }
-
-        public void Dispose()
-        {
-            _unsubscribe();
-        }
-    }
+			_subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Address.Uri,
+				_bus.Endpoint.Address.Uri));
+		}
+	}
 }

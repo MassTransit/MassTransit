@@ -1,3 +1,7 @@
+using MassTransit.BusConfigurators;
+using MassTransit.EndpointConfigurators;
+using MassTransit.Transports;
+
 namespace OpenAllNight
 {
     using System;
@@ -7,10 +11,8 @@ namespace OpenAllNight
     using Castle.Windsor;
     using log4net.Config;
     using MassTransit;
-    using MassTransit.Configuration;
     using MassTransit.Services.HealthMonitoring.Configuration;
     using MassTransit.Services.Subscriptions.Configuration;
-    using MassTransit.Transports.Msmq;
     using MassTransit.WindsorIntegration;
     using Testers;
 
@@ -24,7 +26,8 @@ namespace OpenAllNight
             /////setup
             XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
 
-            WindsorContainer c = new DefaultMassTransitContainer();
+            WindsorContainer c = new WindsorContainer();
+            c.Install(new MassTransitInstaller());
             IEndpointFactory ef = EndpointFactoryConfigurator.New(e => e.RegisterTransport<MsmqEndpoint>());
             c.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), ef);
             c.AddComponent<SimpleMessageHandler>();

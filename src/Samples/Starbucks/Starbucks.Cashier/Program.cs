@@ -15,16 +15,11 @@ namespace Starbucks.Cashier
 	using System;
 	using System.Diagnostics;
 	using System.IO;
-	using Castle.Windsor;
 	using log4net.Config;
 	using Magnum;
 	using Magnum.StateMachine;
-	using MassTransit.Saga;
-	using MassTransit.Transports.Msmq;
-	using MassTransit.WindsorIntegration;
+	using Ninject;
 	using Topshelf;
-	using Topshelf.Configuration;
-	using Topshelf.Configuration.Dsl;
 
 	internal static class Program
 	{
@@ -36,29 +31,28 @@ namespace Starbucks.Cashier
 		{
 			XmlConfigurator.Configure(new FileInfo("cashier.log4net.xml"));
 
-			RunConfiguration cfg = RunnerConfigurator.New(c =>
+			HostFactory.Run(c =>
 				{
 					c.SetServiceName("StarbucksCashier");
 					c.SetDisplayName("Starbucks Cashier");
 					c.SetDescription("a Mass Transit sample service for handling orders of coffee.");
 
 					c.RunAsLocalSystem();
-					c.DependencyOnMsmq();
+				    c.DependsOnMsmq();
 
-					MsmqEndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
-
-					IWindsorContainer container = BootstrapContainer();
+				    var kernel = new StandardKernel();
+                    var module = new CashierRegistry();
+                    kernel.Load(module);
 
 					DisplayStateMachine();
 
-					c.ConfigureService<CashierService>(s =>
+					c.Service<CashierService>(s =>
 						{
-							s.HowToBuildService(builder => container.Resolve<CashierService>());
+							s.ConstructUsing(builder => kernel.Get<CashierService>());
 							s.WhenStarted(o => o.Start());
 							s.WhenStopped(o => o.Stop());
 						});
 				});
-			Runner.Host(cfg, args);
 		}
 
 		private static void DisplayStateMachine()
@@ -66,16 +60,6 @@ namespace Starbucks.Cashier
 			Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
 			StateMachineInspector.Trace(new CashierSaga(CombGuid.Generate()));
-		}
-
-		private static IWindsorContainer BootstrapContainer()
-		{
-			IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Cashier.Castle.xml");
-			container.AddComponent("sagaRepository", typeof (ISagaRepository<>), typeof (InMemorySagaRepository<>));
-
-			container.AddComponent<CashierService>(typeof (CashierService).Name);
-			container.AddComponent<CashierSaga>();
-			return container;
 		}
 	}
 }

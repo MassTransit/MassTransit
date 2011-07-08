@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-    using Magnum.DateTimeExtensions;
+    using Magnum.Extensions;
     using Messages;
 	using NUnit.Framework;
 	using TextFixtures;
@@ -29,7 +29,7 @@ namespace MassTransit.Tests
             FutureMessage<PingMessage> fm=new FutureMessage<PingMessage>();
 			bool workDid = false;
 
-			LocalBus.Subscribe<PingMessage>(
+			LocalBus.SubscribeHandler<PingMessage>(
 				(msg)=> {workDid = true; fm.Set(msg); },
 				delegate { return true; });
 

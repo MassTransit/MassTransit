@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Examples.Sagas
 {
+	using Magnum.TestFramework;
 	using Messages;
 	using TestFramework;
 
@@ -35,7 +36,7 @@ namespace MassTransit.Tests.Examples.Sagas
 		[Then]
 		public void The_saga_should_be_in_the_waiting_for_finish_state()
 		{
-			Saga.ShouldBeInState(SimpleSaga.WaitingForFinish);
+			Saga.ShouldBeInState(SimpleStateMachineSaga.WaitingForFinish);
 		}
 	}
 }

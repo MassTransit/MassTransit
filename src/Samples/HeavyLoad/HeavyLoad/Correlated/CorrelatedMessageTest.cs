@@ -14,34 +14,36 @@ namespace HeavyLoad.Correlated
 {
 	using System;
 	using System.Threading;
-	using Castle.Windsor;
 	using MassTransit;
-	using MassTransit.Transports.Msmq;
 
-    public class CorrelatedMessageTest : IDisposable
+    public class CorrelatedMessageTest :
+		IDisposable
 	{
 		private readonly int _attempts = 5000;
-		private readonly IWindsorContainer _container;
 		private readonly ManualResetEvent _finishedEvent = new ManualResetEvent(false);
 		private readonly IServiceBus _bus;
 		private int _successes;
 		private int _timeouts;
-    	private UnsubscribeAction _unsubscribeToken;
 
     	public CorrelatedMessageTest()
 		{
-			_container = new HeavyLoadContainer();
+			_bus = ServiceBusFactory.New(x =>
+			{
+				x.ReceiveFrom("msmq://localhost/heavy_load");
+				x.SetPurgeOnStartup(true);
 
-			_bus = _container.Resolve<IServiceBus>();
+				x.UseMsmq();
 
-			var management = MsmqEndpointManagement.New(_bus.Endpoint.Address.Uri);
-			management.Purge();
+				x.Subscribe(s =>
+					{
+						s.Consumer<SimpleRequestService>();
+					});
+			});
 		}
 
 		public void Dispose()
 		{
 			_bus.Dispose();
-			_container.Dispose();
 		}
 
 
@@ -49,20 +51,16 @@ namespace HeavyLoad.Correlated
 		{
 			stopWatch.Start();
 
-			SimpleRequestService service = new SimpleRequestService(_bus);
-
-			_unsubscribeToken = _bus.Subscribe(service);
-
 			CheckPoint point = stopWatch.Mark("Correlated Requests");
 		    CheckPoint responsePoint = stopWatch.Mark("Correlated Responses");
 
-		    ManagedThreadPool<CorrelatedController> pool = new ManagedThreadPool<CorrelatedController>(DoWorker, 10, 10);
+		    var pool = new ManagedThreadPool<CorrelatedController>(DoWorker, 10, 10);
             try
             {
 
                 for (int index = 0; index < _attempts; index++)
                 {
-                    CorrelatedController controller = new CorrelatedController(_bus, OnSuccess, OnTimeout);
+                    var controller = new CorrelatedController(_bus, OnSuccess, OnTimeout);
                     pool.Enqueue(controller);
                 }
 
@@ -76,8 +74,6 @@ namespace HeavyLoad.Correlated
             {
                 pool.Dispose();
             }
-
-			_unsubscribeToken();
 
 			Console.WriteLine("Attempts: {0}, Succeeded: {1}, Timeouts: {2}", _attempts, _successes, _timeouts);
 

@@ -27,6 +27,7 @@ namespace MassTransit.Services.Subscriptions.Messages
 
     	protected SubscriptionRefresh()
     	{
+    		_subscriptions = new List<SubscriptionInformation>();
     	}
 
     	public IList<SubscriptionInformation> Subscriptions

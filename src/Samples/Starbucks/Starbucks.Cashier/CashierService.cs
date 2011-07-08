@@ -1,5 +1,5 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,27 +12,31 @@
 // specific language governing permissions and limitations under the License.
 namespace Starbucks.Cashier
 {
-    using MassTransit;
+	using MassTransit;
+	using MassTransit.Saga;
 
-    public class CashierService
-    {
-        IServiceBus _bus;
-        UnsubscribeAction _unsubscribeAction;
+	public class CashierService
+	{
+		private IServiceBus _bus;
+		private ISagaRepository<CashierSaga> _sagaRepository;
+		private UnsubscribeAction _unsubscribeAction;
 
-        public CashierService(IServiceBus bus)
-        {
-            _bus = bus;
-        }
+		public CashierService(IServiceBus bus, ISagaRepository<CashierSaga> sagaRepository)
+		{
+			_bus = bus;
+			_sagaRepository = sagaRepository;
+		}
 
-        public void Start()
-        {
-            _unsubscribeAction = _bus.Subscribe<CashierSaga>();
-        }
+		public void Start()
+		{
+			// ninject doesn't have the brains for this one
+			_unsubscribeAction = _bus.SubscribeSaga(_sagaRepository);
+		}
 
-        public void Stop()
-        {
-            _unsubscribeAction();
-            _bus.Dispose();
-        }
-    }
+		public void Stop()
+		{
+			_unsubscribeAction();
+			_bus.Dispose();
+		}
+	}
 }

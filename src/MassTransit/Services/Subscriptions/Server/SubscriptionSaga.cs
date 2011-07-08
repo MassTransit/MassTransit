@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,7 @@ namespace MassTransit.Services.Subscriptions.Server
 	using Messages;
 	using Saga;
 	using Subscriptions.Messages;
+	using Util;
 
 	/// <summary>
 	///   Manages the lifecycle of a subscription through the system
@@ -25,6 +26,8 @@ namespace MassTransit.Services.Subscriptions.Server
 		SagaStateMachine<SubscriptionSaga>,
 		ISaga
 	{
+		Guid _correlationId;
+
 		static SubscriptionSaga()
 		{
 			Define(() =>
@@ -38,7 +41,8 @@ namespace MassTransit.Services.Subscriptions.Server
 						                       && saga.CurrentState == Active);
 
 					Correlate(SubscriptionRemoved)
-						.By((saga, message) => saga.SubscriptionInfo.SubscriptionId == message.CorrelationId && saga.CurrentState == Active);
+						.By(
+							(saga, message) => saga.SubscriptionInfo.SubscriptionId == message.CorrelationId && saga.CurrentState == Active);
 
 					Correlate(DuplicateSubscriptionAdded)
 						.By((saga, message) => saga.SubscriptionInfo.MessageName == message.Subscription.MessageName
@@ -69,14 +73,18 @@ namespace MassTransit.Services.Subscriptions.Server
 							.Then((saga, message) => saga.NotifySubscriptionRemoved())
 							.Complete()
 						);
+
+					RemoveWhen(x => x.CurrentState == Completed);
 				});
 		}
 
+		[UsedImplicitly]
 		public SubscriptionSaga(Guid correlationId)
 		{
-			CorrelationId = correlationId;
+			_correlationId = correlationId;
 		}
 
+		[UsedImplicitly]
 		protected SubscriptionSaga()
 		{
 		}
@@ -96,19 +104,24 @@ namespace MassTransit.Services.Subscriptions.Server
 		public virtual SubscriptionInformation SubscriptionInfo { get; set; }
 
 		public virtual IServiceBus Bus { get; set; }
-		public virtual Guid CorrelationId { get; set; }
 
-		private void NotifySubscriptionAdded()
+		public virtual Guid CorrelationId
+		{
+			get { return _correlationId; }
+			set { _correlationId = value; }
+		}
+
+		void NotifySubscriptionAdded()
 		{
 			Bus.Publish(new SubscriptionAdded {Subscription = SubscriptionInfo});
 		}
 
-		private void NotifySubscriptionRemoved()
+		void NotifySubscriptionRemoved()
 		{
 			NotifySubscriptionRemoved(SubscriptionInfo);
 		}
 
-		private void NotifySubscriptionRemoved(SubscriptionInformation subscription)
+		void NotifySubscriptionRemoved(SubscriptionInformation subscription)
 		{
 			Bus.Publish(new SubscriptionRemoved {Subscription = subscription});
 		}

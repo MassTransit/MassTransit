@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,41 +13,63 @@
 namespace MassTransit.Tests.Saga.Locator
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Linq.Expressions;
 	using Magnum;
+	using Magnum.Extensions;
+	using MassTransit.Pipeline;
 	using MassTransit.Saga;
 	using MassTransit.Saga.Pipeline;
 	using NUnit.Framework;
-	using Util;
 
 	[TestFixture]
 	public class SagaExpression_Specs
 	{
-		private Guid _sagaId;
-		private InitiateSimpleSaga _initiateSaga;
-		private InMemorySagaRepository<SimpleSaga> _repository;
-		private Guid _otherSagaId;
-		private ObservableSagaMessage _observeSaga;
-		private InitiateSimpleSaga _initiateOtherSaga;
-
 		[SetUp]
 		public void Setup()
 		{
 			_repository = new InMemorySagaRepository<SimpleSaga>();
-			var initiatePolicy = new InitiatingSagaPolicy<SimpleSaga,InitiateSimpleSaga>(x => false);
+			var initiatePolicy = new InitiatingSagaPolicy<SimpleSaga, InitiateSimpleSaga>(x => x.CorrelationId, x => false);
 
 			_sagaId = CombGuid.Generate();
-			_initiateSaga = new InitiateSimpleSaga { CorrelationId = _sagaId, Name = "Chris" };
-			_repository.Send(x => x.CorrelationId == _sagaId, initiatePolicy, _initiateSaga, saga => saga.Consume(_initiateSaga));
+			_initiateSaga = new InitiateSimpleSaga {CorrelationId = _sagaId, Name = "Chris"};
+			var context = _initiateSaga.ToConsumeContext();
+			_repository.GetSaga(context, _sagaId,
+				(i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
+				.Each(x => x(context));
 
 			_initiateOtherSaga = new InitiateSimpleSaga {CorrelationId = _otherSagaId, Name = "Dru"};
 
 			_otherSagaId = Guid.NewGuid();
-			_repository.Send(x => x.CorrelationId == _otherSagaId, initiatePolicy, _initiateOtherSaga, saga => saga.Consume(_initiateOtherSaga));
-	
+			context = _initiateOtherSaga.ToConsumeContext();
+			_repository.GetSaga(context, _otherSagaId,
+				(i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
+				.Each(x => x(context));
+
 			_observeSaga = new ObservableSagaMessage {Name = "Chris"};
+		}
+
+		Guid _sagaId;
+		InitiateSimpleSaga _initiateSaga;
+		InMemorySagaRepository<SimpleSaga> _repository;
+		Guid _otherSagaId;
+		ObservableSagaMessage _observeSaga;
+		InitiateSimpleSaga _initiateOtherSaga;
+
+		[Test]
+		public void Matching_by_property_should_be_happy()
+		{
+			Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> selector = (s, m) => s.Name == m.Name;
+
+			Expression<Func<SimpleSaga, bool>> filter =
+				new SagaFilterExpressionConverter<SimpleSaga, ObservableSagaMessage>(_observeSaga).Convert(selector);
+			Trace.WriteLine(filter.ToString());
+
+			IEnumerable<SimpleSaga> matches = _repository.Where(filter);
+
+			Assert.AreEqual(1, matches.Count());
 		}
 
 		[Test]
@@ -55,23 +77,11 @@ namespace MassTransit.Tests.Saga.Locator
 		{
 			Expression<Func<SimpleSaga, InitiateSimpleSaga, bool>> selector = (s, m) => s.CorrelationId == m.CorrelationId;
 
-			var filter = new SagaFilterExpressionConverter<SimpleSaga, InitiateSimpleSaga>(_initiateSaga).Convert(selector);
+			Expression<Func<SimpleSaga, bool>> filter =
+				new SagaFilterExpressionConverter<SimpleSaga, InitiateSimpleSaga>(_initiateSaga).Convert(selector);
 			Trace.WriteLine(filter.ToString());
 
-			var matches = _repository.Where(filter);
-
-			Assert.AreEqual(1, matches.Count());
-		}
-
-		[Test]
-		public void Matching_by_property_should_be_happy()
-		{
-			Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> selector = (s, m) => s.Name == m.Name;
-
-			var filter = new SagaFilterExpressionConverter<SimpleSaga, ObservableSagaMessage>(_observeSaga).Convert(selector);
-			Trace.WriteLine(filter.ToString());
-
-			var matches = _repository.Where(filter);
+			IEnumerable<SimpleSaga> matches = _repository.Where(filter);
 
 			Assert.AreEqual(1, matches.Count());
 		}

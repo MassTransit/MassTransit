@@ -2,7 +2,7 @@
 <log4net>
   <appender name="RollingFile"
 			      type="log4net.Appender.FileAppender">
-    <file value="..\logs\sample.starbucks.barrista.log" />
+    <file value="..\logs\sample.starbucks.barista.log" />
     <appendToFile value="false" />
 
     <layout type="log4net.Layout.PatternLayout">

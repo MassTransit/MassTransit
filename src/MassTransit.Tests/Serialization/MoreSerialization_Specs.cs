@@ -14,12 +14,56 @@ namespace MassTransit.Tests.Serialization
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.IO;
+	using System.Linq;
+	using System.Text;
+	using Context;
+	using Magnum.TestFramework;
+	using MassTransit.Serialization;
+	using MassTransit.Services.Subscriptions.Messages;
 	using NUnit.Framework;
 
 	[TestFixture]
-	public class MoreSerialization_Specs :
-		SerializationSpecificationBase
+    public class MoreSerializationForCustomXml :
+        MoreSerialization_Specs<XmlMessageSerializer>
 	{
+	}
+
+    [TestFixture]
+    public class MoreSerializationForJson :
+        MoreSerialization_Specs<JsonMessageSerializer>
+    {
+    }
+	
+    [TestFixture]
+    public class MoreSerializationForBson :
+        MoreSerialization_Specs<BsonMessageSerializer>
+    {
+    }
+	
+	[TestFixture]
+    public class MoreSerializationForVersionOneXml :
+        MoreSerialization_Specs<VersionOneXmlMessageSerializer>
+    {
+    }
+
+    [TestFixture][Ignore("Just can't keep up with the others")]
+    public class MoreSerializationForDotNotXml :
+        MoreSerialization_Specs<DotNotXmlMessageSerializer>
+    {
+    }
+
+    [TestFixture]
+    public class MoreSerializationForBinary :
+        MoreSerialization_Specs<BinaryMessageSerializer>
+    {
+    }
+
+	public abstract class MoreSerialization_Specs<TSerializer> :
+		SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
+	{
+        [Serializable]
 		public class ContainerClass
 		{
 			public IList<OuterClass> Elements { get; set; }
@@ -61,6 +105,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+        [Serializable]
 		public class DictionaryContainerClass
 		{
 			public IDictionary<string, OuterClass> Elements { get; set; }
@@ -105,9 +150,15 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+        [Serializable]
 		public class PrimitiveArrayClass
 		{
-			public int[] Values { get; set; }
+        	public PrimitiveArrayClass()
+        	{
+        		Values = new int[] {};
+        	}
+
+        	public int[] Values { get; set; }
 
 			public bool Equals(PrimitiveArrayClass other)
 			{
@@ -146,6 +197,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+        [Serializable]
 		public class GenericArrayClass<T>
 		{
 			public T[] Values { get; set; }
@@ -187,6 +239,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+        [Serializable]
 		public class OuterClass
 		{
 			public InnerClass Inner { get; set; }
@@ -212,6 +265,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+        [Serializable]
 		public class InnerClass
 		{
 			public string Name { get; set; }
@@ -238,6 +292,7 @@ namespace MassTransit.Tests.Serialization
 		}
 
 
+        [Serializable]
 		public class EmptyClass
 		{
 			public bool Equals(EmptyClass other)
@@ -258,6 +313,70 @@ namespace MassTransit.Tests.Serialization
 				return 0;
 			}
 		}
+
+		[Test]
+		public void Should_serialize_an_empty_message()
+		{
+			byte[] serializedMessageData;
+
+			var serializer = new TSerializer();
+
+			var message = new SubscriptionRefresh(Enumerable.Empty<SubscriptionInformation>());
+
+			using (var output = new MemoryStream())
+			{
+				serializer.Serialize(output, new SendContext<SubscriptionRefresh>(message));
+
+				serializedMessageData = output.ToArray();
+
+				Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+			}
+
+			using (var input = new MemoryStream(serializedMessageData))
+			{
+				var receiveContext = ReceiveContext.FromBodyStream(input);
+				serializer.Deserialize(receiveContext);
+
+				IConsumeContext<SubscriptionRefresh> context;
+				receiveContext.TryGetContext(out context).ShouldBeTrue();
+
+				context.ShouldNotBeNull();
+
+				context.Message.Subscriptions.Count.ShouldEqual(message.Subscriptions.Count);
+			}
+		}
+		[Test]
+		public void Should_serialize_a_message_with_one_list_item()
+		{
+			byte[] serializedMessageData;
+
+			var serializer = new TSerializer();
+
+			var message = new SubscriptionRefresh(new[]{new SubscriptionInformation(Guid.NewGuid(),1,typeof(object),new Uri("http://localhost/"))});
+
+			using (var output = new MemoryStream())
+			{
+				serializer.Serialize(output, new SendContext<SubscriptionRefresh>(message));
+
+				serializedMessageData = output.ToArray();
+
+				Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+			}
+
+			using (var input = new MemoryStream(serializedMessageData))
+			{
+				var receiveContext = ReceiveContext.FromBodyStream(input);
+				serializer.Deserialize(receiveContext);
+
+				IConsumeContext<SubscriptionRefresh> context;
+				receiveContext.TryGetContext(out context).ShouldBeTrue();
+
+				context.ShouldNotBeNull();
+
+				context.Message.Subscriptions.Count.ShouldEqual(message.Subscriptions.Count);
+			}
+		}
+
 
 		[Test]
 		public void A_collection_of_objects_should_be_properly_serialized()
@@ -327,6 +446,7 @@ namespace MassTransit.Tests.Serialization
 		}
 
 
+        [Serializable]
 		public class EnumClass
 		{
 			public SomeEnum Setting { get; set; }
@@ -387,9 +507,6 @@ namespace MassTransit.Tests.Serialization
 			TestSerialization(message);
 		}
 
-
-
-
 		[Test]
 		public void A_nested_object_should_be_properly_serialized()
 		{
@@ -402,6 +519,7 @@ namespace MassTransit.Tests.Serialization
 		}
 	}
 
+        [Serializable]
 	public class PrivateSetter
 	{
 		public PrivateSetter(string name)

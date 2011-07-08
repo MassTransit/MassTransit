@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,9 +17,12 @@ namespace MassTransit.Tests.Load
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading;
+	using Context;
 	using Magnum;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using Messages;
+	using TestFramework;
 
 	public class LoadGenerator<TRequest, TResponse> :
 		Consumes<TResponse>.All
@@ -27,10 +30,10 @@ namespace MassTransit.Tests.Load
 		where TResponse : class, First
 
 	{
-		private readonly Dictionary<Guid, CommandInstance> _commands = new Dictionary<Guid, CommandInstance>();
-		private readonly AutoResetEvent _received = new AutoResetEvent(false);
-		private int _responseCount;
-		private int _unknownCommands;
+		readonly Dictionary<Guid, CommandInstance> _commands = new Dictionary<Guid, CommandInstance>();
+		readonly AutoResetEvent _received = new AutoResetEvent(false);
+		int _responseCount;
+		int _unknownCommands;
 
 		public void Consume(TResponse message)
 		{
@@ -44,17 +47,18 @@ namespace MassTransit.Tests.Load
 
 			instance.ResponseCreatedAt = message.CreatedAt;
 			instance.ResponseReceivedAt = SystemUtil.UtcNow;
-			instance.Worker = CurrentMessage.Headers.SourceAddress;
+			instance.Worker = ContextStorage.Context().SourceAddress;
 			Interlocked.Increment(ref _responseCount);
 
 			_received.Set();
 		}
 
-		public void Run(IServiceBus bus, int iterations, Func<Guid, TRequest> generateRequest)
+		public void Run(IServiceBus bus, IEndpoint sendTo, IEnumerable<IServiceBus> instances, int iterations,
+		                Func<Guid, TRequest> generateRequest)
 		{
-			using (bus.Subscribe(this).Disposable())
+			using (bus.SubscribeInstance(this).Disposable())
 			{
-				ThreadUtil.Sleep(2.Seconds());
+				instances.Each(x => x.ShouldHaveRemoteSubscriptionFor<TResponse>());
 
 				for (int i = 0; i < iterations; i++)
 				{
@@ -62,19 +66,15 @@ namespace MassTransit.Tests.Load
 					lock (_commands)
 						_commands.Add(commandInstance.Id, commandInstance);
 
-					var command = generateRequest(commandInstance.Id);
+					TRequest command = generateRequest(commandInstance.Id);
 
 					ThreadUtil.Sleep(5.Milliseconds());
 
-					bus.Publish(command, x =>
-						{
-							x.SendResponseTo(bus.Endpoint);
-
-							x.IfNoSubscribers<FirstCommand>(message => { throw new InvalidOperationException("No subscriptions were found (timing error?)"); });
-						});
+					sendTo.Send(command, x => { x.SendResponseTo(bus.Endpoint); });
 				}
 
-				while (_received.WaitOne(5.Seconds(), true))
+				_received.WaitOne(20.Seconds(), true);
+				while (_received.WaitOne(8.Seconds(), true))
 				{
 				}
 			}
@@ -82,9 +82,27 @@ namespace MassTransit.Tests.Load
 			DisplayResults();
 		}
 
-		private void DisplayResults()
+		public Dictionary<Uri, int> GetWorkerLoad()
 		{
-            var sources = GetWorkerLoad();
+			var sources = new Dictionary<Uri, int>();
+
+			_commands.Values.Each(command =>
+				{
+					if (command.Worker != null)
+					{
+						if (sources.ContainsKey(command.Worker))
+							sources[command.Worker] = sources[command.Worker] + 1;
+						else
+							sources.Add(command.Worker, 1);
+					}
+				});
+
+			return sources;
+		}
+
+		void DisplayResults()
+		{
+			Dictionary<Uri, int> sources = GetWorkerLoad();
 
 			int sent = 0;
 			int received = 0;
@@ -116,7 +134,7 @@ namespace MassTransit.Tests.Load
 
 			if (received > 0)
 			{
-				var query = _commands.Values.Select(x => x.ResponseReceivedAt - x.CreatedAt).OrderBy(x => x);
+				IOrderedEnumerable<TimeSpan> query = _commands.Values.Select(x => x.ResponseReceivedAt - x.CreatedAt).OrderBy(x => x);
 
 				int count = query.Count();
 
@@ -133,23 +151,5 @@ namespace MassTransit.Tests.Load
 
 			received.ShouldEqual(sent);
 		}
-
-        public Dictionary<Uri, int> GetWorkerLoad()
-        {
-            var sources = new Dictionary<Uri, int>();
-
-            _commands.Values.Each(command =>
-            {
-                if (command.Worker != null)
-                {
-                    if (sources.ContainsKey(command.Worker))
-                        sources[command.Worker] = sources[command.Worker] + 1;
-                    else
-                        sources.Add(command.Worker, 1);
-                }
-            });
-
-            return sources;
-        }
 	}
 }

@@ -1,15 +1,15 @@
 namespace CodeCamp.Domain
 {
-    using Magnum.ObjectExtensions;
+    using Magnum;
+    using Magnum.Extensions;
     using MassTransit;
-    using Microsoft.Practices.ServiceLocation;
 
     public static class DomainContext
     {
         private static IServiceBus _serviceBus;
-        private static IServiceLocator _serviceLocator;
+        private static IObjectBuilder _serviceLocator;
 
-        public static IServiceLocator ServiceLocator
+        public static IObjectBuilder ServiceLocator
         {
             get { return _serviceLocator; }
         }
@@ -19,10 +19,10 @@ namespace CodeCamp.Domain
             _serviceBus.Publish(message);
         }
 
-        public static void Initialize(IServiceBus bus, IServiceLocator serviceLocator)
+        public static void Initialize(IServiceBus bus, IObjectBuilder serviceLocator)
         {
-            bus.MustNotBeNull();
-            serviceLocator.MustNotBeNull();
+            Guard.AgainstNull(bus, "bus","Must not be null");
+            Guard.AgainstNull(serviceLocator, "serviceLocator");
 
             _serviceBus = bus;
             _serviceLocator = serviceLocator;

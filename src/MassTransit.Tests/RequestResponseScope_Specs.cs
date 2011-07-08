@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,8 @@
 namespace MassTransit.Tests
 {
 	using System.Threading;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using Messages;
 	using NUnit.Framework;
 	using TextFixtures;
@@ -27,7 +28,7 @@ namespace MassTransit.Tests
 		{
 			FutureMessage<PongMessage> ponged = new FutureMessage<PongMessage>();
 
-			LocalBus.Subscribe<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
+			LocalBus.SubscribeHandler<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
 
 			PingMessage ping = new PingMessage();
 
@@ -49,9 +50,9 @@ namespace MassTransit.Tests
 			FutureMessage<PongMessage> invalidPong = new FutureMessage<PongMessage>();
 			FutureMessage<PongMessage> validPong = new FutureMessage<PongMessage>();
 
-			LocalBus.Subscribe<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
+			LocalBus.SubscribeHandler<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
 
-			LocalBus.Subscribe<PongMessage>(message => validPong.Set(message));
+			LocalBus.SubscribeHandler<PongMessage>(message => validPong.Set(message));
 
 			PingMessage ping = new PingMessage();
 
@@ -92,7 +93,7 @@ namespace MassTransit.Tests
 		[Test]
 		public void Any_type_of_send_should_be_supported()
 		{
-			RemoteBus.Subscribe<PingMessage>(x => RemoteBus.Publish(new PongMessage(x.CorrelationId)));
+			RemoteBus.SubscribeHandler<PingMessage>(x => RemoteBus.Publish(new PongMessage(x.CorrelationId)));
 
 			PingMessage ping = new PingMessage();
 
@@ -107,7 +108,7 @@ namespace MassTransit.Tests
 				.TimeoutAfter(5.Seconds())
 				.Send();
 
-			Assert.IsTrue(ponged.IsAvailable(1.Seconds()), "No response received");
+			ponged.IsAvailable(8.Seconds()).ShouldBeTrue("No response received");
 		}
 
 		[Test]
@@ -128,10 +129,10 @@ namespace MassTransit.Tests
 				.OnTimeout(() => mre.Set())
 				.BeginSend((state) => mre.Set(), null);
 
-			LocalBus.Subscribe<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
+			LocalBus.SubscribeHandler<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
 
-			Assert.IsTrue(mre.WaitOne(5.Seconds(), true));
-			Assert.IsTrue(ponged.IsAvailable(1.Seconds()));
+			Assert.IsTrue(mre.WaitOne(8.Seconds(), true));
+			Assert.IsTrue(ponged.IsAvailable(8.Seconds()));
 		}
 
 		[Test]

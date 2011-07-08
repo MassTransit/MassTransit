@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,42 +14,29 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Exceptions;
+	using Magnum.Extensions;
 
-    /// <summary>
+	/// <summary>
 	/// Routes messages to instances of subscribed components. A new instance of the component
 	/// is created from the container for each message received.
 	/// </summary>
 	/// <typeparam name="TComponent">The component type to handle the message</typeparam>
 	/// <typeparam name="TMessage">The message to handle</typeparam>
 	public class ComponentMessageSink<TComponent, TMessage> :
-		IPipelineSink<TMessage>
+		IPipelineSink<IConsumeContext<TMessage>>
 		where TMessage : class
 		where TComponent : class, Consumes<TMessage>.All
 	{
-		private readonly IObjectBuilder _builder;
+		readonly IConsumerFactory<TComponent> _consumerFactory;
 
-		public ComponentMessageSink(ISubscriberContext context)
+		public ComponentMessageSink(IConsumerFactory<TComponent> consumerFactory)
 		{
-			_builder = context.Builder;
+			_consumerFactory = consumerFactory;
 		}
 
-		public void Dispose()
+		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
 		{
-		}
-
-		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
-		{
-			Consumes<TMessage>.All consumer = BuildConsumer();
-
-			try
-			{
-				yield return consumer.Consume;
-			}
-			finally
-			{
-				Release(consumer);
-			}
+			return _consumerFactory.GetConsumer(context, Selector);
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
@@ -57,20 +44,17 @@ namespace MassTransit.Pipeline.Sinks
 			return inspector.Inspect(this);
 		}
 
-		private void Release(Consumes<TMessage>.All consumer)
+		IEnumerable<Action<IConsumeContext<TMessage>>> Selector(TComponent instance, IConsumeContext<TMessage> messageContext)
 		{
-			_builder.Release(consumer.TranslateTo<TComponent>());
-		}
+			yield return context =>
+				{
+					context.BaseContext.NotifyConsume(context, typeof (TComponent).ToShortTypeName(), null);
 
-		private Consumes<TMessage>.All BuildConsumer()
-		{
-			TComponent component = _builder.GetInstance<TComponent>();
-			if (component == null)
-				throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ", typeof(TComponent)));
-
-			Consumes<TMessage>.All consumer = component.TranslateTo<Consumes<TMessage>.All>();
-
-			return consumer;
+					using (context.CreateScope())
+					{
+						instance.Consume(context.Message);
+					}
+				};
 		}
 	}
 }

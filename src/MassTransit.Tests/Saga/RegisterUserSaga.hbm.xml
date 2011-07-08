@@ -2,7 +2,6 @@
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2"
                    namespace="MassTransit.Tests"
                    assembly="MassTransit.Tests"
-                   default-access="field.camelcase-underscore"
                    default-lazy="false"
                    default-cascade="none" >
   <class name="MassTransit.Tests.Saga.RegisterUserSaga, MassTransit.Tests">

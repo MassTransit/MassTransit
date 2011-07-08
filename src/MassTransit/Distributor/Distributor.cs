@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,109 +13,167 @@
 namespace MassTransit.Distributor
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
+	using log4net;
 	using Magnum;
-	using Magnum.Actors.Schedulers;
-	using Magnum.DateTimeExtensions;
-	using Magnum.Threading;
+	using Magnum.Extensions;
 	using Messages;
+	using Stact;
+	using Stact.Internal;
 
-	public class Distributor<T> :
-		IDistributor<T>,
-		Consumes<T>.Selected
-		where T : class
+	public class Distributor<TMessage> :
+		IDistributor<TMessage>
+		where TMessage : class
 	{
-		private readonly IEndpointFactory _endpointFactory;
-		private readonly IWorkerSelectionStrategy<T> _selectionStrategy;
-		private readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers = new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
-		private ThreadPoolScheduler _threadPoolScheduler;
-		private UnsubscribeAction _unsubscribeAction = () => false;
-        private readonly int _pingTimeout = (int)1.Minutes().TotalMilliseconds;
+		readonly int _pingTimeout = (int) 5.Seconds().TotalMilliseconds;
+		readonly IWorkerSelectionStrategy<TMessage> _selectionStrategy;
 
-		public Distributor(IEndpointFactory endpointFactory, IWorkerSelectionStrategy<T> workerSelectionStrategy)
+		readonly IDictionary<Uri,WorkerDetails> _workers = new Dictionary<Uri,WorkerDetails>();
+
+		Fiber _fiber;
+		ScheduledOperation _scheduled;
+		Scheduler _scheduler;
+		UnsubscribeAction _unsubscribeAction = () => false;
+		IServiceBus _bus;
+
+		public Distributor(IWorkerSelectionStrategy<TMessage> workerSelectionStrategy)
 		{
-			_endpointFactory = endpointFactory;
 			_selectionStrategy = workerSelectionStrategy;
+
+			_fiber = new PoolFiber();
+			_scheduler = new TimerScheduler(new PoolFiber());
 		}
 
-		public Distributor(IEndpointFactory endpointFactory) :
-				this(endpointFactory, new DefaultWorkerSelectionStrategy<T>())
+		public Distributor()
+			: this(new DefaultWorkerSelectionStrategy<TMessage>())
 		{
 		}
 
-		public void Consume(T message)
+		public void Consume(TMessage message)
 		{
-			WorkerDetails worker = _selectionStrategy.GetAvailableWorkers(_workers.Values, message, false).FirstOrDefault();
-			if (worker == null)
+			WorkerDetails worker;
+			lock (_workers)
 			{
-				CurrentMessage.RetryLater();
-				return;
+				worker = _selectionStrategy.SelectWorker(_workers.Values, message);
+				if (worker == null)
+				{
+					_bus.MessageContext<TMessage>().RetryLater();
+					return;
+				}
+
+				worker.Add();
 			}
 
-			worker.Add();
+			IEndpoint endpoint = _bus.GetEndpoint(worker.DataUri);
 
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(worker.DataUri);
-
-			var distributed = new Distributed<T>(message, CurrentMessage.Headers.ResponseAddress);
+			var distributed = new Distributed<TMessage>(message, _bus.Context().ResponseAddress);
 
 			endpoint.Send(distributed);
 		}
 
-		public bool Accept(T message)
+		public bool Accept(TMessage message)
 		{
-			return _selectionStrategy.GetAvailableWorkers(_workers.Values, message, true).Count() > 0;
+			lock(_workers)
+				return _selectionStrategy.HasAvailableWorker(_workers.Values, message);
 		}
+
+		bool _disposed;
 
 		public void Dispose()
 		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
+		~Distributor()
+		{
+			Dispose(false);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_scheduler.Stop(60.Seconds());
+				_scheduler = null;
+
+				_fiber.Shutdown(60.Seconds());
+				_fiber = null;
+			}
+
+			_disposed = true;
+		}
 		public void Start(IServiceBus bus)
 		{
-			_unsubscribeAction = bus.Subscribe<WorkerAvailable<T>>(Consume);
+			_bus = bus;
+
+			_unsubscribeAction = bus.SubscribeHandler<WorkerAvailable<TMessage>>(Consume);
 
 			// don't plan to unsubscribe this since it's an important thing
-			bus.Subscribe(this);
+			bus.SubscribeInstance(this);
 
-			_threadPoolScheduler = new ThreadPoolScheduler();
+			_scheduled = _scheduler.Schedule(_pingTimeout, _pingTimeout, _fiber, PingWorkers);
 
-			_threadPoolScheduler.Schedule(_pingTimeout, _pingTimeout, PingWorkers);
+			_bus.Publish(new PingWorker());
 		}
 
 		public void Stop()
 		{
-			_threadPoolScheduler.Dispose();
+			_scheduled.Cancel();
+			_scheduled = null;
 
-			_workers.Clear();
+			lock(_workers)
+				_workers.Clear();
 
 			_unsubscribeAction();
 		}
 
-		public void Consume(WorkerAvailable<T> message)
+		void Consume(WorkerAvailable<TMessage> message)
 		{
-			WorkerDetails worker = _workers.Retrieve(message.ControlUri, () =>
-				{
-					return new WorkerDetails
-						{
-							ControlUri = message.ControlUri,
-							DataUri = message.DataUri,
-							InProgress = message.InProgress,
-							InProgressLimit = message.InProgressLimit,
-							Pending = message.Pending,
-							PendingLimit = message.PendingLimit,
-							LastUpdate = message.Updated,
-						};
-				});
+			WorkerDetails worker;
+			lock (_workers)
+			{
+				worker = _workers.Retrieve(message.ControlUri, () =>
+					{
+						return new WorkerDetails
+							{
+								ControlUri = message.ControlUri,
+								DataUri = message.DataUri,
+								InProgress = message.InProgress,
+								InProgressLimit = message.InProgressLimit,
+								Pending = message.Pending,
+								PendingLimit = message.PendingLimit,
+								LastUpdate = message.Updated,
+							};
+					});
+			}
 
-			worker.UpdateInProgress(message.InProgress, message.InProgressLimit, message.Pending, message.PendingLimit, message.Updated);
+			worker.UpdateInProgress(message.InProgress, message.InProgressLimit, message.Pending, message.PendingLimit,
+				message.Updated);
+
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Worker {0}: {1} in progress, {2} pending", message.DataUri, message.InProgress, message.Pending);
 		}
 
-		private void PingWorkers()
+		static readonly ILog _log = LogManager.GetLogger(typeof (Distributor<TMessage>));
+
+		void PingWorkers()
 		{
-			_workers.Values
-				.Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(_pingTimeout.Milliseconds()))
-				.ToList()
-				.ForEach(x => { _endpointFactory.GetEndpoint(x.ControlUri).Send(new PingWorker()); });
+			List<WorkerDetails> expired;
+			lock(_workers)
+			{
+				expired = _workers.Values
+					.Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(_pingTimeout.Milliseconds()))
+					.ToList();
+			}
+
+			expired.ForEach(x =>
+					{
+						_bus.GetEndpoint(x.ControlUri).Send(new PingWorker(),
+							context => context.SetResponseAddress(_bus.Endpoint.Address.Uri));
+					});
 		}
 	}
 }

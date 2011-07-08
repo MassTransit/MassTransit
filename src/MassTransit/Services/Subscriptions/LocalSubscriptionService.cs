@@ -13,7 +13,7 @@
 namespace MassTransit.Services.Subscriptions
 {
 	using System;
-	using Internal;
+	using Pipeline;
 	using Util;
 
 	public class LocalSubscriptionService :

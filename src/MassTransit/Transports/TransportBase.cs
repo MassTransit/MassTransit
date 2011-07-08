@@ -1,5 +1,5 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 The Apache Software Foundation.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,62 +12,65 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
-    using System.Diagnostics;
-    using System.IO;
+	using System;
+	using System.Diagnostics;
+	using Context;
 
-    [DebuggerDisplay("{Address}")]
-    public abstract class TransportBase :
-        ITransport
-    {
-        protected bool _disposed;
+	[DebuggerDisplay("{Address}")]
+	public abstract class TransportBase :
+		IDuplexTransport
+	{
+		private bool _disposed;
 
-        protected TransportBase(IEndpointAddress address)
-        {
-            Address = address;
-        }
+		protected TransportBase(IEndpointAddress address)
+		{
+			Address = address;
+		}
 
-        public IEndpointAddress Address { get; private set; }
+		public IEndpointAddress Address { get; private set; }
 
-        public abstract void Send(Action<Stream> sender);
+		public abstract void Send(ISendContext context);
 
-        public void Receive(Func<Stream, Action<Stream>> receiver)
-        {
-            EnsureNotDisposed();
+		public abstract void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout);
 
-            Receive(receiver, TimeSpan.Zero);
-        }
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-        public abstract void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout);
+		protected abstract void OnDisposing();
 
-        protected void EnsureNotDisposed()
-        {
-            if(_disposed)
-                throw new ObjectDisposedException("The transport has already been disposed: " + Address);
-        }
+		protected void GuardAgainstDisposed()
+		{
+			if (_disposed)
+				throw new ObjectDisposedException("The transport has already been disposed: " + Address);
+		}
 
-        public abstract void OnDisposing();
+		private void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				OnDisposing();
+			}
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+			_disposed = true;
+		}
 
-        private void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-            if (disposing)
-            {
-                OnDisposing();
-            }
+		~TransportBase()
+		{
+			Dispose(false);
+		}
 
-            _disposed = true;
-        }
+		public IOutboundTransport OutboundTransport
+		{
+			get { return this; }
+		}
 
-        ~TransportBase()
-        {
-            Dispose(false);
-        }
-    }
+		public IInboundTransport InboundTransport
+		{
+			get { return this; }
+		}
+	}
 }

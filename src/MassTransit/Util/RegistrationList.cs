@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,14 +17,14 @@ namespace MassTransit.Util
 	using Magnum.Threading;
 
 	/// <summary>
-	/// A locked list implementation of IRegistrationList
+	///   A locked list implementation of IRegistrationList
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
+	/// <typeparam name = "T"></typeparam>
 	public class RegistrationList<T> :
-		IRegistrationList<T>
+		IDisposable
 	{
-		private volatile bool _disposed;
-		private ReaderWriterLockedObject<List<T>> _items = new ReaderWriterLockedObject<List<T>>(new List<T>());
+		volatile bool _disposed;
+		ReaderWriterLockedObject<List<T>> _items = new ReaderWriterLockedObject<List<T>>(new List<T>());
 
 		public void Dispose()
 		{

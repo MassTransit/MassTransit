@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,35 +14,38 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
+	using Magnum.Extensions;
 
 	public class InstanceMessageSinkBase<TMessage> :
-		IPipelineSink<TMessage>
+		IPipelineSink<IConsumeContext<TMessage>>
 		where TMessage : class
 	{
-		private Func<TMessage, Action<TMessage>> _acceptor;
+		readonly MultipleHandlerSelector<TMessage> _selector;
 
-		public InstanceMessageSinkBase(Func<TMessage, Action<TMessage>> acceptor)
+		public InstanceMessageSinkBase(MultipleHandlerSelector<TMessage> selector)
 		{
-			_acceptor = acceptor;
+			_selector = selector;
 		}
 
-		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
+		public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
 		{
-			var consumer = _acceptor(message);
-			if (consumer != null)
-				yield return consumer;
+			return Selector(context);
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
 		{
 			inspector.Inspect(this);
-
-			// since this is the end of the line, we don't visit this one I suppose
 			return true;
 		}
 
-		public void Dispose()
+		IEnumerable<Action<IConsumeContext<TMessage>>> Selector(IConsumeContext<TMessage> messageContext)
 		{
+			foreach (var result in _selector(messageContext))
+			{
+				messageContext.BaseContext.NotifyConsume(messageContext, typeof (Action<TMessage>).ToShortTypeName(), null);
+
+				yield return result;
+			}
 		}
 	}
 }

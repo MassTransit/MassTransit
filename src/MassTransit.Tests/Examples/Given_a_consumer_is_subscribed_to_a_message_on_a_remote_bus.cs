@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Examples
 {
+	using Magnum.TestFramework;
 	using Messages;
 	using TestFramework;
 
@@ -23,9 +24,9 @@ namespace MassTransit.Tests.Examples
 		public void A_consumer_is_subscribed_to_a_message()
 		{
 			Consumer = new ConsumerOf<SimpleMessage>();
-			RemoteBus.Subscribe(Consumer);
+			RemoteBus.SubscribeInstance(Consumer);
 
-			LocalBus.ShouldHaveSubscriptionFor<SimpleMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<SimpleMessage>();
 		}
 
 		protected ConsumerOf<SimpleMessage> Consumer { get; private set; }

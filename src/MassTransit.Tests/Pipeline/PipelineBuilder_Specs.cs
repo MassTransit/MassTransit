@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,10 +14,8 @@ namespace MassTransit.Tests.Pipeline
 {
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
-	using MassTransit.Pipeline.Configuration.Subscribers;
 	using Messages;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 
 	[TestFixture]
 	public class When_building_a_pipeline
@@ -25,27 +23,17 @@ namespace MassTransit.Tests.Pipeline
 		[SetUp]
 		public void Setup()
 		{
-			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, null);
+			_pipeline = InboundPipelineConfigurator.CreateDefault(null);
 		}
 
-		private IObjectBuilder _builder;
-		private MessagePipeline _pipeline;
-
-		[Test]
-		public void The_builder_should_stay_with_the_pipeline()
-		{
-			var interceptor = MockRepository.GenerateMock<IPipelineSubscriber>();
-
-			_pipeline.Configure(x => { x.Register(interceptor); });
-		}
+		IInboundMessagePipeline _pipeline;
 
 		[Test]
 		public void The_pipeline_should_be_happy()
 		{
-			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
+			var consumer = new IndiscriminantConsumer<PingMessage>();
 
-			_pipeline.Subscribe(consumer);
+			_pipeline.ConnectInstance(consumer);
 
 			_pipeline.Dispatch(new PingMessage());
 

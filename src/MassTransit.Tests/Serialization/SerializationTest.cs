@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,20 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-	using System.Diagnostics;
 	using System.IO;
-	using System.Text;
+	using Context;
+	using Magnum.TestFramework;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
 
-	public abstract class SerializationTest
+	public abstract class SerializationTest<TSerializer>
+		where TSerializer : IMessageSerializer, new()
 	{
-		private XmlMessageSerializer _serializer;
+		IMessageSerializer _serializer;
 
 		[TestFixtureSetUp]
 		public void Setup()
 		{
-			_serializer = new XmlMessageSerializer();
+			_serializer = new TSerializer();
 		}
 
 		protected T SerializeAndReturn<T>(T obj)
@@ -35,18 +36,24 @@ namespace MassTransit.Tests.Serialization
 
 			using (var output = new MemoryStream())
 			{
-				_serializer.Serialize(output, obj);
+				_serializer.Serialize(output, obj.ToSendContext());
 
 				serializedMessageData = output.ToArray();
 
-				Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+				//		Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
 			}
 
 			using (var input = new MemoryStream(serializedMessageData))
 			{
-				var result = _serializer.Deserialize(input) as T;
+				IReceiveContext receiveContext = ReceiveContext.FromBodyStream(input);
+				_serializer.Deserialize(receiveContext);
 
-				return result;
+				IConsumeContext<T> context;
+				receiveContext.TryGetContext(out context).ShouldBeTrue();
+
+				context.ShouldNotBeNull();
+
+				return context.Message;
 			}
 		}
 	}

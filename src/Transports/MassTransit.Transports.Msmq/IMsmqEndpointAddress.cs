@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,9 +16,9 @@ namespace MassTransit.Transports.Msmq
 		IEndpointAddress
 	{
 		/// <summary>
-		/// The format name used to talk to MSMQ
+		/// The format name used to receive messages
 		/// </summary>
-		string FormatName { get; }
+		string InboundFormatName { get; }
 
 		/// <summary>
 		/// The name of the queue in local format (.\private$\name)
@@ -26,8 +26,13 @@ namespace MassTransit.Transports.Msmq
 		string LocalName { get; }
 
 		/// <summary>
-		/// Was transactional requested by the Uri
+		/// If specified, the multicast address to bind to the queue
 		/// </summary>
-		bool IsTransactional { get; }
+		string MulticastAddress { get; }
+
+		/// <summary>
+		/// The format name used to send messages (may be different if multicast MSMQ is used)
+		/// </summary>
+		string OutboundFormatName { get; }
 	}
 }

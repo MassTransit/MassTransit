@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,45 +14,50 @@ namespace MassTransit.RuntimeServices
 {
 	using System.IO;
 	using FluentNHibernate.Cfg;
-	using Infrastructure.Saga;
 	using Model;
 	using NHibernate;
 	using NHibernate.Tool.hbm2ddl;
+	using NHibernateIntegration.Saga;
 	using Saga;
-	using Services.HealthMonitoring.Configuration;
 	using Services.Timeout;
 	using StructureMap;
-	using StructureMapIntegration;
+	using StructureMap.Configuration.DSL;
 
 	public class TimeoutServiceRegistry :
-		MassTransitRegistryBase
+		Registry
 	{
-		private readonly IContainer _container;
-
 		public TimeoutServiceRegistry(IContainer container)
 		{
-			_container = container;
-
 			var configuration = container.GetInstance<IConfiguration>();
 
-			For<ISessionFactory>().Singleton().Use(context => CreateSessionFactory());
+			For<ISessionFactory>()
+				.Singleton()
+				.Use(context => CreateSessionFactory());
 
-			For(typeof (ISagaRepository<>)).Use(typeof (NHibernateSagaRepositoryForContainers<>));
+			For(typeof (ISagaRepository<>))
+				.Add(typeof (NHibernateSagaRepository<>));
 
-			RegisterControlBus(configuration.TimeoutServiceControlUri, x => { x.SetConcurrentConsumerLimit(1); });
+			For<IServiceBus>()
+				.Singleton()
+				.Use(context =>
+					{
+						return ServiceBusFactory.New(sbc =>
+							{
+								sbc.ReceiveFrom(configuration.TimeoutServiceDataUri);
+								sbc.UseControlBus();
 
-			RegisterServiceBus(configuration.TimeoutServiceDataUri, x =>
-				{
-					x.UseControlBus(_container.GetInstance<IControlBus>());
-					x.SetConcurrentConsumerLimit(1);
+								sbc.UseMsmq();
+								sbc.UseSubscriptionService(configuration.SubscriptionServiceUri);
 
-					ConfigureSubscriptionClient(configuration.SubscriptionServiceUri, x);
+								sbc.SetConcurrentConsumerLimit(1);
 
-					x.ConfigureService<HealthClientConfigurator>(health => health.SetHeartbeatInterval(10));
-				});
+								if(configuration.HealthServiceEnabled)
+									sbc.UseHealthMonitoring(10);
+							});
+					});
 		}
 
-		private static ISessionFactory CreateSessionFactory()
+		static ISessionFactory CreateSessionFactory()
 		{
 			return Fluently.Configure()
 				.Mappings(m => { m.FluentMappings.Add<TimeoutSagaMap>(); })
@@ -60,11 +65,12 @@ namespace MassTransit.RuntimeServices
 				.BuildSessionFactory();
 		}
 
-		private static void BuildSchema(NHibernate.Cfg.Configuration config)
+		static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
 			new SchemaUpdate(config).Execute(false, true);
 
-			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (TimeoutService).Assembly.Location), typeof (TimeoutService).Name + ".sql");
+			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (TimeoutService).Assembly.Location),
+				typeof (TimeoutService).Name + ".sql");
 
 			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
 		}

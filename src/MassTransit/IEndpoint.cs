@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,49 +12,58 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
+	using System;
+	using Context;
+	using Serialization;
+	using Transports;
 
-    /// <summary>
-    /// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
-    /// </summary>
-    public interface IEndpoint :
-        IDisposable
-    {
-        /// <summary>
-        /// The address of the endpoint
-        /// </summary>
-        IEndpointAddress Address { get; }
+	/// <summary>
+	/// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
+	/// </summary>
+	public interface IEndpoint :
+		IDisposable
+	{
+		/// <summary>
+		/// The address of the endpoint
+		/// </summary>
+		IEndpointAddress Address { get; }
 
-        /// <summary>
-        /// The URI of the endpoint
-        /// </summary>
-        Uri Uri { get; }
+		/// <summary>
+		/// The inbound transport for the endpoint
+		/// </summary>
+		IInboundTransport InboundTransport { get; }
 
-        /// <summary>
-        /// Send to the endpoint
-        /// </summary>
-        /// <typeparam name="T">The type of the message to send</typeparam>
-        /// <param name="message">The message to send</param>
-        void Send<T>(T message)
-            where T : class;
+		/// <summary>
+		/// The outbound transport for the endpoint
+		/// </summary>
+		IOutboundTransport OutboundTransport { get; }
 
-        /// <summary>
-        /// Receive from the endpoint by passing a function that can preview the message and if the caller
-        /// chooses to accept it, return a method that will consume the message.
-        /// 
-        /// Returns immediately if no message is available.
-        /// </summary>
-        /// <param name="receiver">The function to preview/consume the message</param>
-        void Receive(Func<object, Action<object>> receiver);
+		/// <summary>
+		/// The transport where faulting messages (poison messages) are sent
+		/// </summary>
+		IOutboundTransport ErrorTransport { get; }
 
-        /// <summary>
-        /// Receive from the endpoint by passing a function that can preview the message and if the caller
-        /// chooses to accept it, return a method that will consume the message.
-        /// 
-        /// Returns after the specified timeout if no message is available.
-        /// </summary>
-        /// <param name="receiver">The function to preview/consume the message</param>
-        /// <param name="timeout">The time to wait for a message to be available</param>
-        void Receive(Func<object, Action<object>> receiver, TimeSpan timeout);
-    }
+		/// <summary>
+		/// The message serializer being used by the endpoint
+		/// </summary>
+		IMessageSerializer Serializer { get; }
+
+		/// <summary>
+		/// Send to the endpoint
+		/// </summary>
+		/// <typeparam name="T">The type of the message to send</typeparam>
+		/// <param name="context"></param>
+		void Send<T>(ISendContext<T> context)
+			where T : class;
+
+		/// <summary>
+		/// Receive from the endpoint by passing a function that can preview the message and if the caller
+		/// chooses to accept it, return a method that will consume the message.
+		/// 
+		/// Returns after the specified timeout if no message is available.
+		/// </summary>
+		/// <param name="receiver">The function to preview/consume the message</param>
+		/// <param name="timeout">The time to wait for a message to be available</param>
+		void Receive(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout);
+	}
 }

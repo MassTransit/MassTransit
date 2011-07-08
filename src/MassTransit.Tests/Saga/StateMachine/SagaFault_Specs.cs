@@ -13,27 +13,29 @@
 namespace MassTransit.Tests.Saga.StateMachine
 {
 	using System;
-	using log4net;
 	using Magnum.StateMachine;
 	using MassTransit.Saga;
 	using NUnit.Framework;
+	using TestFramework;
 	using TextFixtures;
 
 	[TestFixture]
 	public class SagaFault_Specs :
 		LoopbackTestFixture
 	{
+		InMemorySagaRepository<CreateCustomerSaga> _repository;
+
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
-			var repository = SetupSagaRepository<CreateCustomerSaga>(ObjectBuilder);
+			_repository = SetupSagaRepository<CreateCustomerSaga>();
 		}
 
 		[Test]
 		public void The_saga_should_be_subscribable()
 		{
-			var unsubscribeAction = LocalBus.Subscribe<CreateCustomerSaga>();
+			var unsubscribeAction = LocalBus.SubscribeSaga<CreateCustomerSaga>(_repository);
 
 
 			unsubscribeAction();
@@ -45,9 +47,6 @@ namespace MassTransit.Tests.Saga.StateMachine
 		SagaStateMachine<CreateCustomerSaga>,
 		ISaga
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (CreateCustomerSaga));
-
-
 		static CreateCustomerSaga()
 		{
 			Define(() =>
@@ -130,7 +129,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 
@@ -138,7 +137,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 
@@ -146,7 +145,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 
@@ -154,7 +153,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 
@@ -164,7 +163,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 
@@ -172,7 +171,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new ATestException(); }
 		}
 	}
 }

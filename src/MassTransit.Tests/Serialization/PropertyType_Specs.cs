@@ -1,5 +1,5 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
+// Copyright 2007-2010 The Apache Software Foundation.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,90 +12,92 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-	using NUnit.Framework;
+    using Magnum.TestFramework;
+    using MassTransit.Serialization;
+    using NUnit.Framework;
 
-	[TestFixture]
-	public class Serializing_a_property_of_type_char :
-		SerializationTest
-	{
-		public class PropertyOfChar
-		{
-			public char Value { get; set; }
-		}
+    [TestFixture]
+    public class Serializing_a_property_of_type_char :
+        SerializationTest<XmlMessageSerializer>
+    {
+        public class PropertyOfChar
+        {
+            public char Value { get; set; }
+        }
 
-		public class PropertyOfNullableChar
-		{
-			public char? Value { get; set; }
-		}
+        public class PropertyOfNullableChar
+        {
+            public char? Value { get; set; }
+        }
 
-		[Test]
-		public void Should_handle_a_missing_nullable_value()
-		{
-			var obj = new PropertyOfNullableChar();
+        [Test]
+        public void Should_handle_a_missing_nullable_value()
+        {
+            var obj = new PropertyOfNullableChar();
 
-			PropertyOfNullableChar result = SerializeAndReturn(obj);
+            PropertyOfNullableChar result = SerializeAndReturn(obj);
 
-			result.Value.ShouldEqual(obj.Value);
-		}
+            result.Value.ShouldEqual(obj.Value);
+        }
 
-		[Test]
-		public void Should_handle_a_present_nullable_value()
-		{
-			var obj = new PropertyOfNullableChar {Value = 'A'};
+        [Test]
+        public void Should_handle_a_present_nullable_value()
+        {
+            var obj = new PropertyOfNullableChar {Value = 'A'};
 
-			PropertyOfNullableChar result = SerializeAndReturn(obj);
+            PropertyOfNullableChar result = SerializeAndReturn(obj);
 
-			result.Value.ShouldEqual(obj.Value);
-		}
+            result.Value.ShouldEqual(obj.Value);
+        }
 
-		[Test]
-		public void Should_handle_a_present_value()
-		{
-			var obj = new PropertyOfChar {Value = 'A'};
+        [Test]
+        public void Should_handle_a_present_value()
+        {
+            var obj = new PropertyOfChar {Value = 'A'};
 
-			PropertyOfChar result = SerializeAndReturn(obj);
+            PropertyOfChar result = SerializeAndReturn(obj);
 
-			result.Value.ShouldEqual(obj.Value);
-		}
+            result.Value.ShouldEqual(obj.Value);
+        }
 
-		[Test]
-		public void Should_handle_a_string_null()
-		{
-			var obj = new PropertyOfChar {Value = '\0'};
+        [Test]
+        public void Should_handle_a_string_null()
+        {
+            var obj = new PropertyOfChar {Value = '\0'};
 
-			PropertyOfChar result = SerializeAndReturn(obj);
+            PropertyOfChar result = SerializeAndReturn(obj);
 
-			result.Value.ShouldEqual(obj.Value);
-		}
-	}
+            result.Value.ShouldEqual(obj.Value);
+        }
+    }
 
 
-	[TestFixture]
-	public class Serializing_a_string_with_an_escaped_character :
-		SerializationTest
-	{
-		public class SimpleMessage
-		{
-			public SimpleMessage(string body)
-			{
-				Body = body;
-			}
+    [TestFixture]
+    public class Serializing_a_string_with_an_escaped_character :
+        SerializationTest<XmlMessageSerializer>
+    {
+        public class SimpleMessage
+        {
+            public SimpleMessage(string body)
+            {
+                Body = body;
+            }
 
-			protected SimpleMessage()
-			{
-			}
+            protected SimpleMessage()
+            {
+            }
 
-			public string Body { get; private set; }
-		}
+            public string Body { get; private set; }
+        }
 
-		[Test]
-		public void Should_handle_a_missing_nullable_value()
-		{
-			var obj = new SimpleMessage("");
+        [Test]
+        public void Should_handle_a_missing_nullable_value()
+        {
+            var obj = new SimpleMessage("");
 
-			SimpleMessage result = SerializeAndReturn(obj);
+            SimpleMessage result = SerializeAndReturn(obj);
 
-			result.Body.ShouldEqual(obj.Body);
-		}
-	}
+            result.Body.ShouldEqual(obj.Body);
+        }
+    }
 }

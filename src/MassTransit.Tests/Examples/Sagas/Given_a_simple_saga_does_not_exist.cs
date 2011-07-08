@@ -12,17 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Examples.Sagas
 {
-	using TestFramework;
+	using Magnum.TestFramework;
 	using TestFramework.Fixtures;
 
 	[Scenario]
 	public class Given_a_simple_saga_does_not_exist :
-		SagaTestFixture<SimpleSaga>
+		SagaTestFixture<SimpleStateMachineSaga>
 	{
 		[Given]
 		public void A_simple_saga_does_not_exist()
 		{
-			LocalBus.Subscribe<SimpleSaga>();
+			LocalBus.SubscribeSaga<SimpleStateMachineSaga>(Repository);
 		}
 	}
 }

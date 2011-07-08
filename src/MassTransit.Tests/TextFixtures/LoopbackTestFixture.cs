@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,13 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TextFixtures
 {
-	using Configuration;
-	using MassTransit.Transports;
+	using BusConfigurators;
+	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
 
 	[TestFixture]
 	public class LoopbackTestFixture :
-		EndpointTestFixture<LoopbackEndpoint>
+		EndpointTestFixture<LoopbackTransportFactory>
 	{
 		public IServiceBus LocalBus { get; private set; }
 
@@ -26,10 +26,16 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			base.EstablishContext();
 
-			LocalBus = ServiceBusConfigurator.New(x =>
+			LocalBus = ServiceBusFactory.New(x =>
 				{
 					x.ReceiveFrom("loopback://localhost/mt_client");
+
+					ConfigureLocalBus(x);
 				});
+		}
+
+		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
+		{
 		}
 
 		protected override void TeardownContext()

@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<doc>
+  <assembly>
+    <name>Stact.ServerFramework</name>
+  </assembly>
+  <members>
+    <member name="T:Stact.ServerFramework.ConnectionContext">
+      <summary>
+            Abstracts a connection from the underlying transport implementation
+            </summary>
+    </member>
+    <member name="M:Stact.ServerFramework.ConnectionContext.Complete">
+      <summary>
+            Completes the response for this connection
+            </summary>
+    </member>
+    <member name="M:Stact.ServerFramework.ConnectionContext.SetResponseFilter(System.Func{System.IO.Stream,System.IO.Stream})">
+      <summary>
+            Wraps the response stream (for compression, encryption, etc.)
+            </summary>
+      <param name="responseFilter">A method to apply a filter to the connection</param>
+    </member>
+    <member name="P:Stact.ServerFramework.ConnectionContext.Request">
+      <summary>
+            The request submitted for the connection
+            </summary>
+    </member>
+    <member name="P:Stact.ServerFramework.ConnectionContext.Response">
+      <summary>
+            The response for the connection
+            </summary>
+    </member>
+    <member name="P:Stact.ServerFramework.ConnectionContext.User">
+      <summary>
+            The user context under which the connection was established
+            </summary>
+    </member>
+    <member name="P:Stact.ServerFramework.ConnectionContext.Server">
+      <summary>
+            The server context
+            </summary>
+    </member>
+    <member name="M:Stact.ServerFramework.ExtensionsToConnectionContext.WriteObject(Stact.ServerFramework.ConnectionContext,System.Object)">
+      <summary>
+            Writes the object as a JSON response if the request is an Ajax request, otherwise the
+            response is wrapped in an HTML text area for displaying to the user.
+            </summary>
+      <param name="obj">
+      </param>
+    </member>
+    <member name="M:Stact.ServerFramework.ExtensionsToConnectionContext.SetStatusToBadRequest(Stact.ServerFramework.ConnectionContext)">
+      <summary>
+            400 - Bad Request
+            </summary>
+      <param name="context">
+      </param>
+    </member>
+    <member name="M:Stact.ServerFramework.ExtensionsToConnectionContext.SetStatusToUnauthorized(Stact.ServerFramework.ConnectionContext)">
+      <summary>
+            401 - Not Authorized
+            </summary>
+      <param name="context">
+      </param>
+    </member>
+    <member name="T:Stact.ServerFramework.HttpServer">
+      <summary>
+            An HttpServer that can be used to asynchronously process HTTP/HTTPS requests from
+            within the application.
+            </summary>
+    </member>
+    <member name="T:Stact.ServerFramework.Internal.BadRequestConnectionHandler">
+      <summary>
+            Handles a connection inside of a channel, allowing handlers to be injected
+            along the channel network to handle things like authentication and ultimately
+            routing
+            </summary>
+    </member>
+    <member name="T:Stact.ServerFramework.Internal.HttpConnectionChannelProvider">
+      <summary>
+            Returns a channel to process the request, mapping the request Uri to the
+            channel implementation that support the specified URI.
+            </summary>
+    </member>
+    <member name="T:Stact.ServerFramework.RequestContext">
+      <summary>
+            Wraps a request, including the Url, Headers, and any QueryString parameters
+            </summary>
+    </member>
+    <member name="P:Stact.ServerFramework.RequestContext.Headers">
+      <summary>
+            The headers submitted as part of the request
+            </summary>
+    </member>
+    <member name="P:Stact.ServerFramework.RequestContext.InputStream">
+      <summary>
+            The input stream to read the request contents
+            </summary>
+    </member>
+    <member name="P:Stact.ServerFramework.RequestContext.QueryString">
+      <summary>
+            The query string arguments that were included with the request
+            </summary>
+    </member>
+    <member name="P:Stact.ServerFramework.RequestContext.HttpMethod">
+      <summary>
+            The method (GET,PUT,etc.)
+            </summary>
+    </member>
+    <member name="P:Stact.ServerFramework.RequestContext.Url">
+      <summary>
+            The URL specified for the request
+            </summary>
+    </member>
+    <member name="P:Stact.ServerFramework.RequestContext.RawUrl">
+      <summary>
+            The raw URL specified
+            </summary>
+    </member>
+    <member name="T:Stact.ServerFramework.PatternMatchConnectionHandler">
+      <summary>
+            A connection handler returns an appropriate channel to handle the connection
+            based on a URI mapping and a set of accepted verbs
+            </summary>
+    </member>
+    <member name="T:Stact.ServerFramework.SocketServer">
+      <summary>
+              SocketServer listens on the specified address and dispatches connections
+              as they arrive to separate connection objects with their own fibers
+            </summary>
+    </member>
+    <member name="T:Stact.ServerFramework.ValueProviders.ConnectionContextValueProvider">
+      <summary>
+              Maps access to the RequestContext for model binding
+            </summary>
+    </member>
+  </members>
+</doc>

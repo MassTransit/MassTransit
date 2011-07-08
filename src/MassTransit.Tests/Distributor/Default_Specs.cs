@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,16 +16,17 @@ namespace MassTransit.Tests.Distributor
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Threading;
-	using Configuration;
+	using BusConfigurators;
 	using Load;
 	using Load.Messages;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
 	using MassTransit.Distributor;
 	using MassTransit.Distributor.Messages;
 	using MassTransit.Pipeline.Inspectors;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using TestFramework;
+	using Util;
 
 	[TestFixture]
 	public class Default_distributor_specifications :
@@ -39,7 +40,7 @@ namespace MassTransit.Tests.Distributor
 			AddFirstCommandInstance("B", "loopback://localhost/b");
 			AddFirstCommandInstance("C", "loopback://localhost/c");
 
-			RemoteBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
+			RemoteBus.ShouldHaveRemoteSubscriptionFor<Distributed<FirstCommand>>();
 		}
 
 		[Test]
@@ -48,13 +49,13 @@ namespace MassTransit.Tests.Distributor
 			int workerAvaiableCountRecieved = 0;
 			var messageRecieved = new ManualResetEvent(false);
 
-			UnsubscribeAction unsubscribe = LocalBus.Subscribe<IWorkerAvailable>(message =>
+			UnsubscribeAction unsubscribe = LocalBus.SubscribeHandler<IWorkerAvailable>(message =>
 				{
 					Interlocked.Increment(ref workerAvaiableCountRecieved);
 					messageRecieved.Set();
 				});
 
-			Instances.ToList().ForEach(x => { x.Value.ControlBus.Endpoint.Send(new PingWorker()); });
+			Instances.ToList().ForEach(x => { x.Value.DataBus.ControlBus.Endpoint.Send(new PingWorker()); });
 
 			messageRecieved.WaitOne(3.Seconds());
 
@@ -69,7 +70,7 @@ namespace MassTransit.Tests.Distributor
 			int pingRequestsRecieved = 0;
 			var messageRecieved = new ManualResetEvent(false);
 
-			UnsubscribeAction unsubscribe = Instances["A"].ControlBus.Subscribe<PingWorker>(message =>
+			UnsubscribeAction unsubscribe = Instances["A"].DataBus.ControlBus.SubscribeHandler<PingWorker>(message =>
 				{
 					Interlocked.Increment(ref pingRequestsRecieved);
 					messageRecieved.Set();
@@ -88,13 +89,13 @@ namespace MassTransit.Tests.Distributor
 			int workerAvaiableCountRecieved = 0;
 			var messageRecieved = new ManualResetEvent(false);
 
-			UnsubscribeAction unsubscribe = LocalBus.Subscribe<WorkerAvailable<FirstCommand>>(message =>
+			UnsubscribeAction unsubscribe = LocalBus.SubscribeHandler<WorkerAvailable<FirstCommand>>(message =>
 				{
 					Interlocked.Increment(ref workerAvaiableCountRecieved);
 					messageRecieved.Set();
 				});
 
-			Instances.ToList().ForEach(x => { x.Value.ControlBus.Endpoint.Send(new PingWorker()); });
+			Instances.ToList().ForEach(x => { x.Value.DataBus.ControlBus.Endpoint.Send(new PingWorker()); });
 
 			messageRecieved.WaitOne(3.Seconds());
 
@@ -117,7 +118,7 @@ namespace MassTransit.Tests.Distributor
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
 			const int count = 100;
 
-			generator.Run(RemoteBus, count, x => new FirstCommand(x));
+			generator.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), count, x => new FirstCommand(x));
 
 			Dictionary<Uri, int> results = generator.GetWorkerLoad();
 
@@ -133,7 +134,7 @@ namespace MassTransit.Tests.Distributor
 	public class Distributor_with_custom_worker_selection_strategy :
 		LoopbackDistributorTestFixture
 	{
-		private Dictionary<String, Uri> _nodes = new Dictionary<string, Uri>
+		Dictionary<String, Uri> _nodes = new Dictionary<string, Uri>
 			{
 				{"A", new Uri("loopback://localhost/a")},
 				{"B", new Uri("loopback://localhost/b")},
@@ -147,24 +148,26 @@ namespace MassTransit.Tests.Distributor
 			_nodes.ToList().ForEach(x => AddFirstCommandInstance(x.Key, x.Value.ToString()));
 		}
 
-		protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
+		protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
 			var mock = MockRepository.GenerateStub<IWorkerSelectionStrategy<FirstCommand>>();
-			mock.Stub(x => x.GetAvailableWorkers(null, null, false))
+			mock.Stub(x => x.SelectWorker(null, null))
 				.IgnoreArguments()
-				.Return(new List<WorkerDetails>
+				.Return(new WorkerDetails
 					{
-						new WorkerDetails
-							{
-								ControlUri = _nodes["A"].AppendToPath("_control"),
-								DataUri = _nodes["A"],
-								InProgress = 0,
-								InProgressLimit = 100,
-								LastUpdate = DateTime.UtcNow
-							}
-					});
+						ControlUri = _nodes["A"].AppendToPath("_control"),
+						DataUri = _nodes["A"],
+						InProgress = 0,
+						InProgressLimit = 100,
+						LastUpdate = DateTime.UtcNow
+					}
+				);
 
-			configurator.UseDistributorFor(EndpointFactory, mock);
+			mock.Stub(x => x.HasAvailableWorker(null, null))
+				.IgnoreArguments()
+				.Return(true);
+
+			configurator.UseDistributorFor(mock);
 		}
 
 		[Test]
@@ -173,7 +176,7 @@ namespace MassTransit.Tests.Distributor
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
 			const int count = 100;
 
-			generator.Run(RemoteBus, count, x => new FirstCommand(x));
+			generator.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), count, x => new FirstCommand(x));
 
 			Dictionary<Uri, int> results = generator.GetWorkerLoad();
 

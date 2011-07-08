@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,13 +15,16 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 
+	public interface IPipelineSink
+	{
+	}
+
 	/// <summary>
 	/// Implemented by all classes that can be inserted into the pipeline
 	/// </summary>
 	/// <typeparam name="T">The message type passed by this sink</typeparam>
 	public interface IPipelineSink<T> :
-        IPipelineSink,
-		IDisposable
+		IPipelineSink
 		where T : class
 	{
 		/// <summary>
@@ -29,19 +32,17 @@ namespace MassTransit.Pipeline
 		/// so that it can be dispatched to those consumers. The message does not actually dispatch
 		/// in the pipeline, the consumers Consume method is called.
 		/// </summary>
-		/// <param name="item">The message being pushed through the pipeline</param>
+		/// <param name="context"></param>
 		/// <returns>An enumerable of consumers for the message</returns>
-		IEnumerable<Action<T>> Enumerate(T item);
-		
+		IEnumerable<Action<T>> Enumerate(T context);
+
 		/// <summary>
 		/// Walks the pipeline from the current sink forward, calling back to the inspector for each
 		/// sink in the pipeline.
-		/// NOTE: Visitor Pattern merit badge awarded
+		/// DING: Visitor Pattern merit badge awarded
 		/// </summary>
 		/// <param name="inspector">The inspector to call back to for each sink</param>
 		/// <returns>True if the inspection should continue, false to stop</returns>
 		bool Inspect(IPipelineInspector inspector);
 	}
-
-    public interface IPipelineSink {}
 }

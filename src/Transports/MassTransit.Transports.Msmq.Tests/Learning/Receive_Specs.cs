@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,16 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq.Tests
+namespace MassTransit.Transports.Msmq.Tests.Learning
 {
     using System;
     using System.Messaging;
     using System.Transactions;
-    using Magnum.DateTimeExtensions;
-    using MassTransit.Tests;
+    using Magnum.Extensions;
     using NUnit.Framework;
 
-    //TODO: Remove?
+    //TODO: Move to an Assumptions test section like we did for RabbitMQ
     [TestFixture, Category("Integration")]
     public class When_receiving_from_a_transactional_queue
     {
@@ -31,8 +30,12 @@ namespace MassTransit.Transports.Msmq.Tests
             if (!MessageQueue.Exists(_queueName))
                 MessageQueue.Create(_queueName, true);
 
+            using(var purgeq = new MessageQueue(_queueName))
+                purgeq.Purge();
+            
+
             _queue = new MessageQueue(_queueName, false, true, QueueAccessMode.SendAndReceive);
-            _queue.Purge();
+            
 
             _firstMsg = new Message {Label = 0.Days().FromUtcNow().ToString()};
             _secondMsg = new Message {Label = 1.Days().FromUtcNow().ToString()};
@@ -46,11 +49,13 @@ namespace MassTransit.Transports.Msmq.Tests
         {
             try
             {
-                _queue.Close();
+                if(_queue != null)
+                    _queue.Close();
             }
             finally
             {
-                _queue.Dispose();
+                if(_queue != null)
+                    _queue.Dispose();
                 _queue = null;
             }
         }

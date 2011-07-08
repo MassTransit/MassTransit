@@ -1,1 +1,0 @@
-TIBCO does not allow the redistribution of their assemblies. You must get this assembly from your TIBCO distribution and place it in this folder to build the TIBCO endpoint assembly.

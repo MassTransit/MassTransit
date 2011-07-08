@@ -1,55 +1,44 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace HeavyLoad.Load
 {
 	using System;
 	using System.Threading;
-	using Castle.Windsor;
 	using MassTransit;
-	using MassTransit.Transports.Msmq;
 
-    public class LocalLoadTest : IDisposable
+	public class LocalLoadTest :
+		IDisposable
 	{
-		private const int _repeatCount = 5000;
-		private readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
-		private readonly IWindsorContainer _container;
-		private readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
+		const int _repeatCount = 10000;
+		readonly IServiceBus _bus;
+		readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
+		readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
 
-		private readonly IServiceBus _bus;
-		private int _requestCounter = 0;
-		private int _responseCounter = 0;
+		int _requestCounter;
+		int _responseCounter;
 
 		public LocalLoadTest()
 		{
-			_container = new HeavyLoadContainer();
+			_bus = ServiceBusFactory.New(x =>
+				{
+					x.ReceiveFrom("msmq://localhost/heavy_load");
+					x.SetPurgeOnStartup(true);
 
-			_bus = _container.Resolve<IServiceBus>();
+					x.UseMsmq();
 
-			var management = MsmqEndpointManagement.New(_bus.Endpoint.Address.Uri);
-			management.Purge();
+					x.Subscribe(s =>
+						{
+							s.Handler<GeneralMessage>(Handle);
+							s.Handler<SimpleResponse>(Handler);
+						});
+				});
 		}
 
 		public void Dispose()
 		{
 			_bus.Dispose();
-			_container.Dispose();
 		}
 
 		public void Run(StopWatch stopWatch)
 		{
-			_bus.Subscribe<GeneralMessage>(Handle);
-			_bus.Subscribe<SimpleResponse>(Handler);
-
 			stopWatch.Start();
 
 			CheckPoint publishCheckpoint = stopWatch.Mark("Sending " + _repeatCount + " messages");
@@ -62,23 +51,23 @@ namespace HeavyLoad.Load
 
 			publishCheckpoint.Complete(_repeatCount);
 
-			bool completed = _completeEvent.WaitOne(TimeSpan.FromSeconds(60), true);
+			_completeEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
-			bool responseCompleted = _responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
+			_responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
 			receiveCheckpoint.Complete(_requestCounter + _responseCounter);
 
 			stopWatch.Stop();
 		}
 
-		private void Handler(SimpleResponse obj)
+		void Handler(SimpleResponse obj)
 		{
 			Interlocked.Increment(ref _responseCounter);
 			if (_responseCounter == _repeatCount)
 				_responseEvent.Set();
 		}
 
-		private void Handle(GeneralMessage obj)
+		void Handle(GeneralMessage obj)
 		{
 			_bus.Publish(new SimpleResponse());
 

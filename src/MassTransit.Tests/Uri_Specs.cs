@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,32 +13,56 @@
 namespace MassTransit.Tests
 {
 	using System;
+	using Magnum.TestFramework;
 	using NUnit.Framework;
+	using Util;
+	using Magnum.Extensions;
 
-	[TestFixture]
-	public class What_does_the_uri_do :
-		Specification
+	[Scenario]
+	public class Advanced_Uri_Specs
 	{
-		[Test]
-		public void An_address_in_an_invalid_format_should_throw_an_exception()
-		{
-			string address = @".\private$\bogus";
+		Uri _baseUri;
 
-			Assert.Throws<UriFormatException>(() => { new Uri(address); });
+		[When]
+		public void There_s_an_advanced_uri()
+		{
+			_baseUri = new Uri("rabbitmq://testUser:topSecret@localhost:5672/mt/test_queue?a_query=23");
 		}
 
-		[Test]
-		public void The_address_should_be_entered_in_a_URI_style_format()
+		[Then]
+		public void The_uri_extensions_are_capable_of_parsing_it()
 		{
-			string address = "local://localhost/test_endpoint";
+			Assert.That(
+				_baseUri.AppendToPath("_error")
+					.ToString(), Is.EqualTo("rabbitmq://testUser:topSecret@localhost:5672/mt/test_queue_error?a_query=23"));
+		}
+	}
+	[Scenario]
+	public class Simple_Uri_Specs
+	{
+		Uri _baseUri;
 
-			var endpointUri = new Uri(address);
+		[When]
+		public void There_s_a_simple_uri()
+		{
+			_baseUri = new Uri("rabbitmq://a:5672/");
+		}
 
-			Assert.That(endpointUri.Scheme, Is.EqualTo("local"));
+		[Then]
+		public void Can_append_to_path()
+		{
+			Assert.That(
+				_baseUri.AppendToPath("q")
+					.ToString(), Is.EqualTo("rabbitmq://a:5672/q"));
+		}
 
-			Assert.That(endpointUri.Host, Is.EqualTo("localhost"));
-
-			Assert.That(endpointUri.AbsolutePath, Is.EqualTo("/test_endpoint"));
+		[Then]
+		public void Can_append_to_path2()
+		{
+			Assert.That(
+				new Uri("rabbitmq://a:5672?354")
+					.AppendToPath("q").ToString(),
+				Is.EqualTo("rabbitmq://a:5672/q?354"));
 		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,28 +12,25 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Monitoring
 {
-	using System;
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Security;
 	using log4net;
+	using Magnum.Extensions;
 
-
-	public class ServiceBusPerformanceCounters
+    public class ServiceBusPerformanceCounters
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusPerformanceCounters));
-
-		public const string CategoryHelp = "MassTransit Performance Counters";
-		public const string CategoryName = "MassTransit";
-		private static readonly ServiceBusPerformanceCounters _instance;
-		private RuntimePerformanceCounter[] _counters;
+	    public const string CategoryName = "MassTransit";
+	    const string CategoryHelp = "MassTransit Performance Counters";
+	    static readonly ServiceBusPerformanceCounters _instance;
+		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusPerformanceCounters));
 
 		static ServiceBusPerformanceCounters()
 		{
 			_instance = new ServiceBusPerformanceCounters();
 		}
 
-		private ServiceBusPerformanceCounters()
+		ServiceBusPerformanceCounters()
 		{
 			ConsumerThreadCount = new RuntimePerformanceCounter("Consumer Threads",
 				"The current number of threads processing messages.",
@@ -99,27 +96,25 @@ namespace MassTransit.Monitoring
 			get { return _instance; }
 		}
 
-		public RuntimePerformanceCounter ConsumerThreadCount { get; private set; }
-		public RuntimePerformanceCounter ReceiveThreadCount { get; private set; }
-
-		public RuntimePerformanceCounter ReceiveRate { get; private set; }
-		public RuntimePerformanceCounter PublishRate { get; private set; }
-		public RuntimePerformanceCounter SendRate { get; private set; }
-
-		public RuntimePerformanceCounter ReceiveCount { get; private set; }
-		public RuntimePerformanceCounter PublishCount { get; private set; }
-		public RuntimePerformanceCounter SentCount { get; private set; }
-
 		public RuntimePerformanceCounter ConsumerDuration { get; private set; }
 		public RuntimePerformanceCounter ConsumerDurationBase { get; private set; }
 
-		public RuntimePerformanceCounter ReceiveDuration { get; private set; }
-		public RuntimePerformanceCounter ReceiveDurationBase { get; private set; }
-
+		public RuntimePerformanceCounter ConsumerThreadCount { get; private set; }
+		public RuntimePerformanceCounter PublishCount { get; private set; }
 		public RuntimePerformanceCounter PublishDuration { get; private set; }
 		public RuntimePerformanceCounter PublishDurationBase { get; private set; }
+		public RuntimePerformanceCounter PublishRate { get; private set; }
 
-		private void InitiatizeCategory()
+		public RuntimePerformanceCounter ReceiveCount { get; private set; }
+
+		public RuntimePerformanceCounter ReceiveDuration { get; private set; }
+		public RuntimePerformanceCounter ReceiveDurationBase { get; private set; }
+		public RuntimePerformanceCounter ReceiveRate { get; private set; }
+		public RuntimePerformanceCounter ReceiveThreadCount { get; private set; }
+		public RuntimePerformanceCounter SendRate { get; private set; }
+		public RuntimePerformanceCounter SentCount { get; private set; }
+
+		void InitiatizeCategory()
 		{
 			try
 			{
@@ -147,12 +142,12 @@ namespace MassTransit.Monitoring
 						CategoryName,
 						CategoryHelp,
 						PerformanceCounterCategoryType.MultiInstance,
-						new CounterCreationDataCollection(counters.Select(x => (CounterCreationData)x).ToArray()));
+						new CounterCreationDataCollection(counters.Select(x => (CounterCreationData) x).ToArray()));
 
 					return;
 				}
 
-				var missing = counters
+				int missing = counters
 					.Where(counter => !PerformanceCounterCategory.CounterExists(counter.Name, CategoryName))
 					.Count();
 
@@ -164,12 +159,12 @@ namespace MassTransit.Monitoring
 						CategoryName,
 						CategoryHelp,
 						PerformanceCounterCategoryType.MultiInstance,
-						new CounterCreationDataCollection(counters.Select(x => (CounterCreationData)x).ToArray()));
+						new CounterCreationDataCollection(counters.Select(x => (CounterCreationData) x).ToArray()));
 				}
 			}
 			catch (SecurityException ex)
 			{
-				_log.Error("Unable to create performance counter category", ex);
+				_log.Error("Unable to create performance counter category (Category: {0})\nTry running the program in the Administrator role to set these up.".FormatWith(CategoryName), ex);
 			}
 		}
 	}

@@ -82,7 +82,7 @@
 
 			if (_unsubscribeToken != null)
 				_unsubscribeToken();
-			_unsubscribeToken = Bus.Subscribe(this);
+			_unsubscribeToken = Bus.SubscribeInstance(this);
 
 			var message = new NewOrderMessage
 				{
@@ -92,7 +92,7 @@
 					Size = size,
 				};
 
-			Bus.Publish(message, x=> x.SetResponseAddress(Bus.Endpoint.Uri));
+			Bus.Publish(message, x=> x.SetResponseAddress(Bus.Endpoint.Address.Uri));
 		}
 
 		protected override void OnClosing(CancelEventArgs e)
