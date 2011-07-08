@@ -364,7 +364,7 @@
         <member name="T:RabbitMQ.Client.IBasicProperties">
             <summary>Common AMQP Basic content-class headers interface,
             spanning the union of the functionality offered by versions
-            0-8, 0-8qpid and 0-9 (without WIP) of AMQP.</summary>
+            0-8, 0-8qpid, 0-9 and 0-9-1 of AMQP.</summary>
             <remarks>
             <para>
             The specification code generator provides
@@ -420,7 +420,9 @@
             <summary> Clear the AppId property. </summary>
         </member>
         <member name="M:RabbitMQ.Client.IBasicProperties.ClearClusterId">
-            <summary> Clear the ClusterId property. </summary>
+            <summary> Clear the ClusterId property.
+             (cluster id is deprecated in AMQP 0-9-1)
+            </summary>
         </member>
         <member name="M:RabbitMQ.Client.IBasicProperties.IsContentTypePresent">
             <summary> Returns true iff the ContentType property is present. </summary>
@@ -462,7 +464,9 @@
             <summary> Returns true iff the AppId property is present. </summary>
         </member>
         <member name="M:RabbitMQ.Client.IBasicProperties.IsClusterIdPresent">
-            <summary> Returns true iff the ClusterId property is present. </summary>
+            <summary> Returns true iff the ClusterId property is present.
+             (cluster id is deprecated in AMQP 0-9-1)
+            </summary>
         </member>
         <member name="M:RabbitMQ.Client.IBasicProperties.SetPersistent(System.Boolean)">
             <summary>Sets DeliveryMode to either persistent (2) or non-persistent (1).</summary>
@@ -520,7 +524,9 @@
             <summary> creating application id </summary>
         </member>
         <member name="P:RabbitMQ.Client.IBasicProperties.ClusterId">
-            <summary> intra-cluster routing identifier </summary>
+            <summary> intra-cluster routing identifier
+             (cluster id is deprecated in AMQP 0-9-1)
+            </summary>
         </member>
         <member name="P:RabbitMQ.Client.IBasicProperties.ReplyToAddress">
             <summary>Convenience property; parses ReplyTo property
@@ -727,8 +733,8 @@
         </member>
         <member name="T:RabbitMQ.Client.IModel">
             <summary>Common AMQP model, spanning the union of the
-            functionality offered by versions 0-8, 0-8qpid, and 0-9
-            (without WIP) of AMQP.</summary>
+            functionality offered by versions 0-8, 0-8qpid, 0-9 and
+            0-9-1 of AMQP.</summary>
             <remarks>
              Extends the IDisposable interface, so that the "using"
              statement can be used to scope the lifetime of a channel when
@@ -741,11 +747,13 @@
         </member>
         <member name="M:RabbitMQ.Client.IModel.CreateFileProperties">
             <summary>Construct a completely empty content header for
-            use with the File content class.</summary>
+            use with the File content class.
+             (unsupported in AMQP 0-9-1)</summary>
         </member>
         <member name="M:RabbitMQ.Client.IModel.CreateStreamProperties">
             <summary>Construct a completely empty content header for
-            use with the Stream content class.</summary>
+            use with the Stream content class.
+             (unsupported in AMQP 0-9-1)</summary>
         </member>
         <member name="M:RabbitMQ.Client.IModel.ChannelFlow(System.Boolean)">
             <summary>(Spec method) Channel flow control functionality.</summary>
@@ -942,10 +950,11 @@
             transaction.</summary>
         </member>
         <member name="M:RabbitMQ.Client.IModel.DtxSelect">
-            <summary>(Spec method) Enable DTX mode for this session.</summary>
+            <summary>(Spec method) Enable DTX mode for this session.
+             (unsupported in AMQP 0-9-1)</summary>
         </member>
         <member name="M:RabbitMQ.Client.IModel.DtxStart(System.String)">
-            <summary>(Spec method)</summary>
+            <summary>(Spec method, unsupported in AMQP 0-9-1)</summary>
         </member>
         <member name="M:RabbitMQ.Client.IModel.Close">
             <summary>Close this session.</summary>
@@ -1234,7 +1243,9 @@
             <summary>Handle an incoming Connection.OpenOk.</summary>
         </member>
         <member name="M:RabbitMQ.Client.Impl.IFullModel.HandleConnectionRedirect(System.String,System.String)">
-            <summary>Handle an incoming Connection.Redirect.</summary>
+            <summary>Handle an incoming Connection.Redirect.
+             (not available in AMQP 0-9-1)
+            </summary>
         </member>
         <member name="M:RabbitMQ.Client.Impl.IFullModel._Private_ConnectionClose(System.UInt16,System.String,System.UInt16,System.UInt16)">
             <summary>Used to send a Connection.Close. Called during
@@ -1690,7 +1701,7 @@
         <member name="T:RabbitMQ.Client.IFileProperties">
             <summary>Common AMQP File content-class headers interface,
             spanning the union of the functionality offered by versions
-            0-8, 0-8qpid and 0-9 (without WIP) of AMQP.</summary>
+            0-8, 0-8qpid, 0-9 and 0-9-1 of AMQP.</summary>
             <remarks>
             <para>
             The specification code generator provides
@@ -1793,7 +1804,7 @@
         <member name="T:RabbitMQ.Client.IStreamProperties">
             <summary>Common AMQP Stream content-class headers interface,
             spanning the union of the functionality offered by versions
-            0-8, 0-8qpid and 0-9 (without WIP) of AMQP.</summary>
+            0-8, 0-8qpid, 0-9 and 0-9-1 of AMQP.</summary>
             <remarks>
             <para>
             The specification code generator provides
@@ -4476,9 +4487,12 @@
             sections marked "WIP", "work in progress", including in
             particular the Message class of operations).</summary>
         </member>
+        <member name="P:RabbitMQ.Client.Protocols.AMQP_0_9_1">
+            <summary>Protocol version 0-9-1 as modified by VMWare.</summary>
+        </member>
         <member name="P:RabbitMQ.Client.Protocols.DefaultProtocol">
             <summary>Retrieve the current default protocol variant
-            (currently AMQP_0_8)</summary>
+            (currently AMQP_0_9_1)</summary>
         </member>
         <member name="T:RabbitMQ.Client.PublicationAddress">
             <summary>Container for an exchange name, exchange type and

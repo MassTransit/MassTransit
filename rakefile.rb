@@ -12,6 +12,7 @@ PRODUCT = 'MassTransit'
 CLR_TOOLS_VERSION = 'v4.0.30319'
 
 build_number_base = '2.0.0'
+asm_version = '2.0.0.2'
 tc_build_number = '0'
 tc_build_number = ENV["BUILD_NUMBER"] unless ENV['BUILD_NUMBER'].nil?
 BUILD_NUMBER = "#{build_number_base}.#{tc_build_number}"
@@ -64,7 +65,6 @@ task :unclean => [:compile, :ilmerge, :tests]
 
 desc "Update the common version information for the build. You can call this task without building."
 assemblyinfo :global_version do |asm|
-  asm_version = BUILD_NUMBER
   
   commit_data = get_commit_hash_and_date
   commit = commit_data[0]
@@ -110,18 +110,16 @@ task :compile => [:global_version, :build] do
 	copyOutputFiles File.join(props[:src], "Persistence/MassTransit.NHibernateIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NHibernateIntegration.{dll,pdb,xml}", File.join(props[:output], "Persistence/NHibernate")
 	outc = File.join(props[:output], "Containers")
 
-	copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", outc
-	copyOutputFiles File.join(props[:src], "Containers/MassTransit.UnityIntegration/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", outc
-	copyOutputFiles File.join(props[:src], "Containers/MassTransit.WindsorIntegration/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", outc
-	copyOutputFiles File.join(props[:src], "Containers/MassTransit.NinjectIntegration/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", outc
-	copyOutputFiles File.join(props[:src], "Containers/MassTransit.AutofacIntegration/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", outc
+	copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
+	copyOutputFiles File.join(props[:src], "Containers/MassTransit.UnityIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.UnityIntegration.{dll,pdb,xml}", outc
+	copyOutputFiles File.join(props[:src], "Containers/MassTransit.WindsorIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.WindsorIntegration.{dll,pdb,xml}", outc
+	copyOutputFiles File.join(props[:src], "Containers/MassTransit.NinjectIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NinjectIntegration.{dll,pdb,xml}", outc
+	copyOutputFiles File.join(props[:src], "Containers/MassTransit.AutofacIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.AutofacIntegration.{dll,pdb,xml}", outc
 	
 	outt = File.join(props[:output], "Transports")
 
-	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.MSMQ/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", File.join(outt, "MSMQ")
-	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.Nms/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", File.join(outt, "ActiveMQ")
-	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.Nms/bin/#{BUILD_CONFIG}"), "Apache*.{dll,pdb,xml}", File.join(outt, "ActiveMQ")
-	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
+	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.MSMQ/bin/#{BUILD_CONFIG}"), "MassTransit.Transports.MSMQ.{dll,pdb,xml}", File.join(outt, "MSMQ")
+	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "MassTransit.Transports.RabbitMq.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
 	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "RabbitMQ*.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
 end
 
@@ -299,7 +297,7 @@ task :ci => [:default, :package, :moma]
 desc "ZIPs up the build results and runs the MoMA analyzer."
 zip :package do |zip|
 	zip.directories_to_zip = [props[:stage]]
-	zip.output_file = "MassTransit-#{BUILD_NUMBER}.zip"
+	zip.output_file = "MassTransit-#{asm_version}.zip"
 	zip.output_path = [props[:artifacts]]
 end
 
@@ -313,15 +311,15 @@ end
 # TODO: create tasks for installing and running samples!
 
 desc "Builds the nuget package"
-task :nuget => [:compile, :ilmerge] do
-	sh "lib/nuget.exe pack nugets/MassTransit.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
-	sh "lib/nuget.exe pack nugets/MassTransit.StructureMap.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
-	sh "lib/nuget.exe pack nugets/MassTransit.Autofac.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
-	sh "lib/nuget.exe pack nugets/MassTransit.Ninject.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
-	sh "lib/nuget.exe pack nugets/MassTransit.Unity.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
-	sh "lib/nuget.exe pack nugets/MassTransit.CastleWindsor.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
-	sh "lib/nuget.exe pack nugets/MassTransit.NHibernate.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
-	sh "lib/nuget.exe pack nugets/MassTransit.RabbitMQ.nuspec -o build_artifacts /Version #{BUILD_NUMBER}"
+task :nuget do
+	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.StructureMap.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.Autofac.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.Ninject.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.Unity.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.CastleWindsor.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.NHibernate.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.RabbitMQ.nuspec -o build_artifacts"
 end
 
 def project_outputs(props)
