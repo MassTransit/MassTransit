@@ -25,7 +25,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	public class PropertySagaWorkerSubscriptionConnector<TSaga, TMessage> :
 		SagaWorkerSubscriptionConnector
 		where TSaga : SagaStateMachine<TSaga>, ISaga
-		where TMessage : class, CorrelatedBy<Guid>
+		where TMessage : class
 	{
 		readonly PropertySagaSubscriptionConnector<TSaga, TMessage> _connector;
 
