@@ -47,9 +47,8 @@ namespace MassTransit.Transports.RabbitMq
 
 		public IDuplexTransport BuildLoopback(ITransportSettings settings)
 		{
-			var address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+			var transport = new Transport(BuildInbound(settings), BuildOutbound(settings));
 
-			var transport = new LoopbackRabbitMqTransport(address, BuildInbound(settings), BuildOutbound(settings));
 			return transport;
 		}
 
