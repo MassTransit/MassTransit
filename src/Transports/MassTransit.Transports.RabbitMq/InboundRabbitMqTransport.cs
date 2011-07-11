@@ -133,7 +133,12 @@ namespace MassTransit.Transports.RabbitMq
 				_consumerTag = null;
 			}
 
-			_consumer = null;
+			if (_consumer != null)
+			{
+				// LSP violation, ugh.
+				_consumer.Queue.Close();
+				_consumer = null;
+			}
 
 			if (_channel != null)
 			{
