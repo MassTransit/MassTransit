@@ -120,6 +120,7 @@ namespace MassTransit.Transports.RabbitMq
 			DeclareBindings();
 
 			_channel = _connection.CreateModel();
+			_channel.BasicQos(0, 100, false);
 			_consumer = new QueueingBasicConsumer(_channel);
 			_consumerTag = Guid.NewGuid().ToString();
 			_channel.BasicConsume(_address.Name, false, _consumerTag, _consumer);
