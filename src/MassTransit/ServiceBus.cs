@@ -54,8 +54,6 @@ namespace MassTransit
 			try
 			{
 				_log = LogManager.GetLogger(typeof (ServiceBus));
-
-				Null = new NullServiceBus();
 			}
 			catch (Exception ex)
 			{
@@ -92,8 +90,6 @@ namespace MassTransit
 
 			InitializePerformanceCounters();
 		}
-
-		public static IServiceBus Null { get; private set; }
 
 		public int ConcurrentReceiveThreads
 		{

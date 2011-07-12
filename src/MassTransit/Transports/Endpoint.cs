@@ -26,7 +26,6 @@ namespace MassTransit.Transports
 		IEndpoint
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (Endpoint));
-		static IEndpoint _null;
 		readonly IEndpointAddress _address;
 		readonly IMessageSerializer _serializer;
 		readonly MessageRetryTracker _tracker;
@@ -46,11 +45,6 @@ namespace MassTransit.Transports
 			_tracker = new MessageRetryTracker(5);
 
 			SetDisposedMessage();
-		}
-
-		public static IEndpoint Null
-		{
-			get { return _null ?? (_null = CreateNullEndpoint()); }
 		}
 
 		public IOutboundTransport ErrorTransport
@@ -215,12 +209,6 @@ namespace MassTransit.Transports
 		~Endpoint()
 		{
 			Dispose(false);
-		}
-
-		static Endpoint CreateNullEndpoint()
-		{
-			return new Endpoint(EndpointAddress.Null, new XmlMessageSerializer(), new NullTransport(EndpointAddress.Null),
-				new NullTransport(EndpointAddress.Null));
 		}
 	}
 }
