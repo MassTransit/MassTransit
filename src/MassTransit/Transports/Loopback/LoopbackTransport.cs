@@ -57,7 +57,7 @@ namespace MassTransit.Transports
 			}
 			catch
 			{
-				if(message != null)
+				if (message != null)
 					message.Dispose();
 
 				throw;
@@ -97,16 +97,16 @@ namespace MassTransit.Transports
 					if (iterator.Value != null)
 					{
 						LoopbackMessage message = iterator.Value;
-						if(message.ExpirationTime.HasValue && message.ExpirationTime <= DateTime.UtcNow)
+						if (message.ExpirationTime.HasValue && message.ExpirationTime <= DateTime.UtcNow)
 						{
 							_messages.Remove(iterator);
 							return;
 						}
 
-						var context = ReceiveContext.FromBodyStream(message.Body);
+						ReceiveContext context = ReceiveContext.FromBodyStream(message.Body);
 						context.SetMessageId(message.MessageId);
 						context.SetContentType(message.ContentType);
-						if(message.ExpirationTime.HasValue)
+						if (message.ExpirationTime.HasValue)
 							context.SetExpirationTime(message.ExpirationTime.Value);
 
 						using (context.CreateScope())

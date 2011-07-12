@@ -17,9 +17,9 @@ namespace MassTransit.Transports
 	using System.Runtime.Serialization;
 	using Context;
 	using Exceptions;
-	using log4net;
 	using Serialization;
 	using Util;
+	using log4net;
 
 	[DebuggerDisplay("{Address}")]
 	public class Endpoint :
@@ -81,7 +81,7 @@ namespace MassTransit.Transports
 		public void Send<T>(ISendContext<T> context)
 			where T : class
 		{
-			if (_disposed) 
+			if (_disposed)
 				throw new ObjectDisposedException(_disposedMessage);
 
 			try
@@ -110,7 +110,7 @@ namespace MassTransit.Transports
 
 		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout)
 		{
-			if (_disposed) 
+			if (_disposed)
 				throw new ObjectDisposedException(_disposedMessage);
 
 			_transport.Receive(acceptContext =>

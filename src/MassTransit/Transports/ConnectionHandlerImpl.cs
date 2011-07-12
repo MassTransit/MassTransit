@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,27 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
 namespace MassTransit.Transports
 {
 	using System;
-	using System.Diagnostics;
 
-	[DebuggerDisplay("{Address}")]
-	public abstract class TransportBase :
-		IDuplexTransport
+	public class ConnectionHandlerImpl<T> :
+		ConnectionHandler<T>
+		where T : Connection
 	{
+		readonly T _connection;
+		readonly ConnectionPolicyChainImpl _policyChain;
 		bool _disposed;
 
-		protected TransportBase(IEndpointAddress address)
+		public ConnectionHandlerImpl(T connection)
 		{
-			Address = address;
+			_connection = connection;
+			_policyChain = new ConnectionPolicyChainImpl(connection);
+			_policyChain.Push(new ConnectOnFirstUsePolicy(connection, _policyChain));
 		}
-
-		public IEndpointAddress Address { get; private set; }
-
-		public abstract void Send(ISendContext context);
-
-		public abstract void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout);
 
 		public void Dispose()
 		{
@@ -38,22 +36,17 @@ namespace MassTransit.Transports
 			GC.SuppressFinalize(this);
 		}
 
-		public IOutboundTransport OutboundTransport
+		public void Use(Action<T> callback)
 		{
-			get { return this; }
+			_policyChain.Execute(() => callback(_connection));
+			_connection.Connect();
+
+			callback(_connection);
 		}
 
-		public IInboundTransport InboundTransport
+		public void ForceReconnect()
 		{
-			get { return this; }
-		}
-
-		protected abstract void OnDisposing();
-
-		protected void GuardAgainstDisposed()
-		{
-			if (_disposed)
-				throw new ObjectDisposedException("The transport has already been disposed: " + Address);
+			_policyChain.Push(new ReconnectPolicy(_connection, _policyChain, TimeSpan.Zero));
 		}
 
 		void Dispose(bool disposing)
@@ -61,13 +54,14 @@ namespace MassTransit.Transports
 			if (_disposed) return;
 			if (disposing)
 			{
-				OnDisposing();
+				_connection.Disconnect();
+				_connection.Dispose();
 			}
 
 			_disposed = true;
 		}
 
-		~TransportBase()
+		~ConnectionHandlerImpl()
 		{
 			Dispose(false);
 		}

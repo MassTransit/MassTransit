@@ -13,24 +13,39 @@
 namespace MassTransit.Transports
 {
 	using System;
+	using System.Runtime.Serialization;
+	using Exceptions;
 
-	public class NullTransport :
-		TransportBase
+	[Serializable]
+	public class InvalidConnectionException :
+		TransportException
 	{
-		public NullTransport(IEndpointAddress address)
-			: base(address)
+		public InvalidConnectionException()
 		{
 		}
 
-		public override void Send(ISendContext context)
+		public InvalidConnectionException(Uri uri)
+			: base(uri)
 		{
 		}
 
-		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+		public InvalidConnectionException(Uri uri, string message)
+			: base(uri, message)
 		{
 		}
 
-		protected override void OnDisposing()
+		public InvalidConnectionException(Uri uri, Exception innerException)
+			: base(uri, "The connection was invalid", innerException)
+		{
+		}
+
+		public InvalidConnectionException(Uri uri, string message, Exception innerException)
+			: base(uri, message, innerException)
+		{
+		}
+
+		protected InvalidConnectionException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 		}
 	}

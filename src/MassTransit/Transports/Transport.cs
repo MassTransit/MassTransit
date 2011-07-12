@@ -13,7 +13,6 @@
 namespace MassTransit.Transports
 {
 	using System;
-	using Context;
 
 	public class Transport :
 		IDuplexTransport
