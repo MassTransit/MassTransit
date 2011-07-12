@@ -268,7 +268,6 @@
     <Compile Include="IInboundMessageInterceptor.cs" />
     <Compile Include="IServiceContainer.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderImpl.cs" />
-    <Compile Include="NullServiceBus.cs" />
     <Compile Include="Pipeline\Configuration\InboundMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorExtensions.cs" />
     <Compile Include="Pipeline\Configuration\OutboundCorrelatedMessageRouterConfigurator.cs" />
@@ -649,7 +648,6 @@
     <Compile Include="Transports\Loopback\LoopbackTransport.cs" />
     <Compile Include="Transports\MessageRetryTracker.cs" />
     <Compile Include="Transports\NullTransport.cs" />
-    <Compile Include="Transports\TransportBase.cs" />
     <Compile Include="Util\ExpressionVisitor.cs" />
     <Compile Include="Util\IndexedAttribute.cs" />
     <Compile Include="Util\IndexedSagaDictionary.cs" />

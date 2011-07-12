@@ -20,18 +20,31 @@ namespace MassTransit.Transports
 	using Magnum.Extensions;
 
 	public class LoopbackTransport :
-		TransportBase
+		IDuplexTransport
 	{
 		readonly object _messageLock = new object();
 		AutoResetEvent _messageReady = new AutoResetEvent(false);
 		LinkedList<LoopbackMessage> _messages = new LinkedList<LoopbackMessage>();
+		bool _disposed;
 
 		public LoopbackTransport(IEndpointAddress address)
-			: base(address)
 		{
+			Address = address;
 		}
 
-		public override void Send(ISendContext context)
+		public IEndpointAddress Address { get; private set; }
+
+		public IOutboundTransport OutboundTransport
+		{
+			get { return this; }
+		}
+
+		public IInboundTransport InboundTransport
+		{
+			get { return this; }
+		}
+
+		public void Send(ISendContext context)
 		{
 			GuardAgainstDisposed();
 
@@ -66,7 +79,7 @@ namespace MassTransit.Transports
 			_messageReady.Set();
 		}
 
-		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
 		{
 			int messageCount;
 			lock (_messageLock)
@@ -143,20 +156,43 @@ namespace MassTransit.Transports
 			}
 		}
 
-		protected override void OnDisposing()
+		public void Dispose()
 		{
-			lock (_messageLock)
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		void GuardAgainstDisposed()
+		{
+			if (_disposed)
+				throw new ObjectDisposedException("The transport has already been disposed: " + Address);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
 			{
-				_messages.Each(x => x.Dispose());
-				_messages.Clear();
-				_messages = null;
+				lock (_messageLock)
+				{
+					_messages.Each(x => x.Dispose());
+					_messages.Clear();
+					_messages = null;
+				}
+
+				_messageReady.Close();
+				using (_messageReady)
+				{
+				}
+				_messageReady = null;
 			}
 
-			_messageReady.Close();
-			using (_messageReady)
-			{
-			}
-			_messageReady = null;
+			_disposed = true;
+		}
+
+		~LoopbackTransport()
+		{
+			Dispose(false);
 		}
 	}
 }

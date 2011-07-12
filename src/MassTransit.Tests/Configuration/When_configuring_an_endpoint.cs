@@ -75,7 +75,7 @@ namespace MassTransit.Tests.Configuration
 		{
 			IEndpoint endpoint = _endpointCache.GetEndpoint("loopback://localhost/mt_client");
 			var endpointClass = endpoint as Endpoint;
-			endpointClass.ErrorTransport.ShouldBeAnInstanceOf<NullTransport>();
+			endpointClass.ErrorTransport.ShouldBeAnInstanceOf<NullOutboundTransport>();
 		}
 
 		[Then]
