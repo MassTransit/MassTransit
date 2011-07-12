@@ -13,25 +13,32 @@
 namespace MassTransit.Transports
 {
 	using System;
+	using Magnum.Extensions;
 
-	public class NullTransport :
-		TransportBase
+	public class DefaultConnectionPolicy :
+		ConnectionPolicy
 	{
-		public NullTransport(IEndpointAddress address)
-			: base(address)
+		readonly Connection _connection;
+		readonly ConnectionPolicyChain _policyChain;
+
+		public DefaultConnectionPolicy(Connection connection, ConnectionPolicyChain policyChain)
 		{
+			_connection = connection;
+			_policyChain = policyChain;
 		}
 
-		public override void Send(ISendContext context)
+		public void Execute(Action callback)
 		{
-		}
+			try
+			{
+				callback();
+			}
+			catch (InvalidConnectionException ex)
+			{
+				_policyChain.Push(new ReconnectPolicy(_connection, _policyChain, 1.Seconds()));
 
-		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
-		{
-		}
-
-		protected override void OnDisposing()
-		{
+				throw ex.InnerException;
+			}
 		}
 	}
 }

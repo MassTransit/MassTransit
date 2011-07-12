@@ -13,25 +13,35 @@
 namespace MassTransit.Transports
 {
 	using System;
+	using System.Threading;
 
-	public class NullTransport :
-		TransportBase
+	public class ReconnectPolicy :
+		ConnectionPolicy
 	{
-		public NullTransport(IEndpointAddress address)
-			: base(address)
+		readonly Connection _connection;
+		readonly ConnectionPolicyChain _policyChain;
+		readonly TimeSpan _reconnectDelay;
+
+		public ReconnectPolicy(Connection connection, ConnectionPolicyChain policyChain, TimeSpan reconnectDelay)
 		{
+			_connection = connection;
+			_policyChain = policyChain;
+			_reconnectDelay = reconnectDelay;
 		}
 
-		public override void Send(ISendContext context)
+		public void Execute(Action callback)
 		{
-		}
+			_connection.Disconnect();
 
-		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
-		{
-		}
+			if (_reconnectDelay > TimeSpan.Zero)
+				Thread.Sleep(_reconnectDelay);
 
-		protected override void OnDisposing()
-		{
+			_connection.Connect();
+
+			_policyChain.Pop(this);
+			_policyChain.Next(callback);
+
+			callback();
 		}
 	}
 }
