@@ -198,7 +198,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
             ManualResetEvent _repliedEvent = new ManualResetEvent(false);
 
-            RemoteBus.SubscribeInstance(handler);
+            RemoteBus.SubscribeHandler(handler);
 
             LocalBus.SubscribeHandler<UpdateAcceptedMessage>(
                 delegate { _repliedEvent.Set(); });

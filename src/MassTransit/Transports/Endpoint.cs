@@ -117,12 +117,12 @@ namespace MassTransit.Transports
 						return MoveMessageToErrorTransport;
 					}
 
-					_serializer.Deserialize(acceptContext);
-					acceptContext.SetEndpoint(this);
-
 					Action<IReceiveContext> receive;
 					try
 					{
+						_serializer.Deserialize(acceptContext);
+						acceptContext.SetEndpoint(this);
+
 						receive = receiver(acceptContext);
 						if (receive == null)
 							return null;

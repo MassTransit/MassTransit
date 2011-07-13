@@ -14,7 +14,6 @@ namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
 	using System.Messaging;
-	using Context;
 	using Magnum.TestFramework;
 	using MassTransit.Tests.Messages;
 	using NUnit.Framework;

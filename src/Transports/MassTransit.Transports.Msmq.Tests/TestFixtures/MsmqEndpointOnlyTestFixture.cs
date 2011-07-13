@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
+	using System;
 	using MassTransit.Tests.TextFixtures;
 
 	public class MsmqEndpointOnlyTestFixture :
@@ -41,6 +42,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 			Endpoint = EndpointCache.GetEndpoint(EndpointAddress.Uri);
 			ErrorEndpoint = EndpointCache.GetEndpoint(ErrorEndpointAddress.Uri);
+			ErrorEndpoint.Receive(x => null, TimeSpan.Zero);
 		}
 
 		protected override void TeardownContext()
