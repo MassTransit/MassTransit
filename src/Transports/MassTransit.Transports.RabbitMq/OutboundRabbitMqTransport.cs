@@ -1,25 +1,35 @@
-﻿namespace MassTransit.Transports.RabbitMq
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Transports.RabbitMq
 {
 	using System;
 	using System.Collections;
 	using System.IO;
-	using Context;
 	using Magnum;
 	using RabbitMQ.Client;
-	using Util;
 
 	public class OutboundRabbitMqTransport :
 		IOutboundTransport
 	{
 		readonly IRabbitMqEndpointAddress _address;
-		readonly IConnection _connection;
-		IModel _channel;
-		bool _declared;
+		readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
+		RabbitMqProducer _producer;
 
-		public OutboundRabbitMqTransport(IRabbitMqEndpointAddress address, IConnection connection)
+		public OutboundRabbitMqTransport(IRabbitMqEndpointAddress address,
+		                                 ConnectionHandler<RabbitMqConnection> connectionHandler)
 		{
 			_address = address;
-			_connection = connection;
+			_connectionHandler = connectionHandler;
 		}
 
 		public IEndpointAddress Address
@@ -29,50 +39,51 @@
 
 		public void Send(ISendContext context)
 		{
-			DeclareBindings();
+			AddProducerBinding();
 
-			IBasicProperties properties = _channel.CreateBasicProperties();
+			_connectionHandler.Use(connection =>
+				{
+					IBasicProperties properties = _producer.Channel.CreateBasicProperties();
 
-			properties.SetPersistent(true);
-			if(context.ExpirationTime.HasValue)
-			{
-				var value = context.ExpirationTime.Value;
-				properties.Expiration = (value.Kind == DateTimeKind.Utc ? value - SystemUtil.UtcNow : value - SystemUtil.Now).ToString();
-			}
+					properties.SetPersistent(true);
+					if (context.ExpirationTime.HasValue)
+					{
+						DateTime value = context.ExpirationTime.Value;
+						properties.Expiration =
+							(value.Kind == DateTimeKind.Utc ? value - SystemUtil.UtcNow : value - SystemUtil.Now).ToString();
+					}
 
-			using(var body = new MemoryStream())
-			{
-				context.SerializeTo(body);
-				properties.Headers = new Hashtable {{"Content-Type", context.ContentType}};
+					using (var body = new MemoryStream())
+					{
+						context.SerializeTo(body);
+						properties.Headers = new Hashtable {{"Content-Type", context.ContentType}};
 
-				_channel.BasicPublish(_address.Name, "", properties, body.ToArray());
-
-				if (SpecialLoggers.Messages.IsInfoEnabled)
-					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, context.MessageId);
-			}
+						_producer.Channel.BasicPublish(_address.Name, "", properties, body.ToArray());
+					}
+				});
 		}
 
 		public void Dispose()
 		{
-			if (_channel != null)
-			{
-				if (_channel.IsOpen)
-					_channel.Close(200, "dispose");
-				_channel.Dispose();
-				_channel = null;
-			}
+			RemoveProducer();
 		}
 
-		void DeclareBindings()
+		void AddProducerBinding()
 		{
-			if (_declared)
+			if (_producer != null)
 				return;
 
-			_channel = _connection.CreateModel();
+			_producer = new RabbitMqProducer(_address);
 
-			_channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, true);
+			_connectionHandler.AddBinding(_producer);
+		}
 
-			_declared = true;
+		void RemoveProducer()
+		{
+			if (_producer != null)
+			{
+				_connectionHandler.RemoveBinding(_producer);
+			}
 		}
 	}
 }

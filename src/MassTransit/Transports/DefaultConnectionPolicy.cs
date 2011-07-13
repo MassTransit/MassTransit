@@ -18,13 +18,13 @@ namespace MassTransit.Transports
 	public class DefaultConnectionPolicy :
 		ConnectionPolicy
 	{
-		readonly Connection _connection;
-		readonly ConnectionPolicyChain _policyChain;
+		readonly ConnectionHandler _connectionHandler;
+		TimeSpan _reconnectDelay;
 
-		public DefaultConnectionPolicy(Connection connection, ConnectionPolicyChain policyChain)
+		public DefaultConnectionPolicy(ConnectionHandler connectionHandler)
 		{
-			_connection = connection;
-			_policyChain = policyChain;
+			_connectionHandler = connectionHandler;
+			_reconnectDelay = 1.Seconds();
 		}
 
 		public void Execute(Action callback)
@@ -35,7 +35,7 @@ namespace MassTransit.Transports
 			}
 			catch (InvalidConnectionException ex)
 			{
-				_policyChain.Push(new ReconnectPolicy(_connection, _policyChain, 1.Seconds()));
+				_connectionHandler.ForceReconnect(_reconnectDelay);
 
 				throw ex.InnerException;
 			}

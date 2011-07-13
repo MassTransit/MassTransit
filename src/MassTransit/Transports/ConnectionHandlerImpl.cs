@@ -10,24 +10,64 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
 namespace MassTransit.Transports
 {
 	using System;
+	using System.Collections.Generic;
+	using log4net;
 
 	public class ConnectionHandlerImpl<T> :
-		ConnectionHandler<T>
+		ConnectionHandler<T>,
+		ConnectionHandler
 		where T : Connection
 	{
+		readonly HashSet<ConnectionBinding<T>> _bindings;
 		readonly T _connection;
+		readonly object _lock = new object();
+		readonly ILog _log = LogManager.GetLogger(typeof (ConnectionHandlerImpl<T>));
 		readonly ConnectionPolicyChainImpl _policyChain;
+		bool _connected;
+		bool _bound;
 		bool _disposed;
 
 		public ConnectionHandlerImpl(T connection)
 		{
+			_bindings = new HashSet<ConnectionBinding<T>>();
+
 			_connection = connection;
-			_policyChain = new ConnectionPolicyChainImpl(connection);
-			_policyChain.Push(new ConnectOnFirstUsePolicy(connection, _policyChain));
+			_policyChain = new ConnectionPolicyChainImpl(this);
+
+			_policyChain.Push(new ConnectOnFirstUsePolicy(this, _policyChain));
+		}
+
+		public void Connect()
+		{
+			lock (_lock)
+			{
+				if(!_connected)
+					_connection.Connect();
+
+				_connected = true;
+
+				BindBindings();
+			}
+		}
+
+		public void Disconnect()
+		{
+			lock (_lock)
+			{
+				_connected = false;
+
+				UnbindBindings();
+
+				_connection.Disconnect();
+			}
+		}
+
+		public void ForceReconnect(TimeSpan reconnectDelay)
+		{
+			_policyChain.Push(new ReconnectPolicy(this, _policyChain, reconnectDelay));
 		}
 
 		public void Dispose()
@@ -39,22 +79,72 @@ namespace MassTransit.Transports
 		public void Use(Action<T> callback)
 		{
 			_policyChain.Execute(() => callback(_connection));
-			_connection.Connect();
-
-			callback(_connection);
 		}
 
-		public void ForceReconnect()
+
+		public void AddBinding(ConnectionBinding<T> binding)
 		{
-			_policyChain.Push(new ReconnectPolicy(_connection, _policyChain, TimeSpan.Zero));
+			lock (_lock)
+			{
+				_bindings.Add(binding);
+				if (_bound)
+				{
+					binding.Bind(_connection);
+				}
+			}
 		}
+
+		public void RemoveBinding(ConnectionBinding<T> binding)
+		{
+			lock (_lock)
+			{
+				if (_bound)
+				{
+					binding.Unbind(_connection);
+				}
+				_bindings.Remove(binding);
+			}
+		}
+
+		void BindBindings()
+		{
+			if (_bound)
+				return;
+
+			foreach (var binding in _bindings)
+			{
+				binding.Bind(_connection);
+			}
+			_bound = true;
+		}
+
+		void UnbindBindings()
+		{
+			foreach (var binding in _bindings)
+			{
+				try
+				{
+					binding.Unbind(_connection);
+				}
+				catch (Exception ex)
+				{
+					_log.Error("An exception occurred while a binding was being unbound", ex);
+				}
+			}
+
+			_bound = false;
+		}
+
 
 		void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
 			{
-				_connection.Disconnect();
+				UnbindBindings();
+
+				Disconnect();
+
 				_connection.Dispose();
 			}
 

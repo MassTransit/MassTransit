@@ -1,0 +1,76 @@
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Transports.RabbitMq
+{
+	using System;
+	using Management;
+	using RabbitMQ.Client;
+	using log4net;
+
+
+	public class RabbitMqConsumer :
+		ConnectionBinding<RabbitMqConnection>
+	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqConsumer));
+		readonly IRabbitMqEndpointAddress _address;
+		IModel _channel;
+
+		public RabbitMqConsumer(IRabbitMqEndpointAddress address)
+		{
+			_address = address;
+		}
+
+		public BasicGetResult Get()
+		{
+			return _channel.BasicGet(_address.Name, false);
+		}
+
+		public void MessageCompleted(ulong deliveryTag)
+		{
+			_channel.BasicAck(deliveryTag, false);
+		}
+
+		public void MessageFailed(ulong deliveryTag, bool requeue)
+		{
+			_channel.BasicNack(deliveryTag, false, requeue);
+		}
+
+		public void Bind(RabbitMqConnection connection)
+		{
+			using (var management = new RabbitMqEndpointManagement(_address, connection.Connection))
+			{
+				management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "");
+			}
+
+			_channel = connection.Connection.CreateModel();
+			_channel.BasicQos(0, 1, false);
+		}
+
+		public void Unbind(RabbitMqConnection connection)
+		{
+			try
+			{
+				_channel.Close(200, "unbind consumer");
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Failed to close channel: " + _address, ex);
+			}
+			finally
+			{
+				_channel.Dispose();
+				_channel = null;
+			}
+		}
+	}
+}

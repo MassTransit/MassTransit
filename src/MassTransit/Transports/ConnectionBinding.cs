@@ -10,29 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
 namespace MassTransit.Transports
 {
-	using System;
-
-	public interface ConnectionHandler
-	{
-		void Connect();
-		void Disconnect();
-		void ForceReconnect(TimeSpan reconnectDelay);
-	}
-
-	/// <summary>
-	/// Wraps the management of a connection to apply reconnect and retry strategies
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	public interface ConnectionHandler<T> :
-		IDisposable
+	public interface ConnectionBinding<T>
 		where T : Connection
 	{
-		void Use(Action<T> callback);
-
-		void AddBinding(ConnectionBinding<T> binding);
-		void RemoveBinding(ConnectionBinding<T> binding);
+		void Bind(T connection);
+		void Unbind(T connection);
 	}
 }
