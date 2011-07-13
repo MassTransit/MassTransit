@@ -65,18 +65,20 @@ namespace MassTransit.Transports.RabbitMq.Management
 
 		public void UnbindExchange(string destination, string source, string routingKey)
 		{
-			try
+			using (IModel model = _connection.CreateModel())
 			{
-				using (IModel model = _connection.CreateModel())
-				{
-					model.ExchangeUnbind(destination, source, routingKey, null);
+				model.ExchangeUnbind(destination, source, routingKey, null);
 
-					model.Close(200, "ok");
-				}
+				model.Close(200, "ok");
 			}
-			catch (Exception ex)
+		}
+
+		public void Purge(string queueName)
+		{
+			using(IModel model = _connection.CreateModel())
 			{
-				_log.Error("Failed to unbind the exchange", ex);
+				model.QueuePurge(queueName);
+				model.Close(200, "purged queue");
 			}
 		}
 

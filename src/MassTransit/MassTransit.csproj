@@ -246,6 +246,7 @@
     <Compile Include="Pipeline\HandlerSelector.cs" />
     <Compile Include="Pipeline\InstanceHandlerSelector.cs" />
     <Compile Include="Pipeline\MultipleHandlerSelector.cs" />
+    <Compile Include="Pipeline\Sinks\OutboundMessageFilter.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageInterceptor.cs" />
     <Compile Include="PublishExtensions.cs" />
     <Compile Include="Saga\CorrelatedSagaLocator.cs" />
@@ -434,6 +435,7 @@
     <Compile Include="Testing\TransportFactoryTestExtensions.cs" />
     <Compile Include="Threading\ConsumerPool.cs" />
     <Compile Include="Threading\ThreadPoolConsumerPool.cs" />
+    <Compile Include="Transports\ConnectionBinding.cs" />
     <Compile Include="Transports\ConnectionHandlerImpl.cs" />
     <Compile Include="Transports\ConnectionPolicyChainImpl.cs" />
     <Compile Include="Transports\ConnectOnFirstUsePolicy.cs" />

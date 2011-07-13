@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -28,7 +28,9 @@ namespace MassTransit.Transports.Msmq
 		{
 			try
 			{
-				return new Transport(BuildInbound(settings), BuildOutbound(settings));
+				ITransportSettings msmqSettings = new TransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
+
+				return new Transport(msmqSettings.Address, () => BuildInbound(settings), () => BuildOutbound(settings));
 			}
 			catch (Exception ex)
 			{
@@ -93,7 +95,11 @@ namespace MassTransit.Transports.Msmq
 			return BuildOutbound(msmqSettings);
 		}
 
-		private static void PurgeExistingMessagesIfRequested(ITransportSettings settings)
+		public void Dispose()
+		{
+		}
+
+		static void PurgeExistingMessagesIfRequested(ITransportSettings settings)
 		{
 			if (settings.Address.IsLocal && settings.PurgeExistingMessages)
 			{
@@ -101,9 +107,10 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
-		private static void ValidateLocalTransport(ITransportSettings settings)
+		static void ValidateLocalTransport(ITransportSettings settings)
 		{
-			MsmqEndpointManagement.Manage(settings.Address, q => {
+			MsmqEndpointManagement.Manage(settings.Address, q =>
+				{
 					if (!q.Exists)
 					{
 						if (!settings.CreateIfMissing)
@@ -113,10 +120,6 @@ namespace MassTransit.Transports.Msmq
 						q.Create(false); // multicast queues cannot be transactional
 					}
 				});
-		}
-
-		public void Dispose()
-		{
 		}
 	}
 }

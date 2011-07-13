@@ -70,7 +70,7 @@ namespace MassTransit.TestFramework
 		{
 			if (_completed)
 			{
-				throw new InvalidOperationException(ExtensionsToString.FormatWith("A Future cannot be completed twice, value = {0}, passed = {1}", Value, message));
+				throw new InvalidOperationException("A Future cannot be completed twice, value = {0}, passed = {1}".FormatWith(Value, message));
 			}
 
 			Value = message;

@@ -141,6 +141,11 @@ namespace MassTransit.Transports.RabbitMq
 			return new RabbitMqEndpointAddress(address, connectionFactory, name);
 		}
 
+		public override string ToString()
+		{
+			return _uri.ToString();
+		}
+
 		static void VerifyQueueOrExchangeNameIsLegal(string path)
 		{
 			Match match = _regex.Match(path);

@@ -18,30 +18,28 @@ namespace MassTransit.Transports
 	public class ReconnectPolicy :
 		ConnectionPolicy
 	{
-		readonly Connection _connection;
+		readonly ConnectionHandler _connectionHandler;
 		readonly ConnectionPolicyChain _policyChain;
 		readonly TimeSpan _reconnectDelay;
 
-		public ReconnectPolicy(Connection connection, ConnectionPolicyChain policyChain, TimeSpan reconnectDelay)
+		public ReconnectPolicy(ConnectionHandler connectionHandler, ConnectionPolicyChain policyChain, TimeSpan reconnectDelay)
 		{
-			_connection = connection;
+			_connectionHandler = connectionHandler;
 			_policyChain = policyChain;
 			_reconnectDelay = reconnectDelay;
 		}
 
 		public void Execute(Action callback)
 		{
-			_connection.Disconnect();
+			_connectionHandler.Disconnect();
 
 			if (_reconnectDelay > TimeSpan.Zero)
 				Thread.Sleep(_reconnectDelay);
 
-			_connection.Connect();
+			_connectionHandler.Connect();
 
 			_policyChain.Pop(this);
 			_policyChain.Next(callback);
-
-			callback();
 		}
 	}
 }

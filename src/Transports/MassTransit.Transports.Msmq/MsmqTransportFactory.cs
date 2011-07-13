@@ -28,7 +28,13 @@ namespace MassTransit.Transports.Msmq
 		{
 			try
 			{
-				return new Transport(BuildInbound(settings), BuildOutbound(settings));
+				var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
+				var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
+				{
+					Transactional = msmqEndpointAddress.IsTransactional
+				};
+
+				return new Transport(msmqSettings.Address, () => BuildInbound(settings), () => BuildOutbound(settings));
 			}
 			catch (Exception ex)
 			{
@@ -54,6 +60,7 @@ namespace MassTransit.Transports.Msmq
 
 					PurgeExistingMessagesIfRequested(msmqSettings);
 				}
+
 				var connection = new MessageQueueConnection(transportAddress, QueueAccessMode.Receive);
 				var connectionHandler = new ConnectionHandlerImpl<MessageQueueConnection>(connection);
 

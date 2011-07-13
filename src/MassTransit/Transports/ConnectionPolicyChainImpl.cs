@@ -18,14 +18,12 @@ namespace MassTransit.Transports
 	public class ConnectionPolicyChainImpl :
 		ConnectionPolicyChain
 	{
-		readonly Connection _connection;
 		readonly Stack<ConnectionPolicy> _policies;
 
-		public ConnectionPolicyChainImpl(Connection connection)
+		public ConnectionPolicyChainImpl(ConnectionHandler connectionHandler)
 		{
-			_connection = connection;
 			_policies = new Stack<ConnectionPolicy>();
-			_policies.Push(new DefaultConnectionPolicy(_connection, this));
+			_policies.Push(new DefaultConnectionPolicy(connectionHandler));
 		}
 
 		public void Push(ConnectionPolicy policy)

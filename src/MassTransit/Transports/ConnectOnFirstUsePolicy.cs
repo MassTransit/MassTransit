@@ -17,20 +17,20 @@ namespace MassTransit.Transports
 	public class ConnectOnFirstUsePolicy :
 		ConnectionPolicy
 	{
-		readonly Connection _connection;
+		readonly ConnectionHandler _connectionHandler;
 		readonly ConnectionPolicyChain _policyChain;
 
-		public ConnectOnFirstUsePolicy(Connection connection, ConnectionPolicyChain policyChain)
+		public ConnectOnFirstUsePolicy(ConnectionHandler connectionHandler, ConnectionPolicyChain policyChain)
 		{
-			_connection = connection;
+			_connectionHandler = connectionHandler;
 			_policyChain = policyChain;
 		}
 
 		public void Execute(Action callback)
 		{
-			_connection.Connect();
-			_policyChain.Pop(this);
+			_connectionHandler.Connect();
 
+			_policyChain.Pop(this);
 			_policyChain.Next(callback);
 		}
 	}
