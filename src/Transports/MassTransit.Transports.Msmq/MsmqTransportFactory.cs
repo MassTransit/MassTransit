@@ -34,7 +34,10 @@ namespace MassTransit.Transports.Msmq
 					Transactional = msmqEndpointAddress.IsTransactional
 				};
 
-				return new Transport(msmqSettings.Address, () => BuildInbound(settings), () => BuildOutbound(settings));
+				IInboundTransport inboundTransport = BuildInbound(settings);
+				IOutboundTransport outboundTransport = BuildOutbound(settings);
+
+				return new Transport(msmqSettings.Address, () => inboundTransport, () => outboundTransport);
 			}
 			catch (Exception ex)
 			{

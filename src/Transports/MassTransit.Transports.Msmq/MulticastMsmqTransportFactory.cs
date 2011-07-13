@@ -30,7 +30,10 @@ namespace MassTransit.Transports.Msmq
 			{
 				ITransportSettings msmqSettings = new TransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
 
-				return new Transport(msmqSettings.Address, () => BuildInbound(settings), () => BuildOutbound(settings));
+				IInboundTransport inboundTransport = BuildInbound(settings);
+				IOutboundTransport outboundTransport = BuildOutbound(settings);
+
+				return new Transport(msmqSettings.Address, () => inboundTransport, () => outboundTransport);
 			}
 			catch (Exception ex)
 			{

@@ -16,6 +16,7 @@ namespace MassTransit.Context
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
+	using System.Runtime.Serialization;
 	using log4net;
 	using Magnum;
 	using Magnum.Extensions;
@@ -138,18 +139,28 @@ namespace MassTransit.Context
 		public bool TryGetContext<T>(out IConsumeContext<T> context)
 			where T : class
 		{
-			T message;
-			if (_typeConverter.TryConvert(out message))
+			try
 			{
-				context = new ConsumeContext<T>(this, message);
-				//_receiverTypes.Add(typeof (T));
-				return true;
+				T message;
+				if (_typeConverter.TryConvert(out message))
+				{
+					context = new ConsumeContext<T>(this, message);
+					return true;
+				}
+			}
+			catch (Exception ex)
+			{
+				var exception = new SerializationException("Failed to deserialize the message", ex);
+
+				_log.Error("Exception converting message to type: " + typeof (T).ToShortTypeName(), exception);
 			}
 
 			context = null;
 			return false;
 		}
 
+		static readonly ILog _log = LogManager.GetLogger(typeof (ReceiveContext));
+		
 		/// <summary>
 		/// Respond to the current inbound message with either a send to the ResponseAddress or a
 		/// Publish on the bus that received the message

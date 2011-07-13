@@ -291,6 +291,33 @@ task :unit_tests => [:compile] do
 	runner.run ['MassTransit.Tests'].map{ |assem| "#{assem}.dll" }
 end
 
+task :transport_tests => [:msmq_tests, :rabbitmq_tests]
+
+desc "Runs unit tests for MSMQ"
+task :msmq_tests do
+	Dir.mkdir props[:artifacts] unless exists?(props[:artifacts])
+
+	runner = NUnitRunner.new(File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe"),
+		'tests',
+		TARGET_FRAMEWORK_VERSION,
+		['/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'msmq-test-results.xml')}\""])
+
+	runner.run ['MassTransit.Transports.Msmq.Tests'].map{ |assem| "#{assem}.dll" }
+end
+
+desc "Runs unit tests for RabbitMQ"
+task :rabbitmq_tests do
+	Dir.mkdir props[:artifacts] unless exists?(props[:artifacts])
+
+	runner = NUnitRunner.new(File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe"),
+		'tests',
+		TARGET_FRAMEWORK_VERSION,
+		['/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'rabbitmq-test-results.xml')}\""])
+
+	runner.run ['MassTransit.Transports.RabbitMQ.Tests'].map{ |assem| "#{assem}.dll" }
+end
+
+
 desc "Target used for the CI server. It both builds, tests and packages."
 task :ci => [:default, :package, :moma]
 
