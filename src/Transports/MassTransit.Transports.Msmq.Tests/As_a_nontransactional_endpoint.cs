@@ -20,7 +20,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using TestFixtures;
 	using TestFramework;
 
-    [TestFixture, Integration]
+	[TestFixture, Integration]
 	public class Writing_to_a_non_transactional_endpoint_within_a_transaction :
 		MsmqEndpointOnlyTestFixture
 	{
@@ -103,7 +103,7 @@ namespace MassTransit.Transports.Msmq.Tests
 				// do not complete the transaction (implicit rollback)
 			}
 
-            future.IsCompleted.ShouldBeTrue();
+			future.IsCompleted.ShouldBeTrue();
 			Endpoint.ShouldNotContain<DeleteMessage>();
 		}
 	}
