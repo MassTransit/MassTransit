@@ -20,8 +20,9 @@ is any method (including anonymous and lambda methods) that has a single argumen
 type and a void return type.
 
 .. sourcecode:: csharp
-	void MyMessageHandler(MyMessage message)
-	{}
+
+    void MyMessageHandler(MyMessage message)
+    {}
 
 When a message is received, MassTransit will call the method passing the message as the argument.
 With a handler, no special controls are available to manage the lifecycle of the receiver. Therefore,
