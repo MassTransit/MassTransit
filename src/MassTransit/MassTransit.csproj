@@ -444,6 +444,7 @@
     <Compile Include="Transports\ConnectionHandler.cs" />
     <Compile Include="Transports\ConnectionPolicy.cs" />
     <Compile Include="Transports\ConnectionPolicyChain.cs" />
+    <Compile Include="Transports\DisposedConnectionPolicy.cs" />
     <Compile Include="Transports\IDuplexTransport.cs" />
     <Compile Include="Transports\IInboundTransport.cs" />
     <Compile Include="Transports\InvalidConnectionException.cs" />

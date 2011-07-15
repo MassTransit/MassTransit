@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
-	using Context;
 	using Magnum.Concurrency;
 
 	public class InboundMessagePipeline :

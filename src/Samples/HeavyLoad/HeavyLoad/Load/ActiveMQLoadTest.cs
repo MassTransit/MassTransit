@@ -68,7 +68,7 @@ namespace HeavyLoad.Load
 		internal class RequestConsumer :
 			Consumes<GeneralMessage>.All
 		{
-			private IServiceBus _bus = ServiceBus.Null;
+			private IServiceBus _bus;
 
 			public IServiceBus Bus
 			{

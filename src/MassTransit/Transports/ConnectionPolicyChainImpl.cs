@@ -53,5 +53,14 @@ namespace MassTransit.Transports
 		{
 			Next(callback);
 		}
+
+		public void Set(ConnectionPolicy connectionPolicy)
+		{
+			lock (_policies)
+			{
+				_policies.Clear();
+				_policies.Push(connectionPolicy);
+			}
+		}
 	}
 }
