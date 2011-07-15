@@ -17,12 +17,12 @@ namespace MassTransit.Services.Subscriptions.Client
 	using System.ComponentModel;
 	using System.Linq;
 	using System.Reflection;
-	using log4net;
 	using Magnum;
 	using Magnum.Extensions;
 	using Messages;
 	using Pipeline;
 	using Util;
+	using log4net;
 
 	public class SubscriptionCoordinator :
 		ISubscriptionService,
@@ -34,11 +34,12 @@ namespace MassTransit.Services.Subscriptions.Client
 		Consumes<RemoveSubscription>.All
 	{
 		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-		static readonly ILog _log = LogManager.GetLogger(typeof(SubscriptionCoordinator));
+		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionCoordinator));
 		static readonly ClientSubscriptionInfoMapper _mapper = new ClientSubscriptionInfoMapper();
 		readonly IServiceBus _bus;
 		readonly HashSet<string> _ignoredSubscriptions;
 		readonly EndpointUriList _localEndpoints;
+		readonly bool _multicast;
 		readonly string _network;
 		readonly IEndpoint _outboundEndpoint;
 		readonly SequenceNumberGenerator _sequence;
@@ -52,7 +53,6 @@ namespace MassTransit.Services.Subscriptions.Client
 		volatile bool _disposed;
 
 		UnsubscribeAction _unsubscribeAction;
-		readonly bool _multicast;
 
 		public SubscriptionCoordinator(IServiceBus bus, IEndpoint outboundEndpoint, string network, bool multicast)
 		{
@@ -140,8 +140,8 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		public void Start(IServiceBus bus)
 		{
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting subscription coordinator on network '{0}'", _network);
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Starting subscription coordinator on network '{0}'", _network);
 
 			ConnectBus(bus);
 
@@ -193,17 +193,6 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		public event Action OnRefresh;
 
-		void ConnectBus(IServiceBus bus)
-		{
-			var publisher = new SubscriptionPublisher(this);
-			publisher.Start(bus);
-			_services.Add(publisher);
-
-			var consumer = new SubscriptionConsumer(this);
-			consumer.Start(bus);
-			_services.Add(consumer);
-		}
-
 		protected virtual void Dispose(bool disposing)
 		{
 			if (!disposing || _disposed) return;
@@ -223,17 +212,28 @@ namespace MassTransit.Services.Subscriptions.Client
 			_disposed = true;
 		}
 
+		void ConnectBus(IServiceBus bus)
+		{
+			var publisher = new SubscriptionPublisher(this);
+			publisher.Start(bus);
+			_services.Add(publisher);
+
+			var consumer = new SubscriptionConsumer(this);
+			consumer.Start(bus);
+			_services.Add(consumer);
+		}
+
 		bool ShouldIgnoreMessage<T>(T message)
 		{
 			if (_bus.Context().SourceAddress == _bus.Endpoint.Address.Uri)
 			{
-			   _log.Debug("Ignoring subscription because its source address equals the busses address"); 
+				_log.Debug("Ignoring subscription because its source address equals the busses address");
 				return true;
 			}
 
 			if (!string.Equals(_bus.Context().Network, _network))
 			{
-				_log.DebugFormat("Ignoring subscription because the network '{0}' != ours '{1}1", _bus.Context().Network, _network); 
+				_log.DebugFormat("Ignoring subscription because the network '{0}' != ours '{1}1", _bus.Context().Network, _network);
 				return true;
 			}
 
@@ -289,7 +289,7 @@ namespace MassTransit.Services.Subscriptions.Client
 
 			_log.Debug("SubscriptionClient Add: " + sub);
 
-			var messageType = Type.GetType(sub.MessageName);
+			Type messageType = Type.GetType(sub.MessageName);
 			if (messageType == null)
 			{
 				_log.InfoFormat("Unknown message type '{0}', unable to add subscription", sub.MessageName);
@@ -425,8 +425,8 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		bool IgnoreIfLocalEndpoint(Uri endpointUri)
 		{
-		    var r = _localEndpoints.Contains(endpointUri);
-            _log.Debug("Ignored a subscription because its endpoint was local.");
+			bool r = _localEndpoints.Contains(endpointUri);
+			_log.Debug("Ignored a subscription because its endpoint was local.");
 
 			return r;
 		}

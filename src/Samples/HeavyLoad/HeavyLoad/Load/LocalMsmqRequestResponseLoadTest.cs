@@ -1,86 +1,89 @@
-using System;
-using System.Threading;
-using MassTransit;
-using Magnum.Extensions;
-
 namespace HeavyLoad.Load
 {
-    public class LocalMsmqRequestResponseLoadTest :
-        IDisposable
-    {
-        const int _repeatCount = 10000;
-        readonly IServiceBus _bus;
-        readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
-        readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
+	using System;
+	using System.Threading;
+	using Correlated;
+	using Magnum.Extensions;
+	using MassTransit;
 
-        int _requestCounter;
-        int _responseCounter;
+	public class LocalMsmqRequestResponseLoadTest :
+		IDisposable
+	{
+		const int _repeatCount = 1000;
+		readonly IServiceBus _bus;
+		readonly ManualResetEvent _handlerComplete = new ManualResetEvent(false);
+		readonly ManualResetEvent _clientComplete = new ManualResetEvent(false);
 
-        public LocalMsmqRequestResponseLoadTest()
-        {
-            _bus = ServiceBusFactory.New(x =>
-            {
-                x.ReceiveFrom("msmq://localhost/heavy_load");
-                x.SetPurgeOnStartup(true);
+		int _requestCounter;
+		int _responseCounter;
 
-                x.UseMsmq();
+		public LocalMsmqRequestResponseLoadTest()
+		{
+			_bus = ServiceBusFactory.New(x =>
+				{
+					x.ReceiveFrom("msmq://localhost/heavy_load");
+					x.SetPurgeOnStartup(true);
 
-                x.Subscribe(s =>
-                {
-                    s.Handler<GeneralMessage>(Handle);
-                });
-            });
-        }
+					x.UseMsmq();
+					x.UseMulticastSubscriptionClient();
 
-        public void Dispose()
-        {
-            _bus.Dispose();
-        }
+					x.Subscribe(s => { s.Handler<SimpleRequestMessage>(Handle); });
+				});
+		}
 
-        public void Run(StopWatch stopWatch)
-        {
-            stopWatch.Start();
+		public void Dispose()
+		{
+			_bus.Dispose();
+		}
 
-            CheckPoint publishCheckpoint = stopWatch.Mark("Sending " + _repeatCount + " messages");
-            CheckPoint receiveCheckpoint = stopWatch.Mark("Request/Response " + _repeatCount + " messages");
+		public void Run(StopWatch stopWatch)
+		{
+			stopWatch.Start();
 
-            for (int index = 0; index < _repeatCount; index++)
-            {
-                _bus.MakeRequest(x =>
-                {
-                    x.Publish(new GeneralMessage());
-                    Interlocked.Increment(ref _requestCounter);
-                })
-                    .When<SimpleResponse>()
-                    .IsReceived(msg => { 
-                        Interlocked.Increment(ref _responseCounter);
+			CheckPoint publishCheckpoint = stopWatch.Mark("Sending " + _repeatCount + " messages");
+			CheckPoint receiveCheckpoint = stopWatch.Mark("Request/Response " + _repeatCount + " messages");
 
-                        if (_responseCounter == _repeatCount)
-                            _responseEvent.Set();
-                    })
-                    .OnTimeout(()=> { })
-                    .TimeoutAfter(5.Seconds())
-                    .Send();
-            }
+			for (int index = 0; index < _repeatCount; index++)
+			{
+				Guid transactionId = Guid.NewGuid();
 
-            publishCheckpoint.Complete(_repeatCount);
+				_bus.MakeRequest(x =>
+					{
+						x.Publish(new SimpleRequestMessage(transactionId));
+						Interlocked.Increment(ref _requestCounter);
+					})
+					.When<SimpleResponseMessage>()
+					.RelatedTo(transactionId)
+					.IsReceived(msg =>
+						{
+							Interlocked.Increment(ref _responseCounter);
 
-            _completeEvent.WaitOne(TimeSpan.FromSeconds(60), true);
+							if (_responseCounter == _repeatCount)
+								_clientComplete.Set();
+						})
+					.OnTimeout(() => { })
+					.TimeoutAfter(10.Seconds())
+					.Send();
+			}
 
-            _responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
+			publishCheckpoint.Complete(_repeatCount);
 
-            receiveCheckpoint.Complete(_requestCounter + _responseCounter);
+			_handlerComplete.WaitOne(TimeSpan.FromSeconds(60), true);
 
-            stopWatch.Stop();
-        }
+			_clientComplete.WaitOne(TimeSpan.FromSeconds(60), true);
 
-        void Handle(GeneralMessage obj)
-        {
-            _bus.Publish(new SimpleResponse());
+			receiveCheckpoint.Complete(_requestCounter + _responseCounter);
 
-            
-            if (_requestCounter == _repeatCount)
-                _completeEvent.Set();
-        }
-    }
+			stopWatch.Stop();
+		}
+
+		void Handle(SimpleRequestMessage message)
+		{
+			_bus.MessageContext<SimpleRequestMessage>()
+				.Respond(new SimpleResponseMessage(message.CorrelationId));
+
+			if (_requestCounter == _repeatCount)
+				_handlerComplete.Set();
+		}
+	}
 }

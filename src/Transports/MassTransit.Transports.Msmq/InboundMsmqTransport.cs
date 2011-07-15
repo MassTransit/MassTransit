@@ -14,7 +14,6 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Messaging;
-	using System.Threading;
 	using Context;
 	using Exceptions;
 	using Magnum.Extensions;
@@ -48,7 +47,7 @@ namespace MassTransit.Transports.Msmq
 			}
 			catch (MessageQueueException ex)
 			{
-				HandleInboundMessageQueueException(ex, timeout);
+				HandleInboundMessageQueueException(ex);
 			}
 		}
 
@@ -82,7 +81,6 @@ namespace MassTransit.Transports.Msmq
 								continue;
 							}
 
-							Action<IReceiveContext> receive;
 							Message message = enumerator.Current;
 
 							IReceiveContext context = ReceiveContext.FromBodyStream(message.BodyStream);
@@ -91,6 +89,7 @@ namespace MassTransit.Transports.Msmq
 
 							using (context.CreateScope())
 							{
+								Action<IReceiveContext> receive;
 								using (message)
 								{
 									byte[] extension = message.Extension;
@@ -106,9 +105,6 @@ namespace MassTransit.Transports.Msmq
 									{
 										if (_log.IsDebugEnabled)
 											_log.DebugFormat("SKIP:{0}:{1}", Address, message.Id);
-
-										if (_messageLog.IsDebugEnabled)
-											_messageLog.DebugFormat("SKIP:{0}:{1}:{2}", _address.InboundFormatName, message.Label, message.Id);
 
 										continue;
 									}
@@ -150,7 +146,7 @@ namespace MassTransit.Transports.Msmq
 			receiveAction(() => enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.None));
 		}
 
-		protected void HandleInboundMessageQueueException(MessageQueueException ex, TimeSpan timeout)
+		protected void HandleInboundMessageQueueException(MessageQueueException ex)
 		{
 			switch (ex.MessageQueueErrorCode)
 			{

@@ -26,8 +26,8 @@ namespace MassTransit.Transports
 		readonly object _lock = new object();
 		readonly ILog _log = LogManager.GetLogger(typeof (ConnectionHandlerImpl<T>));
 		readonly ConnectionPolicyChainImpl _policyChain;
-		bool _connected;
 		bool _bound;
+		bool _connected;
 		bool _disposed;
 
 		public ConnectionHandlerImpl(T connection)
@@ -44,7 +44,7 @@ namespace MassTransit.Transports
 		{
 			lock (_lock)
 			{
-				if(!_connected)
+				if (!_connected)
 					_connection.Connect();
 
 				_connected = true;
@@ -146,6 +146,8 @@ namespace MassTransit.Transports
 				Disconnect();
 
 				_connection.Dispose();
+
+				_policyChain.Set(new DisposedConnectionPolicy());
 			}
 
 			_disposed = true;

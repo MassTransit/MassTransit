@@ -54,7 +54,7 @@ namespace MassTransit.Transports.Msmq
 			}
 			catch (MessageQueueException ex)
 			{
-				HandleInboundMessageQueueException(ex, timeout);
+				HandleInboundMessageQueueException(ex);
 			}
 		}
 
