@@ -28,7 +28,7 @@ namespace MassTransit.SubscriptionConfigurators
 
 		public HandlerSubscriptionConfiguratorImpl(Action<TMessage> handler)
 		{
-			_handler = message => x => handler(x.Message);
+			_handler = HandlerSelector.ForHandler(handler);
 		}
 
 		public HandlerSubscriptionConfigurator<TMessage> Where(Predicate<TMessage> condition)
@@ -37,8 +37,11 @@ namespace MassTransit.SubscriptionConfigurators
 
 			_handler = context =>
 				{
-					if (!condition(context.Message))
-						return null;
+					using (context.CreateScope())
+					{
+						if (!condition(context.Message))
+							return null;
+					}
 
 					return previousHandler(context);
 				};
