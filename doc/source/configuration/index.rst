@@ -11,3 +11,4 @@ which will be followed up with a few configuration examples.
     keyideas.rst
     interfaces.rst
     gotchas.rst
+    api.rst
