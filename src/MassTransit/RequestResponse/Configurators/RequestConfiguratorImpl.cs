@@ -62,8 +62,8 @@ namespace MassTransit.RequestResponse.Configurators
 					}
 					catch (Exception ex)
 					{
-						var responseException = new RequestException(message, ex);
-						_request.Fail(responseException);
+						var exception = new RequestException(message, ex);
+						_request.Fail(exception);
 					}
 				};
 

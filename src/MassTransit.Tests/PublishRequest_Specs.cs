@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
+	using System;
 	using Exceptions;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
@@ -78,6 +79,44 @@ namespace MassTransit.Tests
 
 			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
 			pongReceived.IsAvailable(timeout).ShouldBeFalse("The pong should not have been received");
+		}
+
+		[Test]
+		public void Should_throw_a_handler_exception_on_the_calling_thread()
+		{
+			var pongReceived = new FutureMessage<PongMessage>();
+			var pingReceived = new FutureMessage<PingMessage>();
+
+			RemoteBus.SubscribeHandler<PingMessage>(message =>
+			{
+				pingReceived.Set(message);
+				RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(message.CorrelationId));
+			});
+
+			var ping = new PingMessage();
+
+			var timeout = 8.Seconds();
+
+			var exception = Assert.Throws<RequestException>(() =>
+				{
+					LocalBus.PublishRequest(ping, x =>
+						{
+							x.Handle<PongMessage>(message =>
+								{
+									pongReceived.Set(message);
+
+									throw new InvalidOperationException("I got it, but I am naughty with it.");
+								});
+
+							x.SetTimeout(timeout);
+						});
+				}, "A request exception should have been thrown");
+
+			exception.ResponseMessage.ShouldBeAnInstanceOf<PongMessage>();
+			exception.HandlerException.ShouldBeAnInstanceOf<InvalidOperationException>();
+
+			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
 		}
 	}
 }
