@@ -38,5 +38,10 @@ namespace MassTransit.Exceptions
 			: base(info, context)
 		{
 		}
+
+		public static RequestTimeoutException FromCorrelationId<TKey>(TKey correlationId)
+		{
+			return new RequestTimeoutException(string.Format("The request timed out: " + correlationId));
+		}
 	}
 }
