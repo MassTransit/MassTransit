@@ -40,7 +40,7 @@ namespace MassTransit.Tests
 
 			var timeout = 8.Seconds();
 
-			IRequest<PingMessage, Guid> request = LocalBus.PublishRequest(ping, x =>
+			LocalBus.PublishRequest(ping, x =>
 				{
 					x.Handle<PongMessage>(message =>
 						{
@@ -53,8 +53,6 @@ namespace MassTransit.Tests
 
 			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
 			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
-
-			request.Wait().ShouldBeTrue("The request was not completed before the timeout expired");
 		}
 	}
 }

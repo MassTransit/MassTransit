@@ -14,48 +14,59 @@ namespace MassTransit.RequestResponse
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using System.Threading;
 	using Exceptions;
 	using Magnum.Extensions;
+	using log4net;
 
 	public class RequestImpl<TRequest, TKey> :
 		IRequest<TRequest, TKey>
 		where TRequest : class, CorrelatedBy<TKey>
 	{
-		readonly ManualResetEvent _complete = new ManualResetEvent(false);
-		TimeSpan _timeout = TimeSpan.MaxValue;
+		static readonly ILog _log = LogManager.GetLogger(typeof (RequestImpl<TRequest, TKey>));
+		readonly IList<AsyncCallback> _completionCallbacks;
+		readonly object _lock = new object();
+
+		ManualResetEvent _complete;
+		bool _completed;
+		Exception _exception;
+		TRequest _message;
 		object _state;
+		TimeSpan _timeout = TimeSpan.MaxValue;
 		Action _timeoutCallback;
 		RegisteredWaitHandle _waitHandle;
-		Exception _exception;
 
-		bool _completed;
-		readonly IList<AsyncCallback> _completionCallbacks;
-
-		public RequestImpl()
+		public RequestImpl(TRequest message)
 		{
+			_message = message;
 			_completionCallbacks = new List<AsyncCallback>();
-		}
-
-		public void SetTimeout(TimeSpan timeout)
-		{
-			_timeout = timeout;
-		}
-
-		public void SetTimeoutCallback(Action timeoutCallback)
-		{
-			_timeoutCallback = timeoutCallback;
 		}
 
 		public bool IsCompleted
 		{
-			get { return _completed; }
+			get
+			{
+				return _completed;
+			}
+		}
+
+		ManualResetEvent CompleteEvent
+		{
+			get
+			{
+				lock (_lock)
+				{
+					if (_complete == null)
+						_complete = new ManualResetEvent(false);
+				}
+
+				return _complete;				
+			}
 		}
 
 		public WaitHandle AsyncWaitHandle
 		{
-			get { return _complete; }
+			get { return CompleteEvent; }
 		}
 
 		public object AsyncState
@@ -68,23 +79,38 @@ namespace MassTransit.RequestResponse
 			get { return false; }
 		}
 
-		public void WaitForIt()
+		public bool Wait(TimeSpan timeout)
 		{
-			UnsubscribeAction unsubscribeToken = () => true;
-			try
-			{
-			//	unsubscribeToken = SubscribeToResponseMessages(unsubscribeToken);
+			_timeout = timeout;
 
-				if (WaitForResponseAction() == false)
-				{
-					if (_timeoutCallback != null)
-						_timeoutCallback();
-				}
-			}
-			finally
+			return Wait();
+		}
+
+		public bool Wait()
+		{
+			bool result = CompleteEvent.WaitOne(_timeout, true);
+
+			if (false == result)
 			{
-				unsubscribeToken();
+				Fail(RequestTimeoutException.FromCorrelationId(_message.CorrelationId));
 			}
+
+			Close();
+
+			if (_exception != null)
+				throw _exception;
+
+			return result;
+		}
+
+		public void SetTimeout(TimeSpan timeout)
+		{
+			_timeout = timeout;
+		}
+
+		public void SetTimeoutCallback(Action timeoutCallback)
+		{
+			_timeoutCallback = timeoutCallback;
 		}
 
 		public void Complete<TResponse>(TResponse response)
@@ -100,76 +126,31 @@ namespace MassTransit.RequestResponse
 			NotifyComplete();
 		}
 
-		void NotifyComplete()
+		public IRequest<TRequest, TKey> BeginAsyncRequest(AsyncCallback callback, object state)
 		{
-			_completed = true;
-			_complete.Set();
-
-			_completionCallbacks.Each(callback =>
-				{
-					try
-					{
-						callback(this);
-					}
-					catch (Exception)
-					{
-					}
-				});
-		}
-
-		public void BeginAsyncRequest(AsyncCallback callback, object state)
-		{
-			if(_waitHandle != null)
+			if (_waitHandle != null)
 			{
 				throw new InvalidOperationException("The asynchronous request was already started.");
 			}
 
 			_state = state;
-			lock(_completionCallbacks)
+			lock (_completionCallbacks)
 				_completionCallbacks.Add(callback);
 
 			WaitOrTimerCallback timerCallback = (s, timeoutExpired) =>
 				{
 					if (timeoutExpired)
 					{
-						lock(_completionCallbacks)
+						lock (_completionCallbacks)
 							_completionCallbacks.Add(asyncResult => _timeoutCallback());
-					}
 
-					Fail(new RequestTimeoutException());
+						Fail(RequestTimeoutException.FromCorrelationId(_message.CorrelationId));
+					}
 				};
 
-			_waitHandle = ThreadPool.RegisterWaitForSingleObject(_complete, timerCallback, state, _timeout, true);
-		}
+			_waitHandle = ThreadPool.RegisterWaitForSingleObject(CompleteEvent, timerCallback, state, _timeout, true);
 
-		bool WaitForResponseAction()
-		{
-			return _complete.WaitOne(_timeout, true);
-		}
-
-
-		public bool Wait(TimeSpan timeout)
-		{
-			_timeout = timeout;
-
-			return Wait();
-		}
-
-		public bool Wait()
-		{
-			var result = _complete.WaitOne(_timeout, true);
-
-			Close();
-
-			if(_exception != null)
-				throw _exception;
-
-			return result;
-		}
-
-		~RequestImpl()
-		{
-			Close();
+			return this;
 		}
 
 		public void Close()
@@ -180,14 +161,49 @@ namespace MassTransit.RequestResponse
 				_waitHandle = null;
 			}
 
-			using (_complete)
-				_complete.Close();
+			lock (_lock)
+			{
+				if (_complete != null)
+				{
+					using (_complete)
+						_complete.Close();
+
+					_complete = null;
+				}
+			}
 		}
 
 		public void AddCompletionCallback(Action callback)
 		{
-			lock(_completionCallbacks)
+			lock (_completionCallbacks)
 				_completionCallbacks.Add(asyncResult => callback());
+		}
+
+		void NotifyComplete()
+		{
+			_completed = true;
+			lock(_lock)
+			{
+				if (_complete != null)
+					_complete.Set();
+			}
+
+			_completionCallbacks.Each(callback =>
+				{
+					try
+					{
+						callback(this);
+					}
+					catch (Exception ex)
+					{
+						_log.Error("The request callback threw an exception", ex);
+					}
+				});
+		}
+
+		~RequestImpl()
+		{
+			Close();
 		}
 	}
 }

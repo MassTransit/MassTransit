@@ -34,7 +34,7 @@ namespace MassTransit.RequestResponse.Configurators
 			_message = message;
 			_pipelineConfigurators = new List<Func<IInboundPipelineConfigurator, UnsubscribeAction>>();
 
-			_request = new RequestImpl<TRequest, TKey>();
+			_request = new RequestImpl<TRequest, TKey>(message);
 		}
 
 		public TKey CorrelationId
@@ -89,7 +89,7 @@ namespace MassTransit.RequestResponse.Configurators
 			throw new NotImplementedException();
 		}
 
-		public IRequest<TRequest,TKey> Build(IServiceBus bus)
+		public IRequest<TRequest, TKey> Build(IServiceBus bus)
 		{
 			var unsubscribeAction = bus.Configure(x =>
 				{
@@ -100,6 +100,17 @@ namespace MassTransit.RequestResponse.Configurators
 			_request.AddCompletionCallback(() => unsubscribeAction());
 
 			return _request;
+		}
+
+		public static IRequest<TRequest, TKey> Create<TRequest, TKey>(IServiceBus bus, TRequest message, Action<RequestConfigurator<TRequest, TKey>> configureCallback)
+			where TRequest : class, CorrelatedBy<TKey>
+		{
+			var configurator = new RequestConfiguratorImpl<TRequest, TKey>(message);
+
+			configureCallback(configurator);
+
+			IRequest<TRequest, TKey> request = configurator.Build(bus);
+			return request;
 		}
 	}
 }

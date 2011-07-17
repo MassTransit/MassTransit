@@ -18,26 +18,22 @@ namespace MassTransit
 
 	public static class RequestResponseExtensions
 	{
-		public static IRequest<TRequest, Guid> PublishRequest<TRequest>(this IServiceBus bus, TRequest message,
+		public static bool PublishRequest<TRequest>(this IServiceBus bus, TRequest message,
 		                                                                Action<RequestConfigurator<TRequest, Guid>> configureCallback)
 			where TRequest : class, CorrelatedBy<Guid>
 		{
 			return PublishRequest<TRequest, Guid>(bus, message, configureCallback);
 		}
 
-		public static IRequest<TRequest, TKey> PublishRequest<TRequest, TKey>(this IServiceBus bus, TRequest message,
+		public static bool PublishRequest<TRequest, TKey>(this IServiceBus bus, TRequest message,
 		                                                                      Action<RequestConfigurator<TRequest, TKey>> configureCallback)
 			where TRequest : class, CorrelatedBy<TKey>
 		{
-			var configurator = new RequestConfiguratorImpl<TRequest, TKey>(message);
-
-			configureCallback(configurator);
-
-			IRequest<TRequest, TKey> request = configurator.Build(bus);
+			IRequest<TRequest, TKey> request = RequestConfiguratorImpl<TRequest,TKey>.Create(bus, message, configureCallback);
 
 			bus.Publish(message, context => context.SendResponseTo(bus));
 
-			return request;
+			return request.Wait();
 		}
 	}
 }

@@ -14,9 +14,8 @@ namespace MassTransit.RequestResponse
 {
 	using System;
 
-	public interface IRequest<T> :
+	public interface IRequest :
 		IAsyncResult
-		where T : class
 	{
 		/// <summary>
 		/// Wait for the request to complete. If the timeout expires, the request
@@ -32,6 +31,12 @@ namespace MassTransit.RequestResponse
 		/// <param name="timeout">The timeout for the request</param>
 		/// <returns>True if the request completed before the timeout expired</returns>
 		bool Wait(TimeSpan timeout);
+	}
+
+	public interface IRequest<T> :
+		IRequest
+		where T : class
+	{
 	}
 
 	public interface IRequest<T, TKey> :
