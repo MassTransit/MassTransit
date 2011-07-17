@@ -56,6 +56,37 @@ namespace MassTransit.Tests
 		}
 
 		[Test]
+		public void Should_support_send_as_well()
+		{
+			var pongReceived = new FutureMessage<PongMessage>();
+			var pingReceived = new FutureMessage<PingMessage>();
+
+			RemoteBus.SubscribeHandler<PingMessage>(x =>
+				{
+					pingReceived.Set(x);
+					RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(x.CorrelationId));
+				});
+
+			var ping = new PingMessage();
+
+			var timeout = 8.Seconds();
+
+			RemoteBus.Endpoint.SendRequest(ping, LocalBus, x =>
+				{
+					x.Handle<PongMessage>(message =>
+						{
+							message.CorrelationId.ShouldEqual(ping.CorrelationId, "The response correlationId did not match");
+							pongReceived.Set(message);
+						});
+
+					x.SetTimeout(timeout);
+				});
+
+			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+		}
+
+		[Test]
 		public void Should_throw_a_timeout_exception_if_no_response_received()
 		{
 			var pongReceived = new FutureMessage<PongMessage>();
@@ -112,8 +143,8 @@ namespace MassTransit.Tests
 						});
 				}, "A request exception should have been thrown");
 
-			exception.ResponseMessage.ShouldBeAnInstanceOf<PongMessage>();
-			exception.HandlerException.ShouldBeAnInstanceOf<InvalidOperationException>();
+			exception.Response.ShouldBeAnInstanceOf<PongMessage>();
+			exception.InnerException.ShouldBeAnInstanceOf<InvalidOperationException>();
 
 			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
 			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
