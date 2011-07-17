@@ -16,23 +16,21 @@ namespace MassTransit.RequestResponse.Configurators
 	using System.Collections.Generic;
 	using System.Linq;
 	using Exceptions;
-	using MassTransit.Configurators;
 	using Pipeline;
 	using SubscriptionConnectors;
-
 
 	public class RequestConfiguratorImpl<TRequest, TKey> :
 		RequestConfigurator<TRequest, TKey>
 		where TRequest : class, CorrelatedBy<TKey>
 	{
+		readonly IList<Func<IInboundPipelineConfigurator, UnsubscribeAction>> _handlers;
 		readonly TRequest _message;
-		readonly IList<Func<IInboundPipelineConfigurator, UnsubscribeAction>> _pipelineConfigurators;
 		RequestImpl<TRequest, TKey> _request;
 
 		public RequestConfiguratorImpl(TRequest message)
 		{
 			_message = message;
-			_pipelineConfigurators = new List<Func<IInboundPipelineConfigurator, UnsubscribeAction>>();
+			_handlers = new List<Func<IInboundPipelineConfigurator, UnsubscribeAction>>();
 
 			_request = new RequestImpl<TRequest, TKey>(message);
 		}
@@ -62,15 +60,13 @@ namespace MassTransit.RequestResponse.Configurators
 					}
 					catch (Exception ex)
 					{
-						var exception = new RequestException(message, ex);
+						var exception = new RequestException("The response handler threw an exception", ex, message);
 						_request.Fail(exception);
 					}
 				};
 
-			_pipelineConfigurators.Add(x =>
-				{
-					return connector.Connect(x, CorrelationId, HandlerSelector.ForHandler(responseHandler));
-				});
+			_handlers.Add(
+				x => { return connector.Connect(x, CorrelationId, HandlerSelector.ForHandler(responseHandler)); });
 		}
 
 		public void HandleTimeout(TimeSpan timeout, Action timeoutCallback)
@@ -84,26 +80,22 @@ namespace MassTransit.RequestResponse.Configurators
 			_request.SetTimeout(timeout);
 		}
 
-		public IEnumerable<ValidationResult> Validate()
+		IRequest<TRequest, TKey> Build(IServiceBus bus)
 		{
-			throw new NotImplementedException();
-		}
-
-		public IRequest<TRequest, TKey> Build(IServiceBus bus)
-		{
-			var unsubscribeAction = bus.Configure(x =>
+			UnsubscribeAction unsubscribeAction = bus.Configure(configurator =>
 				{
-					UnsubscribeAction unsubscribe = () => true;
-					return _pipelineConfigurators.Aggregate(unsubscribe, (current, pipelineConfigurator) => current + pipelineConfigurator(x));
+					UnsubscribeAction seed = () => true;
+
+					return _handlers.Aggregate(seed, (x, handlerConfigurator) => x + handlerConfigurator(configurator));
 				});
 
-			_request.AddCompletionCallback(() => unsubscribeAction());
+			_request.SetUnsubscribeAction(unsubscribeAction);
 
 			return _request;
 		}
 
-		public static IRequest<TRequest, TKey> Create<TRequest, TKey>(IServiceBus bus, TRequest message, Action<RequestConfigurator<TRequest, TKey>> configureCallback)
-			where TRequest : class, CorrelatedBy<TKey>
+		public static IRequest<TRequest, TKey> Create(IServiceBus bus, TRequest message,
+		                                              Action<RequestConfigurator<TRequest, TKey>> configureCallback)
 		{
 			var configurator = new RequestConfiguratorImpl<TRequest, TKey>(message);
 

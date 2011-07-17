@@ -26,11 +26,11 @@ namespace MassTransit.RequestResponse
 		static readonly ILog _log = LogManager.GetLogger(typeof (RequestImpl<TRequest, TKey>));
 		readonly IList<AsyncCallback> _completionCallbacks;
 		readonly object _lock = new object();
+		readonly TRequest _message;
 
 		ManualResetEvent _complete;
 		bool _completed;
 		Exception _exception;
-		TRequest _message;
 		object _state;
 		TimeSpan _timeout = TimeSpan.MaxValue;
 		Action _timeoutCallback;
@@ -40,14 +40,6 @@ namespace MassTransit.RequestResponse
 		{
 			_message = message;
 			_completionCallbacks = new List<AsyncCallback>();
-		}
-
-		public bool IsCompleted
-		{
-			get
-			{
-				return _completed;
-			}
 		}
 
 		ManualResetEvent CompleteEvent
@@ -60,8 +52,13 @@ namespace MassTransit.RequestResponse
 						_complete = new ManualResetEvent(false);
 				}
 
-				return _complete;				
+				return _complete;
 			}
+		}
+
+		public bool IsCompleted
+		{
+			get { return _completed; }
 		}
 
 		public WaitHandle AsyncWaitHandle
@@ -88,12 +85,13 @@ namespace MassTransit.RequestResponse
 
 		public bool Wait()
 		{
-			bool result = CompleteEvent.WaitOne(_timeout, true);
+			bool alreadyCompleted;
+			lock (_lock)
+				alreadyCompleted = _completed;
 
-			if (false == result)
-			{
+			bool result = alreadyCompleted || CompleteEvent.WaitOne(_timeout, true);
+			if (!result)
 				Fail(RequestTimeoutException.FromCorrelationId(_message.CorrelationId));
-			}
 
 			Close();
 
@@ -101,6 +99,12 @@ namespace MassTransit.RequestResponse
 				throw _exception;
 
 			return result;
+		}
+
+		public void SetUnsubscribeAction(UnsubscribeAction unsubscribeAction)
+
+		{
+			_completionCallbacks.Add(x => unsubscribeAction());
 		}
 
 		public void SetTimeout(TimeSpan timeout)
@@ -173,37 +177,30 @@ namespace MassTransit.RequestResponse
 			}
 		}
 
-		public void AddCompletionCallback(Action callback)
-		{
-			lock (_completionCallbacks)
-				_completionCallbacks.Add(asyncResult => callback());
-		}
-
 		void NotifyComplete()
 		{
-			_completed = true;
-			lock(_lock)
+			lock (_lock)
 			{
+				_completed = true;
+
 				if (_complete != null)
 					_complete.Set();
 			}
 
-			_completionCallbacks.Each(callback =>
-				{
-					try
+			lock (_completionCallbacks)
+			{
+				_completionCallbacks.Each(callback =>
 					{
-						callback(this);
-					}
-					catch (Exception ex)
-					{
-						_log.Error("The request callback threw an exception", ex);
-					}
-				});
-		}
-
-		~RequestImpl()
-		{
-			Close();
+						try
+						{
+							callback(this);
+						}
+						catch (Exception ex)
+						{
+							_log.Error("The request callback threw an exception", ex);
+						}
+					});
+			}
 		}
 	}
 }

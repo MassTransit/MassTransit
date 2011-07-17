@@ -19,13 +19,12 @@ namespace MassTransit.Exceptions
 	public class RequestException :
 		MassTransitException
 	{
-		readonly Exception _handlerException;
-		readonly object _responseMessage;
+		readonly object _response;
 
-		public RequestException(object responseMessage, Exception handlerException)
+		public RequestException(string message, Exception innerException, object response)
+			: base(message, innerException)
 		{
-			_responseMessage = responseMessage;
-			_handlerException = handlerException;
+			_response = response;
 		}
 
 		public RequestException()
@@ -47,14 +46,9 @@ namespace MassTransit.Exceptions
 		{
 		}
 
-		public object ResponseMessage
+		public object Response
 		{
-			get { return _responseMessage; }
-		}
-
-		public Exception HandlerException
-		{
-			get { return _handlerException; }
+			get { return _response; }
 		}
 	}
 }
