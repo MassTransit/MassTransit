@@ -12,12 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using System;
+	using Exceptions;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using Messages;
 	using NUnit.Framework;
-	using RequestResponse;
 	using TextFixtures;
 
 	[TestFixture]
@@ -53,6 +52,32 @@ namespace MassTransit.Tests
 
 			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
 			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+		}
+
+		[Test]
+		public void Should_throw_a_timeout_exception_if_no_response_received()
+		{
+			var pongReceived = new FutureMessage<PongMessage>();
+			var pingReceived = new FutureMessage<PingMessage>();
+
+			RemoteBus.SubscribeHandler<PingMessage>(pingReceived.Set);
+
+			var ping = new PingMessage();
+
+			var timeout = 2.Seconds();
+
+			Assert.Throws<RequestTimeoutException>(() =>
+				{
+					LocalBus.PublishRequest(ping, x =>
+						{
+							x.Handle<PongMessage>(pongReceived.Set);
+
+							x.SetTimeout(timeout);
+						});
+				}, "A timeout exception should have been thrown");
+
+			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+			pongReceived.IsAvailable(timeout).ShouldBeFalse("The pong should not have been received");
 		}
 	}
 }
