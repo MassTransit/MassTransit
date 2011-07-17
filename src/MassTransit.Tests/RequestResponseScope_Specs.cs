@@ -12,12 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
+	using System;
 	using System.Threading;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using Messages;
 	using NUnit.Framework;
 	using TextFixtures;
+
 
 	[TestFixture]
 	public class When_creating_a_simple_request_response_handler :
@@ -26,22 +28,25 @@ namespace MassTransit.Tests
 		[Test]
 		public void A_clean_method_of_a_request_reply_should_be_possible()
 		{
-			FutureMessage<PongMessage> ponged = new FutureMessage<PongMessage>();
+			var ponged = new FutureMessage<PongMessage>();
 
-			LocalBus.SubscribeHandler<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
+			RemoteBus.SubscribeHandler<PingMessage>(x => RemoteBus.Publish(new PongMessage(x.CorrelationId)));
 
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			LocalBus.MakeRequest(bus => bus.Publish(ping, context => context.SendResponseTo(bus)))
-				.When<PongMessage>().RelatedTo(ping.CorrelationId).IsReceived(pong =>
-					{
-						Assert.AreEqual(ping.CorrelationId, pong.CorrelationId);
-						ponged.Set(pong);
-					})
-				.TimeoutAfter(5.Seconds())
-				.Send();
 
-			Assert.IsTrue(ponged.IsAvailable(1.Seconds()), "No response received");
+			LocalBus.PublishRequest(ping, x =>
+				{
+					x.Handle<PongMessage>(message =>
+						{
+							message.CorrelationId.ShouldEqual(ping.CorrelationId);
+							ponged.Set(message);
+						});
+
+					x.HandleTimeout(5.Seconds(), () => { });
+				});
+
+			ponged.IsAvailable(8.Seconds()).ShouldBeTrue("No ping response received");
 		}
 
 		[Test]

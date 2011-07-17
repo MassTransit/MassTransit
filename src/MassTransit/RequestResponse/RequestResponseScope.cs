@@ -17,7 +17,8 @@ namespace MassTransit.RequestResponse
     using System.Linq;
     using System.Threading;
 
-    public class RequestResponseScope :
+
+	public class RequestResponseScope :
         IAsyncResult
     {
         readonly IServiceBus _bus;
