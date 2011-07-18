@@ -297,14 +297,6 @@
     <Compile Include="Pipeline\OutboundMessagePipeline.cs" />
     <Compile Include="Pipeline\Sinks\MessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\OutboundConvertMessageSink.cs" />
-    <Compile Include="RequestResponse\ConditionalResponseAction.cs" />
-    <Compile Include="RequestResponse\ConditionalResponseActionBuilder.cs" />
-    <Compile Include="RequestResponse\CorrelatedResponseAction.cs" />
-    <Compile Include="RequestResponse\CorrelatedResponseActionBuilder.cs" />
-    <Compile Include="RequestResponse\IResponseAction.cs" />
-    <Compile Include="RequestResponse\RequestResponseScope.cs" />
-    <Compile Include="RequestResponse\ResponseAction.cs" />
-    <Compile Include="RequestResponse\ResponseActionBuilder.cs" />
     <Compile Include="Saga\Configuration\SagaSubscriptionConfiguratorExtensions.cs" />
     <Compile Include="Saga\SubscriptionBuilders\SagaSubscriptionBuilder.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\SagaSubscriptionConfigurator.cs" />
@@ -732,7 +724,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pipeline\Configuration\Subscribers\" />
-    <Folder Include="RequestResponse\Builders\" />
     <Folder Include="Services\HealthMonitoring\Client\" />
   </ItemGroup>
   <ItemGroup>

@@ -31,6 +31,14 @@ namespace MassTransit.RequestResponse
 		/// <param name="timeout">The timeout for the request</param>
 		/// <returns>True if the request completed before the timeout expired</returns>
 		bool Wait(TimeSpan timeout);
+
+		/// <summary>
+		/// Begins the request as an asynchronous operation
+		/// </summary>
+		/// <param name="callback"></param>
+		/// <param name="state"></param>
+		/// <returns></returns>
+		IAsyncResult BeginAsync(AsyncCallback callback, object state);
 	}
 
 	public interface IRequest<T> :
