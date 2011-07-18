@@ -15,28 +15,9 @@ namespace MassTransit
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using RequestResponse;
 
 	public static class ServiceBusExtensions
 	{
-		/// <summary>
-		/// Make a request to a service and wait for the response to be received, built
-		/// using a fluent interface with a final call to Send()
-		/// </summary>
-		/// <param name="bus"></param>
-		/// <param name="requestAction"></param>
-		/// <returns></returns>
-		public static RequestResponseScope MakeRequest(this IServiceBus bus, Action<IServiceBus> requestAction)
-		{
-			return new RequestResponseScope(bus, requestAction);
-		}
-
-		public static ResponseActionBuilder<T> When<T>(this RequestResponseScope scope)
-			where T : class
-		{
-			return new ResponseActionBuilder<T>(scope);
-		}
-
 		public static string ToMessageName(this Type messageType)
 		{
 			string messageName;

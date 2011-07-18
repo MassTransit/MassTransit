@@ -36,6 +36,18 @@ namespace MassTransit
 			return request.Wait();
 		}
 
+		public static IAsyncResult BeginPublishRequest<TRequest>(this IServiceBus bus, TRequest message,
+		                                                         AsyncCallback callback, object state,
+		                                                         Action<RequestConfigurator<TRequest, Guid>> configureCallback)
+			where TRequest : class, CorrelatedBy<Guid>
+		{
+			IRequest<TRequest, Guid> request = RequestConfiguratorImpl<TRequest, Guid>.Create(bus, message, configureCallback);
+
+			bus.Publish(message, context => context.SendResponseTo(bus.Endpoint.Address.Uri));
+
+			return request.BeginAsync(callback, state);
+		}
+
 		public static bool EndRequest(this IServiceBus bus, IAsyncResult asyncResult)
 		{
 			var request = asyncResult as IRequest;
@@ -45,13 +57,15 @@ namespace MassTransit
 			return request.Wait();
 		}
 
-		public static bool SendRequest<TRequest>(this IEndpoint endpoint, TRequest message, IServiceBus bus, Action<RequestConfigurator<TRequest, Guid>> configureCallback)
+		public static bool SendRequest<TRequest>(this IEndpoint endpoint, TRequest message, IServiceBus bus,
+		                                         Action<RequestConfigurator<TRequest, Guid>> configureCallback)
 			where TRequest : class, CorrelatedBy<Guid>
 		{
 			return SendRequest<TRequest, Guid>(endpoint, message, bus, configureCallback);
 		}
 
-		public static bool SendRequest<TRequest, TKey>(this IEndpoint endpoint, TRequest message, IServiceBus bus, Action<RequestConfigurator<TRequest, TKey>> configureCallback)
+		public static bool SendRequest<TRequest, TKey>(this IEndpoint endpoint, TRequest message, IServiceBus bus,
+		                                               Action<RequestConfigurator<TRequest, TKey>> configureCallback)
 			where TRequest : class, CorrelatedBy<TKey>
 		{
 			IRequest<TRequest, TKey> request = RequestConfiguratorImpl<TRequest, TKey>.Create(bus, message, configureCallback);

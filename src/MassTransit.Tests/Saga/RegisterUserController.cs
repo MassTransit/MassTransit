@@ -54,12 +54,12 @@ namespace MassTransit.Tests.Saga
 
 			bool result = false;
 
-			_bus.MakeRequest(bus => bus.Publish(message))
-				.When<UserRegistrationPending>().RelatedTo(_correlationId).IsReceived(x => { result = false; })
-				.When<UserRegistrationComplete>().RelatedTo(_correlationId).IsReceived(x => { result = true; })
-				.OnTimeout(() => { throw new ApplicationException("A timeout occurred while registering the user"); })
-				.TimeoutAfter(10.Seconds())
-				.Send();
+			_bus.PublishRequest(message, x =>
+				{
+					x.Handle<UserRegistrationPending>(response => { result = false; });
+					x.Handle<UserRegistrationComplete>(response => { result = true; });
+					x.SetTimeout(10.Seconds());
+				});
 
 			return result;
 		}

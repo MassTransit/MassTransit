@@ -56,6 +56,42 @@ namespace MassTransit.Tests
 		}
 
 		[Test]
+		public void Should_support_the_asynchronous_programming_model()
+		{
+			var pongReceived = new FutureMessage<PongMessage>();
+			var pingReceived = new FutureMessage<PingMessage>();
+			var callbackCalled = new FutureMessage<IAsyncResult>();
+
+			RemoteBus.SubscribeHandler<PingMessage>(x =>
+				{
+					pingReceived.Set(x);
+					RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(x.CorrelationId));
+				});
+
+			var ping = new PingMessage();
+
+			var timeout = 8.Seconds();
+
+			LocalBus.BeginPublishRequest(ping, callbackCalled.Set, null, x =>
+				{
+					x.Handle<PongMessage>(message =>
+						{
+							message.CorrelationId.ShouldEqual(ping.CorrelationId, "The response correlationId did not match");
+							pongReceived.Set(message);
+						});
+
+					x.SetTimeout(timeout);
+				});
+
+			callbackCalled.IsAvailable(timeout).ShouldBeTrue("The callback was not called");
+
+			LocalBus.EndRequest(callbackCalled.Message);
+
+			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+		}
+
+		[Test]
 		public void Should_support_send_as_well()
 		{
 			var pongReceived = new FutureMessage<PongMessage>();
@@ -113,6 +149,37 @@ namespace MassTransit.Tests
 		}
 
 		[Test]
+		public void Should_throw_a_timeout_exception_for_async_when_end_is_called()
+		{
+			var pongReceived = new FutureMessage<PongMessage>();
+			var pingReceived = new FutureMessage<PingMessage>();
+			var callbackCalled = new FutureMessage<IAsyncResult>();
+
+			RemoteBus.SubscribeHandler<PingMessage>(pingReceived.Set);
+
+			var ping = new PingMessage();
+
+			var timeout = 2.Seconds();
+
+			LocalBus.BeginPublishRequest(ping, callbackCalled.Set, null, x =>
+			{
+				x.Handle<PongMessage>(pongReceived.Set);
+
+				x.SetTimeout(timeout);
+			});
+
+			callbackCalled.IsAvailable(timeout).ShouldBeTrue("Callback was not invoked");
+
+			Assert.Throws<RequestTimeoutException>(() =>
+				{
+					LocalBus.EndRequest(callbackCalled.Message);
+				}, "A timeout exception should have been thrown");
+
+			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+			pongReceived.IsAvailable(timeout).ShouldBeFalse("The pong should not have been received");
+		}
+
+		[Test]
 		public void Should_throw_a_handler_exception_on_the_calling_thread()
 		{
 			var pongReceived = new FutureMessage<PongMessage>();
@@ -141,6 +208,50 @@ namespace MassTransit.Tests
 
 							x.SetTimeout(timeout);
 						});
+				}, "A request exception should have been thrown");
+
+			exception.Response.ShouldBeAnInstanceOf<PongMessage>();
+			exception.InnerException.ShouldBeAnInstanceOf<InvalidOperationException>();
+
+			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+		}
+
+		[Test]
+		public void Should_throw_a_handler_exception_on_the_calling_thread_using_async()
+		{
+			var pongReceived = new FutureMessage<PongMessage>();
+			var pingReceived = new FutureMessage<PingMessage>();
+			var callbackCalled = new FutureMessage<IAsyncResult>();
+
+			RemoteBus.SubscribeHandler<PingMessage>(message =>
+			{
+				pingReceived.Set(message);
+				RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(message.CorrelationId));
+			});
+
+			var ping = new PingMessage();
+
+			var timeout = 8.Seconds();
+
+			LocalBus.BeginPublishRequest(ping, callbackCalled.Set, null, x =>
+			{
+				x.Handle<PongMessage>(message =>
+				{
+					pongReceived.Set(message);
+
+					throw new InvalidOperationException("I got it, but I am naughty with it.");
+				});
+
+				x.SetTimeout(timeout);
+			});
+
+			callbackCalled.IsAvailable(timeout).ShouldBeTrue("Called was not called");
+
+			var exception = Assert.Throws<RequestException>(() =>
+				{
+					LocalBus.EndRequest(callbackCalled.Message);
+
 				}, "A request exception should have been thrown");
 
 			exception.Response.ShouldBeAnInstanceOf<PongMessage>();

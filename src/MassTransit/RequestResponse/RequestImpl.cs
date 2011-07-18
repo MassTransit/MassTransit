@@ -40,6 +40,7 @@ namespace MassTransit.RequestResponse
 		{
 			_message = message;
 			_completionCallbacks = new List<AsyncCallback>();
+			_timeoutCallback = DefaultTimeoutCallback;
 		}
 
 		ManualResetEvent CompleteEvent
@@ -114,7 +115,7 @@ namespace MassTransit.RequestResponse
 
 		public void SetTimeoutCallback(Action timeoutCallback)
 		{
-			_timeoutCallback = timeoutCallback;
+			_timeoutCallback = timeoutCallback ?? DefaultTimeoutCallback;
 		}
 
 		public void Complete<TResponse>(TResponse response)
@@ -130,7 +131,7 @@ namespace MassTransit.RequestResponse
 			NotifyComplete();
 		}
 
-		public IRequest<TRequest, TKey> BeginAsyncRequest(AsyncCallback callback, object state)
+		public IAsyncResult BeginAsync(AsyncCallback callback, object state)
 		{
 			if (_waitHandle != null)
 			{
@@ -201,6 +202,10 @@ namespace MassTransit.RequestResponse
 						}
 					});
 			}
+		}
+
+		static void DefaultTimeoutCallback()
+		{
 		}
 	}
 }
