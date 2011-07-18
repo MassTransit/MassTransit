@@ -168,7 +168,7 @@ namespace MassTransit.Tests
 				x.SetTimeout(timeout);
 			});
 
-			callbackCalled.IsAvailable(timeout).ShouldBeTrue("Callback was not invoked");
+			callbackCalled.IsAvailable(8.Seconds()).ShouldBeTrue("Callback was not invoked");
 
 			Assert.Throws<RequestTimeoutException>(() =>
 				{
