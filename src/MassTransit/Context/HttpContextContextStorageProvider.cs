@@ -38,12 +38,14 @@ namespace MassTransit.Context
 			set
 			{
 				HttpContext httpContext = HttpContext.Current;
-				if (httpContext != null)
-				{
-					httpContext.Items[SendContextKey] = value;
-				}
-
-				throw new InvalidOperationException("HttpContext.Current is not available to set the current SendContext");
+                if (httpContext != null)
+                {
+                    httpContext.Items[SendContextKey] = value;
+                }
+                else
+                {
+                    throw new InvalidOperationException("HttpContext.Current is not available to set the current SendContext");
+                }
 			}
 		}
 
@@ -64,12 +66,14 @@ namespace MassTransit.Context
 			set
 			{
 				HttpContext httpContext = HttpContext.Current;
-				if (httpContext != null)
-				{
-					httpContext.Items[ReceiveContextKey] = value;
-				}
-
-				throw new InvalidOperationException("HttpContext.Current is not available to set the current SendContext");
+                if (httpContext != null)
+                {
+                    httpContext.Items[ReceiveContextKey] = value;
+                }
+                else
+                {
+                    throw new InvalidOperationException("HttpContext.Current is not available to set the current SendContext");
+                }
 			}
 		}
 	}
