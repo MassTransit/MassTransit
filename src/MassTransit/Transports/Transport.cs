@@ -13,19 +13,23 @@
 namespace MassTransit.Transports
 {
 	using System;
-	using Context;
 
 	public class Transport :
 		IDuplexTransport
 	{
+		readonly Func<IInboundTransport> _inboundFactory;
+		readonly object _lock = new object();
+		readonly Func<IOutboundTransport> _outboundFactory;
 		bool _disposed;
 		IInboundTransport _inbound;
 		IOutboundTransport _outbound;
+		readonly IEndpointAddress _address;
 
-		public Transport(IInboundTransport inbound, IOutboundTransport outbound)
+		public Transport(IEndpointAddress address, Func<IInboundTransport> inboundFactory, Func<IOutboundTransport> outboundFactory)
 		{
-			_inbound = inbound;
-			_outbound = outbound;
+			_inboundFactory = inboundFactory;
+			_outboundFactory = outboundFactory;
+			_address = address;
 		}
 
 		public void Dispose()
@@ -36,7 +40,7 @@ namespace MassTransit.Transports
 
 		public IEndpointAddress Address
 		{
-			get { return _inbound.Address; }
+			get { return _address; }
 		}
 
 		public void Send(ISendContext context)
@@ -44,7 +48,7 @@ namespace MassTransit.Transports
 			if (_disposed)
 				throw new ObjectDisposedException("The transport has already been disposed: " + Address);
 
-			_outbound.Send(context);
+			OutboundTransport.Send(context);
 		}
 
 		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
@@ -52,17 +56,29 @@ namespace MassTransit.Transports
 			if (_disposed)
 				throw new ObjectDisposedException("The transport has already been disposed: " + Address);
 
-			_inbound.Receive(callback, timeout);
+			InboundTransport.Receive(callback, timeout);
 		}
 
 		public IOutboundTransport OutboundTransport
 		{
-			get { return _outbound; }
+			get
+			{
+				lock (_lock)
+				{
+					return _outbound ?? (_outbound = _outboundFactory());
+				}
+			}
 		}
 
 		public IInboundTransport InboundTransport
 		{
-			get { return _inbound; }
+			get
+			{
+				lock (_lock)
+				{
+					return _inbound ?? (_inbound = _inboundFactory());
+				}
+			}
 		}
 
 		void Dispose(bool disposing)
@@ -70,11 +86,17 @@ namespace MassTransit.Transports
 			if (_disposed) return;
 			if (disposing)
 			{
-				_inbound.Dispose();
-				_inbound = null;
+				if (_inbound != null)
+				{
+					_inbound.Dispose();
+					_inbound = null;
+				}
 
-				_outbound.Dispose();
-				_outbound = null;
+				if (_outbound != null)
+				{
+					_outbound.Dispose();
+					_outbound = null;
+				}
 			}
 
 			_disposed = true;

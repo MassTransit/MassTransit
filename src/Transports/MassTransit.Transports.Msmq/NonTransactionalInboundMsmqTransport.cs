@@ -18,8 +18,9 @@ namespace MassTransit.Transports.Msmq
 	public class NonTransactionalInboundMsmqTransport :
 		InboundMsmqTransport
 	{
-		public NonTransactionalInboundMsmqTransport(IMsmqEndpointAddress address)
-			: base(address)
+		public NonTransactionalInboundMsmqTransport(IMsmqEndpointAddress address,
+		                                         ConnectionHandler<MessageQueueConnection> connectionHandler)
+			: base(address, connectionHandler)
 		{
 		}
 	}

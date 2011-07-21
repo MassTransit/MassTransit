@@ -15,6 +15,7 @@ namespace MassTransit.Serialization
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Runtime.Serialization;
 	using Custom;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
@@ -75,36 +76,58 @@ namespace MassTransit.Serialization
 		public void Serialize<T>(Stream output, ISendContext<T> context)
 			where T : class
 		{
-			context.SetContentType(ContentTypeHeaderValue);
-
-			Envelope envelope = Envelope.Create(context);
-
-			using (var nonClosingStream = new NonClosingStream(output))
-			using (var writer = new StreamWriter(nonClosingStream))
-			using (var jsonWriter = new JsonTextWriter(writer))
+			try
 			{
-				jsonWriter.Formatting = Formatting.Indented;
+				context.SetContentType(ContentTypeHeaderValue);
 
-				Serializer.Serialize(jsonWriter, envelope);
+				Envelope envelope = Envelope.Create(context);
 
-				jsonWriter.Flush();
-				writer.Flush();
+				using (var nonClosingStream = new NonClosingStream(output))
+				using (var writer = new StreamWriter(nonClosingStream))
+				using (var jsonWriter = new JsonTextWriter(writer))
+				{
+					jsonWriter.Formatting = Formatting.Indented;
+
+					Serializer.Serialize(jsonWriter, envelope);
+
+					jsonWriter.Flush();
+					writer.Flush();
+				}
+			}
+			catch (SerializationException)
+			{
+				throw;
+			}
+			catch (Exception ex)
+			{
+				throw new SerializationException("Failed to serialize message", ex);
 			}
 		}
 
 		public void Deserialize(IReceiveContext context)
 		{
-			Envelope result;
-			using (var nonClosingStream = new NonClosingStream(context.BodyStream))
-			using (var reader = new StreamReader(nonClosingStream))
-			using (var jsonReader = new JsonTextReader(reader))
+			try
 			{
-				result = Deserializer.Deserialize<Envelope>(jsonReader);
-			}
+				Envelope result;
+				using (var nonClosingStream = new NonClosingStream(context.BodyStream))
+				using (var reader = new StreamReader(nonClosingStream))
+				using (var jsonReader = new JsonTextReader(reader))
+				{
+					result = Deserializer.Deserialize<Envelope>(jsonReader);
+				}
 
-			context.SetUsingEnvelope(result);
-			context.SetMessageTypeConverter(new JsonMessageTypeConverter(Deserializer, result.Message as JToken,
-				result.MessageType));
+				context.SetUsingEnvelope(result);
+				context.SetMessageTypeConverter(new JsonMessageTypeConverter(Deserializer, result.Message as JToken,
+					result.MessageType));
+			}
+			catch (SerializationException)
+			{
+				throw;
+			}
+			catch (Exception ex)
+			{
+				throw new SerializationException("Failed to deserialize message", ex);
+			}
 		}
 	}
-}   
+}

@@ -20,8 +20,9 @@ is any method (including anonymous and lambda methods) that has a single argumen
 type and a void return type.
 
 .. sourcecode:: csharp
-	void MyMessageHandler(MyMessage message)
-	{}
+
+    void MyMessageHandler(MyMessage message)
+    {}
 
 When a message is received, MassTransit will call the method passing the message as the argument.
 With a handler, no special controls are available to manage the lifecycle of the receiver. Therefore,
@@ -40,15 +41,16 @@ instance is subscribed, as messages of the subscribed types are received, MassTr
 call the ``Consume`` method on the class instance passing the message as the argument.
 
 .. sourcecode:: csharp
-	public class MyClass :
-		Consumes<MyMessage>.All,
-		Consumes<MyOtherMessage>.All
-	{
-		public void Consume(MyMessage message)
-		{}
-		public void Consume(MyOtherMessage message)
-		{}
-	}
+
+    public class MyClass :
+        Consumes<MyMessage>.All,
+        Consumes<MyOtherMessage>.All
+    {
+        public void Consume(MyMessage message)
+        {}
+        public void Consume(MyOtherMessage message)
+        {}
+    }
 
 
 Consumers
@@ -87,17 +89,18 @@ the saga instance, but this should be done carefully to avoid potentially matchi
 to hundreds of saga instances which may cause database performance issues.
 
 .. sourcecode:: csharp
-	public class MySaga :
-		ISaga,
-		InitiatedBy<MyInitialMessage>.All,
-		Orchestrates<MyFollowUpMessage>.All
-	{
-		public Guid CorrelationId { get; set; }
-		public void Consume(MyInitialMessage message)
-		{}
-		public void Consume(MyFollowUpMessage message)
-		{}
-	}
+
+    public class MySaga :
+        ISaga,
+        InitiatedBy<MyInitialMessage>.All,
+        Orchestrates<MyFollowUpMessage>.All
+    {
+        public Guid CorrelationId { get; set; }
+        public void Consume(MyInitialMessage message)
+        {}
+        public void Consume(MyFollowUpMessage message)
+        {}
+    }
 
 
 Messages and Serialization
@@ -115,9 +118,11 @@ JSON, XML, etc.) and a type is handled using a *message serializer*. The default
 varies (for MSMQ, the framework uses XML by default, for RabbitMQ JSON is used instead). The 
 default serialization can be changed when a service bus is being configured.
 
-	``sbc.UseJsonSerializer() // uses JSON by default``
-	``sbc.UseXmlSerializer() // uses XML by default``
-	``sbc.UseBsonSerializer() // uses BSON (binary JSON) by default``
+.. sourcecode:: csharp
+
+    sbc.UseJsonSerializer(); // uses JSON by default
+    sbc.UseXmlSerializer();  // uses XML by default
+    sbc.UseBsonSerializer(); // uses BSON (binary JSON) by default
 
 
 Transports and Endpoints
@@ -154,10 +159,8 @@ In MassTransit, a URI is used as an address to an endpoint. The elements of the 
 determine the proper transport, server, port, and queue name of the actual endpoint. For example, 
 an MSMQ endpoint on the local machine named "my_queue" would have the address shown below.
 
-	``msmq://localhost/my_queue``
+    ``msmq://localhost/my_queue``
 
 A RabbitMQ queue on a remote server may be listed as below.
 
-	``rabbitmq://user@password:remote_server/my_queue``
-	
-
+    ``rabbitmq://user@password:remote_server/my_queue``

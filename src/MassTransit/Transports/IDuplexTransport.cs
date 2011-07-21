@@ -20,7 +20,7 @@ namespace MassTransit.Transports
 		IInboundTransport,
 		IOutboundTransport
 	{
-		IOutboundTransport OutboundTransport { get; }
 		IInboundTransport InboundTransport { get; }
+		IOutboundTransport OutboundTransport { get; }
 	}
 }

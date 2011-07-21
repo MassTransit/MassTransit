@@ -15,23 +15,23 @@ namespace MassTransit.Transports.RabbitMq
 	using System;
 	using System.Linq;
 	using Exceptions;
-	using log4net;
 	using Magnum.Extensions;
 	using Magnum.Threading;
 	using Management;
 	using RabbitMQ.Client;
+	using log4net;
 
 	public class RabbitMqTransportFactory :
 		ITransportFactory
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqTransportFactory));
-		readonly ReaderWriterLockedDictionary<Uri, IConnection> _connectionCache;
+		readonly ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>> _connectionCache;
 
 		bool _disposed;
 
 		public RabbitMqTransportFactory()
 		{
-			_connectionCache = new ReaderWriterLockedDictionary<Uri, IConnection>();
+			_connectionCache = new ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>>();
 		}
 
 		public void Dispose()
@@ -47,52 +47,51 @@ namespace MassTransit.Transports.RabbitMq
 
 		public IDuplexTransport BuildLoopback(ITransportSettings settings)
 		{
-			var address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+			RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
 
-			var transport = new LoopbackRabbitMqTransport(address, BuildInbound(settings), BuildOutbound(settings));
+			var transport = new Transport(address, () => BuildInbound(settings), () => BuildOutbound(settings));
+
 			return transport;
 		}
 
 		public IInboundTransport BuildInbound(ITransportSettings settings)
 		{
-			var address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+			RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
 
 			EnsureProtocolIsCorrect(address.Uri);
 
-			return new InboundRabbitMqTransport(address, GetConnection(address));
+			ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
+
+			if (settings.PurgeExistingMessages)
+			{
+				PurgeExistingMessages(connectionHandler, address);
+			}
+
+			return new InboundRabbitMqTransport(address, connectionHandler);
 		}
 
 		public IOutboundTransport BuildOutbound(ITransportSettings settings)
 		{
-			var address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+			RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
 
 			EnsureProtocolIsCorrect(address.Uri);
 
-			return new OutboundRabbitMqTransport(address, GetConnection(address));
+			ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
+
+			return new OutboundRabbitMqTransport(address, connectionHandler);
 		}
 
 		public IOutboundTransport BuildError(ITransportSettings settings)
 		{
-			var address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+			RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
 
 			EnsureProtocolIsCorrect(address.Uri);
 
-			IConnection connection = GetConnection(address);
+			ConnectionHandler<RabbitMqConnection> connection = GetConnection(address);
 
 			BindErrorExchangeToQueue(address, connection);
 
 			return new OutboundRabbitMqTransport(address, connection);
-		}
-
-		static void BindErrorExchangeToQueue(IRabbitMqEndpointAddress address, IConnection connection)
-		{
-			// we need to go ahead and bind a durable queue for the error transport, since
-			// there is probably not a listener for it.
-
-			using (var management = new RabbitMqEndpointManagement(address, connection))
-			{
-				management.BindQueue(address.Name, address.Name, ExchangeType.Fanout, "");
-			}
 		}
 
 		public int ConnectionCount()
@@ -105,19 +104,7 @@ namespace MassTransit.Transports.RabbitMq
 			if (_disposed) return;
 			if (disposing)
 			{
-				_connectionCache.Values.Each(x =>
-					{
-						try
-						{
-							if(x.IsOpen)
-								x.Close(200, "disposed");
-							x.Dispose();
-						}
-						catch (Exception ex)
-						{
-							_log.Warn("Failed to close RabbitMQ connection.", ex);
-						}
-					});
+				_connectionCache.Values.Each(x => x.Dispose());
 				_connectionCache.Clear();
 
 				_connectionCache.Dispose();
@@ -126,14 +113,47 @@ namespace MassTransit.Transports.RabbitMq
 			_disposed = true;
 		}
 
-		IConnection GetConnection(IRabbitMqEndpointAddress address)
+		ConnectionHandler<RabbitMqConnection> GetConnection(IRabbitMqEndpointAddress address)
 		{
-			return _connectionCache.Retrieve(address.Uri, () => address.ConnectionFactory.CreateConnection());
+			return _connectionCache.Retrieve(address.Uri, () =>
+				{
+					var connection = new RabbitMqConnection(address);
+					var connectionHandler = new ConnectionHandlerImpl<RabbitMqConnection>(connection);
+					return connectionHandler;
+				});
 		}
 
 		~RabbitMqTransportFactory()
 		{
 			Dispose(false);
+		}
+
+		static void PurgeExistingMessages(ConnectionHandler<RabbitMqConnection> connectionHandler,
+		                                  IRabbitMqEndpointAddress address)
+		{
+			connectionHandler.Use(connection =>
+				{
+					using (var management = new RabbitMqEndpointManagement(address, connection.Connection))
+					{
+						management.Purge(address.Name);
+					}
+				});
+		}
+
+
+		static void BindErrorExchangeToQueue(IRabbitMqEndpointAddress address,
+		                                     ConnectionHandler<RabbitMqConnection> connectionHandler)
+		{
+			// we need to go ahead and bind a durable queue for the error transport, since
+			// there is probably not a listener for it.
+
+			connectionHandler.Use(connection =>
+				{
+					using (var management = new RabbitMqEndpointManagement(address, connection.Connection))
+					{
+						management.BindQueue(address.Name, address.Name, ExchangeType.Fanout, "");
+					}
+				});
 		}
 
 

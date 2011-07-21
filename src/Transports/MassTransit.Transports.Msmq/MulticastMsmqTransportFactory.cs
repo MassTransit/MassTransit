@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Msmq
 {
 	using System;
+	using System.Messaging;
 	using Exceptions;
 
 	public class MulticastMsmqTransportFactory :
@@ -27,7 +28,12 @@ namespace MassTransit.Transports.Msmq
 		{
 			try
 			{
-				return new Transport(BuildInbound(settings), BuildOutbound(settings));
+				ITransportSettings msmqSettings = new TransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
+
+				IInboundTransport inboundTransport = BuildInbound(settings);
+				IOutboundTransport outboundTransport = BuildOutbound(settings);
+
+				return new Transport(msmqSettings.Address, () => inboundTransport, () => outboundTransport);
 			}
 			catch (Exception ex)
 			{
@@ -41,14 +47,19 @@ namespace MassTransit.Transports.Msmq
 			{
 				ITransportSettings msmqSettings = new TransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
 
-				if (msmqSettings.MsmqAddress().IsLocal)
+				IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
+
+				if (transportAddress.IsLocal)
 				{
 					ValidateLocalTransport(msmqSettings);
 
 					PurgeExistingMessagesIfRequested(msmqSettings);
 				}
 
-				return new NonTransactionalInboundMsmqTransport(msmqSettings.MsmqAddress());
+				var connection = new MessageQueueConnection(transportAddress, QueueAccessMode.Receive);
+				var connectionHandler = new ConnectionHandlerImpl<MessageQueueConnection>(connection);
+
+				return new NonTransactionalInboundMsmqTransport(transportAddress, connectionHandler);
 			}
 			catch (Exception ex)
 			{
@@ -62,12 +73,17 @@ namespace MassTransit.Transports.Msmq
 			{
 				ITransportSettings msmqSettings = new TransportSettings(new MsmqEndpointAddress(settings.Address.Uri), settings);
 
-				if (msmqSettings.MsmqAddress().IsLocal)
+				IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
+
+				if (transportAddress.IsLocal)
 				{
 					ValidateLocalTransport(msmqSettings);
 				}
 
-				return new NonTransactionalOutboundMsmqTransport(msmqSettings.MsmqAddress());
+				var connection = new MessageQueueConnection(transportAddress, QueueAccessMode.Send);
+				var connectionHandler = new ConnectionHandlerImpl<MessageQueueConnection>(connection);
+
+				return new NonTransactionalOutboundMsmqTransport(transportAddress, connectionHandler);
 			}
 			catch (Exception ex)
 			{
@@ -82,7 +98,11 @@ namespace MassTransit.Transports.Msmq
 			return BuildOutbound(msmqSettings);
 		}
 
-		private static void PurgeExistingMessagesIfRequested(ITransportSettings settings)
+		public void Dispose()
+		{
+		}
+
+		static void PurgeExistingMessagesIfRequested(ITransportSettings settings)
 		{
 			if (settings.Address.IsLocal && settings.PurgeExistingMessages)
 			{
@@ -90,9 +110,10 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
-		private static void ValidateLocalTransport(ITransportSettings settings)
+		static void ValidateLocalTransport(ITransportSettings settings)
 		{
-			MsmqEndpointManagement.Manage(settings.Address, q => {
+			MsmqEndpointManagement.Manage(settings.Address, q =>
+				{
 					if (!q.Exists)
 					{
 						if (!settings.CreateIfMissing)
@@ -102,10 +123,6 @@ namespace MassTransit.Transports.Msmq
 						q.Create(false); // multicast queues cannot be transactional
 					}
 				});
-		}
-
-		public void Dispose()
-		{
 		}
 	}
 }

@@ -17,16 +17,15 @@ namespace MassTransit.Transports
 	using System.Runtime.Serialization;
 	using Context;
 	using Exceptions;
-	using log4net;
 	using Serialization;
 	using Util;
+	using log4net;
 
 	[DebuggerDisplay("{Address}")]
 	public class Endpoint :
 		IEndpoint
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (Endpoint));
-		static IEndpoint _null;
 		readonly IEndpointAddress _address;
 		readonly IMessageSerializer _serializer;
 		readonly MessageRetryTracker _tracker;
@@ -46,11 +45,6 @@ namespace MassTransit.Transports
 			_tracker = new MessageRetryTracker(5);
 
 			SetDisposedMessage();
-		}
-
-		public static IEndpoint Null
-		{
-			get { return _null ?? (_null = CreateNullEndpoint()); }
 		}
 
 		public IOutboundTransport ErrorTransport
@@ -81,7 +75,7 @@ namespace MassTransit.Transports
 		public void Send<T>(ISendContext<T> context)
 			where T : class
 		{
-			if (_disposed) 
+			if (_disposed)
 				throw new ObjectDisposedException(_disposedMessage);
 
 			try
@@ -110,7 +104,7 @@ namespace MassTransit.Transports
 
 		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout)
 		{
-			if (_disposed) 
+			if (_disposed)
 				throw new ObjectDisposedException(_disposedMessage);
 
 			_transport.Receive(acceptContext =>
@@ -123,12 +117,12 @@ namespace MassTransit.Transports
 						return MoveMessageToErrorTransport;
 					}
 
-					_serializer.Deserialize(acceptContext);
-					acceptContext.SetEndpoint(this);
-
 					Action<IReceiveContext> receive;
 					try
 					{
+						_serializer.Deserialize(acceptContext);
+						acceptContext.SetEndpoint(this);
+
 						receive = receiver(acceptContext);
 						if (receive == null)
 							return null;
@@ -215,12 +209,6 @@ namespace MassTransit.Transports
 		~Endpoint()
 		{
 			Dispose(false);
-		}
-
-		static Endpoint CreateNullEndpoint()
-		{
-			return new Endpoint(EndpointAddress.Null, new XmlMessageSerializer(), new NullTransport(EndpointAddress.Null),
-				new NullTransport(EndpointAddress.Null));
 		}
 	}
 }

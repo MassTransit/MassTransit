@@ -1,10 +1,15 @@
 <CodeStyleSettings>
+  <CSS>
+    <FormatSettings />
+    <Naming2 />
+  </CSS>
   <CSharp>
     <FormatSettings>
       <ALIGN_MULTILINE_ARGUMENT>False</ALIGN_MULTILINE_ARGUMENT>
       <ALIGN_MULTILINE_ARRAY_AND_OBJECT_INITIALIZER>False</ALIGN_MULTILINE_ARRAY_AND_OBJECT_INITIALIZER>
       <ALIGN_MULTILINE_EXTENDS_LIST>False</ALIGN_MULTILINE_EXTENDS_LIST>
       <ALIGN_MULTLINE_TYPE_PARAMETER_CONSTRAINS>False</ALIGN_MULTLINE_TYPE_PARAMETER_CONSTRAINS>
+      <BLANK_LINES_AFTER_START_COMMENT>0</BLANK_LINES_AFTER_START_COMMENT>
       <EXPLICIT_PRIVATE_MODIFIER>False</EXPLICIT_PRIVATE_MODIFIER>
       <INDENT_ANONYMOUS_METHOD_BLOCK>False</INDENT_ANONYMOUS_METHOD_BLOCK>
       <INDENT_EMBRACED_INITIALIZER_BLOCK>False</INDENT_EMBRACED_INITIALIZER_BLOCK>
@@ -275,6 +280,13 @@ II.2.12 <HandlesEvent />
 </Patterns>
 ]]></CustomMemberReorderingPatterns>
   </CSharp>
+  <HTML>
+    <FormatSettings />
+  </HTML>
+  <JavaScript>
+    <FormatSettings />
+    <Naming2 />
+  </JavaScript>
   <VB>
     <FormatSettings />
     <ImportsSettings />
@@ -286,12 +298,12 @@ II.2.12 <HandlesEvent />
   <Web>
     <Naming2 />
   </Web>
-  <Xaml>
-    <Naming2 />
-  </Xaml>
   <XML>
     <FormatSettings />
   </XML>
+  <Xaml>
+    <Naming2 />
+  </Xaml>
   <FileHeader><![CDATA[Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
  
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use 

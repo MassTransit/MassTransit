@@ -12,27 +12,31 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-	using System;
-	using Context;
+	using log4net;
 
-	public class NullTransport :
-		TransportBase
+	public class NullOutboundTransport :
+		IOutboundTransport
 	{
-		public NullTransport(IEndpointAddress address)
-			: base(address)
+		static readonly ILog _log = LogManager.GetLogger(typeof (NullOutboundTransport));
+		readonly IEndpointAddress _address;
+
+		public NullOutboundTransport(IEndpointAddress address)
+		{
+			_address = address;
+		}
+
+		public void Send(ISendContext context)
+		{
+			_log.DebugFormat("Discarding message on {0}: {1}", _address, context.MessageType);
+		}
+
+		public void Dispose()
 		{
 		}
 
-		public override void Send(ISendContext context)
+		public IEndpointAddress Address
 		{
-		}
-
-		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
-		{
-		}
-
-		protected override void OnDisposing()
-		{
+			get { return _address; }
 		}
 	}
 }
