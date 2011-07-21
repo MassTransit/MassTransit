@@ -2,7 +2,7 @@
 <package> 
   <metadata> 
     <id>MassTransit.Autofac</id> 
-    <version>2.0.0.2</version> 
+    <version>2.0.0.3</version> 
     <authors>Chris Patterson, Dru Sellers, Travis Smith</authors>
     <description>This integration library adds support for Autofac to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.</description> 
     <language>en-US</language>
@@ -10,7 +10,7 @@
     <projectUrl>http://masstransit-project.com</projectUrl>
     <tags>msmq messaging service bus</tags>
     <dependencies>
-      <dependency id="MassTransit" version="2.0.0.2" />
+      <dependency id="MassTransit" version="2.0.0.3" />
       <dependency id="Autofac" version="2.4.5.724" />
     </dependencies> 
   </metadata> 

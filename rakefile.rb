@@ -12,11 +12,11 @@ PRODUCT = 'MassTransit'
 CLR_TOOLS_VERSION = 'v4.0.30319'
 
 build_number_base = '2.0.0'
-asm_version = '2.0.0.2'
+asm_version = '2.0.0.3'
 tc_build_number = '0'
 tc_build_number = ENV["BUILD_NUMBER"] unless ENV['BUILD_NUMBER'].nil?
 BUILD_NUMBER = "#{build_number_base}.#{tc_build_number}"
-  
+
 BUILD_CONFIG = ENV['BUILD_CONFIG'] || "Release"
 BUILD_CONFIG_KEY = ENV['BUILD_CONFIG_KEY'] || 'NET40'
 BUILD_PLATFORM = ''
@@ -24,7 +24,7 @@ TARGET_FRAMEWORK_VERSION = (BUILD_CONFIG_KEY == "NET40" ? "v4.0" : "v3.5")
 MSB_USE = (BUILD_CONFIG_KEY == "NET40" ? :net4 : :net35)
 OUTPUT_PATH = (BUILD_CONFIG_KEY == "NET40" ? 'net-4.0' : 'net-3.5')
 
-props = { 
+props = {
   :src => File.expand_path("src"),
   :lib => File.expand_path("lib"),
   :build_support => File.expand_path("build_support"),
@@ -33,26 +33,6 @@ props = {
   :artifacts => File.expand_path("build_artifacts"),
   :projects => ["MassTransit", "MassTransit.RuntimeServices"]
 }
-
-puts "Building for .NET Framework #{TARGET_FRAMEWORK_VERSION} in #{BUILD_CONFIG}-mode."
- 
-desc "Displays a list of tasks"
-task :help do
-
-  taskHash = Hash[*(`rake.bat -T`.split(/\n/).collect { |l| l.match(/rake (\S+)\s+\#\s(.+)/).to_a }.collect { |l| [l[1], l[2]] }).flatten] 
- 
-  indent = "                          "
-  
-  puts "rake #{indent}#Runs the 'default' task"
-  
-  taskHash.each_pair do |key, value|
-    if key.nil?  
-      next
-    end
-    puts "rake #{key}#{indent.slice(0, indent.length - key.length)}##{value}"
-  end
-end
-
 
 desc "Cleans, compiles, il-merges, unit tests, prepares examples, packages zip and runs MoMA"
 task :all => [:clean, :compile, :compile_samples, :ilmerge, :copy_services, :tests]
@@ -65,15 +45,15 @@ task :unclean => [:compile, :ilmerge, :tests]
 
 desc "Update the common version information for the build. You can call this task without building."
 assemblyinfo :global_version do |asm|
-  
+
   commit_data = get_commit_hash_and_date
   commit = commit_data[0]
   commit_date = commit_data[1]
   puts "##teamcity[buildNumber '#{BUILD_NUMBER}']"
-  
+
   # Assembly file config
   asm.product_name = PRODUCT
-  asm.description = "Git commit hash: #{commit} - #{commit_date} - MassTransit is a distributed application framework for .NET  http://masstransit-project.com"
+  asm.description = "MassTransit is a distributed application framework for .NET  http://masstransit-project.com"
   asm.version = asm_version
   asm.file_version = BUILD_NUMBER
   asm.custom_attributes :AssemblyInformationalVersion => "#{asm_version}",
@@ -91,7 +71,7 @@ task :clean do
 	# work around latency issue where folder still exists for a short while after it is removed
 	waitfor { !exists?(props[:stage]) }
 	waitfor { !exists?(props[:artifacts]) }
-	
+
 	Dir.mkdir props[:stage]
 	Dir.mkdir props[:artifacts]
 end
@@ -115,7 +95,7 @@ task :compile => [:global_version, :build] do
 	copyOutputFiles File.join(props[:src], "Containers/MassTransit.WindsorIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.WindsorIntegration.{dll,pdb,xml}", outc
 	copyOutputFiles File.join(props[:src], "Containers/MassTransit.NinjectIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NinjectIntegration.{dll,pdb,xml}", outc
 	copyOutputFiles File.join(props[:src], "Containers/MassTransit.AutofacIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.AutofacIntegration.{dll,pdb,xml}", outc
-	
+
 	outt = File.join(props[:output], "Transports")
 
 	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.MSMQ/bin/#{BUILD_CONFIG}"), "MassTransit.Transports.MSMQ.{dll,pdb,xml}", File.join(outt, "MSMQ")
@@ -147,14 +127,14 @@ task :copy_services => [:compile] do
 
 	copyOutputFiles src, "MassTransit.*.{dll,exe,config,log4net.xml,sdf}", targ
 	copyOutputFiles props[:output], 'MassTransit.dll', targ
-     	copyOutputFiles src, "Castle*.dll", targ	
-     	copyOutputFiles src, "log4net.dll", targ	
-     	copyOutputFiles src, "Magnum.dll", targ	
-     	copyOutputFiles src, "FluentNHibernate.dll", targ	
-     	copyOutputFiles src, "NHibernate*.dll", targ	
-     	copyOutputFiles src, "Iesi.Collections.dll", targ	
-     	copyOutputFiles src, "StructureMap.dll", targ	
-     	copyOutputFiles src, "Topshelf.dll", targ	
+     	copyOutputFiles src, "Castle*.dll", targ
+     	copyOutputFiles src, "log4net.dll", targ
+     	copyOutputFiles src, "Magnum.dll", targ
+     	copyOutputFiles src, "FluentNHibernate.dll", targ
+     	copyOutputFiles src, "NHibernate*.dll", targ
+     	copyOutputFiles src, "Iesi.Collections.dll", targ
+     	copyOutputFiles src, "StructureMap.dll", targ
+     	copyOutputFiles src, "Topshelf.dll", targ
 	copyOutputFiles File.join(props[:lib], 'SqlCe'), '*', targ
 	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86'), '*', File.join(targ, 'x86')
 	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'x86', 'Microsoft.VC90.CRT')
@@ -166,29 +146,29 @@ task :copy_services => [:compile] do
 
 	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
 	copyOutputFiles props[:output], 'MassTransit.dll', targ
-     	copyOutputFiles src, "log4net.dll", targ	
-     	copyOutputFiles src, "Magnum.dll", targ	
-     	copyOutputFiles src, "StructureMap.dll", targ	
+     	copyOutputFiles src, "log4net.dll", targ
+     	copyOutputFiles src, "Magnum.dll", targ
+     	copyOutputFiles src, "StructureMap.dll", targ
 
   targ = File.join(props[:stage], 'Services', 'BusDriver')
   src = File.join(props[:src], "Tools/BusDriver/bin/#{BUILD_CONFIG}")
-  
+
   copyOutputFiles src, "BusDriver.{exe}", targ
 	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
 	copyOutputFiles src, "RabbitMQ.Client.{dll}", targ
 	copyOutputFiles props[:output], 'MassTransit.dll', targ
-     	copyOutputFiles src, "log4net.dll", targ	
-     	copyOutputFiles src, "Magnum.dll", targ	
+     	copyOutputFiles src, "log4net.dll", targ
+     	copyOutputFiles src, "Magnum.dll", targ
 
 	targ = File.join(props[:stage], 'Services', 'SystemView2')
 	src = File.join(props[:src], "MassTransit.SystemView2/bin/#{BUILD_CONFIG}")
 
 	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
 	copyOutputFiles props[:output], 'MassTransit.dll', targ
-     	copyOutputFiles src, "log4net.dll", targ	
-     	copyOutputFiles src, "Magnum.dll", targ	
-     	copyOutputFiles src, "StructureMap.dll", targ	
-     	copyOutputFiles src, "WPFToolkit.dll", targ	
+     	copyOutputFiles src, "log4net.dll", targ
+     	copyOutputFiles src, "Magnum.dll", targ
+     	copyOutputFiles src, "StructureMap.dll", targ
+     	copyOutputFiles src, "WPFToolkit.dll", targ
 
 	targ = File.join(props[:stage], 'Samples', 'Starbucks')
 	src = File.join(props[:src], "Samples", "Starbucks")
@@ -205,7 +185,7 @@ task :copy_services => [:compile] do
 	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Customer.exe", targ
 	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "customer.log4net.xml", targ
 	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Messages.dll", targ
-	
+
 	targ = File.join(props[:stage], 'Samples', 'Distributor')
 	src = File.join(props[:src], "Samples", "Distributor")
 
@@ -238,7 +218,7 @@ end
 
 desc "Only compiles the application."
 msbuild :build do |msb|
-	msb.properties :Configuration => BUILD_CONFIG, 
+	msb.properties :Configuration => BUILD_CONFIG,
 	    :BuildConfigKey => BUILD_CONFIG_KEY,
 	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
 	    :Platform => 'Any CPU'
@@ -249,7 +229,7 @@ msbuild :build do |msb|
 end
 
 msbuild :build_starbucks do |msb|
-	msb.properties :Configuration => "Build", 
+	msb.properties :Configuration => "Build",
 	    :BuildConfigKey => BUILD_CONFIG_KEY,
 	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
 	    :Platform => 'Any CPU'
@@ -260,7 +240,7 @@ msbuild :build_starbucks do |msb|
 end
 
 msbuild :build_distributor do |msb|
-	msb.properties :Configuration => "Build", 
+	msb.properties :Configuration => "Build",
 	    :BuildConfigKey => BUILD_CONFIG_KEY,
 	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
 	    :Platform => 'Any CPU'
