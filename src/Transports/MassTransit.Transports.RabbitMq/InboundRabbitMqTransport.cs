@@ -15,13 +15,11 @@ namespace MassTransit.Transports.RabbitMq
 	using System;
 	using System.IO;
 	using System.Text;
+	using System.Threading;
 	using Context;
-	using log4net;
-	using Magnum.Extensions;
-	using Management;
 	using RabbitMQ.Client;
-	using RabbitMQ.Client.Events;
 	using Util;
+	using log4net;
 
 	public class InboundRabbitMqTransport :
 		IInboundTransport
@@ -29,17 +27,15 @@ namespace MassTransit.Transports.RabbitMq
 		static readonly ILog _log = LogManager.GetLogger(typeof (InboundRabbitMqTransport));
 
 		readonly IRabbitMqEndpointAddress _address;
-		readonly IConnection _connection;
-		IModel _channel;
-		QueueingBasicConsumer _consumer;
-		string _consumerTag;
-		bool _declared;
+		readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
+		RabbitMqConsumer _consumer;
 		bool _disposed;
 
-		public InboundRabbitMqTransport(IRabbitMqEndpointAddress address, IConnection connection)
+		public InboundRabbitMqTransport(IRabbitMqEndpointAddress address,
+		                                ConnectionHandler<RabbitMqConnection> connectionHandler)
 		{
 			_address = address;
-			_connection = connection;
+			_connectionHandler = connectionHandler;
 		}
 
 		public IEndpointAddress Address
@@ -49,61 +45,64 @@ namespace MassTransit.Transports.RabbitMq
 
 		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
 		{
-			BeginReceiver();
+			AddConsumerBinding();
 
-			try
-			{
-				object obj;
-				if (!_consumer.Queue.Dequeue((int) timeout.TotalMilliseconds, out obj))
-					return;
-
-				var result = obj as BasicDeliverEventArgs;
-				if (result == null)
-					return;
-
-				using (var body = new MemoryStream(result.Body, false))
+			_connectionHandler.Use(connection =>
 				{
-					var context = ReceiveContext.FromBodyStream(body);
-					context.SetMessageId(result.BasicProperties.MessageId ?? result.ConsumerTag + ":" + result.DeliveryTag);
-					context.SetInputAddress(_address);
-
-					byte[] contentType = result.BasicProperties.IsHeadersPresent()
-					                     	? (byte[])result.BasicProperties.Headers["Content-Type"] : null;
-					if (contentType != null)
+					BasicGetResult result = null;
+					try
 					{
-						context.SetContentType(Encoding.UTF8.GetString(contentType));
-					}
+						result = _consumer.Get();
+						if (result == null)
+						{
+							Thread.Sleep(10);
+							return;
+						}
 
-					using (context.CreateScope())
+						using (var body = new MemoryStream(result.Body, false))
+						{
+							ReceiveContext context = ReceiveContext.FromBodyStream(body);
+							context.SetMessageId(result.BasicProperties.MessageId ?? result.DeliveryTag.ToString());
+							context.SetInputAddress(_address);
+
+							byte[] contentType = result.BasicProperties.IsHeadersPresent()
+							                     	? (byte[]) result.BasicProperties.Headers["Content-Type"] : null;
+							if (contentType != null)
+							{
+								context.SetContentType(Encoding.UTF8.GetString(contentType));
+							}
+
+							using (context.CreateScope())
+							{
+								Action<IReceiveContext> receive = callback(context);
+								if (receive == null)
+								{
+									if (_log.IsDebugEnabled)
+										_log.DebugFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
+								}
+								else
+								{
+									receive(context);
+								}
+							}
+
+							_consumer.MessageCompleted(result.DeliveryTag);
+						}
+					}
+					catch (EndOfStreamException ex)
 					{
-						Action<IReceiveContext> receive = callback(context);
-						if (receive == null)
-						{
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
-
-							if (SpecialLoggers.Messages.IsInfoEnabled)
-								SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
-						}
-						else
-						{
-							receive(context);
-						}
+						throw new InvalidConnectionException(_address.Uri, "Connection was closed", ex);
 					}
-				}
+					catch (Exception ex)
+					{
+						_log.Error("Failed to consume message from endpoint", ex);
 
-				_channel.BasicAck(result.DeliveryTag, false);
-			}
-			catch (EndOfStreamException)
-			{
-				return;
-			}
-			catch (Exception ex)
-			{
-				_log.Error("Failed to consume message from endpoint", ex);
+						if(result != null)
+							_consumer.MessageFailed(result.DeliveryTag, true);
 
-				throw;
-			}
+						throw;
+					}
+				});
 		}
 
 		public void Dispose()
@@ -112,35 +111,21 @@ namespace MassTransit.Transports.RabbitMq
 			GC.SuppressFinalize(this);
 		}
 
-		void BeginReceiver()
+		void AddConsumerBinding()
 		{
-			if (_channel != null)
+			if (_consumer != null)
 				return;
 
-			DeclareBindings();
+			_consumer = new RabbitMqConsumer(_address);
 
-			_channel = _connection.CreateModel();
-			_consumer = new QueueingBasicConsumer(_channel);
-			_consumerTag = Guid.NewGuid().ToString();
-			_channel.BasicConsume(_address.Name, false, _consumerTag, _consumer);
+			_connectionHandler.AddBinding(_consumer);
 		}
 
-		void EndReceiver()
+		void RemoveConsumer()
 		{
-			if (_consumerTag.IsNotEmpty())
+			if (_consumer != null)
 			{
-				_channel.BasicCancel(_consumerTag);
-				_consumerTag = null;
-			}
-
-			_consumer = null;
-
-			if (_channel != null)
-			{
-				if (_channel.IsOpen)
-					_channel.Close(200, "end");
-				_channel.Dispose();
-				_channel = null;
+				_connectionHandler.RemoveBinding(_consumer);
 			}
 		}
 
@@ -149,23 +134,10 @@ namespace MassTransit.Transports.RabbitMq
 			if (_disposed) return;
 			if (disposing)
 			{
-				EndReceiver();
+				RemoveConsumer();
 			}
 
 			_disposed = true;
-		}
-
-		void DeclareBindings()
-		{
-			if (_declared)
-				return;
-
-			using (var management = new RabbitMqEndpointManagement(_address, _connection))
-			{
-				management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "");
-			}
-
-			_declared = true;
 		}
 
 		~InboundRabbitMqTransport()

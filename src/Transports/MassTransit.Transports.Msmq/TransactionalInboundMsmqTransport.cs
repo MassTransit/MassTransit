@@ -26,9 +26,11 @@ namespace MassTransit.Transports.Msmq
 		readonly IsolationLevel _isolationLevel;
 		readonly TimeSpan _transactionTimeout;
 
-		public TransactionalInboundMsmqTransport(IMsmqEndpointAddress address, TimeSpan transactionTimeout,
+		public TransactionalInboundMsmqTransport(IMsmqEndpointAddress address,
+		                                         ConnectionHandler<MessageQueueConnection> connectionHandler,
+		                                         TimeSpan transactionTimeout,
 		                                         IsolationLevel isolationLevel)
-			: base(address)
+			: base(address, connectionHandler)
 		{
 			_transactionTimeout = transactionTimeout;
 			_isolationLevel = isolationLevel;
@@ -52,7 +54,7 @@ namespace MassTransit.Transports.Msmq
 			}
 			catch (MessageQueueException ex)
 			{
-				HandleInboundMessageQueueException(ex, timeout);
+				HandleInboundMessageQueueException(ex);
 			}
 		}
 

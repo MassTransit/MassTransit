@@ -13,7 +13,6 @@
 namespace MassTransit.SubscriptionBuilders
 {
 	using System;
-	using Configuration;
 	using Pipeline;
 	using SubscriptionConnectors;
 	using Subscriptions;

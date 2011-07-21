@@ -2253,6 +2253,43 @@
               Maps access to the RequestContext for model binding
             </summary>
     </member>
+    <member name="T:Magnum.Algorithms.Implementations.NodeList`2">
+      <summary>
+            Maintains a list of nodes for a given set of instances of T
+            </summary>
+      <typeparam name="T">The type encapsulated in the node</typeparam>
+      <typeparam name="TNode">The type of node contained in the list</typeparam>
+    </member>
+    <member name="M:Magnum.Algorithms.Implementations.NodeList`2.Index(`0)">
+      <summary>
+            Retrieve the index for a given key
+            </summary>
+      <param name="key">The key</param>
+      <returns>The index</returns>
+    </member>
+    <member name="P:Magnum.Algorithms.Implementations.NodeList`2.Item(`0)">
+      <summary>
+            Retrieves the node for the given key
+            </summary>
+      <param name="key">The key</param>
+      <returns>The unique node that relates to the specified key</returns>
+    </member>
+    <member name="T:Magnum.Algorithms.Implementations.NodeTable`1">
+      <summary>
+            Maintains an index of nodes so that regular ints can be used to execute algorithms
+            against objects with int-compare speed vs. .Equals() speed
+            </summary>
+      <typeparam name="T">
+      </typeparam>
+    </member>
+    <member name="P:Magnum.Algorithms.Implementations.NodeTable`1.Item(`0)">
+      <summary>
+            Returns the index for the specified key, which can be any type that supports
+            equality comparison
+            </summary>
+      <param name="key">The key to retrieve</param>
+      <returns>The index that uniquely relates to the specified key</returns>
+    </member>
     <member name="T:Magnum.Benchmark`1">
       <summary>
             A class that can be benchmarked by the console

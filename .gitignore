@@ -11,6 +11,7 @@ src/logs/*
 bin
 obj
 _ReSharper*
+src/Samples/HeavyLoad/logs
 
 *.csproj.user
 *.resharper.user

@@ -25,6 +25,7 @@ namespace MassTransit.Transports
 		readonly IEndpointFactoryDefaultSettings _defaults;
 		readonly IDictionary<Uri, EndpointBuilder> _endpointBuilders;
 		readonly IDictionary<string, ITransportFactory> _transportFactories;
+		bool _disposed;
 
 		public EndpointFactory(IDictionary<string, ITransportFactory> transportFactories,
 		                       IDictionary<Uri, EndpointBuilder> endpointBuilders, IEndpointFactoryDefaultSettings defaults)
@@ -68,17 +69,10 @@ namespace MassTransit.Transports
 			_transportFactories[scheme] = factory;
 		}
 
-		bool _disposed;
-
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
-		}
-
-		~EndpointFactory()
-		{
-			Dispose(false);
 		}
 
 		void Dispose(bool disposing)
@@ -86,13 +80,15 @@ namespace MassTransit.Transports
 			if (_disposed) return;
 			if (disposing)
 			{
-				_transportFactories.Values.Each(x =>
-					{
-						x.Dispose();
-					});
+				_transportFactories.Values.Each(x => { x.Dispose(); });
 			}
 
 			_disposed = true;
+		}
+
+		~EndpointFactory()
+		{
+			Dispose(false);
 		}
 	}
 }

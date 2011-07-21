@@ -23,10 +23,19 @@ namespace MassTransit.Transports
 		IEndpointAddress Address { get; }
 
 		/// <summary>
-		/// True if the endpoint should be transactional. If Transactional is true and the endpoint already
-		/// exists and is not transactional, an exception will be thrown.
+		/// The transport should be created if it was not found
 		/// </summary>
-		bool Transactional { get; }
+		bool CreateIfMissing { get; }
+
+		/// <summary>
+		/// The isolation level to use with the transaction if a transactional transport is used
+		/// </summary>
+		IsolationLevel IsolationLevel { get; }
+
+		/// <summary>
+		/// If the transport should purge any existing messages before reading from the queue
+		/// </summary>
+		bool PurgeExistingMessages { get; }
 
 		/// <summary>
 		/// if the transactional queue is requested and required it will throw an exception if the queue 
@@ -40,18 +49,9 @@ namespace MassTransit.Transports
 		TimeSpan TransactionTimeout { get; }
 
 		/// <summary>
-		/// The transport should be created if it was not found
+		/// True if the endpoint should be transactional. If Transactional is true and the endpoint already
+		/// exists and is not transactional, an exception will be thrown.
 		/// </summary>
-		bool CreateIfMissing { get; }
-
-		/// <summary>
-		/// If the transport should purge any existing messages before reading from the queue
-		/// </summary>
-		bool PurgeExistingMessages { get; }
-
-		/// <summary>
-		/// The isolation level to use with the transaction if a transactional transport is used
-		/// </summary>
-		IsolationLevel IsolationLevel { get; }
+		bool Transactional { get; }
 	}
 }

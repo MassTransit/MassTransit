@@ -51,12 +51,18 @@ namespace MassTransit.Transports.Msmq
 
 		public void Stop()
 		{
-			_coordinator.Stop();
-			_coordinator.Dispose();
-			_coordinator = null;
+			if (_coordinator != null)
+			{
+				_coordinator.Stop();
+				_coordinator.Dispose();
+				_coordinator = null;
+			}
 
-			_subscriptionBus.Dispose();
-			_subscriptionBus = null;
+			if (_subscriptionBus != null)
+			{
+				_subscriptionBus.Dispose();
+				_subscriptionBus = null;
+			}
 		}
 
 		void Dispose(bool disposing)
@@ -64,17 +70,7 @@ namespace MassTransit.Transports.Msmq
 			if (_disposed) return;
 			if (disposing)
 			{
-				if (_coordinator != null)
-				{
-					_coordinator.Dispose();
-					_coordinator = null;
-				}
-
-				if (_subscriptionBus != null)
-				{
-					_subscriptionBus.Dispose();
-					_subscriptionBus = null;
-				}
+				Stop();
 			}
 
 			_disposed = true;

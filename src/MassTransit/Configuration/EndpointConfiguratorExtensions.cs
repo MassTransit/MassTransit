@@ -47,7 +47,7 @@ namespace MassTransit
 		/// <param name="configurator"></param>
 		public static EndpointConfigurator DiscardFaultingMessages(this EndpointConfigurator configurator)
 		{
-			return configurator.SetErrorTransportFactory((factory, settings) => new NullTransport(settings.Address));
+			return configurator.SetErrorTransportFactory((factory, settings) => new NullOutboundTransport(settings.Address));
 		}
 
 		/// <summary>

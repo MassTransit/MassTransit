@@ -13,7 +13,6 @@
 namespace MassTransit.Pipeline
 {
 	using System;
-	using Context;
 
 	public interface IInboundMessagePipeline :
 		IPipelineSink<IConsumeContext>

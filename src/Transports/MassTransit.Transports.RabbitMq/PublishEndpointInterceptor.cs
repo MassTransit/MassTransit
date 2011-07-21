@@ -14,7 +14,6 @@ namespace MassTransit.Transports.RabbitMq
 {
 	using System;
 	using System.Collections.Generic;
-	using Context;
 	using Exceptions;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
@@ -101,10 +100,10 @@ namespace MassTransit.Transports.RabbitMq
 		{
 			var endpointSink = new EndpointMessageSink<TMessage>(endpoint);
 
-			//var filterSink = new InboundMessageFilter<TMessage>("Type-specific", endpointSink,
-			//	message => message.GetType() == typeof (TMessage));
+			var filterSink = new OutboundMessageFilter<TMessage>(endpointSink,
+				context => context.DeclaringMessageType == typeof (TMessage));
 
-			UnsubscribeAction unsubscribeAction = _bus.OutboundPipeline.ConnectToRouter(endpointSink);
+			UnsubscribeAction unsubscribeAction = _bus.OutboundPipeline.ConnectToRouter(filterSink);
 
 			_added.Add(typeof (TMessage), unsubscribeAction);
 		}

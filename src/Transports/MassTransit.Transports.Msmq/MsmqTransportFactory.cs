@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Msmq
 {
 	using System;
+	using System.Messaging;
 	using Exceptions;
 
 	public class MsmqTransportFactory :
@@ -27,7 +28,16 @@ namespace MassTransit.Transports.Msmq
 		{
 			try
 			{
-				return new Transport(BuildInbound(settings), BuildOutbound(settings));
+				var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
+				var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
+				{
+					Transactional = msmqEndpointAddress.IsTransactional
+				};
+
+				IInboundTransport inboundTransport = BuildInbound(settings);
+				IOutboundTransport outboundTransport = BuildOutbound(settings);
+
+				return new Transport(msmqSettings.Address, () => inboundTransport, () => outboundTransport);
 			}
 			catch (Exception ex)
 			{
@@ -45,18 +55,23 @@ namespace MassTransit.Transports.Msmq
 						Transactional = msmqEndpointAddress.IsTransactional
 					};
 
-				if (msmqSettings.MsmqAddress().IsLocal)
+				var transportAddress = msmqSettings.MsmqAddress();
+
+				if (transportAddress.IsLocal)
 				{
 					ValidateLocalTransport(msmqSettings);
 
 					PurgeExistingMessagesIfRequested(msmqSettings);
 				}
 
+				var connection = new MessageQueueConnection(transportAddress, QueueAccessMode.Receive);
+				var connectionHandler = new ConnectionHandlerImpl<MessageQueueConnection>(connection);
+
 				if (msmqSettings.Transactional)
-					return new TransactionalInboundMsmqTransport(msmqSettings.MsmqAddress(),
+					return new TransactionalInboundMsmqTransport(transportAddress, connectionHandler,
 						msmqSettings.TransactionTimeout, msmqSettings.IsolationLevel);
 
-				return new NonTransactionalInboundMsmqTransport(msmqSettings.MsmqAddress());
+				return new NonTransactionalInboundMsmqTransport(transportAddress, connectionHandler);
 			}
 			catch (Exception ex)
 			{
@@ -74,15 +89,20 @@ namespace MassTransit.Transports.Msmq
 					Transactional = msmqEndpointAddress.IsTransactional
 				};
 
-				if (msmqSettings.MsmqAddress().IsLocal)
+				IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
+
+				if (transportAddress.IsLocal)
 				{
 					ValidateLocalTransport(msmqSettings);
 				}
 
-				if (msmqSettings.Transactional)
-					return new TransactionalOutboundMsmqTransport(msmqSettings.MsmqAddress());
+				var connection = new MessageQueueConnection(transportAddress, QueueAccessMode.Send);
+				var connectionHandler = new ConnectionHandlerImpl<MessageQueueConnection>(connection);
 
-				return new NonTransactionalOutboundMsmqTransport(msmqSettings.MsmqAddress());
+				if (msmqSettings.Transactional)
+					return new TransactionalOutboundMsmqTransport(transportAddress, connectionHandler);
+
+				return new NonTransactionalOutboundMsmqTransport(transportAddress, connectionHandler);
 			}
 			catch (Exception ex)
 			{

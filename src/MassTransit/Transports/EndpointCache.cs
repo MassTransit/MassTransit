@@ -15,9 +15,9 @@ namespace MassTransit.Transports
 	using System;
 	using System.Linq;
 	using Exceptions;
-	using log4net;
 	using Magnum;
 	using Magnum.Threading;
+	using log4net;
 
 	public class EndpointCache :
 		IEndpointCache
@@ -70,10 +70,10 @@ namespace MassTransit.Transports
 
 		public void Clear()
 		{
-			var endpoints = _endpoints.Values.ToArray();
+			IEndpoint[] endpoints = _endpoints.Values.ToArray();
 			_endpoints.Clear();
 
-			foreach (var endpoint in endpoints)
+			foreach (IEndpoint endpoint in endpoints)
 			{
 				try
 				{

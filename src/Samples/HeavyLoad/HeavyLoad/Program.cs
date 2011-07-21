@@ -23,19 +23,21 @@ namespace HeavyLoad
 			Console.WriteLine("HeavyLoad - MassTransit Load Generator");
 			Console.WriteLine();
 
-			RunLoopbackHandlerLoadTest();
-//
-//			RunLoopbackConsumerLoadTest();
-//
-//			RunStructureMapLoadTest();
-//
-//			RunLocalMsmqLoadTest();
-//
-//			RunTransactionLoadTest();
-//
-//			RunCorrelatedMessageTest();
-//
-//			RunRabbitMqLoadTest();
+			//RunLoopbackHandlerLoadTest();
+
+			//RunLoopbackConsumerLoadTest();
+
+			//RunStructureMapLoadTest();
+
+			//RunLocalMsmqLoadTest();
+
+    		//RunTransactionLoadTest();
+
+			//RunCorrelatedMessageTest();
+
+		    RunLocalRequestResponseMsmqLoadTest();
+
+			//RunRabbitMqLoadTest();
 
 			//RunLocalActiveMqLoadTest();
 
@@ -92,6 +94,21 @@ namespace HeavyLoad
 			Console.WriteLine(stopWatch.ToString());
 			Console.WriteLine();
 		}
+
+        static void RunLocalRequestResponseMsmqLoadTest()
+        {
+            Console.WriteLine("Starting MSMQ Local Request Response Load Test");
+            var stopWatch = new StopWatch();
+
+            using (var test = new LocalMsmqRequestResponseLoadTest())
+            {
+                test.Run(stopWatch);
+            }
+
+            Console.WriteLine("Local MSMQ Request Response Load Test: ");
+            Console.WriteLine(stopWatch.ToString());
+            Console.WriteLine();
+        }
 
 		static void RunStructureMapLoadTest()
 		{
