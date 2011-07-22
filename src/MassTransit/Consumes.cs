@@ -73,6 +73,15 @@ namespace MassTransit
 		}
 
 		/// <summary>
+		/// Declares a Consume method for the message type TMessage wrapped in the 
+		/// consume context
+		/// </summary>
+		public interface Context :
+			Consumes<IConsumeContext<TMessage>>.All
+		{
+		}
+
+		/// <summary>
 		/// Called by the framework when a message is available to be consumed that
 		/// matches the correlationId of the consumer object instance (exposed by the
 		/// CorrelationId property). This is called by a framework thread, so care
