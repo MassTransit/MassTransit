@@ -73,4 +73,48 @@ namespace MassTransit.Tests.Configuration
 			_conditionChecked.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
 		}
 	}
+
+	[Scenario]
+	public class When_subscribing_a_context_handler_to_a_bus
+	{
+		IServiceBus _bus;
+		Future<PingMessage> _received;
+
+		[When]
+		public void Subscribing_a_context_handler_to_a_bus()
+		{
+			_received = new Future<PingMessage>();
+
+			_bus = ServiceBusFactory.New(x =>
+				{
+					x.ReceiveFrom("loopback://localhost/mt_test");
+
+					x.Subscribe(s =>
+						{
+							// a simple handler
+							s.Handler<PingMessage>((context,message) =>_received.Complete(message));
+						});
+				});
+
+			_bus.Publish(new PingMessage());
+		}
+
+		[Finally]
+		public void Finally()
+		{
+			_bus.Dispose();
+		}
+
+		[Then]
+		public void Should_have_subscribed()
+		{
+			_bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+		}
+
+		[Then]
+		public void Should_receive_the_message()
+		{
+			_received.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+		}
+	}
 }

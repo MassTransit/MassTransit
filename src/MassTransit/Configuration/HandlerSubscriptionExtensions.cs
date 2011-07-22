@@ -41,6 +41,19 @@ namespace MassTransit
 			return handlerConfigurator;
 		}
 
+		public static HandlerSubscriptionConfigurator<T> Handler<T>(this SubscriptionBusServiceConfigurator configurator,
+		                                                            Action<IConsumeContext<T>, T> handler)
+			where T : class
+		{
+			var handlerConfigurator = new HandlerSubscriptionConfiguratorImpl<T>(handler);
+
+			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(handlerConfigurator);
+
+			configurator.AddConfigurator(busServiceConfigurator);
+
+			return handlerConfigurator;
+		}
+
 		/// <summary>
 		/// Adds a message handler to the service bus for handling a specific type of message
 		/// </summary>

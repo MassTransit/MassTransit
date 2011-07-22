@@ -18,10 +18,7 @@ namespace MassTransit.Tests.Diagnostics
 			_test = TestFactory.ForHandler<InputMessage>()
 				.New(x =>
 					{
-						x.Handler((bus,message) =>
-							{
-								bus.MessageContext<InputMessage>().Respond(new OutputMessage());
-							});
+						x.Handler((context,message) => context.Respond(new OutputMessage()));
 
 					x.Send(new InputMessage(), c => c.SendResponseTo(_test.Scenario.Bus));
 					x.Send(new InputMessage(), c => c.SendResponseTo(_test.Scenario.Bus));

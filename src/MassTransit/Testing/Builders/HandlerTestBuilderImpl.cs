@@ -24,7 +24,7 @@ namespace MassTransit.Testing.Builders
 	{
 		readonly BusTestScenario _testContext;
 		IList<TestAction> _actions;
-		Action<IServiceBus, TMessage> _handler;
+		Action<IConsumeContext<TMessage>, TMessage> _handler;
 
 
 		public HandlerTestBuilderImpl(BusTestScenario testContext)
@@ -42,7 +42,7 @@ namespace MassTransit.Testing.Builders
 			return test;
 		}
 
-		public void SetHandler(Action<IServiceBus, TMessage> handler)
+		public void SetHandler(Action<IConsumeContext<TMessage>, TMessage> handler)
 		{
 			_handler = handler;
 		}
@@ -52,7 +52,7 @@ namespace MassTransit.Testing.Builders
 			_actions.Add(testAction);
 		}
 
-		static void DefaultHandler(IServiceBus bus, TMessage message)
+		static void DefaultHandler(IConsumeContext<TMessage> bus, TMessage message)
 		{
 		}
 	}

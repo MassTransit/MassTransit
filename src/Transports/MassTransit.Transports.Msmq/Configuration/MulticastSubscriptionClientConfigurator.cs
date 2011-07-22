@@ -52,12 +52,12 @@ namespace MassTransit.Transports.Msmq.Configuration
 			Uri uri = new UriBuilder("msmq-pgm", _multicastAddress.Address.ToString(), _multicastAddress.Port, path).Uri;
 			Uri clientUri = uri.AppendToPath("_subscriptions");
 
+			MsmqEndpointManagement.Manage(new MsmqEndpointAddress(clientUri), x => x.Purge());
+
 			var builder = new ControlBusBuilderImpl(new ServiceBusSettings
 				{
 					ConcurrentConsumerLimit = 1,
 					ConcurrentReceiverLimit = 1,
-					// REVIEW get rid of this damn thing (what thing, I don't get it, if Dru doesn't than remove this todo)
-					AutoStart = true,
 					EndpointCache = bus.EndpointCache,
 					InputAddress = clientUri,
 					ReceiveTimeout = 3.Seconds(),

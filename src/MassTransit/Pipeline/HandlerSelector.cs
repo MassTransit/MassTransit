@@ -41,6 +41,21 @@ namespace MassTransit.Pipeline
 				};
 		}
 
+		public static HandlerSelector<TMessage> ForCondition<TMessage>(HandlerSelector<TMessage> handler, Predicate<TMessage> condition) 
+			where TMessage : class
+		{
+			return context =>
+			{
+				using (context.CreateScope())
+				{
+					if (!condition(context.Message))
+						return null;
+				}
+
+				return handler(context);
+			};
+		}
+
 		public static HandlerSelector<TMessage> ForContextHandler<TMessage>(Action<IConsumeContext<TMessage>> handler)
 			where TMessage : class
 		{

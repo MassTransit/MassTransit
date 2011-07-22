@@ -28,7 +28,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 		readonly IList<HandlerTestBuilderConfigurator<TMessage>> _configurators;
 
 		Func<BusTestScenario, HandlerTestBuilder<TMessage>> _builderFactory;
-		Action<IServiceBus, TMessage> _handler;
+		Action<IConsumeContext<TMessage>, TMessage> _handler;
 
 		public HandlerTestInstanceConfiguratorImpl()
 		{
@@ -47,7 +47,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 			_configurators.Add(configurator);
 		}
 
-		public void Handler(Action<IServiceBus, TMessage> handler)
+		public void Handler(Action<IConsumeContext<TMessage>, TMessage> handler)
 		{
 			_handler = handler;
 		}
