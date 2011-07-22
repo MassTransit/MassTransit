@@ -16,6 +16,7 @@ namespace MassTransit.Tests
 	using Messages;
 	using NUnit.Framework;
 	using TestConsumers;
+	using TestFramework;
 	using TextFixtures;
 
 	[TestFixture]
@@ -75,16 +76,14 @@ namespace MassTransit.Tests
 		[Test]
 		public void It_should_be_received_by_one_subscribed_consumer()
 		{
-			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+			var consumer = new TestMessageConsumer<PingMessage>();
 			RemoteBus.SubscribeInstance(consumer);
 
-			PingMessage message = new PingMessage();
+			var message = new PingMessage();
 			LocalBus.Publish(message);
 
 			consumer.ShouldHaveReceivedMessage(message, _timeout);
 		}
-
-
 
 		[Test]
 		public void It_should_be_received_by_one_subscribed_message_handler()

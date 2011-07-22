@@ -54,7 +54,8 @@ namespace MassTransit.SubscriptionConnectors
 			    || interfaces.Implements(typeof (ISagaWorker<>)))
 				throw new ConfigurationException("Distributor classes can only be subscribed as instances");
 
-			_connectors = ConsumesSelected()
+			_connectors = ConsumesContext()
+				.Concat(ConsumesSelected())
 				.Concat(ConsumesAll())
 				.Distinct((x, y) => x.MessageType == y.MessageType)
 				.ToList();
@@ -71,6 +72,22 @@ namespace MassTransit.SubscriptionConnectors
 				.Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x());
 		}
 
+		IEnumerable<ConsumerSubscriptionConnector> ConsumesContext()
+		{
+			return typeof (T).GetInterfaces()
+				.Where(x => x.IsGenericType)
+				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
+				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
+				.Where(x => x.MessageType.IsGenericType)
+				.Where(x => x.MessageType.GetGenericTypeDefinition() == typeof(IConsumeContext<>))
+				.Select(x => new {x.InterfaceType, MessageType = x.MessageType.GetGenericArguments()[0] })
+				.Where(x => x.MessageType.IsValueType == false)
+				.Select(x =>
+				        FastActivator.Create(typeof (ConsumerContextSubscriptionConnector<,>),
+				        	new[] {typeof (T), x.MessageType}, _args))
+				.Cast<ConsumerSubscriptionConnector>();
+		}
+
 		IEnumerable<ConsumerSubscriptionConnector> ConsumesAll()
 		{
 			return typeof (T).GetInterfaces()
@@ -78,8 +95,9 @@ namespace MassTransit.SubscriptionConnectors
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(
-					x => FastActivator.Create(typeof (ConsumerSubscriptionConnector<,>), new[] {typeof (T), x.MessageType}, _args))
+				.Select(x => 
+					FastActivator.Create(typeof (ConsumerSubscriptionConnector<,>), 
+					new[] {typeof (T), x.MessageType}, _args))
 				.Cast<ConsumerSubscriptionConnector>();
 		}
 
@@ -90,9 +108,9 @@ namespace MassTransit.SubscriptionConnectors
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.Selected))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
-				.Select(
-					x =>
-					FastActivator.Create(typeof (SelectedConsumerSubscriptionConnector<,>), new[] {typeof (T), x.MessageType}, _args))
+				.Select(x =>
+					FastActivator.Create(typeof (SelectedConsumerSubscriptionConnector<,>), 
+					new[] {typeof (T), x.MessageType}, _args))
 				.Cast<ConsumerSubscriptionConnector>();
 		}
 	}

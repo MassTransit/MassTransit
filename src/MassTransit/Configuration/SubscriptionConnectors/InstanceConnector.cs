@@ -50,6 +50,7 @@ namespace MassTransit.SubscriptionConnectors
 			_connectors = Distributors()
 				.Concat(Workers())
 				.Concat(ConsumesCorrelated())
+				.Concat(ConsumesContext())
 				.Concat(ConsumesSelected())
 				.Concat(ConsumesAll())
 				.Distinct((x, y) => x.MessageType == y.MessageType)
@@ -66,6 +67,22 @@ namespace MassTransit.SubscriptionConnectors
 		{
 			return _connectors.Select(x => x.Connect(configurator, instance))
 				.Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x());
+		}
+
+		IEnumerable<InstanceSubscriptionConnector> ConsumesContext()
+		{
+			return typeof(T).GetInterfaces()
+				.Where(x => x.IsGenericType)
+				.Where(x => x.GetGenericTypeDefinition() == typeof(Consumes<>.All))
+				.Select(x => new { InterfaceType = x, MessageType = x.GetGenericArguments()[0] })
+				.Where(x => x.MessageType.IsGenericType)
+				.Where(x => x.MessageType.GetGenericTypeDefinition() == typeof(IConsumeContext<>))
+				.Select(x => new { x.InterfaceType, MessageType = x.MessageType.GetGenericArguments()[0] })
+				.Where(x => x.MessageType.IsValueType == false)
+				.Select(x =>
+						FastActivator.Create(typeof(InstanceContextSubscriptionConnector<,>),
+							new[] { typeof(T), x.MessageType }))
+				.Cast<InstanceSubscriptionConnector>();
 		}
 
 		static IEnumerable<InstanceSubscriptionConnector> ConsumesAll()

@@ -166,8 +166,10 @@
     <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ServiceBusFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnectorCache.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ConsumerContextSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\CorrelatedHandlerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnectorCache.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\InstanceContextSubscriptionConnector.cs" />
     <Compile Include="Configuration\ThreadConfigurationExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerSubscriptionConfigurator.cs" />
@@ -249,6 +251,7 @@
     <Compile Include="Pipeline\HandlerSelector.cs" />
     <Compile Include="Pipeline\InstanceHandlerSelector.cs" />
     <Compile Include="Pipeline\MultipleHandlerSelector.cs" />
+    <Compile Include="Pipeline\Sinks\ComponentContextMessageSink.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageFilter.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageInterceptor.cs" />
     <Compile Include="PublishExtensions.cs" />
