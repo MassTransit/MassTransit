@@ -20,6 +20,6 @@ namespace MassTransit.Testing.Builders
 	{
 		HandlerTest<TMessage> Build();
 
-		void SetHandler(Action<IServiceBus, TMessage> handler);
+		void SetHandler(Action<IConsumeContext<TMessage>, TMessage> handler);
 	}
 }

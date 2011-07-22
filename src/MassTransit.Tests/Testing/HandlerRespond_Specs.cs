@@ -26,7 +26,54 @@ namespace MassTransit.Tests.Testing
 			_test = TestFactory.ForHandler<A>()
 				.New(x =>
 					{
-						x.Handler((bus, message) => bus.MessageContext<A>().Respond(new B()));
+						x.Handler((context, message) => context.Respond(new B()));
+
+						x.Send(new A(), c => c.SendResponseTo(_test.Scenario.Bus));
+					});
+
+			_test.Execute();
+		}
+
+		[Finally]
+		public void Teardown()
+		{
+			_test.Dispose();
+			_test = null;
+		}
+
+		[Then]
+		public void Should_have_sent_a_message_of_type_b()
+		{
+			_test.Sent.Any<B>().ShouldBeTrue();
+		}
+
+		[Then]
+		public void Should_support_a_simple_handler()
+		{
+			_test.Handler.Received.Any().ShouldBeTrue();
+		}
+
+		class A
+		{
+		}
+
+		class B
+		{
+		}
+	}
+
+	[Scenario]
+	public class When_a_handler_responds_to_a_message_using_context
+	{
+		HandlerTest<A> _test;
+
+		[When]
+		public void A_handler_responds_to_a_message_using_context()
+		{
+			_test = TestFactory.ForHandler<A>()
+				.New(x =>
+					{
+						x.Handler((context, message) => context.Respond(new B()));
 
 						x.Send(new A(), c => c.SendResponseTo(_test.Scenario.Bus));
 					});

@@ -31,20 +31,14 @@ namespace MassTransit.SubscriptionConfigurators
 			_handler = HandlerSelector.ForHandler(handler);
 		}
 
+		public HandlerSubscriptionConfiguratorImpl(Action<IConsumeContext<TMessage>, TMessage> handler)
+		{
+			_handler = x => context => handler(context, context.Message);
+		}
+
 		public HandlerSubscriptionConfigurator<TMessage> Where(Predicate<TMessage> condition)
 		{
-			HandlerSelector<TMessage> previousHandler = _handler;
-
-			_handler = context =>
-				{
-					using (context.CreateScope())
-					{
-						if (!condition(context.Message))
-							return null;
-					}
-
-					return previousHandler(context);
-				};
+			_handler = HandlerSelector.ForCondition(_handler, condition);
 
 			return this;
 		}

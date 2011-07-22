@@ -28,7 +28,7 @@ namespace MassTransit.Testing.Instances
 		bool _disposed;
 
 		public HandlerTestInstance(BusTestScenario scenario, IList<TestAction> actions,
-		                           Action<IServiceBus, TMessage> handler)
+								   Action<IConsumeContext<TMessage>, TMessage> handler)
 			: base(scenario, actions)
 		{
 			_subject = new HandlerTestSubjectImpl<TMessage>(handler);

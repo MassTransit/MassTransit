@@ -13,19 +13,17 @@
 namespace MassTransit.Testing.Subjects
 {
 	using System;
-	using Context;
 
 	public class HandlerTestSubjectImpl<T> :
 		HandlerTestSubject<T>
 		where T : class
 	{
-		readonly Action<IServiceBus, T> _handler;
+		readonly Action<IConsumeContext<T>, T> _handler;
 		readonly ReceivedMessageListImpl<T> _received;
-		IServiceBus _bus;
 		bool _disposed;
 		UnsubscribeAction _unsubscribe;
 
-		public HandlerTestSubjectImpl(Action<IServiceBus, T> handler)
+		public HandlerTestSubjectImpl(Action<IConsumeContext<T>, T> handler)
 		{
 			_handler = handler;
 			_received = new ReceivedMessageListImpl<T>();
@@ -44,8 +42,6 @@ namespace MassTransit.Testing.Subjects
 
 		public void Prepare(IServiceBus bus)
 		{
-			_bus = bus;
-
 			_unsubscribe = bus.SubscribeContextHandler<T>(HandleMessage);
 		}
 
@@ -74,7 +70,7 @@ namespace MassTransit.Testing.Subjects
 			{
 				using (context.CreateScope())
 				{
-					_handler(_bus, context.Message);
+					_handler(context, context.Message);
 				}
 			}
 			catch (Exception ex)
