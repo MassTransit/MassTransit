@@ -24,6 +24,9 @@ namespace MassTransit.Services.Subscriptions.Client
 	using Util;
 	using log4net;
 
+	/// <summary>
+	/// wholly crap this is a mess of concerns
+	/// </summary>
 	public class SubscriptionCoordinator :
 		ISubscriptionService,
 		IBusService,

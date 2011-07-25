@@ -351,6 +351,7 @@
     <Compile Include="Services\Timeout\Messages\ScheduleTimeout.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
+    <Compile Include="Subscriptions\Actors\SubscriptionActor.cs" />
     <Compile Include="Subscriptions\DisposableUnsubscribeAction.cs" />
     <Compile Include="Subscriptions\ISubscriptionReference.cs" />
     <Compile Include="Subscriptions\IUnsubscribeAction.cs" />
