@@ -13,12 +13,10 @@
 namespace MassTransit.Subscriptions.Actors
 {
 	using System;
-	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 	using Magnum.Extensions;
 	using Services.Subscriptions.Messages;
 	using Stact;
-
 
 
 	public class MessageTypeToEndpointActor :
@@ -61,14 +59,6 @@ namespace MassTransit.Subscriptions.Actors
 		}
 	}
 
-	public class UnsubscribeFrom
-	{
-	}
-
-	public class SubscribeTo
-	{
-	}
-
 	public class InitializeEndpointMessageSinkActor
 	{
 	}
@@ -80,7 +70,7 @@ namespace MassTransit.Subscriptions.Actors
 		readonly Fiber _fiber;
 		readonly Scheduler _scheduler;
 		readonly UntypedChannel _coordinator;
-		Type _messageType;
+		string _messageType;
 		HashSet<Guid> _ids;
 		TimeSpan _unsubscribeTimeout;
 		ScheduledOperation _unsubscribeScheduledAction;
@@ -138,39 +128,6 @@ namespace MassTransit.Subscriptions.Actors
 		}
 	}
 
-	public class SubscriptionCoordinatorActor :
-		Actor
-	{
-		readonly Fiber _fiber;
-		readonly Scheduler _scheduler;
-		readonly Inbox _inbox;
-		IDictionary<Type, ActorInstance> _subscriptionTypes;
-		ActorFactory<SubscriptionActor> _factory;
-
-		public SubscriptionCoordinatorActor(Fiber fiber, Scheduler scheduler, Inbox inbox)
-		{
-			_fiber = fiber;
-			_scheduler = scheduler;
-			_inbox = inbox;
-			_subscriptionTypes = new Dictionary<Type, ActorInstance>();
-
-			_factory = ActorFactory.Create((f, s, i) => new SubscriptionActor(f, s, i, _inbox));
-		}
-
-		public void Handle(Message<SubscriptionAdded> message)
-		{
-			ActorInstance subscriptionActor;
-			if(!_subscriptionTypes.TryGetValue(message.Body.MessageType, out subscriptionActor))
-			{
-				subscriptionActor = _factory.GetActor();
-				subscriptionActor.Send(new InitializeSubscriptionActor(message.Body.MessageType));
-				_subscriptionTypes.Add(message.Body.MessageType, subscriptionActor);
-			}
-
-			subscriptionActor.Send(message);
-		}
-	}
-
 	public class RemoteEndpointActor :
 		Actor
 	{
@@ -216,12 +173,12 @@ namespace MassTransit.Subscriptions.Actors
 
 	public class InitializeSubscriptionActor
 	{
-		public InitializeSubscriptionActor(Type messageType)
+		public InitializeSubscriptionActor(string messageName)
 		{
-			MessageType = messageType;
+			MessageType = messageName;
 		}
 
-		public Type MessageType { get; private set; }
+		public string MessageType { get; private set; }
 	}
 
 	public class SubscriptionRemoved
