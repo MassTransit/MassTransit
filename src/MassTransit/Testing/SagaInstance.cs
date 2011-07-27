@@ -10,22 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Subjects
+namespace MassTransit.Testing
 {
 	using Saga;
 
-	public interface SagaTestSubject<TSaga> :
-		TestSubject<TSaga>
-		where TSaga : class, ISaga
+	public interface SagaInstance<T>
+		where T : class, ISaga
 	{
-		/// <summary>
-		/// The messages that were received by the handler
-		/// </summary>
-		ReceivedMessageList Received { get; }
-
-		/// <summary>
-		/// The sagas that were created during the test
-		/// </summary>
-		SagaList<TSaga> Created { get; }
+		T Saga { get; }
 	}
 }

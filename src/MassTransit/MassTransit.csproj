@@ -391,6 +391,10 @@
     <Compile Include="Testing\PublishedMessageImpl.cs" />
     <Compile Include="Testing\PublishedMessageList.cs" />
     <Compile Include="Testing\PublishedMessageListImpl.cs" />
+    <Compile Include="Testing\SagaInstance.cs" />
+    <Compile Include="Testing\SagaInstanceImpl.cs" />
+    <Compile Include="Testing\SagaList.cs" />
+    <Compile Include="Testing\SagaListImpl.cs" />
     <Compile Include="Testing\SagaTest.cs" />
     <Compile Include="Testing\ScenarioBuilders\BusScenarioBuilder.cs" />
     <Compile Include="Testing\ScenarioBuilders\BusScenarioBuilderImpl.cs" />
@@ -440,6 +444,7 @@
     <Compile Include="Testing\SendTestActionExtensions.cs" />
     <Compile Include="Testing\Subjects\HandlerTestSubject.cs" />
     <Compile Include="Testing\Subjects\HandlerTestSubjectImpl.cs" />
+    <Compile Include="Testing\TestDecorators\SagaPolicyTestDecorator.cs" />
     <Compile Include="Testing\TestDecorators\SagaRepositoryTestDecorator.cs" />
     <Compile Include="Testing\TestDecorators\ServiceBusTestDecorator.cs" />
     <Compile Include="Testing\TestFactory.cs" />

@@ -23,12 +23,14 @@ namespace MassTransit.Testing.TestDecorators
 	{
 		readonly ReceivedMessageListImpl _received;
 		readonly ISagaRepository<TSaga> _sagaRepository;
+		SagaListImpl<TSaga> _created;
 
 		public SagaRepositoryTestDecorator(ISagaRepository<TSaga> sagaRepository,
-		                                   ReceivedMessageListImpl received)
+		                                   ReceivedMessageListImpl received, SagaListImpl<TSaga> created)
 		{
 			_sagaRepository = sagaRepository;
 			_received = received;
+			_created = created;
 		}
 
 		public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
@@ -36,7 +38,11 @@ namespace MassTransit.Testing.TestDecorators
 		                                                                        	selector, ISagaPolicy<TSaga, TMessage> policy)
 			where TMessage : class
 		{
-			IEnumerable<Action<IConsumeContext<TMessage>>> consumers = _sagaRepository.GetSaga(context, sagaId, selector, policy);
+			ISagaPolicy<TSaga, TMessage> decoratedSagaPolicy = new SagaPolicyTestDecorator<TSaga, TMessage>(policy, sagaId,
+				_created);
+
+			IEnumerable<Action<IConsumeContext<TMessage>>> consumers = _sagaRepository.GetSaga(context, sagaId, selector,
+				decoratedSagaPolicy);
 
 			foreach (var action in consumers)
 			{
