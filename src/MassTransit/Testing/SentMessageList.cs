@@ -20,6 +20,7 @@ namespace MassTransit.Testing
 	{
 		bool Any();
 		bool Any(Func<SentMessage, bool> filter);
+
 		bool Any<T>()
 			where T : class;
 	}

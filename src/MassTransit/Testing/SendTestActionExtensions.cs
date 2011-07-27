@@ -45,5 +45,33 @@ namespace MassTransit.Testing
 
 			configurator.AddActionConfigurator(actionConfigurator);
 		}
+
+		public static void Send<TMessage>(this TestInstanceConfigurator<LocalRemoteTestScenario> configurator, TMessage message)
+			where TMessage : class
+		{
+			var actionConfigurator = new SendTestActionConfigurator<LocalRemoteTestScenario, TMessage>(x => x.RemoteBus.Endpoint, message);
+
+			configurator.AddActionConfigurator(actionConfigurator);
+		}
+
+		public static void Send<TMessage>(this TestInstanceConfigurator<LocalRemoteTestScenario> configurator, TMessage message,
+		                                  Action<ISendContext<TMessage>> callback)
+			where TMessage : class
+		{
+			var actionConfigurator = new SendTestActionConfigurator<LocalRemoteTestScenario, TMessage>(x => x.RemoteBus.Endpoint, message,
+				(scenario, context) => callback(context));
+
+			configurator.AddActionConfigurator(actionConfigurator);
+		}
+
+		public static void Send<TMessage>(this TestInstanceConfigurator<LocalRemoteTestScenario> configurator, TMessage message,
+										  Action<LocalRemoteTestScenario, ISendContext<TMessage>> callback)
+			where TMessage : class
+		{
+			var actionConfigurator = new SendTestActionConfigurator<LocalRemoteTestScenario, TMessage>(x => x.RemoteBus.Endpoint, message,
+				callback);
+
+			configurator.AddActionConfigurator(actionConfigurator);
+		}
 	}
 }

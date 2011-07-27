@@ -10,17 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Scenarios
+namespace MassTransit.Testing
 {
 	using System;
+	using System.Collections.Generic;
 
-	public interface TestScenario :
-		IDisposable
+	public interface PublishedMessageList :
+		IEnumerable<PublishedMessage>
 	{
-		IServiceBus InputBus { get; }
-		PublishedMessageList Published { get; }
-		ReceivedMessageList Received { get; }
-		SentMessageList Sent { get; }
-		ReceivedMessageList Skipped { get; }
+		bool Any();
+		bool Any(Func<PublishedMessage, bool> filter);
+
+		bool Any<T>()
+			where T : class;
 	}
 }

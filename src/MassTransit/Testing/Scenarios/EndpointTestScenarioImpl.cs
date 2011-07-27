@@ -24,6 +24,7 @@ namespace MassTransit.Testing.Scenarios
 		readonly EndpointCache _endpointCache;
 		readonly IDictionary<Uri, EndpointTestDecorator> _endpoints;
 		readonly ReceivedMessageListImpl _received;
+		readonly PublishedMessageListImpl _published;
 		readonly SentMessageListImpl _sent;
 		readonly ReceivedMessageListImpl _skipped;
 		bool _disposed;
@@ -33,6 +34,7 @@ namespace MassTransit.Testing.Scenarios
 			_received = new ReceivedMessageListImpl();
 			_sent = new SentMessageListImpl();
 			_skipped = new ReceivedMessageListImpl();
+			_published = new PublishedMessageListImpl();
 
 			_endpoints = new Dictionary<Uri, EndpointTestDecorator>();
 
@@ -70,6 +72,11 @@ namespace MassTransit.Testing.Scenarios
 			get { throw new NotImplementedException(); }
 		}
 
+		public PublishedMessageList Published
+		{
+			get { return _published; }
+		}
+
 		public ReceivedMessageList Received
 		{
 			get { return _received; }
@@ -89,6 +96,11 @@ namespace MassTransit.Testing.Scenarios
 		public void AddSent(SentMessage message)
 		{
 			_sent.Add(message);
+		}
+
+		public void AddPublished(PublishedMessage message)
+		{
+			_published.Add(message);
 		}
 
 		public void AddReceived(ReceivedMessage message)

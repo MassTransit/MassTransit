@@ -50,14 +50,14 @@ namespace MassTransit.Testing.ScenarioBuilders
 		{
 			IEndpointFactory endpointFactory = BuildEndpointFactory();
 
-			var context = new BusTestScenarioImpl(endpointFactory);
+			var scenario = new BusTestScenarioImpl(endpointFactory);
 
-			_configurator.ChangeSettings(x => { x.EndpointCache = context.EndpointCache; });
+			_configurator.ChangeSettings(x => { x.EndpointCache = scenario.EndpointCache; });
 			_configurator.EnableMessageTracing();
 
-			context.Bus = _configurator.CreateServiceBus();
+			scenario.Bus = _configurator.CreateServiceBus();
 
-			return context;
+			return scenario;
 		}
 	}
 }

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Scenarios
 {
+	using TestDecorators;
 	using Transports;
 
 	public class LocalRemoteTestScenarioImpl :
@@ -19,6 +20,8 @@ namespace MassTransit.Testing.Scenarios
 		LocalRemoteTestScenario
 	{
 		bool _disposed;
+		IServiceBus _localBus;
+		IServiceBus _remoteBus;
 
 		public LocalRemoteTestScenarioImpl(IEndpointFactory endpointFactory)
 			: base(endpointFactory)
@@ -30,8 +33,17 @@ namespace MassTransit.Testing.Scenarios
 			get { return RemoteBus; }
 		}
 
-		public IServiceBus LocalBus { get; set; }
-		public IServiceBus RemoteBus { get; set; }
+		public IServiceBus LocalBus
+		{
+			get { return _localBus; }
+			set { _localBus = new ServiceBusTestDecorator(value, this); }
+		}
+
+		public IServiceBus RemoteBus
+		{
+			get { return _remoteBus; }
+			set { _remoteBus = new ServiceBusTestDecorator(value, this); }
+		}
 
 		protected override void Dispose(bool disposing)
 		{
