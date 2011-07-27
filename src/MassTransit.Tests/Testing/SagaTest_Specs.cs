@@ -60,6 +60,12 @@ namespace MassTransit.Tests.Testing
 		}
 
 		[Then]
+		public void Should_create_a_new_saga_for_the_message()
+		{
+			_test.Saga.Created.Any(x => x.CorrelationId == _sagaId).ShouldBeTrue();
+		}
+
+		[Then]
 		public void Should_have_called_the_consumer_method()
 		{
 			_test.Saga.Received.Any<A>().ShouldBeTrue();
