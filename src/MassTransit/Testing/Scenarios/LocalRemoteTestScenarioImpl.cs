@@ -22,6 +22,8 @@ namespace MassTransit.Testing.Scenarios
 		bool _disposed;
 		IServiceBus _localBus;
 		IServiceBus _remoteBus;
+		IServiceBus _realLocalBus;
+		IServiceBus _realRemoteBus;
 
 		public LocalRemoteTestScenarioImpl(IEndpointFactory endpointFactory)
 			: base(endpointFactory)
@@ -36,13 +38,21 @@ namespace MassTransit.Testing.Scenarios
 		public IServiceBus LocalBus
 		{
 			get { return _localBus; }
-			set { _localBus = new ServiceBusTestDecorator(value, this); }
+			set
+			{
+				_realLocalBus = value;
+				_localBus = new ServiceBusTestDecorator(value, this);
+			}
 		}
 
 		public IServiceBus RemoteBus
 		{
 			get { return _remoteBus; }
-			set { _remoteBus = new ServiceBusTestDecorator(value, this); }
+			set
+			{
+				_realRemoteBus = value;
+				_remoteBus = new ServiceBusTestDecorator(value, this);
+			}
 		}
 
 		protected override void Dispose(bool disposing)
@@ -65,6 +75,17 @@ namespace MassTransit.Testing.Scenarios
 		~LocalRemoteTestScenarioImpl()
 		{
 			Dispose(false);
+		}
+
+		public override IServiceBus GetDecoratedBus(IServiceBus bus)
+		{
+			if (bus == _realLocalBus)
+				return _localBus;
+
+			if(bus == _realRemoteBus)
+				return _realRemoteBus;
+
+			return base.GetDecoratedBus(bus);
 		}
 	}
 }

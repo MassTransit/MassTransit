@@ -21,6 +21,7 @@ namespace MassTransit.Testing.Scenarios
 	{
 		IServiceBus _bus;
 		bool _disposed;
+		IServiceBus _realBus;
 
 		public BusTestScenarioImpl(IEndpointFactory endpointFactory)
 			: base(endpointFactory)
@@ -35,7 +36,19 @@ namespace MassTransit.Testing.Scenarios
 		public IServiceBus Bus
 		{
 			get { return _bus; }
-			set { _bus = new ServiceBusTestDecorator(value, this); }
+			set
+			{
+				_realBus = value;
+				_bus = new ServiceBusTestDecorator(value, this);
+			}
+		}
+
+		public override IServiceBus GetDecoratedBus(IServiceBus bus)
+		{
+			if (_realBus == bus)
+				return _bus;
+
+			return base.GetDecoratedBus(bus);
 		}
 
 		protected override void Dispose(bool disposing)

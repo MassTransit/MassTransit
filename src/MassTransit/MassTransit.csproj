@@ -444,6 +444,7 @@
     <Compile Include="Testing\SendTestActionExtensions.cs" />
     <Compile Include="Testing\Subjects\HandlerTestSubject.cs" />
     <Compile Include="Testing\Subjects\HandlerTestSubjectImpl.cs" />
+    <Compile Include="Testing\TestDecorators\ReceiveContextTestDecorator.cs" />
     <Compile Include="Testing\TestDecorators\SagaPolicyTestDecorator.cs" />
     <Compile Include="Testing\TestDecorators\SagaRepositoryTestDecorator.cs" />
     <Compile Include="Testing\TestDecorators\ServiceBusTestDecorator.cs" />

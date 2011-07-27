@@ -23,5 +23,7 @@ namespace MassTransit.Testing
 		bool Any();
 
 		bool Any(Func<T, bool> filter);
+
+		T Contains(Guid sagaId);
 	}
 }
