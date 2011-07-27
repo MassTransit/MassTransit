@@ -18,7 +18,7 @@ namespace MassTransit.Testing.Scenarios
 	using TestDecorators;
 	using Transports;
 
-	public class EndpointTestScenarioImpl :
+	public abstract class EndpointTestScenarioImpl :
 		EndpointTestScenario
 	{
 		readonly EndpointCache _endpointCache;
@@ -161,6 +161,11 @@ namespace MassTransit.Testing.Scenarios
 		~EndpointTestScenarioImpl()
 		{
 			Dispose(false);
+		}
+
+		public virtual IServiceBus GetDecoratedBus(IServiceBus bus)
+		{
+			return new ServiceBusTestDecorator(bus, this);
 		}
 	}
 }

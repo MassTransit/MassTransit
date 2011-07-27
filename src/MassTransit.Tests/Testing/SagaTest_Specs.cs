@@ -21,19 +21,25 @@ namespace MassTransit.Tests.Testing
 	[Scenario]
 	public class When_a_saga_is_being_tested
 	{
-		SagaTest<BusTestScenario, TestSaga> _test;
 		Guid _sagaId;
+		SagaTest<BusTestScenario, TestSaga> _test;
+		string _testValueA;
 
 		[When]
 		public void A_consumer_is_being_tested()
 		{
 			_sagaId = Guid.NewGuid();
+			_testValueA = "TestValueA";
 
 			_test = TestFactory.ForSaga<TestSaga>()
 				.InSingleBusScenario()
 				.New(x =>
 					{
-						x.Send(new A{CorrelationId = _sagaId});
+						x.Send(new A
+							{
+								CorrelationId = _sagaId, 
+								Value = _testValueA
+							});
 					});
 
 			_test.Execute();
@@ -66,6 +72,21 @@ namespace MassTransit.Tests.Testing
 		}
 
 		[Then]
+		public void Should_have_the_saga_instance_with_the_value()
+		{
+			TestSaga saga = _test.Saga.Created.Contains(_sagaId);
+			saga.ShouldNotBeNull();
+
+			saga.ValueA.ShouldEqual(_testValueA);
+		}
+
+		[Then]
+		public void Should_have_published_event_message()
+		{
+			_test.Published.Any<Aa>().ShouldBeTrue();
+		}
+
+		[Then]
 		public void Should_have_called_the_consumer_method()
 		{
 			_test.Saga.Received.Any<A>().ShouldBeTrue();
@@ -86,13 +107,16 @@ namespace MassTransit.Tests.Testing
 				CorrelationId = correlationId;
 			}
 
+			public string ValueA { get; private set; }
+
 			public void Consume(A message)
 			{
+				ValueA = message.Value;
+				Bus.Publish(new Aa {CorrelationId = CorrelationId});
 			}
 
-			public void Consume(B message)
-			{
-			}
+			public Guid CorrelationId { get; private set; }
+			public IServiceBus Bus { get; set; }
 
 			public void Consume(C message)
 			{
@@ -103,11 +127,19 @@ namespace MassTransit.Tests.Testing
 				return (saga, message) => saga.CorrelationId.ToString() == message.CorrelationId;
 			}
 
-			public Guid CorrelationId { get; private set; }
-			public IServiceBus Bus { get; set; }
+			public void Consume(B message)
+			{
+			}
 		}
 
 		class A :
+			CorrelatedBy<Guid>
+		{
+			public string Value { get; set; }
+			public Guid CorrelationId { get; set; }
+		}
+
+		class Aa :
 			CorrelatedBy<Guid>
 		{
 			public Guid CorrelationId { get; set; }

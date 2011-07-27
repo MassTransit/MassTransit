@@ -24,12 +24,12 @@ namespace MassTransit.Testing.TestDecorators
 		readonly IEndpoint _endpoint;
 		readonly ReceivedMessageListImpl _received;
 		readonly SentMessageListImpl _sent;
-		EndpointTestScenarioImpl _testContext;
+		EndpointTestScenarioImpl _scenario;
 
-		public EndpointTestDecorator(IEndpoint endpoint, EndpointTestScenarioImpl testContext)
+		public EndpointTestDecorator(IEndpoint endpoint, EndpointTestScenarioImpl scenario)
 		{
 			_endpoint = endpoint;
-			_testContext = testContext;
+			_scenario = scenario;
 
 			_sent = new SentMessageListImpl();
 			_received = new ReceivedMessageListImpl();
@@ -92,7 +92,7 @@ namespace MassTransit.Testing.TestDecorators
 			finally
 			{
 				_sent.Add(send);
-				_testContext.AddSent(send);
+				_scenario.AddSent(send);
 			}
 		}
 
@@ -100,21 +100,24 @@ namespace MassTransit.Testing.TestDecorators
 		{
 			_endpoint.Receive(receiveContext =>
 				{
-					Action<IReceiveContext> receive = receiver(receiveContext);
+					var decoratedReceiveContext = new ReceiveContextTestDecorator(receiveContext, _scenario);
+
+					Action<IReceiveContext> receive = receiver(decoratedReceiveContext);
 					if (receive == null)
 					{
 						var skipped = new ReceivedMessageImpl(receiveContext);
-						_testContext.AddSkipped(skipped);
+						_scenario.AddSkipped(skipped);
 
 						return null;
 					}
 
 					return context =>
 						{
+							decoratedReceiveContext = new ReceiveContextTestDecorator(context, _scenario);
 							var received = new ReceivedMessageImpl(context);
 							try
 							{
-								receive(context);
+								receive(decoratedReceiveContext);
 							}
 							catch (Exception ex)
 							{
@@ -124,7 +127,7 @@ namespace MassTransit.Testing.TestDecorators
 							finally
 							{
 								_received.Add(received);
-								_testContext.AddReceived(received);
+								_scenario.AddReceived(received);
 							}
 						};
 				}, timeout);
