@@ -17,6 +17,7 @@ namespace MassTransit.Testing.TestDecorators
 	using Serialization;
 	using Transports;
 
+
 	public class EndpointTestDecorator :
 		IEndpoint
 	{

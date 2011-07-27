@@ -381,6 +381,10 @@
     <Compile Include="Testing\ConsumerTest.cs" />
     <Compile Include="Testing\ConsumerTestConfiguratorExtensions.cs" />
     <Compile Include="Testing\LocalRemoteTestScenario.cs" />
+    <Compile Include="Testing\PublishedMessage.cs" />
+    <Compile Include="Testing\PublishedMessageImpl.cs" />
+    <Compile Include="Testing\PublishedMessageList.cs" />
+    <Compile Include="Testing\PublishedMessageListImpl.cs" />
     <Compile Include="Testing\ScenarioBuilders\BusScenarioBuilder.cs" />
     <Compile Include="Testing\ScenarioBuilders\BusScenarioBuilderImpl.cs" />
     <Compile Include="Testing\ScenarioBuilders\EndpointScenarioBuilder.cs" />
@@ -427,6 +431,7 @@
     <Compile Include="Testing\SendTestActionExtensions.cs" />
     <Compile Include="Testing\Subjects\HandlerTestSubject.cs" />
     <Compile Include="Testing\Subjects\HandlerTestSubjectImpl.cs" />
+    <Compile Include="Testing\TestDecorators\ServiceBusTestDecorator.cs" />
     <Compile Include="Testing\TestFactory.cs" />
     <Compile Include="Testing\TestInstance.cs" />
     <Compile Include="Testing\TestInstanceConfigurators\TestInstanceConfigurator.cs" />

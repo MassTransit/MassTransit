@@ -33,6 +33,11 @@ namespace MassTransit.Testing
 		ReceivedMessageList Skipped { get; }
 
 		/// <summary>
+		/// Messages that were published by an bus (does not mean they were actually sent, just published)
+		/// </summary>
+		PublishedMessageList Published { get; }
+
+		/// <summary>
 		/// Execute the test actions
 		/// </summary>
 		void Execute();

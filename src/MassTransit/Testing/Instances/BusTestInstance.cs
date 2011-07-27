@@ -41,6 +41,11 @@ namespace MassTransit.Testing.Instances
 			get { return _scenario.Sent; }
 		}
 
+		public PublishedMessageList Published
+		{
+			get { return _scenario.Published; }
+		}
+
 		public ReceivedMessageList Skipped
 		{
 			get { return _scenario.Skipped; }
