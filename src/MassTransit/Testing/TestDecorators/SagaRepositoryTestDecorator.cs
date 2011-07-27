@@ -23,14 +23,17 @@ namespace MassTransit.Testing.TestDecorators
 	{
 		readonly ReceivedMessageListImpl _received;
 		readonly ISagaRepository<TSaga> _sagaRepository;
+		readonly SagaListImpl<TSaga> _sagas;
 		SagaListImpl<TSaga> _created;
 
 		public SagaRepositoryTestDecorator(ISagaRepository<TSaga> sagaRepository,
-		                                   ReceivedMessageListImpl received, SagaListImpl<TSaga> created)
+		                                   ReceivedMessageListImpl received, SagaListImpl<TSaga> created,
+		                                   SagaListImpl<TSaga> sagas)
 		{
 			_sagaRepository = sagaRepository;
 			_received = received;
 			_created = created;
+			_sagas = sagas;
 		}
 
 		public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
@@ -38,11 +41,17 @@ namespace MassTransit.Testing.TestDecorators
 		                                                                        	selector, ISagaPolicy<TSaga, TMessage> policy)
 			where TMessage : class
 		{
-			ISagaPolicy<TSaga, TMessage> decoratedSagaPolicy = new SagaPolicyTestDecorator<TSaga, TMessage>(policy, sagaId,
-				_created);
+			ISagaPolicy<TSaga, TMessage> sagaPolicy = new SagaPolicyTestDecorator<TSaga, TMessage>(policy, sagaId, _created);
 
-			IEnumerable<Action<IConsumeContext<TMessage>>> consumers = _sagaRepository.GetSaga(context, sagaId, selector,
-				decoratedSagaPolicy);
+			InstanceHandlerSelector<TSaga, TMessage> interceptSelector = (s, c) =>
+				{
+					IEnumerable<Action<IConsumeContext<TMessage>>> result = selector(s, c);
+
+					return DecorateSelector(s, result);
+				};
+
+			IEnumerable<Action<IConsumeContext<TMessage>>> consumers = _sagaRepository.GetSaga(context, sagaId, interceptSelector,
+				sagaPolicy);
 
 			foreach (var action in consumers)
 			{
@@ -86,6 +95,20 @@ namespace MassTransit.Testing.TestDecorators
 		public IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer)
 		{
 			return _sagaRepository.Select(transformer);
+		}
+
+		IEnumerable<Action<IConsumeContext<TMessage>>> DecorateSelector<TMessage>(TSaga instance,
+		                                                                          IEnumerable
+		                                                                          	<Action<IConsumeContext<TMessage>>>
+		                                                                          	selector)
+			where TMessage : class
+		{
+			foreach (var result in selector)
+			{
+				yield return result;
+
+				_sagas.Add(instance);
+			}
 		}
 	}
 }

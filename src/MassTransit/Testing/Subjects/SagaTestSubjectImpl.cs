@@ -13,6 +13,8 @@
 namespace MassTransit.Testing.Subjects
 {
 	using System;
+	using System.Collections;
+	using System.Collections.Generic;
 	using Saga;
 	using Scenarios;
 	using TestDecorators;
@@ -22,11 +24,12 @@ namespace MassTransit.Testing.Subjects
 		where TSaga : class, ISaga
 		where TScenario : TestScenario
 	{
+		readonly SagaListImpl<TSaga> _created;
 		readonly ReceivedMessageListImpl _received;
 		readonly ISagaRepository<TSaga> _sagaRepository;
 		bool _disposed;
+		SagaListImpl<TSaga> _sagas;
 		UnsubscribeAction _unsubscribe;
-		SagaListImpl<TSaga> _created;
 
 		public SagaTestSubjectImpl(ISagaRepository<TSaga> sagaRepository)
 		{
@@ -34,6 +37,7 @@ namespace MassTransit.Testing.Subjects
 
 			_received = new ReceivedMessageListImpl();
 			_created = new SagaListImpl<TSaga>();
+			_sagas = new SagaListImpl<TSaga>();
 		}
 
 		public ReceivedMessageList Received
@@ -52,9 +56,34 @@ namespace MassTransit.Testing.Subjects
 			GC.SuppressFinalize(this);
 		}
 
+		public IEnumerator<SagaInstance<TSaga>> GetEnumerator()
+		{
+			return _sagas.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		public bool Any()
+		{
+			return _sagas.Any();
+		}
+
+		public bool Any(Func<TSaga, bool> filter)
+		{
+			return _sagas.Any(filter);
+		}
+
+		public TSaga Contains(Guid sagaId)
+		{
+			return _sagas.Contains(sagaId);
+		}
+
 		public void Prepare(TScenario scenario)
 		{
-			var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSaga>(_sagaRepository, _received, _created);
+			var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSaga>(_sagaRepository, _received, _created, _sagas);
 
 			_unsubscribe = scenario.InputBus.SubscribeSaga(decoratedSagaRepository);
 		}

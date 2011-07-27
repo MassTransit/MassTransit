@@ -395,6 +395,7 @@
     <Compile Include="Testing\SagaInstanceImpl.cs" />
     <Compile Include="Testing\SagaList.cs" />
     <Compile Include="Testing\SagaListImpl.cs" />
+    <Compile Include="Testing\SagaSubjectExtensions.cs" />
     <Compile Include="Testing\SagaTest.cs" />
     <Compile Include="Testing\ScenarioBuilders\BusScenarioBuilder.cs" />
     <Compile Include="Testing\ScenarioBuilders\BusScenarioBuilderImpl.cs" />

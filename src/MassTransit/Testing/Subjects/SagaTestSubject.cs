@@ -15,7 +15,8 @@ namespace MassTransit.Testing.Subjects
 	using Saga;
 
 	public interface SagaTestSubject<TSaga> :
-		TestSubject<TSaga>
+		TestSubject<TSaga>,
+		SagaList<TSaga>
 		where TSaga : class, ISaga
 	{
 		/// <summary>

@@ -20,15 +20,17 @@ namespace MassTransit.Testing.TestDecorators
 		where TMessage : class
 		where TSaga : class, ISaga
 	{
-		readonly ISagaPolicy<TSaga, TMessage> _policy;
-		readonly Guid _sagaId;
 		readonly SagaListImpl<TSaga> _created;
+		readonly ISagaPolicy<TSaga, TMessage> _policy;
+		readonly SagaListImpl<TSaga> _removed;
+		readonly Guid _sagaId;
 
 		public SagaPolicyTestDecorator(ISagaPolicy<TSaga, TMessage> policy, Guid sagaId, SagaListImpl<TSaga> created)
 		{
 			_policy = policy;
 			_sagaId = sagaId;
 			_created = created;
+			_removed = new SagaListImpl<TSaga>();
 		}
 
 		public bool CanCreateInstance(IConsumeContext<TMessage> context)
@@ -39,9 +41,9 @@ namespace MassTransit.Testing.TestDecorators
 		public TSaga CreateInstance(IConsumeContext<TMessage> context, Guid sagaId)
 		{
 			TSaga instance = _policy.CreateInstance(context, sagaId);
-			if(instance != null)
+			if (instance != null)
 			{
-				_created.Add(new SagaInstanceImpl<TSaga>(instance));
+				_created.Add(instance);
 			}
 
 			return instance;
@@ -59,7 +61,12 @@ namespace MassTransit.Testing.TestDecorators
 
 		public bool CanRemoveInstance(TSaga instance)
 		{
-			return _policy.CanRemoveInstance(instance);
+			bool canRemoveInstance = _policy.CanRemoveInstance(instance);
+			if (canRemoveInstance)
+			{
+				_removed.Add(instance);
+			}
+			return canRemoveInstance;
 		}
 	}
 }
