@@ -10,3 +10,4 @@ How MassTransit Works
     versioning.rst
     inbound.rst
     subscriptions.rst
+    valueadd.rst
