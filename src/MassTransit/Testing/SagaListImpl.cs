@@ -25,19 +25,21 @@ namespace MassTransit.Testing
 		IDisposable
 		where T : class, ISaga
 	{
+		readonly IDictionary<Guid, SagaInstance<T>> _sagaIndex; 
 		readonly HashSet<SagaInstance<T>> _sagas;
-		readonly AutoResetEvent _received;
+		readonly AutoResetEvent _updated;
 		TimeSpan _timeout = 8.Seconds();
 
 		public SagaListImpl()
 		{
 			_sagas = new HashSet<SagaInstance<T>>(new SagaEqualityComparer());
-			_received = new AutoResetEvent(false);
+			_sagaIndex = new Dictionary<Guid, SagaInstance<T>>();
+			_updated = new AutoResetEvent(false);
 		}
 
 		public void Dispose()
 		{
-			using (_received)
+			using (_updated)
 			{
 			}
 		}
@@ -64,8 +66,8 @@ namespace MassTransit.Testing
 
 			while (any == false)
 			{
-				if (_received.WaitOne(_timeout, true) == false)
-					return false;
+				if (_updated.WaitOne(_timeout, true) == false)
+					return _sagas.Any(predicate);
 
 				lock (_sagas)
 				{
@@ -87,8 +89,8 @@ namespace MassTransit.Testing
 
 			while (instance == null)
 			{
-				if (_received.WaitOne(_timeout, true) == false)
-					return null;
+				if (_updated.WaitOne(_timeout, true) == false)
+					break;
 
 				lock (_sagas)
 				{
@@ -96,7 +98,7 @@ namespace MassTransit.Testing
 				}
 			}
 
-			return instance.Saga;
+			return instance == null ? null : instance.Saga;
 		}
 
 		public bool Any()
@@ -107,7 +109,7 @@ namespace MassTransit.Testing
 
 			while (any == false)
 			{
-				if (_received.WaitOne(_timeout, true) == false)
+				if (_updated.WaitOne(_timeout, true) == false)
 					return false;
 
 				lock (_sagas)
@@ -117,13 +119,27 @@ namespace MassTransit.Testing
 			return true;
 		}
 
-		public void Add(SagaInstance<T> message)
+		public void Add(T saga)
 		{
 			lock (_sagas)
 			{
-				if (_sagas.Add(message))
-					_received.Set();
+				SagaInstance<T> instance;
+				if(!_sagaIndex.TryGetValue(saga.CorrelationId, out instance))
+				{
+					instance = new SagaInstanceImpl<T>(saga);
+					_sagaIndex.Add(saga.CorrelationId, instance);
+					_sagas.Add(instance);
+				}
+				else
+				{
+					if(!ReferenceEquals(instance.Saga, saga))
+					{
+						instance.Saga = saga;
+					}
+				}
 			}
+
+			_updated.Set();
 		}
 
 		class SagaEqualityComparer :

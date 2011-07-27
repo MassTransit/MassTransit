@@ -13,20 +13,20 @@
 namespace MassTransit.Tests.Testing
 {
 	using System;
-	using System.Linq.Expressions;
+	using Magnum.StateMachine;
 	using Magnum.TestFramework;
 	using MassTransit.Saga;
 	using MassTransit.Testing;
 
 	[Scenario]
-	public class When_a_saga_is_being_tested
+	public class When_a_state_machine_saga_is_being_tested
 	{
 		Guid _sagaId;
 		SagaTest<BusTestScenario, TestSaga> _test;
 		string _testValueA;
 
 		[When]
-		public void A_saga_is_being_tested()
+		public void A_state_machine_saga_is_being_tested()
 		{
 			_sagaId = Guid.NewGuid();
 			_testValueA = "TestValueA";
@@ -37,8 +37,12 @@ namespace MassTransit.Tests.Testing
 					{
 						x.Send(new A
 							{
-								CorrelationId = _sagaId, 
+								CorrelationId = _sagaId,
 								Value = _testValueA
+							});
+						x.Send(new B
+							{
+								CorrelationId = _sagaId,
 							});
 					});
 
@@ -81,6 +85,12 @@ namespace MassTransit.Tests.Testing
 		}
 
 		[Then]
+		public void Should_be_in_a_busted_state()
+		{
+			_test.Saga.AnyInState(TestSaga.Busted).ShouldBeTrue();
+		}
+
+		[Then]
 		public void Should_have_published_event_message()
 		{
 			_test.Published.Any<Aa>().ShouldBeTrue();
@@ -93,11 +103,28 @@ namespace MassTransit.Tests.Testing
 		}
 
 		class TestSaga :
-			ISaga,
-			InitiatedBy<A>,
-			Orchestrates<B>,
-			Observes<C, TestSaga>
+			SagaStateMachine<TestSaga>, ISaga
 		{
+			static TestSaga()
+			{
+				Define(() =>
+					{
+						Correlate(ReceivedC)
+							.By((saga, message) => saga.CorrelationId.ToString() == message.CorrelationId);
+
+						Initially(
+							When(ReceivedA)
+								.Then((saga, message) => saga.ValueA = message.Value)
+								.Publish((saga, message) => new Aa {CorrelationId = saga.CorrelationId})
+								.TransitionTo(Running));
+
+						During(Running,
+							When(ReceivedB)
+								.TransitionTo(Busted));
+
+					});
+			}
+
 			protected TestSaga()
 			{
 			}
@@ -118,18 +145,14 @@ namespace MassTransit.Tests.Testing
 			public Guid CorrelationId { get; private set; }
 			public IServiceBus Bus { get; set; }
 
-			public void Consume(C message)
-			{
-			}
-
-			public Expression<Func<TestSaga, C, bool>> GetBindExpression()
-			{
-				return (saga, message) => saga.CorrelationId.ToString() == message.CorrelationId;
-			}
-
-			public void Consume(B message)
-			{
-			}
+			public static State Initial { get; set; }
+			public static State Running { get; set; }
+			public static State Busted { get; set; }
+			public static State Completed { get; set; }
+			
+			public static Event<A> ReceivedA { get; set; }
+			public static Event<B> ReceivedB { get; set; }
+			public static Event<C> ReceivedC { get; set; }
 		}
 
 		class A :

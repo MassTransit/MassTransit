@@ -38,7 +38,7 @@ namespace MassTransit.Saga
 		                                                                        	selector, ISagaPolicy<TSaga, TMessage> policy)
 			where TMessage : class
 		{
-			bool needToLeave = true;
+			bool needToLeaveSagas = true;
 			Monitor.Enter(_sagas);
 			try
 			{
@@ -51,37 +51,37 @@ namespace MassTransit.Saga
 						instance = policy.CreateInstance(context, sagaId);
 						_sagas.Add(instance);
 
-						Monitor.Exit(_sagas);
-						needToLeave = false;
+						lock (instance)
+						{
+							Monitor.Exit(_sagas);
+							needToLeaveSagas = false;
 
-						yield return x =>
-							{
-								if (_log.IsDebugEnabled)
-									_log.DebugFormat("SAGA: {0} Creating New {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
-										typeof (TMessage).ToFriendlyName());
-
-								try
+							yield return x =>
 								{
-									lock (instance)
+									if (_log.IsDebugEnabled)
+										_log.DebugFormat("SAGA: {0} Creating New {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+											typeof (TMessage).ToFriendlyName());
+
+									try
 									{
-										foreach (var callback in selector(instance, x))
-										{
-											callback(x);
-										}
+											foreach (var callback in selector(instance, x))
+											{
+												callback(x);
+											}
 
-										if (policy.CanRemoveInstance(instance))
-											_sagas.Remove(instance);
+											if (policy.CanRemoveInstance(instance))
+												_sagas.Remove(instance);
 									}
-								}
-								catch (Exception ex)
-								{
-									var sex = new SagaException("Create Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
-									if (_log.IsErrorEnabled)
-										_log.Error(sex);
+									catch (Exception ex)
+									{
+										var sex = new SagaException("Create Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
+										if (_log.IsErrorEnabled)
+											_log.Error(sex);
 
-									throw sex;
-								}
-							};
+										throw sex;
+									}
+								};
+						}
 					}
 					else
 					{
@@ -95,17 +95,16 @@ namespace MassTransit.Saga
 					if (policy.CanUseExistingInstance(context))
 					{
 						Monitor.Exit(_sagas);
-						needToLeave = false;
-
-						yield return x =>
-							{
-								if (_log.IsDebugEnabled)
-									_log.DebugFormat("SAGA: {0} Using Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
-										typeof (TMessage).ToFriendlyName());
-
-								try
+						needToLeaveSagas = false;
+						lock (instance)
+						{
+							yield return x =>
 								{
-									lock (instance)
+									if (_log.IsDebugEnabled)
+										_log.DebugFormat("SAGA: {0} Using Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+											typeof (TMessage).ToFriendlyName());
+
+									try
 									{
 										foreach (var callback in selector(instance, x))
 										{
@@ -115,16 +114,16 @@ namespace MassTransit.Saga
 										if (policy.CanRemoveInstance(instance))
 											_sagas.Remove(instance);
 									}
-								}
-								catch (Exception ex)
-								{
-									var sex = new SagaException("Existing Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
-									if (_log.IsErrorEnabled)
-										_log.Error(sex);
+									catch (Exception ex)
+									{
+										var sex = new SagaException("Existing Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
+										if (_log.IsErrorEnabled)
+											_log.Error(sex);
 
-									throw sex;
-								}
-							};
+										throw sex;
+									}
+								};
+						}
 					}
 					else
 					{
@@ -136,7 +135,7 @@ namespace MassTransit.Saga
 			}
 			finally
 			{
-				if(needToLeave)
+				if(needToLeaveSagas)
 					Monitor.Exit(_sagas);
 			}
 		}
