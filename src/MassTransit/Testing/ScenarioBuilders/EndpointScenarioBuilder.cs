@@ -16,11 +16,10 @@ namespace MassTransit.Testing.ScenarioBuilders
 	using EndpointConfigurators;
 	using Scenarios;
 
-	public interface EndpointScenarioBuilder :
-		ScenarioBuilder
+	public interface EndpointScenarioBuilder<TScenario> :
+		ScenarioBuilder<TScenario>
+		where TScenario : TestScenario
 	{
 		void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configureCallback);
-
-		EndpointTestScenario Build();
 	}
 }

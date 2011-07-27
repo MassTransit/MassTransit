@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Testing
 					{
 						x.Handler((context, message) => context.Respond(new B()));
 
-						x.Send(new A(), c => c.SendResponseTo(_test.Scenario.Bus));
+						x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
 					});
 
 			_test.Execute();
@@ -75,7 +75,7 @@ namespace MassTransit.Tests.Testing
 					{
 						x.Handler((context, message) => context.Respond(new B()));
 
-						x.Send(new A(), c => c.SendResponseTo(_test.Scenario.Bus));
+						x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
 					});
 
 			_test.Execute();

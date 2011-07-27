@@ -20,7 +20,14 @@ namespace MassTransit.Testing
 		where TMessage : class
 	{
 		HandlerTestSubject<TMessage> Handler { get; }
+	}
 
-		BusTestScenario Scenario { get; }
+	public interface HandlerTest<TScenario, TMessage> :
+		HandlerTest<TMessage>
+		where TMessage : class
+		where TScenario : TestScenario
+	{
+
+		TScenario Scenario { get; }
 	}
 }

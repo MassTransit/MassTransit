@@ -19,7 +19,7 @@ namespace MassTransit.Testing.ScenarioConfigurators
 	using ScenarioBuilders;
 
 	public class BusTestScenarioBuilderConfiguratorImpl :
-		BusTestScenarioBuilderConfigurator
+		ScenarioBuilderConfigurator<BusTestScenario>
 	{
 		readonly Action<ServiceBusConfigurator> _configureAction;
 
@@ -30,12 +30,17 @@ namespace MassTransit.Testing.ScenarioConfigurators
 
 		public IEnumerable<TestConfiguratorResult> Validate()
 		{
-			yield break;
+			if (_configureAction == null)
+				yield return this.Failure("The scenario configuration action cannot be null");
 		}
 
-		public BusScenarioBuilder Configure(BusScenarioBuilder builder)
+		public ScenarioBuilder<BusTestScenario> Configure(ScenarioBuilder<BusTestScenario> builder)
 		{
-			builder.ConfigureBus(_configureAction);
+			var busBuilder = builder as BusScenarioBuilder;
+			if (busBuilder != null)
+			{
+				busBuilder.ConfigureBus(_configureAction);
+			}
 
 			return builder;
 		}

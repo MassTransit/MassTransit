@@ -14,23 +14,34 @@ namespace MassTransit.Testing
 {
 	using System;
 	using ActionConfigurators;
-	using Configurators;
+	using TestInstanceConfigurators;
 
 	public static class SendTestActionExtensions
 	{
-		public static void Send<TMessage>(this TestInstanceConfigurator configurator, TMessage message)
+		public static void Send<TMessage>(this TestInstanceConfigurator<BusTestScenario> configurator, TMessage message)
 			where TMessage : class
 		{
-			var actionConfigurator = new SendTestActionConfigurator<TMessage>(message);
+			var actionConfigurator = new SendTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus.Endpoint, message);
 
 			configurator.AddActionConfigurator(actionConfigurator);
 		}
 
-		public static void Send<TMessage>(this TestInstanceConfigurator configurator, TMessage message,
+		public static void Send<TMessage>(this TestInstanceConfigurator<BusTestScenario> configurator, TMessage message,
 		                                  Action<ISendContext<TMessage>> callback)
 			where TMessage : class
 		{
-			var actionConfigurator = new SendTestActionConfigurator<TMessage>(message, callback);
+			var actionConfigurator = new SendTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus.Endpoint, message,
+				(scenario, context) => callback(context));
+
+			configurator.AddActionConfigurator(actionConfigurator);
+		}
+
+		public static void Send<TMessage>(this TestInstanceConfigurator<BusTestScenario> configurator, TMessage message,
+		                                  Action<BusTestScenario, ISendContext<TMessage>> callback)
+			where TMessage : class
+		{
+			var actionConfigurator = new SendTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus.Endpoint, message,
+				callback);
 
 			configurator.AddActionConfigurator(actionConfigurator);
 		}

@@ -24,6 +24,7 @@ namespace MassTransit.Transports.Msmq.Tests.Testing
 		public void Setup()
 		{
 			_test = TestFactory.ForHandler<A>()
+				.InSingleBusScenario()
 				.New(x =>
 					{
 						x.UseMsmqBusScenario();

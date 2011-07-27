@@ -13,12 +13,13 @@
 namespace MassTransit.Testing.Factories
 {
 	using System;
-	using Configurators;
+	using Scenarios;
 	using TestInstanceConfigurators;
 
-	public interface ConsumerTestFactory<TConsumer>
+	public interface ConsumerTestFactory<TScenario, TConsumer>
 		where TConsumer : class
+		where TScenario : TestScenario
 	{
-		ConsumerTest<TConsumer> New(Action<ConsumerTestInstanceConfigurator<TConsumer>> configureTest);
+		ConsumerTest<TScenario, TConsumer> New(Action<ConsumerTestInstanceConfigurator<TScenario, TConsumer>> configureTest);
 	}
 }

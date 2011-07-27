@@ -25,6 +25,11 @@ namespace MassTransit.Testing.Scenarios
 		{
 		}
 
+		public override IServiceBus InputBus
+		{
+			get { return Bus; }
+		}
+
 		public IServiceBus Bus { get; set; }
 
 		protected override void Dispose(bool disposing)

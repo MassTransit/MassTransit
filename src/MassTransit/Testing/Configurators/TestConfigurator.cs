@@ -18,10 +18,4 @@ namespace MassTransit.Testing.Configurators
 	{
 		IEnumerable<TestConfiguratorResult> Validate();
 	}
-
-	public interface TestConfigurator<TMessage> :
-		TestConfigurator
-		where TMessage : class
-	{
-	}
 }

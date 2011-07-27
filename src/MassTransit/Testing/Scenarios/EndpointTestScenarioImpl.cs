@@ -28,7 +28,7 @@ namespace MassTransit.Testing.Scenarios
 		readonly ReceivedMessageListImpl _skipped;
 		bool _disposed;
 
-		public EndpointTestScenarioImpl(IEndpointFactory endpointFactory)
+		protected EndpointTestScenarioImpl(IEndpointFactory endpointFactory)
 		{
 			_received = new ReceivedMessageListImpl();
 			_sent = new SentMessageListImpl();
@@ -63,6 +63,11 @@ namespace MassTransit.Testing.Scenarios
 		public ReceivedMessageList Skipped
 		{
 			get { return _skipped; }
+		}
+
+		public virtual IServiceBus InputBus
+		{
+			get { throw new NotImplementedException(); }
 		}
 
 		public ReceivedMessageList Received

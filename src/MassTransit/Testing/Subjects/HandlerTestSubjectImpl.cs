@@ -13,23 +13,25 @@
 namespace MassTransit.Testing.Subjects
 {
 	using System;
+	using Scenarios;
 
-	public class HandlerTestSubjectImpl<T> :
-		HandlerTestSubject<T>
-		where T : class
+	public class HandlerTestSubjectImpl<TScenario, TSubject> :
+		HandlerTestSubject<TSubject>
+		where TSubject : class
+		where TScenario : TestScenario
 	{
-		readonly Action<IConsumeContext<T>, T> _handler;
-		readonly ReceivedMessageListImpl<T> _received;
+		readonly Action<IConsumeContext<TSubject>, TSubject> _handler;
+		readonly ReceivedMessageListImpl<TSubject> _received;
 		bool _disposed;
 		UnsubscribeAction _unsubscribe;
 
-		public HandlerTestSubjectImpl(Action<IConsumeContext<T>, T> handler)
+		public HandlerTestSubjectImpl(Action<IConsumeContext<TSubject>, TSubject> handler)
 		{
 			_handler = handler;
-			_received = new ReceivedMessageListImpl<T>();
+			_received = new ReceivedMessageListImpl<TSubject>();
 		}
 
-		public ReceivedMessageList<T> Received
+		public ReceivedMessageList<TSubject> Received
 		{
 			get { return _received; }
 		}
@@ -40,9 +42,9 @@ namespace MassTransit.Testing.Subjects
 			GC.SuppressFinalize(this);
 		}
 
-		public void Prepare(IServiceBus bus)
+		public void Prepare(TScenario scenario)
 		{
-			_unsubscribe = bus.SubscribeContextHandler<T>(HandleMessage);
+			_unsubscribe = scenario.InputBus.SubscribeContextHandler<TSubject>(HandleMessage);
 		}
 
 		void Dispose(bool disposing)
@@ -62,9 +64,9 @@ namespace MassTransit.Testing.Subjects
 			_disposed = true;
 		}
 
-		void HandleMessage(IConsumeContext<T> context)
+		void HandleMessage(IConsumeContext<TSubject> context)
 		{
-			var received = new ReceivedMessageImpl<T>(context);
+			var received = new ReceivedMessageImpl<TSubject>(context);
 
 			try
 			{

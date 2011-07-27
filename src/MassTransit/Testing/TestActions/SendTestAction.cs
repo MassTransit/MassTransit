@@ -13,27 +13,33 @@
 namespace MassTransit.Testing.TestActions
 {
 	using System;
-	using Configurators;
+	using Scenarios;
 
-	public class SendTestAction<TMessage> :
-		TestAction
+	public class SendTestAction<TScenario, TMessage> :
+		TestAction<TScenario>
 		where TMessage : class
+		where TScenario : TestScenario
 	{
-		readonly Action<ISendContext<TMessage>> _callback;
+		readonly Action<TScenario, ISendContext<TMessage>> _callback;
+		readonly Func<TScenario, IEndpoint> _endpointAccessor;
 		readonly TMessage _message;
 
-		public SendTestAction(TMessage message, Action<ISendContext<TMessage>> callback)
+		public SendTestAction(Func<TScenario, IEndpoint> endpointAccessor, TMessage message,
+		                      Action<TScenario, ISendContext<TMessage>> callback)
 		{
 			_message = message;
+			_endpointAccessor = endpointAccessor;
 			_callback = callback ?? DefaultCallback;
 		}
 
-		public void Act(IServiceBus bus)
+		public void Act(TScenario scenario)
 		{
-			bus.Endpoint.Send(_message, _callback);
+			IEndpoint endpoint = _endpointAccessor(scenario);
+
+			endpoint.Send(_message, context => _callback(scenario, context));
 		}
 
-		static void DefaultCallback(ISendContext<TMessage> context)
+		static void DefaultCallback(TScenario scenario, ISendContext<TMessage> context)
 		{
 		}
 	}

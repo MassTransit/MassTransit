@@ -13,27 +13,33 @@
 namespace MassTransit.Testing.TestActions
 {
 	using System;
-	using Configurators;
+	using Scenarios;
 
-	public class PublishTestAction<TMessage> :
-		TestAction
+	public class PublishTestAction<TScenario, TMessage> :
+		TestAction<TScenario>
 		where TMessage : class
+		where TScenario : TestScenario
 	{
-		readonly Action<IPublishContext<TMessage>> _callback;
+		readonly Func<TScenario, IServiceBus> _busAccessor;
+		readonly Action<TScenario, IPublishContext<TMessage>> _callback;
 		readonly TMessage _message;
 
-		public PublishTestAction(TMessage message, Action<IPublishContext<TMessage>> callback)
+		public PublishTestAction(Func<TScenario, IServiceBus> busAccessor, TMessage message,
+		                         Action<TScenario, IPublishContext<TMessage>> callback)
 		{
 			_message = message;
+			_busAccessor = busAccessor;
 			_callback = callback ?? DefaultCallback;
 		}
 
-		public void Act(IServiceBus bus)
+		public void Act(TScenario scenario)
 		{
-			bus.Publish(_message, _callback);
+			IServiceBus bus = _busAccessor(scenario);
+
+			bus.Publish(_message, context => _callback(scenario, context));
 		}
 
-		static void DefaultCallback(IPublishContext<TMessage> context)
+		static void DefaultCallback(TScenario scenario, IPublishContext<TMessage> context)
 		{
 		}
 	}

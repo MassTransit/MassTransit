@@ -12,11 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Builders
 {
-	public interface ConsumerTestBuilder<TConsumer> :
-		TestInstanceBuilder
+	using Scenarios;
+
+	public interface ConsumerTestBuilder<TScenario, TConsumer> :
+		TestInstanceBuilder<TScenario>
 		where TConsumer : class
+		where TScenario : TestScenario
 	{
-		ConsumerTest<TConsumer> Build();
+		ConsumerTest<TScenario, TConsumer> Build();
 
 		void SetConsumerFactory(IConsumerFactory<TConsumer> consumerFactory);
 	}

@@ -14,11 +14,10 @@ namespace MassTransit.Testing.ScenarioBuilders
 {
 	using System;
 	using BusConfigurators;
-	using Scenarios;
 	using SubscriptionConfigurators;
 
 	public interface BusScenarioBuilder :
-		EndpointScenarioBuilder
+		EndpointScenarioBuilder<BusTestScenario>
 	{
 		/// <summary>
 		/// Configure any bus-specific items as part of building the test scenario
@@ -31,8 +30,5 @@ namespace MassTransit.Testing.ScenarioBuilders
 		/// </summary>
 		/// <param name="configureCallback"></param>
 		void ConfigureSubscriptions(Action<SubscriptionBusServiceConfigurator> configureCallback);
-
-
-		new BusTestScenario Build();
 	}
 }

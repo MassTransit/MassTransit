@@ -14,23 +14,34 @@ namespace MassTransit.Testing
 {
 	using System;
 	using ActionConfigurators;
-	using Configurators;
+	using TestInstanceConfigurators;
 
 	public static class PublishTestActionExtensions
 	{
-		public static void Publish<TMessage>(this TestInstanceConfigurator configurator, TMessage message)
+		public static void Publish<TMessage>(this TestInstanceConfigurator<BusTestScenario> configurator, TMessage message)
 			where TMessage : class
 		{
-			var actionConfigurator = new PublishTestActionConfigurator<TMessage>(message);
+			var actionConfigurator = new PublishTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus, message);
 
 			configurator.AddActionConfigurator(actionConfigurator);
 		}
 
-		public static void Publish<TMessage>(this TestInstanceConfigurator configurator, TMessage message,
-		                                     Action<IPublishContext<TMessage>> callback)
+		public static void Publish<TMessage>(this TestInstanceConfigurator<BusTestScenario> configurator, TMessage message,
+											 Action<IPublishContext<TMessage>> callback)
 			where TMessage : class
 		{
-			var actionConfigurator = new PublishTestActionConfigurator<TMessage>(message, callback);
+			var actionConfigurator = new PublishTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus, message,
+				(scenario, context) => callback(context));
+
+			configurator.AddActionConfigurator(actionConfigurator);
+		}
+
+		public static void Publish<TMessage>(this TestInstanceConfigurator<BusTestScenario> configurator, TMessage message,
+		                                     Action<BusTestScenario, IPublishContext<TMessage>> callback)
+			where TMessage : class
+		{
+			var actionConfigurator = new PublishTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus, message,
+				callback);
 
 			configurator.AddActionConfigurator(actionConfigurator);
 		}

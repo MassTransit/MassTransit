@@ -18,31 +18,34 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	using BuilderConfigurators;
 	using Builders;
 	using Configurators;
+	using ScenarioBuilders;
 	using Scenarios;
 
-	public class HandlerTestInstanceConfiguratorImpl<TMessage> :
-		BusTestInstanceConfiguratorImpl,
-		HandlerTestInstanceConfigurator<TMessage>
+	public class HandlerTestInstanceConfiguratorImpl<TScenario, TMessage> :
+		TestInstanceConfiguratorImpl<TScenario>,
+		HandlerTestInstanceConfigurator<TScenario, TMessage>
 		where TMessage : class
+		where TScenario : TestScenario
 	{
-		readonly IList<HandlerTestBuilderConfigurator<TMessage>> _configurators;
+		readonly IList<HandlerTestBuilderConfigurator<TScenario, TMessage>> _configurators;
 
-		Func<BusTestScenario, HandlerTestBuilder<TMessage>> _builderFactory;
+		Func<TScenario, HandlerTestBuilder<TScenario, TMessage>> _builderFactory;
 		Action<IConsumeContext<TMessage>, TMessage> _handler;
 
-		public HandlerTestInstanceConfiguratorImpl()
+		public HandlerTestInstanceConfiguratorImpl(Func<ScenarioBuilder<TScenario>> scenarioBuilderFactory)
+			: base(scenarioBuilderFactory)
 		{
-			_configurators = new List<HandlerTestBuilderConfigurator<TMessage>>();
+			_configurators = new List<HandlerTestBuilderConfigurator<TScenario, TMessage>>();
 
-			_builderFactory = testContext => new HandlerTestBuilderImpl<TMessage>(testContext);
+			_builderFactory = scenario => new HandlerTestBuilderImpl<TScenario, TMessage>(scenario);
 		}
 
-		public void UseBuilder(Func<BusTestScenario, HandlerTestBuilder<TMessage>> builderFactory)
+		public void UseBuilder(Func<TScenario, HandlerTestBuilder<TScenario, TMessage>> builderFactory)
 		{
 			_builderFactory = builderFactory;
 		}
 
-		public void AddConfigurator(HandlerTestBuilderConfigurator<TMessage> configurator)
+		public void AddConfigurator(HandlerTestBuilderConfigurator<TScenario, TMessage> configurator)
 		{
 			_configurators.Add(configurator);
 		}
@@ -57,11 +60,11 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 			return base.Validate().Concat(_configurators.SelectMany(x => x.Validate()));
 		}
 
-		public HandlerTest<TMessage> Build()
+		public HandlerTest<TScenario, TMessage> Build()
 		{
-			BusTestScenario scenario = BuildBusTestScenario();
+			TScenario scenario = BuildTestScenario();
 
-			HandlerTestBuilder<TMessage> builder = _builderFactory(scenario);
+			HandlerTestBuilder<TScenario, TMessage> builder = _builderFactory(scenario);
 
 			if (_handler != null)
 				builder.SetHandler(_handler);

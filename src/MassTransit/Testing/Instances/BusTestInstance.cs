@@ -18,13 +18,14 @@ namespace MassTransit.Testing.Instances
 	using Scenarios;
 	using TestActions;
 
-	public abstract class BusTestInstance
+	public abstract class TestInstance<TScenario>
+		where TScenario : TestScenario
 	{
-		readonly IList<TestAction> _actions;
-		readonly BusTestScenario _scenario;
+		readonly IList<TestAction<TScenario>> _actions;
+		readonly TScenario _scenario;
 		bool _disposed;
 
-		protected BusTestInstance(BusTestScenario scenario, IList<TestAction> actions)
+		protected TestInstance(TScenario scenario, IList<TestAction<TScenario>> actions)
 		{
 			_scenario = scenario;
 			_actions = actions;
@@ -45,7 +46,7 @@ namespace MassTransit.Testing.Instances
 			get { return _scenario.Skipped; }
 		}
 
-		public BusTestScenario Scenario
+		public TScenario Scenario
 		{
 			get { return _scenario; }
 		}
@@ -69,10 +70,10 @@ namespace MassTransit.Testing.Instances
 
 		protected void ExecuteTestActions()
 		{
-			_actions.Each(x => x.Act(_scenario.Bus));
+			_actions.Each(x => x.Act(_scenario));
 		}
 
-		~BusTestInstance()
+		~TestInstance()
 		{
 			Dispose(false);
 		}

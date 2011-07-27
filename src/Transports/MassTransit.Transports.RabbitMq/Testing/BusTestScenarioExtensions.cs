@@ -12,11 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
+	using Scenarios;
 	using TestInstanceConfigurators;
 
 	public static class BusTestScenarioExtensions
 	{
-		public static void UseRabbitMqBusScenario(this BusTestInstanceConfigurator configurator)
+		public static void UseRabbitMqBusScenario(this TestInstanceConfigurator<BusTestScenario> configurator)
 		{
 			configurator.UseScenarioBuilder(() => new RabbitMqBusScenarioBuilder());
 		}
