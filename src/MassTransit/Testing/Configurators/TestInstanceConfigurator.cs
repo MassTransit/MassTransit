@@ -12,11 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Configurators
 {
-	using ActionConfigurators;
-
 	public interface TestInstanceConfigurator :
 		TestConfigurator
 	{
-		void AddActionConfigurator(TestActionConfigurator action);
 	}
 }

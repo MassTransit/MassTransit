@@ -20,15 +20,13 @@ namespace MassTransit.Testing.TestDecorators
 		IConsumerFactory<TConsumer>
 		where TConsumer : class
 	{
-		readonly IServiceBus _bus;
 		readonly IConsumerFactory<TConsumer> _consumerFactory;
 		readonly ReceivedMessageListImpl _received;
 
-		public ConsumerFactoryTestDecorator(IConsumerFactory<TConsumer> consumerFactory, IServiceBus bus,
+		public ConsumerFactoryTestDecorator(IConsumerFactory<TConsumer> consumerFactory,
 		                                    ReceivedMessageListImpl received)
 		{
 			_consumerFactory = consumerFactory;
-			_bus = bus;
 			_received = received;
 		}
 

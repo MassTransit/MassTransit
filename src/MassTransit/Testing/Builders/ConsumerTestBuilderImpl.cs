@@ -17,25 +17,24 @@ namespace MassTransit.Testing.Builders
 	using Scenarios;
 	using TestActions;
 
-	public class ConsumerTestBuilderImpl<TConsumer> :
-		ConsumerTestBuilder<TConsumer>
+	public class ConsumerTestBuilderImpl<TScenario, TConsumer> :
+		ConsumerTestBuilder<TScenario, TConsumer>
 		where TConsumer : class
+		where TScenario : TestScenario
 	{
-		readonly BusTestScenario _testContext;
-		IList<TestAction> _actions;
+		readonly IList<TestAction<TScenario>> _actions;
+		readonly TScenario _scenario;
 		IConsumerFactory<TConsumer> _consumerFactory;
-
-
-		public ConsumerTestBuilderImpl(BusTestScenario testContext)
+		public ConsumerTestBuilderImpl(TScenario scenario)
 		{
-			_testContext = testContext;
+			_scenario = scenario;
 
-			_actions = new List<TestAction>();
+			_actions = new List<TestAction<TScenario>>();
 		}
 
-		public ConsumerTest<TConsumer> Build()
+		public ConsumerTest<TScenario, TConsumer> Build()
 		{
-			var test = new ConsumerTestInstance<TConsumer>(_testContext, _actions, _consumerFactory);
+			var test = new ConsumerTestInstance<TScenario, TConsumer>(_scenario, _actions, _consumerFactory);
 
 			return test;
 		}
@@ -45,7 +44,7 @@ namespace MassTransit.Testing.Builders
 			_consumerFactory = consumerFactory;
 		}
 
-		public void AddTestAction(TestAction testAction)
+		public void AddTestAction(TestAction<TScenario> testAction)
 		{
 			_actions.Add(testAction);
 		}

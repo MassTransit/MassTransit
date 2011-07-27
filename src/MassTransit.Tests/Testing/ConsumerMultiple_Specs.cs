@@ -1,3 +1,15 @@
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Testing
 {
 	using Magnum.TestFramework;
@@ -6,19 +18,19 @@ namespace MassTransit.Tests.Testing
 	[Scenario]
 	public class When_a_consumer_with_multiple_message_consumers_is_tested
 	{
-		ConsumerTest<Testsumer> _test;
+		ConsumerTest<BusTestScenario, Testsumer> _test;
 
 		[When]
 		public void A_consumer_is_being_tested()
 		{
 			_test = TestFactory.ForConsumer<Testsumer>()
 				.New(x =>
-				{
-					x.ConstructUsing(() => new Testsumer());
+					{
+						x.ConstructUsing(() => new Testsumer());
 
-					x.Send(new A(), c => c.SendResponseTo(_test.Scenario.Bus));
-					x.Send(new B(), c => c.SendResponseTo(_test.Scenario.Bus));
-				});
+						x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
+						x.Send(new B(), (scenario, context) => context.SendResponseTo(scenario.Bus));
+					});
 
 			_test.Execute();
 		}
@@ -72,12 +84,17 @@ namespace MassTransit.Tests.Testing
 		class A
 		{
 		}
+
 		class Aa
-		{}
+		{
+		}
 
 		class B
 		{
 		}
-		class Bb{}
+
+		class Bb
+		{
+		}
 	}
 }

@@ -16,24 +16,30 @@ namespace MassTransit.Testing.ActionConfigurators
 	using System.Collections.Generic;
 	using Builders;
 	using Configurators;
+	using Scenarios;
 	using TestActions;
 
-	public class SendTestActionConfigurator<TMessage> :
-		TestActionConfigurator
+	public class SendTestActionConfigurator<TScenario, TMessage> :
+		TestActionConfigurator<TScenario>
 		where TMessage : class
+		where TScenario : TestScenario
 	{
-		readonly Action<ISendContext<TMessage>> _callback;
+		readonly Action<TScenario, ISendContext<TMessage>> _callback;
+		readonly Func<TScenario, IEndpoint> _endpointAccessor;
 		readonly TMessage _message;
 
-		public SendTestActionConfigurator(TMessage message)
+		public SendTestActionConfigurator(Func<TScenario, IEndpoint> endpointAccessor, TMessage message)
 		{
 			_message = message;
+			_endpointAccessor = endpointAccessor;
 		}
 
-		public SendTestActionConfigurator(TMessage message, Action<ISendContext<TMessage>> callback)
+		public SendTestActionConfigurator(Func<TScenario, IEndpoint> endpointAccessor, TMessage message,
+		                                  Action<TScenario, ISendContext<TMessage>> callback)
 		{
 			_message = message;
 			_callback = callback;
+			_endpointAccessor = endpointAccessor;
 		}
 
 		public IEnumerable<TestConfiguratorResult> Validate()
@@ -42,9 +48,9 @@ namespace MassTransit.Testing.ActionConfigurators
 				yield return this.Failure("Message", "The message instance to send must not be null.");
 		}
 
-		public void Configure(TestInstanceBuilder builder)
+		public void Configure(TestInstanceBuilder<TScenario> builder)
 		{
-			var action = new SendTestAction<TMessage>(_message, _callback);
+			var action = new SendTestAction<TScenario, TMessage>(_endpointAccessor, _message, _callback);
 
 			builder.AddTestAction(action);
 		}

@@ -17,9 +17,11 @@ namespace MassTransit.Testing.ScenarioConfigurators
 	using Configurators;
 	using EndpointConfigurators;
 	using ScenarioBuilders;
+	using Scenarios;
 
-	public class EndpointTestScenarioBuilderConfiguratorImpl :
-		EndpointTestScenarioBuilderConfigurator
+	public class EndpointTestScenarioBuilderConfiguratorImpl<TScenario> :
+		ScenarioBuilderConfigurator<TScenario>
+		where TScenario : EndpointTestScenario
 	{
 		readonly Action<EndpointFactoryConfigurator> _configureAction;
 
@@ -33,9 +35,13 @@ namespace MassTransit.Testing.ScenarioConfigurators
 			yield break;
 		}
 
-		public EndpointScenarioBuilder Configure(EndpointScenarioBuilder builder)
+		public ScenarioBuilder<TScenario> Configure(ScenarioBuilder<TScenario> builder)
 		{
-			builder.ConfigureEndpointFactory(_configureAction);
+			var endpointBuilder = builder as EndpointScenarioBuilder<TScenario>;
+			if (endpointBuilder != null)
+			{
+				endpointBuilder.ConfigureEndpointFactory(_configureAction);
+			}
 
 			return builder;
 		}

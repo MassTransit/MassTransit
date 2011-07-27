@@ -16,22 +16,28 @@ namespace MassTransit.Testing.ActionConfigurators
 	using System.Collections.Generic;
 	using Builders;
 	using Configurators;
+	using Scenarios;
 	using TestActions;
 
-	public class PublishTestActionConfigurator<TMessage> :
-		TestActionConfigurator
+	public class PublishTestActionConfigurator<TScenario, TMessage> :
+		TestActionConfigurator<TScenario>
 		where TMessage : class
+		where TScenario : TestScenario
 	{
-		readonly Action<IPublishContext<TMessage>> _callback;
+		readonly Func<TScenario, IServiceBus> _busAccessor;
+		readonly Action<TScenario, IPublishContext<TMessage>> _callback;
 		readonly TMessage _message;
 
-		public PublishTestActionConfigurator(TMessage message)
+		public PublishTestActionConfigurator(Func<TScenario, IServiceBus> busAccessor, TMessage message)
 		{
+			_busAccessor = busAccessor;
 			_message = message;
 		}
 
-		public PublishTestActionConfigurator(TMessage message, Action<IPublishContext<TMessage>> callback)
+		public PublishTestActionConfigurator(Func<TScenario, IServiceBus> busAccessor, TMessage message,
+		                                     Action<TScenario, IPublishContext<TMessage>> callback)
 		{
+			_busAccessor = busAccessor;
 			_message = message;
 			_callback = callback;
 		}
@@ -42,9 +48,9 @@ namespace MassTransit.Testing.ActionConfigurators
 				yield return this.Failure("Message", "The message instance to send must not be null.");
 		}
 
-		public void Configure(TestInstanceBuilder builder)
+		public void Configure(TestInstanceBuilder<TScenario> builder)
 		{
-			var action = new PublishTestAction<TMessage>(_message, _callback);
+			var action = new PublishTestAction<TScenario, TMessage>(_busAccessor, _message, _callback);
 
 			builder.AddTestAction(action);
 		}

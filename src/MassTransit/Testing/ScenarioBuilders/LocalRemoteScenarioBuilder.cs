@@ -14,14 +14,11 @@ namespace MassTransit.Testing.ScenarioBuilders
 {
 	using System;
 	using BusConfigurators;
-	using Scenarios;
 
 	public interface LocalRemoteScenarioBuilder :
-		EndpointScenarioBuilder
+		EndpointScenarioBuilder<LocalRemoteTestScenario>
 	{
 		void ConfigureLocalBus(Action<ServiceBusConfigurator> configureCallback);
 		void ConfigureRemoteBus(Action<ServiceBusConfigurator> configureCallback);
-
-		new LocalRemoteTestScenario Build();
 	}
 }

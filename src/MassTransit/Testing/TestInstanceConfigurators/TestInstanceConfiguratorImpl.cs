@@ -23,31 +23,32 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	using ScenarioConfigurators;
 	using Scenarios;
 
-	public abstract class BusTestInstanceConfiguratorImpl
+	public abstract class TestInstanceConfiguratorImpl<TScenario>
+		where TScenario : TestScenario
 	{
-		readonly IList<TestActionConfigurator> _actionConfigurators;
-		readonly IList<BusTestScenarioBuilderConfigurator> _configurators;
-		Func<BusScenarioBuilder> _builderFactory;
+		readonly IList<TestActionConfigurator<TScenario>> _actionConfigurators;
+		readonly IList<ScenarioBuilderConfigurator<TScenario>> _configurators;
+		Func<ScenarioBuilder<TScenario>> _builderFactory;
 
-		protected BusTestInstanceConfiguratorImpl()
+		protected TestInstanceConfiguratorImpl(Func<ScenarioBuilder<TScenario>> scenarioBuilderFactory)
 		{
-			_configurators = new List<BusTestScenarioBuilderConfigurator>();
-			_actionConfigurators = new List<TestActionConfigurator>();
+			_configurators = new List<ScenarioBuilderConfigurator<TScenario>>();
+			_actionConfigurators = new List<TestActionConfigurator<TScenario>>();
 
-			_builderFactory = () => new LoopbackBusScenarioBuilder();
+			_builderFactory = scenarioBuilderFactory;
 		}
 
-		public void AddActionConfigurator(TestActionConfigurator action)
+		public void AddActionConfigurator(TestActionConfigurator<TScenario> action)
 		{
 			_actionConfigurators.Add(action);
 		}
 
-		public void UseScenarioBuilder(Func<BusScenarioBuilder> contextBuilderFactory)
+		public void UseScenarioBuilder(Func<ScenarioBuilder<TScenario>> contextBuilderFactory)
 		{
 			_builderFactory = contextBuilderFactory;
 		}
 
-		public void AddConfigurator(BusTestScenarioBuilderConfigurator configurator)
+		public void AddConfigurator(ScenarioBuilderConfigurator<TScenario> configurator)
 		{
 			_configurators.Add(configurator);
 		}
@@ -58,19 +59,18 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 				.Concat(_actionConfigurators.SelectMany(x => x.Validate()));
 		}
 
-		protected BusTestScenario BuildBusTestScenario()
+		protected TScenario BuildTestScenario()
 		{
-			BusScenarioBuilder scenarioBuilder = _builderFactory();
+			ScenarioBuilder<TScenario> builder = _builderFactory();
 
-			scenarioBuilder = _configurators.Aggregate(scenarioBuilder,
-				(current, configurator) => configurator.Configure(current));
+			builder = _configurators.Aggregate(builder, (current, configurator) => configurator.Configure(current));
 
-			BusTestScenario context = scenarioBuilder.Build();
+			TScenario context = builder.Build();
 
 			return context;
 		}
 
-		protected void BuildTestActions(TestInstanceBuilder builder)
+		protected void BuildTestActions(TestInstanceBuilder<TScenario> builder)
 		{
 			_actionConfigurators.Each(x => x.Configure(builder));
 		}

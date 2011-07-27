@@ -13,15 +13,26 @@
 namespace MassTransit.Testing.Factories
 {
 	using System;
+	using ScenarioBuilders;
+	using Scenarios;
 	using TestInstanceConfigurators;
 
-	public class HandlerTestFactoryImpl<TMessage> :
-		HandlerTestFactory<TMessage>
+	public class HandlerTestFactoryImpl<TScenario, TMessage> :
+		HandlerTestFactory<TScenario, TMessage>
 		where TMessage : class
+		where TScenario : TestScenario
 	{
-		public HandlerTest<TMessage> New(Action<HandlerTestInstanceConfigurator<TMessage>> configureTest)
+		readonly Func<ScenarioBuilder<TScenario>> _scenarioBuilderFactory;
+
+		public HandlerTestFactoryImpl(Func<ScenarioBuilder<TScenario>> scenarioBuilderFactory)
 		{
-			var configurator = new HandlerTestInstanceConfiguratorImpl<TMessage>();
+			_scenarioBuilderFactory = scenarioBuilderFactory;
+		}
+
+
+		public HandlerTest<TScenario, TMessage> New(Action<HandlerTestInstanceConfigurator<TScenario, TMessage>> configureTest)
+		{
+			var configurator = new HandlerTestInstanceConfiguratorImpl<TScenario, TMessage>(_scenarioBuilderFactory);
 
 			configureTest(configurator);
 

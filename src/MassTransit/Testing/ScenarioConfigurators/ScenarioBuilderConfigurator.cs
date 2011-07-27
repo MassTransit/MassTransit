@@ -10,12 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Scenarios
+namespace MassTransit.Testing.ScenarioConfigurators
 {
-	public interface LocalRemoteTestScenario :
-		BusTestScenario
+	using Configurators;
+	using ScenarioBuilders;
+	using Scenarios;
+
+	public interface ScenarioBuilderConfigurator<TScenario> :
+		TestConfigurator
+		where TScenario : TestScenario
 	{
-		IServiceBus LocalBus { get; }
-		IServiceBus RemoteBus { get; }
+		ScenarioBuilder<TScenario> Configure(ScenarioBuilder<TScenario> builder);
 	}
 }

@@ -13,11 +13,13 @@
 namespace MassTransit.Testing.BuilderConfigurators
 {
 	using Builders;
+	using Scenarios;
 
-	public interface ConsumerTestBuilderConfigurator<TConsumer> :
+	public interface ConsumerTestBuilderConfigurator<TScenario, TConsumer> :
 		TestBuilderConfigurator
 		where TConsumer : class
+		where TScenario : TestScenario
 	{
-		ConsumerTestBuilder<TConsumer> Configure(ConsumerTestBuilder<TConsumer> builder);
+		ConsumerTestBuilder<TScenario, TConsumer> Configure(ConsumerTestBuilder<TScenario, TConsumer> builder);
 	}
 }

@@ -18,17 +18,18 @@ namespace MassTransit.Tests.Testing
 	[Scenario]
 	public class When_a_consumer_is_being_tested
 	{
-		ConsumerTest<Testsumer> _test;
+		ConsumerTest<BusTestScenario, Testsumer> _test;
 
 		[When]
 		public void A_consumer_is_being_tested()
 		{
 			_test = TestFactory.ForConsumer<Testsumer>()
+				.InSingleBusScenario()
 				.New(x =>
 					{
 						x.ConstructUsing(() => new Testsumer());
 
-						x.Send(new A(), c => c.SendResponseTo(_test.Scenario.Bus));
+						x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
 					});
 
 			_test.Execute();
@@ -87,7 +88,7 @@ namespace MassTransit.Tests.Testing
 	[Scenario]
 	public class When_a_context_consumer_is_being_tested
 	{
-		ConsumerTest<Testsumer> _test;
+		ConsumerTest<BusTestScenario, Testsumer> _test;
 
 		[When]
 		public void A_consumer_is_being_tested()
@@ -97,7 +98,7 @@ namespace MassTransit.Tests.Testing
 					{
 						x.ConstructUsing(() => new Testsumer());
 
-						x.Send(new A(), c => c.SendResponseTo(_test.Scenario.Bus));
+						x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
 					});
 
 			_test.Execute();

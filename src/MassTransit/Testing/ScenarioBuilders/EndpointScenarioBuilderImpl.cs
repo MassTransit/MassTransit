@@ -22,8 +22,9 @@ namespace MassTransit.Testing.ScenarioBuilders
 	using Transports;
 	using Transports.Loopback;
 
-	public class EndpointScenarioBuilderImpl :
-		EndpointScenarioBuilder
+	public abstract class EndpointScenarioBuilderImpl<TScenario> :
+		EndpointScenarioBuilder<TScenario>
+		where TScenario : TestScenario
 	{
 		readonly EndpointFactoryConfigurator _endpointFactoryConfigurator;
 
@@ -49,11 +50,6 @@ namespace MassTransit.Testing.ScenarioBuilders
 			configureCallback(_endpointFactoryConfigurator);
 		}
 
-		public EndpointTestScenario Build()
-		{
-			return new EndpointTestScenarioImpl(BuildEndpointFactory());
-		}
-
 		protected IEndpointFactory BuildEndpointFactory()
 		{
 			ConfigurationResult result = ConfigurationResultImpl.CompileResults(_endpointFactoryConfigurator.Validate());
@@ -69,5 +65,7 @@ namespace MassTransit.Testing.ScenarioBuilders
 			}
 			return endpointFactory;
 		}
+
+		public abstract TScenario Build();
 	}
 }

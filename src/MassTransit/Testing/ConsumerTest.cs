@@ -20,7 +20,13 @@ namespace MassTransit.Testing
 		where TConsumer : class
 	{
 		ConsumerTestSubject<TConsumer> Consumer { get; }
+	}
 
-		BusTestScenario Scenario { get; }
+	public interface ConsumerTest<TScenario, TConsumer> :
+		ConsumerTest<TConsumer>
+		where TConsumer : class
+		where TScenario : TestScenario
+	{
+		TScenario Scenario { get; }
 	}
 }

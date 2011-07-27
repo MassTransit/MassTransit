@@ -14,13 +14,16 @@ namespace MassTransit.Testing
 {
 	using System;
 	using Configuration;
+	using Scenarios;
 	using TestInstanceConfigurators;
 
 	public static class ConsumerTestConfiguratorExtensions
 	{
-		public static void ConstructUsing<TConsumer>(this ConsumerTestInstanceConfigurator<TConsumer> configurator,
-		                                             Func<TConsumer> consumer)
+		public static void ConstructUsing<TScenario, TConsumer>(
+			this ConsumerTestInstanceConfigurator<TScenario, TConsumer> configurator,
+			Func<TConsumer> consumer)
 			where TConsumer : class
+			where TScenario : TestScenario
 		{
 			var consumerFactory = new DelegateConsumerFactory<TConsumer>(consumer);
 

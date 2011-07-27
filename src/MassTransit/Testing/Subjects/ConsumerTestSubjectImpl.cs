@@ -13,19 +13,21 @@
 namespace MassTransit.Testing.Subjects
 {
 	using System;
+	using Scenarios;
+	using SubscriptionConfigurators;
 	using TestDecorators;
 
-	public class ConsumerTestSubjectImpl<T> :
-		ConsumerTestSubject<T>
-		where T : class
+	public class ConsumerTestSubjectImpl<TScenario, TSubject> :
+		ConsumerTestSubject<TSubject>
+		where TSubject : class
+		where TScenario : TestScenario
 	{
 		readonly ReceivedMessageListImpl _received;
-		IServiceBus _bus;
-		IConsumerFactory<T> _consumerFactory;
+		readonly IConsumerFactory<TSubject> _consumerFactory;
 		bool _disposed;
 		UnsubscribeAction _unsubscribe;
 
-		public ConsumerTestSubjectImpl(IConsumerFactory<T> consumerFactory)
+		public ConsumerTestSubjectImpl(IConsumerFactory<TSubject> consumerFactory)
 		{
 			_consumerFactory = consumerFactory;
 
@@ -43,13 +45,11 @@ namespace MassTransit.Testing.Subjects
 			GC.SuppressFinalize(this);
 		}
 
-		public void Prepare(IServiceBus bus)
+		public void Prepare(TScenario scenario)
 		{
-			_bus = bus;
+			var decoratedConsumerFactory = new ConsumerFactoryTestDecorator<TSubject>(_consumerFactory, _received);
 
-			var decoratedConsumerFactory = new ConsumerFactoryTestDecorator<T>(_consumerFactory, bus, _received);
-
-			_unsubscribe = bus.SubscribeConsumer(decoratedConsumerFactory);
+			_unsubscribe = scenario.InputBus.SubscribeConsumer(decoratedConsumerFactory);
 		}
 
 		void Dispose(bool disposing)

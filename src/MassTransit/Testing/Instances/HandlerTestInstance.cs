@@ -18,25 +18,26 @@ namespace MassTransit.Testing.Instances
 	using Subjects;
 	using TestActions;
 
-	public class HandlerTestInstance<TMessage> :
-		BusTestInstance,
-		HandlerTest<TMessage>
+	public class HandlerTestInstance<TScenario, TMessage> :
+		TestInstance<TScenario>,
+		HandlerTest<TScenario, TMessage>
 		where TMessage : class
+		where TScenario : TestScenario
 	{
-		readonly HandlerTestSubject<TMessage> _subject;
+		readonly HandlerTestSubjectImpl<TScenario, TMessage> _subject;
 
 		bool _disposed;
 
-		public HandlerTestInstance(BusTestScenario scenario, IList<TestAction> actions,
-								   Action<IConsumeContext<TMessage>, TMessage> handler)
+		public HandlerTestInstance(TScenario scenario, IList<TestAction<TScenario>> actions,
+		                           Action<IConsumeContext<TMessage>, TMessage> handler)
 			: base(scenario, actions)
 		{
-			_subject = new HandlerTestSubjectImpl<TMessage>(handler);
+			_subject = new HandlerTestSubjectImpl<TScenario, TMessage>(handler);
 		}
 
 		public void Execute()
 		{
-			_subject.Prepare(Scenario.Bus);
+			_subject.Prepare(Scenario);
 
 			ExecuteTestActions();
 		}
