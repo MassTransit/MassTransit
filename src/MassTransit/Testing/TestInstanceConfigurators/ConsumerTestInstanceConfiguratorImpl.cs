@@ -20,7 +20,6 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	using Configurators;
 	using ScenarioBuilders;
 	using Scenarios;
-	using SubscriptionConfigurators;
 
 	public class ConsumerTestInstanceConfiguratorImpl<TScenario, TConsumer> :
 		TestInstanceConfiguratorImpl<TScenario>,
@@ -58,7 +57,14 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 
 		public new IEnumerable<TestConfiguratorResult> Validate()
 		{
-			return _configurators.SelectMany(x => x.Validate());
+			if (_consumerFactory == null)
+				yield return this.Failure("ConsumerFactory", "The consumer factory must be configured (using ConstructedBy)");
+
+			IEnumerable<TestConfiguratorResult> results = base.Validate().Concat(_configurators.SelectMany(x => x.Validate()));
+			foreach (TestConfiguratorResult result in results)
+			{
+				yield return result;
+			}
 		}
 
 		public ConsumerTest<TScenario, TConsumer> Build()

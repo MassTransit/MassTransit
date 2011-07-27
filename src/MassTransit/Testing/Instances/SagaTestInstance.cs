@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,25 +13,26 @@
 namespace MassTransit.Testing.Instances
 {
 	using System.Collections.Generic;
+	using Saga;
 	using Scenarios;
 	using Subjects;
 	using TestActions;
 
-	public class ConsumerTestInstance<TScenario, TConsumer> :
+	public class SagaTestInstance<TScenario, TSaga> :
 		TestInstance<TScenario>,
-		ConsumerTest<TScenario, TConsumer>
-		where TConsumer : class
+		SagaTest<TScenario, TSaga>
+		where TSaga : class, ISaga
 		where TScenario : TestScenario
 	{
-		readonly ConsumerTestSubjectImpl<TScenario, TConsumer> _subject;
+		readonly SagaTestSubjectImpl<TScenario, TSaga> _subject;
 
 		bool _disposed;
 
-		public ConsumerTestInstance(TScenario scenario, IList<TestAction<TScenario>> actions,
-		                            IConsumerFactory<TConsumer> consumerFactory)
+		public SagaTestInstance(TScenario scenario, IList<TestAction<TScenario>> actions,
+		                        ISagaRepository<TSaga> sagaRepository)
 			: base(scenario, actions)
 		{
-			_subject = new ConsumerTestSubjectImpl<TScenario, TConsumer>(consumerFactory);
+			_subject = new SagaTestSubjectImpl<TScenario, TSaga>(sagaRepository);
 		}
 
 		public void Execute()
@@ -41,7 +42,7 @@ namespace MassTransit.Testing.Instances
 			ExecuteTestActions();
 		}
 
-		public ConsumerTestSubject<TConsumer> Consumer
+		public SagaTestSubject<TSaga> Saga
 		{
 			get { return _subject; }
 		}
@@ -59,7 +60,7 @@ namespace MassTransit.Testing.Instances
 			_disposed = true;
 		}
 
-		~ConsumerTestInstance()
+		~SagaTestInstance()
 		{
 			Dispose(false);
 		}
