@@ -13,6 +13,7 @@
 namespace MassTransit.Testing
 {
 	using Factories;
+	using Saga;
 	using ScenarioBuilders;
 
 	public static class TestFactory
@@ -29,6 +30,14 @@ namespace MassTransit.Testing
 			where TConsumer : class
 		{
 			var factory = new ConsumerTestFactoryImpl<BusTestScenario, TConsumer>(() => new LoopbackBusScenarioBuilder());
+
+			return factory;
+		}
+
+		public static SagaTestFactory<BusTestScenario, TSaga> ForSaga<TSaga>()
+			where TSaga : class, ISaga
+		{
+			var factory = new SagaTestFactoryImpl<BusTestScenario, TSaga>(() => new LoopbackBusScenarioBuilder());
 
 			return factory;
 		}

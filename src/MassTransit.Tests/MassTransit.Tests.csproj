@@ -191,6 +191,7 @@
     <Compile Include="Testing\ConsumerTest_Specs.cs" />
     <Compile Include="Testing\HandlerRespond_Specs.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
+    <Compile Include="Testing\SagaTest_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
     <None Include="app.config" />
     <None Include="Reactive\Samples\BasicExample.cs" />

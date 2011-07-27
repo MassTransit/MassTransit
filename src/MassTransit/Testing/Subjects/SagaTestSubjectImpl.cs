@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,22 +13,23 @@
 namespace MassTransit.Testing.Subjects
 {
 	using System;
+	using Saga;
 	using Scenarios;
 	using TestDecorators;
 
-	public class ConsumerTestSubjectImpl<TScenario, TSubject> :
-		ConsumerTestSubject<TSubject>
-		where TSubject : class
+	public class SagaTestSubjectImpl<TScenario, TSubject> :
+		SagaTestSubject<TSubject>
+		where TSubject : class, ISaga
 		where TScenario : TestScenario
 	{
-		readonly IConsumerFactory<TSubject> _consumerFactory;
 		readonly ReceivedMessageListImpl _received;
+		readonly ISagaRepository<TSubject> _sagaRepository;
 		bool _disposed;
 		UnsubscribeAction _unsubscribe;
 
-		public ConsumerTestSubjectImpl(IConsumerFactory<TSubject> consumerFactory)
+		public SagaTestSubjectImpl(ISagaRepository<TSubject> sagaRepository)
 		{
-			_consumerFactory = consumerFactory;
+			_sagaRepository = sagaRepository;
 
 			_received = new ReceivedMessageListImpl();
 		}
@@ -46,9 +47,9 @@ namespace MassTransit.Testing.Subjects
 
 		public void Prepare(TScenario scenario)
 		{
-			var decoratedConsumerFactory = new ConsumerFactoryTestDecorator<TSubject>(_consumerFactory, _received);
+			var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSubject>(_sagaRepository, _received);
 
-			_unsubscribe = scenario.InputBus.SubscribeConsumer(decoratedConsumerFactory);
+			_unsubscribe = scenario.InputBus.SubscribeSaga(decoratedSagaRepository);
 		}
 
 		void Dispose(bool disposing)
@@ -68,7 +69,7 @@ namespace MassTransit.Testing.Subjects
 			_disposed = true;
 		}
 
-		~ConsumerTestSubjectImpl()
+		~SagaTestSubjectImpl()
 		{
 			Dispose(false);
 		}
