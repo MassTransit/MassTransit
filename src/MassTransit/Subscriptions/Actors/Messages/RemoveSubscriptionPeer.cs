@@ -10,19 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Actors
+namespace MassTransit.Subscriptions.Actors.Messages
 {
-	using System;
-
-	public class SubscriptionRemoved
+	public interface RemoveSubscriptionPeer :
+		SubscriptionPeer
 	{
-		public SubscriptionRemoved(Guid subscriptionId, string messageName)
-		{
-			SubscriptionId = subscriptionId;
-			MessageName = messageName;
-		}
-
-		public Guid SubscriptionId { get; private set; }
-		public string MessageName { get; private set; }
 	}
 }

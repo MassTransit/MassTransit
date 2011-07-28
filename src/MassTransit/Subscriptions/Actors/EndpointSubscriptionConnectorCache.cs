@@ -18,19 +18,19 @@ namespace MassTransit.Subscriptions.Actors
 	using Magnum.Reflection;
 	using log4net;
 
-	public class EndpointConnectorCache
+	public class EndpointSubscriptionConnectorCache
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointConnectorCache));
+		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionConnectorCache));
 
-		readonly Dictionary<Type, EndpointConnector> _cache;
+		readonly Dictionary<Type, EndpointSubscriptionConnector> _cache;
 		readonly TypeConverter _typeConverter;
 		IServiceBus _bus;
 
-		public EndpointConnectorCache(IServiceBus bus)
+		public EndpointSubscriptionConnectorCache(IServiceBus bus)
 		{
 			_bus = bus;
 			_typeConverter = TypeDescriptor.GetConverter(typeof (string));
-			_cache = new Dictionary<Type, EndpointConnector>();
+			_cache = new Dictionary<Type, EndpointSubscriptionConnector>();
 		}
 
 		public UnsubscribeAction Connect(string messageName, Uri endpointUri, string correlationId)
@@ -42,10 +42,10 @@ namespace MassTransit.Subscriptions.Actors
 				return () => true;
 			}
 
-			EndpointConnector connector;
+			EndpointSubscriptionConnector connector;
 			if (!_cache.TryGetValue(messageType, out connector))
 			{
-				connector = (EndpointConnector) FastActivator.Create(typeof (EndpointConnector<>),
+				connector = (EndpointSubscriptionConnector) FastActivator.Create(typeof (EndpointSubscriptionConnector<>),
 					new[] {messageType}, new object[] {_bus});
 
 				_cache.Add(messageType, connector);

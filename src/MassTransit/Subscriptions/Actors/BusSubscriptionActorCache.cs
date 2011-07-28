@@ -19,18 +19,22 @@ namespace MassTransit.Subscriptions.Actors
 	using Util;
 	using log4net;
 
-	public class MessageNameSubscriptionActorCache :
+	public class BusSubscriptionActorCache :
 		Actor
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (MessageNameSubscriptionActorCache));
+		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionActorCache));
 
-		readonly ActorFactory<SubscriptionActor> _typeActorFactory;
+		readonly ActorFactory<BusSubscriptionActor> _typeActorFactory;
 		readonly IDictionary<string, ActorInstance> _typeActors;
 
-		public MessageNameSubscriptionActorCache(UntypedChannel publishChannel)
+		public BusSubscriptionActorCache(UntypedChannel publishChannel)
 		{
 			_typeActors = new Dictionary<string, ActorInstance>();
-			_typeActorFactory = ActorFactory.Create((f, s, i) => new SubscriptionActor(i, publishChannel));
+			_typeActorFactory = ActorFactory.Create<BusSubscriptionActor>(x =>
+				{
+					x.ConstructedBy(i => new BusSubscriptionActor(i, publishChannel));
+					x.HandleOnCallingThread();
+				});
 		}
 
 		[UsedImplicitly]
@@ -40,38 +44,37 @@ namespace MassTransit.Subscriptions.Actors
 		}
 
 		[UsedImplicitly]
-		public void Handle(Message<SubscribeTo> message)
+		public void Handle(Message<SubscribeToMessage> message)
 		{
 			ActorInstance actor;
 			if (!_typeActors.TryGetValue(message.Body.MessageName, out actor))
 			{
 				actor = _typeActorFactory.GetActor();
-				actor.Send(new InitializeSubscriptionActor(message.Body.MessageName));
+				actor.Send(new InitializeBusSubscriptionActor(message.Body.MessageName));
 				_typeActors.Add(message.Body.MessageName, actor);
 			}
 
-			actor.Send(message);
-
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("SubscribeTo: {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
+
+			actor.Send(message);
 		}
 
 		[UsedImplicitly]
-		public void Handle(Message<UnsubscribeFrom> message)
+		public void Handle(Message<UnsubscribeFromMessage> message)
 		{
 			ActorInstance actor;
 			if (_typeActors.TryGetValue(message.Body.MessageName, out actor))
 			{
-				actor.Send(message);
-
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("UnsubscribeFrom: {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
+
+				actor.Send(message);
 			}
 			else
 			{
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("UnsubscribeFrom(unknown): {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
-
 			}
 		}
 	}

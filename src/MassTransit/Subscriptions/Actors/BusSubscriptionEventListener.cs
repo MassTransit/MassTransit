@@ -14,20 +14,37 @@ namespace MassTransit.Subscriptions.Actors
 {
 	using System;
 	using Magnum;
+	using Magnum.Extensions;
 	using Messages;
 	using Pipeline;
+	using Services.Subscriptions.Messages;
 	using Stact;
 	using log4net;
+	using AddSubscription = Services.Subscriptions.Messages.AddSubscription;
+	using RemoveSubscription = Services.Subscriptions.Messages.RemoveSubscription;
 
-	public class SubscriptionEventChannelPublisher :
-		ISubscriptionEvent
+	public class BusSubscriptionEventListener :
+		ISubscriptionEvent,
+		IDisposable
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionEventChannelPublisher));
-		readonly UntypedChannel _output;
+		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionEventListener));
+		ActorInstance _actorCache;
 
-		public SubscriptionEventChannelPublisher(UntypedChannel output)
+		bool _disposed;
+
+		public BusSubscriptionEventListener(UntypedChannel output)
 		{
-			_output = output;
+			_actorCache = ActorFactory.Create<BusSubscriptionActorCache>(x =>
+				{
+					x.ConstructedBy(() => new BusSubscriptionActorCache(output));
+					x.HandleOnCallingThread();
+				}).GetActor();
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public UnsubscribeAction SubscribedTo<TMessage>()
@@ -45,41 +62,75 @@ namespace MassTransit.Subscriptions.Actors
 		UnsubscribeAction Subscribe<TMessage>(string correlationId)
 			where TMessage : class
 		{
-			Guid subscriptionId = CombGuid.Generate();
+			if (IgnoreMessageType<TMessage>())
+				return () => true;
 
+			Guid subscriptionId = CombGuid.Generate();
 			string messageName = typeof (TMessage).ToMessageName();
 
-			var subscribeTo = new SubscribeTo
+			var subscribeTo = new SubscribeToMessage
 				{
 					SubscriptionId = subscriptionId,
 					MessageName = messageName,
 					CorrelationId = correlationId,
 				};
 
-			_output.Send(subscribeTo);
-
-			if(_log.IsDebugEnabled)
+			if (_log.IsDebugEnabled)
 				_log.DebugFormat("SubscribeTo: {0}, {1}", subscribeTo.MessageName, subscribeTo.SubscriptionId);
+
+			_actorCache.Send(subscribeTo);
 
 			return () => Unsubscribe(subscriptionId, messageName, correlationId);
 		}
 
 		bool Unsubscribe(Guid subscriptionId, string messageName, string correlationId)
 		{
-			var unsubscribeFrom = new UnsubscribeFrom
+			var unsubscribeFrom = new UnsubscribeFromMessage
 				{
 					SubscriptionId = subscriptionId,
 					MessageName = messageName,
 					CorrelationId = correlationId,
 				};
 
-			_output.Send(unsubscribeFrom);
-
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("UnsubscribeFrom: {0}, {1}", unsubscribeFrom.MessageName, unsubscribeFrom.SubscriptionId);
 
+			_actorCache.Send(unsubscribeFrom);
 
 			return true;
+		}
+
+		bool IgnoreMessageType<TMessage>()
+		{
+			if (typeof (TMessage) == typeof (AddSubscription))
+				return true;
+			if (typeof (TMessage) == typeof (RemoveSubscription))
+				return true;
+			if (typeof (TMessage) == typeof (AddSubscriptionClient))
+				return true;
+			if (typeof (TMessage) == typeof (RemoveSubscriptionClient))
+				return true;
+			if (typeof (TMessage) == typeof (SubscriptionRefresh))
+				return true;
+
+			return false;
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_actorCache.ExitOnDispose(30.Seconds()).Dispose();
+				_actorCache = null;
+			}
+
+			_disposed = true;
+		}
+
+		~BusSubscriptionEventListener()
+		{
+			Dispose(false);
 		}
 	}
 }
