@@ -10,14 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Actors
+namespace MassTransit.Testing.ScenarioBuilders
 {
 	using System;
+	using BusConfigurators;
+	using Subscriptions.Actors;
 
-	public abstract class SubscribeMessage
+	public class NewLoopbackBusScenarioBuilder :
+		BusScenarioBuilderImpl
 	{
-		public Guid SubscriptionId { get; set; }
-		public string MessageName { get; set; }
-		public string CorrelationId { get; set; }
+		const string DefaultUri = "loopback://localhost/mt_client";
+
+		public NewLoopbackBusScenarioBuilder()
+			: base(new Uri(DefaultUri))
+		{
+			ConfigureBus(x =>
+				{
+					var busConfigurator = new PostCreateBusBuilderConfiguratorImpl(bus => bus.RemoveLoopbackSubscriber());
+					x.AddBusConfigurator(busConfigurator);
+
+					x.AddService(BusServiceLayer.Session, () => new SubscriptionCoordinatorBusService());
+				});
+		}
 	}
 }

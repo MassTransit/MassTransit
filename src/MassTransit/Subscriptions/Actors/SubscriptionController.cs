@@ -21,36 +21,6 @@ namespace MassTransit.Subscriptions.Actors
 	}
 
 
-
-
-
-
-
-
-
-
-
-
-	public class SubscriptionCoordinatorBusService :
-		IBusService
-	{
-		public void Dispose()
-		{
-			throw new NotImplementedException();
-		}
-
-		public void Start(IServiceBus bus)
-		{
-			throw new NotImplementedException();
-		}
-
-		public void Stop()
-		{
-			throw new NotImplementedException();
-		}
-	}
-
-
 	public class SubscriptionRouter :
 		Actor
 	{

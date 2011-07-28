@@ -187,6 +187,7 @@
     <Compile Include="Saga\StateMachine\CombineSaga_Specs.cs" />
     <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
     <Compile Include="Services\Timeout\TimeoutService_Specs.cs" />
+    <Compile Include="Subscriptions\NewSubscriptionSystem_Specs.cs" />
     <Compile Include="Testing\ConsumerMultiple_Specs.cs" />
     <Compile Include="Testing\ConsumerTest_Specs.cs" />
     <Compile Include="Testing\HandlerRespond_Specs.cs" />

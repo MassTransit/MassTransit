@@ -23,7 +23,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 		TestInstanceConfigurator
 		where TScenario : TestScenario
 	{
-		void UseScenarioBuilder(Func<ScenarioBuilder<TScenario>> contextBuilderFactory);
+		void UseScenarioBuilder(Func<ScenarioBuilder<TScenario>> scenarioBuilderFactory);
 
 		void AddActionConfigurator(TestActionConfigurator<TScenario> action);
 
