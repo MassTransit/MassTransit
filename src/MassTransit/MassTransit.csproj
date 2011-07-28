@@ -352,11 +352,16 @@
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
     <Compile Include="Subscriptions\Actors\AddSubscriptioXn.cs" />
+    <Compile Include="Subscriptions\Actors\EndpointConnector.cs" />
+    <Compile Include="Subscriptions\Actors\EndpointConnectorCache.cs" />
     <Compile Include="Subscriptions\Actors\EndpointSubscriptionMessageProducer.cs" />
+    <Compile Include="Subscriptions\Actors\InitializeRemoteEndpointActor.cs" />
     <Compile Include="Subscriptions\Actors\InitializeSubscriptionActor.cs" />
     <Compile Include="Subscriptions\Actors\MessageNameSubscriptionActorCache.cs" />
     <Compile Include="Subscriptions\Actors\Messages\SubscribeMessage.cs" />
     <Compile Include="Subscriptions\Actors\Messages\SubscribeTo.cs" />
+    <Compile Include="Subscriptions\Actors\OutboundPipelineSubscriptionConnector.cs" />
+    <Compile Include="Subscriptions\Actors\RemoteEndpointActor.cs" />
     <Compile Include="Subscriptions\Actors\SubscriptionActor.cs" />
     <Compile Include="Subscriptions\Actors\SubscriptionAdded.cs" />
     <Compile Include="Subscriptions\Actors\SubscriptionController.cs" />

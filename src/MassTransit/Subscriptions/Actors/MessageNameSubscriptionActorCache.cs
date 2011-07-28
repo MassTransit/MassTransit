@@ -13,6 +13,7 @@
 namespace MassTransit.Subscriptions.Actors
 {
 	using System.Collections.Generic;
+	using Magnum.Extensions;
 	using Messages;
 	using Stact;
 	using Util;
@@ -29,7 +30,13 @@ namespace MassTransit.Subscriptions.Actors
 		public MessageNameSubscriptionActorCache(UntypedChannel publishChannel)
 		{
 			_typeActors = new Dictionary<string, ActorInstance>();
-			_typeActorFactory = ActorFactory.Create((f, s, i) => new SubscriptionActor(f, s, i, publishChannel));
+			_typeActorFactory = ActorFactory.Create((f, s, i) => new SubscriptionActor(i, publishChannel));
+		}
+
+		[UsedImplicitly]
+		public void Handle(Message<Stop> message)
+		{
+			_typeActors.Values.Each(x => x.ExitOnDispose(30.Seconds()).Dispose());
 		}
 
 		[UsedImplicitly]

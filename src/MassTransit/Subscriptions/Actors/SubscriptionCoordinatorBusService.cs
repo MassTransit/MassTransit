@@ -31,6 +31,7 @@ namespace MassTransit.Subscriptions.Actors
 		{
 			_log.Debug("Exiting Cache");
 
+			_cache.Stop();
 			_cache.ExitOnDispose(30.Seconds()).Dispose();
 			_cache = null;
 
@@ -47,7 +48,11 @@ namespace MassTransit.Subscriptions.Actors
 
 			_producer = factory.GetActor();
 
-			var cacheFactory = ActorFactory.Create(() => new MessageNameSubscriptionActorCache(_producer));
+			var connector = ActorFactory.Create(() => new OutboundPipelineSubscriptionConnector(bus)).GetActor();
+
+			var broadcast = new BroadcastChannel(new UntypedChannel[]{connector, _producer});
+
+			var cacheFactory = ActorFactory.Create(() => new MessageNameSubscriptionActorCache(broadcast));
 
 			_cache = cacheFactory.GetActor();
 
