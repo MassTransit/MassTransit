@@ -16,7 +16,13 @@ namespace MassTransit.Subscriptions.Actors
 
 	public class SubscriptionRemoved
 	{
-		public Guid SubscriptionId { get; set; }
-		public string MessageName { get; set; }
+		public SubscriptionRemoved(Guid subscriptionId, string messageName)
+		{
+			SubscriptionId = subscriptionId;
+			MessageName = messageName;
+		}
+
+		public Guid SubscriptionId { get; private set; }
+		public string MessageName { get; private set; }
 	}
 }

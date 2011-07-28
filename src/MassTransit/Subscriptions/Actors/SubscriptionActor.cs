@@ -15,75 +15,22 @@ namespace MassTransit.Subscriptions.Actors
 	using System;
 	using System.Collections.Generic;
 	using Magnum;
-	using Magnum.Extensions;
 	using Messages;
-	using Services.Subscriptions.Messages;
 	using Stact;
-
-
-	public class MessageTypeToEndpointActor :
-		Actor
-	{
-		public MessageTypeToEndpointActor(Inbox inbox)
-		{
-			inbox.Receive<Request<InitializeEndpointMessageSinkActor>>(init =>
-				{
-					var owner = init.ResponseChannel;
-
-					var subscribers = new HashSet<UntypedChannel>();
-
-					inbox.Loop(loop =>
-						{
-							loop.Receive<Request<SubscribeTo>>(request =>
-								{
-									bool added = subscribers.Add(request.ResponseChannel);
-									if(added && subscribers.Count == 1)
-									{
-										// bind message sink to output pipeline
-									}
-
-									loop.Continue();
-								});
-
-							loop.Receive<Request<UnsubscribeFrom>>(request =>
-								{
-									bool removed = subscribers.Remove(request.ResponseChannel);
-									if(removed && subscribers.Count == 0)
-									{
-										// unbind message sink from outbound pipeline
-										
-									}
-
-									loop.Continue();
-								});
-						});
-				});
-		}
-	}
-
-	public class InitializeEndpointMessageSinkActor
-	{
-	}
-
+	using log4net;
 
 	public class SubscriptionActor :
 		Actor
 	{
-		readonly Fiber _fiber;
-		readonly Scheduler _scheduler;
+		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionActor));
 		readonly UntypedChannel _output;
-		string _messageType;
 		HashSet<Guid> _ids;
-		TimeSpan _unsubscribeTimeout;
-		ScheduledOperation _unsubscribeScheduledAction;
+		string _messageType;
 
-		public SubscriptionActor(Fiber fiber, Scheduler scheduler, Inbox inbox, UntypedChannel output)
+		public SubscriptionActor(Inbox inbox, UntypedChannel output)
 		{
-			_fiber = fiber;
-			_scheduler = scheduler;
 			_output = output;
 			_ids = new HashSet<Guid>();
-			_unsubscribeTimeout = 30.Seconds();
 
 			inbox.Receive<Message<InitializeSubscriptionActor>>(message =>
 				{
@@ -97,25 +44,14 @@ namespace MassTransit.Subscriptions.Actors
 								{
 									bool wasAdded = _ids.Add(added.Body.SubscriptionId);
 
-									if(wasAdded && _ids.Count == 1)
+									if (wasAdded && _ids.Count == 1)
 									{
-										if(_unsubscribeScheduledAction != null)
-										{
-											_unsubscribeScheduledAction.Cancel();
-											_unsubscribeScheduledAction = null;
-										}
-										else
-										{
-											subscriptionId = CombGuid.Generate();
+										subscriptionId = CombGuid.Generate();
 
-											var add = new SubscriptionAdded()
-												{
-													SubscriptionId = subscriptionId,
-													MessageName = _messageType,
-												};
+										var add = new SubscriptionAdded(subscriptionId, _messageType, null);
+										_output.Send(add);
 
-											_output.Send(add);
-										}
+										_log.DebugFormat("SubscribeTo: {0}, {1}", _messageType, subscriptionId);
 									}
 
 									loop.Continue();
@@ -123,72 +59,19 @@ namespace MassTransit.Subscriptions.Actors
 
 							loop.Receive<Message<UnsubscribeFrom>>(removed =>
 								{
-									bool wasRemoved = _ids.Remove(removed.Body.SubscriptionId);
+									_ids.Clear();
 
-									if(wasRemoved && _ids.Count == 0)
-									{
-										var remove = new SubscriptionRemoved()
-										{
-											SubscriptionId = subscriptionId,
-											MessageName = _messageType,
-										};
+									var remove = new SubscriptionRemoved(subscriptionId, _messageType);
+									_output.Send(remove);
+									
+									_log.DebugFormat("UnsubscribeFrom: {0}, {1}", _messageType, subscriptionId);
 
-										_output.Send(remove);
-										subscriptionId = Guid.Empty;
-
-//										// we have no more subscriptions
-//										_unsubscribeScheduledAction = _scheduler.Schedule(_unsubscribeTimeout, _fiber, () =>
-//											{
-//											});
-									}
+									subscriptionId = Guid.Empty;
 
 									loop.Continue();
-							});
-
-						});
-				});
-		}
-	}
-
-	public class RemoteEndpointActor :
-		Actor
-	{
-		Fiber _fiber;
-		Scheduler _scheduler;
-		Inbox _inbox;
-		IDictionary<Type, ActorInstance> _subscriptionTypes;
-		ActorFactory<SubscriptionActor> _factory;
-		Uri _controlUri;
-
-		public RemoteEndpointActor(Fiber fiber, Scheduler scheduler, Inbox inbox, UntypedChannel parent)
-		{
-			_fiber = fiber;
-			_scheduler = scheduler;
-			_inbox = inbox;
-			_subscriptionTypes = new Dictionary<Type, ActorInstance>();
-
-			_factory = ActorFactory.Create((f, s, i) => new SubscriptionActor(f, s, i, _inbox));
-
-			inbox.Receive<Message<InitializeRemoteEndpointActor>>(message =>
-				{
-					_controlUri = message.Body.ControlUri;
-
-					inbox.Loop(loop =>
-						{
-							loop.Receive<Message<RemoveSubscriptionClient>>(m =>
-								{
-
-									
 								});
 						});
-
 				});
 		}
-
-	}
-
-	public class InitializeRemoteEndpointActor
-	{
-		public Uri ControlUri { get; set; }
 	}
 }

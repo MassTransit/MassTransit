@@ -16,7 +16,15 @@ namespace MassTransit.Subscriptions.Actors
 
 	public class SubscriptionAdded
 	{
-		public Guid SubscriptionId { get; set; }
-		public string MessageName { get; set; }
+		public SubscriptionAdded(Guid subscriptionId, string messageName, string correlationId)
+		{
+			SubscriptionId = subscriptionId;
+			MessageName = messageName;
+			CorrelationId = correlationId;
+		}
+
+		public Guid SubscriptionId { get; private set; }
+		public string MessageName { get; private set; }
+		public string CorrelationId { get; private set; }
 	}
 }
