@@ -14,13 +14,16 @@ namespace MassTransit.Subscriptions.Actors
 {
 	using System;
 	using Stact;
+	using log4net;
 
 	public class EndpointSubscriptionMessageProducer :
 		Actor
 	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionMessageProducer));
+		
 		readonly UntypedChannel _output;
-		Guid _clientId;
-		Uri _endpointUri;
+		readonly Guid _clientId;
+		readonly Uri _endpointUri;
 		long _lastMessageNumber;
 
 		public EndpointSubscriptionMessageProducer(Guid clientId, Uri endpointUri, UntypedChannel output)
@@ -40,10 +43,13 @@ namespace MassTransit.Subscriptions.Actors
 					EndpointUri = _endpointUri,
 					MessageNumber = messageNumber,
 					SubscriptionId = message.Body.SubscriptionId,
-					MessageName = message.Body.MessageType.ToMessageName(),
+					MessageName = message.Body.MessageName,
 				};
 
 			_output.Send(add);
+
+			if(_log.IsDebugEnabled)
+				_log.DebugFormat("SubscriptionAdded: {0}, {1}", add.MessageName, add.SubscriptionId);
 		}
 
 		public void Handle(Message<SubscriptionRemoved> message)
@@ -56,10 +62,13 @@ namespace MassTransit.Subscriptions.Actors
 				EndpointUri = _endpointUri,
 				MessageNumber = messageNumber,
 				SubscriptionId = message.Body.SubscriptionId,
-				MessageName = message.Body.MessageType.ToMessageName(),
+				MessageName = message.Body.MessageName,
 			};
 
 			_output.Send(add);
+
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("SubscriptionRemoved: {0}, {1}", add.MessageName, add.SubscriptionId);
 		}
 	}
 }

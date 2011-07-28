@@ -14,13 +14,16 @@ namespace MassTransit.Subscriptions.Actors
 {
 	using System;
 	using Magnum;
+	using Messages;
 	using Pipeline;
 	using Stact;
+	using log4net;
 
 	public class SubscriptionEventChannelPublisher :
 		ISubscriptionEvent
 	{
-		UntypedChannel _output;
+		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionEventChannelPublisher));
+		readonly UntypedChannel _output;
 
 		public SubscriptionEventChannelPublisher(UntypedChannel output)
 		{
@@ -55,6 +58,9 @@ namespace MassTransit.Subscriptions.Actors
 
 			_output.Send(subscribeTo);
 
+			if(_log.IsDebugEnabled)
+				_log.DebugFormat("SubscribeTo: {0}, {1}", subscribeTo.MessageName, subscribeTo.SubscriptionId);
+
 			return () => Unsubscribe(subscriptionId, messageName, correlationId);
 		}
 
@@ -68,6 +74,10 @@ namespace MassTransit.Subscriptions.Actors
 				};
 
 			_output.Send(unsubscribeFrom);
+
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("UnsubscribeFrom: {0}, {1}", unsubscribeFrom.MessageName, unsubscribeFrom.SubscriptionId);
+
 
 			return true;
 		}

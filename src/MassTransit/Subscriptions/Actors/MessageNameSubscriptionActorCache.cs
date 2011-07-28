@@ -13,12 +13,16 @@
 namespace MassTransit.Subscriptions.Actors
 {
 	using System.Collections.Generic;
+	using Messages;
 	using Stact;
 	using Util;
+	using log4net;
 
 	public class MessageNameSubscriptionActorCache :
 		Actor
 	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (MessageNameSubscriptionActorCache));
+
 		readonly ActorFactory<SubscriptionActor> _typeActorFactory;
 		readonly IDictionary<string, ActorInstance> _typeActors;
 
@@ -40,6 +44,9 @@ namespace MassTransit.Subscriptions.Actors
 			}
 
 			actor.Send(message);
+
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("SubscribeTo: {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
 		}
 
 		[UsedImplicitly]
@@ -49,6 +56,15 @@ namespace MassTransit.Subscriptions.Actors
 			if (_typeActors.TryGetValue(message.Body.MessageName, out actor))
 			{
 				actor.Send(message);
+
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("UnsubscribeFrom: {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
+			}
+			else
+			{
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("UnsubscribeFrom(unknown): {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
+
 			}
 		}
 	}

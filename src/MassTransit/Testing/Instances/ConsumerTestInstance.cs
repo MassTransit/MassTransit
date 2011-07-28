@@ -48,13 +48,13 @@ namespace MassTransit.Testing.Instances
 
 		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(disposing);
-
 			if (_disposed) return;
 			if (disposing)
 			{
 				_subject.Dispose();
 			}
+
+			base.Dispose(disposing);
 
 			_disposed = true;
 		}

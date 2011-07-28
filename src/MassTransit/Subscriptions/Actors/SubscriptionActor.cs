@@ -14,7 +14,9 @@ namespace MassTransit.Subscriptions.Actors
 {
 	using System;
 	using System.Collections.Generic;
+	using Magnum;
 	using Magnum.Extensions;
+	using Messages;
 	using Services.Subscriptions.Messages;
 	using Stact;
 
@@ -69,27 +71,29 @@ namespace MassTransit.Subscriptions.Actors
 	{
 		readonly Fiber _fiber;
 		readonly Scheduler _scheduler;
-		readonly UntypedChannel _coordinator;
+		readonly UntypedChannel _output;
 		string _messageType;
 		HashSet<Guid> _ids;
 		TimeSpan _unsubscribeTimeout;
 		ScheduledOperation _unsubscribeScheduledAction;
 
-		public SubscriptionActor(Fiber fiber, Scheduler scheduler, Inbox inbox, UntypedChannel coordinator)
+		public SubscriptionActor(Fiber fiber, Scheduler scheduler, Inbox inbox, UntypedChannel output)
 		{
 			_fiber = fiber;
 			_scheduler = scheduler;
-			_coordinator = coordinator;
+			_output = output;
 			_ids = new HashSet<Guid>();
 			_unsubscribeTimeout = 30.Seconds();
 
 			inbox.Receive<Message<InitializeSubscriptionActor>>(message =>
 				{
-					_messageType = message.Body.MessageType;
+					_messageType = message.Body.MessageName;
+
+					Guid subscriptionId = Guid.Empty;
 
 					inbox.Loop(loop =>
 						{
-							loop.Receive<Message<SubscriptionAdded>>(added =>
+							loop.Receive<Message<SubscribeTo>>(added =>
 								{
 									bool wasAdded = _ids.Add(added.Body.SubscriptionId);
 
@@ -100,24 +104,42 @@ namespace MassTransit.Subscriptions.Actors
 											_unsubscribeScheduledAction.Cancel();
 											_unsubscribeScheduledAction = null;
 										}
+										else
+										{
+											subscriptionId = CombGuid.Generate();
 
-										// need to notify that we are adding a subscription for the type
+											var add = new SubscriptionAdded()
+												{
+													SubscriptionId = subscriptionId,
+													MessageName = _messageType,
+												};
+
+											_output.Send(add);
+										}
 									}
 
 									loop.Continue();
 								});
 
-							loop.Receive<Message<SubscriptionRemoved>>(removed =>
+							loop.Receive<Message<UnsubscribeFrom>>(removed =>
 								{
 									bool wasRemoved = _ids.Remove(removed.Body.SubscriptionId);
 
 									if(wasRemoved && _ids.Count == 0)
 									{
-										// we have no more subscriptions
-										_unsubscribeScheduledAction = _scheduler.Schedule(_unsubscribeTimeout, _fiber, () =>
-											{
-												// remove the subscription
-											});
+										var remove = new SubscriptionRemoved()
+										{
+											SubscriptionId = subscriptionId,
+											MessageName = _messageType,
+										};
+
+										_output.Send(remove);
+										subscriptionId = Guid.Empty;
+
+//										// we have no more subscriptions
+//										_unsubscribeScheduledAction = _scheduler.Schedule(_unsubscribeTimeout, _fiber, () =>
+//											{
+//											});
 									}
 
 									loop.Continue();
@@ -168,28 +190,5 @@ namespace MassTransit.Subscriptions.Actors
 	public class InitializeRemoteEndpointActor
 	{
 		public Uri ControlUri { get; set; }
-	}
-
-
-	public class InitializeSubscriptionActor
-	{
-		public InitializeSubscriptionActor(string messageName)
-		{
-			MessageType = messageName;
-		}
-
-		public string MessageType { get; private set; }
-	}
-
-	public class SubscriptionRemoved
-	{
-		public Guid SubscriptionId { get; private set; }
-		public Type MessageType { get; private set; }
-	}
-
-	public class SubscriptionAdded
-	{
-		public Guid SubscriptionId { get; private set; }
-		public Type MessageType { get; private set; }
 	}
 }

@@ -250,7 +250,7 @@ namespace MassTransit
 			_serviceContainer.AddService(layer, service);
 		}
 
-		public void RemoveLoopbackSubsciber()
+		public void RemoveLoopbackSubscriber()
 		{
 			_unsubscribeEventDispatchers();
 			_unsubscribeEventDispatchers = () => true;
@@ -278,7 +278,7 @@ namespace MassTransit
 				if (ControlBus != this)
 					ControlBus.Dispose();
 
-				RemoveLoopbackSubsciber();
+				RemoveLoopbackSubscriber();
 
 				if (_performanceCounterConnection != null)
 				{

@@ -22,7 +22,7 @@ namespace MassTransit
 		{
 			var busConfigurator = new PostCreateBusBuilderConfiguratorImpl(bus =>
 				{
-					bus.RemoveLoopbackSubsciber();
+					bus.RemoveLoopbackSubscriber();
 					bus.InboundPipeline.Configure(x =>
 						{
 							x.Register(new RabbitMqSubscriptionBinder(bus.Endpoint.InboundTransport));
