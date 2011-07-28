@@ -8,6 +8,7 @@ which will be followed up with a few configuration examples.
 .. toctree::
 
     quickstart.rst
+    config_api.rst
     transports/index.rst
     keyideas.rst
     interfaces.rst

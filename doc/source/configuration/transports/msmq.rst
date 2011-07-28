@@ -1,4 +1,14 @@
-MSMQ
-""""
+Msmq Configuration Options
+""""""""""""""""""""""""""""""
 
-Bugs
+.. sourcecode:: csharp
+
+  ServiceBusFactory.New(sbc => 
+  {
+    sbc.UseMsmq();
+    sbc.VerifyMsmqConfiguratio();
+    sbc.VerifyMsDtcConfiguration():
+  });
+
+
+Crap. I just wiped out the msmq and have to rewrite.
