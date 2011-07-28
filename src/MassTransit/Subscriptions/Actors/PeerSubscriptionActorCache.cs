@@ -17,24 +17,24 @@ namespace MassTransit.Subscriptions.Actors
 	using Services.Subscriptions.Messages;
 	using Stact;
 
-	public class RemoteEndpointActor :
+	public class PeerSubscriptionActorCache :
 		Actor
 	{
 		Uri _controlUri;
-		ActorFactory<SubscriptionActor> _factory;
+		ActorFactory<BusSubscriptionActor> _factory;
 		Fiber _fiber;
 		Inbox _inbox;
 		Scheduler _scheduler;
 		IDictionary<Type, ActorInstance> _subscriptionTypes;
 
-		public RemoteEndpointActor(Fiber fiber, Scheduler scheduler, Inbox inbox, UntypedChannel parent)
+		public PeerSubscriptionActorCache(Fiber fiber, Scheduler scheduler, Inbox inbox, UntypedChannel parent)
 		{
 			_fiber = fiber;
 			_scheduler = scheduler;
 			_inbox = inbox;
 			_subscriptionTypes = new Dictionary<Type, ActorInstance>();
 
-			_factory = ActorFactory.Create((f, s, i) => new SubscriptionActor(i, _inbox));
+			_factory = ActorFactory.Create((f, s, i) => new BusSubscriptionActor(i, _inbox));
 
 			inbox.Receive<Message<InitializeRemoteEndpointActor>>(message =>
 				{

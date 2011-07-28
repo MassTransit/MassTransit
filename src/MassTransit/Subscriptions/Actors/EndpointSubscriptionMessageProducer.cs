@@ -13,6 +13,7 @@
 namespace MassTransit.Subscriptions.Actors
 {
 	using System;
+	using Messages;
 	using Stact;
 	using log4net;
 
@@ -37,38 +38,38 @@ namespace MassTransit.Subscriptions.Actors
 		{
 			var messageNumber = ++_lastMessageNumber;
 
-			var add = new AddSubscriptioXn
+			var add = new AddSubscriptionMessage
 				{
-					ClientId = _clientId,
-					EndpointUri = _endpointUri,
+					PeerId = _clientId,
 					MessageNumber = messageNumber,
+					EndpointUri = _endpointUri,
 					SubscriptionId = message.Body.SubscriptionId,
 					MessageName = message.Body.MessageName,
 				};
 
-			_output.Send(add);
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("AddSubscription: {0}, {1}", add.MessageName, add.SubscriptionId);
 
-			if(_log.IsDebugEnabled)
-				_log.DebugFormat("SubscriptionAdded: {0}, {1}", add.MessageName, add.SubscriptionId);
+			_output.Send<AddSubscription>(add);
 		}
 
 		public void Handle(Message<SubscriptionRemoved> message)
 		{
 			var messageNumber = ++_lastMessageNumber;
 
-			var add = new RemoveSubscriptioXn
+			var remove = new RemoveSubscriptionMessage
 			{
-				ClientId = _clientId,
-				EndpointUri = _endpointUri,
+				PeerId = _clientId,
 				MessageNumber = messageNumber,
+				EndpointUri = _endpointUri,
 				SubscriptionId = message.Body.SubscriptionId,
 				MessageName = message.Body.MessageName,
 			};
 
-			_output.Send(add);
-
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("SubscriptionRemoved: {0}, {1}", add.MessageName, add.SubscriptionId);
+				_log.DebugFormat("RemoveSubscription: {0}, {1}", remove.MessageName, remove.SubscriptionId);
+
+			_output.Send<RemoveSubscription>(remove);
 		}
 	}
 }

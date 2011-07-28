@@ -19,20 +19,20 @@ namespace MassTransit.Subscriptions.Actors
 	using Stact;
 	using log4net;
 
-	public class SubscriptionActor :
+	public class BusSubscriptionActor :
 		Actor
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionActor));
+		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionActor));
 		readonly UntypedChannel _output;
 		HashSet<Guid> _ids;
 		string _messageType;
 
-		public SubscriptionActor(Inbox inbox, UntypedChannel output)
+		public BusSubscriptionActor(Inbox inbox, UntypedChannel output)
 		{
 			_output = output;
 			_ids = new HashSet<Guid>();
 
-			inbox.Receive<Message<InitializeSubscriptionActor>>(message =>
+			inbox.Receive<Message<InitializeBusSubscriptionActor>>(message =>
 				{
 					_messageType = message.Body.MessageName;
 
@@ -49,9 +49,10 @@ namespace MassTransit.Subscriptions.Actors
 										subscriptionId = CombGuid.Generate();
 
 										var add = new SubscriptionAdded(subscriptionId, _messageType, null);
-										_output.Send(add);
 
 										_log.DebugFormat("SubscribeTo: {0}, {1}", _messageType, subscriptionId);
+			
+										_output.Send(add);
 									}
 
 									loop.Continue();
@@ -62,9 +63,10 @@ namespace MassTransit.Subscriptions.Actors
 									_ids.Clear();
 
 									var remove = new SubscriptionRemoved(subscriptionId, _messageType);
-									_output.Send(remove);
-									
+
 									_log.DebugFormat("UnsubscribeFrom: {0}, {1}", _messageType, subscriptionId);
+
+									_output.Send(remove);
 
 									subscriptionId = Guid.Empty;
 

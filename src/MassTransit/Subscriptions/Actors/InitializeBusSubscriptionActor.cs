@@ -12,19 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Actors
 {
-	using System;
-
-	public class SubscriptionAdded
+	public class InitializeBusSubscriptionActor
 	{
-		public SubscriptionAdded(Guid subscriptionId, string messageName, string correlationId)
+		public InitializeBusSubscriptionActor(string messageName)
 		{
-			SubscriptionId = subscriptionId;
 			MessageName = messageName;
-			CorrelationId = correlationId;
 		}
 
-		public Guid SubscriptionId { get; private set; }
 		public string MessageName { get; private set; }
-		public string CorrelationId { get; private set; }
 	}
 }

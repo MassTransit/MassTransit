@@ -15,18 +15,18 @@ namespace MassTransit.Subscriptions.Actors
 	using System;
 	using Pipeline;
 
-	public interface EndpointConnector
+	public interface EndpointSubscriptionConnector
 	{
 		UnsubscribeAction Connect(Uri endpointUri, string correlationId);
 	}
 
-	public class EndpointConnector<TMessage> :
-		EndpointConnector
+	public class EndpointSubscriptionConnector<TMessage> :
+		EndpointSubscriptionConnector
 		where TMessage : class
 	{
 		readonly IServiceBus _bus;
 
-		public EndpointConnector(IServiceBus bus)
+		public EndpointSubscriptionConnector(IServiceBus bus)
 		{
 			_bus = bus;
 		}
@@ -39,14 +39,14 @@ namespace MassTransit.Subscriptions.Actors
 		}
 	}
 
-	public class EndpointConnector<TMessage, TKey> :
-		EndpointConnector
+	public class EndpointSubscriptionConnector<TMessage, TKey> :
+		EndpointSubscriptionConnector
 		where TMessage : class, CorrelatedBy<TKey>
 	{
 		readonly IServiceBus _bus;
 		readonly Func<string, TKey> _converter;
 
-		public EndpointConnector(IServiceBus bus, Func<string, TKey> converter)
+		public EndpointSubscriptionConnector(IServiceBus bus, Func<string, TKey> converter)
 		{
 			_bus = bus;
 			_converter = converter;

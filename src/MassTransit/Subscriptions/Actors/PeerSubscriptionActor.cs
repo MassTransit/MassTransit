@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,38 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Actors
 {
-	using System;
+	using Messages;
 	using Stact;
 
-	public interface SubscriptionChannel :
-		UntypedChannel
-	{
-	}
-
-
-	public class SubscriptionRouter :
+	public class PeerSubscriptionActor :
 		Actor
 	{
-		readonly ChannelAdapter _adapter;
-
-		public SubscriptionRouter()
+		public PeerSubscriptionActor(Inbox inbox, UntypedChannel output)
 		{
-			_adapter = new ChannelAdapter();
-		}
+			inbox.Receive<InitializeSubscriptionPeer>(init =>
+				{
+					inbox.Loop(loop =>
+						{
+							loop.Receive<Message<AddSubscription>>(message => { loop.Continue(); });
 
-		public IDisposable Connect(SubscriptionChannel channel)
-		{
-			return _adapter.Connect(x => x.AddChannel(channel));
-		}
-
-		public void Handle(Message<AddSubscriptioXn> message)
-		{
-			_adapter.Send(message);
-		}
-
-		public void Handle(Message<RemoveSubscriptioXn> message)
-		{
-			_adapter.Send(message);
+							loop.Receive<Message<RemoveSubscription>>(message => { loop.Continue(); });
+						});
+				});
 		}
 	}
 }

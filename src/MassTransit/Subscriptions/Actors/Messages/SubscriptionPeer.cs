@@ -12,8 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Actors.Messages
 {
-	public interface SubscribeTo :
-		Subscribe
+	using System;
+
+	public interface SubscriptionPeer
 	{
+		Guid PeerId { get; }
+		Uri DataUri { get; }
+		Uri ControlUri { get; }
 	}
 }

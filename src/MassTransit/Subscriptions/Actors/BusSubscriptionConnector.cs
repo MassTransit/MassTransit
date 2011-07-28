@@ -14,25 +14,28 @@ namespace MassTransit.Subscriptions.Actors
 {
 	using System;
 	using System.Collections.Generic;
+	using Messages;
+	using Stact;
+	using Util;
 	using log4net;
-	using Actor = Stact.Actor;
 
-	public class OutboundPipelineSubscriptionConnector :
+	public class BusSubscriptionConnector :
 		Actor
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (OutboundPipelineSubscriptionConnector));
+		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionConnector));
 		readonly IServiceBus _bus;
-		readonly EndpointConnectorCache _cache;
+		readonly EndpointSubscriptionConnectorCache _cache;
 		readonly Dictionary<Guid, UnsubscribeAction> _connectionCache;
 
-		public OutboundPipelineSubscriptionConnector(IServiceBus bus)
+		public BusSubscriptionConnector(IServiceBus bus)
 		{
 			_bus = bus;
-			_cache = new EndpointConnectorCache(bus);
+			_cache = new EndpointSubscriptionConnectorCache(bus);
 			_connectionCache = new Dictionary<Guid, UnsubscribeAction>();
 		}
 
-		public void Handle(Stact.Message<SubscriptionAdded> message)
+		[UsedImplicitly]
+		public void Handle(Message<SubscriptionAdded> message)
 		{
 			_connectionCache[message.Body.SubscriptionId] = _cache.Connect(message.Body.MessageName, _bus.Endpoint.Address.Uri,
 				message.Body.CorrelationId);
@@ -41,17 +44,18 @@ namespace MassTransit.Subscriptions.Actors
 				_log.DebugFormat("SubscriptionAdded: {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
 		}
 
-		public void Handle(Stact.Message<SubscriptionRemoved> message)
+		[UsedImplicitly]
+		public void Handle(Message<SubscriptionRemoved> message)
 		{
 			UnsubscribeAction unsubscribe;
 			if (_connectionCache.TryGetValue(message.Body.SubscriptionId, out unsubscribe))
 			{
 				unsubscribe();
 				_connectionCache.Remove(message.Body.SubscriptionId);
-			}
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("SubscriptionRemoved: {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("SubscriptionRemoved: {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
+			}
 		}
 	}
 }
