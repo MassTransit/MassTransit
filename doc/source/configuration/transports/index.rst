@@ -1,9 +1,9 @@
-How to configure the various transports
-"""""""""""""""""""""""""""""""""""""""
+Transport Configuration
+"""""""""""""""""""""""
 
-Here are the various options for all of the transports.
+Each transport has different configuration options.
 
 .. toctree::
 
-    msmq.rst
-    rabbitmq.rst
+  msmq.rst
+  rabbitmq.rst
