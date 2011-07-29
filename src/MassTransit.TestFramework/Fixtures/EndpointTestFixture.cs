@@ -147,7 +147,10 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected virtual IServiceBus SetupServiceBus(Uri uri)
 		{
-			return SetupServiceBus(uri, x => ConfigureServiceBus(uri, x));
+			return SetupServiceBus(uri, x =>
+				{
+					ConfigureServiceBus(uri, x);
+				});
 		}
 
 		protected virtual void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)

@@ -13,7 +13,7 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
-	using MassTransit.Pipeline;
+	using Pipeline;
 
 	public interface EndpointSubscriptionConnector
 	{

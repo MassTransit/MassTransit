@@ -10,11 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Messages
+namespace MassTransit.Subscriptions.Coordinator
 {
-	public class RemoveSubscriptionMessage :
-		SubscriptionMessage,
-		RemoveSubscription
+	using Messages;
+
+	public interface BusSubscriptionCoordinator
 	{
+		void AddObserver(BusSubscriptionEventObserver observer);
+
+		void Send(AddPeerSubscription message);
+		void Send(RemovePeerSubscription message);
+		void Send(AddPeer message);
+		void Send(RemovePeer message);
 	}
 }

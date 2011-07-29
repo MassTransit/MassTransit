@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Coordinator
 {
-	using MassTransit.Subscriptions.Messages;
+	using Messages;
 	using Stact;
 
 	public class PeerSubscriptionActor :
@@ -20,13 +20,13 @@ namespace MassTransit.Subscriptions.Coordinator
 	{
 		public PeerSubscriptionActor(Inbox inbox, UntypedChannel output)
 		{
-			inbox.Receive<InitializePeer>(init =>
+			inbox.Receive<InitializePeerHandler>(init =>
 				{
 					inbox.Loop(loop =>
 						{
-							loop.Receive<Message<AddSubscription>>(message => { loop.Continue(); });
+							loop.Receive<Message<AddPeerSubscription>>(message => { loop.Continue(); });
 
-							loop.Receive<Message<RemoveSubscription>>(message => { loop.Continue(); });
+							loop.Receive<Message<RemovePeerSubscription>>(message => { loop.Continue(); });
 						});
 				});
 		}

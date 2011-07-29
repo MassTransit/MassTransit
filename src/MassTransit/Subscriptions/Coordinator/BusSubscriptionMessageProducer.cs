@@ -14,7 +14,7 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using System.Threading;
-	using MassTransit.Subscriptions.Messages;
+	using Messages;
 	using Stact;
 	using log4net;
 
@@ -33,11 +33,11 @@ namespace MassTransit.Subscriptions.Coordinator
 			_output = output;
 		}
 
-		public void OnSubscriptionAdded(SubscriptionAddedMessage message)
+		public void OnSubscriptionAdded(SubscriptionAdded message)
 		{
 			long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
-			var add = new AddSubscriptionMessage
+			var add = new AddPeerSubscriptionMessage
 				{
 					PeerId = _peerId,
 					MessageNumber = messageNumber,
@@ -52,11 +52,11 @@ namespace MassTransit.Subscriptions.Coordinator
 			_output.Send(add);
 		}
 
-		public void OnSubscriptionRemoved(SubscriptionRemovedMessage message)
+		public void OnSubscriptionRemoved(SubscriptionRemoved message)
 		{
 			long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
-			var remove = new RemoveSubscriptionMessage
+			var remove = new RemovePeerSubscriptionMessage
 				{
 					PeerId = _peerId,
 					MessageNumber = messageNumber,

@@ -16,29 +16,9 @@ namespace MassTransit.Subscriptions.Messages
 
 	public abstract class SubscriptionMessage
 	{
-		/// <summary>
-		/// The instance of the client that created the subscription
-		/// </summary>
-		public Guid PeerId { get; set; }
-
-		/// <summary>
-		/// The message number sent by this client
-		/// </summary>
-		public long MessageNumber { get; set; }
-
-		/// <summary>
-		/// The endpoint where messages should be sent
-		/// </summary>
-		public Uri EndpointUri { get; set; }
-
-		/// <summary>
-		/// The unique ID for this subscription
-		/// </summary>
 		public Guid SubscriptionId { get; set; }
-
-		/// <summary>
-		/// The message name for the subscription
-		/// </summary>
+		public Uri EndpointUri { get; set; }
 		public string MessageName { get; set; }
+		public string CorrelationId { get; set; }
 	}
 }

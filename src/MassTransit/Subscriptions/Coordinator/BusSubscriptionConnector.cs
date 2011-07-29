@@ -14,34 +14,32 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using System.Collections.Generic;
-	using MassTransit.Subscriptions.Messages;
+	using Messages;
 	using log4net;
 
 	public class BusSubscriptionConnector :
 		BusSubscriptionEventObserver
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionConnector));
-		readonly IServiceBus _bus;
 		readonly EndpointSubscriptionConnectorCache _cache;
 		readonly Dictionary<Guid, UnsubscribeAction> _connectionCache;
 
 		public BusSubscriptionConnector(IServiceBus bus)
 		{
-			_bus = bus;
 			_cache = new EndpointSubscriptionConnectorCache(bus);
 			_connectionCache = new Dictionary<Guid, UnsubscribeAction>();
 		}
 
-		public void OnSubscriptionAdded(SubscriptionAddedMessage message)
+		public void OnSubscriptionAdded(SubscriptionAdded message)
 		{
-			_connectionCache[message.SubscriptionId] = _cache.Connect(message.MessageName, _bus.Endpoint.Address.Uri,
+			_connectionCache[message.SubscriptionId] = _cache.Connect(message.MessageName, message.EndpointUri,
 				message.CorrelationId);
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("SubscriptionAdded: {0}, {1}", message.MessageName, message.SubscriptionId);
 		}
 
-		public void OnSubscriptionRemoved(SubscriptionRemovedMessage message)
+		public void OnSubscriptionRemoved(SubscriptionRemoved message)
 		{
 			UnsubscribeAction unsubscribe;
 			if (_connectionCache.TryGetValue(message.SubscriptionId, out unsubscribe))

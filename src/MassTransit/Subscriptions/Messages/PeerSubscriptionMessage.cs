@@ -12,8 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Messages
 {
-	public interface RemoveSubscriptionPeer :
-		SubscriptionPeer
+	using System;
+
+	public abstract class PeerSubscriptionMessage :
+		SubscriptionMessage
 	{
+		/// <summary>
+		/// The instance of the client that created the subscription
+		/// </summary>
+		public Guid PeerId { get; set; }
+
+		/// <summary>
+		/// The message number sent by this client
+		/// </summary>
+		public long MessageNumber { get; set; }
 	}
 }

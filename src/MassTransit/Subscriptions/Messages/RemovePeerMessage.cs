@@ -10,25 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Coordinator
+namespace MassTransit.Subscriptions.Messages
 {
-	using System;
-	using MassTransit.Subscriptions.Messages;
-	using Stact;
-
-	public class PeerActor :
-		Actor
+	public class RemovePeerMessage :
+		PeerMessage,
+		RemovePeer
 	{
-		Guid _peerId;
-		Uri _peerUri;
-
-		public PeerActor(Inbox inbox, UntypedChannel output)
-		{
-			inbox.Receive<InitializePeer>(init =>
-				{
-					_peerId = init.PeerId;
-					_peerUri = init.PeerUri;
-				});
-		}
 	}
 }
