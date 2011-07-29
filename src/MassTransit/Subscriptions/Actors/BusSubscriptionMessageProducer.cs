@@ -13,63 +13,62 @@
 namespace MassTransit.Subscriptions.Actors
 {
 	using System;
+	using System.Threading;
 	using Messages;
 	using Stact;
 	using log4net;
 
-	public class EndpointSubscriptionMessageProducer :
-		Actor
+	public class BusSubscriptionMessageProducer :
+		BusSubscriptionEventObserver
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionMessageProducer));
-		
+		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionMessageProducer));
+
 		readonly UntypedChannel _output;
-		readonly Guid _clientId;
-		readonly Uri _endpointUri;
+		readonly Guid _peerId;
 		long _lastMessageNumber;
 
-		public EndpointSubscriptionMessageProducer(Guid clientId, Uri endpointUri, UntypedChannel output)
+		public BusSubscriptionMessageProducer(Guid peerId, UntypedChannel output)
 		{
-			_clientId = clientId;
+			_peerId = peerId;
 			_output = output;
-			_endpointUri = endpointUri;
 		}
 
-		public void Handle(Message<SubscriptionAdded> message)
+		public void OnSubscriptionAdded(SubscriptionAdded message)
 		{
-			var messageNumber = ++_lastMessageNumber;
+			long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
 			var add = new AddSubscriptionMessage
 				{
-					PeerId = _clientId,
+					PeerId = _peerId,
 					MessageNumber = messageNumber,
-					EndpointUri = _endpointUri,
-					SubscriptionId = message.Body.SubscriptionId,
-					MessageName = message.Body.MessageName,
+					SubscriptionId = message.SubscriptionId,
+					EndpointUri = message.EndpointUri,
+					MessageName = message.MessageName,
 				};
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("AddSubscription: {0}, {1}", add.MessageName, add.SubscriptionId);
 
-			_output.Send<AddSubscription>(add);
+			_output.Send(add);
 		}
 
-		public void Handle(Message<SubscriptionRemoved> message)
+		public void OnSubscriptionRemoved(SubscriptionRemoved message)
 		{
-			var messageNumber = ++_lastMessageNumber;
+			long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
 			var remove = new RemoveSubscriptionMessage
-			{
-				PeerId = _clientId,
-				MessageNumber = messageNumber,
-				EndpointUri = _endpointUri,
-				SubscriptionId = message.Body.SubscriptionId,
-				MessageName = message.Body.MessageName,
-			};
+				{
+					PeerId = _peerId,
+					MessageNumber = messageNumber,
+					SubscriptionId = message.SubscriptionId,
+					EndpointUri = message.EndpointUri,
+					MessageName = message.MessageName,
+				};
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("RemoveSubscription: {0}, {1}", remove.MessageName, remove.SubscriptionId);
 
-			_output.Send<RemoveSubscription>(remove);
+			_output.Send(remove);
 		}
 	}
 }

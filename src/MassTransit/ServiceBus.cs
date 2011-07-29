@@ -81,10 +81,7 @@ namespace MassTransit
 			_serviceContainer = new ServiceContainer(this);
 
 			OutboundPipeline = new OutboundPipelineConfigurator(this).Pipeline;
-
 			InboundPipeline = InboundPipelineConfigurator.CreateDefault(this);
-			InboundPipeline.Configure(
-				x => { _unsubscribeEventDispatchers += x.Register(new InboundOutboundSubscriptionBinder(OutboundPipeline, Endpoint)); });
 
 			ControlBus = this;
 
@@ -250,12 +247,6 @@ namespace MassTransit
 			_serviceContainer.AddService(layer, service);
 		}
 
-		public void RemoveLoopbackSubscriber()
-		{
-			_unsubscribeEventDispatchers();
-			_unsubscribeEventDispatchers = () => true;
-		}
-
 		protected virtual void Dispose(bool disposing)
 		{
 			if (_disposed) return;
@@ -277,8 +268,6 @@ namespace MassTransit
 
 				if (ControlBus != this)
 					ControlBus.Dispose();
-
-				RemoveLoopbackSubscriber();
 
 				if (_performanceCounterConnection != null)
 				{

@@ -10,18 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.SubscriptionBuilders
 {
-	using BusConfigurators;
+	using System;
+	using Subscriptions.Actors;
 
-	public static class ThreadConfigurationExtensions
+	public interface SubscriptionCoordinatorBuilder
 	{
-		public static void SetConcurrentConsumerLimit(this ServiceBusConfigurator configurator, int concurrentConsumerLimit)
-		{
-			var controlBusConfigurator =
-				new PostCreateBusBuilderConfigurator(bus => { bus.MaximumConsumerThreads = concurrentConsumerLimit; });
+		void SetObserverFactory(Func<IServiceBus, BusSubscriptionEventObserver> observerFactory);
 
-			configurator.AddBusConfigurator(controlBusConfigurator);
-		}
+		SubscriptionCoordinatorBusService Build();
 	}
 }

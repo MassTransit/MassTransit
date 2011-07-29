@@ -20,14 +20,10 @@ namespace MassTransit
 	{
 		public static void UseRabbitMqRouting(this ServiceBusConfigurator configurator)
 		{
-			var busConfigurator = new PostCreateBusBuilderConfiguratorImpl(bus =>
-				{
-					bus.RemoveLoopbackSubscriber();
-					bus.InboundPipeline.Configure(x =>
-						{
-							x.Register(new RabbitMqSubscriptionBinder(bus.Endpoint.InboundTransport));
-						});
+			configurator.SetSubscriptionObserver(bus => new RabbitMqSubscriptionBinder(bus));
 
+			var busConfigurator = new PostCreateBusBuilderConfigurator(bus =>
+				{
 					var interceptorConfigurator = new OutboundMessageInterceptorConfigurator(bus.OutboundPipeline);
 
 					interceptorConfigurator.Create(new PublishEndpointInterceptor(bus));

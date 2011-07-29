@@ -17,6 +17,7 @@ namespace MassTransit.Subscriptions.Actors.Messages
 	public interface Subscribe
 	{
 		Guid SubscriptionId { get; }
+		Uri EndpointUri { get; }
 		string MessageName { get; }
 		string CorrelationId { get; }
 	}

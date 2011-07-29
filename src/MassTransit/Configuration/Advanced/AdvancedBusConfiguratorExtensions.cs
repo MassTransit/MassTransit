@@ -26,7 +26,7 @@ namespace MassTransit.Advanced
 		public static void SetConcurrentReceiverLimit(this ServiceBusConfigurator configurator, int concurrentReceiverLimit)
 		{
 			var controlBusConfigurator =
-				new PostCreateBusBuilderConfiguratorImpl(bus => { bus.ConcurrentReceiveThreads = concurrentReceiverLimit; });
+				new PostCreateBusBuilderConfigurator(bus => { bus.ConcurrentReceiveThreads = concurrentReceiverLimit; });
 
 			configurator.AddBusConfigurator(controlBusConfigurator);
 		}
@@ -39,7 +39,7 @@ namespace MassTransit.Advanced
 		/// <param name="receiveTimeout"></param>
 		public static void SetReceiveTimeout(this ServiceBusConfigurator configurator, TimeSpan receiveTimeout)
 		{
-			var controlBusConfigurator = new PostCreateBusBuilderConfiguratorImpl(bus => { bus.ReceiveTimeout = receiveTimeout; });
+			var controlBusConfigurator = new PostCreateBusBuilderConfigurator(bus => { bus.ReceiveTimeout = receiveTimeout; });
 
 			configurator.AddBusConfigurator(controlBusConfigurator);
 		}

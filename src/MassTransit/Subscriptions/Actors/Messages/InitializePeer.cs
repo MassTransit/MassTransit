@@ -10,18 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Subscriptions.Actors.Messages
 {
-	using BusConfigurators;
+	using System;
 
-	public static class ThreadConfigurationExtensions
+	public class InitializePeer
 	{
-		public static void SetConcurrentConsumerLimit(this ServiceBusConfigurator configurator, int concurrentConsumerLimit)
+		public InitializePeer(Guid peerId, Uri peerUri)
 		{
-			var controlBusConfigurator =
-				new PostCreateBusBuilderConfigurator(bus => { bus.MaximumConsumerThreads = concurrentConsumerLimit; });
-
-			configurator.AddBusConfigurator(controlBusConfigurator);
+			PeerId = peerId;
+			PeerUri = peerUri;
 		}
+
+		public Guid PeerId { get; private set; }
+		public Uri PeerUri { get; private set; }
 	}
 }

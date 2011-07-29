@@ -12,71 +12,94 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Actors
 {
+	using System;
+	using System.Collections.Generic;
 	using Messages;
 	using Services.Subscriptions.Messages;
 	using Stact;
+	using log4net;
 
 	public class SubscriptionMessageConsumer :
-		Consumes<AddSubscriptionClient>.All,
-		Consumes<RemoveSubscriptionClient>.All,
-		Consumes<SubscriptionRefresh>.All,
-		Consumes<Services.Subscriptions.Messages.AddSubscription>.All,
-		Consumes<Services.Subscriptions.Messages.RemoveSubscription>.All
+		Consumes<AddSubscriptionClient>.Context,
+		Consumes<RemoveSubscriptionClient>.Context,
+		Consumes<SubscriptionRefresh>.Context,
+		Consumes<Services.Subscriptions.Messages.AddSubscription>.Context,
+		Consumes<Services.Subscriptions.Messages.RemoveSubscription>.Context
 	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionMessageConsumer));
+		readonly HashSet<Uri> _ignoredSourceAddresses;
+		readonly string _network;
 		readonly UntypedChannel _output;
 
-		public SubscriptionMessageConsumer(UntypedChannel output)
+		public SubscriptionMessageConsumer(UntypedChannel output, string network, params Uri[] ignoredSourceAddresses)
 		{
 			_output = output;
+			_network = network;
+			_ignoredSourceAddresses = new HashSet<Uri>(ignoredSourceAddresses);
 		}
 
-		public void Consume(Services.Subscriptions.Messages.AddSubscription message)
+		public void Consume(IConsumeContext<Services.Subscriptions.Messages.AddSubscription> context)
 		{
+			if (DiscardMessage(context))
+				return;
+
 			_output.Send(new AddSubscriptionMessage
 				{
-					PeerId = message.Subscription.ClientId,
-					EndpointUri = message.Subscription.EndpointUri,
-					MessageName = message.Subscription.MessageName,
-					MessageNumber = message.Subscription.SequenceNumber,
-					SubscriptionId = message.Subscription.SubscriptionId,
+					PeerId = context.Message.Subscription.ClientId,
+					EndpointUri = context.Message.Subscription.EndpointUri,
+					MessageName = context.Message.Subscription.MessageName,
+					MessageNumber = context.Message.Subscription.SequenceNumber,
+					SubscriptionId = context.Message.Subscription.SubscriptionId,
 				});
 		}
 
-		public void Consume(AddSubscriptionClient message)
+		public void Consume(IConsumeContext<AddSubscriptionClient> context)
 		{
+			if (DiscardMessage(context))
+				return;
+
 			_output.Send(new AddSubscriptionPeerMessage
 				{
-					PeerId = message.CorrelationId,
-					DataUri = message.DataUri,
-					ControlUri = message.ControlUri,
+					PeerId = context.Message.CorrelationId,
+					DataUri = context.Message.DataUri,
+					ControlUri = context.Message.ControlUri,
 				});
 		}
 
-		public void Consume(Services.Subscriptions.Messages.RemoveSubscription message)
+		public void Consume(IConsumeContext<Services.Subscriptions.Messages.RemoveSubscription> context)
 		{
+			if (DiscardMessage(context))
+				return;
+
 			_output.Send(new RemoveSubscriptionMessage
 				{
-					PeerId = message.Subscription.ClientId,
-					EndpointUri = message.Subscription.EndpointUri,
-					MessageName = message.Subscription.MessageName,
-					MessageNumber = message.Subscription.SequenceNumber,
-					SubscriptionId = message.Subscription.SubscriptionId,
+					PeerId = context.Message.Subscription.ClientId,
+					EndpointUri = context.Message.Subscription.EndpointUri,
+					MessageName = context.Message.Subscription.MessageName,
+					MessageNumber = context.Message.Subscription.SequenceNumber,
+					SubscriptionId = context.Message.Subscription.SubscriptionId,
 				});
 		}
 
-		public void Consume(RemoveSubscriptionClient message)
+		public void Consume(IConsumeContext<RemoveSubscriptionClient> context)
 		{
+			if (DiscardMessage(context))
+				return;
+
 			_output.Send(new RemoveSubscriptionPeerMessage
 				{
-					PeerId = message.CorrelationId,
-					DataUri = message.DataUri,
-					ControlUri = message.ControlUri,
+					PeerId = context.Message.CorrelationId,
+					DataUri = context.Message.DataUri,
+					ControlUri = context.Message.ControlUri,
 				});
 		}
 
-		public void Consume(SubscriptionRefresh message)
+		public void Consume(IConsumeContext<SubscriptionRefresh> context)
 		{
-			foreach (SubscriptionInformation subscription in message.Subscriptions)
+			if (DiscardMessage(context))
+				return;
+
+			foreach (SubscriptionInformation subscription in context.Message.Subscriptions)
 			{
 				// TODO do we trust subscriptions that are third-party (sent to us from systems that are not the
 				// system containing the actual subscription)
@@ -90,6 +113,24 @@ namespace MassTransit.Subscriptions.Actors
 						SubscriptionId = subscription.SubscriptionId,
 					});
 			}
+		}
+
+		bool DiscardMessage<T>(IConsumeContext<T> context)
+			where T : class
+		{
+			if (_ignoredSourceAddresses.Contains(context.SourceAddress))
+			{
+				_log.Debug("Ignoring subscription because its source address equals the busses address");
+				return true;
+			}
+
+			if (!string.Equals(context.Network, _network))
+			{
+				_log.DebugFormat("Ignoring subscription because the network '{0}' != ours '{1}1", context.Network, _network);
+				return true;
+			}
+
+			return false;
 		}
 	}
 }

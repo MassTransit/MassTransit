@@ -19,8 +19,10 @@ namespace MassTransit.BusConfigurators
 	using Configuration;
 	using Configurators;
 	using EndpointConfigurators;
-	using log4net;
+	using SubscriptionBuilders;
+	using SubscriptionConfigurators;
 	using Transports;
+	using log4net;
 
 	public class ServiceBusConfiguratorImpl :
 		ServiceBusConfigurator
@@ -28,10 +30,11 @@ namespace MassTransit.BusConfigurators
 		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusConfiguratorImpl));
 
 		readonly IList<BusBuilderConfigurator> _configurators;
+		readonly EndpointFactoryConfigurator _endpointFactoryConfigurator;
 		readonly ServiceBusSettings _settings;
 		Func<BusSettings, BusBuilder> _builderFactory;
 
-		readonly EndpointFactoryConfigurator _endpointFactoryConfigurator;
+		SubscriptionCoordinatorConfiguratorImpl _subscriptionCoordinatorConfigurator;
 
 		public ServiceBusConfiguratorImpl(ServiceBusDefaultSettings defaultSettings)
 		{
@@ -41,6 +44,9 @@ namespace MassTransit.BusConfigurators
 			_configurators = new List<BusBuilderConfigurator>();
 
 			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(new EndpointFactoryDefaultSettings());
+
+			_subscriptionCoordinatorConfigurator = new SubscriptionCoordinatorConfiguratorImpl();
+			_configurators.Add(_subscriptionCoordinatorConfigurator);
 		}
 
 		public IEnumerable<ValidationResult> Validate()
@@ -50,22 +56,31 @@ namespace MassTransit.BusConfigurators
 
 			if (_settings.InputAddress == null)
 			{
-			    var msg = "The 'InputAddress' is null. #sadpanda I was expecting an address to be set like 'msmq://localhost/queue'";
-			    msg += "or 'rabbitmq://localhost/queue'. The InputAddress is a 'Uri' by the way.";
+				string msg =
+					"The 'InputAddress' is null. #sadpanda I was expecting an address to be set like 'msmq://localhost/queue'";
+				msg += "or 'rabbitmq://localhost/queue'. The InputAddress is a 'Uri' by the way.";
 
 				yield return this.Failure("InputAddress", msg);
 			}
 
-			foreach (var result in _endpointFactoryConfigurator.Validate())
+			foreach (ValidationResult result in _endpointFactoryConfigurator.Validate())
 				yield return result.WithParentKey("EndpointFactory");
 
-			foreach (var result in _configurators.SelectMany(configurator => configurator.Validate()))
+			foreach (ValidationResult result in _configurators.SelectMany(configurator => configurator.Validate()))
+				yield return result;
+
+			foreach (ValidationResult result in _subscriptionCoordinatorConfigurator.Validate())
 				yield return result;
 		}
 
 		public void UseBusBuilder(Func<BusSettings, BusBuilder> builderFactory)
 		{
 			_builderFactory = builderFactory;
+		}
+
+		public void AddSubscriptionCoordinatorConfigurator(SubscriptionCoordinatorBuilderConfigurator configurator)
+		{
+			_subscriptionCoordinatorConfigurator.AddConfigurator(configurator);
 		}
 
 		public void AddBusConfigurator(BusBuilderConfigurator configurator)
@@ -94,7 +109,8 @@ namespace MassTransit.BusConfigurators
 				_settings.AfterConsume += afterConsume;
 		}
 
-		public void UseEndpointFactoryBuilder(Func<IEndpointFactoryDefaultSettings, EndpointFactoryBuilder> endpointFactoryBuilderFactory)
+		public void UseEndpointFactoryBuilder(
+			Func<IEndpointFactoryDefaultSettings, EndpointFactoryBuilder> endpointFactoryBuilderFactory)
 		{
 			_endpointFactoryConfigurator.UseEndpointFactoryBuilder(endpointFactoryBuilderFactory);
 		}
@@ -104,6 +120,16 @@ namespace MassTransit.BusConfigurators
 			_endpointFactoryConfigurator.AddEndpointFactoryConfigurator(configurator);
 		}
 
+
+		public IEndpointFactoryDefaultSettings Defaults
+		{
+			get { return _endpointFactoryConfigurator.Defaults; }
+		}
+
+		public IEndpointFactory CreateEndpointFactory()
+		{
+			return _endpointFactoryConfigurator.CreateEndpointFactory();
+		}
 
 		public IServiceBus CreateServiceBus()
 		{
@@ -125,14 +151,9 @@ namespace MassTransit.BusConfigurators
 			return bus;
 		}
 
-		public IEndpointFactoryDefaultSettings Defaults
+		public void ChangeSettings(Action<ServiceBusSettings> callback)
 		{
-			get { return _endpointFactoryConfigurator.Defaults; }
-		}
-
-		public IEndpointFactory CreateEndpointFactory()
-		{
-			return _endpointFactoryConfigurator.CreateEndpointFactory();
+			callback(_settings);
 		}
 
 		IEndpointCache CreateEndpointCache()
@@ -150,11 +171,6 @@ namespace MassTransit.BusConfigurators
 		static BusBuilder DefaultBuilderFactory(BusSettings settings)
 		{
 			return new ServiceBusBuilderImpl(settings);
-		}
-
-		public void ChangeSettings(Action<ServiceBusSettings> callback)
-		{
-			callback(_settings);
 		}
 	}
 }

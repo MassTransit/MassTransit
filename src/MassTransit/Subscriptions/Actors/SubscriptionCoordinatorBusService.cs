@@ -13,25 +13,33 @@
 namespace MassTransit.Subscriptions.Actors
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 	using Magnum;
-	using Magnum.Extensions;
 	using Stact;
 
 	public class SubscriptionCoordinatorBusService :
 		IBusService
 	{
+		readonly string _network;
+		readonly IEnumerable<Func<IServiceBus, BusSubscriptionEventObserver>> _observers;
 		IServiceBus _bus;
-		Guid _clientId;
+		//BusSubscriptionConnector _busConnector;
 		IServiceBus _controlBus;
 		Uri _controlUri;
 		Uri _dataUri;
 
 		bool _disposed;
-		ActorInstance _producer;
+		//BusSubscriptionMessageProducer _producer;
 		BusSubscriptionEventListener _subscriptionEventListener;
 		UnsubscribeAction _unregisterAction;
 		UnsubscribeAction _unsubscribeAction;
-		ActorInstance _busConnector;
+
+		public SubscriptionCoordinatorBusService(string network, IEnumerable<Func<IServiceBus, BusSubscriptionEventObserver>> observers)
+		{
+			_network = network;
+			_observers = observers;
+		}
 
 		public void Dispose()
 		{
@@ -58,23 +66,13 @@ namespace MassTransit.Subscriptions.Actors
 			// that does nothing so that local endpoint subscriptions from the subscription queue
 			// are essentially ignored
 
+			//_producer = new BusSubscriptionMessageProducer(_clientId, stub);
 
-			_clientId = CombGuid.Generate();
+			//_busConnector = new BusSubscriptionConnector(bus);
 
-			ActorFactory<EndpointSubscriptionMessageProducer> factory = ActorFactory.Create(
-				() => new EndpointSubscriptionMessageProducer(_clientId, bus.Endpoint.Address.Uri, stub));
+			var observers = _observers.Select(x => x(bus)).ToArray();
 
-			_producer = factory.GetActor();
-
-			_busConnector = ActorFactory.Create<BusSubscriptionConnector>(x =>
-				{
-					x.ConstructedBy(() => new BusSubscriptionConnector(bus));
-					x.HandleOnCallingThread();
-				}).GetActor();
-
-			var broadcast = new BroadcastChannel(new UntypedChannel[] {_busConnector, _producer});
-
-			_subscriptionEventListener = new BusSubscriptionEventListener(broadcast);
+			_subscriptionEventListener = new BusSubscriptionEventListener(bus, observers);
 
 			_unregisterAction = _bus.Configure(x =>
 				{
@@ -84,7 +82,7 @@ namespace MassTransit.Subscriptions.Actors
 				});
 
 
-			var consumerInstance = new SubscriptionMessageConsumer(stub);
+			var consumerInstance = new SubscriptionMessageConsumer(stub, _network);
 
 			_unsubscribeAction = _bus.ControlBus.SubscribeInstance(consumerInstance);
 		}
@@ -100,23 +98,6 @@ namespace MassTransit.Subscriptions.Actors
 			if (_disposed) return;
 			if (disposing)
 			{
-				if (_subscriptionEventListener != null)
-				{
-					_subscriptionEventListener.Dispose();
-					_subscriptionEventListener = null;
-				}
-
-				if(_busConnector != null)
-				{
-					_busConnector.ExitOnDispose(30.Seconds()).Dispose();
-					_busConnector = null;
-				}
-
-				if (_producer != null)
-				{
-					_producer.ExitOnDispose(30.Seconds()).Dispose();
-					_producer = null;
-				}
 			}
 
 			_disposed = true;

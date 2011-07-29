@@ -20,7 +20,7 @@ namespace MassTransit.Subscriptions.Actors
 	{
 		public PeerSubscriptionActor(Inbox inbox, UntypedChannel output)
 		{
-			inbox.Receive<InitializeSubscriptionPeer>(init =>
+			inbox.Receive<InitializePeer>(init =>
 				{
 					inbox.Loop(loop =>
 						{
