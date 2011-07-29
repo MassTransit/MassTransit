@@ -56,13 +56,13 @@ namespace MassTransit.TestFramework.Fixtures
 
 			base.ConfigureServiceBus(uri, configurator);
 
+			// really need a multicastLoopback transport for this to work properly with these changes
 			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionPublisher(SubscriptionService));
 			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(SubscriptionService));
 		}
 
 		void SetupSubscriptionService()
 		{
-			var router = new SubscriptionCoordinatorBusService();
 		}
 	}
 }

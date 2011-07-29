@@ -13,16 +13,22 @@
 namespace MassTransit.Subscriptions.Actors
 {
 	using System;
+	using Messages;
+	using Stact;
 
-	public class InitializeSubscriptionPeer
+	public class PeerActor :
+		Actor
 	{
-		public InitializeSubscriptionPeer(Guid clientId, Uri clientUri)
-		{
-			ClientId = clientId;
-			ClientUri = clientUri;
-		}
+		Guid _peerId;
+		Uri _peerUri;
 
-		public Guid ClientId { get; private set; }
-		public Uri ClientUri { get; private set; }
+		public PeerActor(Inbox inbox, UntypedChannel output)
+		{
+			inbox.Receive<InitializePeer>(init =>
+				{
+					_peerId = init.PeerId;
+					_peerUri = init.PeerUri;
+				});
+		}
 	}
 }

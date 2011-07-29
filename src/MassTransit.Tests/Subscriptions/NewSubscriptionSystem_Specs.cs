@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Subscriptions
 {
 	using Magnum.TestFramework;
 	using MassTransit.Testing;
-	using MassTransit.Testing.ScenarioBuilders;
 
 	[Scenario]
 	public class When_the_new_subscription_system_is_used
@@ -27,13 +26,11 @@ namespace MassTransit.Tests.Subscriptions
 		{
 			_test = TestFactory.ForConsumer<Testsumer>()
 				.New(x =>
-				{
-					x.UseScenarioBuilder(() => new NewLoopbackBusScenarioBuilder());
+					{
+						x.ConstructUsing(() => new Testsumer());
 
-					x.ConstructUsing(() => new Testsumer());
-
-					x.Publish(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
-				});
+						x.Publish(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
+					});
 
 			_unsub = _test.Scenario.Bus.SubscribeHandler<A>(x => { });
 

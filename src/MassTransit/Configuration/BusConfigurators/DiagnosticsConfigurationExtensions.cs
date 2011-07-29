@@ -18,7 +18,7 @@ namespace MassTransit.BusConfigurators
 	{
 		public static void EnableMessageTracing(this ServiceBusConfigurator configurator)
 		{
-			var busConfigurator = new PostCreateBusBuilderConfiguratorImpl(bus =>
+			var busConfigurator = new PostCreateBusBuilderConfigurator(bus =>
 				{
 					var service = new MessageTraceBusService(bus.EventChannel);
 

@@ -95,6 +95,7 @@ namespace MassTransit.SubscriptionConnectors
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
+				.Where(x => !(x.MessageType.IsGenericType && x.MessageType.GetGenericTypeDefinition() == typeof(IConsumeContext<>)))
 				.Select(x => 
 					FastActivator.Create(typeof (ConsumerSubscriptionConnector<,>), 
 					new[] {typeof (T), x.MessageType}, _args))
@@ -108,6 +109,7 @@ namespace MassTransit.SubscriptionConnectors
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.Selected))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
+				.Where(x => !(x.MessageType.IsGenericType && x.MessageType.GetGenericTypeDefinition() == typeof(IConsumeContext<>)))
 				.Select(x =>
 					FastActivator.Create(typeof (SelectedConsumerSubscriptionConnector<,>), 
 					new[] {typeof (T), x.MessageType}, _args))

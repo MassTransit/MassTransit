@@ -15,12 +15,10 @@ namespace MassTransit.Subscriptions.Actors
 	using System;
 	using System.Collections.Generic;
 	using Messages;
-	using Stact;
-	using Util;
 	using log4net;
 
 	public class BusSubscriptionConnector :
-		Actor
+		BusSubscriptionEventObserver
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionConnector));
 		readonly IServiceBus _bus;
@@ -34,27 +32,25 @@ namespace MassTransit.Subscriptions.Actors
 			_connectionCache = new Dictionary<Guid, UnsubscribeAction>();
 		}
 
-		[UsedImplicitly]
-		public void Handle(Message<SubscriptionAdded> message)
+		public void OnSubscriptionAdded(SubscriptionAdded message)
 		{
-			_connectionCache[message.Body.SubscriptionId] = _cache.Connect(message.Body.MessageName, _bus.Endpoint.Address.Uri,
-				message.Body.CorrelationId);
+			_connectionCache[message.SubscriptionId] = _cache.Connect(message.MessageName, _bus.Endpoint.Address.Uri,
+				message.CorrelationId);
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("SubscriptionAdded: {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
+				_log.DebugFormat("SubscriptionAdded: {0}, {1}", message.MessageName, message.SubscriptionId);
 		}
 
-		[UsedImplicitly]
-		public void Handle(Message<SubscriptionRemoved> message)
+		public void OnSubscriptionRemoved(SubscriptionRemoved message)
 		{
 			UnsubscribeAction unsubscribe;
-			if (_connectionCache.TryGetValue(message.Body.SubscriptionId, out unsubscribe))
+			if (_connectionCache.TryGetValue(message.SubscriptionId, out unsubscribe))
 			{
 				unsubscribe();
-				_connectionCache.Remove(message.Body.SubscriptionId);
+				_connectionCache.Remove(message.SubscriptionId);
 
 				if (_log.IsDebugEnabled)
-					_log.DebugFormat("SubscriptionRemoved: {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
+					_log.DebugFormat("SubscriptionRemoved: {0}, {1}", message.MessageName, message.SubscriptionId);
 			}
 		}
 	}

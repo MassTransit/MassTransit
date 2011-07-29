@@ -24,16 +24,16 @@ namespace MassTransit.Subscriptions.Actors
 		Actor
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (PeerCache));
-		readonly IDictionary<Guid, Uri> _clients;
-		readonly ActorFactory<PeerSubscriptionActor> _factory;
+		readonly ActorFactory<PeerActor> _factory;
+		readonly IDictionary<Guid, Uri> _peerIds;
 		readonly IDictionary<Uri, ActorInstance> _peers;
 
 		public PeerCache(UntypedChannel output)
 		{
 			_peers = new Dictionary<Uri, ActorInstance>();
-			_clients = new Dictionary<Guid, Uri>();
+			_peerIds = new Dictionary<Guid, Uri>();
 
-			_factory = ActorFactory.Create((f, s, i) => new PeerSubscriptionActor(i, output));
+			_factory = ActorFactory.Create((f, s, i) => new PeerActor(i, output));
 		}
 
 		[UsedImplicitly]
@@ -44,15 +44,15 @@ namespace MassTransit.Subscriptions.Actors
 
 		public void Handle(Message<AddSubscription> message)
 		{
-			Uri clientUri;
-			if (_clients.TryGetValue(message.Body.PeerId, out clientUri))
+			Uri peerUri;
+			if (_peerIds.TryGetValue(message.Body.PeerId, out peerUri))
 			{
 				ActorInstance peer;
-				if (!_peers.TryGetValue(clientUri, out peer))
+				if (!_peers.TryGetValue(peerUri, out peer))
 				{
 					peer = _factory.GetActor();
-					peer.Send(new InitializeSubscriptionPeer(message.Body.PeerId, clientUri));
-					_peers.Add(clientUri, peer);
+					peer.Send(new InitializePeer(message.Body.PeerId, peerUri));
+					_peers.Add(peerUri, peer);
 				}
 
 				peer.Send(message);
@@ -60,6 +60,27 @@ namespace MassTransit.Subscriptions.Actors
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("AddSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
 						message.Body.PeerId);
+			}
+		}
+
+		public void Handle(Message<RemoveSubscription> message)
+		{
+			Uri peerUri;
+			if (_peerIds.TryGetValue(message.Body.PeerId, out peerUri))
+			{
+				ActorInstance peer;
+				if (_peers.TryGetValue(peerUri, out peer))
+				{
+					if (_log.IsDebugEnabled)
+						_log.DebugFormat("RemoveSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
+							message.Body.PeerId);
+					peer.Send(message);
+				}
+				else
+				{
+					if (_log.IsDebugEnabled)
+						_log.DebugFormat("RemoveSubscription(unknown): {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
+				}
 			}
 		}
 	}
