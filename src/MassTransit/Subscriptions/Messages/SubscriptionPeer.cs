@@ -10,14 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Actors
+namespace MassTransit.Subscriptions.Messages
 {
-	using Messages;
+	using System;
 
-	public interface BusSubscriptionEventObserver
+	public interface SubscriptionPeer
 	{
-		void OnSubscriptionAdded(SubscriptionAddedMessage message);
-
-		void OnSubscriptionRemoved(SubscriptionRemovedMessage message);
+		Guid PeerId { get; }
+		Uri DataUri { get; }
+		Uri ControlUri { get; }
 	}
 }

@@ -32,7 +32,7 @@ namespace MassTransit.Subscriptions.Actors
 			_connectionCache = new Dictionary<Guid, UnsubscribeAction>();
 		}
 
-		public void OnSubscriptionAdded(SubscriptionAdded message)
+		public void OnSubscriptionAdded(SubscriptionAddedMessage message)
 		{
 			_connectionCache[message.SubscriptionId] = _cache.Connect(message.MessageName, _bus.Endpoint.Address.Uri,
 				message.CorrelationId);
@@ -41,7 +41,7 @@ namespace MassTransit.Subscriptions.Actors
 				_log.DebugFormat("SubscriptionAdded: {0}, {1}", message.MessageName, message.SubscriptionId);
 		}
 
-		public void OnSubscriptionRemoved(SubscriptionRemoved message)
+		public void OnSubscriptionRemoved(SubscriptionRemovedMessage message)
 		{
 			UnsubscribeAction unsubscribe;
 			if (_connectionCache.TryGetValue(message.SubscriptionId, out unsubscribe))

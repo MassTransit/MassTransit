@@ -48,7 +48,7 @@ namespace MassTransit.Subscriptions.Actors
 			_subscriptionId = CombGuid.Generate();
 			_endpointUri = added.EndpointUri;
 
-			var add = new SubscriptionAdded
+			var add = new SubscriptionAddedMessage
 				{
 					SubscriptionId = _subscriptionId,
 					EndpointUri = _endpointUri,
@@ -67,7 +67,7 @@ namespace MassTransit.Subscriptions.Actors
 			
 			_ids.Clear();
 
-			var remove = new SubscriptionRemoved
+			var remove = new SubscriptionRemovedMessage
 				{
 					SubscriptionId = _subscriptionId,
 					EndpointUri = _endpointUri,

@@ -18,7 +18,6 @@ namespace MassTransit.Transports.RabbitMq
 	using System.Threading;
 	using Context;
 	using RabbitMQ.Client;
-	using Util;
 	using log4net;
 
 	public class InboundRabbitMqTransport :
@@ -28,14 +27,16 @@ namespace MassTransit.Transports.RabbitMq
 
 		readonly IRabbitMqEndpointAddress _address;
 		readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
+		readonly bool _purgeExistingMessages;
 		RabbitMqConsumer _consumer;
 		bool _disposed;
 
 		public InboundRabbitMqTransport(IRabbitMqEndpointAddress address,
-		                                ConnectionHandler<RabbitMqConnection> connectionHandler)
+		                                ConnectionHandler<RabbitMqConnection> connectionHandler, bool purgeExistingMessages)
 		{
 			_address = address;
 			_connectionHandler = connectionHandler;
+			_purgeExistingMessages = purgeExistingMessages;
 		}
 
 		public IEndpointAddress Address
@@ -66,7 +67,8 @@ namespace MassTransit.Transports.RabbitMq
 							context.SetInputAddress(_address);
 
 							byte[] contentType = result.BasicProperties.IsHeadersPresent()
-							                     	? (byte[]) result.BasicProperties.Headers["Content-Type"] : null;
+							                     	? (byte[]) result.BasicProperties.Headers["Content-Type"]
+							                     	: null;
 							if (contentType != null)
 							{
 								context.SetContentType(Encoding.UTF8.GetString(contentType));
@@ -97,7 +99,7 @@ namespace MassTransit.Transports.RabbitMq
 					{
 						_log.Error("Failed to consume message from endpoint", ex);
 
-						if(result != null)
+						if (result != null)
 							_consumer.MessageFailed(result.DeliveryTag, true);
 
 						throw;
@@ -116,7 +118,7 @@ namespace MassTransit.Transports.RabbitMq
 			if (_consumer != null)
 				return;
 
-			_consumer = new RabbitMqConsumer(_address);
+			_consumer = new RabbitMqConsumer(_address, _purgeExistingMessages);
 
 			_connectionHandler.AddBinding(_consumer);
 		}

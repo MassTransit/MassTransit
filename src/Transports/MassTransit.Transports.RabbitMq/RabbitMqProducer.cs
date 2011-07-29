@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
+	using Management;
 	using RabbitMQ.Client;
 
 	public class RabbitMqProducer :
@@ -19,10 +20,12 @@ namespace MassTransit.Transports.RabbitMq
 	{
 		readonly IRabbitMqEndpointAddress _address;
 		IModel _channel;
+		bool _bindToQueue;
 
-		public RabbitMqProducer(IRabbitMqEndpointAddress address)
+		public RabbitMqProducer(IRabbitMqEndpointAddress address, bool bindToQueue)
 		{
 			_address = address;
+			_bindToQueue = bindToQueue;
 		}
 
 		public IModel Channel
@@ -35,6 +38,14 @@ namespace MassTransit.Transports.RabbitMq
 			_channel = connection.Connection.CreateModel();
 
 			_channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, true);
+
+			if(_bindToQueue)
+			{
+				using (var management = new RabbitMqEndpointManagement(_address, connection.Connection))
+				{
+					management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "");
+				}
+			}
 		}
 
 		public void Unbind(RabbitMqConnection connection)

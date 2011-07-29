@@ -10,11 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Actors.Messages
+namespace MassTransit.Subscriptions.Messages
 {
-	public class AddSubscriptionPeerMessage : 
-		SubscriptionPeerMessage,
-		AddSubscriptionPeer
+	using System;
+
+	public class InitializePeer
 	{
+		public InitializePeer(Guid peerId, Uri peerUri)
+		{
+			PeerId = peerId;
+			PeerUri = peerUri;
+		}
+
+		public Guid PeerId { get; private set; }
+		public Uri PeerUri { get; private set; }
 	}
 }

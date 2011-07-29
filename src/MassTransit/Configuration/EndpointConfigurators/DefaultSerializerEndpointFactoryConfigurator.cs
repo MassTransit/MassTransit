@@ -32,14 +32,15 @@ namespace MassTransit.EndpointConfigurators
 		public IEnumerable<ValidationResult> Validate()
 		{
 			if (_serializerFactory == null)
-				yield return this.Failure("DefaultSerializer", "was not configured (it was null). It should have been passed in via the ctor.");
+				yield return this.Failure("DefaultSerializer",
+					"was not configured (it was null). The factory method should have been specified.");
 		}
 
 		public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
 		{
 			IMessageSerializer serializer = _serializerFactory();
 			if (serializer == null)
-				throw new ConfigurationException("The configured default serializer could not be created");
+				throw new ConfigurationException("The configured default serializer was not created");
 
 			builder.SetDefaultSerializer(serializer);
 

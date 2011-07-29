@@ -19,7 +19,7 @@ namespace MassTransit.Transports.RabbitMq
 	using Management;
 	using RabbitMQ.Client;
 	using Subscriptions.Actors;
-	using Subscriptions.Actors.Messages;
+	using Subscriptions.Messages;
 	using log4net;
 
 	public class RabbitMqSubscriptionBinder :
@@ -36,7 +36,7 @@ namespace MassTransit.Transports.RabbitMq
 			_inputAddress = bus.Endpoint.InboundTransport.Address.CastAs<IRabbitMqEndpointAddress>();
 		}
 
-		public void OnSubscriptionAdded(SubscriptionAdded message)
+		public void OnSubscriptionAdded(SubscriptionAddedMessage message)
 		{
 			Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
 
@@ -57,7 +57,7 @@ namespace MassTransit.Transports.RabbitMq
 			_bindings[message.SubscriptionId] = messageName;
 		}
 
-		public void OnSubscriptionRemoved(SubscriptionRemoved message)
+		public void OnSubscriptionRemoved(SubscriptionRemovedMessage message)
 		{
 			Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
 
