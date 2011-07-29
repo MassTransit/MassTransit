@@ -13,7 +13,7 @@
 namespace MassTransit.SubscriptionBuilders
 {
 	using System;
-	using Subscriptions.Actors;
+	using Subscriptions.Coordinator;
 
 	public interface SubscriptionCoordinatorBuilder
 	{

@@ -20,7 +20,7 @@ namespace MassTransit.SubscriptionConfigurators
 	using BusServiceConfigurators;
 	using Configurators;
 	using SubscriptionBuilders;
-	using Subscriptions.Actors;
+	using Subscriptions.Coordinator;
 
 	public class SubscriptionCoordinatorConfiguratorImpl :
 		SubscriptionCoordinatorConfigurator,

@@ -18,7 +18,7 @@ namespace MassTransit.Transports.RabbitMq
 	using Magnum.Extensions;
 	using Management;
 	using RabbitMQ.Client;
-	using Subscriptions.Actors;
+	using Subscriptions.Coordinator;
 	using Subscriptions.Messages;
 	using log4net;
 

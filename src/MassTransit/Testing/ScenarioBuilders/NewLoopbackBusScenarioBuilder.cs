@@ -14,7 +14,6 @@ namespace MassTransit.Testing.ScenarioBuilders
 {
 	using System;
 	using BusConfigurators;
-	using Subscriptions.Actors;
 
 	public class NewLoopbackBusScenarioBuilder :
 		BusScenarioBuilderImpl
