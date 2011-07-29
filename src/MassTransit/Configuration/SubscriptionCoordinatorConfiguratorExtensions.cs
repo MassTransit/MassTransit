@@ -15,7 +15,7 @@ namespace MassTransit
 	using System;
 	using BusConfigurators;
 	using SubscriptionConfigurators;
-	using Subscriptions.Actors;
+	using Subscriptions.Coordinator;
 
 	public static class SubscriptionCoordinatorConfiguratorExtensions
 	{

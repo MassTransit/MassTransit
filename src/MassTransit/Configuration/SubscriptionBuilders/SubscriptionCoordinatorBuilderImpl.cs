@@ -14,7 +14,7 @@ namespace MassTransit.SubscriptionBuilders
 {
 	using System;
 	using System.Collections.Generic;
-	using Subscriptions.Actors;
+	using Subscriptions.Coordinator;
 
 	public class SubscriptionCoordinatorBuilderImpl :
 		SubscriptionCoordinatorBuilder

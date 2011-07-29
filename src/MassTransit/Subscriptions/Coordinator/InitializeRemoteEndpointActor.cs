@@ -1,4 +1,4 @@
-namespace MassTransit.Subscriptions.Actors
+namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 

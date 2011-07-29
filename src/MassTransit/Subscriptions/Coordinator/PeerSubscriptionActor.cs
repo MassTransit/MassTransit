@@ -10,14 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Actors
+namespace MassTransit.Subscriptions.Coordinator
 {
-	using Messages;
+	using MassTransit.Subscriptions.Messages;
+	using Stact;
 
-	public interface BusSubscriptionEventObserver
+	public class PeerSubscriptionActor :
+		Actor
 	{
-		void OnSubscriptionAdded(SubscriptionAddedMessage message);
+		public PeerSubscriptionActor(Inbox inbox, UntypedChannel output)
+		{
+			inbox.Receive<InitializePeer>(init =>
+				{
+					inbox.Loop(loop =>
+						{
+							loop.Receive<Message<AddSubscription>>(message => { loop.Continue(); });
 
-		void OnSubscriptionRemoved(SubscriptionRemovedMessage message);
+							loop.Receive<Message<RemoveSubscription>>(message => { loop.Continue(); });
+						});
+				});
+		}
 	}
 }
