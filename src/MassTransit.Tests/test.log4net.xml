@@ -14,7 +14,7 @@
 			<level value="INFO" />
 		</logger>
 
-		<logger name="MassTransit.Subscriptions.Actors">
+		<logger name="MassTransit.Subscriptions">
 			<level value="DEBUG" />
 		</logger>
 

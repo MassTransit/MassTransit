@@ -24,10 +24,12 @@ namespace MassTransit.Transports.RabbitMq
 		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqConsumer));
 		readonly IRabbitMqEndpointAddress _address;
 		IModel _channel;
+		bool _purgeOnBind;
 
-		public RabbitMqConsumer(IRabbitMqEndpointAddress address)
+		public RabbitMqConsumer(IRabbitMqEndpointAddress address, bool purgeOnBind)
 		{
 			_address = address;
+			_purgeOnBind = purgeOnBind;
 		}
 
 		public BasicGetResult Get()
@@ -50,6 +52,12 @@ namespace MassTransit.Transports.RabbitMq
 			using (var management = new RabbitMqEndpointManagement(_address, connection.Connection))
 			{
 				management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "");
+
+				if(_purgeOnBind)
+				{
+					management.Purge(_address.Name);
+					_purgeOnBind = false;
+				}
 			}
 
 			_channel = connection.Connection.CreateModel();

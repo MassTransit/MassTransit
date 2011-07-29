@@ -74,12 +74,7 @@ namespace MassTransit.Transports.RabbitMq
 
 			ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
 
-			if (settings.PurgeExistingMessages)
-			{
-				PurgeExistingMessages(connectionHandler, address);
-			}
-
-			return new InboundRabbitMqTransport(address, connectionHandler);
+			return new InboundRabbitMqTransport(address, connectionHandler, settings.PurgeExistingMessages);
 		}
 
 		public IOutboundTransport BuildOutbound(ITransportSettings settings)
@@ -90,7 +85,7 @@ namespace MassTransit.Transports.RabbitMq
 
 			ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
 
-			return new OutboundRabbitMqTransport(address, connectionHandler);
+			return new OutboundRabbitMqTransport(address, connectionHandler, false);
 		}
 
 		public IOutboundTransport BuildError(ITransportSettings settings)
@@ -101,9 +96,7 @@ namespace MassTransit.Transports.RabbitMq
 
 			ConnectionHandler<RabbitMqConnection> connection = GetConnection(address);
 
-			BindErrorExchangeToQueue(address, connection);
-
-			return new OutboundRabbitMqTransport(address, connection);
+			return new OutboundRabbitMqTransport(address, connection, true);
 		}
 
 		public int ConnectionCount()
@@ -148,35 +141,6 @@ namespace MassTransit.Transports.RabbitMq
 		{
 			Dispose(false);
 		}
-
-		static void PurgeExistingMessages(ConnectionHandler<RabbitMqConnection> connectionHandler,
-		                                  IRabbitMqEndpointAddress address)
-		{
-			connectionHandler.Use(connection =>
-				{
-					using (var management = new RabbitMqEndpointManagement(address, connection.Connection))
-					{
-						management.Purge(address.Name);
-					}
-				});
-		}
-
-
-		static void BindErrorExchangeToQueue(IRabbitMqEndpointAddress address,
-		                                     ConnectionHandler<RabbitMqConnection> connectionHandler)
-		{
-			// we need to go ahead and bind a durable queue for the error transport, since
-			// there is probably not a listener for it.
-
-			connectionHandler.Use(connection =>
-				{
-					using (var management = new RabbitMqEndpointManagement(address, connection.Connection))
-					{
-						management.BindQueue(address.Name, address.Name, ExchangeType.Fanout, "");
-					}
-				});
-		}
-
 
 		static void EnsureProtocolIsCorrect(Uri address)
 		{

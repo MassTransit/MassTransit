@@ -10,35 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Actors.Messages
+namespace MassTransit.Subscriptions.Messages
 {
 	using System;
 
-	public interface Subscription
+	public abstract class SubscribeMessage
 	{
-		/// <summary>
-		/// The instance of the client that created the subscription
-		/// </summary>
-		Guid PeerId { get; }
-
-		/// <summary>
-		/// The message number sent by this client
-		/// </summary>
-		long MessageNumber { get; }
-
-		/// <summary>
-		/// The endpoint where messages should be sent
-		/// </summary>
-		Uri EndpointUri { get; }
-
-		/// <summary>
-		/// The unique ID for this subscription
-		/// </summary>
-		Guid SubscriptionId { get; }
-
-		/// <summary>
-		/// The message name for the subscription
-		/// </summary>
-		string MessageName { get; }
+		public Guid SubscriptionId { get; set; }
+		public Uri EndpointUri { get; set; }
+		public string MessageName { get; set; }
+		public string CorrelationId { get; set; }
 	}
 }

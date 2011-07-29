@@ -24,12 +24,14 @@ namespace MassTransit.Transports.RabbitMq
 		readonly IRabbitMqEndpointAddress _address;
 		readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
 		RabbitMqProducer _producer;
+		bool _bindToQueue;
 
 		public OutboundRabbitMqTransport(IRabbitMqEndpointAddress address,
-		                                 ConnectionHandler<RabbitMqConnection> connectionHandler)
+		                                 ConnectionHandler<RabbitMqConnection> connectionHandler, bool bindToQueue)
 		{
 			_address = address;
 			_connectionHandler = connectionHandler;
+			_bindToQueue = bindToQueue;
 		}
 
 		public IEndpointAddress Address
@@ -73,7 +75,7 @@ namespace MassTransit.Transports.RabbitMq
 			if (_producer != null)
 				return;
 
-			_producer = new RabbitMqProducer(_address);
+			_producer = new RabbitMqProducer(_address, _bindToQueue);
 
 			_connectionHandler.AddBinding(_producer);
 		}

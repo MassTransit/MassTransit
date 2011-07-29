@@ -33,7 +33,7 @@ namespace MassTransit.Subscriptions.Actors
 			_output = output;
 		}
 
-		public void OnSubscriptionAdded(SubscriptionAdded message)
+		public void OnSubscriptionAdded(SubscriptionAddedMessage message)
 		{
 			long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
@@ -52,7 +52,7 @@ namespace MassTransit.Subscriptions.Actors
 			_output.Send(add);
 		}
 
-		public void OnSubscriptionRemoved(SubscriptionRemoved message)
+		public void OnSubscriptionRemoved(SubscriptionRemovedMessage message)
 		{
 			long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
