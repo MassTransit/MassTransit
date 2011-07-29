@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,38 +14,43 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using Magnum;
+	using Magnum.Extensions;
 	using Messages;
 	using log4net;
 
-	public class BusSubscription
+	public class EndpointSubscription
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscription));
+		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscription));
+		readonly IDictionary<Guid, PeerSubscription> _ids;
 		readonly string _messageName;
 		readonly BusSubscriptionEventObserver _observer;
 		Uri _endpointUri;
-		HashSet<Guid> _ids;
 		Guid _subscriptionId;
 
-		public BusSubscription(string messageName, BusSubscriptionEventObserver observer)
+		public EndpointSubscription(string messageName, BusSubscriptionEventObserver observer)
 		{
 			_messageName = messageName;
 			_observer = observer;
 
-			_ids = new HashSet<Guid>();
+			_ids = new Dictionary<Guid, PeerSubscription>();
 
 			_subscriptionId = Guid.Empty;
 		}
 
-		public void OnSubscribeTo(SubscribeTo added)
+		public void Send(AddPeerSubscription message)
 		{
-			bool wasAdded = _ids.Add(added.SubscriptionId);
+			if (_ids.ContainsKey(message.SubscriptionId))
+				return;
 
-			if (!wasAdded || _ids.Count != 1)
+			_ids.Add(message.SubscriptionId, message);
+
+			if (_ids.Count > 1)
 				return;
 
 			_subscriptionId = CombGuid.Generate();
-			_endpointUri = added.EndpointUri;
+			_endpointUri = message.EndpointUri;
 
 			var add = new SubscriptionAddedMessage
 				{
@@ -54,17 +59,16 @@ namespace MassTransit.Subscriptions.Coordinator
 					MessageName = _messageName
 				};
 
-			_log.DebugFormat("SubscribeTo: {0}, {1}", _messageName, _subscriptionId);
+			_log.DebugFormat("PeerSubscriptionAdded: {0}, {1} {2}", _messageName, _endpointUri, _subscriptionId);
 
 			_observer.OnSubscriptionAdded(add);
 		}
 
-		public void OnUnsubscribeFrom(UnsubscribeFrom removed)
+		public void Send(RemovePeerSubscription message)
 		{
-			if (!_ids.Contains(removed.SubscriptionId))
+			bool wasRemoved = _ids.Remove(message.SubscriptionId);
+			if (!wasRemoved || _ids.Count != 0)
 				return;
-
-			_ids.Clear();
 
 			var remove = new SubscriptionRemovedMessage
 				{
@@ -73,10 +77,24 @@ namespace MassTransit.Subscriptions.Coordinator
 					MessageName = _messageName
 				};
 
-			_log.DebugFormat("UnsubscribeFrom: {0}, {1}", _messageName, _subscriptionId);
+			_log.DebugFormat("PeerSubscriptionRemoved: {0}, {1} {2}", _messageName, _endpointUri, _subscriptionId);
 
 			_observer.OnSubscriptionRemoved(remove);
+
 			_subscriptionId = Guid.Empty;
+		}
+
+		public void Send(RemovePeer message)
+		{
+			List<Guid> remove = _ids.Where(x => x.Value.PeerId == message.PeerId)
+				.Select(x => x.Key).ToList();
+
+			if (remove.Count > 0)
+			{
+				remove.Each(x => _ids.Remove(x));
+
+				_log.DebugFormat("Removed {0} subscriptions for peer: {1} {2}", remove.Count, message.PeerId, message.PeerUri);
+			}
 		}
 	}
 }

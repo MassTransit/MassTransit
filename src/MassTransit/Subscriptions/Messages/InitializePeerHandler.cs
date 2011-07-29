@@ -14,11 +14,15 @@ namespace MassTransit.Subscriptions.Messages
 {
 	using System;
 
-	public abstract class SubscribeMessage
+	public class InitializePeerHandler
 	{
-		public Guid SubscriptionId { get; set; }
-		public Uri EndpointUri { get; set; }
-		public string MessageName { get; set; }
-		public string CorrelationId { get; set; }
+		public InitializePeerHandler(Guid peerId, Uri peerUri)
+		{
+			PeerId = peerId;
+			PeerUri = peerUri;
+		}
+
+		public Guid PeerId { get; private set; }
+		public Uri PeerUri { get; private set; }
 	}
 }

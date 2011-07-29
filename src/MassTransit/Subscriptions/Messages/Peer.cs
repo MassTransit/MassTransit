@@ -12,9 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Messages
 {
-	public class AddSubscriptionMessage :
-		SubscriptionMessage,
-		AddSubscription
+	using System;
+
+	public interface Peer
 	{
+		Guid PeerId { get; }
+		long Timestamp { get; }
+		Uri PeerUri { get; }
 	}
 }

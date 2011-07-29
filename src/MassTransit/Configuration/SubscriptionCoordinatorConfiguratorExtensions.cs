@@ -20,12 +20,21 @@ namespace MassTransit
 	public static class SubscriptionCoordinatorConfiguratorExtensions
 	{
 		public static void SetSubscriptionObserver(this ServiceBusConfigurator configurator,
-		                                           Func<IServiceBus, BusSubscriptionEventObserver> observerFactory)
+		                                           Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver>
+		                                           	observerFactory)
 		{
-			var coordinatorConfigurator = new SubscriptionCoordinatorBuilderConfiguratorImpl(x =>
-				{
-					x.SetObserverFactory(observerFactory);
-				});
+			var coordinatorConfigurator =
+				new SubscriptionCoordinatorBuilderConfiguratorImpl(x => { x.SetObserverFactory(observerFactory); });
+
+			configurator.AddSubscriptionCoordinatorConfigurator(coordinatorConfigurator);
+		}
+
+		public static void AddSubscriptionObserver(this ServiceBusConfigurator configurator,
+		                                           Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver>
+		                                           	observerFactory)
+		{
+			var coordinatorConfigurator =
+				new SubscriptionCoordinatorBuilderConfiguratorImpl(x => { x.AddObserverFactory(observerFactory); });
 
 			configurator.AddSubscriptionCoordinatorConfigurator(coordinatorConfigurator);
 		}

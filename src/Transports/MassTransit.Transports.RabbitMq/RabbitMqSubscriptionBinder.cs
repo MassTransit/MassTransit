@@ -36,7 +36,7 @@ namespace MassTransit.Transports.RabbitMq
 			_inputAddress = bus.Endpoint.InboundTransport.Address.CastAs<IRabbitMqEndpointAddress>();
 		}
 
-		public void OnSubscriptionAdded(SubscriptionAddedMessage message)
+		public void OnSubscriptionAdded(SubscriptionAdded message)
 		{
 			Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
 
@@ -57,7 +57,7 @@ namespace MassTransit.Transports.RabbitMq
 			_bindings[message.SubscriptionId] = messageName;
 		}
 
-		public void OnSubscriptionRemoved(SubscriptionRemovedMessage message)
+		public void OnSubscriptionRemoved(SubscriptionRemoved message)
 		{
 			Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
 

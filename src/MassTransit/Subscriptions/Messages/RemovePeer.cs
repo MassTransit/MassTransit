@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Messages
 {
-	public interface AddSubscription :
-		Subscription
+	public interface RemovePeer :
+		Peer
 	{
 	}
 }

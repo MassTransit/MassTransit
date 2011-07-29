@@ -16,29 +16,9 @@ namespace MassTransit.Subscriptions.Messages
 
 	public interface Subscription
 	{
-		/// <summary>
-		/// The instance of the client that created the subscription
-		/// </summary>
-		Guid PeerId { get; }
-
-		/// <summary>
-		/// The message number sent by this client
-		/// </summary>
-		long MessageNumber { get; }
-
-		/// <summary>
-		/// The endpoint where messages should be sent
-		/// </summary>
-		Uri EndpointUri { get; }
-
-		/// <summary>
-		/// The unique ID for this subscription
-		/// </summary>
 		Guid SubscriptionId { get; }
-
-		/// <summary>
-		/// The message name for the subscription
-		/// </summary>
+		Uri EndpointUri { get; }
 		string MessageName { get; }
+		string CorrelationId { get; }
 	}
 }

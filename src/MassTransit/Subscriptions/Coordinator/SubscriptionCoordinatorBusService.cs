@@ -14,30 +14,74 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
+	using Magnum.Extensions;
+	using Messages;
 	using Stact;
 
 	public class SubscriptionCoordinatorBusService :
-		IBusService
+		IBusService,
+		BusSubscriptionCoordinator,
+		BusSubscriptionEventObserver
 	{
 		readonly string _network;
-		readonly IEnumerable<Func<IServiceBus, BusSubscriptionEventObserver>> _observers;
+		readonly IList<BusSubscriptionEventObserver> _observers;
 		IServiceBus _bus;
-		//BusSubscriptionConnector _busConnector;
 		IServiceBus _controlBus;
 		Uri _controlUri;
 		Uri _dataUri;
 
 		bool _disposed;
-		//BusSubscriptionMessageProducer _producer;
-		BusSubscriptionEventListener _subscriptionEventListener;
-		UnsubscribeAction _unregisterAction;
-		UnsubscribeAction _unsubscribeAction;
+		ActorInstance _peerCache;
+		UnsubscribeAction _unregister;
 
-		public SubscriptionCoordinatorBusService(string network, IEnumerable<Func<IServiceBus, BusSubscriptionEventObserver>> observers)
+		public SubscriptionCoordinatorBusService(string network)
 		{
 			_network = network;
-			_observers = observers;
+			_observers = new List<BusSubscriptionEventObserver>();
+
+			_unregister = () => true;
+		}
+
+		public void AddObserver(BusSubscriptionEventObserver observer)
+		{
+			lock (_observers)
+				_observers.Add(observer);
+		}
+
+		public void Send(AddPeerSubscription message)
+		{
+			if (_peerCache != null)
+				_peerCache.Send(message);
+		}
+
+		public void Send(RemovePeerSubscription message)
+		{
+			if (_peerCache != null)
+				_peerCache.Send(message);
+		}
+
+		public void Send(AddPeer message)
+		{
+			if (_peerCache != null)
+				_peerCache.Send(message);
+		}
+
+		public void Send(RemovePeer message)
+		{
+			if (_peerCache != null)
+				_peerCache.Send(message);
+		}
+
+		public void OnSubscriptionAdded(SubscriptionAdded message)
+		{
+			lock (_observers)
+				_observers.Each(x => x.OnSubscriptionAdded(message));
+		}
+
+		public void OnSubscriptionRemoved(SubscriptionRemoved message)
+		{
+			lock (_observers)
+				_observers.Each(x => x.OnSubscriptionRemoved(message));
 		}
 
 		public void Dispose()
@@ -54,42 +98,35 @@ namespace MassTransit.Subscriptions.Coordinator
 			_dataUri = bus.Endpoint.Address.Uri;
 			_controlUri = bus.ControlBus.Endpoint.Address.Uri;
 
+			var connector = new BusSubscriptionConnector(bus);
 
-			var stub = new ChannelAdapter();
+			_peerCache = ActorFactory.Create(() => new PeerCache(connector))
+				.GetActor();
 
-
-			// TODO Remote and Local Ignore
-			// for remote endpoints, we need to pipe the remote endpoint subscriptions into a separate cache for that endpoint
-			// so that they bind the the outbound pipeline
-			// for the remote endpoint that matches the local bus endpoint, we need to setup a default connector
-			// that does nothing so that local endpoint subscriptions from the subscription queue
-			// are essentially ignored
-
-			//_producer = new BusSubscriptionMessageProducer(_clientId, stub);
-
-			//_busConnector = new BusSubscriptionConnector(bus);
-
-			var observers = _observers.Select(x => x(bus)).ToArray();
-
-			_subscriptionEventListener = new BusSubscriptionEventListener(bus, observers);
-
-			_unregisterAction = _bus.Configure(x =>
-				{
-					UnregisterAction unregisterAction = x.Register(_subscriptionEventListener);
-
-					return () => unregisterAction();
-				});
-
-
-			var consumerInstance = new SubscriptionMessageConsumer(stub, _network);
-
-			_unsubscribeAction = _bus.ControlBus.SubscribeInstance(consumerInstance);
+			ListenToBus(bus);
 		}
 
 		public void Stop()
 		{
-			_unsubscribeAction();
-			_unregisterAction();
+			_unregister();
+		}
+
+		void ListenToBus(IServiceBus bus)
+		{
+			var subscriptionEventListener = new BusSubscriptionEventListener(bus, this);
+
+			_unregister += _bus.Configure(x =>
+				{
+					UnregisterAction unregisterAction = x.Register(subscriptionEventListener);
+
+					return () => unregisterAction();
+				});
+
+			IServiceBus controlBus = bus.ControlBus;
+			if (controlBus != bus)
+			{
+				ListenToBus(controlBus);
+			}
 		}
 
 		void Dispose(bool disposing)

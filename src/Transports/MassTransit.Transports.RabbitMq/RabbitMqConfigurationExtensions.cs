@@ -20,7 +20,7 @@ namespace MassTransit
 	{
 		public static void UseRabbitMqRouting(this ServiceBusConfigurator configurator)
 		{
-			configurator.SetSubscriptionObserver(bus => new RabbitMqSubscriptionBinder(bus));
+			configurator.SetSubscriptionObserver((bus,coordinator) => new RabbitMqSubscriptionBinder(bus));
 
 			var busConfigurator = new PostCreateBusBuilderConfigurator(bus =>
 				{

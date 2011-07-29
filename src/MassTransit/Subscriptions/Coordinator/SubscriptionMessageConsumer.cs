@@ -14,36 +14,36 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using System.Collections.Generic;
-	using MassTransit.Subscriptions.Messages;
-	using MassTransit.Services.Subscriptions.Messages;
-	using Stact;
+	using Messages;
+	using Services.Subscriptions.Messages;
 	using log4net;
 
 	public class SubscriptionMessageConsumer :
 		Consumes<AddSubscriptionClient>.Context,
 		Consumes<RemoveSubscriptionClient>.Context,
 		Consumes<SubscriptionRefresh>.Context,
-		Consumes<Services.Subscriptions.Messages.AddSubscription>.Context,
-		Consumes<Services.Subscriptions.Messages.RemoveSubscription>.Context
+		Consumes<AddSubscription>.Context,
+		Consumes<RemoveSubscription>.Context
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionMessageConsumer));
+		readonly BusSubscriptionCoordinator _coordinator;
 		readonly HashSet<Uri> _ignoredSourceAddresses;
 		readonly string _network;
-		readonly UntypedChannel _output;
 
-		public SubscriptionMessageConsumer(UntypedChannel output, string network, params Uri[] ignoredSourceAddresses)
+		public SubscriptionMessageConsumer(BusSubscriptionCoordinator coordinator, string network,
+		                                   params Uri[] ignoredSourceAddresses)
 		{
-			_output = output;
+			_coordinator = coordinator;
 			_network = network;
 			_ignoredSourceAddresses = new HashSet<Uri>(ignoredSourceAddresses);
 		}
 
-		public void Consume(IConsumeContext<Services.Subscriptions.Messages.AddSubscription> context)
+		public void Consume(IConsumeContext<AddSubscription> context)
 		{
 			if (DiscardMessage(context))
 				return;
 
-			_output.Send(new AddSubscriptionMessage
+			_coordinator.Send(new AddPeerSubscriptionMessage
 				{
 					PeerId = context.Message.Subscription.ClientId,
 					EndpointUri = context.Message.Subscription.EndpointUri,
@@ -58,20 +58,20 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (DiscardMessage(context))
 				return;
 
-			_output.Send(new AddSubscriptionPeerMessage
+			_coordinator.Send(new AddPeerMessage
 				{
 					PeerId = context.Message.CorrelationId,
-					DataUri = context.Message.DataUri,
-					ControlUri = context.Message.ControlUri,
+					PeerUri = context.Message.ControlUri,
+					Timestamp = DateTime.UtcNow.Ticks,
 				});
 		}
 
-		public void Consume(IConsumeContext<Services.Subscriptions.Messages.RemoveSubscription> context)
+		public void Consume(IConsumeContext<RemoveSubscription> context)
 		{
 			if (DiscardMessage(context))
 				return;
 
-			_output.Send(new RemoveSubscriptionMessage
+			_coordinator.Send(new RemovePeerSubscriptionMessage
 				{
 					PeerId = context.Message.Subscription.ClientId,
 					EndpointUri = context.Message.Subscription.EndpointUri,
@@ -86,11 +86,11 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (DiscardMessage(context))
 				return;
 
-			_output.Send(new RemoveSubscriptionPeerMessage
+			_coordinator.Send(new RemovePeerMessage
 				{
 					PeerId = context.Message.CorrelationId,
-					DataUri = context.Message.DataUri,
-					ControlUri = context.Message.ControlUri,
+					PeerUri = context.Message.ControlUri,
+					Timestamp = DateTime.UtcNow.Ticks,
 				});
 		}
 
@@ -104,7 +104,7 @@ namespace MassTransit.Subscriptions.Coordinator
 				// TODO do we trust subscriptions that are third-party (sent to us from systems that are not the
 				// system containing the actual subscription)
 
-				_output.Send(new AddSubscriptionMessage
+				_coordinator.Send(new AddPeerSubscriptionMessage
 					{
 						PeerId = subscription.ClientId,
 						EndpointUri = subscription.EndpointUri,

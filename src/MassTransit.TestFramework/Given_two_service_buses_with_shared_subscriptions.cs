@@ -15,7 +15,6 @@ namespace MassTransit.TestFramework
 	using System;
 	using Fixtures;
 	using Magnum.TestFramework;
-	using MassTransit.Transports;
 	using MassTransit.Transports.Loopback;
 
 	[Scenario]

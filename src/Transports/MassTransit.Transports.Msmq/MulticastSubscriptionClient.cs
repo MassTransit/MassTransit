@@ -13,8 +13,76 @@
 namespace MassTransit.Transports.Msmq
 {
 	using System;
+	using Subscriptions.Coordinator;
 	using log4net;
 	using Services.Subscriptions.Client;
+
+	public class MulticastSubscriptionService :
+		IBusService
+	{
+		static readonly ILog _log = LogManager.GetLogger(typeof(MulticastSubscriptionService));
+		bool _disposed;
+		IServiceBus _subscriptionBus;
+		BusSubscriptionCoordinator _coordinator;
+		string _network;
+		UnsubscribeAction _unsubscribeAction;
+
+		public MulticastSubscriptionService(IServiceBus subscriptionBus, BusSubscriptionCoordinator coordinator, string network)
+		{
+			_subscriptionBus = subscriptionBus;
+			_coordinator = coordinator;
+			_network = network;
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		public void Start(IServiceBus bus)
+		{
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Starting MulticastSubscriptionService for {0}", bus.Endpoint.Address);
+
+			var consumerInstance = new SubscriptionMessageConsumer(_coordinator, _network);
+
+			_unsubscribeAction = _subscriptionBus.SubscribeInstance(consumerInstance);
+		}
+
+		public void Stop()
+		{
+			if(_unsubscribeAction != null)
+			{
+				_unsubscribeAction();
+				_unsubscribeAction = null;
+			}
+
+			if (_subscriptionBus != null)
+			{
+				_subscriptionBus.Dispose();
+				_subscriptionBus = null;
+			}
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				Stop();
+			}
+
+			_disposed = true;
+		}
+
+		~MulticastSubscriptionService()
+		{
+			Dispose(false);
+		}
+	}
+
+
 
 	public class MulticastSubscriptionClient :
 		IBusService

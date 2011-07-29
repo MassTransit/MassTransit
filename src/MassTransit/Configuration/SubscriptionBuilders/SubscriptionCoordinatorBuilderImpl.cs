@@ -14,34 +14,49 @@ namespace MassTransit.SubscriptionBuilders
 {
 	using System;
 	using System.Collections.Generic;
+	using Magnum.Extensions;
 	using Subscriptions.Coordinator;
 
 	public class SubscriptionCoordinatorBuilderImpl :
 		SubscriptionCoordinatorBuilder
 	{
 		readonly IServiceBus _bus;
-		string _network;
-		readonly IList<Func<IServiceBus, BusSubscriptionEventObserver>> _observers;
+		readonly string _network;
+		readonly IList<Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver>> _observers;
 
 		public SubscriptionCoordinatorBuilderImpl(IServiceBus bus, string network)
 		{
 			_bus = bus;
 			_network = network;
-			_observers = new List<Func<IServiceBus, BusSubscriptionEventObserver>>();
+			_observers = new List<Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver>>();
+		}
+
+		public string Network
+		{
+			get { return _network; }
+		}
+
+		public void SetObserverFactory(Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory)
+		{
+			_observers.Clear();
+			_observers.Add(observerFactory);
+		}
+
+		public void AddObserverFactory(Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory)
+		{
+			_observers.Add(observerFactory);
 		}
 
 		public SubscriptionCoordinatorBusService Build()
 		{
-			if(_observers.Count == 0)
-				_observers.Add(bus => new BusSubscriptionConnector(bus));
+			if (_observers.Count == 0)
+				_observers.Add((bus,coordinator) => new BusSubscriptionConnector(bus));
 
-			return new SubscriptionCoordinatorBusService(_network, _observers);
-		}
+			var service = new SubscriptionCoordinatorBusService(_network);
 
-		public void SetObserverFactory(Func<IServiceBus, BusSubscriptionEventObserver> observerFactory)
-		{
-			_observers.Clear();
-			_observers.Add(observerFactory);
+			_observers.Each(x => service.AddObserver(x(_bus, service)));
+
+			return service;
 		}
 	}
 }

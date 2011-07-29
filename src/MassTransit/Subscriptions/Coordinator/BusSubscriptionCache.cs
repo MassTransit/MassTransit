@@ -13,19 +13,19 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
 	using System.Collections.Generic;
-	using MassTransit.Subscriptions.Messages;
+	using Messages;
 	using log4net;
 
 	public class BusSubscriptionCache
 	{
+		readonly BusSubscriptionEventObserver _observer;
 		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionCache));
-		readonly IEnumerable<BusSubscriptionEventObserver> _observers;
 
 		readonly IDictionary<string, BusSubscription> _typeActors;
 
-		public BusSubscriptionCache(IEnumerable<BusSubscriptionEventObserver> observers)
+		public BusSubscriptionCache(BusSubscriptionEventObserver observer)
 		{
-			_observers = observers;
+			_observer = observer;
 			_typeActors = new Dictionary<string, BusSubscription>();
 		}
 
@@ -34,7 +34,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			BusSubscription busSubscription;
 			if (!_typeActors.TryGetValue(message.MessageName, out busSubscription))
 			{
-				busSubscription = new BusSubscription(message.MessageName, _observers);
+				busSubscription = new BusSubscription(message.MessageName, _observer);
 				_typeActors.Add(message.MessageName, busSubscription);
 			}
 

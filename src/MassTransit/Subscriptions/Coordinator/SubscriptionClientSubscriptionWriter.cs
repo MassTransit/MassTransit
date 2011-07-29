@@ -13,18 +13,18 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
-	using MassTransit.Services.Subscriptions.Messages;
+	using Services.Subscriptions.Messages;
 	using Stact;
-	using MassTransit.Util;
+	using Util;
 
-	public class EndpointSubscriptionWriter :
+	public class SubscriptionClientSubscriptionWriter :
 		Actor
 	{
 		readonly IEndpoint _endpoint;
 		readonly string _network;
 		readonly Uri _sourceAddress;
 
-		public EndpointSubscriptionWriter(IEndpoint endpoint, Uri sourceAddress, string network)
+		public SubscriptionClientSubscriptionWriter(IEndpoint endpoint, Uri sourceAddress, string network)
 		{
 			_endpoint = endpoint;
 			_sourceAddress = sourceAddress;
@@ -32,7 +32,7 @@ namespace MassTransit.Subscriptions.Coordinator
 		}
 
 		[UsedImplicitly]
-		public void Handle(Message<Messages.AddSubscription> message)
+		public void Handle(Message<Messages.AddPeerSubscription> message)
 		{
 			var subscriptionInformation = new SubscriptionInformation(message.Body.PeerId,
 				message.Body.MessageNumber, message.Body.MessageName, null, message.Body.EndpointUri);
@@ -43,7 +43,7 @@ namespace MassTransit.Subscriptions.Coordinator
 		}
 
 		[UsedImplicitly]
-		public void Handle(Message<Messages.RemoveSubscription> message)
+		public void Handle(Message<Messages.RemovePeerSubscription> message)
 		{
 			var subscriptionInformation = new SubscriptionInformation(message.Body.PeerId,
 				message.Body.MessageNumber, message.Body.MessageName, null, message.Body.EndpointUri);

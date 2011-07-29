@@ -15,25 +15,27 @@ namespace MassTransit.Subscriptions.Coordinator
 	using System;
 	using System.Collections.Generic;
 	using Magnum.Extensions;
-	using MassTransit.Subscriptions.Messages;
+	using Messages;
 	using Stact;
-	using MassTransit.Util;
+	using Util;
 	using log4net;
 
 	public class PeerCache :
 		Actor
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (PeerCache));
-		readonly ActorFactory<PeerActor> _factory;
+		readonly ActorFactory<PeerHandler> _peerHandlerFactory;
 		readonly IDictionary<Guid, Uri> _peerIds;
 		readonly IDictionary<Uri, ActorInstance> _peers;
+		readonly EndpointSubscriptionCache _endpointSubscriptionCache;
 
-		public PeerCache(UntypedChannel output)
+		public PeerCache(BusSubscriptionEventObserver observer)
 		{
 			_peers = new Dictionary<Uri, ActorInstance>();
 			_peerIds = new Dictionary<Guid, Uri>();
+			_endpointSubscriptionCache = new EndpointSubscriptionCache(observer);
 
-			_factory = ActorFactory.Create((f, s, i) => new PeerActor(i, output));
+			_peerHandlerFactory = ActorFactory.Create((f, s, i) => new PeerHandler(i, observer));
 		}
 
 		[UsedImplicitly]
@@ -42,46 +44,74 @@ namespace MassTransit.Subscriptions.Coordinator
 			_peers.Values.Each(x => x.ExitOnDispose(30.Seconds()).Dispose());
 		}
 
-		public void Handle(Message<AddSubscription> message)
+		public void Handle(Message<AddPeer> message)
+		{
+			WithPeer(message.Body.PeerId, message.Body.PeerUri, x =>
+				{
+					if(_log.IsDebugEnabled)
+						_log.DebugFormat("AddPeer: {0}, {1}", message.Body.PeerId, message.Body.PeerUri);
+
+					x.Send(message);
+				}, true);
+		}
+
+		public void Handle(Message<RemovePeer> message)
+		{
+			_endpointSubscriptionCache.Send(message.Body);
+			
+			WithPeer(message.Body.PeerId, message.Body.PeerUri, x => x.Send(message), false);
+		}
+
+		public void Handle(Message<AddPeerSubscription> message)
+		{
+			WithPeer(message.Body.PeerId, x =>
+				{
+					if (_log.IsDebugEnabled)
+						_log.DebugFormat("AddPeerSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
+							message.Body.PeerId);
+
+					_endpointSubscriptionCache.Send(message.Body);
+
+					x.Send(message);
+				});
+		}
+
+		public void Handle(Message<RemovePeerSubscription> message)
+		{
+			WithPeer(message.Body.PeerId, x =>
+				{
+					if (_log.IsDebugEnabled)
+						_log.DebugFormat("RemovePeerSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
+							message.Body.PeerId);
+
+					_endpointSubscriptionCache.Send(message.Body);
+
+					x.Send(message);
+				});
+		}
+
+		void WithPeer(Guid peerId, Action<ActorInstance> callback)
 		{
 			Uri peerUri;
-			if (_peerIds.TryGetValue(message.Body.PeerId, out peerUri))
+			if (_peerIds.TryGetValue(peerId, out peerUri))
 			{
-				ActorInstance peer;
-				if (!_peers.TryGetValue(peerUri, out peer))
-				{
-					peer = _factory.GetActor();
-					peer.Send(new InitializePeer(message.Body.PeerId, peerUri));
-					_peers.Add(peerUri, peer);
-				}
-
-				peer.Send(message);
-
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("AddSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
-						message.Body.PeerId);
+				WithPeer(peerId, peerUri, callback, false);
 			}
 		}
 
-		public void Handle(Message<RemoveSubscription> message)
+		void WithPeer(Guid peerId, Uri controlUri, Action<ActorInstance> callback, bool createIfMissing)
 		{
-			Uri peerUri;
-			if (_peerIds.TryGetValue(message.Body.PeerId, out peerUri))
+			ActorInstance peer;
+			if (!_peers.TryGetValue(controlUri, out peer) && createIfMissing)
 			{
-				ActorInstance peer;
-				if (_peers.TryGetValue(peerUri, out peer))
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("RemoveSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
-							message.Body.PeerId);
-					peer.Send(message);
-				}
-				else
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("RemoveSubscription(unknown): {0}, {1}", message.Body.MessageName, message.Body.SubscriptionId);
-				}
+				peer = _peerHandlerFactory.GetActor();
+				peer.Send(new InitializePeerHandler(peerId, controlUri));
+				_peers.Add(controlUri, peer);
+				_peerIds[peerId] = controlUri;
 			}
+
+			if (peer != null)
+				callback(peer);
 		}
 	}
 }

@@ -13,11 +13,10 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
-	using System.Collections.Generic;
 	using Magnum;
-	using MassTransit.Subscriptions.Messages;
-	using MassTransit.Pipeline;
-	using MassTransit.Services.Subscriptions.Messages;
+	using Messages;
+	using Pipeline;
+	using Services.Subscriptions.Messages;
 	using log4net;
 
 	public class BusSubscriptionEventListener :
@@ -26,14 +25,12 @@ namespace MassTransit.Subscriptions.Coordinator
 		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionEventListener));
 		readonly BusSubscriptionCache _busSubscriptionCache;
 		readonly Uri _endpointUri;
-		readonly IEnumerable<BusSubscriptionEventObserver> _observers;
 
-		public BusSubscriptionEventListener(IServiceBus bus, IEnumerable<BusSubscriptionEventObserver> observers)
+		public BusSubscriptionEventListener(IServiceBus bus, BusSubscriptionEventObserver observer)
 		{
-			_observers = new List<BusSubscriptionEventObserver>(observers);
 			_endpointUri = bus.Endpoint.Address.Uri;
 
-			_busSubscriptionCache = new BusSubscriptionCache(_observers);
+			_busSubscriptionCache = new BusSubscriptionCache(observer);
 		}
 
 		public UnsubscribeAction SubscribedTo<TMessage>()
@@ -92,16 +89,16 @@ namespace MassTransit.Subscriptions.Coordinator
 
 		bool IgnoreMessageType(Type messageType)
 		{
-			if (messageType == typeof (Services.Subscriptions.Messages.AddSubscription))
-				return true;
-			if (messageType == typeof (Services.Subscriptions.Messages.RemoveSubscription))
-				return true;
-			if (messageType == typeof (AddSubscriptionClient))
-				return true;
-			if (messageType == typeof (RemoveSubscriptionClient))
-				return true;
-			if (messageType == typeof (SubscriptionRefresh))
-				return true;
+//			if (messageType == typeof (AddSubscription))
+//				return true;
+//			if (messageType == typeof (RemoveSubscription))
+//				return true;
+//			if (messageType == typeof (AddSubscriptionClient))
+//				return true;
+//			if (messageType == typeof (RemoveSubscriptionClient))
+//				return true;
+//			if (messageType == typeof (SubscriptionRefresh))
+//				return true;
 
 			return false;
 		}

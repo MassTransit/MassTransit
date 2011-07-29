@@ -13,7 +13,7 @@
 namespace MassTransit.Subscriptions.Messages
 {
 	public class UnsubscribeFromMessage :
-		SubscribeMessage,
+		SubscriptionMessage,
 		UnsubscribeFrom
 	{
 	}
