@@ -36,6 +36,10 @@ namespace MassTransit.Testing.TestActions
 		{
 			IServiceBus bus = _busAccessor(scenario);
 
+			// give the message subscription time to show up on the InputBus, but don't require
+			// it since it might be a negative test
+			scenario.InputBus.HasSubscription<TMessage>();
+
 			bus.Publish(_message, context => _callback(scenario, context));
 		}
 

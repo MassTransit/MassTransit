@@ -16,7 +16,7 @@ namespace MassTransit.Testing.ScenarioBuilders
 	using BusConfigurators;
 	using Magnum.Extensions;
 	using Scenarios;
-	using Services.Subscriptions;
+	using Subscriptions.Coordinator;
 	using Transports;
 
 	public class LoopbackLocalRemoteBusScenarioBuilder :
@@ -29,6 +29,8 @@ namespace MassTransit.Testing.ScenarioBuilders
 		readonly ServiceBusConfiguratorImpl _localConfigurator;
 		readonly ServiceBusConfiguratorImpl _remoteConfigurator;
 		readonly ServiceBusDefaultSettings _settings;
+		SubscriptionLoopback _localLoopback;
+		SubscriptionLoopback _remoteLoopback;
 
 		public LoopbackLocalRemoteBusScenarioBuilder()
 		{
@@ -57,31 +59,41 @@ namespace MassTransit.Testing.ScenarioBuilders
 		{
 			IEndpointFactory endpointFactory = BuildEndpointFactory();
 
-			var context = new LocalRemoteTestScenarioImpl(endpointFactory);
+			var scenario = new LocalRemoteTestScenarioImpl(endpointFactory);
 
-			AddSubscriptionService();
+			BuildLocalBus(scenario);
+			BuildRemoteBus(scenario);
 
-			_localConfigurator.ChangeSettings(x => { x.EndpointCache = context.EndpointCache; });
-			context.LocalBus = _localConfigurator.CreateServiceBus();
+			_localLoopback.SetTargetCoordinator(_remoteLoopback.Coordinator);
+			_remoteLoopback.SetTargetCoordinator(_localLoopback.Coordinator);
 
-			_remoteConfigurator.ChangeSettings(x => { x.EndpointCache = context.EndpointCache; });
-			context.RemoteBus = _remoteConfigurator.CreateServiceBus();
-
-			return context;
+			return scenario;
 		}
 
-		void AddSubscriptionService()
+		protected virtual void BuildLocalBus(LocalRemoteTestScenarioImpl scenario)
 		{
-			var subscriptionService = new LocalSubscriptionService();
+			_localConfigurator.ChangeSettings(x => { x.EndpointCache = scenario.EndpointCache; });
 
-			Action<ServiceBusConfigurator> bindSubscriptions = configurator =>
+			_localConfigurator.AddSubscriptionObserver((bus, coordinator) =>
 				{
-					configurator.AddService(BusServiceLayer.Session, () => new SubscriptionPublisher(subscriptionService));
-					configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(subscriptionService));
-				};
+					_localLoopback = new SubscriptionLoopback(bus, coordinator);
+					return _localLoopback;
+				});
 
-			bindSubscriptions(_localConfigurator);
-			bindSubscriptions(_remoteConfigurator);
+			scenario.LocalBus = _localConfigurator.CreateServiceBus();
+		}
+
+		protected virtual void BuildRemoteBus(LocalRemoteTestScenarioImpl scenario)
+		{
+			_remoteConfigurator.ChangeSettings(x => { x.EndpointCache = scenario.EndpointCache; });
+
+			_remoteConfigurator.AddSubscriptionObserver((bus, coordinator) =>
+				{
+					_remoteLoopback = new SubscriptionLoopback(bus, coordinator);
+					return _remoteLoopback;
+				});
+
+			scenario.RemoteBus = _remoteConfigurator.CreateServiceBus();
 		}
 	}
 }
