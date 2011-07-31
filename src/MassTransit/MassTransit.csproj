@@ -436,6 +436,7 @@
     <Compile Include="Testing\Factories\SagaTestFactoryImpl.cs" />
     <Compile Include="Testing\Instances\SagaTestInstance.cs" />
     <Compile Include="Testing\LocalRemoteTestScenario.cs" />
+    <Compile Include="Testing\PipelineSinkLocator.cs" />
     <Compile Include="Testing\PublishedMessage.cs" />
     <Compile Include="Testing\PublishedMessageImpl.cs" />
     <Compile Include="Testing\PublishedMessageList.cs" />
@@ -446,6 +447,7 @@
     <Compile Include="Testing\SagaListImpl.cs" />
     <Compile Include="Testing\SagaSubjectExtensions.cs" />
     <Compile Include="Testing\SagaTest.cs" />
+    <Compile Include="Testing\ScenarioAssertionExtensions.cs" />
     <Compile Include="Testing\ScenarioBuilders\BusScenarioBuilder.cs" />
     <Compile Include="Testing\ScenarioBuilders\BusScenarioBuilderImpl.cs" />
     <Compile Include="Testing\ScenarioBuilders\EndpointScenarioBuilder.cs" />
@@ -770,7 +772,6 @@
     <Compile Include="Serialization\ExtensionsToMessageEnvelope.cs" />
     <Compile Include="ServiceBusExtensions.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionInformation.cs" />
-    <Compile Include="Services\Subscriptions\LocalSubscriptionService.cs" />
     <Compile Include="Services\Timeout\ScheduledTimeout.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />
     <Compile Include="Saga\InMemorySagaRepository.cs" />

@@ -15,7 +15,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 	using System;
 	using BusConfigurators;
 	using MassTransit.Tests.TextFixtures;
-	using Services.Subscriptions;
 	using Subscriptions.Coordinator;
 
 	public class MsmqEndpointTestFixture :
@@ -24,8 +23,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		protected Uri LocalEndpointUri { get; set; }
 		protected Uri LocalErrorUri { get; set; }
 		protected Uri RemoteEndpointUri { get; set; }
-
-		ISubscriptionService SubscriptionService { get; set; }
 
 		protected IServiceBus LocalBus { get; set; }
 		protected IServiceBus RemoteBus { get; set; }
@@ -57,8 +54,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			LocalErrorEndpoint = EndpointCache.GetEndpoint(LocalErrorUri);
 			RemoteEndpoint = EndpointCache.GetEndpoint(RemoteEndpointUri);
 
-			SetupSubscriptionService();
-
 			LocalBus = ServiceBusFactory.New(ConfigureLocalBus);
 
 			RemoteBus = ServiceBusFactory.New(ConfigureRemoteBus);
@@ -89,13 +84,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 					return _remoteLoopback;
 				});
 		}
-
-
-		void SetupSubscriptionService()
-		{
-			SubscriptionService = new LocalSubscriptionService();
-		}
-
 
 		protected IEndpoint LocalEndpoint { get; set; }
 		protected IEndpoint LocalErrorEndpoint { get; set; }
