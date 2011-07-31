@@ -13,8 +13,10 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using System;
+	using BusConfigurators;
 	using MassTransit.Tests.TextFixtures;
 	using Services.Subscriptions;
+	using Subscriptions.Coordinator;
 
 	public class MsmqEndpointTestFixture :
 		EndpointTestFixture<MsmqTransportFactory>
@@ -57,24 +59,37 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 			SetupSubscriptionService();
 
-			LocalBus = ServiceBusFactory.New(x =>
-				{
-					ConnectSubscriptionService(x, SubscriptionService);
-					x.ReceiveFrom(LocalEndpointUri);
-				});
+			LocalBus = ServiceBusFactory.New(ConfigureLocalBus);
 
-			RemoteBus = ServiceBusFactory.New(x =>
-				{
-					ConnectSubscriptionService(x, SubscriptionService);
-					x.ReceiveFrom(RemoteEndpointUri);
-				});
+			RemoteBus = ServiceBusFactory.New(ConfigureRemoteBus);
+
+			_localLoopback.SetTargetCoordinator(_remoteLoopback.Coordinator);
+			_remoteLoopback.SetTargetCoordinator(_localLoopback.Coordinator);
 		}
 
-		protected void Purge(IEndpointAddress address)
+		SubscriptionLoopback _localLoopback;
+		SubscriptionLoopback _remoteLoopback;
+
+		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
-			IEndpointManagement management = MsmqEndpointManagement.New(address.Uri);
-			management.Purge();
+			configurator.ReceiveFrom(LocalEndpointUri);
+			configurator.AddSubscriptionObserver((bus, coordinator) =>
+				{
+					_localLoopback = new SubscriptionLoopback(bus, coordinator);
+					return _localLoopback;
+				});
 		}
+
+		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
+		{
+			configurator.ReceiveFrom(RemoteEndpointUri);
+			configurator.AddSubscriptionObserver((bus, coordinator) =>
+				{
+					_remoteLoopback = new SubscriptionLoopback(bus, coordinator);
+					return _remoteLoopback;
+				});
+		}
+
 
 		void SetupSubscriptionService()
 		{

@@ -16,8 +16,9 @@ namespace MassTransit.Tests
     using Messages;
 	using NUnit.Framework;
 	using TextFixtures;
+    using TestFramework;
 
-    [TestFixture]
+	[TestFixture]
 	public class MessageQueueEndpoint_MeetsCriteria :
 		LoopbackLocalAndRemoteTestFixture
 	{
@@ -32,6 +33,8 @@ namespace MassTransit.Tests
 			LocalBus.SubscribeHandler<PingMessage>(
 				(msg)=> {workDid = true; fm.Set(msg); },
 				delegate { return true; });
+
+			RemoteBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			RemoteBus.Publish(_message);
 		    fm.IsAvailable(1.Seconds());

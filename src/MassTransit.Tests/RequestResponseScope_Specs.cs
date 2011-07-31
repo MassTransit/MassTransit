@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,14 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using System;
-	using System.Threading;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using Messages;
 	using NUnit.Framework;
+	using TestFramework;
 	using TextFixtures;
-
 
 	[TestFixture]
 	public class When_creating_a_simple_request_response_handler :
@@ -30,7 +28,16 @@ namespace MassTransit.Tests
 		{
 			var ponged = new FutureMessage<PongMessage>();
 
-			RemoteBus.SubscribeHandler<PingMessage>(x => RemoteBus.Publish(new PongMessage(x.CorrelationId)));
+			RemoteBus.SubscribeHandler<PingMessage>(x =>
+				{
+					// timing issue here it seems, but that's what Respond() is for, to RESPOND to messages
+					// and not publish responses
+					RemoteBus.ShouldHaveSubscriptionFor<PongMessage>();
+
+					RemoteBus.Publish(new PongMessage(x.CorrelationId));
+				});
+
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			var ping = new PingMessage();
 
@@ -43,7 +50,7 @@ namespace MassTransit.Tests
 							ponged.Set(message);
 						});
 
-					x.HandleTimeout(5.Seconds(), () => { });
+					x.HandleTimeout(8.Seconds(), () => { });
 				});
 
 			ponged.IsAvailable(8.Seconds()).ShouldBeTrue("No ping response received");

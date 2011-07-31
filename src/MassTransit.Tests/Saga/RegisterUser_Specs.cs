@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,8 +13,10 @@
 namespace MassTransit.Tests.Saga
 {
 	using System.Diagnostics;
+	using MassTransit.Saga;
 	using Messages;
 	using NUnit.Framework;
+	using TestFramework;
 	using TextFixtures;
 
 	[TestFixture]
@@ -25,13 +27,21 @@ namespace MassTransit.Tests.Saga
 		{
 			base.EstablishContext();
 
-			var sagaRepository = SetupSagaRepository<RegisterUserSaga>();
+			InMemorySagaRepository<RegisterUserSaga> sagaRepository = SetupSagaRepository<RegisterUserSaga>();
 
 			// this just shows that you can easily respond to the message
 			RemoteBus.SubscribeHandler<SendUserVerificationEmail>(
-				x => RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email)));
+				x =>
+					{
+						RemoteBus.ShouldHaveSubscriptionFor<UserVerificationEmailSent>();
+						RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email));
+					});
 
-			RemoteBus.SubscribeSaga<RegisterUserSaga>(sagaRepository);
+			RemoteBus.SubscribeSaga(sagaRepository);
+
+			LocalBus.ShouldHaveSubscriptionFor<RegisterUser>();
+			LocalBus.ShouldHaveSubscriptionFor<UserVerificationEmailSent>();
+			LocalBus.ShouldHaveSubscriptionFor<UserValidated>();
 		}
 
 		[Test]
@@ -53,9 +63,5 @@ namespace MassTransit.Tests.Saga
 
 			Assert.That(complete, Is.True, "Should have been completed by now");
 		}
-
-
-        
-
 	}
 }

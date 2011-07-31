@@ -68,6 +68,8 @@ namespace MassTransit.Tests.Saga
 		{
 			using (_bus.SubscribeInstance(this).Disposable())
 			{
+				Thread.Sleep(5.Seconds());
+
 				_bus.Publish(new UserValidated(CorrelationId));
 
 				var handles = new WaitHandle[] {_completed};

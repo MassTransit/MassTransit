@@ -46,6 +46,10 @@ namespace MassTransit.Tests
 					RemoteBus.Context().Respond(pong.Message);
 				});
 
+			RemoteBus.ShouldHaveRemoteSubscriptionFor<PongMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PongMessage>();
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+
 			LocalBus.Publish(ping);
 
 			pong.IsAvailable(8.Seconds()).ShouldBeTrue("No pong generated");
@@ -213,8 +217,11 @@ namespace MassTransit.Tests
 		[Test]
 		public void The_method_should_be_called_for_each_destination_endpoint_when_there_are_multiple()
 		{
-			LocalBus.SubscribeHandler<PingMessage>(x => { });
 			RemoteBus.SubscribeHandler<PingMessage>(x => { });
+
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+
+			LocalBus.SubscribeHandler<PingMessage>(x => { });
 
 			var ping = new PingMessage();
 

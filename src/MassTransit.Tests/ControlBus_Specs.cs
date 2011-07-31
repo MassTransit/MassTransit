@@ -12,69 +12,38 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
+	using BusConfigurators;
 	using Magnum.TestFramework;
-	using MassTransit.Services.Subscriptions;
-	using MassTransit.Transports;
-	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
 	using TextFixtures;
 
 	[TestFixture]
 	public class When_creating_a_bus_with_a_separate_control_bus :
-		EndpointTestFixture<LoopbackTransportFactory>
+		LoopbackLocalAndRemoteTestFixture
 	{
-		public ISubscriptionService SubscriptionService { get; private set; }
-		public IServiceBus LocalBus { get; private set; }
 		public IServiceBus LocalControlBus { get; private set; }
-		public IServiceBus RemoteBus { get; private set; }
 		public IServiceBus RemoteControlBus { get; private set; }
 
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
-			SetupSubscriptionService();
-
-			LocalBus = ServiceBusFactory.New(x =>
-				{
-					ConnectSubscriptionService(x, SubscriptionService);
-					x.ReceiveFrom("loopback://localhost/mt_client");
-					x.UseControlBus();
-				});
-
-			RemoteBus = ServiceBusFactory.New(x =>
-				{
-					ConnectSubscriptionService(x, SubscriptionService);
-					x.ReceiveFrom("loopback://localhost/mt_server");
-					x.UseControlBus();
-				});
-
 			LocalControlBus = LocalBus.ControlBus;
 			RemoteControlBus = RemoteBus.ControlBus;
 		}
 
-		protected override void TeardownContext()
+		protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
-			RemoteBus.Dispose();
-			RemoteBus = null;
+			base.ConfigureLocalBus(configurator);
 
-			RemoteControlBus.Dispose();
-			RemoteControlBus = null;
-
-			LocalBus.Dispose();
-			LocalBus = null;
-
-			LocalControlBus.Dispose();
-			LocalControlBus = null;
-
-			SubscriptionService = null;
-
-			base.TeardownContext();
+			configurator.UseControlBus();
 		}
 
-		void SetupSubscriptionService()
+		protected override void ConfigureRemoteBus(ServiceBusConfigurator configurator)
 		{
-			SubscriptionService = new LocalSubscriptionService();
+			base.ConfigureRemoteBus(configurator);
+
+			configurator.UseControlBus();
 		}
 
 		[Test]

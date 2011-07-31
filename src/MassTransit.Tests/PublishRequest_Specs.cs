@@ -19,6 +19,7 @@ namespace MassTransit.Tests
 	using Messages;
 	using NUnit.Framework;
 	using TextFixtures;
+	using TestFramework;
 
 	[TestFixture]
 	public class Publishing_a_simple_request :
@@ -35,6 +36,8 @@ namespace MassTransit.Tests
 					pingReceived.Set(x);
 					RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(x.CorrelationId));
 				});
+
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			var ping = new PingMessage();
 
@@ -68,6 +71,8 @@ namespace MassTransit.Tests
 					RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(x.CorrelationId));
 				});
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			
 			var ping = new PingMessage();
 
 			var timeout = 8.Seconds();
@@ -103,6 +108,8 @@ namespace MassTransit.Tests
 					RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(x.CorrelationId));
 				});
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			
 			var ping = new PingMessage();
 
 			var timeout = 8.Seconds();
@@ -129,6 +136,7 @@ namespace MassTransit.Tests
 			var pingReceived = new FutureMessage<PingMessage>();
 
 			RemoteBus.SubscribeHandler<PingMessage>(pingReceived.Set);
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			var ping = new PingMessage();
 
@@ -156,6 +164,7 @@ namespace MassTransit.Tests
 			var callbackCalled = new FutureMessage<IAsyncResult>();
 
 			RemoteBus.SubscribeHandler<PingMessage>(pingReceived.Set);
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			var ping = new PingMessage();
 
@@ -190,6 +199,7 @@ namespace MassTransit.Tests
 				pingReceived.Set(message);
 				RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(message.CorrelationId));
 			});
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			var ping = new PingMessage();
 
@@ -230,6 +240,8 @@ namespace MassTransit.Tests
 				RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(message.CorrelationId));
 			});
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			
 			var ping = new PingMessage();
 
 			var timeout = 8.Seconds();

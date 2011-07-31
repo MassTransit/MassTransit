@@ -38,6 +38,8 @@ namespace MassTransit.Tests
 		{
 			RemoteBus.SubscribeConsumer<TestMessageConsumer<PingMessage>>();
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
 
@@ -51,6 +53,7 @@ namespace MassTransit.Tests
 
 			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
 			RemoteBus.SubscribeInstance(consumer);
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			LocalBus.Publish(message);
 
@@ -66,6 +69,8 @@ namespace MassTransit.Tests
 			TestMessageConsumer<PingMessage> messageConsumer = new TestMessageConsumer<PingMessage>();
 			RemoteBus.SubscribeHandler<PingMessage>(messageConsumer.MessageHandler);
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
 
@@ -79,6 +84,8 @@ namespace MassTransit.Tests
 			var consumer = new TestMessageConsumer<PingMessage>();
 			RemoteBus.SubscribeInstance(consumer);
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+
 			var message = new PingMessage();
 			LocalBus.Publish(message);
 
@@ -91,6 +98,8 @@ namespace MassTransit.Tests
 			TestMessageConsumer<PingMessage> messageConsumer = new TestMessageConsumer<PingMessage>();
 			RemoteBus.SubscribeHandler<PingMessage>(messageConsumer.MessageHandler);
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
 
@@ -106,6 +115,8 @@ namespace MassTransit.Tests
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 			RemoteBus.SubscribeInstance(consumer);
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
 
@@ -119,6 +130,8 @@ namespace MassTransit.Tests
 			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(Guid.NewGuid());
 			RemoteBus.SubscribeInstance(consumer);
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
 

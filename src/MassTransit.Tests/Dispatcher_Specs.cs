@@ -12,12 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using System.Collections;
 	using Magnum.Extensions;
 	using Messages;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using TextFixtures;
+	using TestFramework;
 
 	[TestFixture]
 	public class When_a_message_is_delivered_to_the_service_bus :
@@ -52,6 +51,7 @@ namespace MassTransit.Tests
 			PingHandler handler = new PingHandler(fm);
 
 			LocalBus.SubscribeInstance(handler);
+			RemoteBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			int old = PingHandler.Pinged;
 
@@ -66,6 +66,7 @@ namespace MassTransit.Tests
 			var fm = new FutureMessage<PingMessage>();
 
 			LocalBus.SubscribeConsumer<PingHandler>(() => new PingHandler(fm));
+			RemoteBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			int old = PingHandler.Pinged;
 
