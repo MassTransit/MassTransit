@@ -14,10 +14,9 @@ namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
 	using BusConfigurators;
-	using Exceptions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Services.Subscriptions;
+	using Subscriptions.Coordinator;
 
 	[TestFixture]
 	public class LocalAndRemoteTestFixture<TTransportFactory> :
@@ -27,10 +26,11 @@ namespace MassTransit.TestFramework.Fixtures
 		[TestFixtureSetUp]
 		public void LocalAndRemoteTestFixtureSetup()
 		{
-			SetupSubscriptionService();
+			LocalBus = SetupServiceBus(LocalUri, ConfigureLocalBus);
+			RemoteBus = SetupServiceBus(RemoteUri, ConfigureRemoteBus);
 
-			LocalBus = SetupServiceBus(LocalUri);
-			RemoteBus = SetupServiceBus(RemoteUri);
+			_localLoopback.SetTargetCoordinator(_remoteLoopback.Coordinator);
+			_remoteLoopback.SetTargetCoordinator(_localLoopback.Coordinator);
 		}
 
 		[TestFixtureTearDown]
@@ -38,7 +38,6 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			LocalBus = null;
 			RemoteBus = null;
-			SubscriptionService = null;
 		}
 
 		protected Uri LocalUri { get; set; }
@@ -46,22 +45,26 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected IServiceBus LocalBus { get; private set; }
 		protected IServiceBus RemoteBus { get; private set; }
-		protected ISubscriptionService SubscriptionService { get; private set; }
 
-		protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
+		SubscriptionLoopback _localLoopback;
+		SubscriptionLoopback _remoteLoopback;
+
+		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
-			if (SubscriptionService == null)
-				throw new ConfigurationException("The subscription service must be configured before creating a service bus");
-
-			base.ConfigureServiceBus(uri, configurator);
-
-			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionPublisher(SubscriptionService));
-			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(SubscriptionService));
+			configurator.AddSubscriptionObserver((bus, coordinator) =>
+				{
+					_localLoopback = new SubscriptionLoopback(bus, coordinator);
+					return _localLoopback;
+				});
 		}
 
-		void SetupSubscriptionService()
+		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
 		{
-			SubscriptionService = new LocalSubscriptionService();
+			configurator.AddSubscriptionObserver((bus, coordinator) =>
+				{
+					_remoteLoopback = new SubscriptionLoopback(bus, coordinator);
+					return _remoteLoopback;
+				});
 		}
 	}
 }

@@ -25,6 +25,8 @@ namespace MassTransit.Tests.Examples
 		{
 			Consumer = new ConsumerOf<SimpleMessage>();
 			RemoteBus.SubscribeInstance(Consumer);
+
+			LocalBus.ShouldHaveSubscriptionFor<SimpleMessage>();
 		}
 
 		protected ConsumerOf<SimpleMessage> Consumer { get; private set; }

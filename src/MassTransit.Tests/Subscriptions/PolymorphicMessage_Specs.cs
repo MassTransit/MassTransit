@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Subscriptions
 {
-	using System.Diagnostics;
 	using BusConfigurators;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
@@ -31,15 +30,15 @@ namespace MassTransit.Tests.Subscriptions
 		{
 			base.EstablishContext();
 
-			RemoteBus.ShouldHaveSubscriptionFor<Message>();
-			RemoteBus.ShouldHaveSubscriptionFor<BaseMessage>();
+			LocalBus.ShouldHaveSubscriptionFor<Message>();
+			LocalBus.ShouldHaveSubscriptionFor<BaseMessage>();
 
 			LocalBus.Publish(new Message());
 		}
 
 		protected override void ConfigureRemoteBus(ServiceBusConfigurator configurator)
 		{
-			base.ConfigureLocalBus(configurator);
+			base.ConfigureRemoteBus(configurator);
 
 			_baseMessage = new Future<BaseMessage>();
 			_message = new Future<Message>();

@@ -30,6 +30,8 @@ namespace MassTransit.Tests
 
 			RemoteBus.SubscribeHandler<FirstMessageContract>(first.Complete);
 
+			LocalBus.ShouldHaveSubscriptionFor<FirstMessageContract>();
+			
 			PipelineViewer.Trace(RemoteBus.InboundPipeline);
 
 			var message = new SomeMessageContract("Joe", 27);
@@ -50,8 +52,7 @@ namespace MassTransit.Tests
 			RemoteBus.SubscribeHandler<FirstMessageContract>(first.Complete);
 			LocalBus.SubscribeHandler<SecondMessageContract>(second.Complete);
 
-			PipelineViewer.Trace(RemoteBus.InboundPipeline);
-			PipelineViewer.Trace(LocalBus.InboundPipeline);
+			LocalBus.ShouldHaveSubscriptionFor<FirstMessageContract>();
 
 			var message = new SomeMessageContract("Joe", 27);
 

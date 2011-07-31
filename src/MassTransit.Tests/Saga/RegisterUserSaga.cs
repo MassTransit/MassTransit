@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Saga
 	using MassTransit.Saga;
 	using MassTransit.Services.Timeout.Messages;
 	using Messages;
+	using TestFramework;
 
 	/// <summary>
 	/// 
@@ -94,6 +95,8 @@ namespace MassTransit.Tests.Saga
 
 			if (Email != message.Email)
 				throw new ArgumentException("The email address was not properly loaded.");
+
+			Bus.ShouldHaveSubscriptionFor<UserRegistrationPending>();
 
 			Bus.Publish(new UserRegistrationPending(CorrelationId));
 			Bus.Publish(new ScheduleTimeout(CorrelationId, 24.Hours().FromNow()));

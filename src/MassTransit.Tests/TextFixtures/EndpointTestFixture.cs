@@ -13,13 +13,11 @@
 namespace MassTransit.Tests.TextFixtures
 {
 	using System;
-	using BusConfigurators;
 	using Configurators;
 	using EndpointConfigurators;
 	using Exceptions;
 	using Magnum.Extensions;
 	using MassTransit.Saga;
-	using MassTransit.Services.Subscriptions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 
@@ -115,13 +113,6 @@ namespace MassTransit.Tests.TextFixtures
 				throw new ConfigurationException("The endpoint factory configurator has already been executed.");
 
 			configure(_endpointFactoryConfigurator);
-		}
-
-		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator,
-		                                          ISubscriptionService subscriptionService)
-		{
-			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionPublisher(subscriptionService));
-			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(subscriptionService));
 		}
 
 		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()

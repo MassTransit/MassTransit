@@ -13,7 +13,7 @@
 namespace MassTransit.Tests.TextFixtures
 {
 	using BusConfigurators;
-	using MassTransit.Services.Subscriptions;
+	using MassTransit.Subscriptions.Coordinator;
 	using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
 
@@ -21,7 +21,6 @@ namespace MassTransit.Tests.TextFixtures
 	public class LoopbackLocalAndRemoteTestFixture :
 		EndpointTestFixture<LoopbackTransportFactory>
 	{
-		public ISubscriptionService SubscriptionService { get; private set; }
 		public IServiceBus LocalBus { get; private set; }
 		public IServiceBus RemoteBus { get; private set; }
 
@@ -29,36 +28,35 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			base.EstablishContext();
 
-			SetupSubscriptionService();
+			LocalBus = ServiceBusFactory.New(ConfigureLocalBus);
 
-			LocalBus = ServiceBusFactory.New(x =>
-				{
-					ConnectSubscriptionService(x, SubscriptionService);
-					x.ReceiveFrom("loopback://localhost/mt_client");
+			RemoteBus = ServiceBusFactory.New(ConfigureRemoteBus);
 
-					ConfigureLocalBus(x);
-				});
-
-			RemoteBus = ServiceBusFactory.New(x =>
-				{
-					ConnectSubscriptionService(x, SubscriptionService);
-					x.ReceiveFrom("loopback://localhost/mt_server");
-
-					ConfigureRemoteBus(x);
-				});
+			_localLoopback.SetTargetCoordinator(_remoteLoopback.Coordinator);
+			_remoteLoopback.SetTargetCoordinator(_localLoopback.Coordinator);
 		}
+
+		SubscriptionLoopback _localLoopback;
+		SubscriptionLoopback _remoteLoopback;
 
 		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
+			configurator.ReceiveFrom("loopback://localhost/mt_client");
+			configurator.AddSubscriptionObserver((bus, coordinator) =>
+				{
+					_localLoopback = new SubscriptionLoopback(bus, coordinator);
+					return _localLoopback;
+				});
 		}
 
 		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
 		{
-		}
-
-		void SetupSubscriptionService()
-		{
-			SubscriptionService = new LocalSubscriptionService();
+			configurator.ReceiveFrom("loopback://localhost/mt_server");
+			configurator.AddSubscriptionObserver((bus, coordinator) =>
+				{
+					_remoteLoopback = new SubscriptionLoopback(bus, coordinator);
+					return _remoteLoopback;
+				});
 		}
 
 		protected override void TeardownContext()
@@ -68,8 +66,6 @@ namespace MassTransit.Tests.TextFixtures
 
 			LocalBus.Dispose();
 			LocalBus = null;
-
-			SubscriptionService = null;
 
 			base.TeardownContext();
 		}
