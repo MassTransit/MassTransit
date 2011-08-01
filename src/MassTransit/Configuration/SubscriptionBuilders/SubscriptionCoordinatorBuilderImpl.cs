@@ -52,7 +52,7 @@ namespace MassTransit.SubscriptionBuilders
 			if (_observers.Count == 0)
 				_observers.Add((bus,coordinator) => new BusSubscriptionConnector(bus));
 
-			var service = new SubscriptionCoordinatorBusService(_network);
+			var service = new SubscriptionCoordinatorBusService(_bus, _network);
 
 			_observers.Each(x => service.AddObserver(x(_bus, service)));
 

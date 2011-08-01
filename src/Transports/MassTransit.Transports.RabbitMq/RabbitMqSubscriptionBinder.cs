@@ -72,5 +72,9 @@ namespace MassTransit.Transports.RabbitMq
 				_bindings.Remove(message.SubscriptionId);
 			}
 		}
+
+		public void OnComplete()
+		{
+		}
 	}
 }

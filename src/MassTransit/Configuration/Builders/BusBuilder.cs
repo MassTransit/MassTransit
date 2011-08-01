@@ -13,6 +13,7 @@
 namespace MassTransit.Builders
 {
 	using System;
+	using BusServiceConfigurators;
 	using Configuration;
 
 	/// <summary>
@@ -31,6 +32,19 @@ namespace MassTransit.Builders
 		/// </summary>
 		/// <returns></returns>
 		IControlBus Build();
+
+		/// <summary>
+		/// Adds an action to be performed after bus creation to adjust settings, etc.
+		/// but before the bus is started.
+		/// </summary>
+		/// <param name="postCreateAction"></param>
+		void AddPostCreateAction(Action<ServiceBus> postCreateAction);
+
+		/// <summary>
+		/// Adds a bus service that will be started and stopped with the service bus 
+		/// </summary>
+		/// <param name="configurator"></param>
+		void AddBusServiceConfigurator(BusServiceConfigurator configurator);
 
 		/// <summary>
 		/// Used to match a builder with a specific type, to allow customization of class properties

@@ -14,6 +14,7 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using System.Collections.Generic;
+	using Magnum;
 	using Magnum.Extensions;
 	using Messages;
 	using Stact;
@@ -33,10 +34,20 @@ namespace MassTransit.Subscriptions.Coordinator
 		bool _disposed;
 		ActorInstance _peerCache;
 		UnsubscribeAction _unregister;
+		readonly Guid _clientId;
 
-		public SubscriptionCoordinatorBusService(string network)
+		public SubscriptionCoordinatorBusService(IServiceBus bus, string network)
 		{
+			_bus = bus;
+			_controlBus = bus.ControlBus;
+
+			_dataUri = bus.Endpoint.Address.Uri;
+			_controlUri = bus.ControlBus.Endpoint.Address.Uri;
+
 			_network = network;
+
+			_clientId = CombGuid.Generate();
+
 			_observers = new List<BusSubscriptionEventObserver>();
 
 			_unregister = () => true;
@@ -72,6 +83,21 @@ namespace MassTransit.Subscriptions.Coordinator
 				_peerCache.Send(message);
 		}
 
+		public string Network
+		{
+			get { return _network; }
+		}
+
+		public Guid ClientId
+		{
+			get { return _clientId; }
+		}
+
+		public Uri ControlUri
+		{
+			get { return _controlUri; }
+		}
+
 		public void OnSubscriptionAdded(SubscriptionAdded message)
 		{
 			lock (_observers)
@@ -82,6 +108,10 @@ namespace MassTransit.Subscriptions.Coordinator
 		{
 			lock (_observers)
 				_observers.Each(x => x.OnSubscriptionRemoved(message));
+		}
+
+		public void OnComplete()
+		{
 		}
 
 		public void Dispose()
@@ -100,7 +130,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
 			var connector = new BusSubscriptionConnector(bus);
 
-			_peerCache = ActorFactory.Create(() => new PeerCache(connector))
+			_peerCache = ActorFactory.Create(() => new PeerCache(connector, _clientId, _controlUri))
 				.GetActor();
 
 			ListenToBus(bus);
@@ -134,6 +164,9 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (_disposed) return;
 			if (disposing)
 			{
+				lock (_observers)
+					_observers.Each(x => x.OnComplete());
+
 			}
 
 			_disposed = true;

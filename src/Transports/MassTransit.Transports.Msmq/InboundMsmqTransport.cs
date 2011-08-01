@@ -68,8 +68,8 @@ namespace MassTransit.Transports.Msmq
 				{
 					using (MessageEnumerator enumerator = connection.Queue.GetMessageEnumerator2())
 					{
-						if (_log.IsDebugEnabled)
-							_log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Address, timeout);
+						// if (_log.IsDebugEnabled)
+						// _log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Address, timeout);
 
 						while (enumerator.MoveNext(timeout))
 						{

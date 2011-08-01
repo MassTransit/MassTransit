@@ -23,24 +23,46 @@ namespace MassTransit.Subscriptions.Coordinator
 		Consumes<RemoveSubscriptionClient>.Context,
 		Consumes<SubscriptionRefresh>.Context,
 		Consumes<AddSubscription>.Context,
-		Consumes<RemoveSubscription>.Context
+		Consumes<RemoveSubscription>.Context,
+		Consumes<AddPeerSubscription>.Context,
+		Consumes<RemovePeerSubscription>.Context,
+		Consumes<AddPeer>.Context,
+		Consumes<RemovePeer>.Context
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionMessageConsumer));
 		readonly BusSubscriptionCoordinator _coordinator;
 		readonly HashSet<Uri> _ignoredSourceAddresses;
 		readonly string _network;
+		readonly Guid _peerId;
 
 		public SubscriptionMessageConsumer(BusSubscriptionCoordinator coordinator, string network,
 		                                   params Uri[] ignoredSourceAddresses)
 		{
 			_coordinator = coordinator;
+			_peerId = coordinator.ClientId;
 			_network = network;
 			_ignoredSourceAddresses = new HashSet<Uri>(ignoredSourceAddresses);
 		}
 
+		public void Consume(IConsumeContext<AddPeer> context)
+		{
+			if (DiscardMessage(context, context.Message.PeerId))
+				return;
+
+			_coordinator.Send(context.Message);
+		}
+
+		public void Consume(IConsumeContext<AddPeerSubscription> context)
+		{
+			if (DiscardMessage(context, context.Message.PeerId))
+				return;
+
+			_coordinator.Send(context.Message);
+		}
+
 		public void Consume(IConsumeContext<AddSubscription> context)
 		{
-			if (DiscardMessage(context))
+			if (DiscardMessage(context, context.Message.Subscription.ClientId))
 				return;
 
 			_coordinator.Send(new AddPeerSubscriptionMessage
@@ -55,7 +77,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
 		public void Consume(IConsumeContext<AddSubscriptionClient> context)
 		{
-			if (DiscardMessage(context))
+			if (DiscardMessage(context, context.Message.CorrelationId))
 				return;
 
 			_coordinator.Send(new AddPeerMessage
@@ -66,9 +88,25 @@ namespace MassTransit.Subscriptions.Coordinator
 				});
 		}
 
+		public void Consume(IConsumeContext<RemovePeer> context)
+		{
+			if (DiscardMessage(context, context.Message.PeerId))
+				return;
+
+			_coordinator.Send(context.Message);
+		}
+
+		public void Consume(IConsumeContext<RemovePeerSubscription> context)
+		{
+			if (DiscardMessage(context, context.Message.PeerId))
+				return;
+
+			_coordinator.Send(context.Message);
+		}
+
 		public void Consume(IConsumeContext<RemoveSubscription> context)
 		{
-			if (DiscardMessage(context))
+			if (DiscardMessage(context, context.Message.Subscription.ClientId))
 				return;
 
 			_coordinator.Send(new RemovePeerSubscriptionMessage
@@ -83,7 +121,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
 		public void Consume(IConsumeContext<RemoveSubscriptionClient> context)
 		{
-			if (DiscardMessage(context))
+			if (DiscardMessage(context, context.Message.CorrelationId))
 				return;
 
 			_coordinator.Send(new RemovePeerMessage
@@ -96,7 +134,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
 		public void Consume(IConsumeContext<SubscriptionRefresh> context)
 		{
-			if (DiscardMessage(context))
+			if (DiscardMessage(context, Guid.Empty))
 				return;
 
 			foreach (SubscriptionInformation subscription in context.Message.Subscriptions)
@@ -115,9 +153,12 @@ namespace MassTransit.Subscriptions.Coordinator
 			}
 		}
 
-		bool DiscardMessage<T>(IConsumeContext<T> context)
+		bool DiscardMessage<T>(IConsumeContext<T> context, Guid clientId)
 			where T : class
 		{
+			if (_peerId == clientId && clientId != Guid.Empty)
+				return true;
+
 			if (_ignoredSourceAddresses.Contains(context.SourceAddress))
 			{
 				_log.Debug("Ignoring subscription because its source address equals the busses address");
@@ -126,7 +167,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
 			if (!string.Equals(context.Network, _network))
 			{
-				_log.DebugFormat("Ignoring subscription because the network '{0}' != ours '{1}1", context.Network, _network);
+				_log.DebugFormat("Ignoring subscription because the network '{0}' != ours '{1}", context.Network, _network);
 				return true;
 			}
 

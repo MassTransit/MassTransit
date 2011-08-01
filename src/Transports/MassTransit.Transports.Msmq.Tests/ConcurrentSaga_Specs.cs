@@ -61,7 +61,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			const int nextValue = 2;
 			var continueConcurrentSaga = new ContinueConcurrentSaga {CorrelationId = transactionId, Value = nextValue};
 
-			LocalBus.Publish(continueConcurrentSaga);
+			LocalBus.Endpoint.Send(continueConcurrentSaga);
 			_log.Info("Just published the continue message");
 			Thread.Sleep(8000);
 

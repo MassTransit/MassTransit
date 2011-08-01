@@ -12,15 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Coordinator
 {
+	using System;
 	using Messages;
 
 	public interface BusSubscriptionCoordinator
 	{
-		void AddObserver(BusSubscriptionEventObserver observer);
-
 		void Send(AddPeerSubscription message);
 		void Send(RemovePeerSubscription message);
 		void Send(AddPeer message);
 		void Send(RemovePeer message);
+		string Network { get; }
+		Guid ClientId { get; }
+		Uri ControlUri { get; }
 	}
 }

@@ -15,22 +15,29 @@ namespace MassTransit.Subscriptions.Coordinator
 	using System;
 	using System.Threading;
 	using Messages;
-	using Stact;
 	using log4net;
 
 	public class BusSubscriptionMessageProducer :
 		BusSubscriptionEventObserver
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionMessageProducer));
+		readonly IEndpoint _endpoint;
+		readonly string _network;
 
-		readonly UntypedChannel _output;
 		readonly Guid _peerId;
+		readonly Uri _peerUri;
 		long _lastMessageNumber;
+		long _timestamp;
 
-		public BusSubscriptionMessageProducer(Guid peerId, UntypedChannel output)
+		public BusSubscriptionMessageProducer(BusSubscriptionCoordinator coordinator, IEndpoint endpoint)
 		{
-			_peerId = peerId;
-			_output = output;
+			_peerId = coordinator.ClientId;
+			_peerUri = coordinator.ControlUri;
+			_network = coordinator.Network;
+			_endpoint = endpoint;
+			_timestamp = DateTime.UtcNow.Ticks;
+
+			SendAddPeerMessage();
 		}
 
 		public void OnSubscriptionAdded(SubscriptionAdded message)
@@ -49,7 +56,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("AddSubscription: {0}, {1}", add.MessageName, add.SubscriptionId);
 
-			_output.Send(add);
+			_endpoint.Send(add, SetSendContext);
 		}
 
 		public void OnSubscriptionRemoved(SubscriptionRemoved message)
@@ -68,7 +75,34 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("RemoveSubscription: {0}, {1}", remove.MessageName, remove.SubscriptionId);
 
-			_output.Send(remove);
+			_endpoint.Send(remove, SetSendContext);
+		}
+
+		public void OnComplete()
+		{
+			_endpoint.Send(new RemovePeerMessage
+			{
+				PeerId = _peerId,
+				PeerUri = _peerUri,
+				Timestamp = _timestamp,
+			}, SetSendContext);
+		}
+
+		void SendAddPeerMessage()
+		{
+			_endpoint.Send(new AddPeerMessage
+				{
+					PeerId = _peerId,
+					PeerUri = _peerUri,
+					Timestamp = _timestamp,
+				}, SetSendContext);
+		}
+
+		void SetSendContext<T>(ISendContext<T> context)
+			where T : class
+		{
+			context.SetNetwork(_network);
+			context.SetSourceAddress(_peerUri);
 		}
 	}
 }

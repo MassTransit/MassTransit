@@ -20,5 +20,10 @@ namespace MassTransit.Subscriptions.Coordinator
 		void OnSubscriptionAdded(SubscriptionAdded message);
 
 		void OnSubscriptionRemoved(SubscriptionRemoved message);
+		
+		/// <summary>
+		/// Called when the observation is complete and we should go away
+		/// </summary>
+		void OnComplete();
 	}
 }

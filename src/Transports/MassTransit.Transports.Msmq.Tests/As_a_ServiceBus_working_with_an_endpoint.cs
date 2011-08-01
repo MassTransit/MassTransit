@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using Magnum.Extensions;
     using Magnum.TestFramework;
@@ -22,8 +23,9 @@ namespace MassTransit.Transports.Msmq.Tests
     using NUnit.Framework;
     using TestFixtures;
     using TestFramework;
+    using MassTransit.Testing;
 
-    [TestFixture, Integration]
+	[TestFixture, Integration]
     public class When_a_message_is_published_to_a_transactional_queue :
         MsmqTransactionalEndpointTestFixture
     {
@@ -35,6 +37,7 @@ namespace MassTransit.Transports.Msmq.Tests
             var consumer = new TestMessageConsumer<PingMessage>();
             RemoteBus.SubscribeInstance(consumer);
 
+        	LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
             var message = new PingMessage();
             LocalBus.Publish(message);
 
@@ -53,7 +56,8 @@ namespace MassTransit.Transports.Msmq.Tests
             		throw new ApplicationException("Boing!");
             	});
 
-            var message = new PingMessage();
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			var message = new PingMessage();
             LocalBus.Publish(message);
 
         	future.IsAvailable(_timeout).ShouldBeTrue("Message was not received");
@@ -76,7 +80,9 @@ namespace MassTransit.Transports.Msmq.Tests
                 throw new ApplicationException("Boing!");
             });
 
-            LocalBus.Publish(message);
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			RemoteBus.ShouldHaveSubscriptionFor<PongMessage>();
+			LocalBus.Publish(message);
 
             consumer.ShouldHaveReceivedMessage(response, _timeout);
         }
@@ -90,129 +96,96 @@ namespace MassTransit.Transports.Msmq.Tests
         [Test]
         public void Multiple_Local_Services_Should_Be_Available()
         {
-            ManualResetEvent _updateEvent = new ManualResetEvent(false);
-            LocalBus.SubscribeHandler<UpdateMessage>(msg => _updateEvent.Set());
+        	var updated = new Future<UpdateMessage>();
+        	var deleted = new Future<DeleteMessage>();
 
-            ManualResetEvent _deleteEvent = new ManualResetEvent(false);
+        	LocalBus.SubscribeHandler<UpdateMessage>(updated.Complete);
+        	LocalBus.SubscribeHandler<DeleteMessage>(deleted.Complete);
 
-
-            LocalBus.SubscribeHandler<DeleteMessage>(
-                delegate { _deleteEvent.Set(); });
-
-
-            DeleteMessage dm = new DeleteMessage();
-
+            var dm = new DeleteMessage();
             LocalBus.Publish(dm);
 
-            UpdateMessage um = new UpdateMessage();
-
+            var um = new UpdateMessage();
             LocalBus.Publish(um);
 
-            Assert.That(_deleteEvent.WaitOne(TimeSpan.FromSeconds(4), true), Is.True,
-                        "Timeout expired waiting for message");
-
-            Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(4), true), Is.True,
-                        "Timeout expired waiting for message");
-
+        	updated.WaitUntilCompleted(8.Seconds()).ShouldBeTrue("Update not received");
+        	deleted.WaitUntilCompleted(8.Seconds()).ShouldBeTrue("Delete not received");
         }
 
         [Test]
         public void Multiple_messages_should_be_delivered_to_the_appropriate_remote_subscribers()
         {
+			var updated = new Future<UpdateMessage>();
+			var deleted = new Future<DeleteMessage>();
 
+			LocalBus.SubscribeHandler<UpdateMessage>(updated.Complete);
+			LocalBus.SubscribeHandler<DeleteMessage>(deleted.Complete);
 
-            ManualResetEvent _updateEvent = new ManualResetEvent(false);
+        	RemoteBus.HasSubscription<UpdateMessage>().Count().ShouldBeGreaterThan(0);
+			RemoteBus.HasSubscription<DeleteMessage>().Count().ShouldBeGreaterThan(0);
 
-            RemoteBus.SubscribeHandler<UpdateMessage>(
-                delegate { _updateEvent.Set(); });
+			var dm = new DeleteMessage();
+			RemoteBus.Publish(dm);
 
-            ManualResetEvent _deleteEvent = new ManualResetEvent(false);
+			var um = new UpdateMessage();
+			RemoteBus.Publish(um);
 
-            RemoteBus.SubscribeHandler<DeleteMessage>(
-                delegate { _deleteEvent.Set(); });
-
-            DeleteMessage dm = new DeleteMessage();
-
-            LocalBus.Publish(dm);
-
-            UpdateMessage um = new UpdateMessage();
-
-            LocalBus.Publish(um);
-
-            Assert.That(_deleteEvent.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
-                        "Timeout expired waiting for message");
-
-            Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
-                        "Timeout expired waiting for message");
-
+			updated.WaitUntilCompleted(8.Seconds()).ShouldBeTrue("Update not received");
+			deleted.WaitUntilCompleted(8.Seconds()).ShouldBeTrue("Delete not received");
         }
 
         [Test]
         public void The_message_should_be_delivered_to_a_local_subscriber()
         {
+			var updated = new Future<UpdateMessage>();
 
-            ManualResetEvent _updateEvent = new ManualResetEvent(false);
+			LocalBus.SubscribeHandler<UpdateMessage>(updated.Complete);
 
-            LocalBus.SubscribeHandler<UpdateMessage>(
-                delegate { _updateEvent.Set(); });
+			var um = new UpdateMessage();
+			LocalBus.Publish(um);
 
-            UpdateMessage um = new UpdateMessage();
-
-            LocalBus.Publish(um);
-
-            Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True,
-                        "Timeout expired waiting for message");
-
+			updated.WaitUntilCompleted(8.Seconds()).ShouldBeTrue("Update not received");
         }
 
         [Test]
         public void The_message_should_be_delivered_to_a_remote_subscriber()
         {
-           
-                ManualResetEvent _updateEvent = new ManualResetEvent(false);
+			var updated = new Future<UpdateMessage>();
+		
+			LocalBus.SubscribeHandler<UpdateMessage>(updated.Complete);
 
-                RemoteBus.SubscribeHandler<UpdateMessage>(
-                    delegate { _updateEvent.Set(); });
+			RemoteBus.HasSubscription<UpdateMessage>().Count().ShouldBeGreaterThan(0);
 
-                UpdateMessage um = new UpdateMessage();
+			var um = new UpdateMessage();
+			RemoteBus.Publish(um);
 
-                LocalBus.Publish(um);
-
-                Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True,
-                            "Timeout expired waiting for message");
-            
-        }
+			updated.WaitUntilCompleted(8.Seconds()).ShouldBeTrue("Update not received");
+		}
 
         [Test]
         public void The_message_should_be_delivered_to_a_remote_subscriber_with_a_reply()
         {
-            ManualResetEvent _updateEvent = new ManualResetEvent(false);
+			var updated = new Future<UpdateMessage>();
+			var updateAccepted = new Future<UpdateAcceptedMessage>();
 
-            Action<UpdateMessage> handler =
-                msg =>
-                    {
-                        _updateEvent.Set();
+			RemoteBus.SubscribeContextHandler<UpdateMessage>(context =>
+				{
+					updated.Complete(context.Message);
 
-                        RemoteBus.Publish(new UpdateAcceptedMessage());
-                    };
+					context.Respond(new UpdateAcceptedMessage());
+				});
 
-            ManualResetEvent _repliedEvent = new ManualResetEvent(false);
+			LocalBus.HasSubscription<UpdateMessage>().Count().ShouldBeGreaterThan(0);
 
-            RemoteBus.SubscribeHandler(handler);
+        	LocalBus.SubscribeHandler<UpdateAcceptedMessage>(updateAccepted.Complete);
+        	RemoteBus.HasSubscription<UpdateAcceptedMessage>().Count().ShouldBeGreaterThan(0);
 
-            LocalBus.SubscribeHandler<UpdateAcceptedMessage>(
-                delegate { _repliedEvent.Set(); });
+			var um = new UpdateMessage();
+			LocalBus.Publish(um);
 
-            UpdateMessage um = new UpdateMessage();
-
-            LocalBus.Publish(um);
-
-            Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True,
-                        "Timeout expired waiting for message");
-
-            Assert.That(_repliedEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "NO response message received");
-
-        }
+			updated.WaitUntilCompleted(8.Seconds()).ShouldBeTrue("Update not received");
+			updateAccepted.WaitUntilCompleted(8.Seconds()).ShouldBeTrue("Update accepted not received");
+	        }
     }
 
     [TestFixture, Integration]

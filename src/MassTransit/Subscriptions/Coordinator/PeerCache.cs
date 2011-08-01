@@ -29,13 +29,16 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly IDictionary<Uri, ActorInstance> _peers;
 		readonly EndpointSubscriptionCache _endpointSubscriptionCache;
 
-		public PeerCache(BusSubscriptionEventObserver observer)
+		public PeerCache(BusSubscriptionEventObserver observer, Guid clientId, Uri controlUri)
 		{
 			_peers = new Dictionary<Uri, ActorInstance>();
 			_peerIds = new Dictionary<Guid, Uri>();
 			_endpointSubscriptionCache = new EndpointSubscriptionCache(observer);
 
 			_peerHandlerFactory = ActorFactory.Create((f, s, i) => new PeerHandler(i, observer));
+
+			// create a peer for our local client
+			WithPeer(clientId, controlUri, x => { }, true);
 		}
 
 		[UsedImplicitly]

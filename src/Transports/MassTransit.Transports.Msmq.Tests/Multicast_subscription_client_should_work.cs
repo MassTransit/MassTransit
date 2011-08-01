@@ -27,20 +27,28 @@ namespace MassTransit.Transports.Msmq.Tests
 	{
 		private PingMessage _ping;
 		private FutureMessage<PingMessage, Guid> _future;
+		UnsubscribeAction _unsubscribe;
 
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
 			_ping = new PingMessage();
-
 			_future = new FutureMessage<PingMessage, Guid>(_ping.CorrelationId);
 
-			RemoteBus.SubscribeHandler<PingMessage>(message => { _future.Set(message); });
+			_unsubscribe = RemoteBus.SubscribeHandler<PingMessage>(message => { _future.Set(message); });
 
 			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
-
 			LocalBus.Publish(_ping);
+		}
+
+		protected override void TeardownContext()
+		{
+			_unsubscribe();
+
+			LocalBus.ShouldNotHaveSubscriptionFor<PingMessage>();
+
+			base.TeardownContext();
 		}
 
 		[Test]

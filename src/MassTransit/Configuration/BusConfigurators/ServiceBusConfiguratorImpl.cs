@@ -141,6 +141,8 @@ namespace MassTransit.BusConfigurators
 
 			BusBuilder builder = _builderFactory(_settings);
 
+			_subscriptionCoordinatorConfigurator.SetNetwork(_settings.Network);
+
 			foreach (BusBuilderConfigurator configurator in _configurators)
 			{
 				builder = configurator.Configure(builder);
