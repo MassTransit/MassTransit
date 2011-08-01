@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
-	using System;
-	using BusServiceConfigurators;
-
 	/// <summary>
 	/// A ServiceBusBuilder includes everything for configuring a complete service bus instance,
 	/// and is an extension of the BusBuilder (which can only build a limited, dependent bus)
@@ -27,18 +24,5 @@ namespace MassTransit.Builders
 		/// </summary>
 		/// <param name="controlBus"></param>
 		void UseControlBus(IControlBus controlBus);
-
-		/// <summary>
-		/// Adds an action to be performed after bus creation to adjust settings, etc.
-		/// but before the bus is started.
-		/// </summary>
-		/// <param name="postCreateAction"></param>
-		void AddPostCreateAction(Action<ServiceBus> postCreateAction);
-
-		/// <summary>
-		/// Adds a bus service that will be started and stopped with the service bus 
-		/// </summary>
-		/// <param name="configurator"></param>
-		void AddBusServiceConfigurator(BusServiceConfigurator configurator);
 	}
 }

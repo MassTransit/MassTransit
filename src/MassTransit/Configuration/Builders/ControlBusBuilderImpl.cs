@@ -13,16 +13,23 @@
 namespace MassTransit.Builders
 {
 	using System;
+	using System.Collections.Generic;
+	using BusServiceConfigurators;
 	using Configuration;
-	using log4net;
+	using Exceptions;
 	using Magnum;
+	using Magnum.Extensions;
+	using SubscriptionConfigurators;
 	using Util;
+	using log4net;
 
 	public class ControlBusBuilderImpl :
 		ControlBusBuilder
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (ControlBusBuilderImpl));
 
+		readonly IList<BusServiceConfigurator> _busServiceConfigurators;
+		readonly IList<Action<ServiceBus>> _postCreateActions;
 		readonly BusSettings _settings;
 
 		public ControlBusBuilderImpl([NotNull] BusSettings settings)
@@ -30,6 +37,12 @@ namespace MassTransit.Builders
 			Guard.AgainstNull(settings, "settings");
 
 			_settings = settings;
+			_postCreateActions = new List<Action<ServiceBus>>();
+			_busServiceConfigurators = new List<BusServiceConfigurator>();
+
+			var subscriptionCoordinatorConfigurator = new SubscriptionCoordinatorConfiguratorImpl();
+			subscriptionCoordinatorConfigurator.SetNetwork(settings.Network);
+			subscriptionCoordinatorConfigurator.Configure(this);
 		}
 
 		public BusSettings Settings
@@ -46,6 +59,10 @@ namespace MassTransit.Builders
 
 			ConfigureBusSettings(bus);
 
+			RunPostCreateActions(bus);
+
+			RunBusServiceConfigurators(bus);
+
 			if (_settings.AutoStart)
 			{
 				bus.Start();
@@ -59,8 +76,18 @@ namespace MassTransit.Builders
 		{
 			Guard.AgainstNull(callback);
 
-			if (typeof(T).IsAssignableFrom(GetType()))
+			if (typeof (T).IsAssignableFrom(GetType()))
 				callback(this as T);
+		}
+
+		public void AddPostCreateAction(Action<ServiceBus> postCreateAction)
+		{
+			_postCreateActions.Add(postCreateAction);
+		}
+
+		public void AddBusServiceConfigurator(BusServiceConfigurator configurator)
+		{
+			_busServiceConfigurators.Add(configurator);
 		}
 
 		ServiceBus CreateServiceBus()
@@ -81,6 +108,39 @@ namespace MassTransit.Builders
 				bus.ConcurrentReceiveThreads = _settings.ConcurrentReceiverLimit;
 
 			bus.ReceiveTimeout = _settings.ReceiveTimeout;
+		}
+
+		void RunBusServiceConfigurators(ServiceBus bus)
+		{
+			foreach (BusServiceConfigurator busServiceConfigurator in _busServiceConfigurators)
+			{
+				try
+				{
+					IBusService busService = busServiceConfigurator.Create(bus);
+
+					bus.AddService(busServiceConfigurator.Layer, busService);
+				}
+				catch (Exception ex)
+				{
+					throw new ConfigurationException("Failed to create the bus service: " +
+					                                 busServiceConfigurator.ServiceType.ToShortTypeName(), ex);
+				}
+			}
+		}
+
+		void RunPostCreateActions(ServiceBus bus)
+		{
+			foreach (var postCreateAction in _postCreateActions)
+			{
+				try
+				{
+					postCreateAction(bus);
+				}
+				catch (Exception ex)
+				{
+					throw new ConfigurationException("An exception was thrown while running post-creation actions", ex);
+				}
+			}
 		}
 	}
 }

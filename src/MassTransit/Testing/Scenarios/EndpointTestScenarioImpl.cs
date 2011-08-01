@@ -90,7 +90,7 @@ namespace MassTransit.Testing.Scenarios
 
 		public void AddEndpoint(EndpointTestDecorator endpoint)
 		{
-			_endpoints.Add(endpoint.Address.Uri, endpoint);
+			_endpoints[endpoint.Address.Uri] = endpoint;
 		}
 
 		public void AddSent(SentMessage message)

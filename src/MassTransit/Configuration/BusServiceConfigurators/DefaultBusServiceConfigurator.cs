@@ -42,7 +42,7 @@ namespace MassTransit.BusServiceConfigurators
 
 		public BusBuilder Configure(BusBuilder builder)
 		{
-			builder.Match<ServiceBusBuilder>(x => x.AddBusServiceConfigurator(this));
+			builder.AddBusServiceConfigurator(this);
 
 			return builder;
 		}

@@ -51,5 +51,9 @@ namespace MassTransit.Subscriptions.Coordinator
 					_log.DebugFormat("SubscriptionRemoved: {0}, {1}", message.MessageName, message.SubscriptionId);
 			}
 		}
+
+		public void OnComplete()
+		{
+		}
 	}
 }

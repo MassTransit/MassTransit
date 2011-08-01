@@ -27,10 +27,10 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly BusSubscriptionCoordinator _coordinator;
 		readonly Guid _peerId;
 		readonly List<Action<BusSubscriptionCoordinator>> _waiting;
-		BusSubscriptionConnector _connector;
+		readonly BusSubscriptionConnector _connector;
 		long _messageNumber;
 		BusSubscriptionCoordinator _targetCoordinator;
-		HashSet<string> _ignoredMessageTypes;
+		readonly HashSet<string> _ignoredMessageTypes;
 
 		public SubscriptionLoopback(IServiceBus bus, BusSubscriptionCoordinator coordinator)
 		{
@@ -101,6 +101,10 @@ namespace MassTransit.Subscriptions.Coordinator
 				}));
 		}
 
+		public void OnComplete()
+		{
+		}
+
 		public void SetTargetCoordinator(BusSubscriptionCoordinator targetCoordinator)
 		{
 			lock (this)
@@ -127,13 +131,14 @@ namespace MassTransit.Subscriptions.Coordinator
 
 		HashSet<string> IgnoredMessageTypes()
 		{
-			var ignoredMessageTypes = new HashSet<string>();
-
-			ignoredMessageTypes.Add(typeof (AddSubscription).ToMessageName());
-			ignoredMessageTypes.Add(typeof(RemoveSubscription).ToMessageName());
-			ignoredMessageTypes.Add(typeof(AddSubscriptionClient).ToMessageName());
-			ignoredMessageTypes.Add(typeof(RemoveSubscriptionClient).ToMessageName());
-			ignoredMessageTypes.Add(typeof(SubscriptionRefresh).ToMessageName());
+			var ignoredMessageTypes = new HashSet<string>
+				{
+					typeof (AddSubscription).ToMessageName(),
+					typeof (RemoveSubscription).ToMessageName(),
+					typeof (AddSubscriptionClient).ToMessageName(),
+					typeof (RemoveSubscriptionClient).ToMessageName(),
+					typeof (SubscriptionRefresh).ToMessageName()
+				};
 
 			return ignoredMessageTypes;
 		}

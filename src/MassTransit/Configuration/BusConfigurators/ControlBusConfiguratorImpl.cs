@@ -46,7 +46,6 @@ namespace MassTransit.BusConfigurators
 					// we really need this to be part of another step, but i don't have a clue how yet.
 					//_configurator.ConfigureEndpoint(_uri, x => x.PurgeExistingMessages());
 
-
 					if (_log.IsDebugEnabled)
 						_log.DebugFormat("Configuring control bus for {0} at {1}", builder.Settings.InputAddress, settings.InputAddress);
 
@@ -72,7 +71,7 @@ namespace MassTransit.BusConfigurators
 			return from configurator in _configurators 
 				   from result in configurator.Validate() 
 				   select result.WithParentKey("ControlBus");
-		}
+					}
 
 		public void ReceiveFrom(Uri uri)
 		{

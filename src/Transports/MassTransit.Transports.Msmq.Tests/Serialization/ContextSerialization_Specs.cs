@@ -18,6 +18,7 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 	using MassTransit.Tests.Messages;
 	using NUnit.Framework;
 	using TestFixtures;
+	using TestFramework;
 
 	[TestFixture, Explicit]
 	public class When_sending_a_message_using_the_specified_serializer<TSerializer> :
@@ -43,6 +44,7 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 					received.Set(message);
 				});
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 			LocalBus.Publish(ping);
 
 			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
@@ -62,7 +64,7 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 					received.Set(message);
 				});
 
-//			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			LocalBus.Publish(ping, context => context.SendFaultTo(LocalBus.Endpoint.Address.Uri));
 
@@ -83,6 +85,7 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 					received.Set(message);
 				});
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 			LocalBus.Publish(ping);
 
 			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
@@ -102,6 +105,7 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 					received.Set(message);
 				});
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus.Endpoint.Address.Uri));
 
 			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
@@ -122,6 +126,7 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 					received.Set(message);
 				});
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 			LocalBus.Publish(ping, context => context.SetRetryCount(retryCount));
 
 			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
@@ -141,6 +146,7 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 					received.Set(message);
 				});
 
+			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 			LocalBus.Publish(ping);
 
 			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");

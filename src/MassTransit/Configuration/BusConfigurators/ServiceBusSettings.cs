@@ -25,6 +25,7 @@ namespace MassTransit.BusConfigurators
 			ConcurrentReceiverLimit = defaultSettings.ConcurrentReceiverLimit;
 			ReceiveTimeout = defaultSettings.ReceiveTimeout;
 			EndpointCache = defaultSettings.EndpointCache;
+			Network = defaultSettings.Network;
 		}
 
 		public ServiceBusSettings(BusSettings settings)
@@ -34,6 +35,7 @@ namespace MassTransit.BusConfigurators
 			ConcurrentReceiverLimit = settings.ConcurrentReceiverLimit;
 			ReceiveTimeout = settings.ReceiveTimeout;
 			EndpointCache = settings.EndpointCache;
+			Network = settings.Network;
 		}
 
 		public ServiceBusSettings()
@@ -45,6 +47,7 @@ namespace MassTransit.BusConfigurators
 		public int ConcurrentReceiverLimit { get; set; }
 		public int ConcurrentConsumerLimit { get; set; }
 
+		public string Network { get; set; }
 
 		public Action BeforeConsume { get; set; }
 		public Action AfterConsume { get; set; }

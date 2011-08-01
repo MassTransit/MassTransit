@@ -30,5 +30,7 @@ namespace MassTransit.Configuration
 		int ConcurrentReceiverLimit { get; }
 
 		int ConcurrentConsumerLimit { get; }
+
+		string Network { get; }
 	}
 }

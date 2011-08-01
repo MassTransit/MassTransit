@@ -32,7 +32,7 @@ namespace MassTransit.BusConfigurators
 
 		public BusBuilder Configure(BusBuilder builder)
 		{
-			builder.Match<ServiceBusBuilder>(x => x.AddPostCreateAction(_postCreateAction));
+			builder.AddPostCreateAction(_postCreateAction);
 
 			return builder;
 		}

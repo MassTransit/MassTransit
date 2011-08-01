@@ -157,8 +157,8 @@ namespace MassTransit.Threading
 				if (_consumerCount >= _maximumThreadCount)
 					return;
 
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Queueing receiver for {0}", _bus.Endpoint.Address.Uri);
+//				if (_log.IsDebugEnabled)
+//					_log.DebugFormat("Queueing receiver for {0}", _bus.Endpoint.Address.Uri);
 
 				var context = new ServiceBusReceiveContext(_bus, _eventChannel, _receiveTimeout);
 

@@ -51,9 +51,9 @@ namespace MassTransit.Context
 		{
 			try
 			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Calling Receive on {0} from thread {1} ({2})", _bus.Endpoint.Address.Uri,
-						Thread.CurrentThread.ManagedThreadId, _receiveTimeout);
+				//if (_log.IsDebugEnabled)
+				//	_log.DebugFormat("Calling Receive on {0} from thread {1} ({2})", _bus.Endpoint.Address.Uri,
+				//		Thread.CurrentThread.ManagedThreadId, _receiveTimeout);
 
 				_startTime = SystemUtil.UtcNow;
 				_receiveTime.Start();

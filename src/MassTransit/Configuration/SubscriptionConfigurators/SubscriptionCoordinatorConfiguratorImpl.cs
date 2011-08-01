@@ -33,6 +33,7 @@ namespace MassTransit.SubscriptionConfigurators
 		public SubscriptionCoordinatorConfiguratorImpl()
 		{
 			_configurators = new List<SubscriptionCoordinatorBuilderConfigurator>();
+			_network = Environment.MachineName.ToLowerInvariant();
 		}
 
 		public IEnumerable<ValidationResult> Validate()
@@ -42,7 +43,7 @@ namespace MassTransit.SubscriptionConfigurators
 
 		public BusBuilder Configure(BusBuilder builder)
 		{
-			builder.Match<ServiceBusBuilder>(x => x.AddBusServiceConfigurator(this));
+			builder.AddBusServiceConfigurator(this);
 
 			return builder;
 		}
