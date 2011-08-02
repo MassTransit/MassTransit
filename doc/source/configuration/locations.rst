@@ -1,8 +1,8 @@
 Configuring Locations in your Application
 """""""""""""""""""""""""""""""""""""""""
 
-One of the common and simple configuration questions we get centers on
-how to configure MassTransit in a console application vs a web application.
+Now that we know how to configure the MassTransit system, the next question is usually
+where should I do the configuration? 
 
 The short answer is: Configure it when you are configuring your IoC Container.
 
