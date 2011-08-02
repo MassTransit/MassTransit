@@ -15,40 +15,23 @@ namespace MassTransit
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Magnum.Extensions;
+	using System.Runtime.Serialization;
 	using Ninject;
 	using NinjectIntegration;
 	using Saga;
 	using Saga.SubscriptionConfigurators;
 	using SubscriptionConfigurators;
+	using Util;
 
-	public static class NinjectExtensions
+    public static class NinjectExtensions
 	{
 		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IKernel kernel)
 		{
-			// Note that this might not be the right thing to do here, since they aren't registering
-			// the consumer and there is no way to enumerate all the bindings in NInject
+            var ex = new NotImplementedByNinjectException("Ninject does not support this option. See https://github.com/ninject/ninject/issues/35");
+		    
+            ex.HelpLink = "https://github.com/ninject/ninject/issues/35";
 
-			IList<Type> concreteTypes = FindTypes<IConsumer>(kernel, x => !x.Implements<ISaga>());
-
-			if (concreteTypes.Count != 0)
-			{
-				foreach (Type type in concreteTypes)
-				{
-					configurator.Consumer(type, t => kernel.Get(t));
-				}
-			}
-
-			IList<Type> sagaTypes = FindTypes<ISaga>(kernel, x => true);
-			if (sagaTypes.Count > 0)
-			{
-				var sagaConfigurator = new NinjectSagaFactoryConfigurator(configurator, kernel);
-
-				foreach (Type type in sagaTypes)
-				{
-					sagaConfigurator.ConfigureSaga(type);
-				}
-			}
+		    throw ex;
 		}
 
 		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
@@ -76,4 +59,26 @@ namespace MassTransit
 				.ToList();
 		}
 	}
+
+    public class NotImplementedByNinjectException : NotImplementedException
+    {
+        public NotImplementedByNinjectException()
+        {
+        }
+
+        public NotImplementedByNinjectException(string message)
+            : base(message)
+        {
+        }
+
+        public NotImplementedByNinjectException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+
+        protected NotImplementedByNinjectException([NotNull] SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+    }
 }
