@@ -9,7 +9,7 @@ which will be followed up with a few configuration examples.
 
     quickstart.rst
     config_api.rst
-    config_location.rst
+    locations.rst
     transports/index.rst
     keyideas.rst
     interfaces.rst
