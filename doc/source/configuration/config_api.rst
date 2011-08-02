@@ -1,81 +1,119 @@
 Common Configuration Options
 """"""""""""""""""""""""""""
 
-Trying to get multiple applications all talking to each other is not a simple
-problem. There are a lot of edge cases that have to be taken into account. With over 
-three years of experience is getting message based systems to talk to each other 
-the developers have tried their darndest to make sure MassTransit's defaults cover
-the majority of the decisions minimizing the configuration code you have to deal with.
-Even so there are some minimum bits that need to be configured.
+Trying to get multiple applications to talk to each other is not a simple
+problem. The biggest difficulty seems to be just getting everything configured
+correctly. With over three years of experience in setting up message based systems
+the developers on MassTransit have tried their darndest to make sure that the
+MassTransit's defaults cover the majority of the decisions you will have to make
+while minimizing the configuration code you have to deal with. We hope that the options
+are clear and make sense why you need to select them. Below are some of the options you
+have:
+
 
 Transport Factory Options
 '''''''''''''''''''''''''
 
 .. sourcecode:: csharp
 
-  ServiceBusFactory.New(sbc =>
-  {
-    sbc.AddTransportFactory<TTransportFactory>();
+    ServiceBusFactory.New(sbc =>
+    {
+        sbc.UseMsmq();
+        sbc.UseRabbitMq();
+        
+        //if you would like to implement your own.
+        sbc.AddTransportFactory<TTransportFactory>();
+    });
 
-    //sbc.UseLocalLoopback(); an implicit option
-    sbc.UseMsmq();
-    sbc.UseRabbitMq();
-  });
-
-The first option is what transport are you going to use? RabbitMQ or MSMQ? If you don't know see the 
-section on the transport choices to help you in your quest to know.
+The first decision is what transport are you going to use? RabbitMQ or MSMQ? If you don't know
+which one to choose I suggest reading up on the two and see which one works better for
+your environment.
 
 Basic Options
 '''''''''''''
 
 .. sourcecode:: csharp
 
-  ServiceBusFactory.New(sbc =>
-  {
-    sbc.ReceiveFrom("address");
+    ServiceBusFactory.New(sbc =>
+    {
+        //transport choice
+        
+        sbc.ReceiveFrom("address");
+        sbc.UseControlBus();
+    });
 
-    sbc.UseControlBus();
-  });
+The next decision we have to make is what address are we going to listen on? Addresses are in the
+form of a URL and will look like ``msmq://localhost/queue_name`` or for RabbitMQ 
+``rabbitmq://localhost/queue_name``.
 
-The next decisions are going to be what address this bus instance is going to listen on.
+.. warning:: 
 
-NOTE: Each instance must have its own address unless you plan on a competing consumer model:
-see ``Competing Consumers``. After that you need to choose
+    Each instance must have its own address.
 
-The last basic concern is, do you want to use a control bus or not. ``Control Bus``
-
-
-Subscription Options
-''''''''''''''''''''
+The last concern is, do you want to use a control bus or not. ``Control Bus``
 
 .. sourcecode:: csharp
 
-  ServiceBusFactory.New(sbc =>
-  {
-    sbc.Subscribe();
-  });
+    ServiceBusFactory.New(sbc =>
+    {
+        //transport choice
+        //address
 
-Now that we have a transport, an address, and some basic options figured out you need to set 
-up your subscriptions.
+        sbc.UseControlBus();
+    });
 
 Serializer Options
 ''''''''''''''''''
 
 .. sourcecode:: csharp
 
-  ServiceBusFactory.New(sbc =>
-  {
-	  sbc.SetDefaultSerializer(); //how to set your very own
-    sbc.UseBinarySerializer();
-    sbc.UseBsonSerializer();
-    sbc.UseJsonSerializer();
-    sbc.UseVersionOneXmlSerializer();
-    sbc.UseXmlSerializer();
-  });
+    ServiceBusFactory.New(sbc =>
+    {
+        //transport choice
+        //address
+        //control bus
+        
+        sbc.UseBinarySerializer();
+        sbc.UseBsonSerializer();
+        sbc.UseJsonSerializer();
+        sbc.UseVersionOneXmlSerializer();
+        sbc.UseXmlSerializer();
+        
+        //if you would like to implement your own.
+        sbc.SetDefaultSerializer<TSerializer>();
+    });
 
-This is mostly optional, and the transports will set their preferred defaults, but if you have
-a choice you can set it yourself as well. With the ``SetDefaultSerializer`` you can even
-use a custom one that you created.
+This is mostly optional, because the transports will set their preferred defaults, but if you
+need to override the default you can using these methods. With the ``SetDefaultSerializer`` you can
+provide a custom serializer that you created.
+
+Subscription Options
+''''''''''''''''''''
+
+.. sourcecode:: csharp
+
+    ServiceBusFactory.New(sbc =>
+    {
+        sbc.Subscribe(s=>
+        {
+            s.Handler(msg => {});
+            s.Handler((cxt, msg) => {});
+            
+            s.Instance(yourObject);
+            
+            s.Consumer(()=> new YourConsumer() );
+            s.Consumer(consumerFactory)
+            s.Consumer(consumerType);
+            s.Consumer<TConsumer>();
+            
+            s.Saga(sagaRepository)
+        });
+    });
+
+Now that we have a transport, an address, and some basic options figured out the meat of the work
+is in front of you. Establishing your subscriptions. As you can see there are a lot of options
+so I am going to save most of the explanation for the next page.
+
 
 Bus Tuning Options
 ''''''''''''''''''
