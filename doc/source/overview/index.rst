@@ -6,7 +6,6 @@ How MassTransit Works
     publishing.rst
     sending.rst
     request.rst
-    terms.rst
     versioning.rst
     inbound.rst
     subscriptions.rst
