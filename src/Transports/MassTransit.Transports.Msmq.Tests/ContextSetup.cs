@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,10 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests
 {
+	using System.Diagnostics;
 	using System.IO;
 	using System.Reflection;
-	using log4net.Config;
 	using NUnit.Framework;
+	using log4net;
+	using log4net.Config;
 
 	[SetUpFixture]
 	public class ContextSetup
@@ -25,9 +27,17 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-			string file = Path.Combine(path, "log4net.config");
+			string file = Path.Combine(path, "msmq.log4net.xml");
+
+			Trace.WriteLine(string.Format("Loading Log4net Configuration: {0}", file));
 
 			XmlConfigurator.Configure(new FileInfo(file));
+		}
+
+		[TearDown]
+		public void After_all()
+		{
+			LogManager.Shutdown();
 		}
 	}
 }

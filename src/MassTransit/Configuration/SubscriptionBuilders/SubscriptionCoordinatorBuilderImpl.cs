@@ -28,7 +28,10 @@ namespace MassTransit.SubscriptionBuilders
 		{
 			_bus = bus;
 			_network = network;
-			_observers = new List<Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver>>();
+			_observers = new List<Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver>>
+				{
+					(b, c) => new BusSubscriptionConnector(b)
+				};
 		}
 
 		public string Network
@@ -36,22 +39,21 @@ namespace MassTransit.SubscriptionBuilders
 			get { return _network; }
 		}
 
-		public void SetObserverFactory(Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory)
+		public void SetObserverFactory(
+			Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory)
 		{
 			_observers.Clear();
 			_observers.Add(observerFactory);
 		}
 
-		public void AddObserverFactory(Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory)
+		public void AddObserverFactory(
+			Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory)
 		{
 			_observers.Add(observerFactory);
 		}
 
 		public SubscriptionCoordinatorBusService Build()
 		{
-			if (_observers.Count == 0)
-				_observers.Add((bus,coordinator) => new BusSubscriptionConnector(bus));
-
 			var service = new SubscriptionCoordinatorBusService(_bus, _network);
 
 			_observers.Each(x => service.AddObserver(x(_bus, service)));

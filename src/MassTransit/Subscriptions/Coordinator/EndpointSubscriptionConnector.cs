@@ -14,6 +14,8 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using Pipeline;
+	using log4net;
+	using Magnum.Extensions;
 
 	public interface EndpointSubscriptionConnector
 	{
@@ -24,6 +26,7 @@ namespace MassTransit.Subscriptions.Coordinator
 		EndpointSubscriptionConnector
 		where TMessage : class
 	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionConnector));
 		readonly IServiceBus _bus;
 
 		public EndpointSubscriptionConnector(IServiceBus bus)
@@ -34,6 +37,9 @@ namespace MassTransit.Subscriptions.Coordinator
 		public UnsubscribeAction Connect(Uri endpointUri, string correlationId)
 		{
 			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
+
+			_log.DebugFormat("Adding subscription for {0} on {1} to {2}", typeof (TMessage).ToShortTypeName(),
+				_bus.Endpoint.Address.Uri, endpointUri);
 
 			return _bus.OutboundPipeline.ConnectEndpoint<TMessage>(endpoint);
 		}

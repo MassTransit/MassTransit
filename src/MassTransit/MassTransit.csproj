@@ -361,6 +361,7 @@
     <Compile Include="Subscriptions\Coordinator\BusSubscriptionCoordinator.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscription.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscriptionCache.cs" />
+    <Compile Include="Subscriptions\Coordinator\PeerSubscriptionCache.cs" />
     <Compile Include="Subscriptions\Coordinator\SubscriptionClientSubscriptionWriter.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscriptionConnector.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscriptionConnectorCache.cs" />
@@ -375,7 +376,6 @@
     <Compile Include="Subscriptions\Coordinator\BusSubscriptionEventListener.cs" />
     <Compile Include="Subscriptions\Coordinator\SubscriptionLoopback.cs" />
     <Compile Include="Subscriptions\Coordinator\SubscriptionMessageConsumer.cs" />
-    <Compile Include="Subscriptions\Coordinator\PeerSubscriptionActor.cs" />
     <Compile Include="Subscriptions\Coordinator\PeerCache.cs" />
     <Compile Include="Subscriptions\DisposableUnsubscribeAction.cs" />
     <Compile Include="Subscriptions\ISubscriptionReference.cs" />

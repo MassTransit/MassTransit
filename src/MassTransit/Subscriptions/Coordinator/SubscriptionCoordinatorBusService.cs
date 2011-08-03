@@ -18,6 +18,7 @@ namespace MassTransit.Subscriptions.Coordinator
 	using Magnum.Extensions;
 	using Messages;
 	using Stact;
+	using Stact.Internal;
 
 	public class SubscriptionCoordinatorBusService :
 		IBusService,
@@ -130,7 +131,14 @@ namespace MassTransit.Subscriptions.Coordinator
 
 			var connector = new BusSubscriptionConnector(bus);
 
-			_peerCache = ActorFactory.Create(() => new PeerCache(connector, _clientId, _controlUri))
+			_peerCache = ActorFactory.Create<PeerCache>(x =>
+				{
+					x.ConstructedBy(() => new PeerCache(connector, _clientId, _controlUri));
+					x.UseFiberFactory(() =>
+						{
+							return new PoolFiber(new BasicOperationExecutor());
+						});
+				})
 				.GetActor();
 
 			ListenToBus(bus);
@@ -145,7 +153,7 @@ namespace MassTransit.Subscriptions.Coordinator
 		{
 			var subscriptionEventListener = new BusSubscriptionEventListener(bus, this);
 
-			_unregister += _bus.Configure(x =>
+			_unregister += bus.Configure(x =>
 				{
 					UnregisterAction unregisterAction = x.Register(subscriptionEventListener);
 

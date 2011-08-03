@@ -25,45 +25,45 @@ namespace MassTransit.Tests.Serialization
 	using NUnit.Framework;
 
 	[TestFixture]
-    public class MoreSerializationForCustomXml :
-        MoreSerialization_Specs<XmlMessageSerializer>
+	public class MoreSerializationForCustomXml :
+		MoreSerialization_Specs<XmlMessageSerializer>
 	{
 	}
 
-    [TestFixture]
-    public class MoreSerializationForJson :
-        MoreSerialization_Specs<JsonMessageSerializer>
-    {
-    }
-	
-    [TestFixture]
-    public class MoreSerializationForBson :
-        MoreSerialization_Specs<BsonMessageSerializer>
-    {
-    }
+	[TestFixture]
+	public class MoreSerializationForJson :
+		MoreSerialization_Specs<JsonMessageSerializer>
+	{
+	}
 	
 	[TestFixture]
-    public class MoreSerializationForVersionOneXml :
-        MoreSerialization_Specs<VersionOneXmlMessageSerializer>
-    {
-    }
+	public class MoreSerializationForBson :
+		MoreSerialization_Specs<BsonMessageSerializer>
+	{
+	}
+	
+	[TestFixture]
+	public class MoreSerializationForVersionOneXml :
+		MoreSerialization_Specs<VersionOneXmlMessageSerializer>
+	{
+	}
 
-    [TestFixture][Ignore("Just can't keep up with the others")]
-    public class MoreSerializationForDotNotXml :
-        MoreSerialization_Specs<DotNotXmlMessageSerializer>
-    {
-    }
+	[TestFixture][Explicit("Just can't keep up with the others")]
+	public class MoreSerializationForDotNotXml :
+		MoreSerialization_Specs<DotNotXmlMessageSerializer>
+	{
+	}
 
-    [TestFixture]
-    public class MoreSerializationForBinary :
-        MoreSerialization_Specs<BinaryMessageSerializer>
-    {
-    }
+	[TestFixture]
+	public class MoreSerializationForBinary :
+		MoreSerialization_Specs<BinaryMessageSerializer>
+	{
+	}
 
 	public abstract class MoreSerialization_Specs<TSerializer> :
 		SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
 	{
-        [Serializable]
+		[Serializable]
 		public class ContainerClass
 		{
 			public IList<OuterClass> Elements { get; set; }
@@ -105,7 +105,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
-        [Serializable]
+		[Serializable]
 		public class DictionaryContainerClass
 		{
 			public IDictionary<string, OuterClass> Elements { get; set; }
@@ -150,15 +150,15 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
-        [Serializable]
+		[Serializable]
 		public class PrimitiveArrayClass
 		{
-        	public PrimitiveArrayClass()
-        	{
-        		Values = new int[] {};
-        	}
+			public PrimitiveArrayClass()
+			{
+				Values = new int[] {};
+			}
 
-        	public int[] Values { get; set; }
+			public int[] Values { get; set; }
 
 			public bool Equals(PrimitiveArrayClass other)
 			{
@@ -197,7 +197,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
-        [Serializable]
+		[Serializable]
 		public class GenericArrayClass<T>
 		{
 			public T[] Values { get; set; }
@@ -239,7 +239,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
-        [Serializable]
+		[Serializable]
 		public class OuterClass
 		{
 			public InnerClass Inner { get; set; }
@@ -265,7 +265,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
-        [Serializable]
+		[Serializable]
 		public class InnerClass
 		{
 			public string Name { get; set; }
@@ -292,7 +292,7 @@ namespace MassTransit.Tests.Serialization
 		}
 
 
-        [Serializable]
+		[Serializable]
 		public class EmptyClass
 		{
 			public bool Equals(EmptyClass other)
@@ -406,7 +406,7 @@ namespace MassTransit.Tests.Serialization
 				{
 					Elements = new Dictionary<string, OuterClass>
 						{
-                            {"Chris", new OuterClass{Inner = new InnerClass {Name = "Chris"}}},
+							{"Chris", new OuterClass{Inner = new InnerClass {Name = "Chris"}}},
 							{"David", new OuterClass{Inner = new InnerClass {Name = "David"}}},
 						}
 				};
@@ -446,7 +446,7 @@ namespace MassTransit.Tests.Serialization
 		}
 
 
-        [Serializable]
+		[Serializable]
 		public class EnumClass
 		{
 			public SomeEnum Setting { get; set; }
@@ -519,7 +519,7 @@ namespace MassTransit.Tests.Serialization
 		}
 	}
 
-        [Serializable]
+		[Serializable]
 	public class PrivateSetter
 	{
 		public PrivateSetter(string name)

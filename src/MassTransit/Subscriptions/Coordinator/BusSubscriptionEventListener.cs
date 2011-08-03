@@ -16,7 +16,6 @@ namespace MassTransit.Subscriptions.Coordinator
 	using Magnum;
 	using Messages;
 	using Pipeline;
-	using Services.Subscriptions.Messages;
 	using log4net;
 
 	public class BusSubscriptionEventListener :

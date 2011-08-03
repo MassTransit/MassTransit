@@ -27,7 +27,6 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly BusSubscriptionCoordinator _coordinator;
 		readonly Guid _peerId;
 		readonly List<Action<BusSubscriptionCoordinator>> _waiting;
-		readonly BusSubscriptionConnector _connector;
 		long _messageNumber;
 		BusSubscriptionCoordinator _targetCoordinator;
 		readonly HashSet<string> _ignoredMessageTypes;
@@ -38,7 +37,6 @@ namespace MassTransit.Subscriptions.Coordinator
 			_peerId = CombGuid.Generate();
 
 			_waiting = new List<Action<BusSubscriptionCoordinator>>();
-			_connector = new BusSubscriptionConnector(bus);
 
 			_ignoredMessageTypes = IgnoredMessageTypes();
 
@@ -63,8 +61,6 @@ namespace MassTransit.Subscriptions.Coordinator
 
 		public void OnSubscriptionAdded(SubscriptionAdded message)
 		{
-			_connector.OnSubscriptionAdded(message);
-
 			if (_ignoredMessageTypes.Contains(message.MessageName))
 				return;
 
@@ -86,8 +82,6 @@ namespace MassTransit.Subscriptions.Coordinator
 
 		public void OnSubscriptionRemoved(SubscriptionRemoved message)
 		{
-			_connector.OnSubscriptionRemoved(message);
-
 			if (_ignoredMessageTypes.Contains(message.MessageName))
 				return;
 

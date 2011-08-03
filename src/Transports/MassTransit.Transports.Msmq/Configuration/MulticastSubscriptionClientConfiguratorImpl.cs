@@ -54,8 +54,6 @@ namespace MassTransit.Transports.Msmq.Configuration
 			Uri uri = new UriBuilder("msmq-pgm", _multicastAddress.Address.ToString(), _multicastAddress.Port, path).Uri;
 			Uri clientUri = uri.AppendToPath("_subscriptions");
 
-			MsmqEndpointManagement.Manage(new MsmqEndpointAddress(clientUri), x => x.Purge());
-
 			var builder = new ControlBusBuilderImpl(new ServiceBusSettings
 				{
 					ConcurrentConsumerLimit = 1,
@@ -69,7 +67,7 @@ namespace MassTransit.Transports.Msmq.Configuration
 
 			IControlBus subscriptionBus = builder.Build();
 
-			var service = new MulticastSubscriptionService(subscriptionBus, coordinator);
+			var service = new MulticastSubscriptionClient(subscriptionBus, coordinator);
 
 			return service;
 		}

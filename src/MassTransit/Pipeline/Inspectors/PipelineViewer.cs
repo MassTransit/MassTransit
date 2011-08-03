@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Inspectors
 	using System.Linq;
 	using System.Text;
 	using Distributor.Pipeline;
+	using Magnum.Extensions;
 	using Saga;
 	using Saga.Pipeline;
 	using Sinks;
@@ -49,17 +50,26 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage>(MessageRouter<TMessage> router)
 			where TMessage : class
 		{
-			Append(string.Format("Routed ({0})", typeof (TMessage).ToMessageName()));
+			Append(string.Format("Routed ({0})", GetMessageName<TMessage>()));
 
 			return true;
 		}
 
-//		public bool Inspect<TMessage>(InboundMessageFilter<TMessage> element) where TMessage : class
-//		{
-//			Append(string.Format("Filtered '{0}' ({1})", element.Description, typeof (TMessage).ToFriendlyName()));
-//
-//			return true;
-//		}
+		static string GetMessageName<TMessage>() where TMessage : class
+		{
+			Type messageType = typeof (TMessage);
+			if (messageType.IsGenericType && messageType.GetGenericTypeDefinition().Implements<IMessageContext>())
+				messageType = messageType.GetGenericArguments()[0];
+
+			return messageType.ToMessageName();
+		}
+
+		public bool Inspect<TMessage>(OutboundMessageFilter<TMessage> element) where TMessage : class
+		{
+			Append(string.Format("Filtered '{0}' ({1})", GetMessageName<TMessage>()));
+
+			return true;
+		}
 
 		public bool Inspect(InboundMessageInterceptor element)
 		{
@@ -78,7 +88,7 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage>(InstanceMessageSink<TMessage> sink)
 			where TMessage : class
 		{
-			Append(string.Format("Consumed by Instance ({0})", typeof (TMessage).ToFriendlyName()));
+			Append(string.Format("Consumed by Instance ({0})", GetMessageName<TMessage>()));
 
 			return true;
 		}
@@ -86,7 +96,7 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage>(DistributorMessageSink<TMessage> sink)
 			where TMessage : class
 		{
-			Append(string.Format("Distributor ({0})", typeof (TMessage).ToFriendlyName()));
+			Append(string.Format("Distributor ({0})", GetMessageName<TMessage>()));
 
 			return true;
 		}
@@ -96,7 +106,7 @@ namespace MassTransit.Pipeline.Inspectors
 			where TSaga : SagaStateMachine<TSaga>, ISaga
 		{
 			Append(string.Format("Saga Distributor Worker ({0} - {1})", typeof (TSaga).ToFriendlyName(),
-				typeof (TMessage).ToFriendlyName()));
+				GetMessageName<TMessage>()));
 
 			return true;
 		}
@@ -114,7 +124,7 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink)
 			where TMessage : class
 		{
-			Append(string.Format("Send {0} to Endpoint {1}", typeof (TMessage).ToFriendlyName(), sink.Endpoint.Address.Uri));
+			Append(string.Format("Send {0} to Endpoint {1}", GetMessageName<TMessage>(), sink.Endpoint.Address.Uri));
 
 			return true;
 		}
@@ -132,7 +142,7 @@ namespace MassTransit.Pipeline.Inspectors
 			where TMessage : class, CorrelatedBy<TKey>
 			where T : class, IMessageContext<TMessage>
 		{
-			Append(string.Format("Correlated by {1} ({0})", typeof (TMessage).ToFriendlyName(), typeof (TKey).ToFriendlyName()));
+			Append(string.Format("Correlated by {1} ({0})", GetMessageName<TMessage>(), typeof(TKey).ToFriendlyName()));
 
 			return true;
 		}
@@ -141,7 +151,7 @@ namespace MassTransit.Pipeline.Inspectors
 			where T : class
 			where TMessage : class, CorrelatedBy<TKey>
 		{
-			Append(string.Format("Routed for Correlation Id {1} ({0})", typeof (TMessage).Name, sink.CorrelationId));
+			Append(string.Format("Routed for Correlation Id {1} ({0})", GetMessageName<TMessage>(), sink.CorrelationId));
 
 			return true;
 		}
@@ -149,7 +159,7 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage>(InboundConvertMessageSink<TMessage> converter)
 			where TMessage : class
 		{
-			Append(string.Format("Translated to {0}", typeof (TMessage).ToFriendlyName()));
+			Append(string.Format("Translated to {0}", GetMessageName<TMessage>()));
 
 			return true;
 		}
@@ -157,7 +167,7 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage>(OutboundConvertMessageSink<TMessage> converter)
 			where TMessage : class
 		{
-			Append(string.Format("Translated to {0}", typeof (TMessage).ToFriendlyName()));
+			Append(string.Format("Translated to {0}", GetMessageName<TMessage>()));
 
 			return true;
 		}
@@ -172,7 +182,7 @@ namespace MassTransit.Pipeline.Inspectors
 			string componentName = componentType.IsGenericType
 			                       	? componentType.GetGenericTypeDefinition().ToFriendlyName() : componentType.ToFriendlyName();
 
-			Append(string.Format("Consumed by Component {0} ({1})", componentName, typeof (TMessage).ToFriendlyName()));
+			Append(string.Format("Consumed by Component {0} ({1})", componentName, GetMessageName<TMessage>()));
 
 			return true;
 		}
@@ -188,7 +198,7 @@ namespace MassTransit.Pipeline.Inspectors
 
 			string policyDescription = GetPolicy(sink.Policy);
 
-			Append(string.Format("{0} Saga {1} ({2})", policyDescription, componentName, typeof (TMessage).ToFriendlyName()));
+			Append(string.Format("{0} Saga {1} ({2})", policyDescription, componentName, GetMessageName<TMessage>()));
 
 			return true;
 		}
@@ -205,7 +215,7 @@ namespace MassTransit.Pipeline.Inspectors
 			string policyDescription = GetPolicy(sink.Policy);
 			string expression = sink.Selector.ToString();
 
-			Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, componentName, typeof (TMessage).ToFriendlyName(),
+			Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, componentName, GetMessageName<TMessage>(),
 				expression));
 
 			return true;
@@ -223,7 +233,7 @@ namespace MassTransit.Pipeline.Inspectors
 			string policyDescription = GetPolicy(sink.Policy);
 			string expression = sink.Selector.ToString();
 
-			Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, componentName, typeof (TMessage).ToFriendlyName(),
+			Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, componentName, GetMessageName<TMessage>(),
 				expression));
 
 			return true;
@@ -241,7 +251,7 @@ namespace MassTransit.Pipeline.Inspectors
 			string policyDescription = GetPolicy(sink.Policy);
 
 			Append(string.Format("{0} SagaStateMachine {1} ({2})", policyDescription, componentName,
-				typeof (TMessage).ToFriendlyName()));
+				GetMessageName<TMessage>()));
 
 			return true;
 		}
@@ -251,7 +261,7 @@ namespace MassTransit.Pipeline.Inspectors
 			where TComponent : class, Consumes<TMessage>.Selected
 		{
 			Append(string.Format("Conditionally Consumed by Component {0} ({1})", typeof (TComponent).ToFriendlyName(),
-				typeof (TMessage).ToFriendlyName()));
+				GetMessageName<TMessage>()));
 
 			return true;
 		}
