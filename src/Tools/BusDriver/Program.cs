@@ -79,7 +79,7 @@ namespace BusDriver
 				Transports.AddTransportFactory(new MsmqTransportFactory());
 				Transports.AddTransportFactory(new RabbitMqTransportFactory());
 
-				string line = CommandLine.GetUnparsedCommandLine();
+				string line = CommandLine.GetUnparsedCommandLine().Trim();
 				if (line.IsNotEmpty())
 				{
 					ProcessLine(line);
