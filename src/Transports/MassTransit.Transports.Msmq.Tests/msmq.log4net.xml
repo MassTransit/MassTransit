@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<log4net>
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="console" />
+	</root>
+	<appender name="console" type="log4net.Appender.ConsoleAppender, log4net">
+		<layout type="log4net.Layout.PatternLayout,log4net">
+			<param name="ConversionPattern" value="%d %-5p %c - %m%n" />
+		</layout>
+	</appender>
+</log4net>

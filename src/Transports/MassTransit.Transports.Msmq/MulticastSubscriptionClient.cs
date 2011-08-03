@@ -16,17 +16,17 @@ namespace MassTransit.Transports.Msmq
 	using Subscriptions.Messages;
 	using log4net;
 
-	public class MulticastSubscriptionService :
+	public class MulticastSubscriptionClient :
 		BusSubscriptionEventObserver
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (MulticastSubscriptionService));
+		static readonly ILog _log = LogManager.GetLogger(typeof (MulticastSubscriptionClient));
 		readonly BusSubscriptionCoordinator _coordinator;
 		readonly string _network;
 		BusSubscriptionMessageProducer _producer;
 		IServiceBus _subscriptionBus;
 		UnsubscribeAction _unsubscribeAction;
 
-		public MulticastSubscriptionService(IServiceBus subscriptionBus, BusSubscriptionCoordinator coordinator)
+		public MulticastSubscriptionClient(IServiceBus subscriptionBus, BusSubscriptionCoordinator coordinator)
 		{
 			_subscriptionBus = subscriptionBus;
 			_coordinator = coordinator;

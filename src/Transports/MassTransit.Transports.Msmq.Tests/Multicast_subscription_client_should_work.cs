@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
+	using System.Diagnostics;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using MassTransit.Tests;
@@ -39,7 +40,80 @@ namespace MassTransit.Transports.Msmq.Tests
 			_unsubscribe = RemoteBus.SubscribeHandler<PingMessage>(message => { _future.Set(message); });
 
 			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+
+			Trace.WriteLine("LocalBus");
+
+			LocalBus.OutboundPipeline.Trace();
+
+			Trace.WriteLine("RemoteBus");
+
+			RemoteBus.OutboundPipeline.Trace();
+
 			LocalBus.Publish(_ping);
+		}
+
+		protected override void TeardownContext()
+		{
+			_unsubscribe();
+
+			LocalBus.ShouldNotHaveSubscriptionFor<PingMessage>();
+
+			base.TeardownContext();
+		}
+
+		[Test]
+		public void The_message_should_arrive()
+		{
+			_future.WaitUntilAvailable(10.Seconds());
+		}
+	}
+
+	[TestFixture, Integration]
+	public class Multicast_subscription_client_with_control_bus_should_work :
+		MulticastMsmqEndpointTestFixture
+	{
+		private PingMessage _ping;
+		private FutureMessage<PingMessage, Guid> _future;
+		UnsubscribeAction _unsubscribe;
+
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
+
+			_ping = new PingMessage();
+			_future = new FutureMessage<PingMessage, Guid>(_ping.CorrelationId);
+
+			_unsubscribe = RemoteBus.SubscribeHandler<PingMessage>(message => { _future.Set(message); });
+
+
+			RemoteBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+	
+			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+
+			Trace.WriteLine("LocalBus");
+
+			LocalBus.OutboundPipeline.Trace();
+
+			Trace.WriteLine("RemoteBus");
+
+			RemoteBus.OutboundPipeline.Trace();
+
+
+			LocalBus.Publish(_ping);
+		}
+
+		protected override void ConfigureLocalBus(BusConfigurators.ServiceBusConfigurator configurator)
+		{
+			base.ConfigureLocalBus(configurator);
+
+			configurator.UseControlBus();
+		}
+
+		protected override void ConfigureRemoteBus(BusConfigurators.ServiceBusConfigurator configurator)
+		{
+			base.ConfigureRemoteBus(configurator);
+
+			configurator.UseControlBus();
 		}
 
 		protected override void TeardownContext()

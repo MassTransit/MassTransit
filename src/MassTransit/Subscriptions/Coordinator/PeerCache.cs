@@ -24,16 +24,16 @@ namespace MassTransit.Subscriptions.Coordinator
 		Actor
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (PeerCache));
+		readonly PeerSubscriptionCache _endpointSubscriptionCache;
 		readonly ActorFactory<PeerHandler> _peerHandlerFactory;
 		readonly IDictionary<Guid, Uri> _peerIds;
 		readonly IDictionary<Uri, ActorInstance> _peers;
-		readonly EndpointSubscriptionCache _endpointSubscriptionCache;
 
 		public PeerCache(BusSubscriptionEventObserver observer, Guid clientId, Uri controlUri)
 		{
 			_peers = new Dictionary<Uri, ActorInstance>();
 			_peerIds = new Dictionary<Guid, Uri>();
-			_endpointSubscriptionCache = new EndpointSubscriptionCache(observer);
+			_endpointSubscriptionCache = new PeerSubscriptionCache(observer);
 
 			_peerHandlerFactory = ActorFactory.Create((f, s, i) => new PeerHandler(i, observer));
 
@@ -44,53 +44,88 @@ namespace MassTransit.Subscriptions.Coordinator
 		[UsedImplicitly]
 		public void Handle(Message<Stop> message)
 		{
-			_peers.Values.Each(x => x.ExitOnDispose(30.Seconds()).Dispose());
+			try
+			{
+				_peers.Values.Each(x => x.ExitOnDispose(30.Seconds()).Dispose());
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Message<Stop> Exception", ex);
+			}
 		}
 
 		public void Handle(Message<AddPeer> message)
 		{
-			WithPeer(message.Body.PeerId, message.Body.PeerUri, x =>
-				{
-					if(_log.IsDebugEnabled)
-						_log.DebugFormat("AddPeer: {0}, {1}", message.Body.PeerId, message.Body.PeerUri);
+			try
+			{
+				WithPeer(message.Body.PeerId, message.Body.PeerUri, x =>
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("AddPeer: {0}, {1}", message.Body.PeerId, message.Body.PeerUri);
 
-					x.Send(message);
-				}, true);
+						x.Send(message);
+					}, true);
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Message<AddPeer> Exception", ex);
+			}
 		}
 
 		public void Handle(Message<RemovePeer> message)
 		{
-			_endpointSubscriptionCache.Send(message.Body);
-			
-			WithPeer(message.Body.PeerId, message.Body.PeerUri, x => x.Send(message), false);
+			try
+			{
+				_endpointSubscriptionCache.Send(message.Body);
+
+				WithPeer(message.Body.PeerId, message.Body.PeerUri, x => x.Send(message), false);
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Message<RemovePeer> Exception", ex);
+			}
 		}
 
 		public void Handle(Message<AddPeerSubscription> message)
 		{
-			WithPeer(message.Body.PeerId, x =>
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("AddPeerSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
-							message.Body.PeerId);
+			try
+			{
+				WithPeer(message.Body.PeerId, x =>
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("AddPeerSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
+								message.Body.PeerId);
 
-					_endpointSubscriptionCache.Send(message.Body);
+						_endpointSubscriptionCache.Send(message.Body);
 
-					x.Send(message);
-				});
+						x.Send(message);
+					});
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Message<AddPeerSubscription> Exception", ex);
+			}
 		}
 
 		public void Handle(Message<RemovePeerSubscription> message)
 		{
-			WithPeer(message.Body.PeerId, x =>
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("RemovePeerSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
-							message.Body.PeerId);
+			try
+			{
+				WithPeer(message.Body.PeerId, x =>
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("RemovePeerSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
+								message.Body.PeerId);
 
-					_endpointSubscriptionCache.Send(message.Body);
+						_endpointSubscriptionCache.Send(message.Body);
 
-					x.Send(message);
-				});
+						x.Send(message);
+					});
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Message<RemovePeerSubscription> Exception", ex);
+			}
 		}
 
 		void WithPeer(Guid peerId, Action<ActorInstance> callback)
@@ -99,6 +134,10 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (_peerIds.TryGetValue(peerId, out peerUri))
 			{
 				WithPeer(peerId, peerUri, callback, false);
+			}
+			else
+			{
+				_log.WarnFormat("Unknown Peer: {0}", peerId);
 			}
 		}
 

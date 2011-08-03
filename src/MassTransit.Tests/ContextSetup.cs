@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,30 +14,30 @@ namespace MassTransit.Tests
 {
 	using System.Diagnostics;
 	using System.IO;
-    using System.Reflection;
+	using System.Reflection;
+	using NUnit.Framework;
 	using log4net;
 	using log4net.Config;
-    using NUnit.Framework;
 
-    [SetUpFixture]
-    public class ContextSetup
-    {
-        [SetUp]
-        public void Before_any()
-        {
-        	Trace.WriteLine("Loading Log4net");
+	[SetUpFixture]
+	public class ContextSetup
+	{
+		[SetUp]
+		public void Before_any()
+		{
+			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			string file = Path.Combine(path, "test.log4net.xml");
 
-            string file = Path.Combine(path, "test.log4net.xml");
+			XmlConfigurator.Configure(new FileInfo(file));
 
-            XmlConfigurator.Configure(new FileInfo(file));
-        }
+			Trace.WriteLine("Loading Log4net: " + file);
+		}
 
 		[TearDown]
 		public void After_all()
 		{
 			LogManager.Shutdown();
 		}
-    }
+	}
 }

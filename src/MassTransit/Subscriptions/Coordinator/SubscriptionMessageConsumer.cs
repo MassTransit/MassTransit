@@ -157,7 +157,10 @@ namespace MassTransit.Subscriptions.Coordinator
 			where T : class
 		{
 			if (_peerId == clientId && clientId != Guid.Empty)
+			{
+				_log.DebugFormat("Ignoring message from client: {0}", clientId);
 				return true;
+			}
 
 			if (_ignoredSourceAddresses.Contains(context.SourceAddress))
 			{

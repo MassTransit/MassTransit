@@ -21,64 +21,8 @@ namespace MassTransit.Tests.Saga.StateMachine
 	using MassTransit.Pipeline.Inspectors;
 	using MassTransit.Saga;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using TestFramework;
 	using TextFixtures;
-
-	[TestFixture]
-	public class When_sagas_are_subscribed_to_the_service_bus :
-		LoopbackTestFixture
-	{
-		protected override void EstablishContext()
-		{
-			base.EstablishContext();
-
-			_sagaId = Guid.NewGuid();
-
-			_repository = SetupSagaRepository<TestSaga>();
-
-		    _initiateSimpleSagaUnsubscribeCalled = false;
-		    _completeSimpleSagaUnsubscribeCalled = false;
-		    _initiateSimpleSagaUnsubscribe = () => {_initiateSimpleSagaUnsubscribeCalled = true; return true; };
-            _completeSimpleSagaUnsubscribe = () => { _completeSimpleSagaUnsubscribeCalled = true; return true; };
-
-			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_subscriptionEvent.Expect(x => x.SubscribedTo<InitiateSimpleSaga>()).Repeat.Any().Return(_initiateSimpleSagaUnsubscribe);
-			_subscriptionEvent.Expect(x => x.SubscribedTo<CompleteSimpleSaga>()).Repeat.Any().Return(_completeSimpleSagaUnsubscribe);
-
-			LocalBus.InboundPipeline.Configure(x => x.Register(_subscriptionEvent));
-
-			_remove = LocalBus.SubscribeSaga<TestSaga>(_repository);
-
-			PipelineViewer.Trace(LocalBus.InboundPipeline);
-		}
-
-		private Guid _sagaId;
-		private UnsubscribeAction _remove;
-		private ISagaRepository<TestSaga> _repository;
-		private ISubscriptionEvent _subscriptionEvent;
-		private UnsubscribeAction _initiateSimpleSagaUnsubscribe;
-		private UnsubscribeAction _completeSimpleSagaUnsubscribe;
-	    private bool _initiateSimpleSagaUnsubscribeCalled;
-	    private bool _completeSimpleSagaUnsubscribeCalled;
-
-	    [Test, Ignore("Rhino Mock 3.6 Bug")]
-		public void Should_publish_subscriptions_for_saga_subscriptions()
-		{
-			_subscriptionEvent.VerifyAllExpectations();
-		}
-
-        [Test, Ignore("Rhino Mock 3.6 Bug")]
-        public void Should_remove_subscriptions_for_saga_subscriptions()
-		{
-			_remove();
-
-			_subscriptionEvent.VerifyAllExpectations();
-
-		    Assert.IsTrue(_initiateSimpleSagaUnsubscribeCalled);
-            Assert.IsTrue(_completeSimpleSagaUnsubscribeCalled);
-		}
-	}
 
 	[TestFixture]
 	public class When_an_initiating_message_for_a_saga_arrives :

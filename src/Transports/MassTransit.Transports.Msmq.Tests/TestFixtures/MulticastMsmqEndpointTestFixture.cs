@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using System;
+	using BusConfigurators;
 	using MassTransit.Tests.TextFixtures;
 
 	public class MulticastMsmqEndpointTestFixture :
@@ -38,26 +39,22 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		{
 			base.EstablishContext();
 
-			LocalEndpoint = EndpointCache.GetEndpoint(LocalEndpointUri);
-			LocalErrorEndpoint = EndpointCache.GetEndpoint(LocalErrorUri);
-			RemoteEndpoint = EndpointCache.GetEndpoint(RemoteEndpointUri);
+			LocalBus = ServiceBusFactory.New(ConfigureLocalBus);
 
-			LocalBus = ServiceBusFactory.New(x =>
-				{
-					x.UseMulticastSubscriptionClient();
-					x.ReceiveFrom(LocalEndpointUri);
-				});
-
-			RemoteBus = ServiceBusFactory.New(x =>
-				{
-					x.UseMulticastSubscriptionClient();
-					x.ReceiveFrom(RemoteEndpointUri);
-				});
+			RemoteBus = ServiceBusFactory.New(ConfigureRemoteBus);
 		}
 
-		public IEndpoint LocalEndpoint { get; private set; }
-		public IEndpoint LocalErrorEndpoint { get; private set; }
-		public IEndpoint RemoteEndpoint { get; private set; }
+		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
+		{
+			configurator.ReceiveFrom(LocalEndpointUri);
+			configurator.UseMulticastSubscriptionClient();
+		}
+
+		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
+		{
+			configurator.ReceiveFrom(RemoteEndpointUri);
+			configurator.UseMulticastSubscriptionClient();
+		}
 
 		protected override void TeardownContext()
 		{
@@ -66,9 +63,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 			RemoteBus.Dispose();
 			RemoteBus = null;
-
-			LocalEndpoint = null;
-			LocalErrorEndpoint = null;
 
 			base.TeardownContext();
 		}
