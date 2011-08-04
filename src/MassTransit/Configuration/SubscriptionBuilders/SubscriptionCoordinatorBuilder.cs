@@ -17,6 +17,7 @@ namespace MassTransit.SubscriptionBuilders
 
 	public interface SubscriptionCoordinatorBuilder
 	{
+		void SetNetwork(string network);
 		void SetObserverFactory(Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory);
 		void AddObserverFactory(Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory);
 

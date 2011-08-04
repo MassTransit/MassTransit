@@ -13,11 +13,35 @@
 namespace MassTransit.Services.Subscriptions.Configuration
 {
 	using System;
+	using Client;
+	using Magnum.Extensions;
+	using MassTransit.Subscriptions.Coordinator;
 
-	public interface SubscriptionClientConfigurator
+	public class SubscriptionClientConfiguratorImpl :
+		SubscriptionClientConfigurator
 	{
-		void SetSubscriptionServiceEndpoint(Uri uri);
+		Uri _subscriptionServiceUri;
+		TimeSpan _timeout = 1.Minutes();
 
-		void SetStartTimeout(TimeSpan timeout);
+
+		public void SetSubscriptionServiceEndpoint(Uri uri)
+		{
+			_subscriptionServiceUri = uri;
+		}
+
+		public void SetStartTimeout(TimeSpan timeout)
+		{
+			_timeout = timeout;
+		}
+
+		public BusSubscriptionEventObserver Create(IServiceBus bus, BusSubscriptionCoordinator coordinator)
+		{
+			string path = bus.ControlBus.Endpoint.Address.Uri.AbsolutePath;
+
+
+			var client = new SubscriptionClient(bus, coordinator, _subscriptionServiceUri, _timeout);
+
+			return client;
+		}
 	}
 }

@@ -88,7 +88,7 @@ namespace MassTransit.Transports
 				context.NotifySend(_address);
 
 				if (SpecialLoggers.Messages.IsInfoEnabled)
-					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, typeof (T).Name);
+					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}:{2}", Address, typeof (T).Name, context.MessageId);
 			}
 			catch (Exception ex)
 			{
@@ -146,13 +146,6 @@ namespace MassTransit.Transports
 
 					return receiveContext =>
 						{
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("RECV:{0}:{1}:{2}", Address, receiveContext.MessageId, receiveContext.MessageType);
-
-							if (SpecialLoggers.Messages.IsInfoEnabled)
-								SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}:{2}", Address, receiveContext.MessageType,
-									receiveContext.MessageId);
-
 							try
 							{
 								receive(receiveContext);

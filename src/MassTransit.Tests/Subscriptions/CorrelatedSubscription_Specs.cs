@@ -74,6 +74,8 @@ namespace MassTransit.Tests.Subscriptions
 			var secondComponent = new SecondComponent();
 			LocalBus.SubscribeInstance(secondComponent);
 
+			RemoteBus.ShouldHaveSubscriptionFor<IncomingMessage>();
+
 			RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(FirstCorrelationId);
 			RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(SecondCorrelationId);
 		}

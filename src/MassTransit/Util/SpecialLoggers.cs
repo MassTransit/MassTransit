@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,26 +15,24 @@ namespace MassTransit.Util
 	using log4net;
 
 	public class SpecialLoggers
-    {
-        private readonly static ILog _diagnostics = LogManager.GetLogger("MassTransit.Diagnostics");
-        private readonly static ILog _messages = LogManager.GetLogger("MassTransit.Messages");
-        private readonly static ILog _ironLogger = LogManager.GetLogger("MassTransit.Iron");
+	{
+		static readonly ILog _diagnostics = LogManager.GetLogger("MassTransit.Diagnostics");
+		static readonly ILog _ironLogger = LogManager.GetLogger("MassTransit.Iron");
+		static readonly ILog _messages = LogManager.GetLogger("MassTransit.Messages");
 
-        public static ILog Messages
-        {
-            get { return _messages; }
-        }
+		public static ILog Messages
+		{
+			get { return _messages; }
+		}
 
-        public static ILog Diagnostics
-        {
-            get { return _diagnostics; }
-        }
+		public static ILog Diagnostics
+		{
+			get { return _diagnostics; }
+		}
 
-        public static ILog Iron
-        {
-            get { return _ironLogger;  }
-        }
-
-
-    }
+		public static ILog Iron
+		{
+			get { return _ironLogger; }
+		}
+	}
 }

@@ -314,9 +314,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="test.log4net.xml">
+    <Content Include="masstransit.tests.log4net.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="loopback.castle.xml">

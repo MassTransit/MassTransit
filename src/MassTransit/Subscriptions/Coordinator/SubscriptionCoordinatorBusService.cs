@@ -18,13 +18,13 @@ namespace MassTransit.Subscriptions.Coordinator
 	using Magnum.Extensions;
 	using Messages;
 	using Stact;
-	using Stact.Internal;
 
 	public class SubscriptionCoordinatorBusService :
 		IBusService,
 		BusSubscriptionCoordinator,
 		BusSubscriptionEventObserver
 	{
+		readonly Guid _clientId;
 		readonly string _network;
 		readonly IList<BusSubscriptionEventObserver> _observers;
 		IServiceBus _bus;
@@ -35,7 +35,6 @@ namespace MassTransit.Subscriptions.Coordinator
 		bool _disposed;
 		ActorInstance _peerCache;
 		UnsubscribeAction _unregister;
-		readonly Guid _clientId;
 
 		public SubscriptionCoordinatorBusService(IServiceBus bus, string network)
 		{
@@ -52,12 +51,17 @@ namespace MassTransit.Subscriptions.Coordinator
 			_observers = new List<BusSubscriptionEventObserver>();
 
 			_unregister = () => true;
-		}
 
-		public void AddObserver(BusSubscriptionEventObserver observer)
-		{
-			lock (_observers)
-				_observers.Add(observer);
+			_bus = bus;
+			_controlBus = bus.ControlBus;
+
+			_dataUri = bus.Endpoint.Address.Uri;
+			_controlUri = bus.ControlBus.Endpoint.Address.Uri;
+
+			var connector = new BusSubscriptionConnector(bus);
+
+			_peerCache = ActorFactory.Create(() => new PeerCache(connector, _clientId, _controlUri))
+				.GetActor();
 		}
 
 		public void Send(AddPeerSubscription message)
@@ -123,30 +127,18 @@ namespace MassTransit.Subscriptions.Coordinator
 
 		public void Start(IServiceBus bus)
 		{
-			_bus = bus;
-			_controlBus = bus.ControlBus;
-
-			_dataUri = bus.Endpoint.Address.Uri;
-			_controlUri = bus.ControlBus.Endpoint.Address.Uri;
-
-			var connector = new BusSubscriptionConnector(bus);
-
-			_peerCache = ActorFactory.Create<PeerCache>(x =>
-				{
-					x.ConstructedBy(() => new PeerCache(connector, _clientId, _controlUri));
-					x.UseFiberFactory(() =>
-						{
-							return new PoolFiber(new BasicOperationExecutor());
-						});
-				})
-				.GetActor();
-
 			ListenToBus(bus);
 		}
 
 		public void Stop()
 		{
 			_unregister();
+		}
+
+		public void AddObserver(BusSubscriptionEventObserver observer)
+		{
+			lock (_observers)
+				_observers.Add(observer);
 		}
 
 		void ListenToBus(IServiceBus bus)
@@ -174,7 +166,6 @@ namespace MassTransit.Subscriptions.Coordinator
 			{
 				lock (_observers)
 					_observers.Each(x => x.OnComplete());
-
 			}
 
 			_disposed = true;
