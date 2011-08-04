@@ -20,12 +20,12 @@ namespace MassTransit.Transports.RabbitMq
 		Connection
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqConnection));
-		readonly IRabbitMqEndpointAddress _address;
 		IConnection _connection;
+		readonly ConnectionFactory _connectionFactory;
 
-		public RabbitMqConnection(IRabbitMqEndpointAddress address)
+		public RabbitMqConnection(ConnectionFactory connectionFactory)
 		{
-			_address = address;
+			_connectionFactory = connectionFactory;
 		}
 
 		public IConnection Connection
@@ -42,7 +42,7 @@ namespace MassTransit.Transports.RabbitMq
 		{
 			Disconnect();
 
-			_connection = _address.ConnectionFactory.CreateConnection();
+			_connection = _connectionFactory.CreateConnection();
 		}
 
 		public void Disconnect()

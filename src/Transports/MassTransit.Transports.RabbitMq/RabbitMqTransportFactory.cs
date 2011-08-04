@@ -13,7 +13,10 @@
 namespace MassTransit.Transports.RabbitMq
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
+	using Configuration.Builders;
+	using Configuration.Configurators;
 	using Exceptions;
 	using Magnum.Extensions;
 	using Magnum.Threading;
@@ -26,12 +29,21 @@ namespace MassTransit.Transports.RabbitMq
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqTransportFactory));
 		readonly ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>> _connectionCache;
+		readonly IDictionary<Uri, ConnectionFactoryBuilder> _connectionFactoryBuilders;
+
 
 		bool _disposed;
+
+		public RabbitMqTransportFactory(IDictionary<Uri, ConnectionFactoryBuilder> connectionFactoryBuilders)
+		{
+			_connectionCache = new ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>>();
+			_connectionFactoryBuilders = connectionFactoryBuilders;
+		}
 
 		public RabbitMqTransportFactory()
 		{
 			_connectionCache = new ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>>();
+			_connectionFactoryBuilders = new Dictionary<Uri, ConnectionFactoryBuilder>();
 		}
 
 		public void Dispose()
@@ -117,7 +129,16 @@ namespace MassTransit.Transports.RabbitMq
 		{
 			return _connectionCache.Retrieve(address.Uri, () =>
 				{
-					var connection = new RabbitMqConnection(address);
+					ConnectionFactoryBuilder builder = _connectionFactoryBuilders.Retrieve(address.Uri, () =>
+						{
+							var configurator = new ConnectionFactoryConfiguratorImpl(address);
+
+							return configurator.CreateBuilder();
+						});
+
+					ConnectionFactory connectionFactory = builder.Build();
+
+					var connection = new RabbitMqConnection(connectionFactory);
 					var connectionHandler = new ConnectionHandlerImpl<RabbitMqConnection>(connection);
 					return connectionHandler;
 				});
