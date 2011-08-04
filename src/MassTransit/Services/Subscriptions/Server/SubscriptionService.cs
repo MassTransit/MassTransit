@@ -190,10 +190,10 @@ namespace MassTransit.Services.Subscriptions.Server
 					endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
 				});
 
-			Dictionary<Guid, Uri> clients = sagas.ToDictionary(x => x.CorrelationId, x => x.ControlUri);
+			List<Guid> clients = sagas.Select(x => x.CorrelationId).ToList();
 
 			SubscriptionInformation[] subscriptions = _subscriptionSagas
-				.Where(x => x.CurrentState == SubscriptionSaga.Active && clients.ContainsKey(x.SubscriptionInfo.ClientId))
+				.Where(x => x.CurrentState == SubscriptionSaga.Active && clients.Contains(x.SubscriptionInfo.ClientId))
 				.Select(x => x.SubscriptionInfo).ToArray();
 
 			_log.InfoFormat("Sending {0} subscriptions to {1}", subscriptions.Length, uri);
