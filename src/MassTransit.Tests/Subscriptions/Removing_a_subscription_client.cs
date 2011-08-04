@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Subscriptions
 {
+	using System.Threading;
 	using Magnum;
 	using Magnum.Extensions;
 	using MassTransit.Transports;

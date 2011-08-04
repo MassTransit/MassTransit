@@ -10,13 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
 namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using System.Collections.Generic;
 	using Magnum.Extensions;
 	using Messages;
+	using Stact;
 	using log4net;
 
 	public class PeerSubscriptionCache
@@ -24,11 +24,15 @@ namespace MassTransit.Subscriptions.Coordinator
 		static readonly ILog _log = LogManager.GetLogger(typeof (PeerSubscriptionCache));
 
 		readonly IDictionary<Uri, EndpointSubscriptionCache> _endpoints;
+		readonly Fiber _fiber;
 		readonly BusSubscriptionEventObserver _observer;
+		readonly Scheduler _scheduler;
 
-		public PeerSubscriptionCache(BusSubscriptionEventObserver observer)
+		public PeerSubscriptionCache(Fiber fiber, Scheduler scheduler, BusSubscriptionEventObserver observer)
 		{
 			_observer = observer;
+			_fiber = fiber;
+			_scheduler = scheduler;
 			_endpoints = new Dictionary<Uri, EndpointSubscriptionCache>();
 		}
 
@@ -37,12 +41,13 @@ namespace MassTransit.Subscriptions.Coordinator
 			EndpointSubscriptionCache subscription;
 			if (!_endpoints.TryGetValue(message.EndpointUri, out subscription))
 			{
-				subscription = new EndpointSubscriptionCache(_observer);
+				subscription = new EndpointSubscriptionCache(_fiber, _scheduler, _observer);
 				_endpoints.Add(message.EndpointUri, subscription);
 			}
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("AddPeerSubscription: {0}, {1} {2}", message.MessageName, message.EndpointUri, message.SubscriptionId);
+				_log.DebugFormat("AddPeerSubscription: {0}, {1} {2}", message.MessageName, message.EndpointUri,
+					message.SubscriptionId);
 
 			subscription.Send(message);
 		}
@@ -53,7 +58,8 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (_endpoints.TryGetValue(message.EndpointUri, out subscription))
 			{
 				if (_log.IsDebugEnabled)
-					_log.DebugFormat("RemovePeerSubscription: {0}, {1} {2}", message.MessageName, message.EndpointUri, message.SubscriptionId);
+					_log.DebugFormat("RemovePeerSubscription: {0}, {1} {2}", message.MessageName, message.EndpointUri,
+						message.SubscriptionId);
 
 				subscription.Send(message);
 			}
@@ -62,6 +68,11 @@ namespace MassTransit.Subscriptions.Coordinator
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("RemovePeerSubscription(unknown): {0}, {1}", message.MessageName, message.SubscriptionId);
 			}
+		}
+
+		public void Send(AddPeer message)
+		{
+			_endpoints.Values.Each(x => x.Send(message));
 		}
 
 		public void Send(RemovePeer message)

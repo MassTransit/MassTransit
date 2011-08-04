@@ -15,6 +15,7 @@ namespace MassTransit.Subscriptions.Coordinator
 	using System.Collections.Generic;
 	using Magnum.Extensions;
 	using Messages;
+	using Stact;
 	using log4net;
 
 	public class EndpointSubscriptionCache
@@ -22,10 +23,14 @@ namespace MassTransit.Subscriptions.Coordinator
 		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionCache));
 
 		readonly IDictionary<string, EndpointSubscription> _messageSubscriptions;
+		readonly Fiber _fiber;
+		readonly Scheduler _scheduler;
 		readonly BusSubscriptionEventObserver _observer;
 
-		public EndpointSubscriptionCache(BusSubscriptionEventObserver observer)
+		public EndpointSubscriptionCache(Fiber fiber, Scheduler scheduler, BusSubscriptionEventObserver observer)
 		{
+			_fiber = fiber;
+			_scheduler = scheduler;
 			_observer = observer;
 			_messageSubscriptions = new Dictionary<string, EndpointSubscription>();
 		}
@@ -35,7 +40,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			EndpointSubscription subscription;
 			if (!_messageSubscriptions.TryGetValue(message.MessageName, out subscription))
 			{
-				subscription = new EndpointSubscription(message.MessageName, _observer);
+				subscription = new EndpointSubscription(_fiber, _scheduler, message.MessageName, _observer);
 				_messageSubscriptions.Add(message.MessageName, subscription);
 			}
 
@@ -60,6 +65,11 @@ namespace MassTransit.Subscriptions.Coordinator
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("RemovePeerSubscription(unknown): {0}, {1}", message.MessageName, message.SubscriptionId);
 			}
+		}
+
+		public void Send(AddPeer message)
+		{
+			_messageSubscriptions.Values.Each(x => x.Send(message));
 		}
 
 		public void Send(RemovePeer message)

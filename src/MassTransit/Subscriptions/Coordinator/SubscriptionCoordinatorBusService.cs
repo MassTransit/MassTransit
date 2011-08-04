@@ -60,8 +60,14 @@ namespace MassTransit.Subscriptions.Coordinator
 
 			var connector = new BusSubscriptionConnector(bus);
 
-			_peerCache = ActorFactory.Create(() => new PeerCache(connector, _clientId, _controlUri))
-				.GetActor();
+			_peerCache = ActorFactory.Create<PeerCache>(x =>
+				{
+					x.ConstructedBy((fiber, scheduler, inbox) =>
+					                new PeerCache(fiber, scheduler, connector, _clientId, _controlUri));
+					x.UseSharedScheduler();
+					x.HandleOnPoolFiber();
+				})
+			.GetActor();
 		}
 
 		public void Send(AddPeerSubscription message)

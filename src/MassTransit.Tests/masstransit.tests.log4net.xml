@@ -10,9 +10,9 @@
 		<level value="INFO" />
 	</logger>
 
-	<logger name="MassTransit.Subscriptions">
-		<level value="DEBUG" />
-	</logger>
+<!--	<logger name="MassTransit.Subscriptions">-->
+<!--		<level value="DEBUG" />-->
+<!--	</logger>-->
 
 	<logger name="MassTransit.Messages" additivity="false">
 		<level value="DEBUG" />

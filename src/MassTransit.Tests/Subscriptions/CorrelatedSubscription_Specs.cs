@@ -76,8 +76,8 @@ namespace MassTransit.Tests.Subscriptions
 
 			RemoteBus.ShouldHaveSubscriptionFor<IncomingMessage>();
 
-			RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(FirstCorrelationId);
-			RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(SecondCorrelationId);
+			//RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(FirstCorrelationId);
+			//RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(SecondCorrelationId);
 		}
 	}
 }
