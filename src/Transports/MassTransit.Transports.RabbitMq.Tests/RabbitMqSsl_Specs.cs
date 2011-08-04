@@ -1,0 +1,61 @@
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Transports.RabbitMq.Tests
+{
+	using System;
+	using Magnum.TestFramework;
+
+	[Scenario]
+	public class When_connecting_to_a_rabbit_mq_server_using_ssl
+	{
+		IServiceBus _bus;
+
+		[When]
+		public void Connecting_to_a_rabbit_mq_server_using_ssl()
+		{
+			Uri inputAddress = new Uri("rabbitmq://localhost/input_via_normal");
+			Uri otherAddress = new Uri("rabbitmq://localhost/input_via_ssl");
+
+			_bus = ServiceBusFactory.New(c =>
+				{
+					c.ReceiveFrom(inputAddress);
+					c.UseRabbitMq(r =>
+						{
+							r.ConfigureHost(otherAddress, h =>
+								{
+									h.UseSsl(s =>
+										{
+											s.SetServerName(System.Net.Dns.GetHostName());
+											s.SetCertificatePath("certificate.p12");
+											s.SetCertificatePassphrase("secret");
+										});
+								});
+						});
+
+				});
+		}
+
+		[Finally]
+		public void Finally()
+		{
+			_bus.Dispose();
+		}
+
+		[Then]
+		public void Should_connect_to_the_queue()
+		{
+			
+		}
+
+	}
+}

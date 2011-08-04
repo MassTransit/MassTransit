@@ -33,11 +33,37 @@ namespace MassTransit
 			return AddTransportFactory(configurator, () => new TTransportFactory());
 		}
 
+		public static EndpointFactoryConfigurator AddTransportFactory<TTransportFactory>(
+			this EndpointFactoryConfigurator configurator, Action<TTransportFactory> configureFactory)
+			where TTransportFactory : ITransportFactory, new()
+		{
+			return AddTransportFactory(configurator, () =>
+				{
+					var transportFactory = new TTransportFactory();
+					configureFactory(transportFactory);
+
+					return transportFactory;
+				});
+		}
+
 		public static ServiceBusConfigurator AddTransportFactory<TTransportFactory>(
 			this ServiceBusConfigurator configurator)
 			where TTransportFactory : ITransportFactory, new()
 		{
 			return AddTransportFactory(configurator, () => new TTransportFactory());
+		}
+
+		public static ServiceBusConfigurator AddTransportFactory<TTransportFactory>(
+			this ServiceBusConfigurator configurator, Action<TTransportFactory> configureFactory)
+			where TTransportFactory : ITransportFactory, new()
+		{
+			return AddTransportFactory(configurator, () =>
+				{
+					var transportFactory = new TTransportFactory();
+					configureFactory(transportFactory);
+
+					return transportFactory;
+				});
 		}
 
 		public static T AddTransportFactory<T>(this T configurator, Type transportFactoryType)
@@ -46,10 +72,11 @@ namespace MassTransit
 			return AddTransportFactory(configurator, () => (ITransportFactory) FastActivator.Create(transportFactoryType));
 		}
 
-		public static T AddTransportFactory<T>(this T configurator, Func<ITransportFactory> transportFactoryFactory)
+		public static T AddTransportFactory<T, TTransport>(this T configurator, Func<TTransport> transportFactoryFactory)
 			where T : EndpointFactoryConfigurator
+			where TTransport : ITransportFactory
 		{
-			var transportFactoryConfigurator = new TransportFactoryEndpointFactoryConfigurator(transportFactoryFactory);
+			var transportFactoryConfigurator = new TransportFactoryConfigurator<TTransport>(transportFactoryFactory);
 
 			configurator.AddEndpointFactoryConfigurator(transportFactoryConfigurator);
 

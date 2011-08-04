@@ -159,7 +159,7 @@
     <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettingsConfiguratorImpl.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettingsConfiguratorImpl.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IEndpointFactoryDefaultSettings.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\TransportFactoryEndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\TransportFactoryConfigurator.cs" />
     <Compile Include="Configuration\ControlBusConfigurationExtensions.cs" />
     <Compile Include="Configuration\EndpointConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SerializerConfigurationExtensions.cs" />

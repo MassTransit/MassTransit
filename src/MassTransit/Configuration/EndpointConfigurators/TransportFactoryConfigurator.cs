@@ -20,12 +20,13 @@ namespace MassTransit.EndpointConfigurators
 	using Transports;
 	using Util;
 
-    public class TransportFactoryEndpointFactoryConfigurator :
+	public class TransportFactoryConfigurator<TTransport> :
 		EndpointFactoryBuilderConfigurator
+		where TTransport : ITransportFactory
 	{
-		readonly Func<ITransportFactory> _transportFactory;
+		readonly Func<TTransport> _transportFactory;
 
-		public TransportFactoryEndpointFactoryConfigurator([NotNull] Func<ITransportFactory> transportFactory)
+		public TransportFactoryConfigurator([NotNull] Func<TTransport> transportFactory)
 		{
 			_transportFactory = transportFactory;
 		}
@@ -38,7 +39,7 @@ namespace MassTransit.EndpointConfigurators
 
 		public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
 		{
-			var transportFactory = _transportFactory();
+			TTransport transportFactory = _transportFactory();
 
 			if (transportFactory == null)
 				throw new ConfigurationException("A transport factory was not created");
