@@ -10,14 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Coordinator
+namespace MassTransit.Services.Subscriptions.Client
 {
 	using System;
 	using System.Threading;
+	using MassTransit.Subscriptions.Coordinator;
+	using MassTransit.Subscriptions.Messages;
 	using Messages;
 	using log4net;
 
-	public class BusSubscriptionMessageProducer :
+	public class SubscriptionServiceMessageProducer :
 		BusSubscriptionEventObserver
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionMessageProducer));
@@ -27,15 +29,13 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly Guid _peerId;
 		readonly Uri _peerUri;
 		long _lastMessageNumber;
-		long _timestamp;
 
-		public BusSubscriptionMessageProducer(BusSubscriptionCoordinator coordinator, IEndpoint endpoint)
+		public SubscriptionServiceMessageProducer(BusSubscriptionCoordinator coordinator, IEndpoint endpoint)
 		{
 			_peerId = coordinator.ClientId;
 			_peerUri = coordinator.ControlUri;
 			_network = coordinator.Network;
 			_endpoint = endpoint;
-			_timestamp = DateTime.UtcNow.Ticks;
 
 			SendAddPeerMessage();
 		}
@@ -44,17 +44,14 @@ namespace MassTransit.Subscriptions.Coordinator
 		{
 			long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
-			var add = new AddPeerSubscriptionMessage
-				{
-					PeerId = _peerId,
-					MessageNumber = messageNumber,
-					SubscriptionId = message.SubscriptionId,
-					EndpointUri = message.EndpointUri,
-					MessageName = message.MessageName,
-				};
+			var subscription = new SubscriptionInformation(_peerId, messageNumber, message.MessageName, message.CorrelationId,
+				message.EndpointUri);
+			subscription.SubscriptionId = message.SubscriptionId;
+
+			var add = new AddSubscription(subscription);
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("AddSubscription: {0}, {1}", add.MessageName, add.SubscriptionId);
+				_log.DebugFormat("AddSubscription: {0}, {1}", subscription.MessageName, subscription.SubscriptionId);
 
 			_endpoint.Send(add, SetSendContext);
 		}
@@ -63,39 +60,26 @@ namespace MassTransit.Subscriptions.Coordinator
 		{
 			long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
-			var remove = new RemovePeerSubscriptionMessage
-				{
-					PeerId = _peerId,
-					MessageNumber = messageNumber,
-					SubscriptionId = message.SubscriptionId,
-					EndpointUri = message.EndpointUri,
-					MessageName = message.MessageName,
-				};
+			var subscription = new SubscriptionInformation(_peerId, messageNumber, message.MessageName, message.CorrelationId,
+				message.EndpointUri);
+			subscription.SubscriptionId = message.SubscriptionId;
+
+			var remove = new RemoveSubscription(subscription);
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("RemoveSubscription: {0}, {1}", remove.MessageName, remove.SubscriptionId);
+				_log.DebugFormat("RemoveSubscription: {0}, {1}", subscription.MessageName, subscription.SubscriptionId);
 
 			_endpoint.Send(remove, SetSendContext);
 		}
 
 		public void OnComplete()
 		{
-			_endpoint.Send(new RemovePeerMessage
-				{
-					PeerId = _peerId,
-					PeerUri = _peerUri,
-					Timestamp = _timestamp,
-				}, SetSendContext);
+			_endpoint.Send(new RemoveSubscriptionClient(_peerId, _peerUri, _peerUri), SetSendContext);
 		}
 
 		void SendAddPeerMessage()
 		{
-			_endpoint.Send(new AddPeerMessage
-				{
-					PeerId = _peerId,
-					PeerUri = _peerUri,
-					Timestamp = _timestamp,
-				}, SetSendContext);
+			_endpoint.Send(new AddSubscriptionClient(_peerId, _peerUri, _peerUri), SetSendContext);
 		}
 
 		void SetSendContext<T>(ISendContext<T> context)

@@ -16,12 +16,11 @@ namespace MassTransit.Services.Subscriptions.Server
 	using System.Collections.Generic;
 	using System.Linq;
 	using Exceptions;
-	using log4net;
 	using Magnum.Extensions;
 	using Messages;
 	using Saga;
-	using Stact;
 	using Subscriptions.Messages;
+	using log4net;
 
 	public class SubscriptionService :
 		Consumes<SubscriptionClientAdded>.All,
@@ -61,13 +60,19 @@ namespace MassTransit.Services.Subscriptions.Server
 			if (_log.IsInfoEnabled)
 				_log.InfoFormat("Subscription Client Added: {0} [{1}]", message.ControlUri, message.ClientId);
 
-			SendCacheUpdateToClient(message.ControlUri);
+			var add = new AddSubscriptionClient(message.ClientId, message.ControlUri, message.DataUri);
+			SendClientToClients(add);
+
+			SendCacheUpdateToClient(message.ControlUri, message.ClientId);
 		}
 
 		public void Consume(SubscriptionClientRemoved message)
 		{
 			if (_log.IsInfoEnabled)
 				_log.InfoFormat("Subscription Client Removed: {0} [{1}]", message.ControlUri, message.CorrelationId);
+
+			var remove = new RemoveSubscriptionClient(message.CorrelationId, message.ControlUri, message.DataUri);
+			SendClientToClients(remove);
 		}
 
 		public void Consume(SubscriptionRemoved message)
@@ -91,8 +96,8 @@ namespace MassTransit.Services.Subscriptions.Server
 			_log.InfoFormat("Subscription Service Starting: {0}", _bus.Endpoint.Address);
 			_unsubscribeToken += _bus.SubscribeInstance(this);
 
-			_unsubscribeToken += _bus.SubscribeSaga<SubscriptionClientSaga>(_subscriptionClientSagas);
-			_unsubscribeToken += _bus.SubscribeSaga<SubscriptionSaga>(_subscriptionSagas);
+			_unsubscribeToken += _bus.SubscribeSaga(_subscriptionClientSagas);
+			_unsubscribeToken += _bus.SubscribeSaga(_subscriptionSagas);
 
 			_log.Info("Subscription Service Started");
 		}
@@ -131,26 +136,61 @@ namespace MassTransit.Services.Subscriptions.Server
 		void SendToClients<T>(T message)
 			where T : SubscriptionChange
 		{
-			IEnumerable<SubscriptionClientSaga> sagas = _subscriptionClientSagas.Where(x => x.CurrentState == SubscriptionClientSaga.Active);
+			IEnumerable<SubscriptionClientSaga> sagas = _subscriptionClientSagas
+				.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
+				.Where(x => x.CorrelationId != message.Subscription.ClientId);
 
 			_log.DebugFormat("Sending {0}:{1} to {2} clients", typeof (T).Name, message.Subscription.MessageName, sagas.Count());
 			sagas.Each(client =>
-					{
-						IEndpoint endpoint = _bus.GetEndpoint(client.ControlUri);
+				{
+					IEndpoint endpoint = _bus.GetEndpoint(client.ControlUri);
 
-						endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
-					});
+					endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
+				});
 		}
 
-		void SendCacheUpdateToClient(Uri uri)
+		void SendClientToClients<T>(T message)
+			where T : SubscriptionClientMessageBase
 		{
-			IEnumerable<SubscriptionInformation> subscriptions = _subscriptionSagas.Where(
-				x => x.CurrentState == SubscriptionSaga.Active)
-				.Select(x => x.SubscriptionInfo);
+			IEnumerable<SubscriptionClientSaga> sagas = _subscriptionClientSagas
+				.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
+				.Where(x => x.CorrelationId != message.CorrelationId);
+
+			sagas.Each(client =>
+				{
+					_log.InfoFormat("Sending {2} {0} to {1}", message.CorrelationId, client.ControlUri, typeof (T).Name);
+
+					IEndpoint endpoint = _bus.GetEndpoint(client.ControlUri);
+
+					endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
+				});
+		}
+
+		void SendCacheUpdateToClient(Uri uri, Guid clientId)
+		{
+			IEndpoint endpoint = _bus.GetEndpoint(uri);
+
+			IEnumerable<SubscriptionClientSaga> sagas = _subscriptionClientSagas
+				.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
+				.Where(x => x.ControlUri != uri);
+
+			sagas.Each(client =>
+				{
+					_log.InfoFormat("Sending AddClient {0} to {1}", client.CorrelationId, uri);
+
+					var message = new AddSubscriptionClient(client.CorrelationId, client.ControlUri, client.DataUri);
+
+					endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
+				});
+
+			SubscriptionInformation[] subscriptions = _subscriptionSagas
+				.Where(x => x.CurrentState == SubscriptionSaga.Active)
+				.Where(x => x.SubscriptionInfo.ClientId != clientId)
+				.Select(x => x.SubscriptionInfo).ToArray();
+
+			_log.InfoFormat("Sending {0} subscriptions to {1}", subscriptions.Length, uri);
 
 			var response = new SubscriptionRefresh(subscriptions);
-
-			IEndpoint endpoint = _bus.GetEndpoint(uri);
 
 			endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
 		}

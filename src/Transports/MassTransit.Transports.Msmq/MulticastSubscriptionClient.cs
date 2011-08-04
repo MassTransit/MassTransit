@@ -60,6 +60,8 @@ namespace MassTransit.Transports.Msmq
 				_unsubscribeAction = null;
 			}
 
+			_producer.OnComplete();
+
 			if (_subscriptionBus != null)
 			{
 				_subscriptionBus.Dispose();

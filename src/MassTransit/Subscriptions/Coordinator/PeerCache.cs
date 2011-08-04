@@ -28,10 +28,12 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly ActorFactory<PeerHandler> _peerHandlerFactory;
 		readonly IDictionary<Guid, Uri> _peerIds;
 		readonly IDictionary<Uri, ActorInstance> _peers;
+		Uri _peerUri;
 
 		public PeerCache(BusSubscriptionEventObserver observer, Guid clientId, Uri controlUri)
 		{
 			_peers = new Dictionary<Uri, ActorInstance>();
+			_peerUri = controlUri;
 			_peerIds = new Dictionary<Guid, Uri>();
 			_endpointSubscriptionCache = new PeerSubscriptionCache(observer);
 
@@ -137,7 +139,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			}
 			else
 			{
-				_log.WarnFormat("Unknown Peer: {0}", peerId);
+				_log.WarnFormat("{0} Unknown Peer: {1}", _peerUri, peerId);
 			}
 		}
 

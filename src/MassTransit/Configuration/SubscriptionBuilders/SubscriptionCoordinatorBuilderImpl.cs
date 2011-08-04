@@ -21,7 +21,7 @@ namespace MassTransit.SubscriptionBuilders
 		SubscriptionCoordinatorBuilder
 	{
 		readonly IServiceBus _bus;
-		readonly string _network;
+		string _network;
 		readonly IList<Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver>> _observers;
 
 		public SubscriptionCoordinatorBuilderImpl(IServiceBus bus, string network)
@@ -37,6 +37,11 @@ namespace MassTransit.SubscriptionBuilders
 		public string Network
 		{
 			get { return _network; }
+		}
+
+		public void SetNetwork(string network)
+		{
+			_network = network;
 		}
 
 		public void SetObserverFactory(

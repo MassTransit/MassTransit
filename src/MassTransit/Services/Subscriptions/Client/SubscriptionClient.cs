@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,106 +15,106 @@ namespace MassTransit.Services.Subscriptions.Client
 	using System;
 	using System.Threading;
 	using Exceptions;
+	using MassTransit.Subscriptions.Coordinator;
+	using MassTransit.Subscriptions.Messages;
+	using Messages;
 	using log4net;
-	using Magnum.Extensions;
 
 	public class SubscriptionClient :
-		IBusService
+		BusSubscriptionEventObserver,
+		Consumes<SubscriptionRefresh>.Context
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionClient));
-		private readonly ManualResetEvent _ready = new ManualResetEvent(false);
-		private SubscriptionCoordinator _coordinator;
-		private volatile bool _disposed;
-		private IEndpoint _subscriptionServiceEndpoint;
+		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionClient));
+		readonly IServiceBus _bus;
+		readonly BusSubscriptionCoordinator _coordinator;
 		readonly string _network;
+		readonly SubscriptionServiceMessageProducer _producer;
+		readonly ManualResetEvent _ready = new ManualResetEvent(false);
+		readonly TimeSpan _startTimeout;
+		readonly Uri _subscriptionServiceUri;
+		UnsubscribeAction _unsubscribeAction;
 
-
-		public SubscriptionClient(Uri subscriptionServiceUri)
+		public SubscriptionClient(IServiceBus bus, BusSubscriptionCoordinator coordinator, Uri subscriptionServiceUri,
+		                          TimeSpan startTimeout)
 		{
-			SubscriptionServiceUri = subscriptionServiceUri;
-			StartTimeout = 1.Minutes();
-			_network = null;
-		}
-
-		public TimeSpan StartTimeout { get; set; }
-
-		public Uri SubscriptionServiceUri { get; private set; }
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		public void Start(IServiceBus bus)
-		{
-			if (_log.IsInfoEnabled)
-				_log.InfoFormat("Starting SubscriptionClient on {0}", bus.Endpoint.Address.Uri);
+			_bus = bus;
+			_coordinator = coordinator;
+			_subscriptionServiceUri = subscriptionServiceUri;
+			_startTimeout = startTimeout;
+			_network = coordinator.Network;
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Getting endpoint for subscription service at {0}", SubscriptionServiceUri);
-
-			_subscriptionServiceEndpoint = bus.GetEndpoint(SubscriptionServiceUri);
+				_log.DebugFormat("Starting SubscriptionClient using {0}", subscriptionServiceUri);
 
 			VerifyClientAndServiceNotOnSameEndpoint(bus);
 
 			_ready.Reset();
 
-			_coordinator = new SubscriptionCoordinator(bus.ControlBus, _subscriptionServiceEndpoint, _network, false);
-			_coordinator.OnRefresh += CoordinatorOnRefresh;
-			_coordinator.Start(bus);
+			var consumerInstance = new SubscriptionMessageConsumer(_coordinator, _network);
+
+			_unsubscribeAction = _bus.ControlBus.SubscribeInstance(consumerInstance);
+			_unsubscribeAction += _bus.ControlBus.SubscribeHandler<SubscriptionRefresh>(x => _ready.Set());
+
+			_producer = new SubscriptionServiceMessageProducer(coordinator, _bus.GetEndpoint(subscriptionServiceUri));
 
 			WaitForSubscriptionServiceResponse();
 		}
 
-		public void Stop()
+		public void OnSubscriptionAdded(SubscriptionAdded message)
 		{
-			_coordinator.Stop();
-			_coordinator.OnRefresh -= CoordinatorOnRefresh;
+			_producer.OnSubscriptionAdded(message);
 		}
 
-		protected virtual void Dispose(bool disposing)
+		public void OnSubscriptionRemoved(SubscriptionRemoved message)
 		{
-			if (!disposing || _disposed) return;
+			_producer.OnSubscriptionRemoved(message);
+		}
 
-			using (_ready)
+		public void OnComplete()
+		{
+			if (_unsubscribeAction != null)
 			{
+				_unsubscribeAction();
+				_unsubscribeAction = null;
 			}
 
-			_coordinator.Dispose();
-
-			_disposed = true;
+			_producer.OnComplete();
 		}
 
-		private void CoordinatorOnRefresh()
+		public void Consume(IConsumeContext<SubscriptionRefresh> context)
 		{
-			_ready.Set();
+			if (_subscriptionServiceUri.Equals(context.SourceAddress))
+			{
+				_ready.Set();
+			}
 		}
 
-		private void WaitForSubscriptionServiceResponse()
+		void WaitForSubscriptionServiceResponse()
 		{
 			if (_log.IsDebugEnabled)
 				_log.Debug("Waiting for response from the subscription service");
 
-			bool received = _ready.WaitOne(StartTimeout);
-			if (!received)
+			using (_ready)
 			{
-				throw new InvalidOperationException("Timeout waiting for subscription service to respond");
+				bool received = _ready.WaitOne(_startTimeout);
+				if (!received)
+				{
+					throw new InvalidOperationException("Timeout waiting for subscription service to respond");
+				}
 			}
 		}
 
-		private void VerifyClientAndServiceNotOnSameEndpoint(IServiceBus bus)
+		void VerifyClientAndServiceNotOnSameEndpoint(IServiceBus bus)
 		{
-			if (!bus.ControlBus.Endpoint.Address.Uri.Equals(_subscriptionServiceEndpoint.Address.Uri))
+			Uri controlUri = bus.ControlBus.Endpoint.Address.Uri;
+
+			if (!controlUri.Equals(_subscriptionServiceUri))
 				return;
 
-			string message = "The service bus and subscription service cannot use the same endpoint: " + bus.ControlBus.Endpoint.Address.Uri;
-			throw new EndpointException(bus.ControlBus.Endpoint.Address.Uri, message);
-		}
+			string message = "The service bus and subscription service cannot use the same endpoint: " +
+			                 controlUri;
 
-		~SubscriptionClient()
-		{
-			Dispose(false);
+			throw new EndpointException(controlUri, message);
 		}
 	}
 }

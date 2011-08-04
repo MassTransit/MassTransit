@@ -27,7 +27,7 @@ namespace MassTransit.Tests
 		{
 			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-			string file = Path.Combine(path, "test.log4net.xml");
+			string file = Path.Combine(path, "masstransit.tests.log4net.xml");
 
 			XmlConfigurator.Configure(new FileInfo(file));
 

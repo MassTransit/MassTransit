@@ -34,12 +34,14 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly HashSet<Uri> _ignoredSourceAddresses;
 		readonly string _network;
 		readonly Guid _peerId;
+		Uri _peerUri;
 
 		public SubscriptionMessageConsumer(BusSubscriptionCoordinator coordinator, string network,
 		                                   params Uri[] ignoredSourceAddresses)
 		{
 			_coordinator = coordinator;
 			_peerId = coordinator.ClientId;
+			_peerUri = coordinator.ControlUri;
 			_network = network;
 			_ignoredSourceAddresses = new HashSet<Uri>(ignoredSourceAddresses);
 		}
@@ -158,19 +160,19 @@ namespace MassTransit.Subscriptions.Coordinator
 		{
 			if (_peerId == clientId && clientId != Guid.Empty)
 			{
-				_log.DebugFormat("Ignoring message from client: {0}", clientId);
+				_log.DebugFormat("{0} Ignoring message from client: {1}", _peerUri, clientId);
 				return true;
 			}
 
 			if (_ignoredSourceAddresses.Contains(context.SourceAddress))
 			{
-				_log.Debug("Ignoring subscription because its source address equals the busses address");
+				_log.DebugFormat("{0} Ignoring subscription because source address is us", _peerUri);
 				return true;
 			}
 
 			if (!string.Equals(context.Network, _network))
 			{
-				_log.DebugFormat("Ignoring subscription because the network '{0}' != ours '{1}", context.Network, _network);
+				_log.DebugFormat("{0} Ignoring subscription because the network '{1}' != ours '{2}'", _peerUri, context.Network, _network);
 				return true;
 			}
 

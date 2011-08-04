@@ -18,6 +18,7 @@ namespace MassTransit.Transports
 	using Context;
 	using Loopback;
 	using Magnum.Extensions;
+	using Util;
 
 	public class LoopbackTransport :
 		IDuplexTransport
@@ -67,6 +68,9 @@ namespace MassTransit.Transports
 
 					_messages.AddLast(message);
 				}
+
+				if (SpecialLoggers.Messages.IsInfoEnabled)
+					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}:{2}", Address, context.MessageType, message.MessageId);
 			}
 			catch
 			{

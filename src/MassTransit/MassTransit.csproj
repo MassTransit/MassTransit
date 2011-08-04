@@ -352,7 +352,9 @@
     <Compile Include="Services\Routing\Configuration\RouteTo.cs" />
     <Compile Include="Services\Subscriptions\Client\EndpointUriList.cs" />
     <Compile Include="Services\Subscriptions\Client\SubscriptionCoordinator.cs" />
+    <Compile Include="Services\Subscriptions\Client\SubscriptionServiceMessageProducer.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfiguratorExtensions.cs" />
+    <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfiguratorImpl.cs" />
     <Compile Include="Services\Timeout\Messages\CancelTimeout.cs" />
     <Compile Include="Services\Timeout\Messages\ScheduleTimeout.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
