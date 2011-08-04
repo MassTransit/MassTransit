@@ -136,9 +136,17 @@ namespace MassTransit.Services.Subscriptions.Server
 		void SendToClients<T>(T message)
 			where T : SubscriptionChange
 		{
-			IEnumerable<SubscriptionClientSaga> sagas = _subscriptionClientSagas
+			SubscriptionClientSaga forClient = _subscriptionClientSagas
+				.Where(x => x.CorrelationId == message.Subscription.ClientId)
+				.FirstOrDefault();
+
+			if (forClient == null)
+				return;
+
+			List<SubscriptionClientSaga> sagas = _subscriptionClientSagas
 				.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
-				.Where(x => x.CorrelationId != message.Subscription.ClientId);
+				.Where(x => x.ControlUri != forClient.ControlUri)
+				.ToList();
 
 			_log.DebugFormat("Sending {0}:{1} to {2} clients", typeof (T).Name, message.Subscription.MessageName, sagas.Count());
 			sagas.Each(client =>
@@ -154,11 +162,11 @@ namespace MassTransit.Services.Subscriptions.Server
 		{
 			IEnumerable<SubscriptionClientSaga> sagas = _subscriptionClientSagas
 				.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
-				.Where(x => x.CorrelationId != message.CorrelationId);
+				.Where(x => x.ControlUri != message.ControlUri);
 
 			sagas.Each(client =>
 				{
-					_log.InfoFormat("Sending {2} {0} to {1}", message.CorrelationId, client.ControlUri, typeof (T).Name);
+					_log.DebugFormat("Sending {2} {0} to {1}", message.CorrelationId, client.ControlUri, typeof (T).Name);
 
 					IEndpoint endpoint = _bus.GetEndpoint(client.ControlUri);
 
@@ -171,21 +179,21 @@ namespace MassTransit.Services.Subscriptions.Server
 			IEndpoint endpoint = _bus.GetEndpoint(uri);
 
 			IEnumerable<SubscriptionClientSaga> sagas = _subscriptionClientSagas
-				.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
-				.Where(x => x.ControlUri != uri);
+				.Where(x => x.CurrentState == SubscriptionClientSaga.Active && x.ControlUri != uri);
 
 			sagas.Each(client =>
 				{
-					_log.InfoFormat("Sending AddClient {0} to {1}", client.CorrelationId, uri);
+					_log.DebugFormat("Sending AddClient {0} to {1}", client.CorrelationId, uri);
 
 					var message = new AddSubscriptionClient(client.CorrelationId, client.ControlUri, client.DataUri);
 
 					endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
 				});
 
+			Dictionary<Guid, Uri> clients = sagas.ToDictionary(x => x.CorrelationId, x => x.ControlUri);
+
 			SubscriptionInformation[] subscriptions = _subscriptionSagas
-				.Where(x => x.CurrentState == SubscriptionSaga.Active)
-				.Where(x => x.SubscriptionInfo.ClientId != clientId)
+				.Where(x => x.CurrentState == SubscriptionSaga.Active && clients.ContainsKey(x.SubscriptionInfo.ClientId))
 				.Select(x => x.SubscriptionInfo).ToArray();
 
 			_log.InfoFormat("Sending {0} subscriptions to {1}", subscriptions.Length, uri);

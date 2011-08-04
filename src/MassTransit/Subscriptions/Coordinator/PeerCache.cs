@@ -25,17 +25,23 @@ namespace MassTransit.Subscriptions.Coordinator
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (PeerCache));
 		readonly PeerSubscriptionCache _endpointSubscriptionCache;
+		readonly Fiber _fiber;
 		readonly ActorFactory<PeerHandler> _peerHandlerFactory;
 		readonly IDictionary<Guid, Uri> _peerIds;
+		readonly Uri _peerUri;
 		readonly IDictionary<Uri, ActorInstance> _peers;
-		Uri _peerUri;
+		readonly Scheduler _scheduler;
 
-		public PeerCache(BusSubscriptionEventObserver observer, Guid clientId, Uri controlUri)
+		public PeerCache(Fiber fiber, Scheduler scheduler, BusSubscriptionEventObserver observer, Guid clientId,
+		                 Uri controlUri)
 		{
 			_peers = new Dictionary<Uri, ActorInstance>();
 			_peerUri = controlUri;
+			_fiber = fiber;
+			_scheduler = scheduler;
 			_peerIds = new Dictionary<Guid, Uri>();
-			_endpointSubscriptionCache = new PeerSubscriptionCache(observer);
+
+			_endpointSubscriptionCache = new PeerSubscriptionCache(_fiber, _scheduler, observer);
 
 			_peerHandlerFactory = ActorFactory.Create((f, s, i) => new PeerHandler(i, observer));
 
@@ -56,10 +62,13 @@ namespace MassTransit.Subscriptions.Coordinator
 			}
 		}
 
+		[UsedImplicitly]
 		public void Handle(Message<AddPeer> message)
 		{
 			try
 			{
+				_endpointSubscriptionCache.Send(message.Body);
+
 				WithPeer(message.Body.PeerId, message.Body.PeerUri, x =>
 					{
 						if (_log.IsDebugEnabled)
@@ -74,6 +83,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			}
 		}
 
+		[UsedImplicitly]
 		public void Handle(Message<RemovePeer> message)
 		{
 			try
@@ -88,6 +98,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			}
 		}
 
+		[UsedImplicitly]
 		public void Handle(Message<AddPeerSubscription> message)
 		{
 			try
@@ -109,6 +120,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			}
 		}
 
+		[UsedImplicitly]
 		public void Handle(Message<RemovePeerSubscription> message)
 		{
 			try

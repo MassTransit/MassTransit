@@ -18,19 +18,26 @@ namespace MassTransit.Subscriptions.Coordinator
 	using Magnum;
 	using Magnum.Extensions;
 	using Messages;
+	using Stact;
 	using log4net;
 
 	public class EndpointSubscription
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscription));
+		readonly Fiber _fiber;
 		readonly IDictionary<Guid, PeerSubscription> _ids;
 		readonly string _messageName;
 		readonly BusSubscriptionEventObserver _observer;
+		readonly Scheduler _scheduler;
+		readonly TimeSpan _unsubscribeTimeout = 4.Seconds();
 		Uri _endpointUri;
 		Guid _subscriptionId;
 
-		public EndpointSubscription(string messageName, BusSubscriptionEventObserver observer)
+		public EndpointSubscription(Fiber fiber, Scheduler scheduler, string messageName,
+		                            BusSubscriptionEventObserver observer)
 		{
+			_fiber = fiber;
+			_scheduler = scheduler;
 			_messageName = messageName;
 			_observer = observer;
 
@@ -70,18 +77,27 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (!wasRemoved || _ids.Count != 0)
 				return;
 
-			var remove = new SubscriptionRemovedMessage
-				{
-					SubscriptionId = _subscriptionId,
-					EndpointUri = _endpointUri,
-					MessageName = _messageName
-				};
+			NotifyRemoveSubscription();
+		}
 
-			_log.DebugFormat("PeerSubscriptionRemoved: {0}, {1} {2}", _messageName, _endpointUri, _subscriptionId);
+		public void Send(AddPeer message)
+		{
+			List<Guid> remove = _ids.Where(x => x.Value.PeerId != message.PeerId)
+				.Select(x => x.Key).ToList();
 
-			_observer.OnSubscriptionRemoved(remove);
+			_log.InfoFormat("Removing {0} subscriptions for {1} {2}", remove.Count, _messageName, _endpointUri);
 
-			_subscriptionId = Guid.Empty;
+			if (remove.Count > 0)
+			{
+				remove.Each(x => _ids.Remove(x));
+			}
+
+			if (_ids.Count == 0 && _subscriptionId != Guid.Empty)
+			{
+				_log.InfoFormat("Removing expired subscription for {0} {1}", _messageName, _endpointUri);
+
+				NotifyRemoveSubscription();
+			}
 		}
 
 		public void Send(RemovePeer message)
@@ -95,6 +111,22 @@ namespace MassTransit.Subscriptions.Coordinator
 
 				_log.DebugFormat("Removed {0} subscriptions for peer: {1} {2}", remove.Count, message.PeerId, message.PeerUri);
 			}
+		}
+
+		void NotifyRemoveSubscription()
+		{
+			var remove = new SubscriptionRemovedMessage
+				{
+					SubscriptionId = _subscriptionId,
+					EndpointUri = _endpointUri,
+					MessageName = _messageName
+				};
+
+			_log.DebugFormat("PeerSubscriptionRemoved: {0}, {1} {2}", _messageName, _endpointUri, _subscriptionId);
+
+			_observer.OnSubscriptionRemoved(remove);
+
+			_subscriptionId = Guid.Empty;
 		}
 	}
 }

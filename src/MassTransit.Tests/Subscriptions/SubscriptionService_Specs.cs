@@ -55,9 +55,11 @@ namespace MassTransit.Tests.Subscriptions
 		public void Removing_a_subscription_twice_should_not_have_a_negative_impact()
 		{
 			Guid clientId = CombGuid.Generate();
+			Uri clientUri = new Uri("loopback://localhost/monster_beats");
 
 			var subscription = new SubscriptionInformation(clientId, 1, typeof (PingMessage), RemoteBus.Endpoint.Address.Uri);
 
+			LocalControlBus.Endpoint.Send(new AddSubscriptionClient(clientId, clientUri, clientUri));
 			LocalControlBus.Endpoint.Send(new AddSubscription(subscription));
 			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
