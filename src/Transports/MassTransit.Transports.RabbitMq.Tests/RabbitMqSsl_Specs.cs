@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 {
 	using System;
 	using Magnum.TestFramework;
+	using NUnit.Framework;
 
 	[Scenario]
 	public class When_connecting_to_a_rabbit_mq_server_using_ssl
@@ -23,21 +24,20 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		[When]
 		public void Connecting_to_a_rabbit_mq_server_using_ssl()
 		{
-			Uri inputAddress = new Uri("rabbitmq://localhost/input_via_normal");
-			Uri otherAddress = new Uri("rabbitmq://localhost/input_via_ssl");
+			Uri inputAddress = new Uri("rabbitmq://localhost:5671/test_queue");
 
 			_bus = ServiceBusFactory.New(c =>
 				{
 					c.ReceiveFrom(inputAddress);
 					c.UseRabbitMq(r =>
 						{
-							r.ConfigureHost(otherAddress, h =>
+							r.ConfigureHost(inputAddress, h =>
 								{
 									h.UseSsl(s =>
 										{
 											s.SetServerName(System.Net.Dns.GetHostName());
-											s.SetCertificatePath("certificate.p12");
-											s.SetCertificatePassphrase("secret");
+											s.SetCertificatePath("client.p12");
+											s.SetCertificatePassphrase("Passw0rd");
 										});
 								});
 						});
@@ -51,7 +51,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 			_bus.Dispose();
 		}
 
-		[Then]
+		[Then, Explicit]
 		public void Should_connect_to_the_queue()
 		{
 			
