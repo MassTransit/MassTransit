@@ -52,7 +52,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
 
 		public IEnumerable<ValidationResult> Validate()
 		{
-			if (_serverName.IsEmpty() && !_acceptablePolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch))
+			if (_serverName.IsEmpty())
 				yield return this.Failure("ServerName", "ServerName must be set or allow remote certificate name mismatch");
 			if (_certificatePath.IsEmpty())
 				yield return this.Failure("CertificatePath", "CertificatePath must be specified");
