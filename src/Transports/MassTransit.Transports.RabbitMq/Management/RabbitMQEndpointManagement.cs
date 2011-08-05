@@ -77,7 +77,15 @@ namespace MassTransit.Transports.RabbitMq.Management
 		{
 			using(IModel model = _connection.CreateModel())
 			{
-				model.QueuePurge(queueName);
+				try
+				{
+					model.QueueDeclarePassive(queueName);
+					model.QueuePurge(queueName);
+				}
+				catch
+				{
+				}
+
 				model.Close(200, "purged queue");
 			}
 		}
