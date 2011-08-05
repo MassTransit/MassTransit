@@ -30,7 +30,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
 
 		public SslConnectionFactoryConfiguratorImpl()
 		{
-			_acceptablePolicyErrors = SslPolicyErrors.None;
+			_acceptablePolicyErrors = SslPolicyErrors.RemoteCertificateChainErrors;
 		}
 
 		public ConnectionFactoryBuilder Configure(ConnectionFactoryBuilder builder)
