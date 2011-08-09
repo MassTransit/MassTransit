@@ -175,7 +175,7 @@ namespace MassTransit.Pipeline.Inspectors
 
         public bool Inspect<TComponent, TMessage>(ContextConsumerMessageSink<TComponent, TMessage> sink)
             where TMessage : class
-            where TComponent : class, Consumes<TMessage>.All
+            where TComponent : class, Consumes<IConsumeContext<TMessage>>.All
         {
             Append(string.Format("Consumed by Component {0} ({1} w/Context)", GetComponentName<TComponent>(), 
                 GetMessageName<TMessage>()));
@@ -245,7 +245,7 @@ namespace MassTransit.Pipeline.Inspectors
 
         public bool Inspect<TComponent, TMessage>(SelectedContextConsumerMessageSink<TComponent, TMessage> sink)
             where TMessage : class
-            where TComponent : class, Consumes<TMessage>.Selected
+            where TComponent : class, Consumes<IConsumeContext<TMessage>>.Selected
         {
             Append(string.Format("Conditionally Consumed by Component {0} ({1} w/Context)", GetComponentName<TComponent>(),
                 GetMessageName<TMessage>()));

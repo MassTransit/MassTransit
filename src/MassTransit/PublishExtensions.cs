@@ -12,12 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	public static class PublishExtensions
-	{
-		public static void Publish<T>(this IServiceBus bus, T message)
-			where T : class
-		{
-			bus.Publish(message, x => { });
-		}
-	}
+    public static class PublishExtensions
+    {
+        public static void Publish<T>(this IServiceBus bus, T message)
+            where T : class
+        {
+            bus.Publish(message, x => { });
+        }
+    }
 }

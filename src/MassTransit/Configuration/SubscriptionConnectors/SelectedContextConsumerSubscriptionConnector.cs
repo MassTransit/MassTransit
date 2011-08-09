@@ -18,7 +18,7 @@ namespace MassTransit.SubscriptionConnectors
 
     public class SelectedContextConsumerSubscriptionConnector<TConsumer, TMessage> :
         ConsumerSubscriptionConnector
-        where TConsumer : class, Consumes<TMessage>.Selected
+        where TConsumer : class, Consumes<IConsumeContext<TMessage>>.Selected
         where TMessage : class
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
