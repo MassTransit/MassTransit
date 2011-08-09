@@ -30,6 +30,7 @@ namespace MassTransit
 		/// Returns the Consume actions for the Consumer that should handle the specified message type
 		/// </summary>
 		/// <typeparam name="TMessage">The type of message being handled</typeparam>
+		/// <param name="context">The context of the message being handled</param>
 		/// <param name="selector">The selector to obtain the handlers from the consumer instance</param>
 		/// <returns></returns>
 		IEnumerable<Action<IConsumeContext<TMessage>>>
