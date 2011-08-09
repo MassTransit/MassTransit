@@ -75,7 +75,7 @@ namespace MassTransit.Tests
 			
 			var ping = new PingMessage();
 
-			var timeout = 8.Seconds();
+			var timeout = 18.Seconds();
 
 			LocalBus.BeginPublishRequest(ping, callbackCalled.Set, null, x =>
 				{
@@ -244,7 +244,7 @@ namespace MassTransit.Tests
 			
 			var ping = new PingMessage();
 
-			var timeout = 8.Seconds();
+			var timeout = 18.Seconds();
 
 			LocalBus.BeginPublishRequest(ping, callbackCalled.Set, null, x =>
 			{
