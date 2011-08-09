@@ -13,19 +13,19 @@
 namespace MassTransit.Reactive
 {
     using System;
-    using System.Linq;
+    using System.Reactive.Linq;
 
     public static class ServiceBusExtensions
     {
         public static IObservable<T> AsObservable<T>(this IServiceBus bus) where T : class
         {
-            return Observable.CreateWithDisposable<T>(
+            return Observable.Create<T>(
                 observer => new ServiceBusSubscription<T>(bus, observer, null));
         }
 
         public static IObservable<T> AsObservable<T>(this IServiceBus bus, Predicate<T> condition) where T : class
         {
-            return Observable.CreateWithDisposable<T>(
+            return Observable.Create<T>(
                 observer => new ServiceBusSubscription<T>(bus, observer, condition));
         }
     }

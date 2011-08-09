@@ -101,17 +101,13 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.CoreEx, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+    <Reference Include="System.Reactive, Version=1.0.10621.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rx\Net35\System.CoreEx.dll</HintPath>
+      <HintPath>..\..\lib\Rx\Net35\System.Reactive.dll</HintPath>
     </Reference>
-    <Reference Include="System.CoreEx, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="System.Reactive, Version=1.0.10621.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rx\Net4\System.CoreEx.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Observable, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rx\Net35\System.Observable.dll</HintPath>
+      <HintPath>..\..\lib\Rx\Net4\System.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
