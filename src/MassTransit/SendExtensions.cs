@@ -26,7 +26,7 @@ namespace MassTransit
         public static void Send<T>(this IEndpoint endpoint, T message)
             where T : class
         {
-            var context = new SendContext<T>(message);
+            SendContext<T> context = ContextStorage.CreateSendContext(message);
 
             endpoint.Send(context);
         }
@@ -41,7 +41,8 @@ namespace MassTransit
         public static void Send<T>(this IEndpoint endpoint, T message, Action<ISendContext<T>> contextCallback)
             where T : class
         {
-            var context = new SendContext<T>(message);
+            SendContext<T> context = ContextStorage.CreateSendContext(message);
+
             contextCallback(context);
 
             endpoint.Send(context);

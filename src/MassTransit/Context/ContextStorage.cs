@@ -49,14 +49,41 @@ namespace MassTransit.Context
             return context;
         }
 
+        public static SendContext<T> CreateSendContext<T>(T message)
+            where T : class
+        {
+            var context = new SendContext<T>(message);
+
+            SetReceiveContextForSend(context);
+
+            return context;
+        }
+
         public static PublishContext<T> CreatePublishContext<T>(T message)
             where T : class
         {
             PublishContext<T> publishContext = PublishContext<T>.FromMessage(message);
 
+            SetReceiveContextForSend(publishContext);
+
             return publishContext;
         }
 
+        internal static void SetReceiveContextForSend<T>(ISendContext<T> context)
+            where T : class
+        {
+            IConsumeContext currentConsumeContext = ContextStorage.CurrentConsumeContext;
+            if (currentConsumeContext != null)
+            {
+                var receiveContext = currentConsumeContext as IReceiveContext;
+                if (receiveContext != null)
+                    context.SetReceiveContext(receiveContext);
+                else if (currentConsumeContext.BaseContext != null)
+                {
+                    context.SetReceiveContext(currentConsumeContext.BaseContext);
+                }
+            }
+        }
         public static IConsumeContext Context()
         {
             IConsumeContext context = CurrentConsumeContext;
