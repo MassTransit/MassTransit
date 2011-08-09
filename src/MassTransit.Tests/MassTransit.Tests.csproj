@@ -193,7 +193,7 @@
     <Compile Include="Testing\SagaStateMachineTest_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
     <None Include="app.config" />
-    <None Include="Reactive\Samples\BasicExample.cs" />
+    <Compile Include="Reactive\Samples\BasicExample.cs" />
     <Compile Include="Pipeline\Interception_Specs.cs" />
     <Compile Include="ReflectionExploration.cs" />
     <Compile Include="Saga\CompleteSimpleSaga.cs" />
