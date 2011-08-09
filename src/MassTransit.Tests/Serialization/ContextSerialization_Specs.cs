@@ -153,13 +153,6 @@ namespace MassTransit.Tests.Serialization
 
 	[TestFixture]
 	[Explicit]
-	public class For_the_XML_message_serializer :
-		When_sending_a_message_using_the_specified_serializer<DotNotXmlMessageSerializer>
-	{
-	}
-
-	[TestFixture]
-	[Explicit]
 	public class For_the_custom_xml_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<XmlMessageSerializer>
 	{

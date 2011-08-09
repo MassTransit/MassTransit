@@ -29,7 +29,7 @@ namespace MassTransit.Testing
 			Result = Enumerable.Empty<IPipelineSink<T>>();
 		}
 
-		public bool Inspect<TComponent, TMessage>(ComponentMessageSink<TComponent, TMessage> sink)
+		public bool Inspect<TComponent, TMessage>(ConsumerMessageSink<TComponent, TMessage> sink)
 			where TComponent : class, Consumes<TMessage>.All
 			where TMessage : class
 		{
@@ -43,7 +43,7 @@ namespace MassTransit.Testing
 			return true;
 		}
 
-		public bool Inspect<TComponent, TMessage>(SelectedComponentMessageSink<TComponent, TMessage> sink)
+		public bool Inspect<TComponent, TMessage>(SelectedConsumerMessageSink<TComponent, TMessage> sink)
 			where TComponent : class, Consumes<TMessage>.Selected
 			where TMessage : class
 		{

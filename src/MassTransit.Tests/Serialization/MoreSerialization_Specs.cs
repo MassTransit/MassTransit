@@ -48,12 +48,6 @@ namespace MassTransit.Tests.Serialization
 	{
 	}
 
-	[TestFixture][Explicit("Just can't keep up with the others")]
-	public class MoreSerializationForDotNotXml :
-		MoreSerialization_Specs<DotNotXmlMessageSerializer>
-	{
-	}
-
 	[TestFixture]
 	public class MoreSerializationForBinary :
 		MoreSerialization_Specs<BinaryMessageSerializer>

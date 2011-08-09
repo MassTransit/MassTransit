@@ -22,14 +22,14 @@ namespace MassTransit.Pipeline.Sinks
 	/// </summary>
 	/// <typeparam name="TComponent">The component type to handle the message</typeparam>
 	/// <typeparam name="TMessage">The message to handle</typeparam>
-	public class ComponentContextMessageSink<TComponent, TMessage> :
+	public class ContextConsumerMessageSink<TComponent, TMessage> :
 		IPipelineSink<IConsumeContext<TMessage>>
 		where TMessage : class
 		where TComponent : class, Consumes<IConsumeContext<TMessage>>.All
 	{
 		readonly IConsumerFactory<TComponent> _consumerFactory;
 
-		public ComponentContextMessageSink(IConsumerFactory<TComponent> consumerFactory)
+		public ContextConsumerMessageSink(IConsumerFactory<TComponent> consumerFactory)
 		{
 			_consumerFactory = consumerFactory;
 		}

@@ -12,191 +12,191 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using Context;
-	using Loopback;
-	using Magnum.Extensions;
-	using Util;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading;
+    using Context;
+    using Loopback;
+    using Magnum.Extensions;
+    using Util;
 
-	public class LoopbackTransport :
-		IDuplexTransport
-	{
-		readonly object _messageLock = new object();
-		AutoResetEvent _messageReady = new AutoResetEvent(false);
-		LinkedList<LoopbackMessage> _messages = new LinkedList<LoopbackMessage>();
-		bool _disposed;
+    public class LoopbackTransport :
+        IDuplexTransport
+    {
+        readonly object _messageLock = new object();
+        bool _disposed;
+        AutoResetEvent _messageReady = new AutoResetEvent(false);
+        LinkedList<LoopbackMessage> _messages = new LinkedList<LoopbackMessage>();
 
-		public LoopbackTransport(IEndpointAddress address)
-		{
-			Address = address;
-		}
+        public LoopbackTransport(IEndpointAddress address)
+        {
+            Address = address;
+        }
 
-		public IEndpointAddress Address { get; private set; }
+        public IEndpointAddress Address { get; private set; }
 
-		public IOutboundTransport OutboundTransport
-		{
-			get { return this; }
-		}
+        public IOutboundTransport OutboundTransport
+        {
+            get { return this; }
+        }
 
-		public IInboundTransport InboundTransport
-		{
-			get { return this; }
-		}
+        public IInboundTransport InboundTransport
+        {
+            get { return this; }
+        }
 
-		public void Send(ISendContext context)
-		{
-			GuardAgainstDisposed();
+        public void Send(ISendContext context)
+        {
+            GuardAgainstDisposed();
 
-			LoopbackMessage message = null;
-			try
-			{
-				message = new LoopbackMessage();
+            LoopbackMessage message = null;
+            try
+            {
+                message = new LoopbackMessage();
 
-				if (context.ExpirationTime.HasValue)
-				{
-					message.ExpirationTime = context.ExpirationTime.Value;
-				}
+                if (context.ExpirationTime.HasValue)
+                {
+                    message.ExpirationTime = context.ExpirationTime.Value;
+                }
 
-				context.SerializeTo(message.Body);
-				message.ContentType = context.ContentType;
+                context.SerializeTo(message.Body);
+                message.ContentType = context.ContentType;
 
-				lock (_messageLock)
-				{
-					GuardAgainstDisposed();
+                lock (_messageLock)
+                {
+                    GuardAgainstDisposed();
 
-					_messages.AddLast(message);
-				}
+                    _messages.AddLast(message);
+                }
 
-				if (SpecialLoggers.Messages.IsInfoEnabled)
-					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}:{2}", Address, context.MessageType, message.MessageId);
-			}
-			catch
-			{
-				if (message != null)
-					message.Dispose();
+                if (SpecialLoggers.Messages.IsInfoEnabled)
+                    SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}:{2}", Address, context.MessageType,
+                        message.MessageId);
+            }
+            catch
+            {
+                if (message != null)
+                    message.Dispose();
 
-				throw;
-			}
+                throw;
+            }
 
-			_messageReady.Set();
-		}
+            _messageReady.Set();
+        }
 
-		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
-		{
-			int messageCount;
-			lock (_messageLock)
-			{
-				GuardAgainstDisposed();
+        public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+        {
+            int messageCount;
+            lock (_messageLock)
+            {
+                GuardAgainstDisposed();
 
-				messageCount = _messages.Count;
-			}
+                messageCount = _messages.Count;
+            }
 
-			bool waited = false;
+            bool waited = false;
 
-			if (messageCount == 0)
-			{
-				if (!_messageReady.WaitOne(timeout, true))
-					return;
+            if (messageCount == 0)
+            {
+                if (!_messageReady.WaitOne(timeout, true))
+                    return;
 
-				waited = true;
-			}
+                waited = true;
+            }
 
-			bool monitorExitNeeded = true;
-			if (!Monitor.TryEnter(_messageLock, timeout))
-				return;
+            bool monitorExitNeeded = true;
+            if (!Monitor.TryEnter(_messageLock, timeout))
+                return;
 
-			try
-			{
-				for (LinkedListNode<LoopbackMessage> iterator = _messages.First; iterator != null; iterator = iterator.Next)
-				{
-					if (iterator.Value != null)
-					{
-						LoopbackMessage message = iterator.Value;
-						if (message.ExpirationTime.HasValue && message.ExpirationTime <= DateTime.UtcNow)
-						{
-							_messages.Remove(iterator);
-							return;
-						}
+            try
+            {
+                for (LinkedListNode<LoopbackMessage> iterator = _messages.First;
+                     iterator != null;
+                     iterator = iterator.Next)
+                {
+                    if (iterator.Value != null)
+                    {
+                        LoopbackMessage message = iterator.Value;
+                        if (message.ExpirationTime.HasValue && message.ExpirationTime <= DateTime.UtcNow)
+                        {
+                            _messages.Remove(iterator);
+                            return;
+                        }
 
-						ReceiveContext context = ReceiveContext.FromBodyStream(message.Body);
-						context.SetMessageId(message.MessageId);
-						context.SetContentType(message.ContentType);
-						if (message.ExpirationTime.HasValue)
-							context.SetExpirationTime(message.ExpirationTime.Value);
+                        ReceiveContext context = ReceiveContext.FromBodyStream(message.Body);
+                        context.SetMessageId(message.MessageId);
+                        context.SetContentType(message.ContentType);
+                        if (message.ExpirationTime.HasValue)
+                            context.SetExpirationTime(message.ExpirationTime.Value);
 
-						using (context.CreateScope())
-						{
-							Action<IReceiveContext> receive = callback(context);
-							if (receive == null)
-								continue;
+                        Action<IReceiveContext> receive = callback(context);
+                        if (receive == null)
+                            continue;
 
-							_messages.Remove(iterator);
+                        _messages.Remove(iterator);
 
-							using (message)
-							{
-								Monitor.Exit(_messageLock);
-								monitorExitNeeded = false;
+                        using (message)
+                        {
+                            Monitor.Exit(_messageLock);
+                            monitorExitNeeded = false;
 
-								receive(context);
-								return;
-							}
-						}
-					}
-				}
+                            receive(context);
+                            return;
+                        }
+                    }
+                }
 
-				if (waited)
-					return;
+                if (waited)
+                    return;
 
-				// we read to the end and none were accepted, so we are going to wait until we get another in the queue
-				if (!_messageReady.WaitOne(timeout, true))
-					return;
-			}
-			finally
-			{
-				if (monitorExitNeeded)
-					Monitor.Exit(_messageLock);
-			}
-		}
+                // we read to the end and none were accepted, so we are going to wait until we get another in the queue
+                if (!_messageReady.WaitOne(timeout, true))
+                    return;
+            }
+            finally
+            {
+                if (monitorExitNeeded)
+                    Monitor.Exit(_messageLock);
+            }
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		void GuardAgainstDisposed()
-		{
-			if (_disposed)
-				throw new ObjectDisposedException("The transport has already been disposed: " + Address);
-		}
+        void GuardAgainstDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException("The transport has already been disposed: " + Address);
+        }
 
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				lock (_messageLock)
-				{
-					_messages.Each(x => x.Dispose());
-					_messages.Clear();
-					_messages = null;
-				}
+        void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                lock (_messageLock)
+                {
+                    _messages.Each(x => x.Dispose());
+                    _messages.Clear();
+                    _messages = null;
+                }
 
-				_messageReady.Close();
-				using (_messageReady)
-				{
-				}
-				_messageReady = null;
-			}
+                _messageReady.Close();
+                using (_messageReady)
+                {
+                }
+                _messageReady = null;
+            }
 
-			_disposed = true;
-		}
+            _disposed = true;
+        }
 
-		~LoopbackTransport()
-		{
-			Dispose(false);
-		}
-	}
+        ~LoopbackTransport()
+        {
+            Dispose(false);
+        }
+    }
 }

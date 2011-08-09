@@ -10,99 +10,86 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
-using System;
-using System.Web;
-
 namespace MassTransit.Context
 {
-	/// <summary>
-	/// The default context provider using thread local storage
-	/// </summary>
-	public static class ContextStorage
-	{
-		private static ContextStorageProvider _provider;
+    using System;
+    using System.Web;
 
-		public static ISendContext CurrentSendContext
-		{
-			get { return Provider.SendContext; }
-			set
-			{
-				if (value == null || value.GetType() == typeof (InvalidSendContext))
-					Provider.SendContext = null;
-				else
-					Provider.SendContext = value;
-			}
-		}
+    /// <summary>
+    /// The default context provider using thread local storage
+    /// </summary>
+    public static class ContextStorage
+    {
+        static ContextStorageProvider _provider;
 
-		public static IConsumeContext CurrentConsumeContext
-		{
-			get { return Provider.ConsumeContext; }
-			set
-			{
-				if (value == null || value.GetType() == typeof (InvalidConsumeContext))
-					Provider.ConsumeContext = null;
-				else
-					Provider.ConsumeContext = value;
-			}
-		}
+        public static IConsumeContext CurrentConsumeContext
+        {
+            get { return Provider.ConsumeContext; }
+            set
+            {
+                if (value == null || value.GetType() == typeof (InvalidConsumeContext))
+                    Provider.ConsumeContext = null;
+                else
+                    Provider.ConsumeContext = value;
+            }
+        }
 
-		private static ContextStorageProvider Provider
-		{
-			get { return _provider ?? (_provider = GetDefaultProvider()); }
-		}
+        static ContextStorageProvider Provider
+        {
+            get { return _provider ?? (_provider = GetDefaultProvider()); }
+        }
 
-		public static IConsumeContext<T> MessageContext<T>()
-			where T : class
-		{
-			var context = CurrentConsumeContext as IConsumeContext<T>;
-			if (context == null)
-				throw new InvalidOperationException("The specified consumer context type was not found");
+        public static IConsumeContext<T> MessageContext<T>()
+            where T : class
+        {
+            var context = CurrentConsumeContext as IConsumeContext<T>;
+            if (context == null)
+                throw new InvalidOperationException("The specified consumer context type was not found");
 
-			return context;
-		}
+            return context;
+        }
 
-		public static PublishContext<T> CreatePublishContext<T>(T message)
-			where T : class
-		{
-			PublishContext<T> publishContext = PublishContext<T>.FromMessage(message);
+        public static PublishContext<T> CreatePublishContext<T>(T message)
+            where T : class
+        {
+            PublishContext<T> publishContext = PublishContext<T>.FromMessage(message);
 
-			return publishContext;
-		}
+            return publishContext;
+        }
 
-		public static IConsumeContext Context()
-		{
-			IConsumeContext context = CurrentConsumeContext;
-			if (context == null)
-				throw new InvalidOperationException("No consumer context was found");
+        public static IConsumeContext Context()
+        {
+            IConsumeContext context = CurrentConsumeContext;
+            if (context == null)
+                throw new InvalidOperationException("No consumer context was found");
 
-			return context;
-		}
+            return context;
+        }
 
-		public static void Context(Action<IConsumeContext> contextCallback)
-		{
-			IConsumeContext context = CurrentConsumeContext;
-			if (context == null)
-				throw new InvalidOperationException("No consumer context was found");
+        public static void Context(Action<IConsumeContext> contextCallback)
+        {
+            IConsumeContext context = CurrentConsumeContext;
+            if (context == null)
+                throw new InvalidOperationException("No consumer context was found");
 
-			contextCallback(context);
-		}
+            contextCallback(context);
+        }
 
-		public static TResult Context<TResult>(Func<IConsumeContext, TResult> contextCallback)
-		{
-			IConsumeContext context = CurrentConsumeContext;
-			if (context == null)
-				throw new InvalidOperationException("No consumer context was found");
+        public static TResult Context<TResult>(Func<IConsumeContext, TResult> contextCallback)
+        {
+            IConsumeContext context = CurrentConsumeContext;
+            if (context == null)
+                throw new InvalidOperationException("No consumer context was found");
 
-			return contextCallback(context);
-		}
+            return contextCallback(context);
+        }
 
-		private static ContextStorageProvider GetDefaultProvider()
-		{
-			if (HttpContext.Current != null)
-				return new HttpContextContextStorageProvider();
+        static ContextStorageProvider GetDefaultProvider()
+        {
+            if (HttpContext.Current != null)
+                return new HttpContextContextStorageProvider();
 
-			return new ThreadStaticContextStorageProvider();
-		}
-	}
+            return new ThreadStaticContextStorageProvider();
+        }
+    }
 }

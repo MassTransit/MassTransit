@@ -12,144 +12,142 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-	using System;
-	using System.IO;
-	using System.Text;
-	using System.Threading;
-	using Context;
-	using RabbitMQ.Client;
-	using RabbitMQ.Client.Exceptions;
-	using log4net;
+    using System;
+    using System.IO;
+    using System.Text;
+    using System.Threading;
+    using Context;
+    using RabbitMQ.Client;
+    using RabbitMQ.Client.Exceptions;
+    using log4net;
 
-	public class InboundRabbitMqTransport :
-		IInboundTransport
-	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (InboundRabbitMqTransport));
+    public class InboundRabbitMqTransport :
+        IInboundTransport
+    {
+        static readonly ILog _log = LogManager.GetLogger(typeof (InboundRabbitMqTransport));
 
-		readonly IRabbitMqEndpointAddress _address;
-		readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
-		readonly bool _purgeExistingMessages;
-		RabbitMqConsumer _consumer;
-		bool _disposed;
+        readonly IRabbitMqEndpointAddress _address;
+        readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
+        readonly bool _purgeExistingMessages;
+        RabbitMqConsumer _consumer;
+        bool _disposed;
 
-		public InboundRabbitMqTransport(IRabbitMqEndpointAddress address,
-		                                ConnectionHandler<RabbitMqConnection> connectionHandler, bool purgeExistingMessages)
-		{
-			_address = address;
-			_connectionHandler = connectionHandler;
-			_purgeExistingMessages = purgeExistingMessages;
-		}
+        public InboundRabbitMqTransport(IRabbitMqEndpointAddress address,
+                                        ConnectionHandler<RabbitMqConnection> connectionHandler,
+                                        bool purgeExistingMessages)
+        {
+            _address = address;
+            _connectionHandler = connectionHandler;
+            _purgeExistingMessages = purgeExistingMessages;
+        }
 
-		public IEndpointAddress Address
-		{
-			get { return _address; }
-		}
+        public IEndpointAddress Address
+        {
+            get { return _address; }
+        }
 
-		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
-		{
-			AddConsumerBinding();
+        public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+        {
+            AddConsumerBinding();
 
-			_connectionHandler.Use(connection =>
-				{
-					BasicGetResult result = null;
-					try
-					{
-						result = _consumer.Get();
-						if (result == null)
-						{
-							Thread.Sleep(10);
-							return;
-						}
+            _connectionHandler.Use(connection =>
+                {
+                    BasicGetResult result = null;
+                    try
+                    {
+                        result = _consumer.Get();
+                        if (result == null)
+                        {
+                            Thread.Sleep(10);
+                            return;
+                        }
 
-						using (var body = new MemoryStream(result.Body, false))
-						{
-							ReceiveContext context = ReceiveContext.FromBodyStream(body);
-							context.SetMessageId(result.BasicProperties.MessageId ?? result.DeliveryTag.ToString());
-							context.SetInputAddress(_address);
+                        using (var body = new MemoryStream(result.Body, false))
+                        {
+                            ReceiveContext context = ReceiveContext.FromBodyStream(body);
+                            context.SetMessageId(result.BasicProperties.MessageId ?? result.DeliveryTag.ToString());
+                            context.SetInputAddress(_address);
 
-							byte[] contentType = result.BasicProperties.IsHeadersPresent()
-							                     	? (byte[]) result.BasicProperties.Headers["Content-Type"]
-							                     	: null;
-							if (contentType != null)
-							{
-								context.SetContentType(Encoding.UTF8.GetString(contentType));
-							}
+                            byte[] contentType = result.BasicProperties.IsHeadersPresent()
+                                                     ? (byte[]) result.BasicProperties.Headers["Content-Type"]
+                                                     : null;
+                            if (contentType != null)
+                            {
+                                context.SetContentType(Encoding.UTF8.GetString(contentType));
+                            }
 
-							using (context.CreateScope())
-							{
-								Action<IReceiveContext> receive = callback(context);
-								if (receive == null)
-								{
-									if (_log.IsDebugEnabled)
-										_log.DebugFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
-								}
-								else
-								{
-									receive(context);
-								}
-							}
+                            Action<IReceiveContext> receive = callback(context);
+                            if (receive == null)
+                            {
+                                if (_log.IsDebugEnabled)
+                                    _log.DebugFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
+                            }
+                            else
+                            {
+                                receive(context);
+                            }
 
-							_consumer.MessageCompleted(result.DeliveryTag);
-						}
-					}
-					catch (EndOfStreamException ex)
-					{
-						throw new InvalidConnectionException(_address.Uri, "Connection was closed", ex);
-					}
-					catch(OperationInterruptedException ex)
-					{
-						throw new InvalidConnectionException(_address.Uri, "Operation was interrupted", ex);
-					}
-					catch (Exception ex)
-					{
-						_log.Error("Failed to consume message from endpoint", ex);
+                            _consumer.MessageCompleted(result.DeliveryTag);
+                        }
+                    }
+                    catch (EndOfStreamException ex)
+                    {
+                        throw new InvalidConnectionException(_address.Uri, "Connection was closed", ex);
+                    }
+                    catch (OperationInterruptedException ex)
+                    {
+                        throw new InvalidConnectionException(_address.Uri, "Operation was interrupted", ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Error("Failed to consume message from endpoint", ex);
 
-						if (result != null)
-							_consumer.MessageFailed(result.DeliveryTag, true);
+                        if (result != null)
+                            _consumer.MessageFailed(result.DeliveryTag, true);
 
-						throw;
-					}
-				});
-		}
+                        throw;
+                    }
+                });
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		void AddConsumerBinding()
-		{
-			if (_consumer != null)
-				return;
+        void AddConsumerBinding()
+        {
+            if (_consumer != null)
+                return;
 
-			_consumer = new RabbitMqConsumer(_address, _purgeExistingMessages);
+            _consumer = new RabbitMqConsumer(_address, _purgeExistingMessages);
 
-			_connectionHandler.AddBinding(_consumer);
-		}
+            _connectionHandler.AddBinding(_consumer);
+        }
 
-		void RemoveConsumer()
-		{
-			if (_consumer != null)
-			{
-				_connectionHandler.RemoveBinding(_consumer);
-			}
-		}
+        void RemoveConsumer()
+        {
+            if (_consumer != null)
+            {
+                _connectionHandler.RemoveBinding(_consumer);
+            }
+        }
 
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				RemoveConsumer();
-			}
+        void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                RemoveConsumer();
+            }
 
-			_disposed = true;
-		}
+            _disposed = true;
+        }
 
-		~InboundRabbitMqTransport()
-		{
-			Dispose(false);
-		}
-	}
+        ~InboundRabbitMqTransport()
+        {
+            Dispose(false);
+        }
+    }
 }

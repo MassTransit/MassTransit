@@ -12,38 +12,38 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
-	using System;
-	using Context;
-	using Exceptions;
-	using Sinks;
+    using System;
+    using Exceptions;
+    using Sinks;
 
-	public class OutboundMessageInterceptorConfigurator
-	{
-		readonly IPipelineSink<ISendContext> _sink;
+    public class OutboundMessageInterceptorConfigurator
+    {
+        readonly IPipelineSink<ISendContext> _sink;
 
-		public OutboundMessageInterceptorConfigurator(IPipelineSink<ISendContext> sink)
-		{
-			_sink = sink;
-		}
+        public OutboundMessageInterceptorConfigurator(IPipelineSink<ISendContext> sink)
+        {
+            _sink = sink;
+        }
 
-		public OutboundMessageInterceptor Create(IOutboundMessageInterceptor messageInterceptor)
-		{
-			var scope = new OutboundMessageInterceptorConfiguratorScope();
-			_sink.Inspect(scope);
+        public OutboundMessageInterceptor Create(IOutboundMessageInterceptor messageInterceptor)
+        {
+            var scope = new OutboundMessageInterceptorConfiguratorScope();
+            _sink.Inspect(scope);
 
-			return ConfigureInterceptor(scope.InsertAfter, messageInterceptor);
-		}
+            return ConfigureInterceptor(scope.InsertAfter, messageInterceptor);
+        }
 
-		static OutboundMessageInterceptor ConfigureInterceptor(
-			Func<IPipelineSink<ISendContext>, IPipelineSink<ISendContext>> insertAfter,
-			IOutboundMessageInterceptor messageInterceptor)
-		{
-			if (insertAfter == null)
-				throw new PipelineException("Unable to insert filter into pipeline for message type " + typeof (object).FullName);
+        static OutboundMessageInterceptor ConfigureInterceptor(
+            Func<IPipelineSink<ISendContext>, IPipelineSink<ISendContext>> insertAfter,
+            IOutboundMessageInterceptor messageInterceptor)
+        {
+            if (insertAfter == null)
+                throw new PipelineException("Unable to insert filter into pipeline for message type " +
+                                            typeof (object).FullName);
 
-			var interceptor = new OutboundMessageInterceptor(insertAfter, messageInterceptor);
+            var interceptor = new OutboundMessageInterceptor(insertAfter, messageInterceptor);
 
-			return interceptor;
-		}
-	}
+            return interceptor;
+        }
+    }
 }

@@ -35,7 +35,7 @@ namespace MassTransit.SubscriptionConnectors
 
 		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
 		{
-			var sink = new SelectedComponentMessageSink<TConsumer, TMessage>(_consumerFactory);
+			var sink = new SelectedConsumerMessageSink<TConsumer, TMessage>(_consumerFactory);
 
 			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
 		}

@@ -118,12 +118,6 @@ namespace MassTransit.Tests.Serialization
     }
 
     [TestFixture]
-    public class WhenUsingDotNotXmlInPerfTest :
-        Performance_Specs<DotNotXmlMessageSerializer>
-    {
-    }
-
-    [TestFixture]
     public class WhenUsingBinaryInPerfTest :
         Performance_Specs<BinaryMessageSerializer>
     {

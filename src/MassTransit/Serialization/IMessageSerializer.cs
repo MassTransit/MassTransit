@@ -12,33 +12,32 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System.IO;
-	using Context;
+    using System.IO;
 
-	/// <summary>
-	/// Message Serialization Methods 
-	/// </summary>
-	public interface IMessageSerializer
-	{
-		/// <summary>
-		/// The content type that identifies the message serializer
-		/// </summary>
-		string ContentType { get; }
+    /// <summary>
+    /// Message Serialization Methods 
+    /// </summary>
+    public interface IMessageSerializer
+    {
+        /// <summary>
+        /// The content type that identifies the message serializer
+        /// </summary>
+        string ContentType { get; }
 
-		/// <summary>
-		/// Serialize the message to the stream
-		/// </summary>
-		/// <typeparam name="T">The implicit type of the message to serialize</typeparam>
-		/// <param name="stream"></param>
-		/// <param name="context"></param>
-		void Serialize<T>(Stream stream, ISendContext<T> context)
-			where T : class;
+        /// <summary>
+        /// Serialize the message to the stream
+        /// </summary>
+        /// <typeparam name="T">The implicit type of the message to serialize</typeparam>
+        /// <param name="stream"></param>
+        /// <param name="context"></param>
+        void Serialize<T>(Stream stream, ISendContext<T> context)
+            where T : class;
 
-		/// <summary>
-		/// Deserialize a message from the stream
-		/// </summary>
-		/// <param name="context"></param>
-		/// <returns>An object that was deserialized</returns>
-		void Deserialize(IReceiveContext context);
-	}
+        /// <summary>
+        /// Deserialize a message from the stream
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns>An object that was deserialized</returns>
+        void Deserialize(IReceiveContext context);
+    }
 }

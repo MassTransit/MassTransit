@@ -79,13 +79,6 @@ namespace MassTransit.Tests.Serialization
     }
 
     [TestFixture]
-    public class WhenUsingDotNotXmlOnSimpleMessage :
-        GivenASimpleMessage<DotNotXmlMessageSerializer>
-    {
-        
-    }
-
-    [TestFixture]
     public class WhenUsingJsonOnSimpleMessage :
         GivenASimpleMessage<JsonMessageSerializer>
     {

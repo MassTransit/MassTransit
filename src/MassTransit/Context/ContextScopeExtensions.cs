@@ -12,32 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using System;
-	using Context;
+    using System;
+    using Context;
 
-	public static class ContextScopeExtensions
-	{
-		public static IDisposable CreateScope<T>(this IBusPublishContext<T> context)
-			where T : class
-		{
-			return ContextScope.FromPublishContext(context);
-		}
-
-		public static IDisposable CreateScope<T>(this ISendContext<T> context)
-			where T : class
-		{
-			return ContextScope.FromSendContext(context);
-		}
-
-		public static IDisposable CreateScope(this IReceiveContext context)
-		{
-			return ContextScope.FromReceiveContext(context);
-		}
-
-		public static IDisposable CreateScope<T>(this IConsumeContext<T> context)
-			where T : class
-		{
-			return ContextScope.FromConsumeContext(context);
-		}
-	}
+    public static class ContextScopeExtensions
+    {
+        public static IDisposable CreateScope<T>(this IConsumeContext<T> context)
+            where T : class
+        {
+            return ContextScope.FromConsumeContext(context);
+        }
+    }
 }

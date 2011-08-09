@@ -63,12 +63,6 @@ namespace MassTransit.Tests.Serialization
 		
 	}
 
-	[TestFixture][Explicit("the built in dot net xml serializer doesn't support this feature")]
-	public class WhenUsingDotNotXml :
-		Deserializing_an_interface<DotNotXmlMessageSerializer>
-	{
-	}
-
 	[TestFixture][Explicit("the built in binary serializer doesn't support this feature")]
 	public class WhenUsingBinary :
 		Deserializing_an_interface<BinaryMessageSerializer>

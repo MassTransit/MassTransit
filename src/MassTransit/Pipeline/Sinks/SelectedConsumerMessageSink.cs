@@ -20,16 +20,16 @@ namespace MassTransit.Pipeline.Sinks
 	/// Routes messages to instances of subscribed components. A new instance of the component
 	/// is created from the container for each message received.
 	/// </summary>
-	/// <typeparam name="TComponent">The component type to handle the message</typeparam>
+	/// <typeparam name="TConsumer">The component type to handle the message</typeparam>
 	/// <typeparam name="TMessage">The message to handle</typeparam>
-	public class SelectedComponentMessageSink<TComponent, TMessage> :
+	public class SelectedConsumerMessageSink<TConsumer, TMessage> :
 		IPipelineSink<IConsumeContext<TMessage>>
 		where TMessage : class
-		where TComponent : class, Consumes<TMessage>.Selected
+		where TConsumer : class, Consumes<TMessage>.Selected
 	{
-		readonly IConsumerFactory<TComponent> _consumerFactory;
+		readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-		public SelectedComponentMessageSink(IConsumerFactory<TComponent> consumerFactory)
+		public SelectedConsumerMessageSink(IConsumerFactory<TConsumer> consumerFactory)
 		{
 			_consumerFactory = consumerFactory;
 		}
@@ -44,7 +44,7 @@ namespace MassTransit.Pipeline.Sinks
 			return inspector.Inspect(this);
 		}
 
-		IEnumerable<Action<IConsumeContext<TMessage>>> Selector(TComponent instance, IConsumeContext<TMessage> messageContext)
+		IEnumerable<Action<IConsumeContext<TMessage>>> Selector(TConsumer instance, IConsumeContext<TMessage> messageContext)
 		{
 			bool accept;
 			using (messageContext.CreateScope())
@@ -56,7 +56,7 @@ namespace MassTransit.Pipeline.Sinks
 			{
 				yield return context =>
 					{
-						context.BaseContext.NotifyConsume(context, typeof (TComponent).ToShortTypeName(), null);
+						context.BaseContext.NotifyConsume(context, typeof (TConsumer).ToShortTypeName(), null);
 
 						using (context.CreateScope())
 						{

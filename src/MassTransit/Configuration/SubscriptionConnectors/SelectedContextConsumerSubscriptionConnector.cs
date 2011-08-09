@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,20 +16,14 @@ namespace MassTransit.SubscriptionConnectors
     using Pipeline;
     using Pipeline.Sinks;
 
-    public interface ConsumerSubscriptionConnector :
-        ConsumerConnector
-    {
-        Type MessageType { get; }
-    }
-
-    public class ConsumerSubscriptionConnector<TConsumer, TMessage> :
+    public class SelectedContextConsumerSubscriptionConnector<TConsumer, TMessage> :
         ConsumerSubscriptionConnector
-        where TConsumer : class, Consumes<TMessage>.All
+        where TConsumer : class, Consumes<TMessage>.Selected
         where TMessage : class
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-        public ConsumerSubscriptionConnector(IConsumerFactory<TConsumer> consumerFactory)
+        public SelectedContextConsumerSubscriptionConnector(IConsumerFactory<TConsumer> consumerFactory)
         {
             _consumerFactory = consumerFactory;
         }
@@ -41,7 +35,7 @@ namespace MassTransit.SubscriptionConnectors
 
         public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
         {
-            var sink = new ConsumerMessageSink<TConsumer, TMessage>(_consumerFactory);
+            var sink = new SelectedContextConsumerMessageSink<TConsumer, TMessage>(_consumerFactory);
 
             return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
         }

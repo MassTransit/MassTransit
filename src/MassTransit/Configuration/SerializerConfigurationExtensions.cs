@@ -20,14 +20,6 @@ namespace MassTransit
 
 	public static class SerializerConfigurationExtensions
 	{
-		public static T UseDotNetXmlSerializer<T>(this T configurator)
-			where T : EndpointFactoryConfigurator
-		{
-			configurator.SetDefaultSerializer<DotNotXmlMessageSerializer>();
-
-			return configurator;
-		}
-
 		public static T UseJsonSerializer<T>(this T configurator)
 			where T : EndpointFactoryConfigurator
 		{
