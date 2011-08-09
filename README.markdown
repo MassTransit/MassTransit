@@ -34,7 +34,10 @@ Documentation is located at [http://docs.masstransit-project.com/](http://docs.m
 
 1. Clone the source down to your machine. 
   `git clone git://github.com/MassTransit/MassTransit.git`
-2. Run `build.bat`. NOTE: You must have git on the path (open a regular command line and type git).
+2. Ensure Ruby is installed. [RubyInstaller for Windows](http://rubyinstaller.org/)
+3. Ensure Albacore is installed.
+  `gem install albacore`
+4. Run `build.bat`.
 
 ### Contributing 
 
