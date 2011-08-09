@@ -21,12 +21,12 @@ namespace MassTransit.Services.Subscriptions.Client
 	using log4net;
 
 	public class SubscriptionClient :
-		BusSubscriptionEventObserver,
+		SubscriptionObserver,
 		Consumes<SubscriptionRefresh>.Context
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionClient));
 		readonly IServiceBus _bus;
-		readonly BusSubscriptionCoordinator _coordinator;
+		readonly SubscriptionRouter _router;
 		readonly string _network;
 		readonly SubscriptionServiceMessageProducer _producer;
 		readonly ManualResetEvent _ready = new ManualResetEvent(false);
@@ -34,14 +34,14 @@ namespace MassTransit.Services.Subscriptions.Client
 		readonly Uri _subscriptionServiceUri;
 		UnsubscribeAction _unsubscribeAction;
 
-		public SubscriptionClient(IServiceBus bus, BusSubscriptionCoordinator coordinator, Uri subscriptionServiceUri,
+		public SubscriptionClient(IServiceBus bus, SubscriptionRouter router, Uri subscriptionServiceUri,
 		                          TimeSpan startTimeout)
 		{
 			_bus = bus;
-			_coordinator = coordinator;
+			_router = router;
 			_subscriptionServiceUri = subscriptionServiceUri;
 			_startTimeout = startTimeout;
-			_network = coordinator.Network;
+			_network = router.Network;
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Starting SubscriptionClient using {0}", subscriptionServiceUri);
@@ -50,12 +50,12 @@ namespace MassTransit.Services.Subscriptions.Client
 
 			_ready.Reset();
 
-			var consumerInstance = new SubscriptionMessageConsumer(_coordinator, _network);
+			var consumerInstance = new SubscriptionMessageConsumer(_router, _network);
 
 			_unsubscribeAction = _bus.ControlBus.SubscribeInstance(consumerInstance);
 			_unsubscribeAction += _bus.ControlBus.SubscribeHandler<SubscriptionRefresh>(x => _ready.Set());
 
-			_producer = new SubscriptionServiceMessageProducer(coordinator, _bus.GetEndpoint(subscriptionServiceUri));
+			_producer = new SubscriptionServiceMessageProducer(router, _bus.GetEndpoint(subscriptionServiceUri));
 
 			WaitForSubscriptionServiceResponse();
 		}

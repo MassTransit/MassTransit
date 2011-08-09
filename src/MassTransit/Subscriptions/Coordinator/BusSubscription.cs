@@ -18,16 +18,17 @@ namespace MassTransit.Subscriptions.Coordinator
 	using Messages;
 	using log4net;
 
-	public class BusSubscription
+	public class BusSubscription :
+		Subscription
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscription));
 		readonly string _messageName;
-		readonly BusSubscriptionEventObserver _observer;
+		readonly SubscriptionObserver _observer;
 		Uri _endpointUri;
 		HashSet<Guid> _ids;
 		Guid _subscriptionId;
 
-		public BusSubscription(string messageName, BusSubscriptionEventObserver observer)
+		public BusSubscription(string messageName, SubscriptionObserver observer)
 		{
 			_messageName = messageName;
 			_observer = observer;
@@ -77,6 +78,35 @@ namespace MassTransit.Subscriptions.Coordinator
 
 			_observer.OnSubscriptionRemoved(remove);
 			_subscriptionId = Guid.Empty;
+		}
+
+		public IEnumerable<Subscription> Subscriptions
+		{
+			get
+			{
+				if (_ids.Count > 0)
+					yield return this;
+			}
+		}
+
+		public Guid SubscriptionId
+		{
+			get { return _subscriptionId; }
+		}
+
+		public Uri EndpointUri
+		{
+			get { return _endpointUri; }
+		}
+
+		public string MessageName
+		{
+			get { return _messageName; }
+		}
+
+		public string CorrelationId
+		{
+			get { return null; }
 		}
 	}
 }

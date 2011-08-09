@@ -14,60 +14,88 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using Magnum;
 	using Magnum.Extensions;
 	using Messages;
 	using Stact;
 
-	public class SubscriptionCoordinatorBusService :
+	public class SubscriptionRouterService :
 		IBusService,
-		BusSubscriptionCoordinator,
-		BusSubscriptionEventObserver
+		SubscriptionRouter,
+		SubscriptionObserver
 	{
-		readonly Guid _clientId;
+		readonly Guid _peerId;
+		readonly Uri _peerUri;
+		readonly IList<BusSubscriptionEventListener> _listeners;
 		readonly string _network;
-		readonly IList<BusSubscriptionEventObserver> _observers;
-		IServiceBus _bus;
-		IServiceBus _controlBus;
-		Uri _controlUri;
-		Uri _dataUri;
-
+		readonly IList<SubscriptionObserver> _observers;
+		readonly ActorInstance _peerCache;
 		bool _disposed;
-		ActorInstance _peerCache;
 		UnsubscribeAction _unregister;
 
-		public SubscriptionCoordinatorBusService(IServiceBus bus, string network)
+		public SubscriptionRouterService(IServiceBus bus, string network)
 		{
-			_bus = bus;
-			_controlBus = bus.ControlBus;
-
-			_dataUri = bus.Endpoint.Address.Uri;
-			_controlUri = bus.ControlBus.Endpoint.Address.Uri;
+			_peerUri = bus.ControlBus.Endpoint.Address.Uri;
 
 			_network = network;
 
-			_clientId = CombGuid.Generate();
+			_peerId = CombGuid.Generate();
 
-			_observers = new List<BusSubscriptionEventObserver>();
+			_observers = new List<SubscriptionObserver>();
+			_listeners = new List<BusSubscriptionEventListener>();
 
 			_unregister = () => true;
 
-			_bus = bus;
-			_controlBus = bus.ControlBus;
-
-			_dataUri = bus.Endpoint.Address.Uri;
-			_controlUri = bus.ControlBus.Endpoint.Address.Uri;
+			_peerUri = bus.ControlBus.Endpoint.Address.Uri;
 
 			var connector = new BusSubscriptionConnector(bus);
 
 			_peerCache = ActorFactory.Create<PeerCache>(x =>
 				{
 					x.ConstructedBy((fiber, scheduler, inbox) =>
-					                new PeerCache(fiber, scheduler, connector, _clientId, _controlUri));
+					                new PeerCache(fiber, scheduler, connector, _peerId, _peerUri));
 					x.UseSharedScheduler();
 					x.HandleOnPoolFiber();
 				})
-			.GetActor();
+				.GetActor();
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		public void Start(IServiceBus bus)
+		{
+			ListenToBus(bus);
+		}
+
+		public void Stop()
+		{
+			_unregister();
+		}
+
+		public void OnSubscriptionAdded(SubscriptionAdded message)
+		{
+			lock (_observers)
+				_observers.Each(x => x.OnSubscriptionAdded(message));
+		}
+
+		public void OnSubscriptionRemoved(SubscriptionRemoved message)
+		{
+			lock (_observers)
+				_observers.Each(x => x.OnSubscriptionRemoved(message));
+		}
+
+		public void OnComplete()
+		{
+		}
+
+		public IEnumerable<Subscription> LocalSubscriptions
+		{
+			get { return _listeners.SelectMany(x => x.Subscriptions); }
 		}
 
 		public void Send(AddPeerSubscription message)
@@ -99,49 +127,17 @@ namespace MassTransit.Subscriptions.Coordinator
 			get { return _network; }
 		}
 
-		public Guid ClientId
+		public Guid PeerId
 		{
-			get { return _clientId; }
+			get { return _peerId; }
 		}
 
-		public Uri ControlUri
+		public Uri PeerUri
 		{
-			get { return _controlUri; }
+			get { return _peerUri; }
 		}
 
-		public void OnSubscriptionAdded(SubscriptionAdded message)
-		{
-			lock (_observers)
-				_observers.Each(x => x.OnSubscriptionAdded(message));
-		}
-
-		public void OnSubscriptionRemoved(SubscriptionRemoved message)
-		{
-			lock (_observers)
-				_observers.Each(x => x.OnSubscriptionRemoved(message));
-		}
-
-		public void OnComplete()
-		{
-		}
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		public void Start(IServiceBus bus)
-		{
-			ListenToBus(bus);
-		}
-
-		public void Stop()
-		{
-			_unregister();
-		}
-
-		public void AddObserver(BusSubscriptionEventObserver observer)
+		public void AddObserver(SubscriptionObserver observer)
 		{
 			lock (_observers)
 				_observers.Add(observer);
@@ -157,6 +153,8 @@ namespace MassTransit.Subscriptions.Coordinator
 
 					return () => unregisterAction();
 				});
+
+			_listeners.Add(subscriptionEventListener);
 
 			IServiceBus controlBus = bus.ControlBus;
 			if (controlBus != bus)
@@ -177,7 +175,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			_disposed = true;
 		}
 
-		~SubscriptionCoordinatorBusService()
+		~SubscriptionRouterService()
 		{
 			Dispose(false);
 		}

@@ -41,6 +41,18 @@ namespace MassTransit.Services.Subscriptions.Messages
 			SubscriptionId = CombGuid.Generate();
 		}
 
+		public SubscriptionInformation(Guid clientId, Guid subscriptionId, string messageName, string correlationId, Uri endpointUri)
+		{
+			ClientId = clientId;
+			SequenceNumber = 0;
+
+			MessageName = messageName.Trim();
+			CorrelationId = correlationId;
+			EndpointUri = endpointUri;
+
+			SubscriptionId = subscriptionId;
+		}
+
 		protected SubscriptionInformation()
 		{
 		}

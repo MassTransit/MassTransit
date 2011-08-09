@@ -18,6 +18,7 @@ namespace MassTransit.Transports.RabbitMq
 	using System.Threading;
 	using Context;
 	using RabbitMQ.Client;
+	using RabbitMQ.Client.Exceptions;
 	using log4net;
 
 	public class InboundRabbitMqTransport :
@@ -94,6 +95,10 @@ namespace MassTransit.Transports.RabbitMq
 					catch (EndOfStreamException ex)
 					{
 						throw new InvalidConnectionException(_address.Uri, "Connection was closed", ex);
+					}
+					catch(OperationInterruptedException ex)
+					{
+						throw new InvalidConnectionException(_address.Uri, "Operation was interrupted", ex);
 					}
 					catch (Exception ex)
 					{

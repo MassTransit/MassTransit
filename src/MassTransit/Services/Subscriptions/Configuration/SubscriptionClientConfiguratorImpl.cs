@@ -34,12 +34,12 @@ namespace MassTransit.Services.Subscriptions.Configuration
 			_timeout = timeout;
 		}
 
-		public BusSubscriptionEventObserver Create(IServiceBus bus, BusSubscriptionCoordinator coordinator)
+		public SubscriptionObserver Create(IServiceBus bus, SubscriptionRouter router)
 		{
 			string path = bus.ControlBus.Endpoint.Address.Uri.AbsolutePath;
 
 
-			var client = new SubscriptionClient(bus, coordinator, _subscriptionServiceUri, _timeout);
+			var client = new SubscriptionClient(bus, router, _subscriptionServiceUri, _timeout);
 
 			return client;
 		}

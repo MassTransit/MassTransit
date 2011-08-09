@@ -5,12 +5,12 @@ namespace MassTransit.SubscriptionConfigurators
 	using Configurators;
 	using SubscriptionBuilders;
 
-	public class SubscriptionCoordinatorBuilderConfiguratorImpl :
-		SubscriptionCoordinatorBuilderConfigurator
+	public class SubscriptionRouterBuilderConfiguratorImpl :
+		SubscriptionRouterBuilderConfigurator
 	{
-		readonly Action<SubscriptionCoordinatorBuilder> _configureCallback;
+		readonly Action<SubscriptionRouterBuilder> _configureCallback;
 
-		public SubscriptionCoordinatorBuilderConfiguratorImpl(Action<SubscriptionCoordinatorBuilder> configureCallback)
+		public SubscriptionRouterBuilderConfiguratorImpl(Action<SubscriptionRouterBuilder> configureCallback)
 		{
 			_configureCallback = configureCallback;
 		}
@@ -21,7 +21,7 @@ namespace MassTransit.SubscriptionConfigurators
 				yield return this.Failure("ConfigureCallback", "Callback cannot be null");
 		}
 
-		public SubscriptionCoordinatorBuilder Configure(SubscriptionCoordinatorBuilder builder)
+		public SubscriptionRouterBuilder Configure(SubscriptionRouterBuilder builder)
 		{
 			_configureCallback(builder);
 

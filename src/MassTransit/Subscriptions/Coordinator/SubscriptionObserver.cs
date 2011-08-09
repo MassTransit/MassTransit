@@ -10,19 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionBuilders
+namespace MassTransit.Subscriptions.Coordinator
 {
-	using System;
-	using Subscriptions.Coordinator;
+	using Messages;
 
-	public interface SubscriptionCoordinatorBuilder
+	public interface SubscriptionObserver
 	{
-		void SetNetwork(string network);
-		void SetObserverFactory(Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory);
-		void AddObserverFactory(Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory);
+		void OnSubscriptionAdded(SubscriptionAdded message);
 
-		SubscriptionCoordinatorBusService Build();
-		
-		string Network { get; }
+		void OnSubscriptionRemoved(SubscriptionRemoved message);
+
+		/// <summary>
+		/// Called when the observation is complete and we should go away
+		/// </summary>
+		void OnComplete();
 	}
 }

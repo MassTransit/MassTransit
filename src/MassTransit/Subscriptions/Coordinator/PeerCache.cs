@@ -32,7 +32,7 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly IDictionary<Uri, ActorInstance> _peers;
 		readonly Scheduler _scheduler;
 
-		public PeerCache(Fiber fiber, Scheduler scheduler, BusSubscriptionEventObserver observer, Guid clientId,
+		public PeerCache(Fiber fiber, Scheduler scheduler, SubscriptionObserver observer, Guid clientId,
 		                 Uri controlUri)
 		{
 			_peers = new Dictionary<Uri, ActorInstance>();

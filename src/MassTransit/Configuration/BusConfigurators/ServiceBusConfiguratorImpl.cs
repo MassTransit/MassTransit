@@ -34,7 +34,7 @@ namespace MassTransit.BusConfigurators
 		readonly ServiceBusSettings _settings;
 		Func<BusSettings, BusBuilder> _builderFactory;
 
-		SubscriptionCoordinatorConfiguratorImpl _subscriptionCoordinatorConfigurator;
+		SubscriptionRouterConfiguratorImpl _subscriptionRouterConfigurator;
 
 		public ServiceBusConfiguratorImpl(ServiceBusDefaultSettings defaultSettings)
 		{
@@ -45,8 +45,8 @@ namespace MassTransit.BusConfigurators
 
 			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(new EndpointFactoryDefaultSettings());
 
-			_subscriptionCoordinatorConfigurator = new SubscriptionCoordinatorConfiguratorImpl();
-			_configurators.Add(_subscriptionCoordinatorConfigurator);
+			_subscriptionRouterConfigurator = new SubscriptionRouterConfiguratorImpl();
+			_configurators.Add(_subscriptionRouterConfigurator);
 		}
 
 		public IEnumerable<ValidationResult> Validate()
@@ -69,7 +69,7 @@ namespace MassTransit.BusConfigurators
 			foreach (ValidationResult result in _configurators.SelectMany(configurator => configurator.Validate()))
 				yield return result;
 
-			foreach (ValidationResult result in _subscriptionCoordinatorConfigurator.Validate())
+			foreach (ValidationResult result in _subscriptionRouterConfigurator.Validate())
 				yield return result;
 		}
 
@@ -78,9 +78,9 @@ namespace MassTransit.BusConfigurators
 			_builderFactory = builderFactory;
 		}
 
-		public void AddSubscriptionCoordinatorConfigurator(SubscriptionCoordinatorBuilderConfigurator configurator)
+		public void AddSubscriptionCoordinatorConfigurator(SubscriptionRouterBuilderConfigurator configurator)
 		{
-			_subscriptionCoordinatorConfigurator.AddConfigurator(configurator);
+			_subscriptionRouterConfigurator.AddConfigurator(configurator);
 		}
 
 		public void AddBusConfigurator(BusBuilderConfigurator configurator)
@@ -141,7 +141,7 @@ namespace MassTransit.BusConfigurators
 
 			BusBuilder builder = _builderFactory(_settings);
 
-			_subscriptionCoordinatorConfigurator.SetNetwork(_settings.Network);
+			_subscriptionRouterConfigurator.SetNetwork(_settings.Network);
 
 			foreach (BusBuilderConfigurator configurator in _configurators)
 			{

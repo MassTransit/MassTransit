@@ -20,23 +20,23 @@ namespace MassTransit.Subscriptions.Coordinator
 	using log4net;
 
 	public class SubscriptionLoopback :
-		BusSubscriptionEventObserver
+		SubscriptionObserver
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionLoopback));
 		
-		readonly BusSubscriptionCoordinator _coordinator;
+		readonly SubscriptionRouter _router;
 		readonly Guid _peerId;
-		readonly List<Action<BusSubscriptionCoordinator>> _waiting;
+		readonly List<Action<SubscriptionRouter>> _waiting;
 		long _messageNumber;
-		BusSubscriptionCoordinator _targetCoordinator;
+		SubscriptionRouter _targetRouter;
 		readonly HashSet<string> _ignoredMessageTypes;
 
-		public SubscriptionLoopback(IServiceBus bus, BusSubscriptionCoordinator coordinator)
+		public SubscriptionLoopback(IServiceBus bus, SubscriptionRouter router)
 		{
-			_coordinator = coordinator;
+			_router = router;
 			_peerId = CombGuid.Generate();
 
-			_waiting = new List<Action<BusSubscriptionCoordinator>>();
+			_waiting = new List<Action<SubscriptionRouter>>();
 
 			_ignoredMessageTypes = IgnoredMessageTypes();
 
@@ -54,9 +54,9 @@ namespace MassTransit.Subscriptions.Coordinator
 				});
 		}
 
-		public BusSubscriptionCoordinator Coordinator
+		public SubscriptionRouter Router
 		{
-			get { return _coordinator; }
+			get { return _router; }
 		}
 
 		public void OnSubscriptionAdded(SubscriptionAdded message)
@@ -99,27 +99,27 @@ namespace MassTransit.Subscriptions.Coordinator
 		{
 		}
 
-		public void SetTargetCoordinator(BusSubscriptionCoordinator targetCoordinator)
+		public void SetTargetCoordinator(SubscriptionRouter targetRouter)
 		{
 			lock (this)
 			{
-				_targetCoordinator = targetCoordinator;
-				_waiting.ForEach(x => x(_targetCoordinator));
+				_targetRouter = targetRouter;
+				_waiting.ForEach(x => x(_targetRouter));
 				_waiting.Clear();
 			}
 		}
 
-		void WithTarget(Action<BusSubscriptionCoordinator> callback)
+		void WithTarget(Action<SubscriptionRouter> callback)
 		{
 			lock (this)
 			{
-				if (_targetCoordinator == null)
+				if (_targetRouter == null)
 				{
 					_waiting.Add(callback);
 					return;
 				}
 
-				callback(_targetCoordinator);
+				callback(_targetRouter);
 			}
 		}
 

@@ -16,7 +16,7 @@ namespace MassTransit.SubscriptionConfigurators
 	/// Configures the subscription coordinator that is used by the bus instance
 	/// to publish messages
 	/// </summary>
-	public interface SubscriptionCoordinatorConfigurator
+	public interface SubscriptionRouterConfigurator
 	{
 		/// <summary>
 		/// Sets the network key for subscriptions so that subscription messages

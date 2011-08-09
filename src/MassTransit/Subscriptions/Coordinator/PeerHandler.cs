@@ -19,11 +19,11 @@ namespace MassTransit.Subscriptions.Coordinator
 	public class PeerHandler :
 		Actor
 	{
-		readonly BusSubscriptionEventObserver _observer;
+		readonly SubscriptionObserver _observer;
 		Guid _peerId;
 		Uri _peerUri;
 
-		public PeerHandler(Inbox inbox, BusSubscriptionEventObserver observer)
+		public PeerHandler(Inbox inbox, SubscriptionObserver observer)
 		{
 			_observer = observer;
 

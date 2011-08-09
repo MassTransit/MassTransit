@@ -1,7 +1,7 @@
-using System;
-
 namespace WebRequestReply.Core
 {
+	using System;
+
 	public interface IView
 	{
 		bool IsPostBack { get; }

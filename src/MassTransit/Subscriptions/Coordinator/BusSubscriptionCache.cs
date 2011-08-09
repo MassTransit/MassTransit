@@ -13,30 +13,35 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
 	using System.Collections.Generic;
+	using System.Linq;
+	using Magnum.Threading;
 	using Messages;
 	using log4net;
 
 	public class BusSubscriptionCache
 	{
-		readonly BusSubscriptionEventObserver _observer;
 		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionCache));
+		readonly SubscriptionObserver _observer;
 
-		readonly IDictionary<string, BusSubscription> _typeActors;
+		readonly ReaderWriterLockedDictionary<string, BusSubscription> _subscriptions;
 
-		public BusSubscriptionCache(BusSubscriptionEventObserver observer)
+		public BusSubscriptionCache(SubscriptionObserver observer)
 		{
 			_observer = observer;
-			_typeActors = new Dictionary<string, BusSubscription>();
+			_subscriptions = new ReaderWriterLockedDictionary<string, BusSubscription>();
+		}
+
+		public IEnumerable<Subscription> Subscriptions
+		{
+			get { return _subscriptions.Values.SelectMany(x => x.Subscriptions); }
 		}
 
 		public void OnSubscribeTo(SubscribeTo message)
 		{
-			BusSubscription busSubscription;
-			if (!_typeActors.TryGetValue(message.MessageName, out busSubscription))
-			{
-				busSubscription = new BusSubscription(message.MessageName, _observer);
-				_typeActors.Add(message.MessageName, busSubscription);
-			}
+			BusSubscription busSubscription = _subscriptions.Retrieve(message.MessageName, () =>
+				{
+					return new BusSubscription(message.MessageName, _observer);
+				});
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("SubscribeTo: {0}, {1}", message.MessageName, message.SubscriptionId);
@@ -47,7 +52,7 @@ namespace MassTransit.Subscriptions.Coordinator
 		public void OnUnsubscribeFrom(UnsubscribeFrom message)
 		{
 			BusSubscription actor;
-			if (_typeActors.TryGetValue(message.MessageName, out actor))
+			if (_subscriptions.TryGetValue(message.MessageName, out actor))
 			{
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("UnsubscribeFrom: {0}, {1}", message.MessageName, message.SubscriptionId);

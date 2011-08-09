@@ -3,27 +3,21 @@ namespace WebRequestReply.Core
 	using System;
 	using MassTransit;
 
-	[Serializable]
 	public class RequestMessage :
-        CorrelatedBy<Guid>
+		CorrelatedBy<Guid>
 	{
-		private readonly Guid _id;
-		private readonly string _text;
-
 		public RequestMessage(Guid id, string text)
 		{
-			_text = text;
-			_id = id;
+			CorrelationId = id;
+			Text = text;
 		}
 
-		public string Text
+		protected RequestMessage()
 		{
-			get { return _text; }
 		}
 
-		public Guid CorrelationId
-		{
-			get { return _id; }
-		}
+		public string Text { get; private set; }
+
+		public Guid CorrelationId { get; private set; }
 	}
 }

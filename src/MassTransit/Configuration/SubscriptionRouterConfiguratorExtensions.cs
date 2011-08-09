@@ -17,24 +17,24 @@ namespace MassTransit
 	using SubscriptionConfigurators;
 	using Subscriptions.Coordinator;
 
-	public static class SubscriptionCoordinatorConfiguratorExtensions
+	public static class SubscriptionRouterConfiguratorExtensions
 	{
 		public static void SetSubscriptionObserver(this ServiceBusConfigurator configurator,
-		                                           Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver>
+		                                           Func<IServiceBus, SubscriptionRouter, SubscriptionObserver>
 		                                           	observerFactory)
 		{
 			var coordinatorConfigurator =
-				new SubscriptionCoordinatorBuilderConfiguratorImpl(x => { x.SetObserverFactory(observerFactory); });
+				new SubscriptionRouterBuilderConfiguratorImpl(x => { x.SetObserverFactory(observerFactory); });
 
 			configurator.AddSubscriptionCoordinatorConfigurator(coordinatorConfigurator);
 		}
 
 		public static void AddSubscriptionObserver(this ServiceBusConfigurator configurator,
-		                                           Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver>
+		                                           Func<IServiceBus, SubscriptionRouter, SubscriptionObserver>
 		                                           	observerFactory)
 		{
 			var coordinatorConfigurator =
-				new SubscriptionCoordinatorBuilderConfiguratorImpl(x => { x.AddObserverFactory(observerFactory); });
+				new SubscriptionRouterBuilderConfiguratorImpl(x => { x.AddObserverFactory(observerFactory); });
 
 			configurator.AddSubscriptionCoordinatorConfigurator(coordinatorConfigurator);
 		}

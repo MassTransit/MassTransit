@@ -29,8 +29,8 @@ namespace MassTransit.TestFramework.Fixtures
 			LocalBus = SetupServiceBus(LocalUri, ConfigureLocalBus);
 			RemoteBus = SetupServiceBus(RemoteUri, ConfigureRemoteBus);
 
-			_localLoopback.SetTargetCoordinator(_remoteLoopback.Coordinator);
-			_remoteLoopback.SetTargetCoordinator(_localLoopback.Coordinator);
+			_localLoopback.SetTargetCoordinator(_remoteLoopback.Router);
+			_remoteLoopback.SetTargetCoordinator(_localLoopback.Router);
 		}
 
 		[TestFixtureTearDown]

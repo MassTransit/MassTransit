@@ -17,18 +17,18 @@ namespace MassTransit.SubscriptionBuilders
 	using Magnum.Extensions;
 	using Subscriptions.Coordinator;
 
-	public class SubscriptionCoordinatorBuilderImpl :
-		SubscriptionCoordinatorBuilder
+	public class SubscriptionRouterBuilderImpl :
+		SubscriptionRouterBuilder
 	{
 		readonly IServiceBus _bus;
 		string _network;
-		readonly IList<Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver>> _observers;
+		readonly IList<Func<IServiceBus, SubscriptionRouter, SubscriptionObserver>> _observers;
 
-		public SubscriptionCoordinatorBuilderImpl(IServiceBus bus, string network)
+		public SubscriptionRouterBuilderImpl(IServiceBus bus, string network)
 		{
 			_bus = bus;
 			_network = network;
-			_observers = new List<Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver>>
+			_observers = new List<Func<IServiceBus, SubscriptionRouter, SubscriptionObserver>>
 				{
 					(b, c) => new BusSubscriptionConnector(b)
 				};
@@ -45,21 +45,21 @@ namespace MassTransit.SubscriptionBuilders
 		}
 
 		public void SetObserverFactory(
-			Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory)
+			Func<IServiceBus, SubscriptionRouter, SubscriptionObserver> observerFactory)
 		{
 			_observers.Clear();
 			_observers.Add(observerFactory);
 		}
 
 		public void AddObserverFactory(
-			Func<IServiceBus, BusSubscriptionCoordinator, BusSubscriptionEventObserver> observerFactory)
+			Func<IServiceBus, SubscriptionRouter, SubscriptionObserver> observerFactory)
 		{
 			_observers.Add(observerFactory);
 		}
 
-		public SubscriptionCoordinatorBusService Build()
+		public SubscriptionRouterService Build()
 		{
-			var service = new SubscriptionCoordinatorBusService(_bus, _network);
+			var service = new SubscriptionRouterService(_bus, _network);
 
 			_observers.Each(x => service.AddObserver(x(_bus, service)));
 

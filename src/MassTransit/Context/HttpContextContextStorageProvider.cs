@@ -1,18 +1,5 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Context
+﻿namespace MassTransit.Context
 {
-	using System;
 	using System.Web;
 
 	public class HttpContextContextStorageProvider :
@@ -20,6 +7,13 @@ namespace MassTransit.Context
 	{
 		const string ReceiveContextKey = "MassTransitReceiveContext";
 		const string SendContextKey = "MassTransitSendContext";
+
+		ContextStorageProvider _fallback;
+
+		public HttpContextContextStorageProvider()
+		{
+			_fallback = new ThreadStaticContextStorageProvider();
+		}
 
 		public ISendContext SendContext
 		{
@@ -32,16 +26,20 @@ namespace MassTransit.Context
 					return value;
 				}
 
-				return new InvalidSendContext();
+				return _fallback.SendContext;
 			}
 
 			set
 			{
 				HttpContext httpContext = HttpContext.Current;
-				if (httpContext == null)
-					throw new InvalidOperationException("HttpContext.Current is not available to set the current SendContext");
-
-				httpContext.Items[SendContextKey] = value;
+				if (httpContext != null)
+				{
+					httpContext.Items[SendContextKey] = value;
+				}
+				else
+				{
+					_fallback.SendContext = value;
+				}
 			}
 		}
 
@@ -56,16 +54,20 @@ namespace MassTransit.Context
 					return value;
 				}
 
-				return new InvalidConsumeContext();
+				return _fallback.ConsumeContext;
 			}
 
 			set
 			{
 				HttpContext httpContext = HttpContext.Current;
-				if (httpContext == null)
-					throw new InvalidOperationException("HttpContext.Current is not available to set the current SendContext");
-				
-				httpContext.Items[ReceiveContextKey] = value;
+				if (httpContext != null)
+				{
+					httpContext.Items[ReceiveContextKey] = value;
+				}
+				else
+				{
+					_fallback.ConsumeContext = value;
+				}
 			}
 		}
 	}

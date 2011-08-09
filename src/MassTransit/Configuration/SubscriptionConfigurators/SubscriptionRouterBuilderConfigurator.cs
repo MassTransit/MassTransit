@@ -10,13 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionBuilders
+namespace MassTransit.SubscriptionConfigurators
 {
-	using Configurators;
+	using MassTransit.Configurators;
+	using SubscriptionBuilders;
 
-	public interface SubscriptionBusServiceBuilderConfigurator :
+	public interface SubscriptionRouterBuilderConfigurator :
 		Configurator
 	{
-		SubscriptionBusServiceBuilder Configure(SubscriptionBusServiceBuilder builder);
+		SubscriptionRouterBuilder Configure(SubscriptionRouterBuilder builder);
 	}
 }

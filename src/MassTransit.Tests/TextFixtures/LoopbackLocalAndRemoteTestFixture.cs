@@ -32,8 +32,8 @@ namespace MassTransit.Tests.TextFixtures
 
 			RemoteBus = ServiceBusFactory.New(ConfigureRemoteBus);
 
-			_localLoopback.SetTargetCoordinator(_remoteLoopback.Coordinator);
-			_remoteLoopback.SetTargetCoordinator(_localLoopback.Coordinator);
+			_localLoopback.SetTargetCoordinator(_remoteLoopback.Router);
+			_remoteLoopback.SetTargetCoordinator(_localLoopback.Router);
 		}
 
 		SubscriptionLoopback _localLoopback;

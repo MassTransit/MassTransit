@@ -40,7 +40,7 @@ namespace MassTransit.Builders
 			_postCreateActions = new List<Action<ServiceBus>>();
 			_busServiceConfigurators = new List<BusServiceConfigurator>();
 
-			var subscriptionCoordinatorConfigurator = new SubscriptionCoordinatorConfiguratorImpl();
+			var subscriptionCoordinatorConfigurator = new SubscriptionRouterConfiguratorImpl();
 			subscriptionCoordinatorConfigurator.SetNetwork(settings.Network);
 			subscriptionCoordinatorConfigurator.Configure(this);
 		}

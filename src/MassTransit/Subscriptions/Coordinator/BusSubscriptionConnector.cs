@@ -18,7 +18,7 @@ namespace MassTransit.Subscriptions.Coordinator
 	using log4net;
 
 	public class BusSubscriptionConnector :
-		BusSubscriptionEventObserver
+		SubscriptionObserver
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionConnector));
 		readonly EndpointSubscriptionConnectorCache _cache;
