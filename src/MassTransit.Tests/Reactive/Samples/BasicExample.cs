@@ -1,15 +1,15 @@
 namespace MassTransit.Tests.Reactive.Samples
 {
     using System;
-    using System.Linq;
+    using System.Reactive.Linq;
     using Magnum.Extensions;
+    using Magnum.TestFramework;
     using MassTransit.Reactive;
     using Messages;
     using NUnit.Framework;
     using TestFramework;
 
     [Scenario]
-    [Ignore("Doesn't seem to be attaching the consumer.")]
     public class BasicExample :
         Given_a_standalone_service_bus
     {
@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Reactive.Samples
         [Then]
         public void Then_One_Message_should_be_observed()
         {
-            Assert.AreEqual(1, obs.Timeout(3.Seconds()).Take(1).ToEnumerable().Count());
+            Assert.IsNotNull(obs.Timeout(3.Seconds()).Take(1).Single());
             Assert.IsTrue(_observed);
         }
     }
