@@ -30,18 +30,18 @@ namespace MassTransit.Subscriptions.Coordinator
 		Consumes<RemovePeer>.Context
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionMessageConsumer));
-		readonly BusSubscriptionCoordinator _coordinator;
+		readonly SubscriptionRouter _router;
 		readonly HashSet<Uri> _ignoredSourceAddresses;
 		readonly string _network;
 		readonly Guid _peerId;
-		Uri _peerUri;
+		readonly Uri _peerUri;
 
-		public SubscriptionMessageConsumer(BusSubscriptionCoordinator coordinator, string network,
+		public SubscriptionMessageConsumer(SubscriptionRouter router, string network,
 		                                   params Uri[] ignoredSourceAddresses)
 		{
-			_coordinator = coordinator;
-			_peerId = coordinator.ClientId;
-			_peerUri = coordinator.ControlUri;
+			_router = router;
+			_peerId = router.PeerId;
+			_peerUri = router.PeerUri;
 			_network = network;
 			_ignoredSourceAddresses = new HashSet<Uri>(ignoredSourceAddresses);
 		}
@@ -51,7 +51,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (DiscardMessage(context, context.Message.PeerId))
 				return;
 
-			_coordinator.Send(context.Message);
+			_router.Send(context.Message);
 		}
 
 		public void Consume(IConsumeContext<AddPeerSubscription> context)
@@ -59,7 +59,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (DiscardMessage(context, context.Message.PeerId))
 				return;
 
-			_coordinator.Send(context.Message);
+			_router.Send(context.Message);
 		}
 
 		public void Consume(IConsumeContext<AddSubscription> context)
@@ -67,7 +67,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (DiscardMessage(context, context.Message.Subscription.ClientId))
 				return;
 
-			_coordinator.Send(new AddPeerSubscriptionMessage
+			_router.Send(new AddPeerSubscriptionMessage
 				{
 					PeerId = context.Message.Subscription.ClientId,
 					EndpointUri = context.Message.Subscription.EndpointUri,
@@ -82,7 +82,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (DiscardMessage(context, context.Message.CorrelationId))
 				return;
 
-			_coordinator.Send(new AddPeerMessage
+			_router.Send(new AddPeerMessage
 				{
 					PeerId = context.Message.CorrelationId,
 					PeerUri = context.Message.ControlUri,
@@ -95,7 +95,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (DiscardMessage(context, context.Message.PeerId))
 				return;
 
-			_coordinator.Send(context.Message);
+			_router.Send(context.Message);
 		}
 
 		public void Consume(IConsumeContext<RemovePeerSubscription> context)
@@ -103,7 +103,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (DiscardMessage(context, context.Message.PeerId))
 				return;
 
-			_coordinator.Send(context.Message);
+			_router.Send(context.Message);
 		}
 
 		public void Consume(IConsumeContext<RemoveSubscription> context)
@@ -111,7 +111,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (DiscardMessage(context, context.Message.Subscription.ClientId))
 				return;
 
-			_coordinator.Send(new RemovePeerSubscriptionMessage
+			_router.Send(new RemovePeerSubscriptionMessage
 				{
 					PeerId = context.Message.Subscription.ClientId,
 					EndpointUri = context.Message.Subscription.EndpointUri,
@@ -126,7 +126,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			if (DiscardMessage(context, context.Message.CorrelationId))
 				return;
 
-			_coordinator.Send(new RemovePeerMessage
+			_router.Send(new RemovePeerMessage
 				{
 					PeerId = context.Message.CorrelationId,
 					PeerUri = context.Message.ControlUri,
@@ -143,8 +143,10 @@ namespace MassTransit.Subscriptions.Coordinator
 			{
 				// TODO do we trust subscriptions that are third-party (sent to us from systems that are not the
 				// system containing the actual subscription)
+				// maybe keep track of source address for the AddPeer and allow if it is from the
+				// subscription service but not others?
 
-				_coordinator.Send(new AddPeerSubscriptionMessage
+				_router.Send(new AddPeerSubscriptionMessage
 					{
 						PeerId = subscription.ClientId,
 						EndpointUri = subscription.EndpointUri,

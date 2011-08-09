@@ -1,0 +1,31 @@
+﻿﻿<?xml version="1.0" encoding="utf-8" ?>
+<log4net>
+	<root>
+		<level value="ALL" />
+		<appender-ref ref="LogFileAppender" />
+	</root>
+
+	<logger name="MassTransit">
+		<level value="INFO" />
+	</logger>
+
+	<!--	<logger name="MassTransit.Subscriptions">-->
+	<!--		<level value="DEBUG" />-->
+	<!--	</logger>-->
+
+	<appender name="LogFileAppender"
+				type="log4net.Appender.RollingFileAppender" >
+		<param name="File"
+				 value="C:\\LogFiles\\WebRequestReplyUI.log" />
+		<param name="AppendToFile"
+				 value="false" />
+		<rollingStyle value="Size" />
+		<maxSizeRollBackups value="4" />
+		<maximumFileSize value="10MB" />
+		<staticLogFileName value="true" />
+		<layout type="log4net.Layout.PatternLayout">
+			<param name="ConversionPattern"
+					 value="%-5p %d{yyyy-MM-dd hh:mm:ss} - %m%n" />
+		</layout>
+	</appender>
+</log4net>

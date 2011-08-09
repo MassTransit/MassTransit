@@ -25,9 +25,9 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly IDictionary<string, EndpointSubscription> _messageSubscriptions;
 		readonly Fiber _fiber;
 		readonly Scheduler _scheduler;
-		readonly BusSubscriptionEventObserver _observer;
+		readonly SubscriptionObserver _observer;
 
-		public EndpointSubscriptionCache(Fiber fiber, Scheduler scheduler, BusSubscriptionEventObserver observer)
+		public EndpointSubscriptionCache(Fiber fiber, Scheduler scheduler, SubscriptionObserver observer)
 		{
 			_fiber = fiber;
 			_scheduler = scheduler;

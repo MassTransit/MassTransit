@@ -22,17 +22,17 @@ namespace MassTransit.SubscriptionConfigurators
 	using SubscriptionBuilders;
 	using Subscriptions.Coordinator;
 
-	public class SubscriptionCoordinatorConfiguratorImpl :
-		SubscriptionCoordinatorConfigurator,
+	public class SubscriptionRouterConfiguratorImpl :
+		SubscriptionRouterConfigurator,
 		BusServiceConfigurator,
 		BusBuilderConfigurator
 	{
-		readonly IList<SubscriptionCoordinatorBuilderConfigurator> _configurators;
+		readonly IList<SubscriptionRouterBuilderConfigurator> _configurators;
 		string _network;
 
-		public SubscriptionCoordinatorConfiguratorImpl()
+		public SubscriptionRouterConfiguratorImpl()
 		{
-			_configurators = new List<SubscriptionCoordinatorBuilderConfigurator>();
+			_configurators = new List<SubscriptionRouterBuilderConfigurator>();
 			_network = Environment.MachineName.ToLowerInvariant();
 		}
 
@@ -50,7 +50,7 @@ namespace MassTransit.SubscriptionConfigurators
 
 		public Type ServiceType
 		{
-			get { return typeof (SubscriptionCoordinatorBusService); }
+			get { return typeof (SubscriptionRouterService); }
 		}
 
 		public BusServiceLayer Layer
@@ -60,7 +60,7 @@ namespace MassTransit.SubscriptionConfigurators
 
 		public IBusService Create(IServiceBus bus)
 		{
-			SubscriptionCoordinatorBuilder builder = new SubscriptionCoordinatorBuilderImpl(bus, _network);
+			SubscriptionRouterBuilder builder = new SubscriptionRouterBuilderImpl(bus, _network);
 
 			builder = _configurators.Aggregate(builder, (seed, next) => next.Configure(seed));
 
@@ -72,7 +72,7 @@ namespace MassTransit.SubscriptionConfigurators
 			_network = network;
 		}
 
-		public void AddConfigurator(SubscriptionCoordinatorBuilderConfigurator configurator)
+		public void AddConfigurator(SubscriptionRouterBuilderConfigurator configurator)
 		{
 			_configurators.Add(configurator);
 		}

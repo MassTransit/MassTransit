@@ -47,7 +47,7 @@ namespace MassTransit.Transports.Msmq.Configuration
 			}
 		}
 
-		public BusSubscriptionEventObserver Create(IServiceBus bus, BusSubscriptionCoordinator coordinator)
+		public SubscriptionObserver Create(IServiceBus bus, SubscriptionRouter router)
 		{
 			string path = bus.ControlBus.Endpoint.Address.Uri.AbsolutePath;
 
@@ -61,13 +61,13 @@ namespace MassTransit.Transports.Msmq.Configuration
 					EndpointCache = bus.EndpointCache,
 					InputAddress = clientUri,
 					ReceiveTimeout = 3.Seconds(),
-					Network = coordinator.Network,
+					Network = router.Network,
 					AutoStart = true,
 				});
 
 			IControlBus subscriptionBus = builder.Build();
 
-			var service = new MulticastSubscriptionClient(subscriptionBus, coordinator);
+			var service = new MulticastSubscriptionClient(subscriptionBus, router);
 
 			return service;
 		}

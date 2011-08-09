@@ -64,8 +64,8 @@ namespace MassTransit.Testing.ScenarioBuilders
 			BuildLocalBus(scenario);
 			BuildRemoteBus(scenario);
 
-			_localLoopback.SetTargetCoordinator(_remoteLoopback.Coordinator);
-			_remoteLoopback.SetTargetCoordinator(_localLoopback.Coordinator);
+			_localLoopback.SetTargetCoordinator(_remoteLoopback.Router);
+			_remoteLoopback.SetTargetCoordinator(_localLoopback.Router);
 
 			return scenario;
 		}

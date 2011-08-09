@@ -20,7 +20,7 @@ namespace MassTransit.Services.Subscriptions.Client
 	using log4net;
 
 	public class SubscriptionServiceMessageProducer :
-		BusSubscriptionEventObserver
+		SubscriptionObserver
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionMessageProducer));
 		readonly IEndpoint _endpoint;
@@ -30,11 +30,11 @@ namespace MassTransit.Services.Subscriptions.Client
 		readonly Uri _peerUri;
 		long _lastMessageNumber;
 
-		public SubscriptionServiceMessageProducer(BusSubscriptionCoordinator coordinator, IEndpoint endpoint)
+		public SubscriptionServiceMessageProducer(SubscriptionRouter router, IEndpoint endpoint)
 		{
-			_peerId = coordinator.ClientId;
-			_peerUri = coordinator.ControlUri;
-			_network = coordinator.Network;
+			_peerId = router.PeerId;
+			_peerUri = router.PeerUri;
+			_network = router.Network;
 			_endpoint = endpoint;
 
 			SendAddPeerMessage();

@@ -12,34 +12,60 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Services.Subscriptions.Messages;
 	using Subscriptions.Coordinator;
 	using Subscriptions.Messages;
 	using log4net;
 
 	public class MulticastSubscriptionClient :
-		BusSubscriptionEventObserver
+		SubscriptionObserver,
+		Consumes<AddSubscriptionClient>.Context
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (MulticastSubscriptionClient));
-		readonly BusSubscriptionCoordinator _coordinator;
 		readonly string _network;
-		BusSubscriptionMessageProducer _producer;
+		readonly Guid _peerId;
+		readonly Uri _peerUri;
+		readonly BusSubscriptionMessageProducer _producer;
+		readonly SubscriptionRouter _router;
 		IServiceBus _subscriptionBus;
 		UnsubscribeAction _unsubscribeAction;
 
-		public MulticastSubscriptionClient(IServiceBus subscriptionBus, BusSubscriptionCoordinator coordinator)
+		public MulticastSubscriptionClient(IServiceBus subscriptionBus, SubscriptionRouter router)
 		{
 			_subscriptionBus = subscriptionBus;
-			_coordinator = coordinator;
-			_network = coordinator.Network;
+			_router = router;
+			_network = router.Network;
+			_peerId = router.PeerId;
+			_peerUri = router.PeerUri;
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Starting MulticastSubscriptionService using {0}", subscriptionBus.Endpoint.Address);
 
-			var consumerInstance = new SubscriptionMessageConsumer(_coordinator, _network);
+			var consumerInstance = new SubscriptionMessageConsumer(_router, _network);
 
 			_unsubscribeAction = _subscriptionBus.SubscribeInstance(consumerInstance);
 
-			_producer = new BusSubscriptionMessageProducer(coordinator, subscriptionBus.Endpoint);
+			_producer = new BusSubscriptionMessageProducer(router, subscriptionBus.Endpoint);
+		}
+
+		public void Consume(IConsumeContext<AddSubscriptionClient> context)
+		{
+			// made a new friend, let's introduce ourselves, but may need to send
+			// an addclient first, which would loop forever, so how do we only send
+			// to people we just met? Observe a PeerAdded event? ;) OnPeerAdded/OnPeerRemoved
+
+			List<SubscriptionInformation> subscriptions = _router.LocalSubscriptions
+				.Select(x => new SubscriptionInformation(_peerId, x.SubscriptionId, x.MessageName, x.CorrelationId, x.EndpointUri))
+				.ToList();
+
+			var response = new SubscriptionRefresh(subscriptions);
+
+			IEndpoint clientEndpoint = _subscriptionBus.GetEndpoint(context.SourceAddress);
+
+			clientEndpoint.Send(response, x => x.SetSourceAddress(_peerUri));
 		}
 
 		public void OnSubscriptionAdded(SubscriptionAdded message)

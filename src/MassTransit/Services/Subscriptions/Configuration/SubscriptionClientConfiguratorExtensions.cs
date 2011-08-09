@@ -37,7 +37,7 @@ namespace MassTransit
 
 			configureCallback(clientConfigurator);
 
-			configurator.AddSubscriptionCoordinatorConfigurator(new SubscriptionCoordinatorBuilderConfiguratorImpl(x =>
+			configurator.AddSubscriptionCoordinatorConfigurator(new SubscriptionRouterBuilderConfiguratorImpl(x =>
 				{
 					x.SetNetwork(null);
 				}));

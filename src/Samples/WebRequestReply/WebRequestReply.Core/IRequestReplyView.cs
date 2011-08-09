@@ -1,5 +1,3 @@
-using System;
-
 namespace WebRequestReply.Core
 {
 	public interface IRequestReplyView :

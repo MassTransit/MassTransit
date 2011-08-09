@@ -20,6 +20,11 @@ namespace MassTransit.Services.Subscriptions.Messages
     {
 		private List<SubscriptionInformation> _subscriptions;
 
+    	public SubscriptionRefresh(List<SubscriptionInformation> subscriptions)
+    	{
+    		_subscriptions = subscriptions;
+    	}
+
     	public SubscriptionRefresh(IEnumerable<SubscriptionInformation> subscriptions)
         {
 			_subscriptions = new List<SubscriptionInformation>(subscriptions);

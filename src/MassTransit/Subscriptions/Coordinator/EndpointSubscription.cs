@@ -27,14 +27,14 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly Fiber _fiber;
 		readonly IDictionary<Guid, PeerSubscription> _ids;
 		readonly string _messageName;
-		readonly BusSubscriptionEventObserver _observer;
+		readonly SubscriptionObserver _observer;
 		readonly Scheduler _scheduler;
 		readonly TimeSpan _unsubscribeTimeout = 4.Seconds();
 		Uri _endpointUri;
 		Guid _subscriptionId;
 
 		public EndpointSubscription(Fiber fiber, Scheduler scheduler, string messageName,
-		                            BusSubscriptionEventObserver observer)
+		                            SubscriptionObserver observer)
 		{
 			_fiber = fiber;
 			_scheduler = scheduler;

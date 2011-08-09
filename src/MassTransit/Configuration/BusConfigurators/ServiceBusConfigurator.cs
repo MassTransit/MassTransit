@@ -17,6 +17,7 @@ namespace MassTransit.BusConfigurators
 	using Configuration;
 	using EndpointConfigurators;
 	using SubscriptionBuilders;
+	using SubscriptionConfigurators;
 
 	public interface ServiceBusConfigurator :
 		EndpointFactoryConfigurator
@@ -31,7 +32,7 @@ namespace MassTransit.BusConfigurators
 		/// Adds a configurator to the subscription coordinator builder
 		/// </summary>
 		/// <param name="configurator"></param>
-		void AddSubscriptionCoordinatorConfigurator(SubscriptionCoordinatorBuilderConfigurator configurator);
+		void AddSubscriptionCoordinatorConfigurator(SubscriptionRouterBuilderConfigurator configurator);
 
 		/// <summary>
 		/// Adds a configurator for the service bus builder to the configurator

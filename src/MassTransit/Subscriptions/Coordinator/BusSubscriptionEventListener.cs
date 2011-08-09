@@ -13,6 +13,7 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
+	using System.Collections.Generic;
 	using Magnum;
 	using Messages;
 	using Pipeline;
@@ -25,11 +26,16 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly BusSubscriptionCache _busSubscriptionCache;
 		readonly Uri _endpointUri;
 
-		public BusSubscriptionEventListener(IServiceBus bus, BusSubscriptionEventObserver observer)
+		public BusSubscriptionEventListener(IServiceBus bus, SubscriptionObserver observer)
 		{
 			_endpointUri = bus.Endpoint.Address.Uri;
 
 			_busSubscriptionCache = new BusSubscriptionCache(observer);
+		}
+
+		public IEnumerable<Subscription> Subscriptions
+		{
+			get { return _busSubscriptionCache.Subscriptions; }
 		}
 
 		public UnsubscribeAction SubscribedTo<TMessage>()
@@ -47,9 +53,6 @@ namespace MassTransit.Subscriptions.Coordinator
 		UnsubscribeAction Subscribe<TMessage>(string correlationId)
 			where TMessage : class
 		{
-			if (IgnoreMessageType(typeof (TMessage)))
-				return () => true;
-
 			Guid subscriptionId = CombGuid.Generate();
 			string messageName = typeof (TMessage).ToMessageName();
 
@@ -84,22 +87,6 @@ namespace MassTransit.Subscriptions.Coordinator
 			_busSubscriptionCache.OnUnsubscribeFrom(unsubscribeFrom);
 
 			return true;
-		}
-
-		bool IgnoreMessageType(Type messageType)
-		{
-//			if (messageType == typeof (AddSubscription))
-//				return true;
-//			if (messageType == typeof (RemoveSubscription))
-//				return true;
-//			if (messageType == typeof (AddSubscriptionClient))
-//				return true;
-//			if (messageType == typeof (RemoveSubscriptionClient))
-//				return true;
-//			if (messageType == typeof (SubscriptionRefresh))
-//				return true;
-
-			return false;
 		}
 	}
 }

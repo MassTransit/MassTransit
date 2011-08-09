@@ -17,6 +17,7 @@ namespace MassTransit.Transports.RabbitMq
 	using System.IO;
 	using Magnum;
 	using RabbitMQ.Client;
+	using RabbitMQ.Client.Exceptions;
 
 	public class OutboundRabbitMqTransport :
 		IOutboundTransport
@@ -45,22 +46,33 @@ namespace MassTransit.Transports.RabbitMq
 
 			_connectionHandler.Use(connection =>
 				{
-					IBasicProperties properties = _producer.Channel.CreateBasicProperties();
-
-					properties.SetPersistent(true);
-					if (context.ExpirationTime.HasValue)
+					try
 					{
-						DateTime value = context.ExpirationTime.Value;
-						properties.Expiration =
-							(value.Kind == DateTimeKind.Utc ? value - SystemUtil.UtcNow : value - SystemUtil.Now).ToString();
+						IBasicProperties properties = _producer.Channel.CreateBasicProperties();
+
+						properties.SetPersistent(true);
+						if (context.ExpirationTime.HasValue)
+						{
+							DateTime value = context.ExpirationTime.Value;
+							properties.Expiration =
+								(value.Kind == DateTimeKind.Utc ? value - SystemUtil.UtcNow : value - SystemUtil.Now).ToString();
+						}
+
+						using (var body = new MemoryStream())
+						{
+							context.SerializeTo(body);
+							properties.Headers = new Hashtable {{"Content-Type", context.ContentType}};
+
+							_producer.Channel.BasicPublish(_address.Name, "", properties, body.ToArray());
+						}
 					}
-
-					using (var body = new MemoryStream())
+					catch (EndOfStreamException ex)
 					{
-						context.SerializeTo(body);
-						properties.Headers = new Hashtable {{"Content-Type", context.ContentType}};
-
-						_producer.Channel.BasicPublish(_address.Name, "", properties, body.ToArray());
+						throw new InvalidConnectionException(_address.Uri, "Connection was closed", ex);
+					}
+					catch (OperationInterruptedException ex)
+					{
+						throw new InvalidConnectionException(_address.Uri, "Operation was interrupted", ex);
 					}
 				});
 		}

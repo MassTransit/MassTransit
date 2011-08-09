@@ -23,7 +23,7 @@ namespace MassTransit.Transports.RabbitMq
 	using log4net;
 
 	public class RabbitMqSubscriptionBinder :
-		BusSubscriptionEventObserver
+		SubscriptionObserver
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqSubscriptionBinder));
 		readonly Dictionary<Guid, MessageName> _bindings;
