@@ -19,10 +19,13 @@ namespace MassTransit.Reactive
 		IDisposable
 		where T : class
 	{
+		readonly IObserver<T> _observer;
 		readonly UnsubscribeAction _unsubscribeAction;
 
 		public ServiceBusSubscription(IServiceBus bus, IObserver<T> observer, Predicate<T> condition)
 		{
+			_observer = observer;
+
 			_unsubscribeAction = bus.SubscribeHandlerSelector(HandlerSelector.ForSelectiveHandler(condition, m =>
 				{
 					try
@@ -38,6 +41,8 @@ namespace MassTransit.Reactive
 
 		public void Dispose()
 		{
+			_observer.OnCompleted();
+			
 			_unsubscribeAction();
 		}
 	}
