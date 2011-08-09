@@ -81,14 +81,6 @@
     }
 
     [TestFixture]
-    [Explicit("well crap, the built-in xml serializer from .NET doesn't support TimeSpan")]
-    public class WhenUsingDotNotXmlOnComplexMessage :
-        GivenAComplexMessage<DotNotXmlMessageSerializer>
-    {
-
-    }
-
-    [TestFixture]
     public class WhenUsingJsonOnComplexMessage :
         GivenAComplexMessage<JsonMessageSerializer>
     {

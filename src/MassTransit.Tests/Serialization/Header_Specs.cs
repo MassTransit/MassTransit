@@ -122,12 +122,6 @@ namespace MassTransit.Tests.Serialization
 	}
 
 	[TestFixture]
-	public class WhenUsingDotNotXmlAndHeaders :
-		Setting_the_message_expiration<DotNotXmlMessageSerializer>
-	{
-	}
-
-	[TestFixture]
 	public class WhenUsingBinaryAndHeaders :
 		Setting_the_message_expiration<BinaryMessageSerializer>
 	{

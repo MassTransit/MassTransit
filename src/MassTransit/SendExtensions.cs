@@ -12,31 +12,39 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using System;
-	using Context;
+    using System;
+    using Context;
 
-	public static class SendExtensions
-	{
-		public static void Send<T>(this IEndpoint endpoint, T message)
-			where T : class
-		{
-			var context = new SendContext<T>(message);
-			using (context.CreateScope())
-			{
-				endpoint.Send(context);
-			}
-		}
+    public static class SendExtensions
+    {
+        /// <summary>
+        /// Send a message to an endpoint
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="endpoint">The destination endpoint</param>
+        /// <param name="message">The message to send</param>
+        public static void Send<T>(this IEndpoint endpoint, T message)
+            where T : class
+        {
+            var context = new SendContext<T>(message);
 
-		public static void Send<T>(this IEndpoint endpoint, T message, Action<ISendContext<T>> contextCallback)
-			where T : class
-		{
-			var context = new SendContext<T>(message);
-			using (context.CreateScope())
-			{
-				contextCallback(context);
+            endpoint.Send(context);
+        }
 
-				endpoint.Send(context);
-			}
-		}
-	}
+        /// <summary>
+        /// Send a message to an endpoint
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="endpoint">The destination endpoint</param>
+        /// <param name="message">The message to send</param>
+        /// <param name="contextCallback">A callback method to modify the send context for the message</param>
+        public static void Send<T>(this IEndpoint endpoint, T message, Action<ISendContext<T>> contextCallback)
+            where T : class
+        {
+            var context = new SendContext<T>(message);
+            contextCallback(context);
+
+            endpoint.Send(context);
+        }
+    }
 }

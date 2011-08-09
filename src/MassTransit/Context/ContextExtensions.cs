@@ -12,41 +12,41 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using System;
-	using Context;
+    using System;
+    using Context;
 
-	public static class ContextExtensions
-	{
-		public static IConsumeContext Context(this IConsumer instance) 
-		{
-			return ContextStorage.Context();
-		}
+    public static class ContextExtensions
+    {
+        public static IConsumeContext Context(this IConsumer instance)
+        {
+            return ContextStorage.Context();
+        }
 
-		public static IConsumeContext Context(this IServiceBus bus)
-		{
-			return ContextStorage.Context();
-		}
+        public static IConsumeContext Context(this IServiceBus bus)
+        {
+            return ContextStorage.Context();
+        }
 
-		public static IConsumeContext<T> MessageContext<T>(this Consumes<T>.All instance) 
-			where T : class
-		{
-			return ContextStorage.MessageContext<T>();
-		}
+        public static IConsumeContext<T> MessageContext<T>(this Consumes<T>.All instance)
+            where T : class
+        {
+            return ContextStorage.MessageContext<T>();
+        }
 
-		public static IConsumeContext<T> MessageContext<T>(this IServiceBus bus)
-			where T : class
-		{
-			return ContextStorage.MessageContext<T>();
-		}
+        public static IConsumeContext<T> MessageContext<T>(this IServiceBus bus)
+            where T : class
+        {
+            return ContextStorage.MessageContext<T>();
+        }
 
-		public static void Context(this IServiceBus bus, Action<IConsumeContext> contextCallback)
-		{
-			ContextStorage.Context(contextCallback);
-		}
+        public static void Context(this IServiceBus bus, Action<IConsumeContext> contextCallback)
+        {
+            ContextStorage.Context(contextCallback);
+        }
 
-		public static TResult Context<TResult>(this IServiceBus bus, Func<IConsumeContext, TResult> contextCallback)
-		{
-			return ContextStorage.Context(contextCallback);
-		}
-	}
+        public static TResult Context<TResult>(this IServiceBus bus, Func<IConsumeContext, TResult> contextCallback)
+        {
+            return ContextStorage.Context(contextCallback);
+        }
+    }
 }

@@ -15,6 +15,5 @@ namespace MassTransit.Context
 	public interface ContextStorageProvider
 	{
 		IConsumeContext ConsumeContext { get; set; }
-		ISendContext SendContext { get; set; }
 	}
 }

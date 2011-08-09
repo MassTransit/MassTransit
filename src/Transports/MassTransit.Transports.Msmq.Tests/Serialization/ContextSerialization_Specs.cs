@@ -160,12 +160,6 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 	}
 
 	[TestFixture, Category("Integration")]
-	public class For_the_DotNetXml_message_serializer :
-		When_sending_a_message_using_the_specified_serializer<DotNotXmlMessageSerializer>
-	{
-	}
-
-	[TestFixture, Category("Integration")]
 	public class For_the_xml_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<XmlMessageSerializer>
 	{

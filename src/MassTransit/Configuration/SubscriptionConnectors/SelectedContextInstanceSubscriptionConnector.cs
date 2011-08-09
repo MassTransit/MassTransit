@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,32 +16,33 @@ namespace MassTransit.SubscriptionConnectors
     using Pipeline;
     using Pipeline.Sinks;
 
-    public interface ConsumerSubscriptionConnector :
-        ConsumerConnector
-    {
-        Type MessageType { get; }
-    }
-
-    public class ConsumerSubscriptionConnector<TConsumer, TMessage> :
-        ConsumerSubscriptionConnector
-        where TConsumer : class, Consumes<TMessage>.All
+    public class SelectedContextInstanceSubscriptionConnector<TConsumer, TMessage> :
+        InstanceSubscriptionConnector
+        where TConsumer : class, Consumes<IConsumeContext<TMessage>>.Selected
         where TMessage : class
     {
-        readonly IConsumerFactory<TConsumer> _consumerFactory;
-
-        public ConsumerSubscriptionConnector(IConsumerFactory<TConsumer> consumerFactory)
-        {
-            _consumerFactory = consumerFactory;
-        }
-
         public Type MessageType
         {
             get { return typeof (TMessage); }
         }
 
-        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
+        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
         {
-            var sink = new ConsumerMessageSink<TConsumer, TMessage>(_consumerFactory);
+            var consumer = instance as TConsumer;
+            if (consumer == null)
+                throw new NullReferenceException("The consumer instance cannot be null.");
+
+            HandlerSelector<TMessage> handler = context =>
+                {
+                    if (consumer.Accept(context))
+                    {
+                        return x => consumer.Consume(x);
+                    }
+
+                    return null;
+                };
+
+            var sink = new InstanceMessageSink<TMessage>(MultipleHandlerSelector.ForHandler(handler));
 
             return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
         }

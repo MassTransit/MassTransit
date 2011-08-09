@@ -16,25 +16,26 @@ namespace MassTransit.SubscriptionConnectors
 	using Pipeline;
 	using Pipeline.Sinks;
 
-	public class InstanceContextSubscriptionConnector<TConsumer, TMessage> :
-		InstanceSubscriptionConnector
+	public class ContextConsumerSubscriptionConnector<TConsumer, TMessage> :
+		ConsumerSubscriptionConnector
 		where TConsumer : class, Consumes<IConsumeContext<TMessage>>.All
 		where TMessage : class
 	{
+		readonly IConsumerFactory<TConsumer> _consumerFactory;
+
+		public ContextConsumerSubscriptionConnector(IConsumerFactory<TConsumer> consumerFactory)
+		{
+			_consumerFactory = consumerFactory;
+		}
+
 		public Type MessageType
 		{
 			get { return typeof (TMessage); }
 		}
 
-		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
+		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
 		{
-			var consumer = instance as TConsumer;
-			if (consumer == null)
-				throw new NullReferenceException("The consumer instance cannot be null.");
-
-			HandlerSelector<TMessage> handler = context => x => consumer.Consume(x);
-
-			var sink = new InstanceMessageSink<TMessage>(MultipleHandlerSelector.ForHandler(handler));
+			var sink = new ContextConsumerMessageSink<TConsumer, TMessage>(_consumerFactory);
 
 			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
 		}

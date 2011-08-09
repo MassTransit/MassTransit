@@ -12,37 +12,36 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
-	using System;
-	using System.Collections.Generic;
-	using Context;
+    using System;
+    using System.Collections.Generic;
 
-	public class OutboundMessageInterceptor :
-		IPipelineSink<ISendContext>
-	{
-		readonly IOutboundMessageInterceptor _interceptor;
-		readonly IPipelineSink<ISendContext> _output;
+    public class OutboundMessageInterceptor :
+        IPipelineSink<ISendContext>
+    {
+        readonly IOutboundMessageInterceptor _interceptor;
+        readonly IPipelineSink<ISendContext> _output;
 
-		public OutboundMessageInterceptor(Func<IPipelineSink<ISendContext>, IPipelineSink<ISendContext>> insertAfter,
-		                                  IOutboundMessageInterceptor interceptor)
-		{
-			_interceptor = interceptor;
+        public OutboundMessageInterceptor(Func<IPipelineSink<ISendContext>, IPipelineSink<ISendContext>> insertAfter,
+                                          IOutboundMessageInterceptor interceptor)
+        {
+            _interceptor = interceptor;
 
-			_output = insertAfter(this);
-		}
+            _output = insertAfter(this);
+        }
 
-		public IEnumerable<Action<ISendContext>> Enumerate(ISendContext context)
-		{
-			_interceptor.PreDispatch(context);
+        public IEnumerable<Action<ISendContext>> Enumerate(ISendContext context)
+        {
+            _interceptor.PreDispatch(context);
 
-			foreach (var consumer in _output.Enumerate(context))
-				yield return consumer;
+            foreach (var consumer in _output.Enumerate(context))
+                yield return consumer;
 
-			_interceptor.PostDispatch(context);
-		}
+            _interceptor.PostDispatch(context);
+        }
 
-		public bool Inspect(IPipelineInspector inspector)
-		{
-			return inspector.Inspect(this) && _output.Inspect(inspector);
-		}
-	}
+        public bool Inspect(IPipelineInspector inspector)
+        {
+            return inspector.Inspect(this) && _output.Inspect(inspector);
+        }
+    }
 }
