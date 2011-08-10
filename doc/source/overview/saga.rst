@@ -43,13 +43,13 @@ To define a saga using the state machine, a class that inherits from SagaStateMa
         {
             Define(() =>
             {
-				// the state machine behavior is defined here
- 			});
+                // the state machine behavior is defined here
+            });
         }
-		public Guid CorrelationId { get; set; }
-		public IServiceBus Bus { get; set; }
-	}
-	
+        public Guid CorrelationId { get; set; }
+        public IServiceBus Bus { get; set; }
+    }
+    
 Shown above is an empty definition of a saga state machine. This is just the start, however, as there
 is much more to be done. The CorrelationId is the Guid assigned to the saga when it is created. The _IServiceBus_ 
 property is set before any methods on the saga instance are called, allowing it to be used by the event handlers
@@ -62,11 +62,11 @@ example states are shown below.
 .. sourcecode:: csharp
     :linenos:
 
-	public static State Initial { get; set; }
-	public static State Completed { get; set; }
-	public static State Open { get; set; }
-	public static State Closed { get; set; }
-	
+    public static State Initial { get; set; }
+    public static State Completed { get; set; }
+    public static State Open { get; set; }
+    public static State Closed { get; set; }
+    
 As you see, the states are added as public static properties of type _State_. This allows the states to be
 used in code as properties, instead of relying on strings or other symbols.
 
@@ -75,9 +75,9 @@ Now, let's define some events to go along with those states.
 .. sourcecode:: csharp
     :linenos:
 
-	public static Event<CreateAuction> Create { get; set; }
-	public static Event<PlaceBid> Bid { get; set; }
-	
+    public static Event<CreateAuction> Create { get; set; }
+    public static Event<PlaceBid> Bid { get; set; }
+    
 Just like states, events are defined as public static properties on the saga class. The generic type
 specified for the event is the message type associated with the event. When the saga is subscribed to the bus,
 the message types for the events are subscribed.
@@ -88,27 +88,27 @@ are shown below.
 .. sourcecode:: csharp
     :linenos:
 
-	public interface CreateAuction :
-		CorrelatedBy<Guid>
-	{
-		string Title { get; }
-		string OwnerEmail { get; }
-		decimal OpeningBid { get; }
-	}
-	
+    public interface CreateAuction :
+        CorrelatedBy<Guid>
+    {
+        string Title { get; }
+        string OwnerEmail { get; }
+        decimal OpeningBid { get; }
+    }
+    
 When an auction is created, a CreateAuction command is sent to the endpoint where the saga is subscribed. Since the 
 message is correlated by Guid, the CorrelationId of the message will be used as the CorrelationId of the saga by default (this can be overridden as well).
 
 .. sourcecode:: csharp
     :linenos:
 
-	public interface PlaceBid
-	{
-		Guid BidId { get; }
-		Guid AuctionId { get; }
-		decimal MaximumBid { get; }
-		string BidderEmail { get; }
-	}
+    public interface PlaceBid
+    {
+        Guid BidId { get; }
+        Guid AuctionId { get; }
+        decimal MaximumBid { get; }
+        string BidderEmail { get; }
+    }
 
 For the bid message, we want to have a unique identifier for the bid, so we have a BidId on the message. We also
 need the AuctionId so that the message can be delivered to the proper saga instance. 
@@ -120,16 +120,16 @@ code to the Define call in the static initializer of the saga class as shown.
 .. sourcecode:: csharp
     :linenos:
 
-	static AuctionSaga()
-	{
-    	Define(() =>
-    	{
-			Initially(
-				When(Create));
-			During(Open,
-				When(Bid));
-		});
-	}
+    static AuctionSaga()
+    {
+        Define(() =>
+        {
+            Initially(
+                When(Create));
+            During(Open,
+                When(Bid));
+        });
+    }
 
 The linkage above is pretty simple, but it defines some important characteristics of the saga. First, based
 on the definition above, we can see that the Create event is only accepted when the saga is in the _Initial_
@@ -152,14 +152,14 @@ This is done using the Correlate method, as shown below.
 .. sourcecode:: csharp
     :linenos:
 
-	static AuctionSaga()
-	{
-    	Define(() =>
-    	{
-			Correlate(Bid)
-				.By((saga,message) => saga.CorrelationId == message.AuctionId);
-		});
-	}
+    static AuctionSaga()
+    {
+        Define(() =>
+        {
+            Correlate(Bid)
+                .By((saga,message) => saga.CorrelationId == message.AuctionId);
+        });
+    }
 
 By defining the correlation, the proper filter expressions are created to load the existing saga instance
 for the message. It is important to realize that these translate directly into LINQ expressions that are
@@ -169,7 +169,39 @@ relationship as shown above is your best bet.
 
 *NOTE: Since the CreateAuction message is correlated by Guid, the default correlation is used.*
 
-	
+Now we need to define some behavior to happen when the events occur. We've already defined the events, we 
+just need to link up some behavior.
+
+.. sourcecode:: csharp
+    :linenos:
+
+    static AuctionSaga()
+    {
+        Define(() =>
+        {
+            Initially(
+                When(Create)
+                    .Then((saga,message) => 
+                    {
+                        saga.OpeningBid = message.OpeningBid;
+                        saga.OwnerEmail = message.OwnerEmail;
+                        saga.Title = message.Title;
+                    })
+                    .TransitionTo(Open));
+        });
+        public decimal OpeningBid { get; set; }
+        public string OwnerEmail { get; set; }
+        public string Title { get; set; }
+    }    
+    
+Two simple behavior steps have been defined above. The first, an anonymous method called with the saga instance
+and the message, initializes some properties on the saga. The second transitions the state of the saga to Open.
+
+
+
+
+Subscribing to the Saga
+-----------------------
 
 Once the saga has been defined, it is subscribed to the bus using the Saga subscription method.
 
@@ -186,7 +218,7 @@ Once the saga has been defined, it is subscribed to the bus using the Saga subsc
                 sbc.Subscribe(subs =>
                 {
                     subs.Saga<AuctionSaga>(new InMemorySagaRepository<AuctionSaga>())
-						.Permanent();
+                        .Permanent();
                 });
             });
         }
