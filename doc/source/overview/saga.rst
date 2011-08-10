@@ -189,14 +189,44 @@ just need to link up some behavior.
                     })
                     .TransitionTo(Open));
         });
-        public decimal OpeningBid { get; set; }
-        public string OwnerEmail { get; set; }
-        public string Title { get; set; }
     }    
+    //
+    public decimal OpeningBid { get; set; }
+    public string OwnerEmail { get; set; }
+    public string Title { get; set; }
     
 Two simple behavior steps have been defined above. The first, an anonymous method called with the saga instance
 and the message, initializes some properties on the saga. The second transitions the state of the saga to Open.
+Properties were also added to store the auction details that were provided in the CreateAuction message.
 
+.. sourcecode:: csharp
+    :linenos:
+
+    static AuctionSaga()
+    {
+        Define(() =>
+        {
+            During(Open,
+                When(Bid)
+                    .Call((saga,message) => saga.Handle(message)));
+        });
+    }
+    void Handle(PlaceBid bid)
+    {
+        if(!CurrentBid.HasValue || bid.MaximumBid > CurrentBid)
+        {
+            CurrentBid = bid.MaximumBid;
+            HighBidder = bid.BidderEmail;
+            HighBidId = bid.BidId;
+        }
+    }
+    //
+    public decimal? CurrentBid { get; set; }
+    public string HighBidder { get; set; }
+    public Guid HighBidId { get; set; }
+
+Above, the behavior for accepting a bid is defined. If the bid received is higher than the current bid,
+the current bid is updated and the high bidder information is stored with the saga instance.
 
 
 
