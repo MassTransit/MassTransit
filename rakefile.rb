@@ -315,10 +315,181 @@ task :moma => [:compile] do
 	sh "lib/MoMA/MoMA.exe --nogui --out #{File.join(props[:artifacts], 'MoMA-report.html')} #{dlls}"
 end
 
-# TODO: create tasks for installing and running samples!
+  # NUSPEC
+  # ===================================================
 
-desc "Builds the nuget package"
-task :nuget do
+def add_files stage, what_dlls, nuspec
+  [['net35', 'net-3.5'], ['net40', 'net-4.0']].each{|fw|
+    takeFrom = File.join(stage, fw[1], what_dlls)
+    Dir.glob(takeFrom).each do |f|
+      nuspec.file(f, "lib\\#{fw[0]}")
+    end
+  }
+end
+  
+task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtun_nuspec, :mtcw_nuspec, :mtnhib_nuspec, :mtrmq_nuspec]
+
+  directory 'nuspecs'
+
+  nuspec :mt_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit'
+    nuspec.version = asm_version
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'MassTransit is a distributed application framework for .NET, including support for MSMQ and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.'
+    # nuspec.title = Projects[:tx][:title]
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "true"
+    nuspec.dependency "Magnum", "2.0.0.0"
+    nuspec.dependency "log4net", "1.2.10"
+    nuspec.output_file = 'nuspecs/MassTransit.nuspec'
+    
+	add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
+  end
+  
+  nuspec :mtcw_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.CastleWindsor'
+    nuspec.version = asm_version
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'This integration library adds support for Castle Windsor to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.'
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "true"
+    nuspec.dependency "MassTransit", asm_version
+    nuspec.dependency "Castle.Windsor", "2.5.2"
+    nuspec.output_file = 'nuspecs/MassTransit.CastleWindsor.nuspec'
+	
+	add_files props[:stage], "#{File.join('Containers', 'MassTransit.WindsorIntegration.{dll,pdb,xml}')}", nuspec
+  end
+  
+  nuspec :mtrmq_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.RabbitMQ'
+    nuspec.version = asm_version
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'This integration library adds support for RabbitMQ to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.'
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "true"
+    nuspec.dependency "MassTransit", asm_version
+    nuspec.dependency "RabbitMQ.Client", "2.5.1"
+    nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
+	
+	add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.Transports.RabbitMq.{dll,pdb,xml}')}", nuspec
+  end
+
+  
+  nuspec :mtaf_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.Autofac'
+    nuspec.version = asm_version
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'This integration library adds support for Autofac to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.'
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "true"
+    nuspec.dependency "MassTransit", asm_version
+    nuspec.dependency "Autofac", "2.4.5.724"
+    nuspec.output_file = 'nuspecs/MassTransit.Autofac.nuspec'
+	
+	add_files props[:stage], "#{File.join('Containers', 'MassTransit.AutofacIntegration.{dll,pdb,xml}')}", nuspec
+  end
+
+  nuspec :mtnhib_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.NHibernate'
+    nuspec.version = asm_version
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'An integration library for NHibernate support in MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.'
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "true"
+    nuspec.dependency "MassTransit", asm_version
+    nuspec.dependency "log4net", "1.2.10"
+    nuspec.dependency "NHibernate", "3.1.0"
+    nuspec.dependency "FluentNHibernate", "1.2"
+    nuspec.dependency "Magnum", "2.0.0"
+    nuspec.output_file = 'nuspecs/MassTransit.NHibernate.nuspec'
+	
+	add_files props[:stage], "#{File.join('Persistence', 'NHibernate', 'MassTransit.NHibernateIntegration.{dll,pdb,xml}')}", nuspec
+  end
+
+  
+  nuspec :mtni_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.Ninject'
+    nuspec.version = asm_version
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'This integration library adds support for Ninject to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.'
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "true"
+    nuspec.dependency "MassTransit", asm_version
+    nuspec.dependency "Ninject", "2.2.1.4"
+    nuspec.output_file = 'nuspecs/MassTransit.Ninject.nuspec'
+	
+	add_files props[:stage], "#{File.join('Containers', 'MassTransit.NinjectIntegration.{dll,pdb,xml}')}", nuspec
+  end
+
+  
+  nuspec :mtsm_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.StructureMap'
+    nuspec.version = asm_version
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'This integration library adds support for StructureMap to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.'
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "true"
+    nuspec.dependency "MassTransit", asm_version
+    nuspec.dependency "StructureMap", "2.6.2"
+    nuspec.output_file = 'nuspecs/MassTransit.StructureMap.nuspec'
+	
+	add_files props[:stage], "#{File.join('Containers', 'MassTransit.StructureMapIntegration.{dll,pdb,xml}')}", nuspec
+  end
+
+  
+  nuspec :mtun_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.Unity'
+    nuspec.version = asm_version
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'This integration library adds support for Unity to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.'
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "true"
+    nuspec.dependency "MassTransit", asm_version
+    nuspec.dependency "Unity", "2.0.0"
+    nuspec.output_file = 'nuspecs/MassTransit.Unity.nuspec'
+	
+	add_files props[:stage], "#{File.join('Containers', 'MassTransit.UnityIntegration.{dll,pdb,xml}')}", nuspec
+  end
+
+  
+  nuspec :mtmsmq_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.Msmq'
+    nuspec.version = asm_version
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'This integration library adds support for MSMQ to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.'
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "true"
+    nuspec.dependency "MassTransit", asm_version
+    nuspec.output_file = 'nuspecs/MassTransit.Transports.Msmq.nuspec'
+	
+	add_files props[:stage], "#{File.join('Transports', 'MSMQ', 'MassTransit.Transports.MSMQ.{dll,pdb,xml}')}", nuspec
+  end
+
+  
+  
+  # NUGET
+  # ===================================================
+
+  desc "Builds the nuget package"
+task :nuget => :nuspecs do
 	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.StructureMap.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.Autofac.nuspec -o build_artifacts"
