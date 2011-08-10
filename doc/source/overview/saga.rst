@@ -208,16 +208,26 @@ Properties were also added to store the auction details that were provided in th
         {
             During(Open,
                 When(Bid)
-                    .Call((saga,message) => saga.Handle(message)));
+                    .Call((saga,message) => saga.Handle(message),
+                        InCaseOf<UnderBidException>()
+                            .Publish((saga,message,ex) => new OutBid(message.BidId))));
         });
     }
     void Handle(PlaceBid bid)
     {
         if(!CurrentBid.HasValue || bid.MaximumBid > CurrentBid)
         {
+            if(HighBidder != null)
+            {
+                Bus.Publish(new Outbid(HighBidId));
+            }
             CurrentBid = bid.MaximumBid;
             HighBidder = bid.BidderEmail;
             HighBidId = bid.BidId;
+        }
+        else
+        {
+            throw new UnderBidException();
         }
     }
     //
@@ -226,9 +236,77 @@ Properties were also added to store the auction details that were provided in th
     public Guid HighBidId { get; set; }
 
 Above, the behavior for accepting a bid is defined. If the bid received is higher than the current bid,
-the current bid is updated and the high bidder information is stored with the saga instance.
+the current bid is updated and the high bidder information is stored with the saga instance. If there was a high
+bidder, a message is published indicating the a previous bidder was outbid, allowing actions to be taken such as
+sending an email to the previous high bidder. If the new bid is too low, and exception is thrown which is caught by the 
+InCaseOf method. This specifies an exception handler for the Call method. Multiple exception handlers can be specified and they are evaluated in a chain-of-command order where the first one that matches the type (IsAssignableFrom) is invoked.
+
+The use of the Bus property is also demonstrated in the Handle method, as it is used to publish the outbid message.
 
 
+Combining Events (think Fork/Join)
+----------------------------------
+
+In some cases, you may want to create a saga that orchestrates several child sagas or initiate multiple concurrent commands
+and continue processing once all of the commands have been acknowledged. This can be done using a clever construct known as Combine(). For example, the saga below sends two requests and handles the response to each request separately. An additional Combine statement signifies that the two events have completed and triggers a third event on the saga instance.
+
+.. sourcecode:: csharp
+    :linenos:
+
+    static SupervisorSaga()
+    {
+        Define(() =>
+        {
+            Initially(
+                When(Create)
+                    .Then((saga,message) => 
+                    {
+                        saga.PostalCode = message.PostalCode;
+                    })
+                    .Publish((saga,message) => new RequestPostalCodeDetails(saga.PostalCode))
+                    .Publish((saga,message) => new RequestGeolocation(saga.PostalCode))
+                    .TransitionTo(Waiting));
+                    
+            During(Waiting,
+                When(PostalCodeDetailsReceived)
+                    .Then((saga,message) => 
+                    {
+                        saga.City = message.City;
+                        saga.State = message.State;
+                    }),
+                When(GeolocationReceived)
+                    .Then((saga,message) =>
+                    {
+                        saga.Latitude = message.Latitude;
+                        saga.Longitude = message.Longitude;
+                    }));
+                    
+            Combine(PostalCodeDetailsReceived, GeolocationReceived)
+                .Into(ReadyToProceed, saga => saga.ReadyFlags);
+                
+            During(Waiting,
+                When(ReadyToProceed)
+                    .Then((saga,message) =>
+                    {
+                        saga.Bus.Publish(new PostalCodeDetails(...));
+                    })
+                    .Complete());
+        });
+    }
+    //
+    public int ReadyFlags { get; set; }
+    public static Event<CreatePostalCodeDetailsRequest> Create { get; set; }
+    public static Event<PostalCodeDetailsResponse> PostalCodeDetailsReceived { get; set; }
+    public static Event<GeolocationResponse> GeolocationReceived { get; set; }
+    public static Event ReadyToProceed { get; set; }
+
+The combine method declares a set of events that must be triggered before the combined event is triggered. In
+this case, the ReadyToProceed event is fired when the two separate result messages have both been received.
+The reception and handling of those messages is done separately as each individual response is received.
+
+This is a pretty simple example of the saga, but with this great power comes great responsibility.
+
+(and with that, I'm too tired to continue for now and must rest)
 
 Subscribing to the Saga
 -----------------------
