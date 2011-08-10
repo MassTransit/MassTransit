@@ -10,14 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+using Magnum.Pipeline;
+
 namespace MassTransit
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Magnum.Extensions;
-	using Microsoft.Practices.Unity;
-	using SubscriptionConfigurators;
+    using Magnum.Extensions;
+    using Microsoft.Practices.Unity;
+    using SubscriptionConfigurators;
 	using UnityIntegration;
 
 	public static class UnityExtensions
@@ -26,7 +28,7 @@ namespace MassTransit
 		{
 			IList<Type> concreteTypes = container.Registrations
 				.Where(r => r.MappedToType.Implements<IConsumer>())
-				.Select(r => r.RegisteredType)
+				.Select(r => r.MappedToType)
 				.ToList();
 
 			if (concreteTypes.Count == 0)
