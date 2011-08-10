@@ -11,3 +11,4 @@ How MassTransit Works
     subscriptions.rst
     valueadd.rst
     saga.rst
+    routing.rst
