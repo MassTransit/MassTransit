@@ -325,12 +325,12 @@ def add_files stage, what_dlls, nuspec
   [['net35', 'net-3.5'], ['net40', 'net-4.0']].each{|fw|
     takeFrom = File.join(stage, fw[1], what_dlls)
     Dir.glob(takeFrom).each do |f|
-      nuspec.file(f, "lib\\#{fw[0]}")
+      nuspec.file(f.gsub("/", "\\"), "lib\\#{fw[0]}")
     end
   }
 end
   
-task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtun_nuspec, :mtcw_nuspec, :mtnhib_nuspec, :mtrmq_nuspec]
+task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtun_nuspec, :mtcw_nuspec, :mtnhib_nuspec, :mtrmq_nuspec, :mtmsmq_nuspec]
 
   directory 'nuspecs'
 
@@ -481,26 +481,25 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
     nuspec.dependency "MassTransit", asm_version
-    nuspec.output_file = 'nuspecs/MassTransit.Transports.Msmq.nuspec'
+    nuspec.output_file = 'nuspecs/MassTransit.Msmq.nuspec'
 	
 	add_files props[:stage], "#{File.join('Transports', 'MSMQ', 'MassTransit.Transports.MSMQ.{dll,pdb,xml}')}", nuspec
   end
 
-  
-  
   # NUGET
   # ===================================================
 
   desc "Builds the nuget package"
 task :nuget => :nuspecs do
-	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.StructureMap.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.Autofac.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.Ninject.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.Unity.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.CastleWindsor.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.NHibernate.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack -BasePath build_output nugets/MassTransit.RabbitMQ.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.StructureMap.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Autofac.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Ninject.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Unity.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.CastleWindsor.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NHibernate.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.RabbitMQ.nuspec -o build_artifacts"
+	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Msmq.nuspec -o build_artifacts"
 end
 
 def project_outputs(props)
