@@ -10,3 +10,4 @@ How MassTransit Works
     inbound.rst
     subscriptions.rst
     valueadd.rst
+	saga.rst
