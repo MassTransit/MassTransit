@@ -1,17 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using MassTransit.Tests.TextFixtures;
-using MassTransit.TestFramework;
-using MassTransit.BusConfigurators;
-using NUnit.Framework;
-using Magnum.TestFramework;
-using Magnum;
-using Magnum.Extensions;
-
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Subscriptions
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using BusConfigurators;
+    using Magnum;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using NUnit.Framework;
+    using TestFramework;
+    using TextFixtures;
+
     [TestFixture]
     public class when_multiple_subscribers_to_same_message
         : LoopbackLocalAndRemoteTestFixture
@@ -25,38 +36,32 @@ namespace MassTransit.Tests.Subscriptions
             LocalBus.Publish(new MyMessage());
         }
 
-        private List<Tuple<string, MyMessage>> receivedMessages = new List<Tuple<string, MyMessage>>();
+        List<Tuple<string, MyMessage>> receivedMessages = new List<Tuple<string, MyMessage>>();
 
 
         protected override void ConfigureRemoteBus(ServiceBusConfigurator configurator)
         {
-            base.ConfigureLocalBus(configurator);
+            base.ConfigureRemoteBus(configurator);
 
             configurator.Subscribe(cf =>
-            {
-                cf.Handler<MyMessage>(message => receivedMessages.Add(new Tuple<string, MyMessage>("One", message)));
-                cf.Handler<MyMessage>(message => receivedMessages.Add(new Tuple<string, MyMessage>("Two", message)));
-            });
+                {
+                    cf.Handler<MyMessage>(message => receivedMessages.Add(new Tuple<string, MyMessage>("One", message)));
+                    cf.Handler<MyMessage>(message => receivedMessages.Add(new Tuple<string, MyMessage>("Two", message)));
+                });
         }
 
 
         [Test]
-        public void each_subscriber_should_only_receive_once()
+        public void Each_subscriber_should_only_receive_once()
         {
-
             ThreadUtil.Sleep(4.Seconds());
 
-            var byReceiver = receivedMessages.GroupBy(r => r.Item1);
+            IEnumerable<IGrouping<string, Tuple<string, MyMessage>>> byReceiver = receivedMessages.GroupBy(r => r.Item1);
             byReceiver.All(g => g.Count() == 1).ShouldBeTrue();
         }
- 
-
     }
 
     public class MyMessage
-    { 
-
+    {
     }
-
-    
 }
