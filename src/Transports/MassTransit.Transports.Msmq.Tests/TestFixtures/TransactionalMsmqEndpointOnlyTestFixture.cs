@@ -18,7 +18,11 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
         MsmqEndpointOnlyTestFixture
     {
         public TransactionalMsmqEndpointOnlyTestFixture():
-            base(new EndpointSettings(new Uri("msmq://localhost/mt_client_tx?tx=true")))
+            base(new EndpointSettings(new Uri("msmq://localhost/mt_client_tx?tx=true"))
+                {
+                    Transactional = true,
+                    RequireTransactional = true,
+                })
         {
         }
     }

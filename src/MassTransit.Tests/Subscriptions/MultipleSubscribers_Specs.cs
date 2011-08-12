@@ -36,7 +36,7 @@ namespace MassTransit.Tests.Subscriptions
             LocalBus.Publish(new MyMessage());
         }
 
-        List<Tuple<string, MyMessage>> receivedMessages = new List<Tuple<string, MyMessage>>();
+        List<int> receivedMessages = new List<int>();
 
 
         protected override void ConfigureRemoteBus(ServiceBusConfigurator configurator)
@@ -45,8 +45,8 @@ namespace MassTransit.Tests.Subscriptions
 
             configurator.Subscribe(cf =>
                 {
-                    cf.Handler<MyMessage>(message => receivedMessages.Add(new Tuple<string, MyMessage>("One", message)));
-                    cf.Handler<MyMessage>(message => receivedMessages.Add(new Tuple<string, MyMessage>("Two", message)));
+                    cf.Handler<MyMessage>(message => receivedMessages.Add(1));
+                    cf.Handler<MyMessage>(message => receivedMessages.Add(2));
                 });
         }
 
@@ -56,7 +56,7 @@ namespace MassTransit.Tests.Subscriptions
         {
             ThreadUtil.Sleep(4.Seconds());
 
-            IEnumerable<IGrouping<string, Tuple<string, MyMessage>>> byReceiver = receivedMessages.GroupBy(r => r.Item1);
+            IEnumerable<IGrouping<int, int>> byReceiver = receivedMessages.GroupBy(r => r);
             byReceiver.All(g => g.Count() == 1).ShouldBeTrue();
         }
     }

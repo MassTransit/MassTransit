@@ -25,13 +25,14 @@ namespace MassTransit.Transports.Msmq.Tests
 		[SetUp]
 		public void Before_any()
 		{
-			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-			string file = Path.Combine(path, "msmq.log4net.xml");
-
-			Trace.WriteLine(string.Format("Loading Log4net Configuration: {0}", file));
-
-			XmlConfigurator.Configure(new FileInfo(file));
+		    XmlConfigurator.Configure();
+//			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+//
+//			string file = Path.Combine(path, "msmq.log4net.xml");
+//
+//			Trace.WriteLine(string.Format("Loading Log4net Configuration: {0}", file));
+//
+//			XmlConfigurator.Configure(new FileInfo(file));
 		}
 
 		[TearDown]

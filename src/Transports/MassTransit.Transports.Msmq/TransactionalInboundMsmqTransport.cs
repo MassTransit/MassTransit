@@ -12,63 +12,61 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq
 {
-	using System;
-	using System.Diagnostics;
-	using System.Messaging;
-	using System.Transactions;
-	using log4net;
+    using System;
+    using System.Diagnostics;
+    using System.Messaging;
+    using System.Transactions;
+    using log4net;
 
-	[DebuggerDisplay("IN:TX:{Address}")]
-	public class TransactionalInboundMsmqTransport :
-		InboundMsmqTransport
-	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (TransactionalInboundMsmqTransport));
-		readonly IsolationLevel _isolationLevel;
-		readonly TimeSpan _transactionTimeout;
+    [DebuggerDisplay("IN:TX:{Address}")]
+    public class TransactionalInboundMsmqTransport :
+        InboundMsmqTransport
+    {
+        static readonly ILog _log = LogManager.GetLogger(typeof (TransactionalInboundMsmqTransport));
+        readonly IsolationLevel _isolationLevel;
+        readonly TimeSpan _transactionTimeout;
 
-		public TransactionalInboundMsmqTransport(IMsmqEndpointAddress address,
-		                                         ConnectionHandler<MessageQueueConnection> connectionHandler,
-		                                         TimeSpan transactionTimeout,
-		                                         IsolationLevel isolationLevel)
-			: base(address, connectionHandler)
-		{
-			_transactionTimeout = transactionTimeout;
-			_isolationLevel = isolationLevel;
-		}
+        public TransactionalInboundMsmqTransport(IMsmqEndpointAddress address,
+                                                 ConnectionHandler<MessageQueueConnection> connectionHandler,
+                                                 TimeSpan transactionTimeout,
+                                                 IsolationLevel isolationLevel)
+            : base(address, connectionHandler)
+        {
+            _transactionTimeout = transactionTimeout;
+            _isolationLevel = isolationLevel;
+        }
 
-		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
-		{
-			try
-			{
-				var options = new TransactionOptions
-					{
-						IsolationLevel = _isolationLevel,
-						Timeout = _transactionTimeout,
-					};
+        public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+        {
+            try
+            {
+                var options = new TransactionOptions
+                    {
+                        IsolationLevel = _isolationLevel,
+                        Timeout = _transactionTimeout,
+                    };
 
-				using (var scope = new TransactionScope(TransactionScopeOption.Required, options))
-				{
-					if (EnumerateQueue(callback, timeout))
-						scope.Complete();
-				}
-			}
-			catch (MessageQueueException ex)
-			{
-				HandleInboundMessageQueueException(ex);
-			}
-		}
+                // TODO well shit, if we can't control the transaction scope, we need a new plan
+
+                EnumerateQueue(callback, timeout);
+            }
+            catch (MessageQueueException ex)
+            {
+                HandleInboundMessageQueueException(ex);
+            }
+        }
 
 
-		protected override void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout,
-		                                       Action<Func<Message>> receiveAction)
-		{
-			receiveAction(() =>
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Removing message {0} from queue {1}", enumerator.Current.Id, Address);
+        protected override void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout,
+                                               Action<Func<Message>> receiveAction)
+        {
+            receiveAction(() =>
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Removing message {0} from queue {1}", enumerator.Current.Id, Address);
 
-					return enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic);
-				});
-		}
-	}
+                    return enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic);
+                });
+        }
+    }
 }

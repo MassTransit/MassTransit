@@ -51,7 +51,7 @@ namespace MassTransit.TestFramework
 					return saga;
 				}
 
-				Thread.Sleep(30);
+				Thread.Sleep(100);
 			}
 
 			return null;
@@ -76,7 +76,7 @@ namespace MassTransit.TestFramework
 				if (sagas.Count > 0)
 					return sagas.Single();
 
-				Thread.Sleep(30);
+				Thread.Sleep(100);
 			}
 
 			return null;
@@ -98,7 +98,7 @@ namespace MassTransit.TestFramework
 				if (saga.CurrentState == state)
 					return;
 
-				Thread.Sleep(30);
+				Thread.Sleep(100);
 			}
 
 			Assert.Fail("The saga was not in the expected state: " + state.Name + " (" + saga.CurrentState.Name + ")");
