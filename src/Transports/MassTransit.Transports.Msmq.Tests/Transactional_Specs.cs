@@ -12,103 +12,103 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests
 {
-	using System;
-	using Magnum.Extensions;
-	using Magnum.TestFramework;
-	using MassTransit.Tests;
-	using MassTransit.Tests.Messages;
-	using NUnit.Framework;
-	using TestFixtures;
-	using TestFramework;
+    using System;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using MassTransit.Tests;
+    using MassTransit.Tests.Messages;
+    using NUnit.Framework;
+    using TestFixtures;
+    using TestFramework;
 
     [TestFixture, Integration]
-	public class Given_a_message_is_received_from_a_transactional_queue :
-		MsmqTransactionalEndpointTestFixture
-	{
-	}
+    public class Given_a_message_is_received_from_a_transactional_queue :
+        MsmqTransactionalEndpointTestFixture
+    {
+    }
 
-	[TestFixture, Integration]
-	public class When_a_consumer_throws_an_exception_in_the_transaction :
-		Given_a_message_is_received_from_a_transactional_queue
-	{
-		private PingMessage _ping;
-	    private FutureMessage<Fault<PingMessage, Guid>> _faultFuture;
+    [TestFixture, Integration]
+    public class When_a_consumer_throws_an_exception_in_the_transaction :
+        Given_a_message_is_received_from_a_transactional_queue
+    {
+        private PingMessage _ping;
+        private FutureMessage<Fault<PingMessage, Guid>> _faultFuture;
 
-		protected override void EstablishContext()
-		{
-			base.EstablishContext();
+        protected override void EstablishContext()
+        {
+            base.EstablishContext();
             _faultFuture = new FutureMessage<Fault<PingMessage, Guid>>();
 
-			LocalBus.SubscribeHandler<PingMessage>(message => { throw new NotSupportedException("I am a naughty consumer! I go boom!"); });
-		    LocalBus.SubscribeHandler<Fault<PingMessage, Guid>>(message =>
-		    	{
-					if (_faultFuture.IsAvailable(TimeSpan.Zero))
-						return;
+            LocalBus.SubscribeHandler<PingMessage>(message => { throw new NotSupportedException("I am a naughty consumer! I go boom!"); });
+            LocalBus.SubscribeHandler<Fault<PingMessage, Guid>>(message =>
+                {
+                    if (_faultFuture.IsAvailable(TimeSpan.Zero))
+                        return;
 
-		    		_faultFuture.Set(message);
-		    	});
+                    _faultFuture.Set(message);
+                });
 
-			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
-			LocalBus.ShouldHaveRemoteSubscriptionFor<Fault<PingMessage, Guid>>();
+            LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+            LocalBus.ShouldHaveRemoteSubscriptionFor<Fault<PingMessage, Guid>>();
 
-			_ping = new PingMessage();
+            _ping = new PingMessage();
 
-			LocalBus.Publish(_ping);
-		}
+            LocalBus.Publish(_ping);
+        }
 
-		[Test]
-		public void The_message_should_exist_in_the_error_queue()
-		{
-			LocalErrorEndpoint.ShouldContain(_ping, 5.Seconds());
-		}
+        [Test]
+        public void The_message_should_exist_in_the_error_queue()
+        {
+            LocalErrorEndpoint.ShouldContain(_ping, 5.Seconds());
+        }
 
-		[Test]
-		public void The_message_should_not_exist_in_the_input_queue()
-		{
-			LocalEndpoint.ShouldNotContain(_ping);
-		}
+        [Test]
+        public void The_message_should_not_exist_in_the_input_queue()
+        {
+            LocalEndpoint.ShouldNotContain(_ping);
+        }
 
         [Test]
         public void A_fault_should_be_published()
         {
             _faultFuture.IsAvailable(3.Seconds()).ShouldBeTrue();
         }
-	}
+    }
 
-	[TestFixture, Integration]
-	public class When_a_consumer_receives_the_message_in_the_transaction :
-		Given_a_message_is_received_from_a_transactional_queue
-	{
-		private PingMessage _ping;
-		private FutureMessage<PingMessage> _future;
+    [TestFixture, Integration]
+    public class When_a_consumer_receives_the_message_in_the_transaction :
+        Given_a_message_is_received_from_a_transactional_queue
+    {
+        private PingMessage _ping;
+        private FutureMessage<PingMessage> _future;
 
-		protected override void EstablishContext()
-		{
-			base.EstablishContext();
+        protected override void EstablishContext()
+        {
+            base.EstablishContext();
 
-			_future = new FutureMessage<PingMessage>();
+            _future = new FutureMessage<PingMessage>();
 
-			LocalBus.SubscribeHandler<PingMessage>(message => _future.Set(message));
+            LocalBus.SubscribeHandler<PingMessage>(message => _future.Set(message));
 
-			_ping = new PingMessage();
+            _ping = new PingMessage();
 
-			LocalBus.Publish(_ping);
-		}
+            LocalBus.Publish(_ping);
+        }
 
-		[Test]
-		public void The_message_should_not_exist_in_the_error_queue()
-		{
+        [Test]
+        public void The_message_should_not_exist_in_the_error_queue()
+        {
             _future.IsAvailable(3.Seconds()).ShouldBeTrue();
 
-			LocalErrorEndpoint.ShouldNotContain(_ping);
-		}
+            LocalErrorEndpoint.ShouldNotContain(_ping);
+        }
 
-		[Test]
-		public void The_message_should_not_exist_in_the_input_queue()
-		{
+        [Test]
+        public void The_message_should_not_exist_in_the_input_queue()
+        {
             _future.IsAvailable(3.Seconds()).ShouldBeTrue();
 
-			LocalEndpoint.ShouldNotContain(_ping);
-		}
-	}
+            LocalEndpoint.ShouldNotContain(_ping);
+        }
+    }
 }

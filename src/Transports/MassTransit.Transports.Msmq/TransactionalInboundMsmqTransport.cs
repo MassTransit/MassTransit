@@ -58,15 +58,12 @@ namespace MassTransit.Transports.Msmq
 
 
         protected override void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout,
-                                               Action<Func<Message>> receiveAction)
+                                               Action<Message> receiveAction)
         {
-            receiveAction(() =>
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Removing message {0} from queue {1}", enumerator.Current.Id, Address);
-
-                    return enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic);
-                });
+            using (var message = enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic))
+            {
+                receiveAction(message);
+            }
         }
     }
 }
