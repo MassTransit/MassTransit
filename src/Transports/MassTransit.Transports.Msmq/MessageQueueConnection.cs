@@ -15,10 +15,13 @@ namespace MassTransit.Transports.Msmq
 	using System;
 	using System.Messaging;
 	using Exceptions;
+	using log4net;
 
-	public class MessageQueueConnection :
+    public class MessageQueueConnection :
 		Connection
 	{
+	    static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueConnection));
+	    
 		readonly QueueAccessMode _accessMode;
 		readonly IMsmqEndpointAddress _address;
 		readonly string _formatName;
@@ -76,6 +79,8 @@ namespace MassTransit.Transports.Msmq
 		{
 			if (_queue != null)
 			{
+			    _log.DebugFormat("Closing: " + _formatName);
+
 				_queue.Close();
 				_queue.Dispose();
 				_queue = null;
@@ -85,6 +90,8 @@ namespace MassTransit.Transports.Msmq
 		public void Connect()
 		{
 			Disconnect();
+
+            _log.DebugFormat("Creating MessageQueue: " + _formatName);
 
 			_queue = new MessageQueue(_formatName, _accessMode);
 			if (_multicastAddress != null)

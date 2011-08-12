@@ -24,6 +24,7 @@ namespace MassTransit.EndpointConfigurators
 		public EndpointFactoryDefaultSettings()
 		{
 			CreateMissingQueues = true;
+		    CreateTransactionalQueues = false;
 			PurgeOnStartup = false;
 			RequireTransactional = false;
 			Serializer = new XmlMessageSerializer();
@@ -34,28 +35,23 @@ namespace MassTransit.EndpointConfigurators
 		public EndpointFactoryDefaultSettings(IEndpointFactoryDefaultSettings defaults)
 		{
 			CreateMissingQueues = defaults.CreateMissingQueues;
-			PurgeOnStartup = defaults.PurgeOnStartup;
-			RequireTransactional = defaults.RequireTransactional;
-			Serializer = defaults.Serializer;
-			TransactionTimeout = defaults.TransactionTimeout;
-			CreateTransactionalQueues = defaults.CreateTransactionalQueues;
+		    CreateTransactionalQueues = defaults.CreateTransactionalQueues;
+		    IsolationLevel = defaults.IsolationLevel;
+		    PurgeOnStartup = defaults.PurgeOnStartup;
+		    RequireTransactional = defaults.RequireTransactional;
+		    Serializer = defaults.Serializer;
+		    TransactionTimeout = defaults.TransactionTimeout;
 		}
 
-		public TimeSpan TransactionTimeout { get; set; }
+	    public bool CreateMissingQueues { get; set; }
+	    public bool CreateTransactionalQueues { get; set; }
+	    public IsolationLevel IsolationLevel { get; set; }
+	    public IMessageSerializer Serializer { get; set; }
+	    public bool PurgeOnStartup { get; set; }
+	    public bool RequireTransactional { get; set; }
+	    public TimeSpan TransactionTimeout { get; set; }
 
-		public IsolationLevel IsolationLevel { get; set; }
-
-		public IMessageSerializer Serializer { get; set; }
-
-		public bool CreateMissingQueues { get; set; }
-
-		public bool RequireTransactional { get; set; }
-
-		public bool PurgeOnStartup { get; set; }
-
-		public bool CreateTransactionalQueues { get; set; }
-
-		public EndpointSettings CreateEndpointSettings(Uri uri)
+	    public EndpointSettings CreateEndpointSettings(Uri uri)
 		{
 			var settings = new EndpointSettings(uri)
 				{
@@ -64,6 +60,8 @@ namespace MassTransit.EndpointConfigurators
 					TransactionTimeout = TransactionTimeout,
 					PurgeExistingMessages = PurgeOnStartup,
 					RequireTransactional = RequireTransactional,
+                    IsolationLevel = IsolationLevel,
+                    Transactional = CreateTransactionalQueues,
 				};
 
 			return settings;

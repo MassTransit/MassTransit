@@ -73,19 +73,19 @@ namespace MassTransit.Transports
 		/// </summary>
 		public TimeSpan TransactionTimeout { get; set; }
 
-		/// <summary>
+	    /// <summary>
+	    /// The isolation level to use with the transaction if a transactional transport is used
+	    /// </summary>
+	    public IsolationLevel IsolationLevel { get; set; }
+
+	    /// <summary>
 		/// The transport should be created if it was not found
 		/// </summary>
 		public bool CreateIfMissing { get; set; }
 
-		/// <summary>
+	    /// <summary>
 		/// If the transport should purge any existing messages before reading from the queue
 		/// </summary>
 		public bool PurgeExistingMessages { get; set; }
-
-		/// <summary>
-		/// The isolation level to use with the transaction if a transactional transport is used
-		/// </summary>
-		public IsolationLevel IsolationLevel { get; set; }
 	}
 }

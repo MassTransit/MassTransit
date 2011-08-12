@@ -12,160 +12,166 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.NHibernateIntegration.Saga
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Transactions;
-	using Exceptions;
-	using log4net;
-	using MassTransit.Saga;
-	using NHibernate;
-	using NHibernate.Linq;
-	using Pipeline;
-	using Util;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Transactions;
+    using Exceptions;
+    using log4net;
+    using MassTransit.Saga;
+    using NHibernate;
+    using NHibernate.Linq;
+    using Pipeline;
+    using Util;
 
-	public class NHibernateSagaRepository<TSaga> :
-		ISagaRepository<TSaga>
-		where TSaga : class, ISaga
-	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepository<TSaga>).ToFriendlyName());
+    public class NHibernateSagaRepository<TSaga> :
+        ISagaRepository<TSaga>
+        where TSaga : class, ISaga
+    {
+        static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepository<TSaga>).ToFriendlyName());
 
-		readonly ISessionFactory _sessionFactory;
+        readonly ISessionFactory _sessionFactory;
 
-		public NHibernateSagaRepository(ISessionFactory sessionFactory)
-		{
-			_sessionFactory = sessionFactory;
-		}
+        public NHibernateSagaRepository(ISessionFactory sessionFactory)
+        {
+            _sessionFactory = sessionFactory;
+        }
 
-		public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
-		                                                                        InstanceHandlerSelector<TSaga, TMessage>
-		                                                                        	selector,
-		                                                                        ISagaPolicy<TSaga, TMessage> policy)
-			where TMessage : class
-		{
-			using (ISession session = _sessionFactory.OpenSession())
-			using (ITransaction transaction = session.BeginTransaction())
-			{
-				var instance = session.Get<TSaga>(sagaId, LockMode.Upgrade);
-				if (instance == null)
-				{
-					if (policy.CanCreateInstance(context))
-					{
-						yield return x =>
-							{
-								if (_log.IsDebugEnabled)
-									_log.DebugFormat("SAGA: {0} Creating New {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
-										typeof (TMessage).ToFriendlyName());
+        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
+                                                                                InstanceHandlerSelector<TSaga, TMessage>
+                                                                                    selector,
+                                                                                ISagaPolicy<TSaga, TMessage> policy)
+            where TMessage : class
+        {
+            using (ISession session = _sessionFactory.OpenSession())
+            using (ITransaction transaction = session.BeginTransaction())
+            {
+                var instance = session.Get<TSaga>(sagaId, LockMode.Upgrade);
+                if (instance == null)
+                {
+                    if (policy.CanCreateInstance(context))
+                    {
+                        yield return x =>
+                            {
+                                if (_log.IsDebugEnabled)
+                                    _log.DebugFormat("SAGA: {0} Creating New {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+                                        typeof (TMessage).ToFriendlyName());
 
-								try
-								{
-									instance = policy.CreateInstance(x, sagaId);
+                                try
+                                {
+                                    instance = policy.CreateInstance(x, sagaId);
 
-									foreach (var callback in selector(instance, x))
-									{
-										callback(x);
-									}
+                                    foreach (var callback in selector(instance, x))
+                                    {
+                                        callback(x);
+                                    }
 
-									if (!policy.CanRemoveInstance(instance))
-										session.Save(instance);
-								}
-								catch (Exception ex)
-								{
-									var sex = new SagaException("Create Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
-									if (_log.IsErrorEnabled)
-										_log.Error(sex);
+                                    if (!policy.CanRemoveInstance(instance))
+                                        session.Save(instance);
+                                }
+                                catch (Exception ex)
+                                {
+                                    var sex = new SagaException("Create Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
+                                    if (_log.IsErrorEnabled)
+                                        _log.Error(sex);
 
-									throw sex;
-								}
-							};
-					}
-					else
-					{
-						if (_log.IsDebugEnabled)
-							_log.DebugFormat("SAGA: {0} Ignoring Missing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
-								typeof (TMessage).ToFriendlyName());
-					}
-				}
-				else
-				{
-					if (policy.CanUseExistingInstance(context))
-					{
-						yield return x =>
-							{
-								if (_log.IsDebugEnabled)
-									_log.DebugFormat("SAGA: {0} Using Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
-										typeof (TMessage).ToFriendlyName());
+                                    if(transaction.IsActive)
+                                        transaction.Rollback();
 
-								try
-								{
-									foreach (var callback in selector(instance, x))
-									{
-										callback(x);
-									}
+                                    throw sex;
+                                }
+                            };
+                    }
+                    else
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("SAGA: {0} Ignoring Missing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+                                typeof (TMessage).ToFriendlyName());
+                    }
+                }
+                else
+                {
+                    if (policy.CanUseExistingInstance(context))
+                    {
+                        yield return x =>
+                            {
+                                if (_log.IsDebugEnabled)
+                                    _log.DebugFormat("SAGA: {0} Using Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+                                        typeof (TMessage).ToFriendlyName());
 
-									if (policy.CanRemoveInstance(instance))
-										session.Delete(instance);
-								}
-								catch (Exception ex)
-								{
-									var sex = new SagaException("Existing Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
-									if (_log.IsErrorEnabled)
-										_log.Error(sex);
+                                try
+                                {
+                                    foreach (var callback in selector(instance, x))
+                                    {
+                                        callback(x);
+                                    }
 
-									throw sex;
-								}
-							};
-					}
-					else
-					{
-						if (_log.IsDebugEnabled)
-							_log.DebugFormat("SAGA: {0} Ignoring Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
-								typeof (TMessage).ToFriendlyName());
-					}
-				}
+                                    if (policy.CanRemoveInstance(instance))
+                                        session.Delete(instance);
+                                }
+                                catch (Exception ex)
+                                {
+                                    var sex = new SagaException("Existing Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
+                                    if (_log.IsErrorEnabled)
+                                        _log.Error(sex);
 
-				transaction.Commit();
-			}
-		}
+                                    if (transaction.IsActive)
+                                        transaction.Rollback();
 
-		public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
-		{
-			return Where(filter, x => x.CorrelationId);
-		}
+                                    throw sex;
+                                }
+                            };
+                    }
+                    else
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("SAGA: {0} Ignoring Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+                                typeof (TMessage).ToFriendlyName());
+                    }
+                }
 
-		public IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter)
-		{
-			using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
-			using (ISession session = _sessionFactory.OpenSession())
-			{
-				List<TSaga> result = session.Query<TSaga>()
-					.Where(filter.FilterExpression)
-					.ToList();
+                transaction.Commit();
+            }
+        }
 
-				scope.Complete();
+        public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
+        {
+            return Where(filter, x => x.CorrelationId);
+        }
 
-				return result;
-			}
-		}
+        public IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter)
+        {
+            using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
+            using (ISession session = _sessionFactory.OpenSession())
+            {
+                List<TSaga> result = session.Query<TSaga>()
+                    .Where(filter.FilterExpression)
+                    .ToList();
 
-		public IEnumerable<TResult> Where<TResult>(ISagaFilter<TSaga> filter, Func<TSaga, TResult> transformer)
-		{
-			return Where(filter).Select(transformer);
-		}
+                scope.Complete();
 
-		public IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer)
-		{
-			using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
-			using (ISession session = _sessionFactory.OpenSession())
-			{
-				List<TResult> result = session.Query<TSaga>()
-					.Select(transformer)
-					.ToList();
+                return result;
+            }
+        }
 
-				scope.Complete();
+        public IEnumerable<TResult> Where<TResult>(ISagaFilter<TSaga> filter, Func<TSaga, TResult> transformer)
+        {
+            return Where(filter).Select(transformer);
+        }
 
-				return result;
-			}
-		}
-	}
+        public IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer)
+        {
+            using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
+            using (ISession session = _sessionFactory.OpenSession())
+            {
+                List<TResult> result = session.Query<TSaga>()
+                    .Select(transformer)
+                    .ToList();
+
+                scope.Complete();
+
+                return result;
+            }
+        }
+    }
 }

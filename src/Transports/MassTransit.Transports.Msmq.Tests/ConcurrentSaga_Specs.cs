@@ -12,68 +12,98 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests
 {
-	using System;
-	using System.Linq;
-	using System.Threading;
-	using log4net;
-	using Magnum;
-	using NHibernateIntegration.Saga;
-	using NHibernateIntegration.Tests.Sagas;
-	using NUnit.Framework;
-	using Saga;
-	using TestFixtures;
+    using System;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Threading;
+    using BusConfigurators;
+    using Magnum;
+    using Magnum.TestFramework;
+    using NHibernateIntegration.Saga;
+    using NHibernateIntegration.Tests.Sagas;
+    using NUnit.Framework;
+    using Saga;
+    using TestFixtures;
+    using log4net;
+    using TestFramework;
 
-	[TestFixture, Category("Integration")]
-	public class Sending_multiple_initiating_messages_should_not_fail_badly :
-		MsmqConcurrentSagaTestFixtureBase
-	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (Sending_multiple_initiating_messages_should_not_fail_badly));
+    [TestFixture, Category("Integration")]
+    public class Sending_multiple_initiating_messages_should_not_fail_badly :
+        MsmqConcurrentSagaTestFixtureBase
+    {
+        static readonly ILog _log =
+            LogManager.GetLogger(typeof (Sending_multiple_initiating_messages_should_not_fail_badly));
 
-		ISagaRepository<ConcurrentLegacySaga> _sagaRepository;
+        ISagaRepository<ConcurrentSaga> _sagaRepository;
 
-		protected override void EstablishContext()
-		{
-			base.EstablishContext();
+        protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
+        {
+            base.ConfigureLocalBus(configurator);
 
-			_sagaRepository = new NHibernateSagaRepository<ConcurrentLegacySaga>(SessionFactory);
-		}
+            _sagaRepository = new NHibernateSagaRepository<ConcurrentSaga>(SessionFactory);
 
-		[Test]
-		public void Should_process_the_messages_in_order_and_not_at_the_same_time()
-		{
-			Guid transactionId = CombGuid.Generate();
+            configurator.Subscribe(x => x.Saga(_sagaRepository));
+        }
 
-			_log.Info("Creating transaction for " + transactionId);
+        [Test]
+        public void Should_process_the_messages_in_order_and_not_at_the_same_time()
+        {
+            Guid transactionId = CombGuid.Generate();
 
-			const int startValue = 1;
+            Trace.WriteLine("Creating transaction for " + transactionId);
 
-			var startConcurrentSaga = new StartConcurrentSaga {CorrelationId = transactionId, Name = "Chris", Value = startValue};
+            int startValue = 1;
 
-			LocalBus.Endpoint.Send(startConcurrentSaga);
-			LocalBus.Endpoint.Send(startConcurrentSaga);
+            var startConcurrentSaga = new StartConcurrentSaga { CorrelationId = transactionId, Name = "Chris", Value = startValue };
 
-			_log.Info("Just published the start message");
+            LocalBus.Publish(startConcurrentSaga);
+            LocalBus.Publish(startConcurrentSaga);
+            Trace.WriteLine("Just published the start message");
 
-			UnsubscribeAction unsubscribeAction = LocalBus.SubscribeSaga(_sagaRepository);
+            _sagaRepository.ShouldContainSaga(transactionId).ShouldNotBeNull();
 
-			Thread.Sleep(3000);
+            int nextValue = 2;
+            var continueConcurrentSaga = new ContinueConcurrentSaga { CorrelationId = transactionId, Value = nextValue };
 
-			const int nextValue = 2;
-			var continueConcurrentSaga = new ContinueConcurrentSaga {CorrelationId = transactionId, Value = nextValue};
+            LocalBus.Publish(continueConcurrentSaga);
+            Trace.WriteLine("Just published the continue message");
 
-			LocalBus.Endpoint.Send(continueConcurrentSaga);
-			_log.Info("Just published the continue message");
-			Thread.Sleep(8000);
+            _sagaRepository.ShouldContainSaga(x => x.CorrelationId == transactionId && x.Value == nextValue).
+                ShouldNotBeNull();
 
-			unsubscribeAction();
-			foreach (ConcurrentLegacySaga saga in _sagaRepository.Where(x => true))
-			{
-				_log.Info("Found saga: " + saga.CorrelationId);
-			}
+            Thread.Sleep(8000);
 
-			int currentValue = _sagaRepository.Where(x => x.CorrelationId == transactionId).First().Value;
+            LocalEndpoint.ShouldNotContain<StartConcurrentSaga>();
+            LocalErrorEndpoint.ShouldContain<StartConcurrentSaga>();
+        }
 
-			Assert.AreEqual(nextValue, currentValue);
-		}
-	}
+        [Test]
+        public void Should_process_the_saga_normally()
+        {
+            Guid transactionId = CombGuid.Generate();
+
+            Trace.WriteLine("Creating transaction for " + transactionId);
+
+            int startValue = 1;
+
+            var startConcurrentSaga = new StartConcurrentSaga
+                {CorrelationId = transactionId, Name = "Chris", Value = startValue};
+
+            LocalBus.Publish(startConcurrentSaga);
+            Trace.WriteLine("Just published the start message");
+
+            _sagaRepository.ShouldContainSaga(transactionId).ShouldNotBeNull();
+
+            int nextValue = 2;
+            var continueConcurrentSaga = new ContinueConcurrentSaga {CorrelationId = transactionId, Value = nextValue};
+
+            LocalBus.Publish(continueConcurrentSaga);
+            Trace.WriteLine("Just published the continue message");
+
+            ConcurrentSaga saga = _sagaRepository
+                .ShouldContainSaga(x => x.CorrelationId == transactionId && x.Value == nextValue);
+            saga.ShouldNotBeNull();
+            saga.ShouldBeInState(ConcurrentSaga.Completed);
+        }
+    }
 }

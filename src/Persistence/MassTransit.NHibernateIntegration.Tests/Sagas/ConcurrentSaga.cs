@@ -12,101 +12,99 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.NHibernateIntegration.Tests.Sagas
 {
-	using System;
-	using System.Threading;
-	using FluentNHibernate.Mapping;
-	using log4net;
-	using Magnum.StateMachine;
-	using MassTransit.Saga;
+    using System;
+    using System.Diagnostics;
+    using System.Threading;
+    using FluentNHibernate.Mapping;
+    using Magnum.StateMachine;
+    using MassTransit.Saga;
 
-	public class ConcurrentSaga :
-		SagaStateMachine<ConcurrentSaga>,
-		ISaga
-	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ConcurrentSaga));
+    public class ConcurrentSaga :
+        SagaStateMachine<ConcurrentSaga>,
+        ISaga
+    {
+        static ConcurrentSaga()
+        {
+            Define(() =>
+                {
+                    Initially(
+                        When(Start)
+                            .Then((saga, message) =>
+                                {
+                                    Trace.WriteLine("Consuming " + message.GetType());
+                                    Thread.Sleep(3000);
+                                    saga.Name = message.Name;
+                                    saga.Value = message.Value;
+                                    Trace.WriteLine("Completed " + message.GetType());
+                                }).TransitionTo(Active));
 
-		static ConcurrentSaga()
-		{
-			Define(() =>
-				{
-					Initially(
-						When(Start)
-							.Then((saga, message) =>
-								{
-									_log.Info("Consuming " + message.GetType());
-									Thread.Sleep(3000);
-									saga.Name = message.Name;
-									saga.Value = message.Value;
-									_log.Info("Completed " + message.GetType());
-								}).TransitionTo(Active));
+                    During(Active,
+                        When(Continue)
+                            .Then((saga, message) =>
+                                {
+                                    Trace.WriteLine("Consuming " + message.GetType());
+                                    Thread.Sleep(1000);
+                                    saga.Value = message.Value;
+                                    Trace.WriteLine("Completed " + message.GetType());
+                                }).Complete());
+                });
+        }
 
-					During(Active,
-						When(Continue)
-							.Then((saga, message) =>
-								{
-									_log.Info("Consuming " + message.GetType());
-									Thread.Sleep(1000);
-									saga.Value = message.Value;
-									_log.Info("Completed " + message.GetType());
-								}).Complete());
-				});
-		}
+        public ConcurrentSaga(Guid correlationId)
+        {
+            CorrelationId = correlationId;
+        }
 
-		public ConcurrentSaga(Guid correlationId)
-		{
-			CorrelationId = correlationId;
-		}
+        protected ConcurrentSaga()
+        {
+        }
 
-		protected ConcurrentSaga()
-		{
-		}
+        public static State Initial { get; set; }
+        public static State Completed { get; set; }
+        public static State Active { get; set; }
 
-		public static State Initial { get; set; }
-		public static State Completed { get; set; }
-		public static State Active { get; set; }
+        public static Event<StartConcurrentSaga> Start { get; set; }
+        public static Event<ContinueConcurrentSaga> Continue { get; set; }
 
-		public static Event<StartConcurrentSaga> Start { get; set; }
-		public static Event<ContinueConcurrentSaga> Continue { get; set; }
+        public string Name { get; set; }
+        public int Value { get; set; }
+        public Guid CorrelationId { get; set; }
+        public IServiceBus Bus { get; set; }
+    }
 
-		public virtual string Name { get; set; }
-		public virtual int Value { get; set; }
-		public virtual Guid CorrelationId { get; set; }
-		public virtual IServiceBus Bus { get; set; }
-	}
+    public class ContinueConcurrentSaga :
+        CorrelatedBy<Guid>
+    {
+        public int Value { get; set; }
+        public virtual Guid CorrelationId { get; set; }
+    }
 
-	[Serializable]
-	public class ContinueConcurrentSaga :
-		CorrelatedBy<Guid>
-	{
-		public int Value { get; set; }
-		public virtual Guid CorrelationId { get; set; }
-	}
+    public class StartConcurrentSaga :
+        CorrelatedBy<Guid>
+    {
+        public string Name { get; set; }
 
-	[Serializable]
-	public class StartConcurrentSaga :
-		CorrelatedBy<Guid>
-	{
-		public string Name { get; set; }
+        public int Value { get; set; }
+        public virtual Guid CorrelationId { get; set; }
+    }
 
-		public int Value { get; set; }
-		public virtual Guid CorrelationId { get; set; }
-	}
+    public class ConcurrentSagaMap :
+        ClassMap<ConcurrentSaga>
+    {
+        public ConcurrentSagaMap()
+        {
+            Not.LazyLoad();
 
-	public class ConcurrentSagaMap :
-		ClassMap<ConcurrentSaga>
-	{
-		public ConcurrentSagaMap()
-		{
-			Id(x => x.CorrelationId)
-				.GeneratedBy.Assigned();
+            Id(x => x.CorrelationId)
+                .GeneratedBy.Assigned();
 
-			Map(x => x.CurrentState)
-				.Access.ReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
-				.CustomType<StateMachineUserType>();
+            Map(x => x.CurrentState)
+                .Access.ReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
+                .CustomType<StateMachineUserType>();
 
 
-			Map(x => x.Name).Length(40);
-			Map(x => x.Value);
-		}
-	}
+            Map(x => x.Name).Length(40);
+            Map(x => x.Value);
+        }
+    }
 }

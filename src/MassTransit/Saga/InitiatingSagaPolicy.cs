@@ -14,6 +14,7 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Linq.Expressions;
+	using Exceptions;
 	using Magnum.Reflection;
 
 	public class InitiatingSagaPolicy<TSaga, TMessage> :
@@ -50,7 +51,7 @@ namespace MassTransit.Saga
 
 		public bool CanUseExistingInstance(IConsumeContext<TMessage> context)
 		{
-			return false;
+		    throw new SagaException("The message cannot be accepted by an existing saga", typeof (TSaga), typeof (TMessage));
 		}
 
 		public bool CanRemoveInstance(TSaga instance)
