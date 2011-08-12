@@ -41,7 +41,7 @@ namespace MassTransit.TestFramework
 					}
 
 					return null;
-				}, TimeSpan.Zero);
+				}, TimeSpan.FromSeconds(3));
 
 			future.IsCompleted.ShouldBeTrue(transport.Address + " should contain a message of type " + typeof (TMessage).Name);
 		}
@@ -64,7 +64,7 @@ namespace MassTransit.TestFramework
 					}
 
 					return null;
-				}, TimeSpan.Zero);
+				}, TimeSpan.FromSeconds(3));
 
 			future.IsCompleted.ShouldBeTrue(endpoint.Address + " should contain a message of type " + typeof (TMessage).Name);
 		}

@@ -23,12 +23,6 @@ namespace MassTransit.Transports.Msmq.Tests
 		public MsmqNonTransactionalSendingContract()
 			: base(new Uri("msmq://localhost/mt_client"), new MsmqTransportFactory())
 		{
-			EndpointCacheFactory.ConfigureDefaultSettings(x =>
-				{
-					x.SetCreateMissingQueues(true);
-					x.SetCreateTransactionalQueues(false);
-					x.SetPurgeOnStartup(true);
-				});
 		}
 	}
 }

@@ -82,16 +82,14 @@ namespace MassTransit.Transports.Msmq
                                 continue;
                             }
 
-                            Message message = enumerator.Current;
-
-                            IReceiveContext context = ReceiveContext.FromBodyStream(message.BodyStream);
-                            context.SetMessageId(message.Id);
-                            context.SetInputAddress(_address);
-
-                            Action<IReceiveContext> receive;
-                            using (message)
+                            Message peekMessage = enumerator.Current;
+                            using (peekMessage)
                             {
-                                byte[] extension = message.Extension;
+                                IReceiveContext context = ReceiveContext.FromBodyStream(peekMessage.BodyStream);
+                                context.SetMessageId(peekMessage.Id);
+                                context.SetInputAddress(_address);
+
+                                byte[] extension = peekMessage.Extension;
                                 if (extension.Length > 0)
                                 {
                                     TransportMessageHeaders headers = TransportMessageHeaders.Create(extension);
@@ -99,19 +97,16 @@ namespace MassTransit.Transports.Msmq
                                     context.SetContentType(headers["Content-Type"]);
                                 }
 
-                                receive = receiver(context);
+                                Action<IReceiveContext> receive = receiver(context);
                                 if (receive == null)
                                 {
                                     if (_log.IsDebugEnabled)
-                                        _log.DebugFormat("SKIP:{0}:{1}", Address, message.Id);
+                                        _log.DebugFormat("SKIP:{0}:{1}", Address, peekMessage.Id);
 
                                     continue;
                                 }
-                            }
 
-                            ReceiveMessage(enumerator, timeout, receiveCurrent =>
-                                {
-                                    using (message = receiveCurrent())
+                                ReceiveMessage(enumerator, timeout, message =>
                                     {
                                         if (message == null)
                                             throw new TransportException(Address.Uri,
@@ -130,8 +125,8 @@ namespace MassTransit.Transports.Msmq
                                         receive(context);
 
                                         received = true;
-                                    }
-                                });
+                                    });
+                            }
                         }
                     }
                 });
@@ -140,9 +135,12 @@ namespace MassTransit.Transports.Msmq
         }
 
         protected virtual void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout,
-                                              Action<Func<Message>> receiveAction)
+                                              Action<Message> receiveAction)
         {
-            receiveAction(() => enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.None));
+            using (Message message = enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.None))
+            {
+                receiveAction(message);
+            }
         }
 
         protected void HandleInboundMessageQueueException(MessageQueueException ex)
