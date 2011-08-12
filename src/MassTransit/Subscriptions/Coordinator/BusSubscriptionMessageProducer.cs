@@ -29,7 +29,12 @@ namespace MassTransit.Subscriptions.Coordinator
 		long _lastMessageNumber;
 		long _timestamp;
 
-		public BusSubscriptionMessageProducer(SubscriptionRouter router, IEndpoint endpoint)
+	    public long Timestamp
+	    {
+	        get { return _timestamp; }
+	    }
+
+	    public BusSubscriptionMessageProducer(SubscriptionRouter router, IEndpoint endpoint)
 		{
 			_peerId = router.PeerId;
 			_peerUri = router.PeerUri;
@@ -103,6 +108,7 @@ namespace MassTransit.Subscriptions.Coordinator
 		{
 			context.SetNetwork(_network);
 			context.SetSourceAddress(_peerUri);
+		    context.SetResponseAddress(_endpoint.Address.Uri);
 		}
 	}
 }
