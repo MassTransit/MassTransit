@@ -12,38 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration
 {
-	using System;
-	using System.Collections.Generic;
-	using Autofac;
-	using Exceptions;
-	using Pipeline;
+    using System;
+    using System.Collections.Generic;
+    using Autofac;
+    using Exceptions;
+    using Pipeline;
 
-	public class AutofacConsumerFactory<T> :
-		IConsumerFactory<T>
-		where T : class
-	{
-		readonly IContainer _container;
+    public class AutofacConsumerFactory<T> :
+        IConsumerFactory<T>
+        where T : class
+    {
+        readonly IComponentContext _container;
 
-		public AutofacConsumerFactory(IContainer container)
-		{
-			_container = container;
-		}
+        public AutofacConsumerFactory(IComponentContext container)
+        {
+            _container = container;
+        }
 
-		public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
-			IConsumeContext<TMessage> context, InstanceHandlerSelector<T, TMessage> selector)
-			where TMessage : class
-		{
-			using (_container.BeginLifetimeScope())
-			{
-				var consumer = _container.Resolve<T>();
-				if (consumer == null)
-					throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ", typeof (T)));
+        public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
+            IConsumeContext<TMessage> context, InstanceHandlerSelector<T, TMessage> selector)
+            where TMessage : class
+        {
+            var consumer = _container.Resolve<T>();
+            if (consumer == null)
+                throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ",
+                    typeof (T)));
 
-				foreach (var handler in selector(consumer, context))
-				{
-					yield return handler;
-				}
-			}
-		}
-	}
+            return selector(consumer, context);
+        }
+    }
 }
