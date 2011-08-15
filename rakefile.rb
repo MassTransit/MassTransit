@@ -14,7 +14,7 @@ PRODUCT = 'MassTransit'
 CLR_TOOLS_VERSION = 'v4.0.30319'
 
 REVISION = 4
-build_number_base = SemVer.find.format "%M.%m.%p" 
+build_number_base = SemVer.find.format "%M.%m.%p"
 asm_version = build_number_base + "." + REVISION.to_s
 tc_build_number = '0'
 tc_build_number = ENV["BUILD_NUMBER"] unless ENV['BUILD_NUMBER'].nil?
@@ -329,8 +329,8 @@ def add_files stage, what_dlls, nuspec
     end
   }
 end
-  
-task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtun_nuspec, :mtcw_nuspec, :mtnhib_nuspec, :mtrmq_nuspec, :mtmsmq_nuspec]
+
+task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtun_nuspec, :mtcw_nuspec, :mtnhib_nuspec, :mtrmq_nuspec]
 
   directory 'nuspecs'
 
@@ -347,10 +347,11 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.dependency "Magnum", "2.0.0.0"
     nuspec.dependency "log4net", "1.2.10"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
-    
+
 	add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
+	add_files props[:stage], "#{File.join('Transports', 'MSMQ', 'MassTransit.Transports.Msmq.{dll,pdb,xml}')}", nuspec
   end
-  
+
   nuspec :mtcw_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.CastleWindsor'
     nuspec.version = asm_version
@@ -363,10 +364,10 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.dependency "MassTransit", asm_version
     nuspec.dependency "Castle.Windsor", "2.5.2"
     nuspec.output_file = 'nuspecs/MassTransit.CastleWindsor.nuspec'
-	
+
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.WindsorIntegration.{dll,pdb,xml}')}", nuspec
   end
-  
+
   nuspec :mtrmq_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.RabbitMQ'
     nuspec.version = asm_version
@@ -379,11 +380,11 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.dependency "MassTransit", asm_version
     nuspec.dependency "RabbitMQ.Client", "2.5.1"
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
-	
+
 	add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.Transports.RabbitMq.{dll,pdb,xml}')}", nuspec
   end
 
-  
+
   nuspec :mtaf_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.Autofac'
     nuspec.version = asm_version
@@ -396,7 +397,7 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.dependency "MassTransit", asm_version
     nuspec.dependency "Autofac", "2.4.5.724"
     nuspec.output_file = 'nuspecs/MassTransit.Autofac.nuspec'
-	
+
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.AutofacIntegration.{dll,pdb,xml}')}", nuspec
   end
 
@@ -415,11 +416,11 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.dependency "FluentNHibernate", "1.2"
     nuspec.dependency "Magnum", "2.0.0"
     nuspec.output_file = 'nuspecs/MassTransit.NHibernate.nuspec'
-	
+
 	add_files props[:stage], "#{File.join('Persistence', 'NHibernate', 'MassTransit.NHibernateIntegration.{dll,pdb,xml}')}", nuspec
   end
 
-  
+
   nuspec :mtni_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.Ninject'
     nuspec.version = asm_version
@@ -432,11 +433,11 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.dependency "MassTransit", asm_version
     nuspec.dependency "Ninject", "2.2.1.4"
     nuspec.output_file = 'nuspecs/MassTransit.Ninject.nuspec'
-	
+
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.NinjectIntegration.{dll,pdb,xml}')}", nuspec
   end
 
-  
+
   nuspec :mtsm_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.StructureMap'
     nuspec.version = asm_version
@@ -449,11 +450,11 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.dependency "MassTransit", asm_version
     nuspec.dependency "StructureMap", "2.6.2"
     nuspec.output_file = 'nuspecs/MassTransit.StructureMap.nuspec'
-	
+
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.StructureMapIntegration.{dll,pdb,xml}')}", nuspec
   end
 
-  
+
   nuspec :mtun_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.Unity'
     nuspec.version = asm_version
@@ -466,33 +467,17 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.dependency "MassTransit", asm_version
     nuspec.dependency "Unity", "2.0.0"
     nuspec.output_file = 'nuspecs/MassTransit.Unity.nuspec'
-	
-	add_files props[:stage], "#{File.join('Containers', 'MassTransit.UnityIntegration.{dll,pdb,xml}')}", nuspec
-  end
 
-  
-  nuspec :mtmsmq_nuspec => ['nuspecs'] do |nuspec|
-    nuspec.id = 'MassTransit.Msmq'
-    nuspec.version = asm_version
-    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
-    nuspec.description = 'This integration library adds support for MSMQ to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ. Version 2.0 is currently in beta, but the NuGet package is being made available prior to Pre-Release support in NuGet to ease installation.'
-    nuspec.projectUrl = 'http://masstransit-project.com'
-    nuspec.language = "en-US"
-    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", asm_version
-    nuspec.output_file = 'nuspecs/MassTransit.Msmq.nuspec'
-	
-	add_files props[:stage], "#{File.join('Transports', 'MSMQ', 'MassTransit.Transports.MSMQ.{dll,pdb,xml}')}", nuspec
+	add_files props[:stage], "#{File.join('Containers', 'MassTransit.UnityIntegration.{dll,pdb,xml}')}", nuspec
   end
 
   # NUGET
   # ===================================================
 
   directory 'build_artifacts'
-  
+
   desc "Builds the nuget package"
-task :nuget => ['build_artifacts', :nuspecs] do
+task :nuget => ['build_artifacts', :all_nuspecs] do
 	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.StructureMap.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Autofac.nuspec -o build_artifacts"
@@ -501,7 +486,6 @@ task :nuget => ['build_artifacts', :nuspecs] do
 	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.CastleWindsor.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NHibernate.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.RabbitMQ.nuspec -o build_artifacts"
-	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Msmq.nuspec -o build_artifacts"
 end
 
 def project_outputs(props)
