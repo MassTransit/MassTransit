@@ -22,9 +22,9 @@ namespace MassTransit.AutofacIntegration
 	public class AutofacSagaRepositoryFactoryConfigurator
 	{
 		readonly SubscriptionBusServiceConfigurator _configurator;
-		readonly IContainer _container;
+        readonly IComponentContext _container;
 
-		public AutofacSagaRepositoryFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IContainer container)
+        public AutofacSagaRepositoryFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IComponentContext container)
 		{
 			_container = container;
 			_configurator = configurator;

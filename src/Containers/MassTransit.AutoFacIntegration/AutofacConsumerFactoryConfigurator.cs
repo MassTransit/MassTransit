@@ -12,33 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration
 {
-	using System;
-	using Autofac;
-	using Magnum.Reflection;
-	using SubscriptionConfigurators;
-	using Util;
+    using System;
+    using Autofac;
+    using Magnum.Reflection;
+    using SubscriptionConfigurators;
+    using Util;
 
-	public class AutofacConsumerFactoryConfigurator
-	{
-		readonly SubscriptionBusServiceConfigurator _configurator;
-		readonly IContainer _container;
+    public class AutofacConsumerFactoryConfigurator
+    {
+        readonly SubscriptionBusServiceConfigurator _configurator;
+        readonly IComponentContext _container;
 
-		public AutofacConsumerFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IContainer container)
-		{
-			_container = container;
-			_configurator = configurator;
-		}
+        public AutofacConsumerFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IComponentContext container)
+        {
+            _container = container;
+            _configurator = configurator;
+        }
 
-		public void ConfigureConsumer(Type messageType)
-		{
-			this.FastInvoke(new[] {messageType}, "Configure");
-		}
+        public void ConfigureConsumer(Type messageType)
+        {
+            this.FastInvoke(new[] {messageType}, "Configure");
+        }
 
-		[UsedImplicitly]
-		public void Configure<T>()
-			where T : class
-		{
-			_configurator.Consumer(new AutofacConsumerFactory<T>(_container));
-		}
-	}
+        [UsedImplicitly]
+        public void Configure<T>()
+            where T : class
+        {
+            _configurator.Consumer(new AutofacConsumerFactory<T>(_container));
+        }
+    }
 }
