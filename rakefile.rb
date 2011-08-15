@@ -1,7 +1,5 @@
 COPYRIGHT = "Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al. - All rights reserved."
 
-require 'semver'
-
 require File.dirname(__FILE__) + "/build_support/BuildUtils.rb"
 require File.dirname(__FILE__) + "/build_support/util.rb"
 
@@ -14,7 +12,7 @@ PRODUCT = 'MassTransit'
 CLR_TOOLS_VERSION = 'v4.0.30319'
 
 REVISION = 4
-build_number_base = SemVer.find.format "%M.%m.%p"
+build_number_base = "2.0.0"
 asm_version = build_number_base + "." + REVISION.to_s
 tc_build_number = '0'
 tc_build_number = ENV["BUILD_NUMBER"] unless ENV['BUILD_NUMBER'].nil?
