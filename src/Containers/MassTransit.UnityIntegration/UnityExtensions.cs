@@ -10,45 +10,67 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-using Magnum.Pipeline;
-
 namespace MassTransit
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Magnum.Extensions;
     using Microsoft.Practices.Unity;
+    using Saga;
+    using Saga.SubscriptionConfigurators;
     using SubscriptionConfigurators;
-	using UnityIntegration;
+    using UnityIntegration;
 
-	public static class UnityExtensions
-	{
-		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IUnityContainer container)
-		{
-			IList<Type> concreteTypes = container.Registrations
-				.Where(r => r.MappedToType.Implements<IConsumer>())
-				.Select(r => r.MappedToType)
-				.ToList();
+    public static class UnityExtensions
+    {
+        public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IUnityContainer container)
+        {
+            IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.Implements<ISaga>());
+            if (concreteTypes.Count > 0)
+            {
+                var consumerConfigurator = new UnityConsumerFactoryConfigurator(configurator, container);
 
-			if (concreteTypes.Count == 0)
-				return;
+                foreach (Type concreteType in concreteTypes)
+                {
+                    consumerConfigurator.ConfigureConsumer(concreteType);
+                }
+            }
 
-			var consumerConfigurator = new UnityConsumerFactoryConfigurator(configurator, container);
+            IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
+            if (sagaTypes.Count > 0)
+            {
+                var sagaConfigurator = new UnitySagaFactoryConfigurator(configurator, container);
 
-			foreach (Type concreteType in concreteTypes)
-			{
-				consumerConfigurator.ConfigureConsumer(concreteType);
-			}
-		}
+                foreach (Type type in sagaTypes)
+                {
+                    sagaConfigurator.ConfigureSaga(type);
+                }
+            }
+        }
 
-		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-			this SubscriptionBusServiceConfigurator configurator, IUnityContainer container)
-			where TConsumer : class
-		{
-			var consumerFactory = new UnityConsumerFactory<TConsumer>(container);
+        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
+            this SubscriptionBusServiceConfigurator configurator, IUnityContainer kernel)
+            where TConsumer : class
+        {
+            var consumerFactory = new UnityConsumerFactory<TConsumer>(kernel);
 
-			return configurator.Consumer(consumerFactory);
-		}
-	}
+            return configurator.Consumer(consumerFactory);
+        }
+
+        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
+            this SubscriptionBusServiceConfigurator configurator, IUnityContainer kernel)
+            where TSaga : class, ISaga
+        {
+            return configurator.Saga(kernel.Resolve<ISagaRepository<TSaga>>());
+        }
+
+        static IList<Type> FindTypes<T>(IUnityContainer container, Func<Type, bool> filter)
+        {
+            return container.Registrations
+                .Where(r => r.MappedToType.Implements<T>())
+                .Select(r => r.MappedToType)
+                .ToList();
+        }
+    }
 }
