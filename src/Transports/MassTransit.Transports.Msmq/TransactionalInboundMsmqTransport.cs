@@ -40,14 +40,6 @@ namespace MassTransit.Transports.Msmq
         {
             try
             {
-                var options = new TransactionOptions
-                    {
-                        IsolationLevel = _isolationLevel,
-                        Timeout = _transactionTimeout,
-                    };
-
-                // TODO well shit, if we can't control the transaction scope, we need a new plan
-
                 EnumerateQueue(callback, timeout);
             }
             catch (MessageQueueException ex)
@@ -60,9 +52,20 @@ namespace MassTransit.Transports.Msmq
         protected override void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout,
                                                Action<Message> receiveAction)
         {
-            using (var message = enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic))
+            var options = new TransactionOptions
+                {
+                    IsolationLevel = _isolationLevel,
+                    Timeout = _transactionTimeout,
+                };
+
+            using (var scope = new TransactionScope(TransactionScopeOption.Required, options))
             {
-                receiveAction(message);
+                using (Message message = enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic))
+                {
+                    receiveAction(message);
+                }
+
+                scope.Complete();
             }
         }
     }
