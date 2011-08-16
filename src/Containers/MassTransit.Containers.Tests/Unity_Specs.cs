@@ -14,19 +14,46 @@ namespace MassTransit.Containers.Tests
 {
     using Magnum.TestFramework;
     using Microsoft.Practices.Unity;
+    using Saga;
     using Scenarios;
     using SubscriptionConfigurators;
 
     [Scenario]
-    public class Using_a_unity_simple_consumer :
-        When_resolving_a_simple_consumer
+    public class Unity_Consumer :
+        When_registering_a_consumer
     {
         readonly IUnityContainer _container;
 
-        public Using_a_unity_simple_consumer()
+        public Unity_Consumer()
         {
             _container = new UnityContainer();
             _container.RegisterType<SimpleConsumer>();
+        }
+
+        [Finally]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+        {
+            subscriptionBusServiceConfigurator.LoadFrom(_container);
+        }
+    }
+
+    [Scenario]
+    public class Unity_Saga :
+        When_registering_a_saga
+    {
+        readonly IUnityContainer _container;
+
+        public Unity_Saga()
+        {
+            _container = new UnityContainer();
+            _container.RegisterType<SimpleSaga>();
+            _container.RegisterType(typeof (ISagaRepository<>), typeof (InMemorySagaRepository<>),
+                new ContainerControlledLifetimeManager());
         }
 
         [Finally]

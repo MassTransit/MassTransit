@@ -13,21 +13,49 @@
 namespace MassTransit.Containers.Tests
 {
     using Magnum.TestFramework;
+    using Saga;
     using Scenarios;
     using StructureMap;
     using SubscriptionConfigurators;
 
     [Scenario]
-    public class Using_a_structuremap_simple_consumer :
-        When_resolving_a_simple_consumer
+    public class StructureMap_Consumer :
+        When_registering_a_consumer
     {
         readonly IContainer _container;
 
-        public Using_a_structuremap_simple_consumer()
+        public StructureMap_Consumer()
+        {
+            _container = new Container(x => { x.ForConcreteType<SimpleConsumer>(); });
+        }
+
+        [Finally]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+        {
+            subscriptionBusServiceConfigurator.LoadFrom(_container);
+        }
+    }
+
+    [Scenario]
+    public class StructureMap_Saga :
+        When_registering_a_saga
+    {
+        readonly IContainer _container;
+
+        public StructureMap_Saga()
         {
             _container = new Container(x =>
                 {
-                    x.ForConcreteType<SimpleConsumer>();
+                    x.For(typeof (ISagaRepository<>))
+                        .Singleton()
+                        .Use(typeof (InMemorySagaRepository<>));
+
+                    x.ForConcreteType<SimpleSaga>();
                 });
         }
 

@@ -12,24 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Scenarios
 {
-    using System.Linq;
-    using Magnum.TestFramework;
-    using Testing;
+    using System;
 
-    [Scenario]
-    public abstract class When_resolving_a_simple_consumer :
-        Given_a_service_bus_instance
+    public class FirstSagaMessage :
+        CorrelatedBy<Guid>
     {
-        [When]
-        public void Resolving_a_simple_consumer()
-        {
-        }
-
-        [Then]
-        public void Should_have_a_subscription_for_the_consumer_message_type()
-        {
-            LocalBus.HasSubscription<SimpleMessageInterface>().Count()
-                .ShouldEqual(1, "No subscription for the SimpleMessageInterface was found.");
-        }
+        public Guid CorrelationId { get; set; }
     }
 }

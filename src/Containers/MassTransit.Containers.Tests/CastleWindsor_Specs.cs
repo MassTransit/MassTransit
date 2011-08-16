@@ -15,20 +15,49 @@ namespace MassTransit.Containers.Tests
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using Magnum.TestFramework;
+    using Saga;
     using Scenarios;
     using SubscriptionConfigurators;
 
     [Scenario]
-    public class Using_a_castle_simple_consumer :
-        When_resolving_a_simple_consumer
+    public class Castle_Consumer :
+        When_registering_a_consumer
     {
         readonly IWindsorContainer _container;
 
-        public Using_a_castle_simple_consumer()
+        public Castle_Consumer()
         {
             _container = new WindsorContainer();
             _container.Register(
                 Component.For<SimpleConsumer>());
+        }
+
+        [Finally]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+        {
+            subscriptionBusServiceConfigurator.LoadFrom(_container);
+        }
+    }
+
+    [Scenario]
+    public class Castle_Saga :
+        When_registering_a_saga
+    {
+        readonly IWindsorContainer _container;
+
+        public Castle_Saga()
+        {
+            _container = new WindsorContainer();
+            _container.Register(
+                Component.For<SimpleSaga>(),
+                Component.For(typeof (ISagaRepository<>))
+                    .ImplementedBy(typeof (InMemorySagaRepository<>))
+                    .LifeStyle.Singleton);
         }
 
         [Finally]
