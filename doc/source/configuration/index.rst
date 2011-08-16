@@ -12,4 +12,5 @@ which will be followed up with a few configuration examples.
     locations.rst
     transports/index.rst
     keyideas.rst
+    containers.rst
     gotchas.rst
