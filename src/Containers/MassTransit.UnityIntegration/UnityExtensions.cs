@@ -70,6 +70,7 @@ namespace MassTransit
             return container.Registrations
                 .Where(r => r.MappedToType.Implements<T>())
                 .Select(r => r.MappedToType)
+                .Where(filter)
                 .ToList();
         }
     }

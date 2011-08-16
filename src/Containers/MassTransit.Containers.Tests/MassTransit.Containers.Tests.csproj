@@ -71,7 +71,12 @@
     <Compile Include="Ninject_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Autofac_Specs.cs" />
-    <Compile Include="Scenarios\ConsumerFactory_Specs.cs" />
+    <Compile Include="Scenarios\FirstSagaMessage.cs" />
+    <Compile Include="Scenarios\SecondSagaMessage.cs" />
+    <Compile Include="Scenarios\SimpleSaga.cs" />
+    <Compile Include="Scenarios\ThirdSagaMessage.cs" />
+    <Compile Include="Scenarios\When_registering_a_saga.cs" />
+    <Compile Include="Scenarios\When_registering_a_consumer.cs" />
     <Compile Include="Scenarios\Given_a_service_bus_instance.cs" />
     <Compile Include="Scenarios\SimpleConsumer.cs" />
     <Compile Include="Scenarios\SimpleMessageClass.cs" />

@@ -13,19 +13,18 @@
 namespace MassTransit.Containers.Tests
 {
     using Magnum.TestFramework;
-    using NUnit.Framework;
     using Ninject;
+    using Saga;
     using Scenarios;
     using SubscriptionConfigurators;
 
     [Scenario]
-    [Explicit("Unfortunately, Ninject does not expose enough metadata to automatically load consumers")]
-    public class Using_a_ninject_simple_consumer :
-        When_resolving_a_simple_consumer
+    public class Ninject_Consumer :
+        When_registering_a_consumer
     {
         readonly IKernel _container;
 
-        public Using_a_ninject_simple_consumer()
+        public Ninject_Consumer()
         {
             _container = new StandardKernel();
             _container.Bind<SimpleConsumer>()
@@ -40,7 +39,37 @@ namespace MassTransit.Containers.Tests
 
         protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
         {
-            subscriptionBusServiceConfigurator.LoadFrom(_container);
+            // we have to do this explicitly, since the metadata is not exposed by Ninject
+            subscriptionBusServiceConfigurator.Consumer<SimpleConsumer>(_container);
+        }
+    }
+
+    [Scenario]
+    public class Ninject_Saga :
+        When_registering_a_saga
+    {
+        readonly IKernel _container;
+
+        public Ninject_Saga()
+        {
+            _container = new StandardKernel();
+            _container.Bind<SimpleSaga>()
+                .ToSelf();
+            _container.Bind(typeof (ISagaRepository<>))
+                .To(typeof (InMemorySagaRepository<>))
+                .InSingletonScope();
+        }
+
+        [Finally]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+        {
+            // we have to do this explicitly, since the metadata is not exposed by Ninject
+            subscriptionBusServiceConfigurator.Saga<SimpleSaga>(_container);
         }
     }
 }

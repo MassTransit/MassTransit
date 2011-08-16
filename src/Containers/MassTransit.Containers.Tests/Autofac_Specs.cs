@@ -14,19 +14,49 @@ namespace MassTransit.Containers.Tests
 {
     using Autofac;
     using Magnum.TestFramework;
+    using Saga;
     using Scenarios;
     using SubscriptionConfigurators;
 
     [Scenario]
-    public class Using_an_autofac_simple_consumer :
-        When_resolving_a_simple_consumer
+    public class Autofac_Consumer :
+        When_registering_a_consumer
     {
         readonly IContainer _container;
 
-        public Using_an_autofac_simple_consumer()
+        public Autofac_Consumer()
         {
             var builder = new ContainerBuilder();
             builder.RegisterType<SimpleConsumer>();
+            _container = builder.Build();
+        }
+
+        [Finally]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+        {
+            subscriptionBusServiceConfigurator.LoadFrom(_container);
+        }
+    }
+
+    [Scenario]
+    public class Autofac_Saga :
+        When_registering_a_saga
+    {
+        readonly IContainer _container;
+
+        public Autofac_Saga()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterGeneric(typeof(InMemorySagaRepository<>))
+                .As(typeof (ISagaRepository<>))
+                .SingleInstance();
+            builder.RegisterType<SimpleSaga>();
+
             _container = builder.Build();
         }
 
