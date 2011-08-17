@@ -12,3 +12,4 @@ How MassTransit Works
     valueadd.rst
     saga.rst
     routing.rst
+    controlbus.rst
