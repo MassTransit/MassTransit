@@ -33,7 +33,22 @@ namespace MassTransit.Context
 			get { throw CreateException(); }
 		}
 
-		public Uri SourceAddress
+	    public string RequestId
+	    {
+            get { throw CreateException(); }
+	    }
+
+	    public string ConversationId
+	    {
+	        get { throw CreateException(); }
+	    }
+
+	    public string CorrelationId
+	    {
+	        get { throw CreateException(); }
+	    }
+
+	    public Uri SourceAddress
 		{
 			get { throw CreateException(); }
 		}

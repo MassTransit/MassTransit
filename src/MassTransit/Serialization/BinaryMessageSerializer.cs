@@ -12,149 +12,164 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Runtime.Remoting.Messaging;
-	using System.Runtime.Serialization.Formatters.Binary;
-	using Context;
-	using log4net;
-	using Util;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Runtime.Remoting.Messaging;
+    using System.Runtime.Serialization.Formatters.Binary;
+    using Util;
+    using log4net;
 
-	/// <summary>
-	/// The binary message serializer used the .NET BinaryFormatter to serialize
-	/// message content. 
-	/// </summary>
-	public class BinaryMessageSerializer :
-		IMessageSerializer
-	{
-		const string ContentTypeHeaderValue = "application/vnd.masstransit+binary";
+    /// <summary>
+    /// The binary message serializer used the .NET BinaryFormatter to serialize
+    /// message content. 
+    /// </summary>
+    public class BinaryMessageSerializer :
+        IMessageSerializer
+    {
+        const string ContentTypeHeaderValue = "application/vnd.masstransit+binary";
 
-		const string ConversationIdKey = "ConversationId";
-		const string CorrelationIdKey = "CorrelationId";
-		const string DestinationAddressKey = "DestinationAddress";
-		const string ExpirationTimeKey = "Expiration";
-		const string FaultAddressKey = "FaultAddress";
-		const string MessageIdKey = "MessageId";
-		const string MessageTypeKey = "MessageType";
-		const string NetworkKey = "Network";
-		const string ResponseAddressKey = "ResponseAddress";
-		const string RetryCountKey = "RetryCount";
-		const string SourceAddressKey = "SourceAddress";
+        const string ConversationIdKey = "ConversationId";
+        const string CorrelationIdKey = "CorrelationId";
+        const string DestinationAddressKey = "DestinationAddress";
+        const string ExpirationTimeKey = "Expiration";
+        const string FaultAddressKey = "FaultAddress";
+        const string MessageIdKey = "MessageId";
+        const string MessageTypeKey = "MessageType";
+        const string NetworkKey = "Network";
+        const string RequestIdKey = "RequestId";
+        const string ResponseAddressKey = "ResponseAddress";
+        const string RetryCountKey = "RetryCount";
+        const string SourceAddressKey = "SourceAddress";
 
-		static readonly BinaryFormatter _formatter = new BinaryFormatter();
-		static readonly ILog _log = LogManager.GetLogger(typeof (BinaryMessageSerializer));
+        static readonly BinaryFormatter _formatter = new BinaryFormatter();
+        static readonly ILog _log = LogManager.GetLogger(typeof (BinaryMessageSerializer));
 
-		public string ContentType
-		{
-			get { return ContentTypeHeaderValue; }
-		}
+        public string ContentType
+        {
+            get { return ContentTypeHeaderValue; }
+        }
 
-		public void Serialize<T>(Stream output, ISendContext<T> context)
-			where T : class
-		{
-			CheckConvention.EnsureSerializable(context.Message);
+        public void Serialize<T>(Stream output, ISendContext<T> context)
+            where T : class
+        {
+            CheckConvention.EnsureSerializable(context.Message);
 
-			_formatter.Serialize(output, context.Message, GetHeaders(context));
+            _formatter.Serialize(output, context.Message, GetHeaders(context));
 
-			context.SetContentType(ContentTypeHeaderValue);
-		}
+            context.SetContentType(ContentTypeHeaderValue);
+        }
 
-		public void Deserialize(IReceiveContext context)
-		{
-			object obj = _formatter.Deserialize(context.BodyStream, headers => DeserializeHeaderHandler(headers, context));
+        public void Deserialize(IReceiveContext context)
+        {
+            object obj = _formatter.Deserialize(context.BodyStream,
+                headers => DeserializeHeaderHandler(headers, context));
 
-			context.SetContentType(ContentTypeHeaderValue);
-			context.SetMessageTypeConverter(new StaticMessageTypeConverter(obj));
+            context.SetContentType(ContentTypeHeaderValue);
+            context.SetMessageTypeConverter(new StaticMessageTypeConverter(obj));
+        }
 
-		}
+        static Header[] GetHeaders(IMessageContext context)
+        {
+            var headers = new List<Header>();
 
-		static Header[] GetHeaders(IMessageContext context)
-		{
-			var headers = new List<Header>();
+            headers.Add(MessageTypeKey, context.MessageType);
+            headers.Add(RequestIdKey, context.RequestId);
+            headers.Add(ConversationIdKey, context.ConversationId);
+            headers.Add(CorrelationIdKey, context.CorrelationId);
 
-			headers.Add(MessageTypeKey, context.MessageType);
+            headers.Add(SourceAddressKey, context.SourceAddress);
+            headers.Add(DestinationAddressKey, context.DestinationAddress);
+            headers.Add(ResponseAddressKey, context.ResponseAddress);
+            headers.Add(FaultAddressKey, context.FaultAddress);
+            headers.Add(NetworkKey, context.Network);
+            headers.Add(RetryCountKey, context.RetryCount);
 
-			headers.Add(SourceAddressKey, context.SourceAddress);
-			headers.Add(DestinationAddressKey, context.DestinationAddress);
-			headers.Add(ResponseAddressKey, context.ResponseAddress);
-			headers.Add(FaultAddressKey, context.FaultAddress);
-			headers.Add(NetworkKey, context.Network);
-			headers.Add(RetryCountKey, context.RetryCount);
+            if (context.ExpirationTime.HasValue)
+                headers.Add(ExpirationTimeKey, context.ExpirationTime.Value);
 
-			if (context.ExpirationTime.HasValue)
-				headers.Add(ExpirationTimeKey, context.ExpirationTime.Value);
+            return headers.ToArray();
+        }
 
-			return headers.ToArray();
-		}
+        static object DeserializeHeaderHandler(Header[] headers, IReceiveContext context)
+        {
+            if (headers == null)
+                return null;
 
-		static object DeserializeHeaderHandler(Header[] headers, IReceiveContext context)
-		{
-			if (headers == null)
-				return null;
+            for (int i = 0; i < headers.Length; i++)
+            {
+                MapNameValuePair(context, headers[i]);
+            }
 
-			for (int i = 0; i < headers.Length; i++)
-			{
-				MapNameValuePair(context, headers[i]);
-			}
+            return null;
+        }
 
-			return null;
-		}
+        static void MapNameValuePair(IReceiveContext context, Header header)
+        {
+            switch (header.Name)
+            {
+                case SourceAddressKey:
+                    context.SetSourceAddress(GetAsUri(header.Value));
+                    break;
 
-		static void MapNameValuePair(IReceiveContext context, Header header)
-		{
-			switch (header.Name)
-			{
-				case SourceAddressKey:
-					context.SetSourceAddress(GetAsUri(header.Value));
-					break;
+                case ResponseAddressKey:
+                    context.SetResponseAddress(GetAsUri(header.Value));
+                    break;
 
-				case ResponseAddressKey:
-					context.SetResponseAddress(GetAsUri(header.Value));
-					break;
+                case DestinationAddressKey:
+                    context.SetDestinationAddress(GetAsUri(header.Value));
+                    break;
 
-				case DestinationAddressKey:
-					context.SetDestinationAddress(GetAsUri(header.Value));
-					break;
+                case FaultAddressKey:
+                    context.SetFaultAddress(GetAsUri(header.Value));
+                    break;
 
-				case FaultAddressKey:
-					context.SetFaultAddress(GetAsUri(header.Value));
-					break;
+                case RequestIdKey:
+                    context.SetRequestId((string) header.Value);
+                    break;
 
-				case RetryCountKey:
-					context.SetRetryCount((int) header.Value);
-					break;
+                case ConversationIdKey:
+                    context.SetConversationId((string) header.Value);
+                    break;
 
-				case MessageTypeKey:
-					context.SetMessageType((string) header.Value);
-					break;
+                case CorrelationIdKey:
+                    context.SetCorrelationId((string) header.Value);
+                    break;
 
-				case NetworkKey:
-					context.SetNetwork((string) header.Value);
-					break;
+                case RetryCountKey:
+                    context.SetRetryCount((int) header.Value);
+                    break;
 
-				case ExpirationTimeKey:
-					context.SetExpirationTime((DateTime) header.Value);
-					break;
+                case MessageTypeKey:
+                    context.SetMessageType((string) header.Value);
+                    break;
 
-				default:
-					if (header.MustUnderstand)
-					{
-						_log.WarnFormat("The header was not understood: " + header.Name);
-					}
-					break;
-			}
-		}
+                case NetworkKey:
+                    context.SetNetwork((string) header.Value);
+                    break;
 
-		static Uri GetAsUri(object value)
-		{
-			if (value == null)
-				return null;
+                case ExpirationTimeKey:
+                    context.SetExpirationTime((DateTime) header.Value);
+                    break;
 
-			if (value.GetType() != typeof (Uri))
-				return null;
+                default:
+                    if (header.MustUnderstand)
+                    {
+                        _log.WarnFormat("The header was not understood: " + header.Name);
+                    }
+                    break;
+            }
+        }
 
-			return (Uri) value;
-		}
-	}
+        static Uri GetAsUri(object value)
+        {
+            if (value == null)
+                return null;
+
+            if (value.GetType() != typeof (Uri))
+                return null;
+
+            return (Uri) value;
+        }
+    }
 }

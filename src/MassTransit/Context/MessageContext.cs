@@ -20,6 +20,9 @@ namespace MassTransit.Context
 		public string MessageId { get; private set; }
 		public string MessageType { get; private set; }
 		public string ContentType { get; private set; }
+        public string RequestId { get; private set; }
+        public string ConversationId { get; private set; }
+        public string CorrelationId { get; private set; }
 		public Uri SourceAddress { get; private set; }
 		public Uri InputAddress { get; private set; }
 		public Uri DestinationAddress { get; private set; }
@@ -33,6 +36,21 @@ namespace MassTransit.Context
 		{
 			MessageId = value;
 		}
+
+        public void SetRequestId(string value)
+        {
+            RequestId = value;
+        }
+
+        public void SetConversationId(string value)
+        {
+            ConversationId = value;
+        }
+
+        public void SetCorrelationId(string value)
+        {
+            CorrelationId = value;
+        }
 
 		public void SetMessageType(string value)
 		{
@@ -88,6 +106,9 @@ namespace MassTransit.Context
 		{
 			SetMessageType(context.MessageType);
 			SetMessageId(context.MessageId);
+		    SetRequestId(context.RequestId);
+		    SetConversationId(context.ConversationId);
+		    SetCorrelationId(context.CorrelationId);
 			SetSourceAddress(context.SourceAddress);
 			SetDestinationAddress(context.DestinationAddress);
 			SetResponseAddress(context.ResponseAddress);

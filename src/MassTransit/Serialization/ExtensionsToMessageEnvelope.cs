@@ -12,46 +12,51 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System;
-	using Context;
-	using Util;
+    using System;
+    using Util;
 
-	public static class ExtensionsToMessageEnvelope
-	{
-		public static void SetUsingMessageEnvelope(this IReceiveContext context, MessageEnvelopeBase envelope)
-		{
-			context.SetSourceAddress(envelope.SourceAddress.ToUriOrNull());
-			context.SetDestinationAddress(envelope.DestinationAddress.ToUriOrNull());
-			context.SetResponseAddress(envelope.ResponseAddress.ToUriOrNull());
-			context.SetFaultAddress(envelope.FaultAddress.ToUriOrNull());
-			context.SetNetwork(envelope.Network);
-			context.SetRetryCount(envelope.RetryCount);
-			context.SetMessageType(envelope.MessageType);
-			if (envelope.ExpirationTime.HasValue)
-				context.SetExpirationTime(envelope.ExpirationTime.Value);
-		}
+    public static class ExtensionsToMessageEnvelope
+    {
+        public static void SetUsingMessageEnvelope(this IReceiveContext context, MessageEnvelopeBase envelope)
+        {
+            context.SetRequestId(envelope.RequestId);
+            context.SetConversationId(envelope.ConversationId);
+            context.SetCorrelationId(envelope.CorrelationId);
+            context.SetSourceAddress(envelope.SourceAddress.ToUriOrNull());
+            context.SetDestinationAddress(envelope.DestinationAddress.ToUriOrNull());
+            context.SetResponseAddress(envelope.ResponseAddress.ToUriOrNull());
+            context.SetFaultAddress(envelope.FaultAddress.ToUriOrNull());
+            context.SetNetwork(envelope.Network);
+            context.SetRetryCount(envelope.RetryCount);
+            context.SetMessageType(envelope.MessageType);
+            if (envelope.ExpirationTime.HasValue)
+                context.SetExpirationTime(envelope.ExpirationTime.Value);
+        }
 
-		public static void SetUsingContext(this MessageEnvelopeBase envelope, ISendContext headers)
-		{
-			envelope.SourceAddress = headers.SourceAddress.ToStringOrNull() ?? envelope.SourceAddress;
-			envelope.DestinationAddress = headers.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
-			envelope.ResponseAddress = headers.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
-			envelope.FaultAddress = headers.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
-			envelope.Network = headers.Network;
-			envelope.RetryCount = headers.RetryCount;
-			envelope.MessageType = headers.MessageType ?? envelope.MessageType;
-			if (headers.ExpirationTime.HasValue)
-				envelope.ExpirationTime = headers.ExpirationTime.Value;
-		}
+        public static void SetUsingContext(this MessageEnvelopeBase envelope, ISendContext headers)
+        {
+            envelope.RequestId = headers.RequestId;
+            envelope.ConversationId = headers.ConversationId;
+            envelope.CorrelationId = headers.CorrelationId;
+            envelope.SourceAddress = headers.SourceAddress.ToStringOrNull() ?? envelope.SourceAddress;
+            envelope.DestinationAddress = headers.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
+            envelope.ResponseAddress = headers.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
+            envelope.FaultAddress = headers.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
+            envelope.Network = headers.Network;
+            envelope.RetryCount = headers.RetryCount;
+            envelope.MessageType = headers.MessageType ?? envelope.MessageType;
+            if (headers.ExpirationTime.HasValue)
+                envelope.ExpirationTime = headers.ExpirationTime.Value;
+        }
 
-		public static string ToStringOrNull(this Uri uri)
-		{
-			return uri == null ? null : uri.ToString();
-		}
+        public static string ToStringOrNull(this Uri uri)
+        {
+            return uri == null ? null : uri.ToString();
+        }
 
-		public static Uri ToUriOrNull(this string uriString)
-		{
-			return string.IsNullOrEmpty(uriString) ? null : uriString.ToUri();
-		}
-	}
+        public static Uri ToUriOrNull(this string uriString)
+        {
+            return string.IsNullOrEmpty(uriString) ? null : uriString.ToUri();
+        }
+    }
 }

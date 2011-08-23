@@ -42,6 +42,21 @@ namespace MassTransit
 		/// </summary>
 		string ContentType { get; }
 
+        /// <summary>
+        /// The request identifier this message is either a request or a response
+        /// </summary>
+	    string RequestId { get; }
+
+        /// <summary>
+        /// The conversation identifier is a higher-level identifier for trace/correlation of conversations
+        /// </summary>
+	    string ConversationId { get; }
+
+        /// <summary>
+        /// If the message is CorrelatedBy, this header contains the string version of the correlation identifier
+        /// </summary>
+	    string CorrelationId { get;  }
+
 		/// <summary>
 		/// The address from which this message originated
 		/// </summary>
