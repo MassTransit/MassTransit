@@ -12,84 +12,83 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System;
-	using System.IO;
-	using System.Runtime.Serialization;
-	using Context;
-	using Custom;
+    using System;
+    using System.IO;
+    using System.Runtime.Serialization;
+    using Custom;
 
-	public class VersionOneXmlMessageSerializer :
-		IMessageSerializer
-	{
-		const string ContentTypeHeaderValue = "application/vnd.masstransit+xmlv1";
+    public class VersionOneXmlMessageSerializer :
+        IMessageSerializer
+    {
+        const string ContentTypeHeaderValue = "application/vnd.masstransit+xmlv1";
 
-		static readonly IXmlSerializer _serializer = new CustomXmlSerializer();
+        static readonly IXmlSerializer _serializer = new CustomXmlSerializer();
 
-		public string ContentType
-		{
-			get { return ContentTypeHeaderValue; }
-		}
+        public string ContentType
+        {
+            get { return ContentTypeHeaderValue; }
+        }
 
-		public void Serialize<T>(Stream stream, ISendContext<T> context)
-			where T : class
-		{
-			try
-			{
-				context.SetContentType(ContentTypeHeaderValue);
+        public void Serialize<T>(Stream stream, ISendContext<T> context)
+            where T : class
+        {
+            try
+            {
+                context.SetContentType(ContentTypeHeaderValue);
 
-				XmlMessageEnvelope envelope = XmlMessageEnvelope.Create(context);
+                XmlMessageEnvelope envelope = XmlMessageEnvelope.Create(context);
 
-				_serializer.Serialize(stream, envelope, (declaringType, propertyType, value) =>
-					{
-						if (declaringType == typeof (XmlMessageEnvelope) && propertyType == typeof (object))
-							return typeof (T);
+                _serializer.Serialize(stream, envelope, (declaringType, propertyType, value) =>
+                    {
+                        if (declaringType == typeof (XmlMessageEnvelope) && propertyType == typeof (object))
+                            return typeof (T);
 
-						if (propertyType == typeof (object))
-							return value.GetType();
+                        if (propertyType == typeof (object))
+                            return value.GetType();
 
-						return propertyType;
-					});
-			}
-			catch (SerializationException)
-			{
-				throw;
-			}
-			catch (Exception ex)
-			{
-				throw new SerializationException("Failed to serialize message", ex);
-			}
-		}
+                        return propertyType;
+                    });
+            }
+            catch (SerializationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new SerializationException("Failed to serialize message", ex);
+            }
+        }
 
-		public void Deserialize(IReceiveContext context)
-		{
-			try
-			{
-				object message = _serializer.Deserialize(context.BodyStream);
+        public void Deserialize(IReceiveContext context)
+        {
+            try
+            {
+                object message = _serializer.Deserialize(context.BodyStream);
 
-				if (message == null)
-					throw new SerializationException("Could not deserialize message.");
+                if (message == null)
+                    throw new SerializationException("Could not deserialize message.");
 
-				context.SetContentType(ContentTypeHeaderValue);
+                context.SetContentType(ContentTypeHeaderValue);
 
-				if (message is XmlMessageEnvelope)
-				{
-					var envelope = message as XmlMessageEnvelope;
+                if (message is XmlMessageEnvelope)
+                {
+                    var envelope = message as XmlMessageEnvelope;
 
-					context.SetUsingMessageEnvelope(envelope);
-					context.SetMessageTypeConverter(new StaticMessageTypeConverter(envelope.Message));
-					return;
-				}
+                    context.SetUsingMessageEnvelope(envelope);
+                    context.SetMessageTypeConverter(new StaticMessageTypeConverter(envelope.Message));
+                    return;
+                }
 
-				context.SetMessageTypeConverter(new StaticMessageTypeConverter(message));
-			}
-			catch (SerializationException)
-			{
-				throw;
-			}
-			catch (Exception ex)
-			{
-				throw new SerializationException("Failed to serialize message", ex);
-			}
-		}
-	}
+                context.SetMessageTypeConverter(new StaticMessageTypeConverter(message));
+            }
+            catch (SerializationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new SerializationException("Failed to serialize message", ex);
+            }
+        }
+    }
 }

@@ -12,47 +12,47 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Context;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-	public class Envelope
-	{
-		Envelope(object message, IEnumerable<Type> messageTypes)
-		{
-			Headers = new Dictionary<string, string>();
-			MessageType = new List<string>(messageTypes.Select(type => new MessageUrn(type).ToString()));
-			Message = message;
-		}
+    public class Envelope
+    {
+        Envelope(object message, IEnumerable<Type> messageTypes)
+        {
+            Headers = new Dictionary<string, string>();
+            MessageType = new List<string>(messageTypes.Select(type => new MessageUrn(type).ToString()));
+            Message = message;
+        }
 
-		protected Envelope()
-		{
-			Headers = new Dictionary<string, string>();
-			MessageType = new List<string>();
-		}
+        protected Envelope()
+        {
+            Headers = new Dictionary<string, string>();
+            MessageType = new List<string>();
+        }
 
-		public string ConversationId { get; set; }
-		public string CorrelationId { get; set; }
-		public string DestinationAddress { get; set; }
-		public DateTime? ExpirationTime { get; set; }
-		public string FaultAddress { get; set; }
-		public IDictionary<string, string> Headers { get; set; }
-		public object Message { get; set; }
-		public string MessageId { get; set; }
-		public IList<string> MessageType { get; set; }
-		public string Network { get; set; }
-		public string ResponseAddress { get; set; }
-		public int RetryCount { get; set; }
-		public string SourceAddress { get; set; }
+        public string RequestId { get; set; }
+        public string ConversationId { get; set; }
+        public string CorrelationId { get; set; }
+        public string DestinationAddress { get; set; }
+        public DateTime? ExpirationTime { get; set; }
+        public string FaultAddress { get; set; }
+        public IDictionary<string, string> Headers { get; set; }
+        public object Message { get; set; }
+        public string MessageId { get; set; }
+        public IList<string> MessageType { get; set; }
+        public string Network { get; set; }
+        public string ResponseAddress { get; set; }
+        public int RetryCount { get; set; }
+        public string SourceAddress { get; set; }
 
-		public static Envelope Create<T>(ISendContext<T> context)
-			where T : class
-		{
-			var envelope = new Envelope(context.Message, context.Message.GetType().GetMessageTypes());
-			envelope.SetUsingContext(context);
+        public static Envelope Create<T>(ISendContext<T> context)
+            where T : class
+        {
+            var envelope = new Envelope(context.Message, context.Message.GetType().GetMessageTypes());
+            envelope.SetUsingContext(context);
 
-			return envelope;
-		}
-	}
+            return envelope;
+        }
+    }
 }

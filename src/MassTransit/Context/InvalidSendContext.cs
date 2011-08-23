@@ -12,95 +12,110 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-	using System;
-	using System.IO;
+    using System;
+    using System.IO;
 
-	public class InvalidSendContext :
-		ISendContext
-	{
-		public string MessageId
-		{
-			get { throw CreateException(); }
-		}
+    public class InvalidSendContext :
+        ISendContext
+    {
+        public string MessageId
+        {
+            get { throw CreateException(); }
+        }
 
-		public string MessageType
-		{
-			get { throw CreateException(); }
-		}
+        public string MessageType
+        {
+            get { throw CreateException(); }
+        }
 
-		public Uri SourceAddress
-		{
-			get { throw CreateException(); }
-		}
+        public string CorrelationId
+        {
+            get { throw CreateException(); }
+        }
 
-		public Uri InputAddress
-		{
-			get { throw CreateException(); }
-		}
+        public Uri SourceAddress
+        {
+            get { throw CreateException(); }
+        }
 
-		public Uri DestinationAddress
-		{
-			get { throw CreateException(); }
-		}
+        public Uri InputAddress
+        {
+            get { throw CreateException(); }
+        }
 
-		public Uri ResponseAddress
-		{
-			get { throw CreateException(); }
-		}
+        public Uri DestinationAddress
+        {
+            get { throw CreateException(); }
+        }
 
-		public Uri FaultAddress
-		{
-			get { throw CreateException(); }
-		}
+        public Uri ResponseAddress
+        {
+            get { throw CreateException(); }
+        }
 
-		public string Network
-		{
-			get { throw CreateException(); }
-		}
+        public Uri FaultAddress
+        {
+            get { throw CreateException(); }
+        }
 
-		public DateTime? ExpirationTime
-		{
-			get { throw CreateException(); }
-		}
+        public string Network
+        {
+            get { throw CreateException(); }
+        }
 
-		public int RetryCount
-		{
-			get { throw CreateException(); }
-		}
+        public DateTime? ExpirationTime
+        {
+            get { throw CreateException(); }
+        }
 
-		public Guid Id
-		{
-			get { throw CreateException(); }
-		}
+        public int RetryCount
+        {
+            get { throw CreateException(); }
+        }
 
-		public Type DeclaringMessageType
-		{
-			get { throw CreateException(); }
-		}
+        public Guid Id
+        {
+            get { throw CreateException(); }
+        }
 
-		public string ContentType
-		{
-			get { throw CreateException(); }
-		}
+        public Type DeclaringMessageType
+        {
+            get { throw CreateException(); }
+        }
 
-		public void SerializeTo(Stream stream)
-		{
-			throw CreateException();
-		}
+        public string ContentType
+        {
+            get { throw CreateException(); }
+        }
 
-		public bool TryGetContext<T>(out IBusPublishContext<T> context) where T : class
-		{
-			throw CreateException();
-		}
+        public string RequestId
+        {
+            get { throw CreateException(); }
+        }
 
-		public void NotifySend(IEndpointAddress address)
-		{
-			throw CreateException();
-		}
+        public string ConversationId
+        {
+            get { throw CreateException(); }
+        }
 
-		static ContextException CreateException()
-		{
-			return new ContextException("Send/Publish context is only available when consuming a message");
-		}
-	}
+        public void SerializeTo(Stream stream)
+        {
+            throw CreateException();
+        }
+
+        public bool TryGetContext<T>(out IBusPublishContext<T> context) where T : class
+        {
+            throw CreateException();
+        }
+
+        public void NotifySend(IEndpointAddress address)
+        {
+            throw CreateException();
+        }
+
+        static ContextException CreateException()
+        {
+            return new ContextException("Send/Publish context is only available when consuming a message");
+        }
+    }
 }

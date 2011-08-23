@@ -37,6 +37,11 @@ namespace MassTransit.Serialization
         public string MessageId { get; set; }
 
         /// <summary>
+        /// The request identifier
+        /// </summary>
+        public string RequestId { get; set; }
+
+        /// <summary>
         ///   A higher-level conversation identifier that goes above any type of saga or request/response
         /// </summary>
         public string ConversationId { get; set; }

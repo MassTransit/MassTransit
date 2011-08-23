@@ -22,6 +22,12 @@ namespace MassTransit
 	{
 		void SetMessageType(string messageType);
 
+	    void SetRequestId(string value);
+
+	    void SetConversationId(string value);
+
+	    void SetCorrelationId(string value);
+
 		void SetSourceAddress(Uri uri);
 
 		void SetDestinationAddress(Uri uri);

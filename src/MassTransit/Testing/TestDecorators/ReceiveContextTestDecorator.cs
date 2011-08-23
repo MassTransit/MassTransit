@@ -12,226 +12,256 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.TestDecorators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using Context;
-	using Scenarios;
-	using Serialization;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using Context;
+    using Scenarios;
+    using Serialization;
 
-	public class ReceiveContextTestDecorator :
-		IReceiveContext
-	{
-		readonly IReceiveContext _context;
-		readonly EndpointTestScenarioImpl _scenario;
+    public class ReceiveContextTestDecorator :
+        IReceiveContext
+    {
+        readonly IReceiveContext _context;
+        readonly EndpointTestScenarioImpl _scenario;
 
-		public ReceiveContextTestDecorator(IReceiveContext context, EndpointTestScenarioImpl scenario)
-		{
-			_context = context;
-			_scenario = scenario;
-		}
+        public ReceiveContextTestDecorator(IReceiveContext context, EndpointTestScenarioImpl scenario)
+        {
+            _context = context;
+            _scenario = scenario;
+        }
 
-		public string MessageId
-		{
-			get { return _context.MessageId; }
-		}
+        public void SetRequestId(string value)
+        {
+            _context.SetRequestId(value);
+        }
 
-		public string MessageType
-		{
-			get { return _context.MessageType; }
-		}
+        public void SetConversationId(string value)
+        {
+            _context.SetConversationId(value);
+        }
 
-		public string ContentType
-		{
-			get { return _context.ContentType; }
-		}
+        public void SetCorrelationId(string value)
+        {
+            _context.SetCorrelationId(value);
+        }
 
-		public Uri SourceAddress
-		{
-			get { return _context.SourceAddress; }
-		}
+        public string RequestId
+        {
+            get { return _context.RequestId; }
+        }
 
-		public Uri InputAddress
-		{
-			get { return _context.InputAddress; }
-		}
+        public string ConversationId
+        {
+            get { return _context.ConversationId; }
+        }
 
-		public Uri DestinationAddress
-		{
-			get { return _context.DestinationAddress; }
-		}
+        public string CorrelationId
+        {
+            get { return _context.CorrelationId; }
+        }
 
-		public Uri ResponseAddress
-		{
-			get { return _context.ResponseAddress; }
-		}
+        public string MessageId
+        {
+            get { return _context.MessageId; }
+        }
 
-		public Uri FaultAddress
-		{
-			get { return _context.FaultAddress; }
-		}
+        public string MessageType
+        {
+            get { return _context.MessageType; }
+        }
 
-		public string Network
-		{
-			get { return _context.Network; }
-		}
+        public string ContentType
+        {
+            get { return _context.ContentType; }
+        }
 
-		public DateTime? ExpirationTime
-		{
-			get { return _context.ExpirationTime; }
-		}
+        public Uri SourceAddress
+        {
+            get { return _context.SourceAddress; }
+        }
 
-		public int RetryCount
-		{
-			get { return _context.RetryCount; }
-		}
+        public Uri InputAddress
+        {
+            get { return _context.InputAddress; }
+        }
 
-		public IReceiveContext BaseContext
-		{
-			get { return _context.BaseContext; }
-		}
+        public Uri DestinationAddress
+        {
+            get { return _context.DestinationAddress; }
+        }
 
-		public IServiceBus Bus
-		{
-			get { return _context.Bus; }
-		}
+        public Uri ResponseAddress
+        {
+            get { return _context.ResponseAddress; }
+        }
 
-		public IEndpoint Endpoint
-		{
-			get { return _context.Endpoint; }
-		}
+        public Uri FaultAddress
+        {
+            get { return _context.FaultAddress; }
+        }
 
-		public bool TryGetContext<T>(out IConsumeContext<T> context) where T : class
-		{
-			return _context.TryGetContext(out context);
-		}
+        public string Network
+        {
+            get { return _context.Network; }
+        }
 
-		public void Respond<T>(T message, Action<ISendContext<T>> contextCallback) where T : class
-		{
-			_context.Respond(message, contextCallback);
-		}
+        public DateTime? ExpirationTime
+        {
+            get { return _context.ExpirationTime; }
+        }
 
-		public void SetContentType(string value)
-		{
-			_context.SetContentType(value);
-		}
+        public int RetryCount
+        {
+            get { return _context.RetryCount; }
+        }
 
-		public void SetMessageId(string value)
-		{
-			_context.SetMessageId(value);
-		}
+        public IReceiveContext BaseContext
+        {
+            get { return _context.BaseContext; }
+        }
 
-		public void SetInputAddress(Uri uri)
-		{
-			_context.SetInputAddress(uri);
-		}
+        public IServiceBus Bus
+        {
+            get { return _context.Bus; }
+        }
 
-		public void SetEndpoint(IEndpoint endpoint)
-		{
-			_context.SetEndpoint(endpoint);
-		}
+        public IEndpoint Endpoint
+        {
+            get { return _context.Endpoint; }
+        }
 
-		public void SetBus(IServiceBus bus)
-		{
-			var busValue = _scenario.GetDecoratedBus(bus);
+        public bool TryGetContext<T>(out IConsumeContext<T> context) where T : class
+        {
+            return _context.TryGetContext(out context);
+        }
 
-			_context.SetBus(busValue);
-		}
+        public void Respond<T>(T message, Action<ISendContext<T>> contextCallback) where T : class
+        {
+            _context.Respond(message, contextCallback);
+        }
 
-		public void SetSourceAddress(Uri uri)
-		{
-			_context.SetSourceAddress(uri);
-		}
+        public void SetContentType(string value)
+        {
+            _context.SetContentType(value);
+        }
 
-		public void SetDestinationAddress(Uri uri)
-		{
-			_context.SetDestinationAddress(uri);
-		}
+        public void SetMessageId(string value)
+        {
+            _context.SetMessageId(value);
+        }
 
-		public void SetResponseAddress(Uri uri)
-		{
-			_context.SetResponseAddress(uri);
-		}
+        public void SetInputAddress(Uri uri)
+        {
+            _context.SetInputAddress(uri);
+        }
 
-		public void SetFaultAddress(Uri uri)
-		{
-			_context.SetFaultAddress(uri);
-		}
+        public void SetEndpoint(IEndpoint endpoint)
+        {
+            _context.SetEndpoint(endpoint);
+        }
 
-		public void SetNetwork(string value)
-		{
-			_context.SetNetwork(value);
-		}
+        public void SetBus(IServiceBus bus)
+        {
+            IServiceBus busValue = _scenario.GetDecoratedBus(bus);
 
-		public void SetRetryCount(int retryCount)
-		{
-			_context.SetRetryCount(retryCount);
-		}
+            _context.SetBus(busValue);
+        }
 
-		public void SetExpirationTime(DateTime value)
-		{
-			_context.SetExpirationTime(value);
-		}
+        public void SetSourceAddress(Uri uri)
+        {
+            _context.SetSourceAddress(uri);
+        }
 
-		public void SetMessageType(string messageType)
-		{
-			_context.SetMessageType(messageType);
-		}
+        public void SetDestinationAddress(Uri uri)
+        {
+            _context.SetDestinationAddress(uri);
+        }
 
-		public void SetBodyStream(Stream stream)
-		{
-			_context.SetBodyStream(stream);
-		}
+        public void SetResponseAddress(Uri uri)
+        {
+            _context.SetResponseAddress(uri);
+        }
 
-		public void CopyBodyTo(Stream stream)
-		{
-			_context.CopyBodyTo(stream);
-		}
+        public void SetFaultAddress(Uri uri)
+        {
+            _context.SetFaultAddress(uri);
+        }
 
-		public Stream BodyStream
-		{
-			get { return _context.BodyStream; }
-		}
+        public void SetNetwork(string value)
+        {
+            _context.SetNetwork(value);
+        }
 
-		public void SetMessageTypeConverter(IMessageTypeConverter messageTypeConverter)
-		{
-			_context.SetMessageTypeConverter(messageTypeConverter);
-		}
+        public void SetRetryCount(int retryCount)
+        {
+            _context.SetRetryCount(retryCount);
+        }
 
-		public void NotifySend(ISendContext context, IEndpointAddress address)
-		{
-			_context.NotifySend(context, address);
-		}
+        public void SetExpirationTime(DateTime value)
+        {
+            _context.SetExpirationTime(value);
+        }
 
-		public void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address) where T : class
-		{
-			_context.NotifySend(sendContext, address);
-		}
+        public void SetMessageType(string messageType)
+        {
+            _context.SetMessageType(messageType);
+        }
 
-		public void NotifyPublish<T>(IPublishContext<T> publishContext) where T : class
-		{
-			_context.NotifyPublish(publishContext);
-		}
+        public void SetBodyStream(Stream stream)
+        {
+            _context.SetBodyStream(stream);
+        }
 
-		public void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
-			where T : class
-		{
-			_context.NotifyConsume(consumeContext, consumerType, correlationId);
-		}
+        public void CopyBodyTo(Stream stream)
+        {
+            _context.CopyBodyTo(stream);
+        }
 
-		public IEnumerable<ISent> Sent
-		{
-			get { return _context.Sent; }
-		}
+        public Stream BodyStream
+        {
+            get { return _context.BodyStream; }
+        }
 
-		public IEnumerable<IReceived> Received
-		{
-			get { return _context.Received; }
-		}
+        public void SetMessageTypeConverter(IMessageTypeConverter messageTypeConverter)
+        {
+            _context.SetMessageTypeConverter(messageTypeConverter);
+        }
 
-		public Guid Id
-		{
-			get { return _context.Id; }
-		}
-	}
+        public void NotifySend(ISendContext context, IEndpointAddress address)
+        {
+            _context.NotifySend(context, address);
+        }
+
+        public void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address) where T : class
+        {
+            _context.NotifySend(sendContext, address);
+        }
+
+        public void NotifyPublish<T>(IPublishContext<T> publishContext) where T : class
+        {
+            _context.NotifyPublish(publishContext);
+        }
+
+        public void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
+            where T : class
+        {
+            _context.NotifyConsume(consumeContext, consumerType, correlationId);
+        }
+
+        public IEnumerable<ISent> Sent
+        {
+            get { return _context.Sent; }
+        }
+
+        public IEnumerable<IReceived> Received
+        {
+            get { return _context.Received; }
+        }
+
+        public Guid Id
+        {
+            get { return _context.Id; }
+        }
+    }
 }
