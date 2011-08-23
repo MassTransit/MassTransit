@@ -12,122 +12,127 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-	using System;
+    using System;
 
 
-	public class InvalidConsumeContext :
-		IConsumeContext
-	{
-		public string MessageId
-		{
-			get { throw CreateException(); }
-		}
-
-		public string MessageType
-		{
-			get { throw CreateException(); }
-		}
-
-		public string ContentType
-		{
-			get { throw CreateException(); }
-		}
-
-	    public string RequestId
-	    {
+    public class InvalidConsumeContext :
+        IConsumeContext
+    {
+        public string MessageId
+        {
             get { throw CreateException(); }
-	    }
+        }
 
-	    public string ConversationId
-	    {
-	        get { throw CreateException(); }
-	    }
+        public string MessageType
+        {
+            get { throw CreateException(); }
+        }
 
-	    public string CorrelationId
-	    {
-	        get { throw CreateException(); }
-	    }
+        public string ContentType
+        {
+            get { throw CreateException(); }
+        }
 
-	    public Uri SourceAddress
-		{
-			get { throw CreateException(); }
-		}
+        public string RequestId
+        {
+            get { throw CreateException(); }
+        }
 
-		public Uri DestinationAddress
-		{
-			get { throw CreateException(); }
-		}
+        public string ConversationId
+        {
+            get { throw CreateException(); }
+        }
 
-		public Uri ResponseAddress
-		{
-			get { throw CreateException(); }
-		}
+        public string CorrelationId
+        {
+            get { throw CreateException(); }
+        }
 
-		public Uri FaultAddress
-		{
-			get { throw CreateException(); }
-		}
+        public Uri SourceAddress
+        {
+            get { throw CreateException(); }
+        }
 
-		public string Network
-		{
-			get { throw CreateException(); }
-		}
+        public Uri DestinationAddress
+        {
+            get { throw CreateException(); }
+        }
 
-		public DateTime? ExpirationTime
-		{
-			get { throw CreateException(); }
-		}
+        public Uri ResponseAddress
+        {
+            get { throw CreateException(); }
+        }
 
-		public int RetryCount
-		{
-			get { throw CreateException(); }
-		}
+        public Uri FaultAddress
+        {
+            get { throw CreateException(); }
+        }
 
-		public IReceiveContext BaseContext
-		{
-			get { throw CreateException(); }
-		}
+        public string Network
+        {
+            get { throw CreateException(); }
+        }
 
-		public IServiceBus Bus
-		{
-			get { throw CreateException(); }
-		}
+        public DateTime? ExpirationTime
+        {
+            get { throw CreateException(); }
+        }
 
-		public IEndpoint Endpoint
-		{
-			get { throw CreateException(); }
-		}
+        public int RetryCount
+        {
+            get { throw CreateException(); }
+        }
 
-		public Uri InputAddress
-		{
-			get { throw CreateException(); }
-		}
+        public IMessageHeaders Headers
+        {
+            get { throw CreateException(); }
+        }
 
-		public bool TryGetContext<T>(out IConsumeContext<T> context) 
-			where T : class
-		{
-			throw CreateException();
-		}
+        public IReceiveContext BaseContext
+        {
+            get { throw CreateException(); }
+        }
 
-		public void RetryLater()
-		{
-			throw CreateException();
-		}
+        public IServiceBus Bus
+        {
+            get { throw CreateException(); }
+        }
 
-		public void Respond<T>(T message, Action<ISendContext<T>> contextCallback)
-			where T : class
-		{
-			throw CreateException();
-		}
+        public IEndpoint Endpoint
+        {
+            get { throw CreateException(); }
+        }
 
-		public void GenerateFault(Exception ex)
-		{
-			throw CreateException();
-		}
+        public Uri InputAddress
+        {
+            get { throw CreateException(); }
+        }
 
-		static ContextException CreateException()
-		{
-			return new ContextException("Consume context is only available when consuming a message");
-		}
-	}
+        public bool TryGetContext<T>(out IConsumeContext<T> context) 
+            where T : class
+        {
+            throw CreateException();
+        }
+
+        public void RetryLater()
+        {
+            throw CreateException();
+        }
+
+        public void Respond<T>(T message, Action<ISendContext<T>> contextCallback)
+            where T : class
+        {
+            throw CreateException();
+        }
+
+        public void GenerateFault(Exception ex)
+        {
+            throw CreateException();
+        }
+
+        static ContextException CreateException()
+        {
+            return new ContextException("Consume context is only available when consuming a message");
+        }
+    }
 }

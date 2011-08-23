@@ -48,6 +48,8 @@ namespace MassTransit
 
 		void SetContentType(string value);
 
+	    void SetHeader(string key, string value);
+
 		/// <summary>
 		/// Sets the receive context that the send was created in for tracing
 		/// </summary>

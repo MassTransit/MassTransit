@@ -215,6 +215,25 @@ namespace MassTransit.Tests
 
             Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
         }
+
+        [Test]
+        public void A_random_header_should_pass()
+        {
+            Guid id = Guid.NewGuid();
+
+            var received = new FutureMessage<PingMessage>();
+
+            LocalBus.SubscribeHandler<PingMessage>(message =>
+                {
+                    Assert.AreEqual(id.ToString(), LocalBus.Context().Headers["RequestId"]);
+
+                    received.Set(message);
+                });
+
+            LocalBus.Publish(new PingMessage(), context => context.SetHeader("RequestId", id.ToString()));
+
+            Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
+        }
     }
 
     [TestFixture]

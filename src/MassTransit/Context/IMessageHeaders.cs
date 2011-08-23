@@ -10,21 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Serialization
+namespace MassTransit
 {
-    using System.Xml;
-    using System.Xml.Serialization;
+    using System.Collections.Generic;
 
-    /// <summary>
-    ///   The class used to deserialize a message serialized in Xml
-    ///   Used since we don't know the type of the message until after the
-    ///   MessageType property has been evaluated
-    /// </summary>
-    [XmlRoot(ElementName = "MessageEnvelope")]
-    public class XmlReceiveMessageEnvelope :
-        MessageEnvelopeBase
+    public interface IMessageHeaders :
+        IEnumerable<KeyValuePair<string,string>>
     {
-        [XmlAnyElement]
-        public XmlNode Message { get; set; }
+        string this[string key] { get; }
     }
 }

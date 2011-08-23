@@ -27,21 +27,31 @@ namespace MassTransit.Serialization
             context.SetRetryCount(envelope.RetryCount);
             if (envelope.ExpirationTime.HasValue)
                 context.SetExpirationTime(envelope.ExpirationTime.Value);
+
+            foreach (var header in envelope.Headers)
+            {
+                context.SetHeader(header.Key, header.Value);
+            }
         }
 
-        public static void SetUsingContext(this Envelope envelope, ISendContext headers)
+        public static void SetUsingContext(this Envelope envelope, ISendContext context)
         {
-            envelope.RequestId = headers.RequestId;
-            envelope.ConversationId = headers.ConversationId;
-            envelope.CorrelationId = headers.CorrelationId;
-            envelope.SourceAddress = headers.SourceAddress.ToStringOrNull() ?? envelope.SourceAddress;
-            envelope.DestinationAddress = headers.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
-            envelope.ResponseAddress = headers.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
-            envelope.FaultAddress = headers.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
-            envelope.Network = headers.Network;
-            envelope.RetryCount = headers.RetryCount;
-            if (headers.ExpirationTime.HasValue)
-                envelope.ExpirationTime = headers.ExpirationTime.Value;
+            envelope.RequestId = context.RequestId;
+            envelope.ConversationId = context.ConversationId;
+            envelope.CorrelationId = context.CorrelationId;
+            envelope.SourceAddress = context.SourceAddress.ToStringOrNull() ?? envelope.SourceAddress;
+            envelope.DestinationAddress = context.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
+            envelope.ResponseAddress = context.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
+            envelope.FaultAddress = context.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
+            envelope.Network = context.Network;
+            envelope.RetryCount = context.RetryCount;
+            if (context.ExpirationTime.HasValue)
+                envelope.ExpirationTime = context.ExpirationTime.Value;
+
+            foreach (var header in context.Headers)
+            {
+                envelope.Headers[header.Key] = header.Value;
+            }
         }
     }
 }

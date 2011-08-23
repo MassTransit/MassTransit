@@ -208,9 +208,11 @@
     <Compile Include="Context\ContextStorageProvider.cs" />
     <Compile Include="Context\ContextScopeExtensions.cs" />
     <Compile Include="Context\ContextScope.cs" />
+    <Compile Include="Context\IMessageHeaders.cs" />
     <Compile Include="Context\IPublished.cs" />
     <Compile Include="Context\IReceived.cs" />
     <Compile Include="Context\ISent.cs" />
+    <Compile Include="Context\MessageHeaders.cs" />
     <Compile Include="Context\Published.cs" />
     <Compile Include="Context\ReceiveContext.cs" />
     <Compile Include="Context\MessageContext.cs" />
@@ -801,7 +803,6 @@
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />
     <Compile Include="Serialization\IMessageSerializer.cs" />
     <Compile Include="Serialization\XmlMessageEnvelope.cs" />
-    <Compile Include="Serialization\XmlReceiveMessageEnvelope.cs" />
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
     <Compile Include="Util\SequenceNumberGenerator.cs" />
   </ItemGroup>
