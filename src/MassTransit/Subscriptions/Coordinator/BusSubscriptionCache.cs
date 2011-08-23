@@ -12,58 +12,67 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Coordinator
 {
-	using System.Collections.Generic;
-	using System.Linq;
-	using Magnum.Threading;
-	using Messages;
-	using log4net;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Magnum.Extensions;
+    using Messages;
+    using log4net;
 
-	public class BusSubscriptionCache
-	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionCache));
-		readonly SubscriptionObserver _observer;
+    public class BusSubscriptionCache
+    {
+        static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionCache));
+        readonly object _lock = new object();
+        readonly SubscriptionObserver _observer;
+        readonly IDictionary<string, BusSubscription> _subscriptions;
 
-		readonly ReaderWriterLockedDictionary<string, BusSubscription> _subscriptions;
+        public BusSubscriptionCache(SubscriptionObserver observer)
+        {
+            _observer = observer;
+            _subscriptions = new Dictionary<string, BusSubscription>();
+        }
 
-		public BusSubscriptionCache(SubscriptionObserver observer)
-		{
-			_observer = observer;
-			_subscriptions = new ReaderWriterLockedDictionary<string, BusSubscription>();
-		}
+        public IEnumerable<Subscription> Subscriptions
+        {
+            get
+            {
+                lock(_lock)
+                    return _subscriptions.Values.SelectMany(x => x.Subscriptions).ToList();
+            }
+        }
 
-		public IEnumerable<Subscription> Subscriptions
-		{
-			get { return _subscriptions.Values.SelectMany(x => x.Subscriptions); }
-		}
+        public void OnSubscribeTo(SubscribeTo message)
+        {
+            BusSubscription busSubscription;
+            lock (_lock)
+            {
+                busSubscription = _subscriptions.Retrieve(message.MessageName,
+                    () => new BusSubscription(message.MessageName, _observer));
+            }
 
-		public void OnSubscribeTo(SubscribeTo message)
-		{
-			BusSubscription busSubscription = _subscriptions.Retrieve(message.MessageName, () =>
-				{
-					return new BusSubscription(message.MessageName, _observer);
-				});
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("SubscribeTo: {0}, {1}", message.MessageName, message.SubscriptionId);
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("SubscribeTo: {0}, {1}", message.MessageName, message.SubscriptionId);
+            busSubscription.OnSubscribeTo(message);
+        }
 
-			busSubscription.OnSubscribeTo(message);
-		}
+        public void OnUnsubscribeFrom(UnsubscribeFrom message)
+        {
+            BusSubscription actor;
+            bool result;
+            lock (_lock)
+                result = _subscriptions.TryGetValue(message.MessageName, out actor);
+            if (result)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("UnsubscribeFrom: {0}, {1}", message.MessageName, message.SubscriptionId);
 
-		public void OnUnsubscribeFrom(UnsubscribeFrom message)
-		{
-			BusSubscription actor;
-			if (_subscriptions.TryGetValue(message.MessageName, out actor))
-			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("UnsubscribeFrom: {0}, {1}", message.MessageName, message.SubscriptionId);
-
-				actor.OnUnsubscribeFrom(message);
-			}
-			else
-			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("UnsubscribeFrom(unknown): {0}, {1}", message.MessageName, message.SubscriptionId);
-			}
-		}
-	}
+                actor.OnUnsubscribeFrom(message);
+            }
+            else
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("UnsubscribeFrom(unknown): {0}, {1}", message.MessageName, message.SubscriptionId);
+            }
+        }
+    }
 }
