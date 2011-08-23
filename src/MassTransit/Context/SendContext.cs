@@ -12,82 +12,82 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-	using System;
-	using System.IO;
-	using Magnum;
+    using System;
+    using System.IO;
+    using Magnum;
 
-	public class SendContext<T> :
-		MessageContext,
-		ISendContext<T>
-		where T : class
-	{
-		readonly T _message;
-		Action<Stream> _bodyWriter;
-		IReceiveContext _receiveContext;
-		Guid _id;
+    public class SendContext<T> :
+        MessageContext,
+        ISendContext<T>
+        where T : class
+    {
+        readonly T _message;
+        Action<Stream> _bodyWriter;
+        Guid _id;
+        IReceiveContext _receiveContext;
 
-		public SendContext(T message)
-		{
-			_id = CombGuid.Generate();
-			_message = message;
+        public SendContext(T message)
+        {
+            _id = CombGuid.Generate();
+            _message = message;
 
-			this.SetMessageType(typeof (T));
-			DeclaringMessageType = typeof (T);
-		}
+            this.SetMessageType(typeof (T));
+            DeclaringMessageType = typeof (T);
+        }
 
-		protected SendContext(T message, ISendContext context)
-		{
-			_id = context.Id;
-			_message = message;
+        protected SendContext(T message, ISendContext context)
+        {
+            _id = context.Id;
+            _message = message;
 
-			SetUsing(context);
+            SetUsing(context);
 
-			this.SetMessageType(typeof (T));
-			DeclaringMessageType = context.DeclaringMessageType;
-		}
+            this.SetMessageType(typeof (T));
+            DeclaringMessageType = context.DeclaringMessageType;
+        }
 
-		public Guid Id
-		{
-			get { return _id; }
-		}
+        public Guid Id
+        {
+            get { return _id; }
+        }
 
-		public Type DeclaringMessageType { get; private set; }
+        public Type DeclaringMessageType { get; private set; }
 
-		public void SerializeTo(Stream stream)
-		{
-			if (_bodyWriter == null)
-				throw new InvalidOperationException("No message body writer was specified");
+        public void SerializeTo(Stream stream)
+        {
+            if (_bodyWriter == null)
+                throw new InvalidOperationException("No message body writer was specified");
 
-			_bodyWriter(stream);
-		}
+            _bodyWriter(stream);
+        }
 
-		public virtual bool TryGetContext<TMessage>(out IBusPublishContext<TMessage> context)
-			where TMessage : class
-		{
-			context = PublishContext<TMessage>.FromMessage(_message, this);
+        public virtual bool TryGetContext<TMessage>(out IBusPublishContext<TMessage> context)
+            where TMessage : class
+        {
+            context = PublishContext<TMessage>.FromMessage(_message, this);
 
-			return context != null;
-		}
+            return context != null;
+        }
 
-		public virtual void NotifySend(IEndpointAddress address)
-		{
-			if(_receiveContext != null)
-				_receiveContext.NotifySend(this, address);
-		}
+        public virtual void NotifySend(IEndpointAddress address)
+        {
+            if (_receiveContext != null)
+                _receiveContext.NotifySend(this, address);
+        }
 
-		public T Message
-		{
-			get { return _message; }
-		}
+        public T Message
+        {
+            get { return _message; }
+        }
 
-		public void SetBodyWriter(Action<Stream> bodyWriter)
-		{
-			_bodyWriter = bodyWriter;
-		}
+        public void SetBodyWriter(Action<Stream> bodyWriter)
+        {
+            _bodyWriter = bodyWriter;
+        }
 
-		public void SetReceiveContext(IReceiveContext receiveContext)
-		{
-			_receiveContext = receiveContext;
-		}
-	}
+        public void SetReceiveContext(IReceiveContext receiveContext)
+        {
+            _receiveContext = receiveContext;
+        }
+    }
 }

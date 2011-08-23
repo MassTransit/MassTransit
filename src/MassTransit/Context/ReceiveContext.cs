@@ -240,6 +240,11 @@ namespace MassTransit.Context
             _responseAddress = context.ResponseAddress;
         }
 
+        public IMessageHeaders Headers
+        {
+            get { return _context.Headers; }
+        }
+
         public string RequestId
         {
             get { return _context.RequestId; }

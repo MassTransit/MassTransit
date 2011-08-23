@@ -73,6 +73,11 @@ namespace MassTransit.Context
             get { throw CreateException(); }
         }
 
+        public IMessageHeaders Headers
+        {
+            get { throw CreateException(); }
+        }
+
         public Guid Id
         {
             get { throw CreateException(); }

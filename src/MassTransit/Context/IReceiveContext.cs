@@ -57,6 +57,8 @@ namespace MassTransit
 
 		void SetMessageType(string messageType);
 
+	    void SetHeader(string key, string value);
+
 		void SetBodyStream(Stream stream);
 
 		void CopyBodyTo(Stream stream);

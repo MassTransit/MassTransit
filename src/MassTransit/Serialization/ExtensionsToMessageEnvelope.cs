@@ -17,7 +17,7 @@ namespace MassTransit.Serialization
 
     public static class ExtensionsToMessageEnvelope
     {
-        public static void SetUsingMessageEnvelope(this IReceiveContext context, MessageEnvelopeBase envelope)
+        public static void SetUsingMessageEnvelope(this IReceiveContext context, XmlMessageEnvelope envelope)
         {
             context.SetRequestId(envelope.RequestId);
             context.SetConversationId(envelope.ConversationId);
@@ -33,7 +33,7 @@ namespace MassTransit.Serialization
                 context.SetExpirationTime(envelope.ExpirationTime.Value);
         }
 
-        public static void SetUsingContext(this MessageEnvelopeBase envelope, ISendContext headers)
+        public static void SetUsingContext(this XmlMessageEnvelope envelope, ISendContext headers)
         {
             envelope.RequestId = headers.RequestId;
             envelope.ConversationId = headers.ConversationId;

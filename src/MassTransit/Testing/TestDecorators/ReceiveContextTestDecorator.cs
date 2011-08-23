@@ -31,6 +31,11 @@ namespace MassTransit.Testing.TestDecorators
             _scenario = scenario;
         }
 
+        public void SetHeader(string key, string value)
+        {
+            _context.SetHeader(key, value);
+        }
+
         public void SetRequestId(string value)
         {
             _context.SetRequestId(value);
@@ -114,6 +119,11 @@ namespace MassTransit.Testing.TestDecorators
         public int RetryCount
         {
             get { return _context.RetryCount; }
+        }
+
+        public IMessageHeaders Headers
+        {
+            get { return _context.Headers; }
         }
 
         public IReceiveContext BaseContext
