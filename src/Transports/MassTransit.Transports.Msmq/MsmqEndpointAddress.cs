@@ -26,6 +26,8 @@ namespace MassTransit.Transports.Msmq
 
 			InboundFormatName = uri.GetInboundFormatName();
 
+		    InboundUri = uri.GetInboundUri();
+
 			OutboundFormatName = uri.GetOutboundFormatName();
 
 			IsTransactional = CheckForTransactionalHint(uri);
@@ -48,9 +50,11 @@ namespace MassTransit.Transports.Msmq
 
 		public string InboundFormatName { get; private set; }
 
-		public string OutboundFormatName { get; private set; }
+	    public Uri InboundUri { get; private set; }
 
-		public string LocalName { get; private set; }
+	    public string OutboundFormatName { get; private set; }
+
+	    public string LocalName { get; private set; }
 
 		public string MulticastAddress { get; private set; }
 

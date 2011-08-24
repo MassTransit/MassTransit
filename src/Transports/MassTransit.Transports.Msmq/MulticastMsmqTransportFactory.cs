@@ -19,9 +19,11 @@ namespace MassTransit.Transports.Msmq
 	public class MulticastMsmqTransportFactory :
 		ITransportFactory
 	{
-		public string Scheme
+	    public const string MulticastScheme = "msmq-pgm";
+
+	    public string Scheme
 		{
-			get { return "msmq-pgm"; }
+			get { return MulticastScheme; }
 		}
 
 		public IDuplexTransport BuildLoopback(ITransportSettings settings)

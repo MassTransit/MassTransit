@@ -16,6 +16,7 @@ namespace MassTransit.Transports.Msmq
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Exceptions;
     using Magnum.Extensions;
     using Services.Subscriptions.Messages;
     using Subscriptions.Coordinator;
@@ -51,7 +52,12 @@ namespace MassTransit.Transports.Msmq
             _unsubscribeAction = _subscriptionBus.SubscribeInstance(consumerInstance);
             _unsubscribeAction += _subscriptionBus.SubscribeInstance(this);
 
-            _producer = new BusSubscriptionMessageProducer(router, subscriptionBus.Endpoint);
+            var msmqAddress = subscriptionBus.Endpoint.Address as IMsmqEndpointAddress;
+            if (msmqAddress == null || msmqAddress.Uri.Scheme != MulticastMsmqTransportFactory.MulticastScheme)
+                throw new EndpointException(subscriptionBus.Endpoint.Address.Uri,
+                    "The multicast subscription client must be used on a multicast MSMQ endpoint");
+
+            _producer = new BusSubscriptionMessageProducer(router, subscriptionBus.Endpoint, msmqAddress.InboundUri);
         }
 
         public void Consume(IConsumeContext<AddPeer> context)
