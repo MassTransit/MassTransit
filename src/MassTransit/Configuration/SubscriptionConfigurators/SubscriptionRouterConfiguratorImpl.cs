@@ -23,17 +23,16 @@ namespace MassTransit.SubscriptionConfigurators
 	using Subscriptions.Coordinator;
 
 	public class SubscriptionRouterConfiguratorImpl :
-		SubscriptionRouterConfigurator,
 		BusServiceConfigurator,
 		BusBuilderConfigurator
 	{
 		readonly IList<SubscriptionRouterBuilderConfigurator> _configurators;
 		string _network;
 
-		public SubscriptionRouterConfiguratorImpl()
+		public SubscriptionRouterConfiguratorImpl(string network)
 		{
 			_configurators = new List<SubscriptionRouterBuilderConfigurator>();
-			_network = Environment.MachineName.ToLowerInvariant();
+			_network = network;
 		}
 
 		public IEnumerable<ValidationResult> Validate()

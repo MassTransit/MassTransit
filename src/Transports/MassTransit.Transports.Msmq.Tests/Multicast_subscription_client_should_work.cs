@@ -12,123 +12,137 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests
 {
-	using System;
-	using System.Diagnostics;
-	using Magnum.Extensions;
-	using Magnum.TestFramework;
-	using MassTransit.Tests;
-	using MassTransit.Tests.Messages;
-	using NUnit.Framework;
-	using TestFixtures;
-	using TestFramework;
+    using System;
+    using System.Diagnostics;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using MassTransit.Tests;
+    using MassTransit.Tests.Messages;
+    using NUnit.Framework;
+    using TestFixtures;
+    using TestFramework;
 
-	[TestFixture, Integration]
-	public class Multicast_subscription_client_should_work :
-		MulticastMsmqEndpointTestFixture
-	{
-		private PingMessage _ping;
-		private FutureMessage<PingMessage, Guid> _future;
-		UnsubscribeAction _unsubscribe;
+    [TestFixture, Integration]
+    public class Multicast_subscription_client_should_work :
+        MulticastMsmqEndpointTestFixture
+    {
+        private PingMessage _ping;
+        private FutureMessage<PingMessage, Guid> _future;
+        UnsubscribeAction _unsubscribe;
 
-		protected override void EstablishContext()
-		{
-			base.EstablishContext();
+        protected override void EstablishContext()
+        {
+            base.EstablishContext();
 
-			_ping = new PingMessage();
-			_future = new FutureMessage<PingMessage, Guid>(_ping.CorrelationId);
+            _ping = new PingMessage();
+            _future = new FutureMessage<PingMessage, Guid>(_ping.CorrelationId);
 
-			_unsubscribe = RemoteBus.SubscribeHandler<PingMessage>(message => { _future.Set(message); });
+            _unsubscribe = RemoteBus.SubscribeHandler<PingMessage>(message => { _future.Set(message); });
 
-			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+            LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
-			Trace.WriteLine("LocalBus");
+            Trace.WriteLine("LocalBus");
 
-			LocalBus.OutboundPipeline.Trace();
+            LocalBus.OutboundPipeline.Trace();
 
-			Trace.WriteLine("RemoteBus");
+            Trace.WriteLine("RemoteBus");
 
-			RemoteBus.OutboundPipeline.Trace();
+            RemoteBus.OutboundPipeline.Trace();
 
-			LocalBus.Publish(_ping);
-		}
+            LocalBus.Publish(_ping);
+        }
 
-		protected override void TeardownContext()
-		{
-			_unsubscribe();
+        protected override void TeardownContext()
+        {
+            _unsubscribe();
 
-			LocalBus.ShouldNotHaveSubscriptionFor<PingMessage>();
+            LocalBus.ShouldNotHaveSubscriptionFor<PingMessage>();
 
-			base.TeardownContext();
-		}
+            base.TeardownContext();
+        }
 
-		[Test]
-		public void The_message_should_arrive()
-		{
-			_future.WaitUntilAvailable(10.Seconds());
-		}
-	}
+        protected override void ConfigureLocalBus(BusConfigurators.ServiceBusConfigurator configurator)
+        {
+            base.ConfigureLocalBus(configurator);
 
-	[TestFixture, Integration]
-	public class Multicast_subscription_client_with_control_bus_should_work :
-		MulticastMsmqEndpointTestFixture
-	{
-		private PingMessage _ping;
-		private FutureMessage<PingMessage, Guid> _future;
-		UnsubscribeAction _unsubscribe;
+            configurator.SetNetwork("ONE");
+        }
 
-		protected override void EstablishContext()
-		{
-			base.EstablishContext();
+        protected override void ConfigureRemoteBus(BusConfigurators.ServiceBusConfigurator configurator)
+        {
+            base.ConfigureRemoteBus(configurator);
+            
+            configurator.SetNetwork("ONE");
+        }
 
-			_ping = new PingMessage();
-			_future = new FutureMessage<PingMessage, Guid>(_ping.CorrelationId);
+        [Test]
+        public void The_message_should_arrive()
+        {
+            _future.WaitUntilAvailable(10.Seconds());
+        }
+    }
 
-			_unsubscribe = RemoteBus.SubscribeHandler<PingMessage>(message => { _future.Set(message); });
+    [TestFixture, Integration]
+    public class Multicast_subscription_client_with_control_bus_should_work :
+        MulticastMsmqEndpointTestFixture
+    {
+        private PingMessage _ping;
+        private FutureMessage<PingMessage, Guid> _future;
+        UnsubscribeAction _unsubscribe;
+
+        protected override void EstablishContext()
+        {
+            base.EstablishContext();
+
+            _ping = new PingMessage();
+            _future = new FutureMessage<PingMessage, Guid>(_ping.CorrelationId);
+
+            _unsubscribe = RemoteBus.SubscribeHandler<PingMessage>(message => { _future.Set(message); });
 
 
-			RemoteBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
-	
-			LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+            RemoteBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+    
+            LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
-			Trace.WriteLine("LocalBus");
+            Trace.WriteLine("LocalBus");
 
-			LocalBus.OutboundPipeline.Trace();
+            LocalBus.OutboundPipeline.Trace();
 
-			Trace.WriteLine("RemoteBus");
+            Trace.WriteLine("RemoteBus");
 
-			RemoteBus.OutboundPipeline.Trace();
+            RemoteBus.OutboundPipeline.Trace();
 
 
-			LocalBus.Publish(_ping);
-		}
+            LocalBus.Publish(_ping);
+        }
 
-		protected override void ConfigureLocalBus(BusConfigurators.ServiceBusConfigurator configurator)
-		{
-			base.ConfigureLocalBus(configurator);
+        protected override void ConfigureLocalBus(BusConfigurators.ServiceBusConfigurator configurator)
+        {
+            base.ConfigureLocalBus(configurator);
 
-			configurator.UseControlBus();
-		}
+            configurator.UseControlBus();
+        }
 
-		protected override void ConfigureRemoteBus(BusConfigurators.ServiceBusConfigurator configurator)
-		{
-			base.ConfigureRemoteBus(configurator);
+        protected override void ConfigureRemoteBus(BusConfigurators.ServiceBusConfigurator configurator)
+        {
+            base.ConfigureRemoteBus(configurator);
 
-			configurator.UseControlBus();
-		}
+            configurator.UseControlBus();
+        }
 
-		protected override void TeardownContext()
-		{
-			_unsubscribe();
+        protected override void TeardownContext()
+        {
+            _unsubscribe();
 
-			LocalBus.ShouldNotHaveSubscriptionFor<PingMessage>();
+            LocalBus.ShouldNotHaveSubscriptionFor<PingMessage>();
 
-			base.TeardownContext();
-		}
+            base.TeardownContext();
+        }
 
-		[Test]
-		public void The_message_should_arrive()
-		{
-			_future.WaitUntilAvailable(10.Seconds());
-		}
-	}
+        [Test]
+        public void The_message_should_arrive()
+        {
+            _future.WaitUntilAvailable(10.Seconds());
+        }
+    }
 }
