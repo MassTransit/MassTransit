@@ -12,103 +12,108 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Coordinator
 {
-	using System;
-	using System.Threading;
-	using Messages;
-	using log4net;
+    using System;
+    using System.Threading;
+    using Messages;
+    using log4net;
 
-	public class BusSubscriptionMessageProducer :
-		SubscriptionObserver
-	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionMessageProducer));
-		readonly IEndpoint _endpoint;
-		readonly string _network;
+    public class BusSubscriptionMessageProducer :
+        SubscriptionObserver
+    {
+        static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionMessageProducer));
+        readonly IEndpoint _endpoint;
+        readonly Uri _endpointUri;
+        readonly string _network;
 
-		readonly Guid _peerId;
-		readonly Uri _peerUri;
-		long _lastMessageNumber;
-		long _timestamp;
+        readonly Guid _peerId;
+        readonly Uri _peerUri;
+        long _lastMessageNumber;
+        long _timestamp;
 
-	    public long Timestamp
-	    {
-	        get { return _timestamp; }
-	    }
+        public long Timestamp
+        {
+            get { return _timestamp; }
+        }
 
-	    public BusSubscriptionMessageProducer(SubscriptionRouter router, IEndpoint endpoint)
-		{
-			_peerId = router.PeerId;
-			_peerUri = router.PeerUri;
-			_network = router.Network;
-			_endpoint = endpoint;
-			_timestamp = DateTime.UtcNow.Ticks;
+        public BusSubscriptionMessageProducer(SubscriptionRouter router, IEndpoint endpoint, Uri endpointUri)
+        {
+            _peerId = router.PeerId;
+            _peerUri = router.PeerUri;
+            _network = router.Network;
+            _endpoint = endpoint;
+            _endpointUri = endpointUri;
+            _timestamp = DateTime.UtcNow.Ticks;
 
-			SendAddPeerMessage();
-		}
+            SendAddPeerMessage();
+        }
 
-		public void OnSubscriptionAdded(SubscriptionAdded message)
-		{
-			long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
+        public void OnSubscriptionAdded(SubscriptionAdded message)
+        {
+            long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
-			var add = new AddPeerSubscriptionMessage
-				{
-					PeerId = _peerId,
-					MessageNumber = messageNumber,
-					SubscriptionId = message.SubscriptionId,
-					EndpointUri = message.EndpointUri,
-					MessageName = message.MessageName,
-				};
+            var add = new AddPeerSubscriptionMessage
+                {
+                    PeerId = _peerId,
+                    MessageNumber = messageNumber,
+                    SubscriptionId = message.SubscriptionId,
+                    EndpointUri = message.EndpointUri,
+                    MessageName = message.MessageName,
+                };
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("AddSubscription: {0}, {1}", add.MessageName, add.SubscriptionId);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("AddSubscription: {0}, {1}", add.MessageName, add.SubscriptionId);
 
-			_endpoint.Send(add, SetSendContext);
-		}
+            _endpoint.Send(add, SetSendContext);
+        }
 
-		public void OnSubscriptionRemoved(SubscriptionRemoved message)
-		{
-			long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
+        public void OnSubscriptionRemoved(SubscriptionRemoved message)
+        {
+            long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
-			var remove = new RemovePeerSubscriptionMessage
-				{
-					PeerId = _peerId,
-					MessageNumber = messageNumber,
-					SubscriptionId = message.SubscriptionId,
-					EndpointUri = message.EndpointUri,
-					MessageName = message.MessageName,
-				};
+            var remove = new RemovePeerSubscriptionMessage
+                {
+                    PeerId = _peerId,
+                    MessageNumber = messageNumber,
+                    SubscriptionId = message.SubscriptionId,
+                    EndpointUri = message.EndpointUri,
+                    MessageName = message.MessageName,
+                };
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("RemoveSubscription: {0}, {1}", remove.MessageName, remove.SubscriptionId);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("RemoveSubscription: {0}, {1}", remove.MessageName, remove.SubscriptionId);
 
-			_endpoint.Send(remove, SetSendContext);
-		}
+            _endpoint.Send(remove, SetSendContext);
+        }
 
-		public void OnComplete()
-		{
-			_endpoint.Send(new RemovePeerMessage
-				{
-					PeerId = _peerId,
-					PeerUri = _peerUri,
-					Timestamp = _timestamp,
-				}, SetSendContext);
-		}
+        public void OnComplete()
+        {
+            _endpoint.Send(new RemovePeerMessage
+                {
+                    PeerId = _peerId,
+                    PeerUri = _peerUri,
+                    Timestamp = _timestamp,
+                }, SetSendContext);
+        }
 
-		void SendAddPeerMessage()
-		{
-			_endpoint.Send(new AddPeerMessage
-				{
-					PeerId = _peerId,
-					PeerUri = _peerUri,
-					Timestamp = _timestamp,
-				}, SetSendContext);
-		}
+        void SendAddPeerMessage()
+        {
+            _endpoint.Send(new AddPeerMessage
+                {
+                    PeerId = _peerId,
+                    PeerUri = _peerUri,
+                    Timestamp = _timestamp,
+                }, context =>
+                    {
+                        SetSendContext(context);
+                        context.SetResponseAddress(_endpointUri);
+                    });
+        }
 
-		void SetSendContext<T>(ISendContext<T> context)
-			where T : class
-		{
-			context.SetNetwork(_network);
-			context.SetSourceAddress(_peerUri);
-		    context.SetResponseAddress(_endpoint.Address.Uri);
-		}
-	}
+        void SetSendContext<T>(ISendContext<T> context)
+            where T : class
+        {
+            context.SetNetwork(_network);
+            context.SetSourceAddress(_peerUri);
+        }
+    }
 }

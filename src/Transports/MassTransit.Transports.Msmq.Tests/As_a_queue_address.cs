@@ -118,6 +118,16 @@ namespace MassTransit.Transports.Msmq.Tests
 			new MsmqEndpointAddress(new Uri(address));
 		}
 
+	    [Test]
+	    public void Should_property_convert_multicast_to_local()
+	    {
+	        Uri multicast = new Uri("msmq-pgm://205.10.13.15/my_queue");
+
+	        Uri local = multicast.GetInboundUri();
+
+	        local.ShouldEqual(new Uri("msmq://" + Environment.MachineName.ToLowerInvariant() + "/my_queue"));
+	    }
+
 		[Test]
 		public void Local_queues_should_be_non_transactional_by_default()
 		{
