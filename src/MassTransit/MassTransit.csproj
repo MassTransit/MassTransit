@@ -169,7 +169,6 @@
     <Compile Include="Configuration\SubscriptionBuilders\SubscriptionRouterBuilder.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\SubscriptionRouterBuilderImpl.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionRouterBuilderConfiguratorImpl.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionRouterConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionRouterConfiguratorImpl.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ContextConsumerSubscriptionConnector.cs" />

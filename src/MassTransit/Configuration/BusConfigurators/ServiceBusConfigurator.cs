@@ -12,50 +12,56 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.BusConfigurators
 {
-	using System;
-	using Builders;
-	using Configuration;
-	using EndpointConfigurators;
-	using SubscriptionBuilders;
-	using SubscriptionConfigurators;
+    using System;
+    using Builders;
+    using Configuration;
+    using EndpointConfigurators;
+    using SubscriptionBuilders;
+    using SubscriptionConfigurators;
 
-	public interface ServiceBusConfigurator :
-		EndpointFactoryConfigurator
-	{
-		/// <summary>
-		/// Specifies the builder factory to use when the service is invoked
-		/// </summary>
-		/// <param name="builderFactory"></param>
-		void UseBusBuilder(Func<BusSettings, BusBuilder> builderFactory);
+    public interface ServiceBusConfigurator :
+        EndpointFactoryConfigurator
+    {
+        /// <summary>
+        /// Specifies the builder factory to use when the service is invoked
+        /// </summary>
+        /// <param name="builderFactory"></param>
+        void UseBusBuilder(Func<BusSettings, BusBuilder> builderFactory);
 
-		/// <summary>
-		/// Adds a configurator to the subscription coordinator builder
-		/// </summary>
-		/// <param name="configurator"></param>
-		void AddSubscriptionCoordinatorConfigurator(SubscriptionRouterBuilderConfigurator configurator);
+        /// <summary>
+        /// Adds a configurator to the subscription coordinator builder
+        /// </summary>
+        /// <param name="configurator"></param>
+        void AddSubscriptionCoordinatorConfigurator(SubscriptionRouterBuilderConfigurator configurator);
 
-		/// <summary>
-		/// Adds a configurator for the service bus builder to the configurator
-		/// </summary>
-		/// <param name="configurator"></param>
-		void AddBusConfigurator(BusBuilderConfigurator configurator);
+        /// <summary>
+        /// Adds a configurator for the service bus builder to the configurator
+        /// </summary>
+        /// <param name="configurator"></param>
+        void AddBusConfigurator(BusBuilderConfigurator configurator);
 
-		/// <summary>
-		/// Specify the endpoint from which messages should be read
-		/// </summary>
-		/// <param name="uri">The uri of the endpoint</param>
-		void ReceiveFrom(Uri uri);
+        /// <summary>
+        /// Specify the endpoint from which messages should be read
+        /// </summary>
+        /// <param name="uri">The uri of the endpoint</param>
+        void ReceiveFrom(Uri uri);
 
-		/// <summary>
-		/// Specifies an action to call before a message is consumed
-		/// </summary>
-		/// <param name="beforeConsume"></param>
-		void BeforeConsumingMessage(Action beforeConsume);
+        /// <summary>
+        /// Sets the network key for subscriptions
+        /// </summary>
+        /// <param name="network"></param>
+        void SetNetwork(string network);
 
-		/// <summary>
-		/// Specifies an action to call after a message is consumed
-		/// </summary>
-		/// <param name="afterConsume"></param>
-		void AfterConsumingMessage(Action afterConsume);
-	}
+        /// <summary>
+        /// Specifies an action to call before a message is consumed
+        /// </summary>
+        /// <param name="beforeConsume"></param>
+        void BeforeConsumingMessage(Action beforeConsume);
+
+        /// <summary>
+        /// Specifies an action to call after a message is consumed
+        /// </summary>
+        /// <param name="afterConsume"></param>
+        void AfterConsumingMessage(Action afterConsume);
+    }
 }

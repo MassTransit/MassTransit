@@ -12,167 +12,173 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.BusConfigurators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Builders;
-	using Configuration;
-	using Configurators;
-	using EndpointConfigurators;
-	using SubscriptionBuilders;
-	using SubscriptionConfigurators;
-	using Transports;
-	using log4net;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Builders;
+    using Configuration;
+    using Configurators;
+    using EndpointConfigurators;
+    using Magnum.Extensions;
+    using SubscriptionConfigurators;
+    using Transports;
+    using log4net;
 
-	public class ServiceBusConfiguratorImpl :
-		ServiceBusConfigurator
-	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusConfiguratorImpl));
+    public class ServiceBusConfiguratorImpl :
+        ServiceBusConfigurator
+    {
+        static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusConfiguratorImpl));
 
-		readonly IList<BusBuilderConfigurator> _configurators;
-		readonly EndpointFactoryConfigurator _endpointFactoryConfigurator;
-		readonly ServiceBusSettings _settings;
-		Func<BusSettings, BusBuilder> _builderFactory;
+        readonly IList<BusBuilderConfigurator> _configurators;
+        readonly EndpointFactoryConfigurator _endpointFactoryConfigurator;
+        readonly ServiceBusSettings _settings;
 
-		SubscriptionRouterConfiguratorImpl _subscriptionRouterConfigurator;
+        readonly SubscriptionRouterConfiguratorImpl _subscriptionRouterConfigurator;
+        Func<BusSettings, BusBuilder> _builderFactory;
 
-		public ServiceBusConfiguratorImpl(ServiceBusDefaultSettings defaultSettings)
-		{
-			_settings = new ServiceBusSettings(defaultSettings);
+        public ServiceBusConfiguratorImpl(ServiceBusDefaultSettings defaultSettings)
+        {
+            _settings = new ServiceBusSettings(defaultSettings);
 
-			_builderFactory = DefaultBuilderFactory;
-			_configurators = new List<BusBuilderConfigurator>();
+            _builderFactory = DefaultBuilderFactory;
+            _configurators = new List<BusBuilderConfigurator>();
 
-			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(new EndpointFactoryDefaultSettings());
+            _endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(new EndpointFactoryDefaultSettings());
 
-			_subscriptionRouterConfigurator = new SubscriptionRouterConfiguratorImpl();
-			_configurators.Add(_subscriptionRouterConfigurator);
-		}
+            _subscriptionRouterConfigurator = new SubscriptionRouterConfiguratorImpl(_settings.Network);
+            _configurators.Add(_subscriptionRouterConfigurator);
+        }
 
-		public IEnumerable<ValidationResult> Validate()
-		{
-			if (_builderFactory == null)
-				yield return this.Failure("BuilderFactory", "The builder factory cannot be null.");
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (_builderFactory == null)
+                yield return this.Failure("BuilderFactory", "The builder factory cannot be null.");
 
-			if (_settings.InputAddress == null)
-			{
-				string msg =
-					"The 'InputAddress' is null. #sadpanda I was expecting an address to be set like 'msmq://localhost/queue'";
-				msg += "or 'rabbitmq://localhost/queue'. The InputAddress is a 'Uri' by the way.";
+            if (_settings.InputAddress == null)
+            {
+                string msg =
+                    "The 'InputAddress' is null. #sadpanda I was expecting an address to be set like 'msmq://localhost/queue'";
+                msg += "or 'rabbitmq://localhost/queue'. The InputAddress is a 'Uri' by the way.";
 
-				yield return this.Failure("InputAddress", msg);
-			}
+                yield return this.Failure("InputAddress", msg);
+            }
 
-			foreach (ValidationResult result in _endpointFactoryConfigurator.Validate())
-				yield return result.WithParentKey("EndpointFactory");
+            foreach (ValidationResult result in _endpointFactoryConfigurator.Validate())
+                yield return result.WithParentKey("EndpointFactory");
 
-			foreach (ValidationResult result in _configurators.SelectMany(configurator => configurator.Validate()))
-				yield return result;
+            foreach (ValidationResult result in _configurators.SelectMany(configurator => configurator.Validate()))
+                yield return result;
 
-			foreach (ValidationResult result in _subscriptionRouterConfigurator.Validate())
-				yield return result;
-		}
+            foreach (ValidationResult result in _subscriptionRouterConfigurator.Validate())
+                yield return result;
+        }
 
-		public void UseBusBuilder(Func<BusSettings, BusBuilder> builderFactory)
-		{
-			_builderFactory = builderFactory;
-		}
+        public void UseBusBuilder(Func<BusSettings, BusBuilder> builderFactory)
+        {
+            _builderFactory = builderFactory;
+        }
 
-		public void AddSubscriptionCoordinatorConfigurator(SubscriptionRouterBuilderConfigurator configurator)
-		{
-			_subscriptionRouterConfigurator.AddConfigurator(configurator);
-		}
+        public void AddSubscriptionCoordinatorConfigurator(SubscriptionRouterBuilderConfigurator configurator)
+        {
+            _subscriptionRouterConfigurator.AddConfigurator(configurator);
+        }
 
-		public void AddBusConfigurator(BusBuilderConfigurator configurator)
-		{
-			_configurators.Add(configurator);
-		}
+        public void AddBusConfigurator(BusBuilderConfigurator configurator)
+        {
+            _configurators.Add(configurator);
+        }
 
-		public void ReceiveFrom(Uri uri)
-		{
-			_settings.InputAddress = uri;
-		}
+        public void ReceiveFrom(Uri uri)
+        {
+            _settings.InputAddress = uri;
+        }
 
-		public void BeforeConsumingMessage(Action beforeConsume)
-		{
-			if (_settings.BeforeConsume == null)
-				_settings.BeforeConsume = beforeConsume;
-			else
-				_settings.BeforeConsume += beforeConsume;
-		}
+        public void SetNetwork(string network)
+        {
+            _settings.Network = network.IsEmpty() ? null : network;
+        }
 
-		public void AfterConsumingMessage(Action afterConsume)
-		{
-			if (_settings.AfterConsume == null)
-				_settings.AfterConsume = afterConsume;
-			else
-				_settings.AfterConsume += afterConsume;
-		}
+        public void BeforeConsumingMessage(Action beforeConsume)
+        {
+            if (_settings.BeforeConsume == null)
+                _settings.BeforeConsume = beforeConsume;
+            else
+                _settings.BeforeConsume += beforeConsume;
+        }
 
-		public void UseEndpointFactoryBuilder(
-			Func<IEndpointFactoryDefaultSettings, EndpointFactoryBuilder> endpointFactoryBuilderFactory)
-		{
-			_endpointFactoryConfigurator.UseEndpointFactoryBuilder(endpointFactoryBuilderFactory);
-		}
+        public void AfterConsumingMessage(Action afterConsume)
+        {
+            if (_settings.AfterConsume == null)
+                _settings.AfterConsume = afterConsume;
+            else
+                _settings.AfterConsume += afterConsume;
+        }
 
-		public void AddEndpointFactoryConfigurator(EndpointFactoryBuilderConfigurator configurator)
-		{
-			_endpointFactoryConfigurator.AddEndpointFactoryConfigurator(configurator);
-		}
+        public void UseEndpointFactoryBuilder(
+            Func<IEndpointFactoryDefaultSettings, EndpointFactoryBuilder> endpointFactoryBuilderFactory)
+        {
+            _endpointFactoryConfigurator.UseEndpointFactoryBuilder(endpointFactoryBuilderFactory);
+        }
+
+        public void AddEndpointFactoryConfigurator(EndpointFactoryBuilderConfigurator configurator)
+        {
+            _endpointFactoryConfigurator.AddEndpointFactoryConfigurator(configurator);
+        }
 
 
-		public IEndpointFactoryDefaultSettings Defaults
-		{
-			get { return _endpointFactoryConfigurator.Defaults; }
-		}
+        public IEndpointFactoryDefaultSettings Defaults
+        {
+            get { return _endpointFactoryConfigurator.Defaults; }
+        }
 
-		public IEndpointFactory CreateEndpointFactory()
-		{
-			return _endpointFactoryConfigurator.CreateEndpointFactory();
-		}
+        public IEndpointFactory CreateEndpointFactory()
+        {
+            return _endpointFactoryConfigurator.CreateEndpointFactory();
+        }
 
-		public IServiceBus CreateServiceBus()
-		{
-			_log.InfoFormat("MassTransit v{0}, .NET Framework v{1}", typeof (ServiceBusFactory).Assembly.GetName().Version,
-				Environment.Version);
+        public IServiceBus CreateServiceBus()
+        {
+            _log.InfoFormat("MassTransit v{0}, .NET Framework v{1}",
+                typeof (ServiceBusFactory).Assembly.GetName().Version,
+                Environment.Version);
 
-			IEndpointCache endpointCache = CreateEndpointCache();
-			_settings.EndpointCache = endpointCache;
+            IEndpointCache endpointCache = CreateEndpointCache();
+            _settings.EndpointCache = endpointCache;
 
-			BusBuilder builder = _builderFactory(_settings);
+            BusBuilder builder = _builderFactory(_settings);
 
-			_subscriptionRouterConfigurator.SetNetwork(_settings.Network);
+            _subscriptionRouterConfigurator.SetNetwork(_settings.Network);
 
-			foreach (BusBuilderConfigurator configurator in _configurators)
-			{
-				builder = configurator.Configure(builder);
-			}
+            foreach (BusBuilderConfigurator configurator in _configurators)
+            {
+                builder = configurator.Configure(builder);
+            }
 
-			IServiceBus bus = builder.Build();
+            IServiceBus bus = builder.Build();
 
-			return bus;
-		}
+            return bus;
+        }
 
-		public void ChangeSettings(Action<ServiceBusSettings> callback)
-		{
-			callback(_settings);
-		}
+        public void ChangeSettings(Action<ServiceBusSettings> callback)
+        {
+            callback(_settings);
+        }
 
-		IEndpointCache CreateEndpointCache()
-		{
-			if (_settings.EndpointCache != null)
-				return _settings.EndpointCache;
+        IEndpointCache CreateEndpointCache()
+        {
+            if (_settings.EndpointCache != null)
+                return _settings.EndpointCache;
 
-			IEndpointFactory endpointFactory = CreateEndpointFactory();
+            IEndpointFactory endpointFactory = CreateEndpointFactory();
 
-			IEndpointCache endpointCache = new EndpointCache(endpointFactory);
+            IEndpointCache endpointCache = new EndpointCache(endpointFactory);
 
-			return endpointCache;
-		}
+            return endpointCache;
+        }
 
-		static BusBuilder DefaultBuilderFactory(BusSettings settings)
-		{
-			return new ServiceBusBuilderImpl(settings);
-		}
-	}
+        static BusBuilder DefaultBuilderFactory(BusSettings settings)
+        {
+            return new ServiceBusBuilderImpl(settings);
+        }
+    }
 }
