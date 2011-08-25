@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using Context;
+    using Magnum.Reflection;
 
     public static class SendExtensions
     {
@@ -46,6 +47,22 @@ namespace MassTransit
             contextCallback(context);
 
             endpoint.Send(context);
+        }
+
+        public static void Send<T>(this IEndpoint endpoint, object values)
+            where T : class
+        {
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            endpoint.Send(message, x => { });
+        }
+
+        public static void Send<T>(this IEndpoint endpoint, object values, Action<ISendContext<T>> contextCallback)
+            where T : class
+        {
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            endpoint.Send(message, contextCallback);
         }
     }
 }
