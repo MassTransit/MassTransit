@@ -12,12 +12,31 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
+    using Magnum.Reflection;
+
     public static class PublishExtensions
     {
         public static void Publish<T>(this IServiceBus bus, T message)
             where T : class
         {
             bus.Publish(message, x => { });
+        }
+
+        public static void Publish<T>(this IServiceBus bus, object values)
+            where T : class
+        {
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            bus.Publish(message, x => { });
+        }
+
+        public static void Publish<T>(this IServiceBus bus, object values, Action<IPublishContext<T>> contextCallback)
+            where T : class
+        {
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            bus.Publish(message, contextCallback);
         }
     }
 }

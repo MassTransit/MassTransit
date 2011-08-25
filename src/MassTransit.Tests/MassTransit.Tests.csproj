@@ -117,6 +117,7 @@
   <ItemGroup>
     <Compile Include="Diagnostics\Trace_Specs.cs" />
     <Compile Include="Environment_Specs.cs" />
+    <Compile Include="InterfaceProxy_Specs.cs" />
     <Compile Include="MessageUrnSpecs.cs" />
     <Compile Include="BddExtensions.cs" />
     <Compile Include="Configuration\ConsumerSubscription_Specs.cs" />
