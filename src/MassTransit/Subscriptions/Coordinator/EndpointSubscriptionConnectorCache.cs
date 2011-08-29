@@ -12,66 +12,71 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Coordinator
 {
-	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using Magnum.Reflection;
-	using log4net;
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using Magnum.Reflection;
+    using log4net;
 
-	public class EndpointSubscriptionConnectorCache
-	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionConnectorCache));
+    public class EndpointSubscriptionConnectorCache
+    {
+        static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionConnectorCache));
 
-		readonly Dictionary<Type, EndpointSubscriptionConnector> _cache;
-		readonly TypeConverter _typeConverter;
-		IServiceBus _bus;
+        readonly Dictionary<Type, EndpointSubscriptionConnector> _cache;
+        readonly object _lock = new object();
+        readonly TypeConverter _typeConverter;
+        IServiceBus _bus;
 
-		public EndpointSubscriptionConnectorCache(IServiceBus bus)
-		{
-			_bus = bus;
-			_typeConverter = TypeDescriptor.GetConverter(typeof (string));
-			_cache = new Dictionary<Type, EndpointSubscriptionConnector>();
-		}
+        public EndpointSubscriptionConnectorCache(IServiceBus bus)
+        {
+            _bus = bus;
+            _typeConverter = TypeDescriptor.GetConverter(typeof (string));
+            _cache = new Dictionary<Type, EndpointSubscriptionConnector>();
+        }
 
-		public UnsubscribeAction Connect(string messageName, Uri endpointUri, string correlationId)
-		{
-			Type messageType = Type.GetType(messageName);
-			if (messageType == null)
-			{
-				_log.InfoFormat("Unknown message type '{0}', unable to add subscription", messageName);
-				return () => true;
-			}
+        public UnsubscribeAction Connect(string messageName, Uri endpointUri, string correlationId)
+        {
+            Type messageType = Type.GetType(messageName);
+            if (messageType == null)
+            {
+                _log.InfoFormat("Unknown message type '{0}', unable to add subscription", messageName);
+                return () => true;
+            }
 
-			EndpointSubscriptionConnector connector;
-			if (!_cache.TryGetValue(messageType, out connector))
-			{
-				connector = (EndpointSubscriptionConnector) FastActivator.Create(typeof (EndpointSubscriptionConnector<>),
-					new[] {messageType}, new object[] {_bus});
+            EndpointSubscriptionConnector connector;
+            lock (_lock)
+            {
+                if (!_cache.TryGetValue(messageType, out connector))
+                {
+                    connector = (EndpointSubscriptionConnector)
+                                FastActivator.Create(typeof (EndpointSubscriptionConnector<>),
+                                    new[] {messageType}, new object[] {_bus});
 
-				_cache.Add(messageType, connector);
-			}
+                    _cache.Add(messageType, connector);
+                }
+            }
 
-			return connector.Connect(endpointUri, correlationId);
-		}
+            return connector.Connect(endpointUri, correlationId);
+        }
 
-		Func<string, TKey> GetKeyConverter<TKey>()
-		{
-			Type keyType = typeof (TKey);
+        Func<string, TKey> GetKeyConverter<TKey>()
+        {
+            Type keyType = typeof (TKey);
 
-			object correlationId;
-			if (keyType == typeof (Guid))
-			{
-				return x => (TKey) ((object) new Guid(x));
-			}
+            object correlationId;
+            if (keyType == typeof (Guid))
+            {
+                return x => (TKey) ((object) new Guid(x));
+            }
 
-			if (_typeConverter.CanConvertTo(keyType))
-			{
-				return x => (TKey) _typeConverter.ConvertTo(x, keyType);
-			}
+            if (_typeConverter.CanConvertTo(keyType))
+            {
+                return x => (TKey) _typeConverter.ConvertTo(x, keyType);
+            }
 
-			throw new InvalidOperationException(
-				"The correlationId in the subscription could not be converted to the CorrelatedBy type: " +
-				keyType.FullName);
-		}
-	}
+            throw new InvalidOperationException(
+                "The correlationId in the subscription could not be converted to the CorrelatedBy type: " +
+                keyType.FullName);
+        }
+    }
 }
