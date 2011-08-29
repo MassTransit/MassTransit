@@ -12,265 +12,268 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using System;
-	using Exceptions;
-	using Magnum.Extensions;
-	using Magnum.TestFramework;
-	using Messages;
-	using NUnit.Framework;
-	using TextFixtures;
-	using TestFramework;
+    using System;
+    using Exceptions;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using NUnit.Framework;
+    using TestFramework;
+    using TextFixtures;
 
-	[TestFixture]
-	public class Publishing_a_simple_request :
-		LoopbackLocalAndRemoteTestFixture
-	{
-		[Test]
-		public void Should_use_a_clean_syntax_following_standard_conventions()
-		{
-			var pongReceived = new FutureMessage<PongMessage>();
-			var pingReceived = new FutureMessage<PingMessage>();
+    [TestFixture]
+    public class Publishing_a_simple_request :
+        LoopbackLocalAndRemoteTestFixture
+    {
+        class PingMessage
+        {
+            public Guid TransactionId { get; set; }
+        }
 
-			RemoteBus.SubscribeHandler<PingMessage>(x =>
-				{
-					pingReceived.Set(x);
-					RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(x.CorrelationId));
-				});
+        class PongMessage
+        {
+            public Guid TransactionId { get; set; }
+        }
 
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+        [Test]
+        public void Should_support_send_as_well()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
 
-			var ping = new PingMessage();
+            RemoteBus.SubscribeContextHandler<PingMessage>(x =>
+                {
+                    pingReceived.Set(x.Message);
+                    x.Respond(new PongMessage {TransactionId = x.Message.TransactionId});
+                });
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
-			var timeout = 8.Seconds();
+            var ping = new PingMessage();
 
-			LocalBus.PublishRequest(ping, x =>
-				{
-					x.Handle<PongMessage>(message =>
-						{
-							message.CorrelationId.ShouldEqual(ping.CorrelationId, "The response correlationId did not match");
-							pongReceived.Set(message);
-						});
+            TimeSpan timeout = 8.Seconds();
 
-					x.SetTimeout(timeout);
-				});
+            RemoteBus.Endpoint.SendRequest(ping, LocalBus, x =>
+                {
+                    x.Handle<PongMessage>(message =>
+                        {
+                            message.TransactionId.ShouldEqual(ping.TransactionId,
+                                "The response correlationId did not match");
+                            pongReceived.Set(message);
+                        });
 
-			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
-			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
-		}
+                    x.SetTimeout(timeout);
+                });
 
-		[Test]
-		public void Should_support_the_asynchronous_programming_model()
-		{
-			var pongReceived = new FutureMessage<PongMessage>();
-			var pingReceived = new FutureMessage<PingMessage>();
-			var callbackCalled = new FutureMessage<IAsyncResult>();
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+        }
 
-			RemoteBus.SubscribeHandler<PingMessage>(x =>
-				{
-					pingReceived.Set(x);
-					RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(x.CorrelationId));
-				});
+        [Test]
+        public void Should_support_the_asynchronous_programming_model()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
+            var callbackCalled = new FutureMessage<IAsyncResult>();
 
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
-			
-			var ping = new PingMessage();
+            RemoteBus.SubscribeContextHandler<PingMessage>(x =>
+                {
+                    pingReceived.Set(x.Message);
+                    x.Respond(new PongMessage {TransactionId = x.Message.TransactionId});
+                });
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
-			var timeout = 18.Seconds();
+            var ping = new PingMessage();
 
-			LocalBus.BeginPublishRequest(ping, callbackCalled.Set, null, x =>
-				{
-					x.Handle<PongMessage>(message =>
-						{
-							message.CorrelationId.ShouldEqual(ping.CorrelationId, "The response correlationId did not match");
-							pongReceived.Set(message);
-						});
+            TimeSpan timeout = 18.Seconds();
 
-					x.SetTimeout(timeout);
-				});
+            LocalBus.BeginPublishRequest(ping, callbackCalled.Set, null, x =>
+                {
+                    x.Handle<PongMessage>(message =>
+                        {
+                            message.TransactionId.ShouldEqual(ping.TransactionId,
+                                "The response correlationId did not match");
+                            pongReceived.Set(message);
+                        });
 
-			callbackCalled.IsAvailable(timeout).ShouldBeTrue("The callback was not called");
+                    x.SetTimeout(timeout);
+                });
 
-			LocalBus.EndRequest(callbackCalled.Message);
+            callbackCalled.IsAvailable(timeout).ShouldBeTrue("The callback was not called");
 
-			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
-			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
-		}
+            LocalBus.EndRequest(callbackCalled.Message);
 
-		[Test]
-		public void Should_support_send_as_well()
-		{
-			var pongReceived = new FutureMessage<PongMessage>();
-			var pingReceived = new FutureMessage<PingMessage>();
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+        }
 
-			RemoteBus.SubscribeHandler<PingMessage>(x =>
-				{
-					pingReceived.Set(x);
-					RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(x.CorrelationId));
-				});
+        [Test]
+        public void Should_throw_a_handler_exception_on_the_calling_thread()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
 
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
-			
-			var ping = new PingMessage();
+            RemoteBus.SubscribeContextHandler<PingMessage>(x =>
+                {
+                    pingReceived.Set(x.Message);
+                    x.Respond(new PongMessage {TransactionId = x.Message.TransactionId});
+                });
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
-			var timeout = 8.Seconds();
+            var ping = new PingMessage();
 
-			RemoteBus.Endpoint.SendRequest(ping, LocalBus, x =>
-				{
-					x.Handle<PongMessage>(message =>
-						{
-							message.CorrelationId.ShouldEqual(ping.CorrelationId, "The response correlationId did not match");
-							pongReceived.Set(message);
-						});
+            TimeSpan timeout = 8.Seconds();
 
-					x.SetTimeout(timeout);
-				});
+            var exception = Assert.Throws<RequestException>(() =>
+                {
+                    LocalBus.PublishRequest(ping, x =>
+                        {
+                            x.Handle<PongMessage>(message =>
+                                {
+                                    pongReceived.Set(message);
 
-			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
-			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
-		}
+                                    throw new InvalidOperationException("I got it, but I am naughty with it.");
+                                });
 
-		[Test]
-		public void Should_throw_a_timeout_exception_if_no_response_received()
-		{
-			var pongReceived = new FutureMessage<PongMessage>();
-			var pingReceived = new FutureMessage<PingMessage>();
+                            x.SetTimeout(timeout);
+                        });
+                }, "A request exception should have been thrown");
 
-			RemoteBus.SubscribeHandler<PingMessage>(pingReceived.Set);
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+            exception.Response.ShouldBeAnInstanceOf<PongMessage>();
+            exception.InnerException.ShouldBeAnInstanceOf<InvalidOperationException>();
 
-			var ping = new PingMessage();
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+        }
 
-			var timeout = 2.Seconds();
+        [Test]
+        public void Should_throw_a_handler_exception_on_the_calling_thread_using_async()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
+            var callbackCalled = new FutureMessage<IAsyncResult>();
 
-			Assert.Throws<RequestTimeoutException>(() =>
-				{
-					LocalBus.PublishRequest(ping, x =>
-						{
-							x.Handle<PongMessage>(pongReceived.Set);
+            RemoteBus.SubscribeContextHandler<PingMessage>(x =>
+                {
+                    pingReceived.Set(x.Message);
+                    x.Respond(new PongMessage {TransactionId = x.Message.TransactionId});
+                });
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
-							x.SetTimeout(timeout);
-						});
-				}, "A timeout exception should have been thrown");
+            var ping = new PingMessage();
 
-			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
-			pongReceived.IsAvailable(timeout).ShouldBeFalse("The pong should not have been received");
-		}
+            TimeSpan timeout = 18.Seconds();
 
-		[Test]
-		public void Should_throw_a_timeout_exception_for_async_when_end_is_called()
-		{
-			var pongReceived = new FutureMessage<PongMessage>();
-			var pingReceived = new FutureMessage<PingMessage>();
-			var callbackCalled = new FutureMessage<IAsyncResult>();
+            LocalBus.BeginPublishRequest(ping, callbackCalled.Set, null, x =>
+                {
+                    x.Handle<PongMessage>(message =>
+                        {
+                            pongReceived.Set(message);
 
-			RemoteBus.SubscribeHandler<PingMessage>(pingReceived.Set);
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+                            throw new InvalidOperationException("I got it, but I am naughty with it.");
+                        });
 
-			var ping = new PingMessage();
+                    x.SetTimeout(timeout);
+                });
 
-			var timeout = 2.Seconds();
+            callbackCalled.IsAvailable(timeout).ShouldBeTrue("Called was not called");
 
-			LocalBus.BeginPublishRequest(ping, callbackCalled.Set, null, x =>
-			{
-				x.Handle<PongMessage>(pongReceived.Set);
+            var exception = Assert.Throws<RequestException>(() => { LocalBus.EndRequest(callbackCalled.Message); },
+                "A request exception should have been thrown");
 
-				x.SetTimeout(timeout);
-			});
+            exception.Response.ShouldBeAnInstanceOf<PongMessage>();
+            exception.InnerException.ShouldBeAnInstanceOf<InvalidOperationException>();
 
-			callbackCalled.IsAvailable(8.Seconds()).ShouldBeTrue("Callback was not invoked");
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+        }
 
-			Assert.Throws<RequestTimeoutException>(() =>
-				{
-					LocalBus.EndRequest(callbackCalled.Message);
-				}, "A timeout exception should have been thrown");
+        [Test]
+        public void Should_throw_a_timeout_exception_for_async_when_end_is_called()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
+            var callbackCalled = new FutureMessage<IAsyncResult>();
 
-			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
-			pongReceived.IsAvailable(timeout).ShouldBeFalse("The pong should not have been received");
-		}
+            RemoteBus.SubscribeHandler<PingMessage>(pingReceived.Set);
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
-		[Test]
-		public void Should_throw_a_handler_exception_on_the_calling_thread()
-		{
-			var pongReceived = new FutureMessage<PongMessage>();
-			var pingReceived = new FutureMessage<PingMessage>();
+            var ping = new PingMessage();
 
-			RemoteBus.SubscribeHandler<PingMessage>(message =>
-			{
-				pingReceived.Set(message);
-				RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(message.CorrelationId));
-			});
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+            TimeSpan timeout = 2.Seconds();
 
-			var ping = new PingMessage();
+            LocalBus.BeginPublishRequest(ping, callbackCalled.Set, null, x =>
+                {
+                    x.Handle<PongMessage>(pongReceived.Set);
 
-			var timeout = 8.Seconds();
+                    x.SetTimeout(timeout);
+                });
 
-			var exception = Assert.Throws<RequestException>(() =>
-				{
-					LocalBus.PublishRequest(ping, x =>
-						{
-							x.Handle<PongMessage>(message =>
-								{
-									pongReceived.Set(message);
+            callbackCalled.IsAvailable(8.Seconds()).ShouldBeTrue("Callback was not invoked");
 
-									throw new InvalidOperationException("I got it, but I am naughty with it.");
-								});
+            Assert.Throws<RequestTimeoutException>(() => { LocalBus.EndRequest(callbackCalled.Message); },
+                "A timeout exception should have been thrown");
 
-							x.SetTimeout(timeout);
-						});
-				}, "A request exception should have been thrown");
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeFalse("The pong should not have been received");
+        }
 
-			exception.Response.ShouldBeAnInstanceOf<PongMessage>();
-			exception.InnerException.ShouldBeAnInstanceOf<InvalidOperationException>();
+        [Test]
+        public void Should_throw_a_timeout_exception_if_no_response_received()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
 
-			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
-			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
-		}
+            RemoteBus.SubscribeHandler<PingMessage>(pingReceived.Set);
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
-		[Test]
-		public void Should_throw_a_handler_exception_on_the_calling_thread_using_async()
-		{
-			var pongReceived = new FutureMessage<PongMessage>();
-			var pingReceived = new FutureMessage<PingMessage>();
-			var callbackCalled = new FutureMessage<IAsyncResult>();
+            var ping = new PingMessage();
 
-			RemoteBus.SubscribeHandler<PingMessage>(message =>
-			{
-				pingReceived.Set(message);
-				RemoteBus.MessageContext<PingMessage>().Respond(new PongMessage(message.CorrelationId));
-			});
+            TimeSpan timeout = 2.Seconds();
 
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
-			
-			var ping = new PingMessage();
+            Assert.Throws<RequestTimeoutException>(() =>
+                {
+                    LocalBus.PublishRequest(ping, x =>
+                        {
+                            x.Handle<PongMessage>(pongReceived.Set);
 
-			var timeout = 18.Seconds();
+                            x.SetTimeout(timeout);
+                        });
+                }, "A timeout exception should have been thrown");
 
-			LocalBus.BeginPublishRequest(ping, callbackCalled.Set, null, x =>
-			{
-				x.Handle<PongMessage>(message =>
-				{
-					pongReceived.Set(message);
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeFalse("The pong should not have been received");
+        }
 
-					throw new InvalidOperationException("I got it, but I am naughty with it.");
-				});
+        [Test]
+        public void Should_use_a_clean_syntax_following_standard_conventions()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
 
-				x.SetTimeout(timeout);
-			});
+            RemoteBus.SubscribeContextHandler<PingMessage>(x =>
+                {
+                    pingReceived.Set(x.Message);
+                    x.Respond(new PongMessage {TransactionId = x.Message.TransactionId});
+                });
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
-			callbackCalled.IsAvailable(timeout).ShouldBeTrue("Called was not called");
+            var ping = new PingMessage();
 
-			var exception = Assert.Throws<RequestException>(() =>
-				{
-					LocalBus.EndRequest(callbackCalled.Message);
+            TimeSpan timeout = 8.Seconds();
 
-				}, "A request exception should have been thrown");
+            LocalBus.PublishRequest(ping, x =>
+                {
+                    x.Handle<PongMessage>(message =>
+                        {
+                            message.TransactionId.ShouldEqual(ping.TransactionId,
+                                "The response correlationId did not match");
+                            pongReceived.Set(message);
+                        });
 
-			exception.Response.ShouldBeAnInstanceOf<PongMessage>();
-			exception.InnerException.ShouldBeAnInstanceOf<InvalidOperationException>();
+                    x.SetTimeout(timeout);
+                });
 
-			pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
-			pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
-		}
-	}
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+        }
+    }
 }
