@@ -12,98 +12,99 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Context;
-	using Magnum.Concurrency;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Magnum.Concurrency;
 
-	/// <summary>
-	/// Splits a message path based on the correlation information in the message
-	/// </summary>
-	/// <typeparam name="TMessage">The type of the message to be routed</typeparam>
-	/// <typeparam name="TKey">They key type for the message</typeparam>
-	/// <typeparam name="T"></typeparam>
-	public class CorrelatedMessageRouter<T, TMessage, TKey> :
-		IPipelineSink<T>
-		where TMessage : class, CorrelatedBy<TKey>
-		where T : class, IMessageContext<TMessage>
-	{
-		readonly Atomic<Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>> _output;
+    /// <summary>
+    /// Splits a message path based on the correlation information in the message
+    /// </summary>
+    /// <typeparam name="TMessage">The type of the message to be routed</typeparam>
+    /// <typeparam name="TKey">They key type for the message</typeparam>
+    /// <typeparam name="T"></typeparam>
+    public class CorrelatedMessageRouter<T, TMessage, TKey> :
+        IPipelineSink<T>
+        where TMessage : class, CorrelatedBy<TKey>
+        where T : class, IMessageContext<TMessage>
+    {
+        readonly Atomic<Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>> _output;
 
-		public CorrelatedMessageRouter()
-		{
-			_output = Atomic.Create(new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage,TKey>>());
-		}
+        public CorrelatedMessageRouter()
+        {
+            _output = Atomic.Create(new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>());
+        }
 
-		public int SinkCount(TKey key)
-		{
-			CorrelatedMessageSinkRouter<T,TMessage,TKey> router;
-			if (!_output.Value.TryGetValue(key, out router))
-				return 0;
+        public IEnumerable<Action<T>> Enumerate(T context)
+        {
+            TKey key = context.Message.CorrelationId;
 
-			return router.SinkCount;
-		}
+            CorrelatedMessageSinkRouter<T, TMessage, TKey> output;
+            if (!_output.Value.TryGetValue(key, out output))
+                return Enumerable.Empty<Action<T>>();
 
-		public IEnumerable<Action<T>> Enumerate(T context)
-		{
-			TKey key = context.Message.CorrelationId;
+            return output.Enumerate(context);
+        }
 
-			CorrelatedMessageSinkRouter<T,TMessage, TKey> output;
-			if (!_output.Value.TryGetValue(key, out output))
-				return Enumerable.Empty<Action<T>>();
+        public bool Inspect(IPipelineInspector inspector)
+        {
+            return inspector.Inspect(this, () => _output.Value.Values.All(x => x.Inspect(inspector)));
+        }
 
-			return output.Enumerate(context);
-		}
+        public int SinkCount(TKey key)
+        {
+            CorrelatedMessageSinkRouter<T, TMessage, TKey> router;
+            if (!_output.Value.TryGetValue(key, out router))
+                return 0;
 
-		public bool Inspect(IPipelineInspector inspector)
-		{
-			return inspector.Inspect(this, () => _output.Value.Values.All(x => x.Inspect(inspector)));
-		}
+            return router.SinkCount;
+        }
 
-		public UnsubscribeAction Connect(TKey correlationId, IPipelineSink<T> sink)
-		{
-			_output.Set(sinks =>
-				{
-					CorrelatedMessageSinkRouter<T, TMessage, TKey> keySink;
-					if (sinks.TryGetValue(correlationId, out keySink) == false)
-					{
-						keySink = new CorrelatedMessageSinkRouter<T,TMessage, TKey>(correlationId);
-						keySink.Connect(sink);
+        public UnsubscribeAction Connect(TKey correlationId, IPipelineSink<T> sink)
+        {
+            _output.Set(sinks =>
+                {
+                    CorrelatedMessageSinkRouter<T, TMessage, TKey> keySink;
+                    if (sinks.TryGetValue(correlationId, out keySink) == false)
+                    {
+                        keySink = new CorrelatedMessageSinkRouter<T, TMessage, TKey>(correlationId);
+                        keySink.Connect(sink);
 
-						return new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>(sinks) { { correlationId, keySink } };
-					}
+                        return new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>(sinks)
+                            {{correlationId, keySink}};
+                    }
 
-					var result = new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>(sinks);
+                    var result = new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>(sinks);
 
-					keySink = new CorrelatedMessageSinkRouter<T, TMessage, TKey>(correlationId, keySink.Sinks);
-					keySink.Connect(sink);
-					result[correlationId] = keySink;
+                    keySink = new CorrelatedMessageSinkRouter<T, TMessage, TKey>(correlationId, keySink.Sinks);
+                    keySink.Connect(sink);
+                    result[correlationId] = keySink;
 
-					return result;
-				});
+                    return result;
+                });
 
-			return () => Disconnect(correlationId, sink);
-		}
+            return () => Disconnect(correlationId, sink);
+        }
 
-		bool Disconnect(TKey correlationId, IPipelineSink<T> sink)
-		{
-			return _output.Set(sinks =>
-				{
-					CorrelatedMessageSinkRouter<T, TMessage, TKey> keySink;
-					if (sinks.TryGetValue(correlationId, out keySink) == false)
-						return sinks;
+        bool Disconnect(TKey correlationId, IPipelineSink<T> sink)
+        {
+            return _output.Set(sinks =>
+                {
+                    CorrelatedMessageSinkRouter<T, TMessage, TKey> keySink;
+                    if (sinks.TryGetValue(correlationId, out keySink) == false)
+                        return sinks;
 
-					var result = new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>(sinks);
+                    var result = new Dictionary<TKey, CorrelatedMessageSinkRouter<T, TMessage, TKey>>(sinks);
 
-					List<IPipelineSink<T>> outputSinks = keySink.Sinks.Where(x => x != sink).ToList();
-					if (outputSinks.Count == 0)
-						result.Remove(correlationId);
-					else
-						result[correlationId] = new CorrelatedMessageSinkRouter<T, TMessage, TKey>(correlationId, outputSinks);
+                    List<IPipelineSink<T>> outputSinks = keySink.Sinks.Where(x => x != sink).ToList();
+                    if (outputSinks.Count == 0)
+                        result.Remove(correlationId);
+                    else
+                        result[correlationId] = new CorrelatedMessageSinkRouter<T, TMessage, TKey>(correlationId,
+                            outputSinks);
 
-					return result;
-				}) != null;
-		}
-	}
+                    return result;
+                }) != null;
+        }
+    }
 }

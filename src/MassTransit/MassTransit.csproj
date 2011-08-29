@@ -172,7 +172,7 @@
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionRouterConfiguratorImpl.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ContextConsumerSubscriptionConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\CorrelatedHandlerSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\RequestHandlerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ContextInstanceSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\SelectedContextConsumerSubscriptionConnector.cs" />
@@ -258,10 +258,13 @@
     <Compile Include="Exceptions\RequestTimeoutException.cs" />
     <Compile Include="Exceptions\SendException.cs" />
     <Compile Include="IOutboundMessageInterceptor.cs" />
+    <Compile Include="Pipeline\Configuration\InboundRequestMessageRouterConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\InboundRequestMessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\HandlerSelector.cs" />
     <Compile Include="Pipeline\InstanceHandlerSelector.cs" />
     <Compile Include="Pipeline\MultipleHandlerSelector.cs" />
     <Compile Include="Pipeline\Sinks\ContextConsumerMessageSink.cs" />
+    <Compile Include="Pipeline\Sinks\RequestMessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageFilter.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageInterceptor.cs" />
     <Compile Include="Pipeline\Sinks\SelectedContextConsumerMessageSink.cs" />

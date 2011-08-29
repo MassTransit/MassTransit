@@ -12,97 +12,99 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse.Configurators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Exceptions;
-	using Pipeline;
-	using SubscriptionConnectors;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Exceptions;
+    using Magnum;
+    using Pipeline;
+    using SubscriptionConnectors;
 
-	public class RequestConfiguratorImpl<TRequest, TKey> :
-		RequestConfigurator<TRequest, TKey>
-		where TRequest : class, CorrelatedBy<TKey>
-	{
-		readonly IList<Func<IInboundPipelineConfigurator, UnsubscribeAction>> _handlers;
-		readonly TRequest _message;
-		RequestImpl<TRequest, TKey> _request;
+    public class RequestConfiguratorImpl<TRequest> :
+        RequestConfigurator<TRequest>
+        where TRequest : class
+    {
+        readonly IList<Func<IInboundPipelineConfigurator, UnsubscribeAction>> _handlers;
+        readonly TRequest _message;
+        readonly RequestImpl<TRequest> _request;
+        readonly string _requestId;
 
-		public RequestConfiguratorImpl(TRequest message)
-		{
-			_message = message;
-			_handlers = new List<Func<IInboundPipelineConfigurator, UnsubscribeAction>>();
+        public RequestConfiguratorImpl(TRequest message)
+        {
+            _message = message;
+            _handlers = new List<Func<IInboundPipelineConfigurator, UnsubscribeAction>>();
+            _requestId = CombGuid.Generate().ToString();
 
-			_request = new RequestImpl<TRequest, TKey>(message);
-		}
+            _request = new RequestImpl<TRequest>(_requestId, message);
+        }
 
-		public TKey CorrelationId
-		{
-			get { return _message.CorrelationId; }
-		}
+        public TRequest Request
+        {
+            get { return _message; }
+        }
 
-		public TRequest Request
-		{
-			get { return _message; }
-		}
+        public string RequestId
+        {
+            get { return _requestId; }
+        }
 
-		public void Handle<TResponse>(Action<TResponse> handler)
-			where TResponse : class, CorrelatedBy<TKey>
-		{
-			var connector = new CorrelatedHandlerSubscriptionConnector<TResponse, TKey>();
+        public void Handle<TResponse>(Action<TResponse> handler)
+            where TResponse : class
+        {
+            var connector = new RequestHandlerSubscriptionConnector<TResponse>();
 
-			Action<TResponse> responseHandler = message =>
-				{
-					try
-					{
-						handler(message);
+            Action<TResponse> responseHandler = message =>
+                {
+                    try
+                    {
+                        handler(message);
 
-						_request.Complete(message);
-					}
-					catch (Exception ex)
-					{
-						var exception = new RequestException("The response handler threw an exception", ex, message);
-						_request.Fail(exception);
-					}
-				};
+                        _request.Complete(message);
+                    }
+                    catch (Exception ex)
+                    {
+                        var exception = new RequestException("The response handler threw an exception", ex, message);
+                        _request.Fail(exception);
+                    }
+                };
 
-			_handlers.Add(
-				x => { return connector.Connect(x, CorrelationId, HandlerSelector.ForHandler(responseHandler)); });
-		}
+            _handlers.Add(
+                x => { return connector.Connect(x, _requestId, HandlerSelector.ForHandler(responseHandler)); });
+        }
 
-		public void HandleTimeout(TimeSpan timeout, Action timeoutCallback)
-		{
-			_request.SetTimeout(timeout);
-			_request.SetTimeoutCallback(timeoutCallback);
-		}
+        public void HandleTimeout(TimeSpan timeout, Action timeoutCallback)
+        {
+            _request.SetTimeout(timeout);
+            _request.SetTimeoutCallback(timeoutCallback);
+        }
 
-		public void SetTimeout(TimeSpan timeout)
-		{
-			_request.SetTimeout(timeout);
-		}
+        public void SetTimeout(TimeSpan timeout)
+        {
+            _request.SetTimeout(timeout);
+        }
 
-		IRequest<TRequest, TKey> Build(IServiceBus bus)
-		{
-			UnsubscribeAction unsubscribeAction = bus.Configure(configurator =>
-				{
-					UnsubscribeAction seed = () => true;
+        IRequest<TRequest> Build(IServiceBus bus)
+        {
+            UnsubscribeAction unsubscribeAction = bus.Configure(configurator =>
+                {
+                    UnsubscribeAction seed = () => true;
 
-					return _handlers.Aggregate(seed, (x, handlerConfigurator) => x + handlerConfigurator(configurator));
-				});
+                    return _handlers.Aggregate(seed, (x, handlerConfigurator) => x + handlerConfigurator(configurator));
+                });
 
-			_request.SetUnsubscribeAction(unsubscribeAction);
+            _request.SetUnsubscribeAction(unsubscribeAction);
 
-			return _request;
-		}
+            return _request;
+        }
 
-		public static IRequest<TRequest, TKey> Create(IServiceBus bus, TRequest message,
-		                                              Action<RequestConfigurator<TRequest, TKey>> configureCallback)
-		{
-			var configurator = new RequestConfiguratorImpl<TRequest, TKey>(message);
+        public static IRequest<TRequest> Create(IServiceBus bus, TRequest message,
+                                                Action<RequestConfigurator<TRequest>> configureCallback)
+        {
+            var configurator = new RequestConfiguratorImpl<TRequest>(message);
 
-			configureCallback(configurator);
+            configureCallback(configurator);
 
-			IRequest<TRequest, TKey> request = configurator.Build(bus);
-			return request;
-		}
-	}
+            return configurator.Build(bus);
+        }
+    }
 }

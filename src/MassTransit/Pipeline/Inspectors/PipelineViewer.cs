@@ -147,6 +147,15 @@ namespace MassTransit.Pipeline.Inspectors
             return true;
         }
 
+        public bool Inspect<T,TMessage>(RequestMessageRouter<T,TMessage> router)
+            where T : class, IConsumeContext<TMessage> 
+            where TMessage : class
+        {
+            Append(string.Format("Routed Request {0}", GetMessageName<TMessage>()));
+
+            return true;
+        }
+
         public bool Inspect<TMessage>(InboundConvertMessageSink<TMessage> converter)
             where TMessage : class
         {

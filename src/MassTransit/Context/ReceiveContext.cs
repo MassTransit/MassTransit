@@ -179,6 +179,7 @@ namespace MassTransit.Context
                 Bus.GetEndpoint(ResponseAddress).Send(message, context =>
                     {
                         context.SetSourceAddress(Bus.Endpoint.Address.Uri);
+                        context.SetRequestId(RequestId);
                         contextCallback(context);
                     });
             }
@@ -186,7 +187,7 @@ namespace MassTransit.Context
             {
                 Bus.Publish(message, context =>
                     {
-                        // don't roll this up or it breaks the 3.5 build
+                        context.SetRequestId(RequestId);
                         contextCallback(context);
                     });
             }

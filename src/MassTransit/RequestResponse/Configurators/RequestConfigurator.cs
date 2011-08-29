@@ -12,53 +12,48 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse.Configurators
 {
-	using System;
+    using System;
 
-	public interface RequestConfigurator<TKey>
-	{
-		/// <summary>
-		/// The correlation id for the request
-		/// </summary>
-		TKey CorrelationId { get; }
-	}
+    /// <summary>
+    /// Configures a request and the associated response handler behavior
+    /// </summary>
+    /// <typeparam name="TRequest">The message type of the request</typeparam>
+    /// <typeparam name="TKey">The correlation key for the request and response messages</typeparam>
+    public interface RequestConfigurator<TRequest>
+        where TRequest : class
+    {
+        /// <summary>
+        /// The request message that was sent
+        /// </summary>
+        TRequest Request { get; }
 
+        /// <summary>
+        /// Returns the identifier assigned to this request
+        /// </summary>
+        string RequestId { get; }
 
-	/// <summary>
-	/// Configures a request and the associated response handler behavior
-	/// </summary>
-	/// <typeparam name="TRequest">The message type of the request</typeparam>
-	/// <typeparam name="TKey">The correlation key for the request and response messages</typeparam>
-	public interface RequestConfigurator<TRequest, TKey> :
-		RequestConfigurator<TKey>
-		where TRequest : class, CorrelatedBy<TKey>
-	{
-		/// <summary>
-		/// The request message that was sent
-		/// </summary>
-		TRequest Request { get; }
+        /// <summary>
+        /// Configures a handler to be called if a response of the specified type
+        /// is received. Once received, the request completes by default unless
+        /// overridden by calling Continue on the request.
+        /// </summary>
+        /// <typeparam name="TResponse">The message type of the response</typeparam>
+        /// <param name="handler">The handler to call with the response message</param>
+        void Handle<TResponse>(Action<TResponse> handler)
+            where TResponse : class;
 
-		/// <summary>
-		/// Configures a handler to be called if a response of the specified type
-		/// is received. Once received, the request completes by default unless
-		/// overridden by calling Continue on the request.
-		/// </summary>
-		/// <typeparam name="TResponse">The message type of the response</typeparam>
-		/// <param name="handler">The handler to call with the response message</param>
-		void Handle<TResponse>(Action<TResponse> handler)
-			where TResponse : class, CorrelatedBy<TKey>;
+        /// <summary>
+        /// Specifies a timeout period after which the request should be cancelled
+        /// </summary>
+        /// <param name="timeout">The timeout period</param>
+        /// <param name="timeoutCallback"></param>
+        void HandleTimeout(TimeSpan timeout, Action timeoutCallback);
 
-		/// <summary>
-		/// Specifies a timeout period after which the request should be cancelled
-		/// </summary>
-		/// <param name="timeout">The timeout period</param>
-		/// <param name="handler">The handler to call if the request times out</param>
-		void HandleTimeout(TimeSpan timeout, Action timeoutCallback);
-
-		/// <summary>
-		/// Specifies a timeout period after which the request should be cancelled and
-		/// a TimeoutException should be thrown
-		/// </summary>
-		/// <param name="timeout">The timeout period</param>
-		void SetTimeout(TimeSpan timeout);
-	}
+        /// <summary>
+        /// Specifies a timeout period after which the request should be cancelled and
+        /// a TimeoutException should be thrown
+        /// </summary>
+        /// <param name="timeout">The timeout period</param>
+        void SetTimeout(TimeSpan timeout);
+    }
 }

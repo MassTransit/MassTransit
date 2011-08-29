@@ -15,36 +15,36 @@ namespace MassTransit.Pipeline.Configuration
     using Exceptions;
     using Sinks;
 
-    public class InboundCorrelatedMessageRouterConfigurator
+    public class InboundRequestMessageRouterConfigurator
     {
         readonly IPipelineSink<IConsumeContext> _sink;
 
-        internal InboundCorrelatedMessageRouterConfigurator(IPipelineSink<IConsumeContext> sink)
+        internal InboundRequestMessageRouterConfigurator(IPipelineSink<IConsumeContext> sink)
         {
             _sink = sink;
         }
 
-        public CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey> FindOrCreate<TMessage, TKey>()
-            where TMessage : class, CorrelatedBy<TKey>
+        public RequestMessageRouter<IConsumeContext<TMessage>, TMessage> FindOrCreate<TMessage>()
+            where TMessage : class
         {
             var configurator = new InboundMessageRouterConfigurator(_sink);
 
             MessageRouter<IConsumeContext<TMessage>> router = configurator.FindOrCreate<TMessage>();
 
-            var scope = new InboundCorrelatedMessageRouterConfiguratorScope<TMessage, TKey>();
+            var scope = new InboundRequestMessageRouterConfiguratorScope<TMessage>();
             _sink.Inspect(scope);
 
-            return scope.Router ?? ConfigureRouter<TMessage, TKey>(router);
+            return scope.Router ?? ConfigureRouter(router);
         }
 
-        static CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey> ConfigureRouter<TMessage, TKey>(
+        static RequestMessageRouter<IConsumeContext<TMessage>, TMessage> ConfigureRouter<TMessage>(
             MessageRouter<IConsumeContext<TMessage>> inputRouter)
-            where TMessage : class, CorrelatedBy<TKey>
+            where TMessage : class
         {
             if (inputRouter == null)
                 throw new PipelineException("The input router was not found");
 
-            var outputRouter = new CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey>();
+            var outputRouter = new RequestMessageRouter<IConsumeContext<TMessage>, TMessage>(x => x.RequestId);
 
             inputRouter.Connect(outputRouter);
 

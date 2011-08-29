@@ -16,21 +16,20 @@ namespace MassTransit.Pipeline.Configuration
     using Sinks;
     using Util;
 
-    public class InboundCorrelatedMessageRouterConfiguratorScope<TMessage, TKey> :
-        PipelineInspectorBase<InboundCorrelatedMessageRouterConfiguratorScope<TMessage, TKey>>
-        where TMessage : class, CorrelatedBy<TKey>
+    public class InboundRequestMessageRouterConfiguratorScope<TMessage> :
+        PipelineInspectorBase<InboundRequestMessageRouterConfiguratorScope<TMessage>>
+        where TMessage : class
     {
-        public CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey> Router { get; private set; }
+        public RequestMessageRouter<IConsumeContext<TMessage>, TMessage> Router { get; private set; }
 
         [UsedImplicitly]
-        public bool Inspect<T, TM, TK>(CorrelatedMessageRouter<T, TM, TK> router)
+        public bool Inspect<T, TM, TK>(RequestMessageRouter<T, TM> router)
             where T : class, IMessageContext<TM>
-            where TM : class, CorrelatedBy<TK>
+            where TM : class
         {
-            if (typeof (T) == typeof (IConsumeContext<TMessage>) && typeof (TM) == typeof (TMessage) &&
-                typeof (TK) == typeof (TKey))
+            if (typeof (T) == typeof (IConsumeContext<TMessage>) && typeof (TM) == typeof (TMessage))
             {
-                Router = router.TranslateTo<CorrelatedMessageRouter<IConsumeContext<TMessage>, TMessage, TKey>>();
+                Router = router.TranslateTo<RequestMessageRouter<IConsumeContext<TMessage>, TMessage>>();
 
                 return false;
             }

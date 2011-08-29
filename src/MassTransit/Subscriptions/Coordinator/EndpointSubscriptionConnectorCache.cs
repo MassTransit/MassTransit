@@ -25,7 +25,7 @@ namespace MassTransit.Subscriptions.Coordinator
         readonly Dictionary<Type, EndpointSubscriptionConnector> _cache;
         readonly object _lock = new object();
         readonly TypeConverter _typeConverter;
-        IServiceBus _bus;
+        readonly IServiceBus _bus;
 
         public EndpointSubscriptionConnectorCache(IServiceBus bus)
         {
