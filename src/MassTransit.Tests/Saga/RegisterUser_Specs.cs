@@ -12,56 +12,62 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Saga
 {
-	using System.Diagnostics;
-	using MassTransit.Saga;
-	using Messages;
-	using NUnit.Framework;
-	using TestFramework;
-	using TextFixtures;
+    using System.Diagnostics;
+    using Magnum.TestFramework;
+    using MassTransit.Saga;
+    using MassTransit.Subscriptions;
+    using Messages;
+    using NUnit.Framework;
+    using TestFramework;
+    using TextFixtures;
 
-	[TestFixture]
-	public class When_a_unknown_user_registers :
-		LoopbackLocalAndRemoteTestFixture
-	{
-		protected override void EstablishContext()
-		{
-			base.EstablishContext();
+    [TestFixture]
+    public class When_a_unknown_user_registers :
+        LoopbackLocalAndRemoteTestFixture
+    {
+        protected override void EstablishContext()
+        {
+            base.EstablishContext();
 
-			InMemorySagaRepository<RegisterUserSaga> sagaRepository = SetupSagaRepository<RegisterUserSaga>();
+            InMemorySagaRepository<RegisterUserSaga> sagaRepository = SetupSagaRepository<RegisterUserSaga>();
 
-			// this just shows that you can easily respond to the message
-			RemoteBus.SubscribeHandler<SendUserVerificationEmail>(
-				x =>
-					{
-						RemoteBus.ShouldHaveSubscriptionFor<UserVerificationEmailSent>();
-						RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email));
-					});
+            // this just shows that you can easily respond to the message
+            RemoteBus.SubscribeHandler<SendUserVerificationEmail>(
+                x =>
+                    {
+                        RemoteBus.ShouldHaveSubscriptionFor<UserVerificationEmailSent>();
+                        RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email));
+                    });
 
-			RemoteBus.SubscribeSaga(sagaRepository);
+            RemoteBus.SubscribeSaga(sagaRepository);
 
-			LocalBus.ShouldHaveSubscriptionFor<RegisterUser>();
-			LocalBus.ShouldHaveSubscriptionFor<UserVerificationEmailSent>();
-			LocalBus.ShouldHaveSubscriptionFor<UserValidated>();
-		}
+            LocalBus.ShouldHaveSubscriptionFor<RegisterUser>();
+            LocalBus.ShouldHaveSubscriptionFor<UserVerificationEmailSent>();
+            LocalBus.ShouldHaveSubscriptionFor<UserValidated>();
+        }
 
-		[Test]
-		public void The_user_should_be_pending()
-		{
-			Stopwatch timer = Stopwatch.StartNew();
+        [Test]
+        public void The_user_should_be_pending()
+        {
+            Stopwatch timer = Stopwatch.StartNew();
 
-			var controller = new RegisterUserController(LocalBus);
+            var controller = new RegisterUserController(LocalBus);
+            using (IUnsubscribeAction unsubscribe = LocalBus.SubscribeInstance(controller).Disposable())
+            {
+                RemoteBus.ShouldHaveSubscriptionFor<UserRegistrationPending>();
+                RemoteBus.ShouldHaveSubscriptionFor<UserRegistrationComplete>();
 
-			bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
+                bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
 
-			Assert.That(complete, Is.False, "The user should be pending");
+                complete.ShouldBeTrue("The user should be pending");
 
-			timer.Stop();
+                timer.Stop();
+                Debug.WriteLine(string.Format("Time to handle message: {0}ms", timer.ElapsedMilliseconds));
 
-			Debug.WriteLine(string.Format("Time to handle message: {0}ms", timer.ElapsedMilliseconds));
+                complete = controller.ValidateUser();
 
-			complete = controller.ValidateUser();
-
-			Assert.That(complete, Is.True, "Should have been completed by now");
-		}
-	}
+                complete.ShouldBeTrue("The user should be complete");
+            }
+        }
+    }
 }
