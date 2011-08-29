@@ -22,20 +22,19 @@ namespace MassTransit.Tests.Saga
 		Consumes<UserRegistrationComplete>.For<Guid>
 	{
 		readonly IServiceBus _bus;
-		readonly ManualResetEvent _completed = new ManualResetEvent(false);
+		readonly ManualResetEvent _registrationComplete = new ManualResetEvent(false);
 		readonly Guid _correlationId;
-		readonly ManualResetEvent _pending = new ManualResetEvent(false);
+		readonly ManualResetEvent _registrationPending = new ManualResetEvent(false);
 
 		public RegisterUserController(IServiceBus bus)
 		{
 			_bus = bus;
-
 			_correlationId = Guid.NewGuid();
 		}
 
 		public void Consume(UserRegistrationComplete message)
 		{
-			_completed.Set();
+			_registrationComplete.Set();
 		}
 
 		public Guid CorrelationId
@@ -45,51 +44,35 @@ namespace MassTransit.Tests.Saga
 
 		public void Consume(UserRegistrationPending message)
 		{
-			_pending.Set();
+			_registrationPending.Set();
 		}
 
 		public bool RegisterUser(string username, string password, string displayName, string email)
 		{
-			var message = new RegisterUser(_correlationId, "username", "password", "Display Name", "user@domain.com");
+			var message = new RegisterUser(_correlationId, username, password, displayName, email);
 
-			bool result = false;
+		    _bus.Publish(message);
 
-			_bus.PublishRequest(message, x =>
-				{
-					x.Handle<UserRegistrationPending>(response => { result = false; });
-					x.Handle<UserRegistrationComplete>(response => { result = true; });
-					x.SetTimeout(10.Seconds());
-				});
-
-			return result;
+		    return _registrationPending.WaitOne(8.Seconds());
 		}
 
 		public bool ValidateUser()
 		{
-			using (_bus.SubscribeInstance(this).Disposable())
-			{
-				Thread.Sleep(5.Seconds());
+		    _bus.Publish(new UserValidated(CorrelationId));
 
-				_bus.Publish(new UserValidated(CorrelationId));
-
-				var handles = new WaitHandle[] {_completed};
-
-				int result = WaitHandle.WaitAny(handles, TimeSpan.FromSeconds(10), true);
-
-				if (result == 0)
-				{
-					// we have success!
-					return true;
-				}
-
-				if (result == 1)
-				{
-					// we are pending, so we need to return false but not fail
-					return false;
-				}
-
-				throw new ApplicationException("A timeout occurred while registering the user");
-			}
+		    return WaitOn(_registrationComplete, 8.Seconds(), "Timeout waiting for registration to complete");
 		}
+
+        bool WaitOn(WaitHandle handle, TimeSpan timeout, string message)
+        {
+            int result = WaitHandle.WaitAny(new[] { handle }, timeout, true);
+            if (result == 0)
+                return true;
+
+            if (result == 1)
+                return false;
+
+            throw new ApplicationException(message);
+        }
 	}
 }
