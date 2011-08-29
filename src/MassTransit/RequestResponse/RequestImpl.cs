@@ -19,14 +19,15 @@ namespace MassTransit.RequestResponse
 	using Magnum.Extensions;
 	using log4net;
 
-	public class RequestImpl<TRequest, TKey> :
-		IRequest<TRequest, TKey>
-		where TRequest : class, CorrelatedBy<TKey>
+	public class RequestImpl<TRequest> :
+		IRequest<TRequest>
+		where TRequest : class
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (RequestImpl<TRequest, TKey>));
+		static readonly ILog _log = LogManager.GetLogger(typeof (RequestImpl<TRequest>));
 		readonly IList<AsyncCallback> _completionCallbacks;
 		readonly object _lock = new object();
-		readonly TRequest _message;
+	    readonly string _requestId;
+	    readonly TRequest _message;
 
 		ManualResetEvent _complete;
 		bool _completed;
@@ -36,9 +37,10 @@ namespace MassTransit.RequestResponse
 		Action _timeoutCallback;
 		RegisteredWaitHandle _waitHandle;
 
-		public RequestImpl(TRequest message)
+		public RequestImpl(string requestId, TRequest message)
 		{
-			_message = message;
+		    _requestId = requestId;
+		    _message = message;
 			_completionCallbacks = new List<AsyncCallback>();
 			_timeoutCallback = DefaultTimeoutCallback;
 		}
@@ -84,7 +86,12 @@ namespace MassTransit.RequestResponse
 			return Wait();
 		}
 
-		public bool Wait()
+	    public string RequestId
+	    {
+	        get { return _requestId; }
+	    }
+
+	    public bool Wait()
 		{
 			bool alreadyCompleted;
 			lock (_lock)
@@ -92,7 +99,7 @@ namespace MassTransit.RequestResponse
 
 			bool result = alreadyCompleted || CompleteEvent.WaitOne(_timeout, true);
 			if (!result)
-				Fail(RequestTimeoutException.FromCorrelationId(_message.CorrelationId));
+				Fail(RequestTimeoutException.FromCorrelationId(_requestId));
 
 			Close();
 
@@ -119,7 +126,7 @@ namespace MassTransit.RequestResponse
 		}
 
 		public void Complete<TResponse>(TResponse response)
-			where TResponse : class, CorrelatedBy<TKey>
+			where TResponse : class
 		{
 			NotifyComplete();
 		}
@@ -149,7 +156,7 @@ namespace MassTransit.RequestResponse
 						lock (_completionCallbacks)
 							_completionCallbacks.Add(asyncResult => _timeoutCallback());
 
-						Fail(RequestTimeoutException.FromCorrelationId(_message.CorrelationId));
+						Fail(RequestTimeoutException.FromCorrelationId(_requestId));
 					}
 				};
 

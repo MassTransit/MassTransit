@@ -12,44 +12,43 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse
 {
-	using System;
+    using System;
 
-	public interface IRequest :
-		IAsyncResult
-	{
-		/// <summary>
-		/// Wait for the request to complete. If the timeout expires, the request
-		/// completes and the timeout callback is called.
-		/// </summary>
-		/// <returns>True if the request completed before the timeout expired</returns>
-		bool Wait();
+    public interface IRequest :
+        IAsyncResult
+    {
+        /// <summary>
+        /// Identifies the request for matching up request/response messages
+        /// </summary>
+        string RequestId { get; }
 
-		/// <summary>
-		/// Wait for the request to complete. If the timeout expires, the request
-		/// completes and the timeout callback is called.
-		/// </summary>
-		/// <param name="timeout">The timeout for the request</param>
-		/// <returns>True if the request completed before the timeout expired</returns>
-		bool Wait(TimeSpan timeout);
+        /// <summary>
+        /// Wait for the request to complete. If the timeout expires, the request
+        /// completes and the timeout callback is called.
+        /// </summary>
+        /// <returns>True if the request completed before the timeout expired</returns>
+        bool Wait();
 
-		/// <summary>
-		/// Begins the request as an asynchronous operation
-		/// </summary>
-		/// <param name="callback"></param>
-		/// <param name="state"></param>
-		/// <returns></returns>
-		IAsyncResult BeginAsync(AsyncCallback callback, object state);
-	}
+        /// <summary>
+        /// Wait for the request to complete. If the timeout expires, the request
+        /// completes and the timeout callback is called.
+        /// </summary>
+        /// <param name="timeout">The timeout for the request</param>
+        /// <returns>True if the request completed before the timeout expired</returns>
+        bool Wait(TimeSpan timeout);
 
-	public interface IRequest<T> :
-		IRequest
-		where T : class
-	{
-	}
+        /// <summary>
+        /// Begins the request as an asynchronous operation
+        /// </summary>
+        /// <param name="callback"></param>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        IAsyncResult BeginAsync(AsyncCallback callback, object state);
+    }
 
-	public interface IRequest<T, TKey> :
-		IRequest<T>
-		where T : class, CorrelatedBy<TKey>
-	{
-	}
+    public interface IRequest<T> :
+        IRequest
+        where T : class
+    {
+    }
 }
