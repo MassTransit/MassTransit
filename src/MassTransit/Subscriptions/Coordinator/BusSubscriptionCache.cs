@@ -23,50 +23,62 @@ namespace MassTransit.Subscriptions.Coordinator
         static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionCache));
         readonly object _lock = new object();
         readonly SubscriptionObserver _observer;
-        readonly IDictionary<string, BusSubscription> _subscriptions;
+        readonly IDictionary<SubscriptionKey, BusSubscription> _subscriptions;
 
         public BusSubscriptionCache(SubscriptionObserver observer)
         {
             _observer = observer;
-            _subscriptions = new Dictionary<string, BusSubscription>();
+            _subscriptions = new Dictionary<SubscriptionKey, BusSubscription>();
         }
 
         public IEnumerable<Subscription> Subscriptions
         {
             get
             {
-                lock(_lock)
+                lock (_lock)
                     return _subscriptions.Values.SelectMany(x => x.Subscriptions).ToList();
             }
         }
 
         public void OnSubscribeTo(SubscribeTo message)
         {
-            BusSubscription busSubscription;
+            var key = new SubscriptionKey
+                {
+                    MessageName = message.MessageName,
+                    CorrelationId = message.CorrelationId,
+                };
+
+            BusSubscription subscription;
             lock (_lock)
             {
-                busSubscription = _subscriptions.Retrieve(message.MessageName,
-                    () => new BusSubscription(message.MessageName, _observer));
+                subscription = _subscriptions.Retrieve(key,
+                    () => new BusSubscription(message.MessageName, message.CorrelationId, _observer));
             }
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("SubscribeTo: {0}, {1}", message.MessageName, message.SubscriptionId);
 
-            busSubscription.OnSubscribeTo(message);
+            subscription.OnSubscribeTo(message);
         }
 
         public void OnUnsubscribeFrom(UnsubscribeFrom message)
         {
-            BusSubscription actor;
+            var key = new SubscriptionKey
+                {
+                    MessageName = message.MessageName,
+                    CorrelationId = message.CorrelationId,
+                };
+
+            BusSubscription subscription;
             bool result;
             lock (_lock)
-                result = _subscriptions.TryGetValue(message.MessageName, out actor);
+                result = _subscriptions.TryGetValue(key, out subscription);
             if (result)
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("UnsubscribeFrom: {0}, {1}", message.MessageName, message.SubscriptionId);
 
-                actor.OnUnsubscribeFrom(message);
+                subscription.OnUnsubscribeFrom(message);
             }
             else
             {

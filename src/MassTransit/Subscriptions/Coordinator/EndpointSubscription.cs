@@ -27,19 +27,21 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly Fiber _fiber;
 		readonly IDictionary<Guid, PeerSubscription> _ids;
 		readonly string _messageName;
-		readonly SubscriptionObserver _observer;
+	    readonly string _correlationId;
+	    readonly SubscriptionObserver _observer;
 		readonly Scheduler _scheduler;
 		readonly TimeSpan _unsubscribeTimeout = 4.Seconds();
 		Uri _endpointUri;
 		Guid _subscriptionId;
 
-		public EndpointSubscription(Fiber fiber, Scheduler scheduler, string messageName,
+		public EndpointSubscription(Fiber fiber, Scheduler scheduler, string messageName, string correlationId,
 		                            SubscriptionObserver observer)
 		{
 			_fiber = fiber;
 			_scheduler = scheduler;
 			_messageName = messageName;
-			_observer = observer;
+		    _correlationId = correlationId;
+		    _observer = observer;
 
 			_ids = new Dictionary<Guid, PeerSubscription>();
 
@@ -63,7 +65,8 @@ namespace MassTransit.Subscriptions.Coordinator
 				{
 					SubscriptionId = _subscriptionId,
 					EndpointUri = _endpointUri,
-					MessageName = _messageName
+					MessageName = _messageName,
+                    CorrelationId = _correlationId,
 				};
 
 			_log.DebugFormat("PeerSubscriptionAdded: {0}, {1} {2}", _messageName, _endpointUri, _subscriptionId);
@@ -119,7 +122,8 @@ namespace MassTransit.Subscriptions.Coordinator
 				{
 					SubscriptionId = _subscriptionId,
 					EndpointUri = _endpointUri,
-					MessageName = _messageName
+					MessageName = _messageName,
+                    CorrelationId = _correlationId,
 				};
 
 			_log.DebugFormat("PeerSubscriptionRemoved: {0}, {1} {2}", _messageName, _endpointUri, _subscriptionId);

@@ -58,6 +58,7 @@ namespace MassTransit.Subscriptions.Coordinator
                     SubscriptionId = message.SubscriptionId,
                     EndpointUri = message.EndpointUri,
                     MessageName = message.MessageName,
+                    CorrelationId = message.CorrelationId,
                 };
 
             if (_log.IsDebugEnabled)
@@ -77,6 +78,7 @@ namespace MassTransit.Subscriptions.Coordinator
                     SubscriptionId = message.SubscriptionId,
                     EndpointUri = message.EndpointUri,
                     MessageName = message.MessageName,
+                    CorrelationId = message.CorrelationId,
                 };
 
             if (_log.IsDebugEnabled)

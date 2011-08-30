@@ -22,7 +22,7 @@ namespace MassTransit.Subscriptions.Coordinator
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionCache));
 
-		readonly IDictionary<string, EndpointSubscription> _messageSubscriptions;
+		readonly IDictionary<SubscriptionKey, EndpointSubscription> _messageSubscriptions;
 		readonly Fiber _fiber;
 		readonly Scheduler _scheduler;
 		readonly SubscriptionObserver _observer;
@@ -32,16 +32,22 @@ namespace MassTransit.Subscriptions.Coordinator
 			_fiber = fiber;
 			_scheduler = scheduler;
 			_observer = observer;
-			_messageSubscriptions = new Dictionary<string, EndpointSubscription>();
+			_messageSubscriptions = new Dictionary<SubscriptionKey, EndpointSubscription>();
 		}
 
 		public void Send(AddPeerSubscription message)
 		{
-			EndpointSubscription subscription;
-			if (!_messageSubscriptions.TryGetValue(message.MessageName, out subscription))
+            var key = new SubscriptionKey
+            {
+                MessageName = message.MessageName,
+                CorrelationId = message.CorrelationId,
+            };
+
+            EndpointSubscription subscription;
+			if (!_messageSubscriptions.TryGetValue(key, out subscription))
 			{
-				subscription = new EndpointSubscription(_fiber, _scheduler, message.MessageName, _observer);
-				_messageSubscriptions.Add(message.MessageName, subscription);
+				subscription = new EndpointSubscription(_fiber, _scheduler, message.MessageName, message.CorrelationId, _observer);
+				_messageSubscriptions.Add(key, subscription);
 			}
 
 			if (_log.IsDebugEnabled)
@@ -52,8 +58,15 @@ namespace MassTransit.Subscriptions.Coordinator
 
 		public void Send(RemovePeerSubscription message)
 		{
+            var key = new SubscriptionKey
+            {
+                MessageName = message.MessageName,
+                CorrelationId = message.CorrelationId,
+            };
+
+
 			EndpointSubscription subscription;
-			if (_messageSubscriptions.TryGetValue(message.MessageName, out subscription))
+			if (_messageSubscriptions.TryGetValue(key, out subscription))
 			{
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("RemovePeerSubscription: {0}, {1}", message.MessageName, message.SubscriptionId);
