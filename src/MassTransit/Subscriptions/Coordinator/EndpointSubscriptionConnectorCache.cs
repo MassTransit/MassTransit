@@ -15,6 +15,8 @@ namespace MassTransit.Subscriptions.Coordinator
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Linq;
+    using Magnum.Extensions;
     using Magnum.Reflection;
     using log4net;
 
@@ -48,10 +50,22 @@ namespace MassTransit.Subscriptions.Coordinator
             {
                 if (!_cache.TryGetValue(messageType, out connector))
                 {
-                    connector = (EndpointSubscriptionConnector)
-                                FastActivator.Create(typeof (EndpointSubscriptionConnector<>),
-                                    new[] {messageType}, new object[] {_bus});
+                    var correlationType = messageType.GetInterfaces()
+                        .Where(x => x.IsGenericType)
+                        .Where(x => x.GetGenericTypeDefinition() == typeof (CorrelatedBy<>))
+                        .Select(x => x.GetGenericArguments()[0])
+                        .FirstOrDefault();
 
+                    if (correlationType != null)
+                    {
+                        connector = this.FastInvoke<EndpointSubscriptionConnectorCache, EndpointSubscriptionConnector>(
+                            new[] {messageType, correlationType}, "CreateCorrelatedConnector", _bus);
+                    }
+                    else
+                    {
+                        connector = this.FastInvoke<EndpointSubscriptionConnectorCache, EndpointSubscriptionConnector>(
+                            new[] { messageType }, "CreateConnector", _bus);
+                    }
                     _cache.Add(messageType, connector);
                 }
             }
@@ -59,11 +73,22 @@ namespace MassTransit.Subscriptions.Coordinator
             return connector.Connect(endpointUri, correlationId);
         }
 
+        EndpointSubscriptionConnector CreateConnector<TMessage>(IServiceBus bus)
+            where TMessage : class
+        {
+            return new EndpointSubscriptionConnector<TMessage>(bus);
+        }
+
+        EndpointSubscriptionConnector CreateCorrelatedConnector<TMessage, TKey>(IServiceBus bus)
+            where TMessage : class, CorrelatedBy<TKey>
+        {
+            return new EndpointSubscriptionConnector<TMessage, TKey>(bus, GetKeyConverter<TKey>());
+        }
+
         Func<string, TKey> GetKeyConverter<TKey>()
         {
             Type keyType = typeof (TKey);
 
-            object correlationId;
             if (keyType == typeof (Guid))
             {
                 return x => (TKey) ((object) new Guid(x));

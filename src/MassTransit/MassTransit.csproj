@@ -204,6 +204,7 @@
     <Compile Include="Configuration\TransportFactoryConfigurationExtensions.cs" />
     <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
     <Compile Include="Configuration\Xml\SettingsOptions.cs" />
+    <Compile Include="Context\ConsumeContext.cs" />
     <Compile Include="Context\ContextStorageProvider.cs" />
     <Compile Include="Context\ContextScopeExtensions.cs" />
     <Compile Include="Context\ContextScope.cs" />
@@ -366,6 +367,7 @@
     <Compile Include="Services\Timeout\Messages\ScheduleTimeout.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
+    <Compile Include="Subscriptions\Coordinator\SubscriptionKey.cs" />
     <Compile Include="Subscriptions\Coordinator\SubscriptionObserver.cs" />
     <Compile Include="Subscriptions\Coordinator\SubscriptionRouter.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscription.cs" />

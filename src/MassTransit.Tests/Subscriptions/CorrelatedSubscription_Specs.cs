@@ -21,8 +21,8 @@ namespace MassTransit.Tests.Subscriptions
 	public class Adding_a_correlated_subscription_via_the_subscription_client :
 		SubscriptionServiceTestFixture<LoopbackTransportFactory>
 	{
-		const string FirstCorrelationId = "FirstSybsystemCorrelationId";
-		const string SecondCorrelationId = "SecondSubsystemCorrelationId";
+		const string FirstCorrelationId = "FirstId";
+		const string SecondCorrelationId = "SecondId";
 
 		public class FirstComponent :
 			Consumes<IncomingMessage>.For<string>
@@ -53,16 +53,7 @@ namespace MassTransit.Tests.Subscriptions
 		public class IncomingMessage :
 			CorrelatedBy<string>
 		{
-			protected IncomingMessage()
-			{
-			}
-
-			public IncomingMessage(string correlationId)
-			{
-				CorrelationId = correlationId;
-			}
-
-			public string CorrelationId { get; protected set; }
+			public string CorrelationId { get; set; }
 		}
 
 		[Test]
@@ -76,8 +67,8 @@ namespace MassTransit.Tests.Subscriptions
 
 			RemoteBus.ShouldHaveSubscriptionFor<IncomingMessage>();
 
-			//RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(FirstCorrelationId);
-			//RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(SecondCorrelationId);
+			RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(FirstCorrelationId);
+			RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(SecondCorrelationId);
 		}
 	}
 }

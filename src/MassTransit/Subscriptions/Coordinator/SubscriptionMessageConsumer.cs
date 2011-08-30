@@ -74,6 +74,7 @@ namespace MassTransit.Subscriptions.Coordinator
 					MessageName = context.Message.Subscription.MessageName,
 					MessageNumber = context.Message.Subscription.SequenceNumber,
 					SubscriptionId = context.Message.Subscription.SubscriptionId,
+                    CorrelationId = context.Message.Subscription.CorrelationId,
 				});
 		}
 
@@ -118,6 +119,7 @@ namespace MassTransit.Subscriptions.Coordinator
 					MessageName = context.Message.Subscription.MessageName,
 					MessageNumber = context.Message.Subscription.SequenceNumber,
 					SubscriptionId = context.Message.Subscription.SubscriptionId,
+                    CorrelationId = context.Message.Subscription.CorrelationId,
 				});
 		}
 
@@ -153,6 +155,7 @@ namespace MassTransit.Subscriptions.Coordinator
 						MessageName = subscription.MessageName,
 						MessageNumber = subscription.SequenceNumber,
 						SubscriptionId = subscription.SubscriptionId,
+                        CorrelationId = subscription.CorrelationId,
 					});
 			}
 		}

@@ -62,6 +62,9 @@ namespace MassTransit.Subscriptions.Coordinator
 		{
 			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
+            if (correlationId.IsEmpty())
+                return _bus.OutboundPipeline.ConnectEndpoint<TMessage>(endpoint);
+
 			TKey key = _converter(correlationId);
 
 			return _bus.OutboundPipeline.ConnectEndpoint<TMessage, TKey>(key, endpoint);
