@@ -7,7 +7,7 @@ up a ServiceBus instance at ``msmq://localhost/servicea`` you will also get a bu
 though the pattern may be different). This queue is monitored by your instance of the IServiceBus
 on the 'ControlBus' property. Control messages are not transactional and are more about information
 passing and management issues. They should not be used for business critical communication, they are
-usually temporary in nature (if your instance isn’t there it doesn’t get control messages) and are
+usually temporary in nature (if your instance isn't there it doesn't get control messages) and are
 usually purged on start up.
 
 Inspiration: 
