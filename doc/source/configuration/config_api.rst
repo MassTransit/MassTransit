@@ -106,6 +106,10 @@ Subscription Options
             s.Consumer(consumerType);
             s.Consumer<TConsumer>();
             
+            //for a permanent subscription
+            s.Consumer<TConsumer>()
+                .Permanent();
+            
             s.Saga(sagaRepository)
         });
     });
@@ -114,7 +118,11 @@ Now that we have a transport, an address, and some basic options figured out the
 is in front of you. Establishing your subscriptions. As you can see there are a lot of options
 so I am going to save most of the explanation for the next page.
 
+.. note:: 
 
+    Permanent Subscriptions will not be automatically unsubscribed at bus shutdown.
+
+    
 Bus Tuning Options
 ''''''''''''''''''
 
