@@ -120,7 +120,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 			where T : class
 		{
 			Console.WriteLine(correlatedMessage.OccurredAt);
-			Console.WriteLine(correlatedMessage.CaughtException.StackTrace);
+			Console.WriteLine(correlatedMessage.StackTrace);
 		}
 	}
 
