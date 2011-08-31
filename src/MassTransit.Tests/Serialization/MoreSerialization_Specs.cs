@@ -24,37 +24,12 @@ namespace MassTransit.Tests.Serialization
     using MassTransit.Services.Subscriptions.Messages;
     using NUnit.Framework;
 
-    [TestFixture]
-    public class MoreSerializationForCustomXml :
-        MoreSerialization_Specs<XmlMessageSerializer>
-    {
-    }
-
-    [TestFixture]
-    public class MoreSerializationForJson :
-        MoreSerialization_Specs<JsonMessageSerializer>
-    {
-    }
-    
-    [TestFixture]
-    public class MoreSerializationForBson :
-        MoreSerialization_Specs<BsonMessageSerializer>
-    {
-    }
-    
-    [TestFixture]
-    public class MoreSerializationForVersionOneXml :
-        MoreSerialization_Specs<VersionOneXmlMessageSerializer>
-    {
-    }
-
-    [TestFixture]
-    public class MoreSerializationForBinary :
-        MoreSerialization_Specs<BinaryMessageSerializer>
-    {
-    }
-
-    public abstract class MoreSerialization_Specs<TSerializer> :
+    [TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(BsonMessageSerializer))]
+    [TestFixture(typeof(VersionOneXmlMessageSerializer))]
+    [TestFixture(typeof(BinaryMessageSerializer))]
+    public class MoreSerialization_Specs<TSerializer> :
         SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
     {
         [Serializable]
@@ -104,14 +79,27 @@ namespace MassTransit.Tests.Serialization
         {
             public IDictionary<string, OuterClass> Elements { get; set; }
 
+            public DictionaryContainerClass()
+            {
+                Elements = new Dictionary<string, OuterClass>();
+            }
+
             public bool Equals(DictionaryContainerClass other)
             {
                 if (ReferenceEquals(null, other)) return false;
                 if (ReferenceEquals(this, other)) return true;
 
                 if (ReferenceEquals(other.Elements, Elements)) return true;
-                if (other.Elements == null && Elements != null) return false;
-                if (other.Elements != null && Elements == null) return false;
+                if (other.Elements == null && Elements != null)
+                {
+                    Trace.WriteLine("other element was null");
+                    return false;
+                }
+                if (other.Elements != null && Elements == null)
+                {
+                    Trace.WriteLine("other element was not null");
+                    return false;
+                }
 
                 if (other.Elements != null && Elements != null)
                 {
@@ -408,6 +396,33 @@ namespace MassTransit.Tests.Serialization
             TestSerialization(message);
         }
 
+        [Test]
+        public void A_dictionary_of_one_objects_should_be_properly_serialized()
+        {
+            DictionaryContainerClass message = new DictionaryContainerClass
+                {
+                    Elements = new Dictionary<string, OuterClass>
+                        {
+                            {"David", new OuterClass{Inner = new InnerClass {Name = "David"}}},
+                        }
+                };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_dictionary_of_no_objects_should_be_properly_serialized()
+        {
+            DictionaryContainerClass message = new DictionaryContainerClass
+                {
+                    Elements = new Dictionary<string, OuterClass>
+                        {
+                        }
+                };
+
+            TestSerialization(message);
+        }
+
 
         [Test]
         public void A_primitive_array_of_objects_should_be_properly_serialized()
@@ -428,6 +443,17 @@ namespace MassTransit.Tests.Serialization
             {
                 Values = new[] { 1 }
 
+            };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_primitive_array_of_objects_with_no_elements_should_be_properly_serialized()
+        {
+            var message = new PrimitiveArrayClass
+            {
+                Values = new int[] {  }
             };
 
             TestSerialization(message);

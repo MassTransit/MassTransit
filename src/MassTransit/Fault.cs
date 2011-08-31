@@ -30,8 +30,6 @@ namespace MassTransit
 		/// <param name="message">The message that was being processed when the exception was thrown</param>
 		public Fault(TMessage message, Exception ex)
 		{
-			CaughtException = ex;
-
 			FailedMessage = message;
 			OccurredAt = DateTime.UtcNow;
 			Messages = GetExceptionMessages(ex);
@@ -41,11 +39,6 @@ namespace MassTransit
 		protected Fault()
 		{
 		}
-
-		/// <summary>
-		/// The exception that was caught
-		/// </summary>
-		public Exception CaughtException { get; set; }
 
 		/// <summary>
 		/// The message that failed to be consumed
@@ -69,11 +62,9 @@ namespace MassTransit
 
 		static List<string> GetStackTrace(Exception ex)
 		{
-			var result = new List<string>();
+			var result = new List<string> {string.IsNullOrEmpty(ex.StackTrace) ? "Stack Trace" : ex.StackTrace};
 
-			result.Add(string.IsNullOrEmpty(ex.StackTrace) ? "Stack Trace" : ex.StackTrace);
-
-			Exception innerException = ex.InnerException;
+		    Exception innerException = ex.InnerException;
 			while (innerException != null)
 			{
 				string stackTrace = "InnerException Stack Trace: " + innerException.StackTrace;
@@ -87,11 +78,9 @@ namespace MassTransit
 
 		static List<string> GetExceptionMessages(Exception ex)
 		{
-			var result = new List<string>();
+			var result = new List<string> {ex.Message};
 
-			result.Add(ex.Message);
-
-			Exception innerException = ex.InnerException;
+		    Exception innerException = ex.InnerException;
 			while (innerException != null)
 			{
 				result.Add(innerException.Message);

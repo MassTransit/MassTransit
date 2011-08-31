@@ -15,7 +15,6 @@ namespace MassTransit.Serialization
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Linq;
     using Magnum.Extensions;
     using Magnum.Reflection;
     using Newtonsoft.Json;
@@ -33,9 +32,10 @@ namespace MassTransit.Serialization
         {
             if (objectType.IsArray)
             {
-                Type elementType =
-                    objectType.GetInterfaces().First(i => typeof (IEnumerable).IsAssignableFrom(i) && i.IsGenericType).
-                        GetGenericArguments()[0];
+                Type elementType = objectType.GetElementType();
+//                Type elementType =
+//                    objectType.GetInterfaces().First(i => typeof (IEnumerable).IsAssignableFrom(i) && i.IsGenericType).
+//                        GetGenericArguments()[0];
 
                 return this.FastInvoke<ListJsonConverter, object>(new[] {elementType}, "GetSingleItemList", reader,
                     serializer, true);

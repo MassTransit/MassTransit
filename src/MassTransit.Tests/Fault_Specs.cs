@@ -53,7 +53,7 @@ namespace MassTransit.Tests
 
 		    LocalBus.Publish(new Hello(), x => x.SendFaultTo(LocalBus));
 
-			consumer.Fault.IsAvailable(8.Seconds()).ShouldBeTrue();
+			consumer.Fault.IsAvailable(300.Seconds()).ShouldBeTrue();
 		}
 	}
 
