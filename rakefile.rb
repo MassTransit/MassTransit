@@ -261,15 +261,12 @@ end
 task :tests => [:unit_tests]
 
 desc "Runs unit tests (integration tests?, acceptance-tests?) etc."
-task :unit_tests => [:compile] do
-	Dir.mkdir props[:artifacts] unless exists?(props[:artifacts])
+nunit :unit_tests => [:compile] do |nunit|
 
-	runner = NUnitRunner.new(File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe"),
-		'tests',
-		TARGET_FRAMEWORK_VERSION,
-		['/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results.xml')}\""])
+        nunit.command = File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe")
+        nunit.options = "/framework=#{CLR_TOOLS_VERSION}", '/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results.xml')}\""
 
-	runner.run ['MassTransit.Tests'].map{ |assem| "#{assem}.dll" }
+        nunit.assemblies = FileList["tests/MassTransit.Tests.dll"]
 end
 
 task :transport_tests => [:msmq_tests, :rabbitmq_tests]
