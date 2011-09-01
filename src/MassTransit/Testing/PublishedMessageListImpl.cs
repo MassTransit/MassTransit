@@ -25,7 +25,7 @@ namespace MassTransit.Testing
 	{
 		readonly HashSet<PublishedMessage> _messages;
 		readonly AutoResetEvent _published;
-		readonly TimeSpan _timeout = 8.Seconds();
+		readonly TimeSpan _timeout = 12.Seconds();
 
 		public PublishedMessageListImpl()
 		{
