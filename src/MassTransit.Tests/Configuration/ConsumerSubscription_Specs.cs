@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Configuration
 {
-    using System.Threading;
+    using System;
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using Messages;
@@ -34,7 +34,7 @@ namespace MassTransit.Tests.Configuration
                     x.Subscribe(s => s.Consumer<ConsumerOf<PingMessage>>());
                 });
 
-            _ping = new PingMessage();
+            _ping = new PingMessage(Guid.NewGuid());
             _bus.Publish(_ping);
         }
 
@@ -53,17 +53,15 @@ namespace MassTransit.Tests.Configuration
         [Then]
         public void Should_have_received_the_message()
         {
-            ConsumerOf<PingMessage>.OnlyOneShouldHaveReceivedMessage(_ping, 8.Seconds());
+            ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping, 8.Seconds());
         }
     }
 
     [Scenario]
-    public class When_subscribing_a_consumer_to_the_bus_with_a_factory_method
+    public class When_subscribing_a_type_of_consumer_to_the_bus
     {
         IServiceBus _bus;
-        PingMessage _ping1;
-        int _count;
-        PingMessage _ping2;
+        PingMessage _ping;
 
         [When]
         public void Subscribing_a_consumer_to_the_bus()
@@ -71,22 +69,12 @@ namespace MassTransit.Tests.Configuration
             _bus = ServiceBusFactory.New(x =>
                 {
                     x.ReceiveFrom("loopback://localhost/mt_test");
-                    x.SetConcurrentConsumerLimit(1);
 
-                    x.Subscribe(s => s.Consumer(GetConsumer));
+                    x.Subscribe(s => s.Consumer(typeof (ConsumerOf<PingMessage>), Activator.CreateInstance));
                 });
 
-            _ping1 = new PingMessage();
-            _ping2 = new PingMessage();
-            _bus.Publish(_ping1);
-            _bus.Publish(_ping2);
-        }
-
-        ConsumerOf<PingMessage> GetConsumer()
-        {
-            Interlocked.Increment(ref _count);
-
-            return new ConsumerOf<PingMessage>();
+            _ping = new PingMessage(Guid.NewGuid());
+            _bus.Publish(_ping);
         }
 
         [Finally]
@@ -104,16 +92,62 @@ namespace MassTransit.Tests.Configuration
         [Then]
         public void Should_have_received_the_message()
         {
-            ConsumerOf<PingMessage>.OnlyOneShouldHaveReceivedMessage(_ping1, 8.Seconds());
+            ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping, 12.Seconds());
+        }
+    }
 
+    [Scenario]
+    public class When_subscribing_a_consumer_to_the_bus_with_a_factory_method
+    {
+        IServiceBus _bus;
+        PingMessage _ping1;
+        PingMessage _ping2;
+
+
+        [When]
+        public void Subscribing_a_consumer_to_the_bus()
+        {
+            _bus = ServiceBusFactory.New(x =>
+                {
+                    x.ReceiveFrom("loopback://localhost/mt_test");
+                    x.SetConcurrentConsumerLimit(1);
+
+                    x.Subscribe(s => s.Consumer(GetConsumer));
+                });
+
+            _ping1 = new PingMessage(Guid.NewGuid());
+            _ping2 = new PingMessage(Guid.NewGuid());
+            _bus.Publish(_ping1);
+            _bus.Publish(_ping2);
+        }
+
+        [Finally]
+        public void Finally()
+        {
+            _bus.Dispose();
+        }
+
+        [Then]
+        public void Should_have_subscribed()
+        {
+            _bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
+        }
+
+        [Then]
+        public void Should_have_received_the_message()
+        {
+            ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping1, 12.Seconds());
         }
 
         [Then]
         public void Should_have_received_the_second_message()
         {
-            ConsumerOf<PingMessage>.OnlyOneShouldHaveReceivedMessage(_ping2, 8.Seconds());
+            ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping2, 12.Seconds());
+        }
 
-            _count.ShouldEqual(2, "There should have been two consumers created");
+        ConsumerOf<PingMessage> GetConsumer()
+        {
+            return new ConsumerOf<PingMessage>();
         }
     }
 }

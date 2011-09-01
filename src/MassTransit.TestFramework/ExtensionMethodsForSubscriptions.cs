@@ -35,7 +35,7 @@ namespace MassTransit.TestFramework
 
 		static ExtensionMethodsForSubscriptions()
 		{
-			Timeout = 8.Seconds();
+			Timeout = 12.Seconds();
 		}
 
 		public static void ShouldHaveRemoteSubscriptionFor<TMessage>(this IServiceBus bus)
@@ -51,7 +51,7 @@ namespace MassTransit.TestFramework
 				if (inspector.DestinationAddress != null)
 					return;
 
-				Thread.Sleep(10);
+				Thread.Sleep(20);
 			}
 
 			PipelineViewer.Trace(bus.OutboundPipeline, text => _log.ErrorFormat("Pipeline Inspection Result: " + text));
@@ -88,7 +88,7 @@ namespace MassTransit.TestFramework
 				if (inspector.Result.Count() > 0)
 					return inspector.Result;
 
-				Thread.Sleep(10);
+				Thread.Sleep(20);
 			}
 
 			Assert.Fail("A subscription for " + typeof (TMessage).ToFriendlyName() + " was not found on the pipeline");
@@ -110,7 +110,7 @@ namespace MassTransit.TestFramework
 				if (inspector.Result.Count() > 0)
 					return inspector.Result;
 
-				Thread.Sleep(10);
+				Thread.Sleep(20);
 			}
 
 			Assert.Fail("A subscription for " + typeof (TMessage).ToFriendlyName() + " was not found on the pipeline");
@@ -131,7 +131,7 @@ namespace MassTransit.TestFramework
 				if (inspector.DestinationAddress == null)
 					return;
 
-				Thread.Sleep(10);
+				Thread.Sleep(20);
 			}
 
 			Assert.Fail("A subscription for " + typeof (TMessage).ToFriendlyName() + " was found on " + bus.Endpoint.Address.Uri);
@@ -151,7 +151,7 @@ namespace MassTransit.TestFramework
 				if (inspector.Success)
 					return;
 
-				Thread.Sleep(10);
+				Thread.Sleep(20);
 			}
 
 			var message = string.Format("A correlated subscription for {0}({1}) was not found on {2}", 

@@ -360,7 +360,6 @@
     <Compile Include="Saga\InitiatedBy.cs" />
     <Compile Include="Services\Routing\Configuration\RouteTo.cs" />
     <Compile Include="Services\Subscriptions\Client\EndpointUriList.cs" />
-    <Compile Include="Services\Subscriptions\Client\SubscriptionCoordinator.cs" />
     <Compile Include="Services\Subscriptions\Client\SubscriptionServiceMessageProducer.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfiguratorExtensions.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfiguratorImpl.cs" />
@@ -374,7 +373,6 @@
     <Compile Include="Subscriptions\Coordinator\EndpointSubscription.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscriptionCache.cs" />
     <Compile Include="Subscriptions\Coordinator\PeerSubscriptionCache.cs" />
-    <Compile Include="Subscriptions\Coordinator\SubscriptionClientSubscriptionWriter.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscriptionConnector.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscriptionConnectorCache.cs" />
     <Compile Include="Subscriptions\Coordinator\BusSubscriptionMessageProducer.cs" />

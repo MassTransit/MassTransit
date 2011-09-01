@@ -103,6 +103,7 @@ namespace MassTransit.Transports.Msmq
                             SubscriptionId = x.SubscriptionId,
                             EndpointUri = x.EndpointUri,
                             MessageName = x.MessageName,
+                            CorrelationId = x.CorrelationId,
                         };
 
                     clientEndpoint.Send(add, sendContext =>
