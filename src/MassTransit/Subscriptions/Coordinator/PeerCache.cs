@@ -13,7 +13,7 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
-    using System.Collections.Generic;
+    using Magnum.Caching;
     using Magnum.Extensions;
     using Messages;
     using Stact;
@@ -26,19 +26,19 @@ namespace MassTransit.Subscriptions.Coordinator
         static readonly ILog _log = LogManager.GetLogger(typeof (PeerCache));
         readonly Fiber _fiber;
         readonly ActorFactory<PeerHandler> _peerHandlerFactory;
-        readonly IDictionary<Guid, Uri> _peerIds;
+        readonly Cache<Guid, Uri> _peerIds;
         readonly Uri _peerUri;
-        readonly IDictionary<Uri, ActorInstance> _peers;
+        readonly Cache<Uri, ActorInstance> _peers;
         readonly Scheduler _scheduler;
 
         public PeerCache(Fiber fiber, Scheduler scheduler, SubscriptionObserver observer, Guid clientId,
                          Uri controlUri)
         {
-            _peers = new Dictionary<Uri, ActorInstance>();
+            _peers = new DictionaryCache<Uri, ActorInstance>();
             _peerUri = controlUri;
             _fiber = fiber;
             _scheduler = scheduler;
-            _peerIds = new Dictionary<Guid, Uri>();
+            _peerIds = new DictionaryCache<Guid, Uri>();
 
             _peerHandlerFactory = ActorFactory.Create((f, s, i) => new PeerHandler(f, s, i, observer));
 
@@ -51,7 +51,7 @@ namespace MassTransit.Subscriptions.Coordinator
         {
             try
             {
-                _peers.Values.Each(x => x.ExitOnDispose(30.Seconds()).Dispose());
+                _peers.Each(x => x.ExitOnDispose(30.Seconds()).Dispose());
             }
             catch (Exception ex)
             {
@@ -105,7 +105,8 @@ namespace MassTransit.Subscriptions.Coordinator
                 WithPeer(message.Body.PeerId, x =>
                     {
                         if (_log.IsInfoEnabled)
-                            _log.InfoFormat("AddPeerSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
+                            _log.InfoFormat("AddPeerSubscription: {0}, {1} - {2}", message.Body.MessageName,
+                                message.Body.SubscriptionId,
                                 message.Body.PeerId);
 
                         x.Send(message);
@@ -125,7 +126,8 @@ namespace MassTransit.Subscriptions.Coordinator
                 WithPeer(message.Body.PeerId, x =>
                     {
                         if (_log.IsInfoEnabled)
-                            _log.InfoFormat("RemovePeerSubscription: {0}, {1} - {2}", message.Body.MessageName, message.Body.SubscriptionId,
+                            _log.InfoFormat("RemovePeerSubscription: {0}, {1} - {2}", message.Body.MessageName,
+                                message.Body.SubscriptionId,
                                 message.Body.PeerId);
 
                         x.Send(message);
@@ -139,35 +141,31 @@ namespace MassTransit.Subscriptions.Coordinator
 
         void WithPeer(Guid peerId, Action<ActorInstance> callback)
         {
-            Uri peerUri;
-            if (_peerIds.TryGetValue(peerId, out peerUri))
-            {
-                WithPeer(peerId, peerUri, callback, false);
-            }
-            else
-            {
-                _log.WarnFormat("{0} Unknown Peer: {1}", _peerUri, peerId);
-            }
+            _peerIds.WithValue(peerId, peerUri => { WithPeer(peerId, peerUri, callback, false); });
         }
 
         void WithPeer(Guid peerId, Uri controlUri, Action<ActorInstance> callback, bool createIfMissing)
         {
-            ActorInstance peer;
-            if (!_peers.TryGetValue(controlUri, out peer) && createIfMissing)
+            bool found = _peers.Has(controlUri);
+            if (!found)
             {
-                peer = _peerHandlerFactory.GetActor();
+                if (!createIfMissing)
+                {
+                    return;
+                }
+
+                ActorInstance peer = _peerHandlerFactory.GetActor();
                 peer.Send(new InitializePeerHandler(peerId, controlUri));
                 _peers.Add(controlUri, peer);
                 _peerIds[peerId] = controlUri;
             }
             else
             {
-                if (!_peerIds.ContainsKey(peerId))
+                if (!_peerIds.Has(peerId))
                     _peerIds[peerId] = controlUri;
             }
 
-            if (peer != null)
-                callback(peer);
+            callback(_peers[controlUri]);
         }
     }
 }

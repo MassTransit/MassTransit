@@ -13,27 +13,27 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
-    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Linq;
-    using Magnum.Extensions;
+    using Magnum.Caching;
     using Magnum.Reflection;
+    using Util;
     using log4net;
 
     public class EndpointSubscriptionConnectorCache
     {
         static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionConnectorCache));
-
-        readonly Dictionary<Type, EndpointSubscriptionConnector> _cache;
-        readonly object _lock = new object();
-        readonly TypeConverter _typeConverter;
         readonly IServiceBus _bus;
+
+        readonly Cache<Type, EndpointSubscriptionConnector> _cache;
+        readonly TypeConverter _typeConverter;
 
         public EndpointSubscriptionConnectorCache(IServiceBus bus)
         {
             _bus = bus;
             _typeConverter = TypeDescriptor.GetConverter(typeof (string));
-            _cache = new Dictionary<Type, EndpointSubscriptionConnector>();
+            _cache = new GenericTypeCache<EndpointSubscriptionConnector>(typeof (EndpointSubscriptionConnector<>),
+                CreateConnector);
         }
 
         public UnsubscribeAction Connect(string messageName, Uri endpointUri, string correlationId)
@@ -45,40 +45,37 @@ namespace MassTransit.Subscriptions.Coordinator
                 return () => true;
             }
 
-            EndpointSubscriptionConnector connector;
-            lock (_lock)
-            {
-                if (!_cache.TryGetValue(messageType, out connector))
-                {
-                    var correlationType = messageType.GetInterfaces()
-                        .Where(x => x.IsGenericType)
-                        .Where(x => x.GetGenericTypeDefinition() == typeof (CorrelatedBy<>))
-                        .Select(x => x.GetGenericArguments()[0])
-                        .FirstOrDefault();
-
-                    if (correlationType != null)
-                    {
-                        connector = this.FastInvoke<EndpointSubscriptionConnectorCache, EndpointSubscriptionConnector>(
-                            new[] {messageType, correlationType}, "CreateCorrelatedConnector", _bus);
-                    }
-                    else
-                    {
-                        connector = this.FastInvoke<EndpointSubscriptionConnectorCache, EndpointSubscriptionConnector>(
-                            new[] { messageType }, "CreateConnector", _bus);
-                    }
-                    _cache.Add(messageType, connector);
-                }
-            }
+            EndpointSubscriptionConnector connector = _cache[messageType];
 
             return connector.Connect(endpointUri, correlationId);
         }
 
+        EndpointSubscriptionConnector CreateConnector(Type messageType)
+        {
+            Type correlationType = messageType.GetInterfaces()
+                .Where(x => x.IsGenericType)
+                .Where(x => x.GetGenericTypeDefinition() == typeof (CorrelatedBy<>))
+                .Select(x => x.GetGenericArguments()[0])
+                .FirstOrDefault();
+
+            if (correlationType != null)
+            {
+                return this.FastInvoke<EndpointSubscriptionConnectorCache, EndpointSubscriptionConnector>(
+                    new[] {messageType, correlationType}, "CreateCorrelatedConnector", _bus);
+            }
+
+            return this.FastInvoke<EndpointSubscriptionConnectorCache, EndpointSubscriptionConnector>(
+                new[] {messageType}, "CreateConnector", _bus);
+        }
+
+        [UsedImplicitly]
         EndpointSubscriptionConnector CreateConnector<TMessage>(IServiceBus bus)
             where TMessage : class
         {
             return new EndpointSubscriptionConnector<TMessage>(bus);
         }
 
+        [UsedImplicitly]
         EndpointSubscriptionConnector CreateCorrelatedConnector<TMessage, TKey>(IServiceBus bus)
             where TMessage : class, CorrelatedBy<TKey>
         {

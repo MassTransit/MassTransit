@@ -13,7 +13,7 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
-    using System.Collections.Generic;
+    using Magnum.Caching;
     using Messages;
     using log4net;
 
@@ -22,12 +22,12 @@ namespace MassTransit.Subscriptions.Coordinator
     {
         static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionConnector));
         readonly EndpointSubscriptionConnectorCache _cache;
-        readonly Dictionary<Guid, UnsubscribeAction> _connectionCache;
+        readonly Cache<Guid, UnsubscribeAction> _connectionCache;
 
         public BusSubscriptionConnector(IServiceBus bus)
         {
             _cache = new EndpointSubscriptionConnectorCache(bus);
-            _connectionCache = new Dictionary<Guid, UnsubscribeAction>();
+            _connectionCache = new ConcurrentCache<Guid, UnsubscribeAction>();
         }
 
         public void OnSubscriptionAdded(SubscriptionAdded message)
@@ -42,16 +42,15 @@ namespace MassTransit.Subscriptions.Coordinator
 
         public void OnSubscriptionRemoved(SubscriptionRemoved message)
         {
-            UnsubscribeAction unsubscribe;
-            if (_connectionCache.TryGetValue(message.SubscriptionId, out unsubscribe))
-            {
-                unsubscribe();
-                _connectionCache.Remove(message.SubscriptionId);
+            _connectionCache.WithValue(message.SubscriptionId, unsubscribe =>
+                {
+                    unsubscribe();
+                    _connectionCache.Remove(message.SubscriptionId);
 
-                if (_log.IsInfoEnabled)
-                    _log.InfoFormat("Removed: {0} => {1}, {2}", message.MessageName, message.EndpointUri,
-                        message.SubscriptionId);
-            }
+                    if (_log.IsInfoEnabled)
+                        _log.InfoFormat("Removed: {0} => {1}, {2}", message.MessageName, message.EndpointUri,
+                            message.SubscriptionId);
+                });
         }
 
         public void OnComplete()

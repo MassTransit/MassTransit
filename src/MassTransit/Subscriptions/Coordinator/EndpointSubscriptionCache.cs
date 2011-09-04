@@ -12,82 +12,71 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Coordinator
 {
-	using System.Collections.Generic;
-	using Magnum.Extensions;
-	using Messages;
-	using Stact;
-	using log4net;
+    using Magnum.Caching;
+    using Messages;
+    using Stact;
+    using log4net;
 
-	public class EndpointSubscriptionCache
-	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionCache));
+    public class EndpointSubscriptionCache
+    {
+        static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionCache));
 
-		readonly IDictionary<SubscriptionKey, EndpointSubscription> _messageSubscriptions;
-		readonly Fiber _fiber;
-		readonly Scheduler _scheduler;
-		readonly SubscriptionObserver _observer;
+        readonly Fiber _fiber;
+        readonly Cache<SubscriptionKey, EndpointSubscription> _messageSubscriptions;
+        readonly SubscriptionObserver _observer;
+        readonly Scheduler _scheduler;
 
-		public EndpointSubscriptionCache(Fiber fiber, Scheduler scheduler, SubscriptionObserver observer)
-		{
-			_fiber = fiber;
-			_scheduler = scheduler;
-			_observer = observer;
-			_messageSubscriptions = new Dictionary<SubscriptionKey, EndpointSubscription>();
-		}
+        public EndpointSubscriptionCache(Fiber fiber, Scheduler scheduler, SubscriptionObserver observer)
+        {
+            _fiber = fiber;
+            _scheduler = scheduler;
+            _observer = observer;
+            _messageSubscriptions =
+                new DictionaryCache<SubscriptionKey, EndpointSubscription>(
+                    key => new EndpointSubscription(_fiber, _scheduler, key.MessageName, key.CorrelationId, _observer));
+        }
 
-		public void Send(AddPeerSubscription message)
-		{
+        public void Send(AddPeerSubscription message)
+        {
             var key = new SubscriptionKey
-            {
-                MessageName = message.MessageName,
-                CorrelationId = message.CorrelationId,
-            };
+                {
+                    MessageName = message.MessageName,
+                    CorrelationId = message.CorrelationId,
+                };
 
-            EndpointSubscription subscription;
-			if (!_messageSubscriptions.TryGetValue(key, out subscription))
-			{
-				subscription = new EndpointSubscription(_fiber, _scheduler, message.MessageName, message.CorrelationId, _observer);
-				_messageSubscriptions.Add(key, subscription);
-			}
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("AddPeerSubscription: {0}, {1}", message.MessageName, message.SubscriptionId);
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("AddPeerSubscription: {0}, {1}", message.MessageName, message.SubscriptionId);
+            EndpointSubscription subscription = _messageSubscriptions[key];
 
-			subscription.Send(message);
-		}
+            subscription.Send(message);
+        }
 
-		public void Send(RemovePeerSubscription message)
-		{
+        public void Send(RemovePeerSubscription message)
+        {
             var key = new SubscriptionKey
-            {
-                MessageName = message.MessageName,
-                CorrelationId = message.CorrelationId,
-            };
+                {
+                    MessageName = message.MessageName,
+                    CorrelationId = message.CorrelationId,
+                };
 
+            _messageSubscriptions.WithValue(key, subscription =>
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("RemovePeerSubscription: {0}, {1}", message.MessageName, message.SubscriptionId);
 
-			EndpointSubscription subscription;
-			if (_messageSubscriptions.TryGetValue(key, out subscription))
-			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("RemovePeerSubscription: {0}, {1}", message.MessageName, message.SubscriptionId);
+                    subscription.Send(message);
+                });
+        }
 
-				subscription.Send(message);
-			}
-			else
-			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("RemovePeerSubscription(unknown): {0}, {1}", message.MessageName, message.SubscriptionId);
-			}
-		}
+        public void Send(AddPeer message)
+        {
+            _messageSubscriptions.Each(x => x.Send(message));
+        }
 
-		public void Send(AddPeer message)
-		{
-			_messageSubscriptions.Values.Each(x => x.Send(message));
-		}
-
-		public void Send(RemovePeer message)
-		{
-			_messageSubscriptions.Values.Each(x => x.Send(message));
-		}
-	}
+        public void Send(RemovePeer message)
+        {
+            _messageSubscriptions.Each(x => x.Send(message));
+        }
+    }
 }
