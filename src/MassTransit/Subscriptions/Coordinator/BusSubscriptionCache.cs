@@ -14,30 +14,27 @@ namespace MassTransit.Subscriptions.Coordinator
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Magnum.Extensions;
+    using Magnum.Caching;
     using Messages;
     using log4net;
 
     public class BusSubscriptionCache
     {
         static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionCache));
-        readonly object _lock = new object();
         readonly SubscriptionObserver _observer;
-        readonly IDictionary<SubscriptionKey, BusSubscription> _subscriptions;
+        readonly Cache<SubscriptionKey, BusSubscription> _subscriptions;
 
         public BusSubscriptionCache(SubscriptionObserver observer)
         {
             _observer = observer;
-            _subscriptions = new Dictionary<SubscriptionKey, BusSubscription>();
+            _subscriptions =
+                new ConcurrentCache<SubscriptionKey, BusSubscription>(
+                    x => new BusSubscription(x.MessageName, x.CorrelationId, _observer));
         }
 
         public IEnumerable<Subscription> Subscriptions
         {
-            get
-            {
-                lock (_lock)
-                    return _subscriptions.Values.SelectMany(x => x.Subscriptions).ToList();
-            }
+            get { return _subscriptions.SelectMany(x => x.Subscriptions).ToList(); }
         }
 
         public void OnSubscribeTo(SubscribeTo message)
@@ -48,12 +45,7 @@ namespace MassTransit.Subscriptions.Coordinator
                     CorrelationId = message.CorrelationId,
                 };
 
-            BusSubscription subscription;
-            lock (_lock)
-            {
-                subscription = _subscriptions.Retrieve(key,
-                    () => new BusSubscription(message.MessageName, message.CorrelationId, _observer));
-            }
+            BusSubscription subscription = _subscriptions.Get(key);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("SubscribeTo: {0}, {1}", message.MessageName, message.SubscriptionId);
@@ -69,22 +61,13 @@ namespace MassTransit.Subscriptions.Coordinator
                     CorrelationId = message.CorrelationId,
                 };
 
-            BusSubscription subscription;
-            bool result;
-            lock (_lock)
-                result = _subscriptions.TryGetValue(key, out subscription);
-            if (result)
-            {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("UnsubscribeFrom: {0}, {1}", message.MessageName, message.SubscriptionId);
+            _subscriptions.WithValue(key, subscription =>
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("UnsubscribeFrom: {0}, {1}", message.MessageName, message.SubscriptionId);
 
-                subscription.OnUnsubscribeFrom(message);
-            }
-            else
-            {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("UnsubscribeFrom(unknown): {0}, {1}", message.MessageName, message.SubscriptionId);
-            }
+                    subscription.OnUnsubscribeFrom(message);
+                });
         }
     }
 }

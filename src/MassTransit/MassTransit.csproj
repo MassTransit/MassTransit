@@ -372,12 +372,9 @@
     <Compile Include="Subscriptions\Coordinator\SubscriptionRouter.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscription.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscriptionCache.cs" />
-    <Compile Include="Subscriptions\Coordinator\PeerSubscriptionCache.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscriptionConnector.cs" />
     <Compile Include="Subscriptions\Coordinator\EndpointSubscriptionConnectorCache.cs" />
     <Compile Include="Subscriptions\Coordinator\BusSubscriptionMessageProducer.cs" />
-    <Compile Include="Subscriptions\Coordinator\InitializeRemoteEndpointActor.cs" />
-    <Compile Include="Subscriptions\Coordinator\InitializeBusSubscriptionActor.cs" />
     <Compile Include="Subscriptions\Coordinator\BusSubscriptionCache.cs" />
     <Compile Include="Subscriptions\Coordinator\BusSubscriptionConnector.cs" />
     <Compile Include="Subscriptions\Coordinator\PeerHandler.cs" />
