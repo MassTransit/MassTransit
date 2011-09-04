@@ -16,7 +16,6 @@ namespace MassTransit
 	using Configuration;
 	using log4net;
 	using Magnum.Reflection;
-	using SubscriptionBuilders;
 	using SubscriptionConfigurators;
 	using SubscriptionConnectors;
 	using Util;
