@@ -12,44 +12,44 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
-	using System;
-	using Subscriptions;
+    using System;
+    using Subscriptions;
 
-	public class SubscriptionConfiguratorImpl<TInterface> :
-		SubscriptionConfigurator<TInterface>
-		where TInterface : class, SubscriptionConfigurator<TInterface>
-	{
-		Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
+    public class SubscriptionConfiguratorImpl<TInterface> :
+        SubscriptionConfigurator<TInterface>
+        where TInterface : class, SubscriptionConfigurator<TInterface>
+    {
+        Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
 
-		protected SubscriptionConfiguratorImpl()
-		{
-			Transient();
-		}
+        protected SubscriptionConfiguratorImpl()
+        {
+            Permanent();
+        }
 
-		protected Func<UnsubscribeAction, ISubscriptionReference> ReferenceFactory
-		{
-			get { return _referenceFactory; }
-		}
+        protected Func<UnsubscribeAction, ISubscriptionReference> ReferenceFactory
+        {
+            get { return _referenceFactory; }
+        }
 
-		public TInterface Permanent()
-		{
-			_referenceFactory = PermanentSubscriptionReference.Create;
+        public TInterface Permanent()
+        {
+            _referenceFactory = PermanentSubscriptionReference.Create;
 
-			return this as TInterface;
-		}
+            return this as TInterface;
+        }
 
-		public TInterface Transient()
-		{
-			_referenceFactory = TransientSubscriptionReference.Create;
+        public TInterface Transient()
+        {
+            _referenceFactory = TransientSubscriptionReference.Create;
 
-			return this as TInterface;
-		}
+            return this as TInterface;
+        }
 
-		public TInterface SetReferenceFactory(Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)
-		{
-			_referenceFactory = referenceFactory;
+        public TInterface SetReferenceFactory(Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)
+        {
+            _referenceFactory = referenceFactory;
 
-			return this as TInterface;
-		}
-	}
+            return this as TInterface;
+        }
+    }
 }
