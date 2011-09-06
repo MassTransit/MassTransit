@@ -87,41 +87,6 @@ This is mostly optional, because the transports will set their preferred default
 need to override the default you can using these methods. With the ``SetDefaultSerializer`` you can
 provide a custom serializer that you created.
 
-Subscription Options
-''''''''''''''''''''
-
-.. sourcecode:: csharp
-
-    ServiceBusFactory.New(sbc =>
-    {
-        sbc.Subscribe(s=>
-        {
-            s.Handler(msg => {});
-            s.Handler((cxt, msg) => {});
-            
-            s.Instance(yourObject);
-            
-            s.Consumer(()=> new YourConsumer() );
-            s.Consumer(consumerFactory)
-            s.Consumer(consumerType);
-            s.Consumer<TConsumer>();
-            
-            //for a permanent subscription
-            s.Consumer<TConsumer>()
-                .Permanent();
-            
-            s.Saga(sagaRepository)
-        });
-    });
-
-Now that we have a transport, an address, and some basic options figured out the meat of the work
-is in front of you. Establishing your subscriptions. As you can see there are a lot of options
-so I am going to save most of the explanation for the next page.
-
-.. note:: 
-
-    Permanent Subscriptions will not be automatically unsubscribed at bus shutdown.
-
     
 Bus Tuning Options
 ''''''''''''''''''
