@@ -25,7 +25,8 @@ namespace MassTransit.SubscriptionConnectors
 
     public interface ConsumerConnector
     {
-        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator);
+        UnsubscribeAction Connect<TConsumer>(IInboundPipelineConfigurator configurator, IConsumerFactory<TConsumer> consumerFactory) 
+            where TConsumer : class;
     }
 
     public class ConsumerConnector<T> :
@@ -35,9 +36,9 @@ namespace MassTransit.SubscriptionConnectors
         readonly object[] _args;
         readonly IEnumerable<ConsumerSubscriptionConnector> _connectors;
 
-        public ConsumerConnector(IConsumerFactory<T> consumerFactory)
+        public ConsumerConnector()
         {
-            _args = new object[] {consumerFactory};
+            _args = new object[] {};
 
             Type[] interfaces = typeof (T).GetInterfaces();
 
@@ -67,9 +68,10 @@ namespace MassTransit.SubscriptionConnectors
             get { return _connectors; }
         }
 
-        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
+        public UnsubscribeAction Connect<TConsumer>(IInboundPipelineConfigurator configurator, IConsumerFactory<TConsumer> consumerFactory ) 
+            where TConsumer : class
         {
-            return _connectors.Select(x => x.Connect(configurator))
+            return _connectors.Select(x => x.Connect(configurator, consumerFactory))
                 .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x());
         }
 

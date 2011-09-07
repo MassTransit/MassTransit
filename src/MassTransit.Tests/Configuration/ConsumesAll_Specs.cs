@@ -23,14 +23,17 @@ namespace MassTransit.Tests.Configuration
 	public class When_a_consumer_with_consumes_all_interfaces_is_inspected
 	{
 		ConsumerConnector<Consumer> _factory;
+	    DelegateConsumerFactory<Consumer> _consumerFactory;
 
-		[When]
+	    [When]
 		public void A_consumer_with_consumes_all_interfaces_is_inspected()
-		{
-			_factory = new ConsumerConnector<Consumer>(new DelegateConsumerFactory<Consumer>(() => new Consumer()));
-		}
+	    {
+	        _consumerFactory = new DelegateConsumerFactory<Consumer>(() => new Consumer());
 
-		[Then]
+	        _factory = new ConsumerConnector<Consumer>();
+	    }
+
+	    [Then]
 		public void Should_create_the_builder()
 		{
 			_factory.ShouldNotBeNull();
@@ -111,15 +114,16 @@ namespace MassTransit.Tests.Configuration
 	public class When_a_consumer_with_consumes_selected_interfaces_is_inspected
 	{
 		ConsumerConnector<SelectedConsumer> _factory;
+	    DelegateConsumerFactory<SelectedConsumer> _consumerFactory;
 
-		[When]
+	    [When]
 		public void A_consumer_with_consumes_all_interfaces_is_inspected()
-		{
-			_factory =
-				new ConsumerConnector<SelectedConsumer>(new DelegateConsumerFactory<SelectedConsumer>(() => new SelectedConsumer()));
-		}
+	    {
+	        _consumerFactory = new DelegateConsumerFactory<SelectedConsumer>(() => new SelectedConsumer());
+	        _factory = new ConsumerConnector<SelectedConsumer>();
+	    }
 
-		[Then]
+	    [Then]
 		public void Should_create_the_builder()
 		{
 			_factory.ShouldNotBeNull();
