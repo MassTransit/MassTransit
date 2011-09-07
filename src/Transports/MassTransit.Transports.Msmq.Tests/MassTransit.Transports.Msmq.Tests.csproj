@@ -117,6 +117,7 @@
     <Compile Include="As_a_transactional_endpoint.cs" />
     <Compile Include="ConcurrentSaga_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
+    <Compile Include="CreateTransactional_Specs.cs" />
     <Compile Include="Distributor_Specs.cs" />
     <Compile Include="Installer_Specs.cs" />
     <Compile Include="MessageQueue_Extensions.cs" />
