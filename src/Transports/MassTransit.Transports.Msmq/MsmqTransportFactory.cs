@@ -12,141 +12,141 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq
 {
-	using System;
-	using System.Messaging;
-	using Exceptions;
+    using System;
+    using System.Messaging;
+    using Exceptions;
 
-	public class MsmqTransportFactory :
-		ITransportFactory
-	{
-		public string Scheme
-		{
-			get { return "msmq"; }
-		}
+    public class MsmqTransportFactory :
+        ITransportFactory
+    {
+        public string Scheme
+        {
+            get { return "msmq"; }
+        }
 
-		public IDuplexTransport BuildLoopback(ITransportSettings settings)
-		{
-			try
-			{
-				var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
-				var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
-				{
-					Transactional = msmqEndpointAddress.IsTransactional
-				};
+        public IDuplexTransport BuildLoopback(ITransportSettings settings)
+        {
+            try
+            {
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
+                var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
+                    {
+                        Transactional = settings.Transactional || msmqEndpointAddress.IsTransactional
+                    };
 
-				IInboundTransport inboundTransport = BuildInbound(settings);
-				IOutboundTransport outboundTransport = BuildOutbound(settings);
+                IInboundTransport inboundTransport = BuildInbound(settings);
+                IOutboundTransport outboundTransport = BuildOutbound(settings);
 
-				return new Transport(msmqSettings.Address, () => inboundTransport, () => outboundTransport);
-			}
-			catch (Exception ex)
-			{
-				throw new TransportException(settings.Address.Uri, "Failed to create MSMQ transport", ex);
-			}
-		}
+                return new Transport(msmqSettings.Address, () => inboundTransport, () => outboundTransport);
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException(settings.Address.Uri, "Failed to create MSMQ transport", ex);
+            }
+        }
 
-		public IInboundTransport BuildInbound(ITransportSettings settings)
-		{
-			try
-			{
-				var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
-				var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
-					{
-						Transactional = msmqEndpointAddress.IsTransactional
-					};
+        public IInboundTransport BuildInbound(ITransportSettings settings)
+        {
+            try
+            {
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
+                var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
+                    {
+                        Transactional = settings.Transactional || msmqEndpointAddress.IsTransactional
+                    };
 
-				var transportAddress = msmqSettings.MsmqAddress();
+                IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
 
-				if (transportAddress.IsLocal)
-				{
-					ValidateLocalTransport(msmqSettings);
+                if (transportAddress.IsLocal)
+                {
+                    ValidateLocalTransport(msmqSettings);
 
-					PurgeExistingMessagesIfRequested(msmqSettings);
-				}
+                    PurgeExistingMessagesIfRequested(msmqSettings);
+                }
 
-				var connection = new MessageQueueConnection(transportAddress, QueueAccessMode.Receive);
-				var connectionHandler = new ConnectionHandlerImpl<MessageQueueConnection>(connection);
+                var connection = new MessageQueueConnection(transportAddress, QueueAccessMode.Receive);
+                var connectionHandler = new ConnectionHandlerImpl<MessageQueueConnection>(connection);
 
-				if (msmqSettings.Transactional)
-					return new TransactionalInboundMsmqTransport(transportAddress, connectionHandler,
-						msmqSettings.TransactionTimeout, msmqSettings.IsolationLevel);
+                if (msmqSettings.Transactional)
+                    return new TransactionalInboundMsmqTransport(transportAddress, connectionHandler,
+                        msmqSettings.TransactionTimeout, msmqSettings.IsolationLevel);
 
-				return new NonTransactionalInboundMsmqTransport(transportAddress, connectionHandler);
-			}
-			catch (Exception ex)
-			{
-				throw new TransportException(settings.Address.Uri, "Failed to create MSMQ inbound transport", ex);
-			}
-		}
+                return new NonTransactionalInboundMsmqTransport(transportAddress, connectionHandler);
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException(settings.Address.Uri, "Failed to create MSMQ inbound transport", ex);
+            }
+        }
 
-		public IOutboundTransport BuildOutbound(ITransportSettings settings)
-		{
-			try
-			{
-				var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
-				var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
-				{
-					Transactional = msmqEndpointAddress.IsTransactional
-				};
+        public IOutboundTransport BuildOutbound(ITransportSettings settings)
+        {
+            try
+            {
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
+                var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
+                    {
+                        Transactional = settings.Transactional || msmqEndpointAddress.IsTransactional
+                    };
 
-				IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
+                IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
 
-				if (transportAddress.IsLocal)
-				{
-					ValidateLocalTransport(msmqSettings);
-				}
+                if (transportAddress.IsLocal)
+                {
+                    ValidateLocalTransport(msmqSettings);
+                }
 
-				var connection = new MessageQueueConnection(transportAddress, QueueAccessMode.Send);
-				var connectionHandler = new ConnectionHandlerImpl<MessageQueueConnection>(connection);
+                var connection = new MessageQueueConnection(transportAddress, QueueAccessMode.Send);
+                var connectionHandler = new ConnectionHandlerImpl<MessageQueueConnection>(connection);
 
-				if (msmqSettings.Transactional)
-					return new TransactionalOutboundMsmqTransport(transportAddress, connectionHandler);
+                if (msmqSettings.Transactional)
+                    return new TransactionalOutboundMsmqTransport(transportAddress, connectionHandler);
 
-				return new NonTransactionalOutboundMsmqTransport(transportAddress, connectionHandler);
-			}
-			catch (Exception ex)
-			{
-				throw new TransportException(settings.Address.Uri, "Failed to create MSMQ outbound transport", ex);
-			}
-		}
+                return new NonTransactionalOutboundMsmqTransport(transportAddress, connectionHandler);
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException(settings.Address.Uri, "Failed to create MSMQ outbound transport", ex);
+            }
+        }
 
-		public IOutboundTransport BuildError(ITransportSettings settings)
-		{
-			return BuildOutbound(settings);
-		}
+        public IOutboundTransport BuildError(ITransportSettings settings)
+        {
+            return BuildOutbound(settings);
+        }
 
-		static void PurgeExistingMessagesIfRequested(ITransportSettings settings)
-		{
-			if (settings.Address.IsLocal && settings.PurgeExistingMessages)
-			{
-				MsmqEndpointManagement.Manage(settings.Address, x => x.Purge());
-			}
-		}
+        public void Dispose()
+        {
+        }
 
-		static void ValidateLocalTransport(ITransportSettings settings)
-		{
-			MsmqEndpointManagement.Manage(settings.Address, q =>
-				{
-					if (!q.Exists)
-					{
-						if (!settings.CreateIfMissing)
-							throw new TransportException(settings.Address.Uri,
-								"The transport does not exist and automatic creation is not enabled");
+        static void PurgeExistingMessagesIfRequested(ITransportSettings settings)
+        {
+            if (settings.Address.IsLocal && settings.PurgeExistingMessages)
+            {
+                MsmqEndpointManagement.Manage(settings.Address, x => x.Purge());
+            }
+        }
 
-						q.Create(settings.Transactional || settings.Address.IsTransactional);
-					}
+        static void ValidateLocalTransport(ITransportSettings settings)
+        {
+            MsmqEndpointManagement.Manage(settings.Address, q =>
+                {
+                    if (!q.Exists)
+                    {
+                        if (!settings.CreateIfMissing)
+                            throw new TransportException(settings.Address.Uri,
+                                "The transport does not exist and automatic creation is not enabled");
 
-					if (settings.RequireTransactional)
-					{
-						if (!q.IsTransactional && (settings.Transactional || settings.Address.IsTransactional))
-							throw new TransportException(settings.Address.Uri,
-								"The transport is non-transactional but a transactional transport was requested");
-					}
-				});
-		}
+                        q.Create(settings.Transactional || settings.Address.IsTransactional);
+                    }
 
-		public void Dispose()
-		{
-		}
-	}
+                    if (settings.RequireTransactional)
+                    {
+                        if (!q.IsTransactional && (settings.Transactional || settings.Address.IsTransactional))
+                            throw new TransportException(settings.Address.Uri,
+                                "The transport is non-transactional but a transactional transport was requested");
+                    }
+                });
+        }
+    }
 }
