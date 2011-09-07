@@ -13,6 +13,7 @@
 namespace MassTransit.SubscriptionConnectors
 {
     using System;
+    using Magnum.Extensions;
     using Pipeline;
     using Pipeline.Sinks;
 
@@ -21,21 +22,20 @@ namespace MassTransit.SubscriptionConnectors
         where TConsumer : class, Consumes<IConsumeContext<TMessage>>.Selected
         where TMessage : class
     {
-        readonly IConsumerFactory<TConsumer> _consumerFactory;
-
-        public SelectedContextConsumerSubscriptionConnector(IConsumerFactory<TConsumer> consumerFactory)
-        {
-            _consumerFactory = consumerFactory;
-        }
-
         public Type MessageType
         {
             get { return typeof (TMessage); }
         }
 
-        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
+        public UnsubscribeAction Connect<T>(IInboundPipelineConfigurator configurator, IConsumerFactory<T> factory)
+            where T : class
         {
-            var sink = new SelectedContextConsumerMessageSink<TConsumer, TMessage>(_consumerFactory);
+            var consumerFactory = factory as IConsumerFactory<TConsumer>;
+            if (consumerFactory == null)
+                throw new ArgumentException("The consumer factory is of an invalid type: " +
+                                            typeof(T).ToShortTypeName());
+
+            var sink = new SelectedContextConsumerMessageSink<TConsumer, TMessage>(consumerFactory);
 
             return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
         }

@@ -22,19 +22,21 @@ namespace MassTransit.SubscriptionBuilders
 		where TConsumer : class
 	{
 		readonly ConsumerConnector _consumerConnector;
-		readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
+	    readonly IConsumerFactory<TConsumer> _consumerFactory;
+	    readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
 
 		public ConsumerSubscriptionBuilder(IConsumerFactory<TConsumer> consumerFactory,
 		                                   Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)
 		{
-			_referenceFactory = referenceFactory;
+		    _consumerFactory = consumerFactory;
+		    _referenceFactory = referenceFactory;
 
-			_consumerConnector = ConsumerConnectorCache.GetConsumerConnector(consumerFactory);
+			_consumerConnector = ConsumerConnectorCache.GetConsumerConnector<TConsumer>();
 		}
 
 		public ISubscriptionReference Subscribe(IInboundPipelineConfigurator configurator)
 		{
-			UnsubscribeAction unsubscribe = _consumerConnector.Connect(configurator);
+			UnsubscribeAction unsubscribe = _consumerConnector.Connect(configurator, _consumerFactory);
 
 			return _referenceFactory(unsubscribe);
 		}

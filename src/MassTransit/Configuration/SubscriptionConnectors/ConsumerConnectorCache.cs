@@ -41,23 +41,20 @@ namespace MassTransit.SubscriptionConnectors
 			}
 		}
 
-		public static ConsumerConnector GetConsumerConnector<T>(IConsumerFactory<T> consumerFactory)
+		public static ConsumerConnector GetConsumerConnector<T>()
 			where T : class
 		{
-			return Instance._connectors.Retrieve(typeof (T), () => new ConsumerConnector<T>(consumerFactory));
+			return Instance._connectors.Retrieve(typeof (T), () => new ConsumerConnector<T>());
 		}
 
-		public static ConsumerConnector GetConsumerConnector(Type type, Func<Type, object> consumerFactory)
+		public static ConsumerConnector GetConsumerConnector(Type type)
 		{
-			return Instance._connectors.Retrieve(type, () => { return ConsumerConnectorFactory(type, consumerFactory); });
+			return Instance._connectors.Retrieve(type, () => { return ConsumerConnectorFactory(type); });
 		}
 
-		static ConsumerConnector ConsumerConnectorFactory(Type type, Func<Type, object> consumerFactory)
+		static ConsumerConnector ConsumerConnectorFactory(Type type)
 		{
-			object factory = FastActivator.Create(typeof (ObjectConsumerFactory<>), new[] {type},
-				new object[] {consumerFactory});
-
-			var args = new[] {factory};
+			var args = new object[] {};
 			var connector = (ConsumerConnector) FastActivator.Create(typeof (ConsumerConnector<>), new[] {type}, args);
 
 			return connector;
