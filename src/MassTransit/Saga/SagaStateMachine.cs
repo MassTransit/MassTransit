@@ -77,6 +77,15 @@ namespace MassTransit.Saga
 			eventAction.Call((saga, message) => saga.Bus.Publish(action(saga, message)));
 			return eventAction;
 		}
+		
+		public static BasicEventAction<T> Publish<T, TMessage>(this BasicEventAction<T> eventAction, Func<T, TMessage> action)
+			where T : SagaStateMachine<T>, ISaga
+			where TMessage : class
+		{
+			Action<T> f = saga => saga.Bus.Publish(action(saga));
+			eventAction.Call(saga => f(saga));
+			return eventAction;		
+		}
 
 		public static DataEventAction<T, TData> RespondWith<T, TData, TMessage>(this DataEventAction<T, TData> eventAction, Func<T, TData, TMessage> action)
 			where T : SagaStateMachine<T>, ISaga
