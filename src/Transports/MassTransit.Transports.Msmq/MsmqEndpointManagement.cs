@@ -24,10 +24,11 @@ namespace MassTransit.Transports.Msmq
 	{
 		private static readonly string AdministratorsGroupName;
 		private static readonly string EveryoneAccountName;
+        static static readonly string AnonymousLoginAccountName;
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpointManagement));
 		private readonly IMsmqEndpointAddress _address;
 
-		static MsmqEndpointManagement()
+	    static MsmqEndpointManagement()
 		{
 			// WellKnowSidType.WorldSid == "Everyone"; 
 			// whoda thunk (http://social.msdn.microsoft.com/forums/en-US/netfxbcl/thread/0737f978-a998-453d-9a6a-c348285d7ea3/)
@@ -36,6 +37,8 @@ namespace MassTransit.Transports.Msmq
 				.Translate(typeof (NTAccount)).ToString();
 			EveryoneAccountName = (new SecurityIdentifier(WellKnownSidType.WorldSid, null))
 				.Translate(typeof (NTAccount)).ToString();
+		    AnonymousLoginAccountName = (new SecurityIdentifier(WellKnownSidType.AnonymousSid, null))
+		        .Translate(typeof (NTAccount)).ToString();
 		}
 
 		private MsmqEndpointManagement(IEndpointAddress address)
@@ -57,6 +60,7 @@ namespace MassTransit.Transports.Msmq
 
 				queue.SetPermissions(AdministratorsGroupName, MessageQueueAccessRights.FullControl, AccessControlEntryType.Allow);
 				queue.SetPermissions(EveryoneAccountName, MessageQueueAccessRights.GenericWrite, AccessControlEntryType.Allow);
+                queue.SetPermissions(AnonymousLoginAccountName, MessageQueueAccessRights.GenericWrite, AccessControlEntryType.Allow);
 			}
 
 			VerifyQueueSendAndReceive();
