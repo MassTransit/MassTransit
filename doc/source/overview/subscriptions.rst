@@ -9,7 +9,9 @@ MSMQ Multicast
 
 .. warning::
 
-    limited by default to one subnet
+    - limited by default to one subnet
+    - subscriptions do not survive service restarts
+    - sensitive to the order in which services are brought online
 
 Each bus instance communicates with every other instance on the network through a reliable
 multicast network protocol.
