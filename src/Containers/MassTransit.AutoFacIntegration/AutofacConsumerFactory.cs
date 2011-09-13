@@ -22,23 +22,29 @@ namespace MassTransit.AutofacIntegration
         IConsumerFactory<T>
         where T : class
     {
-        readonly IComponentContext _container;
+        readonly ILifetimeScope _scope;
 
-        public AutofacConsumerFactory(IComponentContext container)
+        public AutofacConsumerFactory(ILifetimeScope scope)
         {
-            _container = container;
+            _scope = scope;
         }
 
         public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
             IConsumeContext<TMessage> context, InstanceHandlerSelector<T, TMessage> selector)
             where TMessage : class
         {
-            var consumer = _container.Resolve<T>();
-            if (consumer == null)
-                throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ",
-                    typeof (T)));
+            using (var innerScope = _scope.BeginLifetimeScope())
+            {
+                var consumer = innerScope.Resolve<T>();
+                if (consumer == null)
+                    throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ",
+                        typeof (T)));
 
-            return selector(consumer, context);
+                foreach (var handler in selector(consumer, context))
+                {
+                    yield return handler;
+                }
+            }
         }
     }
 }
