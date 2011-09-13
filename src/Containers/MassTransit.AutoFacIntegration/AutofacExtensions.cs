@@ -25,12 +25,12 @@ namespace MassTransit
 
     public static class AutofacExtensions
     {
-        public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IComponentContext container)
+        public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope)
         {
-            IList<Type> concreteTypes = FindTypes<IConsumer>(container, r => !r.Implements<ISaga>());
+            IList<Type> concreteTypes = FindTypes<IConsumer>(scope, r => !r.Implements<ISaga>());
             if (concreteTypes.Count != 0)
             {
-                var consumerConfigurator = new AutofacConsumerFactoryConfigurator(configurator, container);
+                var consumerConfigurator = new AutofacConsumerFactoryConfigurator(configurator, scope);
 
                 foreach (Type concreteType in concreteTypes)
                 {
@@ -38,10 +38,10 @@ namespace MassTransit
                 }
             }
 
-            IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
+            IList<Type> sagaTypes = FindTypes<ISaga>(scope, x => true);
             if (sagaTypes.Count > 0)
             {
-                var sagaConfigurator = new AutofacSagaRepositoryFactoryConfigurator(configurator, container);
+                var sagaConfigurator = new AutofacSagaRepositoryFactoryConfigurator(configurator, scope);
 
                 foreach (Type type in sagaTypes)
                 {
@@ -51,24 +51,24 @@ namespace MassTransit
         }
 
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-            this SubscriptionBusServiceConfigurator configurator, IComponentContext kernel)
+            this SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope)
             where TConsumer : class
         {
-            var consumerFactory = new AutofacConsumerFactory<TConsumer>(kernel);
+            var consumerFactory = new AutofacConsumerFactory<TConsumer>(scope);
 
             return configurator.Consumer(consumerFactory);
         }
 
         public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-            this SubscriptionBusServiceConfigurator configurator, IComponentContext kernel)
+            this SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope)
             where TSaga : class, ISaga
         {
-            return configurator.Saga(kernel.Resolve<ISagaRepository<TSaga>>());
+            return configurator.Saga(scope.Resolve<ISagaRepository<TSaga>>());
         }
 
-        static IList<Type> FindTypes<T>(IComponentContext container, Func<Type, bool> filter)
+        static IList<Type> FindTypes<T>(ILifetimeScope scope, Func<Type, bool> filter)
         {
-            return container.ComponentRegistry.Registrations
+            return scope.ComponentRegistry.Registrations
                 .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})
                 .Where(rs => rs.s.ServiceType.Implements<T>())
                 .Select(rs => rs.r.Activator.LimitType)

@@ -21,11 +21,11 @@ namespace MassTransit.AutofacIntegration
     public class AutofacConsumerFactoryConfigurator
     {
         readonly SubscriptionBusServiceConfigurator _configurator;
-        readonly IComponentContext _container;
+        readonly ILifetimeScope _scope;
 
-        public AutofacConsumerFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IComponentContext container)
+        public AutofacConsumerFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope)
         {
-            _container = container;
+            _scope = scope;
             _configurator = configurator;
         }
 
@@ -38,7 +38,7 @@ namespace MassTransit.AutofacIntegration
         public void Configure<T>()
             where T : class
         {
-            _configurator.Consumer(new AutofacConsumerFactory<T>(_container));
+            _configurator.Consumer(new AutofacConsumerFactory<T>(_scope));
         }
     }
 }

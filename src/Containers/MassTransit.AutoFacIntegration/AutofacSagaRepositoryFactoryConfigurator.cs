@@ -22,11 +22,11 @@ namespace MassTransit.AutofacIntegration
 	public class AutofacSagaRepositoryFactoryConfigurator
 	{
 		readonly SubscriptionBusServiceConfigurator _configurator;
-        readonly IComponentContext _container;
+        readonly ILifetimeScope _scope;
 
-        public AutofacSagaRepositoryFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IComponentContext container)
+        public AutofacSagaRepositoryFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope)
 		{
-			_container = container;
+            _scope = scope;
 			_configurator = configurator;
 		}
 
@@ -39,7 +39,7 @@ namespace MassTransit.AutofacIntegration
 		public void Configure<T>()
 			where T : class, ISaga
 		{
-			_configurator.Saga(_container.Resolve<ISagaRepository<T>>());
+			_configurator.Saga(_scope.Resolve<ISagaRepository<T>>());
 		}
 	}
 }
