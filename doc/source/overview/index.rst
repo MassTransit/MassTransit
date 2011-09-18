@@ -15,3 +15,4 @@ How MassTransit Works
     databus.rst
     controlbus.rst
     inheritance.rst
+    users.rst
