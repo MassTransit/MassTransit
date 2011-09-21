@@ -3,6 +3,7 @@ How MassTransit Works
 
 .. toctree::
 
+    keyideas.rst
     publishing.rst
     sending.rst
     request.rst
