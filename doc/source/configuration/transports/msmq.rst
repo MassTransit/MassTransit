@@ -19,3 +19,8 @@ Crap. I just wiped out the msmq and have to rewrite.
 the install by adding missing components.
 
 ``VerifyMsDtcConfiguration()`` will confirm that the DTC is setup correctly.
+
+
+.. note::
+
+    A post on MSMQ and Ports: http://blogs.msdn.com/b/johnbreakwell/archive/2008/04/29/clear-the-way-msmq-coming-through.aspx
