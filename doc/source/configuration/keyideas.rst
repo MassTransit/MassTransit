@@ -119,6 +119,11 @@ For<TCorrelationId>
 This interface defines how to do a correlated consumer.
 
 
+.. note::
+
+    Consumers are usually sourced from an IoC container. When they are, MassTransit respects
+    your container's lifecycle.
+
 Sagas
 """""
 
