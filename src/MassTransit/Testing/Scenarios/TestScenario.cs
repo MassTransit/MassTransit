@@ -18,6 +18,7 @@ namespace MassTransit.Testing.Scenarios
 		IDisposable
 	{
 		IServiceBus InputBus { get; }
+	    IServiceBus OutputBus { get; }
 		PublishedMessageList Published { get; }
 		ReceivedMessageList Received { get; }
 		SentMessageList Sent { get; }

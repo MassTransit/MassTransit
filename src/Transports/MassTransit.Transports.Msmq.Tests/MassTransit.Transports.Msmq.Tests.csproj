@@ -143,6 +143,7 @@
     <Compile Include="TestFixtures\MulticastMsmqEndpointTestFixture.cs" />
     <Compile Include="TestFixtures\TransactionalMsmqEndpointOnlyTestFixture.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
+    <Compile Include="TransactionalToNonTransactional_Specs.cs" />
     <Compile Include="Transactional_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
