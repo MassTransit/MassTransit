@@ -20,6 +20,11 @@ namespace MassTransit.Transports.Msmq
 		IMsmqEndpointAddress
 	{
 		public MsmqEndpointAddress(Uri uri)
+            : this(uri, false)
+		{
+		}
+
+	    public MsmqEndpointAddress(Uri uri, bool defaultTransactional)
 			: base(uri)
 		{
 			PublicQueuesNotAllowed();
@@ -30,7 +35,7 @@ namespace MassTransit.Transports.Msmq
 
 			OutboundFormatName = uri.GetOutboundFormatName();
 
-			IsTransactional = CheckForTransactionalHint(uri);
+			IsTransactional = CheckForTransactionalHint(uri, defaultTransactional);
 
 			MulticastAddress = uri.GetMulticastAddress();
 			if(MulticastAddress != null)

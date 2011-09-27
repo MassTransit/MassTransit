@@ -13,6 +13,9 @@
 namespace MassTransit.Testing.Subjects
 {
 	using System;
+	using System.Linq;
+	using Exceptions;
+	using Magnum.Extensions;
 	using Scenarios;
 
 	public class HandlerTestSubjectImpl<TScenario, TSubject> :
@@ -45,6 +48,9 @@ namespace MassTransit.Testing.Subjects
 		public void Prepare(TScenario scenario)
 		{
 			_unsubscribe = scenario.InputBus.SubscribeContextHandler<TSubject>(HandleMessage);
+
+            if(!scenario.OutputBus.HasSubscription<TSubject>(8.Seconds()).Any())
+                throw new ConfigurationException("The subscription was not received on the output bus");
 		}
 
 		void Dispose(bool disposing)

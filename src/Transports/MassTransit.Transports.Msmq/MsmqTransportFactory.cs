@@ -15,6 +15,7 @@ namespace MassTransit.Transports.Msmq
     using System;
     using System.Messaging;
     using Exceptions;
+    using Util;
 
     public class MsmqTransportFactory :
         ITransportFactory
@@ -29,10 +30,7 @@ namespace MassTransit.Transports.Msmq
             try
             {
                 var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
-                var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
-                    {
-                        Transactional = settings.Transactional || msmqEndpointAddress.IsTransactional
-                    };
+                var msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IInboundTransport inboundTransport = BuildInbound(settings);
                 IOutboundTransport outboundTransport = BuildOutbound(settings);
@@ -45,15 +43,21 @@ namespace MassTransit.Transports.Msmq
             }
         }
 
+        static TransportSettings GetTransportSettings(ITransportSettings settings, MsmqEndpointAddress msmqEndpointAddress)
+        {
+            var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
+                {
+                    Transactional = msmqEndpointAddress.IsTransactional,
+                };
+            return msmqSettings;
+        }
+
         public IInboundTransport BuildInbound(ITransportSettings settings)
         {
             try
             {
-                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
-                var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
-                    {
-                        Transactional = settings.Transactional || msmqEndpointAddress.IsTransactional
-                    };
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional);
+                var msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
 
@@ -84,10 +88,7 @@ namespace MassTransit.Transports.Msmq
             try
             {
                 var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
-                var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
-                    {
-                        Transactional = settings.Transactional || msmqEndpointAddress.IsTransactional
-                    };
+                var msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
 

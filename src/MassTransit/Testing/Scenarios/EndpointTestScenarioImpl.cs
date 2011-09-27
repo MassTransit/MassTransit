@@ -72,6 +72,11 @@ namespace MassTransit.Testing.Scenarios
 			get { throw new NotImplementedException(); }
 		}
 
+	    public virtual IServiceBus OutputBus
+	    {
+            get { throw new NotImplementedException(); }
+	    }
+
 		public PublishedMessageList Published
 		{
 			get { return _published; }

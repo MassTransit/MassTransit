@@ -275,5 +275,57 @@ namespace MassTransit.Tests
             pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
             pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
         }
+
+        [Test]
+        public void Should_allow_publish_request_more_than_once()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
+
+            RemoteBus.SubscribeContextHandler<PingMessage>(x =>
+            {
+                pingReceived.Set(x.Message);
+                x.Respond(new PongMessage { TransactionId = x.Message.TransactionId });
+            });
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+
+            var ping = new PingMessage();
+
+            TimeSpan timeout = 8.Seconds();
+
+            LocalBus.PublishRequest(ping, x =>
+            {
+                x.Handle<PongMessage>(message =>
+                {
+                    message.TransactionId.ShouldEqual(ping.TransactionId,
+                        "The response correlationId did not match");
+                    pongReceived.Set(message);
+                });
+
+                x.SetTimeout(timeout);
+            });
+
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+
+            var secondPongReceived = new FutureMessage<PongMessage>();
+
+            ping = new PingMessage();
+
+            LocalBus.PublishRequest(ping, x =>
+            {
+                x.Handle<PongMessage>(message =>
+                {
+                    message.TransactionId.ShouldEqual(ping.TransactionId,
+                        "The response correlationId did not match");
+                    secondPongReceived.Set(message);
+                });
+
+                x.SetTimeout(timeout);
+            });
+
+            secondPongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+
+        }
     }
 }
