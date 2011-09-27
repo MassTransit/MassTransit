@@ -165,7 +165,7 @@ namespace MassTransit.Tests.Testing
 		public void Setup()
 		{
 			_test = TestFactory.ForHandler<A>()
-				.InLocalRemoteBusScenario()
+				//.InLocalRemoteBusScenario()
 				.New(x =>
 					{
 						x.Publish(new A());

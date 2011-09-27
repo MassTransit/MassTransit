@@ -120,7 +120,7 @@ namespace MassTransit.Tests
 
             var ping = new PingMessage();
 
-            TimeSpan timeout = 8.Seconds();
+            TimeSpan timeout = 24.Seconds();
 
             var exception = Assert.Throws<RequestException>(() =>
                 {
