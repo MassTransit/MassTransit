@@ -23,7 +23,7 @@ namespace Client
         public void Start(IServiceBus bus)
         {
             _bus = bus;
-            _bus.Subscribe<PasswordUpdater>();
+            _bus.SubscribeConsumer<PasswordUpdater>();
 
             Console.WriteLine(new string('-', 20));
             Console.WriteLine("New Password Client");

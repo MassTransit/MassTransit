@@ -51,14 +51,10 @@ namespace Client
                     s.WhenStarted(o =>
                     {
                         container = new WindsorContainer();
-                        container.Install(
-                            new MassTransitInstaller(),
-                            new MassTransitInMemorySagaRepositoryInstaller(), 
-                            new MassTransitInMemorySubscriptionsInstaller()
-                            );
+                        
                         container.Register(Component.For<PasswordUpdater>());
 
-                        var bus = Bus.Instance();
+                        var bus = Bus.Instance;
                         o.Start(bus);
                     });
                     s.WhenStopped(o => o.Stop());

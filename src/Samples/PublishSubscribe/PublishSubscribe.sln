@@ -15,13 +15,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure", "..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RuntimeServices", "..\..\MassTransit.RuntimeServices\MassTransit.RuntimeServices.csproj", "{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "..\..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SystemView", "..\..\MassTransit.SystemView\MassTransit.SystemView.csproj", "{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NHibernateIntegration", "..\..\Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,10 +53,6 @@ Global
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -69,6 +65,10 @@ Global
 		{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,9 +77,9 @@ Global
 		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273} = {5A039536-728C-4B3C-88D0-030539735F66}
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {5A039536-728C-4B3C-88D0-030539735F66}
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {5A039536-728C-4B3C-88D0-030539735F66}
-		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E} = {5A039536-728C-4B3C-88D0-030539735F66}
 		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9} = {5A039536-728C-4B3C-88D0-030539735F66}
 		{F5E67502-2B30-484C-88C3-97710291F5AA} = {5A039536-728C-4B3C-88D0-030539735F66}
 		{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC} = {5A039536-728C-4B3C-88D0-030539735F66}
+		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E} = {5A039536-728C-4B3C-88D0-030539735F66}
 	EndGlobalSection
 EndGlobal
