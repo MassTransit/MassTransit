@@ -12,52 +12,50 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConnectors
 {
-	using System;
-	using System.Collections.Generic;
-	using Configuration;
-	using Magnum.Extensions;
-	using Magnum.Reflection;
+    using System;
+    using Magnum.Caching;
+    using Magnum.Reflection;
 
-	public class ConsumerConnectorCache
-	{
-		[ThreadStatic]
-		static ConsumerConnectorCache _current;
+    public class ConsumerConnectorCache
+    {
+        [ThreadStatic]
+        static ConsumerConnectorCache _current;
 
-		readonly IDictionary<Type, ConsumerConnector> _connectors;
+        readonly GenericTypeCache<ConsumerConnector> _connectors;
 
-		ConsumerConnectorCache()
-		{
-			_connectors = new Dictionary<Type, ConsumerConnector>();
-		}
+        ConsumerConnectorCache()
+        {
+            _connectors = new GenericTypeCache<ConsumerConnector>(typeof (ConsumerConnector<>));
+        }
 
-		static ConsumerConnectorCache Instance
-		{
-			get
-			{
-				if (_current == null)
-					_current = new ConsumerConnectorCache();
+        static ConsumerConnectorCache Instance
+        {
+            get
+            {
+                if (_current == null)
+                    _current = new ConsumerConnectorCache();
 
-				return _current;
-			}
-		}
+                return _current;
+            }
+        }
 
-		public static ConsumerConnector GetConsumerConnector<T>()
-			where T : class
-		{
-			return Instance._connectors.Retrieve(typeof (T), () => new ConsumerConnector<T>());
-		}
+        public static ConsumerConnector GetConsumerConnector<T>()
+            where T : class
+        {
+            return Instance._connectors.Get(typeof (T), _ => new ConsumerConnector<T>());
+        }
 
-		public static ConsumerConnector GetConsumerConnector(Type type)
-		{
-			return Instance._connectors.Retrieve(type, () => { return ConsumerConnectorFactory(type); });
-		}
+        public static ConsumerConnector GetConsumerConnector(Type type)
+        {
+            return Instance._connectors.Get(type, ConsumerConnectorFactory);
+        }
 
-		static ConsumerConnector ConsumerConnectorFactory(Type type)
-		{
-			var args = new object[] {};
-			var connector = (ConsumerConnector) FastActivator.Create(typeof (ConsumerConnector<>), new[] {type}, args);
+        static ConsumerConnector ConsumerConnectorFactory(Type type)
+        {
+            var args = new object[] {};
+            var connector = (ConsumerConnector) FastActivator.Create(typeof (ConsumerConnector<>), new[] {type}, args);
 
-			return connector;
-		}
-	}
+            return connector;
+        }
+    }
 }
