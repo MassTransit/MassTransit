@@ -12,48 +12,47 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConnectors
 {
-	using System;
-	using System.Collections.Generic;
-	using Magnum.Extensions;
-	using Magnum.Reflection;
+    using System;
+    using Magnum.Caching;
+    using Magnum.Reflection;
 
-	public class InstanceConnectorCache
-	{
-		[ThreadStatic]
-		static InstanceConnectorCache _current;
+    public class InstanceConnectorCache
+    {
+        [ThreadStatic]
+        static InstanceConnectorCache _current;
 
-		readonly IDictionary<Type, InstanceConnector> _connectors;
+        readonly GenericTypeCache<InstanceConnector> _connectors;
 
-		InstanceConnectorCache()
-		{
-			_connectors = new Dictionary<Type, InstanceConnector>();
-		}
+        InstanceConnectorCache()
+        {
+            _connectors = new GenericTypeCache<InstanceConnector>(typeof (InstanceConnector<>));
+        }
 
-		static InstanceConnectorCache Instance
-		{
-			get
-			{
-				if (_current == null)
-					_current = new InstanceConnectorCache();
+        static InstanceConnectorCache Instance
+        {
+            get
+            {
+                if (_current == null)
+                    _current = new InstanceConnectorCache();
 
-				return _current;
-			}
-		}
+                return _current;
+            }
+        }
 
-		public static InstanceConnector GetInstanceConnector(Type type)
-		{
-			return Instance._connectors.Retrieve(type, () => InstanceConnectorFactory(type));
-		}
+        public static InstanceConnector GetInstanceConnector(Type type)
+        {
+            return Instance._connectors.Get(type, InstanceConnectorFactory);
+        }
 
-		public static InstanceConnector GetInstanceConnector<T>()
-			where T : class
-		{
-			return Instance._connectors.Retrieve(typeof (T), () => new InstanceConnector<T>());
-		}
+        public static InstanceConnector GetInstanceConnector<T>()
+            where T : class
+        {
+            return Instance._connectors.Get(typeof (T), _ => new InstanceConnector<T>());
+        }
 
-		static InstanceConnector InstanceConnectorFactory(Type type)
-		{
-			return (InstanceConnector) FastActivator.Create(typeof (InstanceConnector<>), new[] {type});
-		}
-	}
+        static InstanceConnector InstanceConnectorFactory(Type type)
+        {
+            return (InstanceConnector) FastActivator.Create(typeof (InstanceConnector<>), new[] {type});
+        }
+    }
 }
