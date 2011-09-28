@@ -1,6 +1,5 @@
 namespace Server
 {
-	using System;
 	using log4net;
 	using MassTransit;
 	using SecurityMessages;
@@ -26,7 +25,7 @@ namespace Server
 		public void Start(IServiceBus bus)
 		{
 		    _serviceBus = bus;
-			_unsubscribeToken = _serviceBus.Subscribe(this);
+			_unsubscribeToken = _serviceBus.SubscribeInstance(this);
 		}
 
 		public void Stop()

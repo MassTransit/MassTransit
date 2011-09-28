@@ -30,7 +30,7 @@ namespace Client
 
     	public void Start()
         {
-    		_bus.Subscribe<PasswordUpdater>();
+    		_bus.SubscribeConsumer<PasswordUpdater>();
 
             Console.WriteLine(new string('-', 20));
             Console.WriteLine("New Password Client");
@@ -43,7 +43,7 @@ namespace Client
     		RequestPasswordUpdate message = new RequestPasswordUpdate(newPassword);
     		_correlationId = message.CorrelationId;
 
-    		_unsubscribeToken = _bus.Subscribe(this);
+    		_unsubscribeToken = _bus.SubscribeInstance(this);
 
     		_bus.Publish(message);
 

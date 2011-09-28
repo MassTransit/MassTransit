@@ -49,13 +49,9 @@ namespace Server
                     s.WhenStarted(o =>
                     {
                         container = new WindsorContainer();
-                        container.Install(
-                            new MassTransitInstaller(),
-                            new MassTransitInMemorySagaRepositoryInstaller(), 
-                            new MassTransitInMemorySubscriptionsInstaller()
-                            );
+                        //load up consumers?
 
-                        var bus = Bus.Instance();
+                        var bus = Bus.Instance;
                         o.Start(bus);
                     });
                     s.WhenStopped(o => o.Stop());
