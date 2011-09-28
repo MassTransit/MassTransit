@@ -192,7 +192,6 @@ namespace MassTransit.Distributor
 			}
 		}
 
-		[UsedImplicitly]
 		void PublishWorkerAvailable<TMessage>()
 		{
 			_bus.Publish(new WorkerAvailable<TMessage>(_controlUri, _dataUri, _inProgress, _inProgressLimit,
