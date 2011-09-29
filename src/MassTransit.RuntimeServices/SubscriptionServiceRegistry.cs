@@ -10,6 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using FluentNHibernate.Cfg.Db;
+using NHibernate.Dialect;
+
 namespace MassTransit.RuntimeServices
 {
 	using System.IO;
@@ -59,6 +63,12 @@ namespace MassTransit.RuntimeServices
 					{
 						m.FluentMappings.Add<SubscriptionSagaMap>();
 						m.FluentMappings.Add<SubscriptionClientSagaMap>();
+					}).Database(()=>
+					{
+					    return MsSqlConfiguration.MsSql2008.ConnectionString(cfg =>
+					    {
+                            cfg.FromConnectionStringWithKey("MassTransit");
+					    });
 					})
 				//.ExposeConfiguration(BuildSchema)
 				.BuildSessionFactory();
