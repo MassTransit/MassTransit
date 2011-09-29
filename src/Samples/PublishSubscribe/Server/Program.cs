@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit;
+
 namespace Server
 {
     using System.IO;
@@ -51,6 +54,15 @@ namespace Server
                         container = new WindsorContainer();
                         //load up consumers?
 
+                        Bus.Initialize(sbc=>
+                        {
+                            sbc.UseMsmq();
+                            sbc.VerifyMsDtcConfiguration();
+                            sbc.VerifyMsmqConfiguration();
+                            sbc.ReceiveFrom("msmq://localhost/mt_server");
+                            sbc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
+
+                        });
                         var bus = Bus.Instance;
                         o.Start(bus);
                     });

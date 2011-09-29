@@ -54,6 +54,15 @@ namespace Client
                         
                         container.Register(Component.For<PasswordUpdater>());
 
+                        Bus.Initialize(sbc=>
+                        {
+                            sbc.ReceiveFrom("msmq://localhost/mt_client");
+                            sbc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
+                            sbc.UseMsmq();
+                            sbc.VerifyMsDtcConfiguration();
+                            sbc.VerifyMsmqConfiguration();
+
+                        });
                         var bus = Bus.Instance;
                         o.Start(bus);
                     });
