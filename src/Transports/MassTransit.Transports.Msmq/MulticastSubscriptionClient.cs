@@ -49,15 +49,16 @@ namespace MassTransit.Transports.Msmq
 
             var consumerInstance = new SubscriptionMessageConsumer(_router, _network);
 
-            _unsubscribeAction = _subscriptionBus.SubscribeInstance(consumerInstance);
-            _unsubscribeAction += _subscriptionBus.SubscribeInstance(this);
-
             var msmqAddress = subscriptionBus.Endpoint.Address as IMsmqEndpointAddress;
             if (msmqAddress == null || msmqAddress.Uri.Scheme != MulticastMsmqTransportFactory.MulticastScheme)
                 throw new EndpointException(subscriptionBus.Endpoint.Address.Uri,
                     "The multicast subscription client must be used on a multicast MSMQ endpoint");
 
             _producer = new BusSubscriptionMessageProducer(router, subscriptionBus.Endpoint, msmqAddress.InboundUri);
+
+            _unsubscribeAction = _subscriptionBus.SubscribeInstance(consumerInstance);
+            _unsubscribeAction += _subscriptionBus.SubscribeInstance(this);
+
         }
 
         public void Consume(IConsumeContext<AddPeer> context)
