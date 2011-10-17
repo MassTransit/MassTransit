@@ -97,7 +97,7 @@ namespace MassTransit.RequestResponse
 			lock (_lock)
 				alreadyCompleted = _completed;
 
-			bool result = alreadyCompleted || CompleteEvent.WaitOne(_timeout, true);
+			bool result = alreadyCompleted || CompleteEvent.WaitOne(_timeout == TimeSpan.MaxValue ? Int32.MaxValue : (int)_timeout.TotalMilliseconds, true);
 			if (!result)
 				Fail(RequestTimeoutException.FromCorrelationId(_requestId));
 
