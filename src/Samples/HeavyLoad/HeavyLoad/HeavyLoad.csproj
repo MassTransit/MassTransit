@@ -81,6 +81,7 @@
     <Compile Include="GeneralMessage.cs" />
     <Compile Include="Load\ActiveMQLoadTest.cs" />
     <Compile Include="Load\LocalMsmqRequestResponseLoadTest.cs" />
+    <Compile Include="Load\LongRunningMemoryTest.cs" />
     <Compile Include="Load\LoopbackConsumerLoadTest.cs" />
     <Compile Include="Load\RabbitMqHandlerLoadTest.cs" />
     <Compile Include="Load\LocalLoadTest.cs" />
