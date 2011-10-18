@@ -47,23 +47,20 @@ namespace HeavyLoad.Load
 			{
 				Guid transactionId = Guid.NewGuid();
 
-				_bus.MakeRequest(x =>
-					{
-						x.Publish(new SimpleRequestMessage(transactionId));
-						Interlocked.Increment(ref _requestCounter);
-					})
-					.When<SimpleResponseMessage>()
-					.RelatedTo(transactionId)
-					.IsReceived(msg =>
-						{
-							Interlocked.Increment(ref _responseCounter);
+			    _bus.PublishRequest(new SimpleRequestMessage(transactionId), x =>
+			        {
+			            Interlocked.Increment(ref _requestCounter);
 
-							if (_responseCounter == _repeatCount)
-								_clientComplete.Set();
-						})
-					.OnTimeout(() => { })
-					.TimeoutAfter(10.Seconds())
-					.Send();
+			            x.Handle<SimpleResponseMessage>(message =>
+			                {
+			                    Interlocked.Increment(ref _responseCounter);
+
+			                    if (_responseCounter == _repeatCount)
+			                        _clientComplete.Set();
+			                });
+
+			            x.HandleTimeout(10.Seconds(), () => { });
+			        });
 			}
 
 			publishCheckpoint.Complete(_repeatCount);
