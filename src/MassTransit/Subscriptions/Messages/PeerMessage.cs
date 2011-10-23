@@ -14,6 +14,7 @@ namespace MassTransit.Subscriptions.Messages
 {
 	using System;
 
+	[Serializable]
 	public abstract class PeerMessage
 	{
 		public Guid PeerId { get; set; }
