@@ -14,6 +14,7 @@ namespace MassTransit.Subscriptions.Messages
 {
 	using System;
 
+	[Serializable]
 	public abstract class PeerSubscriptionMessage :
 		SubscriptionMessage
 	{
