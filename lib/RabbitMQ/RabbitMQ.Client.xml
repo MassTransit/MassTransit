@@ -1106,6 +1106,10 @@
             <summary>Used to send a Queue.Declare method. Called by the
             public declare method.</summary>
         </member>
+        <member name="M:RabbitMQ.Client.Impl.IFullModel.HandleQueueDeclareOk(System.String,System.UInt32,System.UInt32)">
+            <summary>Handle incoming Queue.DeclareOk methods. Routes the
+            information to a waiting Queue.DeclareOk continuation.</summary>
+        </member>
         <member name="M:RabbitMQ.Client.Impl.IFullModel._Private_QueueBind(System.String,System.String,System.String,System.Boolean,System.Collections.IDictionary)">
             <summary>Used to send a Queue.Bind method. Called by the
             public bind method.</summary>
@@ -3776,7 +3780,7 @@
                  factory.VirtualHost = ConnectionFactory.DefaultVHost;
                  factory.Protocol = Protocols.FromEnvironment();
                  factory.HostName = hostName;
-                 factory.PortNumber = AmqpTcpEndpoint.UseDefaultPort;
+                 factory.Port     = AmqpTcpEndpoint.UseDefaultPort;
                  //
                  IConnection conn = factory.CreateConnection();
                  //
@@ -4000,12 +4004,13 @@
         </member>
         <member name="T:RabbitMQ.Client.ExchangeType">
             <summary>
-             Convenience class providing compile-time names for various exchange types.
+             Convenience class providing compile-time names for standard exchange types.
             </summary>
             <remarks>
              Use the static members of this class as values for the
              "exchangeType" arguments for IModel methods such as
-             ExchangeDeclare.
+             ExchangeDeclare. The broker may be extended with additional
+             exchange types that do not appear in this class.
             </remarks>
         </member>
         <member name="F:RabbitMQ.Client.ExchangeType.Fanout">
@@ -4017,11 +4022,14 @@
         <member name="F:RabbitMQ.Client.ExchangeType.Topic">
             <summary>Exchange type used for AMQP topic exchanges.</summary>
         </member>
+        <member name="F:RabbitMQ.Client.ExchangeType.Headers">
+            <summary>Exchange type used for AMQP headers exchanges.</summary>
+        </member>
         <member name="M:RabbitMQ.Client.ExchangeType.#ctor">
             <summary>Private constructor - this class has no instances</summary>
         </member>
         <member name="M:RabbitMQ.Client.ExchangeType.All">
-            <summary>Retrieve a collection containing all defined exchange types.</summary>
+            <summary>Retrieve a collection containing all standard exchange types.</summary>
         </member>
         <member name="T:RabbitMQ.Client.IConnection">
             <summary>Main interface to an AMQP connection.</summary>
@@ -4743,8 +4751,10 @@
             </summary>
         </member>
         <member name="P:RabbitMQ.Client.SslOption.Certs">
-            <summary>Convenience read-only property to retrieve an X509CertificateCollection
-            containing the client certificate</summary>
+            <summary>Retrieve or set the X509CertificateCollection
+            containing the client certificate. If no collection is set,
+            the client will attempt to load one from the specified
+            CertPath.</summary>
         </member>
         <member name="P:RabbitMQ.Client.SslOption.ServerName">
             <summary>Retrieve or set server's Canonical Name. This MUST match the CN
