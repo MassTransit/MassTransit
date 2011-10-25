@@ -15,7 +15,6 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 	using System;
 	using System.Collections.Generic;
 	using System.Xml;
-	using Magnum.Monads;
 
 	public abstract class SerializerBase<T> :
 		IObjectSerializer
@@ -29,7 +28,7 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 			_namespace = _type.AssemblyQualifiedName;//.ToMessageName();
 		}
 
-		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
+		public IEnumerable<Continuation<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
 		{
 			string prefix = context.GetPrefix(_type.Name, _namespace);
 

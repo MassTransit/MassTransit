@@ -15,7 +15,6 @@ namespace MassTransit.Serialization.Custom
 	using System;
 	using System.Collections.Generic;
 	using System.Xml;
-	using Magnum.Monads;
 
 	public class ObjectSerializer<T> :
 		IObjectSerializer
@@ -32,7 +31,7 @@ namespace MassTransit.Serialization.Custom
 			_ns = _type.AssemblyQualifiedName;//.ToMessageName();
 		}
 
-		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
+		public IEnumerable<Continuation<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
 		{
 			if (value == null)
 				yield break;
@@ -56,8 +55,8 @@ namespace MassTransit.Serialization.Custom
 					continue;
 
 				var serializeType = context.MapType(typeof (T), property.PropertyType, obj);
-				IEnumerable<K<Action<XmlWriter>>> enumerable = context.SerializeObject(property.Name, serializeType, obj);
-				foreach (K<Action<XmlWriter>> action in enumerable)
+				IEnumerable<Continuation<Action<XmlWriter>>> enumerable = context.SerializeObject(property.Name, serializeType, obj);
+				foreach (Continuation<Action<XmlWriter>> action in enumerable)
 				{
 					yield return action;
 				}

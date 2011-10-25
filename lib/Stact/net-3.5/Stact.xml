@@ -17,7 +17,7 @@
             <param name="convention">The convention to compare</param>
             <returns>True if it matches, otherwise false</returns>
         </member>
-        <member name="T:Stact.ActorInstance">
+        <member name="T:Stact.ActorRef">
             <summary>
             An ActorInstance is used to send messages to an actor instance. This abstraction
             helps avoid tight coupling with the actor class definition.
@@ -52,7 +52,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Stact.ExtensionsForLinking.Link(Stact.ActorInstance,Stact.Inbox)">
+        <member name="M:Stact.ExtensionsForLinking.Link(Stact.ActorRef,Stact.Inbox)">
             <summary>
             Initiates a link to another actor instance. Once linked, if either actor
             exits, all actors linked to this actor will be sent an Exit with a reason
@@ -68,6 +68,11 @@
             intercept messages such as a Kill command to an actor.
             </summary>
             <typeparam name="TOutput">The message type to siphon from the channel</typeparam>
+        </member>
+        <member name="T:Stact.Messages.InboxMessage">
+            <summary>
+            An InboxMessage is one that is handled by the inbox by default
+            </summary>
         </member>
         <member name="T:Stact.Internal.LocalizationRequiredAttribute">
             <summary>
@@ -308,21 +313,21 @@
             An actor registry provide running storage for actors that are active in the system
             </summary>
         </member>
-        <member name="M:Stact.ActorRegistry.Register(System.Guid,Stact.ActorInstance)">
+        <member name="M:Stact.ActorRegistry.Register(System.Guid,Stact.ActorRef)">
             <summary>
             Adds an actor instance to the registry
             </summary>
             <param name="key">The unique identifier for the actor instance</param>
             <param name="actor">The actor instance</param>
         </member>
-        <member name="M:Stact.ActorRegistry.Register(Stact.ActorInstance,System.Action{System.Guid,Stact.ActorInstance})">
+        <member name="M:Stact.ActorRegistry.Register(Stact.ActorRef,System.Action{System.Guid,Stact.ActorRef})">
             <summary>
             Adds an actor to the registry
             </summary>
             <param name="actor">The actor to add</param>
             <param name="callback"></param>
         </member>
-        <member name="M:Stact.ActorRegistry.Unregister(Stact.ActorInstance)">
+        <member name="M:Stact.ActorRegistry.Unregister(Stact.ActorRef)">
             <summary>
             Removes an actor from the registry
             </summary>
@@ -340,7 +345,7 @@
             Stops all actors and removes them from the registry
             </summary>
         </member>
-        <member name="M:Stact.ActorRegistry.Get(System.Guid,System.Action{Stact.ActorInstance},System.Action)">
+        <member name="M:Stact.ActorRegistry.Get(System.Guid,System.Action{Stact.ActorRef},System.Action)">
             <summary>
             Gets an actor from the registry
             </summary>
@@ -348,7 +353,7 @@
             <param name="callback"></param>
             <param name="notFoundCallback"></param>
         </member>
-        <member name="M:Stact.ActorRegistry.Select(System.Uri,System.Action{Stact.ActorInstance},System.Action)">
+        <member name="M:Stact.ActorRegistry.Select(System.Uri,System.Action{Stact.ActorRef},System.Action)">
             <summary>
             Returns an actor instance for the actor referenced by the URI specified.
             </summary>
@@ -356,7 +361,7 @@
             <param name="callback">Called when the actor intance is available</param>
             <param name="notFoundCallback">Called if the actor instance was not found and could not be created</param>
         </member>
-        <member name="M:Stact.ActorRegistry.Each(System.Action{System.Guid,Stact.ActorInstance})">
+        <member name="M:Stact.ActorRegistry.Each(System.Action{System.Guid,Stact.ActorRef})">
             <summary>
             Calls the callback for each actor in the registry
             </summary>
@@ -427,13 +432,6 @@
               Configure the shutdown timeout for the fiber
             </summary>
             <param name = "timeout"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Stact.Configuration.FiberFactoryConfigurator`1.UseBasicExecutor">
-            <summary>
-            Specifies the basic operation executor for the fiber, relying on operations
-            to catch their own exceptions
-            </summary>
             <returns></returns>
         </member>
         <member name="M:Stact.Configuration.Configurator.ValidateConfiguration">
@@ -511,7 +509,7 @@
             </summary>
             <param name = "instance">The actor instance</param>
         </member>
-        <member name="M:Stact.Extensions.Exit(Stact.ActorInstance,Stact.Inbox)">
+        <member name="M:Stact.Extensions.Exit(Stact.ActorRef,Stact.Inbox)">
             <summary>
               Sends an Exit message to an actor instance
             </summary>
@@ -847,6 +845,12 @@
             <param name = "consumer">The consumer to call with the message</param>
             <param name = "timeout">The time period to wait for a message</param>
             <param name = "timeoutCallback">The method to call if a message is not received within the timeout period</param>
+        </member>
+        <member name="M:Stact.Inbox.SetExceptionHandler(Stact.Actors.Actors.ActorExceptionHandler)">
+            <summary>
+            Sets the exception handler for the inbox
+            </summary>
+            <param name="handler">The exception handler</param>
         </member>
         <member name="T:Stact.Internal.ThreadStaticActorFactory`1">
             <summary>

@@ -15,7 +15,6 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 	using System;
 	using System.Collections.Generic;
 	using System.Xml;
-	using Magnum.Monads;
 
 	public class DictionarySerializer<TKey, TValue> :
 		IObjectSerializer
@@ -33,7 +32,7 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 			_ns = _containerType.AssemblyQualifiedName;//.ToMessageName();
 		}
 
-		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
+		public IEnumerable<Continuation<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
 		{
 			if (value == null)
 				yield break;

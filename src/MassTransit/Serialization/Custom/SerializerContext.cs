@@ -19,7 +19,6 @@ namespace MassTransit.Serialization.Custom
 	using System.Reflection;
 	using System.Xml;
 	using log4net;
-	using Magnum.Monads;
 	using Magnum.Reflection;
     using Magnum.Extensions;
 	using TypeSerializers;
@@ -66,17 +65,17 @@ namespace MassTransit.Serialization.Custom
 			_namespaceTable.Each((ns, prefix) => writer.WriteAttributeString("xmlns", prefix, null, ns));
 		}
 
-		public IEnumerable<K<Action<XmlWriter>>> SerializeObject(string localName, Type type, object value)
+		public IEnumerable<Continuation<Action<XmlWriter>>> SerializeObject(string localName, Type type, object value)
 		{
 			IObjectSerializer serializer = GetSerializerFor(type);
 
-			foreach (K<Action<XmlWriter>> action in serializer.GetSerializationActions(this, localName, value))
+			foreach (Continuation<Action<XmlWriter>> action in serializer.GetSerializationActions(this, localName, value))
 			{
 				yield return action;
 			}
 		}
 
-		public IEnumerable<K<Action<XmlWriter>>> Serialize<T>(T value)
+		public IEnumerable<Continuation<Action<XmlWriter>>> Serialize<T>(T value)
 			where T : class
 		{
 			if (value == null)
@@ -85,7 +84,7 @@ namespace MassTransit.Serialization.Custom
 			Type type = typeof(T);
 			string localName = type.ToXmlFriendlyName();
 
-			foreach (K<Action<XmlWriter>> action in SerializeObject(localName, type, value))
+			foreach (Continuation<Action<XmlWriter>> action in SerializeObject(localName, type, value))
 			{
 				yield return action;
 			}

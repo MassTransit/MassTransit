@@ -30,7 +30,7 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly IList<BusSubscriptionEventListener> _listeners;
 		readonly string _network;
 		readonly IList<SubscriptionObserver> _observers;
-		readonly ActorInstance _peerCache;
+        readonly ActorRef _peerCache;
 		bool _disposed;
 		UnsubscribeAction _unregister;
 
