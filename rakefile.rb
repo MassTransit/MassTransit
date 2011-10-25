@@ -11,8 +11,8 @@ require File.dirname(__FILE__) + "/build_support/ilmerge.rb"
 PRODUCT = 'MassTransit'
 CLR_TOOLS_VERSION = 'v4.0.30319'
 
-REVISION = 5
-build_number_base = "2.0.0"
+REVISION = 0
+build_number_base = "2.0.1"
 asm_version = build_number_base + "." + REVISION.to_s
 tc_build_number = '0'
 tc_build_number = ENV["BUILD_NUMBER"] unless ENV['BUILD_NUMBER'].nil?
@@ -339,7 +339,7 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "Magnum", "2.0.0.1"
+    nuspec.dependency "Magnum", "2.0.0.2"
     nuspec.dependency "log4net", "1.2.10"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
