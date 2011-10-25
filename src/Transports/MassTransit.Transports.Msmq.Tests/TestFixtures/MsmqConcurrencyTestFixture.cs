@@ -36,8 +36,8 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
                         .ConnectionString(s => s.Is("Server=(local);initial catalog=test;Trusted_Connection=yes"))
                         .DefaultSchema("dbo")
                         .ShowSql()
-                        .ProxyFactoryFactory("NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle")
                         .Raw(Environment.Isolation, IsolationLevel.RepeatableRead.ToString()))
+                .ProxyFactoryFactory("NHibernate.Bytecode.DefaultProxyFactoryFactory, NHibernate")
                 .Mappings(m =>
                     {
                         m.FluentMappings.Add<ConcurrentSagaMap>();

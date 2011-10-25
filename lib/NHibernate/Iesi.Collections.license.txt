@@ -1,9 +1,0 @@
-Copyright © 2002-2004 by Aidant Systems, Inc., and by Jason Smith.
-
-Copied from http://www.codeproject.com/csharp/sets.asp#xx703510xx that was posted by JasonSmith 12:13 2 Jan '04
-
-Feel free to use this code any way you want to. As a favor to me, you can leave the copyright in there. You never know when someone might recognize your name! 
-
-If you do use the code in a commercial product, I would appreciate hearing about it. This message serves as legal notice that I won't be suing you for royalties!  The code is in the public domain.
-
-On the other hand, I don't provide support. The code is actually simple enough that it shouldn't need it. 

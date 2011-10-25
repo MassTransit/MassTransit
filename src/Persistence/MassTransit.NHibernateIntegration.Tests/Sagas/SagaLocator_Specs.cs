@@ -43,8 +43,6 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 			_cfg.SetProperty("connection.connection_string", _connectionString);
 			_cfg.SetProperty("dialect", "NHibernate.Dialect.MsSql2005Dialect");
 			_cfg.SetProperty("show_sql", "true");
-			_cfg.SetProperty("proxyfactory.factory_class",
-				"NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle");
 
 			_cfg.AddAssembly(typeof (NHibernateSagaRepository<>).Assembly);
 			_cfg.AddAssembly(typeof (RegisterUserStateMachine).Assembly);

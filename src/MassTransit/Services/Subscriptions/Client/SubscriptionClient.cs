@@ -21,8 +21,7 @@ namespace MassTransit.Services.Subscriptions.Client
 	using log4net;
 
 	public class SubscriptionClient :
-		SubscriptionObserver,
-		Consumes<SubscriptionRefresh>.Context
+		SubscriptionObserver
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionClient));
 		readonly IServiceBus _bus;
@@ -33,8 +32,9 @@ namespace MassTransit.Services.Subscriptions.Client
 		readonly TimeSpan _startTimeout;
 		readonly Uri _subscriptionServiceUri;
 		UnsubscribeAction _unsubscribeAction;
+	    IEndpoint _subscriptionEndpoint;
 
-		public SubscriptionClient(IServiceBus bus, SubscriptionRouter router, Uri subscriptionServiceUri,
+	    public SubscriptionClient(IServiceBus bus, SubscriptionRouter router, Uri subscriptionServiceUri,
 		                          TimeSpan startTimeout)
 		{
 			_bus = bus;
@@ -53,9 +53,10 @@ namespace MassTransit.Services.Subscriptions.Client
 			var consumerInstance = new SubscriptionMessageConsumer(_router, _network);
 
 			_unsubscribeAction = _bus.ControlBus.SubscribeInstance(consumerInstance);
-			_unsubscribeAction += _bus.ControlBus.SubscribeHandler<SubscriptionRefresh>(x => _ready.Set());
+		    _unsubscribeAction += _bus.ControlBus.SubscribeContextHandler<SubscriptionRefresh>(Consume);
 
-			_producer = new SubscriptionServiceMessageProducer(router, _bus.GetEndpoint(subscriptionServiceUri));
+		    _subscriptionEndpoint = _bus.GetEndpoint(subscriptionServiceUri);
+		    _producer = new SubscriptionServiceMessageProducer(router, _subscriptionEndpoint);
 
 			WaitForSubscriptionServiceResponse();
 		}
@@ -81,9 +82,9 @@ namespace MassTransit.Services.Subscriptions.Client
 			_producer.OnComplete();
 		}
 
-		public void Consume(IConsumeContext<SubscriptionRefresh> context)
-		{
-			if (_subscriptionServiceUri.Equals(context.SourceAddress))
+	    void Consume(IConsumeContext<SubscriptionRefresh> context)
+	    {
+			if (_subscriptionEndpoint.Address.Uri.Equals(context.SourceAddress))
 			{
 				_ready.Set();
 			}
