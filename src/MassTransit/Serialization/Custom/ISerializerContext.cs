@@ -15,9 +15,8 @@ namespace MassTransit.Serialization.Custom
 	using System;
 	using System.Collections.Generic;
 	using System.Xml;
-	using Magnum.Monads;
 
-	/// <summary>
+    /// <summary>
 	/// The serializer context is passed through all of the serializers to provide a central context for
 	/// dispatching to the appropriate serializer for each type encountered without using a static class
 	/// </summary>
@@ -53,6 +52,6 @@ namespace MassTransit.Serialization.Custom
 		/// <param name="type">The type of object to serialize</param>
 		/// <param name="value">The actual object to serialize</param>
 		/// <returns>An enumeration of continuations to actually write the XML</returns>
-		IEnumerable<K<Action<XmlWriter>>> SerializeObject(string localName, Type type, object value);
+		IEnumerable<Continuation<Action<XmlWriter>>> SerializeObject(string localName, Type type, object value);
 	}
 }

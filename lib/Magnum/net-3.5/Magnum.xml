@@ -10349,51 +10349,6 @@
             </summary>
       <param name="parser">The pattern to match and return the resulting object</param>
     </member>
-    <member name="T:Magnum.Data.IUnitOfWork">
-      <summary>
-            An interface to resolve from the container to encapsulate a unit of work
-            </summary>
-    </member>
-    <member name="M:Magnum.Data.IUnitOfWork.BeginTransaction">
-      <summary>
-            Begins a transaction for the data source
-            </summary>
-      <returns>The transaction instance that was created</returns>
-    </member>
-    <member name="M:Magnum.Data.IUnitOfWork.BeginTransaction(System.Data.IsolationLevel)">
-      <summary>
-            Begins a transaction for the data source
-            </summary>
-      <param name="isolationLevel">The isolation level to use for the transaction</param>
-      <returns>The transaction instance that was created</returns>
-    </member>
-    <member name="M:Magnum.Data.IUnitOfWork.Flush">
-      <summary>
-            Flush any changes made outside of a transaction
-            </summary>
-    </member>
-    <member name="M:Magnum.Data.IUnitOfWork.Commit">
-      <summary>
-            Commit any changes made inside of a transaction
-            </summary>
-    </member>
-    <member name="M:Magnum.Data.IUnitOfWork.Commit(System.Data.IsolationLevel)">
-      <summary>
-            Commit any changes made inside of a transaction using the isolation level specified
-            </summary>
-      <param name="isolationLevel">
-      </param>
-    </member>
-    <member name="P:Magnum.Data.IUnitOfWork.IsInTransaction">
-      <summary>
-            True if the <see cref="T:Magnum.Data.UnitOfWork" /> is currently inside of a transaction
-            </summary>
-    </member>
-    <member name="T:Magnum.Data.UnitOfWork">
-      <summary>
-            This is really just a facade around the <see cref="T:Magnum.LocalContext" /> storage
-            </summary>
-    </member>
     <member name="M:Magnum.Extensions.ExtensionsToAttributes.GetAttribute``1(System.Reflection.ICustomAttributeProvider)">
       <summary>
             Returns the first attribute of the specified type for the object specified
@@ -10696,33 +10651,6 @@
             and creation of reference properties. May not be suitable to all situations, but works great
             for deserializing data into an empty object graph.
             </summary>
-    </member>
-    <member name="M:Magnum.ILocalContext.Store``1(``0)">
-      <summary>
-            Stores the value using a <see cref="T:Magnum.Context.TypedKey`1" /> for the key
-            </summary>
-      <typeparam name="T">
-      </typeparam>
-      <param name="value">
-      </param>
-    </member>
-    <member name="T:Magnum.LocalContext">
-      <summary>
-            Supports the storage of context information through the life of a thread
-            </summary>
-    </member>
-    <member name="P:Magnum.LocalContext.Current">
-      <summary>
-            Gets the current data
-            </summary>
-      <value>The data.</value>
-    </member>
-    <member name="P:Magnum.LocalContext.RunningInWeb">
-      <summary>
-            Gets a value indicating whether running in the web context
-            </summary>
-      <value>
-        <c>true</c> if [running in web]; otherwise, <c>false</c>.</value>
     </member>
     <member name="T:Magnum.Metrics.IMonitor">
       <summary>
@@ -11037,27 +10965,6 @@
             Returns the current state of the StateMachine
             </summary>
     </member>
-    <member name="T:Magnum.Data.IRepositoryFactory">
-      <summary>
-            Supports the creation of repository instances that should be disposed once they are used
-            </summary>
-    </member>
-    <member name="M:Magnum.Data.IRepositoryFactory.GetRepository">
-      <summary>
-            Returns an untyped repository that can be used for any class stored in the database
-            </summary>
-      <returns>
-      </returns>
-    </member>
-    <member name="M:Magnum.Data.IRepositoryFactory.GetRepository``1">
-      <summary>
-            Returns a typed repository that can be used and queried (using LINQ)
-            </summary>
-      <typeparam name="T">
-      </typeparam>
-      <returns>
-      </returns>
-    </member>
     <member name="T:Magnum.Range`1">
       <summary>
             Represents a range of enumerable items
@@ -11130,97 +11037,6 @@
       </param>
       <returns>
       </returns>
-    </member>
-    <member name="T:Magnum.Data.IRepository">
-      <summary>
-            A repository generalization
-            </summary>
-    </member>
-    <member name="M:Magnum.Data.IRepository.Get``1(System.Object)">
-      <summary>
-            Returns the entity for the Id specified.
-            </summary>
-      <typeparam name="T">
-      </typeparam>
-      <param name="id">
-      </param>
-      <returns>
-      </returns>
-    </member>
-    <member name="M:Magnum.Data.IRepository.List``1">
-      <summary>
-            Returns a list of objects
-            </summary>
-      <typeparam name="T">
-      </typeparam>
-      <returns>
-      </returns>
-    </member>
-    <member name="M:Magnum.Data.IRepository.Save``1(``0)">
-      <summary>
-            Saves an object
-            </summary>
-      <typeparam name="T">
-      </typeparam>
-      <param name="item">
-      </param>
-    </member>
-    <member name="M:Magnum.Data.IRepository.Update``1(``0)">
-      <summary>
-            Updates an existing object
-            </summary>
-      <typeparam name="T">
-      </typeparam>
-      <param name="item">
-      </param>
-    </member>
-    <member name="M:Magnum.Data.IRepository.Delete``1(``0)">
-      <summary>
-            Deletes an object from the repository
-            </summary>
-      <typeparam name="T">
-      </typeparam>
-      <param name="item">
-      </param>
-    </member>
-    <member name="M:Magnum.Data.IRepository.FindBy``1">
-      <summary>
-            Finds an object using linq
-            </summary>
-      <typeparam name="T">
-      </typeparam>
-      <returns>
-      </returns>
-    </member>
-    <member name="T:Magnum.Data.IRepository`1">
-      <summary>
-            A repository generalization
-            </summary>
-    </member>
-    <member name="M:Magnum.Data.IRepository`1.Save(`0)">
-      <summary>
-            Saves an object
-            </summary>
-      <typeparam name="T">
-      </typeparam>
-      <param name="item">
-      </param>
-    </member>
-    <member name="M:Magnum.Data.IRepository`1.Update(`0)">
-      <summary>
-            Updates an existing item
-            </summary>
-      <param name="item">
-      </param>
-    </member>
-    <member name="M:Magnum.Data.IRepository`1.Delete(`0)">
-      <summary>
-            Deletes an object from the repository
-            </summary>
-      <typeparam name="T">
-      </typeparam>
-      <param name="item">
-      </param>
     </member>
     <member name="M:Magnum.Extensions.ExtensionsToTimeSpan.Weeks(System.Int32)">
       <summary>

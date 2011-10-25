@@ -28,13 +28,13 @@ namespace MassTransit.Subscriptions.Coordinator
         readonly ActorFactory<PeerHandler> _peerHandlerFactory;
         readonly Cache<Guid, Uri> _peerIds;
         readonly Uri _peerUri;
-        readonly Cache<Uri, ActorInstance> _peers;
+        readonly Cache<Uri, ActorRef> _peers;
         readonly Scheduler _scheduler;
 
         public PeerCache(Fiber fiber, Scheduler scheduler, SubscriptionObserver observer, Guid clientId,
                          Uri controlUri)
         {
-            _peers = new DictionaryCache<Uri, ActorInstance>();
+            _peers = new DictionaryCache<Uri, ActorRef>();
             _peerUri = controlUri;
             _fiber = fiber;
             _scheduler = scheduler;
@@ -139,12 +139,12 @@ namespace MassTransit.Subscriptions.Coordinator
             }
         }
 
-        void WithPeer(Guid peerId, Action<ActorInstance> callback)
+        void WithPeer(Guid peerId, Action<ActorRef> callback)
         {
             _peerIds.WithValue(peerId, peerUri => { WithPeer(peerId, peerUri, callback, false); });
         }
 
-        void WithPeer(Guid peerId, Uri controlUri, Action<ActorInstance> callback, bool createIfMissing)
+        void WithPeer(Guid peerId, Uri controlUri, Action<ActorRef> callback, bool createIfMissing)
         {
             bool found = _peers.Has(controlUri);
             if (!found)
@@ -154,7 +154,7 @@ namespace MassTransit.Subscriptions.Coordinator
                     return;
                 }
 
-                ActorInstance peer = _peerHandlerFactory.GetActor();
+                ActorRef peer = _peerHandlerFactory.GetActor();
                 peer.Send(new InitializePeerHandler(peerId, controlUri));
                 _peers.Add(controlUri, peer);
                 _peerIds[peerId] = controlUri;

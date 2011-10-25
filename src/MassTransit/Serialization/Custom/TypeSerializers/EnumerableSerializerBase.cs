@@ -15,7 +15,6 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 	using System;
 	using System.Collections.Generic;
 	using System.Xml;
-	using Magnum.Monads;
 
 	public class EnumerableSerializerBase<T> :
 		IObjectSerializer
@@ -29,7 +28,7 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 			_ns = _containerType.AssemblyQualifiedName; //.ToMessageName();
 		}
 
-		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName,
+		public IEnumerable<Continuation<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName,
 		                                                                 object value)
 		{
 			if (value == null)
@@ -55,11 +54,11 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 			yield return output => output(writer => { writer.WriteEndElement(); });
 		}
 
-		protected virtual IEnumerable<K<Action<XmlWriter>>> SerializeElements(object value, ISerializerContext context)
+		protected virtual IEnumerable<Continuation<Action<XmlWriter>>> SerializeElements(object value, ISerializerContext context)
 		{
 			foreach (T obj in ((IEnumerable<T>) value))
 			{
-				IEnumerable<K<Action<XmlWriter>>> enumerable = context.SerializeObject(obj.GetType().Name, obj.GetType(), obj);
+				IEnumerable<Continuation<Action<XmlWriter>>> enumerable = context.SerializeObject(obj.GetType().Name, obj.GetType(), obj);
 				foreach (var action in enumerable)
 				{
 					yield return action;
