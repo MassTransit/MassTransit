@@ -80,33 +80,33 @@ AutoFac
 
 .. sourcecode:: csharp
 
-    public static void main(string[] args) 
+    public static void main(string[] args)
     {
         var builder = new ContainerBuilder();
-        
+
         // register each consumer manually
-        builder.RegisterType<YourConsumer>;
-        
-        //are there scanning capabilities?
-        
-        var container = builder.Build();
-        
-        var bus = ServiceBusFactory.New(sbc =>
+        builder.RegisterType<YourConsumer>().As<IConsumer>();
+
+        //or use Autofac's scanning capabilities -- SomeClass is any class in the correct assembly
+        builder.RegisterAssemblyTypes(typeof(SomeClass).Assembly).As<IConsumer>();
+
+        //now we add the bus
+        builder.Register(c => ServiceBusFactory.New(sbc =>
         {
             //other configuration options
-            
-            //this will find all of the consumers in the container and 
+
+            //this will find all of the consumers in the container and
             //register them with the bus.
-            sbc.LoadFrom(container);
-        });
-        
-        //now we add the bus
-        //can I get the bus in the container now?
+            sbc.LoadFrom(c);
+        })).As<IServiceBus>()
+            .SingleInstance();
+
+        var container = builder.Build();
     }
 
 .. note::
 
-    Does Autofac have any kind of Module / Installer / Registry?
+    We recommend that most of this type of code be placed in an Autofac Module
 
 
 Ninject
