@@ -119,7 +119,7 @@ Ninject
         var kernel = new StandardKernel();
         
         // register each consumer manually
-        kernel.Bind<YourConsumer>).ToSelf();
+        kernel.Bind<YourConsumer>().ToSelf();
         
         //Dru is currently unaware of any scanning capability
         
