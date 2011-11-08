@@ -106,10 +106,6 @@
       <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
       <Name>MassTransit.WindsorIntegration</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Persistence\MassTransit.NHibernateIntegration\Persistence\MassTransit.NHibernateIntegration.csproj">
-      <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
-      <Name>MassTransit.NHibernateIntegration</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>

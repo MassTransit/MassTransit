@@ -64,9 +64,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\lib\NHibernate\NHibernate.dll</HintPath>
     </Reference>
-    <Reference Include="NHibernate.ByteCode.Castle">
-      <HintPath>..\..\..\..\lib\NHibernate\NHibernate.ByteCode.Castle.dll</HintPath>
-    </Reference>
     <Reference Include="Npgsql, Version=1.99.2.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\lib\npgsql\Npgsql.dll</HintPath>
@@ -135,6 +132,10 @@
     <ProjectReference Include="..\..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj">
+      <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
+      <Name>MassTransit.NHibernateIntegration</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Transports\MassTransit.Transports.MSMQ\MassTransit.Transports.Msmq.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
