@@ -280,4 +280,27 @@ namespace MassTransit.Transports.RabbitMq.Tests
 			//_addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://dru:mt@some_server:5432/thehost/the_queue"));
 		}
 	}
+
+    [Scenario]
+    public class GivenAHighAvailableQueue
+    {
+        public Uri uri = new Uri("rabbitmq://localhost/somequeue?ha=true");
+        RabbitMqEndpointAddress _addr;
+        
+        [When]
+        public void WhenParsed()
+        {
+            _addr = RabbitMqEndpointAddress.Parse(uri);
+        }
+
+        [Then]
+        public void HighAvailability()
+        {
+            _addr.IsHighlyAvailable.ShouldBeTrue();
+        }
+
+
+    }
+    
+
 }
