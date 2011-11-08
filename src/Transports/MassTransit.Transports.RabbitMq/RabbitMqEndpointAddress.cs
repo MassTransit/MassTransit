@@ -35,9 +35,10 @@ namespace MassTransit.Transports.RabbitMq
 		readonly string _name;
 		readonly Uri _uri;
 		Func<bool> _isLocal;
+	    bool _isHighAvailable;
 
 
-		public RabbitMqEndpointAddress(Uri uri, ConnectionFactory connectionFactory, string name)
+	    public RabbitMqEndpointAddress(Uri uri, ConnectionFactory connectionFactory, string name)
 		{
 			_uri = uri;
 			_connectionFactory = connectionFactory;
@@ -45,6 +46,7 @@ namespace MassTransit.Transports.RabbitMq
 
 			_isTransactional = uri.Query.GetValueFromQueryString("tx", false);
 			_isLocal = () => DetermineIfEndpointIsLocal(_uri);
+		    _isHighAvailable = uri.Query.GetValueFromQueryString("ha", false);
 		}
 
 		public ConnectionFactory ConnectionFactory
@@ -79,6 +81,11 @@ namespace MassTransit.Transports.RabbitMq
 		{
 			get { return _isTransactional; }
 		}
+
+	    public bool IsHighlyAvailable
+	    {
+	        get { return _isHighAvailable; }
+	    }
 
 		bool DetermineIfEndpointIsLocal(Uri uri)
 		{
