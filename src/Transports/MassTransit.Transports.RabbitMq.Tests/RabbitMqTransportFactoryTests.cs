@@ -58,7 +58,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		{
 			using (var management = new RabbitMqEndpointManagement(_queue))
 			{
-				management.BindQueue(_queue.Name, _exchange.Name, ExchangeType.Fanout, "");
+				management.BindQueue(_queue.Name, _exchange.Name, ExchangeType.Fanout, "",null);
 			}
 
 			IMessageSerializer serializer = new XmlMessageSerializer();
@@ -86,7 +86,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		{
 			using (var management = new RabbitMqEndpointManagement(_queue))
 			{
-				management.BindQueue(_queue.Name, _exchange.Name, ExchangeType.Fanout, "");
+				management.BindQueue(_queue.Name, _exchange.Name, ExchangeType.Fanout, "",null);
 			}
 
 			IOutboundTransport t = _factory.BuildOutbound(new TransportSettings(_exchange));

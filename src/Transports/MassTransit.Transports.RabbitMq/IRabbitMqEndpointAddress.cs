@@ -21,5 +21,7 @@ namespace MassTransit.Transports.RabbitMq
 		string Name { get; }
 
 		IRabbitMqEndpointAddress ForQueue(string name);
+
+	    bool IsHighlyAvailable { get; }
 	}
 }
