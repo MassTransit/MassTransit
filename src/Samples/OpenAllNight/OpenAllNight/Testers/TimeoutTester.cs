@@ -15,7 +15,7 @@ namespace OpenAllNight.Testers
         public TimeoutTester(IServiceBus bus)
         {
             _bus = bus;
-            _bus.Subscribe(this);
+            _bus.SubscribeInstance(this);
             _ticket = Guid.NewGuid();
         }
 
