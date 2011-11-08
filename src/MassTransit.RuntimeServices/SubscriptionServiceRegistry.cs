@@ -63,12 +63,6 @@ namespace MassTransit.RuntimeServices
 					{
 						m.FluentMappings.Add<SubscriptionSagaMap>();
 						m.FluentMappings.Add<SubscriptionClientSagaMap>();
-					}).Database(()=>
-					{
-					    return MsSqlConfiguration.MsSql2008.ConnectionString(cfg =>
-					    {
-                            cfg.FromConnectionStringWithKey("MassTransit");
-					    });
 					})
 				//.ExposeConfiguration(BuildSchema)
 				.BuildSessionFactory();
