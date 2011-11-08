@@ -27,7 +27,7 @@ namespace OpenAllNight.Testers
 
         public void Test()
         {
-            bool result = _healthInfos.Any(i => i.DataUri.Equals(_bus.Endpoint.Uri));
+            bool result = _healthInfos.Any(i => i.DataUri.Equals(_bus.Endpoint.Address.Uri));
             if (result)
                 Console.WriteLine("Found myself in the health info");
             else

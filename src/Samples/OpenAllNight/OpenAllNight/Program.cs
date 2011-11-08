@@ -1,3 +1,4 @@
+using Castle.MicroKernel.Registration;
 using MassTransit.BusConfigurators;
 using MassTransit.EndpointConfigurators;
 using MassTransit.Transports;
@@ -27,29 +28,35 @@ namespace OpenAllNight
             XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
 
             WindsorContainer c = new WindsorContainer();
-            c.Install(new MassTransitInstaller());
-            IEndpointFactory ef = EndpointFactoryConfigurator.New(e => e.RegisterTransport<MsmqEndpoint>());
-            c.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), ef);
             c.AddComponent<SimpleMessageHandler>();
             c.AddComponentLifeStyle("counter", typeof (Counter), LifestyleType.Singleton);
             c.AddComponentLifeStyle("rvaoeuaoe", typeof (CacheUpdateResponseHandler), LifestyleType.Transient);
 
-            IServiceBus bus = ServiceBusConfigurator.New(b =>
+            var bus = ServiceBusFactory.New(sbc =>
             {
-                b.ReceiveFrom("msmq://localhost/mt_client");
-                b.ConfigureService<SubscriptionClientConfigurator>(sc => sc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
-                b.ConfigureService<HealthClientConfigurator>(hc=>hc.SetHeartbeatInterval(10));
-            });
-            c.Kernel.AddComponentInstance("bus", typeof(IServiceBus), bus);
-            
-            bus.Subscribe<CacheUpdateResponseHandler>();
-            bus.Subscribe<SimpleMessageHandler>();
+                sbc.UseMsmq();
+                sbc.VerifyMsDtcConfiguration();
+                sbc.VerifyMsmqConfiguration();
+                sbc.ReceiveFrom("msmq://localhost/mt_client");
+                sbc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
+                sbc.UseHealthMonitoring(10);
 
-            IEndpoint ep = c.Resolve<IEndpointFactory>().GetEndpoint(new Uri("msmq://localhost/mt_subscriptions"));
+                sbc.Subscribe(subs=>
+                {
+                    subs.LoadFrom(c);
+                });
+            });
+
+            c.Register(Component.For<IServiceBus>().Instance(bus));
+
+            
+            
+            
+            IEndpoint ep = bus.GetEndpoint(new Uri("msmq://localhost/mt_subscriptions"));
             var subTester = new SubscriptionServiceTester(ep, bus, c.Resolve<Counter>());
             var healthTester = new HealthServiceTester(c.Resolve<Counter>(), bus);
             var timeoutTester = new TimeoutTester(bus);
-            bus.Subscribe(healthTester);
+            bus.SubscribeInstance(healthTester);
             ///////
 
 
