@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using Topshelf.Configuration.Dsl;
+
 namespace GatewayService
 {
 	using System;
@@ -32,7 +35,7 @@ namespace GatewayService
 
 			MsmqEndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
-			var configuration = RunnerConfigurator.New(config =>
+			HostFactory.Run(config =>
 				{
 					config.SetServiceName(typeof (Program).Namespace);
 					config.SetDisplayName(typeof (Program).Namespace);
@@ -40,25 +43,25 @@ namespace GatewayService
 
 					config.RunAsLocalSystem();
 
-					config.DependencyOnMsmq();
-					config.DependencyOnMsSql();
+                    config.DependsOnMsmq();
+                    config.DependsOnMsSql();
+
 
 					ObjectFactory.Configure(x =>
 						{
 							x.AddRegistry(new GatewayServiceRegistry());
 						});
 
-					config.ConfigureService<OrderServiceGateway>(typeof (OrderServiceGateway).Name, service =>
+					config.Service<OrderServiceGateway>(service =>
 						{
-							service.CreateServiceLocator(() => new StructureMapObjectBuilder(ObjectFactory.Container));
+                            service.ConstructUsing(() => ObjectFactory.GetInstance<OrderServiceGateway>());
 							service.WhenStarted(x => x.Start());
 							service.WhenStopped(x => x.Stop());
 						});
 
-
-					config.AfterStoppingTheHost(x => { _log.Info("Exiting..."); });
+                    config.AfterStoppingServices(x => { _log.Info("Exiting..."); });
 				});
-			Runner.Host(configuration, args);
+			
 		}
 
 		private static void BootstrapLogger()
