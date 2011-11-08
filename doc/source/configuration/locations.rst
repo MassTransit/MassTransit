@@ -1,5 +1,5 @@
-Configuring Locations in your Application
-"""""""""""""""""""""""""""""""""""""""""
+Locations in your Application where MT is usually configured
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Now that we know how to configure the MassTransit system, the next question is usually
 where should I do the configuration? 
