@@ -74,10 +74,6 @@ Windsor
 AutoFac
 '''''''
 
-.. warning::
-
-    This sample could use some help!
-
 .. sourcecode:: csharp
 
     public static void main(string[] args)
