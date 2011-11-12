@@ -27,12 +27,7 @@ namespace MassTransit.Transports.RabbitMq.Management
 			_address = address;
 			_connection = connection;
 		}
-        
-        public void BindQueue(string queueName, string exchangeName, string exchangeType, string routingKey)
-        {
-            BindQueue(queueName, exchangeName, exchangeType,routingKey,null);
-        }
-
+       
 		public void BindQueue(string queueName, string exchangeName, string exchangeType, string routingKey, IDictionary queueArguments )
 		{
 			using (IModel model = _connection.CreateModel())

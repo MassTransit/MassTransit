@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq
 {
 	using System;
+	using System.Collections;
 	using System.Text.RegularExpressions;
 	using System.Threading;
 	using Magnum;
@@ -39,8 +40,8 @@ namespace MassTransit.Transports.RabbitMq
 
 
 	    public RabbitMqEndpointAddress(Uri uri, ConnectionFactory connectionFactory, string name)
-		{
-			_uri = uri;
+	    {
+	        _uri = new Uri(uri.GetLeftPart(UriPartial.Path));
 			_connectionFactory = connectionFactory;
 			_name = name;
 
@@ -61,9 +62,8 @@ namespace MassTransit.Transports.RabbitMq
 
 		public IRabbitMqEndpointAddress ForQueue(string name)
 		{
-			string uri = _uri.ToString();
+			var uri = _uri.ToString();
 			uri = uri.Remove(uri.Length - _name.Length);
-
 			return new RabbitMqEndpointAddress(new Uri(uri).AppendToPath(name), _connectionFactory, name);
 		}
 
@@ -82,12 +82,12 @@ namespace MassTransit.Transports.RabbitMq
 			get { return _isTransactional; }
 		}
 
-	    public bool IsHighlyAvailable
+	    public IDictionary QueueArguments()
 	    {
-	        get { return _isHighAvailable; }
+	        return !_isHighAvailable ? null : new Hashtable {{"x-ha-policy", "all"}};
 	    }
 
-		bool DetermineIfEndpointIsLocal(Uri uri)
+	    bool DetermineIfEndpointIsLocal(Uri uri)
 		{
 			string hostName = uri.Host;
 			bool local = string.Compare(hostName, ".") == 0 ||
