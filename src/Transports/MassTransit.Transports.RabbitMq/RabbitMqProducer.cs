@@ -43,7 +43,7 @@ namespace MassTransit.Transports.RabbitMq
 			{
 				using (var management = new RabbitMqEndpointManagement(_address, connection.Connection))
 				{
-					management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "");
+					management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "",_address.QueueArguments());
 				}
 			}
 		}

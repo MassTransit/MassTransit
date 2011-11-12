@@ -53,13 +53,7 @@ namespace MassTransit.Transports.RabbitMq
 		{
 			using (var management = new RabbitMqEndpointManagement(_address, connection.Connection))
 			{
-			    IDictionary args = null;
-                if (_address.IsHighlyAvailable)
-                {
-                    args = new Hashtable();
-                    args.Add("asdf","asdf");
-                }
-				management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "", args);
+				management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "", _address.QueueArguments());
 
 				if(_purgeOnBind)
 				{
