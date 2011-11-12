@@ -156,7 +156,7 @@ namespace MassTransit.Tests.Serialization
 		{
 			DateTime dateTime = DateTime.UtcNow;
 			AddedAt = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second,
-				dateTime.Millisecond);
+				dateTime.Millisecond, DateTimeKind.Utc);
 
 			AddedBy = addedBy;
 			Subject = subject;

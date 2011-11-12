@@ -216,4 +216,4 @@ an MSMQ endpoint on the local machine named "my_queue" would have the address sh
 
 A RabbitMQ queue on a remote server may be listed as below.
 
-    ``rabbitmq://user@password:remote_server/my_queue``
+    ``rabbitmq://user:password@remote_server/my_queue``
