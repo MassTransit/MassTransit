@@ -45,6 +45,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		{
 //            _addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://guest:guest@some_server:5432/thehost/queue"));
 		}
+
+        [Then]
+        public void RelativeQueue()
+        {
+            _addr.ForQueue("anotherone")
+                .Uri.ToString().ShouldEqual("rabbitmq://some_server/thehost/anotherone");
+        }
 	}
 
 	[Scenario]
@@ -219,7 +226,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		[Then]
 		public void ThePort()
 		{
-			_addr.ConnectionFactory.Port.ShouldEqual(5432);
+			_addr.ConnectionFactory.Port.ShouldEqual(5672);
 		}
 	}
 
@@ -284,7 +291,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     [Scenario]
     public class GivenAHighAvailableQueue
     {
-        public Uri uri = new Uri("rabbitmq://localhost/somequeue?ha=true");
+        public string uri = "rabbitmq://localhost/somequeue?ha=true";
         RabbitMqEndpointAddress _addr;
         
         [When]
@@ -294,12 +301,29 @@ namespace MassTransit.Transports.RabbitMq.Tests
         }
 
         [Then]
-        public void HighAvailability()
+        public void TheQueueArguments()
         {
-            _addr.IsHighlyAvailable.ShouldBeTrue();
+            _addr.QueueArguments().ShouldNotBeNull();
+        }
+        
+        [Then]
+        public void HighAvailabilityQueue()
+        {
+            _addr.QueueArguments()["x-ha-policy"].ShouldEqual("all");
         }
 
+        [Then]
+        public void TheQueueName()
+        {
+            _addr.Name.ShouldEqual("somequeue");
+        }
 
+        [Then]
+        public void should_not_use_query_string_of_uri()
+        {
+            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/anotherone");
+            _addr.ForQueue("anotherone").Name.ShouldEqual("anotherone");
+        }
     }
     
 

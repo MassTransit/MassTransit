@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 {
-	using System.Text;
+    using System.Collections;
+    using System.Text;
 	using Magnum.TestFramework;
 	using RabbitMQ.Client;
 	using RabbitMQ.Client.Framing.v0_9_1;
@@ -144,4 +145,38 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 			Model.ExchangeUnbind("TheDestination", "TheSource", "");
 		}
 	}
+
+    [Scenario]
+	public class When_an_exchange_is_bound_to_a_high_available_queue :
+		Given_a_rabbitmq_server
+	{
+		string _queueName;
+
+		[When]
+		public void An_exchange_is_bound_to_a_highly_available_queue()
+		{
+		    var args = new Hashtable();
+            args.Add("x-ha-policy", "all");
+			Model.ExchangeDeclare("TypeA", ExchangeType.Fanout, true, true, null);
+			_queueName = Model.QueueDeclare("TypeA", true, true, true, args);
+
+			Model.QueueBind(_queueName, "TypeA", "");
+			Model.QueuePurge(_queueName);
+
+			byte[] message = Encoding.UTF8.GetBytes("HELLO, WORLD.");
+
+			IBasicProperties properties = new BasicProperties();
+			properties.Type = "System.string";
+
+			Model.BasicPublish("TypeA", "", properties, message);
+		}
+
+		[Then]
+		public void Should_receive_messages_sent_to_the_exchange()
+		{
+			BasicGetResult x = Model.BasicGet(_queueName, true);
+			x.Exchange.ShouldEqual("TypeA");
+		}
+	}
+
 }
