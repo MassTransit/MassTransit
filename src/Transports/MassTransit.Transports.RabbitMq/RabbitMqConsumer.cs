@@ -13,6 +13,8 @@
 namespace MassTransit.Transports.RabbitMq
 {
 	using System;
+	using System.Collections;
+	using System.Collections.Generic;
 	using Management;
 	using RabbitMQ.Client;
 	using log4net;
@@ -51,7 +53,7 @@ namespace MassTransit.Transports.RabbitMq
 		{
 			using (var management = new RabbitMqEndpointManagement(_address, connection.Connection))
 			{
-				management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "");
+				management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "", _address.QueueArguments());
 
 				if(_purgeOnBind)
 				{

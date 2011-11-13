@@ -463,7 +463,6 @@
     <Compile Include="Testing\ScenarioBuilders\LocalRemoteScenarioBuilder.cs" />
     <Compile Include="Testing\ScenarioBuilders\LoopbackBusScenarioBuilder.cs" />
     <Compile Include="Testing\ScenarioBuilders\LoopbackLocalRemoteBusScenarioBuilder.cs" />
-    <Compile Include="Testing\ScenarioBuilders\NewLoopbackBusScenarioBuilder.cs" />
     <Compile Include="Testing\ScenarioBuilders\ScenarioBuilder.cs" />
     <Compile Include="Testing\Factories\ConsumerTestFactory.cs" />
     <Compile Include="Testing\Factories\ConsumerTestFactoryImpl.cs" />

@@ -12,122 +12,131 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Runtime.Serialization;
-	using Custom;
-	using Newtonsoft.Json;
-	using Newtonsoft.Json.Linq;
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.Serialization;
+    using Custom;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
+    using Newtonsoft.Json.Linq;
 
-	public class JsonMessageSerializer :
-		IMessageSerializer
-	{
-		const string ContentTypeHeaderValue = "application/vnd.masstransit+json";
+    public class JsonMessageSerializer :
+        IMessageSerializer
+    {
+        const string ContentTypeHeaderValue = "application/vnd.masstransit+json";
 
-		[ThreadStatic]
-		static JsonSerializer _deserializer;
+        [ThreadStatic]
+        static JsonSerializer _deserializer;
 
-		[ThreadStatic]
-		static JsonSerializer _serializer;
+        [ThreadStatic]
+        static JsonSerializer _serializer;
 
-		public static JsonSerializer Deserializer
-		{
-			get
-			{
-				return _deserializer ?? (_deserializer = JsonSerializer.Create(new JsonSerializerSettings
-					{
-						NullValueHandling = NullValueHandling.Ignore,
-						DefaultValueHandling = DefaultValueHandling.Ignore,
-						MissingMemberHandling = MissingMemberHandling.Ignore,
-						ObjectCreationHandling = ObjectCreationHandling.Auto,
-						ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-						ContractResolver = new JsonContractResolver(),
-						Converters = new List<JsonConverter>(new JsonConverter[]
-							{
-								new ListJsonConverter(),
-								new InterfaceProxyConverter(),
-							})
-					}));
-			}
-		}
+        public static JsonSerializer Deserializer
+        {
+            get
+            {
+                return _deserializer ?? (_deserializer = JsonSerializer.Create(new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        DefaultValueHandling = DefaultValueHandling.Ignore,
+                        MissingMemberHandling = MissingMemberHandling.Ignore,
+                        ObjectCreationHandling = ObjectCreationHandling.Auto,
+                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+                        ContractResolver = new JsonContractResolver(),
 
-		public static JsonSerializer Serializer
-		{
-			get
-			{
-				return _serializer ?? (_serializer = JsonSerializer.Create(new JsonSerializerSettings
-					{
-						NullValueHandling = NullValueHandling.Ignore,
-						DefaultValueHandling = DefaultValueHandling.Ignore,
-						MissingMemberHandling = MissingMemberHandling.Ignore,
-						ObjectCreationHandling = ObjectCreationHandling.Auto,
-						ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-						ContractResolver = new JsonContractResolver(),
-					}));
-			}
-		}
+                        Converters = new List<JsonConverter>(new JsonConverter[]
+                            {
+                                new ListJsonConverter(),
+                                new InterfaceProxyConverter(),
+                                new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
+                            })
+                    }));
 
-		public string ContentType
-		{
-			get { return ContentTypeHeaderValue; }
-		}
+            }
+        }
 
-		public void Serialize<T>(Stream output, ISendContext<T> context)
-			where T : class
-		{
-			try
-			{
-				context.SetContentType(ContentTypeHeaderValue);
+        public static JsonSerializer Serializer
+        {
+            get
+            {
+                return _serializer ?? (_serializer = JsonSerializer.Create(new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        DefaultValueHandling = DefaultValueHandling.Ignore,
+                        MissingMemberHandling = MissingMemberHandling.Ignore,
+                        ObjectCreationHandling = ObjectCreationHandling.Auto,
+                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+                        ContractResolver = new JsonContractResolver(),
+                        Converters = new List<JsonConverter>(new JsonConverter[]
+                            {
+                                new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
+                            }),
+                    }));
+            }
+        }
 
-				Envelope envelope = Envelope.Create(context);
+        public string ContentType
+        {
+            get { return ContentTypeHeaderValue; }
+        }
 
-				using (var nonClosingStream = new NonClosingStream(output))
-				using (var writer = new StreamWriter(nonClosingStream))
-				using (var jsonWriter = new JsonTextWriter(writer))
-				{
-					jsonWriter.Formatting = Formatting.Indented;
+        public void Serialize<T>(Stream output, ISendContext<T> context)
+            where T : class
+        {
+            try
+            {
+                context.SetContentType(ContentTypeHeaderValue);
 
-					Serializer.Serialize(jsonWriter, envelope);
+                Envelope envelope = Envelope.Create(context);
 
-					jsonWriter.Flush();
-					writer.Flush();
-				}
-			}
-			catch (SerializationException)
-			{
-				throw;
-			}
-			catch (Exception ex)
-			{
-				throw new SerializationException("Failed to serialize message", ex);
-			}
-		}
+                using (var nonClosingStream = new NonClosingStream(output))
+                using (var writer = new StreamWriter(nonClosingStream))
+                using (var jsonWriter = new JsonTextWriter(writer))
+                {
+                    jsonWriter.Formatting = Formatting.Indented;
 
-		public void Deserialize(IReceiveContext context)
-		{
-			try
-			{
-				Envelope result;
-				using (var nonClosingStream = new NonClosingStream(context.BodyStream))
-				using (var reader = new StreamReader(nonClosingStream))
-				using (var jsonReader = new JsonTextReader(reader))
-				{
-					result = Deserializer.Deserialize<Envelope>(jsonReader);
-				}
+                    Serializer.Serialize(jsonWriter, envelope);
 
-				context.SetUsingEnvelope(result);
-				context.SetMessageTypeConverter(new JsonMessageTypeConverter(Deserializer, result.Message as JToken,
-					result.MessageType));
-			}
-			catch (SerializationException)
-			{
-				throw;
-			}
-			catch (Exception ex)
-			{
-				throw new SerializationException("Failed to deserialize message", ex);
-			}
-		}
-	}
+                    jsonWriter.Flush();
+                    writer.Flush();
+                }
+            }
+            catch (SerializationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new SerializationException("Failed to serialize message", ex);
+            }
+        }
+
+        public void Deserialize(IReceiveContext context)
+        {
+            try
+            {
+                Envelope result;
+                using (var nonClosingStream = new NonClosingStream(context.BodyStream))
+                using (var reader = new StreamReader(nonClosingStream))
+                using (var jsonReader = new JsonTextReader(reader))
+                {
+                    result = Deserializer.Deserialize<Envelope>(jsonReader);
+                }
+
+                context.SetUsingEnvelope(result);
+                context.SetMessageTypeConverter(new JsonMessageTypeConverter(Deserializer, result.Message as JToken,
+                    result.MessageType));
+            }
+            catch (SerializationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new SerializationException("Failed to deserialize message", ex);
+            }
+        }
+    }
 }

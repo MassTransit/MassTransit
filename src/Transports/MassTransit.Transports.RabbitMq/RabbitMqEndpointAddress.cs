@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq
 {
 	using System;
+	using System.Collections;
 	using System.Text.RegularExpressions;
 	using System.Threading;
 	using Magnum;
@@ -35,16 +36,18 @@ namespace MassTransit.Transports.RabbitMq
 		readonly string _name;
 		readonly Uri _uri;
 		Func<bool> _isLocal;
+	    bool _isHighAvailable;
 
 
-		public RabbitMqEndpointAddress(Uri uri, ConnectionFactory connectionFactory, string name)
-		{
-			_uri = uri;
+	    public RabbitMqEndpointAddress(Uri uri, ConnectionFactory connectionFactory, string name)
+	    {
+	        _uri = new Uri(uri.GetLeftPart(UriPartial.Path));
 			_connectionFactory = connectionFactory;
 			_name = name;
 
 			_isTransactional = uri.Query.GetValueFromQueryString("tx", false);
 			_isLocal = () => DetermineIfEndpointIsLocal(_uri);
+		    _isHighAvailable = uri.Query.GetValueFromQueryString("ha", false);
 		}
 
 		public ConnectionFactory ConnectionFactory
@@ -59,9 +62,8 @@ namespace MassTransit.Transports.RabbitMq
 
 		public IRabbitMqEndpointAddress ForQueue(string name)
 		{
-			string uri = _uri.ToString();
+			var uri = _uri.ToString();
 			uri = uri.Remove(uri.Length - _name.Length);
-
 			return new RabbitMqEndpointAddress(new Uri(uri).AppendToPath(name), _connectionFactory, name);
 		}
 
@@ -80,7 +82,12 @@ namespace MassTransit.Transports.RabbitMq
 			get { return _isTransactional; }
 		}
 
-		bool DetermineIfEndpointIsLocal(Uri uri)
+	    public IDictionary QueueArguments()
+	    {
+	        return !_isHighAvailable ? null : new Hashtable {{"x-ha-policy", "all"}};
+	    }
+
+	    bool DetermineIfEndpointIsLocal(Uri uri)
 		{
 			string hostName = uri.Host;
 			bool local = string.Compare(hostName, ".") == 0 ||

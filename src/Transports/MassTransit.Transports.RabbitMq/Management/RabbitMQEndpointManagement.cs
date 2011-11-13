@@ -1,6 +1,7 @@
 namespace MassTransit.Transports.RabbitMq.Management
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
 	using log4net;
@@ -26,12 +27,12 @@ namespace MassTransit.Transports.RabbitMq.Management
 			_address = address;
 			_connection = connection;
 		}
-
-		public void BindQueue(string queueName, string exchangeName, string exchangeType, string routingKey)
+       
+		public void BindQueue(string queueName, string exchangeName, string exchangeType, string routingKey, IDictionary queueArguments )
 		{
 			using (IModel model = _connection.CreateModel())
 			{
-				string queue = model.QueueDeclare(queueName, true, false, false, null);
+				string queue = model.QueueDeclare(queueName, true, false, false, queueArguments);
 				model.ExchangeDeclare(exchangeName, exchangeType, true);
 
 				model.QueueBind(queue, exchangeName, routingKey);
