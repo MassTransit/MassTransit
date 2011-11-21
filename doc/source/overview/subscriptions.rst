@@ -51,6 +51,18 @@ MSMQ Multicast
 Each bus instance communicates with every other instance on the network through a reliable
 multicast network protocol.
 
+.. sourcecode:: csharp
+
+    var bus = ServiceBusFactory.New(sbc =>
+    {
+        //other settings
+        
+        sbc.UseMsmq();       
+        sbc.UseMulticastSubscriptionClient(); //turns on multicast
+        sbc.SetNetwork("YOUR_KEY"); //must be set to cross machines
+    });
+    
+
 MSMQ Runtime Services
 ---------------------
 
@@ -60,6 +72,16 @@ the Runtime Services (specifically the Subscription Service).
 .. note::
 
     supports permanent subscriptions
+
+.. sourcecode:: csharp
+
+    var bus = ServiceBusFactory.New(sbc =>
+    {
+        //other settings
+        
+        sbc.UseMsmq();       
+        sbc.UseSubscriptionService("msmq://localhost/my_queue");
+    });
 
 RabbitMQ
 --------
@@ -71,3 +93,13 @@ information to all nodes in the cluster.
 .. note::
 
     supports permanent subscriptions
+    
+.. sourcecode:: csharp
+
+    var bus = ServiceBusFactory.New(sbc =>
+    {
+        //other settings
+        
+        sbc.UseRabbitMq();
+        sbc.UseRabbitMqRouting();
+    });
