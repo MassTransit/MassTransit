@@ -54,9 +54,15 @@ namespace MassTransit.Monitoring
         {
             if (_performanceCounter != null)
             {
-                _performanceCounter.RemoveInstance();
-                _performanceCounter.Close();
-                _performanceCounter = null;
+                try
+                {
+                    _performanceCounter.RemoveInstance();
+                    _performanceCounter.Close();
+                }
+                finally
+                {
+                    _performanceCounter = null;
+                }
             }
         }
 
