@@ -189,19 +189,19 @@ namespace MassTransit.Context
         }
 
         [UsedImplicitly]
-        void CreateAndSendFault<TMessage>(TMessage message, Exception exception)
-            where TMessage : class
+        void CreateAndSendFault<T>(T message, Exception exception)
+            where T : class
         {
-            var fault = new Fault<TMessage>(message, exception);
+            var fault = new Fault<T>(message, exception);
 
             SendFault(fault);
         }
 
         [UsedImplicitly]
-        void CreateAndSendCorrelatedFault<TMessage, TKey>(TMessage message, Exception exception)
-            where TMessage : class, CorrelatedBy<TKey>
+        void CreateAndSendCorrelatedFault<T, TKey>(T message, Exception exception)
+            where T : class, CorrelatedBy<TKey>
         {
-            var fault = new Fault<TMessage, TKey>(message, exception);
+            var fault = new Fault<T, TKey>(message, exception);
 
             SendFault(fault);
         }

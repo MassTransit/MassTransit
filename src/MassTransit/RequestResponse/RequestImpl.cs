@@ -165,7 +165,7 @@ namespace MassTransit.RequestResponse
 			return this;
 		}
 
-		public void Close()
+	    void Close()
 		{
 			if (_waitHandle != null)
 			{

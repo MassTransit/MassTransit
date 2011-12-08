@@ -18,7 +18,6 @@ namespace MassTransit.RequestResponse.Configurators
     /// Configures a request and the associated response handler behavior
     /// </summary>
     /// <typeparam name="TRequest">The message type of the request</typeparam>
-    /// <typeparam name="TKey">The correlation key for the request and response messages</typeparam>
     public interface RequestConfigurator<TRequest>
         where TRequest : class
     {

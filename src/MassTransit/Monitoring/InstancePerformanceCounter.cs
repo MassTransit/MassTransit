@@ -59,7 +59,7 @@ namespace MassTransit.Monitoring
                     _performanceCounter.RemoveInstance();
                     _performanceCounter.Close();
                 }
-                catch (NotImplementedException ex)
+                catch (NotImplementedException)
                 {
                     // blame mono for this.
                 }

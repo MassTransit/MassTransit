@@ -33,7 +33,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		readonly DataEvent<TSaga, TMessage> _dataEvent;
 		readonly IEnumerable<State> _states;
 		readonly ISagaRepository<TSaga> _sagaRepository;
-		readonly ISagaPolicy<TSaga, TMessage> _policy;
 		readonly ISagaPolicyFactory _policyFactory;
 		readonly Expression<Func<TSaga, bool>> _removeExpression;
 
