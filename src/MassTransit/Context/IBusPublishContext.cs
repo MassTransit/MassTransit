@@ -19,8 +19,6 @@ namespace MassTransit
 		/// <summary>
 		/// Called if there are no subscribers for the message
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="message"></param>
 		void NotifyNoSubscribers();
 
 		/// <summary>

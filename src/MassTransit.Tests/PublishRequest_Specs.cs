@@ -68,6 +68,41 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public void Should_ignore_a_response_that_was_not_for_us()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
+            var badResponse = new FutureMessage<PongMessage>();
+
+            LocalBus.SubscribeHandler<PongMessage>(pongReceived.Set);
+
+            RemoteBus.SubscribeContextHandler<PingMessage>(x =>
+                {
+                    pingReceived.Set(x.Message);
+                    RemoteBus.Publish(new PongMessage {TransactionId = x.Message.TransactionId});
+                });
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+
+            var ping = new PingMessage();
+
+            TimeSpan timeout = 8.Seconds();
+
+            Assert.Throws<RequestTimeoutException>(() =>
+                {
+                    RemoteBus.Endpoint.SendRequest(ping, LocalBus, x =>
+                        {
+                            x.Handle<PongMessage>(badResponse.Set);
+
+                            x.SetTimeout(timeout);
+                        });
+                });
+
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+            badResponse.IsAvailable(2.Seconds()).ShouldBeFalse("Should not have received a response");
+        }
+
+        [Test]
         public void Should_support_the_asynchronous_programming_model()
         {
             var pongReceived = new FutureMessage<PongMessage>();
@@ -241,6 +276,32 @@ namespace MassTransit.Tests
 
             pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
             pongReceived.IsAvailable(timeout).ShouldBeFalse("The pong should not have been received");
+        }
+
+        [Test, NotYetImplemented]
+        public void Should_call_the_timeout_handler_and_not_throw_an_exception()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
+            var timeoutCalled = new FutureMessage<bool>();
+
+            RemoteBus.SubscribeHandler<PingMessage>(pingReceived.Set);
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+
+            var ping = new PingMessage();
+
+            TimeSpan timeout = 2.Seconds();
+
+            LocalBus.PublishRequest(ping, x =>
+                {
+                    x.Handle<PongMessage>(pongReceived.Set);
+
+                    x.HandleTimeout(timeout, () => timeoutCalled.Set(true));
+                });
+
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeFalse("The pong should not have been received");
+            timeoutCalled.IsAvailable(timeout).ShouldBeTrue("The timeout handler was not called");
         }
 
         [Test]

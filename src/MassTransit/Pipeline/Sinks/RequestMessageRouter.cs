@@ -1,3 +1,15 @@
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
     using System;
@@ -15,6 +27,7 @@ namespace MassTransit.Pipeline.Sinks
         where TMessage : class
         where T : class, IMessageContext<TMessage>
     {
+        readonly IEnumerable<Action<T>> _empty;
         readonly Func<T, string> _keyAccessor;
         readonly Atomic<Dictionary<string, MessageRouter<T>>> _output;
 
@@ -22,17 +35,20 @@ namespace MassTransit.Pipeline.Sinks
         {
             _keyAccessor = keyAccessor;
             _output = Atomic.Create(new Dictionary<string, MessageRouter<T>>());
+            _empty = Enumerable.Empty<Action<T>>();
         }
 
         public IEnumerable<Action<T>> Enumerate(T context)
         {
             string key = _keyAccessor(context);
+            if (!string.IsNullOrEmpty(key))
+            {
+                MessageRouter<T> router;
+                if (_output.Value.TryGetValue(key, out router))
+                    return router.Enumerate(context);
+            }
 
-            MessageRouter<T> router;
-            if (!_output.Value.TryGetValue(key, out router))
-                return Enumerable.Empty<Action<T>>();
-
-            return router.Enumerate(context);
+            return _empty;
         }
 
         public bool Inspect(IPipelineInspector inspector)
