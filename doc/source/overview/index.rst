@@ -22,3 +22,4 @@ How MassTransit Works
     perfcounters.rst
     standardservices.rst
     runtimeservices.rst
+    videos.rst
