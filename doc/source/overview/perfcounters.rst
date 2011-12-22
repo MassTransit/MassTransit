@@ -1,7 +1,7 @@
 Performance Counters
 ======================
 
-Masstransit has support for updating Windows performance counters. Chris has a post introducing them - Performance Counters Added to MassTransit.
+Masstransit has support for updating Windows performance counters. Chris has a post introducing them - Performance Counters Added to MassTransit. http://lostechies.com/chrispatterson/2009/10/14/performance-counters-added-to-masstransit/
 
 User Permissions
 """"""""""""""""
