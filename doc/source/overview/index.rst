@@ -17,4 +17,5 @@ How MassTransit Works
     controlbus.rst
     inheritance.rst
     users.rst
-	serializers.rst
+    serializers.rst
+    logging.rst
