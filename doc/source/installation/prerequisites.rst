@@ -1,10 +1,16 @@
 Prerequisites
 =============
 
+MassTransit is a .Net framework for C# and will need a .Net runtime to run on.
+
 To work with MassTransit you will need to be running on a Windows operating
 system. The developers of MassTransit regulary test on Windows 7 and
 Windows Server 2008RC2. Though it should still work on Windows Server 2003, as
 long as .Net 3.5 sp1 is installed.
+
+.. note::
+
+    People are starting to run MassTransit with RabbitMQ on Mono with success.
 
 .Net Framework
 """"""""""""""
