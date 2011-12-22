@@ -340,7 +340,7 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
     nuspec.dependency "Magnum", "2.0.0.3"
-    nuspec.dependency "log4net", "1.2.10"
+    nuspec.dependency "log4net", "[1.2.10]"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
 	add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
