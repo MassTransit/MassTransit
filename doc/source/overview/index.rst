@@ -19,3 +19,4 @@ How MassTransit Works
     users.rst
     serializers.rst
     logging.rst
+    perfcounters.rst
