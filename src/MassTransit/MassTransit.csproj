@@ -123,6 +123,7 @@
     <Compile Include="Configuration\Configurators\ValidationResultDisposition.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultImpl.cs" />
     <Compile Include="Configuration\ConsumerSubscriptionExtensions.cs" />
+    <Compile Include="Configuration\DiagnosticsConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurationExtensions.cs" />
     <Compile Include="Configuration\EnvironmentConfigurators\DelegateEnvironmentConfigurator.cs" />
     <Compile Include="Configuration\EnvironmentConfigurators\EnvironmentsConfigurator.cs" />
