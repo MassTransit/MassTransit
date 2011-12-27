@@ -31,7 +31,13 @@ namespace MassTransit.Testing.TestDecorators
 			_published = new PublishedMessageListImpl();
 		}
 
-		public void Dispose()
+
+	    public void Diagnose(DiagnosticsProbe probe)
+	    {
+	        _bus.Diagnose(probe);
+	    }
+
+	    public void Dispose()
 		{
 			_bus.Dispose();
 		}
