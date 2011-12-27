@@ -33,5 +33,10 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			return _endpointCache.GetEndpoint(uri);
 		}
+
+	    public void Diagnose(DiagnosticsProbe probe)
+	    {
+	        _endpointCache.Diagnose(probe);
+	    }
 	}
 }

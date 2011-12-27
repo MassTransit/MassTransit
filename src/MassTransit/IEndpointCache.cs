@@ -18,6 +18,7 @@ namespace MassTransit
 	/// The endpoint factory methods used to retrieve objects implementing IEndpoint from Uris
 	/// </summary>
 	public interface IEndpointCache :
+        DiagnosticsSource,
 		IDisposable
 	{
 		/// <summary>
