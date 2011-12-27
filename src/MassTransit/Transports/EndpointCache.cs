@@ -88,7 +88,12 @@ namespace MassTransit.Transports
 			_endpoints.Clear();
 		}
 
-		protected virtual void Dispose(bool disposing)
+	    public void Diagnose(DiagnosticsProbe probe)
+	    {
+	        _endpointFactory.Diagnose(probe);
+	    }
+
+	    protected virtual void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)

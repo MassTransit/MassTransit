@@ -337,18 +337,19 @@ namespace MassTransit
 
         public void Diagnose(DiagnosticsProbe probe)
         {
-            probe.Add("Receive From", Endpoint.Address);
-            probe.Add("Control Bus", ControlBus.Endpoint.Address);
-            probe.Add("Max Consumer Threads", MaximumConsumerThreads);
-            probe.Add("Receive Timeout", ReceiveTimeout);
-            probe.Add("Concurrent Receive Threads", ConcurrentReceiveThreads);
+            probe.Add("mt.receive_from", Endpoint.Address);
+            probe.Add("mt.control_bus", ControlBus.Endpoint.Address);
+            probe.Add("mt.max_consumer_threads", MaximumConsumerThreads);
+            probe.Add("mt.concurrent_receive_threads", ConcurrentReceiveThreads);
+            probe.Add("mt._receive_timeout", ReceiveTimeout);
 
+            EndpointCache.Diagnose(probe);
             //serializer(s)
             //transport(s)
             _serviceContainer.Diagnose(probe);
 
-            OutboundPipeline.View(pipe => probe.Add("Outbound Pipeline", pipe));
-            InboundPipeline.View(pipe => probe.Add("Inbound Pipeline", pipe));
+            OutboundPipeline.View(pipe => probe.Add("zz.mt.outbound_pipeline", pipe));
+            InboundPipeline.View(pipe => probe.Add("zz.mt.inbound_pipeline", pipe));
         }
     }
 }

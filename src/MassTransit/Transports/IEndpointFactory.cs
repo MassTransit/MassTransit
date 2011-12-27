@@ -15,6 +15,7 @@ namespace MassTransit.Transports
 	using System;
 
 	public interface IEndpointFactory :
+        DiagnosticsSource,
 		IDisposable
 	{
 		/// <summary>

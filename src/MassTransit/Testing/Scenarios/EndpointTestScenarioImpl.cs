@@ -161,6 +161,11 @@ namespace MassTransit.Testing.Scenarios
 			{
 				return _endpointCache.GetEndpoint(uri);
 			}
+
+		    public void Diagnose(DiagnosticsProbe probe)
+		    {
+		        _endpointCache.Diagnose(probe);
+		    }
 		}
 
 		~EndpointTestScenarioImpl()
