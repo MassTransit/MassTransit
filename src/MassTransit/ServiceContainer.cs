@@ -17,8 +17,9 @@ namespace MassTransit
 	using System.Linq;
 	using log4net;
 	using Util;
+	using Magnum.Extensions;
 
-	public class ServiceContainer :
+    public class ServiceContainer :
 		IServiceContainer
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceContainer));
@@ -85,7 +86,20 @@ namespace MassTransit
 			}
 		}
 
-		public void Dispose()
+	    public void Diagnose(DiagnosticsProbe probe)
+	    {
+            probe.Add("Service Count", _catalog.Services.Count());
+
+	        _catalog.Services
+                .Where(svc => svc.Implements<DiagnosticsSource>())
+                .Cast<DiagnosticsSource>()
+	            .Each(src =>
+	                {
+	                    src.Diagnose(probe);
+	                });
+	    }
+
+	    public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);

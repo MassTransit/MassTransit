@@ -18,12 +18,13 @@ namespace MassTransit
     using Builders;
     using BusConfigurators;
     using Configurators;
-    using Magnum.Extensions;
+    using Magnum.Binding.TypeBinders;
     using Magnum.FileSystem;
+    using Magnum.Extensions;
 
     public static class DiagnosticsConfiguratorExtensions
     {
-        public static void WriteDiagnosticsTo(this ServiceBusConfigurator cfg, Action<string> action)
+        public static void WriteDiagnosticsTo(this ServiceBusConfigurator cfg, Action<DiagnosticsProbe> action)
         {
             
              cfg.AddBusConfigurator(new DiagnosticsBusBuilder(action));
@@ -36,20 +37,20 @@ namespace MassTransit
 
         public static void WriteDiagnosticsToFile(this ServiceBusConfigurator cfg, string fileName)
          {
-            cfg.WriteDiagnosticsTo(contents =>
+            cfg.WriteDiagnosticsTo(probe =>
                 {
                     var fs = new DotNetFileSystem();
                     fs.DeleteFile(fileName);
-                    fs.Write(fileName, contents);
+                    fs.Write(fileName, probe.ToString());
                 });
          }
     }
 
     public class DiagnosticsBusBuilder : BusBuilderConfigurator
     {
-        readonly Action<string> _writeAction;
+        readonly Action<DiagnosticsProbe> _writeAction;
 
-        public DiagnosticsBusBuilder(Action<string> writeAction)
+        public DiagnosticsBusBuilder(Action<DiagnosticsProbe> writeAction)
         {
             _writeAction = writeAction;
         }
@@ -61,54 +62,78 @@ namespace MassTransit
 
         public BusBuilder Configure(BusBuilder builder)
         {
+            var probe = new InMemoryDiagnosticsProbe();
             builder.AddPostCreateAction(bus=>
-                {
-                    var sb = new StringBuilder();
+                {   
+                    probe.Add("Machine Name", Environment.MachineName);
+                    OperatingSystem(probe);
+                    Process(probe);
+                    probe.Add("Network Key", builder.Settings.Network);
+
+                    bus.Diagnose(probe);
                     
-                    sb.AppendLine("Machine Name: {0}".FormatWith(System.Environment.MachineName));
+                   
 
-                    OperatingSystem(sb);
-                    Process(sb);
 
-                    sb.AppendLine("Receive From: {0}".FormatWith(bus.Endpoint.Address));
-                    sb.AppendLine("Control Bus: {0}".FormatWith(bus.ControlBus.Endpoint.Address));
-                    sb.AppendLine("Network Key: {0}".FormatWith(builder.Settings.Network));
-                    
-                    //serializer(s)
-                    //service(s) --
-                    //transport(s)
-
-                    sb.AppendLine("Max Consumer Threads: {0}".FormatWith( bus.MaximumConsumerThreads));
-                    sb.AppendLine("Receive Timeout: {0}".FormatWith(bus.ReceiveTimeout));
-                    sb.AppendLine("Concurrent Receive Threads: {0}".FormatWith(bus.ConcurrentReceiveThreads));
-                    
-                    sb.Append("Outbound ");
-                    bus.OutboundPipeline.View(pipe => sb.AppendLine(pipe));
-
-                    sb.AppendLine("Inbound ");
-                    bus.InboundPipeline.View(pipe => sb.AppendLine(pipe));
-
-                    _writeAction(sb.ToString());
+                    _writeAction(probe);
                 });
 
             return builder;
         }
 
-        void Process(StringBuilder sb)
+        void Process(DiagnosticsProbe probe)
         {
-            sb.Append("Process: PID?");
-            if (System.Environment.Is64BitProcess)
-                sb.Append(" (x64)");
-            sb.AppendLine();
+            var msg = "PID?";
+            if (Environment.Is64BitProcess)
+                msg = msg + " (x64)";
+         
+            probe.Add("Process",msg);
         }
 
-        void OperatingSystem(StringBuilder sb)
+        void OperatingSystem(DiagnosticsProbe probe)
         {
-            sb.Append("OS: {0}".FormatWith(System.Environment.OSVersion));
-            if (System.Environment.Is64BitOperatingSystem)
-                sb.AppendFormat(" (x64)");
-            sb.AppendLine();
+            var msg = Environment.OSVersion.ToString();
+            if (Environment.Is64BitOperatingSystem)
+                msg = msg + " (x64)";
             
+            probe.Add("OS", msg);
         }
+    }
+
+    public interface DiagnosticsProbe
+    {
+        //methods as needed
+        void Add(string key, object  value);
+    }
+
+    public class InMemoryDiagnosticsProbe :
+        DiagnosticsProbe
+    {
+        Dictionary<string, string> _values;
+
+        public InMemoryDiagnosticsProbe()
+        {
+            _values = new Dictionary<string, string>();
+        }
+
+        public void Add(string key, object value)
+        {
+            _values.Add(key, value.ToString());
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            _values.Each(kvp =>
+                {
+                    sb.AppendFormat("{0}: {1}{2}", kvp.Key, kvp.Value, Environment.NewLine);
+                });
+            return sb.ToString();
+        }
+    }
+
+    public interface DiagnosticsSource
+    {
+        void Diagnose(DiagnosticsProbe probe);
     }
 }

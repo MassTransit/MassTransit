@@ -33,7 +33,8 @@ namespace MassTransit
     /// </summary>
     [DebuggerDisplay("{DebugDisplay}")]
     public class ServiceBus :
-        IControlBus
+        IControlBus, 
+        DiagnosticsSource
     {
         static readonly ILog _log;
 
@@ -332,6 +333,22 @@ namespace MassTransit
             {
                 _log.Warn("The performance counters could not be created, try running the program in the Administrator role. Just once.", ex);
             }
+        }
+
+        public void Diagnose(DiagnosticsProbe probe)
+        {
+            probe.Add("Receive From", Endpoint.Address);
+            probe.Add("Control Bus", ControlBus.Endpoint.Address);
+            probe.Add("Max Consumer Threads", MaximumConsumerThreads);
+            probe.Add("Receive Timeout", ReceiveTimeout);
+            probe.Add("Concurrent Receive Threads", ConcurrentReceiveThreads);
+
+                    //serializer(s)
+                    //transport(s)
+            _serviceContainer.Diagnose(probe);
+
+            OutboundPipeline.View(pipe => probe.Add("Outbound Pipeline", pipe));
+            InboundPipeline.View(pipe => probe.Add("Inbound Pipeline", pipe));
         }
     }
 }
