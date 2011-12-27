@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using System.Collections.Generic;
     using System.Text;
     using Builders;
@@ -22,19 +23,35 @@ namespace MassTransit
 
     public static class DiagnosticsConfiguratorExtensions
     {
-         public static void WriteDiagnosticsToFile(this ServiceBusConfigurator cfg, string fileName)
+        public static void WriteDiagnosticsTo(this ServiceBusConfigurator cfg, Action<string> action)
+        {
+            
+             cfg.AddBusConfigurator(new DiagnosticsBusBuilder(action));
+        }
+
+        public static void WriteDiagnosticsToConsole(this ServiceBusConfigurator cfg)
+        {
+            cfg.WriteDiagnosticsTo(Console.Write);
+        }
+
+        public static void WriteDiagnosticsToFile(this ServiceBusConfigurator cfg, string fileName)
          {
-             cfg.AddBusConfigurator(new DiagnosticsBusBuilder(fileName));
+            cfg.WriteDiagnosticsTo(contents =>
+                {
+                    var fs = new DotNetFileSystem();
+                    fs.DeleteFile(fileName);
+                    fs.Write(fileName, contents);
+                });
          }
     }
 
     public class DiagnosticsBusBuilder : BusBuilderConfigurator
     {
-        string _fileName;
+        readonly Action<string> _writeAction;
 
-        public DiagnosticsBusBuilder(string fileName)
+        public DiagnosticsBusBuilder(Action<string> writeAction)
         {
-            _fileName = fileName;
+            _writeAction = writeAction;
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -44,11 +61,9 @@ namespace MassTransit
 
         public BusBuilder Configure(BusBuilder builder)
         {
-            FileSystem fs = new DotNetFileSystem();
             builder.AddPostCreateAction(bus=>
                 {
                     var sb = new StringBuilder();
-                    fs.DeleteFile(_fileName);
                     
                     sb.AppendLine("Machine Name: {0}".FormatWith(System.Environment.MachineName));
 
@@ -57,23 +72,23 @@ namespace MassTransit
 
                     sb.AppendLine("Receive From: {0}".FormatWith(bus.Endpoint.Address));
                     sb.AppendLine("Control Bus: {0}".FormatWith(bus.ControlBus.Endpoint.Address));
+                    sb.AppendLine("Network Key: {0}".FormatWith(builder.Settings.Network));
                     
                     //serializer(s)
-                    //service(s)
+                    //service(s) --
                     //transport(s)
 
                     sb.AppendLine("Max Consumer Threads: {0}".FormatWith( bus.MaximumConsumerThreads));
                     sb.AppendLine("Receive Timeout: {0}".FormatWith(bus.ReceiveTimeout));
                     sb.AppendLine("Concurrent Receive Threads: {0}".FormatWith(bus.ConcurrentReceiveThreads));
-                    sb.AppendLine("Network Key: {0}".FormatWith(builder.Settings.Network));
                     
                     sb.Append("Outbound ");
                     bus.OutboundPipeline.View(pipe => sb.AppendLine(pipe));
 
                     sb.AppendLine("Inbound ");
                     bus.InboundPipeline.View(pipe => sb.AppendLine(pipe));
-                    
-                    fs.Write(_fileName, sb.ToString());
+
+                    _writeAction(sb.ToString());
                 });
 
             return builder;
