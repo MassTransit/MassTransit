@@ -343,8 +343,8 @@ namespace MassTransit
             probe.Add("Receive Timeout", ReceiveTimeout);
             probe.Add("Concurrent Receive Threads", ConcurrentReceiveThreads);
 
-                    //serializer(s)
-                    //transport(s)
+            //serializer(s)
+            //transport(s)
             _serviceContainer.Diagnose(probe);
 
             OutboundPipeline.View(pipe => probe.Add("Outbound Pipeline", pipe));
