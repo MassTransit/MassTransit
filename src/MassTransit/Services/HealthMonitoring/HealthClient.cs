@@ -21,7 +21,8 @@ namespace MassTransit.Services.HealthMonitoring
 
 	public class HealthClient :
 		IBusService,
-		Consumes<PingEndpoint>.All
+		Consumes<PingEndpoint>.All,
+        DiagnosticsSource
 	{
 		private readonly int _heartbeatIntervalInMilliseconds;
 		private readonly int _heartbeatIntervalInSeconds;
@@ -91,7 +92,13 @@ namespace MassTransit.Services.HealthMonitoring
 			_unsubscribe();
 		}
 
-		public virtual void Dispose(bool disposing)
+	    public void Diagnose(DiagnosticsProbe probe)
+	    {
+	        probe.Add("Health Client","On");
+            probe.Add("Interval", _heartbeatIntervalInSeconds);
+	    }
+
+	    public virtual void Dispose(bool disposing)
 		{
 			if (!disposing || _disposed) return;
 

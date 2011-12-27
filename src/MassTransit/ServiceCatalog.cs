@@ -13,8 +13,12 @@
 namespace MassTransit
 {
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
+	using Magnum.Extensions;
+	using Util;
 
+    [DebuggerDisplay("{DebuggerDisplay()}")]
 	public class ServiceCatalog
 	{
 		readonly IDictionary<int, IList<IBusService>> _services;
@@ -29,7 +33,12 @@ namespace MassTransit
 			get { return _services.OrderBy(x => x.Key).SelectMany(x => x.Value); }
 		}
 
-		public void Add(BusServiceLayer layer, IBusService service)
+        public int NumberOfServices
+        {
+            get { return _services.Count; }
+        }
+
+        public void Add(BusServiceLayer layer, IBusService service)
 		{
 			lock (_services)
 			{
@@ -43,5 +52,11 @@ namespace MassTransit
 				serviceList.Add(service);
 			}
 		}
+
+        [UsedImplicitly]
+        string DebuggerDisplay()
+        {
+            return "Hosting '{0}' Services".FormatWith(NumberOfServices);
+        }
 	}
 }
