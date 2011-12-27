@@ -45,32 +45,55 @@ namespace MassTransit
         public BusBuilder Configure(BusBuilder builder)
         {
             FileSystem fs = new DotNetFileSystem();
-            
             builder.AddPostCreateAction(bus=>
                 {
                     var sb = new StringBuilder();
                     fs.DeleteFile(_fileName);
+                    
+                    sb.AppendLine("Machine Name: {0}".FormatWith(System.Environment.MachineName));
+
+                    OperatingSystem(sb);
+                    Process(sb);
+
                     sb.AppendLine("Receive From: {0}".FormatWith(bus.Endpoint.Address));
                     sb.AppendLine("Control Bus: {0}".FormatWith(bus.ControlBus.Endpoint.Address));
                     
                     //serializer(s)
-                    //services
-                    //
+                    //service(s)
+                    //transport(s)
 
                     sb.AppendLine("Max Consumer Threads: {0}".FormatWith( bus.MaximumConsumerThreads));
                     sb.AppendLine("Receive Timeout: {0}".FormatWith(bus.ReceiveTimeout));
                     sb.AppendLine("Concurrent Receive Threads: {0}".FormatWith(bus.ConcurrentReceiveThreads));
-
-                    sb.AppendLine("Outbound Pipe:");
+                    sb.AppendLine("Network Key: {0}".FormatWith(builder.Settings.Network));
+                    
+                    sb.Append("Outbound ");
                     bus.OutboundPipeline.View(pipe => sb.AppendLine(pipe));
 
-                    sb.AppendLine("Inbound Pipe:");
+                    sb.AppendLine("Inbound ");
                     bus.InboundPipeline.View(pipe => sb.AppendLine(pipe));
                     
                     fs.Write(_fileName, sb.ToString());
                 });
 
             return builder;
+        }
+
+        void Process(StringBuilder sb)
+        {
+            sb.Append("Process: PID?");
+            if (System.Environment.Is64BitProcess)
+                sb.Append(" (x64)");
+            sb.AppendLine();
+        }
+
+        void OperatingSystem(StringBuilder sb)
+        {
+            sb.Append("OS: {0}".FormatWith(System.Environment.OSVersion));
+            if (System.Environment.Is64BitOperatingSystem)
+                sb.AppendFormat(" (x64)");
+            sb.AppendLine();
+            
         }
     }
 }
