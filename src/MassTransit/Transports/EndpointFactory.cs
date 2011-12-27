@@ -69,7 +69,16 @@ namespace MassTransit.Transports
 			_transportFactories[scheme] = factory;
 		}
 
-		public void Dispose()
+	    public void Diagnose(DiagnosticsProbe probe)
+	    {
+            probe.Add("mt.default_serializer", _defaults.Serializer.GetType().Name);
+	        foreach (var scheme in _transportFactories)
+	        {
+	            probe.Add("mt.transport", scheme.Key + " via " + scheme.Value.GetType().Name);
+	        }
+	    }
+
+	    public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);

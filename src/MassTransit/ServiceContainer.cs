@@ -88,8 +88,7 @@ namespace MassTransit
 
 	    public void Diagnose(DiagnosticsProbe probe)
 	    {
-            probe.Add("Service Count", _catalog.NumberOfServices);
-
+            probe.Add("mt.service_count", _catalog.NumberOfServices);
 	        _catalog.Services
                 .Where(svc => svc.Implements<DiagnosticsSource>())
                 .Cast<DiagnosticsSource>()

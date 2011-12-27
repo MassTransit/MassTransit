@@ -94,8 +94,8 @@ namespace MassTransit.Services.HealthMonitoring
 
 	    public void Diagnose(DiagnosticsProbe probe)
 	    {
-	        probe.Add("Health Client","On");
-            probe.Add("Interval", _heartbeatIntervalInSeconds);
+	        probe.Add("health_client","on");
+            probe.Add("health_client.interval", _heartbeatIntervalInSeconds);
 	    }
 
 	    public virtual void Dispose(bool disposing)

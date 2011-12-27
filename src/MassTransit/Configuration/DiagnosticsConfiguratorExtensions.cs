@@ -14,11 +14,12 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
     using Builders;
     using BusConfigurators;
     using Configurators;
-    using Magnum.Binding.TypeBinders;
+    using Magnum.Collections;
     using Magnum.FileSystem;
     using Magnum.Extensions;
 
@@ -65,11 +66,11 @@ namespace MassTransit
             var probe = new InMemoryDiagnosticsProbe();
             builder.AddPostCreateAction(bus=>
                 {   
-                    probe.Add("MTVER", GetType().Assembly.GetName().Version);
-                    probe.Add("Machine Name", Environment.MachineName);
+                    probe.Add("mt.version", GetType().Assembly.GetName().Version);
+                    probe.Add("host.machine_name", Environment.MachineName);
                     OperatingSystem(probe);
                     Process(probe);
-                    probe.Add("Network Key", builder.Settings.Network);
+                    probe.Add("mt.network_key", builder.Settings.Network);
 
                     bus.Diagnose(probe);
                     
@@ -88,7 +89,7 @@ namespace MassTransit
             if (Environment.Is64BitProcess)
                 msg = msg + " (x64)";
          
-            probe.Add("Process",msg);
+            probe.Add("os.process",msg);
         }
 
         void OperatingSystem(DiagnosticsProbe probe)
@@ -97,7 +98,7 @@ namespace MassTransit
             if (Environment.Is64BitOperatingSystem)
                 msg = msg + " (x64)";
             
-            probe.Add("OS", msg);
+            probe.Add("os", msg);
         }
     }
 
@@ -110,24 +111,30 @@ namespace MassTransit
     public class InMemoryDiagnosticsProbe :
         DiagnosticsProbe
     {
-        Dictionary<string, string> _values;
+        MultiDictionary<string, object> _values;
 
         public InMemoryDiagnosticsProbe()
         {
-            _values = new Dictionary<string, string>();
+            _values = new MultiDictionary<string, object>(true);
         }
 
         public void Add(string key, object value)
         {
-            _values.Add(key, value.ToString());
+            _values.Add(key, value);
         }
 
         public override string ToString()
         {
             var sb = new StringBuilder();
-            _values.Each(kvp =>
+            _values
+                .OrderBy(kvp => kvp.Key)
+                .Each(kvp =>
                 {
-                    sb.AppendFormat("{0}: {1}{2}", kvp.Key, kvp.Value, Environment.NewLine);
+                    var key = kvp.Key;
+                    kvp.Value.Each(value =>
+                        {
+                            sb.AppendLine("{0}: {1}".FormatWith(key, value));
+                        });
                 });
             return sb.ToString();
         }

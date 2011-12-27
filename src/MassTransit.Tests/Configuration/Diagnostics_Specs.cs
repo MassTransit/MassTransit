@@ -18,12 +18,13 @@ namespace MassTransit.Tests.Configuration
     public class Diagnostics_Specs
     {
          
-        [Test]
+        [Test][Explicit]
         public void X()
         {
             using(var bus = ServiceBusFactory.New(sbc =>
                 {
                     sbc.ReceiveFrom("loopback://localhost/test");
+                    
                     sbc.WriteDiagnosticsToFile("x.txt");
                     sbc.UseBinarySerializer();
                     sbc.UseHealthMonitoring(3);
