@@ -17,6 +17,7 @@ namespace MassTransit
     using Builders;
     using BusConfigurators;
     using Configurators;
+    using Magnum.Extensions;
     using Magnum.FileSystem;
 
     public static class DiagnosticsConfiguratorExtensions
@@ -38,19 +39,37 @@ namespace MassTransit
 
         public IEnumerable<ValidationResult> Validate()
         {
-           yield return new ValidationResultImpl(ValidationResultDisposition.Success, "Diagnostics have been turned on.");
+            yield return this.Success("Diagnostics have been turned on.");
         }
 
         public BusBuilder Configure(BusBuilder builder)
         {
             FileSystem fs = new DotNetFileSystem();
+            
             builder.AddPostCreateAction(bus=>
                 {
                     var sb = new StringBuilder();
                     fs.DeleteFile(_fileName);
-                    sb.AppendFormat("Receive From: {0}", bus.Endpoint.Address);
+                    sb.AppendLine("Receive From: {0}".FormatWith(bus.Endpoint.Address));
+                    sb.AppendLine("Control Bus: {0}".FormatWith(bus.ControlBus.Endpoint.Address));
+                    
+                    //serializer(s)
+                    //services
+                    //
+
+                    sb.AppendLine("Max Consumer Threads: {0}".FormatWith( bus.MaximumConsumerThreads));
+                    sb.AppendLine("Receive Timeout: {0}".FormatWith(bus.ReceiveTimeout));
+                    sb.AppendLine("Concurrent Receive Threads: {0}".FormatWith(bus.ConcurrentReceiveThreads));
+
+                    sb.AppendLine("Outbound Pipe:");
+                    bus.OutboundPipeline.View(pipe => sb.AppendLine(pipe));
+
+                    sb.AppendLine("Inbound Pipe:");
+                    bus.InboundPipeline.View(pipe => sb.AppendLine(pipe));
+                    
                     fs.Write(_fileName, sb.ToString());
                 });
+
             return builder;
         }
     }
