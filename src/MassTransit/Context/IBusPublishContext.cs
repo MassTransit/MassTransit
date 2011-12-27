@@ -21,11 +21,5 @@ namespace MassTransit
 		/// </summary>
 		void NotifyNoSubscribers();
 
-		/// <summary>
-		/// Determines if the endpoint was already sent to during this publish
-		/// </summary>
-		/// <param name="address">The address of the endpoint to check</param>
-		/// <returns>True if the message was already sent to the specified endpoint address</returns>
-		bool WasEndpointAlreadySent(IEndpointAddress address);
 	}
 }

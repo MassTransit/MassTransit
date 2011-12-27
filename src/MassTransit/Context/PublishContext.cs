@@ -12,114 +12,133 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
 
+    public class PublishContext<T> :
+        SendContext<T>,
+        IBusPublishContext<T>
+        where T : class
+    {
+        readonly IPublishContext _notifySend;
+        readonly HashSet<Uri> _endpoints = new HashSet<Uri>();
+        Action<IEndpointAddress> _eachSubscriberAction = Ignore;
+        Action _noSubscribersAction = Ignore;
+        Stopwatch _timer;
+        Func<Uri, bool> _wasEndpointAlreadySent;
 
-	public class PublishContext<T> :
-		SendContext<T>,
-		IBusPublishContext<T>
-		where T : class
-	{
-		readonly HashSet<IEndpointAddress> _endpoints = new HashSet<IEndpointAddress>();
-		Action<IEndpointAddress> _eachSubscriberAction = Ignore;
-		Action _noSubscribersAction = Ignore;
-		Func<IEndpointAddress, bool> _wasEndpointAlreadySent;
-		Stopwatch _timer;
+        PublishContext(T message)
+            : base(message)
+        {
+            _wasEndpointAlreadySent = DefaultEndpointSent;
+            _timer = Stopwatch.StartNew();
+            _notifySend = null;
+        }
 
-		PublishContext(T message)
-			: base(message)
-		{
-			_wasEndpointAlreadySent = _endpoints.Contains;
-			_timer = Stopwatch.StartNew();
-		}
+        PublishContext(T message, ISendContext context)
+            : base(message, context)
+        {
+            _notifySend = context as IPublishContext;
+    
+            _wasEndpointAlreadySent = DefaultEndpointSent;
+            _timer = Stopwatch.StartNew();
+        }
 
-		PublishContext(T message, ISendContext context)
-			: base(message, context)
-		{
-			_wasEndpointAlreadySent = _endpoints.Contains;
-			_timer = Stopwatch.StartNew();
-		}
+        public TimeSpan Duration
+        {
+            get { return _timer.Elapsed; }
+        }
 
-		public TimeSpan Duration
-		{
-			get { return _timer.Elapsed; }
-		}
+        public override bool TryGetContext<TMessage>(out IBusPublishContext<TMessage> context)
+        {
+            context = null;
 
-		public static PublishContext<T> FromMessage(T message)
-		{
-			return new PublishContext<T>(message);
-		}
+            if (typeof (TMessage).IsAssignableFrom(typeof (T)))
+            {
+                var busPublishContext = new PublishContext<TMessage>(Message as TMessage, this);
+                busPublishContext._wasEndpointAlreadySent = _wasEndpointAlreadySent;
+                busPublishContext.IfNoSubscribers(_noSubscribersAction);
+                busPublishContext.ForEachSubscriber(_eachSubscriberAction);
 
-		public static PublishContext<T> FromMessage<TMessage>(TMessage message, ISendContext context)
-			where TMessage : class
-		{
-			if (typeof (TMessage).IsAssignableFrom(typeof (T)))
-			{
-				return new PublishContext<T>(message as T, context);
-			}
+                context = busPublishContext;
+            }
 
-			return null;
-		}
+            return context != null;
+        }
 
-		public override bool TryGetContext<TMessage>(out IBusPublishContext<TMessage> context)
-		{
-			context = null;
+        public override void NotifySend(IEndpointAddress address)
+        {
+            if (_notifySend != null)
+            {
+                _notifySend.NotifySend(address);
+                return;
+            }
 
-			if (typeof(TMessage).IsAssignableFrom(typeof(T)))
-			{
-				var busPublishContext = new PublishContext<TMessage>(Message as TMessage, this);
-				busPublishContext._wasEndpointAlreadySent = _wasEndpointAlreadySent;
-				busPublishContext.IfNoSubscribers(_noSubscribersAction);
-				busPublishContext.ForEachSubscriber(_eachSubscriberAction);
+            _endpoints.Add(address.Uri);
 
-				context = busPublishContext;
-			}
+            base.NotifySend(address);
 
-			return context != null;
-		}
+            _eachSubscriberAction(address);
+        }
 
-		public override void NotifySend(IEndpointAddress address)
-		{
-			base.NotifySend(address);
+        public bool WasEndpointAlreadySent(IEndpointAddress address)
+        {
+            return _wasEndpointAlreadySent(address.Uri);
+        }
 
-			_endpoints.Add(address);
+        public void NotifyNoSubscribers()
+        {
+            _noSubscribersAction();
+        }
 
-			_eachSubscriberAction(address);
-		}
+        public void IfNoSubscribers(Action action)
+        {
+            _noSubscribersAction = action;
+        }
 
-		public bool WasEndpointAlreadySent(IEndpointAddress address)
-		{
-			return _wasEndpointAlreadySent(address);
-		}
+        public void ForEachSubscriber(Action<IEndpointAddress> action)
+        {
+            _eachSubscriberAction = action;
+        }
 
-		public void NotifyNoSubscribers()
-		{
-			_noSubscribersAction();
-		}
+        public void Complete()
+        {
+            _timer.Stop();
+        }
 
-		public void IfNoSubscribers(Action action)
-		{
-			_noSubscribersAction = action;
-		}
+        bool DefaultEndpointSent(Uri uri)
+        {
+            return _endpoints.Contains(uri);
+        }
 
-		public void ForEachSubscriber(Action<IEndpointAddress> action)
-		{
-			_eachSubscriberAction = action;
-		}
+        public static PublishContext<T> FromMessage(T message)
+        {
+            return new PublishContext<T>(message);
+        }
 
-		static void Ignore()
-		{
-		}
+        public static PublishContext<T> FromMessage<TMessage>(TMessage message, ISendContext context)
+            where TMessage : class
+        {
+            if (typeof (TMessage).IsAssignableFrom(typeof (T)))
+            {
+                return new PublishContext<T>(message as T, context);
+            }
 
-		static void Ignore(IEndpointAddress endpoint)
-		{
-		}
+            return null;
+        }
 
-		public void Complete()
-		{
-			_timer.Stop();
-		}
-	}
+        static void Ignore()
+        {
+        }
+
+        static void Ignore(IEndpointAddress endpoint)
+        {
+        }
+
+        public void SentTo(Uri uri)
+        {
+            _endpoints.Add(uri);
+        }
+    }
 }
