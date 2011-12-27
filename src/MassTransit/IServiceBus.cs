@@ -31,7 +31,8 @@ namespace MassTransit
 	///   The base service bus interface
 	/// </summary>
 	public interface IServiceBus :
-		IDisposable
+		IDisposable,
+        DiagnosticsSource
 	{
 		/// <summary>
 		///   The endpoint from which messages are received

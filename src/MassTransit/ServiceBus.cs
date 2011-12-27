@@ -33,8 +33,7 @@ namespace MassTransit
     /// </summary>
     [DebuggerDisplay("{DebugDisplay}")]
     public class ServiceBus :
-        IControlBus, 
-        DiagnosticsSource
+        IControlBus
     {
         static readonly ILog _log;
 

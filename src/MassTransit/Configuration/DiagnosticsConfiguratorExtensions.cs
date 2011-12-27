@@ -45,6 +45,13 @@ namespace MassTransit
                     fs.Write(fileName, probe.ToString());
                 });
          }
+
+        public static DiagnosticsProbe Probe(this IServiceBus bus)
+        {
+            var probe = new InMemoryDiagnosticsProbe();
+            bus.Diagnose(probe);
+            return probe;
+        }
     }
 
     public class DiagnosticsBusBuilder : BusBuilderConfigurator
