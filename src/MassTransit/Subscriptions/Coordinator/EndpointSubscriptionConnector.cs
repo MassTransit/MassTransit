@@ -12,62 +12,62 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Coordinator
 {
-	using System;
-	using Pipeline;
-	using log4net;
-	using Magnum.Extensions;
+    using System;
+    using Pipeline;
+    using log4net;
+    using Magnum.Extensions;
 
-	public interface EndpointSubscriptionConnector
-	{
-		UnsubscribeAction Connect(Uri endpointUri, string correlationId);
-	}
+    public interface EndpointSubscriptionConnector
+    {
+        UnsubscribeAction Connect(Uri endpointUri, string correlationId);
+    }
 
-	public class EndpointSubscriptionConnector<TMessage> :
-		EndpointSubscriptionConnector
-		where TMessage : class
-	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionConnector));
-		readonly IServiceBus _bus;
+    public class EndpointSubscriptionConnector<TMessage> :
+        EndpointSubscriptionConnector
+        where TMessage : class
+    {
+        static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionConnector));
+        readonly IServiceBus _bus;
 
-		public EndpointSubscriptionConnector(IServiceBus bus)
-		{
-			_bus = bus;
-		}
+        public EndpointSubscriptionConnector(IServiceBus bus)
+        {
+            _bus = bus;
+        }
 
-		public UnsubscribeAction Connect(Uri endpointUri, string correlationId)
-		{
-			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
+        public UnsubscribeAction Connect(Uri endpointUri, string correlationId)
+        {
+            IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
-			_log.DebugFormat("Adding subscription for {0} on {1} to {2}", typeof (TMessage).ToShortTypeName(),
-				_bus.Endpoint.Address.Uri, endpointUri);
+            _log.DebugFormat("Adding subscription for {0} on {1} to {2}", typeof (TMessage).ToShortTypeName(),
+                _bus.Endpoint.Address.Uri, endpointUri);
 
-			return _bus.OutboundPipeline.ConnectEndpoint<TMessage>(endpoint);
-		}
-	}
+            return _bus.OutboundPipeline.ConnectEndpoint<TMessage>(endpoint);
+        }
+    }
 
-	public class EndpointSubscriptionConnector<TMessage, TKey> :
-		EndpointSubscriptionConnector
-		where TMessage : class, CorrelatedBy<TKey>
-	{
-		readonly IServiceBus _bus;
-		readonly Func<string, TKey> _converter;
+    public class EndpointSubscriptionConnector<TMessage, TKey> :
+        EndpointSubscriptionConnector
+        where TMessage : class, CorrelatedBy<TKey>
+    {
+        readonly IServiceBus _bus;
+        readonly Func<string, TKey> _converter;
 
-		public EndpointSubscriptionConnector(IServiceBus bus, Func<string, TKey> converter)
-		{
-			_bus = bus;
-			_converter = converter;
-		}
+        public EndpointSubscriptionConnector(IServiceBus bus, Func<string, TKey> converter)
+        {
+            _bus = bus;
+            _converter = converter;
+        }
 
-		public UnsubscribeAction Connect(Uri endpointUri, string correlationId)
-		{
-			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
+        public UnsubscribeAction Connect(Uri endpointUri, string correlationId)
+        {
+            IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
             if (correlationId.IsEmpty())
                 return _bus.OutboundPipeline.ConnectEndpoint<TMessage>(endpoint);
 
-			TKey key = _converter(correlationId);
+            TKey key = _converter(correlationId);
 
-			return _bus.OutboundPipeline.ConnectEndpoint<TMessage, TKey>(key, endpoint);
-		}
-	}
+            return _bus.OutboundPipeline.ConnectEndpoint<TMessage, TKey>(key, endpoint);
+        }
+    }
 }

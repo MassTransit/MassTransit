@@ -12,34 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Context;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-	public class OutboundConvertMessageSink<TMessage> :
-		IOutboundPipelineSink
-		where TMessage : class
-	{
-		readonly IPipelineSink<IBusPublishContext<TMessage>> _output;
+    public class OutboundConvertMessageSink<TMessage> :
+        IOutboundPipelineSink
+        where TMessage : class
+    {
+        readonly IPipelineSink<IBusPublishContext<TMessage>> _output;
 
-		public OutboundConvertMessageSink(IPipelineSink<IBusPublishContext<TMessage>> output)
-		{
-			_output = output;
-		}
+        public OutboundConvertMessageSink(IPipelineSink<IBusPublishContext<TMessage>> output)
+        {
+            _output = output;
+        }
 
-		public IEnumerable<Action<ISendContext>> Enumerate(ISendContext context)
-		{
-			IBusPublishContext<TMessage> outputContext;
-			if (!context.TryGetContext(out outputContext))
-				return Enumerable.Empty<Action<ISendContext>>();
+        public IEnumerable<Action<ISendContext>> Enumerate(ISendContext context)
+        {
+            IBusPublishContext<TMessage> outputContext;
+            if (!context.TryGetContext(out outputContext))
+                return Enumerable.Empty<Action<ISendContext>>();
 
-			return _output.Enumerate(outputContext).Select(consumer => (Action<ISendContext>) (x => consumer(outputContext)));
-		}
+            return _output.Enumerate(outputContext).Select(consumer => (Action<ISendContext>) (x => consumer(outputContext)));
+        }
 
-		public bool Inspect(IPipelineInspector inspector)
-		{
-			return inspector.Inspect(this) && _output.Inspect(inspector);
-		}
-	}
+        public bool Inspect(IPipelineInspector inspector)
+        {
+            return inspector.Inspect(this) && _output.Inspect(inspector);
+        }
+    }
 }

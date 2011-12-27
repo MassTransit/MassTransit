@@ -12,22 +12,35 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using System;
+    using System;
 
-	public interface IPublishContext<T> :
-		ISendContext<T>
-		where T : class
-	{
-		/// <summary>
-		/// Defines an action to be called if there are no subscribers for the message
-		/// </summary>
-		/// <param name="callback">The action to call if there are no subscribers registered</param>
-		void IfNoSubscribers(Action callback);
+    public interface IPublishContext :
+        ISendContext
+    {
+        /// <summary>
+        /// Determines if the endpoint was already sent to during this publish
+        /// </summary>
+        /// <param name="address">The address of the endpoint to check</param>
+        /// <returns>True if the message was already sent to the specified endpoint address</returns>
+        bool WasEndpointAlreadySent(IEndpointAddress address);
 
-		/// <summary>
-		/// Defines an action to be called for each subscriber of the message
-		/// </summary>
-		/// <param name="callback">The action to call for each subscriber, including the endpoint address of the destination endpoint</param>
-		void ForEachSubscriber(Action<IEndpointAddress> callback);
-	}
+        /// <summary>
+        /// Defines an action to be called if there are no subscribers for the message
+        /// </summary>
+        /// <param name="callback">The action to call if there are no subscribers registered</param>
+        void IfNoSubscribers(Action callback);
+
+        /// <summary>
+        /// Defines an action to be called for each subscriber of the message
+        /// </summary>
+        /// <param name="callback">The action to call for each subscriber, including the endpoint address of the destination endpoint</param>
+        void ForEachSubscriber(Action<IEndpointAddress> callback);
+    }
+
+    public interface IPublishContext<T> :
+        ISendContext<T>,
+        IPublishContext
+        where T : class
+    {
+    }
 }
