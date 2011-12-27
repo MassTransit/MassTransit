@@ -26,6 +26,7 @@ namespace MassTransit.Tests.Configuration
                     sbc.ReceiveFrom("loopback://localhost/test");
                     sbc.WriteDiagnosticsToFile("x.txt");
                     sbc.UseBinarySerializer();
+                    sbc.UseHealthMonitoring(3);
                 }))
             {
                 

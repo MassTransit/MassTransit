@@ -65,6 +65,7 @@ namespace MassTransit
             var probe = new InMemoryDiagnosticsProbe();
             builder.AddPostCreateAction(bus=>
                 {   
+                    probe.Add("MTVER", GetType().Assembly.GetName().Version);
                     probe.Add("Machine Name", Environment.MachineName);
                     OperatingSystem(probe);
                     Process(probe);
