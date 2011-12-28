@@ -10,26 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Diagnostics
 {
-	using System;
-	using Diagnostics;
-
-    public interface IEndpointFactory :
-        DiagnosticsSource,
-		IDisposable
-	{
-		/// <summary>
-		/// Creates a new endpoint for the specified URI
-		/// </summary>
-		/// <param name="uri"></param>
-		/// <returns></returns>
-		IEndpoint CreateEndpoint(Uri uri);
-
-		/// <summary>
-		/// Adds a transport factory to the endpoint factory
-		/// </summary>
-		/// <param name="factory"></param>
-		void AddTransportFactory(ITransportFactory factory);
-	}
+    public interface DiagnosticsSource
+    {
+        void Diagnose(DiagnosticsProbe probe);
+    }
 }

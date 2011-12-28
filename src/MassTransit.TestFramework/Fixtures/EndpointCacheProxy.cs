@@ -13,8 +13,9 @@
 namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
+	using Diagnostics;
 
-	public class EndpointCacheProxy :
+    public class EndpointCacheProxy :
 		IEndpointCache
 	{
 		readonly IEndpointCache _endpointCache;

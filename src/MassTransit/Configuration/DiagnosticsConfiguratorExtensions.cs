@@ -14,14 +14,11 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using Builders;
     using BusConfigurators;
     using Configurators;
-    using Magnum.Collections;
+    using Diagnostics;
     using Magnum.FileSystem;
-    using Magnum.Extensions;
 
     public static class DiagnosticsConfiguratorExtensions
     {
@@ -107,48 +104,5 @@ namespace MassTransit
             
             probe.Add("os", msg);
         }
-    }
-
-    public interface DiagnosticsProbe
-    {
-        //methods as needed
-        void Add(string key, object  value);
-    }
-
-    public class InMemoryDiagnosticsProbe :
-        DiagnosticsProbe
-    {
-        MultiDictionary<string, object> _values;
-
-        public InMemoryDiagnosticsProbe()
-        {
-            _values = new MultiDictionary<string, object>(true);
-        }
-
-        public void Add(string key, object value)
-        {
-            _values.Add(key, value);
-        }
-
-        public override string ToString()
-        {
-            var sb = new StringBuilder();
-            _values
-                .OrderBy(kvp => kvp.Key)
-                .Each(kvp =>
-                {
-                    var key = kvp.Key;
-                    kvp.Value.Each(value =>
-                        {
-                            sb.AppendLine("{0}: {1}".FormatWith(key, value));
-                        });
-                });
-            return sb.ToString();
-        }
-    }
-
-    public interface DiagnosticsSource
-    {
-        void Diagnose(DiagnosticsProbe probe);
     }
 }
