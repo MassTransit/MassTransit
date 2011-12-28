@@ -10,10 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Diagnostics
+namespace MassTransit.Diagnostics.Introspection
 {
-    public interface DiagnosticsSource
+    using System;
+    using BusServiceConfigurators;
+
+    public class IntrospectionServiceConfigurator : BusServiceConfigurator
     {
-        void Diagnose(DiagnosticsProbe probe);
+        public Type ServiceType
+        {
+            get { return typeof (IntrospectionBusService); }
+        }
+
+        public BusServiceLayer Layer
+        {
+            get { return BusServiceLayer.Application; }
+        }
+
+        public IBusService Create(IServiceBus bus)
+        {
+            return new IntrospectionBusService();
+        }
     }
 }

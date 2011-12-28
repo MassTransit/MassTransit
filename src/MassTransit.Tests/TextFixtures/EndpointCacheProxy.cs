@@ -14,6 +14,7 @@ namespace MassTransit.Tests.TextFixtures
 {
 	using System;
 	using MassTransit.Diagnostics;
+	using MassTransit.Diagnostics.Introspection;
 
     public class EndpointCacheProxy :
 		IEndpointCache

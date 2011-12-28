@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Diagnostics;
     using Context;
     using Diagnostics;
+    using Diagnostics.Introspection;
     using Events;
     using Exceptions;
     using log4net;
@@ -337,12 +338,17 @@ namespace MassTransit
 
         public void Diagnose(DiagnosticsProbe probe)
         {
+            DiagnosticsInfo.WriteCommonItems(probe);
+
+            //network key
+            //probe.Add("mt.network_key", builder.Settings.Network);
+
             probe.Add("mt.receive_from", Endpoint.Address);
             probe.Add("mt.control_bus", ControlBus.Endpoint.Address);
             probe.Add("mt.max_consumer_threads", MaximumConsumerThreads);
             probe.Add("mt.concurrent_receive_threads", ConcurrentReceiveThreads);
             probe.Add("mt._receive_timeout", ReceiveTimeout);
-
+            
             EndpointCache.Diagnose(probe);
             //serializer(s)
             //transport(s)

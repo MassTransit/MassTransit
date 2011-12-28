@@ -14,6 +14,7 @@ namespace MassTransit.Transports
 {
 	using System;
 	using Diagnostics;
+	using Diagnostics.Introspection;
 
     public interface IEndpointFactory :
         DiagnosticsSource,

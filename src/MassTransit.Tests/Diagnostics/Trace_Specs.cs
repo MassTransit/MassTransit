@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Diagnostics
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using MassTransit.Diagnostics;
+    using MassTransit.Diagnostics.Tracing;
     using MassTransit.Testing;
 
     [Scenario]

@@ -17,6 +17,7 @@ namespace BusDriver.Commands
 	using System.Linq;
 	using System.Threading;
 	using Formatting;
+	using MassTransit.Diagnostics.Tracing;
 	using log4net;
 	using Magnum.Extensions;
 	using MassTransit;
