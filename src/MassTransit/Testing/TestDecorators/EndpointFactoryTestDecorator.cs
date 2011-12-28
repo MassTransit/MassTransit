@@ -14,6 +14,7 @@ namespace MassTransit.Testing.TestDecorators
 {
 	using System;
 	using Diagnostics;
+	using Diagnostics.Introspection;
 	using Scenarios;
 	using Transports;
 

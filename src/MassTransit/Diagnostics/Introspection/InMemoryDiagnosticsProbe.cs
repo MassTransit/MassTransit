@@ -10,37 +10,45 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Diagnostics
+namespace MassTransit.Diagnostics.Introspection
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using Magnum.Collections;
     using Magnum.Extensions;
 
     public class InMemoryDiagnosticsProbe :
         DiagnosticsProbe
     {
-        readonly MultiDictionary<string, object> _values;
+        readonly List<DiagnosticEntry> _entries;
 
         public InMemoryDiagnosticsProbe()
         {
-            _values = new MultiDictionary<string, object>(true);
+            _entries = new List<DiagnosticEntry>();
         }
 
         public void Add(string key, object value)
         {
-            _values.Add(key, value);
+            var entry = new InMemoryDiagnosticEntry();
+            entry.Key = key;
+            entry.Value = value.ToString();
+            _entries.Add(entry);
         }
 
+        public IEnumerable<DiagnosticEntry> Entries
+        {
+            get { return _entries; }
+        }
         public override string ToString()
         {
             var sb = new StringBuilder();
-            _values
-                .OrderBy(kvp => kvp.Key)
-                .Each(kvp =>
+            _entries
+                .OrderBy(entry => entry.Key)
+                .Each(entry =>
                     {
-                        var key = kvp.Key;
-                        kvp.Value.Each(value => { sb.AppendLine("{0}: {1}".FormatWith(key, value)); });
+                        var key = entry.Key;
+                        var value = entry.Value;
+                         sb.AppendLine("{0}: {1}".FormatWith(key, value));
                     });
             return sb.ToString();
         }
