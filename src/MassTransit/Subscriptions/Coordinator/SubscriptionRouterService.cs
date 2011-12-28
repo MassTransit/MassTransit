@@ -165,7 +165,7 @@ namespace MassTransit.Subscriptions.Coordinator
 			}
 		}
 
-	    public void Diagnose(DiagnosticsProbe probe)
+	    public void Inspect(DiagnosticsProbe probe)
 	    {
 	        probe.Add("mt.network",_network);
 	    }

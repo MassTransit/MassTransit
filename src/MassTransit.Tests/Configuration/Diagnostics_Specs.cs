@@ -29,7 +29,7 @@ namespace MassTransit.Tests.Configuration
                     sbc.UseHealthMonitoring(3);
                 }))
             {
-                    bus.WriteDiagnosticsToFile("x.txt");
+                    bus.WriteIntrospectionToFile("x.txt");
             }
 
             //check file

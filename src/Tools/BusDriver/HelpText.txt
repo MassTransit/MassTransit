@@ -53,6 +53,11 @@ Command-Line Reference
                         instance
       -count            The number of messages to request
 
+	status				Request a status probe of the bus at the endpoint
+
+	  -uri				The URI of the control bus for the service bus
+						instance
+
     exit, quit          Exit the interactive console (run without arguments
                         to start the interactive console)
 
