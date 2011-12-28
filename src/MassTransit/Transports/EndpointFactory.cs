@@ -15,6 +15,7 @@ namespace MassTransit.Transports
 	using System;
 	using System.Collections.Generic;
 	using Builders;
+	using Diagnostics;
 	using EndpointConfigurators;
 	using Exceptions;
 	using Magnum.Extensions;

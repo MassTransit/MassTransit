@@ -13,6 +13,7 @@
 namespace MassTransit.Testing.TestDecorators
 {
 	using System;
+	using Diagnostics;
 	using Scenarios;
 	using Transports;
 

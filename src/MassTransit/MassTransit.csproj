@@ -239,7 +239,10 @@
     <Compile Include="Context\ThreadStaticContextStorageProvider.cs" />
     <Compile Include="Context\TransportMessageHeaders.cs" />
     <Compile Include="Context\HttpContextContextStorageProvider.cs" />
+    <Compile Include="Diagnostics\DiagnosticsProbe.cs" />
+    <Compile Include="Diagnostics\DiagnosticsSource.cs" />
     <Compile Include="Diagnostics\GetMessageTraceList.cs" />
+    <Compile Include="Diagnostics\InMemoryDiagnosticsProbe.cs" />
     <Compile Include="Diagnostics\MessageTraceBusService.cs" />
     <Compile Include="Diagnostics\MessageTraceClient.cs" />
     <Compile Include="Diagnostics\MessageTraceClientExtensions.cs" />
