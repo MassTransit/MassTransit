@@ -14,6 +14,7 @@ namespace MassTransit.Testing.Scenarios
 {
 	using System;
 	using System.Collections.Generic;
+	using Diagnostics;
 	using Magnum.Extensions;
 	using TestDecorators;
 	using Transports;

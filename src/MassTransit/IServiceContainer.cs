@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using Diagnostics;
 
     public interface IServiceContainer :
         IDisposable,

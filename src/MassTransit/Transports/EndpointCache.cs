@@ -14,6 +14,7 @@ namespace MassTransit.Transports
 {
 	using System;
 	using System.Linq;
+	using Diagnostics;
 	using Exceptions;
 	using Magnum;
 	using Magnum.Threading;

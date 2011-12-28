@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Diagnostics;
     using Context;
+    using Diagnostics;
     using Events;
     using Exceptions;
     using log4net;

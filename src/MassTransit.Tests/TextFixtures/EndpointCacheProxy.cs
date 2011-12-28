@@ -13,8 +13,9 @@
 namespace MassTransit.Tests.TextFixtures
 {
 	using System;
+	using MassTransit.Diagnostics;
 
-	public class EndpointCacheProxy :
+    public class EndpointCacheProxy :
 		IEndpointCache
 	{
 		readonly IEndpointCache _endpointCache;

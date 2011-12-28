@@ -15,6 +15,7 @@ namespace MassTransit
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using Diagnostics;
 	using log4net;
 	using Util;
 	using Magnum.Extensions;

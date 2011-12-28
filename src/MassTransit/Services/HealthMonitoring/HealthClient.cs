@@ -13,6 +13,7 @@
 namespace MassTransit.Services.HealthMonitoring
 {
 	using System;
+	using Diagnostics;
 	using Magnum;
 	using Magnum.Extensions;
 	using Messages;

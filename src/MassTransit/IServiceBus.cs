@@ -13,6 +13,7 @@
 namespace MassTransit
 {
 	using System;
+	using Diagnostics;
 	using Pipeline;
 
 	/// <summary>
