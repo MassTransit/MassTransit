@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Diagnostics.Introspection
 {
-    public interface GetBusStatus
+    public class GetBusStatusImpl :
+        GetBusStatus
     {
     }
 }
