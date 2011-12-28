@@ -1,5 +1,7 @@
 namespace MassTransit.Diagnostics.Introspection
 {
+    using System.Linq;
+
     public class IntrospectionBusService :
         IBusService,
         Consumes<GetBusStatus>.Context
@@ -33,7 +35,7 @@ namespace MassTransit.Diagnostics.Introspection
 
             ep.Send(new BusStatus()
                 {
-                    Probe = probe
+                    Entries = probe.Entries.ToArray()
                 });
         }
     }

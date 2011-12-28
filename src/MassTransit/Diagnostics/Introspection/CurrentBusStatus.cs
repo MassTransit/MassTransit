@@ -14,6 +14,6 @@ namespace MassTransit.Diagnostics.Introspection
 {
     public interface CurrentBusStatus
     {
-        DiagnosticsProbe Probe { get; }
+        DiagnosticEntry[] Entries { get; }
     }
 }
