@@ -34,9 +34,9 @@ namespace MassTransit.Testing.TestDecorators
 		}
 
 
-	    public void Diagnose(DiagnosticsProbe probe)
+	    public void Inspect(DiagnosticsProbe probe)
 	    {
-	        _bus.Diagnose(probe);
+	        _bus.Inspect(probe);
 	    }
 
 	    public void Dispose()

@@ -14,6 +14,6 @@ namespace MassTransit.Diagnostics.Introspection
 {
     public interface DiagnosticsSource
     {
-        void Diagnose(DiagnosticsProbe probe);
+        void Inspect(DiagnosticsProbe probe);
     }
 }
