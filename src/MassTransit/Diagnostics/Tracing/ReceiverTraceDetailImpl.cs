@@ -10,35 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Fixtures
+namespace MassTransit.Diagnostics.Tracing
 {
-	using System;
-	using Diagnostics;
-	using Diagnostics.Introspection;
+    using System;
 
-    public class EndpointCacheProxy :
-		IEndpointCache
+    public class ReceiverTraceDetailImpl :
+		ReceiverTraceDetail
 	{
-		readonly IEndpointCache _endpointCache;
+		public string MessageType { get; set; }
+		public string ReceiverType { get; set; }
+		public DateTime StartTime { get; set; }
+		public TimeSpan Duration { get; set; }
 
-		public EndpointCacheProxy(IEndpointCache endpointCache)
-		{
-			_endpointCache = endpointCache;
-		}
-
-		public void Dispose()
-		{
-			// we don't dispose, since we're in testing
-		}
-
-		public IEndpoint GetEndpoint(Uri uri)
-		{
-			return _endpointCache.GetEndpoint(uri);
-		}
-
-	    public void Diagnose(DiagnosticsProbe probe)
-	    {
-	        _endpointCache.Diagnose(probe);
-	    }
+		public string CorrelationId { get; set; }
 	}
 }

@@ -10,22 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Diagnostics
+namespace MassTransit.Diagnostics.Tracing
 {
-	using System.Collections.Generic;
+    using System;
 
-	public class ReceivedMessageTraceDetailImpl :
-		MessageTraceDetailImpl,
-		ReceivedMessageTraceDetail
+    /// <summary>
+	/// A message that was sent while a message was being received
+	/// </summary>
+	public interface SentMessageTraceDetail :
+		MessageTraceDetail
 	{
-		public ReceivedMessageTraceDetailImpl()
-		{
-			Receivers = new List<ReceiverTraceDetail>();
-			SentMessages = new List<SentMessageTraceDetail>();
-		}
+		Uri Address { get; }
 
-		public IList<SentMessageTraceDetail> SentMessages { get; set; }
-
-		public IList<ReceiverTraceDetail> Receivers { get; set; }
+		string DeclaringMessageType { get; }
 	}
 }

@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using Diagnostics;
+    using Diagnostics.Introspection;
 
     public interface IServiceContainer :
         IDisposable,
