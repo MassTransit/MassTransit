@@ -107,6 +107,28 @@ Bus Tuning Options
 These options, aren't usually needed until you get into production and need to tune the 
 behavior of the bus.
 
+Turning on Diagnostics
+''''''''''''''''''''''
+
+If you want to get a snapshot of how your service bus is configured, you can get 
+a pretty good picture of it by using the following config option.
+
+.. sourcecode:: csharp
+
+	ServiceBusFactory.New(sbc =>
+	{
+	    //the usual options
+		
+	    sbc.WriteDiagnosticsToFile("bus.txt");
+	});
+
+This will write out to 'bus.txt' a simple listing of the various configured options in 
+MassTransit.
+
+.. note::
+
+	This is a great file to send with support requests. :)
+
 Low Lever Config Api
 ''''''''''''''''''''
 
