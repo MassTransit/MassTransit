@@ -20,7 +20,7 @@ namespace MassTransit
 
     public static class DiagnosticsConfigurationExtensions
 	{
-        public static void EnableRemoteIntrospection(this ServiceBusConfigurator cfg, Action<DiagnosticsProbe> action)
+        public static void EnableRemoteIntrospection(this ServiceBusConfigurator cfg)
         {
             cfg.ConfigureService<IntrospectionServiceConfigurator>(BusServiceLayer.Session, svc =>
                 {

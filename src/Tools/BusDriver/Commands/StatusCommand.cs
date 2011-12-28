@@ -64,10 +64,12 @@ namespace BusDriver.Commands
 
             ITextBlock text = new TextBlock()
                 .BeginBlock("Status URI:", _uriString)
-                .EndBlock()
-                .BeginBlock("Status:",
-                    message.Probe.ToString())
                 .EndBlock();
+            foreach (var entry in message.Entries)
+            {
+                text.BeginBlock(entry.Key, entry.Value)
+                    .Break();
+            }
 
             _log.Info(text.ToString());
             _complete.Set();
