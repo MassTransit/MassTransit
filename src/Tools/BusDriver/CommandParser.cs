@@ -74,6 +74,9 @@ namespace BusDriver
 					from remove in
 						(from s in x.Switch("remove") select s).Optional("remove", false)
 					select (Command)new LoadCommand(uri.Value, name.Value, int.Parse(count.Value), remove.Value))
+                .Or(from arg in x.Argument("status")
+                    from uri in (from d in x.Definition("uri") select d).Optional("uri",Program.CurrentUri)
+                    select (Command) new StatusCommand(uri.Value))
 				.Or(from arg in x.Argument("trace")
 				    from uri in
 				    	(from d in x.Definition("uri") select d).Optional("uri", Program.CurrentUri)

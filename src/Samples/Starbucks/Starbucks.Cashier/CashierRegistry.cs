@@ -39,7 +39,7 @@ namespace Starbucks.Cashier
 							sbc.SetConcurrentConsumerLimit(1); //a cashier cannot multi-task
 
 							sbc.UseControlBus();
-                            sbc.WriteDiagnosticsToFile("cashier.txt");
+                            sbc.EnableRemoteIntrospection();
 						});
 				})
 				.InSingletonScope();
