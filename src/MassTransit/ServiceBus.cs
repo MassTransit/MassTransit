@@ -335,7 +335,7 @@ namespace MassTransit
             }
         }
 
-        public void Diagnose(DiagnosticsProbe probe)
+        public void Inspect(DiagnosticsProbe probe)
         {
             using (var timer = new FunctionTimer("probe", result => _log.DebugFormat("probe took {0}ms", result.ElapsedMilliseconds)))
             {
@@ -347,10 +347,10 @@ namespace MassTransit
                 probe.Add("mt.concurrent_receive_threads", ConcurrentReceiveThreads);
                 probe.Add("mt._receive_timeout", ReceiveTimeout);
 
-                EndpointCache.Diagnose(probe);
+                EndpointCache.Inspect(probe);
                 //serializer(s)
                 //transport(s)
-                _serviceContainer.Diagnose(probe);
+                _serviceContainer.Inspect(probe);
 
                 using (var mark = timer.Mark())
                 {

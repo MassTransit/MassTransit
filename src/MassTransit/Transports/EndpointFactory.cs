@@ -71,7 +71,7 @@ namespace MassTransit.Transports
 			_transportFactories[scheme] = factory;
 		}
 
-	    public void Diagnose(DiagnosticsProbe probe)
+	    public void Inspect(DiagnosticsProbe probe)
 	    {
             probe.Add("mt.default_serializer", _defaults.Serializer.GetType().Name);
 	        foreach (var scheme in _transportFactories)

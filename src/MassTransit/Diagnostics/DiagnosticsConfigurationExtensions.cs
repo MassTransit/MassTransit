@@ -43,13 +43,13 @@ namespace MassTransit
 
         //convienience methods
 
-        public static void WriteDiagnosticsToConsole(this IServiceBus bus)
+        public static void WriteIntrospectionToConsole(this IServiceBus bus)
         {
             var probe = bus.Probe();
             Console.Write(probe);
         }
 
-        public static void WriteDiagnosticsToFile(this IServiceBus bus, string fileName)
+        public static void WriteIntrospectionToFile(this IServiceBus bus, string fileName)
         {
             var probe = bus.Probe();
             var fs = new DotNetFileSystem();
@@ -64,7 +64,7 @@ namespace MassTransit
         public static DiagnosticsProbe Probe(this IServiceBus bus)
         {
             var probe = new InMemoryDiagnosticsProbe();
-            bus.Diagnose(probe);
+            bus.Inspect(probe);
             return probe;
         }
 

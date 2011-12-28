@@ -36,9 +36,9 @@ namespace MassTransit.Tests.TextFixtures
 			return _endpointCache.GetEndpoint(uri);
 		}
 
-	    public void Diagnose(DiagnosticsProbe probe)
+	    public void Inspect(DiagnosticsProbe probe)
 	    {
-	        _endpointCache.Diagnose(probe);
+	        _endpointCache.Inspect(probe);
 	    }
 	}
 }

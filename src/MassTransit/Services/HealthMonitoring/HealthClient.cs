@@ -94,7 +94,7 @@ namespace MassTransit.Services.HealthMonitoring
             _unsubscribe();
         }
 
-        public void Diagnose(DiagnosticsProbe probe)
+        public void Inspect(DiagnosticsProbe probe)
         {
             probe.Add("health_client", "on");
             probe.Add("health_client.interval", _heartbeatIntervalInSeconds);

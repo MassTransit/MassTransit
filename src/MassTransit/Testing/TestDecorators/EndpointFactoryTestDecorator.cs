@@ -46,9 +46,9 @@ namespace MassTransit.Testing.TestDecorators
 			return endpointTestDecorator;
 		}
 
-	    public void Diagnose(DiagnosticsProbe probe)
+	    public void Inspect(DiagnosticsProbe probe)
 	    {
-	        _endpointFactory.Diagnose(probe);
+	        _endpointFactory.Inspect(probe);
 	    }
 
 	    public void AddTransportFactory(ITransportFactory factory)

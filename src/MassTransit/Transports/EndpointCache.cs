@@ -90,9 +90,9 @@ namespace MassTransit.Transports
 			_endpoints.Clear();
 		}
 
-	    public void Diagnose(DiagnosticsProbe probe)
+	    public void Inspect(DiagnosticsProbe probe)
 	    {
-	        _endpointFactory.Diagnose(probe);
+	        _endpointFactory.Inspect(probe);
 	    }
 
 	    protected virtual void Dispose(bool disposing)

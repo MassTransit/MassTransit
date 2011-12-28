@@ -30,7 +30,7 @@ namespace MassTransit.Diagnostics.Introspection
             builder.AddPostCreateAction(bus=>
                 {   
 
-                    bus.Diagnose(probe);
+                    bus.Inspect(probe);
                     
                    
 
