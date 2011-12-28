@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using System.Diagnostics;
     using Context;
-    using Diagnostics;
     using Diagnostics.Introspection;
     using Events;
     using Exceptions;
@@ -338,24 +337,27 @@ namespace MassTransit
 
         public void Diagnose(DiagnosticsProbe probe)
         {
-            DiagnosticsInfo.WriteCommonItems(probe);
+            using (var timer = new FunctionTimer("probe", result => _log.DebugFormat("probe took {0}ms", result.ElapsedMilliseconds)))
+            {
+                DiagnosticsInfo.WriteCommonItems(probe);
 
-            //network key
-            //probe.Add("mt.network_key", builder.Settings.Network);
+                probe.Add("mt.receive_from", Endpoint.Address);
+                probe.Add("mt.control_bus", ControlBus.Endpoint.Address);
+                probe.Add("mt.max_consumer_threads", MaximumConsumerThreads);
+                probe.Add("mt.concurrent_receive_threads", ConcurrentReceiveThreads);
+                probe.Add("mt._receive_timeout", ReceiveTimeout);
 
-            probe.Add("mt.receive_from", Endpoint.Address);
-            probe.Add("mt.control_bus", ControlBus.Endpoint.Address);
-            probe.Add("mt.max_consumer_threads", MaximumConsumerThreads);
-            probe.Add("mt.concurrent_receive_threads", ConcurrentReceiveThreads);
-            probe.Add("mt._receive_timeout", ReceiveTimeout);
-            
-            EndpointCache.Diagnose(probe);
-            //serializer(s)
-            //transport(s)
-            _serviceContainer.Diagnose(probe);
+                EndpointCache.Diagnose(probe);
+                //serializer(s)
+                //transport(s)
+                _serviceContainer.Diagnose(probe);
 
-            OutboundPipeline.View(pipe => probe.Add("zz.mt.outbound_pipeline", pipe));
-            InboundPipeline.View(pipe => probe.Add("zz.mt.inbound_pipeline", pipe));
+                using (var mark = timer.Mark())
+                {
+                    OutboundPipeline.View(pipe => probe.Add("zz.mt.outbound_pipeline", pipe));
+                    InboundPipeline.View(pipe => probe.Add("zz.mt.inbound_pipeline", pipe));
+                }
+            }
         }
     }
 }
