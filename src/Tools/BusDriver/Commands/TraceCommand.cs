@@ -21,9 +21,8 @@ namespace BusDriver.Commands
 	using log4net;
 	using Magnum.Extensions;
 	using MassTransit;
-	using MassTransit.Diagnostics;
 
-	public class TraceCommand :
+    public class TraceCommand :
 		Consumes<ReceivedMessageTraceList>.All,
 		Command,
 		IPendingCommand
