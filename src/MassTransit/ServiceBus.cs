@@ -223,8 +223,6 @@ namespace MassTransit
             probe.Add("mt.receive_timeout", ReceiveTimeout);
 
             EndpointCache.Inspect(probe);
-            //serializer(s)
-            //transport(s)
             _serviceContainer.Inspect(probe);
 
             OutboundPipeline.View(pipe => probe.Add("zz.mt.outbound_pipeline", pipe));

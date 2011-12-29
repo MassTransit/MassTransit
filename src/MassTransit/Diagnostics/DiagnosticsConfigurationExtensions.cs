@@ -24,7 +24,7 @@ namespace MassTransit
         public static void EnableRemoteIntrospection(this ServiceBusConfigurator configurator)
         {
             var serviceConfigurator = new IntrospectionServiceConfigurator();
-
+            
             var busConfigurator = new CustomBusServiceConfigurator(serviceConfigurator);
 
             configurator.AddBusConfigurator(busConfigurator);
