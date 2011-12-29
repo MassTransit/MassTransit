@@ -12,23 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace BusDriver.Commands
 {
+    using System;
     using System.Threading;
     using Formatting;
+    using Magnum.Extensions;
     using MassTransit;
     using MassTransit.Diagnostics.Introspection;
+    using MassTransit.Diagnostics.Introspection.Messages;
     using log4net;
-    using Magnum.Extensions;
 
     public class StatusCommand :
-        Consumes<CurrentBusStatus>.All,
+        Consumes<BusStatus>.Context,
         Command,
         IPendingCommand
     {
         static readonly ILog _log = LogManager.GetLogger(typeof (StatusCommand));
 
-        readonly string _uriString;
-        UnsubscribeAction _unsubscribe;
         readonly ManualResetEvent _complete;
+        readonly string _uriString;
+        string _requestId;
+        UnsubscribeAction _unsubscribe;
 
         public StatusCommand(string uriString)
         {
@@ -38,17 +41,22 @@ namespace BusDriver.Commands
 
         public bool Execute()
         {
-            var uri = _uriString.ToUri("The status URI was invalid");
+            Uri uri = _uriString.ToUri("The status URI was invalid");
 
-            var bus = Program.Bus;
+            IServiceBus bus = Program.Bus;
 
-            var endpoint = bus.GetEndpoint(uri);
+            IEndpoint endpoint = bus.GetEndpoint(uri);
 
             _log.DebugFormat("Sending status request to '{0}'", uri);
 
             _unsubscribe = bus.SubscribeInstance(this);
+            _requestId = Guid.NewGuid().ToString("N");
 
-            endpoint.Send<GetBusStatus>(new GetBusStatusImpl(), x=>x.SendResponseTo(bus));
+            endpoint.Send<GetBusStatus>(new GetBusStatusImpl(), x =>
+                {
+                    x.SendResponseTo(bus);
+                    x.SetRequestId(_requestId);
+                });
 
             Program.AddPendingCommand(this);
 
@@ -56,8 +64,11 @@ namespace BusDriver.Commands
         }
 
 
-        public void Consume(CurrentBusStatus message)
+        public void Consume(IConsumeContext<BusStatus> context)
         {
+            if (!_requestId.Equals(context.RequestId))
+                return;
+
             if (_unsubscribe != null)
                 _unsubscribe();
             _unsubscribe = null;
@@ -66,10 +77,9 @@ namespace BusDriver.Commands
                 .BeginBlock("Status URI:", _uriString)
                 .EndBlock();
 
-            foreach (var entry in message.Entries)
+            foreach (BusStatusEntry entry in context.Message.Entries)
             {
                 text.BodyFormat("{0}:{1}", entry.Key, entry.Value);
-
             }
             text.EndBlock();
 

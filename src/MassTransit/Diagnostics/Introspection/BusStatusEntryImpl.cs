@@ -1,4 +1,4 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,11 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Diagnostics.Introspection
 {
-    public class InMemoryDiagnosticEntry :
-        DiagnosticEntry
+    using Messages;
+
+    public class BusStatusEntryImpl :
+        BusStatusEntry
     {
-        public string Context { get; set; }
-        public string Key { get; set; }
-        public string Value { get; set; }
+        public BusStatusEntryImpl(string context, string key, string value)
+        {
+            Context = context;
+            Key = key;
+            Value = value;
+        }
+
+        public string Context { get; private set; }
+        public string Key { get; private set; }
+        public string Value { get; private set; }
     }
 }
