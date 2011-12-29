@@ -10,10 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Diagnostics.Introspection
+namespace MassTransit.Diagnostics.Introspection.Messages
 {
-    public class BusStatus : CurrentBusStatus
+    public interface BusStatusEntry
     {
-        public DiagnosticEntry[] Entries { get; set; }
+        string Context { get; }
+        string Key { get; }
+        string Value { get; }
     }
 }

@@ -15,7 +15,8 @@ namespace MassTransit.Diagnostics.Introspection
     using System;
     using BusServiceConfigurators;
 
-    public class IntrospectionServiceConfigurator : BusServiceConfigurator
+    public class IntrospectionServiceConfigurator :
+        BusServiceConfigurator
     {
         public Type ServiceType
         {

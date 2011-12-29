@@ -73,10 +73,10 @@ namespace MassTransit.Transports
 
 	    public void Inspect(DiagnosticsProbe probe)
 	    {
-            probe.Add("mt.default_serializer", _defaults.Serializer.GetType().Name);
+            probe.Add("mt.default_serializer", _defaults.Serializer.GetType().ToShortTypeName());
 	        foreach (var scheme in _transportFactories)
 	        {
-	            probe.Add("mt.transport", scheme.Key + " via " + scheme.Value.GetType().Name);
+	            probe.Add("mt.transport", string.Format("[{0}] {1}", scheme.Key , scheme.Value.GetType().ToShortTypeName()));
 	        }
 	    }
 
