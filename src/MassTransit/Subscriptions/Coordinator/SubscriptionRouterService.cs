@@ -167,7 +167,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
 	    public void Inspect(DiagnosticsProbe probe)
 	    {
-	        probe.Add("mt.network",_network);
+	        probe.Add("mt.network", _network);
 	    }
 
 	    void Dispose(bool disposing)

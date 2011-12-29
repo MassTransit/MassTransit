@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Diagnostics.Introspection
 {
+    using Messages;
+
     public class GetBusStatusImpl :
         GetBusStatus
     {

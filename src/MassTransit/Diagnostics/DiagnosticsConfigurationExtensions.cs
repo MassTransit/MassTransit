@@ -14,18 +14,20 @@ namespace MassTransit
 {
     using System;
     using BusConfigurators;
+    using BusServiceConfigurators;
     using Diagnostics.Introspection;
     using Diagnostics.Tracing;
     using Magnum.FileSystem;
 
     public static class DiagnosticsConfigurationExtensions
 	{
-        public static void EnableRemoteIntrospection(this ServiceBusConfigurator cfg)
+        public static void EnableRemoteIntrospection(this ServiceBusConfigurator configurator)
         {
-            cfg.ConfigureService<IntrospectionServiceConfigurator>(BusServiceLayer.Session, svc =>
-                {
-                    //configure service here
-                });
+            var serviceConfigurator = new IntrospectionServiceConfigurator();
+
+            var busConfigurator = new CustomBusServiceConfigurator(serviceConfigurator);
+
+            configurator.AddBusConfigurator(busConfigurator);
         }
 
 		public static void EnableMessageTracing(this ServiceBusConfigurator configurator)
@@ -41,7 +43,7 @@ namespace MassTransit
 		}
 
 
-        //convienience methods
+        //convenience methods
 
         public static void WriteIntrospectionToConsole(this IServiceBus bus)
         {
@@ -59,7 +61,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// A convience method for inspecting an active service bus instance.
+        /// A convenience method for inspecting an active service bus instance.
         /// </summary>
         public static DiagnosticsProbe Probe(this IServiceBus bus)
         {

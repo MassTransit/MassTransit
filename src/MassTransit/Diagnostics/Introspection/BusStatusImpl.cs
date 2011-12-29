@@ -12,12 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Diagnostics.Introspection
 {
-    using System.Collections.Generic;
+    using Messages;
 
-    public interface DiagnosticsProbe
+    public class BusStatusImpl :
+        BusStatus
     {
-        IEnumerable<DiagnosticEntry> Entries { get; }
-
-        void Add(string key, object value);
+        public BusStatusEntry[] Entries { get; set; }
     }
 }

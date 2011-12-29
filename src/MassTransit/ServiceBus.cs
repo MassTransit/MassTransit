@@ -1,14 +1,14 @@
 // Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
@@ -18,7 +18,6 @@ namespace MassTransit
     using Diagnostics.Introspection;
     using Events;
     using Exceptions;
-    using log4net;
     using Magnum;
     using Magnum.Extensions;
     using Monitoring;
@@ -27,6 +26,7 @@ namespace MassTransit
     using Stact;
     using Threading;
     using Util;
+    using log4net;
 
     /// <summary>
     /// A service bus is used to attach message handlers (services) to endpoints, as well as
@@ -48,7 +48,6 @@ namespace MassTransit
         TimeSpan _receiveTimeout = 3.Seconds();
         IServiceContainer _serviceContainer;
         volatile bool _started;
-        UnregisterAction _unsubscribeEventDispatchers = () => true;
 
         static ServiceBus()
         {
@@ -121,10 +120,16 @@ namespace MassTransit
             set
             {
                 if (_started)
-                    throw new ConfigurationException("The receive timeout cannot be changed once the bus is in motion. Beep! Beep!");
+                    throw new ConfigurationException(
+                        "The receive timeout cannot be changed once the bus is in motion. Beep! Beep!");
 
                 _receiveTimeout = value;
             }
+        }
+
+        public UntypedChannel EventChannel
+        {
+            get { return _eventChannel; }
         }
 
         [UsedImplicitly]
@@ -150,7 +155,7 @@ namespace MassTransit
         public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
             where T : class
         {
-            var context = ContextStorage.CreatePublishContext(message);
+            PublishContext<T> context = ContextStorage.CreatePublishContext(message);
             context.SetSourceAddress(Endpoint.Address.Uri);
 
             contextCallback(context);
@@ -201,17 +206,29 @@ namespace MassTransit
 
         public IServiceBus ControlBus { get; set; }
 
-        public UntypedChannel EventChannel
-        {
-            get
-            {
-                return _eventChannel;
-            }
-        }
-
         public IEndpoint GetEndpoint(Uri address)
         {
             return EndpointCache.GetEndpoint(address);
+        }
+
+        public void Inspect(DiagnosticsProbe probe)
+        {
+            new StandardDiagnosticsInfo().WriteCommonItems(probe);
+
+            probe.Add("mt.version", typeof(IServiceBus).Assembly.GetName().Version);
+            probe.Add("mt.receive_from", Endpoint.Address);
+            probe.Add("mt.control_bus", ControlBus.Endpoint.Address);
+            probe.Add("mt.max_consumer_threads", MaximumConsumerThreads);
+            probe.Add("mt.concurrent_receive_threads", ConcurrentReceiveThreads);
+            probe.Add("mt.receive_timeout", ReceiveTimeout);
+
+            EndpointCache.Inspect(probe);
+            //serializer(s)
+            //transport(s)
+            _serviceContainer.Inspect(probe);
+
+            OutboundPipeline.View(pipe => probe.Add("zz.mt.outbound_pipeline", pipe));
+            InboundPipeline.View(pipe => probe.Add("zz.mt.inbound_pipeline", pipe));
         }
 
         public void Start()
@@ -231,7 +248,7 @@ namespace MassTransit
             }
             catch (Exception)
             {
-                if(_consumerPool != null)
+                if (_consumerPool != null)
                     _consumerPool.Dispose();
 
                 throw;
@@ -303,9 +320,11 @@ namespace MassTransit
                                 {
                                     _counters.ReceiveCount.Increment();
                                     _counters.ReceiveRate.Increment();
-                                    _counters.ReceiveDuration.IncrementBy((long) message.ReceiveDuration.TotalMilliseconds);
+                                    _counters.ReceiveDuration.IncrementBy(
+                                        (long) message.ReceiveDuration.TotalMilliseconds);
                                     _counters.ReceiveDurationBase.Increment();
-                                    _counters.ConsumerDuration.IncrementBy((long) message.ConsumeDuration.TotalMilliseconds);
+                                    _counters.ConsumerDuration.IncrementBy(
+                                        (long) message.ConsumeDuration.TotalMilliseconds);
                                     _counters.ConsumerDurationBase.Increment();
                                 });
 
@@ -331,32 +350,9 @@ namespace MassTransit
             }
             catch (Exception ex)
             {
-                _log.Warn("The performance counters could not be created, try running the program in the Administrator role. Just once.", ex);
-            }
-        }
-
-        public void Inspect(DiagnosticsProbe probe)
-        {
-            using (var timer = new FunctionTimer("probe", result => _log.DebugFormat("probe took {0}ms", result.ElapsedMilliseconds)))
-            {
-                DiagnosticsInfo.WriteCommonItems(probe);
-
-                probe.Add("mt.receive_from", Endpoint.Address);
-                probe.Add("mt.control_bus", ControlBus.Endpoint.Address);
-                probe.Add("mt.max_consumer_threads", MaximumConsumerThreads);
-                probe.Add("mt.concurrent_receive_threads", ConcurrentReceiveThreads);
-                probe.Add("mt._receive_timeout", ReceiveTimeout);
-
-                EndpointCache.Inspect(probe);
-                //serializer(s)
-                //transport(s)
-                _serviceContainer.Inspect(probe);
-
-                using (var mark = timer.Mark())
-                {
-                    OutboundPipeline.View(pipe => probe.Add("zz.mt.outbound_pipeline", pipe));
-                    InboundPipeline.View(pipe => probe.Add("zz.mt.inbound_pipeline", pipe));
-                }
+                _log.Warn(
+                    "The performance counters could not be created, try running the program in the Administrator role. Just once.",
+                    ex);
             }
         }
     }

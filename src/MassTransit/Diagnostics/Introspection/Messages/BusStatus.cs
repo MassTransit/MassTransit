@@ -10,14 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Diagnostics.Introspection
+namespace MassTransit.Diagnostics.Introspection.Messages
 {
-    using System.Collections.Generic;
-
-    public interface DiagnosticsProbe
+    public interface BusStatus
     {
-        IEnumerable<DiagnosticEntry> Entries { get; }
-
-        void Add(string key, object value);
+        BusStatusEntry[] Entries { get; }
     }
 }

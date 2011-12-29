@@ -29,7 +29,7 @@ namespace MassTransit.Diagnostics.Introspection
 
         public void Add(string key, object value)
         {
-            var entry = new InMemoryDiagnosticEntry();
+            var entry = new DiagnosticEntryImpl();
             entry.Key = key;
             entry.Value = value.ToString();
             _entries.Add(entry);
