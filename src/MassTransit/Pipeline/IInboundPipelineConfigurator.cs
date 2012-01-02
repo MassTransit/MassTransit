@@ -12,11 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+	/// <summary>
+	/// Implementors should manage subscriptions from the subscription events,
+	/// see also <see cref="ISubscriptionEvent"/> - which is passed to implementors of this
+	/// interface.
+	/// </summary>
 	public interface IInboundPipelineConfigurator :
 		ISubscriptionEvent
 	{
+		/// <summary>
+		/// Gets the inbound message pipeline.
+		/// </summary>
 		IInboundMessagePipeline Pipeline { get; }
+		
+		/// <summary>
+		/// Gets the service bus under configuration.
+		/// </summary>
 		IServiceBus Bus { get; }
+
+		/// <summary>
+		/// Register some instance that cares about message-subscriptions.
+		/// </summary>
+		/// <param name="subscriptionEventHandler">Instance</param>
+		/// <returns>An unsubscribing multi-cast delegate.</returns>
 		UnregisterAction Register(ISubscriptionEvent subscriptionEventHandler);
 	}
 }

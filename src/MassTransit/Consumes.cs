@@ -12,13 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+	using Util;
 	using log4net;
 	using Magnum.Extensions;
 
 	/// <summary>
-	/// 
+	/// API-oriented class.
 	/// </summary>
-	/// <typeparam name="TMessage"></typeparam>
+	/// <typeparam name="TMessage">The message type to consume.</typeparam>
+	[UsedImplicitly]
 	public class Consumes<TMessage>
 		where TMessage : class
 	{

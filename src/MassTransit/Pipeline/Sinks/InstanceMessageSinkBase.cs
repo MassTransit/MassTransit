@@ -16,6 +16,10 @@ namespace MassTransit.Pipeline.Sinks
 	using System.Collections.Generic;
 	using Magnum.Extensions;
 
+	/// <summary>
+	/// Handles 
+	/// </summary>
+	/// <typeparam name="TMessage"></typeparam>
 	public class InstanceMessageSinkBase<TMessage> :
 		IPipelineSink<IConsumeContext<TMessage>>
 		where TMessage : class

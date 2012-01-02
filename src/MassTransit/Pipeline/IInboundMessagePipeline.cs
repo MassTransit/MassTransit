@@ -14,10 +14,26 @@ namespace MassTransit.Pipeline
 {
 	using System;
 
+	/// <summary>
+	/// Implemented by classes that can be placed in the inbound message pipeline. See
+	/// <see cref="IPipelineSink{IConsumeContext}"/> for sink documentation.
+	/// </summary>
 	public interface IInboundMessagePipeline :
 		IPipelineSink<IConsumeContext>
 	{
+		/// <summary>
+		/// Called when the pipeline part is being configured, during the initial setup
+		/// of the message bus, allowing the pipeline part to provide a configurator
+		/// implementation/instance of its own.
+		/// </summary>
+		/// <param name="configureCallback">A callback that may be called (directly) from
+		/// the implementing method. The pipeline sink may choose the configurator instance to
+		/// pass to this action.</param>
 		void Configure(Action<IInboundPipelineConfigurator> configureCallback);
+
+		/// <summary>
+		/// <see cref="Configure"/>
+		/// </summary>
 		TResult Configure<TResult>(Func<IInboundPipelineConfigurator, TResult> configureCallback);
 	}
 }

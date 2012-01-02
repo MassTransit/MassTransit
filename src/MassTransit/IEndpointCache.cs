@@ -25,7 +25,7 @@ namespace MassTransit
 		/// the factory will attempt to create an endpoint for the Uri.
 		/// </summary>
 		/// <param name="uri">The Uri to resolve to an endpoint</param>
-		/// <returns>An IEndpoint instance</returns>
+		/// <returns>An IEndpoint instance - never null</returns>
 		IEndpoint GetEndpoint(Uri uri);
 	}
 }

@@ -36,6 +36,10 @@ namespace MassTransit.Pipeline.Sinks
 			_output = Atomic.Create(new List<IPipelineSink<T>>(sinks));
 		}
 
+		/// <summary>
+		/// Gets the number of pipelink sinks this message router
+		/// has.
+		/// </summary>
 		public int SinkCount
 		{
 			get { return _output.Value.Count; }
