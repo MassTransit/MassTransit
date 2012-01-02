@@ -15,12 +15,15 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 
+	/// <summary>
+	/// <see cref="IPipelineSink{T}"/>.
+	/// </summary>
 	public interface IPipelineSink
 	{
 	}
 
 	/// <summary>
-	/// Implemented by all classes that can be inserted into the pipeline
+	/// Implemented by all classes that can be inserted into the pipeline.
 	/// </summary>
 	/// <typeparam name="T">The message type passed by this sink</typeparam>
 	public interface IPipelineSink<T> :
@@ -30,7 +33,9 @@ namespace MassTransit.Pipeline
 		/// <summary>
 		/// Passes a message through the pipeline returning all consumers for the message
 		/// so that it can be dispatched to those consumers. The message does not actually dispatch
-		/// in the pipeline, the consumers Consume method is called.
+		/// in the pipeline - the consumers' Consume method is called after all consumers have
+		/// been enumerated. A consumer's method of consumption should be equal to the action
+		/// returned.
 		/// </summary>
 		/// <param name="context"></param>
 		/// <returns>An enumerable of consumers for the message</returns>

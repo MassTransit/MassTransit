@@ -17,7 +17,7 @@ namespace MassTransit.Util
 	using Magnum.Threading;
 
 	/// <summary>
-	///   A locked list implementation of IRegistrationList
+	///   A multiple-readers, single-writer, disposable, list implementation.
 	/// </summary>
 	/// <typeparam name = "T"></typeparam>
 	public class RegistrationList<T> :

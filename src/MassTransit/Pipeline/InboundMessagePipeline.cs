@@ -16,6 +16,12 @@ namespace MassTransit.Pipeline
 	using System.Collections.Generic;
 	using Magnum.Concurrency;
 
+	/// <summary>
+	/// An inbound message pipeline takes a consume context and maps it
+	/// to a number if actual consumers, in its <see cref="Enumerate"/> method. It
+	/// is also a place-holder for configuration regarding the consume context/its mapped
+	/// outputs.
+	/// </summary>
 	public class InboundMessagePipeline :
 		IInboundMessagePipeline
 	{
@@ -48,6 +54,11 @@ namespace MassTransit.Pipeline
 			return configureCallback(_configurator);
 		}
 
+		/// <summary>
+		/// Atomically replaces the current output sink with the argument.
+		/// </summary>
+		/// <param name="sink">The argument sink.</param>
+		/// <returns>The passed argument when the replace operation is done.</returns>
 		public IPipelineSink<IConsumeContext> ReplaceOutputSink(IPipelineSink<IConsumeContext> sink)
 		{
 			return _output.Set(output => sink);

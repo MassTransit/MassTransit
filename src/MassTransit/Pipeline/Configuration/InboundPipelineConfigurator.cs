@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Configuration
 	using Sinks;
 	using Util;
 
+	/// <summary><see cref="IInboundPipelineConfigurator"/>.</summary>
 	public class InboundPipelineConfigurator :
 		IInboundPipelineConfigurator
 	{

@@ -16,7 +16,7 @@ namespace MassTransit
 	using Pipeline;
 
 	/// <summary>
-	///   The action to call to unsubscribe a previously subscribed consumer
+	///   The action to call to unsubscribe a previously subscribed consumer.
 	/// </summary>
 	/// <returns></returns>
 	public delegate bool UnsubscribeAction();
@@ -47,14 +47,22 @@ namespace MassTransit
 		IEndpointCache EndpointCache { get; }
 
 		/// <summary>
-		///   Publishes a message to all subscribed consumers for the message type
+		///   Publishes a message to all subscribed consumers for the message type as specified
+		/// by the generic parameter. The second parameter allows the caller to customize the
+		/// outgoing publish context and set things like headers on the message.
 		/// </summary>
 		/// <typeparam name = "T">The type of the message</typeparam>
 		/// <param name = "message">The messages to be published</param>
-		/// <param name = "contextCallback"></param>
+		/// <param name = "contextCallback">A callback that gives the caller
+		/// access to the publish context.</param>
 		void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
 			where T : class;
 
+		/// <summary>
+		/// Looks an endpoint up by its uri.
+		/// </summary>
+		/// <param name="address"></param>
+		/// <returns>The </returns>
 		IEndpoint GetEndpoint(Uri address);
 
 		/// <summary>

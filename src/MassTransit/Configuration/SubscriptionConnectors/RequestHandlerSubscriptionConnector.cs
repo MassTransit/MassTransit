@@ -29,7 +29,7 @@ namespace MassTransit.SubscriptionConnectors
         public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, string requestId, HandlerSelector<TMessage> handler)
         {
             if (handler == null)
-                throw new NullReferenceException("The handler cannot be null.");
+                throw new ArgumentNullException("handler", "The handler cannot be null.");
 
             var correlatedConfigurator = new InboundRequestMessageRouterConfigurator(configurator.Pipeline);
 

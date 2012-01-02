@@ -14,6 +14,13 @@ namespace MassTransit
 {
 	using System;
 
+	/// <summary>
+	/// Typed consumer context that can be used by message consumers to retrieve out-of-band information
+	/// related to a message. This consumer context can also be used for explicitly telling the service bus
+	/// to place the message at the end of the input-queue (by calling <see cref="RetryLater"/>) or send the message to the poison-letter queue (by
+	/// calling <see cref="GenerateFault"/>.)
+	/// </summary>
+	/// <typeparam name="T">Incoming message type.</typeparam>
 	public interface IConsumeContext<T> :
 		IConsumeContext,
 		IMessageContext<T>
@@ -50,7 +57,7 @@ namespace MassTransit
 		IEndpoint Endpoint { get; }
 
 		/// <summary>
-		/// Retrieves a specified message type from the consumer context, if available
+		/// Retrieves a specified message type from the consumer context, if available.
 		/// </summary>
 		/// <typeparam name="T">The message type requested</typeparam>
 		/// <param name="context">The message context for the requested message type</param>
@@ -62,7 +69,7 @@ namespace MassTransit
 		/// Respond to the current message, sending directly to the ResponseAddress if specified
 		/// otherwise publishing the message
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="T">The type of the message to respond with.</typeparam>
 		/// <param name="message">The message to send in response</param>
 		/// <param name="contextCallback">The context action for specifying additional context information</param>
 		void Respond<T>(T message, Action<ISendContext<T>> contextCallback)

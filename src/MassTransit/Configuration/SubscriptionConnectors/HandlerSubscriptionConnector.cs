@@ -19,6 +19,13 @@ namespace MassTransit.SubscriptionConnectors
 	public class HandlerSubscriptionConnector<TMessage>
 		where TMessage : class
 	{
+		/// <summary>
+		/// Connects a handler selector through an 'instance message sink' and makes sure that
+		/// the message router is wired up to route messages to this handler.
+		/// </summary>
+		/// <param name="configurator">The inbound pipeline configurator</param>
+		/// <param name="handler">The handler to subscribe.</param>
+		/// <returns>An action that can be called to unsubscribe the handler.</returns>
 		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, HandlerSelector<TMessage> handler)
 		{
 			var routerConfigurator = new InboundMessageRouterConfigurator(configurator.Pipeline);
@@ -27,10 +34,13 @@ namespace MassTransit.SubscriptionConnectors
 
 			var sink = new InstanceMessageSink<TMessage>(MultipleHandlerSelector.ForHandler(handler));
 
+			// connect the router
 			UnsubscribeAction result = router.Connect(sink);
 
+			// and notify the subscription
 			UnsubscribeAction remove = configurator.SubscribedTo<TMessage>();
 
+			// remove the subscription when there are no further sinks for TMessage.
 			return () => result() && (router.SinkCount == 0) && remove();
 		}
 	}
