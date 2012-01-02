@@ -35,6 +35,7 @@ namespace MassTransit.Transports.ZeroMq
 
                     using(var body = new MemoryStream())
                     {
+                        
                         context.SerializeTo(body);
                         connection.Socket.Send(body.ToArray());
                     }

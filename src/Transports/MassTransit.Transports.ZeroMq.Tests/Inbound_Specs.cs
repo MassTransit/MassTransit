@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.ZeroMq.Tests
 {
     using System;
+    using System.Text;
     using System.Threading;
     using Context;
     using Magnum.Extensions;
@@ -25,7 +26,6 @@ namespace MassTransit.Transports.ZeroMq.Tests
     {
         InboundZeroMqTransport _inbound;
         Context _context;
-        OutboundZeroMqTransport _outbound;
 
         [SetUp]
         public void SetUp()
@@ -35,17 +35,15 @@ namespace MassTransit.Transports.ZeroMq.Tests
             var zeroMqConnection = new ZeroMqConnection(_context, address, SocketType.REQ );
             ConnectionHandler<ZeroMqConnection> connection = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
             _inbound = new InboundZeroMqTransport(address, connection, true);
-            _outbound = new OutboundZeroMqTransport(address, connection);
 
             //push simple message in
-            ISendContext sendContext = new SendContext<string>("dru");
-            _outbound.Send(sendContext);
+            zeroMqConnection.Connect();
+           zeroMqConnection.Socket.Send("dru", Encoding.UTF8);
         }
 
         [TearDown]
         public void TearDown()
         {
-            _outbound.Dispose();
             _inbound.Dispose();
             _context.Dispose();
         }
@@ -67,7 +65,7 @@ namespace MassTransit.Transports.ZeroMq.Tests
                             x.ShouldEqual("dru");
                             mre.Set();
                         };
-                }, 20.Seconds());
+                }, 2.Seconds());
             mre.WaitOne(5.Seconds());
         }
     }
