@@ -13,8 +13,6 @@
 namespace MassTransit.Transports.RabbitMq
 {
 	using System;
-	using System.Collections;
-	using System.Collections.Generic;
 	using Management;
 	using RabbitMQ.Client;
 	using log4net;

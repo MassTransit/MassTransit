@@ -20,7 +20,6 @@ namespace MassTransit.Transports.RabbitMq
 	using Exceptions;
 	using Magnum.Extensions;
 	using Magnum.Threading;
-	using Management;
 	using RabbitMQ.Client;
 	using log4net;
 

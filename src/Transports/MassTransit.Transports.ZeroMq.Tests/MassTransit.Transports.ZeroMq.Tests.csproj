@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{93575983-0B24-42FB-BD53-1BFCB1BD40A7}</ProjectGuid>
+    <ProjectGuid>{8E39C801-6754-4917-9039-BCB794D0D9A5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.Transports.ZeroMq</RootNamespace>
-    <AssemblyName>MassTransit.Transports.ZeroMq</AssemblyName>
+    <RootNamespace>MassTransit.Transports.ZeroMq.Tests</RootNamespace>
+    <AssemblyName>MassTransit.Transports.ZeroMq.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -32,32 +32,43 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="clrzmq, Version=2.2.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\clrzmq.2.2.1\lib\clrzmq.dll</HintPath>
     </Reference>
     <Reference Include="clrzmq-ext">
       <HintPath>..\..\packages\clrzmq.2.2.1\lib\clrzmq-ext.dll</HintPath>
     </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\..\lib\log4net.dll</HintPath>
+    <Reference Include="Magnum, Version=2.0.0.3, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum.TestFramework">
+      <HintPath>..\..\..\lib\Magnum\net-4.0\TestFramework\Magnum.TestFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\..\lib\NUnit\net-2.0\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IZeroMqEndpointAddress.cs" />
-    <Compile Include="OutboundZeroMqTransport.cs" />
-    <Compile Include="ZeroMqAddress.cs" />
+    <Compile Include="GivenALocalAddress.cs" />
+    <Compile Include="Inbound_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="InboundZeroMqTransport.cs" />
-    <Compile Include="ZeroMqConnection.cs" />
-    <Compile Include="ZeroMqTransportFactory.cs" />
+    <Compile Include="ZeroMqConnection_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.Transports.ZeroMQ\MassTransit.Transports.ZeroMq.csproj">
+      <Project>{93575983-0B24-42FB-BD53-1BFCB1BD40A7}</Project>
+      <Name>MassTransit.Transports.ZeroMq</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

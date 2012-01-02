@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>clrzmq-ext</name>
+    </assembly>
+    <members>
+        <member name="M:ZMQ.ZMQDevice.Device.#ctor(ZMQ.Socket,ZMQ.Socket)">
+            <summary>
+            Create Device
+            </summary>
+            <param name="frontend">Fontend Socket</param>
+            <param name="backend">Backend Socket</param>
+        </member>
+        <member name="M:ZMQ.ZMQDevice.Device.Start">
+            <summary>
+            Start Device
+            </summary>
+        </member>
+        <member name="M:ZMQ.ZMQDevice.Device.Stop">
+            <summary>
+            Stop Device
+            </summary>
+        </member>
+        <member name="T:ZMQ.ZMQDevice.Queue">
+            <summary>
+            Standard Queue Device
+            </summary>
+        </member>
+        <member name="T:ZMQ.ZMQExt.SocketExt">
+            <summary>
+            Socket Extension Methods
+            </summary>
+        </member>
+        <member name="M:ZMQ.ZMQExt.SocketExt.RecvAll(ZMQ.Socket,System.Byte[]@)">
+            <summary>
+            Receive all messages and seperate out socket identity and remove delimiter message
+            </summary>
+            <param name="skt">Socket</param>
+            <param name="identity">Destination Socket Identity</param>
+            <returns>Message Parts</returns>
+        </member>
+        <member name="M:ZMQ.ZMQExt.SocketExt.RecvAll(ZMQ.Socket,System.String@,System.Text.Encoding)">
+            <summary>
+            Receive all messages and seperate out socket identity and remove delimiter message
+            </summary>
+            <param name="skt">Socket</param>
+            <param name="identity">Destination Socket Identity</param>
+            <param name="encoding">Identity string encoding</param>
+            <returns>Message Parts</returns>
+        </member>
+        <member name="M:ZMQ.ZMQExt.SocketExt.Send(ZMQ.Socket,System.Collections.Generic.Queue{System.Byte[]})">
+            <summary>
+            Send Queue of message parts
+            </summary>
+            <param name="skt">Socket</param>
+            <param name="data">Message Parts</param>
+        </member>
+        <member name="M:ZMQ.ZMQExt.SocketExt.Recv``1(ZMQ.Socket)">
+            <summary>
+            Receive and deserialize an object of a given type using .Net binary serialization.
+            </summary>
+            <typeparam name="T">Received Object Type</typeparam>
+            <param name="skt">Socket</param>
+            <returns>T obj</returns>
+        </member>
+        <member name="M:ZMQ.ZMQExt.SocketExt.Recv``1(ZMQ.Socket,System.Int32)">
+            <summary>
+            Receive and deserialize an object of a given type using .Net binary serialization.
+            </summary>
+            <typeparam name="T">Received Object Type</typeparam>
+            <param name="skt">Socket</param>
+            <param name="timeout">Non-blocking receive timeout</param>
+            <returns>T obj</returns>
+        </member>
+        <member name="M:ZMQ.ZMQExt.SocketExt.Send``1(ZMQ.Socket,``0)">
+            <summary>
+            Serialize and send object of given type using .Net binary serialization
+            </summary>
+            <typeparam name="T">Sending Object Type</typeparam>
+            <param name="skt">Socket</param>
+            <param name="obj">T Object</param>
+        </member>
+        <member name="T:ZMQ.ZMQDevice.WorkerPool">
+            <summary>
+            Worker pool device
+            </summary>
+        </member>
+    </members>
+</doc>

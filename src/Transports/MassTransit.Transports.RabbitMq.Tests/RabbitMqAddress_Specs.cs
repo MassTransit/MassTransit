@@ -43,7 +43,8 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		[Then]
 		public void Rebuilt()
 		{
-//            _addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://guest:guest@some_server:5432/thehost/queue"));
+            //Hmm, why was this removed
+            //_addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://guest:guest@some_server:5432/thehost/queue"));
 		}
 
         [Then]

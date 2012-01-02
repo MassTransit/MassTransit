@@ -12,36 +12,60 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.ZeroMQ
 {
-	public class ZeroMqTransportFactory :
+    using ZMQ;
+    using ZeroMq;
+
+    public class ZeroMqTransportFactory :
 		ITransportFactory
 	{
-		public string Scheme
+        //this should own the creation of the Context
+        Context _context;
+
+        public ZeroMqTransportFactory(int numberOfIoThreads = 1)
+        {
+            _context  = new Context(numberOfIoThreads);
+        }
+
+        public string Scheme
 		{
-			get { return "zmq"; }
+			get { return "zeromq"; }
 		}
 
 		public IDuplexTransport BuildLoopback(ITransportSettings settings)
 		{
-			return new ZeroMqTransport(settings.Address);
+            return new Transports.Transport(settings.Address,
+                ()=> BuildInbound(settings),
+                ()=>BuildOutbound(settings));
 		}
 
 		public IInboundTransport BuildInbound(ITransportSettings settings)
 		{
-			return BuildLoopback(settings);
+		    var address = (ZeroMqAddress)settings.Address;
+		    var zeroMqConnection = new ZeroMqConnection(_context, address,SocketType.REQ); //what should the type be?
+		    var handler = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
+		    return new InboundZeroMqTransport(address, handler, true);
 		}
 
 		public IOutboundTransport BuildOutbound(ITransportSettings settings)
 		{
-			return BuildLoopback(settings);
+		    var address = (ZeroMqAddress)settings.Address;
+		    var zeroMqConnection = new ZeroMqConnection(_context, address, SocketType.REQ); //what should the type be?
+		    var handler = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
+			return new OutboundZeroMqTransport(address, handler);
 		}
 
 		public IOutboundTransport BuildError(ITransportSettings settings)
 		{
-			return BuildLoopback(settings);
+			return BuildLoopback(settings); //what the F' should this be.
 		}
 
 		public void Dispose()
 		{
+            if(_context != null)
+            {
+                _context.Dispose();
+                _context = null;
+            }
 		}
 	}
 }
