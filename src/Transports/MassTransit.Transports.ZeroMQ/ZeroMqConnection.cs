@@ -12,9 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.ZeroMq
 {
+    using System.Diagnostics;
     using ZMQ;
     using log4net;
 
+    [DebuggerDisplay("Connected:{_connected}")]
     public class ZeroMqConnection :
         Connection
     {
@@ -23,6 +25,7 @@ namespace MassTransit.Transports.ZeroMq
         SocketType _socketType;
         Socket _socket;
         ZeroMqAddress _address;
+        bool _connected;
 
         public ZeroMqConnection(Context context,
             ZeroMqAddress address,
@@ -44,13 +47,20 @@ namespace MassTransit.Transports.ZeroMq
         }
         public void Connect()
         {
+            Disconnect();
+
             _socket = _context.Socket(_socketType);
+            
+            //this needs to be configurable maybe the '/queue' part of the uri?
+            _socket.Identity = new byte[]{12,12};
+
             var addr = _address.RebuiltUri.ToString();
 
             if (addr.EndsWith("/")) //TODO: log this as an issue with ZMQ?
                 addr = addr.Substring(0, addr.Length - 1);
 
             _socket.Connect(addr);
+            _connected = true;
         }
 
         public void Disconnect()
@@ -68,6 +78,7 @@ namespace MassTransit.Transports.ZeroMq
             {
                 _log.Warn("Faild to close ZeroMq connection.", ex);
             }
+            _connected = false;
         }
     }
 }

@@ -32,13 +32,19 @@ namespace MassTransit.Transports.ZeroMq.Tests
         {
             _context = new Context();
             var address  = new ZeroMqAddress(new Uri("zeromq-tcp://localhost:5555"));
-            var zeroMqConnection = new ZeroMqConnection(_context, address, SocketType.REQ );
+            var zeroMqConnection = new ZeroMqConnection(_context, address, SocketType.SUB );
             ConnectionHandler<ZeroMqConnection> connection = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
             _inbound = new InboundZeroMqTransport(address, connection, true);
 
             //push simple message in
+
             zeroMqConnection.Connect();
-           zeroMqConnection.Socket.Send("dru", Encoding.UTF8);
+
+            using(var pub = _context.Socket(SocketType.PUB) )
+            {
+                pub.Connect("zeromq-tcp://localhost:5555");
+                pub.Send(Encoding.UTF8.GetBytes("dru"));
+            }
         }
 
         [TearDown]
