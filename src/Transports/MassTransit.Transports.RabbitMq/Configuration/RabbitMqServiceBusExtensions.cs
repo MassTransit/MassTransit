@@ -34,7 +34,10 @@ namespace MassTransit
 
 		/// <summary>
 		/// Returns the endpoint for the specified message type using the default
-		/// exchange/queue convention for naming
+		/// exchange/queue convention for naming.
+		/// 
+		/// TODO: FIX!!!
+		/// 
 		/// </summary>
 		/// <param name="bus">The bus instance used to resolve the endpoint</param>
 		/// <param name="messageType">The message type to convert to a URI</param>
@@ -44,6 +47,9 @@ namespace MassTransit
 			return null;
 		}
 
+		/// <summary>
+		/// <see cref="UseRabbitMq{T}(T,Action{RabbitMqTransportFactoryConfigurator})"/>
+		/// </summary>
 		public static T UseRabbitMq<T>(this T configurator)
 			where T : EndpointFactoryConfigurator
 		{
@@ -56,6 +62,15 @@ namespace MassTransit
 			return configurator;
 		}
 
+		/// <summary>
+		/// This method specifies that the container under configuration is to use RabbitMQ for message queueing but not necessarily for routing
+		/// polymorphically. See http://readthedocs.org/docs/masstransit/en/latest/configuration/transports/rabbitmq.html.
+		/// This method also calls <see cref="SerializerConfigurationExtensions.UseJsonSerializer{T}"/>.
+		/// </summary>
+		/// <typeparam name="T">configurator type param</typeparam>
+		/// <param name="configurator">configurator instance</param>
+		/// <param name="configureFactory">custom action used to call APIs on the configurator</param>
+		/// <returns>the configurator instance</returns>
 		public static T UseRabbitMq<T>(this T configurator, Action<RabbitMqTransportFactoryConfigurator> configureFactory)
 			where T : EndpointFactoryConfigurator
 		{

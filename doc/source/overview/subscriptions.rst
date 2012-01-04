@@ -98,10 +98,8 @@ information to all nodes in the cluster.
 
     var bus = ServiceBusFactory.New(sbc =>
     {
-        //other settings
+        // this is the recommended routing strategy, and will call 'sbc.UseRabbitMq()'.
+        sbc.UseRabbitMqRouting();
         
-        sbc.UseRabbitMq();
-        
-        // nothing else is required for a 
-        // rabbitmq configuration (UsingRabbitMqRouting is implicit)
+        // more config
     });
