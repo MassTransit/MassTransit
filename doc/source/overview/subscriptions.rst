@@ -22,7 +22,7 @@ to unsubscribe the subscription.
 
 .. sourcecode:: csharp
 
-    var subscriptionToken = bus.Subscribe<>();
+    var subscriptionToken = bus.Subscribe<MyMessage>();
     
     //later, when you want to unsubscribe
     if(!subscriptionToken())
@@ -101,5 +101,7 @@ information to all nodes in the cluster.
         //other settings
         
         sbc.UseRabbitMq();
-        sbc.UseRabbitMqRouting();
+        
+        // nothing else is required for a 
+        // rabbitmq configuration (UsingRabbitMqRouting is implicit)
     });
