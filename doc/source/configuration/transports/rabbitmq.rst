@@ -36,7 +36,7 @@ convention based routing for RabbitMq
  ==================================  ================================      ==================================
  IServiceBus.Publish<T>(T, A<C<T>>)  Enables *Polymorphic routing* [#pr]   Will only route non-polymorphicly.
                                      and *Interface-based routing* [#ir]   Will not route on interfaces.
- 
+                                                                           Will not place message in any exchange.
  ==================================  ================================      ==================================
  
  
