@@ -20,12 +20,26 @@ namespace MassTransit
 	using Saga;
 	using Saga.SubscriptionConfigurators;
 	using SubscriptionConfigurators;
+	using Util;
 	using WindsorIntegration;
 
+	/// <summary>
+	/// Extension methods for the Windsor IoC container.
+	/// </summary>
 	public static class WindsorContainerExtensions
 	{
-		public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IWindsorContainer container)
+		/// <summary>
+		/// Specify that the service bus should load its subscribers from the container passed as an argument.
+		/// </summary>
+		/// <param name="configurator">The configurator the extension method works on.</param>
+		/// <param name="container">The Windsow container.</param>
+		public static void LoadFrom(
+			[NotNull] this SubscriptionBusServiceConfigurator configurator, 
+			[NotNull] IWindsorContainer container)
 		{
+			if (configurator == null) throw new ArgumentNullException("configurator");
+			if (container == null) throw new ArgumentNullException("container");
+
 			IList<Type> consumerTypes = FindTypes<IConsumer>(container, x => !x.Implements<ISaga>());
 			if (consumerTypes.Count > 0)
 			{
@@ -49,19 +63,40 @@ namespace MassTransit
 			}
 		}
 
+		/// <summary>
+		/// Register the type as a type to load from the container as a consumer.
+		/// </summary>
+		/// <typeparam name="TConsumer">The type of the consumer that consumes messages</typeparam>
+		/// <param name="configurator">configurator</param>
+		/// <param name="container">The container that the consumer should be loaded from.</param>
+		/// <returns>The configurator</returns>
 		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-			this SubscriptionBusServiceConfigurator configurator, IWindsorContainer container)
+			[NotNull] this SubscriptionBusServiceConfigurator configurator, 
+			[NotNull] IWindsorContainer container)
 			where TConsumer : class
 		{
+			if (configurator == null) throw new ArgumentNullException("configurator");
+			if (container == null) throw new ArgumentNullException("container");
 			var consumerFactory = new WindsorConsumerFactory<TConsumer>(container);
 
 			return configurator.Consumer(consumerFactory);
 		}
 
+		/// <summary>
+		/// Load the saga of the generic type from the windsor container,
+		/// by loading it directly from the container.
+		/// </summary>
+		/// <typeparam name="TSaga">The type of the saga</typeparam>
+		/// <param name="configurator">The configurator</param>
+		/// <param name="container">The windsor container</param>
+		/// <returns>The configurator</returns>
 		public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-			this SubscriptionBusServiceConfigurator configurator, IWindsorContainer container)
+			[NotNull] this SubscriptionBusServiceConfigurator configurator, 
+			[NotNull] IWindsorContainer container)
 			where TSaga : class, ISaga
 		{
+			if (configurator == null) throw new ArgumentNullException("configurator");
+			if (container == null) throw new ArgumentNullException("container");
 			return configurator.Saga(container.Resolve<ISagaRepository<TSaga>>());
 		}
 
