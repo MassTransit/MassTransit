@@ -19,6 +19,7 @@ namespace MassTransit.Serialization
     using Magnum.Reflection;
     using Newtonsoft.Json;
 
+
     public class ListJsonConverter :
         JsonConverter
     {

@@ -40,56 +40,14 @@ namespace MassTransit.Serialization
         [ThreadStatic]
         static JsonSerializer _xmlSerializer;
 
-        static JsonSerializer Deserializer
-        {
-            get
-            {
-                return _deserializer ?? (_deserializer = JsonSerializer.Create(new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore,
-                        DefaultValueHandling = DefaultValueHandling.Ignore,
-                        MissingMemberHandling = MissingMemberHandling.Ignore,
-                        ObjectCreationHandling = ObjectCreationHandling.Auto,
-                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                        ContractResolver = new JsonContractResolver(),
-                        Converters = new List<JsonConverter>(new JsonConverter[]
-                            {
-                                new ListJsonConverter(),
-                                new InterfaceProxyConverter(),
-                                new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
-                            })
-                    }));
-            }
-        }
-
-        static JsonSerializer Serializer
-        {
-            get
-            {
-                return _serializer ?? (_serializer = JsonSerializer.Create(new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore,
-                        DefaultValueHandling = DefaultValueHandling.Ignore,
-                        MissingMemberHandling = MissingMemberHandling.Ignore,
-                        ObjectCreationHandling = ObjectCreationHandling.Auto,
-                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                        ContractResolver = new JsonContractResolver(),
-                        Converters = new List<JsonConverter>(new JsonConverter[]
-                            {
-                                new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
-                            }),
-                    }));
-            }
-        }
-
         static JsonSerializer XmlSerializer
         {
             get
             {
                 return _xmlSerializer ?? (_xmlSerializer = JsonSerializer.Create(new JsonSerializerSettings
                     {
-                        NullValueHandling = NullValueHandling.Ignore,
-                        DefaultValueHandling = DefaultValueHandling.Ignore,
+                        NullValueHandling = NullValueHandling.Include,
+                        DefaultValueHandling = DefaultValueHandling.Include,
                         MissingMemberHandling = MissingMemberHandling.Ignore,
                         ObjectCreationHandling = ObjectCreationHandling.Auto,
                         ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
@@ -127,7 +85,7 @@ namespace MassTransit.Serialization
                 {
                     jsonWriter.Formatting = Newtonsoft.Json.Formatting.None;
 
-                    Serializer.Serialize(jsonWriter, envelope);
+                    JsonMessageSerializer.Serializer.Serialize(jsonWriter, envelope);
 
                     jsonWriter.Flush();
                     stringWriter.Flush();
@@ -175,15 +133,17 @@ namespace MassTransit.Serialization
                     XmlSerializer.Serialize(jsonWriter, document.Root);
                 }
 
+                Console.WriteLine("Json: {0}", json);
+
                 Envelope result;
                 using (var stringReader = new StringReader(json.ToString()))
                 using (var jsonReader = new JsonTextReader(stringReader))
                 {
-                    result = Deserializer.Deserialize<Envelope>(jsonReader);
+                    result = JsonMessageSerializer.Deserializer.Deserialize<Envelope>(jsonReader);
                 }
 
                 context.SetUsingEnvelope(result);
-                context.SetMessageTypeConverter(new JsonMessageTypeConverter(Deserializer, result.Message as JToken,
+                context.SetMessageTypeConverter(new JsonMessageTypeConverter(JsonMessageSerializer.Deserializer, result.Message as JToken,
                     result.MessageType));
             }
             catch (SerializationException)
