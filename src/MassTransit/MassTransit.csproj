@@ -351,6 +351,7 @@
     <Compile Include="Serialization\JsonMessageTypeConverter.cs" />
     <Compile Include="Serialization\ListJsonConverter.cs" />
     <Compile Include="Serialization\StaticMessageTypeConverter.cs" />
+    <Compile Include="Serialization\StringDecimalConverter.cs" />
     <Compile Include="Serialization\VersionOneXmlMessageSerializer.cs" />
     <Compile Include="ServiceCatalog.cs" />
     <Compile Include="ServiceContainer.cs" />

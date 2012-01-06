@@ -45,15 +45,14 @@ namespace MassTransit.Serialization
                         ObjectCreationHandling = ObjectCreationHandling.Auto,
                         ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
                         ContractResolver = new JsonContractResolver(),
-
                         Converters = new List<JsonConverter>(new JsonConverter[]
                             {
                                 new ListJsonConverter(),
                                 new InterfaceProxyConverter(),
+                                new StringDecimalConverter(), 
                                 new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
                             })
                     }));
-
             }
         }
 
