@@ -44,6 +44,9 @@ namespace MassTransit
 	public interface IConsumeContext :
 		IMessageContext
 	{
+		/// <summary>
+		/// Gets the base context of this consume context.
+		/// </summary>
 		IReceiveContext BaseContext { get; }
 
 		/// <summary>
