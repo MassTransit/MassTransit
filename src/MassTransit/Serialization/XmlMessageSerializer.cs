@@ -133,8 +133,6 @@ namespace MassTransit.Serialization
                     XmlSerializer.Serialize(jsonWriter, document.Root);
                 }
 
-                Console.WriteLine("Json: {0}", json);
-
                 Envelope result;
                 using (var stringReader = new StringReader(json.ToString()))
                 using (var jsonReader = new JsonTextReader(stringReader))
