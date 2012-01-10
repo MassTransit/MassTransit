@@ -1,0 +1,781 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>clrzmq</name>
+    </assembly>
+    <members>
+        <member name="T:ZMQ.Context">
+            <summary>
+            ZMQ Context
+            </summary>
+        </member>
+        <member name="M:ZMQ.Context.#ctor(System.Int32)">
+            <summary>
+            Create ZMQ Context
+            </summary>
+            <param name="io_threads">Thread pool size</param>
+        </member>
+        <member name="M:ZMQ.Context.Socket(ZMQ.SocketType)">
+            <summary>
+            Creates a new ZMQ socket
+            </summary>
+            <param name="type">Type of socket to be created</param>
+            <returns>A new ZMQ socket</returns>
+        </member>
+        <member name="M:ZMQ.Context.Poll(ZMQ.PollItem[],System.Int64)">
+            <summary>
+            Polls the supplied items for events.
+            </summary>
+            <param name="items">Items to Poll</param>
+            <param name="timeout">Timeout(micro seconds)</param>
+            <returns>Number of Poll items with events</returns>
+        </member>
+        <member name="M:ZMQ.Context.Poll(ZMQ.PollItem[])">
+            <summary>
+            Polls the supplied items for events, with infinite timeout.
+            </summary>
+            <param name="items">Items to Poll</param>
+            <returns>Number of Poll items with events</returns>
+        </member>
+        <member name="M:ZMQ.Context.Poller(ZMQ.PollItem[],System.Int64)">
+            <summary>
+            Polls the supplied items for events. Static method.
+            </summary>
+            <param name="items">Items to Poll</param>
+            <param name="timeout">Timeout(micro seconds)</param>
+            <returns>Number of Poll items with events</returns>
+        </member>
+        <member name="M:ZMQ.Context.Poller(ZMQ.PollItem[])">
+            <summary>
+            Polls the supplied items for events, with infinite timeout.
+            Static method
+            </summary>
+            <param name="items">Items to Poll</param>
+            <returns>Number of Poll items with events</returns>
+        </member>
+        <member name="M:ZMQ.Context.Poller(System.Collections.Generic.IList{ZMQ.Socket},System.Int64)">
+            <summary>
+            Polls the supplied sockets (sockets need to have events set).
+            Static method
+            </summary>
+            <param name="skts">Socket List</param>
+            <param name="timeout">Timeout(micro seconds)</param>
+            <returns>Number of Poll items with events</returns>
+        </member>
+        <member name="M:ZMQ.Context.Poller(System.Collections.Generic.IList{ZMQ.Socket})">
+            <summary>
+            Polls the supplied sockets (sockets need to have events set),
+            infinite timeout. Static method.
+            </summary>
+            <param name="skts">Socket List</param>
+            <returns>Number of Poll items with events</returns>
+        </member>
+        <member name="T:ZMQ.Transport">
+            <summary>
+            Message transport types
+            </summary>
+        </member>
+        <member name="T:ZMQ.SocketOpt">
+            <summary>
+            Socket options
+            </summary>
+        </member>
+        <member name="T:ZMQ.SocketType">
+            <summary>
+            Socket types
+            </summary>
+        </member>
+        <member name="T:ZMQ.DeviceType">
+            <summary>
+            Device types
+            </summary>
+        </member>
+        <member name="T:ZMQ.SendRecvOpt">
+            <summary>
+            Send and receive options
+            </summary>
+        </member>
+        <member name="T:ZMQ.IOMultiPlex">
+            <summary>
+            IO Multiplexing polling events bit flags
+            </summary>
+        </member>
+        <member name="T:ZMQ.PollHandler">
+            <summary>
+            Polling event handler
+            </summary>
+            <param name="socket">Target socket</param>
+            <param name="revents">Poll events</param>
+        </member>
+        <member name="T:ZMQ.ZMQPollItem">
+            <summary>
+            ZMQ Poll item, sets target socket and events.
+            </summary>
+        </member>
+        <member name="M:ZMQ.ZMQPollItem.#ctor(System.IntPtr,System.Object,System.Int16)">
+            <summary>
+            Do not call directly
+            </summary>
+            <param name="socket">Target ZMQ socket ptr</param>
+            <param name="fd">Non ZMQ socket (Experimental)</param>
+            <param name="events">Desired events</param>
+        </member>
+        <member name="M:ZMQ.ZMQPollItem.ResetRevents">
+            <summary>
+            Reset revents so that poll item can be safely reused
+            </summary>
+        </member>
+        <member name="P:ZMQ.ZMQPollItem.Revents">
+            <summary>
+            Get returned event flags
+            </summary>
+        </member>
+        <member name="T:ZMQ.PollItem">
+            <summary>
+            Polling item, provides the polling mechanism
+            </summary>
+        </member>
+        <member name="M:ZMQ.PollItem.#ctor(ZMQ.ZMQPollItem,ZMQ.Socket)">
+            <summary>
+            Should not be created directly, use Socket.CreatePollItem
+            </summary>
+            <param name="zmqPollItem">Native poll item</param>
+            <param name="socket">Socket to poll</param>
+        </member>
+        <member name="M:ZMQ.PollItem.FireEvents">
+            <summary>
+            Fire handlers for any returned events
+            </summary>
+        </member>
+        <member name="E:ZMQ.PollItem.PollInHandler">
+            <summary>
+            POLLIN event handler
+            </summary>
+        </member>
+        <member name="E:ZMQ.PollItem.PollOutHandler">
+            <summary>
+            POLLOUT event handler
+            </summary>
+        </member>
+        <member name="E:ZMQ.PollItem.PollErrHandler">
+            <summary>
+            POLLERR event handler
+            </summary>
+        </member>
+        <member name="P:ZMQ.PollItem.ZMQPollItem">
+            <summary>
+            Get and Set ZMQ poll item
+            </summary>
+        </member>
+        <member name="T:ZMQ.Exception">
+            <summary>
+            ZMQ Exception type
+            </summary>
+        </member>
+        <member name="P:ZMQ.Exception.Errno">
+            <summary>
+            Get ZeroMQ Errno
+            </summary>
+        </member>
+        <member name="T:ZMQ.ZHelpers">
+            <summary>
+            Utility methods
+            </summary>
+        </member>
+        <member name="M:ZMQ.ZHelpers.DecodeUUID(System.Byte[])">
+            <summary>
+            Decode UUID to string
+            </summary>
+            <param name="data">UUID</param>
+            <returns>String representation of UUID</returns>
+        </member>
+        <member name="M:ZMQ.ZHelpers.EncodeUUID(System.String)">
+            <summary>
+            Encode string to UUID
+            </summary>
+            <param name="uuid">String representation of UUID</param>
+            <returns>UUID</returns>
+        </member>
+        <member name="M:ZMQ.ZHelpers.Dump(ZMQ.Socket,System.Text.Encoding)">
+            <summary>
+            Prints all pending messages to the console.
+            </summary>
+            <param name="socket">ZMQ Socket</param>
+            <param name="encoding">Encoding to use for message decoding</param>
+        </member>
+        <member name="M:ZMQ.ZHelpers.SetID(ZMQ.Socket,System.Text.Encoding)">
+            <summary>
+            Sets socket Identity to a random number.
+            </summary>
+            <param name="socket">ZMQ Socket</param>
+            <param name="encoding">Encoding to use for the socket identity</param>
+            <returns>The identity assigned to the socket.</returns>
+        </member>
+        <member name="M:ZMQ.ZHelpers.Version(System.Int32@,System.Int32@,System.Int32@)">
+            <summary>
+            Get ZMQ version numbers
+            </summary>
+            <param name="major">Major</param>
+            <param name="minor">Minor</param>
+            <param name="patch">Patch</param>
+        </member>
+        <member name="M:ZMQ.ZHelpers.VersionAssert(System.Int32,System.Int32)">
+            <summary>
+            Assert the current version
+            </summary>
+            <param name="wantMajor">Desired Major</param>
+            <param name="wantMinor">Desired Minor</param>
+        </member>
+        <member name="M:ZMQ.ZHelpers.Version">
+            <summary>
+            Get ZMQ version
+            </summary>
+            <returns>ZMQ version string (major.minor.patch)</returns>
+        </member>
+        <member name="T:ZMQ.Socket">
+            <summary>
+            ZMQ Socket
+            </summary>
+        </member>
+        <member name="M:ZMQ.Socket.#ctor(System.IntPtr)">
+            <summary>
+            This constructor should not be called directly, use the Context
+            Socket method
+            </summary>
+            <param name="ptr">Pointer to a socket</param>
+        </member>
+        <member name="M:ZMQ.Socket.#ctor(ZMQ.SocketType)">
+            <summary>
+            Create Socket using application wide Context. OBSOLETE: use <see cref="M:ZMQ.Context.Socket(ZMQ.SocketType)"/> and
+            avoid using application-wide Context objects.
+            </summary>
+            <param name="type">Socket type</param>
+        </member>
+        <member name="M:ZMQ.Socket.ReadSizeT(System.IntPtr)">
+            <summary>
+            Allows cross platform reading of size_t
+            </summary>
+            <param name="ptr">Pointer to a size_t</param>
+            <returns>Size_t value</returns>
+        </member>
+        <member name="M:ZMQ.Socket.WriteSizeT(System.IntPtr,System.Object)">
+            <summary>
+            Allows cross platform writing of size_t
+            </summary>
+            <param name="ptr">Pointer to a size_</param>
+            <param name="val">Value to write</param>
+        </member>
+        <member name="M:ZMQ.Socket.CreatePollItem(ZMQ.IOMultiPlex)">
+            <summary>
+            Create poll item for ZMQ socket listening, for the supplied events
+            </summary>
+            <param name="events">Listening events</param>
+            <returns>Socket Poll item</returns>
+        </member>
+        <member name="M:ZMQ.Socket.CreatePollItem(ZMQ.IOMultiPlex,System.Net.Sockets.Socket)">
+            <summary>
+            Create poll item for ZMQ and plain socket listening, for the supplied events
+            </summary>
+            <param name="events">Listening events</param>
+            <param name="sysSocket">Raw Socket</param>
+            <returns>Socket Poll item</returns>
+        </member>
+        <member name="M:ZMQ.Socket.SetSockOpt(ZMQ.SocketOpt,System.UInt64)">
+            <summary>
+            Set Socket Option
+            </summary>
+            <param name="option">Socket Option</param>
+            <param name="value">Option value</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.SetSockOpt(ZMQ.SocketOpt,System.Byte[])">
+            <summary>
+            Set Socket Option
+            </summary>
+            <param name="option">Socket Option</param>
+            <param name="value">Option value</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.SetSockOpt(ZMQ.SocketOpt,System.Int32)">
+            <summary>
+            Set Socket Option
+            </summary>
+            <param name="option">Socket Option</param>
+            <param name="value">Option value</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.SetSockOpt(ZMQ.SocketOpt,System.Int64)">
+            <summary>
+            Set Socket Option
+            </summary>
+            <param name="option">Socket Option</param>
+            <param name="value">Option value</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.GetSockOpt(ZMQ.SocketOpt)">
+            <summary>
+            Get the socket option value
+            </summary>
+            <param name="option">Socket Option</param>
+            <returns>Option value</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Bind(System.String)">
+            <summary>
+            Bind the socket to address
+            </summary>
+            <param name="addr">Socket Address</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Bind(ZMQ.Transport,System.String,System.UInt32)">
+            <summary>
+            Bind the socket to address
+            </summary>
+            <param name="transport">Socket transport type</param>
+            <param name="addr">Socket address</param>
+            <param name="port">Socket port</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Bind(ZMQ.Transport,System.String)">
+            <summary>
+            Bind the socket to address
+            </summary>
+            <param name="transport">Socket transport type</param>
+            <param name="addr">Socket address</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Connect(System.String)">
+            <summary>
+            Connect socket to destination address
+            </summary>
+            <param name="addr">Destination Address</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Connect(ZMQ.Transport,System.String,System.UInt32)">
+            <summary>
+            Connect socket to destination address
+            </summary>
+            <param name="transport">Socket transport type</param>
+            <param name="addr">Socket address</param>
+            <param name="port">Socket port</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Connect(ZMQ.Transport,System.String)">
+            <summary>
+            Connect socket to destination address
+            </summary>
+            <param name="transport">Socket transport type</param>
+            <param name="addr">Socket address</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Forward(ZMQ.Socket)">
+            <summary>
+            Forward all message parts directly to destination. No marshalling performed.
+            </summary>
+            <param name="destination">Destination Socket</param>
+        </member>
+        <member name="M:ZMQ.Socket.Recv(System.Byte[],System.Int32@,ZMQ.SendRecvOpt[])">
+            <summary>
+            Listen for message
+            </summary>
+            <param name="message">Message buffer</param>
+            <param name="size">The size of the read message</param>
+            <param name="flags">Receive Options</param>
+            <returns>Message</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Recv(ZMQ.SendRecvOpt[])">
+            <summary>
+            Listen for message
+            </summary>
+            <param name="flags">Receive Options</param>
+            <returns>Message</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Recv">
+            <summary>
+            Listen for message
+            </summary>
+            <returns>Message</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Recv(System.Int32)">
+            <summary>
+            Listen for message with timeout
+            </summary>
+            <param name="timeout">Timeout in milliseconds</param>
+            <returns>Message</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Recv(System.Text.Encoding)">
+            <summary>
+            Listen for message, and return it in string format
+            </summary>
+            <param name="encoding">String encoding</param>
+            <returns>Message string</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Recv(System.Text.Encoding,System.Int32)">
+            <summary>
+            Listen for message, and return it in string format, with timeout
+            </summary>
+            <param name="encoding">String encoding</param>
+            <param name="timeout">Timeout in milliseconds</param>
+            <returns>Message string</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Recv(System.Text.Encoding,ZMQ.SendRecvOpt[])">
+            <summary>
+            Listen for message, and return it in string format
+            </summary>
+            <param name="encoding">String encoding</param>
+            <param name="flags">Receive options</param>
+            <returns>Message string</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.RecvAll">
+            <summary>
+            Listen for message, retrieving all pending message parts
+            </summary>
+            <returns>Queue of message parts</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.RecvAll(System.Collections.Generic.Queue{System.Byte[]})">
+            <summary>
+            Listen for message, retrieving all pending message parts
+            </summary>
+            <param name="messages">The queue object to put the message into</param>
+            <returns>Queue of message parts</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.RecvAll(ZMQ.SendRecvOpt[])">
+            <summary>
+            DO NOT USE. Left in for backward compatibility, but SendRecvOpt flags are
+            not compatible with RecvAll.
+            Listen for message, retrieving all pending message parts.
+            </summary>
+            <param name="flags">Receive options</param>
+            <returns>Queue of message parts</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.RecvAll(System.Collections.Generic.Queue{System.Byte[]},ZMQ.SendRecvOpt[])">
+            <summary>
+            DO NOT USE. Left in for backward compatibility, but SendRecvOpt flags are
+            not compatible with RecvAll.
+            Listen for message, retrieving all pending message parts.
+            </summary>
+            <param name="messages">The queue object to put the message into</param>
+            <param name="flags">Receive options</param>
+            <returns>Queue of message parts</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.RecvAll(System.Text.Encoding)">
+            <summary>
+            Listen for message, retrieving all pending message parts
+            </summary>
+            <param name="encoding">String Encoding</param>
+            <returns>Queue of message parts as strings</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.RecvAll(System.Text.Encoding,ZMQ.SendRecvOpt[])">
+            <summary>
+            DO NOT USE. Left in for backward compatibility, but SendRecvOpt flags are
+            not compatible with RecvAll.
+            Listen for message, retrieving all pending message parts.
+            </summary>
+            <param name="encoding">String Encoding</param>
+            <param name="flags">Socket options to use when receiving</param>
+            <returns>Queue of message parts</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Send(System.Byte[],System.Int32,ZMQ.SendRecvOpt[])">
+            <summary>
+            Send Message
+            </summary>
+            <param name="message">Message</param>
+            <param name="length">Length of data to send from message</param>
+            <param name="flags">Send Options</param>
+        </member>
+        <member name="M:ZMQ.Socket.Send(System.Byte[],System.Int32,System.Int32,ZMQ.SendRecvOpt[])">
+            <summary>
+            Send Message
+            </summary>
+            <param name="message">Message</param>
+            <param name="startIndex">Index to start reading data from</param>
+            <param name="length">Length of data to send from message, starting at startIndex</param>
+            <param name="flags">Send Options</param>
+        </member>
+        <member name="M:ZMQ.Socket.Send(System.Byte[],ZMQ.SendRecvOpt[])">
+            <summary>
+            Send Message
+            </summary>
+            <param name="message">Message</param>
+            <param name="flags">Send Options</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Send(System.Byte[])">
+            <summary>
+            Send Message.
+            </summary>
+            <param name="message">Message</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Send(System.String,System.Text.Encoding)">
+            <summary>
+            Send Message.
+            </summary>
+            <param name="message">Message string</param>
+            <param name="encoding">String encoding</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Send">
+            <summary>
+            Send empty message part
+            </summary>
+        </member>
+        <member name="M:ZMQ.Socket.SendMore">
+            <summary>
+            Send empty message part
+            </summary>
+        </member>
+        <member name="M:ZMQ.Socket.SendMore(System.Byte[])">
+            <summary>
+            Send multi-part message, holding for further message parts.
+            </summary>
+            <param name="message">Message</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.SendMore(System.String,System.Text.Encoding)">
+            <summary>
+            Send multi-part message, holding for further message parts.
+            </summary>
+            <param name="message">Message</param>
+            <param name="encoding">String encoding</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.SendMore(System.String,System.Text.Encoding,ZMQ.SendRecvOpt[])">
+            <summary>
+            Send multi-part message, holding for further message parts.
+            </summary>
+            <param name="message">Message</param>
+            <param name="encoding">String encoding</param>
+            <param name="flags">Send options</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Send(System.String,System.Text.Encoding,ZMQ.SendRecvOpt[])">
+            <summary>
+            Send Message.
+            </summary>
+            <param name="message">Message data</param>
+            <param name="encoding">Encoding to use when sending</param>
+            <param name="flags">Send Options</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.IdentityToString(System.Text.Encoding)">
+            <summary>
+            Retrieve identity as a string
+            </summary>
+            <param name="encoding">String encoding</param>
+            <returns>Socket Identity</returns>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.StringToIdentity(System.String,System.Text.Encoding)">
+            <summary>
+            Set identity from string
+            </summary>
+            <param name="identity">Identity</param>
+            <param name="encoding">String encoding</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Subscribe(System.Byte[])">
+            <summary>
+            Set socket subscription filter
+            </summary>
+            <param name="filter">Filter</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Subscribe(System.String,System.Text.Encoding)">
+            <summary>
+            Set socket subscription filter
+            </summary>
+            <param name="filter">Filter</param>
+            <param name="encoding">Encoding to use when setting the filter</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Unsubscribe(System.Byte[])">
+            <summary>
+            Remove socket subscription filter
+            </summary>
+            <param name="filter">Filter</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Unsubscribe(System.String,System.Text.Encoding)">
+            <summary>
+            Remove socket subscription filter
+            </summary>
+            <param name="filter">Filter</param>
+            <param name="encoding">Encoding to use when removing the filter</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="E:ZMQ.Socket.PollInHandler">
+            <summary>
+            POLLIN event handler
+            </summary>
+        </member>
+        <member name="E:ZMQ.Socket.PollOutHandler">
+            <summary>
+            POLLOUT event handler
+            </summary>
+        </member>
+        <member name="E:ZMQ.Socket.PollErrHandler">
+            <summary>
+            POLLERR event handler
+            </summary>
+        </member>
+        <member name="P:ZMQ.Socket.Identity">
+            <summary>
+            Gets or Sets socket identity
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.HWM">
+            <summary>
+            Gets or Sets socket High Water Mark
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.RcvMore">
+            <summary>
+            Gets socket more messages indicator (multipart message)
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.Swap">
+            <summary>
+            Gets or Sets socket swap
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.Affinity">
+            <summary>
+            Gets or Sets socket thread affinity
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.Rate">
+            <summary>
+            Gets or Sets socket transfer rate
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.RecoveryIvl">
+            <summary>
+            Gets or Sets socket recovery interval
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.RecoveryIvlMsec">
+            <summary>
+            Gets or Sets socket recovery interval in milliseconds
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.MCastLoop">
+            <summary>
+            Gets or Sets socket MultiCast Loop
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.SndBuf">
+            <summary>
+            Gets or Sets socket Send buffer size(bytes)
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.RcvBuf">
+            <summary>
+            Gets or Sets socket Receive buffer size(bytes)
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.Linger">
+            <summary>
+            Get or Set linger period for socket shutdown
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.ReconnectIvl">
+            <summary>
+            Get or Set reconnection interval
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.ReconnectIvlMax">
+            <summary>
+            Get or Set maximum reconnection interval
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.Backlog">
+            <summary>
+            Get or Set maximum length of the queue of outstanding connections
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.FD">
+            <summary>
+            Get Socket winsock HANDLE
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.Events">
+            <summary>
+            Get socket event state
+            </summary>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="P:ZMQ.Socket.Address">
+            <summary>
+            Get connection address
+            </summary>
+        </member>
+        <member name="T:ZMQ.Socket.Device">
+            <summary>
+            ZMQ Device creation
+            </summary>
+        </member>
+        <member name="M:ZMQ.Socket.Device.Create(ZMQ.DeviceType,ZMQ.Socket,ZMQ.Socket)">
+            <summary>
+            Create ZMQ Device
+            </summary>
+            <param name="device">Device type</param>
+            <param name="inSocket">Input socket</param>
+            <param name="outSocket">Output socket</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Device.Queue(ZMQ.Socket,ZMQ.Socket)">
+            <summary>
+            Create ZMQ Queue Device
+            </summary>
+            <param name="inSocket">Input socket</param>
+            <param name="outSocket">Output socket</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Device.Forwarder(ZMQ.Socket,ZMQ.Socket)">
+            <summary>
+            Create ZMQ Forwarder Device
+            </summary>
+            <param name="inSocket">Input socket</param>
+            <param name="outSocket">Output socket</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+        <member name="M:ZMQ.Socket.Device.Streamer(ZMQ.Socket,ZMQ.Socket)">
+            <summary>
+            Create ZMQ Streamer Device
+            </summary>
+            <param name="inSocket">Input socket</param>
+            <param name="outSocket">Output socket</param>
+            <exception cref="T:ZMQ.Exception">ZMQ Exception</exception>
+        </member>
+    </members>
+</doc>
