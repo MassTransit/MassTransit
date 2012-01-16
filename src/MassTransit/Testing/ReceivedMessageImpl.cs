@@ -60,7 +60,7 @@ namespace MassTransit.Testing
 
 		public IReceiveContext Context
 		{
-			get { return _context.BaseContext as IReceiveContext; }
+			get { return _context.BaseContext; }
 		}
 
 		public T Message

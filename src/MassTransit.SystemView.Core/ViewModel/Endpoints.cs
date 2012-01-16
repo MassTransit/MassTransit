@@ -67,7 +67,7 @@ namespace MassTransit.SystemView.Core.ViewModel
                                 .ToList()
                                 .Where(y => y.MessageName.StartsWith("MassTransit.Distributor.Messages.WorkerAvailable`"))
                                 .Where(y => matchMessageType.Replace(y.MessageName, "${type}") == wa.WorkerItemType)
-                                .Count() > 0)
+                                .Any())
                 .ToList()
                 .ForEach(x => Update(x.EndpointUri, wa));
         }

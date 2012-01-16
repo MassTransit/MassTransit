@@ -14,6 +14,7 @@ namespace MassTransit.SubscriptionConnectors
 {
 	using System;
 	using Pipeline;
+	using Pipeline.Configuration;
 	using Pipeline.Sinks;
 
 	public class SelectedInstanceSubscriptionConnector<TConsumer, TMessage> :

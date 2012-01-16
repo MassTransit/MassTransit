@@ -22,10 +22,9 @@ namespace MassTransit.Tests.Configuration
 		[Then]
 		public void Configuring_a_service_bus_easily()
 		{
-			FutureMessage<PingMessage> received;
-			using (var bus = ServiceBusFactory.New(x => { x.ReceiveFrom("loopback://localhost/queue"); }))
+		    using (var bus = ServiceBusFactory.New(x => { x.ReceiveFrom("loopback://localhost/queue"); }))
 			{
-				received = new FutureMessage<PingMessage>();
+				var received = new FutureMessage<PingMessage>();
 
 				bus.SubscribeHandler<PingMessage>(received.Set);
 

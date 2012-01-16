@@ -23,7 +23,7 @@ namespace MassTransit.Tests.Distributor
 
 	public class DistributorTestFixture<TTransportFactory> :
 		SubscriptionServiceTestFixture<TTransportFactory>
-		where TTransportFactory : ITransportFactory, new()
+		where TTransportFactory : class, ITransportFactory, new()
 	{
 		protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{

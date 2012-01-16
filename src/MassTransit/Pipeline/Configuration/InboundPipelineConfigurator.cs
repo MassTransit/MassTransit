@@ -12,8 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
-	using Context;
-	using Sinks;
+    using Sinks;
 	using Util;
 
 	/// <summary><see cref="IInboundPipelineConfigurator"/>.</summary>

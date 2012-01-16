@@ -19,6 +19,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using Exceptions;
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
+	using MassTransit.Pipeline.Configuration;
 	using Pipeline;
 	using Util;
 

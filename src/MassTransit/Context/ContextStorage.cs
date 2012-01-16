@@ -72,7 +72,7 @@ namespace MassTransit.Context
         internal static void SetReceiveContextForSend<T>(ISendContext<T> context)
             where T : class
         {
-            IConsumeContext currentConsumeContext = ContextStorage.CurrentConsumeContext;
+            IConsumeContext currentConsumeContext = CurrentConsumeContext;
             if (currentConsumeContext != null)
             {
                 var receiveContext = currentConsumeContext as IReceiveContext;

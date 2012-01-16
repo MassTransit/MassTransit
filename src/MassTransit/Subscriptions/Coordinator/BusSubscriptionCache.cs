@@ -39,11 +39,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
         public void OnSubscribeTo(SubscribeTo message)
         {
-            var key = new SubscriptionKey
-                {
-                    MessageName = message.MessageName,
-                    CorrelationId = message.CorrelationId,
-                };
+            var key = new SubscriptionKey(message.MessageName, message.CorrelationId);
 
             BusSubscription subscription = _subscriptions.Get(key);
 
@@ -55,11 +51,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
         public void OnUnsubscribeFrom(UnsubscribeFrom message)
         {
-            var key = new SubscriptionKey
-                {
-                    MessageName = message.MessageName,
-                    CorrelationId = message.CorrelationId,
-                };
+            var key = new SubscriptionKey(message.MessageName, message.CorrelationId);
 
             _subscriptions.WithValue(key, subscription =>
                 {

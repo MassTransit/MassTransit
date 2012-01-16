@@ -15,6 +15,7 @@ namespace MassTransit.SubscriptionConnectors
     using System;
     using Magnum.Extensions;
     using Pipeline;
+    using Pipeline.Configuration;
     using Pipeline.Sinks;
 
     public class SelectedContextConsumerSubscriptionConnector<TConsumer, TMessage> :

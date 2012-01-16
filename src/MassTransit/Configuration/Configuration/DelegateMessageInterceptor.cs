@@ -13,9 +13,8 @@
 namespace MassTransit.Configuration
 {
 	using System;
-	using Context;
 
-	public class DelegateMessageInterceptor :
+    public class DelegateMessageInterceptor :
 		IInboundMessageInterceptor
 	{
 		readonly Action _afterConsume;

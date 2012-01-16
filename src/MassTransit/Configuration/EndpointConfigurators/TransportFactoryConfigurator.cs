@@ -22,7 +22,7 @@ namespace MassTransit.EndpointConfigurators
 
 	public class TransportFactoryConfigurator<TTransport> :
 		EndpointFactoryBuilderConfigurator
-		where TTransport : ITransportFactory
+		where TTransport : class, ITransportFactory
 	{
 		readonly Func<TTransport> _transportFactory;
 

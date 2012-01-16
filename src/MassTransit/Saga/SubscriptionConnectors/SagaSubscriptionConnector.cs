@@ -13,7 +13,6 @@
 namespace MassTransit.Saga.SubscriptionConnectors
 {
 	using System;
-	using Context;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Sinks;
