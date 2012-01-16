@@ -33,14 +33,14 @@ namespace MassTransit.TestFramework.Fixtures
 		[TestFixtureSetUp]
 		public void Setup()
 		{
-			if (_endpointFactoryConfigurator != null)
+			if (EndpointFactoryConfigurator != null)
 			{
-				ConfigurationResult result = ConfigurationResultImpl.CompileResults(_endpointFactoryConfigurator.Validate());
+				ConfigurationResult result = ConfigurationResultImpl.CompileResults(EndpointFactoryConfigurator.Validate());
 
 				try
 				{
-					EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
-					_endpointFactoryConfigurator = null;
+					EndpointFactory = EndpointFactoryConfigurator.CreateEndpointFactory();
+					EndpointFactoryConfigurator = null;
 
 					_endpointCache = new EndpointCache(EndpointFactory);
 					EndpointCache = new EndpointCacheProxy(_endpointCache);
@@ -81,25 +81,25 @@ namespace MassTransit.TestFramework.Fixtures
 
 			var defaultSettings = new EndpointFactoryDefaultSettings();
 
-			_endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(defaultSettings);
-			_endpointFactoryConfigurator.AddTransportFactory<TTransportFactory>();
-			_endpointFactoryConfigurator.SetPurgeOnStartup(true);
+			EndpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(defaultSettings);
+			EndpointFactoryConfigurator.AddTransportFactory<TTransportFactory>();
+			EndpointFactoryConfigurator.SetPurgeOnStartup(true);
 		}
 
 		protected void AddTransport<T>()
 			where T : ITransportFactory, new()
 		{
-			_endpointFactoryConfigurator.AddTransportFactory<T>();
+			EndpointFactoryConfigurator.AddTransportFactory<T>();
 		}
 
 		protected IEndpointFactory EndpointFactory { get; private set; }
 
 		protected void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configure)
 		{
-			if (_endpointFactoryConfigurator == null)
+			if (EndpointFactoryConfigurator == null)
 				throw new ConfigurationException("The endpoint factory configurator has already been executed.");
 
-			configure(_endpointFactoryConfigurator);
+			configure(EndpointFactoryConfigurator);
 		}
 
 		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator,
@@ -118,7 +118,7 @@ namespace MassTransit.TestFramework.Fixtures
 		}
 
 
-		EndpointFactoryConfigurator _endpointFactoryConfigurator;
+		protected EndpointFactoryConfigurator EndpointFactoryConfigurator;
 		EndpointCache _endpointCache;
 
 		void TeardownBuses()
