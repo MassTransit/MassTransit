@@ -95,8 +95,14 @@
                 subscriptionB().ShouldBeFalse("B static not remaining");
                 subscriptionC().ShouldBeFalse("C static not remaining");
 
+                LocalBus.Publish(new A());
+                LocalBus.Publish(new B());
+                LocalBus.Publish(new C());
                 LocalBus.Publish(new D());
 
+                _receivedA.IsAvailable(8.Seconds()).ShouldBeTrue("A not received");
+                _receivedB.IsAvailable(8.Seconds()).ShouldBeTrue("B not received");
+                _receivedC.IsAvailable(8.Seconds()).ShouldBeTrue("C not received");
                 dynamicD.IsAvailable(8.Seconds()).ShouldBeTrue("D should have been received");
             }
             finally
