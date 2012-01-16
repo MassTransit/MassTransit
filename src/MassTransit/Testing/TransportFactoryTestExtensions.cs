@@ -19,7 +19,7 @@ namespace MassTransit.Testing
 	public static class TransportFactoryTestExtensions
 	{
 		public static void AddTransportFactory<TTransportFactory>(this ScenarioConfigurator<BusTestScenario> configurator)
-			where TTransportFactory : ITransportFactory, new()
+			where TTransportFactory : class, ITransportFactory, new()
 		{
 			var endpointFactoryConfigurator =
 				new EndpointTestScenarioBuilderConfiguratorImpl<BusTestScenario>(x => x.AddTransportFactory<TTransportFactory>());
@@ -29,7 +29,7 @@ namespace MassTransit.Testing
 
 		public static void AddTransportFactory<TTransportFactory>(
 			this ScenarioConfigurator<LocalRemoteTestScenario> configurator)
-			where TTransportFactory : ITransportFactory, new()
+			where TTransportFactory : class, ITransportFactory, new()
 		{
 			var endpointFactoryConfigurator =
 				new EndpointTestScenarioBuilderConfiguratorImpl<LocalRemoteTestScenario>(

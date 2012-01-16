@@ -18,7 +18,7 @@ namespace MassTransit.TestFramework.Transports
 	using NUnit.Framework;
 
 	public abstract class TransportReceivingContract<TTransportFactory>
-		where TTransportFactory : ITransportFactory, new()
+		where TTransportFactory : class, ITransportFactory, new()
 	{
 		IEndpoint _endpoint;
 

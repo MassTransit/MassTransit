@@ -135,7 +135,6 @@ namespace MassTransit.Serialization.Custom
 			if(NodeType == XmlNodeType.EndElement)
 			{
 				Read();
-				return;
 			}
 		}
 

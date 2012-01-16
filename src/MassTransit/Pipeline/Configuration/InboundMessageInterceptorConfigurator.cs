@@ -13,7 +13,6 @@
 namespace MassTransit.Pipeline.Configuration
 {
 	using System;
-	using Context;
 	using Exceptions;
 	using Sinks;
 

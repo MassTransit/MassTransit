@@ -13,8 +13,8 @@
 namespace MassTransit.Pipeline
 {
 	/// <summary>
-	/// Implementors should manage subscriptions from the subscription events,
-	/// see also <see cref="ISubscriptionEvent"/> - which is passed to implementors of this
+	/// Implementers should manage subscriptions from the subscription events,
+	/// see also <see cref="ISubscriptionEvent"/> - which is passed to implementers of this
 	/// interface.
 	/// </summary>
 	public interface IInboundPipelineConfigurator :

@@ -14,8 +14,14 @@ namespace MassTransit.Subscriptions.Coordinator
 {
     public class SubscriptionKey
     {
-        public string CorrelationId;
-        public string MessageName;
+        public readonly string CorrelationId;
+        public readonly string MessageName;
+
+        public SubscriptionKey(string messageName, string correlationId)
+        {
+            CorrelationId = correlationId;
+            MessageName = messageName;
+        }
 
         public bool Equals(SubscriptionKey other)
         {

@@ -22,9 +22,8 @@ namespace MassTransit.Distributor
 	using Saga;
 	using Stact;
 	using Stact.Internal;
-	using Util;
 
-	public class SagaWorker<TSaga> :
+    public class SagaWorker<TSaga> :
 		ISagaWorker<TSaga>,
 		Consumes<WakeUpWorker>.All
 		where TSaga : SagaStateMachine<TSaga>, ISaga

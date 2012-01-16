@@ -19,7 +19,7 @@ namespace MassTransit.TestFramework.Fixtures
 	[TestFixture]
 	public class LocalTestFixture<TTransportFactory> :
 		EndpointTestFixture<TTransportFactory>
-		where TTransportFactory : ITransportFactory, new()
+		where TTransportFactory : class, ITransportFactory, new()
 	{
 		[TestFixtureSetUp]
 		public void LocalTestFixtureSetup()

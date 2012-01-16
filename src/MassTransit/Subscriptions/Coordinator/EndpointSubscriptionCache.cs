@@ -38,11 +38,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
         public void Send(AddPeerSubscription message)
         {
-            var key = new SubscriptionKey
-                {
-                    MessageName = message.MessageName,
-                    CorrelationId = message.CorrelationId,
-                };
+            var key = new SubscriptionKey(message.MessageName, message.CorrelationId);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("AddPeerSubscription: {0}, {1}", message.MessageName, message.SubscriptionId);
@@ -54,11 +50,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
         public void Send(RemovePeerSubscription message)
         {
-            var key = new SubscriptionKey
-                {
-                    MessageName = message.MessageName,
-                    CorrelationId = message.CorrelationId,
-                };
+            var key = new SubscriptionKey(message.MessageName, message.CorrelationId);
 
             _messageSubscriptions.WithValue(key, subscription =>
                 {

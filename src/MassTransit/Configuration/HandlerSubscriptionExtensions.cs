@@ -14,7 +14,6 @@ namespace MassTransit
 {
 	using System;
 	using Pipeline;
-	using SubscriptionBuilders;
 	using SubscriptionConfigurators;
 	using SubscriptionConnectors;
 

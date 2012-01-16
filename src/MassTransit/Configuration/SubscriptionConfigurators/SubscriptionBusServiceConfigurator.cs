@@ -13,9 +13,8 @@
 namespace MassTransit.SubscriptionConfigurators
 {
 	using Configurators;
-	using SubscriptionBuilders;
 
-	/// <summary>
+    /// <summary>
 	/// The configuration scope for subscriptions on the bus
 	/// </summary>
 	public interface SubscriptionBusServiceConfigurator :

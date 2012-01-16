@@ -12,9 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using Context;
-
-	/// <summary>
+    /// <summary>
 	/// Implementations can be added to the inbound message pipeline to intercept
 	/// messages before they are delivered to any consumers.
 	/// </summary>

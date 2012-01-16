@@ -12,9 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-	using System;
-
-	public interface IReceived
+    public interface IReceived
 	{
 		string MessageType { get; }
 		string ReceiverType { get; }

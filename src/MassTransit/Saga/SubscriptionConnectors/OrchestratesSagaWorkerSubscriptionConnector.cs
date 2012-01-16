@@ -17,8 +17,9 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using Distributor.Messages;
 	using Distributor.Pipeline;
 	using MassTransit.Pipeline;
+	using MassTransit.Pipeline.Configuration;
 
-	public class OrchestratesSagaWorkerSubscriptionConnector<TSaga, TMessage> :
+    public class OrchestratesSagaWorkerSubscriptionConnector<TSaga, TMessage> :
 		SagaWorkerSubscriptionConnector
 		where TSaga : class, ISaga, Orchestrates<TMessage>
 		where TMessage : class, CorrelatedBy<Guid>

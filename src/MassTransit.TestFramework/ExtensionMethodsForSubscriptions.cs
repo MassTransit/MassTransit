@@ -85,7 +85,7 @@ namespace MassTransit.TestFramework
 
 				pipeline.Inspect(inspector);
 
-				if (inspector.Result.Count() > 0)
+				if (inspector.Result.Any())
 					return inspector.Result;
 
 				Thread.Sleep(20);
@@ -107,7 +107,7 @@ namespace MassTransit.TestFramework
 
 				pipeline.Inspect(inspector);
 
-				if (inspector.Result.Count() > 0)
+				if (inspector.Result.Any())
 					return inspector.Result;
 
 				Thread.Sleep(20);

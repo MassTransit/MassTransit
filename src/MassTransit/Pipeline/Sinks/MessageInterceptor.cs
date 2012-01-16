@@ -14,9 +14,8 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Context;
 
-	public class InboundMessageInterceptor :
+    public class InboundMessageInterceptor :
 		IPipelineSink<IConsumeContext>
 	{
 		readonly IInboundMessageInterceptor _interceptor;

@@ -25,7 +25,7 @@ namespace MassTransit.Tests.TextFixtures
 	[TestFixture]
 	public class SubscriptionServiceTestFixture<TTransportFactory> :
 		EndpointTestFixture<TTransportFactory>
-		where TTransportFactory : ITransportFactory, new()
+		where TTransportFactory : class, ITransportFactory, new()
 	{
 		ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
 		ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;

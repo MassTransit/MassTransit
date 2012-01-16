@@ -87,7 +87,7 @@ namespace MassTransit.Services.Timeout
 				_log.Info("Timeout Service Starting");
 
 			_unsubscribeToken = _bus.SubscribeInstance(this);
-			_unsubscribeToken += _bus.SubscribeSaga<TimeoutSaga>(_repository);
+			_unsubscribeToken += _bus.SubscribeSaga(_repository);
 
 			_fiber.Add(CheckExistingTimeouts);
 

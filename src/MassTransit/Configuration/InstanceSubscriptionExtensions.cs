@@ -13,7 +13,6 @@
 namespace MassTransit
 {
 	using Magnum;
-	using SubscriptionBuilders;
 	using SubscriptionConfigurators;
 	using SubscriptionConnectors;
 	using Util;
