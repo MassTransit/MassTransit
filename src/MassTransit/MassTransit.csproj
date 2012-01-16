@@ -297,7 +297,6 @@
     <Compile Include="IServiceContainer.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderImpl.cs" />
     <Compile Include="Pipeline\Configuration\InboundMessageRouterConfigurator.cs" />
-    <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorExtensions.cs" />
     <Compile Include="Pipeline\Configuration\OutboundCorrelatedMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\OutboundCorrelatedMessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Configuration\OutboundMessageInterceptorConfigurator.cs" />
@@ -771,7 +770,6 @@
     <Compile Include="IEndpointCache.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\BusServiceConfigurators\BusServiceConfigurator.cs" />
-    <Compile Include="Pipeline\IMessagePipeline.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfigurator.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="Transports\EndpointCache.cs" />

@@ -38,6 +38,9 @@ namespace MassTransit.Util
 			}
 
 			string name = type.GetGenericTypeDefinition().FullName;
+            if (name == null)
+                return type.Name;
+
 			name = name.Substring(0, name.IndexOf('`'));
 			name += "<";
 

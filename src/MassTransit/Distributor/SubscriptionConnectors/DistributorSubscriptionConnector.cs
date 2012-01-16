@@ -15,6 +15,7 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 	using System;
 	using Exceptions;
 	using MassTransit.Pipeline;
+	using MassTransit.Pipeline.Configuration;
 	using MassTransit.SubscriptionConnectors;
 	using Pipeline;
 

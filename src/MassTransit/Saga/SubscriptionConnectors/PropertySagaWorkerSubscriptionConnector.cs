@@ -21,8 +21,9 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using Distributor.Pipeline;
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
+	using MassTransit.Pipeline.Configuration;
 
-	public class PropertySagaWorkerSubscriptionConnector<TSaga, TMessage> :
+    public class PropertySagaWorkerSubscriptionConnector<TSaga, TMessage> :
 		SagaWorkerSubscriptionConnector
 		where TSaga : SagaStateMachine<TSaga>, ISaga
 		where TMessage : class

@@ -57,7 +57,7 @@ namespace MassTransit.Pipeline.Inspectors
 
         public bool Inspect<TMessage>(OutboundMessageFilter<TMessage> element) where TMessage : class
         {
-            Append(string.Format("Filtered '{0}' ({1})", GetMessageName<TMessage>()));
+            Append(string.Format("Filtered '{0}'", GetMessageName<TMessage>()));
 
             return true;
         }

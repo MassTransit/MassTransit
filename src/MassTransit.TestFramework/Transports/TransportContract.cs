@@ -19,7 +19,7 @@ namespace MassTransit.TestFramework.Transports
 	using NUnit.Framework;
 
 	public abstract class TransportContract<TTransportFactory>
-		where TTransportFactory : ITransportFactory, new()
+		where TTransportFactory : class, ITransportFactory, new()
 	{
 		IEndpoint _endpoint;
 

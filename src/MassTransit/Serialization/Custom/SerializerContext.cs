@@ -135,7 +135,7 @@ namespace MassTransit.Serialization.Custom
 			}
 
 			Type[] genericArguments = type.GetDeclaredGenericArguments().ToArray();
-			if (genericArguments == null || genericArguments.Length == 0)
+			if (genericArguments.Length == 0)
 			{
 				Type elementType = type.IsArray ? type.GetElementType() : typeof (object);
 
@@ -169,11 +169,14 @@ namespace MassTransit.Serialization.Custom
 
 			foreach (Type type in query)
 			{
-				Type itemType = type.BaseType.GetGenericArguments()[0];
+                if (type.BaseType != null)
+                {
+                    Type itemType = type.BaseType.GetGenericArguments()[0];
 
-				_log.DebugFormat("Adding serializer for {0} ({1})", itemType.Name, type.Name);
+                    _log.DebugFormat("Adding serializer for {0} ({1})", itemType.Name, type.Name);
 
-				_serializers.Add(itemType, FastActivator.Create(type) as IObjectSerializer);
+                    _serializers.Add(itemType, FastActivator.Create(type) as IObjectSerializer);
+                }
 			}
 		}
 	}

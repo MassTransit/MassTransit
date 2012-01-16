@@ -12,10 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-	using Context;
-
-
-	public interface IOutboundPipelineSink :
+    public interface IOutboundPipelineSink :
 		IPipelineSink<ISendContext>
 	{	
 	}

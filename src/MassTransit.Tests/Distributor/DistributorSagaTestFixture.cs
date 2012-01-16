@@ -17,12 +17,11 @@ namespace MassTransit.Tests.Distributor
 	using MassTransit.Distributor;
 	using MassTransit.Saga;
 	using MassTransit.Transports;
-	using TestFramework;
 	using TextFixtures;
 
 	public class DistributorSagaTestFixture<TTransportFactory> :
 		SubscriptionServiceTestFixture<TTransportFactory>
-		where TTransportFactory : ITransportFactory, new()
+		where TTransportFactory : class, ITransportFactory, new()
 	{
 		protected ISagaRepository<FirstSaga> FirstSagaRepository { get; private set; }
 

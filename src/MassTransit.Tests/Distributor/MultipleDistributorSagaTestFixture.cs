@@ -21,7 +21,7 @@ namespace MassTransit.Tests.Distributor
 
 	public class MultipleDistributorSagaTestFixture<TTransportFactory> :
 		SubscriptionServiceTestFixture<TTransportFactory>
-		where TTransportFactory : ITransportFactory, new()
+		where TTransportFactory : class, ITransportFactory, new()
 	{
 		protected ISagaRepository<FirstSaga> FirstSagaRepository { get; private set; }
 

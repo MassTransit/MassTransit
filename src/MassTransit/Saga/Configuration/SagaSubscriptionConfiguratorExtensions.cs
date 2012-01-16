@@ -17,7 +17,6 @@ namespace MassTransit
 	using Saga;
 	using Saga.SubscriptionConfigurators;
 	using Saga.SubscriptionConnectors;
-	using SubscriptionBuilders;
 	using SubscriptionConfigurators;
 
 	public static class SagaSubscriptionConfiguratorExtensions

@@ -16,7 +16,6 @@ namespace MassTransit.BusConfigurators
     using Builders;
     using Configuration;
     using EndpointConfigurators;
-    using SubscriptionBuilders;
     using SubscriptionConfigurators;
 
     public interface ServiceBusConfigurator :

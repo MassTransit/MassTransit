@@ -179,7 +179,8 @@ namespace MassTransit.Services.Subscriptions.Server
 			IEndpoint endpoint = _bus.GetEndpoint(uri);
 
 			IEnumerable<SubscriptionClientSaga> sagas = _subscriptionClientSagas
-				.Where(x => x.CurrentState == SubscriptionClientSaga.Active && x.ControlUri != uri);
+				.Where(x => x.CurrentState == SubscriptionClientSaga.Active && x.ControlUri != uri)
+                .ToList();
 
 			sagas.Each(client =>
 				{

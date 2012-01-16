@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline
 	using System.IO;
 	using Configuration;
 	using Context;
-	using Magnum.Reflection;
 	using MassTransit.Configuration;
 	using Sinks;
 	using SubscriptionConnectors;
@@ -175,15 +174,7 @@ namespace MassTransit.Pipeline
 			return pipeline.ConnectToRouter(sink);
 		}
 
-		public static UnsubscribeAction ConnectEndpoint(this IMessagePipeline pipeline, Type messageType, IEndpoint endpoint)
-		{
-			object sink = FastActivator.Create(typeof (EndpointMessageSink<>).MakeGenericType(messageType),
-				new object[] {endpoint});
-
-			return pipeline.FastInvoke<IMessagePipeline, UnsubscribeAction>("ConnectToRouter", sink);
-		}
-
-		public static UnsubscribeAction ConnectEndpoint<TMessage, TKey>(this IOutboundMessagePipeline pipeline,
+	    public static UnsubscribeAction ConnectEndpoint<TMessage, TKey>(this IOutboundMessagePipeline pipeline,
 		                                                                TKey correlationId,
 		                                                                IEndpoint endpoint)
 			where TMessage : class, CorrelatedBy<TKey>

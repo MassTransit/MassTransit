@@ -12,8 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
-	using Context;
-	using Sinks;
+    using Sinks;
 
 	public class OutboundPipelineConfigurator :
 		IOutboundPipelineConfigurator
@@ -27,7 +26,7 @@ namespace MassTransit.Pipeline.Configuration
 
 			var router = new MessageRouter<ISendContext>();
 
-			_pipeline = new OutboundMessagePipeline(router, this);
+			_pipeline = new OutboundMessagePipeline(router);
 		}
 
 		public IOutboundMessagePipeline Pipeline

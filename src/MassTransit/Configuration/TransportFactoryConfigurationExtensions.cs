@@ -28,14 +28,14 @@ namespace MassTransit
 
 		public static EndpointFactoryConfigurator AddTransportFactory<TTransportFactory>(
 			this EndpointFactoryConfigurator configurator)
-			where TTransportFactory : ITransportFactory, new()
+			where TTransportFactory : class, ITransportFactory, new()
 		{
 			return AddTransportFactory(configurator, () => new TTransportFactory());
 		}
 
 		public static EndpointFactoryConfigurator AddTransportFactory<TTransportFactory>(
 			this EndpointFactoryConfigurator configurator, Action<TTransportFactory> configureFactory)
-			where TTransportFactory : ITransportFactory, new()
+			where TTransportFactory : class, ITransportFactory, new()
 		{
 			return AddTransportFactory(configurator, () =>
 				{
@@ -48,14 +48,14 @@ namespace MassTransit
 
 		public static ServiceBusConfigurator AddTransportFactory<TTransportFactory>(
 			this ServiceBusConfigurator configurator)
-			where TTransportFactory : ITransportFactory, new()
+			where TTransportFactory : class, ITransportFactory, new()
 		{
 			return AddTransportFactory(configurator, () => new TTransportFactory());
 		}
 
 		public static ServiceBusConfigurator AddTransportFactory<TTransportFactory>(
 			this ServiceBusConfigurator configurator, Action<TTransportFactory> configureFactory)
-			where TTransportFactory : ITransportFactory, new()
+			where TTransportFactory : class, ITransportFactory, new()
 		{
 			return AddTransportFactory(configurator, () =>
 				{
@@ -74,7 +74,7 @@ namespace MassTransit
 
 		public static T AddTransportFactory<T, TTransport>(this T configurator, Func<TTransport> transportFactoryFactory)
 			where T : EndpointFactoryConfigurator
-			where TTransport : ITransportFactory
+			where TTransport : class, ITransportFactory
 		{
 			var transportFactoryConfigurator = new TransportFactoryConfigurator<TTransport>(transportFactoryFactory);
 

@@ -67,6 +67,10 @@ namespace MassTransit.Builders
 		/// <param name="transportFactory"></param>
 		void AddTransportFactory(ITransportFactory transportFactory);
 
+		/// <summary>
+		/// Sets the default isolation level for transports that perform transactional operations
+		/// </summary>
+		/// <param name="isolationLevel"></param>
 		void SetDefaultIsolationLevel(IsolationLevel isolationLevel);
 	}
 }

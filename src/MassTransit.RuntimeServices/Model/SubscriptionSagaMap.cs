@@ -35,7 +35,7 @@ namespace MassTransit.RuntimeServices.Model
 					x.Map(c => c.ClientId);
 					x.Map(c => c.CorrelationId, "MessageCorrelationId");
 					x.Map(c => c.EndpointUri).CustomType<UriUserType>();
-					;
+					
 					x.Map(c => c.MessageName);
 					x.Map(c => c.SequenceNumber);
 					x.Map(c => c.SubscriptionId);
