@@ -38,12 +38,28 @@ namespace MassTransit
 		/// </summary>
 		IEndpoint Endpoint { get; }
 
+		/// <summary>
+		/// Gets the inbound message pipeline.
+		/// </summary>
 		IInboundMessagePipeline InboundPipeline { get; }
 
+		/// <summary>
+		/// Gets the outbound message pipeline.
+		/// </summary>
 		IOutboundMessagePipeline OutboundPipeline { get; }
 
+		/// <summary>
+		/// Gets the control bus that can be used 
+		/// to add/remove subscripts, move message 
+		/// handlers around and tap runtime metrics
+		/// from the service bus.
+		/// </summary>
 		IServiceBus ControlBus { get; }
 
+		/// <summary>
+		/// Gets the endpoint cache. This property is used
+		/// by <see cref="GetEndpoint"/> method in turn.
+		/// </summary>
 		IEndpointCache EndpointCache { get; }
 
 		/// <summary>
