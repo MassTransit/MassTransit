@@ -17,22 +17,55 @@ namespace MassTransit.Saga
 	using MassTransit.Pipeline;
 
 	/// <summary>
-	/// A saga repository is used by the service bus to dispatch messages to sagas
+	/// A saga repository is used by the service bus to dispatch messages to sagas.
 	/// </summary>
 	/// <typeparam name="TSaga"></typeparam>
 	public interface ISagaRepository<TSaga>
 		where TSaga : class, ISaga
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="sagaId"></param>
+		/// <param name="selector"></param>
+		/// <param name="policy"></param>
+		/// <typeparam name="TMessage"></typeparam>
+		/// <returns></returns>
 		IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
 																		 InstanceHandlerSelector<TSaga, TMessage> selector,
 																		 ISagaPolicy<TSaga, TMessage> policy)
 			where TMessage : class;
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="filter"></param>
+		/// <returns></returns>
 		IEnumerable<Guid> Find(ISagaFilter<TSaga> filter);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="filter"></param>
+		/// <returns></returns>
 		IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="filter"></param>
+		/// <param name="transformer"></param>
+		/// <typeparam name="TResult"></typeparam>
+		/// <returns></returns>
 		IEnumerable<TResult> Where<TResult>(ISagaFilter<TSaga> filter, Func<TSaga, TResult> transformer);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="transformer"></param>
+		/// <typeparam name="TResult"></typeparam>
+		/// <returns></returns>
 		IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer);
 	}
 }
