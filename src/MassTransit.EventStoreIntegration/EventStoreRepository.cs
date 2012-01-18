@@ -13,50 +13,17 @@
 namespace MassTransit.EventStoreIntegration
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
 	using EventStore;
 	using EventStore.Persistence;
 	using Exceptions;
 	using Magnum;
+	using Magnum.Reflection;
 	using Pipeline;
 	using Saga;
 	using Util;
 	using log4net;
-
-	/// <summary>
-	/// This instance has the moving state:
-	/// 
-	/// <list type="bullet">
-	///		<value>Uncommitted events</value>
-	///		<value><see cref="ClearUncommittedEvents"/> clears the instance list of uncommitted events.</value>
-	/// </list>
-	/// </summary>
-	public interface IEventSourcedSaga : ISaga
-	{
-		/// <summary>
-		/// Gets the saga version.
-		/// </summary>
-		ulong Version { get; }
-
-		/// <summary>
-		/// Apply an event that causes the saga to transition.
-		/// </summary>
-		/// <param name="message"></param>
-		void Transition(object message);
-
-		/// <summary>
-		/// Gets the collection of events that haven't yet been committed.
-		/// </summary>
-		/// <returns>A collection of events</returns>
-		IEnumerable<object> GetUncommittedEvents();
-
-		/// <summary>
-		/// Clears the collection of uncommitted events from this saga instance.
-		/// </summary>
-		void ClearUncommittedEvents();
-	}
 
 	/// <summary>
 	/// 	joliver's Event Store backing of sagas!
@@ -64,7 +31,7 @@ namespace MassTransit.EventStoreIntegration
 	/// <typeparam name="TSaga">The type of saga.</typeparam>
 	public class EventStoreRepository<TSaga> :
 		ISagaRepository<TSaga>
-		where TSaga : class, IEventSourcedSaga, new()
+		where TSaga : class, ISagaEventSourced
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (InMemorySagaRepository<TSaga>));
 
@@ -84,7 +51,7 @@ namespace MassTransit.EventStoreIntegration
 			ISagaPolicy<TSaga, TMessage> policy)
 		{
 			TSaga instance;
-			IEventStream sagaStream = TryGetSaga(sagaId, out instance);
+			var sagaStream = TryGetSaga(sagaId, out instance);
 
 			if (instance == null)
 			{
@@ -182,10 +149,10 @@ namespace MassTransit.EventStoreIntegration
 			try
 			{
 				eventStream = _eventStore.OpenStream(sagaId, 0, int.MaxValue);
-				instance = new TSaga();
+				instance = FastActivator<TSaga>.Create(sagaId);
 
 				foreach (var @event in eventStream.CommittedEvents.Select(x => x.Body))
-					instance.Transition(@event);
+					instance.DeltaManager.ApplyStateDelta(@event);
 			}
 			catch (StreamNotFoundException ex)
 			{
@@ -202,7 +169,7 @@ namespace MassTransit.EventStoreIntegration
 
 			Persist<TMessage>(stream, commitId);
 
-			instance.ClearUncommittedEvents();
+			instance.DeltaManager.ClearUncommittedEvents();
 		}
 
 		private IEventStream PrepareStream(TSaga saga, Dictionary<string, object> headers, IEventStream stream)
@@ -210,8 +177,7 @@ namespace MassTransit.EventStoreIntegration
 			foreach (var item in headers)
 				stream.UncommittedHeaders[item.Key] = item.Value;
 
-			saga.GetUncommittedEvents()
-				.Cast<object>()
+			saga.DeltaManager.GetUncommittedEvents()
 				.Select(x => new EventMessage { Body = x })
 				.ToList()
 				.ForEach(stream.Add);

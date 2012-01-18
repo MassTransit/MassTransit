@@ -34,6 +34,9 @@
     <Reference Include="EventStore">
       <HintPath>..\..\packages\EventStore.3.0.11326.44\lib\net40\EventStore.dll</HintPath>
     </Reference>
+    <Reference Include="Machine.Specifications">
+      <HintPath>..\..\packages\Machine.Specifications.0.5.2.0\lib\Machine.Specifications.dll</HintPath>
+    </Reference>
     <Reference Include="Magnum">
       <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
@@ -46,8 +49,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cashier.cs" />
+    <Compile Include="Messages\GuardsGetThisDudeOutOfTheStore.cs" />
+    <Compile Include="Messages\NewOrderMessage.cs" />
+    <Compile Include="Messages\PaymentCompleteMessage.cs" />
+    <Compile Include="Messages\PaymentDueMessage.cs" />
+    <Compile Include="Messages\PaymentType.cs" />
     <Compile Include="Saga_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Messages\SubmitPayment.cs" />
+    <Compile Include="Specs\got_new_order_spec.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -49,7 +49,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConventionEventRouter.cs" />
+    <Compile Include="DeltaManager.cs" />
     <Compile Include="EventStoreRepository.cs" />
+    <Compile Include="SagaStateDelta.cs" />
+    <Compile Include="StateMachineHelper.cs" />
+    <Compile Include="ISagaEventSourced.cs" />
+    <Compile Include="IRouteEvents.cs" />
+    <Compile Include="ISagaDeltaManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

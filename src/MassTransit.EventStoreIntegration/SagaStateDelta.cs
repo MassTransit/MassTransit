@@ -10,30 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.EventStoreIntegration.Tests
+namespace MassTransit.EventStoreIntegration
 {
-	using EventStore;
-	using EventStore.Dispatcher;
-	using MassTransit.Tests.TextFixtures;
-	using Saga;
-	using CS = Saga.SagaStateMachine<Cashier>;
+	using System;
+	using Magnum.StateMachine;
 
-	public class Saga_Tests
-		: LoopbackTestFixture
+	[Serializable]
+	public class SagaStateDelta
 	{
-		ISagaRepository<Cashier> _sagaRepository;
+		readonly State _stateDelta;
 
-		protected override void EstablishContext()
+		public SagaStateDelta(State stateDelta)
 		{
-			base.EstablishContext();
-
-			var es = Wireup.Init()
-				.UsingInMemoryPersistence()
-				.LogToConsoleWindow()
-				.UsingSynchronousDispatchScheduler(new NullDispatcher())
-				.Build();
-
-			 _sagaRepository = new EventStoreRepository<Cashier>(es);
+			_stateDelta = stateDelta;
 		}
 	}
 }
