@@ -34,11 +34,33 @@
     <Reference Include="EventStore">
       <HintPath>..\..\packages\EventStore.3.0.11326.44\lib\net40\EventStore.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\log4net.1.2.10\lib\2.0\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Machine.Specifications">
       <HintPath>..\..\packages\Machine.Specifications.0.5.2.0\lib\Machine.Specifications.dll</HintPath>
     </Reference>
     <Reference Include="Magnum">
       <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NUnit.2.5.9.10348\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.mocks, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NUnit.2.5.9.10348\lib\nunit.mocks.dll</HintPath>
+    </Reference>
+    <Reference Include="pnunit.framework, Version=1.0.4000.25744, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NUnit.2.5.9.10348\lib\pnunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpTestsEx">
+      <HintPath>..\..\packages\SharpTestsEx.1.1.1\lib\SharpTestsEx.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpTestsEx.Mvc">
+      <HintPath>..\..\packages\SharpTestsEx.1.1.1\lib\SharpTestsEx.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -51,14 +73,14 @@
   <ItemGroup>
     <Compile Include="Cashier.cs" />
     <Compile Include="Messages\GuardsGetThisDudeOutOfTheStore.cs" />
-    <Compile Include="Messages\NewOrderMessage.cs" />
+    <Compile Include="Messages\NewOrder.cs" />
     <Compile Include="Messages\PaymentCompleteMessage.cs" />
     <Compile Include="Messages\PaymentDueMessage.cs" />
     <Compile Include="Messages\PaymentType.cs" />
     <Compile Include="Saga_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Messages\SubmitPayment.cs" />
-    <Compile Include="Specs\got_new_order_spec.cs" />
+    <Compile Include="Specs\cashier_got_tired_of_waiting_spec.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -67,6 +89,10 @@
     <ProjectReference Include="..\..\MassTransit.EventStoreIntegration\MassTransit.EventStoreIntegration.csproj">
       <Project>{F6DB738D-120B-4F5D-AE01-102E0F4DCC7C}</Project>
       <Name>MassTransit.EventStoreIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
+      <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>
+      <Name>MassTransit.TestFramework</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj">
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>

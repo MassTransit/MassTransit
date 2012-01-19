@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SharpTestsEx.Mvc</name>
+    </assembly>
+    <members>
+        <member name="M:SharpTestsEx.Mvc.SharpTetsExExtesions.AsUri(System.String)">
+            <summary>
+            Try to transform a string to a valid <see cref="T:System.Uri"/>
+            </summary>
+            <param name="url">The url.</param>
+            <returns>The <see cref="T:System.Uri"/>.</returns>
+        </member>
+    </members>
+</doc>

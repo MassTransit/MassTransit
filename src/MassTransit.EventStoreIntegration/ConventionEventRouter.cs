@@ -17,7 +17,10 @@ namespace MassTransit.EventStoreIntegration
 	using System.Linq;
 	using System.Reflection;
 	using EventStore;
+	using Magnum.StateMachine;
+	using Saga;
 	using Util;
+	using Magnum.Reflection;
 
 	public class ConventionEventRouter : IRouteEvents
 	{
@@ -30,14 +33,16 @@ namespace MassTransit.EventStoreIntegration
 			Register(typeof (T), @event => handler((T) @event));
 		}
 
-		public virtual void Register([NotNull] ISagaEventSourced aggregate)
+		public virtual void Register([NotNull] ISagaEventSourced saga)
 		{
-			if (aggregate == null) throw new ArgumentNullException("aggregate");
+			if (saga == null) throw new ArgumentNullException("saga");
 
-			registered = aggregate;
+			registered = saga;
 
 			// Get instance methods named Apply with one parameter returning void
-			var applyMethods = aggregate.GetType()
+			Type sagaType = saga.GetType();
+
+			var applyMethods = sagaType
 				.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
 				.Where(m => m.Name == "Apply" && m.GetParameters().Length == 1
 				            && m.ReturnParameter.ParameterType == typeof (void))
@@ -50,7 +55,18 @@ namespace MassTransit.EventStoreIntegration
 			foreach (var apply in applyMethods)
 			{
 				var applyMethod = apply.Method;
-				_handlers.Add(apply.MessageType, m => applyMethod.Invoke(aggregate, new[] {m}));
+				_handlers.Add(apply.MessageType, m => applyMethod.Invoke(saga, new[] {m}));
+			}
+
+			if (!_handlers.ContainsKey(typeof(SagaStateDelta)) 
+				&& typeof(SagaStateMachine<>).MakeGenericType(sagaType).IsAssignableFrom(sagaType))
+			{
+				var getState = StateMachineHelper.GetStateMethod(saga);
+				_handlers.Add(typeof(SagaStateDelta),
+					delta => typeof(StateMachineHelper)
+						.GetMethod("SetCurrentState")
+						.MakeGenericMethod(sagaType)
+						.Invoke(null, new[]{ saga as object, getState(((SagaStateDelta)delta).StateName) }));
 			}
 		}
 

@@ -20,9 +20,11 @@ namespace MassTransit.EventStoreIntegration
 	{
 		readonly State _stateDelta;
 
+		public string StateName { get; set; }
+
 		public SagaStateDelta(State stateDelta)
 		{
-			_stateDelta = stateDelta;
+			StateName = stateDelta.Name;
 		}
 	}
 }

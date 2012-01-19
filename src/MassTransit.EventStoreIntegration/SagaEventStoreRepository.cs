@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Henrik Feldt
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit.EventStoreIntegration
 	using System.Collections.Generic;
 	using System.Linq;
 	using EventStore;
+	using EventStore.Dispatcher;
 	using EventStore.Persistence;
 	using Exceptions;
 	using Magnum;
@@ -28,8 +29,8 @@ namespace MassTransit.EventStoreIntegration
 	/// <summary>
 	/// 	joliver's Event Store backing of sagas!
 	/// </summary>
-	/// <typeparam name="TSaga">The type of saga.</typeparam>
-	public class EventStoreRepository<TSaga> :
+	/// <typeparam name="TSaga"> The type of saga. </typeparam>
+	public class SagaEventStoreRepository<TSaga> :
 		ISagaRepository<TSaga>
 		where TSaga : class, ISagaEventSourced
 	{
@@ -38,7 +39,7 @@ namespace MassTransit.EventStoreIntegration
 		readonly ISagaRepository<TSaga> _self;
 		readonly IStoreEvents _eventStore;
 
-		public EventStoreRepository([NotNull] IStoreEvents eventStore)
+		public SagaEventStoreRepository([NotNull] IStoreEvents eventStore)
 		{
 			if (eventStore == null) throw new ArgumentNullException("eventStore");
 			_eventStore = eventStore;
@@ -72,12 +73,12 @@ namespace MassTransit.EventStoreIntegration
 									callback(x);
 
 								if (!policy.CanRemoveInstance(instance))
-									Save<TMessage>(instance, sagaStream, new Guid(x.RequestId));
+									Save<TMessage>(instance, sagaStream, GetCommitId(x));
 							}
 							catch (Exception ex)
 							{
 								var sex = new SagaException("Create Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
-								
+
 								if (_log.IsErrorEnabled)
 									_log.Error(sex);
 
@@ -88,8 +89,8 @@ namespace MassTransit.EventStoreIntegration
 				else
 				{
 					if (_log.IsDebugEnabled)
-						_log.DebugFormat("SAGA: {0} Ignoring Missing {1} for {2}", typeof(TSaga).ToFriendlyName(), sagaId,
-							typeof(TMessage).ToFriendlyName());
+						_log.DebugFormat("SAGA: {0} Ignoring Missing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+							typeof (TMessage).ToFriendlyName());
 				}
 			}
 			else
@@ -97,38 +98,38 @@ namespace MassTransit.EventStoreIntegration
 				if (policy.CanUseExistingInstance(context))
 				{
 					yield return x =>
-					{
-						if (_log.IsDebugEnabled)
-							_log.DebugFormat("SAGA: {0} Using Existing {1} for {2}", typeof(TSaga).ToFriendlyName(), sagaId,
-								typeof(TMessage).ToFriendlyName());
-
-						try
 						{
-							foreach (var callback in selector(instance, x))
+							if (_log.IsDebugEnabled)
+								_log.DebugFormat("SAGA: {0} Using Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+									typeof (TMessage).ToFriendlyName());
+
+							try
 							{
-								callback(x);
-							}
+								foreach (var callback in selector(instance, x))
+								{
+									callback(x);
+								}
 
-							Save<TMessage>(instance, sagaStream, GetCommitId(x));
-							
-							if (policy.CanRemoveInstance(instance)) ;
+								Save<TMessage>(instance, sagaStream, GetCommitId(x));
+
+								if (policy.CanRemoveInstance(instance)) ;
 								// no need to do work right now...
-						}
-						catch (Exception ex)
-						{
-							var sex = new SagaException("Existing Saga Instance Exception", typeof(TSaga), typeof(TMessage), sagaId, ex);
-							if (_log.IsErrorEnabled)
-								_log.Error(sex);
+							}
+							catch (Exception ex)
+							{
+								var sex = new SagaException("Existing Saga Instance Exception", typeof (TSaga), typeof (TMessage), sagaId, ex);
+								if (_log.IsErrorEnabled)
+									_log.Error(sex);
 
-							throw sex;
-						}
-					};
+								throw sex;
+							}
+						};
 				}
 				else
 				{
 					if (_log.IsDebugEnabled)
-						_log.DebugFormat("SAGA: {0} Ignoring Existing {1} for {2}", typeof(TSaga).ToFriendlyName(), sagaId,
-							typeof(TMessage).ToFriendlyName());
+						_log.DebugFormat("SAGA: {0} Ignoring Existing {1} for {2}", typeof (TSaga).ToFriendlyName(), sagaId,
+							typeof (TMessage).ToFriendlyName());
 				}
 			}
 		}
@@ -142,24 +143,25 @@ namespace MassTransit.EventStoreIntegration
 			return commitId;
 		}
 
-		/// <returns>Always an event stream. Maybe a saga instance.</returns>
+		/// <returns> Always an event stream. Maybe a saga instance. </returns>
 		IEventStream TryGetSaga(Guid sagaId, out TSaga instance)
 		{
-			IEventStream eventStream;
-			try
+			var eventStream = _eventStore.OpenStream(sagaId, 0, int.MaxValue);
+
+			// has seen no events
+			if (eventStream.StreamRevision == 0)
 			{
-				eventStream = _eventStore.OpenStream(sagaId, 0, int.MaxValue);
+				_log.Info(string.Format("could not find saga, creating new event stream for saga #{0}", sagaId));
+				instance = null;
+			}
+			else
+			{
 				instance = FastActivator<TSaga>.Create(sagaId);
 
 				foreach (var @event in eventStream.CommittedEvents.Select(x => x.Body))
 					instance.DeltaManager.ApplyStateDelta(@event);
 			}
-			catch (StreamNotFoundException ex)
-			{
-				_log.Info(string.Format("could not find saga, creating new event stream for saga #{0}", sagaId), ex);
-				eventStream = _eventStore.CreateStream(sagaId);
-				instance = null;
-			}
+
 			return eventStream;
 		}
 
@@ -172,32 +174,33 @@ namespace MassTransit.EventStoreIntegration
 			instance.DeltaManager.ClearUncommittedEvents();
 		}
 
-		private IEventStream PrepareStream(TSaga saga, Dictionary<string, object> headers, IEventStream stream)
+		IEventStream PrepareStream(TSaga saga, Dictionary<string, object> headers, IEventStream stream)
 		{
 			foreach (var item in headers)
 				stream.UncommittedHeaders[item.Key] = item.Value;
 
 			saga.DeltaManager.GetUncommittedEvents()
-				.Select(x => new EventMessage { Body = x })
+				.Select(x => new EventMessage {Body = x})
 				.ToList()
 				.ForEach(stream.Add);
 
 			return stream;
 		}
-		private static void Persist<TMessage>(IEventStream stream, Guid commitId)
+
+		static void Persist<TMessage>(IEventStream stream, Guid commitId)
 		{
 			try
 			{
 				stream.CommitChanges(commitId);
 			}
-			// also: ConcurrencyException
+				// also: ConcurrencyException
 			catch (DuplicateCommitException)
 			{
 				stream.ClearChanges();
 			}
 			catch (StorageException e)
 			{
-				throw new SagaException(e.Message, typeof(TSaga), typeof(TMessage), commitId, e);
+				throw new SagaException(e.Message, typeof (TSaga), typeof (TMessage), commitId, e);
 			}
 		}
 
@@ -212,7 +215,7 @@ namespace MassTransit.EventStoreIntegration
 		}
 
 		IEnumerable<TResult> ISagaRepository<TSaga>.Where<TResult>(ISagaFilter<TSaga> filter,
-			Func<TSaga, TResult> transformer)
+		                                                           Func<TSaga, TResult> transformer)
 		{
 			return _self.Where(filter).Select(transformer);
 		}

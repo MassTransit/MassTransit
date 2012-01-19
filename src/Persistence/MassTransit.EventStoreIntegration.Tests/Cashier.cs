@@ -27,7 +27,7 @@ namespace MassTransit.EventStoreIntegration.Tests
 							.Complete(),
 						When(ItTookTooLong)
 							.Then((saga, message) => saga.CallInTheGuards())
-							.Complete()
+							.TransitionTo(TimedOut)
 						);
 				});
 		}
@@ -48,7 +48,7 @@ namespace MassTransit.EventStoreIntegration.Tests
 			public decimal Amount { get; set; }
 		}
 
-		void ProcessNewOrder(NewOrderMessage message)
+		void ProcessNewOrder(NewOrder message)
 		{
 			var delta = _eventHandler.RaiseStateDelta(new RememberOrder
 				{
@@ -96,12 +96,10 @@ namespace MassTransit.EventStoreIntegration.Tests
 				Console.WriteLine("done!");
 			}
 
-			var completeMessage = new PaymentCompleteMessage
+			Bus.Publish(new PaymentCompleteMessage
 				{
 					CorrelationId = message.CorrelationId
-				};
-
-			Bus.Publish(completeMessage);
+				});
 		}
 
 		void CallInTheGuards()
@@ -127,9 +125,10 @@ namespace MassTransit.EventStoreIntegration.Tests
 		public static State Initial { get; set; }
 		public static State Completed { get; set; }
 		public static State WaitingForPayment { get; set; }
+		public static State TimedOut { get; set; }
 
 		public static Event<TimeoutExpired> ItTookTooLong { get; set; }
-		public static Event<NewOrderMessage> NewOrder { get; set; }
+		public static Event<NewOrder> NewOrder { get; set; }
 		public static Event<SubmitPayment> PaymentSubmitted { get; set; }
 
 		public Guid CorrelationId { get { return _eventHandler.CorrelationId; } }

@@ -17,6 +17,7 @@ namespace MassTransit.EventStoreIntegration
 	using System.Reflection;
 	using Magnum.StateMachine;
 	using Magnum.Threading;
+	using Saga;
 
 	public static class StateMachineHelper
 	{
@@ -27,6 +28,16 @@ namespace MassTransit.EventStoreIntegration
 			_getStateMethods = new ReaderWriterLockedDictionary<Type, Func<string, State>>();
 		}
 
+		public static void SetCurrentState<TSaga>(this TSaga saga, State state)
+			where TSaga : SagaStateMachine<TSaga>
+		{
+			var newState = State<TSaga>.GetState(state);
+
+			FieldInfo field = typeof(StateMachine<TSaga>)
+				.GetField("_currentState", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+
+			field.SetValue(saga, newState);
+		}
 
 		public static Func<string, State> GetStateMethod(object owner)
 		{

@@ -51,7 +51,7 @@
   <ItemGroup>
     <Compile Include="ConventionEventRouter.cs" />
     <Compile Include="DeltaManager.cs" />
-    <Compile Include="EventStoreRepository.cs" />
+    <Compile Include="SagaEventStoreRepository.cs" />
     <Compile Include="SagaStateDelta.cs" />
     <Compile Include="StateMachineHelper.cs" />
     <Compile Include="ISagaEventSourced.cs" />

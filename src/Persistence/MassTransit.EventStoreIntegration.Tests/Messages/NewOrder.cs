@@ -3,7 +3,7 @@ namespace MassTransit.EventStoreIntegration.Tests
 	using System;
 
 	[Serializable]
-	public class NewOrderMessage 
+	public class NewOrder 
 		: CorrelatedBy<Guid>
 	{
 		public Guid CorrelationId { get; set; }

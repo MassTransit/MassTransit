@@ -13,18 +13,25 @@
 namespace MassTransit.EventStoreIntegration.Tests.Specs
 {
 	using System;
-	using System.Collections.Generic;
 	using Machine.Specifications;
 	using Magnum;
+	using Magnum.Extensions;
 	using Magnum.Reflection;
-	using Magnum.StateMachine;
+	using MassTransit.Tests;
+	using MassTransit.Tests.Messages;
+	using TestFramework;
 
-	public class got_new_order_spec
-		:  helper_methods<Cashier>
+	static class BusActions
+	{
+		//Action<Func< in_memory_event_store_repository = () => 
+	}
+
+	public class cashier_got_tired_of_waiting_spec
+		: loopback_spec<Cashier>
 	{
 		Establish context = () =>
 			{
-				the_cashier = specification.CreateSubject();
+				the_cashier = the_cashier_ = specification.CreateSubject();
 				the_cashier.had_these_deltas(
 					the_cashier.changed_state_to("WaitingForPayment"),
 					new Cashier.RememberOrder
@@ -37,23 +44,33 @@ namespace MassTransit.EventStoreIntegration.Tests.Specs
 			};
 
 		static ISagaEventSourced the_cashier;
+		static Cashier the_cashier_;
 
 		Because the_customer_was_slow = () => 
 			the_cashier.got_tired_of_waiting();
 
-
+		It timed_out = () => 
+			the_cashier_.ShouldBeInState(Cashier.TimedOut);
 	}
 
-	public class helper_methods<T>
+	public class loopback_spec<T>
 		: spec_for<T>
 		where T : ISagaEventSourced
 	{
-		public helper_methods()
-		{
-		}
+		protected static IServiceBus LocalBus { get; private set; }
 
-		protected static spec_for<T> specification { get { return new helper_methods<T>(); } }
+		Establish the_bus = () =>
+			{
+				LocalBus = ServiceBusFactory.New(x => { x.ReceiveFrom("loopback://localhost/queue"); });
+			};
 
+		Cleanup state = () =>
+			{
+				LocalBus.Dispose();
+				LocalBus = null;
+			};
+
+		protected static spec_for<T> specification { get { return new loopback_spec<T>(); } }
 	}
 
 	public interface spec_for<T>
@@ -80,7 +97,7 @@ namespace MassTransit.EventStoreIntegration.Tests.Specs
 
 		public static void got_tired_of_waiting(this ISagaEventSourced saga)
 		{
-			
+			// HMMMMMM...
 		}
 
 		public static T CreateSubject<T>(this spec_for<T> spec)
