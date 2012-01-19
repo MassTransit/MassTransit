@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.ZeroMq
 {
     using System.Diagnostics;
+    using Util;
     using ZMQ;
     using log4net;
 
@@ -25,6 +26,8 @@ namespace MassTransit.Transports.ZeroMq
         SocketType _socketType;
         Socket _socket;
         ZeroMqAddress _address;
+
+		[UsedImplicitly]
         bool _connected;
 
         public ZeroMqConnection(Context context,
@@ -77,6 +80,7 @@ namespace MassTransit.Transports.ZeroMq
             catch (System.Exception ex)
             {
                 _log.Warn("Faild to close ZeroMq connection.", ex);
+            	throw;
             }
             _connected = false;
         }
