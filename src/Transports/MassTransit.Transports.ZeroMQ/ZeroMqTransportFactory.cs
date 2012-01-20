@@ -41,7 +41,7 @@ namespace MassTransit.Transports.ZeroMQ
 		public IInboundTransport BuildInbound(ITransportSettings settings)
 		{
 			var address = (ZeroMqAddress) settings.Address;
-			var zeroMqConnection = new ZeroMqConnection(_context, address, SocketType.REQ); //what should the type be?
+			var zeroMqConnection = new ZeroMqConnection(_context, address);
 			var handler = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
 			return new InboundZeroMqTransport(address, handler, true);
 		}
@@ -49,7 +49,7 @@ namespace MassTransit.Transports.ZeroMQ
 		public IOutboundTransport BuildOutbound(ITransportSettings settings)
 		{
 			var address = (ZeroMqAddress) settings.Address;
-			var zeroMqConnection = new ZeroMqConnection(_context, address, SocketType.REQ); //what should the type be?
+			var zeroMqConnection = new ZeroMqConnection(_context, address);
 			var handler = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
 			return new OutboundZeroMqTransport(address, handler);
 		}
