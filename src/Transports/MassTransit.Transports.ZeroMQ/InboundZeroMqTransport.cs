@@ -14,8 +14,12 @@ namespace MassTransit.Transports.ZeroMq
 {
 	using System;
 	using System.IO;
+	using System.Linq;
+	using System.Text;
 	using System.Threading;
 	using Context;
+	using Serialization;
+	using ZMQ;
 	using log4net;
 
 	public class InboundZeroMqTransport :
@@ -46,49 +50,89 @@ namespace MassTransit.Transports.ZeroMq
 		{
 			_connectionHandler.Use(connection =>
 				{
-					byte[] result = null;
-					try
-					{
-						// here 
-						result = connection.PullSocket.Recv(); //we can auto string it here by adding the encoding
-						
-						if (result == null)
+					var pollers = (from s in new[] {connection.PullSocket, connection.SubSocket}
+					               let pi = s.CreatePollItem(IOMultiPlex.POLLIN)
+					               select pi).ToArray();
+
+					PollHandler errorHandler = (socket, revents) =>
 						{
-							Thread.Sleep(10);
-							return;
-						}
+							// handle errors
+							_log.Fatal("unknown error on zmq... check docs on how to read it");
+						};
 
-						using (var body = new MemoryStream(result, false))
+					Array.ForEach(pollers, p => { p.PollErrHandler += errorHandler; });
+
+
+					/* Protocol:
+					 * 
+					 * A wants to publish something. It has looked this node up and want to make sure that it's ready to receive.
+					 * We bind our sub socket to its sub socket.
+					 * We read its address and bind our sub socket to it.
+					 * We tell it to continue to send.
+					 */
+
+					pollers[0].PollInHandler += (pullSocket, revts) =>
 						{
-							var context = ReceiveContext.FromBodyStream(body);
-							context.SetMessageId("ZMQ MSG ID");
-							context.SetInputAddress(_address);
+							var msg = pullSocket.Recv(Encoding.UTF8);
 
-							//handle content type
+							// bind our sub socket
+							connection.SubSocket.Bind(msg.Substring("LISTEN TO ME ".Length));
 
-							var receive = callback(context);
-							if (receive == null)
+							// notify that we can consume things on this socket
+							var targetSubSocket = connection.Address.SubSocket.ToString();
+
+							if (_purgeExistingMessages)
+								connection.PushSocket.Send(string.Format("PURGE {0}", targetSubSocket), Encoding.UTF8);
+
+							connection.PushSocket.Send(string.Format("CONTINUE {0}", targetSubSocket), Encoding.UTF8);
+						};
+					pollers[1].PollInHandler += (subSocket, revts) =>
+						{
+							try
 							{
-								if (_log.IsDebugEnabled)
-									_log.DebugFormat("SKIP:{0}:{1}", Address, "MESSAGEID");
+								using (var body = new MemoryStream())
+								{
+									var offset = 0;
+									var buffers = subSocket.RecvAll();
+									while (buffers.Count > 0)
+									{
+										var dequeue = buffers.Dequeue();
+										body.Write(dequeue, offset, dequeue.Length);
+										offset += dequeue.Length;
+									}
+
+									// need to read envelope
+									// where do we handle the envelope in MT?
+									var context = ReceiveContext.FromBodyStream(body);
+
+									var zmqMsgId = "ZMQ MSG ID";
+									context.SetMessageId(zmqMsgId);
+									context.SetInputAddress(_address);
+
+									//handle content type
+
+									var receive = callback(context);
+									if (receive == null && _log.IsDebugEnabled)
+										_log.DebugFormat("SKIP:{0}:{1}", Address, zmqMsgId);
+									else if (receive != null)
+										receive(context);
+
+									connection.PushSocket.Send(string.Format("ACK {0}", zmqMsgId), Encoding.UTF8);
+								}
 							}
-							else
+							catch (System.Exception ex)
 							{
-								receive(context);
+								_log.Error("Failed to consume message from endpoint", ex);
+
+								//if (result != null)
+								//    _consumer.MessageFailed(result.DeliveryTag, true);
+
+								throw;
 							}
+						};
 
-							//_consumer.MessageCompleted(result.DeliveryTag);
-						}
-					}
-					catch (Exception ex)
-					{
-						_log.Error("Failed to consume message from endpoint", ex);
-
-//                        if (result != null)
-//                            _consumer.MessageFailed(result.DeliveryTag, true);
-
-						throw;
-					}
+					if (connection.Context.Poll(pollers, 10*1000) == 0) // in microseconds for 2.1, 3.1 => ms.
+						Thread.Sleep(10);
 				});
 		}
 

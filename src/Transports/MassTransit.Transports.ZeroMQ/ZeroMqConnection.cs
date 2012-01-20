@@ -13,11 +13,14 @@
 namespace MassTransit.Transports.ZeroMq
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using Util;
 	using ZMQ;
 	using log4net;
 	using H = ZeroMqSocketHelper;
+	using ST = ZMQ.SocketType;
+	using System.Linq;
 
 	[DebuggerDisplay("Connected:{_connected}")]
 	public class ZeroMqConnection :
@@ -26,26 +29,19 @@ namespace MassTransit.Transports.ZeroMq
 		static readonly ILog _log = LogManager.GetLogger(typeof (ZeroMqConnection));
 
 		readonly Context _context;
-		readonly SocketType _socketType;
-		
-		Lazy<Socket>[] _sockets;
+
+		List<Lazy<Socket>> _sockets;
 		readonly ZeroMqAddress _address;
 
 		[UsedImplicitly]
 		bool _connected;
+		bool _disposed;
 
 		public ZeroMqConnection(Context context,
-		                        ZeroMqAddress address,
-		                        SocketType socketType)
+		                        ZeroMqAddress address)
 		{
 			_context = context;
 			_address = address;
-			_socketType = socketType;
-		}
-
-		public void Dispose()
-		{
-			Disconnect();
 		}
 
 		Lazy<Socket> SocketFor(SocketType type)
@@ -58,78 +54,103 @@ namespace MassTransit.Transports.ZeroMq
 		/// </summary>
 		public Socket PullSocket
 		{
-			get { return ; }
+			get { return SocketFor(ST.PULL).Value ; }
 		}
 
 		/// <summary>
 		/// Outgoing signals
 		/// </summary>
-		public Uri PushSocket
+		public Socket PushSocket
 		{
-			get { return NextPortBy(1); }
+			get { return SocketFor(ST.PUSH).Value; }
 		}
 
 		/// <summary>
 		/// Incoming data by subscription.
 		/// </summary>
-		public Uri SubSocket
+		public Socket SubSocket
 		{
-			get { return NextPortBy(2); }
+			get { return SocketFor(ST.SUB).Value; }
 		}
 
 		/// <summary>
 		/// Outgoing data per subscription.
 		/// </summary>
-		public Uri PubSocket
+		public Socket PubSocket
 		{
-			get { return NextPortBy(3); }
+			get { return SocketFor(ST.PUB).Value; }
 		}
 
 		/// <summary>
 		/// Incoming socket for routing.
 		/// </summary>
-		public Uri RouterSocket
+		public Socket RouterSocket
 		{
-			get { return NextPortBy(4); }
+			get { return SocketFor(ST.ROUTER).Value; }
 		}
+
 		/// <summary>
 		/// Outgoing fair-routing socket.
 		/// </summary>
-		public Uri DealerSocket
+		public Socket DealerSocket
 		{
-			get { return NextPortBy(5); }
+			get { return SocketFor(ST.DEALER).Value; }
 		}
+
+		public Context Context
+		{
+			get { return _context; }
+		}
+
+		/// <summary>
+		/// Gets the address
+		/// </summary>
+		public ZeroMqAddress Address { get { return _address; } }
 
 		public void Connect()
 		{
-			Disconnect();
-
-			_sockets =  _context.Socket(_socketType);
-			//this needs to be configurable maybe the '/queue' part of the uri?
-			
-
-			var addr = _address.PullSocket.ToString();
-			_sockets.Connect(addr);
-
+			// prepare the sockets
+			foreach (var st in new[] {ST.PUSH, ST.PULL, ST.PUB, ST.SUB, ST.ROUTER, ST.DEALER})
+			{
+				var stt = st;
+				_sockets[H.OffsetFor(stt)] = new Lazy<Socket>(() => _context.Socket(stt));
+			}
 			_connected = true;
+		}
+
+		public void Dispose()
+		{
+			if (_disposed)
+				throw new ObjectDisposedException("already disposed");
+			
+			_disposed = false;
+			
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual void Dispose(bool managed)
+		{
+			if (managed)
+				Disconnect();
 		}
 
 		public void Disconnect()
 		{
+			if (!_connected)
+				return;
+
 			try
 			{
-				if (_sockets != null)
-				{
-					_sockets.Dispose();
-				}
-				_sockets = null;
+				_sockets
+					.Where(x => x.IsValueCreated)
+					.ToList()
+					.ForEach(socket => socket.Value.Dispose());
 			}
-			catch (System.Exception ex)
+			finally
 			{
-				_log.Warn("Failed to close ZeroMq connection.", ex);
-				throw;
+				_connected = false;
 			}
-			_connected = false;
 		}
 	}
 }

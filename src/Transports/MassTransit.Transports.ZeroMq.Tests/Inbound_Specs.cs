@@ -31,7 +31,7 @@ namespace MassTransit.Transports.ZeroMq.Tests
 		{
 			_context = new Context();
 			var address = new ZeroMqAddress(new Uri("zmq-tcp://localhost:5555"));
-			var zeroMqConnection = new ZeroMqConnection(_context, address, SocketType.SUB);
+			var zeroMqConnection = new ZeroMqConnection(_context, address);
 			ConnectionHandler<ZeroMqConnection> connection = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
 			_inbound = new InboundZeroMqTransport(address, connection, true);
 

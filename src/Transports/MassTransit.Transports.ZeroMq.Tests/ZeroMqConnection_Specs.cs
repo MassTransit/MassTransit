@@ -17,7 +17,7 @@ namespace MassTransit.Transports.ZeroMq.Tests
 	using ZMQ;
 
 	[TestFixture]
-	public class X
+	public class Connecting_ZeroMqConnection
 	{
 		Context _context;
 		ZeroMqConnection _zmqc;
@@ -27,8 +27,7 @@ namespace MassTransit.Transports.ZeroMq.Tests
 		{
 			_context = new Context();
 			_zmqc = new ZeroMqConnection(_context,
-				new ZeroMqAddress(new Uri("zmq-tcp://localhost:5555")),
-				SocketType.REQ);
+				new ZeroMqAddress(new Uri("zmq-tcp://localhost:5555")));
 		}
 
 		[TearDown]
