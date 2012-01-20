@@ -1,4 +1,4 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2011 Dru Sellers, Henrik Feldt
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,77 +12,124 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.ZeroMq
 {
-    using System.Diagnostics;
-    using Util;
-    using ZMQ;
-    using log4net;
+	using System;
+	using System.Diagnostics;
+	using Util;
+	using ZMQ;
+	using log4net;
+	using H = ZeroMqSocketHelper;
 
-    [DebuggerDisplay("Connected:{_connected}")]
-    public class ZeroMqConnection :
-        Connection
-    {
-        static readonly ILog _log = LogManager.GetLogger(typeof (ZeroMqConnection));
-        Context _context;
-        SocketType _socketType;
-        Socket _socket;
-        ZeroMqAddress _address;
+	[DebuggerDisplay("Connected:{_connected}")]
+	public class ZeroMqConnection :
+		Connection
+	{
+		static readonly ILog _log = LogManager.GetLogger(typeof (ZeroMqConnection));
+
+		readonly Context _context;
+		readonly SocketType _socketType;
+		
+		Lazy<Socket>[] _sockets;
+		readonly ZeroMqAddress _address;
 
 		[UsedImplicitly]
-        bool _connected;
+		bool _connected;
 
-        public ZeroMqConnection(Context context,
-            ZeroMqAddress address,
-            SocketType socketType)
-        {
-            _context = context;
-            _address = address;
-            _socketType = socketType;
-        }
+		public ZeroMqConnection(Context context,
+		                        ZeroMqAddress address,
+		                        SocketType socketType)
+		{
+			_context = context;
+			_address = address;
+			_socketType = socketType;
+		}
 
-        public void Dispose()
-        {
-            Disconnect();
-        }
+		public void Dispose()
+		{
+			Disconnect();
+		}
 
-        public Socket Socket
-        {
-            get { return _socket; }
-        }
-        public void Connect()
-        {
-            Disconnect();
+		Lazy<Socket> SocketFor(SocketType type)
+		{
+			return _sockets[H.OffsetFor(type)];
+		}
 
-            _socket = _context.Socket(_socketType);
-            
-            //this needs to be configurable maybe the '/queue' part of the uri?
-            _socket.Identity = new byte[]{12,12};
+		/// <summary>
+		/// Incoming signals
+		/// </summary>
+		public Socket PullSocket
+		{
+			get { return ; }
+		}
 
-            var addr = _address.RebuiltUri.ToString();
+		/// <summary>
+		/// Outgoing signals
+		/// </summary>
+		public Uri PushSocket
+		{
+			get { return NextPortBy(1); }
+		}
 
-            if (addr.EndsWith("/")) //TODO: log this as an issue with ZMQ?
-                addr = addr.Substring(0, addr.Length - 1);
+		/// <summary>
+		/// Incoming data by subscription.
+		/// </summary>
+		public Uri SubSocket
+		{
+			get { return NextPortBy(2); }
+		}
 
-            _socket.Connect(addr);
-            _connected = true;
-        }
+		/// <summary>
+		/// Outgoing data per subscription.
+		/// </summary>
+		public Uri PubSocket
+		{
+			get { return NextPortBy(3); }
+		}
 
-        public void Disconnect()
-        {
-            try
-            {
-                if (_socket != null)
-                {
-                    //_socket.Unsubscribe(); needed? 
-                    _socket.Dispose();
-                }
-                _socket = null;
-            }
-            catch (System.Exception ex)
-            {
-                _log.Warn("Faild to close ZeroMq connection.", ex);
-            	throw;
-            }
-            _connected = false;
-        }
-    }
+		/// <summary>
+		/// Incoming socket for routing.
+		/// </summary>
+		public Uri RouterSocket
+		{
+			get { return NextPortBy(4); }
+		}
+		/// <summary>
+		/// Outgoing fair-routing socket.
+		/// </summary>
+		public Uri DealerSocket
+		{
+			get { return NextPortBy(5); }
+		}
+
+		public void Connect()
+		{
+			Disconnect();
+
+			_sockets =  _context.Socket(_socketType);
+			//this needs to be configurable maybe the '/queue' part of the uri?
+			
+
+			var addr = _address.PullSocket.ToString();
+			_sockets.Connect(addr);
+
+			_connected = true;
+		}
+
+		public void Disconnect()
+		{
+			try
+			{
+				if (_sockets != null)
+				{
+					_sockets.Dispose();
+				}
+				_sockets = null;
+			}
+			catch (System.Exception ex)
+			{
+				_log.Warn("Failed to close ZeroMq connection.", ex);
+				throw;
+			}
+			_connected = false;
+		}
+	}
 }

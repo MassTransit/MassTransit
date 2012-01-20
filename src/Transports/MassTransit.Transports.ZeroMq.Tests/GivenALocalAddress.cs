@@ -12,50 +12,88 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.ZeroMq.Tests
 {
-    using System;
-    using Magnum.TestFramework;
-    using NUnit.Framework;
+	using System;
+	using System.Collections.Generic;
+	using Magnum.TestFramework;
+	using NUnit.Framework;
+	using System.Linq;
 
-    [TestFixture]
-    public class GivenALocalAddress
-    {
-        public Uri Uri = new Uri("zeromq-pgm://some_server:1234/");
-        ZeroMqAddress _addr;
+	public class GivenALocalAddress
+	{
+		Uri Uri = new Uri("zmq-pgm://theserver:1234");
+		ZeroMqAddress _addr;
 
-        [When]
-        public void WhenParsed()
-        {
-            _addr = ZeroMqAddress.Parse(Uri);
-        }
+		[When]
+		public void WhenParsed()
+		{
+			_addr = ZeroMqAddress.Parse(Uri);
+		}
 
-        [Then]
-        public void TheHost()
-        {
-            _addr.Host.ShouldEqual("some_server");
-        }
+		[Then]
+		public void TheHost()
+		{
+			_addr.Host.ShouldEqual("theserver");
+		}
 
-        [Then]
-        public void ThePort()
-        {
-            _addr.Port.ShouldEqual(1234);
-        }
+		[Then]
+		public void ThePort()
+		{
+			_addr.Port.ShouldEqual(1234);
+		}
 
-        [Then]
-        public void IsLocal()
-        {
-            _addr.IsLocal.ShouldBeTrue();
-        }
+		[Then]
+		public void IsLocal()
+		{
+			_addr.IsLocal.ShouldBeTrue();
+		}
 
-        [Then]
-        public void IsTransactional()
-        {
-            _addr.IsTransactional.ShouldBeFalse();
-        }
+		[Then]
+		public void IsTransactional()
+		{
+			_addr.IsTransactional.ShouldBeFalse();
+		}
 
-        [Then]
-        public void Rebuilt()
-        {
-            _addr.RebuiltUri.ShouldEqual(new Uri("pgm://some_server:1234"));
-        }
-    }
+		[Then]
+		public void Rebuilt()
+		{
+			_addr.PullSocket.ShouldEqual(new Uri("zmq-pgm://theserver:1234"));
+		}
+	}
+
+	class Given_invalid_zmq_address
+	{
+		Uri _uri;
+
+		[When]
+		public void set_uri()
+		{
+			_uri = new Uri("zmq-tcp://comp:5555/");
+		}
+
+		[Then]
+		public void ending_slash_forbidden()
+		{
+			ZeroMqAddress addr;
+			IEnumerable<string> reasons;
+			Assert.IsFalse(ZeroMqAddress.TryParse(
+				_uri,
+				out addr,
+				out reasons
+				));
+			Assert.IsNull(addr);
+			Assert.IsNotNull(reasons);
+			Assert.IsTrue(
+				reasons.Any(x => x.Contains("'/'")),
+				"the reasons should include the faulty character"
+				);
+		}
+
+		[Then]
+		public void ending_slash_forbidden_Parse()
+		{
+			Assert.Throws<FormatException>(
+				() => ZeroMqAddress.Parse(_uri)
+				);
+		}
+	}
 }
