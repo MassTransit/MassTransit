@@ -18,7 +18,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 	using TestFramework.Fixtures;
 
 	[Scenario]
-	public class Given_a_rabbitmq_bus :
+	public abstract class Given_a_rabbitmq_bus :
 		LocalTestFixture<RabbitMqTransportFactory>
 	{
 		protected Given_a_rabbitmq_bus()
