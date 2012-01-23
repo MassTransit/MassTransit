@@ -26,7 +26,7 @@ namespace MassTransit.Testing.ScenarioBuilders
 		void ConfigureBus(Action<ServiceBusConfigurator> configureCallback);
 
 		/// <summary>
-		/// Configure the subscriptions for a test using this scenario
+		/// Configure the subscriptions for a test using this scenario.
 		/// </summary>
 		/// <param name="configureCallback"></param>
 		void ConfigureSubscriptions(Action<SubscriptionBusServiceConfigurator> configureCallback);

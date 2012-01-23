@@ -19,7 +19,6 @@ namespace MassTransit.Transports.RabbitMq
 	using RabbitMQ.Client;
 	using log4net;
 
-
 	public class RabbitMqConsumer :
 		ConnectionBinding<RabbitMqConnection>
 	{
