@@ -17,6 +17,10 @@ namespace MassTransit.Testing
 	using Magnum.Extensions;
 	using ScenarioBuilders;
 
+	/// <summary>
+	/// A RabbitMQ bus scenario builder. Will consume off
+	/// 'rabbitmq://localhost/mt_client', and use RabbitMQ routing. Timeout = 100 ms.
+	/// </summary>
 	public class RabbitMqBusScenarioBuilder :
 		BusScenarioBuilderImpl
 	{

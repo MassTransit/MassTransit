@@ -14,14 +14,43 @@ namespace MassTransit.Testing.Scenarios
 {
 	using System;
 
+	/// <summary>
+	/// A test scenario that allows the tester to
+	/// get hold of what messages were published, skipped, sent and received.
+	/// Inherits IDisposable.
+	/// </summary>
 	public interface TestScenario :
 		IDisposable
 	{
+		/// <summary>
+		/// Gets the input bus. This is the bus that has *incoming* messages, i.e. the bus
+		/// that you receive messages from.
+		/// </summary>
 		IServiceBus InputBus { get; }
+
+		/// <summary>
+		/// Gets the output bus. This is the bus that has *outgoing* messages, i.e. the bus
+		/// that you publish and send on.
+		/// </summary>
 	    IServiceBus OutputBus { get; }
+		/// <summary>
+		/// The list of published messages is contained within this instance.
+		/// </summary>
 		PublishedMessageList Published { get; }
+
+		/// <summary>
+		/// The list of received messages is contained within this instance.
+		/// </summary>
 		ReceivedMessageList Received { get; }
+
+		/// <summary>
+		/// The list of send messages is contained within this instance.
+		/// </summary>
 		SentMessageList Sent { get; }
+
+		/// <summary>
+		/// The list of skipped messages is contained within this instance.
+		/// </summary>
 		ReceivedMessageList Skipped { get; }
 	}
 }
