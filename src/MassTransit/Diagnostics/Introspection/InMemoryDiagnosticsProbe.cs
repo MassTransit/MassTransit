@@ -29,9 +29,7 @@ namespace MassTransit.Diagnostics.Introspection
 
         public void Add(string key, object value)
         {
-            var entry = new DiagnosticEntryImpl();
-            entry.Key = key;
-            entry.Value = value.ToString();
+            var entry = new DiagnosticEntryImpl(key, value);
             _entries.Add(entry);
         }
 
@@ -39,17 +37,14 @@ namespace MassTransit.Diagnostics.Introspection
         {
             get { return _entries; }
         }
+
         public override string ToString()
         {
             var sb = new StringBuilder();
             _entries
                 .OrderBy(entry => entry.Key)
-                .Each(entry =>
-                    {
-                        var key = entry.Key;
-                        var value = entry.Value;
-                         sb.AppendLine("{0}: {1}".FormatWith(key, value));
-                    });
+                .Each(entry => sb.AppendFormat("{0}: {1}", entry.Key, entry.Value).AppendLine());
+
             return sb.ToString();
         }
     }

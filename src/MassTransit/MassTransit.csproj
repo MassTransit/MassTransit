@@ -31,7 +31,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <BuildConfigKey Condition=" '$(BuildConfigKey)' == '' ">NET40</BuildConfigKey>
+    <DefineConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">NET40</DefineConstants>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
   </PropertyGroup>
@@ -40,18 +40,19 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;$(BuildConfigKey)</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;$(DefineConstants)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>3009,3001,3008</NoWarn>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>bin\Debug\MassTransit.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;$(BuildConfigKey)</DefineConstants>
+    <DefineConstants>TRACE;$(DefineConstants)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\MassTransit.XML</DocumentationFile>
@@ -108,7 +109,7 @@
     <Compile Include="Configuration\Builders\EndpointFactoryBuilderImpl.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilder.cs" />
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
-    <Compile Include="Diagnostics\DiagnosticsConfigurationExtensions.cs" />
+    <Compile Include="Diagnostics\IntrospectionExtensions.cs" />
     <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
     <Compile Include="Configuration\BusServiceLayer.cs" />
     <Compile Include="Configuration\Configuration\BusSettings.cs" />
@@ -250,6 +251,7 @@
     <Compile Include="Context\HttpContextContextStorageProvider.cs" />
     <Compile Include="Diagnostics\Introspection\DiagnosticsProbe.cs" />
     <Compile Include="Diagnostics\Introspection\DiagnosticsSource.cs" />
+    <Compile Include="Diagnostics\TracingExtensions.cs" />
     <Compile Include="Diagnostics\Tracing\GetMessageTraceList.cs" />
     <Compile Include="Diagnostics\Introspection\InMemoryDiagnosticsProbe.cs" />
     <Compile Include="Diagnostics\Tracing\MessageTraceBusService.cs" />
@@ -368,7 +370,6 @@
     <Compile Include="ServiceCatalog.cs" />
     <Compile Include="ServiceContainer.cs" />
     <Compile Include="Diagnostics\Introspection\IntrospectionBusService.cs" />
-    <Compile Include="Diagnostics\Introspection\IntrospectionBusBuilder.cs" />
     <Compile Include="Services\HealthMonitoring\Configuration\HealthClientConfiguratorExtensions.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthInformation.cs" />
     <Compile Include="Saga\ISagaRepository.cs" />
@@ -843,7 +844,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

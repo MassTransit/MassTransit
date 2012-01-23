@@ -15,7 +15,7 @@ namespace MassTransit.Util
 	using System;
 	using System.IO;
 
-#if NET35
+#if !NET40
 	public static class StreamExtensions
 	{
 		public static void CopyTo(this Stream fromStream, Stream toStream)
@@ -33,5 +33,4 @@ namespace MassTransit.Util
 	}
 
 #endif
-
 }
