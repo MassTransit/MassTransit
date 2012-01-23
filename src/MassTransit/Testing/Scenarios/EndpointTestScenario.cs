@@ -14,10 +14,24 @@ namespace MassTransit.Testing.Scenarios
 {
 	using Transports;
 
+	/// <summary>
+	/// Adds the further feature onto <see cref="TestScenario"/> of having 
+	/// an endpoint cache and an endpoint factory. This is useful if you are 
+	/// testing that you can send messages to what can be considered 'endpoints' rather than
+	/// just 'subscribers'. It's more in line to the usage scenario of request-reply or fire-and-forget
+	/// rather than publish-subscribe.
+	/// </summary>
 	public interface EndpointTestScenario :
 		TestScenario
 	{
+		/// <summary>
+		/// Gets the endpoint cache. Use this instance to find the <see cref="IEndpoint"/>s.
+		/// </summary>
 		IEndpointCache EndpointCache { get; }
+		
+		/// <summary>
+		/// Gets the endpoint factory.
+		/// </summary>
 		IEndpointFactory EndpointFactory { get; }
 	}
 }
