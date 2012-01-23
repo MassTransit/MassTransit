@@ -16,48 +16,31 @@ namespace MassTransit
     using BusConfigurators;
     using BusServiceConfigurators;
     using Diagnostics.Introspection;
-    using Diagnostics.Tracing;
     using Magnum.FileSystem;
 
-    public static class DiagnosticsConfigurationExtensions
-	{
+    public static class IntrospectionExtensions
+    {
         public static void EnableRemoteIntrospection(this ServiceBusConfigurator configurator)
         {
             var serviceConfigurator = new IntrospectionServiceConfigurator();
-            
+
             var busConfigurator = new CustomBusServiceConfigurator(serviceConfigurator);
 
             configurator.AddBusConfigurator(busConfigurator);
         }
 
-		public static void EnableMessageTracing(this ServiceBusConfigurator configurator)
-		{
-			var busConfigurator = new PostCreateBusBuilderConfigurator(bus =>
-				{
-					var service = new MessageTraceBusService(bus.EventChannel);
-
-					bus.AddService(BusServiceLayer.Network, service);
-				});
-
-			configurator.AddBusConfigurator(busConfigurator);
-		}
-
-
-        //convenience methods
-
         public static void WriteIntrospectionToConsole(this IServiceBus bus)
         {
-            var probe = bus.Probe();
+            DiagnosticsProbe probe = bus.Probe();
             Console.Write(probe);
         }
 
         public static void WriteIntrospectionToFile(this IServiceBus bus, string fileName)
         {
-            var probe = bus.Probe();
+            DiagnosticsProbe probe = bus.Probe();
             var fs = new DotNetFileSystem();
             fs.DeleteFile(fileName);
             fs.Write(fileName, probe.ToString());
-
         }
 
         /// <summary>
@@ -69,7 +52,5 @@ namespace MassTransit
             bus.Inspect(probe);
             return probe;
         }
-
-
-	}
+    }
 }

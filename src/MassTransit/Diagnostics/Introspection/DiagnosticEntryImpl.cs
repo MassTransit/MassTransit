@@ -15,6 +15,12 @@ namespace MassTransit.Diagnostics.Introspection
     public class DiagnosticEntryImpl :
         DiagnosticEntry
     {
+        public DiagnosticEntryImpl(string key, object value)
+        {
+            Key = key;
+            Value = string.Format("{0}", value);
+        }
+
         public string Context { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
