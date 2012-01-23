@@ -14,6 +14,10 @@ namespace MassTransit.Testing.ScenarioBuilders
 {
 	using System;
 
+	/// <summary>
+	/// Scenario builder for the loopback style of bus. This is basically an
+	/// in-memory bus.
+	/// </summary>
 	public class LoopbackBusScenarioBuilder :
 		BusScenarioBuilderImpl
 	{

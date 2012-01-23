@@ -16,10 +16,27 @@ namespace MassTransit.Testing.ScenarioBuilders
 	using EndpointConfigurators;
 	using Scenarios;
 
+	/// <summary>
+	/// And endpoint scenario builder implementation ties together the scenario 
+	/// with the underlying infrastructure.
+	/// </summary>
+	/// <typeparam name="TScenario">See <see cref="BusTestScenario"/>, <see cref="EndpointTestScenario"/> and <see cref="TestScenario"/>
+	/// for feeding as the generic parameter.</typeparam>
 	public interface EndpointScenarioBuilder<TScenario> :
 		ScenarioBuilder<TScenario>
 		where TScenario : TestScenario
 	{
+		/// <summary>
+		/// Endpoint scenario builders may call this method to configure the endpoint factory. Call this method
+		/// to customize how the endpoint uris are built. Example:
+		/// <code>
+		/// ConfigureEndpointFactory(x =>
+		///    {
+		///    	x.UseRabbitMq();
+		///    });
+		/// </code>
+		/// </summary>
+		/// <param name="configureCallback"></param>
 		void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configureCallback);
 	}
 }

@@ -19,13 +19,21 @@ namespace MassTransit.Testing.ScenarioBuilders
 	using SubscriptionConfigurators;
 	using Transports;
 
-	public class BusScenarioBuilderImpl :
+	/// <summary>
+	/// Implementation for the test scenario, but abstract for others to customize it. Sets some defaults in the c'tor, which you
+	/// can override with the <see cref="ConfigureBus"/> and <see cref="ConfigureSubscriptions"/> methods.
+	/// </summary>
+	public abstract class BusScenarioBuilderImpl :
 		EndpointScenarioBuilderImpl<BusTestScenario>,
 		BusScenarioBuilder
 	{
 		readonly ServiceBusConfiguratorImpl _configurator;
 		readonly ServiceBusDefaultSettings _settings;
 
+		/// <summary>
+		/// c'tor
+		/// </summary>
+		/// <param name="uri">The uri to receive from during the scenario.</param>
 		protected BusScenarioBuilderImpl(Uri uri)
 		{
 			_settings = new ServiceBusDefaultSettings();

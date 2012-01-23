@@ -15,9 +15,21 @@ namespace MassTransit.Testing
 	using Factories;
 	using Saga;
 	using ScenarioBuilders;
+	using TestInstanceConfigurators;
 
+	/// <summary>
+	/// Factory for testing message handlers, buses and messages - received, skipped, sent and published. The builders used
+	/// with the <see cref="TestInstanceConfigurator{TScenario}"/>, defaults to the loopback bus scenario. Use the extension methods in
+	/// <see cref="BusTestScenarioExtensions"/> to use alternative scenario builders. A builder is something that ties some component
+	/// together.
+	/// </summary>
 	public static class TestFactory
 	{
+		/// <summary>
+		/// Creates a new <see cref="HandlerTestFactory{TScenario,TMessage}"/> for the passed message (generic parameter).
+		/// </summary>
+		/// <typeparam name="TMessage">The type of the message to create a test for.</typeparam>
+		/// <returns>A 'configurator' - a handler test factory.</returns>
 		public static HandlerTestFactory<BusTestScenario, TMessage> ForHandler<TMessage>()
 			where TMessage : class
 		{
