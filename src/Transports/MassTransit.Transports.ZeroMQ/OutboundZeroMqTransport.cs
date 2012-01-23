@@ -37,7 +37,7 @@ namespace MassTransit.Transports.ZeroMq
                     {
                         
                         context.SerializeTo(body);
-                        connection.PullSocket.Send(body.ToArray());
+                        connection.PushSocket.Send(body.ToArray());
                     }
 
                     }
