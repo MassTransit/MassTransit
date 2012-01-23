@@ -19,7 +19,7 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
     using RabbitMQ.Client.Framing.v0_9_1;
 
     [Scenario]
-    public class Given_a_rabbitmq_server
+    public abstract class Given_a_rabbitmq_server
     {
         public IConnection Connection { get; set; }
         public IModel Model { get; private set; }
