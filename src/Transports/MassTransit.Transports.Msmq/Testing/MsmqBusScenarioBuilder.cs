@@ -17,6 +17,9 @@ namespace MassTransit.Transports.Msmq.Testing
 	using Magnum.Extensions;
 	using MassTransit.Testing.ScenarioBuilders;
 
+	/// <summary>
+	/// Scenario builder for MSMQ transport.
+	/// </summary>
 	public class MsmqBusScenarioBuilder :
 		BusScenarioBuilderImpl
 	{

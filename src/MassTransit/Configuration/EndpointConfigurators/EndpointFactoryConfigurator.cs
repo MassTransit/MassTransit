@@ -23,6 +23,9 @@ namespace MassTransit.EndpointConfigurators
 	public interface EndpointFactoryConfigurator :
 		Configurator
 	{
+		/// <summary>
+		/// Gets the endpoint factory defaults.
+		/// </summary>
 		IEndpointFactoryDefaultSettings Defaults { get; }
 
 		/// <summary>
