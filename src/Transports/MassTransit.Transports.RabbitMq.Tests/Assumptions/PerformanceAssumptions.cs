@@ -31,7 +31,7 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
         {
             WithChannel(chan =>
                 {
-                    WithStopWatch("Acks", () =>
+                    WithStopWatch("NoAcks", () =>
                         {
                             for (int i = 0; i < HowMany; i++)
                             {
