@@ -29,15 +29,7 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
         [Given]
         public void A_rabbitmq_server()
         {
-            Factory = new ConnectionFactory
-                {
-                    UserName = "guest",
-                    Password = "guest",
-                    Port = 5672,
-                    VirtualHost = "/",
-                    HostName = "localhost",
-                    Protocol = Protocols.AMQP_0_9_1,
-                };
+        	Factory = TestFactory.ConnectionFactory();
 
             Connection = Factory.CreateConnection();
             Model = Connection.CreateModel();
