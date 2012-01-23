@@ -56,7 +56,6 @@ namespace MassTransit.Transports.RabbitMq
 			finally
 			{
 				_disposed = true;
-				
 			}
 		}
 

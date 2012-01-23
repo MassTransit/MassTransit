@@ -26,14 +26,7 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 		[SetUp]
 		public void BuildUpAConnection()
 		{
-			var cf = new ConnectionFactory();
-			cf.UserName = "guest";
-			cf.Password = "guest";
-			cf.Port = 5672;
-			cf.VirtualHost = "/";
-			cf.HostName = "localhost";
-
-			_connection = cf.CreateConnection();
+			_connection = TestFactory.ConnectionFactory().CreateConnection();
 		}
 
 		[TearDown]
@@ -62,9 +55,7 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 			finally
 			{
 				if (model != null)
-				{
 					model.Dispose();
-				}
 			}
 		}
 	}
