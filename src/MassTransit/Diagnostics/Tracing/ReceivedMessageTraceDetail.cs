@@ -10,19 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Diagnostics.Tracing
 {
-    using System;
-    using Diagnostics;
-    using Diagnostics.Introspection;
+    using System.Collections.Generic;
 
-    public interface IServiceContainer :
-        IDisposable,
-        DiagnosticsSource
-    {
-        void AddService(BusServiceLayer layer, IBusService service);
+    public interface ReceivedMessageTraceDetail :
+		MessageTraceDetail
+	{
+		/// <summary>
+		/// The receivers that processed the message
+		/// </summary>
+		IList<ReceiverTraceDetail> Receivers { get; }
 
-        void Start();
-        void Stop();
-    }
+		/// <summary>
+		/// The messages that were sent while the message was being received
+		/// </summary>
+		IList<SentMessageTraceDetail> SentMessages { get; }
+	}
 }

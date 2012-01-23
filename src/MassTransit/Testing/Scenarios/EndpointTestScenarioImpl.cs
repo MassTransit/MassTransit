@@ -14,6 +14,8 @@ namespace MassTransit.Testing.Scenarios
 {
 	using System;
 	using System.Collections.Generic;
+	using Diagnostics;
+	using Diagnostics.Introspection;
 	using Magnum.Extensions;
 	using TestDecorators;
 	using Transports;
@@ -161,6 +163,11 @@ namespace MassTransit.Testing.Scenarios
 			{
 				return _endpointCache.GetEndpoint(uri);
 			}
+
+		    public void Inspect(DiagnosticsProbe probe)
+		    {
+		        _endpointCache.Inspect(probe);
+		    }
 		}
 
 		~EndpointTestScenarioImpl()

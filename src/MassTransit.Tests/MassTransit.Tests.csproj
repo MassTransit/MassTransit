@@ -115,6 +115,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\Diagnostics_Specs.cs" />
     <Compile Include="Diagnostics\Trace_Specs.cs" />
     <Compile Include="Environment_Specs.cs" />
     <Compile Include="InterfaceProxy_Specs.cs" />

@@ -14,6 +14,8 @@ namespace MassTransit.Transports
 {
 	using System;
 	using System.Linq;
+	using Diagnostics;
+	using Diagnostics.Introspection;
 	using Exceptions;
 	using Magnum;
 	using Magnum.Threading;
@@ -88,7 +90,12 @@ namespace MassTransit.Transports
 			_endpoints.Clear();
 		}
 
-		protected virtual void Dispose(bool disposing)
+	    public void Inspect(DiagnosticsProbe probe)
+	    {
+	        _endpointFactory.Inspect(probe);
+	    }
+
+	    protected virtual void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)

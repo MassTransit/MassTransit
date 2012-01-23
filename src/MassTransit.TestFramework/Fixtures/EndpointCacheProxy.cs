@@ -13,8 +13,10 @@
 namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
+	using Diagnostics;
+	using Diagnostics.Introspection;
 
-	public class EndpointCacheProxy :
+    public class EndpointCacheProxy :
 		IEndpointCache
 	{
 		readonly IEndpointCache _endpointCache;
@@ -33,5 +35,10 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			return _endpointCache.GetEndpoint(uri);
 		}
+
+	    public void Inspect(DiagnosticsProbe probe)
+	    {
+	        _endpointCache.Inspect(probe);
+	    }
 	}
 }

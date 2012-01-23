@@ -13,6 +13,8 @@
 namespace MassTransit.Testing.TestDecorators
 {
 	using System;
+	using Diagnostics;
+	using Diagnostics.Introspection;
 	using Scenarios;
 	using Transports;
 
@@ -44,7 +46,12 @@ namespace MassTransit.Testing.TestDecorators
 			return endpointTestDecorator;
 		}
 
-		public void AddTransportFactory(ITransportFactory factory)
+	    public void Inspect(DiagnosticsProbe probe)
+	    {
+	        _endpointFactory.Inspect(probe);
+	    }
+
+	    public void AddTransportFactory(ITransportFactory factory)
 		{
 			_endpointFactory.AddTransportFactory(factory);
 		}

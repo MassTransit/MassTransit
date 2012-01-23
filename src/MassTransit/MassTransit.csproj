@@ -31,7 +31,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <BuildConfigKey Condition=" '$(BuildConfigKey)' == '' ">NET40</BuildConfigKey>
+    <DefineConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">NET40</DefineConstants>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
   </PropertyGroup>
@@ -40,18 +40,19 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;$(BuildConfigKey)</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;$(DefineConstants)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>3009,3001,3008</NoWarn>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>bin\Debug\MassTransit.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;$(BuildConfigKey)</DefineConstants>
+    <DefineConstants>TRACE;$(DefineConstants)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\MassTransit.XML</DocumentationFile>
@@ -108,7 +109,7 @@
     <Compile Include="Configuration\Builders\EndpointFactoryBuilderImpl.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilder.cs" />
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\BusConfigurators\DiagnosticsConfigurationExtensions.cs" />
+    <Compile Include="Diagnostics\IntrospectionExtensions.cs" />
     <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
     <Compile Include="Configuration\BusServiceLayer.cs" />
     <Compile Include="Configuration\Configuration\BusSettings.cs" />
@@ -123,6 +124,16 @@
     <Compile Include="Configuration\Configurators\ValidationResultDisposition.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultImpl.cs" />
     <Compile Include="Configuration\ConsumerSubscriptionExtensions.cs" />
+    <Compile Include="Diagnostics\Introspection\BusStatusEntryImpl.cs" />
+    <Compile Include="Diagnostics\Introspection\BusStatusImpl.cs" />
+    <Compile Include="Diagnostics\Introspection\Messages\BusStatus.cs" />
+    <Compile Include="Diagnostics\Introspection\DiagnosticEntry.cs" />
+    <Compile Include="Diagnostics\Introspection\StandardDiagnosticsInfo.cs" />
+    <Compile Include="Diagnostics\Introspection\Messages\BusStatusEntry.cs" />
+    <Compile Include="Diagnostics\Introspection\Messages\GetBusStatus.cs" />
+    <Compile Include="Diagnostics\Introspection\GetBusStatusImpl.cs" />
+    <Compile Include="Diagnostics\Introspection\DiagnosticEntryImpl.cs" />
+    <Compile Include="Diagnostics\Introspection\IntrospectionServiceConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurationExtensions.cs" />
     <Compile Include="Configuration\EnvironmentConfigurators\DelegateEnvironmentConfigurator.cs" />
     <Compile Include="Configuration\EnvironmentConfigurators\EnvironmentsConfigurator.cs" />
@@ -238,21 +249,25 @@
     <Compile Include="Context\ThreadStaticContextStorageProvider.cs" />
     <Compile Include="Context\TransportMessageHeaders.cs" />
     <Compile Include="Context\HttpContextContextStorageProvider.cs" />
-    <Compile Include="Diagnostics\GetMessageTraceList.cs" />
-    <Compile Include="Diagnostics\MessageTraceBusService.cs" />
-    <Compile Include="Diagnostics\MessageTraceClient.cs" />
-    <Compile Include="Diagnostics\MessageTraceClientExtensions.cs" />
-    <Compile Include="Diagnostics\MessageTraceDetail.cs" />
-    <Compile Include="Diagnostics\ReceivedMessageTraceList.cs" />
-    <Compile Include="Diagnostics\MessageTraceDetailImpl.cs" />
-    <Compile Include="Diagnostics\ReceivedMessageTraceListImpl.cs" />
-    <Compile Include="Diagnostics\ReceivedMessageTraceDetail.cs" />
-    <Compile Include="Diagnostics\ReceivedMessageTraceDetailImpl.cs" />
-    <Compile Include="Diagnostics\ReceiverTraceDetail.cs" />
-    <Compile Include="Diagnostics\ReceiverTraceDetailImpl.cs" />
-    <Compile Include="Diagnostics\GetMessageTraceListImpl.cs" />
-    <Compile Include="Diagnostics\SentMessageTraceDetail.cs" />
-    <Compile Include="Diagnostics\SentMessageTraceDetailImpl.cs" />
+    <Compile Include="Diagnostics\Introspection\DiagnosticsProbe.cs" />
+    <Compile Include="Diagnostics\Introspection\DiagnosticsSource.cs" />
+    <Compile Include="Diagnostics\TracingExtensions.cs" />
+    <Compile Include="Diagnostics\Tracing\GetMessageTraceList.cs" />
+    <Compile Include="Diagnostics\Introspection\InMemoryDiagnosticsProbe.cs" />
+    <Compile Include="Diagnostics\Tracing\MessageTraceBusService.cs" />
+    <Compile Include="Diagnostics\Tracing\MessageTraceClient.cs" />
+    <Compile Include="Diagnostics\Tracing\MessageTraceClientExtensions.cs" />
+    <Compile Include="Diagnostics\Tracing\MessageTraceDetail.cs" />
+    <Compile Include="Diagnostics\Tracing\ReceivedMessageTraceList.cs" />
+    <Compile Include="Diagnostics\Tracing\MessageTraceDetailImpl.cs" />
+    <Compile Include="Diagnostics\Tracing\ReceivedMessageTraceListImpl.cs" />
+    <Compile Include="Diagnostics\Tracing\ReceivedMessageTraceDetail.cs" />
+    <Compile Include="Diagnostics\Tracing\ReceivedMessageTraceDetailImpl.cs" />
+    <Compile Include="Diagnostics\Tracing\ReceiverTraceDetail.cs" />
+    <Compile Include="Diagnostics\Tracing\ReceiverTraceDetailImpl.cs" />
+    <Compile Include="Diagnostics\Tracing\GetMessageTraceListImpl.cs" />
+    <Compile Include="Diagnostics\Tracing\SentMessageTraceDetail.cs" />
+    <Compile Include="Diagnostics\Tracing\SentMessageTraceDetailImpl.cs" />
     <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
@@ -354,6 +369,7 @@
     <Compile Include="Serialization\VersionOneXmlMessageSerializer.cs" />
     <Compile Include="ServiceCatalog.cs" />
     <Compile Include="ServiceContainer.cs" />
+    <Compile Include="Diagnostics\Introspection\IntrospectionBusService.cs" />
     <Compile Include="Services\HealthMonitoring\Configuration\HealthClientConfiguratorExtensions.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthInformation.cs" />
     <Compile Include="Saga\ISagaRepository.cs" />
@@ -828,7 +844,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

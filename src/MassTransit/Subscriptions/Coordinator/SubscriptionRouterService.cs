@@ -15,6 +15,7 @@ namespace MassTransit.Subscriptions.Coordinator
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using Diagnostics.Introspection;
 	using Magnum;
 	using Magnum.Extensions;
 	using Messages;
@@ -23,7 +24,8 @@ namespace MassTransit.Subscriptions.Coordinator
 	public class SubscriptionRouterService :
 		IBusService,
 		SubscriptionRouter,
-		SubscriptionObserver
+		SubscriptionObserver,
+        DiagnosticsSource
 	{
 		readonly Guid _peerId;
 		readonly Uri _peerUri;
@@ -163,7 +165,12 @@ namespace MassTransit.Subscriptions.Coordinator
 			}
 		}
 
-		void Dispose(bool disposing)
+	    public void Inspect(DiagnosticsProbe probe)
+	    {
+	        probe.Add("mt.network", _network);
+	    }
+
+	    void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)

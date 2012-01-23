@@ -10,22 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.BusConfigurators
+namespace MassTransit
 {
-	using Diagnostics;
+    using BusConfigurators;
+    using Diagnostics.Tracing;
 
-	public static class DiagnosticsConfigurationExtensions
-	{
-		public static void EnableMessageTracing(this ServiceBusConfigurator configurator)
-		{
-			var busConfigurator = new PostCreateBusBuilderConfigurator(bus =>
-				{
-					var service = new MessageTraceBusService(bus.EventChannel);
+    public static class TracingExtensions
+    {
+        public static void EnableMessageTracing(this ServiceBusConfigurator configurator)
+        {
+            var busConfigurator = new PostCreateBusBuilderConfigurator(bus =>
+                {
+                    var service = new MessageTraceBusService(bus.EventChannel);
 
-					bus.AddService(BusServiceLayer.Network, service);
-				});
+                    bus.AddService(BusServiceLayer.Network, service);
+                });
 
-			configurator.AddBusConfigurator(busConfigurator);
-		}
-	}
+            configurator.AddBusConfigurator(busConfigurator);
+        }
+    }
 }

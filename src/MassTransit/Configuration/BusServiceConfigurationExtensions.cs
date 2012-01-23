@@ -18,6 +18,7 @@ namespace MassTransit
 
 	public static class BusServiceConfigurationExtensions
 	{
+        [Obsolete("Use AddService<TService>(..) instead.")]
 		public static void ConfigureService<TServiceConfigurator>(this ServiceBusConfigurator configurator, BusServiceLayer layer,
 		                                                          Action<TServiceConfigurator> configure)
 			where TServiceConfigurator : BusServiceConfigurator, new()

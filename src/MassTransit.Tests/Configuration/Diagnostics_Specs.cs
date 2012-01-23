@@ -10,19 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Tests.Configuration
 {
-    using System;
-    using Diagnostics;
-    using Diagnostics.Introspection;
+    using NUnit.Framework;
 
-    public interface IServiceContainer :
-        IDisposable,
-        DiagnosticsSource
+    [TestFixture]
+    public class Diagnostics_Specs
     {
-        void AddService(BusServiceLayer layer, IBusService service);
+         
+        [Test][Explicit]
+        public void X()
+        {
+            using(var bus = ServiceBusFactory.New(sbc =>
+                {
+                    sbc.ReceiveFrom("loopback://localhost/test");
+                    
+                    sbc.UseBinarySerializer();
+                    sbc.UseHealthMonitoring(3);
+                }))
+            {
+                    bus.WriteIntrospectionToFile("x.txt");
+            }
 
-        void Start();
-        void Stop();
+            //check file
+            System.Diagnostics.Process.Start("notepad", "x.txt");
+        }
     }
 }

@@ -15,6 +15,8 @@ namespace MassTransit.Transports
 	using System;
 	using System.Collections.Generic;
 	using Builders;
+	using Diagnostics;
+	using Diagnostics.Introspection;
 	using EndpointConfigurators;
 	using Exceptions;
 	using Magnum.Extensions;
@@ -69,7 +71,16 @@ namespace MassTransit.Transports
 			_transportFactories[scheme] = factory;
 		}
 
-		public void Dispose()
+	    public void Inspect(DiagnosticsProbe probe)
+	    {
+            probe.Add("mt.default_serializer", _defaults.Serializer.GetType().ToShortTypeName());
+	        foreach (var scheme in _transportFactories)
+	        {
+	            probe.Add("mt.transport", string.Format("[{0}] {1}", scheme.Key , scheme.Value.GetType().ToShortTypeName()));
+	        }
+	    }
+
+	    public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);

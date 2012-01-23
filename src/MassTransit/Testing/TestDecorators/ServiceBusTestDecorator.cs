@@ -13,6 +13,8 @@
 namespace MassTransit.Testing.TestDecorators
 {
 	using System;
+	using Diagnostics;
+	using Diagnostics.Introspection;
 	using Pipeline;
 	using Scenarios;
 
@@ -31,7 +33,13 @@ namespace MassTransit.Testing.TestDecorators
 			_published = new PublishedMessageListImpl();
 		}
 
-		public void Dispose()
+
+	    public void Inspect(DiagnosticsProbe probe)
+	    {
+	        _bus.Inspect(probe);
+	    }
+
+	    public void Dispose()
 		{
 			_bus.Dispose();
 		}

@@ -13,13 +13,19 @@
 namespace MassTransit
 {
 	using BusConfigurators;
+	using BusServiceConfigurators;
 	using Services.HealthMonitoring.Configuration;
 
 	public static class HealthClientConfiguratorExtensions
 	{
 		public static void UseHealthMonitoring(this ServiceBusConfigurator configurator, int heartbeatInterval)
 		{
-			configurator.ConfigureService<HealthClientConfigurator>(BusServiceLayer.Session, s => s.SetHeartbeatInterval(heartbeatInterval));
+		    var serviceConfigurator = new HealthClientConfigurator();
+            serviceConfigurator.SetHeartbeatInterval(heartbeatInterval);
+
+            var busConfigurator = new CustomBusServiceConfigurator(serviceConfigurator);
+
+            configurator.AddBusConfigurator(busConfigurator);
 		}
 	}
 }
