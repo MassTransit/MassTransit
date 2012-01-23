@@ -10,26 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Diagnostics.Introspection
+namespace MassTransit
 {
-    using System.Collections.Generic;
-    using Builders;
     using BusConfigurators;
-    using Configurators;
+    using Diagnostics.Tracing;
 
-    public class IntrospectionBusBuilder :
-        BusBuilderConfigurator
+    public static class TracingExtensions
     {
-        public IEnumerable<ValidationResult> Validate()
+        public static void EnableMessageTracing(this ServiceBusConfigurator configurator)
         {
-            yield return this.Success("Remote Introspection has been turned on.");
-        }
+            var busConfigurator = new PostCreateBusBuilderConfigurator(bus =>
+                {
+                    var service = new MessageTraceBusService(bus.EventChannel);
 
-        public BusBuilder Configure(BusBuilder builder)
-        {
-            builder.AddBusServiceConfigurator(new IntrospectionServiceConfigurator());
+                    bus.AddService(BusServiceLayer.Network, service);
+                });
 
-            return builder;
+            configurator.AddBusConfigurator(busConfigurator);
         }
     }
 }
