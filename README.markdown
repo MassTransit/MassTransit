@@ -19,7 +19,7 @@ MassTransit is lean service bus implementation for building loosely coupled appl
 Documentation is located at [http://docs.masstransit-project.com/](http://docs.masstransit-project.com/).
 
 ### Downloads
- Download straight from NuGet 'MassTransit' [Search NuGet for MassTransit](http://nuget.org/List/Search?packageType=Packages&searchCategory=All+Categories&searchTerm=MassTransit&sortOrder=package-download-count&pageSize=10)
+ Download straight from NuGet 'MassTransit' [Search NuGet for MassTransit](http://nuget.org/packages?q=masstransit)
  
  Download officially released builds from 
  [Github](http://github.com/masstransit/masstransit/downloads/).
