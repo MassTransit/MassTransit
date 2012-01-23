@@ -14,10 +14,12 @@ namespace MassTransit.Configurators
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using Exceptions;
+	using Util;
 
-	[Serializable]
+	[Serializable, DebuggerDisplay("{DebuggerString()}")]
 	public class ConfigurationResultImpl :
 		ConfigurationResult
 	{
@@ -37,6 +39,15 @@ namespace MassTransit.Configurators
 	    {
 	        get { return _results.Any(x => x.Disposition == ValidationResultDisposition.Failure); }
 	    }
+
+		[UsedImplicitly]
+		protected string DebuggerString()
+		{
+			var debuggerString = string.Join(", ", _results);
+			return string.IsNullOrWhiteSpace(debuggerString)
+				? "No Obvious Problems says ConfigurationResult"
+				: debuggerString;
+		}
 
 		public static ConfigurationResult CompileResults(IEnumerable<ValidationResult> results)
 		{
