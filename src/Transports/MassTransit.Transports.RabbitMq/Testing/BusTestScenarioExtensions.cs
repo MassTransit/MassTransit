@@ -15,8 +15,17 @@ namespace MassTransit.Testing
 	using Scenarios;
 	using TestInstanceConfigurators;
 
+	/// <summary>
+	/// Extensions for configuring a test RabbitMQ instance that can be used
+	/// in the test. See <see cref="RabbitMqBusScenarioBuilder"/> docs.
+	/// </summary>
 	public static class BusTestScenarioExtensions
 	{
+		/// <summary>
+		/// Extensions for configuring a test RabbitMQ instance that can be used
+		/// in the test. See <see cref="RabbitMqBusScenarioBuilder"/> docs.
+		/// </summary>
+		/// <param name="configurator"></param>
 		public static void UseRabbitMqBusScenario(this TestInstanceConfigurator<BusTestScenario> configurator)
 		{
 			configurator.UseScenarioBuilder(() => new RabbitMqBusScenarioBuilder());
