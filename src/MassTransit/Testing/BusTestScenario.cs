@@ -14,9 +14,16 @@ namespace MassTransit.Testing
 {
 	using Scenarios;
 
+	/// <summary>
+	/// A bus test scenario tests a full service bus. see also <see cref="EndpointTestScenario"/> and <see cref="TestScenario"/> for documentation
+	/// and the properties on the interfaces.
+	/// </summary>
 	public interface BusTestScenario :
 		EndpointTestScenario
 	{
+		/// <summary>
+		/// Gets the service bus that is active during the test.
+		/// </summary>
 		IServiceBus Bus { get; }
 	}
 }
