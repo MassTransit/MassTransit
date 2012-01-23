@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq
 {
 	using System;
+	using Magnum.Extensions;
 	using RabbitMQ.Client;
 	using log4net;
 
@@ -20,6 +21,7 @@ namespace MassTransit.Transports.RabbitMq
 		Connection
 	{
 		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqConnection));
+		bool _disposed;
 		IConnection _connection;
 		readonly ConnectionFactory _connectionFactory;
 
@@ -35,7 +37,27 @@ namespace MassTransit.Transports.RabbitMq
 
 		public void Dispose()
 		{
-			Disconnect();
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual void Dispose(bool managed)
+		{
+			if (!managed)
+				return;
+
+			if (_disposed)
+				throw new ObjectDisposedException("RabbitMqConnection for {0}".FormatWith(_connectionFactory.Address), "Cannot dispose a connection twice");
+
+			try
+			{
+				Disconnect();
+			}
+			finally
+			{
+				_disposed = true;
+				
+			}
 		}
 
 		public void Connect()
