@@ -12,67 +12,66 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.ZeroMq.Tests
 {
-    using System;
-    using System.Text;
-    using System.Threading;
-    using Context;
-    using Magnum.Extensions;
-    using NUnit.Framework;
-    using ZMQ;
-    using Magnum.TestFramework;
+	using System;
+	using System.Text;
+	using System.Threading;
+	using Magnum.Extensions;
+	using Magnum.TestFramework;
+	using NUnit.Framework;
+	using ZMQ;
 
-    [TestFixture]
-    public class Inbound_Specs
-    {
-        InboundZeroMqTransport _inbound;
-        Context _context;
+	[TestFixture]
+	public class Inbound_Specs
+	{
+		InboundZeroMqTransport _inbound;
+		Context _context;
 
-        [SetUp]
-        public void SetUp()
-        {
-            _context = new Context();
-            var address  = new ZeroMqAddress(new Uri("zeromq-tcp://localhost:5555"));
-            var zeroMqConnection = new ZeroMqConnection(_context, address, SocketType.SUB );
-            ConnectionHandler<ZeroMqConnection> connection = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
-            _inbound = new InboundZeroMqTransport(address, connection, true);
+		[SetUp]
+		public void SetUp()
+		{
+			_context = new Context();
+			var address = new ZeroMqAddress(new Uri("zmq-tcp://localhost:5555"));
+			var zeroMqConnection = new ZeroMqConnection(_context, address);
+			ConnectionHandler<ZeroMqConnection> connection = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
+			_inbound = new InboundZeroMqTransport(address, connection, true);
 
-            //push simple message in
+			//push simple message in
 
-            zeroMqConnection.Connect();
+			zeroMqConnection.Connect();
 
-            using(var pub = _context.Socket(SocketType.PUB) )
-            {
-                pub.Connect("zeromq-tcp://localhost:5555");
-                pub.Send(Encoding.UTF8.GetBytes("dru"));
-            }
-        }
+			using (var pub = _context.Socket(SocketType.PUB))
+			{
+				pub.Connect("zmq-tcp://localhost:5556");
+				pub.Send("Hello World", Encoding.UTF8);
+			}
+		}
 
-        [TearDown]
-        public void TearDown()
-        {
-            _inbound.Dispose();
-            _context.Dispose();
-        }
+		[TearDown]
+		public void TearDown()
+		{
+			_inbound.Dispose();
+			_context.Dispose();
+		}
 
-        [Test]
-        public void SmokeTest()
-        {
-        }
+		[Test]
+		public void SmokeTest()
+		{
+		}
 
-        [Test]
-        public void CanRcv()
-        {
-            var mre = new ManualResetEvent(false);
-            _inbound.Receive(cxt=>
-                {
-                    return context =>
-                        {
-                            var x = context.BodyStream.ReadToEndAsText();
-                            x.ShouldEqual("dru");
-                            mre.Set();
-                        };
-                }, 2.Seconds());
-            mre.WaitOne(5.Seconds());
-        }
-    }
+		[Test]
+		public void CanRcv()
+		{
+			var mre = new ManualResetEvent(false);
+			_inbound.Receive(cxt =>
+				{
+					return context =>
+						{
+							var x = context.BodyStream.ReadToEndAsText();
+							x.ShouldEqual("dru");
+							mre.Set();
+						};
+				}, 2.Seconds());
+			mre.WaitOne(5.Seconds());
+		}
+	}
 }

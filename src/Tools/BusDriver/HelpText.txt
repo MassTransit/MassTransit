@@ -29,7 +29,7 @@ Command-Line Reference
       -uri              The URI of the queue
       -count            The number of messages to move
 
-    save                Save messages from a queue to a set of files
+    save                Save messages from a queue to a set of files 
       
       -uri              The URI of the source queue
       -file             The name of the file to write to (will have .1, .2

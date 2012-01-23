@@ -12,45 +12,43 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.ZeroMq.Tests
 {
-    using System;
-    using NUnit.Framework;
-    using ZMQ;
+	using System;
+	using NUnit.Framework;
+	using ZMQ;
 
-    [TestFixture]
-    public class X
-    {
-        Context _context;
-        ZeroMqConnection _zmqc;
+	[TestFixture]
+	public class Connecting_ZeroMqConnection
+	{
+		Context _context;
+		ZeroMqConnection _zmqc;
 
-        [SetUp]
-        public void SetUp()
-        {
-            _context = new Context();
-            _zmqc = new ZeroMqConnection(_context, 
-                new ZeroMqAddress(new Uri("zeromq-tcp://localhost:5555")), 
-                SocketType.REQ);
+		[SetUp]
+		public void SetUp()
+		{
+			_context = new Context();
+			_zmqc = new ZeroMqConnection(_context,
+				new ZeroMqAddress(new Uri("zmq-tcp://localhost:5555")));
+		}
 
-        }
+		[TearDown]
+		public void Teardown()
+		{
+			_zmqc.Dispose();
+			_zmqc = null;
 
-        [TearDown]
-        public void Teardown()
-        {
-            _zmqc.Dispose();
-            _zmqc = null;
+			_context.Dispose();
+			_context = null;
+		}
 
-            _context.Dispose();
-            _context = null;
-        }
+		[Test]
+		public void BasicSmokeTest()
+		{
+		}
 
-        [Test]
-        public void BasicSmokeTest()
-        {
-        }
-
-        [Test]
-        public void ConnectTest()
-        {
-            _zmqc.Connect();
-        }
-    }
+		[Test]
+		public void ConnectTest()
+		{
+			_zmqc.Connect();
+		}
+	}
 }

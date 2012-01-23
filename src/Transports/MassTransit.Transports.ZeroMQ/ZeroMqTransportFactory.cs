@@ -12,45 +12,45 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.ZeroMQ
 {
-    using ZMQ;
-    using ZeroMq;
+	using ZMQ;
+	using ZeroMq;
 
-    public class ZeroMqTransportFactory :
+	public class ZeroMqTransportFactory :
 		ITransportFactory
 	{
-        //this should own the creation of the Context
-        Context _context;
+		//this should own the creation of the Context
+		Context _context;
 
-        public ZeroMqTransportFactory(int numberOfIoThreads = 1)
-        {
-            _context  = new Context(numberOfIoThreads);
-        }
+		public ZeroMqTransportFactory(int numberOfIoThreads = 1)
+		{
+			_context = new Context(numberOfIoThreads);
+		}
 
-        public string Scheme
+		public string Scheme
 		{
 			get { return "zeromq"; }
 		}
 
 		public IDuplexTransport BuildLoopback(ITransportSettings settings)
 		{
-            return new Transports.Transport(settings.Address,
-                ()=> BuildInbound(settings),
-                ()=>BuildOutbound(settings));
+			return new Transports.Transport(settings.Address,
+				() => BuildInbound(settings),
+				() => BuildOutbound(settings));
 		}
 
 		public IInboundTransport BuildInbound(ITransportSettings settings)
 		{
-		    var address = (ZeroMqAddress)settings.Address;
-		    var zeroMqConnection = new ZeroMqConnection(_context, address,SocketType.REQ); //what should the type be?
-		    var handler = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
-		    return new InboundZeroMqTransport(address, handler, true);
+			var address = (ZeroMqAddress) settings.Address;
+			var zeroMqConnection = new ZeroMqConnection(_context, address);
+			var handler = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
+			return new InboundZeroMqTransport(address, handler, true);
 		}
 
 		public IOutboundTransport BuildOutbound(ITransportSettings settings)
 		{
-		    var address = (ZeroMqAddress)settings.Address;
-		    var zeroMqConnection = new ZeroMqConnection(_context, address, SocketType.REQ); //what should the type be?
-		    var handler = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
+			var address = (ZeroMqAddress) settings.Address;
+			var zeroMqConnection = new ZeroMqConnection(_context, address);
+			var handler = new ConnectionHandlerImpl<ZeroMqConnection>(zeroMqConnection);
 			return new OutboundZeroMqTransport(address, handler);
 		}
 
@@ -61,11 +61,11 @@ namespace MassTransit.Transports.ZeroMQ
 
 		public void Dispose()
 		{
-            if(_context != null)
-            {
-                _context.Dispose();
-                _context = null;
-            }
+			if (_context != null)
+			{
+				_context.Dispose();
+				_context = null;
+			}
 		}
 	}
 }
