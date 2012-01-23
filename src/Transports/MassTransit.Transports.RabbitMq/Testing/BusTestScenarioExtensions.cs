@@ -24,8 +24,43 @@ namespace MassTransit.Testing
 		/// <summary>
 		/// Extensions for configuring a test RabbitMQ instance that can be used
 		/// in the test. See <see cref="RabbitMqBusScenarioBuilder"/> docs.
+		/// 
+		/// Sample usage:
+		/// <code>
+		///using Magnum.TestFramework;
+		///using MassTransit.Testing;
+		///[Scenario]
+		///public class Using_the_handler_test_factory
+		///{
+		///    HandlerTest&lt;A&gt; _test;
+		///
+		///    [When]
+		///    public void Setup()
+		///    {
+		///        _test = TestFactory.ForHandler&lt;A&gt;()
+		///            .New(x =>
+		///                {
+		///                    x.UseRabbitMqBusScenario();
+		///                    x.Send(new A());
+		///                    x.Send(new B());
+		///                });
+		///        _test.Execute();
+		///    }
+		///    [Finally]
+		///    public void Teardown()
+		///    {
+		///        _test.Dispose();
+		///        _test = null;
+		///    }
+		///    [Then]
+		///    public void Should_have_received_a_message_of_type_a()
+		///    {
+		///        _test.Received.Any&lt;A&gt;().ShouldBeTrue();
+		///    }
+		///}
+		///</code>
 		/// </summary>
-		/// <param name="configurator"></param>
+		/// <param name="configurator">The configurator that is passed via the lambda that you are calling this method from.</param>
 		public static void UseRabbitMqBusScenario(this TestInstanceConfigurator<BusTestScenario> configurator)
 		{
 			configurator.UseScenarioBuilder(() => new RabbitMqBusScenarioBuilder());

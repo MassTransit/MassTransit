@@ -15,8 +15,17 @@ namespace MassTransit.Testing
 	using Configurators;
 	using ScenarioConfigurators;
 
+	/// <summary>
+	/// Extension methods for the bus test scenarios.
+	/// </summary>
 	public static class BusTestScenarioExtensions
 	{
+		/// <summary>
+		/// Sets the concurrent consumer limit for the <see cref="BusTestScenario"/> that is
+		/// under test.
+		/// </summary>
+		/// <param name="configurator">The configurator passed from the XXXTestFactory interfaces' "New(HandlerTestInstanceConfigurator{TScenario,TMessage})" method.</param>
+		/// <param name="value">The value for this setting.</param>
 		public static void SetConcurrentConsumerLimit(this ScenarioConfigurator<BusTestScenario> configurator, int value)
 		{
 			var scenarioConfigurator =
