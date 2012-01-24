@@ -38,7 +38,7 @@ desc "**DOOES NOT CLEAR OUTPUT FOLDER**, compiles and runs tests"
 task :unclean => [:compile, :ilmerge, :tests]
 
 desc "Gen SolutionVersion.cs"
-assemblyinfo :global_version do |asm|
+assemblyinfo :global_version => [:versioning] do |asm|
   # Assembly file config
   asm.product_name = PRODUCT
   asm.description = "MassTransit is a distributed application framework for .NET  http://masstransit-project.com"
