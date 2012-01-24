@@ -1,0 +1,772 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SharpTestsEx</name>
+    </assembly>
+    <members>
+        <member name="T:SharpTestsEx.ActionAssert">
+            <summary>
+            Assertion for <see cref="T:System.Action"/>.
+            </summary>
+        </member>
+        <member name="M:SharpTestsEx.ActionAssert.Throws``1(System.Action)">
+            <summary>
+            Verifies that the given <see cref="T:System.Action"/> throws a specific <see cref="T:System.Exception"/>.
+            </summary>
+            <typeparam name="T">The specific expected <see cref="T:System.Exception"/>.</typeparam>
+            <param name="action">The given <see cref="T:System.Action"/> to execute.</param>
+            <returns>The <see cref="T:System.Exception"/>.</returns>
+            <exception cref="T:SharpTestsEx.AssertException">The <paramref name="action"/> does not throws the expected <see cref="T:System.Exception"/>. </exception>
+        </member>
+        <member name="M:SharpTestsEx.ActionAssert.Throws``1(System.Action,System.String)">
+            <summary>
+            Verifies that the given <see cref="T:System.Action"/> throws a specific <see cref="T:System.Exception"/>.
+            </summary>
+            <typeparam name="T">The specific expected <see cref="T:System.Exception"/>.</typeparam>
+            <param name="action">The given <see cref="T:System.Action"/> to execute.</param>
+            <param name="customMessage">A message to display if the assertion fails. This message can be seen in the unit test results. </param>
+            <returns>The <see cref="T:System.Exception"/>.</returns>
+            <exception cref="T:SharpTestsEx.AssertException">The <paramref name="action"/> does not throws the expected <see cref="T:System.Exception"/>. </exception>
+        </member>
+        <member name="M:SharpTestsEx.ActionAssert.Throws(System.Action)">
+            <summary>
+            Verifies that the given <see cref="T:System.Action"/> throws an <see cref="T:System.Exception"/>.
+            </summary>
+            <param name="action">The given <see cref="T:System.Action"/> to execute.</param>
+            <returns>The <see cref="T:System.Exception"/>.</returns>
+            <exception cref="T:SharpTestsEx.AssertException">The <paramref name="action"/> does not throws an <see cref="T:System.Exception"/>. </exception>
+        </member>
+        <member name="M:SharpTestsEx.ActionAssert.Throws(System.Action,System.String)">
+            <summary>
+            Verifies that the given <see cref="T:System.Action"/> throws an <see cref="T:System.Exception"/>.
+            </summary>
+            <param name="action">The given <see cref="T:System.Action"/> to execute.</param>
+            <param name="customMessage">A message to display if the assertion fails. This message can be seen in the unit test results. </param>
+            <returns>The <see cref="T:System.Exception"/>.</returns>
+            <exception cref="T:SharpTestsEx.AssertException">The <paramref name="action"/> does not throws the expected <see cref="T:System.Exception"/>. </exception>
+        </member>
+        <member name="M:SharpTestsEx.ActionAssert.NotThrow(System.Action)">
+            <summary>
+            Verifies that the given <see cref="T:System.Action"/> does not throw any <see cref="T:System.Exception"/>.
+            </summary>
+            <param name="action">The given <see cref="T:System.Action"/> to execute.</param>
+        </member>
+        <member name="M:SharpTestsEx.ActionAssert.NotThrow(System.Action,System.String)">
+            <summary>
+            Verifies that the given <see cref="T:System.Action"/> does not throw any <see cref="T:System.Exception"/>.
+            </summary>
+            <param name="action">The given <see cref="T:System.Action"/> to execute.</param>
+            <param name="customMessage">A message to display if the assertion fails. This message can be seen in the unit test results. </param>
+        </member>
+        <member name="T:SharpTestsEx.Assertions.ExpressionStringBuilder">
+            <summary>
+            The intention of <see cref="T:SharpTestsEx.Assertions.ExpressionStringBuilder"/> is to create a more readable 
+            string representation for the failure message.
+            </summary>
+        </member>
+        <member name="T:SharpTestsEx.Assertions.NullAssertion`1">
+            <summary>
+            Verifies that the specified object is null. The assertion fails if it is not null.
+            </summary>
+            <typeparam name="TA">Type of the actual value subject of the assertion.</typeparam>
+        </member>
+        <member name="T:SharpTestsEx.Assertions.Assertion`2">
+            <summary>
+            Represent a Assertion template where the real logic is delegated.
+            </summary>
+            <typeparam name="TA">Type of the actual value.</typeparam>
+            <typeparam name="TE">Type of the expected value.</typeparam>
+        </member>
+        <member name="M:SharpTestsEx.Assertions.NullAssertion`1.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:SharpTestsEx.Assertions.NullAssertion`1"/> class.
+            </summary>
+        </member>
+        <member name="T:SharpTestsEx.Assertions.ObjectEqualsAssertion`2">
+            <summary>
+            Verifies that two specified generic type data are equal. The assertion fails if they are not equal.
+            </summary>
+            <typeparam name="TA">Type of the actual value.</typeparam>
+            <typeparam name="TE">Type of the expected value.</typeparam>
+            <remarks>
+            The comparison is done ny the base <see cref="M:System.Object.Equals(System.Object,System.Object)"/>.
+            </remarks>
+        </member>
+        <member name="M:SharpTestsEx.Assertions.ObjectEqualsAssertion`2.#ctor(`1)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SharpTestsEx.Assertions.ObjectEqualsAssertion`2"/> class.
+            </summary>
+            <param name="expected">The value to compare.</param>
+        </member>
+        <member name="T:SharpTestsEx.Assertions.SameInstanceAssertion`2">
+            <summary>
+            Verifies that two specified instances are the same object instance..
+            </summary>
+            <typeparam name="TA">Type of the actual value.</typeparam>
+            <typeparam name="TE">Type of the expected value.</typeparam>
+        </member>
+        <member name="M:SharpTestsEx.Assertions.SameInstanceAssertion`2.#ctor(`1)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SharpTestsEx.Assertions.SameInstanceAssertion`2"/> class.
+            </summary>
+            <param name="expected">The value to compare.</param>
+        </member>
+        <member name="T:SharpTestsEx.ClassConstraintsExtensions">
+            <summary>
+            Extensions for constraint over object instances.
+            </summary>
+        </member>
+        <member name="M:SharpTestsEx.ClassConstraintsExtensions.SameInstanceAs(SharpTestsEx.IClassBeConstraints,System.Object)">
+            <summary>
+            Verifies that actual is the same instance than <paramref name="expected"/>.
+            </summary>
+            <param name="constraint">The <see cref="T:SharpTestsEx.IClassBeConstraints"/> extented.</param>
+            <param name="expected">The expected object instance.</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.ClassConstraintsExtensions.InstanceOf``1(SharpTestsEx.IClassBeConstraints)">
+            <summary>
+            Verifies that actual is an instance of <typeparamref name="T"/>.
+            </summary>
+            <typeparam name="T">The <see cref="T:System.Type"/> expected.</typeparam>
+            <param name="constraint">The <see cref="T:SharpTestsEx.IClassBeConstraints"/> extented.</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.ClassConstraintsExtensions.AssignableFrom``1(SharpTestsEx.IClassBeConstraints)">
+            <summary>
+            Verifies that actual instance is assignable from <typeparamref name="T"/>.
+            </summary>
+            <typeparam name="T">The <see cref="T:System.Type"/> expected.</typeparam>
+            <param name="constraint">The <see cref="T:SharpTestsEx.IClassBeConstraints"/> extented.</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.ClassConstraintsExtensions.AssignableTo``1(SharpTestsEx.IClassBeConstraints)">
+            <summary>
+            Verifies that actual instance is assignable to <typeparamref name="T"/>.
+            </summary>
+            <typeparam name="T">The <see cref="T:System.Type"/> expected.</typeparam>
+            <param name="constraint">The <see cref="T:SharpTestsEx.IClassBeConstraints"/> extented.</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="T:SharpTestsEx.Executing">
+            <summary>
+            Useful class to avoid the creation of new Action.
+            </summary>
+            <remarks>
+            This class can be used when the instance of the class under test is no available;
+            typically to test a constructor.
+            When you have an instance of the class under test the most appropite way to test an action
+            is the extension <see cref="M:SharpTestsEx.Extensions.Executing``1(``0,System.Linq.Expressions.Expression{System.Action{``0}})"/>.
+            </remarks>
+            <example>
+            <code>
+            Executing.This(() =&gt; new AClass(null)).Should().Throw();
+            </code>
+            <code>
+            Executing.This(() =&gt; new AClass(null)).Should().Throw{ArgumentNullException}()
+            		.And.ValueOf
+            			.ParamName.Should().Be("obj");
+            </code>
+            </example>
+        </member>
+        <member name="T:SharpTestsEx.IConstraints`1">
+            <summary>
+            Basic contract for a generic constraint.
+            </summary>
+            <typeparam name="T">The type of the 'actual' value subject of the test.</typeparam>
+        </member>
+        <member name="M:SharpTestsEx.IExpressionActionConstraints`1.Throws``1">
+            <summary>
+            Verifies that the <see cref="T:System.Action`1"/> throws a specific <see cref="T:System.Exception"/>.
+            </summary>
+            <typeparam name="TException">The specific <see cref="T:System.Exception"/> subclass expected. </typeparam>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.IExpressionActionConstraints`1.Throws">
+            <summary>
+            Verifies that the <see cref="T:System.Action"/> throws an <see cref="T:System.Exception"/>.
+            </summary>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.IExpressionActionConstraints`1.NotThrows">
+            <summary>
+            Verifies that the <see cref="T:System.Action"/> does not throw any <see cref="T:System.Exception"/>.
+            </summary>
+        </member>
+        <member name="M:SharpTestsEx.FullNetClassConstraintsExtensions.BinarySerializable(SharpTestsEx.IClassBeConstraints)">
+            <summary>
+            Verifies that actual instance is serializable using <see cref="T:System.Runtime.Serialization.Formatters.Binary.BinaryFormatter"/>.
+            </summary>
+            <param name="constraint">The <see cref="T:SharpTestsEx.IClassBeConstraints"/> extented.</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.FullNetClassConstraintsExtensions.XmlSerializable(SharpTestsEx.IClassBeConstraints)">
+            <summary>
+            Verifies that actual instance is serializable using <see cref="T:System.Xml.Serialization.XmlSerializer"/>.
+            </summary>
+            <param name="constraint">The <see cref="T:SharpTestsEx.IClassBeConstraints"/> extented.</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="T:SharpTestsEx.EnumerableExtensions">
+            <summary>
+            <see cref="T:System.Collections.Generic.IEnumerable`1"/> etensions methods.
+            </summary>
+        </member>
+        <member name="M:SharpTestsEx.EnumerableExtensions.PositionOfFirstDifference``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Find the first position where two sequence differ
+            </summary>
+            <typeparam name="TSource">The type of the elements of the input sequences.</typeparam>
+            <param name="first">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> to compare to second</param>
+            <param name="second">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> to compare to the first sequence. </param>
+            <returns>The position of the first difference; otherwise -1 where the two sequences has the same sequence.</returns>
+        </member>
+        <member name="T:SharpTestsEx.ExceptionExtensions">
+            <summary>
+            Useful extensions to test <see cref="T:System.Exception"/>s.
+            </summary>
+        </member>
+        <member name="M:SharpTestsEx.ExceptionExtensions.InnerExceptions(System.Exception)">
+            <summary>
+            Returns a sequence of all Inner Exceptions.
+            </summary>
+            <param name="source">The root <see cref="T:System.Exception"/> </param>
+            <returns>A <see cref="T:System.Collections.Generic.IEnumerable`1"/> of all Inner Exceptions</returns>
+        </member>
+        <member name="M:SharpTestsEx.ExceptionExtensions.Exceptions(System.Exception)">
+            <summary>
+            Returns a sequence of including the root <see cref="T:System.Exception"/> and all Inner Exceptions.
+            </summary>
+            <param name="source">The root <see cref="T:System.Exception"/> </param>
+            <returns>A <see cref="T:System.Collections.Generic.IEnumerable`1"/> of including the root <see cref="T:System.Exception"/> and all Inner Exceptions.</returns>
+        </member>
+        <member name="T:SharpTestsEx.IActionConstraints">
+            <summary>
+            Constraints for <see cref="T:System.Action"/>.
+            </summary>
+        </member>
+        <member name="M:SharpTestsEx.IActionConstraints.Throw``1">
+            <summary>
+            Verifies that the <see cref="T:System.Action"/> throws a specific <see cref="T:System.Exception"/>.
+            </summary>
+            <typeparam name="TException">The specific <see cref="T:System.Exception"/> subclass expected. </typeparam>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.IActionConstraints.Throw">
+            <summary>
+            Verifies that the <see cref="T:System.Action"/> throws an.
+            </summary>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.IActionConstraints.NotThrow">
+            <summary>
+            Verifies that the <see cref="T:System.Action"/> does not throw any <see cref="T:System.Exception"/>.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.IActionAndConstraints`2.Exception">
+            <summary>
+            The instance <see cref="P:SharpTestsEx.IActionAndConstraints`2.Exception"/> thrown.
+            </summary>
+            <remarks>
+            <example>
+            <code>
+            var ex = (new Action(() =&gt; new AClass(null))).Should().Throw().Exception;
+            </code>
+            </example>
+            </remarks>
+        </member>
+        <member name="T:SharpTestsEx.IThrowConstraints`1">
+            <summary>
+            Chainable constraint for <see cref="P:SharpTestsEx.IThrowConstraints`1.Exception"/>
+            </summary>
+            <typeparam name="TException">The specific <see cref="P:SharpTestsEx.IThrowConstraints`1.Exception"/> subclass expected. </typeparam>
+        </member>
+        <member name="P:SharpTestsEx.IThrowConstraints`1.ValueOf">
+            <summary>
+            The <see cref="P:SharpTestsEx.IThrowConstraints`1.Exception"/> thrown.
+            </summary>
+            <remarks>
+            Allow an readable chained way to begin a new assertion based on one of the properties
+            of the expected <see cref="P:SharpTestsEx.IThrowConstraints`1.Exception"/>
+            <example>
+            <code>
+            (new Action(() =&gt; new AClass(null)))
+            		.Should().Throw{ArgumentNullException}()
+            		.And.ValueOf.ParamName
+            				.Should().Be.EqualTo("obj");
+            </code>
+            </example>
+            </remarks>
+        </member>
+        <member name="P:SharpTestsEx.IThrowConstraints`1.Exception">
+            <summary>
+            The instance <see cref="P:SharpTestsEx.IThrowConstraints`1.Exception"/> thrown.
+            </summary>
+            <remarks>
+            Allow an readable chained way to begin a new assertion based on the <see cref="P:SharpTestsEx.IThrowConstraints`1.Exception"/> itself.
+            <example>
+            <code>
+            (new Action(() =&gt; new AClass(null)))
+            		.Should().Throw()
+            		.And.Exception.Should().Be.InstanceOf{ArgumentException}();
+            </code>
+            </example>
+            </remarks>
+        </member>
+        <member name="T:SharpTestsEx.IAssertionInfo`1">
+            <summary>
+            Assertion information.
+            </summary>
+            <typeparam name="T">The type of the value subject of the assertion.</typeparam>
+        </member>
+        <member name="P:SharpTestsEx.IAssertionInfo`1.Actual">
+            <summary>
+            Subject of the assertion.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.IAssertionInfo`1.IsNegated">
+            <summary>
+            The assertion is negated ?
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.IAssertionInfo`1.FailureMessage">
+            <summary>
+            The title of the assertion ("message" in MsTests terminology)
+            </summary>
+        </member>
+        <member name="T:SharpTestsEx.IBooleanConstraints">
+            <summary>
+            Constraint over boolean values.
+            </summary>
+        </member>
+        <member name="T:SharpTestsEx.IBooleanBeConstraints">
+            <summary>
+            Constraints for boolean "Should Be"
+            </summary>
+        </member>
+        <member name="M:SharpTestsEx.IBooleanBeConstraints.True">
+            <summary>
+            Verifies that actual is true.
+            </summary>
+        </member>
+        <member name="M:SharpTestsEx.IBooleanBeConstraints.False">
+            <summary>
+            Verifies that actual is false.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.ExtensionsImpl.NegableConstraints`2.Not">
+            <summary>
+            Negate next constraint.
+            </summary>
+        </member>
+        <member name="T:SharpTestsEx.IClassConstraints">
+            <summary>
+            Constraint over object instances.
+            </summary>
+        </member>
+        <member name="T:SharpTestsEx.IClassConstraints`1">
+            <summary>
+            Constraints for object instance of a specific gine <see cref="T:System.Type"/>.
+            </summary>
+            <typeparam name="TValue">The <see cref="T:System.Type"/> of the instance.</typeparam>
+        </member>
+        <member name="P:SharpTestsEx.IClassConstraints`1.ValueOf">
+            <summary>
+            The actual value
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.IClassConstraints`1.Value">
+            <summary>
+            The actual value
+            </summary>
+        </member>
+        <member name="T:SharpTestsEx.IClassBeConstraints">
+            <summary>
+            Constraints for object instance "Should Be"
+            </summary>
+        </member>
+        <member name="M:SharpTestsEx.IClassBeConstraints.EqualTo(System.Object)">
+            <summary>
+            Verifies that actual is equal to <paramref name="expected"/>.
+            </summary>
+            <param name="expected">The expected instance</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.IClassBeConstraints.Null">
+            <summary>
+            Verifies that the <see cref="T:System.Object"/> is null.
+            </summary>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.IClassBeConstraints.OfType``1">
+            <summary>
+            Verifies that the actual is an instance of a specific type.
+            </summary>
+            <typeparam name="T">The expected <see cref="T:System.Type"/>.</typeparam>
+            <returns>
+            A <see cref="T:SharpTestsEx.IClassConstraints`1"/> for the instance converted to 
+            the specified type to start a chained assertion.
+            </returns>
+        </member>
+        <member name="T:SharpTestsEx.IComparableConstraints`1">
+            <summary>
+            Constraint over <see cref="T:System.IComparable"/> instances.
+            </summary>
+            <typeparam name="T">The concrete type of actual value.</typeparam>
+        </member>
+        <member name="T:SharpTestsEx.IComparableBeConstraints`1">
+            <summary>
+            Constraints for <see cref="T:System.IComparable"/> instance ("Should Be")
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:SharpTestsEx.IComparableBeConstraints`1.EqualTo(System.IComparable)">
+            <summary>
+            Verifies that actual is equal to <paramref name="expected"/>.
+            </summary>
+            <param name="expected">The expected instance</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.IComparableBeConstraints`1.GreaterThan(System.IComparable)">
+            <summary>
+            Verifies that actual is greater than <paramref name="expected"/>.
+            </summary>
+            <param name="expected">The expected instance</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.IComparableBeConstraints`1.LessThan(System.IComparable)">
+            <summary>
+            Verifies that actual is less than <paramref name="expected"/>.
+            </summary>
+            <param name="expected">The expected instance</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.IComparableBeConstraints`1.GreaterThanOrEqualTo(System.IComparable)">
+            <summary>
+            Verifies that actual is greater than or equal to <paramref name="expected"/>.
+            </summary>
+            <param name="expected">The expected instance</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.IComparableBeConstraints`1.LessThanOrEqualTo(System.IComparable)">
+            <summary>
+            Verifies that actual is less than or equal to <paramref name="expected"/>.
+            </summary>
+            <param name="expected">The expected instance</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.IComparableBeConstraints`1.IncludedIn(System.IComparable,System.IComparable)">
+            <summary>
+            Verifies that actual is included in the range <paramref name="lowLimit"/>-<paramref name="highLimit"/>.
+            </summary>
+            <param name="lowLimit">The less aceptable value.</param>
+            <param name="highLimit">The higher aceptable value.</param>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.ExtensionsImpl.EnumerableBeConstraints`1.Null">
+            <summary>
+            Verifies that the <see cref="T:System.Collections.Generic.IEnumerable`1"/> instance is null.
+            </summary>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.ExtensionsImpl.EnumerableBeConstraints`1.Empty">
+            <summary>
+            Verifies that the <see cref="T:System.Collections.Generic.IEnumerable`1"/> is empty.
+            </summary>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.ExtensionsImpl.StringBeConstraints.Null">
+            <summary>
+            Verifies that the <see cref="T:System.String"/> is null.
+            </summary>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.ExtensionsImpl.StringBeConstraints.Empty">
+            <summary>
+            Verifies that the <see cref="T:System.String"/> is empty.
+            </summary>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="M:SharpTestsEx.ExtensionsImpl.TypeBeConstraints.Null">
+            <summary>
+            Verifies that the <see cref="T:System.Type"/> instance is null.
+            </summary>
+            <returns>Chainable And constraint</returns>
+        </member>
+        <member name="T:SharpTestsEx.MessageBuilderInfo`2">
+            <summary>
+            Collection information to build the failure message
+            </summary>
+            <typeparam name="TActual">Type of the actual value.</typeparam>
+            <typeparam name="TExpected">Type of the expected value.</typeparam>
+        </member>
+        <member name="P:SharpTestsEx.MessageBuilderInfo`2.Actual">
+            <summary>
+            The actual value under test.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.MessageBuilderInfo`2.Expected">
+            <summary>
+            The expected value of the test.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.MessageBuilderInfo`2.AssertionPredicate">
+            <summary>
+            The name of the assertion
+            </summary>
+            <example>
+            "be EqualTo"
+            </example>
+        </member>
+        <member name="P:SharpTestsEx.MessageBuilderInfo`2.CustomMessage">
+            <summary>
+            The user custom message.
+            </summary>
+        </member>
+        <member name="T:SharpTestsEx.ObjectExtensions">
+            <summary>
+            Extensions for any System.Object.
+            </summary>
+        </member>
+        <member name="M:SharpTestsEx.ObjectExtensions.FieldValue``1(System.Object,System.String)">
+            <summary>
+            Allow access to a private field of a class instance.
+            </summary>
+            <typeparam name="T">The <see cref="T:System.Type"/> of the field. </typeparam>
+            <param name="source">The class instance.</param>
+            <param name="fieldName">The field name.</param>
+            <returns>The value of the field.</returns>
+        </member>
+        <member name="T:SharpTestsEx.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.AssertionVerb">
+            <summary>
+              Looks up a localized string similar to Should.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.Be">
+            <summary>
+              Looks up a localized string similar to Be.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.EmptyEnumerable">
+            <summary>
+              Looks up a localized string similar to &lt;Empty&gt;.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.ExceptionMsgAccessToField">
+            <summary>
+              Looks up a localized string similar to Can&apos;t access to a field of a null value..
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.ExceptionMsgFieldNameTmpl">
+            <summary>
+              Looks up a localized string similar to The class {0} does not contain a field named {1}..
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.ExceptionMsgInvalidCastTmpl">
+            <summary>
+              Looks up a localized string similar to The class {0} does contain a field named {1} but its type is {2} and not {3}..
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.ExceptionMsgSerializableNull">
+            <summary>
+              Looks up a localized string similar to Can&apos;t check serialization for (null) value..
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.ExpectedTmpl">
+            <summary>
+              Looks up a localized string similar to Expected: {0}.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.FailureMsgDifferences">
+            <summary>
+              Looks up a localized string similar to Differences :.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.FailureMsgEnumerableDiffPosTmpl">
+            <summary>
+              Looks up a localized string similar to Values differ at position {0}..
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.FailureMsgNotThrow">
+            <summary>
+              Looks up a localized string similar to Not expected exception message:.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.FailureMsgStringDiffPosTmpl">
+            <summary>
+              Looks up a localized string similar to Strings differ at position {0}..
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.FoundTmpl">
+            <summary>
+              Looks up a localized string similar to Found   : {0}.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.Negation">
+            <summary>
+              Looks up a localized string similar to Not.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.NullValue">
+            <summary>
+              Looks up a localized string similar to (null).
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeAssignableFrom">
+            <summary>
+              Looks up a localized string similar to Be Assignable From.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeAssignableTo">
+            <summary>
+              Looks up a localized string similar to Be Assignable To.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeBinarySerializable">
+            <summary>
+              Looks up a localized string similar to Be Binary Serializable.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeEmpty">
+            <summary>
+              Looks up a localized string similar to Be Empty.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeEqualTo">
+            <summary>
+              Looks up a localized string similar to Be Equal To.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeGreaterThan">
+            <summary>
+              Looks up a localized string similar to Be Greater Than.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeGreaterThanOrEquaTo">
+            <summary>
+              Looks up a localized string similar to Be Greater than Or Equal to.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeInRange">
+            <summary>
+              Looks up a localized string similar to Be in Range.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeInstanceOf">
+            <summary>
+              Looks up a localized string similar to Be Instance Of.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeLessThan">
+            <summary>
+              Looks up a localized string similar to Be Less Than.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeLessThanOrEqualTo">
+            <summary>
+              Looks up a localized string similar to Be Less than Or Equal to.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeNull">
+            <summary>
+              Looks up a localized string similar to Be Null.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeOrdered">
+            <summary>
+              Looks up a localized string similar to Be Ordered.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeOrderedAscending">
+            <summary>
+              Looks up a localized string similar to Be Ordered ascending.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeOrderedBy">
+            <summary>
+              Looks up a localized string similar to Be Ordered By ({0}).
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeSameAs">
+            <summary>
+              Looks up a localized string similar to Be Same instance As.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeSubClassOf">
+            <summary>
+              Looks up a localized string similar to Be SubClass Of.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeSubsetOf">
+            <summary>
+              Looks up a localized string similar to Be Subset Of.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateBeXmlSerializable">
+            <summary>
+              Looks up a localized string similar to Be Xml Serializable.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateContain">
+            <summary>
+              Looks up a localized string similar to Contain.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateDoesNotThrow">
+            <summary>
+              Looks up a localized string similar to Not throw.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateHaveAttribute">
+            <summary>
+              Looks up a localized string similar to Have Attribute.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateHaveSameSequenceAs">
+            <summary>
+              Looks up a localized string similar to Have Same Sequence As.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateHaveSameValuesAs">
+            <summary>
+              Looks up a localized string similar to Have Same Values As.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateHaveUniqueValues">
+            <summary>
+              Looks up a localized string similar to Have Unique Values.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateHaveValue">
+            <summary>
+              Looks up a localized string similar to Have Value.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateThrow">
+            <summary>
+              Looks up a localized string similar to Throw.
+            </summary>
+        </member>
+        <member name="P:SharpTestsEx.Properties.Resources.PredicateThrows">
+            <summary>
+              Looks up a localized string similar to Throws an exception.
+            </summary>
+        </member>
+    </members>
+</doc>
