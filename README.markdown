@@ -35,10 +35,10 @@ Documentation is located at [http://docs.masstransit-project.com/](http://docs.m
 1. Clone the source down to your machine. 
   `git clone git://github.com/MassTransit/MassTransit.git`
 2. Ensure Ruby is installed. [RubyInstaller for Windows](http://rubyinstaller.org/)
-3. Ensure Albacore, SemVer2 and Bundler is installed.
-  `gem install albacore semver2 bundler`
+3. Ensure Bundler is installed.
+  `gem install bundler`
    
-    * Or if you have bundler installed: `bundle install` will install all dependencies.
+    * Then do: `bundle install` which will install all dependencies.
 
 4. Run `build.bat`.
 
