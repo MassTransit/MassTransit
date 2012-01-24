@@ -66,7 +66,7 @@ end
 
 task :compile_samples => [:compile, :build_starbucks, :build_distributor] do ; end
 
-desc "Cleans, versions, compiles the application and generates build_output/."
+desc "Compiles MT into build_output"
 task :compile => [:versioning, :global_version, :build] do
   puts 'Copying unmerged dependencies to output folder'
   
