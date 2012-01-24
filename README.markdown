@@ -48,8 +48,7 @@ ServiceBusFactory.New(sbc =>
 1. Clone the source down to your machine. 
   `git clone git://github.com/MassTransit/MassTransit.git`
 2. Ensure Ruby is installed. [RubyInstaller for Windows](http://rubyinstaller.org/)
-3. Ensure Bundler is installed.
-  `gem install bundler`
+3. Ensure Bundler is installed. `gem install bundler`
 4. Run `build.bat`.
 
 ### Contributing 
