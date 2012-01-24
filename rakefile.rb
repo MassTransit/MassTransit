@@ -105,33 +105,32 @@ ilmerge :ilmerge_masstransit do |ilm|
 	ilm.references = [ 'MassTransit.dll', 'Stact.dll', 'Newtonsoft.Json.dll']
 end
 
-desc "Copying Services"
 task :copy_services => [:compile] do
-	puts "Copying services"
-	targ = File.join(props[:stage], 'Services', 'RuntimeServices')
-	src = File.join(props[:src], "MassTransit.RuntimeServices/bin/#{BUILD_CONFIG}")
-
-	copyOutputFiles src, "MassTransit.*.{dll,exe,config,log4net.xml,sdf}", targ
-	copyOutputFiles props[:output], 'MassTransit.dll', targ
-     	copyOutputFiles src, "Castle*.dll", targ
-     	copyOutputFiles src, "log4net.dll", targ
-     	copyOutputFiles src, "Magnum.dll", targ
-     	copyOutputFiles src, "FluentNHibernate.dll", targ
-     	copyOutputFiles src, "NHibernate*.dll", targ
-     	copyOutputFiles src, "Iesi.Collections.dll", targ
-     	copyOutputFiles src, "StructureMap.dll", targ
-     	copyOutputFiles src, "Topshelf.dll", targ
-	copyOutputFiles File.join(props[:lib], 'SqlCe'), '*', targ
-	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86'), '*', File.join(targ, 'x86')
-	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'x86', 'Microsoft.VC90.CRT')
-	copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64'), '*', File.join(targ, 'amd64')
-	copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'amd64', 'Microsoft.VC90.CRT')
-
-	targ = File.join(props[:stage], 'Services', 'SystemView')
-	src = File.join(props[:src], "MassTransit.SystemView/bin/#{BUILD_CONFIG}")
-
-	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
-	copyOutputFiles props[:output], 'MassTransit.dll', targ
+  puts "Copying services"
+  targ = File.join(props[:stage], 'Services', 'RuntimeServices')
+  src = File.join(props[:src], "MassTransit.RuntimeServices/bin/#{BUILD_CONFIG}")
+  
+  copyOutputFiles src, "MassTransit.*.{dll,exe,config,log4net.xml,sdf}", targ
+  copyOutputFiles props[:output], 'MassTransit.dll', targ
+  copyOutputFiles src, "Castle*.dll", targ
+  copyOutputFiles src, "log4net.dll", targ
+  copyOutputFiles src, "Magnum.dll", targ
+  copyOutputFiles src, "FluentNHibernate.dll", targ
+  copyOutputFiles src, "NHibernate*.dll", targ
+  copyOutputFiles src, "Iesi.Collections.dll", targ
+  copyOutputFiles src, "StructureMap.dll", targ
+  copyOutputFiles src, "Topshelf.dll", targ
+  copyOutputFiles File.join(props[:lib], 'SqlCe'), '*', targ
+  copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86'), '*', File.join(targ, 'x86')
+  copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'x86', 'Microsoft.VC90.CRT')
+  copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64'), '*', File.join(targ, 'amd64')
+  copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'amd64', 'Microsoft.VC90.CRT')
+  
+  targ = File.join(props[:stage], 'Services', 'SystemView')
+  src = File.join(props[:src], "MassTransit.SystemView/bin/#{BUILD_CONFIG}")
+  
+  copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
+  copyOutputFiles props[:output], 'MassTransit.dll', targ
      	copyOutputFiles src, "log4net.dll", targ
      	copyOutputFiles src, "Magnum.dll", targ
      	copyOutputFiles src, "StructureMap.dll", targ
