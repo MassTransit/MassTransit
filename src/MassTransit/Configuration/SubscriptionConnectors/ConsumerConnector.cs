@@ -34,9 +34,9 @@ namespace MassTransit.SubscriptionConnectors
         where T : class
     {
         readonly object[] _args;
-        readonly IEnumerable<ConsumerSubscriptionConnector> _connectors;
+    	readonly IEnumerable<ConsumerSubscriptionConnector> _connectors;
 
-        public ConsumerConnector()
+    	public ConsumerConnector()
         {
             _args = new object[] {};
 
@@ -77,14 +77,7 @@ namespace MassTransit.SubscriptionConnectors
 
         IEnumerable<ConsumerSubscriptionConnector> ConsumesContext()
         {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsGenericType)
-                .Where(x => x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>))
-                .Select(x => new {x.InterfaceType, MessageType = x.MessageType.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsValueType == false)
+			return ConsumptionReflector<T>.ConsumesContextMessages()
                 .Select(x =>
                         FastActivator.Create(typeof (ContextConsumerSubscriptionConnector<,>),
                             new[] {typeof (T), x.MessageType}, _args))
@@ -93,14 +86,7 @@ namespace MassTransit.SubscriptionConnectors
 
         IEnumerable<ConsumerSubscriptionConnector> ConsumesSelectedContext()
         {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.Selected))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsGenericType)
-                .Where(x => x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>))
-                .Select(x => new {x.InterfaceType, MessageType = x.MessageType.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsValueType == false)
+			return ConsumptionReflector<T>.ConsumesSelectedContextMessages()
                 .Select(x =>
                         FastActivator.Create(typeof (SelectedContextConsumerSubscriptionConnector<,>),
                             new[] {typeof (T), x.MessageType}, _args))
@@ -109,32 +95,15 @@ namespace MassTransit.SubscriptionConnectors
 
         IEnumerable<ConsumerSubscriptionConnector> ConsumesAll()
         {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsValueType == false)
-                .Where(
-                    x =>
-                    !(x.MessageType.IsGenericType &&
-                      x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>)))
+			return ConsumptionReflector<T>.ConsumesAllMessages()
                 .Select(x =>
                         FastActivator.Create(typeof (ConsumerSubscriptionConnector<,>),
                             new[] {typeof (T), x.MessageType}, _args))
                 .Cast<ConsumerSubscriptionConnector>();
         }
-
         IEnumerable<ConsumerSubscriptionConnector> ConsumesSelected()
         {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.Selected))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsValueType == false)
-                .Where(
-                    x =>
-                    !(x.MessageType.IsGenericType &&
-                      x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>)))
+			return ConsumptionReflector<T>.ConsumesSelectedMessages()
                 .Select(x =>
                         FastActivator.Create(typeof (SelectedConsumerSubscriptionConnector<,>),
                             new[] {typeof (T), x.MessageType}, _args))

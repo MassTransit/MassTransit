@@ -18,6 +18,7 @@ namespace MassTransit.Tests.Configuration
 	using Exceptions;
 	using Magnum.TestFramework;
 	using NUnit.Framework;
+	using TestFramework;
 
 	[TestFixture]
 	public class When_configuration_fails
@@ -44,6 +45,33 @@ namespace MassTransit.Tests.Configuration
 			catch (Exception ex)
 			{
 				Assert.Fail("The exception type thrown was invalid: " + ex.GetType().Name);
+			}
+		}
+
+		[Test, Description("It should be possible to introspect the configuration " +
+		                   "as we're starting up to make sure that the programmer " +
+						   "is warned to avoid strange exceptions and errors from serialization.")]
+		public void Should_know_consumers_messages_without_default_ctors()
+		{
+			using (ServiceBusFactory.New(x =>
+				{
+					x.Subscribe(s => s.Consumer<ConsumerOf<MessageWithNonDefaultCtor>>());
+					x.ReceiveFrom("loopback://localhost/mt_queue");
+					x.Validate()
+						.Any(result => result.Disposition == ValidationResultDisposition.Warning
+									   && result.Message.Contains("default c'tor")
+									   && result.Key.Contains("CTorWarning"))
+						.ShouldBeTrue(string.Format("there should be a warning on message without default c'tors"));
+				}))
+			{
+			}
+		}
+
+		[Serializable]
+		public class MessageWithNonDefaultCtor
+		{
+			public MessageWithNonDefaultCtor(int someInt)
+			{
 			}
 		}
 	}
