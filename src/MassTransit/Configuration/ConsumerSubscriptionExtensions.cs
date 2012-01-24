@@ -27,7 +27,7 @@ namespace MassTransit
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
             [NotNull] this SubscriptionBusServiceConfigurator configurator,
             [NotNull] IConsumerFactory<TConsumer> consumerFactory)
-            where TConsumer : class
+            where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (using supplied consumer factory)", typeof (TConsumer));
@@ -43,7 +43,7 @@ namespace MassTransit
 
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
             [NotNull] this SubscriptionBusServiceConfigurator configurator)
-            where TConsumer : class, new()
+            where TConsumer : class, IConsumer, new()
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (using default consumer factory)", typeof (TConsumer));
@@ -61,7 +61,7 @@ namespace MassTransit
 
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
             [NotNull] this SubscriptionBusServiceConfigurator configurator, [NotNull] Func<TConsumer> consumerFactory)
-            where TConsumer : class
+            where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (using delegate consumer factory)", typeof (TConsumer));
@@ -98,7 +98,7 @@ namespace MassTransit
         }
 
         public static UnsubscribeAction SubscribeConsumer<TConsumer>([NotNull] this IServiceBus bus)
-            where TConsumer : class, new()
+            where TConsumer : class, IConsumer, new()
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (using default consumer factory)", typeof (TConsumer));
@@ -112,7 +112,7 @@ namespace MassTransit
 
         public static UnsubscribeAction SubscribeConsumer<TConsumer>([NotNull] this IServiceBus bus,
                                                                      [NotNull] Func<TConsumer> consumerFactory)
-            where TConsumer : class
+            where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (using delegate consumer factory)", typeof (TConsumer));
@@ -127,7 +127,7 @@ namespace MassTransit
         public static UnsubscribeAction SubscribeConsumer<TConsumer>([NotNull] this IServiceBus bus,
                                                                      [NotNull] IConsumerFactory<TConsumer>
                                                                          consumerFactory)
-            where TConsumer : class
+            where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (using supplied consumer factory)", typeof (TConsumer));

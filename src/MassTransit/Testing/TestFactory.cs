@@ -27,7 +27,7 @@ namespace MassTransit.Testing
 		}
 
 		public static ConsumerTestFactory<BusTestScenario, TConsumer> ForConsumer<TConsumer>()
-			where TConsumer : class
+			where TConsumer : class, IConsumer
 		{
 			var factory = new ConsumerTestFactoryImpl<BusTestScenario, TConsumer>(() => new LoopbackBusScenarioBuilder());
 

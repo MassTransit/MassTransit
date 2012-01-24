@@ -73,7 +73,7 @@ namespace MassTransit
 		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
 			[NotNull] this SubscriptionBusServiceConfigurator configurator, 
 			[NotNull] IWindsorContainer container)
-			where TConsumer : class
+			where TConsumer : class, IConsumer
 		{
 			if (configurator == null) throw new ArgumentNullException("configurator");
 			if (container == null) throw new ArgumentNullException("container");

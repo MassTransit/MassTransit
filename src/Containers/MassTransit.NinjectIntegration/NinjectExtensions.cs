@@ -36,7 +36,7 @@ namespace MassTransit
 
 		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
 			this SubscriptionBusServiceConfigurator configurator, IKernel kernel)
-			where TConsumer : class
+			where TConsumer : class, IConsumer
 		{
 			var consumerFactory = new NinjectConsumerFactory<TConsumer>(kernel);
 

@@ -18,8 +18,8 @@ namespace MassTransit.Testing.Subjects
 
 	public class ConsumerTestSubjectImpl<TScenario, TSubject> :
 		ConsumerTestSubject<TSubject>
-		where TSubject : class
-		where TScenario : TestScenario
+		where TSubject : class, IConsumer
+	    where TScenario : TestScenario
 	{
 		readonly IConsumerFactory<TSubject> _consumerFactory;
 		readonly ReceivedMessageListImpl _received;
