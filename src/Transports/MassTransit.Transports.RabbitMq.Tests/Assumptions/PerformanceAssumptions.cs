@@ -2,7 +2,7 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 {
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Explicit]
     public class BasicAckIsFasterOnGet :
         GivenAChannel
     {
@@ -77,7 +77,7 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 
 
 
-    [TestFixture]
+    [TestFixture, Explicit]
     public class BasicPublishWithNoTxIsFaster :
         GivenAChannel
     {
