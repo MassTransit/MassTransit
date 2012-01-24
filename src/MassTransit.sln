@@ -53,6 +53,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusDriver", "Tools\BusDrive
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Containers.Tests", "Containers\MassTransit.Containers.Tests\MassTransit.Containers.Tests.csproj", "{9CE51963-9E51-48EE-A75F-62C9CB0CF23C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{238CEF6D-A75F-44FA-8DB6-ADC2AE03D0CF}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.markdown = ..\README.markdown
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
