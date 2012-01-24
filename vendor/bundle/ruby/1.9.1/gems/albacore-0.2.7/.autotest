@@ -1,0 +1,4 @@
+Autotest.add_hook :initialize do |at|
+  %w{.git .svn rakefile spec/spec.opts spec/support .autotest .DS_Store }.each {|exception|at.add_exception(exception)}
+end
+

@@ -1,0 +1,16 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    albacore (0.2.7)
+      rubyzip (~> 0.9)
+    rake (0.9.2.2)
+    rubyzip (0.9.5)
+    semver2 (2.0.0)
+
+PLATFORMS
+  x86-mingw32
+
+DEPENDENCIES
+  albacore
+  rake
+  semver2

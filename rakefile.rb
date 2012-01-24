@@ -1,5 +1,6 @@
 COPYRIGHT = "Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al. - All rights reserved."
-
+require "rubygems"
+require "bundler/setup"
 require File.dirname(__FILE__) + "/build_support/BuildUtils.rb"
 require File.dirname(__FILE__) + "/build_support/util.rb"
 
