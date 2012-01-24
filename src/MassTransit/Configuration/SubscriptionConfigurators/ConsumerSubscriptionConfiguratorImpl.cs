@@ -12,32 +12,38 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
-	using System.Collections.Generic;
-	using Configurators;
-	using SubscriptionBuilders;
+    using System.Collections.Generic;
+    using Configurators;
+    using Magnum.Extensions;
+    using SubscriptionBuilders;
 
-	public class ConsumerSubscriptionConfiguratorImpl<TConsumer> :
-		SubscriptionConfiguratorImpl<ConsumerSubscriptionConfigurator<TConsumer>>,
-		ConsumerSubscriptionConfigurator<TConsumer>,
-		SubscriptionBuilderConfigurator
-		where TConsumer : class
-	{
-		readonly IConsumerFactory<TConsumer> _consumerFactory;
+    public class ConsumerSubscriptionConfiguratorImpl<TConsumer> :
+        SubscriptionConfiguratorImpl<ConsumerSubscriptionConfigurator<TConsumer>>,
+        ConsumerSubscriptionConfigurator<TConsumer>,
+        SubscriptionBuilderConfigurator
+        where TConsumer : class
+    {
+        readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-		public ConsumerSubscriptionConfiguratorImpl(IConsumerFactory<TConsumer> consumerFactory)
-		{
-			_consumerFactory = consumerFactory;
-		}
+        public ConsumerSubscriptionConfiguratorImpl(IConsumerFactory<TConsumer> consumerFactory)
+        {
+            _consumerFactory = consumerFactory;
+        }
 
-		public IEnumerable<ValidationResult> Validate()
-		{
-			if (_consumerFactory == null)
-				yield return this.Failure("The consumer factory cannot be null.");
-		}
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (_consumerFactory == null)
+                yield return this.Failure("The consumer factory cannot be null.");
+            
+            if (!typeof (TConsumer).Implements<IConsumer>())
+                yield return
+                    this.Warning(string.Format("The consumer class {0} does not implement any IConsumer interfaces",
+                        typeof (TConsumer).ToShortTypeName()));
+        }
 
-		public SubscriptionBuilder Configure()
-		{
-			return new ConsumerSubscriptionBuilder<TConsumer>(_consumerFactory, ReferenceFactory);
-		}
-	}
+        public SubscriptionBuilder Configure()
+        {
+            return new ConsumerSubscriptionBuilder<TConsumer>(_consumerFactory, ReferenceFactory);
+        }
+    }
 }

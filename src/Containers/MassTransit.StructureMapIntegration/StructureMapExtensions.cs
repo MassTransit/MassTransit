@@ -51,7 +51,7 @@ namespace MassTransit
 
 		public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
 			this SubscriptionBusServiceConfigurator configurator, IContainer kernel)
-			where TConsumer : class
+			where TConsumer : class, IConsumer
 		{
 			var consumerFactory = new StructureMapConsumerFactory<TConsumer>(kernel);
 

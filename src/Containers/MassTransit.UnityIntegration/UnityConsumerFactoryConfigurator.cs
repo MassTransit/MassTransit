@@ -36,7 +36,7 @@ namespace MassTransit.UnityIntegration
 
 		[UsedImplicitly]
 		public void Configure<T>()
-			where T : class
+			where T : class, IConsumer
 		{
 			_configurator.Consumer(new UnityConsumerFactory<T>(_container));
 		}

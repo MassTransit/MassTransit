@@ -51,7 +51,7 @@ namespace MassTransit
 
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
             this SubscriptionBusServiceConfigurator configurator, IUnityContainer kernel)
-            where TConsumer : class
+            where TConsumer : class, IConsumer
         {
             var consumerFactory = new UnityConsumerFactory<TConsumer>(kernel);
 

@@ -52,7 +52,7 @@ namespace MassTransit
 
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
             this SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope)
-            where TConsumer : class
+            where TConsumer : class, IConsumer
         {
             var consumerFactory = new AutofacConsumerFactory<TConsumer>(scope);
 

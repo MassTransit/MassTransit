@@ -12,31 +12,37 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
-	using System.Collections.Generic;
-	using Configurators;
-	using SubscriptionBuilders;
+    using System.Collections.Generic;
+    using Configurators;
+    using Magnum.Extensions;
+    using SubscriptionBuilders;
 
-	public class InstanceSubscriptionConfiguratorImpl :
-		SubscriptionConfiguratorImpl<InstanceSubscriptionConfigurator>,
-		InstanceSubscriptionConfigurator,
-		SubscriptionBuilderConfigurator
-	{
-		readonly object _instance;
+    public class InstanceSubscriptionConfiguratorImpl :
+        SubscriptionConfiguratorImpl<InstanceSubscriptionConfigurator>,
+        InstanceSubscriptionConfigurator,
+        SubscriptionBuilderConfigurator
+    {
+        readonly object _instance;
 
-		public InstanceSubscriptionConfiguratorImpl(object instance)
-		{
-			_instance = instance;
-		}
+        public InstanceSubscriptionConfiguratorImpl(object instance)
+        {
+            _instance = instance;
+        }
 
-		public IEnumerable<ValidationResult> Validate()
-		{
-			if (_instance == null)
-				yield return this.Failure("The instance cannot be null. This should have come in the ctor.");
-		}
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (_instance == null)
+                yield return this.Failure("The instance cannot be null. This should have come in the ctor.");
 
-		public SubscriptionBuilder Configure()
-		{
-			return new InstanceSubscriptionBuilder(_instance, ReferenceFactory);
-		}
-	}
+            if (_instance != null && !_instance.GetType().Implements<IConsumer>())
+                yield return
+                    this.Warning(string.Format("The instance of {0} does not implement any IConsumer interfaces",
+                        _instance.GetType().ToShortTypeName()));
+        }
+
+        public SubscriptionBuilder Configure()
+        {
+            return new InstanceSubscriptionBuilder(_instance, ReferenceFactory);
+        }
+    }
 }

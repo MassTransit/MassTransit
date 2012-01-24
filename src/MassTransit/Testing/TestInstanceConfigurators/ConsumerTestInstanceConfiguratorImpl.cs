@@ -24,8 +24,8 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	public class ConsumerTestInstanceConfiguratorImpl<TScenario, TConsumer> :
 		TestInstanceConfiguratorImpl<TScenario>,
 		ConsumerTestInstanceConfigurator<TScenario, TConsumer>
-		where TConsumer : class
-		where TScenario : TestScenario
+		where TConsumer : class, IConsumer
+	    where TScenario : TestScenario
 	{
 		readonly IList<ConsumerTestBuilderConfigurator<TScenario, TConsumer>> _configurators;
 
