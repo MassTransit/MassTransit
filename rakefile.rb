@@ -282,7 +282,7 @@ end
 
 
 desc "Target used for the CI server. It both builds, tests and packages."
-task :ci => [:default, :package, :moma]
+task :ci => [:default, :nuget, :package]
 
 desc "ZIPs up the build results and runs the MoMA analyzer."
 zip :package do |zip|
