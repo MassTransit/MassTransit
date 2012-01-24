@@ -36,7 +36,7 @@ namespace MassTransit.StructureMapIntegration
 
 		[UsedImplicitly]
 		public void Configure<T>()
-			where T : class
+			where T : class, IConsumer
 		{
 			_configurator.Consumer(new StructureMapConsumerFactory<T>(_container));
 		}

@@ -38,7 +38,7 @@ namespace MassTransit.Testing
 		public static ConsumerTestFactoryImpl<BusTestScenario, TConsumer> InSingleBusScenario<TScenario, TConsumer>(
 			this ConsumerTestFactory<TScenario, TConsumer> factory)
 			where TScenario : TestScenario
-			where TConsumer : class
+			where TConsumer : class, IConsumer
 		{
 			return new ConsumerTestFactoryImpl<BusTestScenario, TConsumer>(LoopbackBus);
 		}
@@ -47,7 +47,7 @@ namespace MassTransit.Testing
 			(
 			this ConsumerTestFactory<TScenario, TConsumer> factory)
 			where TScenario : TestScenario
-			where TConsumer : class
+			where TConsumer : class, IConsumer
 		{
 			return new ConsumerTestFactoryImpl<LocalRemoteTestScenario, TConsumer>(LoopbackLocalRemote);
 		}

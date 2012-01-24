@@ -19,8 +19,8 @@ namespace MassTransit.Testing.Factories
 
 	public class ConsumerTestFactoryImpl<TScenario, TConsumer> :
 		ConsumerTestFactory<TScenario, TConsumer>
-		where TConsumer : class
-		where TScenario : TestScenario
+		where TConsumer : class, IConsumer
+	    where TScenario : TestScenario
 	{
 		readonly Func<ScenarioBuilder<TScenario>> _scenarioBuilderFactory;
 
