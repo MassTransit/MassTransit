@@ -45,6 +45,8 @@ Documentation is located at [http://docs.masstransit-project.com/](http://docs.m
 2. Shared ReSharper settings are under src/MassTransit.resharper.xml
 3. Make a pull request
 
+`rake global_version` generates the global version if you prefer building with MsBuild/Visual Studio. 
+ 
  
 # REQUIREMENTS
 * .NET Framework 3.5 

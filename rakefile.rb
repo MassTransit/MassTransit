@@ -37,7 +37,7 @@ task :default => [:clean, :compile, :compile_samples, :ilmerge, :copy_services]
 desc "**DOOES NOT CLEAR OUTPUT FOLDER**, compiles and runs tests"
 task :unclean => [:compile, :ilmerge, :tests]
 
-desc "Update the common version information for the build. You can call this task without building."
+desc "Gen SolutionVersion.cs"
 assemblyinfo :global_version do |asm|
   # Assembly file config
   asm.product_name = PRODUCT
@@ -242,9 +242,9 @@ def copyOutputFiles(fromDir, filePattern, outDir)
 	}
 end
 
+desc "Run all tests"
 task :tests => [:unit_tests]
 
-desc "Runs unit tests (integration tests?, acceptance-tests?) etc."
 nunit :unit_tests => [:compile] do |nunit|
 
         nunit.command = File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe")
@@ -255,7 +255,6 @@ end
 
 task :transport_tests => [:msmq_tests, :rabbitmq_tests]
 
-desc "Runs unit tests for MSMQ"
 task :msmq_tests do
 	Dir.mkdir props[:artifacts] unless exists?(props[:artifacts])
 
@@ -267,7 +266,6 @@ task :msmq_tests do
 	runner.run ['MassTransit.Transports.Msmq.Tests'].map{ |assem| "#{assem}.dll" }
 end
 
-desc "Runs unit tests for RabbitMQ"
 task :rabbitmq_tests do
 	Dir.mkdir props[:artifacts] unless exists?(props[:artifacts])
 
