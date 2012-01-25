@@ -17,29 +17,54 @@ namespace MassTransit.Subscriptions.Coordinator
     using Magnum.Caching;
     using Messages;
 
+    /// <summary>
+    /// Connects received subscriptions to a local bus.
+    /// The connector is responsible for picking between the data and the control bus.
+    /// </summary>
     public class BusSubscriptionConnector :
         SubscriptionObserver
     {
         static readonly ILog _log = Logger.Get(typeof (BusSubscriptionConnector));
-        readonly EndpointSubscriptionConnectorCache _cache;
+        readonly EndpointSubscriptionConnectorCache _dataBusSubscriptionCache;
+        readonly EndpointSubscriptionConnectorCache _controlBusSubscriptionCache;
         readonly Cache<Guid, UnsubscribeAction> _connectionCache;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BusSubscriptionConnector"/> class.
+        /// </summary>
+        /// <param name="bus">The bus.</param>
         public BusSubscriptionConnector(IServiceBus bus)
         {
-            _cache = new EndpointSubscriptionConnectorCache(bus);
+            _dataBusSubscriptionCache = new EndpointSubscriptionConnectorCache(bus);
+            _controlBusSubscriptionCache = new EndpointSubscriptionConnectorCache(bus.ControlBus);
+
             _connectionCache = new ConcurrentCache<Guid, UnsubscribeAction>();
         }
 
+        /// <summary>
+        /// Adds a remote subscription to the route path or a local data or control bus 
+        /// </summary>
+        /// <param name="message"></param>
         public void OnSubscriptionAdded(SubscriptionAdded message)
         {
-            _connectionCache[message.SubscriptionId] = _cache.Connect(message.MessageName, message.EndpointUri,
-                message.CorrelationId);
+            // determine whether the message should be send over the control bus
+            var isControlMessage = message.EndpointUri.IsControlAddress();
+
+            // connect the message to the correct cache
+            if (!isControlMessage)
+                _connectionCache[message.SubscriptionId] = _dataBusSubscriptionCache.Connect(message.MessageName, message.EndpointUri, message.CorrelationId);
+            else
+                _connectionCache[message.SubscriptionId] = _controlBusSubscriptionCache.Connect(message.MessageName, message.EndpointUri, message.CorrelationId);
 
             if (_log.IsInfoEnabled)
                 _log.InfoFormat("Added: {0} => {1}, {2}", message.MessageName, message.EndpointUri,
                     message.SubscriptionId);
         }
 
+        /// <summary>
+        /// Removes a remote subscription from the route path or a local data or control bus 
+        /// </summary>
+        /// <param name="message"></param>
         public void OnSubscriptionRemoved(SubscriptionRemoved message)
         {
             _connectionCache.WithValue(message.SubscriptionId, unsubscribe =>
