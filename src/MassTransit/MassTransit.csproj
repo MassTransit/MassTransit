@@ -378,7 +378,6 @@
     <Compile Include="Saga\Orchestrates.cs" />
     <Compile Include="Saga\InitiatedBy.cs" />
     <Compile Include="Services\Routing\Configuration\RouteTo.cs" />
-    <Compile Include="Services\Subscriptions\Client\EndpointUriList.cs" />
     <Compile Include="Services\Subscriptions\Client\SubscriptionServiceMessageProducer.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfiguratorExtensions.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfiguratorImpl.cs" />
@@ -773,8 +772,6 @@
     <Compile Include="Services\HealthMonitoring\Server\HealthSaga.cs" />
     <Compile Include="Services\Routing\Configuration\RoutingConfigurator.cs" />
     <Compile Include="Services\Routing\RoutingService.cs" />
-    <Compile Include="Services\Subscriptions\Client\ClientSubscriptionInfoMapper.cs" />
-    <Compile Include="Services\Subscriptions\Client\ClientSubscriptionInformation.cs" />
     <Compile Include="Services\Subscriptions\ISubscriptionService.cs" />
     <Compile Include="Services\Subscriptions\Server\Messages\SubscriptionAdded.cs" />
     <Compile Include="Services\Subscriptions\Server\Messages\SubscriptionClientAdded.cs" />
@@ -825,7 +822,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pipeline\Configuration\Subscribers\" />
-    <Folder Include="Services\HealthMonitoring\Client\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
