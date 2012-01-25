@@ -19,6 +19,9 @@ namespace MassTransit.Services.HealthMonitoring
 	using Saga;
 	using Server;
 
+    /// <summary>
+    /// The healh service monitors the heart beats of a <see cref="HealthClient"/>
+    /// </summary>
 	public class HealthService :
 		Consumes<HealthUpdateRequest>.All,
 		IDisposable
@@ -28,6 +31,11 @@ namespace MassTransit.Services.HealthMonitoring
 		readonly ISagaRepository<HealthSaga> _healthSagas;
 		UnsubscribeAction _unsubscribeToken = () => false;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HealthService"/> class.
+        /// </summary>
+        /// <param name="bus">The bus.</param>
+        /// <param name="healthSagas">The health sagas.</param>
 		public HealthService(IServiceBus bus, ISagaRepository<HealthSaga> healthSagas)
 		{
 			_bus = bus;
@@ -44,16 +52,22 @@ namespace MassTransit.Services.HealthMonitoring
 			_bus.Dispose();
 		}
 
+        /// <summary>
+        /// Starts this instance.
+        /// </summary>
 		public void Start()
 		{
 			_log.Info("Health Service Starting");
 
-			_unsubscribeToken += _bus.SubscribeInstance(this);
-			_unsubscribeToken += _bus.SubscribeSaga(_healthSagas);
+			_unsubscribeToken += _bus.ControlBus.SubscribeInstance(this);
+            _unsubscribeToken += _bus.ControlBus.SubscribeSaga(_healthSagas);
 
 			_log.Info("Health Service Started");
 		}
 
+        /// <summary>
+        /// Stops this instance.
+        /// </summary>
 		public void Stop()
 		{
 			_log.Info("Health Service Stopping");
@@ -72,7 +86,7 @@ namespace MassTransit.Services.HealthMonitoring
 				.Each(x => message.Information.Add(x));
 
 			_log.Debug("Publishing HealthUpdate");
-			_bus.Publish(message);
+			_bus.ControlBus.Publish(message);
 		}
 	}
 }
