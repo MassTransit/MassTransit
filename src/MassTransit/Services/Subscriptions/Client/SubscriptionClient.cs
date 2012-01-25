@@ -20,6 +20,9 @@ namespace MassTransit.Services.Subscriptions.Client
 	using MassTransit.Subscriptions.Messages;
 	using Messages;
 
+    /// <summary>
+    /// The subscription client is responsible for exchanging subscription information between a local bus and the central subscription coordinator.
+    /// </summary>
     public class SubscriptionClient :
 		SubscriptionObserver
 	{
@@ -32,10 +35,16 @@ namespace MassTransit.Services.Subscriptions.Client
 		readonly TimeSpan _startTimeout;
 		readonly Uri _subscriptionServiceUri;
 		UnsubscribeAction _unsubscribeAction;
-	    IEndpoint _subscriptionEndpoint;
+	    readonly IEndpoint _subscriptionEndpoint;
 
-	    public SubscriptionClient(IServiceBus bus, SubscriptionRouter router, Uri subscriptionServiceUri,
-		                          TimeSpan startTimeout)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubscriptionClient"/> class.
+        /// </summary>
+        /// <param name="bus">The bus.</param>
+        /// <param name="router">The router.</param>
+        /// <param name="subscriptionServiceUri">The subscription service URI.</param>
+        /// <param name="startTimeout">The start timeout.</param>
+	    public SubscriptionClient(IServiceBus bus, SubscriptionRouter router, Uri subscriptionServiceUri, TimeSpan startTimeout)
 		{
 			_bus = bus;
 			_router = router;
@@ -61,16 +70,27 @@ namespace MassTransit.Services.Subscriptions.Client
 			WaitForSubscriptionServiceResponse();
 		}
 
+        /// <summary>
+        /// Called when a subscription was added.
+        /// </summary>
+        /// <param name="message"></param>
 		public void OnSubscriptionAdded(SubscriptionAdded message)
 		{
 			_producer.OnSubscriptionAdded(message);
 		}
 
+        /// <summary>
+        /// Called when a subscription was removed.
+        /// </summary>
+        /// <param name="message">The message.</param>
 		public void OnSubscriptionRemoved(SubscriptionRemoved message)
 		{
 			_producer.OnSubscriptionRemoved(message);
 		}
 
+        /// <summary>
+        /// Called when the observation is complete and we should go away
+        /// </summary>
 		public void OnComplete()
 		{
 			if (_unsubscribeAction != null)
