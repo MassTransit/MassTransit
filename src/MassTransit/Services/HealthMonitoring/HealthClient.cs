@@ -81,15 +81,15 @@ namespace MassTransit.Services.HealthMonitoring
             _bus = bus;
 
             _controlUri = _bus.ControlBus.Endpoint.Address.Uri;
-			_dataUri = _bus.ControlBus.Endpoint.Address.Uri;
+            _dataUri = _bus.Endpoint.Address.Uri;
 
             _unsubscribe = _bus.ControlBus.SubscribeInstance(this);
 
             var message = new EndpointCameOnline(SystemId, _controlUri, _dataUri, _heartbeatIntervalInSeconds);
             _bus.ControlBus.Publish(message);
 
-			_unschedule = _scheduler.Schedule(_heartbeatIntervalInMilliseconds, _heartbeatIntervalInMilliseconds, _fiber,
-				PublishHeartbeat);
+            _unschedule = _scheduler.Schedule(_heartbeatIntervalInMilliseconds, _heartbeatIntervalInMilliseconds, _fiber,
+                PublishHeartbeat);
         }
 
         public void Stop()
