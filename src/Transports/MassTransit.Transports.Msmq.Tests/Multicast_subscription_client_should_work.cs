@@ -19,6 +19,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using MassTransit.Tests;
     using MassTransit.Tests.Messages;
     using NUnit.Framework;
+    using Pipeline.Inspectors;
     using TestFixtures;
     using TestFramework;
 

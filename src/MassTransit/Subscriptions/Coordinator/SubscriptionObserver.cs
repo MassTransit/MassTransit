@@ -14,10 +14,20 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using Messages;
 
+    /// <summary>
+    /// Service bus subscription observer
+    /// </summary>
 	public interface SubscriptionObserver
 	{
+        /// <summary>
+        /// Called when a subscription was added.
+        /// </summary>
 		void OnSubscriptionAdded(SubscriptionAdded message);
 
+        /// <summary>
+        /// Called when a subscription was removed.
+        /// </summary>
+        /// <param name="message">The message.</param>
 		void OnSubscriptionRemoved(SubscriptionRemoved message);
 
 		/// <summary>
