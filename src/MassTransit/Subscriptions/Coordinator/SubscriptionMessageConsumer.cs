@@ -18,6 +18,9 @@ namespace MassTransit.Subscriptions.Coordinator
 	using Messages;
 	using Services.Subscriptions.Messages;
 
+    /// <summary>
+    /// The Subscription Message Consumer handles subscription update messages send from the Subscription Service. 
+    /// </summary>
     public class SubscriptionMessageConsumer :
 		Consumes<AddSubscriptionClient>.Context,
 		Consumes<RemoveSubscriptionClient>.Context,
@@ -36,8 +39,13 @@ namespace MassTransit.Subscriptions.Coordinator
 		readonly Guid _peerId;
 		readonly Uri _peerUri;
 
-		public SubscriptionMessageConsumer(SubscriptionRouter router, string network,
-		                                   params Uri[] ignoredSourceAddresses)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubscriptionMessageConsumer"/> class.
+        /// </summary>
+        /// <param name="router">The router.</param>
+        /// <param name="network">The network.</param>
+        /// <param name="ignoredSourceAddresses">The ignored source addresses.</param>
+		public SubscriptionMessageConsumer(SubscriptionRouter router, string network, params Uri[] ignoredSourceAddresses)
 		{
 			_router = router;
 			_peerId = router.PeerId;
@@ -143,10 +151,9 @@ namespace MassTransit.Subscriptions.Coordinator
 
 			foreach (SubscriptionInformation subscription in context.Message.Subscriptions)
 			{
-				// TODO do we trust subscriptions that are third-party (sent to us from systems that are not the
-				// system containing the actual subscription)
-				// maybe keep track of source address for the AddPeer and allow if it is from the
-				// subscription service but not others?
+				// TODO:
+                // do we trust subscriptions that are third-party (sent to us from systems that are not the system containing the actual subscription)
+                // maybe keep track of source address for the AddPeer and allow if it is from the subscription service but not others?
 
 				_router.Send(new AddPeerSubscriptionMessage
 					{
@@ -155,13 +162,12 @@ namespace MassTransit.Subscriptions.Coordinator
 						MessageName = subscription.MessageName,
 						MessageNumber = subscription.SequenceNumber,
 						SubscriptionId = subscription.SubscriptionId,
-                        CorrelationId = subscription.CorrelationId,
+                        CorrelationId = subscription.CorrelationId
 					});
 			}
 		}
 
-		bool DiscardMessage<T>(IConsumeContext<T> context, Guid clientId)
-			where T : class
+        bool DiscardMessage(IMessageContext context, Guid clientId)
 		{
 			if (_peerId == clientId && clientId != Guid.Empty)
 			{

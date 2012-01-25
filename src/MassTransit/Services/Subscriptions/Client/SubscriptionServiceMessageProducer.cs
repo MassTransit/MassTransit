@@ -19,8 +19,10 @@ namespace MassTransit.Services.Subscriptions.Client
     using MassTransit.Subscriptions.Messages;
     using Messages;
 
-    public class SubscriptionServiceMessageProducer :
-        SubscriptionObserver
+    /// <summary>
+    /// The message producer is used to send subscription updates to the central subscription coordinator.
+    /// </summary>
+    internal class SubscriptionServiceMessageProducer 
     {
         static readonly ILog _log = Logger.Get(typeof(SubscriptionServiceMessageProducer));
         readonly IEndpoint _endpoint;
@@ -30,6 +32,11 @@ namespace MassTransit.Services.Subscriptions.Client
         readonly Uri _peerUri;
         long _lastMessageNumber;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubscriptionServiceMessageProducer"/> class.
+        /// </summary>
+        /// <param name="router">The router.</param>
+        /// <param name="endpoint">The endpoint.</param>
         public SubscriptionServiceMessageProducer(SubscriptionRouter router, IEndpoint endpoint)
         {
             _peerId = router.PeerId;
@@ -40,14 +47,17 @@ namespace MassTransit.Services.Subscriptions.Client
             SendAddPeerMessage();
         }
 
+        /// <summary>
+        /// Called when a subscription was added.
+        /// </summary>
+        /// <param name="message"></param>
         public void OnSubscriptionAdded(SubscriptionAdded message)
         {
             long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
-            var subscription = new SubscriptionInformation(_peerId, messageNumber, message.MessageName, message.CorrelationId,
-                message.EndpointUri);
-            subscription.SubscriptionId = message.SubscriptionId;
-
+            var subscription = new SubscriptionInformation(_peerId, messageNumber, message.MessageName, message.CorrelationId, message.EndpointUri)
+                {SubscriptionId = message.SubscriptionId};
+            
             var add = new AddSubscription(subscription);
 
             if (_log.IsDebugEnabled)
@@ -56,13 +66,16 @@ namespace MassTransit.Services.Subscriptions.Client
             _endpoint.Send(add, SetSendContext);
         }
 
+        /// <summary>
+        /// Called when a subscription was removed.
+        /// </summary>
+        /// <param name="message">The message.</param>
         public void OnSubscriptionRemoved(SubscriptionRemoved message)
         {
             long messageNumber = Interlocked.Increment(ref _lastMessageNumber);
 
-            var subscription = new SubscriptionInformation(_peerId, messageNumber, message.MessageName, message.CorrelationId,
-                message.EndpointUri);
-            subscription.SubscriptionId = message.SubscriptionId;
+            var subscription = new SubscriptionInformation(_peerId, messageNumber, message.MessageName, message.CorrelationId, message.EndpointUri)
+                {SubscriptionId = message.SubscriptionId};
 
             var remove = new RemoveSubscription(subscription);
 
@@ -72,6 +85,9 @@ namespace MassTransit.Services.Subscriptions.Client
             _endpoint.Send(remove, SetSendContext);
         }
 
+        /// <summary>
+        /// Called when the observation is complete and we should go away
+        /// </summary>
         public void OnComplete()
         {
             _endpoint.Send(new RemoveSubscriptionClient(_peerId, _peerUri, _peerUri), SetSendContext);

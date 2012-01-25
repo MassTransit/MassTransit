@@ -13,12 +13,34 @@
 namespace MassTransit.Subscriptions.Messages
 {
 	using System;
+	using Transports;
 
+    /// <summary>
+    /// Describes a subscription of an <see cref="Endpoint"/> to a particular message.
+    /// </summary>
 	public interface Subscription
 	{
+        /// <summary>
+        /// Gets the subscription id.
+        /// </summary>
 		Guid SubscriptionId { get; }
-		Uri EndpointUri { get; }
+
+        /// <summary>
+        /// Gets the endpoint URI.
+        /// </summary>
+        Uri EndpointUri { get; }
+
+        /// <summary>
+        /// Gets the name of the subscription message.
+        /// </summary>
+        /// <value>
+        /// The name of the message.
+        /// </value>
 		string MessageName { get; }
+
+        /// <summary>
+        /// Gets the correlation id.
+        /// </summary>
 		string CorrelationId { get; }
 	}
 }
