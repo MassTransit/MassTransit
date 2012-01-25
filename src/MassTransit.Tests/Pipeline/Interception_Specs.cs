@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
 	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using TextFixtures;
 
 	[Scenario]
@@ -25,12 +26,7 @@ namespace MassTransit.Tests.Pipeline
 
 		}
 
-		protected override void ConfigureLocalBus(BusConfigurators.ServiceBusConfigurator configurator)
-		{
-			base.ConfigureLocalBus(configurator);
-		}
-
-		[Then]
+		[Then, Ignore]
 		public void Should_receive_the_message_before_the_pipeline()
 		{
 		}
