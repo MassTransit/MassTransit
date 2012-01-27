@@ -13,7 +13,6 @@
 namespace MassTransit.Logging
 {
     using System;
-    using System.Diagnostics;
     using Tracing;
 
     public static class Logger
@@ -38,85 +37,6 @@ namespace MassTransit.Logging
         public static void UseLogger(ILogger logger)
         {
             _logger = logger;
-        }
-    }
-
-    public interface ILogWriter
-    {
-    }
-
-    public class TraceLogWriter :
-        ILogWriter
-    {
-        const string NullString = "null";
-        readonly Func<bool> _enabled;
-
-        public TraceLogWriter(Func<bool> enabled)
-        {
-            _enabled = enabled;
-        }
-
-        public void Write(string format, params object[] args)
-        {
-            if (_enabled())
-                Trace.WriteLine(string.Format(format, args));
-        }
-
-        public void Write(IFormatProvider provider, string format, params object[] args)
-        {
-            if (_enabled())
-                Trace.WriteLine(string.Format(provider, format, args));
-        }
-
-        public void Write(Exception exception, string format, params object[] args)
-        {
-            if (_enabled())
-            {
-                Trace.WriteLine(string.Format(format, args));
-                Trace.WriteLine(exception);
-            }
-        }
-
-        public void Write(Exception exception, IFormatProvider provider, string format, params object[] args)
-        {
-            if (_enabled())
-            {
-                Trace.WriteLine(string.Format(provider, format, args));
-                Trace.WriteLine(exception);
-            }
-        }
-
-        public void Write(Action<ILogWriter> action)
-        {
-            if (_enabled())
-                action(this);
-        }
-
-        public void Write(object obj)
-        {
-            if (_enabled())
-                Trace.WriteLine(obj != null ? obj.ToString() : NullString);
-        }
-
-        public void Write(string message)
-        {
-            if (_enabled() && !string.IsNullOrEmpty(message))
-                Trace.WriteLine(message);
-        }
-
-        public void Write(Exception exception)
-        {
-            if (_enabled())
-                Trace.WriteLine(exception);
-        }
-
-        public void Write(Exception exception, string message)
-        {
-            if (_enabled())
-            {
-                Trace.WriteLine(message);
-                Trace.WriteLine(exception);
-            }
         }
     }
 }
