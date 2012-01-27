@@ -15,15 +15,15 @@ namespace MassTransit.Subscriptions.Coordinator
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Logging;
     using Magnum;
     using Magnum.Extensions;
     using Messages;
     using Stact;
-    using log4net;
 
     public class EndpointSubscription
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscription));
+        static readonly ILog _log = Logger.Get(typeof (EndpointSubscription));
         readonly Fiber _fiber;
         readonly IDictionary<Guid, PeerSubscription> _ids;
         readonly string _messageName;

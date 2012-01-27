@@ -18,6 +18,7 @@ namespace MassTransit
     using Diagnostics.Introspection;
     using Events;
     using Exceptions;
+    using Logging;
     using Magnum;
     using Magnum.Extensions;
     using Monitoring;
@@ -26,7 +27,6 @@ namespace MassTransit
     using Stact;
     using Threading;
     using Util;
-    using log4net;
 
     /// <summary>
     /// A service bus is used to attach message handlers (services) to endpoints, as well as
@@ -53,7 +53,7 @@ namespace MassTransit
         {
             try
             {
-                _log = LogManager.GetLogger(typeof (ServiceBus));
+                _log = Logger.Get(typeof (ServiceBus));
             }
             catch (Exception ex)
             {

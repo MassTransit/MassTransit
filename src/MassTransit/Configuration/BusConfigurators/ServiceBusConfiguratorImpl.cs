@@ -19,15 +19,15 @@ namespace MassTransit.BusConfigurators
     using Configuration;
     using Configurators;
     using EndpointConfigurators;
+    using Logging;
     using Magnum.Extensions;
     using SubscriptionConfigurators;
     using Transports;
-    using log4net;
 
     public class ServiceBusConfiguratorImpl :
         ServiceBusConfigurator
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusConfiguratorImpl));
+        static readonly ILog _log = Logger.Get(typeof (ServiceBusConfiguratorImpl));
 
         readonly IList<BusBuilderConfigurator> _configurators;
         readonly EndpointFactoryConfigurator _endpointFactoryConfigurator;

@@ -16,20 +16,20 @@ namespace MassTransit.Services.Subscriptions.Server
 	using System.Collections.Generic;
 	using System.Linq;
 	using Exceptions;
+	using Logging;
 	using Magnum.Extensions;
 	using Messages;
 	using Saga;
 	using Subscriptions.Messages;
-	using log4net;
 
-	public class SubscriptionService :
+    public class SubscriptionService :
 		Consumes<SubscriptionClientAdded>.All,
 		Consumes<SubscriptionClientRemoved>.All,
 		Consumes<SubscriptionAdded>.All,
 		Consumes<SubscriptionRemoved>.All,
 		IDisposable
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
+		static readonly ILog _log = Logger.Get(typeof (SubscriptionService));
 		readonly ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagas;
 		readonly ISagaRepository<SubscriptionSaga> _subscriptionSagas;
 		IServiceBus _bus;

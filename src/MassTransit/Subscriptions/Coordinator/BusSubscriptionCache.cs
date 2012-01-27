@@ -14,13 +14,13 @@ namespace MassTransit.Subscriptions.Coordinator
 {
     using System.Collections.Generic;
     using System.Linq;
+    using Logging;
     using Magnum.Caching;
     using Messages;
-    using log4net;
 
     public class BusSubscriptionCache
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionCache));
+        static readonly ILog _log = Logger.Get(typeof (BusSubscriptionCache));
         readonly SubscriptionObserver _observer;
         readonly Cache<SubscriptionKey, BusSubscription> _subscriptions;
 

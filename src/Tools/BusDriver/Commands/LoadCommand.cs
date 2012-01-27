@@ -17,7 +17,7 @@ namespace BusDriver.Commands
 	using System.Linq;
 	using System.Text;
 	using Formatting;
-	using log4net;
+	using MassTransit.Logging;
 	using Magnum.Extensions;
 	using Magnum.FileSystem;
 	using Magnum.FileSystem.Internal;
@@ -29,7 +29,7 @@ namespace BusDriver.Commands
 	public class LoadCommand :
 		Command
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (LoadCommand));
+		static readonly ILog _log = Logger.Get(typeof (LoadCommand));
 		readonly int _count;
 		readonly string _name;
 		readonly bool _remove;

@@ -17,15 +17,15 @@ namespace MassTransit.Transports
 	using System.Runtime.Serialization;
 	using Context;
 	using Exceptions;
+	using Logging;
 	using Serialization;
 	using Util;
-	using log4net;
 
-	[DebuggerDisplay("{Address}")]
+    [DebuggerDisplay("{Address}")]
 	public class Endpoint :
 		IEndpoint
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (Endpoint));
+		static readonly ILog _log = Logger.Get(typeof (Endpoint));
 		readonly IEndpointAddress _address;
 		readonly IMessageSerializer _serializer;
 		readonly MessageRetryTracker _tracker;

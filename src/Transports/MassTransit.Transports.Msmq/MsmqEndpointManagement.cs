@@ -17,7 +17,7 @@ namespace MassTransit.Transports.Msmq
     using System.Messaging;
     using System.Security.Principal;
     using Exceptions;
-    using log4net;
+    using Logging;
 
     public class MsmqEndpointManagement :
         IEndpointManagement
@@ -25,7 +25,7 @@ namespace MassTransit.Transports.Msmq
         static readonly string AdministratorsGroupName;
         static readonly string AnonymousLoginAccountName;
         static readonly string EveryoneAccountName;
-        static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpointManagement));
+        static readonly ILog _log = Logger.Get(typeof (MsmqEndpointManagement));
         readonly IMsmqEndpointAddress _address;
 
         static MsmqEndpointManagement()

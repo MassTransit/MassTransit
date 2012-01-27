@@ -14,7 +14,7 @@ namespace MassTransit.RuntimeServices
 {
 	using System;
 	using System.IO;
-	using log4net;
+	using Logging;
 	using log4net.Config;
 	using Services.HealthMonitoring;
 	using Services.Subscriptions.Server;
@@ -26,7 +26,7 @@ namespace MassTransit.RuntimeServices
 
 	class Program
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (Program));
+		static readonly ILog _log = Logger.Get(typeof (Program));
 
 		static void Main()
 		{

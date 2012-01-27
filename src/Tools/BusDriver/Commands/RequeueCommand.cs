@@ -14,14 +14,14 @@ namespace BusDriver.Commands
 {
 	using System;
 	using Formatting;
-	using log4net;
+	using MassTransit.Logging;
 	using MassTransit.Context;
 	using MassTransit.Transports;
 
 	public class RequeueCommand :
 		Command
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof(RequeueCommand));
+		static readonly ILog _log = Logger.Get(typeof(RequeueCommand));
 		readonly int _count;
 		readonly string _uriString;
 

@@ -14,18 +14,18 @@ namespace MassTransit.Transports.RabbitMq
 {
 	using System;
 	using System.Collections.Generic;
+	using Logging;
 	using Magnum;
 	using Magnum.Extensions;
 	using Management;
 	using RabbitMQ.Client;
 	using Subscriptions.Coordinator;
 	using Subscriptions.Messages;
-	using log4net;
 
-	public class RabbitMqSubscriptionBinder :
+    public class RabbitMqSubscriptionBinder :
 		SubscriptionObserver
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqSubscriptionBinder));
+		static readonly ILog _log = Logger.Get(typeof (RabbitMqSubscriptionBinder));
 		readonly Dictionary<Guid, MessageName> _bindings;
 		IRabbitMqEndpointAddress _inputAddress;
 

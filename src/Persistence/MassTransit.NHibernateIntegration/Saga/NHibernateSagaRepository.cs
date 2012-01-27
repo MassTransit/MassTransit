@@ -17,7 +17,7 @@ namespace MassTransit.NHibernateIntegration.Saga
     using System.Linq;
     using System.Transactions;
     using Exceptions;
-    using log4net;
+    using Logging;
     using MassTransit.Saga;
     using NHibernate;
     using NHibernate.Linq;
@@ -28,7 +28,7 @@ namespace MassTransit.NHibernateIntegration.Saga
         ISagaRepository<TSaga>
         where TSaga : class, ISaga
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepository<TSaga>).ToFriendlyName());
+        static readonly ILog _log = Logger.Get(typeof (NHibernateSagaRepository<TSaga>).ToFriendlyName());
 
         readonly ISessionFactory _sessionFactory;
 

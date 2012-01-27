@@ -17,7 +17,7 @@ namespace MassTransit.Saga
 	using System.Linq;
 	using System.Threading;
 	using Exceptions;
-	using log4net;
+	using Logging;
 	using MassTransit.Pipeline;
 	using Util;
 
@@ -25,7 +25,7 @@ namespace MassTransit.Saga
 		ISagaRepository<TSaga>
 		where TSaga : class, ISaga
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (InMemorySagaRepository<TSaga>));
+		static readonly ILog _log = Logger.Get(typeof (InMemorySagaRepository<TSaga>));
 		IndexedSagaDictionary<TSaga> _sagas;
 
 		public InMemorySagaRepository()

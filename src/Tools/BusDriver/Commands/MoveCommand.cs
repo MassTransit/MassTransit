@@ -14,14 +14,14 @@ namespace BusDriver.Commands
 {
 	using System;
 	using Formatting;
-	using log4net;
+	using MassTransit.Logging;
 	using MassTransit.Context;
 	using MassTransit.Transports;
 
 	public class MoveCommand :
 		Command
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (MoveCommand));
+		static readonly ILog _log = Logger.Get(typeof (MoveCommand));
 		readonly int _count;
 		readonly string _fromUriString;
 		readonly string _toUriString;

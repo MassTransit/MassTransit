@@ -17,16 +17,16 @@ namespace MassTransit.Builders
 	using BusServiceConfigurators;
 	using Configuration;
 	using Exceptions;
+	using Logging;
 	using Magnum;
 	using Magnum.Extensions;
 	using SubscriptionConfigurators;
 	using Util;
-	using log4net;
 
-	public class ControlBusBuilderImpl :
+    public class ControlBusBuilderImpl :
 		ControlBusBuilder
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ControlBusBuilderImpl));
+		static readonly ILog _log = Logger.Get(typeof (ControlBusBuilderImpl));
 
 		readonly IList<BusServiceConfigurator> _busServiceConfigurators;
 		readonly IList<Action<ServiceBus>> _postCreateActions;

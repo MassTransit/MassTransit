@@ -13,7 +13,7 @@
 namespace MassTransit.Services.HealthMonitoring.Server
 {
 	using System;
-	using log4net;
+	using Logging;
 	using Magnum.Extensions;
 	using Magnum.StateMachine;
 	using Messages;
@@ -25,7 +25,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		SagaStateMachine<HealthSaga>,
 		ISaga
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (HealthSaga));
+		static readonly ILog _log = Logger.Get(typeof (HealthSaga));
 		Guid _correlationId;
 
 		static HealthSaga()

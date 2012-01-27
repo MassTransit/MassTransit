@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,24 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework
+namespace MassTransit.Log4NetIntegration
 {
-	using System.IO;
-	using System.Reflection;
-	using log4net.Config;
-	using NUnit.Framework;
+    using BusConfigurators;
+    using Logging;
 
-	[SetUpFixture]
-	public class LogSetup
-	{
-		[SetUp]
-		public void SetupLog4Net()
-		{
-			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+    public static class Log4NetConfigurationExtensions
+    {
 
-			string file = Path.Combine(path, "MassTransit.TestFramework.log4net.xml");
+        public static void UseLog4Net(this ServiceBusConfigurator configurator)
+        {
+            MassTransit.Logging.Logger.UseLogger(new Log4NetLogger());
+        }
 
-			XmlConfigurator.Configure(new FileInfo(file));
-		}
-	}
+    }
 }

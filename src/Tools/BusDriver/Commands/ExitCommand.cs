@@ -12,12 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace BusDriver.Commands
 {
-	using log4net;
+    using MassTransit.Logging;
 
-	public class ExitCommand :
+    public class ExitCommand :
 		Command
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ExitCommand));
+		static readonly ILog _log = Logger.Get(typeof (ExitCommand));
 
 		public bool Execute()
 		{

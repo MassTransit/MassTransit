@@ -15,14 +15,14 @@ namespace MassTransit.Saga
 	using System;
 	using System.Linq.Expressions;
 	using Exceptions;
-	using log4net;
+	using Logging;
 
-	public class ExistingOrIgnoreSagaPolicy<TSaga, TMessage> :
+    public class ExistingOrIgnoreSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
 		where TMessage : class
 	{
-		static readonly ILog _log = LogManager.GetLogger("MassTransit.Saga.ExistingOrIgnoreSagaPolicy");
+		static readonly ILog _log = Logger.Get("MassTransit.Saga.ExistingOrIgnoreSagaPolicy");
 
 		private readonly Func<TSaga, bool> _canRemoveInstance;
 

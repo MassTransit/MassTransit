@@ -14,15 +14,15 @@ namespace MassTransit.Context
 {
     using System;
     using System.Linq;
+    using Logging;
     using Magnum.Reflection;
     using Util;
-    using log4net;
 
     public class ConsumeContext<TMessage> :
         IConsumeContext<TMessage>
         where TMessage : class
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (ReceiveContext));
+        static readonly ILog _log = Logger.Get(typeof (ReceiveContext));
 
         readonly IReceiveContext _context;
         readonly TMessage _message;

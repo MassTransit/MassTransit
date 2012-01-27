@@ -14,13 +14,13 @@ namespace MassTransit.Transports.Msmq.Management
 {
 	using System;
 	using System.IO;
-	using log4net;
+	using Logging;
 	using System.Diagnostics;
 
 	public class Windows7Installer :
 		MsmqInstaller
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof(Windows7Installer));
+		static readonly ILog _log = Logger.Get(typeof(Windows7Installer));
 
 		public Process Install()
 		{

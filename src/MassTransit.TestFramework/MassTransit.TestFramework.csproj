@@ -57,11 +57,6 @@
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\log4net.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
@@ -112,7 +107,6 @@
     <Compile Include="Fixtures\SubscriptionServiceTestFixture.cs" />
     <Compile Include="Given_a_subscription_service_and_two_service_buses.cs" />
     <Compile Include="Given_two_service_buses_with_shared_subscriptions.cs" />
-    <Compile Include="LogSetup.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="SelectiveConsumerOf.cs" />
     <Compile Include="Fixtures\LocalTestFixture.cs" />

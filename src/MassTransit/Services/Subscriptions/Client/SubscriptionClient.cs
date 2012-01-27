@@ -15,15 +15,15 @@ namespace MassTransit.Services.Subscriptions.Client
 	using System;
 	using System.Threading;
 	using Exceptions;
+	using Logging;
 	using MassTransit.Subscriptions.Coordinator;
 	using MassTransit.Subscriptions.Messages;
 	using Messages;
-	using log4net;
 
-	public class SubscriptionClient :
+    public class SubscriptionClient :
 		SubscriptionObserver
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionClient));
+		static readonly ILog _log = Logger.Get(typeof (SubscriptionClient));
 		readonly IServiceBus _bus;
 		readonly SubscriptionRouter _router;
 		readonly string _network;

@@ -14,7 +14,7 @@ namespace MassTransit.Saga.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
-	using log4net;
+	using Logging;
 	using Magnum.Extensions;
 	using Magnum.StateMachine;
 	using Util;
@@ -25,7 +25,7 @@ namespace MassTransit.Saga.Pipeline
 		where TSaga : SagaStateMachine<TSaga>, ISaga
 	{
 		static readonly ILog _log =
-			LogManager.GetLogger(typeof (CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
+			Logger.Get(typeof (CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
 
 		public CorrelatedSagaStateMachineMessageSink(ISagaRepository<TSaga> repository,
 		                                             ISagaPolicy<TSaga, TMessage> policy,

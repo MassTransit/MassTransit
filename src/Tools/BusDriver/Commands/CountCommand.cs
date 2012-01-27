@@ -14,13 +14,13 @@ namespace BusDriver.Commands
 {
 	using System;
 	using Formatting;
-	using log4net;
+	using MassTransit.Logging;
 	using MassTransit.Transports.Msmq;
 
 	public class CountCommand :
 		Command
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (CountCommand));
+		static readonly ILog _log = Logger.Get(typeof (CountCommand));
 		readonly string _uriString;
 
 		public CountCommand(string uriString)

@@ -16,12 +16,12 @@ namespace MassTransit.Transports.Msmq.Management
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
-	using log4net;
+	using Logging;
 
-	public class WindowsServer2003Installer :
+    public class WindowsServer2003Installer :
 		MsmqInstaller
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (WindowsServer2003Installer));
+		static readonly ILog _log = Logger.Get(typeof (WindowsServer2003Installer));
 		readonly IEnumerable<string> _installComponents;
 		readonly IEnumerable<string> _unsupportedComponents;
 

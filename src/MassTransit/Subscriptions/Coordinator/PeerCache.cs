@@ -13,17 +13,17 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
+    using Logging;
     using Magnum.Caching;
     using Magnum.Extensions;
     using Messages;
     using Stact;
     using Util;
-    using log4net;
 
     public class PeerCache :
         Actor
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (PeerCache));
+        static readonly ILog _log = Logger.Get(typeof (PeerCache));
         readonly Fiber _fiber;
         readonly ActorFactory<PeerHandler> _peerHandlerFactory;
         readonly Cache<Guid, Uri> _peerIds;

@@ -13,14 +13,14 @@
 namespace MassTransit.Serialization.Custom
 {
 	using System.Xml;
-	using log4net;
+	using Logging;
 	using Magnum.Reflection;
 	using Util;
 
 	public class ObjectDeserializer<T> :
 		IObjectDeserializer<T>
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (ObjectDeserializer<T>));
+		private static readonly ILog _log = Logger.Get(typeof (ObjectDeserializer<T>));
 
 		private readonly IDeserializeObjectPropertyCache<T> _propertyCache;
 

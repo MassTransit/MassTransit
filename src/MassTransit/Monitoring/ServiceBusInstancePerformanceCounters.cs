@@ -13,12 +13,12 @@
 namespace MassTransit.Monitoring
 {
 	using System;
-	using log4net;
+	using Logging;
 
-	public class ServiceBusInstancePerformanceCounters :
+    public class ServiceBusInstancePerformanceCounters :
 		IDisposable
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusInstancePerformanceCounters));
+		static readonly ILog _log = Logger.Get(typeof (ServiceBusInstancePerformanceCounters));
 
 		bool _disposed;
 

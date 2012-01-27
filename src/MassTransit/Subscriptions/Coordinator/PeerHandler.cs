@@ -13,15 +13,15 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
+    using Logging;
     using Messages;
     using Stact;
     using Util;
-    using log4net;
 
     public class PeerHandler :
         Actor
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (PeerHandler));
+        static readonly ILog _log = Logger.Get(typeof (PeerHandler));
 
         readonly EndpointSubscriptionCache _endpointSubscriptionCache;
         readonly SubscriptionObserver _observer;

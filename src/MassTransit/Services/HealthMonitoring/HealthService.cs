@@ -13,7 +13,7 @@
 namespace MassTransit.Services.HealthMonitoring
 {
 	using System;
-	using log4net;
+	using Logging;
 	using Magnum.Extensions;
 	using Messages;
 	using Saga;
@@ -23,7 +23,7 @@ namespace MassTransit.Services.HealthMonitoring
 		Consumes<HealthUpdateRequest>.All,
 		IDisposable
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (HealthService));
+		static readonly ILog _log = Logger.Get(typeof (HealthService));
 		readonly IServiceBus _bus;
 		readonly ISagaRepository<HealthSaga> _healthSagas;
 		UnsubscribeAction _unsubscribeToken = () => false;

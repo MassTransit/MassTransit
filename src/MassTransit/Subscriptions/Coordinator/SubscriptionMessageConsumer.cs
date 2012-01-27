@@ -14,11 +14,11 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using System.Collections.Generic;
+	using Logging;
 	using Messages;
 	using Services.Subscriptions.Messages;
-	using log4net;
 
-	public class SubscriptionMessageConsumer :
+    public class SubscriptionMessageConsumer :
 		Consumes<AddSubscriptionClient>.Context,
 		Consumes<RemoveSubscriptionClient>.Context,
 		Consumes<SubscriptionRefresh>.Context,
@@ -29,7 +29,7 @@ namespace MassTransit.Subscriptions.Coordinator
 		Consumes<AddPeer>.Context,
 		Consumes<RemovePeer>.Context
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionMessageConsumer));
+		static readonly ILog _log = Logger.Get(typeof (SubscriptionMessageConsumer));
 		readonly SubscriptionRouter _router;
 		readonly HashSet<Uri> _ignoredSourceAddresses;
 		readonly string _network;

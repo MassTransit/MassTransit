@@ -12,32 +12,36 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using System.Diagnostics;
-	using System.IO;
-	using System.Reflection;
-	using NUnit.Framework;
-	using log4net;
-	using log4net.Config;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Reflection;
+    using Log4NetIntegration.Logging;
+    using Logging;
+    using NUnit.Framework;
+    using log4net;
+    using log4net.Config;
 
-	[SetUpFixture]
-	public class ContextSetup
-	{
-		[SetUp]
-		public void Before_any()
-		{
-			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+    [SetUpFixture]
+    public class ContextSetup
+    {
+        [SetUp]
+        public void Before_any()
+        {
+            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-			string file = Path.Combine(path, "masstransit.tests.log4net.xml");
+            string file = Path.Combine(path, "masstransit.tests.log4net.xml");
 
-			XmlConfigurator.Configure(new FileInfo(file));
+            XmlConfigurator.Configure(new FileInfo(file));
 
-			Trace.WriteLine("Loading Log4net: " + file);
-		}
+            Trace.WriteLine("Loading Log4net: " + file);
 
-		[TearDown]
-		public void After_all()
-		{
-			LogManager.Shutdown();
-		}
-	}
+            Logger.UseLogger(new Log4NetLogger());
+        }
+
+        [TearDown]
+        public void After_all()
+        {
+            LogManager.Shutdown();
+        }
+    }
 }

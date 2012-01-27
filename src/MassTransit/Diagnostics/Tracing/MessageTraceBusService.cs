@@ -17,7 +17,7 @@ namespace MassTransit.Diagnostics.Tracing
     using System.Linq;
     using Context;
     using Events;
-    using log4net;
+    using Logging;
     using Magnum.Collections;
     using Magnum.Extensions;
     using Stact;
@@ -26,7 +26,7 @@ namespace MassTransit.Diagnostics.Tracing
 		IBusService,
 		Consumes<GetMessageTraceList>.All
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (MessageTraceBusService));
+		static readonly ILog _log = Logger.Get(typeof (MessageTraceBusService));
 		readonly ChannelConnection _connection;
 		readonly UntypedChannel _eventChannel;
 
