@@ -17,14 +17,14 @@ namespace MassTransit
 	using System.Linq;
 	using Diagnostics;
 	using Diagnostics.Introspection;
-	using log4net;
+	using Logging;
 	using Util;
 	using Magnum.Extensions;
 
     public class ServiceContainer :
 		IServiceContainer
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceContainer));
+		static readonly ILog _log = Logger.Get(typeof (ServiceContainer));
 		readonly IServiceBus _bus;
 		readonly ServiceCatalog _catalog;
 		bool _disposed;

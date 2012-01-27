@@ -17,14 +17,14 @@ namespace MassTransit.BusConfigurators
 	using System.Linq;
 	using Builders;
 	using Configurators;
-	using log4net;
+	using Logging;
 	using Util;
 
 	public class ControlBusConfiguratorImpl :
 		ControlBusConfigurator,
 		BusBuilderConfigurator
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ControlBusConfiguratorImpl));
+		static readonly ILog _log = Logger.Get(typeof (ControlBusConfiguratorImpl));
 
 		readonly IList<BusBuilderConfigurator> _configurators;
 		Uri _uri;

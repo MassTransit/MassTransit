@@ -15,14 +15,14 @@ namespace MassTransit.Transports.RabbitMq
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
+	using Logging;
 	using Management;
 	using RabbitMQ.Client;
-	using log4net;
 
-	public class RabbitMqConsumer :
+    public class RabbitMqConsumer :
 		ConnectionBinding<RabbitMqConnection>
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqConsumer));
+		static readonly ILog _log = Logger.Get(typeof (RabbitMqConsumer));
 		readonly IRabbitMqEndpointAddress _address;
 		IModel _channel;
 		bool _purgeOnBind;

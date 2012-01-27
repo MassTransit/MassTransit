@@ -16,13 +16,13 @@ namespace MassTransit.Transports.Msmq
     using System.Diagnostics;
     using System.Messaging;
     using System.Transactions;
-    using log4net;
+    using Logging;
 
     [DebuggerDisplay("IN:TX:{Address}")]
     public class TransactionalInboundMsmqTransport :
         InboundMsmqTransport
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (TransactionalInboundMsmqTransport));
+        static readonly ILog _log = Logger.Get(typeof (TransactionalInboundMsmqTransport));
         readonly IsolationLevel _isolationLevel;
         readonly TimeSpan _transactionTimeout;
 

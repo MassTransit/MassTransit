@@ -15,7 +15,7 @@ namespace MassTransit.Saga.Pipeline
 	using System;
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
-	using log4net;
+	using Logging;
 	using Magnum.Extensions;
 	using Magnum.StateMachine;
 	using Util;
@@ -26,7 +26,7 @@ namespace MassTransit.Saga.Pipeline
 		where TMessage : class
 	{
 		static readonly ILog _log =
-			LogManager.GetLogger(typeof (PropertySagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
+			Logger.Get(typeof (PropertySagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
 
 		public PropertySagaStateMachineMessageSink(ISagaRepository<TSaga> repository,
 		                                           ISagaPolicy<TSaga, TMessage> policy,

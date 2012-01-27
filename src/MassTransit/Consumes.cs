@@ -12,9 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using Util;
-	using log4net;
-	using Magnum.Extensions;
+    using Logging;
+    using Util;
+    using Magnum.Extensions;
 
 	/// <summary>
 	/// API-oriented class.
@@ -39,7 +39,7 @@ namespace MassTransit
 		class NullConsumer :
 			Selected
 		{
-			static readonly ILog _log = LogManager.GetLogger(typeof (NullConsumer));
+			static readonly ILog _log = Logger.Get(typeof (NullConsumer));
 			readonly string _message;
 
 			public NullConsumer()

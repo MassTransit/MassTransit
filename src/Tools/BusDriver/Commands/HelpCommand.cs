@@ -14,12 +14,12 @@ namespace BusDriver.Commands
 {
 	using System.IO;
 	using System.Reflection;
-	using log4net;
+	using MassTransit.Logging;
 
-	public class HelpCommand :
+    public class HelpCommand :
 		Command
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (HelpCommand));
+		static readonly ILog _log = Logger.Get(typeof (HelpCommand));
 
 		public bool Execute()
 		{

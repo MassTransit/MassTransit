@@ -16,14 +16,14 @@ namespace MassTransit.Transports.Msmq
     using System.Messaging;
     using Context;
     using Exceptions;
+    using Logging;
     using Magnum.Extensions;
-    using log4net;
 
     public abstract class InboundMsmqTransport :
         IInboundTransport
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (InboundMsmqTransport));
-        static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");
+        static readonly ILog _log = Logger.Get(typeof (InboundMsmqTransport));
+        static readonly ILog _messageLog = Logger.Get("MassTransit.Msmq.MessageLog");
         readonly IMsmqEndpointAddress _address;
         readonly ConnectionHandler<MessageQueueConnection> _connectionHandler;
         bool _disposed;

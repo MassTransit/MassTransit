@@ -14,15 +14,15 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using System.Collections.Generic;
+	using Logging;
 	using Magnum;
 	using Messages;
 	using Services.Subscriptions.Messages;
-	using log4net;
 
-	public class SubscriptionLoopback :
+    public class SubscriptionLoopback :
 		SubscriptionObserver
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionLoopback));
+		static readonly ILog _log = Logger.Get(typeof (SubscriptionLoopback));
 		
 		readonly SubscriptionRouter _router;
 		readonly Guid _peerId;

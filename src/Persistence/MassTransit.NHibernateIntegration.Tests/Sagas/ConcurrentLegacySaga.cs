@@ -16,10 +16,10 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 	using System.Diagnostics;
 	using System.Threading;
 	using FluentNHibernate.Mapping;
-	using log4net;
 	using MassTransit.Saga;
+	using log4net;
 
-	public class ConcurrentLegacySaga :
+    public class ConcurrentLegacySaga :
 		ISaga,
 		InitiatedBy<StartConcurrentSaga>,
 		Orchestrates<ContinueConcurrentSaga>

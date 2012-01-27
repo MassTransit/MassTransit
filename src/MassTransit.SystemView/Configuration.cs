@@ -12,77 +12,77 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView
 {
-	using System;
-	using System.Configuration;
-	using System.Reflection;
-	using log4net;
+    using System;
+    using System.Configuration;
+    using System.Reflection;
+    using Logging;
 
-	public class Configuration :
-		IConfiguration
-	{
-		const string SubscriptionServiceUriKey = "SubscriptionServiceUri";
-		const string SystemViewControlUriKey = "SystemViewControlUri";
-		const string SystemViewDataUriKey = "SystemViewDataUri";
+    public class Configuration :
+        IConfiguration
+    {
+        const string SubscriptionServiceUriKey = "SubscriptionServiceUri";
+        const string SystemViewControlUriKey = "SystemViewControlUri";
+        const string SystemViewDataUriKey = "SystemViewDataUri";
 
-		static readonly ILog _log = LogManager.GetLogger(typeof (Configuration));
+        static readonly ILog _log = Logger.Get(typeof (Configuration));
 
-		public Uri SubscriptionServiceUri
-		{
-			get { return GetUriApplicationSetting(SubscriptionServiceUriKey); }
-		}
+        public Uri SubscriptionServiceUri
+        {
+            get { return GetUriApplicationSetting(SubscriptionServiceUriKey); }
+        }
 
-		public Uri SystemViewControlUri
-		{
-			get { return GetUriApplicationSetting(SystemViewControlUriKey); }
-		}
+        public Uri SystemViewControlUri
+        {
+            get { return GetUriApplicationSetting(SystemViewControlUriKey); }
+        }
 
-		public Uri SystemViewDataUri
-		{
-			get { return GetUriApplicationSetting(SystemViewDataUriKey); }
-		}
+        public Uri SystemViewDataUri
+        {
+            get { return GetUriApplicationSetting(SystemViewDataUriKey); }
+        }
 
-		static Uri GetUriApplicationSetting(string key)
-		{
-			try
-			{
-				var value = new Uri(GetApplicationSetting(key));
+        static Uri GetUriApplicationSetting(string key)
+        {
+            try
+            {
+                var value = new Uri(GetApplicationSetting(key));
 
-				return value;
-			}
-			catch (UriFormatException ex)
-			{
-				throw new ConfigurationErrorsException("The " + key + " is not a valid Uri", ex);
-			}
-			catch (ConfigurationErrorsException)
-			{
-				throw;
-			}
-			catch (Exception ex)
-			{
-				throw new ConfigurationErrorsException("The " + key + " application setting failed to load", ex);
-			}
-		}
+                return value;
+            }
+            catch (UriFormatException ex)
+            {
+                throw new ConfigurationErrorsException("The " + key + " is not a valid Uri", ex);
+            }
+            catch (ConfigurationErrorsException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigurationErrorsException("The " + key + " application setting failed to load", ex);
+            }
+        }
 
-		static string GetApplicationSetting(string key)
-		{
-			string value = ConfigurationManager.AppSettings[key] ?? LocateConfiguration().AppSettings.Settings[key].Value;
+        static string GetApplicationSetting(string key)
+        {
+            string value = ConfigurationManager.AppSettings[key] ?? LocateConfiguration().AppSettings.Settings[key].Value;
 
-			if (value == null)
-				throw new ConfigurationErrorsException("There are no configuration string configured");
+            if (value == null)
+                throw new ConfigurationErrorsException("There are no configuration string configured");
 
-			return value;
-		}
+            return value;
+        }
 
-		static System.Configuration.Configuration LocateConfiguration()
-		{
-			var map = new ExeConfigurationFileMap
-				{
-					ExeConfigFilename = Assembly.GetExecutingAssembly().Location + ".config"
-				};
+        static System.Configuration.Configuration LocateConfiguration()
+        {
+            var map = new ExeConfigurationFileMap
+                {
+                    ExeConfigFilename = Assembly.GetExecutingAssembly().Location + ".config"
+                };
 
-			_log.InfoFormat("Using Configuration File: {0}", map.ExeConfigFilename);
+            _log.InfoFormat("Using Configuration File: {0}", map.ExeConfigFilename);
 
-			return ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
-		}
-	}
+            return ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
+        }
+    }
 }

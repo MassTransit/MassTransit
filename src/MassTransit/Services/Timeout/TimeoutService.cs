@@ -15,7 +15,7 @@ namespace MassTransit.Services.Timeout
 	using System;
 	using System.Linq;
 	using Exceptions;
-	using log4net;
+	using Logging;
 	using Magnum;
 	using Magnum.Extensions;
 	using Messages;
@@ -29,7 +29,7 @@ namespace MassTransit.Services.Timeout
 		Consumes<TimeoutScheduled>.All,
 		Consumes<TimeoutRescheduled>.All
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (TimeoutService));
+		private static readonly ILog _log = Logger.Get(typeof (TimeoutService));
 		private readonly Fiber _fiber = new PoolFiber();
 		private readonly Scheduler _scheduler = new TimerScheduler(new PoolFiber());
 		private IServiceBus _bus;

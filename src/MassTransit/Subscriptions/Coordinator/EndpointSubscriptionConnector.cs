@@ -13,8 +13,8 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
+    using Logging;
     using Pipeline;
-    using log4net;
     using Magnum.Extensions;
 
     public interface EndpointSubscriptionConnector
@@ -26,7 +26,7 @@ namespace MassTransit.Subscriptions.Coordinator
         EndpointSubscriptionConnector
         where TMessage : class
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionConnector));
+        static readonly ILog _log = Logger.Get(typeof (EndpointSubscriptionConnector));
         readonly IServiceBus _bus;
 
         public EndpointSubscriptionConnector(IServiceBus bus)

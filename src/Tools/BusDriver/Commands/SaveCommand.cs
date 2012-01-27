@@ -16,7 +16,7 @@ namespace BusDriver.Commands
 	using System.IO;
 	using System.Text;
 	using Formatting;
-	using log4net;
+	using MassTransit.Logging;
 	using Magnum.Extensions;
 	using Magnum.FileSystem;
 	using Magnum.FileSystem.Internal;
@@ -26,7 +26,7 @@ namespace BusDriver.Commands
 	public class SaveCommand :
 		Command
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (SaveCommand));
+		static readonly ILog _log = Logger.Get(typeof (SaveCommand));
 		readonly int _count;
 		readonly string _name;
 		readonly bool _remove;

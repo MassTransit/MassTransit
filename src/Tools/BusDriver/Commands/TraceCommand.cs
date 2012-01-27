@@ -18,7 +18,7 @@ namespace BusDriver.Commands
 	using System.Threading;
 	using Formatting;
 	using MassTransit.Diagnostics.Tracing;
-	using log4net;
+	using MassTransit.Logging;
 	using Magnum.Extensions;
 	using MassTransit;
 
@@ -27,7 +27,7 @@ namespace BusDriver.Commands
 		Command,
 		IPendingCommand
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (TraceCommand));
+		static readonly ILog _log = Logger.Get(typeof (TraceCommand));
 		readonly ManualResetEvent _complete;
 		readonly int _count;
 		readonly string _uriString;

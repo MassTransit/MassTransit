@@ -18,13 +18,13 @@ namespace MassTransit.Context
 	using System.Threading;
 	using Events;
 	using Exceptions;
-	using log4net;
+	using Logging;
 	using Magnum;
 	using Stact;
 
 	public class ServiceBusReceiveContext
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusReceiveContext));
+		static readonly ILog _log = Logger.Get(typeof (ServiceBusReceiveContext));
 
 		readonly IServiceBus _bus;
 		readonly Stopwatch _consumeTime;

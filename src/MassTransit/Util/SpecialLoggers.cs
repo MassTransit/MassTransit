@@ -12,13 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Util
 {
-	using log4net;
+    using Logging;
 
-	public class SpecialLoggers
+    public class SpecialLoggers
 	{
-		static readonly ILog _diagnostics = LogManager.GetLogger("MassTransit.Diagnostics");
-		static readonly ILog _ironLogger = LogManager.GetLogger("MassTransit.Iron");
-		static readonly ILog _messages = LogManager.GetLogger("MassTransit.Messages");
+		static readonly ILog _diagnostics = Logger.Get("MassTransit.Diagnostics");
+		static readonly ILog _ironLogger = Logger.Get("MassTransit.Iron");
+		static readonly ILog _messages = Logger.Get("MassTransit.Messages");
 
 		public static ILog Messages
 		{

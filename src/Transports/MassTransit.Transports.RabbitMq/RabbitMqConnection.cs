@@ -13,14 +13,14 @@
 namespace MassTransit.Transports.RabbitMq
 {
 	using System;
+	using Logging;
 	using Magnum.Extensions;
 	using RabbitMQ.Client;
-	using log4net;
 
-	public class RabbitMqConnection :
+    public class RabbitMqConnection :
 		Connection
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqConnection));
+		static readonly ILog _log = Logger.Get(typeof (RabbitMqConnection));
 		bool _disposed;
 		IConnection _connection;
 		readonly ConnectionFactory _connectionFactory;

@@ -19,7 +19,6 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 	using System.Threading;
 	using FluentNHibernate.Cfg;
 	using FluentNHibernate.Cfg.Db;
-	using log4net;
 	using Magnum;
 	using MassTransit.Saga;
 	using MassTransit.Tests.TextFixtures;
@@ -28,8 +27,9 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 	using NHibernate.Tool.hbm2ddl;
 	using NUnit.Framework;
 	using Saga;
+	using log4net;
 
-	[TestFixture, Category("Integration")]
+    [TestFixture, Category("Integration")]
 	public class ConcurrentSagaTestFixtureBase :
 		LoopbackTestFixture
 	{

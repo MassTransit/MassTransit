@@ -16,14 +16,14 @@ namespace MassTransit.Threading
 	using System.Threading;
 	using Context;
 	using Events;
-	using log4net;
+	using Logging;
 	using Magnum.Extensions;
 	using Stact;
 
 	public class ThreadPoolConsumerPool :
 		ConsumerPool
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ThreadPoolConsumerPool));
+		static readonly ILog _log = Logger.Get(typeof (ThreadPoolConsumerPool));
 
 		readonly IServiceBus _bus;
 		readonly UntypedChannel _eventChannel;
