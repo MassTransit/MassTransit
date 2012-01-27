@@ -16,14 +16,14 @@ namespace MassTransit.RequestResponse
 	using System.Collections.Generic;
 	using System.Threading;
 	using Exceptions;
+	using Logging;
 	using Magnum.Extensions;
-	using log4net;
 
-	public class RequestImpl<TRequest> :
+    public class RequestImpl<TRequest> :
 		IRequest<TRequest>
 		where TRequest : class
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (RequestImpl<TRequest>));
+		static readonly ILog _log = Logger.Get(typeof (RequestImpl<TRequest>));
 		readonly IList<AsyncCallback> _completionCallbacks;
 		readonly object _lock = new object();
 	    readonly string _requestId;

@@ -12,20 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests
 {
-	using System.Diagnostics;
-	using System.IO;
-	using System.Reflection;
-	using NUnit.Framework;
-	using log4net;
-	using log4net.Config;
+    using NUnit.Framework;
+    using log4net;
+    using log4net.Config;
 
-	[SetUpFixture]
-	public class ContextSetup
-	{
-		[SetUp]
-		public void Before_any()
-		{
-		    XmlConfigurator.Configure();
+    [SetUpFixture]
+    public class ContextSetup
+    {
+        [SetUp]
+        public void Before_any()
+        {
+            XmlConfigurator.Configure();
 //			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 //
 //			string file = Path.Combine(path, "msmq.log4net.xml");
@@ -33,12 +30,12 @@ namespace MassTransit.Transports.Msmq.Tests
 //			Trace.WriteLine(string.Format("Loading Log4net Configuration: {0}", file));
 //
 //			XmlConfigurator.Configure(new FileInfo(file));
-		}
+        }
 
-		[TearDown]
-		public void After_all()
-		{
-			LogManager.Shutdown();
-		}
-	}
+        [TearDown]
+        public void After_all()
+        {
+            LogManager.Shutdown();
+        }
+    }
 }

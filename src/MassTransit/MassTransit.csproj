@@ -60,11 +60,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\log4net.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
@@ -275,6 +270,12 @@
     <Compile Include="Exceptions\RequestTimeoutException.cs" />
     <Compile Include="Exceptions\SendException.cs" />
     <Compile Include="IOutboundMessageInterceptor.cs" />
+    <Compile Include="Logging\ILog.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\Tracing\LogLevel.cs" />
+    <Compile Include="Logging\Tracing\TraceLog.cs" />
+    <Compile Include="Logging\Tracing\TraceLogger.cs" />
     <Compile Include="Pipeline\Configuration\InboundRequestMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\InboundRequestMessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\HandlerSelector.cs" />

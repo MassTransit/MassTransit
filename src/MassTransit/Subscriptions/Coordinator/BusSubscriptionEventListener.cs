@@ -14,15 +14,15 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using System;
 	using System.Collections.Generic;
+	using Logging;
 	using Magnum;
 	using Messages;
 	using Pipeline;
-	using log4net;
 
-	public class BusSubscriptionEventListener :
+    public class BusSubscriptionEventListener :
 		ISubscriptionEvent
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionEventListener));
+		static readonly ILog _log = Logger.Get(typeof (BusSubscriptionEventListener));
 		readonly BusSubscriptionCache _busSubscriptionCache;
 		readonly Uri _endpointUri;
 

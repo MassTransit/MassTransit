@@ -4,13 +4,13 @@ namespace MassTransit.Transports.RabbitMq.Management
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
-	using log4net;
+	using Logging;
 	using RabbitMQ.Client;
 
 	public class RabbitMqEndpointManagement :
 		IRabbitMqEndpointManagement
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqEndpointManagement));
+		static readonly ILog _log = Logger.Get(typeof (RabbitMqEndpointManagement));
 		readonly IRabbitMqEndpointAddress _address;
 		readonly bool _owned;
 		IConnection _connection;

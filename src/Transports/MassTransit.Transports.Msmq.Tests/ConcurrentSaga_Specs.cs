@@ -14,7 +14,6 @@ namespace MassTransit.Transports.Msmq.Tests
 {
     using System;
     using System.Diagnostics;
-    using System.Linq;
     using System.Threading;
     using BusConfigurators;
     using Magnum;
@@ -24,8 +23,8 @@ namespace MassTransit.Transports.Msmq.Tests
     using NUnit.Framework;
     using Saga;
     using TestFixtures;
-    using log4net;
     using TestFramework;
+    using log4net;
 
     [TestFixture, Category("Integration")]
     public class Sending_multiple_initiating_messages_should_not_fail_badly :

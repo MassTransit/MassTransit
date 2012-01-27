@@ -17,8 +17,8 @@ namespace MassTransit.Serialization
     using System.IO;
     using System.Runtime.Remoting.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
+    using Logging;
     using Util;
-    using log4net;
 
     /// <summary>
     /// The binary message serializer used the .NET BinaryFormatter to serialize
@@ -43,7 +43,7 @@ namespace MassTransit.Serialization
         const string SourceAddressKey = "SourceAddress";
 
         static readonly BinaryFormatter _formatter = new BinaryFormatter();
-        static readonly ILog _log = LogManager.GetLogger(typeof (BinaryMessageSerializer));
+        static readonly ILog _log = Logger.Get(typeof (BinaryMessageSerializer));
 
         public string ContentType
         {

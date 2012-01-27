@@ -16,7 +16,7 @@ namespace MassTransit.TestFramework.Fixtures
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
-	using log4net;
+	using Logging;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using NUnit.Framework;
@@ -50,7 +50,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 		static AbstractTestFixture()
 		{
-			Log = LogManager.GetLogger("Test");
+			Log = Logger.Get("Test");
 		}
 
 		private void OutputTestName(Type type)

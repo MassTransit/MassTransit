@@ -12,12 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-	using log4net;
+    using Logging;
 
-	public class NullOutboundTransport :
+    public class NullOutboundTransport :
 		IOutboundTransport
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (NullOutboundTransport));
+		static readonly ILog _log = Logger.Get(typeof (NullOutboundTransport));
 		readonly IEndpointAddress _address;
 
 		public NullOutboundTransport(IEndpointAddress address)

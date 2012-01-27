@@ -17,14 +17,14 @@ namespace MassTransit.Transports.RabbitMq
     using System.Text;
     using System.Threading;
     using Context;
+    using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
-    using log4net;
 
     public class InboundRabbitMqTransport :
         IInboundTransport
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (InboundRabbitMqTransport));
+        static readonly ILog _log = Logger.Get(typeof (InboundRabbitMqTransport));
 
         readonly IRabbitMqEndpointAddress _address;
         readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;

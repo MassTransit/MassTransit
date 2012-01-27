@@ -58,6 +58,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{238CEF6D-A
 		..\README.markdown = ..\README.markdown
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Loggers", "Loggers", "{6A938565-BEE9-434C-9A1A-CD2905907554}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Log4NetIntegration", "Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj", "{8D2BE372-A756-4676-B2EA-ED7846809BFE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -152,6 +156,10 @@ Global
 		{9CE51963-9E51-48EE-A75F-62C9CB0CF23C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CE51963-9E51-48EE-A75F-62C9CB0CF23C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CE51963-9E51-48EE-A75F-62C9CB0CF23C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -170,5 +178,6 @@ Global
 		{A31F2C6B-C806-46FD-A4F3-C54209DD495C} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{9CE51963-9E51-48EE-A75F-62C9CB0CF23C} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{910594A6-E942-4985-B248-6DDB17D316B6} = {02C3B269-A00C-42D9-B4E8-EA7E6C233EBB}
+		{8D2BE372-A756-4676-B2EA-ED7846809BFE} = {6A938565-BEE9-434C-9A1A-CD2905907554}
 	EndGlobalSection
 EndGlobal

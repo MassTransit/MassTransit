@@ -16,9 +16,9 @@ namespace MassTransit.RuntimeServices
 	using System.ComponentModel;
 	using System.Configuration;
 	using System.Reflection;
-	using log4net;
+	using Logging;
 
-	public class Configuration :
+    public class Configuration :
 		IConfiguration
 	{
 		const string HealthServiceDataUriKey = "HealthServiceDataUri";
@@ -30,7 +30,7 @@ namespace MassTransit.RuntimeServices
 		const string TimeoutServiceDataUriKey = "TimeoutServiceDataUri";
 		const string TimeoutServiceEnabledKey = "TimeoutServiceEnabled";
 
-		static readonly ILog _log = LogManager.GetLogger(typeof (Configuration));
+		static readonly ILog _log = Logger.Get(typeof (Configuration));
 
 		public bool UseServiceCredentials
 		{

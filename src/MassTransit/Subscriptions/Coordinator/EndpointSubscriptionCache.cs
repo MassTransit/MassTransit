@@ -12,14 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Coordinator
 {
+    using Logging;
     using Magnum.Caching;
     using Messages;
     using Stact;
-    using log4net;
 
     public class EndpointSubscriptionCache
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (EndpointSubscriptionCache));
+        static readonly ILog _log = Logger.Get(typeof (EndpointSubscriptionCache));
 
         readonly Fiber _fiber;
         readonly Cache<SubscriptionKey, EndpointSubscription> _messageSubscriptions;

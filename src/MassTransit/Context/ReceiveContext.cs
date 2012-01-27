@@ -17,17 +17,17 @@ namespace MassTransit.Context
     using System.Diagnostics;
     using System.IO;
     using System.Runtime.Serialization;
+    using Logging;
     using Magnum;
     using Magnum.Extensions;
     using Serialization;
     using Util;
-    using log4net;
 
     public class ReceiveContext :
         MessageContext,
         IReceiveContext
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (ReceiveContext));
+        static readonly ILog _log = Logger.Get(typeof (ReceiveContext));
         readonly IList<IPublished> _published;
         readonly IList<IReceived> _received;
         readonly IList<ISent> _sent;

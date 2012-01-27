@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using log4net;
-	using Magnum;
+    using Logging;
+    using Magnum;
 	using Saga;
 	using Saga.SubscriptionConfigurators;
 	using Saga.SubscriptionConnectors;
@@ -21,7 +21,7 @@ namespace MassTransit
 
 	public static class SagaSubscriptionConfiguratorExtensions
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (SagaSubscriptionConfiguratorExtensions));
+		static readonly ILog _log = Logger.Get(typeof (SagaSubscriptionConfiguratorExtensions));
 
 		/// <summary>
 		/// Configure a saga subscription

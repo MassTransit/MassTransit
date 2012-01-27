@@ -14,15 +14,15 @@ namespace MassTransit
 {
     using System;
     using Configuration;
+    using Logging;
     using Magnum.Reflection;
     using SubscriptionConfigurators;
     using SubscriptionConnectors;
     using Util;
-    using log4net;
 
     public static class ConsumerSubscriptionExtensions
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (ConsumerSubscriptionExtensions));
+        static readonly ILog _log = Logger.Get(typeof (ConsumerSubscriptionExtensions));
 
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
             [NotNull] this SubscriptionBusServiceConfigurator configurator,

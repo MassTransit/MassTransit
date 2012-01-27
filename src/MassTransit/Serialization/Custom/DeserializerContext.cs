@@ -19,7 +19,7 @@ namespace MassTransit.Serialization.Custom
 	using System.Reflection;
 	using System.Runtime.Serialization;
 	using System.Xml;
-	using log4net;
+	using Logging;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
 	using TypeDeserializers;
@@ -30,7 +30,7 @@ namespace MassTransit.Serialization.Custom
 		private readonly XmlReader _reader;
 		private static readonly Dictionary<string, IObjectDeserializer> _deserializers;
 		private static readonly Dictionary<Type, IObjectDeserializer> _deserializersByType;
-		private static readonly ILog _log = LogManager.GetLogger(typeof (DeserializerContext));
+		private static readonly ILog _log = Logger.Get(typeof (DeserializerContext));
 
 		static DeserializerContext()
 		{

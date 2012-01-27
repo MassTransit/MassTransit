@@ -17,8 +17,8 @@ namespace MassTransit.TestFramework
 	using System.Linq;
 	using System.Threading;
 	using Helpers;
+	using Logging;
 	using Testing;
-	using log4net;
 	using Magnum.Extensions;
 	using NUnit.Framework;
 	using Pipeline;
@@ -29,7 +29,7 @@ namespace MassTransit.TestFramework
 
 	public static class ExtensionMethodsForSubscriptions
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (ExtensionMethodsForSubscriptions));
+		static readonly ILog _log = Logger.Get(typeof (ExtensionMethodsForSubscriptions));
 
 		public static TimeSpan Timeout { get; set; }
 

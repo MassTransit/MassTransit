@@ -17,14 +17,14 @@ namespace MassTransit.Transports
 	using Diagnostics;
 	using Diagnostics.Introspection;
 	using Exceptions;
+	using Logging;
 	using Magnum;
 	using Magnum.Threading;
-	using log4net;
 
-	public class EndpointCache :
+    public class EndpointCache :
 		IEndpointCache
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (EndpointCache));
+		static readonly ILog _log = Logger.Get(typeof (EndpointCache));
 
 		readonly IEndpointFactory _endpointFactory;
 		volatile bool _disposed;

@@ -19,14 +19,14 @@ namespace BusDriver.Commands
     using MassTransit;
     using MassTransit.Diagnostics.Introspection;
     using MassTransit.Diagnostics.Introspection.Messages;
-    using log4net;
+    using MassTransit.Logging;
 
     public class StatusCommand :
         Consumes<BusStatus>.Context,
         Command,
         IPendingCommand
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (StatusCommand));
+        static readonly ILog _log = Logger.Get(typeof (StatusCommand));
 
         readonly ManualResetEvent _complete;
         readonly string _uriString;

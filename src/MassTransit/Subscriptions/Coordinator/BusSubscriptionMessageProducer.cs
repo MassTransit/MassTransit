@@ -14,13 +14,13 @@ namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
     using System.Threading;
+    using Logging;
     using Messages;
-    using log4net;
 
     public class BusSubscriptionMessageProducer :
         SubscriptionObserver
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (BusSubscriptionMessageProducer));
+        static readonly ILog _log = Logger.Get(typeof (BusSubscriptionMessageProducer));
         readonly IEndpoint _endpoint;
         readonly Uri _endpointUri;
         readonly string _network;

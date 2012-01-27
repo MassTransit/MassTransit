@@ -15,13 +15,13 @@ namespace MassTransit.Transports.Msmq.Management
 	using System;
 	using System.Linq;
 	using System.ServiceProcess;
-	using log4net;
+	using Logging;
 	using Magnum.Extensions;
 
 	public class WindowsService :
 		IDisposable
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (WindowsService));
+		static readonly ILog _log = Logger.Get(typeof (WindowsService));
 
 		readonly TimeSpan _timeout;
 		ServiceController _controller;

@@ -18,7 +18,7 @@ namespace MassTransit.Serialization.Custom
 	using System.Linq;
 	using System.Reflection;
 	using System.Xml;
-	using log4net;
+	using Logging;
 	using Magnum.Reflection;
     using Magnum.Extensions;
 	using TypeSerializers;
@@ -26,7 +26,7 @@ namespace MassTransit.Serialization.Custom
 	public class SerializerContext :
 		ISerializerContext
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (SerializerContext));
+		private static readonly ILog _log = Logger.Get(typeof (SerializerContext));
 
 		private static readonly Dictionary<Type, IObjectSerializer> _serializers;
 

@@ -17,17 +17,17 @@ namespace MassTransit.Transports.Msmq
     using System.Collections.Generic;
     using System.Linq;
     using Exceptions;
+    using Logging;
     using Magnum.Extensions;
     using Services.Subscriptions.Messages;
     using Subscriptions.Coordinator;
     using Subscriptions.Messages;
-    using log4net;
 
     public class MulticastSubscriptionClient :
         SubscriptionObserver,
         Consumes<AddPeer>.Context
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof (MulticastSubscriptionClient));
+        static readonly ILog _log = Logger.Get(typeof (MulticastSubscriptionClient));
         readonly string _network;
         readonly Guid _peerId;
         readonly Uri _peerUri;

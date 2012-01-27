@@ -14,9 +14,9 @@ namespace MassTransit.Transports
 {
 	using System;
 	using System.Collections.Generic;
-	using log4net;
+	using Logging;
 
-	public class ConnectionHandlerImpl<T> :
+    public class ConnectionHandlerImpl<T> :
 		ConnectionHandler<T>,
 		ConnectionHandler
 		where T : Connection
@@ -24,7 +24,7 @@ namespace MassTransit.Transports
 		readonly HashSet<ConnectionBinding<T>> _bindings;
 		readonly T _connection;
 		readonly object _lock = new object();
-		readonly ILog _log = LogManager.GetLogger(typeof (ConnectionHandlerImpl<T>));
+		readonly ILog _log = Logger.Get(typeof (ConnectionHandlerImpl<T>));
 		readonly ConnectionPolicyChainImpl _policyChain;
 		bool _bound;
 		bool _connected;

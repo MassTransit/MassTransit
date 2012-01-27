@@ -18,16 +18,16 @@ namespace MassTransit.Transports.RabbitMq
 	using Configuration.Builders;
 	using Configuration.Configurators;
 	using Exceptions;
+	using Logging;
 	using Magnum.Extensions;
 	using Magnum.Threading;
 	using Management;
 	using RabbitMQ.Client;
-	using log4net;
 
-	public class RabbitMqTransportFactory :
+    public class RabbitMqTransportFactory :
 		ITransportFactory
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (RabbitMqTransportFactory));
+		static readonly ILog _log = Logger.Get(typeof (RabbitMqTransportFactory));
 		readonly ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>> _connectionCache;
 		readonly IDictionary<Uri, ConnectionFactoryBuilder> _connectionFactoryBuilders;
 

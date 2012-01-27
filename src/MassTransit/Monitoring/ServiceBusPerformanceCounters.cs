@@ -15,7 +15,7 @@ namespace MassTransit.Monitoring
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Security;
-	using log4net;
+	using Logging;
 	using Magnum.Extensions;
 
     public class ServiceBusPerformanceCounters
@@ -23,7 +23,7 @@ namespace MassTransit.Monitoring
 	    public const string CategoryName = "MassTransit";
 	    const string CategoryHelp = "MassTransit Performance Counters";
 	    static readonly ServiceBusPerformanceCounters _instance;
-		static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusPerformanceCounters));
+		static readonly ILog _log = Logger.Get(typeof (ServiceBusPerformanceCounters));
 
 		static ServiceBusPerformanceCounters()
 		{

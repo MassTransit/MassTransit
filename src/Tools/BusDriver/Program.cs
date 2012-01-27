@@ -15,7 +15,7 @@ namespace BusDriver
 	using System;
 	using System.Collections.Generic;
 	using System.Threading;
-	using log4net;
+	using MassTransit.Logging;
 	using log4net.Appender;
 	using log4net.Config;
 	using log4net.Core;
@@ -30,7 +30,7 @@ namespace BusDriver
 
 	class Program
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof (Program));
+		static readonly ILog _log = Logger.Get(typeof (Program));
 		static readonly MonadicCommandLineParser _parser = new MonadicCommandLineParser();
 		static ConsoleAppender _appender;
 		static IServiceBus _bus;

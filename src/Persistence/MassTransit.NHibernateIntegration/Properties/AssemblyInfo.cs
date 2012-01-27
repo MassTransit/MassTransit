@@ -17,6 +17,3 @@ using System.Reflection;
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCulture("")]
-
-
-[assembly: log4net.Config.XmlConfigurator(ConfigFile = "test.log4net.xml")]

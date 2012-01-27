@@ -15,14 +15,14 @@ namespace BusDriver.Commands
 	using System;
 	using System.Text;
 	using Formatting;
-	using log4net;
+	using MassTransit.Logging;
 	using Magnum.Extensions;
 	using MassTransit.Transports;
 
 	public class PeekCommand :
 		Command
 	{
-		static readonly ILog _log = LogManager.GetLogger(typeof(PeekCommand));
+		static readonly ILog _log = Logger.Get(typeof(PeekCommand));
 		readonly int _count;
 		readonly string _uriString;
 

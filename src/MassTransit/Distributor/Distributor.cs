@@ -15,7 +15,7 @@ namespace MassTransit.Distributor
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using log4net;
+	using Logging;
 	using Magnum;
 	using Magnum.Extensions;
 	using Messages;
@@ -157,7 +157,7 @@ namespace MassTransit.Distributor
 				_log.DebugFormat("Worker {0}: {1} in progress, {2} pending", message.DataUri, message.InProgress, message.Pending);
 		}
 
-		static readonly ILog _log = LogManager.GetLogger(typeof (Distributor<TMessage>));
+		static readonly ILog _log = Logger.Get(typeof (Distributor<TMessage>));
 
 		void PingWorkers()
 		{

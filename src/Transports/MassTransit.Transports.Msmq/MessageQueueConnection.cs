@@ -15,12 +15,12 @@ namespace MassTransit.Transports.Msmq
 	using System;
 	using System.Messaging;
 	using Exceptions;
-	using log4net;
+	using Logging;
 
     public class MessageQueueConnection :
 		Connection
 	{
-	    static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueConnection));
+	    static readonly ILog _log = Logger.Get(typeof (MessageQueueConnection));
 	    
 		readonly QueueAccessMode _accessMode;
 		readonly IMsmqEndpointAddress _address;

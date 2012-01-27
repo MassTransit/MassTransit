@@ -13,9 +13,9 @@
 namespace BusDriver.Commands
 {
 	using System;
-	using log4net;
+	using MassTransit.Logging;
 
-	public class SetUriCommand :
+    public class SetUriCommand :
 		Command
 	{
 		readonly string _uriString;
@@ -36,6 +36,6 @@ namespace BusDriver.Commands
 			return true;
 		}
 
-		static readonly ILog _log = LogManager.GetLogger(typeof (SetUriCommand));
+		static readonly ILog _log = Logger.Get(typeof (SetUriCommand));
 	}
 }
