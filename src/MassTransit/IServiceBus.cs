@@ -66,9 +66,13 @@ namespace MassTransit
 		IEndpointCache EndpointCache { get; }
 
 		/// <summary>
-		///   Publishes a message to all subscribed consumers for the message type as specified
+		/// <para>Publishes a message to all subscribed consumers for the message type as specified
 		/// by the generic parameter. The second parameter allows the caller to customize the
-		/// outgoing publish context and set things like headers on the message.
+		/// outgoing publish context and set things like headers on the message.</para>
+		/// 
+		/// <para>
+		/// Read up on publishing: http://readthedocs.org/docs/masstransit/en/latest/overview/publishing.html
+		/// </para>
 		/// </summary>
 		/// <typeparam name = "T">The type of the message</typeparam>
 		/// <param name = "message">The messages to be published</param>
