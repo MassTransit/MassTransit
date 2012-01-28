@@ -24,6 +24,10 @@ namespace MassTransit.BusConfigurators
     using SubscriptionConfigurators;
     using Transports;
 
+	/// <summary>
+	/// <see cref="ServiceBusConfigurator"/>. Core implementation of service bus
+	/// configurator.
+	/// </summary>
     public class ServiceBusConfiguratorImpl :
         ServiceBusConfigurator
     {
