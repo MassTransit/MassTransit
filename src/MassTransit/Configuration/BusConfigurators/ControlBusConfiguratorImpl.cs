@@ -36,6 +36,7 @@ namespace MassTransit.BusConfigurators
 
 		public BusBuilder Configure(BusBuilder builder)
 		{
+			if (builder == null) throw new ArgumentNullException("builder");
 			builder.Match<ServiceBusBuilder>(x =>
 				{
 					var settings = new ServiceBusSettings(builder.Settings);
