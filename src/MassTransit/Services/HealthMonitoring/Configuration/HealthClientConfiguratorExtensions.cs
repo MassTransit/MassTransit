@@ -18,14 +18,21 @@ namespace MassTransit
 
 	public static class HealthClientConfiguratorExtensions
 	{
+		/// <summary>
+		/// Specifies that the service bus will be using health monitoring. This means that
+		/// the bus will publish heart beats and respond to ping messages. For more information,
+		/// see http://readthedocs.org/docs/masstransit/en/latest/overview/standardservices.html
+		/// </summary>
+		/// <param name="configurator">Configurator that the extension method is invoked upon.</param>
+		/// <param name="heartbeatInterval">The heartbeat interval in seconds (one heartbeat evey n seconds)</param>
 		public static void UseHealthMonitoring(this ServiceBusConfigurator configurator, int heartbeatInterval)
 		{
-		    var serviceConfigurator = new HealthClientConfigurator();
-            serviceConfigurator.SetHeartbeatInterval(heartbeatInterval);
+			var serviceConfigurator = new HealthClientConfigurator();
+			serviceConfigurator.SetHeartbeatInterval(heartbeatInterval);
 
-            var busConfigurator = new CustomBusServiceConfigurator(serviceConfigurator);
+			var busConfigurator = new CustomBusServiceConfigurator(serviceConfigurator);
 
-            configurator.AddBusConfigurator(busConfigurator);
+			configurator.AddBusConfigurator(busConfigurator);
 		}
 	}
 }
