@@ -23,6 +23,10 @@ namespace MassTransit.SubscriptionConnectors
     using Saga;
     using Util;
 
+	/// <summary>
+	/// Interface implemented by objects that tie an inbound pipeline together with
+	/// consumers (by means of calling a consumer factory).
+	/// </summary>
     public interface ConsumerConnector
     {
         UnsubscribeAction Connect<TConsumer>(IInboundPipelineConfigurator configurator, IConsumerFactory<TConsumer> consumerFactory) 

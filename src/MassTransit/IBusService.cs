@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit
 {
 	using System;
@@ -29,8 +32,8 @@ namespace MassTransit
 		/// <summary>
 		/// Called when the service is being started, which is after the service bus has been started.
 		/// </summary>
-		/// <param name="bus"></param>
-		void Start(IServiceBus bus);
+		/// <param name="bus">The service bus</param>
+		void Start([NotNull] IServiceBus bus);
 
 		/// <summary>
 		/// Called when the ServiceBus is being disposed, to allow any resources or subscriptions
