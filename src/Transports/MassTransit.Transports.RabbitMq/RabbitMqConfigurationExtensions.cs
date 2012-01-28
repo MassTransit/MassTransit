@@ -16,6 +16,9 @@ namespace MassTransit
 	using Pipeline.Configuration;
 	using Transports.RabbitMq;
 
+	/// <summary>
+	/// Extensions for configuring RabbitMq.
+	/// </summary>
 	public static class RabbitMqConfigurationExtensions
 	{
 		/// <summary>
