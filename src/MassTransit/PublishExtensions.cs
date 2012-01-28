@@ -15,6 +15,9 @@ namespace MassTransit
     using System;
     using Magnum.Reflection;
 
+	/// <summary>
+	/// Publish extensions to <see cref="IServiceBus"/>
+	/// </summary>
     public static class PublishExtensions
     {
         public static void Publish<T>(this IServiceBus bus, T message)
