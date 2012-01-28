@@ -20,6 +20,9 @@ namespace MassTransit.Pipeline
 	using Sinks;
 	using SubscriptionConnectors;
 
+	/// <summary>
+	/// Extensions for the message pipeline.
+	/// </summary>
 	public static class MessagePipelineExtensions
 	{
 		/// <summary>
@@ -46,6 +49,7 @@ namespace MassTransit.Pipeline
 		/// <param name="pipeline">The pipeline instance</param>
 		/// <param name="message">The message to dispatch</param>
 		/// <param name="acknowledge">The function to call if the message will be consumed by the pipeline</param>
+		/// <returns>whether the message was consumed</returns>
 		public static bool Dispatch<T>(this IInboundMessagePipeline pipeline, T message, Func<T, bool> acknowledge)
 			where T : class
 		{
@@ -76,6 +80,9 @@ namespace MassTransit.Pipeline
 			return consumed;
 		}
 
+		/// <summary>
+		/// <see cref="Dispatch{T}(MassTransit.Pipeline.IInboundMessagePipeline,T)"/>: this one is for the outbound pipeline.
+		/// </summary>
 		public static bool Dispatch<T>(this IOutboundMessagePipeline pipeline, T message, Func<T, bool> acknowledge)
 			where T : class
 		{
@@ -166,6 +173,13 @@ namespace MassTransit.Pipeline
 				});
 		}
 
+		/// <summary>
+		/// Connects an endpoint to the outbound pipeline by message type.
+		/// </summary>
+		/// <typeparam name="TMessage">The type of the message to route</typeparam>
+		/// <param name="pipeline">The outbound pipeline</param>
+		/// <param name="endpoint">The endpoint to route to</param>
+		/// <returns></returns>
 		public static UnsubscribeAction ConnectEndpoint<TMessage>(this IOutboundMessagePipeline pipeline, IEndpoint endpoint)
 			where TMessage : class
 		{
