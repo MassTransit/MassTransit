@@ -10,11 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit.Services.Subscriptions
 {
 	using System;
 	using Pipeline;
 
+	/// <summary>
+	/// Used by testing framework
+	/// </summary>
 	public class SubscriptionConsumer :
 		IEndpointSubscriptionEvent,
 		IBusService
@@ -35,6 +41,7 @@ namespace MassTransit.Services.Subscriptions
 
 		public void Start(IServiceBus bus)
 		{
+			if (bus == null) throw new ArgumentNullException("bus");
 			_bus = bus;
 			_pipeline = _bus.OutboundPipeline;
 			_unregisterAction = _service.Register(this);
@@ -48,9 +55,11 @@ namespace MassTransit.Services.Subscriptions
 		public UnsubscribeAction SubscribedTo<TMessage>(Uri endpointUri)
 			where TMessage : class
 		{
+			// messages to the same bus that we're on should not be connected further
 			if (endpointUri == _bus.Endpoint.Address.Uri)
 				return () => true;
 
+			// other messages should be connected to the passed endpoint uri
 			IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
 			return _pipeline.ConnectEndpoint<TMessage>(endpoint);

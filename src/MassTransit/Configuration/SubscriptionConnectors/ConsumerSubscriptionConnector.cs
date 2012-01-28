@@ -18,6 +18,10 @@ namespace MassTransit.SubscriptionConnectors
     using Pipeline.Sinks;
     using Magnum.Extensions;
 
+	/// <summary>
+	/// A connector for a specific message. Objects implementing this interface should be able to
+	/// both do <see cref="ConsumerConnector"/> and be typed to a specific message.
+	/// </summary>
     public interface ConsumerSubscriptionConnector :
         ConsumerConnector
     {
