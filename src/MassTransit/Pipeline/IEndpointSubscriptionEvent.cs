@@ -14,6 +14,10 @@ namespace MassTransit.Pipeline
 {
 	using System;
 
+	/// <summary>
+	/// Interface that implementors wishing to be notified on subscription events should
+	/// implement.
+	/// </summary>
 	public interface IEndpointSubscriptionEvent
 	{
 		UnsubscribeAction SubscribedTo<TMessage>(Uri endpointUri)
