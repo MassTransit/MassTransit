@@ -13,7 +13,6 @@
 namespace MassTransit
 {
 	using System;
-	using Diagnostics;
 	using Diagnostics.Introspection;
 	using Pipeline;
 
