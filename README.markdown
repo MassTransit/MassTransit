@@ -57,11 +57,10 @@ ServiceBusFactory.New(sbc =>
 1. `git config --global core.autoclrf false`
 2. Shared ReSharper settings are under src/MassTransit.resharper.xml
 3. Make a pull request
-
  
 # REQUIREMENTS
-* .NET Framework 3.5 
-
+* .NET Framework 3.5
+* (Will also try to build for .Net 4.0)
 
 # CREDITS
 Logo Design by [The Agile Badger](http://www.theagilebadger.com)  
