@@ -26,6 +26,19 @@ Documentation is located at [http://docs.masstransit-project.com/](http://docs.m
  
  Download Nightly Binaries from [TeamCity](http://teamcity.codebetter.com/viewType.html?buildTypeId=bt8&tab=buildTypeStatusDiv).
 
+### Simplest possible thing:
+
+`install-package MassTransit.RabbitMq` then;
+
+```
+ServiceBusFactory.New(sbc =>
+{
+	sbc.UseRabbitMq();
+	sbc.UseRabbitMqRouting();
+	sbc.ReceiveFrom("rabbitmq://localhost/mybus");
+});
+```
+
 ### Mailing List
 
 [MassTransit Discuss](http://groups.google.com/group/masstransit-discuss)
