@@ -13,11 +13,21 @@
 
 namespace MassTransit.Distributor
 {
+	/// <summary>
+	/// Interface implemented by distributor implementations - a marker
+	/// interface in general, that names the concept and specifies
+	/// that the distributor is a bus service.
+	/// </summary>
 	public interface IDistributor :
 		IBusService
 	{
 	}
 
+	/// <summary>
+	/// Interface implemented by distributor implementations - a marker
+	/// interface in general, that names the concept and specifies
+	/// that the distributor is a bus service.
+	/// </summary>
 	public interface IDistributor<TMessage> :
 		IDistributor,
 		Consumes<TMessage>.Selected

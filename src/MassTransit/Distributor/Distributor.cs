@@ -22,6 +22,10 @@ namespace MassTransit.Distributor
 	using Stact;
 	using Stact.Internal;
 
+	/// <summary>
+	/// <see cref="IDistributor"/>
+	/// </summary>
+	/// <typeparam name="TMessage"></typeparam>
 	public class Distributor<TMessage> :
 		IDistributor<TMessage>
 		where TMessage : class
