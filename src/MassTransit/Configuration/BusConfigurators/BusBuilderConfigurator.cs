@@ -10,14 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit.BusConfigurators
 {
 	using Builders;
 	using Configurators;
 
+	/// <summary>
+	/// A thing that configures the thing that builds the bus.
+	/// </summary>
 	public interface BusBuilderConfigurator :
 		Configurator
 	{
-		BusBuilder Configure(BusBuilder builder);
+		/// <summary>
+		/// Pays the bus builder a visit and return a new builder
+		/// that is correctly configured.
+		/// </summary>
+		/// <param name="builder">The bus builder</param>
+		/// <returns>An updated builder.</returns>
+		[NotNull]
+		BusBuilder Configure([NotNull] BusBuilder builder);
 	}
 }
