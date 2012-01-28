@@ -18,6 +18,16 @@ namespace MassTransit.BusConfigurators
     using EndpointConfigurators;
     using SubscriptionConfigurators;
 
+	/// <summary>
+	/// <para>The configurator to call methods on, as well as extension methods on,
+	/// in order to configure your service bus. The configuration
+	/// goes a lot by convention, but this interface allows you to configure
+	/// almost any aspect of the bus.</para>
+	/// 
+	/// <para>
+	/// Documentation is at http://readthedocs.org/docs/masstransit/en/latest/configuration/index.html
+	/// </para>
+	/// </summary>
     public interface ServiceBusConfigurator :
         EndpointFactoryConfigurator
     {
