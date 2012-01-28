@@ -15,11 +15,13 @@ namespace MassTransit
 	using System;
 
 	/// <summary>
-	/// A bus service is an extension to the service bus, and is used to create services that
-	/// add functionality to the service bus, such as subscription managers, distributors, etc.
+	/// <para>A bus service is an extension to the service bus, and is used to create services that
+	/// add functionality to the service bus, such as subscription managers, distributors, etc.</para>
 	/// 
-	/// This interface should not be used in most situations and is typically an internal
-	/// use thing.
+	/// <para>This interface should not be used in most situations and is typically an internal
+	/// use thing.</para>
+	/// 
+	/// <para>Have a look at <see cref="BusServiceLayer"/> for the different levels the service can live in.</para>
 	/// </summary>
 	public interface IBusService :
 		IDisposable
