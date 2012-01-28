@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit.BusConfigurators
 {
     using System;
@@ -153,6 +156,8 @@ namespace MassTransit.BusConfigurators
 
             _subscriptionRouterConfigurator.SetNetwork(_settings.Network);
 
+			// run through all configurators that have been set and let
+			// them do their magic
             foreach (BusBuilderConfigurator configurator in _configurators)
             {
                 builder = configurator.Configure(builder);
@@ -163,12 +168,19 @@ namespace MassTransit.BusConfigurators
             return bus;
         }
 
-        public void ChangeSettings(Action<ServiceBusSettings> callback)
-        {
-            callback(_settings);
-        }
+		/// <summary>
+		/// This lets you change the bus settings without
+		/// having to implement a <see cref="BusBuilderConfigurator"/>
+		/// first. Use with caution.
+		/// </summary>
+		/// <param name="callback">The callback that changes the settings.</param>
+        public void ChangeSettings([NotNull] Action<ServiceBusSettings> callback)
+		{
+			if (callback == null) throw new ArgumentNullException("callback");
+			callback(_settings);
+		}
 
-        IEndpointCache CreateEndpointCache()
+		IEndpointCache CreateEndpointCache()
         {
             if (_settings.EndpointCache != null)
                 return _settings.EndpointCache;
