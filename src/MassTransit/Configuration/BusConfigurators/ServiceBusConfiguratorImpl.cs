@@ -24,6 +24,10 @@ namespace MassTransit.BusConfigurators
     using Transports;
     using log4net;
 
+	/// <summary>
+	/// <see cref="ServiceBusConfigurator"/>. Core implementation of service bus
+	/// configurator.
+	/// </summary>
     public class ServiceBusConfiguratorImpl :
         ServiceBusConfigurator
     {
