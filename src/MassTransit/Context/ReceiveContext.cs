@@ -168,12 +168,13 @@ namespace MassTransit.Context
         /// Respond to the current inbound message with either a send to the ResponseAddress or a
         /// Publish on the bus that received the message
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">Message type</typeparam>
         /// <param name="message">The message to send/publish</param>
         /// <param name="contextCallback">The action to setup the context on the outbound message</param>
-        public void Respond<T>(T message, Action<ISendContext<T>> contextCallback) where T : class
+        public void Respond<T>(T message, [NotNull] Action<ISendContext<T>> contextCallback) where T : class
         {
-            if (ResponseAddress != null)
+        	if (contextCallback == null) throw new ArgumentNullException("contextCallback");
+        	if (ResponseAddress != null)
             {
                 Bus.GetEndpoint(ResponseAddress).Send(message, context =>
                     {
@@ -192,7 +193,7 @@ namespace MassTransit.Context
             }
         }
 
-        public static ReceiveContext FromBodyStream(Stream bodyStream)
+    	public static ReceiveContext FromBodyStream(Stream bodyStream)
         {
             return new ReceiveContext(bodyStream);
         }

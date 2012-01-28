@@ -16,6 +16,9 @@ namespace MassTransit.Subscriptions.Coordinator
 	using System.Collections.Generic;
 	using Messages;
 
+	/// <summary>
+	/// Implementors take care of 
+	/// </summary>
 	public interface SubscriptionRouter
 	{
 		string Network { get; }

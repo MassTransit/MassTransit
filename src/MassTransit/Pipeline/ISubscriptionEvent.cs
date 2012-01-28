@@ -13,13 +13,21 @@
 namespace MassTransit.Pipeline
 {
 	/// <summary>
-	/// Notifies when changes to the subscribed message types changes in the pipeline
+	/// Notifies when changes to the subscribed message types changes in the pipeline.
 	/// </summary>
 	public interface ISubscriptionEvent
 	{
+		/// <summary>
+		/// Notify of a subscription for a message.
+		/// </summary>
+		/// <typeparam name="TMessage">Message type</typeparam>
+		/// <returns>The corresponding action for unsubscription</returns>
 		UnsubscribeAction SubscribedTo<TMessage>()
 			where TMessage : class;
 
+		/// <typeparam name="TMessage">Message type</typeparam>
+		/// <typeparam name="TKey">Type of correlation key </typeparam>
+		/// <returns>The corresponding action for unsubscription</returns>
 		UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId)
 			where TMessage : class, CorrelatedBy<TKey>;
 	}
