@@ -52,7 +52,10 @@ namespace MassTransit.BusConfigurators
         /// <summary>
         /// Specify the endpoint from which messages should be read
         /// </summary>
-        /// <param name="uri">The uri of the endpoint</param>
+        /// <param name="uri">
+        /// The uri of the endpoint that this bus should
+        /// receive message from.
+        /// </param>
         void ReceiveFrom(Uri uri);
 
         /// <summary>
@@ -62,15 +65,19 @@ namespace MassTransit.BusConfigurators
         void SetNetwork(string network);
 
         /// <summary>
-        /// Specifies an action to call before a message is consumed
+        /// Specifies an action to call before a message is consumed. Implementors
+        /// should take care to not remove previously set actions so that multiple
+        /// calls to this method generates calls to all those action parameters.
         /// </summary>
-        /// <param name="beforeConsume"></param>
+        /// <param name="beforeConsume">The action to run before consumption.</param>
         void BeforeConsumingMessage(Action beforeConsume);
 
         /// <summary>
-        /// Specifies an action to call after a message is consumed
+		/// Specifies an action to call after a message is consumed. Implementors
+		/// should take care to not remove previously set actions so that multiple
+		/// calls to this method generates calls to all those action parameters.
         /// </summary>
-        /// <param name="afterConsume"></param>
+        /// <param name="afterConsume">The action to run after consumption</param>
         void AfterConsumingMessage(Action afterConsume);
     }
 }
