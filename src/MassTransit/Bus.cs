@@ -29,6 +29,10 @@ namespace MassTransit
 		/// <summary>
 		/// The configured instance of the service bus.
 		/// </summary>
+		/// <exception cref="InvalidOperationException">
+		/// If you call this method before you call
+		/// <see cref="Initialize"/>.
+		/// </exception>
 		public static IServiceBus Instance
 		{
 			get
@@ -43,7 +47,10 @@ namespace MassTransit
 		/// <summary>
 		/// Call to initialize the service bus instance, including any configuration.
 		/// </summary>
-		/// <param name="configure"></param>
+		/// <param name="configure">A lambda/action that does the bus configugration.</param>
+		/// <exception cref="ConfigurationException">
+		/// If the bus has already been initialized by a call
+		/// to this method.</exception>
 		public static void Initialize(Action<ServiceBusConfigurator> configure)
 		{
 			if (_instance != null)
