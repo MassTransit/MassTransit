@@ -16,6 +16,10 @@ namespace MassTransit.Transports.RabbitMq
 	using Pipeline.Inspectors;
 	using Pipeline.Sinks;
 
+	/// <summary>
+	/// Finds publish endpoints that consume the message type specified in the c'tor of this
+	/// class.
+	/// </summary>
 	public class PublishEndpointSinkLocator :
 		PipelineInspectorBase<PublishEndpointSinkLocator>
 	{
