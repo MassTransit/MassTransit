@@ -14,10 +14,25 @@ namespace MassTransit.Subscriptions.Coordinator
 {
 	using Messages;
 
+	/// <summary>
+	/// Implemented by observers of subscriptions - subscriptions are locally published inside of the bus,
+	/// so if you're implementing a transport; implementing this interface will allow you to bind whatever
+	/// topics/queues/exchanges/etc to your inbound queue 
+	/// (e.g. if doing equivalent of RMQ:publish w/ fanout, MSMQ: multicast, ZMQ: PGM). 
+	/// This interface is also used internally to route subscriptions and manage their lifestyles.
+	/// </summary>
 	public interface SubscriptionObserver
 	{
+		/// <summary>
+		/// Called when a subscription is registered in the service bus.
+		/// </summary>
+		/// <param name="message">The subscription added message.</param>
 		void OnSubscriptionAdded(SubscriptionAdded message);
 
+		/// <summary>
+		/// Called when a subscription is unregistered in the service bus.
+		/// </summary>
+		/// <param name="message">The subscription removed message.</param>
 		void OnSubscriptionRemoved(SubscriptionRemoved message);
 
 		/// <summary>
