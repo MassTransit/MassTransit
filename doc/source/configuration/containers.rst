@@ -28,7 +28,7 @@ StructureMap
             
             //this will find all of the consumers in the container and 
             //register them with the bus.
-            sbc.LoadFrom(container);
+            sbc.Subscribe(x => x.LoadFrom(container));
         });
         
         //now we add the bus
@@ -60,7 +60,7 @@ Windsor
             
             //this will find all of the consumers in the container and 
             //register them with the bus.
-            sbc.LoadFrom(container);
+            sbc.Subscribe(x => x.LoadFrom(container));
         });
         
         //now we add the bus
@@ -93,7 +93,7 @@ AutoFac
 
             //this will find all of the consumers in the container and
             //register them with the bus.
-            sbc.LoadFrom(c);
+            sbc.Subscribe(x => x.LoadFrom(container));
         })).As<IServiceBus>()
             .SingleInstance();
 
