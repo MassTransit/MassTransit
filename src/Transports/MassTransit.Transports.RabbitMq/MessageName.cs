@@ -17,6 +17,10 @@ namespace MassTransit.Transports.RabbitMq
 	using System.Runtime.Serialization;
 	using System.Text;
 
+	/// <summary>
+	/// Class encapsulating naming strategies for exchanges corresponding
+	/// to message types.
+	/// </summary>
 	[Serializable]
 	public class MessageName :
 		ISerializable
