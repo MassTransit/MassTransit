@@ -32,7 +32,7 @@ StructureMap
         });
         
         //now we add the bus
-        container.Inject<IServiceBus>(bus);
+        container.Inject(bus);
     }
 
 .. note::
