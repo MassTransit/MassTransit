@@ -334,4 +334,4 @@ Once the saga has been defined, it is subscribed to the bus using the Saga subsc
 
 NOTE: The example above uses an in-memory transport and saga repository, which is not durable. It is shown
 for testing purposes only. There is a library for use with NHibernate provided with MassTransit, called
-MassTransit.NHibernateIntegration. It uses FluentNHibernate with NHibernate 3.1 currently.
+MassTransit.NHibernateIntegration. It uses FluentNHibernate with NHibernate currently.
