@@ -40,6 +40,7 @@ namespace MassTransit
 				{
 					var interceptorConfigurator = new OutboundMessageInterceptorConfigurator(bus.OutboundPipeline);
 
+					// make sure we publish correctly through this interceptor; works on the outgoing pipeline
 					interceptorConfigurator.Create(new PublishEndpointInterceptor(bus));
 				});
 

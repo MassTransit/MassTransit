@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+	/// <summary>
+	/// Transport 
+	/// </summary>
 	public interface IOutboundTransport :
 		ITransport
 	{
