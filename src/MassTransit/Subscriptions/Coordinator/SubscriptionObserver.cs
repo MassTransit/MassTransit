@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit.Subscriptions.Coordinator
 {
 	using Messages;
@@ -27,13 +30,13 @@ namespace MassTransit.Subscriptions.Coordinator
 		/// Called when a subscription is registered in the service bus.
 		/// </summary>
 		/// <param name="message">The subscription added message.</param>
-		void OnSubscriptionAdded(SubscriptionAdded message);
+		void OnSubscriptionAdded([NotNull] SubscriptionAdded message);
 
 		/// <summary>
 		/// Called when a subscription is unregistered in the service bus.
 		/// </summary>
 		/// <param name="message">The subscription removed message.</param>
-		void OnSubscriptionRemoved(SubscriptionRemoved message);
+		void OnSubscriptionRemoved([NotNull] SubscriptionRemoved message);
 
 		/// <summary>
 		/// Called when the observation is complete and we should go away
