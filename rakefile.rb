@@ -55,14 +55,14 @@ end
 
 desc "Prepares the working directory for a new build"
 task :clean do
-	FileUtils.rm_rf props[:artifacts]
-	FileUtils.rm_rf props[:stage]
-	# work around latency issue where folder still exists for a short while after it is removed
-	waitfor { !exists?(props[:stage]) }
-	waitfor { !exists?(props[:artifacts]) }
-
-	Dir.mkdir props[:stage]
-	Dir.mkdir props[:artifacts]
+  FileUtils.rm_rf props[:artifacts]
+  FileUtils.rm_rf props[:stage]
+  # work around latency issue where folder still exists for a short while after it is removed
+  waitfor { !exists?(props[:stage]) }
+  waitfor { !exists?(props[:artifacts]) }
+  
+  Dir.mkdir props[:stage]
+  Dir.mkdir props[:artifacts]
 end
 
 task :compile_samples => [:compile, :build_starbucks, :build_distributor] do ; end
@@ -73,6 +73,7 @@ task :compile => [:versioning, :global_version, :build] do
   
   copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "log4net.{dll,pdb,xml}", props[:output]
   copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "Magnum.{dll,pdb,xml}", props[:output]
+  copyOutputFiles File.join(props[:src], "MassTransit.TestFramework/bin/#{BUILD_CONFIG}"), "MassTransit.TestFramework.{dll,pdb,xml}", props[:output]
   
   copyOutputFiles File.join(props[:src], "Persistence/MassTransit.NHibernateIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NHibernateIntegration.{dll,pdb,xml}", File.join(props[:output], "Persistence/NHibernate")
   outc = File.join(props[:output], "Containers")
@@ -93,23 +94,24 @@ end
 task :ilmerge => [:ilmerge_masstransit] do
 end
 
-
 ilmerge :ilmerge_masstransit do |ilm|
-	out = File.join(props[:output], 'MassTransit.dll')
-	ilm.output = out
-	ilm.internalize = File.join(props[:build_support], 'internalize.txt')
-	ilm.working_directory = File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}")
-	ilm.target = :library
-        ilm.use MSB_USE
-	ilm.log = File.join( props[:src], "MassTransit","bin","#{BUILD_CONFIG}", 'ilmerge.log' )
-	ilm.allow_dupes = true
-	ilm.references = [ 'MassTransit.dll', 'Stact.dll', 'Newtonsoft.Json.dll']
+  out = File.join(props[:output], 'MassTransit.dll')
+  ilm.output = out
+  ilm.internalize = File.join(props[:build_support], 'internalize.txt')
+  ilm.working_directory = File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}")
+  ilm.target = :library
+      ilm.use MSB_USE
+  ilm.log = File.join( props[:src], "MassTransit","bin","#{BUILD_CONFIG}", 'ilmerge.log' )
+  ilm.allow_dupes = true
+  ilm.references = [ 'MassTransit.dll', 'Stact.dll', 'Newtonsoft.Json.dll']
 end
 
 task :copy_services => [:compile] do
   puts "Copying services"
   targ = File.join(props[:stage], 'Services', 'RuntimeServices')
   src = File.join(props[:src], "MassTransit.RuntimeServices/bin/#{BUILD_CONFIG}")
+  
+  copyOutputFiles src, "MassTransit.TestFramework.{xml,dll,pdb}", props[:stage]
   
   copyOutputFiles src, "MassTransit.*.{dll,exe,config,log4net.xml,sdf}", targ
   copyOutputFiles props[:output], 'MassTransit.dll', targ
@@ -132,9 +134,9 @@ task :copy_services => [:compile] do
   
   copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
   copyOutputFiles props[:output], 'MassTransit.dll', targ
-     	copyOutputFiles src, "log4net.dll", targ
-     	copyOutputFiles src, "Magnum.dll", targ
-     	copyOutputFiles src, "StructureMap.dll", targ
+    copyOutputFiles src, "log4net.dll", targ
+    copyOutputFiles src, "Magnum.dll", targ
+    copyOutputFiles src, "StructureMap.dll", targ
 
   targ = File.join(props[:stage], 'Services', 'BusDriver')
   src = File.join(props[:src], "Tools/BusDriver/bin/#{BUILD_CONFIG}")
@@ -185,23 +187,6 @@ task :copy_services => [:compile] do
 	copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "*.config", targ
 end
 
-
-#desc "Prepare examples"
-#task :prepare_examples => [:compile] do#
-#	puts "Preparing samples"
-#	targ = File.join(props[:output], 'Services', 'clock' )
-#	copyOutputFiles File.join(props[:src], "Samples/StuffOnAShelf/bin/#{BUILD_CONFIG}"), "clock.*", targ
-#	copyOutputFiles File.join(props[:src], "Samples/StuffOnAShelf/bin/#{BUILD_CONFIG}"), "StuffOnAShelf.{dll}", targ
-#	copyOutputFiles props[:output], "Topshelf.{dll}", targ
-#	copyOutputFiles props[:output], "log4net.{dll,pdb}", targ
-#	copy('doc/Using Shelving.txt', props[:output])
-#	copy('doc/log4net.config.example', props[:output])
-#	commit_data = get_commit_hash_and_date
-#	what_commit = File.new File.join(props[:output], "#{commit_data[0]} - #{commit_data[1]}.txt"), "w"
-#	what_commit.puts "The file name denotes what commit these files were built off of. You can also find that information in the assembly info accessible through code."
-#	what_commit.close
-#end
-
 desc "Only compiles the application."
 msbuild :build do |msb|
 	msb.properties :Configuration => BUILD_CONFIG,
@@ -247,11 +232,9 @@ desc "Run all tests"
 task :tests => [:unit_tests]
 
 nunit :unit_tests => [:compile] do |nunit|
-
-        nunit.command = File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe")
-        nunit.options = "/framework=#{CLR_TOOLS_VERSION}", '/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results.xml')}\""
-
-        nunit.assemblies = FileList["tests/MassTransit.Tests.dll"]
+  nunit.command = File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe")
+  nunit.options = "/framework=#{CLR_TOOLS_VERSION}", '/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results.xml')}\""
+  nunit.assemblies = FileList["tests/MassTransit.Tests.dll"]
 end
 
 task :transport_tests => [:msmq_tests, :rabbitmq_tests]
@@ -306,7 +289,7 @@ def add_files stage, what_dlls, nuspec
   }
 end
 
-task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtun_nuspec, :mtcw_nuspec, :mtnhib_nuspec, :mtrmq_nuspec]
+task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtun_nuspec, :mtcw_nuspec, :mtnhib_nuspec, :mtrmq_nuspec, :mttf_nuspec]
 
   directory 'nuspecs'
 
@@ -324,8 +307,8 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.dependency "log4net", "[1.2.10]"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
-	add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
-	add_files props[:stage], "#{File.join('Transports', 'MSMQ', 'MassTransit.Transports.Msmq.{dll,pdb,xml}')}", nuspec
+    add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
+    add_files props[:stage], "#{File.join('Transports', 'MSMQ', 'MassTransit.Transports.Msmq.{dll,pdb,xml}')}", nuspec
   end
 
   nuspec :mtcw_nuspec => ['nuspecs'] do |nuspec|
@@ -341,7 +324,7 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.dependency "Castle.Windsor", "2.5.2"
     nuspec.output_file = 'nuspecs/MassTransit.CastleWindsor.nuspec'
 
-	add_files props[:stage], "#{File.join('Containers', 'MassTransit.WindsorIntegration.{dll,pdb,xml}')}", nuspec
+    add_files props[:stage], "#{File.join('Containers', 'MassTransit.WindsorIntegration.{dll,pdb,xml}')}", nuspec
   end
 
   nuspec :mtrmq_nuspec => ['nuspecs'] do |nuspec|
@@ -444,7 +427,23 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.dependency "Unity", "2.0.0"
     nuspec.output_file = 'nuspecs/MassTransit.Unity.nuspec'
 
-	add_files props[:stage], "#{File.join('Containers', 'MassTransit.UnityIntegration.{dll,pdb,xml}')}", nuspec
+    add_files props[:stage], "#{File.join('Containers', 'MassTransit.UnityIntegration.{dll,pdb,xml}')}", nuspec
+  end
+  
+  nuspec :mttf_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.TestFramework'
+    nuspec.version = FORMAL_VERSION
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'Bits and pieces to test MassTransit-oriented code.'
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "true"
+    nuspec.dependency "MassTransit", FORMAL_VERSION
+    nuspec.dependency "Unity", "2.0.0"
+    nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'
+
+    add_files props[:stage], 'MassTransit.TestFramework.{dll,pdb,xml}', nuspec
   end
 
   # NUGET
@@ -462,6 +461,7 @@ task :nuget => ['build_artifacts', :versioning, :all_nuspecs] do
   sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.CastleWindsor.nuspec -o build_artifacts"
   sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NHibernate.nuspec -o build_artifacts"
   sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.RabbitMQ.nuspec -o build_artifacts"
+  sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.TestFramework.nuspec -o build_artifacts"
 end
 
 def project_outputs(props)
