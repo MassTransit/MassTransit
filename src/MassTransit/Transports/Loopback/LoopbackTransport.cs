@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Subscriptions.Coordinator;
+
 namespace MassTransit.Transports
 {
     using System;
@@ -20,6 +23,12 @@ namespace MassTransit.Transports
     using Magnum.Extensions;
     using Util;
 
+	/// <summary>
+	/// The loopback transport is a built-in transport for MassTransit that 
+	/// works on messages in-memory. It is dependent on the <see cref="SubscriptionLoopback"/>
+	/// that takes care of subscribing the buses in the process
+	/// depending on what subscriptions are made.
+	/// </summary>
     public class LoopbackTransport :
         IDuplexTransport
     {
