@@ -37,6 +37,10 @@ namespace MassTransit.TestFramework.Fixtures
 		AbstractTestFixture
 		where TTransportFactory : class, ITransportFactory, new()
 	{
+		/// <summary>
+		/// Sets up the endpoint factory by calling the configurator (see <see cref="ConfigureEndpointFactory"/>)
+		/// and sets a few defaults on the service bus factory.
+		/// </summary>
 		[TestFixtureSetUp]
 		public void Setup()
 		{
@@ -67,6 +71,10 @@ namespace MassTransit.TestFramework.Fixtures
 				});
 		}
 
+		/// <summary>
+		/// Tears down the buses,
+		/// tears down the endpoint caches.
+		/// </summary>
 		[TestFixtureTearDown]
 		public void FixtureTeardown()
 		{
@@ -82,6 +90,11 @@ namespace MassTransit.TestFramework.Fixtures
 			ServiceBusFactory.ConfigureDefaultSettings(x => { x.SetEndpointCache(null); });
 		}
 
+		/// <summary>
+		/// c'tor that sets up the endpoint configurator, its default settings,
+		/// and uses the class type parameter <see cref="TTransportFactory"/> 
+		/// as the transport for that endpoint.
+		/// </summary>
 		protected EndpointTestFixture()
 		{
 			Buses = new List<IServiceBus>();
@@ -93,6 +106,11 @@ namespace MassTransit.TestFramework.Fixtures
 			EndpointFactoryConfigurator.SetPurgeOnStartup(true);
 		}
 
+		/// <summary>
+		/// Add further transport factories to the endpoint configured as a 
+		/// result of this test fixture set up logic.
+		/// </summary>
+		/// <typeparam name="T">type of transport factory to add.</typeparam>
 		protected void AddTransport<T>()
 			where T : class, ITransportFactory, new()
 		{
@@ -101,6 +119,11 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected IEndpointFactory EndpointFactory { get; private set; }
 
+		/// <summary>
+		/// Call this method from anytime before the test fixture set up
+		/// starts running (i.e. in the c'tor) to configure the endpoint factory.
+		/// </summary>
+		/// <param name="configure">The action that configures the endpoint factory configurator.</param>
 		protected void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configure)
 		{
 			if (EndpointFactoryConfigurator == null)
@@ -116,6 +139,11 @@ namespace MassTransit.TestFramework.Fixtures
 			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(subscriptionService));
 		}
 
+		/// <summary>
+		/// Sets up a new in memory saga repository for the passed type of saga.
+		/// </summary>
+		/// <typeparam name="TSaga">The saga to test.</typeparam>
+		/// <returns>An instance of the saga repository.</returns>
 		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
 			where TSaga : class, ISaga
 		{
