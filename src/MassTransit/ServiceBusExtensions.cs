@@ -16,6 +16,11 @@ namespace MassTransit
 	using System.Collections.Generic;
 	using System.Linq;
 
+	/// <summary>
+	/// Extension methods pertinent to service bus logic, but on
+	/// type <see cref="Type"/> - handles different sorts of reflection
+	/// logic.
+	/// </summary>
 	public static class ServiceBusExtensions
 	{
 		/// <summary>
