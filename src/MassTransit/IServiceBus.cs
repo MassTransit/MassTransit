@@ -91,6 +91,8 @@ namespace MassTransit
 		///   Not sure this is going to make it, but trying a new approach.
 		/// </summary>
 		/// <param name = "configure"></param>
+		/// <returns>An unsubscribe action that can be called to unsubscribe
+		/// what was configured to be subscribed with the func passed. <see cref="UnsubscribeAction"/>.</returns>
 		UnsubscribeAction Configure(Func<IInboundPipelineConfigurator, UnsubscribeAction> configure);
 	}
 }
