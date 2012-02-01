@@ -33,7 +33,7 @@ namespace MassTransit.TestFramework.Fixtures
 	/// </summary>
 	/// <typeparam name="TTransportFactory">Type of transport factory to create the endpoint with</typeparam>
 	[TestFixture]
-	public class EndpointTestFixture<TTransportFactory> :
+	public abstract class EndpointTestFixture<TTransportFactory> :
 		AbstractTestFixture
 		where TTransportFactory : class, ITransportFactory, new()
 	{
