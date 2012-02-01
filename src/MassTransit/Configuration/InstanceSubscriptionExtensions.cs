@@ -17,14 +17,20 @@ namespace MassTransit
 	using SubscriptionConnectors;
 	using Util;
 
+	/// <summary>
+	/// Extensions for subscribing object instances.
+	/// </summary>
 	public static class InstanceSubscriptionExtensions
 	{
 		/// <summary>
 		/// Subscribes an object instance to the bus
 		/// </summary>
-		/// <param name="configurator"></param>
-		/// <param name="instance"></param>
-		/// <returns></returns>
+		/// <param name="configurator">Service Bus Service Configurator 
+		/// - the item that is passed as a parameter to
+		/// the action that is calling the configurator.</param>
+		/// <param name="instance">The instance to subscribe.</param>
+		/// <returns>An instance subscription configurator.</returns>
+		[NotNull]
 		public static InstanceSubscriptionConfigurator Instance(
 			[NotNull] this SubscriptionBusServiceConfigurator configurator,
 			[NotNull] object instance)
@@ -42,8 +48,10 @@ namespace MassTransit
 		/// <summary>
 		/// Connects any consumers for the component to the message dispatcher
 		/// </summary>
-		/// <param name="bus"></param>
+		/// <param name="bus">The service bus to configure</param>
 		/// <param name="instance"></param>
+		/// <returns>The unsubscribe action that can be called to unsubscribe the instance
+		/// passed as an argument.</returns>
 		public static UnsubscribeAction SubscribeInstance([NotNull] this IServiceBus bus, [NotNull] object instance)
 		{
 			Guard.AgainstNull(instance, "instance", "A null instance cannot be subscribed");
@@ -57,8 +65,10 @@ namespace MassTransit
 		/// Connects any consumers for the component to the message dispatcher
 		/// </summary>
 		/// <typeparam name="T">The consumer type</typeparam>
-		/// <param name="bus"></param>
-		/// <param name="instance"></param>
+		/// <param name="bus">The service bus instance to call this method on.</param>
+		/// <param name="instance">The instance to subscribe.</param>
+		/// <returns>The unsubscribe action that can be called to unsubscribe the instance
+		/// passed as an argument.</returns>
 		public static UnsubscribeAction SubscribeInstance<T>([NotNull] this IServiceBus bus, [NotNull] T instance)
 			where T : class, IConsumer
 		{

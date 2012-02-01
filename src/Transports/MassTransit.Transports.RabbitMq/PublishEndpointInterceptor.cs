@@ -22,6 +22,11 @@ namespace MassTransit.Transports.RabbitMq
 	using Pipeline.Sinks;
 	using Util;
 
+	/// <summary>
+	/// Makes sure that the exchange for the published message is available. This ensures
+	/// that we'll never get 404 exchange not found for published messages. If someone is
+	/// listening to them; that's another question (there might be no queue bound to it).
+	/// </summary>
 	public class PublishEndpointInterceptor :
 		IOutboundMessageInterceptor
 	{
@@ -79,12 +84,18 @@ namespace MassTransit.Transports.RabbitMq
 			}
 		}
 
+		/// <summary>
+		/// Finds all endpoints in the outbound pipeline and starts routing messages
+		/// to that endpoint.
+		/// </summary>
+		/// <param name="messageType">type of message</param>
+		/// <param name="address">The message endpoint address.</param>
 		void FindOrAddEndpoint(Type messageType, IRabbitMqEndpointAddress address)
 		{
 			var locator = new PublishEndpointSinkLocator(messageType, address);
 			_bus.OutboundPipeline.Inspect(locator);
 
-			if (locator.Found)
+			if (locator.Found) // there was already a subscribed endpoint
 			{
 				_added.Add(messageType, () => true);
 				return;
@@ -92,6 +103,8 @@ namespace MassTransit.Transports.RabbitMq
 
 			IEndpoint endpoint = _bus.GetEndpoint(address.Uri);
 
+			// otherwise, create the sink for this message type and connect the out
+			// bound pipeline to this sink.
 			this.FastInvoke(new[] {messageType}, "CreateEndpointSink", endpoint);
 		}
 

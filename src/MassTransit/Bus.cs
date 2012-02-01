@@ -19,7 +19,7 @@ namespace MassTransit
 	/// <summary>
 	/// This is a static singleton instance of an IServiceBus. While it goes
 	/// against my very soul, it is here to ensure consistent usage of MassTransit
-	/// as a singleton. It is highly recommended that ServiceBusFactory.New() be
+	/// as a singleton. It is highly recommended that <see cref="ServiceBusFactory.New"/> be
 	/// used instead and the application maintain the reference to the IServiceBus.
 	/// </summary>
 	public static class Bus
@@ -29,6 +29,10 @@ namespace MassTransit
 		/// <summary>
 		/// The configured instance of the service bus.
 		/// </summary>
+		/// <exception cref="InvalidOperationException">
+		/// If you call this method before you call
+		/// <see cref="Initialize"/>.
+		/// </exception>
 		public static IServiceBus Instance
 		{
 			get
@@ -41,9 +45,12 @@ namespace MassTransit
 		}
 
 		/// <summary>
-		/// Call to initialize the service bus instance, including any configuration
+		/// Call to initialize the service bus instance, including any configuration.
 		/// </summary>
-		/// <param name="configure"></param>
+		/// <param name="configure">A lambda/action that does the bus configugration.</param>
+		/// <exception cref="ConfigurationException">
+		/// If the bus has already been initialized by a call
+		/// to this method.</exception>
 		public static void Initialize(Action<ServiceBusConfigurator> configure)
 		{
 			if (_instance != null)

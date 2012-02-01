@@ -13,7 +13,6 @@
 namespace MassTransit
 {
 	using System;
-	using Diagnostics;
 	using Diagnostics.Introspection;
 	using Pipeline;
 
@@ -41,18 +40,38 @@ namespace MassTransit
 		/// </summary>
 		IEndpoint Endpoint { get; }
 
+		/// <summary>
+		/// Gets the inbound message pipeline.
+		/// </summary>
 		IInboundMessagePipeline InboundPipeline { get; }
 
+		/// <summary>
+		/// Gets the outbound message pipeline.
+		/// </summary>
 		IOutboundMessagePipeline OutboundPipeline { get; }
 
+		/// <summary>
+		/// Gets the control bus that can be used 
+		/// to add/remove subscripts, move message 
+		/// handlers around and tap runtime metrics
+		/// from the service bus.
+		/// </summary>
 		IServiceBus ControlBus { get; }
 
+		/// <summary>
+		/// Gets the endpoint cache. This property is used
+		/// by <see cref="GetEndpoint"/> method in turn.
+		/// </summary>
 		IEndpointCache EndpointCache { get; }
 
 		/// <summary>
-		///   Publishes a message to all subscribed consumers for the message type as specified
+		/// <para>Publishes a message to all subscribed consumers for the message type as specified
 		/// by the generic parameter. The second parameter allows the caller to customize the
-		/// outgoing publish context and set things like headers on the message.
+		/// outgoing publish context and set things like headers on the message.</para>
+		/// 
+		/// <para>
+		/// Read up on publishing: http://readthedocs.org/docs/masstransit/en/latest/overview/publishing.html
+		/// </para>
 		/// </summary>
 		/// <typeparam name = "T">The type of the message</typeparam>
 		/// <param name = "message">The messages to be published</param>
@@ -72,6 +91,8 @@ namespace MassTransit
 		///   Not sure this is going to make it, but trying a new approach.
 		/// </summary>
 		/// <param name = "configure"></param>
+		/// <returns>An unsubscribe action that can be called to unsubscribe
+		/// what was configured to be subscribed with the func passed. <see cref="UnsubscribeAction"/>.</returns>
 		UnsubscribeAction Configure(Func<IInboundPipelineConfigurator, UnsubscribeAction> configure);
 	}
 }

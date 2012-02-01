@@ -63,9 +63,13 @@ namespace MassTransit
 		}
 
 		/// <summary>
-		/// This method specifies that the container under configuration is to use RabbitMQ for message queueing but not necessarily for routing
+		/// <para>This method specifies that the container under configuration is to 
+		/// use RabbitMQ for message queueing but not necessarily for routing
 		/// polymorphically. See http://readthedocs.org/docs/masstransit/en/latest/configuration/transports/rabbitmq.html.
-		/// This method also calls <see cref="SerializerConfigurationExtensions.UseJsonSerializer{T}"/>.
+		/// This method also calls <see cref="SerializerConfigurationExtensions.UseJsonSerializer{T}"/>.</para>
+		/// 
+		/// <para>Contrast with <see cref="RabbitMqConfigurationExtensions.UseRabbitMqRouting"/></para>
+		/// and its documentation.
 		/// </summary>
 		/// <typeparam name="T">configurator type param</typeparam>
 		/// <param name="configurator">configurator instance</param>

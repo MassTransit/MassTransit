@@ -25,11 +25,22 @@ namespace MassTransit.TestFramework.Fixtures
 	using Saga;
 	using Services.Subscriptions;
 
+	/// <summary>
+	/// Test fixture that tests a single endpoint, given
+	/// a transport factory. The transport factory needs to
+	/// have a default public c'tor. The endpoint is one-to-one
+	/// with the bus in this test fixture.
+	/// </summary>
+	/// <typeparam name="TTransportFactory">Type of transport factory to create the endpoint with</typeparam>
 	[TestFixture]
-	public class EndpointTestFixture<TTransportFactory> :
+	public abstract class EndpointTestFixture<TTransportFactory> :
 		AbstractTestFixture
 		where TTransportFactory : class, ITransportFactory, new()
 	{
+		/// <summary>
+		/// Sets up the endpoint factory by calling the configurator (see <see cref="ConfigureEndpointFactory"/>)
+		/// and sets a few defaults on the service bus factory.
+		/// </summary>
 		[TestFixtureSetUp]
 		public void Setup()
 		{
@@ -60,6 +71,10 @@ namespace MassTransit.TestFramework.Fixtures
 				});
 		}
 
+		/// <summary>
+		/// Tears down the buses,
+		/// tears down the endpoint caches.
+		/// </summary>
 		[TestFixtureTearDown]
 		public void FixtureTeardown()
 		{
@@ -75,6 +90,11 @@ namespace MassTransit.TestFramework.Fixtures
 			ServiceBusFactory.ConfigureDefaultSettings(x => { x.SetEndpointCache(null); });
 		}
 
+		/// <summary>
+		/// c'tor that sets up the endpoint configurator, its default settings,
+		/// and uses the class type parameter <see cref="TTransportFactory"/> 
+		/// as the transport for that endpoint.
+		/// </summary>
 		protected EndpointTestFixture()
 		{
 			Buses = new List<IServiceBus>();
@@ -86,6 +106,11 @@ namespace MassTransit.TestFramework.Fixtures
 			EndpointFactoryConfigurator.SetPurgeOnStartup(true);
 		}
 
+		/// <summary>
+		/// Add further transport factories to the endpoint configured as a 
+		/// result of this test fixture set up logic.
+		/// </summary>
+		/// <typeparam name="T">type of transport factory to add.</typeparam>
 		protected void AddTransport<T>()
 			where T : class, ITransportFactory, new()
 		{
@@ -94,6 +119,11 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected IEndpointFactory EndpointFactory { get; private set; }
 
+		/// <summary>
+		/// Call this method from anytime before the test fixture set up
+		/// starts running (i.e. in the c'tor) to configure the endpoint factory.
+		/// </summary>
+		/// <param name="configure">The action that configures the endpoint factory configurator.</param>
 		protected void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configure)
 		{
 			if (EndpointFactoryConfigurator == null)
@@ -109,6 +139,11 @@ namespace MassTransit.TestFramework.Fixtures
 			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(subscriptionService));
 		}
 
+		/// <summary>
+		/// Sets up a new in memory saga repository for the passed type of saga.
+		/// </summary>
+		/// <typeparam name="TSaga">The saga to test.</typeparam>
+		/// <returns>An instance of the saga repository.</returns>
 		protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
 			where TSaga : class, ISaga
 		{
@@ -117,7 +152,9 @@ namespace MassTransit.TestFramework.Fixtures
 			return sagaRepository;
 		}
 
-
+		/// <summary>
+		/// Set this property to have custom [<see cref="TestFixtureSetUpAttribute"/>] logic.
+		/// </summary>
 		protected EndpointFactoryConfigurator EndpointFactoryConfigurator;
 		EndpointCache _endpointCache;
 
@@ -127,10 +164,26 @@ namespace MassTransit.TestFramework.Fixtures
 			Buses.Clear();
 		}
 
+		/// <summary>
+		/// Gets the list of buses that are created in this test fixture. Call 
+		/// <see cref="SetupServiceBus(System.Uri,System.Action{MassTransit.BusConfigurators.ServiceBusConfigurator})"/>
+		/// to create more of them
+		/// </summary>
 		protected IList<IServiceBus> Buses { get; private set; }
 
+		/// <summary>
+		/// Gets the endpoint cache implementation used in this test. Is set up
+		/// during the [TestFixtureSetUp] phase  aka. [Given] phase.
+		/// </summary>
 		protected IEndpointCache EndpointCache { get; private set; }
 
+		/// <summary>
+		/// Call this method to set up a new service bus and add it to the <see cref="Buses"/> list.
+		/// </summary>
+		/// <param name="uri">The bus endpoint uri (its consumption point)</param>
+		/// <param name="configure">The configuration action, that allows you to configure the new
+		/// bus as you please.</param>
+		/// <returns>The new service bus that was configured.</returns>
 		protected virtual IServiceBus SetupServiceBus(Uri uri, Action<ServiceBusConfigurator> configure)
 		{
 			IServiceBus bus = ServiceBusFactory.New(x =>
@@ -145,6 +198,11 @@ namespace MassTransit.TestFramework.Fixtures
 			return bus;
 		}
 
+		/// <summary>
+		/// See <see cref="SetupServiceBus(System.Uri,System.Action{MassTransit.BusConfigurators.ServiceBusConfigurator})"/>.
+		/// </summary>
+		/// <param name="uri">The uri to set the service bus up at.</param>
+		/// <returns>The service bus instance.</returns>
 		protected virtual IServiceBus SetupServiceBus(Uri uri)
 		{
 			return SetupServiceBus(uri, x =>
@@ -153,6 +211,12 @@ namespace MassTransit.TestFramework.Fixtures
 				});
 		}
 
+		/// <summary>
+		/// This method does nothing at all. Override (you don't need to call into the base)
+		/// to provide the default action to configure the buses newly created, with.
+		/// </summary>
+		/// <param name="uri">The uri that is passed from the configuration lambda of the bus.</param>
+		/// <param name="configurator">The service bus configurator.</param>
 		protected virtual void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
 		{
 		}

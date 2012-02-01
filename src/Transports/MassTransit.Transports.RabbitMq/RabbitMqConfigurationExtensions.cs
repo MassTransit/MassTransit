@@ -16,8 +16,22 @@ namespace MassTransit
 	using Pipeline.Configuration;
 	using Transports.RabbitMq;
 
+	/// <summary>
+	/// Extensions for configuring RabbitMq.
+	/// </summary>
 	public static class RabbitMqConfigurationExtensions
 	{
+		/// <summary>
+		/// <para>This specifies that the routing conventions for RabbitMQ should be used by MassTransit.
+		/// Without these conventions, the automatic routing for RabbitMQ won't happen, and you'd have
+		/// to manually find and send messages to the endpoints. This method calls
+		/// <see cref="RabbitMqServiceBusExtensions.UseRabbitMq{T}(T)"/> in turn.</para>
+		/// 
+		/// <para>If you are using RMQ you *probably* want to call this method when configuring
+		/// your bus!</para>
+		/// </summary>
+		/// <param name="configurator">The configurator that is used to configure
+		/// the message bus instance.</param>
 		public static void UseRabbitMqRouting(this ServiceBusConfigurator configurator)
 		{
 			configurator.SetSubscriptionObserver((bus,coordinator) => new RabbitMqSubscriptionBinder(bus));
@@ -26,6 +40,7 @@ namespace MassTransit
 				{
 					var interceptorConfigurator = new OutboundMessageInterceptorConfigurator(bus.OutboundPipeline);
 
+					// make sure we publish correctly through this interceptor; works on the outgoing pipeline
 					interceptorConfigurator.Create(new PublishEndpointInterceptor(bus));
 				});
 

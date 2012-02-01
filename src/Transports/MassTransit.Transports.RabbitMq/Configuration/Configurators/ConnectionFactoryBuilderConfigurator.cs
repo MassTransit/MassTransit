@@ -15,9 +15,21 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
 	using Builders;
 	using MassTransit.Configurators;
 
+	/// <summary>
+	/// <para>A configurator for the connection factory builder, i.e.
+	/// a thing that actually lets you configure the settings that will go
+	/// into creating the connection factory.
+	/// </para>
+	/// <para>Digression: There are three turtles on the way down, then there's Atlas.</para>
+	/// </summary>
 	public interface ConnectionFactoryBuilderConfigurator :
 		Configurator
 	{
+		/// <summary>
+		/// Configure the connection factory builder.
+		/// </summary>
+		/// <param name="builder">The builder</param>
+		/// <returns>An updated builder</returns>
 		ConnectionFactoryBuilder Configure(ConnectionFactoryBuilder builder);
 	}
 }
