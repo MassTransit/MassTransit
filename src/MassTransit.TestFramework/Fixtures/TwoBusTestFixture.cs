@@ -18,11 +18,21 @@ namespace MassTransit.TestFramework.Fixtures
 	using NUnit.Framework;
 	using Subscriptions.Coordinator; 
 
+	/// <summary>
+	/// Test fixture that creates two buses, one "remote" and one "local". Of course, both are in-memory;
+	/// but this test fixture makes sure that the two buses uses the same loopback router, while still having 
+	/// a non-loopback transport factory.
+	/// </summary>
+	/// <typeparam name="TTransportFactory"></typeparam>
 	[TestFixture]
 	public class TwoBusTestFixture<TTransportFactory> :
 		EndpointTestFixture<TTransportFactory>
 		where TTransportFactory : class, ITransportFactory, new()
 	{
+		/// <summary>
+		/// Sets up the remote and local bus and their target coordinators/subscription
+		/// routers.
+		/// </summary>
 		[TestFixtureSetUp]
 		public void TwoBusTestFixtureSetup()
 		{
@@ -33,6 +43,9 @@ namespace MassTransit.TestFramework.Fixtures
 			_remoteLoopback.SetTargetCoordinator(_localLoopback.Router);
 		}
 
+		/// <summary>
+		/// Makes remote and local bus = null.
+		/// </summary>
 		[TestFixtureTearDown]
 		public void TwoBusTestFixtureTeardown()
 		{
@@ -40,15 +53,36 @@ namespace MassTransit.TestFramework.Fixtures
 			RemoteBus = null;
 		}
 
+		/// <summary>
+		/// Gets or sets the local uri, i.e. the bus endpoint for the local bus. Set this property in the c'tor of your
+		/// subclassing test fixture.
+		/// </summary>
 		protected Uri LocalUri { get; set; }
+
+		/// <summary>
+		/// Gets or sets the remote uri, i.e. the bus endpoint for the remote bus. Set this property in the c'tor of your
+		/// subclassing test fixture.
+		/// </summary>
 		protected Uri RemoteUri { get; set; }
 
+		/// <summary>
+		/// Gets the local bus. Is null when c'tor runs.
+		/// </summary>
 		protected IServiceBus LocalBus { get; private set; }
+
+		/// <summary>
+		/// Gets the remote bus. Is null when c'tor runs.
+		/// </summary>
 		protected IServiceBus RemoteBus { get; private set; }
 
 		SubscriptionLoopback _localLoopback;
 		SubscriptionLoopback _remoteLoopback;
 
+		/// <summary>
+		/// You can override to configure the local bus; but if you don't call base method,
+		/// you will not get the subscription loopback router.
+		/// </summary>
+		/// <param name="configurator"></param>
 		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
 			configurator.AddSubscriptionObserver((bus, coordinator) =>
@@ -58,6 +92,11 @@ namespace MassTransit.TestFramework.Fixtures
 				});
 		}
 
+		/// <summary>
+		/// You can override to configure the remote bus; but if you don't call base method,
+		/// you will not get the subscription loopback router.
+		/// </summary>
+		/// <param name="configurator"></param>
 		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
 		{
 			configurator.AddSubscriptionObserver((bus, coordinator) =>
