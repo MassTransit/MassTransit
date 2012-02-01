@@ -19,6 +19,9 @@ namespace MassTransit.Subscriptions.Coordinator
 	using Messages;
 	using Services.Subscriptions.Messages;
 
+	/// <summary>
+	/// 
+	/// </summary>
     public class SubscriptionLoopback :
 		SubscriptionObserver
 	{

@@ -18,6 +18,12 @@ namespace MassTransit
 
 	public static class ServiceBusExtensions
 	{
+		/// <summary>
+		/// Transforms the type of message to a normalized string which can be used
+		/// for naming a queue on a transport.
+		/// </summary>
+		/// <param name="messageType">The message class/interface type</param>
+		/// <returns>The normalized name for this type</returns>
 		public static string ToMessageName(this Type messageType)
 		{
 			string messageName;
@@ -52,7 +58,9 @@ namespace MassTransit
 		}
 
 		/// <summary>
-		/// Returns true if the specified type is an allowed message type
+		/// Returns true if the specified type is an allowed message type, i.e.
+		/// that it doesn't come from the .Net core assemblies or is without a namespace,
+		/// amongst others.
 		/// </summary>
 		/// <param name="type">The type to inspect</param>
 		/// <returns>True if the message can be sent, otherwise false</returns>

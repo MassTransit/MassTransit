@@ -16,7 +16,7 @@ namespace MassTransit.TestFramework.Fixtures
 	using BusConfigurators;
 	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Subscriptions.Coordinator;
+	using Subscriptions.Coordinator; 
 
 	[TestFixture]
 	public class TwoBusTestFixture<TTransportFactory> :
