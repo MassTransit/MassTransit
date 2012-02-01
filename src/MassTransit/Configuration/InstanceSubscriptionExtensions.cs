@@ -22,9 +22,12 @@ namespace MassTransit
 		/// <summary>
 		/// Subscribes an object instance to the bus
 		/// </summary>
-		/// <param name="configurator"></param>
-		/// <param name="instance"></param>
-		/// <returns></returns>
+		/// <param name="configurator">Service Bus Service Configurator 
+		/// - the item that is passed as a parameter to
+		/// the action that is calling the configurator.</param>
+		/// <param name="instance">The instance to subscribe.</param>
+		/// <returns>An instance subscription configurator.</returns>
+		[NotNull]
 		public static InstanceSubscriptionConfigurator Instance(
 			[NotNull] this SubscriptionBusServiceConfigurator configurator,
 			[NotNull] object instance)
