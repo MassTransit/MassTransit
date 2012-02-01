@@ -440,7 +440,7 @@ task :all_nuspecs => [:mt_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtu
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
     nuspec.dependency "MassTransit", FORMAL_VERSION
-    nuspec.dependency "Rhino.Mocks", "3.6.0"
+    nuspec.dependency "RhinoMocks", "3.6"
     #nuspec.framework_dependency "System.Transactions", "net40"
     #nuspec.framework_dependency "System.XML", "net40"
     nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'
