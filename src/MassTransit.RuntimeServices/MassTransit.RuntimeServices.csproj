@@ -72,9 +72,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\NHibernate\Iesi.Collections.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\log4net.dll</HintPath>
+    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\lib\log4net\1.2.11\net35-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\lib\log4net\1.2.11\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
@@ -127,6 +129,10 @@
       <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
       <Name>MassTransit.StructureMapIntegration</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
+      <Project>{8D2BE372-A756-4676-B2EA-ED7846809BFE}</Project>
+      <Name>MassTransit.Log4NetIntegration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
@@ -172,7 +178,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

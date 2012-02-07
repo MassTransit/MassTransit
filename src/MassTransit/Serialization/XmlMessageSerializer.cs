@@ -30,13 +30,6 @@ namespace MassTransit.Serialization
     {
         const string ContentTypeHeaderValue = "application/vnd.masstransit+xml";
 
-
-        [ThreadStatic]
-        static JsonSerializer _deserializer;
-
-        [ThreadStatic]
-        static JsonSerializer _serializer;
-
         [ThreadStatic]
         static JsonSerializer _xmlSerializer;
 
