@@ -15,6 +15,8 @@ namespace MassTransit.SystemView
     using System.Windows;
     using Core;
     using Core.Consumer;
+    using Log4NetIntegration.Logging;
+    using Logging;
     using StructureMap;
 
     /// <summary>
@@ -32,6 +34,8 @@ namespace MassTransit.SystemView
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            Logger.UseLogger(new Log4NetLogger());
+
             var configuration = new Configuration();
 
             ObjectFactory.Configure(config =>

@@ -14,8 +14,10 @@ namespace MassTransit.SystemView
 {
 	using System;
 	using System.Windows.Forms;
+	using Log4NetIntegration.Logging;
+	using Logging;
 
-	internal static class Program
+    internal static class Program
 	{
 		/// <summary>
 		/// The main entry point for the application.
@@ -23,6 +25,8 @@ namespace MassTransit.SystemView
 		[STAThread]
 		private static void Main()
 		{
+            Logger.UseLogger(new Log4NetLogger());
+
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new MainForm());
