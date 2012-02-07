@@ -10,23 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Inspectors
+namespace MassTransit
 {
     using System;
     using Pipeline;
+    using Pipeline.Inspectors;
 
     public static class PipelineViewerExtensions
-	{
-		public static void Trace<T>(this IPipelineSink<T> pipeline)
-			where T : class
-		{
-			PipelineViewer.Trace(pipeline);
-		}
+    {
+        public static void Trace<T>(this IPipelineSink<T> pipeline)
+            where T : class
+        {
+            PipelineViewer.Trace(pipeline);
+        }
 
-		public static void View<T>(this IPipelineSink<T> pipeline, Action<string> callback)
-			where T : class
-		{
-			PipelineViewer.Trace(pipeline, callback);
-		}
-	}
+        public static void View<T>(this IPipelineSink<T> pipeline, Action<string> callback)
+            where T : class
+        {
+            PipelineViewer.Trace(pipeline, callback);
+        }
+    }
 }
