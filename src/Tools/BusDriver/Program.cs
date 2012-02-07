@@ -15,6 +15,7 @@ namespace BusDriver
 	using System;
 	using System.Collections.Generic;
 	using System.Threading;
+	using MassTransit.Log4NetIntegration.Logging;
 	using MassTransit.Logging;
 	using log4net.Appender;
 	using log4net.Config;
@@ -31,8 +32,7 @@ namespace BusDriver
 	class Program
 	{
 		static readonly ILog _log = Logger.Get(typeof (Program));
-		static readonly MonadicCommandLineParser _parser = new MonadicCommandLineParser();
-		static ConsoleAppender _appender;
+	    static ConsoleAppender _appender;
 		static IServiceBus _bus;
 		static Uri _driverUri = new Uri("msmq://localhost/masstransit_busdriver");
 		static IList<IPendingCommand> _pending;
@@ -191,6 +191,8 @@ namespace BusDriver
 
 		static void BootstrapLogger()
 		{
+            Logger.UseLogger(new Log4NetLogger());
+
 			_appender = new ConsoleAppender();
 			_appender.Threshold = Level.Info;
 			_appender.Layout = new PatternLayout("%m%n");

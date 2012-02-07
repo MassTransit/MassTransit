@@ -193,6 +193,10 @@
       <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
       <Name>MassTransit.StructureMapIntegration</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
+      <Project>{8D2BE372-A756-4676-B2EA-ED7846809BFE}</Project>
+      <Name>MassTransit.Log4NetIntegration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MassTransit.SystemView.Core\MassTransit.SystemView.Core.csproj">
       <Project>{40F4115D-713B-471D-9A6A-39C678F1133C}</Project>
       <Name>MassTransit.SystemView.Core</Name>
