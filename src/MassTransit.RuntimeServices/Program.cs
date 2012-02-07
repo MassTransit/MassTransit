@@ -14,6 +14,7 @@ namespace MassTransit.RuntimeServices
 {
 	using System;
 	using System.IO;
+	using Log4NetIntegration.Logging;
 	using Logging;
 	using log4net.Config;
 	using Services.HealthMonitoring;
@@ -75,6 +76,8 @@ namespace MassTransit.RuntimeServices
 
 		static void BootstrapLogger()
 		{
+            Logger.UseLogger(new Log4NetLogger());
+
 			string configFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
 				typeof (Program).Namespace + ".log4net.xml");
 
