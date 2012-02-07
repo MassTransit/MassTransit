@@ -952,6 +952,12 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.Transient">
+            <summary>
+            Convenience method to mark a PluginFamily as a Transient
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.HybridHttpOrThreadLocalScoped">
             <summary>
             Convenience method to mark a PluginFamily as a Hybrid lifecycle
