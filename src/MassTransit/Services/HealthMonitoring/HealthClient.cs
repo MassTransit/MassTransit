@@ -14,19 +14,20 @@ namespace MassTransit.Services.HealthMonitoring
 {
     using System;
     using Diagnostics.Introspection;
+    using Logging;
     using Magnum;
     using Magnum.Extensions;
-    using MassTransit.Diagnostics;
     using Messages;
     using Stact;
     using Stact.Internal;
-	using log4net;
 
     public class HealthClient :
         IBusService,
         Consumes<PingEndpoint>.All,
         DiagnosticsSource
     {
+        readonly ILog _log = Logger.Get(typeof (HealthClient));
+
         readonly int _heartbeatIntervalInMilliseconds;
         readonly int _heartbeatIntervalInSeconds;
         IServiceBus _bus;
@@ -38,17 +39,17 @@ namespace MassTransit.Services.HealthMonitoring
         ScheduledOperation _unschedule;
         UnsubscribeAction _unsubscribe;
 
-	    /// <summary>
-		///   Initializes a new instance of the <see cref="HealthClient" /> class with an interval time out of 3 seconds.
-		/// </summary>
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="HealthClient" /> class with an interval time out of 3 seconds.
+        /// </summary>
         public HealthClient()
             : this(3)
         {
         }
 
-		/// <summary>
+        /// <summary>
         ///   Constructs a new HealthClient object
-		/// </summary>
+        /// </summary>
         /// <param name = "intervalInSeconds">The heartbeat interval in seconds</param>
         public HealthClient(int intervalInSeconds)
         {
@@ -67,7 +68,13 @@ namespace MassTransit.Services.HealthMonitoring
         {
             var response = new PingEndpointResponse(SystemId, _controlUri, _dataUri, _heartbeatIntervalInSeconds);
 
-			_bus.ControlBus.Context().Respond(response);
+            _bus.ControlBus.Context().Respond(response);
+        }
+
+        public void Inspect(DiagnosticsProbe probe)
+        {
+            probe.Add("health_client", "on");
+            probe.Add("health_client.interval", _heartbeatIntervalInSeconds);
         }
 
         public void Dispose()
@@ -99,12 +106,6 @@ namespace MassTransit.Services.HealthMonitoring
             _unsubscribe();
         }
 
-        public void Inspect(DiagnosticsProbe probe)
-        {
-            probe.Add("health_client", "on");
-            probe.Add("health_client.interval", _heartbeatIntervalInSeconds);
-        }
-
         public virtual void Dispose(bool disposing)
         {
             if (!disposing || _disposed) return;
@@ -121,8 +122,10 @@ namespace MassTransit.Services.HealthMonitoring
         public void PublishHeartbeat()
         {
             var message = new Heartbeat(SystemId, _controlUri, _dataUri, _heartbeatIntervalInSeconds);
-			_bus.ControlBus.Publish(message,
-				context => _log.Info("No routing entry found for the HeartBeat message. Are you sure the HealthMonitor is setup correctly?"));
+            _bus.ControlBus.Publish(message,
+                context =>
+                _log.Info(
+                    "No routing entry found for the HeartBeat message. Are you sure the HealthMonitor is setup correctly?"));
         }
 
         ~HealthClient()
