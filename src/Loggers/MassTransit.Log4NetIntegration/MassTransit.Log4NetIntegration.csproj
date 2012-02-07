@@ -31,18 +31,22 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net">
-      <HintPath>..\..\..\lib\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
+    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\..\lib\log4net\1.2.11\net35-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\..\lib\log4net\1.2.11\net40-full\log4net.dll</HintPath>
+    </Reference>   <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\SolutionVersion.cs">
+      <Link>SolutionVersion.cs</Link>
+    </Compile>
     <Compile Include="Log4NetConfigurationExtensions.cs" />
     <Compile Include="Logging\Log4NetLog.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
@@ -50,8 +54,11 @@
       <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

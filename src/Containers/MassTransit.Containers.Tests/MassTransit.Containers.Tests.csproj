@@ -43,6 +43,12 @@
     <Reference Include="Autofac.Configuration" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\lib\Autofac\NET40\Autofac.Configuration.dll</HintPath>
     </Reference>
+    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\..\lib\log4net\1.2.11\net35-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\..\lib\log4net\1.2.11\net40-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
@@ -60,9 +66,6 @@
     </Reference>
     <Reference Include="Castle.Windsor">
       <HintPath>..\..\..\lib\Castle.Windsor\Castle.Windsor.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\..\lib\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Practices.Unity">
       <HintPath>..\..\..\lib\Unity\Microsoft.Practices.Unity.dll</HintPath>
