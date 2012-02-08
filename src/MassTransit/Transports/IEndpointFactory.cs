@@ -12,25 +12,24 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-	using System;
-	using Diagnostics;
-	using Diagnostics.Introspection;
+    using System;
+    using Diagnostics.Introspection;
 
     public interface IEndpointFactory :
         DiagnosticsSource,
-		IDisposable
-	{
-		/// <summary>
-		/// Creates a new endpoint for the specified URI
-		/// </summary>
-		/// <param name="uri"></param>
-		/// <returns></returns>
-		IEndpoint CreateEndpoint(Uri uri);
+        IDisposable
+    {
+        /// <summary>
+        /// Creates a new endpoint for the specified URI
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        IEndpoint CreateEndpoint(Uri uri);
 
-		/// <summary>
-		/// Adds a transport factory to the endpoint factory
-		/// </summary>
-		/// <param name="factory"></param>
-		void AddTransportFactory(ITransportFactory factory);
-	}
+        /// <summary>
+        /// Adds a transport factory to the endpoint factory
+        /// </summary>
+        /// <param name="factory"></param>
+        void AddTransportFactory(ITransportFactory factory);
+    }
 }

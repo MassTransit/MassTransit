@@ -15,11 +15,17 @@ namespace MassTransit.Transports.Msmq
     using System;
     using System.Messaging;
     using Exceptions;
-    using Util;
 
     public class MsmqTransportFactory :
         ITransportFactory
     {
+        IMessageNameFormatter _messageNameFormatter;
+
+        public MsmqTransportFactory()
+        {
+            _messageNameFormatter = new DefaultMessageNameFormatter("::", "--", ":", "-");
+        }
+
         public string Scheme
         {
             get { return "msmq"; }
@@ -30,7 +36,7 @@ namespace MassTransit.Transports.Msmq
             try
             {
                 var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
-                var msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
+                TransportSettings msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IInboundTransport inboundTransport = BuildInbound(settings);
                 IOutboundTransport outboundTransport = BuildOutbound(settings);
@@ -43,21 +49,12 @@ namespace MassTransit.Transports.Msmq
             }
         }
 
-        static TransportSettings GetTransportSettings(ITransportSettings settings, MsmqEndpointAddress msmqEndpointAddress)
-        {
-            var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
-                {
-                    Transactional = msmqEndpointAddress.IsTransactional,
-                };
-            return msmqSettings;
-        }
-
         public IInboundTransport BuildInbound(ITransportSettings settings)
         {
             try
             {
                 var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional);
-                var msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
+                TransportSettings msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
 
@@ -88,7 +85,7 @@ namespace MassTransit.Transports.Msmq
             try
             {
                 var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
-                var msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
+                TransportSettings msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
 
@@ -116,8 +113,23 @@ namespace MassTransit.Transports.Msmq
             return BuildOutbound(settings);
         }
 
+        public IMessageNameFormatter MessageNameFormatter
+        {
+            get { return _messageNameFormatter; }
+        }
+
         public void Dispose()
         {
+        }
+
+        static TransportSettings GetTransportSettings(ITransportSettings settings,
+                                                      MsmqEndpointAddress msmqEndpointAddress)
+        {
+            var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
+                {
+                    Transactional = msmqEndpointAddress.IsTransactional,
+                };
+            return msmqSettings;
         }
 
         static void PurgeExistingMessagesIfRequested(ITransportSettings settings)

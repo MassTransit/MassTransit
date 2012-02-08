@@ -22,11 +22,11 @@ namespace MassTransit.Transports.RabbitMq.Management
 		void BindQueue(string queueName, string exchangeName, string exchangeType, string routingKey = "", IDictionary queueArguments = null );
 		void UnbindQueue(string queueName, string exchangeName, string routingKey = "");
 		void BindExchange(string destination, string source, string exchangeType, string routingKey = "");
-
-		IEnumerable<Type> BindExchangesForPublisher(Type messageType);
-		void BindExchangesForSubscriber(Type messageType);
 		void UnbindExchange(string destination, string source, string routingKey);
 
 		void Purge(string queueName);
+
+        IEnumerable<Type> BindExchangesForPublisher(Type messageType, IMessageNameFormatter messageNameFormatter);
+        void BindExchangesForSubscriber(Type messageType, IMessageNameFormatter messageNameFormatter);
 	}
 }

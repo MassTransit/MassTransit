@@ -28,17 +28,25 @@ namespace MassTransit.Transports.RabbitMq
 
         readonly IRabbitMqEndpointAddress _address;
         readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
+        readonly IMessageNameFormatter _messageNameFormatter;
         readonly bool _purgeExistingMessages;
         RabbitMqConsumer _consumer;
         bool _disposed;
 
         public InboundRabbitMqTransport(IRabbitMqEndpointAddress address,
                                         ConnectionHandler<RabbitMqConnection> connectionHandler,
-                                        bool purgeExistingMessages)
+                                        bool purgeExistingMessages,
+                                        IMessageNameFormatter messageNameFormatter)
         {
             _address = address;
             _connectionHandler = connectionHandler;
             _purgeExistingMessages = purgeExistingMessages;
+            _messageNameFormatter = messageNameFormatter;
+        }
+
+        public IMessageNameFormatter MessageNameFormatter
+        {
+            get { return _messageNameFormatter; }
         }
 
         public IEndpointAddress Address

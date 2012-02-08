@@ -12,15 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-	public interface TransactionStrategy
-	{
-	}
+    using System;
 
-	public class NonTransactionalBehavior : TransactionStrategy
-	{
-	}
+    public class RabbitMqMessageNameFormatter :
+        IMessageNameFormatter
+    {
+        readonly IMessageNameFormatter _formatter;
 
-	public class TransactionalBehavior : TransactionStrategy
-	{
-	}
+        public RabbitMqMessageNameFormatter()
+        {
+            _formatter = new DefaultMessageNameFormatter("::", "--", ":", "-");
+        }
+
+        public MessageName GetMessageName(Type type)
+        {
+            return _formatter.GetMessageName(type);
+        }
+    }
 }

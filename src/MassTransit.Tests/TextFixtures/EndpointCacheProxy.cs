@@ -12,33 +12,32 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TextFixtures
 {
-	using System;
-	using MassTransit.Diagnostics;
-	using MassTransit.Diagnostics.Introspection;
+    using System;
+    using MassTransit.Diagnostics.Introspection;
 
     public class EndpointCacheProxy :
-		IEndpointCache
-	{
-		readonly IEndpointCache _endpointCache;
+        IEndpointCache
+    {
+        readonly IEndpointCache _endpointCache;
 
-		public EndpointCacheProxy(IEndpointCache endpointCache)
-		{
-			_endpointCache = endpointCache;
-		}
+        public EndpointCacheProxy(IEndpointCache endpointCache)
+        {
+            _endpointCache = endpointCache;
+        }
 
-		public void Dispose()
-		{
-			// we don't dispose, since we're in testing
-		}
+        public void Dispose()
+        {
+            // we don't dispose, since we're in testing
+        }
 
-		public IEndpoint GetEndpoint(Uri uri)
-		{
-			return _endpointCache.GetEndpoint(uri);
-		}
+        public IEndpoint GetEndpoint(Uri uri)
+        {
+            return _endpointCache.GetEndpoint(uri);
+        }
 
-	    public void Inspect(DiagnosticsProbe probe)
-	    {
-	        _endpointCache.Inspect(probe);
-	    }
-	}
+        public void Inspect(DiagnosticsProbe probe)
+        {
+            _endpointCache.Inspect(probe);
+        }
+    }
 }
