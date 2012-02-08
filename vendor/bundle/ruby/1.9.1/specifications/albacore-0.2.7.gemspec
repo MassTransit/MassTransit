@@ -1,20 +1,20 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{albacore}
+  s.name = "albacore"
   s.version = "0.2.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = [%q{Derick Bailey}, %q{etc}]
-  s.date = %q{2011-07-10}
-  s.description = %q{Easily build your .NET solutions with Ruby and Rake, using this suite of Rake tasks.}
-  s.email = %q{albacorebuild@gmail.com}
-  s.extra_rdoc_files = [%q{README.markdown}]
-  s.files = [%q{README.markdown}]
-  s.homepage = %q{http://albacorebuild.net}
-  s.require_paths = [%q{lib}]
-  s.rubygems_version = %q{1.8.8}
-  s.summary = %q{Dolphin-Safe Rake Tasks For .NET Systems}
+  s.authors = ["Derick Bailey", "etc"]
+  s.date = "2011-07-10"
+  s.description = "Easily build your .NET solutions with Ruby and Rake, using this suite of Rake tasks."
+  s.email = "albacorebuild@gmail.com"
+  s.extra_rdoc_files = ["README.markdown"]
+  s.files = ["README.markdown"]
+  s.homepage = "http://albacorebuild.net"
+  s.require_paths = ["lib"]
+  s.rubygems_version = "1.8.15"
+  s.summary = "Dolphin-Safe Rake Tasks For .NET Systems"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
