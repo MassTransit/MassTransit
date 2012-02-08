@@ -59,8 +59,8 @@ namespace MassTransit.Tests.Configuration
 					x.ReceiveFrom("loopback://localhost/mt_queue");
 					x.Validate()
 						.Any(result => result.Disposition == ValidationResultDisposition.Warning
-									   && result.Message.Contains("default c'tor")
-									   && result.Key.Contains("CTorWarning"))
+									   && result.Message.Contains("default")
+									   && result.Key.Contains("Consumer"))
 						.ShouldBeTrue(string.Format("there should be a warning on message without default c'tors"));
 				}))
 			{
