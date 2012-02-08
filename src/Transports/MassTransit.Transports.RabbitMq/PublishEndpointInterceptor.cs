@@ -12,114 +12,118 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-	using System;
-	using System.Collections.Generic;
-	using Exceptions;
-	using Magnum.Extensions;
-	using Magnum.Reflection;
-	using Management;
-	using Pipeline.Configuration;
-	using Pipeline.Sinks;
-	using Util;
+    using System;
+    using System.Collections.Generic;
+    using Exceptions;
+    using Magnum.Extensions;
+    using Magnum.Reflection;
+    using Management;
+    using Pipeline.Configuration;
+    using Pipeline.Sinks;
+    using Util;
 
-	/// <summary>
-	/// Makes sure that the exchange for the published message is available. This ensures
-	/// that we'll never get 404 exchange not found for published messages. If someone is
-	/// listening to them; that's another question (there might be no queue bound to it).
-	/// </summary>
-	public class PublishEndpointInterceptor :
-		IOutboundMessageInterceptor
-	{
-		readonly IDictionary<Type, UnsubscribeAction> _added;
-		readonly IRabbitMqEndpointAddress _address;
-		readonly IServiceBus _bus;
-		readonly InboundRabbitMqTransport _inboundTransport;
+    /// <summary>
+    /// Makes sure that the exchange for the published message is available. This ensures
+    /// that we'll never get 404 exchange not found for published messages. If someone is
+    /// listening to them; that's another question (there might be no queue bound to it).
+    /// </summary>
+    public class PublishEndpointInterceptor :
+        IOutboundMessageInterceptor
+    {
+        readonly IDictionary<Type, UnsubscribeAction> _added;
+        readonly IRabbitMqEndpointAddress _address;
+        readonly IServiceBus _bus;
+        readonly InboundRabbitMqTransport _inboundTransport;
+        readonly IMessageNameFormatter _messageNameFormatter;
 
-		public PublishEndpointInterceptor(IServiceBus bus)
-		{
-			_bus = bus;
+        public PublishEndpointInterceptor(IServiceBus bus)
+        {
+            _bus = bus;
 
-			_inboundTransport = _bus.Endpoint.InboundTransport as InboundRabbitMqTransport;
-			if (_inboundTransport == null)
-				throw new ConfigurationException("The bus must be receiving from a RabbitMQ endpoint for this interceptor to work");
+            _inboundTransport = _bus.Endpoint.InboundTransport as InboundRabbitMqTransport;
+            if (_inboundTransport == null)
+                throw new ConfigurationException(
+                    "The bus must be receiving from a RabbitMQ endpoint for this interceptor to work");
 
-			_address = _inboundTransport.Address.CastAs<IRabbitMqEndpointAddress>();
+            _messageNameFormatter = _inboundTransport.MessageNameFormatter;
 
-			_added = new Dictionary<Type, UnsubscribeAction>();
-		}
+            _address = _inboundTransport.Address.CastAs<IRabbitMqEndpointAddress>();
 
-		public void PreDispatch(ISendContext context)
-		{
-			lock (_added)
-			{
-				Type messageType = context.DeclaringMessageType;
+            _added = new Dictionary<Type, UnsubscribeAction>();
+        }
 
-				if (_added.ContainsKey(messageType))
-					return;
+        public void PreDispatch(ISendContext context)
+        {
+            lock (_added)
+            {
+                Type messageType = context.DeclaringMessageType;
 
-				AddEndpointForType(messageType);
-			}
-		}
+                if (_added.ContainsKey(messageType))
+                    return;
 
-		public void PostDispatch(ISendContext context)
-		{
-		}
+                AddEndpointForType(messageType);
+            }
+        }
 
-		void AddEndpointForType(Type messageType)
-		{
-			using (var management = new RabbitMqEndpointManagement(_address))
-			{
-				IEnumerable<Type> types = management.BindExchangesForPublisher(messageType);
-				foreach (Type type in types)
-				{
-					if (_added.ContainsKey(type))
-						continue;
+        public void PostDispatch(ISendContext context)
+        {
+        }
 
-					var messageName = new MessageName(type);
+        void AddEndpointForType(Type messageType)
+        {
+            using (var management = new RabbitMqEndpointManagement(_address))
+            {
+                IEnumerable<Type> types = management.BindExchangesForPublisher(messageType, _messageNameFormatter);
+                foreach (Type type in types)
+                {
+                    if (_added.ContainsKey(type))
+                        continue;
 
-					IRabbitMqEndpointAddress messageEndpointAddress = _address.ForQueue(messageName.ToString());
+                    MessageName messageName = _messageNameFormatter.GetMessageName(type);
 
-					FindOrAddEndpoint(type, messageEndpointAddress);
-				}
-			}
-		}
+                    IRabbitMqEndpointAddress messageEndpointAddress = _address.ForQueue(messageName.ToString());
 
-		/// <summary>
-		/// Finds all endpoints in the outbound pipeline and starts routing messages
-		/// to that endpoint.
-		/// </summary>
-		/// <param name="messageType">type of message</param>
-		/// <param name="address">The message endpoint address.</param>
-		void FindOrAddEndpoint(Type messageType, IRabbitMqEndpointAddress address)
-		{
-			var locator = new PublishEndpointSinkLocator(messageType, address);
-			_bus.OutboundPipeline.Inspect(locator);
+                    FindOrAddEndpoint(type, messageEndpointAddress);
+                }
+            }
+        }
 
-			if (locator.Found) // there was already a subscribed endpoint
-			{
-				_added.Add(messageType, () => true);
-				return;
-			}
+        /// <summary>
+        /// Finds all endpoints in the outbound pipeline and starts routing messages
+        /// to that endpoint.
+        /// </summary>
+        /// <param name="messageType">type of message</param>
+        /// <param name="address">The message endpoint address.</param>
+        void FindOrAddEndpoint(Type messageType, IRabbitMqEndpointAddress address)
+        {
+            var locator = new PublishEndpointSinkLocator(messageType, address);
+            _bus.OutboundPipeline.Inspect(locator);
 
-			IEndpoint endpoint = _bus.GetEndpoint(address.Uri);
+            if (locator.Found) // there was already a subscribed endpoint
+            {
+                _added.Add(messageType, () => true);
+                return;
+            }
 
-			// otherwise, create the sink for this message type and connect the out
-			// bound pipeline to this sink.
-			this.FastInvoke(new[] {messageType}, "CreateEndpointSink", endpoint);
-		}
+            IEndpoint endpoint = _bus.GetEndpoint(address.Uri);
 
-		[UsedImplicitly]
-		void CreateEndpointSink<TMessage>(IEndpoint endpoint)
-			where TMessage : class
-		{
-			var endpointSink = new EndpointMessageSink<TMessage>(endpoint);
+            // otherwise, create the sink for this message type and connect the out
+            // bound pipeline to this sink.
+            this.FastInvoke(new[] {messageType}, "CreateEndpointSink", endpoint);
+        }
 
-			var filterSink = new OutboundMessageFilter<TMessage>(endpointSink,
-				context => context.DeclaringMessageType == typeof (TMessage));
+        [UsedImplicitly]
+        void CreateEndpointSink<TMessage>(IEndpoint endpoint)
+            where TMessage : class
+        {
+            var endpointSink = new EndpointMessageSink<TMessage>(endpoint);
 
-			UnsubscribeAction unsubscribeAction = _bus.OutboundPipeline.ConnectToRouter(filterSink);
+            var filterSink = new OutboundMessageFilter<TMessage>(endpointSink,
+                context => context.DeclaringMessageType == typeof (TMessage));
 
-			_added.Add(typeof (TMessage), unsubscribeAction);
-		}
-	}
+            UnsubscribeAction unsubscribeAction = _bus.OutboundPipeline.ConnectToRouter(filterSink);
+
+            _added.Add(typeof (TMessage), unsubscribeAction);
+        }
+    }
 }

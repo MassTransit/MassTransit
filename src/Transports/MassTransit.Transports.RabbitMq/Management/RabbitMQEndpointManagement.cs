@@ -1,157 +1,170 @@
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq.Management
 {
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Logging;
-	using RabbitMQ.Client;
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Logging;
+    using RabbitMQ.Client;
 
-	public class RabbitMqEndpointManagement :
-		IRabbitMqEndpointManagement
-	{
-		static readonly ILog _log = Logger.Get(typeof (RabbitMqEndpointManagement));
-		readonly IRabbitMqEndpointAddress _address;
-		readonly bool _owned;
-		IConnection _connection;
-		bool _disposed;
+    public class RabbitMqEndpointManagement :
+        IRabbitMqEndpointManagement
+    {
+        static readonly ILog _log = Logger.Get(typeof (RabbitMqEndpointManagement));
+        readonly IRabbitMqEndpointAddress _address;
+        readonly bool _owned;
+        IConnection _connection;
+        bool _disposed;
 
-		public RabbitMqEndpointManagement(IRabbitMqEndpointAddress address)
-			: this(address, address.ConnectionFactory.CreateConnection())
-		{
-			_owned = true;
-		}
+        public RabbitMqEndpointManagement(IRabbitMqEndpointAddress address)
+            : this(address, address.ConnectionFactory.CreateConnection())
+        {
+            _owned = true;
+        }
 
-		public RabbitMqEndpointManagement(IRabbitMqEndpointAddress address, IConnection connection)
-		{
-			_address = address;
-			_connection = connection;
-		}
-       
-		public void BindQueue(string queueName, string exchangeName, string exchangeType, string routingKey, IDictionary queueArguments )
-		{
-			using (IModel model = _connection.CreateModel())
-			{
-				string queue = model.QueueDeclare(queueName, true, false, false, queueArguments);
-				model.ExchangeDeclare(exchangeName, exchangeType, true);
+        public RabbitMqEndpointManagement(IRabbitMqEndpointAddress address, IConnection connection)
+        {
+            _address = address;
+            _connection = connection;
+        }
 
-				model.QueueBind(queue, exchangeName, routingKey);
+        public void BindQueue(string queueName, string exchangeName, string exchangeType, string routingKey,
+                              IDictionary queueArguments)
+        {
+            using (IModel model = _connection.CreateModel())
+            {
+                string queue = model.QueueDeclare(queueName, true, false, false, queueArguments);
+                model.ExchangeDeclare(exchangeName, exchangeType, true);
 
-				model.Close(200, "ok");
-			}
-		}
+                model.QueueBind(queue, exchangeName, routingKey);
 
-		public void UnbindQueue(string queueName, string exchangeName, string routingKey)
-		{
-			using (IModel model = _connection.CreateModel())
-			{
-				model.QueueUnbind(queueName, exchangeName, routingKey, null);
+                model.Close(200, "ok");
+            }
+        }
 
-				model.Close(200, "ok");
-			}
-		}
+        public void UnbindQueue(string queueName, string exchangeName, string routingKey)
+        {
+            using (IModel model = _connection.CreateModel())
+            {
+                model.QueueUnbind(queueName, exchangeName, routingKey, null);
 
-		public void BindExchange(string destination, string source, string exchangeType, string routingKey)
-		{
-			using (IModel model = _connection.CreateModel())
-			{
-				model.ExchangeDeclare(destination, exchangeType, true, false, null);
-				model.ExchangeDeclare(source, exchangeType, true, false, null);
+                model.Close(200, "ok");
+            }
+        }
 
-				model.ExchangeBind(destination, source, routingKey);
+        public void BindExchange(string destination, string source, string exchangeType, string routingKey)
+        {
+            using (IModel model = _connection.CreateModel())
+            {
+                model.ExchangeDeclare(destination, exchangeType, true, false, null);
+                model.ExchangeDeclare(source, exchangeType, true, false, null);
 
-				model.Close(200, "ok");
-			}
-		}
+                model.ExchangeBind(destination, source, routingKey);
 
-		public void UnbindExchange(string destination, string source, string routingKey)
-		{
-			using (IModel model = _connection.CreateModel())
-			{
-				model.ExchangeUnbind(destination, source, routingKey, null);
+                model.Close(200, "ok");
+            }
+        }
 
-				model.Close(200, "ok");
-			}
-		}
+        public void UnbindExchange(string destination, string source, string routingKey)
+        {
+            using (IModel model = _connection.CreateModel())
+            {
+                model.ExchangeUnbind(destination, source, routingKey, null);
 
-		public void Purge(string queueName)
-		{
-			using(IModel model = _connection.CreateModel())
-			{
-				try
-				{
-					model.QueueDeclarePassive(queueName);
-					model.QueuePurge(queueName);
-				}
-				catch
-				{
-				}
+                model.Close(200, "ok");
+            }
+        }
 
-				model.Close(200, "purged queue");
-			}
-		}
+        public void Purge(string queueName)
+        {
+            using (IModel model = _connection.CreateModel())
+            {
+                try
+                {
+                    model.QueueDeclarePassive(queueName);
+                    model.QueuePurge(queueName);
+                }
+                catch
+                {
+                }
 
-		public IEnumerable<Type> BindExchangesForPublisher(Type messageType)
-		{
-			var messageName = new MessageName(messageType);
+                model.Close(200, "purged queue");
+            }
+        }
 
-			using (IModel model = _connection.CreateModel())
-			{
-				model.ExchangeDeclare(messageName.ToString(), ExchangeType.Fanout, true, false, null);
+        public IEnumerable<Type> BindExchangesForPublisher(Type messageType, IMessageNameFormatter messageNameFormatter)
+        {
+            MessageName messageName = messageNameFormatter.GetMessageName(messageType);
 
-				yield return messageType;
+            using (IModel model = _connection.CreateModel())
+            {
+                model.ExchangeDeclare(messageName.ToString(), ExchangeType.Fanout, true, false, null);
 
-				foreach (var type in messageType.GetMessageTypes().Skip(1))
-				{
-					var interfaceName = new MessageName(type);
+                yield return messageType;
 
-					model.ExchangeDeclare(interfaceName.ToString(), ExchangeType.Fanout, true, false, null);
-					model.ExchangeBind(interfaceName.ToString(), messageName.ToString(), "");
+                foreach (Type type in messageType.GetMessageTypes().Skip(1))
+                {
+                    MessageName interfaceName = messageNameFormatter.GetMessageName(type);
 
-					yield return type;
-				}
+                    model.ExchangeDeclare(interfaceName.ToString(), ExchangeType.Fanout, true, false, null);
+                    model.ExchangeBind(interfaceName.ToString(), messageName.ToString(), "");
 
-				model.Close(200, "ok");
-			}
-		}
+                    yield return type;
+                }
 
-		public void BindExchangesForSubscriber(Type messageType)
-		{
-			var messageName = new MessageName(messageType);
+                model.Close(200, "ok");
+            }
+        }
 
-			BindExchange(_address.Name, messageName.ToString(), ExchangeType.Fanout, "");
-		}
+        public void BindExchangesForSubscriber(Type messageType, IMessageNameFormatter messageNameFormatter)
+        {
+            MessageName messageName = messageNameFormatter.GetMessageName(messageType);
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+            BindExchange(_address.Name, messageName.ToString(), ExchangeType.Fanout, "");
+        }
 
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				if (_connection != null)
-				{
-					if (_owned)
-					{
-						if (_connection.IsOpen)
-							_connection.Close(200, "normal");
-						_connection.Dispose();
-					}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-					_connection = null;
-				}
-			}
+        void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                if (_connection != null)
+                {
+                    if (_owned)
+                    {
+                        if (_connection.IsOpen)
+                            _connection.Close(200, "normal");
+                        _connection.Dispose();
+                    }
 
-			_disposed = true;
-		}
+                    _connection = null;
+                }
+            }
 
-		~RabbitMqEndpointManagement()
-		{
-			Dispose(false);
-		}
-	}
+            _disposed = true;
+        }
+
+        ~RabbitMqEndpointManagement()
+        {
+            Dispose(false);
+        }
+    }
 }

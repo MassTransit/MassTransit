@@ -12,140 +12,147 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Configuration.Builders;
-	using Configuration.Configurators;
-	using Exceptions;
-	using Logging;
-	using Magnum.Extensions;
-	using Magnum.Threading;
-	using Management;
-	using RabbitMQ.Client;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Configuration.Builders;
+    using Configuration.Configurators;
+    using Exceptions;
+    using Logging;
+    using Magnum.Extensions;
+    using Magnum.Threading;
+    using RabbitMQ.Client;
 
     public class RabbitMqTransportFactory :
-		ITransportFactory
-	{
-		static readonly ILog _log = Logger.Get(typeof (RabbitMqTransportFactory));
-		readonly ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>> _connectionCache;
-		readonly IDictionary<Uri, ConnectionFactoryBuilder> _connectionFactoryBuilders;
+        ITransportFactory
+    {
+        static readonly ILog _log = Logger.Get(typeof (RabbitMqTransportFactory));
+        readonly ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>> _connectionCache;
+        readonly IDictionary<Uri, ConnectionFactoryBuilder> _connectionFactoryBuilders;
+        readonly IMessageNameFormatter _messageNameFormatter;
+        bool _disposed;
 
+        public RabbitMqTransportFactory(IDictionary<Uri, ConnectionFactoryBuilder> connectionFactoryBuilders)
+        {
+            _connectionCache = new ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>>();
+            _connectionFactoryBuilders = connectionFactoryBuilders;
+            _messageNameFormatter = new RabbitMqMessageNameFormatter();
+        }
 
-		bool _disposed;
+        public RabbitMqTransportFactory()
+        {
+            _connectionCache = new ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>>();
+            _connectionFactoryBuilders = new Dictionary<Uri, ConnectionFactoryBuilder>();
+            _messageNameFormatter = new RabbitMqMessageNameFormatter();
+        }
 
-		public RabbitMqTransportFactory(IDictionary<Uri, ConnectionFactoryBuilder> connectionFactoryBuilders)
-		{
-			_connectionCache = new ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>>();
-			_connectionFactoryBuilders = connectionFactoryBuilders;
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		public RabbitMqTransportFactory()
-		{
-			_connectionCache = new ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>>();
-			_connectionFactoryBuilders = new Dictionary<Uri, ConnectionFactoryBuilder>();
-		}
+        public string Scheme
+        {
+            get { return "rabbitmq"; }
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public IDuplexTransport BuildLoopback(ITransportSettings settings)
+        {
+            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
 
-		public string Scheme
-		{
-			get { return "rabbitmq"; }
-		}
+            var transport = new Transport(address, () => BuildInbound(settings), () => BuildOutbound(settings));
 
-		public IDuplexTransport BuildLoopback(ITransportSettings settings)
-		{
-			RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+            return transport;
+        }
 
-			var transport = new Transport(address, () => BuildInbound(settings), () => BuildOutbound(settings));
+        public IInboundTransport BuildInbound(ITransportSettings settings)
+        {
+            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
 
-			return transport;
-		}
+            EnsureProtocolIsCorrect(address.Uri);
 
-		public IInboundTransport BuildInbound(ITransportSettings settings)
-		{
-			RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+            ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
 
-			EnsureProtocolIsCorrect(address.Uri);
+            return new InboundRabbitMqTransport(address, connectionHandler, settings.PurgeExistingMessages,
+                _messageNameFormatter);
+        }
 
-			ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
+        public IOutboundTransport BuildOutbound(ITransportSettings settings)
+        {
+            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
 
-			return new InboundRabbitMqTransport(address, connectionHandler, settings.PurgeExistingMessages);
-		}
+            EnsureProtocolIsCorrect(address.Uri);
 
-		public IOutboundTransport BuildOutbound(ITransportSettings settings)
-		{
-			RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+            ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
 
-			EnsureProtocolIsCorrect(address.Uri);
+            return new OutboundRabbitMqTransport(address, connectionHandler, false);
+        }
 
-			ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
+        public IOutboundTransport BuildError(ITransportSettings settings)
+        {
+            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
 
-			return new OutboundRabbitMqTransport(address, connectionHandler, false);
-		}
+            EnsureProtocolIsCorrect(address.Uri);
 
-		public IOutboundTransport BuildError(ITransportSettings settings)
-		{
-			RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+            ConnectionHandler<RabbitMqConnection> connection = GetConnection(address);
 
-			EnsureProtocolIsCorrect(address.Uri);
+            return new OutboundRabbitMqTransport(address, connection, true);
+        }
 
-			ConnectionHandler<RabbitMqConnection> connection = GetConnection(address);
+        public IMessageNameFormatter MessageNameFormatter
+        {
+            get { return _messageNameFormatter; }
+        }
 
-			return new OutboundRabbitMqTransport(address, connection, true);
-		}
+        public int ConnectionCount()
+        {
+            return _connectionCache.Count();
+        }
 
-		public int ConnectionCount()
-		{
-			return _connectionCache.Count();
-		}
+        void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                _connectionCache.Values.Each(x => x.Dispose());
+                _connectionCache.Clear();
 
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_connectionCache.Values.Each(x => x.Dispose());
-				_connectionCache.Clear();
+                _connectionCache.Dispose();
+            }
 
-				_connectionCache.Dispose();
-			}
+            _disposed = true;
+        }
 
-			_disposed = true;
-		}
+        ConnectionHandler<RabbitMqConnection> GetConnection(IRabbitMqEndpointAddress address)
+        {
+            return _connectionCache.Retrieve(address.Uri, () =>
+                {
+                    ConnectionFactoryBuilder builder = _connectionFactoryBuilders.Retrieve(address.Uri, () =>
+                        {
+                            var configurator = new ConnectionFactoryConfiguratorImpl(address);
 
-		ConnectionHandler<RabbitMqConnection> GetConnection(IRabbitMqEndpointAddress address)
-		{
-			return _connectionCache.Retrieve(address.Uri, () =>
-				{
-					ConnectionFactoryBuilder builder = _connectionFactoryBuilders.Retrieve(address.Uri, () =>
-						{
-							var configurator = new ConnectionFactoryConfiguratorImpl(address);
+                            return configurator.CreateBuilder();
+                        });
 
-							return configurator.CreateBuilder();
-						});
+                    ConnectionFactory connectionFactory = builder.Build();
 
-					ConnectionFactory connectionFactory = builder.Build();
+                    var connection = new RabbitMqConnection(connectionFactory);
+                    var connectionHandler = new ConnectionHandlerImpl<RabbitMqConnection>(connection);
+                    return connectionHandler;
+                });
+        }
 
-					var connection = new RabbitMqConnection(connectionFactory);
-					var connectionHandler = new ConnectionHandlerImpl<RabbitMqConnection>(connection);
-					return connectionHandler;
-				});
-		}
+        ~RabbitMqTransportFactory()
+        {
+            Dispose(false);
+        }
 
-		~RabbitMqTransportFactory()
-		{
-			Dispose(false);
-		}
-
-		static void EnsureProtocolIsCorrect(Uri address)
-		{
-			if (address.Scheme != "rabbitmq")
-				throw new EndpointException(address, "Address must start with 'rabbitmq' not '{0}'".FormatWith(address.Scheme));
-		}
-	}
+        static void EnsureProtocolIsCorrect(Uri address)
+        {
+            if (address.Scheme != "rabbitmq")
+                throw new EndpointException(address,
+                    "Address must start with 'rabbitmq' not '{0}'".FormatWith(address.Scheme));
+        }
+    }
 }

@@ -19,51 +19,58 @@ namespace MassTransit.Transports.RabbitMq.Tests
 	[Scenario]
 	public class When_converting_a_type_to_a_message_name
 	{
-		[Then]
+	    IMessageNameFormatter _formatter;
+
+	    public When_converting_a_type_to_a_message_name()
+	    {
+	        _formatter = new RabbitMqMessageNameFormatter();
+	    }
+
+	    [Then]
 		public void Should_handle_an_interface_name()
 		{
-			var name = new MessageName(typeof (NameEasyToo));
+			var name = _formatter.GetMessageName(typeof (NameEasyToo));
 			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:NameEasyToo");
 		}
 
 		[Then]
 		public void Should_handle_nested_classes()
 		{
-			var name = new MessageName(typeof(Nested));
+            var name = _formatter.GetMessageName(typeof(Nested));
 			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:When_converting_a_type_to_a_message_name-Nested");
 		}
 
 		[Then]
 		public void Should_handle_regular_classes()
 		{
-			var name = new MessageName(typeof(NameEasy));
+            var name = _formatter.GetMessageName(typeof(NameEasy));
 			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:NameEasy");
 		}
 
 		[Then]
 		public void Should_throw_an_exception_on_an_open_generic_class_name()
 		{
-			Assert.Throws<ArgumentException>(() => new MessageName(typeof(NameGeneric<>)));
+            Assert.Throws<ArgumentException>(() => _formatter.GetMessageName(typeof(NameGeneric<>)));
 		}
 
 		[Then]
 		public void Should_handle_a_closed_single_generic()
 		{
-			var name = new MessageName(typeof(NameGeneric<string>));
+            var name = _formatter.GetMessageName(typeof(NameGeneric<string>));
 			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:NameGeneric--System:String--");
 		}
 
 		[Then]
 		public void Should_handle_a_closed_double_generic()
 		{
-			var name = new MessageName(typeof(NameDoubleGeneric<string,NameEasy>));
+            var name = _formatter.GetMessageName(typeof(NameDoubleGeneric<string, NameEasy>));
 			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:NameDoubleGeneric--System:String::NameEasy--");
 		}
 
 		[Then]
 		public void Should_handle_a_closed_double_generic_with_a_generic()
 		{
-			var name = new MessageName(typeof(NameDoubleGeneric<NameGeneric<NameEasyToo>,NameEasy>));
+            var name = _formatter.GetMessageName(typeof(NameDoubleGeneric<NameGeneric<NameEasyToo>, NameEasy>));
 			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:NameDoubleGeneric--NameGeneric--NameEasyToo--::NameEasy--");
 		}
 

@@ -23,7 +23,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
 		SslConnectionFactoryConfigurator,
 		ConnectionFactoryBuilderConfigurator
 	{
-		SslPolicyErrors _acceptablePolicyErrors;
+	    readonly SslPolicyErrors _acceptablePolicyErrors;
 		string _certificatePath;
 		string _passphrase;
 		string _serverName;

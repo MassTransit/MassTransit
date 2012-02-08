@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,19 +14,12 @@ namespace MassTransit.Transports
 {
     using System;
 
-    public interface ITransportFactory :
-        IDisposable
+    /// <summary>
+    /// Used to format a message type into a MessageName, which can be used as a valid
+    /// queue name on the transport
+    /// </summary>
+    public interface IMessageNameFormatter
     {
-        string Scheme { get; }
-
-        IDuplexTransport BuildLoopback(ITransportSettings settings);
-        IInboundTransport BuildInbound(ITransportSettings settings);
-        IOutboundTransport BuildOutbound(ITransportSettings settings);
-        IOutboundTransport BuildError(ITransportSettings settings);
-
-        /// <summary>
-        /// The message name formatter associated with this transport
-        /// </summary>
-        IMessageNameFormatter MessageNameFormatter { get; }
+        MessageName GetMessageName(Type type);
     }
 }

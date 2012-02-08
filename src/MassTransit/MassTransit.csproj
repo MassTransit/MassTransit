@@ -552,12 +552,15 @@
     <Compile Include="Transports\ConnectionHandler.cs" />
     <Compile Include="Transports\ConnectionPolicy.cs" />
     <Compile Include="Transports\ConnectionPolicyChain.cs" />
+    <Compile Include="Transports\DefaultMessageNameFormatter.cs" />
     <Compile Include="Transports\DisposedConnectionPolicy.cs" />
     <Compile Include="Transports\IDuplexTransport.cs" />
     <Compile Include="Transports\IInboundTransport.cs" />
+    <Compile Include="Transports\IMessageNameFormatter.cs" />
     <Compile Include="Transports\InvalidConnectionException.cs" />
     <Compile Include="Transports\IOutboundTransport.cs" />
     <Compile Include="Transports\ITransport.cs" />
+    <Compile Include="Transports\MessageName.cs" />
     <Compile Include="Transports\ReconnectPolicy.cs" />
     <Compile Include="Transports\TransportSettings.cs" />
     <Compile Include="Transports\EndpointCacheExtensions.cs" />
