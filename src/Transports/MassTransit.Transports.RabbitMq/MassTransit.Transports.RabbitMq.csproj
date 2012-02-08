@@ -92,7 +92,6 @@
     <Compile Include="IRabbitMqEndpointAddress.cs" />
     <Compile Include="Management\IRabbitMqEndpointManagement.cs" />
     <Compile Include="Management\RabbitMQEndpointManagement.cs" />
-    <Compile Include="MessageName.cs" />
     <Compile Include="OutboundRabbitMqTransport.cs" />
     <Compile Include="PublishEndpointInterceptor.cs" />
     <Compile Include="PublishEndpointSinkLocator.cs" />
@@ -102,14 +101,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMqAddressException.cs" />
     <Compile Include="RabbitMqConfigurationExtensions.cs" />
-    <Compile Include="RabbitMqHelper.cs" />
+    <Compile Include="RabbitMqMessageNameFormatter.cs" />
     <Compile Include="RabbitMqProducer.cs" />
     <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
     <Compile Include="Configuration\RabbitMqServiceBusExtensions.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
     <Compile Include="Testing\RabbitMqBusScenarioBuilder.cs" />
-    <Compile Include="TransactionalBehavior.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">

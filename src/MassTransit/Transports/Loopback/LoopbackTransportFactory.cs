@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,36 +12,48 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Loopback
 {
-	public class LoopbackTransportFactory :
-		ITransportFactory
-	{
-		public string Scheme
-		{
-			get { return "loopback"; }
-		}
+    public class LoopbackTransportFactory :
+        ITransportFactory
+    {
+        IMessageNameFormatter _messageNameFormatter;
 
-		public IDuplexTransport BuildLoopback(ITransportSettings settings)
-		{
-			return new LoopbackTransport(settings.Address);
-		}
+        public LoopbackTransportFactory()
+        {
+            _messageNameFormatter = new DefaultMessageNameFormatter("::", "--", ":", "-");
+        }
 
-		public IInboundTransport BuildInbound(ITransportSettings settings)
-		{
-			return BuildLoopback(settings);
-		}
+        public string Scheme
+        {
+            get { return "loopback"; }
+        }
 
-		public IOutboundTransport BuildOutbound(ITransportSettings settings)
-		{
-			return BuildLoopback(settings);
-		}
+        public IDuplexTransport BuildLoopback(ITransportSettings settings)
+        {
+            return new LoopbackTransport(settings.Address);
+        }
 
-		public IOutboundTransport BuildError(ITransportSettings settings)
-		{
-			return new LoopbackTransport(settings.Address);
-		}
+        public IInboundTransport BuildInbound(ITransportSettings settings)
+        {
+            return BuildLoopback(settings);
+        }
 
-		public void Dispose()
-		{
-		}
-	}
+        public IOutboundTransport BuildOutbound(ITransportSettings settings)
+        {
+            return BuildLoopback(settings);
+        }
+
+        public IOutboundTransport BuildError(ITransportSettings settings)
+        {
+            return new LoopbackTransport(settings.Address);
+        }
+
+        public IMessageNameFormatter MessageNameFormatter
+        {
+            get { return _messageNameFormatter; }
+        }
+
+        public void Dispose()
+        {
+        }
+    }
 }

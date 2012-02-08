@@ -12,77 +12,78 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-	using System;
-	using Logging;
-	using Magnum.Extensions;
-	using RabbitMQ.Client;
+    using System;
+    using Logging;
+    using Magnum.Extensions;
+    using RabbitMQ.Client;
 
     public class RabbitMqConnection :
-		Connection
-	{
-		static readonly ILog _log = Logger.Get(typeof (RabbitMqConnection));
-		bool _disposed;
-		IConnection _connection;
-		readonly ConnectionFactory _connectionFactory;
+        Connection
+    {
+        static readonly ILog _log = Logger.Get(typeof (RabbitMqConnection));
+        readonly ConnectionFactory _connectionFactory;
+        IConnection _connection;
+        bool _disposed;
 
-		public RabbitMqConnection(ConnectionFactory connectionFactory)
-		{
-			_connectionFactory = connectionFactory;
-		}
+        public RabbitMqConnection(ConnectionFactory connectionFactory)
+        {
+            _connectionFactory = connectionFactory;
+        }
 
-		public IConnection Connection
-		{
-			get { return _connection; }
-		}
+        public IConnection Connection
+        {
+            get { return _connection; }
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		protected virtual void Dispose(bool managed)
-		{
-			if (!managed)
-				return;
+        public void Connect()
+        {
+            Disconnect();
 
-			if (_disposed)
-				throw new ObjectDisposedException("RabbitMqConnection for {0}".FormatWith(_connectionFactory.Address), "Cannot dispose a connection twice");
+            _connection = _connectionFactory.CreateConnection();
+        }
 
-			try
-			{
-				Disconnect();
-			}
-			finally
-			{
-				_disposed = true;
-			}
-		}
+        public void Disconnect()
+        {
+            try
+            {
+                if (_connection != null)
+                {
+                    if (_connection.IsOpen)
+                        _connection.Close(200, "disconnected");
 
-		public void Connect()
-		{
-			Disconnect();
+                    _connection.Dispose();
+                    _connection = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Failed to close RabbitMQ connection.", ex);
+            }
+        }
 
-			_connection = _connectionFactory.CreateConnection();
-		}
+        protected virtual void Dispose(bool managed)
+        {
+            if (!managed)
+                return;
 
-		public void Disconnect()
-		{
-			try
-			{
-				if (_connection != null)
-				{
-					if (_connection.IsOpen)
-						_connection.Close(200, "disconnected");
+            if (_disposed)
+                throw new ObjectDisposedException("RabbitMqConnection for {0}".FormatWith(_connectionFactory.Address),
+                    "Cannot dispose a connection twice");
 
-					_connection.Dispose();
-					_connection = null;
-				}
-			}
-			catch (Exception ex)
-			{
-				_log.Warn("Failed to close RabbitMQ connection.", ex);
-			}
-		}
-	}
+            try
+            {
+                Disconnect();
+            }
+            finally
+            {
+                _disposed = true;
+            }
+        }
+    }
 }

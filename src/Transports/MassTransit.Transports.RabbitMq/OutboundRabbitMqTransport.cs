@@ -12,92 +12,93 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-	using System;
-	using System.Collections;
-	using System.IO;
-	using Magnum;
-	using RabbitMQ.Client;
-	using RabbitMQ.Client.Exceptions;
+    using System;
+    using System.Collections;
+    using System.IO;
+    using Magnum;
+    using RabbitMQ.Client;
+    using RabbitMQ.Client.Exceptions;
 
-	public class OutboundRabbitMqTransport :
-		IOutboundTransport
-	{
-		readonly IRabbitMqEndpointAddress _address;
-		readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
-		RabbitMqProducer _producer;
-		bool _bindToQueue;
+    public class OutboundRabbitMqTransport :
+        IOutboundTransport
+    {
+        readonly IRabbitMqEndpointAddress _address;
+        readonly bool _bindToQueue;
+        readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
+        RabbitMqProducer _producer;
 
-		public OutboundRabbitMqTransport(IRabbitMqEndpointAddress address,
-		                                 ConnectionHandler<RabbitMqConnection> connectionHandler, bool bindToQueue)
-		{
-			_address = address;
-			_connectionHandler = connectionHandler;
-			_bindToQueue = bindToQueue;
-		}
+        public OutboundRabbitMqTransport(IRabbitMqEndpointAddress address,
+                                         ConnectionHandler<RabbitMqConnection> connectionHandler, bool bindToQueue)
+        {
+            _address = address;
+            _connectionHandler = connectionHandler;
+            _bindToQueue = bindToQueue;
+        }
 
-		public IEndpointAddress Address
-		{
-			get { return _address; }
-		}
+        public IEndpointAddress Address
+        {
+            get { return _address; }
+        }
 
-		public void Send(ISendContext context)
-		{
-			AddProducerBinding();
+        public void Send(ISendContext context)
+        {
+            AddProducerBinding();
 
-			_connectionHandler.Use(connection =>
-				{
-					try
-					{
-						IBasicProperties properties = _producer.Channel.CreateBasicProperties();
+            _connectionHandler.Use(connection =>
+                {
+                    try
+                    {
+                        IBasicProperties properties = _producer.Channel.CreateBasicProperties();
 
-						properties.SetPersistent(true);
-						if (context.ExpirationTime.HasValue)
-						{
-							DateTime value = context.ExpirationTime.Value;
-							properties.Expiration =
-								(value.Kind == DateTimeKind.Utc ? value - SystemUtil.UtcNow : value - SystemUtil.Now).ToString();
-						}
+                        properties.SetPersistent(true);
+                        if (context.ExpirationTime.HasValue)
+                        {
+                            DateTime value = context.ExpirationTime.Value;
+                            properties.Expiration =
+                                (value.Kind == DateTimeKind.Utc ? value - SystemUtil.UtcNow : value - SystemUtil.Now).
+                                    ToString();
+                        }
 
-						using (var body = new MemoryStream())
-						{
-							context.SerializeTo(body);
-							properties.Headers = new Hashtable {{"Content-Type", context.ContentType}};
+                        using (var body = new MemoryStream())
+                        {
+                            context.SerializeTo(body);
+                            properties.Headers = new Hashtable {{"Content-Type", context.ContentType}};
 
-							_producer.Channel.BasicPublish(_address.Name, "", properties, body.ToArray());
-						}
-					}
-					catch (EndOfStreamException ex)
-					{
-						throw new InvalidConnectionException(_address.Uri, "Connection was closed", ex);
-					}
-					catch (OperationInterruptedException ex)
-					{
-						throw new InvalidConnectionException(_address.Uri, "Operation was interrupted", ex);
-					}
-				});
-		}
+                            _producer.Channel.BasicPublish(_address.Name, "", properties, body.ToArray());
+                        }
+                    }
+                    catch (EndOfStreamException ex)
+                    {
+                        throw new InvalidConnectionException(_address.Uri, "Connection was closed", ex);
+                    }
+                    catch (OperationInterruptedException ex)
+                    {
+                        throw new InvalidConnectionException(_address.Uri, "Operation was interrupted", ex);
+                    }
+                });
+        }
 
-		public void Dispose()
-		{
-			RemoveProducer();
-		}
+        public void Dispose()
+        {
+            RemoveProducer();
+        }
 
-		void AddProducerBinding()
-		{
-			if (_producer != null)
-				return;
+        void AddProducerBinding()
+        {
+            if (_producer != null)
+                return;
 
-			_producer = new RabbitMqProducer(_address, _bindToQueue);
+            _producer = new RabbitMqProducer(_address, _bindToQueue);
 
-			_connectionHandler.AddBinding(_producer);
-		}
+            _connectionHandler.AddBinding(_producer);
+        }
 
-		void RemoveProducer()
-		{
-			if (_producer != null)
-			{
-				_connectionHandler.RemoveBinding(_producer);
-			}
-		}
-	}
+        void RemoveProducer()
+        {
+            if (_producer != null)
+            {
+                _connectionHandler.RemoveBinding(_producer);
+            }
+        }
+    }
 }

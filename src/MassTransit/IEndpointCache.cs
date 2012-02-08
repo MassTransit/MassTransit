@@ -12,23 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using System;
-	using Diagnostics;
-	using Diagnostics.Introspection;
+    using System;
+    using Diagnostics.Introspection;
 
     /// <summary>
-	/// The endpoint factory methods used to retrieve objects implementing IEndpoint from Uris
-	/// </summary>
-	public interface IEndpointCache :
+    /// The endpoint factory methods used to retrieve objects implementing IEndpoint from Uris
+    /// </summary>
+    public interface IEndpointCache :
         DiagnosticsSource,
-		IDisposable
-	{
-		/// <summary>
-		/// Returns an IEndpoint for the Uri specified. If the endpoint has not yet been created,
-		/// the factory will attempt to create an endpoint for the Uri.
-		/// </summary>
-		/// <param name="uri">The Uri to resolve to an endpoint</param>
-		/// <returns>An IEndpoint instance - never null</returns>
-		IEndpoint GetEndpoint(Uri uri);
-	}
+        IDisposable
+    {
+        /// <summary>
+        /// Returns an IEndpoint for the Uri specified. If the endpoint has not yet been created,
+        /// the factory will attempt to create an endpoint for the Uri.
+        /// </summary>
+        /// <param name="uri">The Uri to resolve to an endpoint</param>
+        /// <returns>An IEndpoint instance - never null</returns>
+        IEndpoint GetEndpoint(Uri uri);
+    }
 }

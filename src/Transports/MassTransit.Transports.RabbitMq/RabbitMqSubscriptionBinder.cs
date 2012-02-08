@@ -12,69 +12,79 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-	using System;
-	using System.Collections.Generic;
-	using Logging;
-	using Magnum;
-	using Magnum.Extensions;
-	using Management;
-	using RabbitMQ.Client;
-	using Subscriptions.Coordinator;
-	using Subscriptions.Messages;
+    using System;
+    using System.Collections.Generic;
+    using Exceptions;
+    using Logging;
+    using Magnum;
+    using Magnum.Extensions;
+    using Management;
+    using RabbitMQ.Client;
+    using Subscriptions.Coordinator;
+    using Subscriptions.Messages;
 
     public class RabbitMqSubscriptionBinder :
-		SubscriptionObserver
-	{
-		static readonly ILog _log = Logger.Get(typeof (RabbitMqSubscriptionBinder));
-		readonly Dictionary<Guid, MessageName> _bindings;
-		IRabbitMqEndpointAddress _inputAddress;
+        SubscriptionObserver
+    {
+        static readonly ILog _log = Logger.Get(typeof (RabbitMqSubscriptionBinder));
+        readonly Dictionary<Guid, MessageName> _bindings;
+        readonly InboundRabbitMqTransport _inboundTransport;
+        readonly IRabbitMqEndpointAddress _inputAddress;
+        readonly IMessageNameFormatter _messageNameFormatter;
 
-		public RabbitMqSubscriptionBinder(IServiceBus bus)
-		{
-			_bindings = new Dictionary<Guid, MessageName>();
+        public RabbitMqSubscriptionBinder(IServiceBus bus)
+        {
+            _bindings = new Dictionary<Guid, MessageName>();
 
-			_inputAddress = bus.Endpoint.InboundTransport.Address.CastAs<IRabbitMqEndpointAddress>();
-		}
+            _inboundTransport = bus.Endpoint.InboundTransport as InboundRabbitMqTransport;
+            if (_inboundTransport == null)
+                throw new ConfigurationException(
+                    "The bus must be receiving from a RabbitMQ endpoint for this interceptor to work");
 
-		public void OnSubscriptionAdded(SubscriptionAdded message)
-		{
-			Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
+            _inputAddress = _inboundTransport.Address.CastAs<IRabbitMqEndpointAddress>();
 
-			Type messageType = Type.GetType(message.MessageName);
-			if (messageType == null)
-			{
-				_log.InfoFormat("Unknown message type '{0}', unable to add subscription", message.MessageName);
-				return;
-			}
+            _messageNameFormatter = _inboundTransport.MessageNameFormatter;
+        }
 
-			var messageName = new MessageName(messageType);
+        public void OnSubscriptionAdded(SubscriptionAdded message)
+        {
+            Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
 
-			using (var management = new RabbitMqEndpointManagement(_inputAddress))
-			{
-				management.BindExchange(_inputAddress.Name, messageName.ToString(), ExchangeType.Fanout, "");
-			}
+            Type messageType = Type.GetType(message.MessageName);
+            if (messageType == null)
+            {
+                _log.InfoFormat("Unknown message type '{0}', unable to add subscription", message.MessageName);
+                return;
+            }
 
-			_bindings[message.SubscriptionId] = messageName;
-		}
+            MessageName messageName = _messageNameFormatter.GetMessageName(messageType);
 
-		public void OnSubscriptionRemoved(SubscriptionRemoved message)
-		{
-			Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
+            using (var management = new RabbitMqEndpointManagement(_inputAddress))
+            {
+                management.BindExchange(_inputAddress.Name, messageName.ToString(), ExchangeType.Fanout, "");
+            }
 
-			MessageName messageName;
-			if (_bindings.TryGetValue(message.SubscriptionId, out messageName))
-			{
-				using (var management = new RabbitMqEndpointManagement(_inputAddress))
-				{
-					management.UnbindExchange(_inputAddress.Name, messageName.ToString(), "");
-				}
+            _bindings[message.SubscriptionId] = messageName;
+        }
 
-				_bindings.Remove(message.SubscriptionId);
-			}
-		}
+        public void OnSubscriptionRemoved(SubscriptionRemoved message)
+        {
+            Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
 
-		public void OnComplete()
-		{
-		}
-	}
+            MessageName messageName;
+            if (_bindings.TryGetValue(message.SubscriptionId, out messageName))
+            {
+                using (var management = new RabbitMqEndpointManagement(_inputAddress))
+                {
+                    management.UnbindExchange(_inputAddress.Name, messageName.ToString(), "");
+                }
+
+                _bindings.Remove(message.SubscriptionId);
+            }
+        }
+
+        public void OnComplete()
+        {
+        }
+    }
 }
