@@ -12,14 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
-	using System;
+    using System;
     using System.Collections.Generic;
-	using System.Linq;
-	using System.Reflection;
+    using System.Linq;
+    using System.Reflection;
     using Configurators;
-	using Magnum.Extensions;
+    using Magnum.Extensions;
     using SubscriptionBuilders;
-	using SubscriptionConnectors;
+    using SubscriptionConnectors;
 
     public class ConsumerSubscriptionConfiguratorImpl<TConsumer> :
         SubscriptionConfiguratorImpl<ConsumerSubscriptionConfigurator<TConsumer>>,
@@ -38,39 +38,45 @@ namespace MassTransit.SubscriptionConfigurators
         {
             if (_consumerFactory == null)
                 yield return this.Failure("The consumer factory cannot be null.");
-            
+
             if (!typeof (TConsumer).Implements<IConsumer>())
                 yield return
                     this.Warning(string.Format("The consumer class {0} does not implement any IConsumer interfaces",
                         typeof (TConsumer).ToShortTypeName()));
-				.Select(x => ("You should have a protected default c'tor or a public parameterless" +
-				             " c'tor for '{0}', or otherwise you have to ensure that you have" +
-				             " no initialization logic in your constructors that NEEDS to run. " +
-				             "This is because for other messages, MassTransit will initialize the" +
-				             " objects without calling their constructors.").FormatWith(x.MessageType))
-				.Select(message => new ValidationResultImpl(ValidationResultDisposition.Warning, 
-															"CTorWarning", message))
-				;
 
-			foreach (var message in warningForMessages)
-				yield return  message;
-		}
+            IEnumerable<ValidationResult> warningForMessages = MessageInterfaceTypeReflector<TConsumer>
+                .GetAllTypes()
+                .Distinct()
+                .Where(x => !(HasDefaultProtectedCtor(typeof (TConsumer)) || HasSinglePublicCtor(typeof (TConsumer))))
+                .Select(x => ("The {0} consumer should have a public or protected default constructor." +
+                              " Without an available constructor, MassTransit will initialize new consumer instances" +
+                              " without calling a constructor, which can lead to unpredictable behavior if the consumer" +
+                              " depends upon logic in the constructor to be executed.")
+                                 .FormatWith(x.MessageType.ToShortTypeName()))
+                .Select(message => this.Warning("Consumer", message));
 
-		private static bool HasDefaultProtectedCtor(Type type)
-		{
-			return type.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Any(c => c.GetParameters().Count() == 0);
-		}
-
-		private static bool HasSinglePublicCtor(Type type)
-		{
-			return
-				type.GetConstructors(BindingFlags.Public | BindingFlags.Instance).All(c => c.GetParameters().Count() == 0)
-					&& type.GetConstructors().Count() == 1;
+            foreach (ValidationResultImpl message in warningForMessages)
+                yield return message;
         }
 
         public SubscriptionBuilder Configure()
         {
             return new ConsumerSubscriptionBuilder<TConsumer>(_consumerFactory, ReferenceFactory);
+        }
+
+        static bool HasDefaultProtectedCtor(Type type)
+        {
+            return
+                type.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Any(
+                    c => !c.GetParameters().Any());
+        }
+
+        static bool HasSinglePublicCtor(Type type)
+        {
+            return
+                type.GetConstructors(BindingFlags.Public | BindingFlags.Instance).All(
+                    c => !c.GetParameters().Any())
+                && type.GetConstructors().Count() == 1;
         }
     }
 }
