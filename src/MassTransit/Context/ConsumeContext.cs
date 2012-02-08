@@ -128,9 +128,10 @@ namespace MassTransit.Context
         public bool TryGetContext<T>(out IConsumeContext<T> context)
             where T : class
         {
-            if (typeof (T).IsAssignableFrom(Message.GetType()))
+            T messageOfT = Message as T;
+            if (messageOfT != null)
             {
-                context = new ConsumeContext<T>(_context, Message as T);
+                context = new ConsumeContext<T>(_context, messageOfT);
                 return true;
             }
 

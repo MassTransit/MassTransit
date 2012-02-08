@@ -15,6 +15,7 @@ namespace MassTransit.Transports.RabbitMq
     using System;
     using System.Collections;
     using System.IO;
+    using Logging;
     using Magnum;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
@@ -65,6 +66,8 @@ namespace MassTransit.Transports.RabbitMq
                             properties.Headers = new Hashtable {{"Content-Type", context.ContentType}};
 
                             _producer.Channel.BasicPublish(_address.Name, "", properties, body.ToArray());
+
+                            _address.LogSent("", context.MessageType);
                         }
                     }
                     catch (EndOfStreamException ex)

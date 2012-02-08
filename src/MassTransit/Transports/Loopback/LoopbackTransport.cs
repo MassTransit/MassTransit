@@ -10,9 +10,6 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
-using MassTransit.Subscriptions.Coordinator;
-
 namespace MassTransit.Transports
 {
     using System;
@@ -21,14 +18,14 @@ namespace MassTransit.Transports
     using Context;
     using Loopback;
     using Magnum.Extensions;
-    using Util;
+    using Subscriptions.Coordinator;
 
-	/// <summary>
-	/// The loopback transport is a built-in transport for MassTransit that 
-	/// works on messages in-memory. It is dependent on the <see cref="SubscriptionLoopback"/>
-	/// that takes care of subscribing the buses in the process
-	/// depending on what subscriptions are made.
-	/// </summary>
+    /// <summary>
+    /// The loopback transport is a built-in transport for MassTransit that 
+    /// works on messages in-memory. It is dependent on the <see cref="SubscriptionLoopback"/>
+    /// that takes care of subscribing the buses in the process
+    /// depending on what subscriptions are made.
+    /// </summary>
     public class LoopbackTransport :
         IDuplexTransport
     {
@@ -78,9 +75,7 @@ namespace MassTransit.Transports
                     _messages.AddLast(message);
                 }
 
-                if (SpecialLoggers.Messages.IsInfoEnabled)
-                    SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}:{2}", Address, context.MessageType,
-                        message.MessageId);
+                Address.LogSent(message.MessageId, context.MessageType);
             }
             catch
             {
