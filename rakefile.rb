@@ -340,14 +340,14 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mt
 
   nuspec :mtl4n_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.Log4Net'
-    nuspec.version = asm_version
+    nuspec.version = FORMAL_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'This integration library adds support for Log4Net to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", asm_version
+    nuspec.dependency "MassTransit", FORMAL_VERSION
     nuspec.dependency "log4net", "1.2.11"
     nuspec.output_file = 'nuspecs/MassTransit.Log4Net.nuspec'
 
@@ -474,14 +474,14 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mt
 
   nuspec :mttf_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.TestFramework'
-    nuspec.version = asm_version
+    nuspec.version = FORMAL_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'This library contains testing helpers for use with MassTransit.'
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", asm_version
+    nuspec.dependency "MassTransit", FORMAL_VERSION
     nuspec.dependency "NUnit", "2.5.9"
     nuspec.dependency "RhinoMocks", "3.6"
     nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'
