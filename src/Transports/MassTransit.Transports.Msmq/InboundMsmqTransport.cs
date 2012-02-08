@@ -23,7 +23,6 @@ namespace MassTransit.Transports.Msmq
         IInboundTransport
     {
         static readonly ILog _log = Logger.Get(typeof (InboundMsmqTransport));
-        static readonly ILog _messageLog = Logger.Get("MassTransit.Msmq.MessageLog");
         readonly IMsmqEndpointAddress _address;
         readonly ConnectionHandler<MessageQueueConnection> _connectionHandler;
         bool _disposed;
@@ -69,9 +68,6 @@ namespace MassTransit.Transports.Msmq
                 {
                     using (MessageEnumerator enumerator = connection.Queue.GetMessageEnumerator2())
                     {
-                        // if (_log.IsDebugEnabled)
-                        // _log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Address, timeout);
-
                         while (enumerator.MoveNext(timeout))
                         {
                             if (enumerator.Current == null)
@@ -100,9 +96,6 @@ namespace MassTransit.Transports.Msmq
                                 Action<IReceiveContext> receive = receiver(context);
                                 if (receive == null)
                                 {
-                                    if (_log.IsDebugEnabled)
-                                        _log.DebugFormat("SKIP:{0}:{1}", Address, peekMessage.Id);
-
                                     continue;
                                 }
 
@@ -117,10 +110,6 @@ namespace MassTransit.Transports.Msmq
                                                 string.Format(
                                                     "Received message does not match current message: ({0} != {1})",
                                                     message.Id, context.MessageId));
-
-                                        if (_messageLog.IsDebugEnabled)
-                                            _messageLog.DebugFormat("RECV:{0}:{1}:{2}", _address.InboundFormatName,
-                                                message.Label, message.Id);
 
                                         receive(context);
 

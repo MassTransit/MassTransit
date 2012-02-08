@@ -87,8 +87,7 @@ namespace MassTransit.Transports.RabbitMq
                             Action<IReceiveContext> receive = callback(context);
                             if (receive == null)
                             {
-                                if (_log.IsDebugEnabled)
-                                    _log.DebugFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
+                                Address.LogSkipped(result.BasicProperties.MessageId);
                             }
                             else
                             {

@@ -12,49 +12,49 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-	using System;
-	using System.IO;
-	using Exceptions;
+    using System;
+    using System.IO;
+    using Exceptions;
 
     public class MoveMessageSendContext :
-		MessageContext,
-		ISendContext
-	{
-		readonly Action<Stream> _bodyWriter;
-    	Action<IEndpointAddress> _notifySend;
+        MessageContext,
+        ISendContext
+    {
+        readonly Action<Stream> _bodyWriter;
+        Action<IEndpointAddress> _notifySend;
 
-		public MoveMessageSendContext(IReceiveContext context)
-		{
-			SetUsing(context);
+        public MoveMessageSendContext(IReceiveContext context)
+        {
+            SetUsing(context);
 
-			Id = context.Id;
+            Id = context.Id;
 
-			_notifySend = address => context.NotifySend(this, address);
+            _notifySend = address => context.NotifySend(this, address);
 
-			_bodyWriter = stream => context.CopyBodyTo(stream);
-		}
+            _bodyWriter = stream => context.CopyBodyTo(stream);
+        }
 
-    	public Guid Id { get; set; }
+        public Guid Id { get; set; }
 
-    	public Type DeclaringMessageType
-    	{
-			get { return typeof (object); }
-    	}
+        public Type DeclaringMessageType
+        {
+            get { return typeof (object); }
+        }
 
-    	public void SerializeTo(Stream stream)
-		{
-			_bodyWriter(stream);
-		}
+        public void SerializeTo(Stream stream)
+        {
+            _bodyWriter(stream);
+        }
 
-		public bool TryGetContext<T>(out IBusPublishContext<T> context) 
-			where T : class
-		{
-			throw new MessageException(typeof(T), "The message type is unknown and can not be type-cast");
-		}
+        public bool TryGetContext<T>(out IBusPublishContext<T> context)
+            where T : class
+        {
+            throw new MessageException(typeof (T), "The message type is unknown and can not be type-cast");
+        }
 
-    	public void NotifySend(IEndpointAddress address)
-    	{
-    		_notifySend(address);
-    	}
-	}
+        public void NotifySend(IEndpointAddress address)
+        {
+            _notifySend(address);
+        }
+    }
 }

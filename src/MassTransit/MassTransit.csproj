@@ -270,6 +270,7 @@
     <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\DistributorSubscriptionConnector.cs" />
     <Compile Include="Distributor\SubscriptionConnectors\WorkerSubscriptionConnector.cs" />
+    <Compile Include="EndpointLoggerExtensions.cs" />
     <Compile Include="Exceptions\RequestException.cs" />
     <Compile Include="Exceptions\RequestTimeoutException.cs" />
     <Compile Include="Exceptions\SendException.cs" />
@@ -602,7 +603,6 @@
     <Compile Include="Util\LambdaEqualityComparer.cs" />
     <Compile Include="Util\ObjectExtensions.cs" />
     <Compile Include="Util\ReSharperStaticAnalysis.cs" />
-    <Compile Include="Util\SpecialLoggers.cs" />
     <Compile Include="Util\StreamExtensions.cs" />
     <Compile Include="Util\UriExtensions.cs" />
   </ItemGroup>

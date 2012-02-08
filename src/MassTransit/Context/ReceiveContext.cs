@@ -121,10 +121,8 @@ namespace MassTransit.Context
         public void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
             where T : class
         {
-            if (SpecialLoggers.Messages.IsInfoEnabled)
-                SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}:{2}", consumeContext.InputAddress,
-                    typeof (T).ToMessageName(),
-                    consumeContext.MessageId);
+            if(Endpoint != null)
+                Endpoint.Address.LogReceived(consumeContext.MessageId, typeof (T).ToMessageName());
 
             _received.Add(new Received<T>(consumeContext, consumerType, correlationId, _timer.ElapsedMilliseconds));
         }
