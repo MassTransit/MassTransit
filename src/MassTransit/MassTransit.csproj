@@ -104,8 +104,10 @@
     <Compile Include="Configuration\Builders\EndpointFactoryBuilderImpl.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilder.cs" />
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\ConsumptionPair.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\ConsumptionReflector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\CorrelatedMessageInterfaceType.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceType.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeReflector.cs" />
     <Compile Include="Diagnostics\IntrospectionExtensions.cs" />
     <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
     <Compile Include="Configuration\BusServiceLayer.cs" />

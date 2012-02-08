@@ -21,12 +21,8 @@ namespace MassTransit.SubscriptionConnectors
         HandlerSubscriptionConnector<TMessage>
         where TMessage : class
     {
-        public Type MessageType
-        {
-            get { return typeof (TMessage); }
-        }
-
-        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, string requestId, HandlerSelector<TMessage> handler)
+        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, string requestId,
+                                         HandlerSelector<TMessage> handler)
         {
             if (handler == null)
                 throw new ArgumentNullException("handler", "The handler cannot be null.");
@@ -40,10 +36,7 @@ namespace MassTransit.SubscriptionConnectors
 
             UnsubscribeAction result = router.Connect(requestId, sink);
 
-            // TODO this should NOT publish a correlated subscription, in fact, do we even need to subscribe?
-            //UnsubscribeAction remove = configurator.SubscribedTo<TMessage>();
-
-            return () => result() && (router.SinkCount(requestId) == 0);// && remove();
+            return () => result() && (router.SinkCount(requestId) == 0); // && remove();
         }
     }
 }

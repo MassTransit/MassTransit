@@ -15,7 +15,6 @@ namespace MassTransit.SubscriptionConnectors
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Distributor;
     using Distributor.SubscriptionConnectors;
     using Exceptions;
     using Magnum.Extensions;
@@ -72,121 +71,79 @@ namespace MassTransit.SubscriptionConnectors
 
         IEnumerable<InstanceSubscriptionConnector> ConsumesContext()
         {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsGenericType)
-                .Where(x => x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>))
-                .Select(x => new {x.InterfaceType, MessageType = x.MessageType.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsValueType == false)
-                .Select(x =>
-                        FastActivator.Create(typeof (ContextInstanceSubscriptionConnector<,>),
-                            new[] {typeof (T), x.MessageType}))
-                .Cast<InstanceSubscriptionConnector>();
+            return MessageInterfaceTypeReflector<T>.GetConsumesContextTypes()
+                .Select(CreateContextConnector);
         }
 
         IEnumerable<InstanceSubscriptionConnector> ConsumesSelectedContext()
         {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.Selected))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsGenericType)
-                .Where(x => x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>))
-                .Select(x => new {x.InterfaceType, MessageType = x.MessageType.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsValueType == false)
-                .Select(x =>
-                        FastActivator.Create(typeof (SelectedContextInstanceSubscriptionConnector<,>),
-                            new[] {typeof (T), x.MessageType}))
-                .Cast<InstanceSubscriptionConnector>();
+            return MessageInterfaceTypeReflector<T>.GetConsumesSelectedContextTypes()
+                .Select(CreateSelectedContextConnector);
+        }
+
+        static InstanceSubscriptionConnector CreateContextConnector(MessageInterfaceType x)
+        {
+            return (InstanceSubscriptionConnector)
+                   FastActivator.Create(typeof (ContextInstanceSubscriptionConnector<,>),
+                       new[] {typeof (T), x.MessageType});
+        }
+
+        static InstanceSubscriptionConnector CreateSelectedContextConnector(MessageInterfaceType x)
+        {
+            return (InstanceSubscriptionConnector)
+                   FastActivator.Create(typeof (SelectedContextInstanceSubscriptionConnector<,>),
+                       new[] {typeof (T), x.MessageType});
         }
 
         static IEnumerable<InstanceSubscriptionConnector> ConsumesAll()
         {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsValueType == false)
-                .Where(
-                    x =>
-                    !(x.MessageType.IsGenericType &&
-                      x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>)))
-                .Select(
-                    x =>
-                    FastActivator.Create(typeof (InstanceSubscriptionConnector<,>), new[] {typeof (T), x.MessageType}))
-                .Cast<InstanceSubscriptionConnector>();
+            return MessageInterfaceTypeReflector<T>.GetConsumesAllTypes()
+                .Select(CreateConnector);
+        }
+
+        static InstanceSubscriptionConnector CreateConnector(MessageInterfaceType x)
+        {
+            return (InstanceSubscriptionConnector)
+                   FastActivator.Create(typeof (InstanceSubscriptionConnector<,>), new[] {typeof (T), x.MessageType});
         }
 
         static IEnumerable<InstanceSubscriptionConnector> ConsumesSelected()
         {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.Selected))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsValueType == false)
-                .Where(
-                    x =>
-                    !(x.MessageType.IsGenericType &&
-                      x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>)))
-                .Select(
-                    x =>
-                    FastActivator.Create(typeof (SelectedInstanceSubscriptionConnector<,>),
-                        new[] {typeof (T), x.MessageType}))
-                .Cast<InstanceSubscriptionConnector>();
+            return MessageInterfaceTypeReflector<T>.GetConsumesSelectedTypes()
+                .Select(CreateSelectedConnector);
+        }
+
+        static InstanceSubscriptionConnector CreateSelectedConnector(MessageInterfaceType x)
+        {
+            return (InstanceSubscriptionConnector)
+                   FastActivator.Create(typeof (SelectedInstanceSubscriptionConnector<,>),
+                       new[] {typeof (T), x.MessageType});
         }
 
         static IEnumerable<InstanceSubscriptionConnector> ConsumesCorrelated()
         {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.For<>))
-                .Select(x => new
-                    {
-                        InterfaceType = x,
-                        MessageType = x.GetGenericArguments()[0],
-                        CorrelationType = x.GetGenericArguments()[1]
-                    })
-                .Where(x => x.MessageType.IsValueType == false)
-                .Where(
-                    x =>
-                    !(x.MessageType.IsGenericType &&
-                      x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>)))
-                .Select(
-                    x =>
-                    typeof (CorrelatedInstanceSubscriptionConnector<,,>).MakeGenericType(typeof (T), x.MessageType,
-                        x.CorrelationType))
-                .Select(x => FastActivator.Create(x))
-                .Cast<InstanceSubscriptionConnector>();
+            return MessageInterfaceTypeReflector<T>.GetConsumesCorrelatedTypes()
+                .Select(CreateCorrelatedConnector);
         }
+
+        static InstanceSubscriptionConnector CreateCorrelatedConnector(CorrelatedMessageInterfaceType x)
+        {
+            return (InstanceSubscriptionConnector)
+                   FastActivator.Create(typeof (CorrelatedInstanceSubscriptionConnector<,,>),
+                       new[] {typeof (T), x.MessageType, x.CorrelationType});
+        }
+
 
         static IEnumerable<InstanceSubscriptionConnector> Distributors()
         {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (IDistributor<>))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsValueType == false)
-                .Where(
-                    x =>
-                    !(x.MessageType.IsGenericType &&
-                      x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>)))
+            return MessageInterfaceTypeReflector<T>.GetDistributorTypes()
                 .Select(x => FastActivator.Create(typeof (DistributorSubscriptionConnector<>), new[] {x.MessageType}))
                 .Cast<InstanceSubscriptionConnector>();
         }
 
         static IEnumerable<InstanceSubscriptionConnector> Workers()
         {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (IWorker<>))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
-                .Where(x => x.MessageType.IsValueType == false)
-                .Where(
-                    x =>
-                    !(x.MessageType.IsGenericType &&
-                      x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>)))
+            return MessageInterfaceTypeReflector<T>.GetWorkerTypes()
                 .Select(x => FastActivator.Create(typeof (WorkerSubscriptionConnector<>), new[] {x.MessageType}))
                 .Cast<InstanceSubscriptionConnector>();
         }
