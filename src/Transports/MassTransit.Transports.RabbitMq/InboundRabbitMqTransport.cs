@@ -17,6 +17,7 @@ namespace MassTransit.Transports.RabbitMq
     using System.Text;
     using System.Threading;
     using Context;
+    using Exceptions;
     using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
@@ -88,11 +89,12 @@ namespace MassTransit.Transports.RabbitMq
                             if (receive == null)
                             {
                                 Address.LogSkipped(result.BasicProperties.MessageId);
+
+                                throw new MessageNotConsumedException(Address.Uri,
+                                    string.Format("Message Not Received: {0}", result.BasicProperties.MessageId));
                             }
-                            else
-                            {
-                                receive(context);
-                            }
+
+                            receive(context);
 
                             _consumer.MessageCompleted(result.DeliveryTag);
                         }

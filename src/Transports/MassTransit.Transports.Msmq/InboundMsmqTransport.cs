@@ -57,12 +57,10 @@ namespace MassTransit.Transports.Msmq
             GC.SuppressFinalize(this);
         }
 
-        protected bool EnumerateQueue(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout)
+        protected void EnumerateQueue(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout)
         {
             if (_disposed)
                 throw new ObjectDisposedException("The transport has been disposed: '{0}'".FormatWith(Address));
-
-            bool received = false;
 
             _connectionHandler.Use(connection =>
                 {
@@ -112,15 +110,11 @@ namespace MassTransit.Transports.Msmq
                                                     message.Id, context.MessageId));
 
                                         receive(context);
-
-                                        received = true;
                                     });
                             }
                         }
                     }
                 });
-
-            return received;
         }
 
         protected virtual void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout,

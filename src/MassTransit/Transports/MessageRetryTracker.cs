@@ -12,77 +12,70 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-	using System;
-	using System.Collections.Generic;
-	using Magnum.Threading;
+    using System;
+    using System.Threading;
+    using Magnum.Caching;
 
-	public class MessageRetryTracker :
-		IDisposable
-	{
-		readonly ReaderWriterLockedObject<Dictionary<string, int>> _messages =
-			new ReaderWriterLockedObject<Dictionary<string, int>>(new Dictionary<string, int>());
+    public class MessageRetryTracker
+    {
+        readonly Cache<string, TrackedMessage> _messages;
 
-		readonly int _retryLimit;
+        readonly int _retryLimit;
 
-		bool _disposed;
+        public MessageRetryTracker(int retryLimit)
+        {
+            _retryLimit = retryLimit;
 
-		public MessageRetryTracker(int retryLimit)
-		{
-			_retryLimit = retryLimit;
-		}
+            _messages = new ConcurrentCache<string, TrackedMessage>(id => new TrackedMessage());
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public bool IsRetryLimitExceeded(string id, out Exception retryException)
+        {
+            bool exceeded = false;
+            Exception result = null;
 
-		public bool IsRetryLimitExceeded(string id)
-		{
-			if (string.IsNullOrEmpty(id))
-				return false;
+            if (!string.IsNullOrEmpty(id))
+            {
+                _messages.WithValue(id, x =>
+                    {
+                        result = x.Exception;
+                        exceeded = x.RetryCount >= _retryLimit;
+                    });
+            }
 
-			int retryCount = 0;
-			if (!_messages.ReadLock(x => x.TryGetValue(id, out retryCount)))
-				return false;
+            retryException = result;
+            return exceeded;
+        }
 
-			return retryCount >= _retryLimit;
-		}
+        public void IncrementRetryCount(string id, Exception ex)
+        {
+            if (string.IsNullOrEmpty(id))
+                return;
 
-		public void IncrementRetryCount(string id)
-		{
-			if (string.IsNullOrEmpty(id))
-				return;
+            _messages[id].Increment(ex);
+        }
 
-			_messages.WriteLock(x => { x[id] = x.ContainsKey(id) ? x[id] + 1 : 1; });
-		}
+        public void MessageWasReceivedSuccessfully(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return;
 
-		public void MessageWasReceivedSuccessfully(string id)
-		{
-			if (string.IsNullOrEmpty(id))
-				return;
+            _messages.Remove(id);
+        }
 
-			_messages.WriteLock(x =>
-				{
-					if (x.ContainsKey(id))
-						x.Remove(id);
-				});
-		}
+        class TrackedMessage
+        {
+            public Exception Exception;
+            public int RetryCount;
 
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_messages.Dispose();
-			}
-
-			_disposed = true;
-		}
-
-		~MessageRetryTracker()
-		{
-			Dispose(false);
-		}
-	}
+            public void Increment(Exception exception)
+            {
+                lock(this)
+                {
+                    RetryCount++;
+                    Exception = exception;
+                }
+            }
+        }
+    }
 }

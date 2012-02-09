@@ -12,47 +12,51 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using MassTransit.Transports;
-	using NUnit.Framework;
+    using System;
+    using MassTransit.Transports;
+    using NUnit.Framework;
 
-	[TestFixture]
-	public class The_message_retry_tracker
-	{
-		[Test]
-		public void Should_return_false_until_the_limit_is_exceeded()
-		{
-			const int retryLimit = 5;
+    [TestFixture]
+    public class The_message_retry_tracker
+    {
+        [Test]
+        public void Should_return_false_until_the_limit_is_exceeded()
+        {
+            const int retryLimit = 5;
 
-			var tracker = new MessageRetryTracker(retryLimit);
-			const string id = "qelofjsw";
+            var tracker = new MessageRetryTracker(retryLimit);
+            const string id = "qelofjsw";
 
-			for (int i = 0; i < retryLimit; i++)
-			{
-				Assert.IsFalse(tracker.IsRetryLimitExceeded(id));
-				tracker.IncrementRetryCount(id);
-			}
-			Assert.IsTrue(tracker.IsRetryLimitExceeded(id));
-		}
+            Exception ex;
 
-		[Test]
-		public void Should_reset_once_the_message_was_received()
-		{
-			const int retryLimit = 5;
+            for (int i = 0; i < retryLimit; i++)
+            {
+                Assert.IsFalse(tracker.IsRetryLimitExceeded(id, out ex));
+                tracker.IncrementRetryCount(id, ex);
+            }
+            Assert.IsTrue(tracker.IsRetryLimitExceeded(id, out ex));
+        }
 
-			var tracker = new MessageRetryTracker(retryLimit);
-			const string id = "qelofjsw";
+        [Test]
+        public void Should_reset_once_the_message_was_received()
+        {
+            const int retryLimit = 5;
 
-			Assert.IsFalse(tracker.IsRetryLimitExceeded(id));
-			tracker.IncrementRetryCount(id);
+            var tracker = new MessageRetryTracker(retryLimit);
+            const string id = "qelofjsw";
 
-			tracker.MessageWasReceivedSuccessfully(id);
+            Exception ex;
+            Assert.IsFalse(tracker.IsRetryLimitExceeded(id, out ex));
+            tracker.IncrementRetryCount(id, ex);
 
-			for (int i = 0; i < retryLimit; i++)
-			{
-				Assert.IsFalse(tracker.IsRetryLimitExceeded(id));
-				tracker.IncrementRetryCount(id);
-			}
-			Assert.IsTrue(tracker.IsRetryLimitExceeded(id));
-		}
-	}
+            tracker.MessageWasReceivedSuccessfully(id);
+
+            for (int i = 0; i < retryLimit; i++)
+            {
+                Assert.IsFalse(tracker.IsRetryLimitExceeded(id, out ex));
+                tracker.IncrementRetryCount(id, ex);
+            }
+            Assert.IsTrue(tracker.IsRetryLimitExceeded(id, out ex));
+        }
+    }
 }
