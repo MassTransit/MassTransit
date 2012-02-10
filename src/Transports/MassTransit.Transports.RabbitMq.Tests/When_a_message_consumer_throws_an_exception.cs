@@ -49,7 +49,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 				{
 					StringA = "ValueA",
 				};
-
+            
 			LocalBus.Publish(_message);
 		}
 
