@@ -1,0 +1,83 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'semver'
+
+class CommandError < StandardError; end
+
+begin
+  command = ARGV.shift || 'tag'
+
+  case command
+  when /^init(ialize)?$/
+    file = SemVer::FILE_NAME
+
+    if File.exist? file
+      puts "#{file} already exists"
+    else
+      version = SemVer.new
+      version.save file
+    end
+
+  when /^inc(rement)?$/
+    version = SemVer.find
+    dimension = ARGV.shift or raise CommandError, "required: major | minor | patch"
+
+    case dimension
+    when 'major'
+      version.major += 1
+      version.minor = 0
+      version.patch = 0
+
+    when 'minor'
+      version.minor += 1
+      version.patch = 0
+
+    when 'patch'
+      version.patch += 1
+
+    else
+      raise CommandError, "#{dimension} is invalid: major | minor | patch"
+    end
+
+    version.special = ''
+    version.save
+
+  when /^spe(cial)?$/
+    version = SemVer.find
+    special_str = ARGV.shift or raise CommandError, "required: an arbitrary string (beta, alfa, romeo, etc)"
+    version.special = special_str
+    version.save
+
+  when 'format'
+    version = SemVer.find
+    format_str = ARGV.shift or raise CommandError, "required: format string"
+    version.format format_str
+
+  when 'tag'
+    version = SemVer.find
+    puts version.to_s
+
+  when 'help'
+    puts <<-HELP
+semver commands
+---------------
+
+init[ialze]                        # initialize semantic version tracking
+inc[rement] major | minor | patch  # increment a specific version number
+spe[cial] [STRING]                 # set a special version suffix
+format                             # printf like format: %M, %m, %p, %s
+tag                                # equivalent to format 'v%M.%m.%p%s'
+help
+
+PLEASE READ http://semver.org
+    HELP
+
+  else raise CommandError, "invalid command #{command}"
+  end
+
+rescue CommandError => e
+  puts e.message
+  puts "#{$0} help for more info"
+  exit 1
+end

@@ -1,0 +1,32 @@
+PATH
+  remote: vendor/bundle/ruby/1.9.1/gems/albacore-0.2.7
+  specs:
+    albacore (0.2.7)
+
+PATH
+  remote: vendor/bundle/ruby/1.9.1/gems/rake-0.9.2.2
+  specs:
+    rake (0.9.2.2)
+
+PATH
+  remote: vendor/bundle/ruby/1.9.1/gems/rubyzip-0.9.5
+  specs:
+    rubyzip (0.9.5)
+
+PATH
+  remote: vendor/bundle/ruby/1.9.1/gems/semver2-2.0.0
+  specs:
+    semver2 (2.0.0)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+
+PLATFORMS
+  x86-mingw32
+
+DEPENDENCIES
+  albacore (= 0.2.7)!
+  rake (= 0.9.2.2)!
+  rubyzip (= 0.9.5)!
+  semver2 (= 2.0.0)!
