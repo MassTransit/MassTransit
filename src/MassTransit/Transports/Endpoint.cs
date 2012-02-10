@@ -115,6 +115,8 @@ namespace MassTransit.Transports
 
                         if (successfulMessageId != null)
                         {
+                            _log.DebugFormat("Received Successfully: {0}", successfulMessageId);
+
                             _tracker.MessageWasReceivedSuccessfully(successfulMessageId);
                             successfulMessageId = null;
                         }
@@ -169,7 +171,7 @@ namespace MassTransit.Transports
                                 {
                                     receive(receiveContext);
 
-                                    _tracker.MessageWasReceivedSuccessfully(receiveContext.MessageId);
+                                    //                                    _tracker.MessageWasReceivedSuccessfully(receiveContext.MessageId);
                                     receivedSuccessfully = true;
                                 }
                                 catch (MessageNotConsumedException ex)
@@ -190,7 +192,7 @@ namespace MassTransit.Transports
                                     MoveMessageToErrorTransport(receiveContext);
                                 }
 
-                                if(receivedSuccessfully)
+                                if (receivedSuccessfully)
                                 {
                                     successfulMessageId = receiveContext.MessageId;
                                 }
@@ -198,17 +200,29 @@ namespace MassTransit.Transports
                     }, timeout);
 
                 if (failedMessageException != null)
+                {
+                    _log.DebugFormat("Throwing Original Exception: {0}", failedMessageException.GetType());
+
                     throw failedMessageException;
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                successfulMessageId = null;
+                if (successfulMessageId != null)
+                {
+                    _log.DebugFormat("Increment Retry Count: {0}", successfulMessageId);
+
+                    _tracker.IncrementRetryCount(successfulMessageId, ex);
+                    successfulMessageId = null;
+                }
                 throw;
             }
             finally
             {
                 if (successfulMessageId != null)
                 {
+                    _log.DebugFormat("Received Successfully: {0}", successfulMessageId);
+
                     _tracker.MessageWasReceivedSuccessfully(successfulMessageId);
                     successfulMessageId = null;
                 }

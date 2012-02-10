@@ -29,7 +29,7 @@
   <appender name="LogFileAppender"
         type="log4net.Appender.RollingFileAppender" >
     <param name="File"
-         value="C:\LogFiles\MassTransit.ServiceBus.Tests.log" />
+         value="C:\LogFiles\MassTransit.Transports.Msmq.Tests.log" />
     <param name="AppendToFile"
          value="false" />
     <rollingStyle value="Size" />
