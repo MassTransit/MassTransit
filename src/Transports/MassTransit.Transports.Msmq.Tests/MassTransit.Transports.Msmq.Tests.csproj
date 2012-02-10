@@ -146,6 +146,10 @@
     <Compile Include="Transactional_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
+      <Project>{8D2BE372-A756-4676-B2EA-ED7846809BFE}</Project>
+      <Name>MassTransit.Log4NetIntegration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Persistence\MassTransit.NHibernateIntegration.Tests\MassTransit.NHibernateIntegration.Tests.csproj">
       <Project>{44E6D06D-B60E-434B-981D-D8139062A6EC}</Project>
       <Name>MassTransit.NHibernateIntegration.Tests</Name>
