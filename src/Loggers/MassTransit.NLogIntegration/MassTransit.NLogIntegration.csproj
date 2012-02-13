@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{8D2BE372-A756-4676-B2EA-ED7846809BFE}</ProjectGuid>
+    <ProjectGuid>{F802655A-D5EC-4031-B21F-A3EECCBE02A5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.Log4NetIntegration</RootNamespace>
-    <AssemblyName>MassTransit.Log4NetIntegration</AssemblyName>
+    <RootNamespace>MassTransit.NLogIntegration</RootNamespace>
+    <AssemblyName>MassTransit.NLogIntegration</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -21,6 +21,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,33 +31,29 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\MassTransit.NLogIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\..\lib\log4net\1.2.11\net35-full\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\..\lib\log4net\1.2.11\net40-full\log4net.dll</HintPath>
-    </Reference>
+   <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+     <HintPath>..\..\..\lib\NLog\net35\NLog.dll</HintPath>
+   </Reference>
+   <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+     <HintPath>..\..\..\lib\NLog\net40\NLog.dll</HintPath>
+   </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\SolutionVersion.cs">
-      <Link>SolutionVersion.cs</Link>
-    </Compile>
-    <Compile Include="Log4NetConfigurationExtensions.cs" />
-    <Compile Include="Logging\Log4NetLog.cs" />
-    <Compile Include="Logging\Log4NetLogger.cs" />
+    <Compile Include="NLogConfiguratorExtensions.cs" />
+    <Compile Include="Logging\NLogLog.cs" />
+    <Compile Include="Logging\NLogLogger.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
