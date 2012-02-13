@@ -10,10 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit.Logging
 {
     using System;
 
+	/// <summary>
+	/// A delegate that only is called if the given level is being logged with. This allows
+	/// the programmer to avoid having expensive debugging string format expressions
+	/// evaluate.
+	/// </summary>
+	/// <returns>The string to log.</returns>
+	public delegate string LogMessageGenerator();
+
+	/// <summary>
+	/// Implementors handle logging and filtering based on logging levels.
+	/// </summary>
     public interface ILog
     {
         bool IsDebugEnabled { get; }
@@ -23,16 +37,20 @@ namespace MassTransit.Logging
         bool IsFatalEnabled { get; }
 
         void Debug(object obj);
-        void Debug(object obj, Exception exception);
+		void Debug([NotNull] LogMessageGenerator messageGenerator);
+        void Debug([NotNull] object obj, Exception exception);
         void Info(object obj);
-        void Info(object obj, Exception exception);
+		void Info([NotNull] LogMessageGenerator messageGenerator);
+		void Info([NotNull] object obj, Exception exception);
         void Warn(object obj);
-        void Warn(object obj, Exception exception);
+		void Warn(LogMessageGenerator messageGenerator);
+		void Warn([NotNull] object obj, Exception exception);
         void Error(object obj);
-        void Error(object obj, Exception exception);
+		void Error([NotNull] LogMessageGenerator messageGenerator);
+		void Error([NotNull] object obj, Exception exception);
         void Fatal(object obj);
-        void Fatal(object obj, Exception exception);
-
+		void Fatal([NotNull] LogMessageGenerator messageGenerator);
+		void Fatal([NotNull] object obj, Exception exception);
 
         void DebugFormat(IFormatProvider formatProvider, string format, params object[] args);
         void DebugFormat(string format, params object[] args);
