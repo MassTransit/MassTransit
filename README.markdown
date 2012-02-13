@@ -48,8 +48,8 @@ ServiceBusFactory.New(sbc =>
 1. Clone the source down to your machine. 
   `git clone git://github.com/MassTransit/MassTransit.git`
 2. Ensure Ruby is installed. [RubyInstaller for Windows](http://rubyinstaller.org/)
-3. Ensure Albacore is installed.
-  `gem install albacore`
+3. Ensure gems are installed.
+  `gem install albacore semver2`
 4. Run `build.bat`.
 
 ### Contributing 
@@ -63,5 +63,4 @@ ServiceBusFactory.New(sbc =>
 * (Will also try to build for .Net 4.0)
 
 # CREDITS
-Logo Design by [The Agile Badger](http://www.theagilebadger.com)  
-UppercuT - Automated Builds in moments, not days! [Project UppercuT](http://projectuppercut.org)
+Logo Design by [The Agile Badger](http://www.theagilebadger.com)
