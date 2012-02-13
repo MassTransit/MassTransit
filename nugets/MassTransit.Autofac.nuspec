@@ -11,7 +11,7 @@
     <tags>msmq messaging service bus</tags>
     <dependencies>
       <dependency id="MassTransit" version="2.0.0.3" />
-      <dependency id="Autofac" version="2.4.5.724" />
+      <dependency id="Autofac" version="2.5.2.830" />
     </dependencies> 
   </metadata> 
   <files>
