@@ -30,7 +30,13 @@ namespace MassTransit.Log4NetIntegration.Logging
             _log.Debug(message);
         }
 
-        public void Debug(object message, Exception exception)
+    	public void Debug(LogMessageGenerator messageGenerator)
+    	{
+    		if (IsDebugEnabled)
+				Debug(messageGenerator());
+    	}
+
+    	public void Debug(object message, Exception exception)
         {
             _log.Debug(message, exception);
         }
@@ -50,7 +56,13 @@ namespace MassTransit.Log4NetIntegration.Logging
             _log.Info(message);
         }
 
-        public void Info(object message, Exception exception)
+    	public void Info(LogMessageGenerator messageGenerator)
+    	{
+			if (IsInfoEnabled)
+				Info(messageGenerator());
+    	}
+
+    	public void Info(object message, Exception exception)
         {
             _log.Info(message, exception);
         }
@@ -70,7 +82,13 @@ namespace MassTransit.Log4NetIntegration.Logging
             _log.Warn(message);
         }
 
-        public void Warn(object message, Exception exception)
+    	public void Warn(LogMessageGenerator messageGenerator)
+    	{
+			if (IsWarnEnabled)
+				Warn(messageGenerator());
+    	}
+
+    	public void Warn(object message, Exception exception)
         {
             _log.Warn(message, exception);
         }
@@ -90,7 +108,13 @@ namespace MassTransit.Log4NetIntegration.Logging
             _log.Error(message);
         }
 
-        public void Error(object message, Exception exception)
+    	public void Error(LogMessageGenerator messageGenerator)
+    	{
+			if (IsErrorEnabled)
+				Error(messageGenerator());
+    	}
+
+    	public void Error(object message, Exception exception)
         {
             _log.Error(message, exception);
         }
@@ -110,7 +134,13 @@ namespace MassTransit.Log4NetIntegration.Logging
             _log.Fatal(message);
         }
 
-        public void Fatal(object message, Exception exception)
+    	public void Fatal(LogMessageGenerator messageGenerator)
+    	{
+			if (IsFatalEnabled)
+				Fatal(messageGenerator());
+    	}
+
+    	public void Fatal(object message, Exception exception)
         {
             _log.Fatal(message, exception);
         }

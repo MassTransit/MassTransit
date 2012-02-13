@@ -37,15 +37,20 @@ namespace MassTransit.Logging
         bool IsFatalEnabled { get; }
 
         void Debug(object obj);
+		void Debug([NotNull] LogMessageGenerator messageGenerator);
         void Debug([NotNull] object obj, Exception exception);
         void Info(object obj);
-        void Info([NotNull] object obj, Exception exception);
+		void Info([NotNull] LogMessageGenerator messageGenerator);
+		void Info([NotNull] object obj, Exception exception);
         void Warn(object obj);
-        void Warn([NotNull] object obj, Exception exception);
+		void Warn(LogMessageGenerator messageGenerator);
+		void Warn([NotNull] object obj, Exception exception);
         void Error(object obj);
-        void Error([NotNull] object obj, Exception exception);
+		void Error([NotNull] LogMessageGenerator messageGenerator);
+		void Error([NotNull] object obj, Exception exception);
         void Fatal(object obj);
-        void Fatal([NotNull] object obj, Exception exception);
+		void Fatal([NotNull] LogMessageGenerator messageGenerator);
+		void Fatal([NotNull] object obj, Exception exception);
 
         void DebugFormat(IFormatProvider formatProvider, string format, params object[] args);
         void DebugFormat(string format, params object[] args);

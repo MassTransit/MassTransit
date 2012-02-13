@@ -69,10 +69,17 @@ namespace MassTransit.Logging.Tracing
         {
             if (!IsDebugEnabled)
                 return;
+
             Log(LogLevel.Debug, message, null);
         }
 
-        /// <summary>
+    	public void Debug(LogMessageGenerator messageGenerator)
+    	{
+			if (IsDebugEnabled)
+				Log(LogLevel.Debug, messageGenerator(), null);
+    	}
+
+    	/// <summary>
         /// Logs a debug message.
         /// 
         /// </summary>
@@ -120,7 +127,13 @@ namespace MassTransit.Logging.Tracing
             Log(LogLevel.Info, message, null);
         }
 
-        /// <summary>
+    	public void Info(LogMessageGenerator messageGenerator)
+    	{
+			if (IsInfoEnabled)
+				Log(LogLevel.Info, messageGenerator(), null);
+    	}
+
+    	/// <summary>
         /// Logs an info message.
         /// 
         /// </summary>
@@ -168,7 +181,12 @@ namespace MassTransit.Logging.Tracing
             Log(LogLevel.Warn, message, null);
         }
 
-        /// <summary>
+    	public void Warn(LogMessageGenerator messageGenerator)
+    	{
+    		throw new NotImplementedException();
+    	}
+
+    	/// <summary>
         /// Logs a warn message.
         /// 
         /// </summary>
@@ -216,7 +234,13 @@ namespace MassTransit.Logging.Tracing
             Log(LogLevel.Error, message, null);
         }
 
-        /// <summary>
+    	public void Error(LogMessageGenerator messageGenerator)
+    	{
+    		if (IsErrorEnabled)
+				Log(LogLevel.Error, messageGenerator() , null);
+    	}
+
+    	/// <summary>
         /// Logs an error message.
         /// 
         /// </summary>
@@ -264,7 +288,13 @@ namespace MassTransit.Logging.Tracing
             Log(LogLevel.Fatal, message, null);
         }
 
-        /// <summary>
+    	public void Fatal(LogMessageGenerator messageGenerator)
+    	{
+			if (IsFatalEnabled)
+				Log(LogLevel.Fatal, messageGenerator(), null);
+    	}
+
+    	/// <summary>
         /// Logs a fatal message.
         /// 
         /// </summary>

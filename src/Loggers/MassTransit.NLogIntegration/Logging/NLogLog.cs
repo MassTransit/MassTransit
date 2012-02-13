@@ -2,6 +2,7 @@ using System;
 using MassTransit.Logging;
 using MassTransit.Util;
 using NLog;
+using LogMessageGenerator = MassTransit.Logging.LogMessageGenerator;
 
 namespace MassTransit.NLogIntegration.Logging
 {
@@ -59,6 +60,12 @@ namespace MassTransit.NLogIntegration.Logging
 			_log.Log(typeof (NLogLog), new LogEventInfo(LogLevel.Debug, _log.Name, null, "{0}", new[] {obj}));
 		}
 
+		public void Debug(LogMessageGenerator messageGenerator)
+		{
+			if (IsDebugEnabled)
+				Debug(messageGenerator());
+		}
+
 		public void Debug(object obj, Exception exception)
 		{
 			_log.Log(typeof (NLogLog), new LogEventInfo(LogLevel.Debug, _log.Name, null, "{0}", new[] {obj}, exception));
@@ -67,6 +74,12 @@ namespace MassTransit.NLogIntegration.Logging
 		public void Info(object obj)
 		{
 			_log.Log(typeof (NLogLog), new LogEventInfo(LogLevel.Info, _log.Name, null, "{0}", new[] {obj}));
+		}
+
+		public void Info(LogMessageGenerator messageGenerator)
+		{
+			if (IsInfoEnabled)
+				Info(messageGenerator());
 		}
 
 		public void Info(object obj, Exception exception)
@@ -79,6 +92,12 @@ namespace MassTransit.NLogIntegration.Logging
 			_log.Log(typeof (NLogLog), new LogEventInfo(LogLevel.Warn, _log.Name, null, "{0}", new[] {obj}));
 		}
 
+		public void Warn(LogMessageGenerator messageGenerator)
+		{
+			if (IsWarnEnabled)
+				Warn(messageGenerator());
+		}
+
 		public void Warn(object obj, Exception exception)
 		{
 			_log.Log(typeof (NLogLog), new LogEventInfo(LogLevel.Warn, _log.Name, null, "{0}", new[] {obj}, exception));
@@ -89,6 +108,12 @@ namespace MassTransit.NLogIntegration.Logging
 			_log.Log(typeof (NLogLog), new LogEventInfo(LogLevel.Error, _log.Name, null, "{0}", new[] {obj}));
 		}
 
+		public void Error(LogMessageGenerator messageGenerator)
+		{
+			if (IsErrorEnabled)
+				Warn(messageGenerator());
+		}
+
 		public void Error(object obj, Exception exception)
 		{
 			_log.Log(typeof (NLogLog), new LogEventInfo(LogLevel.Error, _log.Name, null, "{0}", new[] {obj}, exception));
@@ -97,6 +122,12 @@ namespace MassTransit.NLogIntegration.Logging
 		public void Fatal(object obj)
 		{
 			_log.Log(typeof (NLogLog), new LogEventInfo(LogLevel.Fatal, _log.Name, null, "{0}", new[] {obj}));
+		}
+
+		public void Fatal(LogMessageGenerator messageGenerator)
+		{
+			if (IsFatalEnabled)
+				Fatal(messageGenerator());
 		}
 
 		public void Fatal(object obj, Exception exception)
