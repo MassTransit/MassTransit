@@ -12,16 +12,18 @@ def commit_data
   [commit, commit_date]
 end
 
-def version(str)
-  ver = /v?(\d+)\.(\d+)\.(\d+)\.?(\d+)?/i.match(str).to_a()
-  ver[1,4].map{|s|s.to_i} unless ver == nil or ver.empty?
-end
-
 task :versioning do
-  fv = version SemVer.find.to_s
-  #revision = (!fv[3] || fv[3] == 0) ? (ENV['BUILD_NUMBER'] || ) : fv[3] #  (day of year 0-265)(hour 00-24)
-  revision = (ENV['BUILD_NUMBER'] || fv[2]).to_i
-  ENV['BUILD_VERSION'] = BUILD_VERSION = "#{ SemVer.new(fv[0], fv[1], revision).format "%M.%m.%p" }-#{commit_data()[0]}"
-  ENV['FORMAL_VERSION'] = FORMAL_VERSION = "#{ SemVer.new(fv[0], fv[1], revision).format "%M.%m.%p"}"
+  ver = SemVer.find
+  revision = (ENV['BUILD_NUMBER'] || ver.patch).to_i
+  var = SemVer.new(ver.major, ver.minor, revision, ver.special)
+  
+  # extensible number w/ git hash
+  ENV['BUILD_VERSION'] = BUILD_VERSION = ver.format("%M.%m.%p%s") + ".#{commit_data()[0]}"
+  
+  # nuget (not full semver 2.0.0-rc.1 support) see http://nuget.codeplex.com/workitem/1796
+  ENV['NUGET_VERSION'] = NUGET_VERSION = ver.format("%M.%m.%p%s")
+  
+  # purely M.m.p format
+  ENV['FORMAL_VERSION'] = FORMAL_VERSION = "#{ SemVer.new(ver.major, ver.minor, revision).format "%M.%m.%p"}"
   puts "##teamcity[buildNumber '#{BUILD_VERSION}']" # tell teamcity our decision
 end
