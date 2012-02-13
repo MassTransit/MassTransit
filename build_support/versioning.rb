@@ -22,6 +22,6 @@ task :versioning do
   #revision = (!fv[3] || fv[3] == 0) ? (ENV['BUILD_NUMBER'] || ) : fv[3] #  (day of year 0-265)(hour 00-24)
   revision = (ENV['BUILD_NUMBER'] || fv[2]).to_i
   ENV['BUILD_VERSION'] = BUILD_VERSION = "#{ SemVer.new(fv[0], fv[1], revision).format "%M.%m.%p" }-#{commit_data()[0]}"
-  ENV['FORMAL_VERSION'] = FORMAL_VERSION = "#{ SemVer.new(fv[0], fv[1], revision).format "%M.%m.%p"}.#{Time.now.strftime('%j%H')}"
+  ENV['FORMAL_VERSION'] = FORMAL_VERSION = "#{ SemVer.new(fv[0], fv[1], revision).format "%M.%m.%p"}"
   puts "##teamcity[buildNumber '#{BUILD_VERSION}']" # tell teamcity our decision
 end
