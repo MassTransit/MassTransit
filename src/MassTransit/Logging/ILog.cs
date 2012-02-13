@@ -13,7 +13,11 @@
 namespace MassTransit.Logging
 {
     using System;
+    using Util;
 
+    /// <summary>
+    /// Implementers handle logging and filtering based on logging levels.
+    /// </summary>
     public interface ILog
     {
         bool IsDebugEnabled { get; }
@@ -23,29 +27,28 @@ namespace MassTransit.Logging
         bool IsFatalEnabled { get; }
 
         void Debug(object obj);
-        void Debug(object obj, Exception exception);
+        void Debug([NotNull] object obj, Exception exception);
         void Info(object obj);
-        void Info(object obj, Exception exception);
+        void Info([NotNull] object obj, Exception exception);
         void Warn(object obj);
-        void Warn(object obj, Exception exception);
+        void Warn([NotNull] object obj, Exception exception);
         void Error(object obj);
-        void Error(object obj, Exception exception);
+        void Error([NotNull] object obj, Exception exception);
         void Fatal(object obj);
-        void Fatal(object obj, Exception exception);
-
+        void Fatal([NotNull] object obj, Exception exception);
 
         void DebugFormat(IFormatProvider formatProvider, string format, params object[] args);
         void DebugFormat(string format, params object[] args);
 
         void InfoFormat(IFormatProvider formatProvider, string format, params object[] args);
         void InfoFormat(string format, params object[] args);
-        
+
         void WarnFormat(IFormatProvider formatProvider, string format, params object[] args);
         void WarnFormat(string format, params object[] args);
-        
+
         void ErrorFormat(IFormatProvider formatProvider, string format, params object[] args);
         void ErrorFormat(string format, params object[] args);
-        
+
         void FatalFormat(IFormatProvider formatProvider, string format, params object[] args);
         void FatalFormat(string format, params object[] args);
     }
