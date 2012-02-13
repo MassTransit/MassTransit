@@ -491,8 +491,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mt
 
   directory 'build_artifacts'
 
-  desc "Builds the nuget package"
-task :nuget => ['build_artifacts', :all_nuspecs] do
+desc "Builds the nuget package"
+task :nuget => [:versioning, 'build_artifacts', :all_nuspecs] do
 	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Log4Net.nuspec -o build_artifacts"
 	sh "lib/nuget.exe pack -BasePath build_output nuspecs/MassTransit.StructureMap.nuspec -o build_artifacts"
@@ -511,6 +511,45 @@ def project_outputs(props)
 		find_all{ |path| exists?(path) }
 end
 
+desc "publishes (pushes) the nuget package 'NLog.Targets.RabbitMQ'"
+nugetpush :nr_nuget_push do |nuget|
+  nuget.command = "#{COMMANDS[:nuget]}"
+  nuget.package = "#{File.join(FOLDERS[:nuget], PROJECTS[:nr][:nuget_key] + "." + BUILD_VERSION + '.nupkg')}"
+# nuget.apikey = "...."
+  nuget.source = URIS[:local]
+  nuget.create_only = false
+end
 
+task :verify do
+  changed_files = `git diff --cached --name-only`.split("\n") + `git diff --name-only`.split("\n")
+  if !(changed_files == [".semver", "Rakefile.rb"] or 
+    changed_files == ["Rakefile.rb"] or 
+    changed_files == [".semver"] or
+    changed_files.empty?)
+    raise "Repository contains uncommitted changes; either commit or stash."
+  end
+end
 
+task :gittag do 
+  v = SemVer.find
+  if `git tag`.split("\n").include?("#{v.to_s}")
+    raise "Version #{v.to_s} has already been released! You cannot release it twice."
+  end
+  puts 'committing'
+  `git commit -am "Released version #{v.to_s}"` 
+  puts 'tagging'
+  `git tag #{v.to_s}`
+  puts 'pushing'
+  `git push`
+  `git push --tags`
+  
+  puts "MAINTAINERS: now merge into master and then back into develop!!!"
+end
 
+desc "publish nugets! (doesn't build)"
+task :publish => [:nr_nuget_push]
+
+desc "MAINTAINERS: builds, git tags and pushes nugets"
+task :release => [:verify, :default, :gittag, :publish] do
+  puts 'done'
+end
