@@ -321,7 +321,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
   nuspec :mt_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit'
-    nuspec.version = FORMAL_VERSION
+    nuspec.version = NUGET_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'MassTransit is a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
     # nuspec.title = Projects[:tx][:title]
@@ -338,14 +338,14 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
   nuspec :mtl4n_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.Log4Net'
-    nuspec.version = FORMAL_VERSION
+    nuspec.version = NUGET_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'This integration library adds support for Log4Net to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", FORMAL_VERSION
+    nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "log4net", "1.2.11"
     nuspec.output_file = 'nuspecs/MassTransit.Log4Net.nuspec'
 
@@ -371,14 +371,14 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
   nuspec :mtcw_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.CastleWindsor'
-    nuspec.version = FORMAL_VERSION
+    nuspec.version = NUGET_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'This integration library adds support for Castle Windsor to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", FORMAL_VERSION
+    nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Castle.Windsor", "2.5.2"
     nuspec.output_file = 'nuspecs/MassTransit.CastleWindsor.nuspec'
 
@@ -387,14 +387,14 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
   nuspec :mtrmq_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.RabbitMQ'
-    nuspec.version = FORMAL_VERSION
+    nuspec.version = NUGET_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'This integration library adds support for RabbitMQ to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", FORMAL_VERSION
+    nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "RabbitMQ.Client", "2.6.1"
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
 
@@ -404,14 +404,14 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
   nuspec :mtaf_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.Autofac'
-    nuspec.version = FORMAL_VERSION
+    nuspec.version = NUGET_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'This integration library adds support for Autofac to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", FORMAL_VERSION
+    nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Autofac", "2.5.2.830"
     nuspec.output_file = 'nuspecs/MassTransit.Autofac.nuspec'
 
@@ -420,14 +420,14 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
   nuspec :mtnhib_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.NHibernate'
-    nuspec.version = FORMAL_VERSION
+    nuspec.version = NUGET_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'An integration library for NHibernate support in MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", FORMAL_VERSION
+    nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NHibernate", "3.2.0"
     nuspec.dependency "FluentNHibernate", "1.3"
     nuspec.dependency "Magnum", "2.0.0.4"
@@ -439,14 +439,14 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
   nuspec :mtni_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.Ninject'
-    nuspec.version = FORMAL_VERSION
+    nuspec.version = NUGET_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'This integration library adds support for Ninject to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", FORMAL_VERSION
+    nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Ninject", "2.2.1.4"
     nuspec.output_file = 'nuspecs/MassTransit.Ninject.nuspec'
 
@@ -456,14 +456,14 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
   nuspec :mtsm_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.StructureMap'
-    nuspec.version = FORMAL_VERSION
+    nuspec.version = NUGET_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'This integration library adds support for StructureMap to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", FORMAL_VERSION
+    nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "StructureMap", "2.6.3"
     nuspec.output_file = 'nuspecs/MassTransit.StructureMap.nuspec'
 
@@ -473,14 +473,14 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
    nuspec :mtun_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.Unity'
-    nuspec.version = FORMAL_VERSION
+    nuspec.version = NUGET_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'This integration library adds support for Unity to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", FORMAL_VERSION
+    nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Unity", "2.0.0"
     nuspec.output_file = 'nuspecs/MassTransit.Unity.nuspec'
 
@@ -489,14 +489,14 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
   nuspec :mttf_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.TestFramework'
-    nuspec.version = FORMAL_VERSION
+    nuspec.version = NUGET_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'This library contains testing helpers for use with MassTransit.'
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", FORMAL_VERSION
+    nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NUnit", "2.5.9"
     nuspec.dependency "RhinoMocks", "3.6"
     nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'
@@ -534,7 +534,7 @@ end
 desc "publishes (pushes) the nuget package 'NLog.Targets.RabbitMQ'"
 nugetpush :nr_nuget_push do |nuget|
   nuget.command = "#{COMMANDS[:nuget]}"
-  nuget.package = "#{File.join(FOLDERS[:nuget], PROJECTS[:nr][:nuget_key] + "." + BUILD_VERSION + '.nupkg')}"
+  nuget.package = "#{File.join(FOLDERS[:nuget], PROJECTS[:nr][:nuget_key] + "." + NUGET_VERSION + '.nupkg')}"
 # nuget.apikey = "...."
   nuget.source = URIS[:local]
   nuget.create_only = false
