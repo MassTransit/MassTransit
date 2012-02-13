@@ -67,13 +67,13 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
-        protected virtual void Dispose(bool managed)
+        protected virtual void Dispose(bool disposing)
         {
-            if (!managed)
+            if (!disposing)
                 return;
 
             if (_disposed)
-                throw new ObjectDisposedException("RabbitMqConnection for {0}".FormatWith(_connectionFactory.Address),
+                throw new ObjectDisposedException("RabbitMqConnection for {0}".FormatWith(_connectionFactory.GetUri()),
                     "Cannot dispose a connection twice");
 
             try
