@@ -96,6 +96,8 @@ task :compile => [:global_version, :build] do
 
         outl = File.join(props[:output], "Logging")
 	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.Log4NetIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.Log4NetIntegration.{dll,pdb,xml}", outl
+	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.NLogIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NLogIntegration.{dll,pdb,xml}", outl
+	
 
 	outc = File.join(props[:output], "Containers")
         copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
@@ -365,7 +367,23 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mt
     nuspec.dependency "log4net", "1.2.11"
     nuspec.output_file = 'nuspecs/MassTransit.Log4Net.nuspec'
 
-	add_files props[:stage], "#{File.join('Logging', 'MassTransit.Log4NetIntegration.{dll,pdb,xml}')}", nuspec
+	add_files props[:stage], File.join('Logging', 'MassTransit.Log4NetIntegration.{dll,pdb,xml}'), nuspec
+  end
+  
+  nuspec :mtnlog_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.NLog'
+    nuspec.version = asm_version
+    nuspec.authors = 'Henrik Feldt'
+    nuspec.description = 'This integration library adds support for NLog to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "true"
+    nuspec.dependency "MassTransit", asm_version
+    nuspec.dependency "NLog", "2.0.0.2000"
+    nuspec.output_file = 'nuspecs/MassTransit.NLog.nuspec'
+    
+    add_files props[:stage], File.join('Logging', 'MassTransit.NLogIntegration.{dll,pdb,xml}'), nuspec
   end
 
   nuspec :mtcw_nuspec => ['nuspecs'] do |nuspec|
