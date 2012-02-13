@@ -34,26 +34,31 @@
     <DocumentationFile>bin\Release\MassTransit.NLogIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-   <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-     <HintPath>..\..\..\lib\NLog\net35\NLog.dll</HintPath>
-   </Reference>
-   <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-     <HintPath>..\..\..\lib\NLog\net40\NLog.dll</HintPath>
-   </Reference>
+    <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\..\lib\NLog\net35\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\..\lib\NLog\net40\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\SolutionVersion.cs">
+      <Link>SolutionVersion.cs</Link>
+    </Compile>
     <Compile Include="NLogConfiguratorExtensions.cs" />
     <Compile Include="Logging\NLogLog.cs" />
     <Compile Include="Logging\NLogLogger.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
