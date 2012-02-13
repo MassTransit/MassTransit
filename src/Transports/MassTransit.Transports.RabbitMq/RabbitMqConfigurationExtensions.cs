@@ -12,9 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using BusConfigurators;
+    using System;
+    using BusConfigurators;
 	using Pipeline.Configuration;
-	using Transports.RabbitMq;
+    using RabbitMQ.Client;
+    using Transports.RabbitMq;
 
 	/// <summary>
 	/// Extensions for configuring RabbitMq.
@@ -48,5 +50,14 @@ namespace MassTransit
 
 			configurator.UseRabbitMq();
 		}
+
+        public static Uri GetUri(this ConnectionFactory factory)
+        {
+            return new UriBuilder("rabbitmq", factory.HostName, factory.Port, factory.VirtualHost)
+                {
+                    UserName = factory.UserName,
+                    Password = factory.Password,
+                }.Uri;
+        }
 	}
 }

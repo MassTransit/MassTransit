@@ -869,6 +869,26 @@
         <member name="M:RabbitMQ.Client.IModel.ConfirmSelect">
             <summary>Enable publisher acknowledgements.</summary>
         </member>
+        <member name="M:RabbitMQ.Client.IModel.WaitForConfirms">
+            <summary>Wait until all published messages have been confirmed.
+            </summary>
+            <remarks>
+            Waits until all messages published since the last call have
+            been either ack'd or nack'd by the broker.  Returns whether
+            all the messages were ack'd (and none were nack'd). Note,
+            when called on a non-Confirm channel, returns true
+            immediately.
+            </remarks>
+        </member>
+        <member name="M:RabbitMQ.Client.IModel.WaitForConfirmsOrDie">
+            <summary>Wait until all published messages have been confirmed.
+            </summary>
+            <remarks>
+            Waits until all messages published since the last call have
+            been ack'd by the broker.  If a nack is received, throws an
+            OperationInterrupedException exception immediately.
+            </remarks>
+        </member>
         <member name="M:RabbitMQ.Client.IModel.BasicConsume(System.String,System.Boolean,RabbitMQ.Client.IBasicConsumer)">
             <summary>Start a Basic content-class consumer.</summary>
             <remarks>
@@ -3712,16 +3732,16 @@
             <summary>The AMQP specification minor version number</summary>
         </member>
         <member name="T:RabbitMQ.Client.AuthMechanism">
-            A pluggable authentication mechanism.
+            <summary>A pluggable authentication mechanism.</summary>
         </member>
         <member name="M:RabbitMQ.Client.AuthMechanism.handleChallenge(System.Byte[],RabbitMQ.Client.ConnectionFactory)">
-            Handle one round of challenge-response
+            <summary>Handle one round of challenge-response</summary>
         </member>
         <member name="M:RabbitMQ.Client.AuthMechanismFactory.GetInstance">
-            Return a new authentication mechanism implementation
+            <summary>Return a new authentication mechanism implementation</summary>
         </member>
         <member name="P:RabbitMQ.Client.AuthMechanismFactory.Name">
-            The name of the authentication mechanism, as negotiated on the wire
+            <summary>The name of the authentication mechanism, as negotiated on the wire</summary>
         </member>
         <member name="T:RabbitMQ.Client.BinaryTableValue">
             <summary>Wrapper for a byte[]. May appear as values read from
@@ -3792,17 +3812,24 @@
                  conn.Close(Constants.ReplySuccess, "Closing the connection");
             </code></example>
             <para>
+            The same example, written more compactly with AMQP URIs:
+            </para>
+            <example><code>
+                 ConnectionFactory factory = new ConnectionFactory();
+                 factory.Uri = "amqp://localhost";
+                 IConnection conn = factory.CreateConnection();
+                 ...
+            </code></example>
+            <para>
              Please see also the API overview and tutorial in the User Guide.
             </para>
             <para>
-             Some of the static methods described below take, as a
-             convenience, a System.Uri instance representing an AMQP server
-             address. The use of Uri here is not standardised - Uri is
-             simply a convenient container for internet-address-like
-             components. In particular, the Uri "Scheme" property is
-             ignored: only the "Host" and "Port" properties are extracted.
-            </para>
-            </remarks>
+            Note that the Uri property takes a string representation of an
+            AMQP URI.  Omitted URI parts will take default values.  The
+            host part of the URI cannot be omitted and URIs of the form
+            "amqp://foo/" (note the trailling slash) also represent the
+            default virtual host.  The latter issue means that virtual
+            hosts with an empty name are not addressable. </para></remarks>
         </member>
         <member name="F:RabbitMQ.Client.ConnectionFactory.DefaultUser">
             <summary>Default user name (value: "guest")</summary>
@@ -3884,6 +3911,15 @@
             <summary>Given a list of mechanism names supported by the
             server, select a preferred mechanism, or null if we have
             none in common.</summary>
+        </member>
+        <member name="P:RabbitMQ.Client.ConnectionFactory.Endpoint">
+            <summary>The AMQP connection target</summary>
+        </member>
+        <member name="P:RabbitMQ.Client.ConnectionFactory.uri">
+            <summary>Set connection parameters using the amqp or amqps scheme</summary>
+        </member>
+        <member name="P:RabbitMQ.Client.ConnectionFactory.Uri">
+            <summary>Set connection parameters using the amqp or amqps scheme</summary>
         </member>
         <member name="T:RabbitMQ.Client.DefaultBasicConsumer">
             <summary>Useful default/base implementation of
@@ -5483,6 +5519,10 @@
             <summary>Whether this nack applies to one message or
             multiple messages.</summary>
         </member>
+        <member name="P:RabbitMQ.Client.Events.BasicNackEventArgs.Requeue">
+            <summary>Ignore</summary>
+            <remarks>Clients should ignore this field.</remarks>
+        </member>
         <member name="T:RabbitMQ.Client.Events.BasicNackEventHandler">
             <summary>Delegate used to process Basic.Nack events.</summary>
         </member>
@@ -5846,11 +5886,6 @@
         <member name="F:RabbitMQ.Client.Impl.ConnectionBase.HandshakeTimeout">
             <summary>Timeout used while waiting for AMQP handshaking to
             complete (milliseconds)</summary>
-        </member>
-        <member name="F:RabbitMQ.Client.Impl.ConnectionBase.ConnectionCloseTimeout">
-            <summary>Timeout used while waiting for a
-            connection.close-ok reply to a connection.close request
-            (milliseconds)</summary>
         </member>
         <member name="M:RabbitMQ.Client.Impl.ConnectionBase.Close">
             <summary>API-side invocation of connection.close.</summary>
