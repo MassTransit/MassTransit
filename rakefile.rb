@@ -82,7 +82,7 @@ task :compile => [:versioning, :global_version, :build] do
         outl = File.join(props[:output], "Logging")
 	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.Log4NetIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.Log4NetIntegration.{dll,pdb,xml}", outl
 	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.NLogIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NLogIntegration.{dll,pdb,xml}", outl
-	
+
 
 	outc = File.join(props[:output], "Containers")
         copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
@@ -351,10 +351,10 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
 	add_files props[:stage], File.join('Logging', 'MassTransit.Log4NetIntegration.{dll,pdb,xml}'), nuspec
   end
-  
+
   nuspec :mtnlog_nuspec => ['nuspecs'] do |nuspec|
     nuspec.id = 'MassTransit.NLog'
-    nuspec.version = asm_version
+    nuspec.version = NUGET_VERSION
     nuspec.authors = 'Henrik Feldt'
     nuspec.owners = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'This integration library adds support for NLog to MassTransit, a distributed application framework for .NET, including support for MSMQ and RabbitMQ.'
@@ -362,10 +362,10 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "MassTransit", asm_version
+    nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NLog", "2.0.0.2000"
     nuspec.output_file = 'nuspecs/MassTransit.NLog.nuspec'
-    
+
     add_files props[:stage], File.join('Logging', 'MassTransit.NLogIntegration.{dll,pdb,xml}'), nuspec
   end
 
@@ -542,27 +542,27 @@ end
 
 task :verify do
   changed_files = `git diff --cached --name-only`.split("\n") + `git diff --name-only`.split("\n")
-  if !(changed_files == [".semver", "Rakefile.rb"] or 
-    changed_files == ["Rakefile.rb"] or 
+  if !(changed_files == [".semver", "Rakefile.rb"] or
+    changed_files == ["Rakefile.rb"] or
     changed_files == [".semver"] or
     changed_files.empty?)
     raise "Repository contains uncommitted changes; either commit or stash."
   end
 end
 
-task :gittag do 
+task :gittag do
   v = SemVer.find
   if `git tag`.split("\n").include?("#{v.to_s}")
     raise "Version #{v.to_s} has already been released! You cannot release it twice."
   end
   puts 'committing'
-  `git commit -am "Released version #{v.to_s}"` 
+  `git commit -am "Released version #{v.to_s}"`
   puts 'tagging'
   `git tag #{v.to_s}`
   puts 'pushing'
   `git push`
   `git push --tags`
-  
+
   puts "MAINTAINERS: now merge into master and then back into develop!!!"
 end
 
