@@ -290,9 +290,9 @@ end
 task :ci => [:default, :package, :moma]
 
 desc "ZIPs up the build results"
-zip :package do |zip|
+zip :package => [:versioning] do |zip|
   zip.directories_to_zip props[:stage]
-  zip.output_file = "MassTransit-#{BUILD_VERSION}.zip"
+  zip.output_file = "MassTransit-#{NUGET_VERSION}.zip"
   zip.output_path = props[:artifacts]
 end
 
