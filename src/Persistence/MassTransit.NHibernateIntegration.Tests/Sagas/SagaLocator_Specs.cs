@@ -10,6 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using System.Data;
+using System.Data.SQLite;
+using FluentNHibernate.Cfg;
+using MassTransit.NHibernateIntegration.Tests.Framework;
+
 namespace MassTransit.NHibernateIntegration.Tests.Sagas
 {
 	using System;
@@ -36,26 +42,51 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 		[SetUp]
 		public void Setup()
 		{
-			_cfg = new Configuration();
+			var cfg = Fluently.Configure(TestConfigurator.CreateConfiguration(null, c =>
+			{
+				c.SetProperty(NHibernate.Cfg.Environment.ShowSql, "true");
+				c.SetProperty(NHibernate.Cfg.Environment.Isolation, IsolationLevel.Serializable.ToString());
+			})).Mappings(m =>
+			{
+				m.FluentMappings.Add<ConcurrentSagaMap>();
+				m.FluentMappings.Add<ConcurrentLegacySagaMap>();
+			}).BuildConfiguration();
 
-			_cfg.SetProperty("connection.provider", "NHibernate.Connection.DriverConnectionProvider");
-			_cfg.SetProperty("connection.driver_class", "NHibernate.Driver.SqlClientDriver");
-			_cfg.SetProperty("connection.connection_string", _connectionString);
-			_cfg.SetProperty("dialect", "NHibernate.Dialect.MsSql2005Dialect");
-			_cfg.SetProperty("show_sql", "true");
+			var sessionFactory = cfg.BuildSessionFactory();
 
-			_cfg.AddAssembly(typeof (NHibernateSagaRepository<>).Assembly);
-			_cfg.AddAssembly(typeof (RegisterUserStateMachine).Assembly);
-			_cfg.AddAssembly(typeof (When_using_the_saga_locator_with_NHibernate).Assembly);
+			_openConnection = new SQLiteConnection(cfg.Properties[NHibernate.Cfg.Environment.ConnectionString]);
+			_openConnection.Open();
+			sessionFactory.OpenSession(_openConnection);
 
-			_sessionFactory = _cfg.BuildSessionFactory();
+			_sessionFactory = new SingleConnectionSessionFactory(sessionFactory, _openConnection);
+
+			BuildSchema(cfg, _openConnection);
 
 			_sagaId = CombGuid.Generate();
 		}
 
+		[TearDown]
+		public void teardown()
+		{
+			if (_openConnection != null)
+			{
+				_openConnection.Close();
+				_openConnection.Dispose();
+			}
+
+			if (_sessionFactory != null)
+				_sessionFactory.Dispose();
+		}
+		
+		private IDbConnection _openConnection;
+
+		static void BuildSchema(Configuration config, IDbConnection connection)
+		{
+			new SchemaExport(config).Execute(true, true, false, connection, null);
+		}
+
 		Guid _sagaId;
 
-		const string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
 		Configuration _cfg;
 		ISessionFactory _sessionFactory;
 
