@@ -30,6 +30,8 @@ namespace MassTransit.Transports
 		/// </summary>
 		/// <param name="lookupSinkChain">A lookup function that takes a receive context
 		/// and gives back either a non-null action handler for </param>
+		/// <param name="timeout">The timeout to wait for the inbound transport technology to
+		/// yield a message before giving up.</param>
 		void Receive(Func<IReceiveContext, Action<IReceiveContext>> lookupSinkChain, TimeSpan timeout);
 	}
 }
