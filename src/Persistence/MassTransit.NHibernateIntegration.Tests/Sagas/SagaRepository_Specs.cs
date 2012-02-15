@@ -10,6 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using System.Data.SQLite;
+using NHibernate.Cache;
+using NHibernate.Dialect;
+using NHibernate.Driver;
+
 namespace MassTransit.NHibernateIntegration.Tests.Sagas
 {
     using MassTransit.Tests.Saga.StateMachine;
@@ -21,29 +27,39 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
     [TestFixture, Category("Integration")]
     public class SagaRepository_Specs
     {
-        [SetUp]
+    	Configuration _cfg;
+
+    	[SetUp]
         public void Setup()
         {
-            _cfg = new Configuration();
+			Assert.NotNull(typeof(SQLiteConnection));
 
-            _cfg.SetProperty("connection.provider", "NHibernate.Connection.DriverConnectionProvider");
-            _cfg.SetProperty("connection.driver_class", "NHibernate.Driver.SqlClientDriver");
-            _cfg.SetProperty("connection.connection_string", _connectionString);
-            _cfg.SetProperty("dialect", "NHibernate.Dialect.MsSql2005Dialect");
-            _cfg.SetProperty("default_schema", "bus");
-
-            _cfg.AddAssembly(typeof (NHibernateSagaRepository<>).Assembly);
-            _cfg.AddAssembly(typeof (RegisterUserStateMachine).Assembly);
-            _cfg.AddAssembly(typeof (SagaRepository_Specs).Assembly);
+			_cfg = new Configuration()
+				.SetProperty(Environment.ConnectionDriver, typeof(SQLite20Driver).AssemblyQualifiedName)
+				.SetProperty(Environment.Dialect, typeof(SQLiteDialect).AssemblyQualifiedName)
+					//.SetProperty(Environment.ConnectionDriver, typeof(Sql2008ClientDriver).AssemblyQualifiedName)
+					//.SetProperty(Environment.Dialect, typeof(MsSql2008Dialect).AssemblyQualifiedName)
+				.SetProperty(Environment.ConnectionString, ConnectionString)
+					//.SetProperty(Environment.ProxyFactoryFactoryClass, typeof(ProxyFactoryFactory).AssemblyQualifiedName)
+				.SetProperty(Environment.ReleaseConnections, "on_close")
+				.SetProperty(Environment.UseSecondLevelCache, "true")
+				.SetProperty(Environment.UseQueryCache, "true")
+				.SetProperty(Environment.CacheProvider, typeof(HashtableCacheProvider).AssemblyQualifiedName)
+				.SetProperty(Environment.DefaultSchema, "bus")
+				.AddAssembly(typeof (NHibernateSagaRepository<>).Assembly)
+				.AddAssembly(typeof (RegisterUserStateMachine).Assembly)
+				.AddAssembly(typeof (SagaRepository_Specs).Assembly);
         }
 
-        const string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
-        Configuration _cfg;
-
-        [Test, Explicit]
+    	[Test, Explicit]
         public void First_we_need_a_schema_to_test()
         {
             new SchemaExport(_cfg).Create(true, true);
         }
+
+		public virtual string ConnectionString
+		{
+			get { return "Data Source=:memory:"; }
+		}
     }
 }
