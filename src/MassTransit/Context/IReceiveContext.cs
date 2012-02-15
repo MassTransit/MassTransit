@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit
 {
 	using System;
@@ -18,6 +21,9 @@ namespace MassTransit
 	using Context;
 	using Serialization;
 
+	/// <summary>
+	/// Receive context that allows receiving sinks to 
+	/// </summary>
 	public interface IReceiveContext :
 		IConsumeContext
 	{
@@ -33,7 +39,11 @@ namespace MassTransit
 
 		void SetEndpoint(IEndpoint endpoint);
 
-		void SetBus(IServiceBus bus);
+		/// <summary>
+		/// Sets the bus which is receiving this message/data.
+		/// </summary>
+		/// <param name="bus">Bus instance</param>
+		void SetBus([NotNull] IServiceBus bus);
 
 	    void SetRequestId(string value);
 
@@ -59,7 +69,14 @@ namespace MassTransit
 
 	    void SetHeader(string key, string value);
 
-		void SetBodyStream(Stream stream);
+		/// <summary>
+		/// Sets the context's body stream;
+		/// useful for wrapped serializers 
+		/// such as encrypting serializers
+		/// and for testing.
+		/// </summary>
+		/// <param name="stream">Stream to replace the previous stream with</param>
+		void SetBodyStream([NotNull] Stream stream);
 
 		void CopyBodyTo(Stream stream);
 

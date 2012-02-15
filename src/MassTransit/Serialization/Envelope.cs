@@ -16,6 +16,9 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Linq;
 
+	/// <summary>
+	/// The envelope in use for storing meta-data/out-of-band data and message object data.
+	/// </summary>
     public class Envelope
     {
         Envelope(object message, IEnumerable<Type> messageTypes)
@@ -46,6 +49,12 @@ namespace MassTransit.Serialization
         public int RetryCount { get; set; }
         public string SourceAddress { get; set; }
 
+		/// <summary>
+		/// Creates a new envelope using the passed send context.
+		/// </summary>
+		/// <typeparam name="T">The type of message</typeparam>
+		/// <param name="context">Context to write to the envelope</param>
+		/// <returns>The constructed envelope</returns>
         public static Envelope Create<T>(ISendContext<T> context)
             where T : class
         {
