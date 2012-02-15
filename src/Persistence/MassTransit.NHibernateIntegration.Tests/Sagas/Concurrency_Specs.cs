@@ -10,6 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using System.Data.SQLite;
+using MassTransit.NHibernateIntegration.Tests.Framework;
+
 namespace MassTransit.NHibernateIntegration.Tests.Sagas
 {
 	using System;
@@ -18,7 +22,6 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 	using System.Linq;
 	using System.Threading;
 	using FluentNHibernate.Cfg;
-	using FluentNHibernate.Cfg.Db;
 	using Magnum;
 	using MassTransit.Saga;
 	using MassTransit.Tests.TextFixtures;
@@ -29,37 +32,55 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 	using Saga;
 	using log4net;
 
-    [TestFixture, Category("Integration")]
-	public class ConcurrentSagaTestFixtureBase :
+	[TestFixture, Category("Integration")]
+	public abstract class ConcurrentSagaTestFixtureBase :
 		LoopbackTestFixture
-	{
-		protected ISessionFactory _sessionFactory;
+    {
+    	private IDbConnection _openConnection;
+		protected ISessionFactory SessionFactory;
 
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
-			_sessionFactory = Fluently.Configure()
-				.Database(
-					MsSqlConfiguration.MsSql2005
-						.AdoNetBatchSize(100)
-						.ConnectionString(s => s.Is("Server=(local);initial catalog=test;Trusted_Connection=yes"))
-						.DefaultSchema("dbo")
-						.ShowSql()
-						.Raw(NHibernate.Cfg.Environment.Isolation, IsolationLevel.Serializable.ToString()))
-                .ProxyFactoryFactory("NHibernate.Bytecode.DefaultProxyFactoryFactory, NHibernate")
-                .Mappings(m =>
-					{
-						m.FluentMappings.Add<ConcurrentSagaMap>();
-						m.FluentMappings.Add<ConcurrentLegacySagaMap>();
-					})
-				.ExposeConfiguration(BuildSchema)
-				.BuildSessionFactory();
+			var cfg = Fluently.Configure(TestConfigurator.CreateConfiguration(null, c =>
+				{
+					c.SetProperty(NHibernate.Cfg.Environment.ShowSql, "true");
+					c.SetProperty(NHibernate.Cfg.Environment.Isolation, IsolationLevel.Serializable.ToString());
+				})).Mappings(m =>
+				{
+					m.FluentMappings.Add<ConcurrentSagaMap>();
+					m.FluentMappings.Add<ConcurrentLegacySagaMap>();
+				}).BuildConfiguration();
+
+			var sessionFactory = cfg.BuildSessionFactory();
+
+			_openConnection = new SQLiteConnection(cfg.Properties[NHibernate.Cfg.Environment.ConnectionString]);
+			_openConnection.Open();
+			sessionFactory.OpenSession(_openConnection);
+
+			SessionFactory = new SingleConnectionSessionFactory(sessionFactory, _openConnection);
+
+			BuildSchema(cfg, _openConnection);
 		}
 
-		static void BuildSchema(Configuration config)
+		protected override void TeardownContext()
 		{
-			new SchemaExport(config).Create(false, true);
+			base.TeardownContext();
+
+			if (_openConnection != null)
+			{
+				_openConnection.Close();
+				_openConnection.Dispose();
+			}
+
+			if (SessionFactory != null)
+				SessionFactory.Dispose();
+		}
+
+    	static void BuildSchema(Configuration config, IDbConnection connection)
+		{
+			new SchemaExport(config).Execute(true, true, false, connection, null);
 		}
 	}
 
@@ -73,7 +94,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 		{
 			base.EstablishContext();
 
-			_sagaRepository = new NHibernateSagaRepository<ConcurrentSaga>(_sessionFactory);
+			_sagaRepository = new NHibernateSagaRepository<ConcurrentSaga>(SessionFactory);
 		}
 
 		[Test]
@@ -126,7 +147,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 		{
 			base.EstablishContext();
 
-			_sagaRepository = new NHibernateSagaRepository<ConcurrentLegacySaga>(_sessionFactory);
+			_sagaRepository = new NHibernateSagaRepository<ConcurrentLegacySaga>(SessionFactory);
 		}
 
 		[Test]
@@ -178,7 +199,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 		{
 			base.EstablishContext();
 
-			_sagaRepository = new NHibernateSagaRepository<ConcurrentLegacySaga>(_sessionFactory);
+			_sagaRepository = new NHibernateSagaRepository<ConcurrentLegacySaga>(SessionFactory);
 		}
 
 		[Test]
