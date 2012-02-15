@@ -16,14 +16,20 @@ namespace MassTransit.Transports
 
 	/// <summary>
 	/// The inbound transport takes messages from the underlying transport technology and hands it to the
-	/// Action{IReceiveContext} that can be gotten from the callback passed to the <see cref="Receive"/> method.
+	/// Action{IReceiveContext} that can be gotten from the lookup function 
+	/// passed to the <see cref="Receive"/> method.
 	/// </summary>
 	public interface IInboundTransport :
 		ITransport
 	{
 		/// <summary>
-		/// See <see cref="IEndpoint.Receive"/> for details.
+		/// Implementors should take messages from the inbound transport technology,
+		/// call the lookup function to get a callback that passes messages to all
+		/// routed sinks for the context's message type and properties and then
+		/// ACK the receive.
 		/// </summary>
-		void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout);
+		/// <param name="lookupSinkChain">A lookup function that takes a receive context
+		/// and gives back either a non-null action handler for </param>
+		void Receive(Func<IReceiveContext, Action<IReceiveContext>> lookupSinkChain, TimeSpan timeout);
 	}
 }
