@@ -15,7 +15,9 @@ namespace MassTransit.Serialization
     using System.IO;
 
     /// <summary>
-    /// Message Serialization Methods 
+    /// Message Serialization implementors should handle the nitty-gritty
+    /// details of writing object instances to streams and reading them back
+    /// up from streams.
     /// </summary>
     public interface IMessageSerializer
     {
@@ -28,15 +30,17 @@ namespace MassTransit.Serialization
         /// Serialize the message to the stream
         /// </summary>
         /// <typeparam name="T">The implicit type of the message to serialize</typeparam>
-        /// <param name="stream"></param>
-        /// <param name="context"></param>
+        /// <param name="stream">The stream to write the context to</param>
+        /// <param name="context">The context to send</param>
         void Serialize<T>(Stream stream, ISendContext<T> context)
             where T : class;
 
         /// <summary>
-        /// Deserialize a message from the stream
+        /// Deserialize a message from the stream by reading the 
+        /// bits in the <see cref="IReceiveContext.BodyStream"/>
+        /// and hydrating the context with that.
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context">The context to deserialize</param>
         /// <returns>An object that was deserialized</returns>
         void Deserialize(IReceiveContext context);
     }
