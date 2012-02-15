@@ -17,7 +17,14 @@ namespace MassTransit
 	using Transports;
 
 	/// <summary>
-	/// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
+	/// <para>IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.</para>
+	/// <para>In MassTransit, the endpoint ties together the inbound transport, the outbound transport,
+	/// the error transport that ships problematic messages to the error queue, mesage retry trackers
+	/// and serialization.</para>
+	/// <para>It is up to the transports themselves to implement the correct connection handling and to
+	/// to create the <see cref="IReceiveContext"/> from the bytes on the wire, which hands the message
+	/// over to MassTransit's internals.
+	/// </para>
 	/// </summary>
 	public interface IEndpoint :
 		IDisposable
@@ -51,15 +58,19 @@ namespace MassTransit
 		/// Send to the endpoint
 		/// </summary>
 		/// <typeparam name="T">The type of the message to send</typeparam>
-		/// <param name="context"></param>
+		/// <param name="context">Send context to generate the in-transport message from. Contains
+		/// out-of-band data such as message ids, correlation ids, headers, and in-band data
+		/// such as the actual data of the message to send.</param>
 		void Send<T>(ISendContext<T> context)
 			where T : class;
 
 		/// <summary>
-		/// Receive from the endpoint by passing a function that can preview the message and if the caller
-		/// chooses to accept it, return a method that will consume the message.
-		/// 
-		/// Returns after the specified timeout if no message is available.
+		/// <para>Receive from the endpoint by passing a function that can preview the message: if the caller
+		/// chooses to accept it, return a method that will consume the message. The first argument of the 
+		/// Func is created by the transport and this is what callers of receive must inspect
+		/// to find what receivers (the return value Action{IReceiveContext}) are interested in the 
+		/// received data.</para>
+		/// <para>Returns after the specified timeout if no message is available.</para>
 		/// </summary>
 		/// <param name="receiver">The function to preview/consume the message</param>
 		/// <param name="timeout">The time to wait for a message to be available</param>

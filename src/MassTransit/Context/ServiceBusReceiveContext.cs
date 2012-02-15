@@ -51,31 +51,36 @@ namespace MassTransit.Context
 		{
 			try
 			{
-				//if (_log.IsDebugEnabled)
-				//	_log.DebugFormat("Calling Receive on {0} from thread {1} ({2})", _bus.Endpoint.Address.Uri,
-				//		Thread.CurrentThread.ManagedThreadId, _receiveTimeout);
-
 				_startTime = SystemUtil.UtcNow;
 				_receiveTime.Start();
 
+				// let the endpoint (and hence inbound transport) consume a message
+				// The lambda passed is not called until the transport decides that it has
+				// gotten a message and want to pass it forward.
 				_bus.Endpoint.Receive(context =>
 					{
 						context.SetBus(_bus);
 						
+						// look inside the inbound pipeline and find all message sinks that match the receive
+						// context (i.e. the message type we actually got from the transport)
+						// Have a look at everything implementing IPipelineSink<IConsumeContext> to
+						// dig deeper
 						IEnumerable<Action<IConsumeContext>> enumerable = _bus.InboundPipeline.Enumerate(context);
 
 						_consumers = enumerable.GetEnumerator();
 						if (!_consumers.MoveNext())
 						{
 							_consumers.Dispose();
-							return null;
+							return null; // meaning we don't have any sinks interested in this msg context
 						}
 
+						// otherwise, we have some consumers
 						return DeliverMessageToConsumers;
 					}, _receiveTimeout);
 			}
-			catch (ObjectDisposedException)
+			catch (ObjectDisposedException ex)
 			{
+				_log.Warn("Endpoint threw ObjectDisposedException", ex);
 				Thread.Sleep(1000);
 			}
 			catch (Exception ex)

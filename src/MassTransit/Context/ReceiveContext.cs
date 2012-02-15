@@ -77,10 +77,11 @@ namespace MassTransit.Context
 
         public void SetBodyStream(Stream stream)
         {
-            _bodyStream = stream;
+        	if (stream == null) throw new ArgumentNullException("stream");
+        	_bodyStream = stream;
         }
 
-        public void CopyBodyTo(Stream stream)
+    	public void CopyBodyTo(Stream stream)
         {
             _bodyStream.Seek(0, SeekOrigin.Begin);
             _bodyStream.CopyTo(stream);
@@ -190,11 +191,24 @@ namespace MassTransit.Context
             }
         }
 
+		/// <summary>
+		/// Create a new <see cref="ReceiveContext"/> from the incoming 
+		/// stream; the stream should contain the MassTransit <see cref="Envelope"/>
+		/// which in turn contains both payload and meta-data/out-of-band data.
+		/// </summary>
+		/// <param name="bodyStream">Body stream to create receive context from</param>
+		/// <returns>The receive context</returns>
+		[NotNull]
         public static ReceiveContext FromBodyStream(Stream bodyStream)
         {
             return new ReceiveContext(bodyStream);
         }
 
+		/// <summary>
+		/// Create a new empty receive context
+		/// </summary>
+		/// <returns></returns>
+		[NotNull]
         public static ReceiveContext Empty()
         {
             return new ReceiveContext(null);

@@ -20,6 +20,9 @@ namespace MassTransit.Transports
     using Logging;
     using Serialization;
 
+	/// <summary>
+	/// See <see cref="IEndpoint"/> for docs.
+	/// </summary>
     [DebuggerDisplay("{Address}")]
     public class Endpoint :
         IEndpoint

@@ -14,9 +14,16 @@ namespace MassTransit.Transports
 {
 	using System;
 
+	/// <summary>
+	/// The inbound transport takes messages from the underlying transport technology and hands it to the
+	/// Action{IReceiveContext} that can be gotten from the callback passed to the <see cref="Receive"/> method.
+	/// </summary>
 	public interface IInboundTransport :
 		ITransport
 	{
+		/// <summary>
+		/// See <see cref="IEndpoint.Receive"/> for details.
+		/// </summary>
 		void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout);
 	}
 }
