@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit.Transports
 {
 	using System;
@@ -32,6 +35,6 @@ namespace MassTransit.Transports
 		/// and gives back either a non-null action handler for </param>
 		/// <param name="timeout">The timeout to wait for the inbound transport technology to
 		/// yield a message before giving up.</param>
-		void Receive(Func<IReceiveContext, Action<IReceiveContext>> lookupSinkChain, TimeSpan timeout);
+		void Receive([NotNull] Func<IReceiveContext, Action<IReceiveContext>> lookupSinkChain, TimeSpan timeout);
 	}
 }
