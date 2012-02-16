@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit.Context
 {
 	using System;
@@ -22,21 +25,41 @@ namespace MassTransit.Context
 	using Magnum;
 	using Stact;
 
+	/// <summary>
+	/// The context keeps track of some statistics about the consumption
+	/// of the message. Both when the receive operation completes
+	/// and when the consume operation completes, does this context
+	/// broadcast that information on the passed <see cref="UntypedChannel"/>
+	/// passed in the constructor.
+	/// </summary>
 	public class ServiceBusReceiveContext
 	{
 		static readonly ILog _log = Logger.Get(typeof (ServiceBusReceiveContext));
 
 		readonly IServiceBus _bus;
-		readonly Stopwatch _consumeTime;
+
 		readonly UntypedChannel _eventChannel;
-		readonly Stopwatch _receiveTime;
 		readonly TimeSpan _receiveTimeout;
-		int _consumeCount;
-		bool _consumeNotified;
 		IEnumerator<Action<IConsumeContext>> _consumers;
+
+		/// <summary>number of consumers that were selected for the receive context</summary>
+		int _consumeCount;
+
+		bool _consumeNotified;
 		bool _receiveNotified;
+
+		readonly Stopwatch _receiveTime;
+		readonly Stopwatch _consumeTime;
 		DateTime _startTime;
 
+		/// <summary>
+		/// Creates a new service bus receive context, from a bus
+		/// and a channel which will be used to broadcast statistical
+		/// information.
+		/// </summary>
+		/// <param name="bus">The Service Bus instance</param>
+		/// <param name="eventChannel">The Event Channel to broadcast timing information on</param>
+		/// <param name="receiveTimeout">The receive timeout</param>
 		public ServiceBusReceiveContext(IServiceBus bus, UntypedChannel eventChannel, TimeSpan receiveTimeout)
 		{
 			_bus = bus;
@@ -47,6 +70,12 @@ namespace MassTransit.Context
 			_consumeCount = 0;
 		}
 
+		/// <summary>
+		/// <para>Performs a receive from the endpoint that is specified on the bus given in the 
+		/// constructor. First try to do the receive, then let the endpoint/transport
+		/// call <see cref="DeliverMessageToConsumers"/> (if there are consumers interested)</para>
+		/// <para>This method must not throw exceptions, because it might not be run on the main thread.</para>
+		/// </summary>
 		public void ReceiveFromEndpoint()
 		{
 			try
@@ -54,8 +83,8 @@ namespace MassTransit.Context
 				_startTime = SystemUtil.UtcNow;
 				_receiveTime.Start();
 
-				// let the endpoint (and hence inbound transport) consume a message
-				// The lambda passed is not called until the transport decides that it has
+				// Let the endpoint (and hence inbound transport) consume a message.
+				// This lambda passed is not called until the transport decides that it has
 				// gotten a message and want to pass it forward.
 				_bus.Endpoint.Receive(context =>
 					{
@@ -70,8 +99,9 @@ namespace MassTransit.Context
 						_consumers = enumerable.GetEnumerator();
 						if (!_consumers.MoveNext())
 						{
+							// meaning we don't have any sinks interested in this msg context
 							_consumers.Dispose();
-							return null; // meaning we don't have any sinks interested in this msg context
+							return null; 
 						}
 
 						// otherwise, we have some consumers
@@ -94,7 +124,18 @@ namespace MassTransit.Context
 			}
 		}
 
-		void DeliverMessageToConsumers(IReceiveContext context)
+		/// <summary>
+		/// <para>Deliver the message to the consumers selected in <see cref="ReceiveFromEndpoint"/>. Assumption:
+		/// the inbound transport will send the same context to this method as it did
+		/// to the lambda in <see cref="ReceiveFromEndpoint"/>.</para>
+		/// <para>This method will try to give the message to all consumers found.</para>
+		/// </summary>
+		/// <param name="context">The receive context</param>
+		/// <exception cref="MessageException">If at least one consumer throws
+		/// an exception, then a MessageException will be thrown. If multiple consumers
+		/// threw exceptions, then the last exception will be the inner exception
+		/// and the others won't be tracked.</exception>
+		void DeliverMessageToConsumers([NotNull] IReceiveContext context)
 		{
 			try
 			{
