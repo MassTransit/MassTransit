@@ -10,14 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Transactions;
 	using Builders;
+	using Util;
 	using Configurators;
-	using Magnum;
 	using Magnum.Extensions;
 	using Serialization;
 	using Transports;
@@ -32,10 +34,13 @@ namespace MassTransit.EndpointConfigurators
 		Func<ITransportFactory, ITransportSettings, IOutboundTransport> _errorTransportFactory;
 		Func<ITransportFactory, ITransportSettings, IDuplexTransport> _transportFactory;
 
-		public EndpointConfiguratorImpl(Uri uri, IEndpointFactoryDefaultSettings defaultSettings)
+		public EndpointConfiguratorImpl([NotNull] Uri uri,
+			[NotNull] IEndpointFactoryDefaultSettings defaultSettings)
 		{
+			if (uri == null) throw new ArgumentNullException("uri");
+			if (defaultSettings == null) throw new ArgumentNullException("defaultSettings");
+
 			_uri = uri;
-			Guard.AgainstNull(uri, "uri");
 
 			_transportFactory = DefaultTransportFactory;
 			_errorTransportFactory = DefaultErrorTransportFactory;
@@ -108,7 +113,7 @@ namespace MassTransit.EndpointConfigurators
 		{
 			if (_errorAddress != null)
 			{
-				if (string.Compare(_errorAddress.Uri.Scheme, _settings.Address.Uri.Scheme, true) != 0)
+				if (string.Compare(_errorAddress.Uri.Scheme, _settings.Address.Uri.Scheme, StringComparison.InvariantCultureIgnoreCase) != 0)
 					yield return this.Failure("ErrorAddress", _errorAddress.ToString(),
 						"The error address ('{0}') must use the same scheme as the endpoint address ('{1}')"
 							.FormatWith(_errorAddress.Uri, _settings.Address.Uri.Scheme));

@@ -10,12 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
 	using System.Transactions;
 	using Serialization;
 	using Transports;
+	using Util;
 
 	public interface IEndpointFactoryDefaultSettings
 	{
@@ -27,6 +30,7 @@ namespace MassTransit.EndpointConfigurators
 		bool RequireTransactional { get; }
 		IsolationLevel IsolationLevel { get; set; }
 
-		EndpointSettings CreateEndpointSettings(Uri uri);
+		[NotNull]
+		EndpointSettings CreateEndpointSettings([NotNull] Uri uri);
 	}
 }
