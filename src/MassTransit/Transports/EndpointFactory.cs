@@ -10,12 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit.Transports
 {
 	using System;
 	using System.Collections.Generic;
 	using Builders;
-	using Diagnostics;
 	using Diagnostics.Introspection;
 	using EndpointConfigurators;
 	using Exceptions;
@@ -29,9 +31,19 @@ namespace MassTransit.Transports
 		readonly IDictionary<string, ITransportFactory> _transportFactories;
 		bool _disposed;
 
-		public EndpointFactory(IDictionary<string, ITransportFactory> transportFactories,
-		                       IDictionary<Uri, EndpointBuilder> endpointBuilders, IEndpointFactoryDefaultSettings defaults)
+		/// <summary>
+		/// Creates a new endpoint factory instance
+		/// </summary>
+		/// <param name="transportFactories">Dictionary + contents owned by the EndpointFactory instance.</param>
+		/// <param name="endpointBuilders"></param>
+		/// <param name="defaults"></param>
+		public EndpointFactory([NotNull] IDictionary<string, ITransportFactory> transportFactories, 
+			[NotNull] IDictionary<Uri, EndpointBuilder> endpointBuilders, 
+			[NotNull] IEndpointFactoryDefaultSettings defaults)
 		{
+			if (transportFactories == null) throw new ArgumentNullException("transportFactories");
+			if (endpointBuilders == null) throw new ArgumentNullException("endpointBuilders");
+			if (defaults == null) throw new ArgumentNullException("defaults");
 			_transportFactories = transportFactories;
 			_defaults = defaults;
 			_endpointBuilders = endpointBuilders;

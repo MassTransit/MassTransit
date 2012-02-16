@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit.EndpointConfigurators
 {
 	using System;
@@ -32,8 +35,9 @@ namespace MassTransit.EndpointConfigurators
 			IsolationLevel = IsolationLevel.Serializable;
 		}
 
-		public EndpointFactoryDefaultSettings(IEndpointFactoryDefaultSettings defaults)
+		public EndpointFactoryDefaultSettings([NotNull] IEndpointFactoryDefaultSettings defaults)
 		{
+			if (defaults == null) throw new ArgumentNullException("defaults");
 			CreateMissingQueues = defaults.CreateMissingQueues;
 		    CreateTransactionalQueues = defaults.CreateTransactionalQueues;
 		    IsolationLevel = defaults.IsolationLevel;

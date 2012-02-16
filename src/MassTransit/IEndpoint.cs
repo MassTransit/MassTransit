@@ -35,26 +35,31 @@ namespace MassTransit
 		/// <summary>
 		/// The address of the endpoint
 		/// </summary>
+		[NotNull]
 		IEndpointAddress Address { get; }
 
 		/// <summary>
 		/// The inbound transport for the endpoint
 		/// </summary>
+		[NotNull]
 		IInboundTransport InboundTransport { get; }
 
 		/// <summary>
 		/// The outbound transport for the endpoint
 		/// </summary>
+		[NotNull]
 		IOutboundTransport OutboundTransport { get; }
 
 		/// <summary>
 		/// The transport where faulting messages (poison messages) are sent
 		/// </summary>
+		[NotNull]
 		IOutboundTransport ErrorTransport { get; }
 
 		/// <summary>
 		/// The message serializer being used by the endpoint
 		/// </summary>
+		[NotNull]
 		IMessageSerializer Serializer { get; }
 
 		/// <summary>
@@ -64,7 +69,7 @@ namespace MassTransit
 		/// <param name="context">Send context to generate the in-transport message from. Contains
 		/// out-of-band data such as message ids, correlation ids, headers, and in-band data
 		/// such as the actual data of the message to send.</param>
-		void Send<T>(ISendContext<T> context)
+		void Send<T>([NotNull] ISendContext<T> context)
 			where T : class;
 
 		/// <summary>
