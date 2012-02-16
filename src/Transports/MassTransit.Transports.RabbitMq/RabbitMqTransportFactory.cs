@@ -18,7 +18,6 @@ namespace MassTransit.Transports.RabbitMq
     using Configuration.Builders;
     using Configuration.Configurators;
     using Exceptions;
-    using Logging;
     using Magnum.Extensions;
     using Magnum.Threading;
     using RabbitMQ.Client;
@@ -26,7 +25,6 @@ namespace MassTransit.Transports.RabbitMq
     public class RabbitMqTransportFactory :
         ITransportFactory
     {
-        static readonly ILog _log = Logger.Get(typeof (RabbitMqTransportFactory));
         readonly ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>> _connectionCache;
         readonly IDictionary<Uri, ConnectionFactoryBuilder> _connectionFactoryBuilders;
         readonly IMessageNameFormatter _messageNameFormatter;
@@ -51,6 +49,20 @@ namespace MassTransit.Transports.RabbitMq
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+		void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_connectionCache.Values.Each(x => x.Dispose());
+				_connectionCache.Clear();
+
+				_connectionCache.Dispose();
+			}
+
+			_disposed = true;
+		}
 
         public string Scheme
         {
@@ -110,20 +122,6 @@ namespace MassTransit.Transports.RabbitMq
             return _connectionCache.Count();
         }
 
-        void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-            if (disposing)
-            {
-                _connectionCache.Values.Each(x => x.Dispose());
-                _connectionCache.Clear();
-
-                _connectionCache.Dispose();
-            }
-
-            _disposed = true;
-        }
-
         ConnectionHandler<RabbitMqConnection> GetConnection(IRabbitMqEndpointAddress address)
         {
             return _connectionCache.Retrieve(address.Uri, () =>
@@ -141,11 +139,6 @@ namespace MassTransit.Transports.RabbitMq
                     var connectionHandler = new ConnectionHandlerImpl<RabbitMqConnection>(connection);
                     return connectionHandler;
                 });
-        }
-
-        ~RabbitMqTransportFactory()
-        {
-            Dispose(false);
         }
 
         static void EnsureProtocolIsCorrect(Uri address)

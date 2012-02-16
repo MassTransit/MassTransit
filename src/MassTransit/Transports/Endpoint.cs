@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit.Transports
 {
     using System;
@@ -36,10 +39,16 @@ namespace MassTransit.Transports
         IOutboundTransport _errorTransport;
         IDuplexTransport _transport;
 
-        public Endpoint(IEndpointAddress address, IMessageSerializer serializer, IDuplexTransport transport,
-                        IOutboundTransport errorTransport)
+        public Endpoint([NotNull] IEndpointAddress address,
+			[NotNull] IMessageSerializer serializer,
+			[NotNull] IDuplexTransport transport,
+			[NotNull] IOutboundTransport errorTransport)
         {
-            _address = address;
+        	if (address == null) throw new ArgumentNullException("address");
+        	if (serializer == null) throw new ArgumentNullException("serializer");
+        	if (transport == null) throw new ArgumentNullException("transport");
+        	if (errorTransport == null) throw new ArgumentNullException("errorTransport");
+        	_address = address;
             _transport = transport;
             _errorTransport = errorTransport;
             _serializer = serializer;
