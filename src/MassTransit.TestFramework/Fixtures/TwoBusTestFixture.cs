@@ -19,9 +19,10 @@ namespace MassTransit.TestFramework.Fixtures
 	using Subscriptions.Coordinator; 
 
 	/// <summary>
-	/// Test fixture that creates two buses, one "remote" and one "local". Of course, both are in-memory;
+	/// <para>WARN: this bus test fixture DOES NOT call <see cref="EndpointTestFixture{TTransportFactory}.ConfigureServiceBus"/></para>
+	/// <para>Test fixture that creates two buses, one "remote" and one "local". Of course, both are in-memory;
 	/// but this test fixture makes sure that the two buses uses the same loopback router, while still having 
-	/// a non-loopback transport factory.
+	/// a non-loopback transport factory.</para>
 	/// </summary>
 	/// <typeparam name="TTransportFactory"></typeparam>
 	[TestFixture]
