@@ -45,18 +45,18 @@ namespace MassTransit
         /// <param name="bytes"></param>
         public NewId(byte[] bytes)
         {
-            Contract.Requires(bytes != null, "bytes cannot be null");
-            Contract.Requires(bytes.Length == 16, "Exactly 16 bytes expected");
-            Contract.EndContractBlock();
+            if(bytes == null)
+                throw new ArgumentNullException("bytes");
+            if(bytes.Length != 16)
+                throw new ArgumentException("Exactly 16 bytes expected", "bytes");
 
             ConvertBytes(bytes, out _a, out _b, out _c, out _d);
         }
 
         public NewId(string value)
         {
-            Contract.Requires(value != null, "value cannot be null");
-            Contract.Requires(value.Length > 0, "value cannot be empty");
-            Contract.EndContractBlock();
+            if(string.IsNullOrEmpty(value))
+                throw new ArgumentException("A string is expected", "value");
 
             var guid = new Guid(value);
 
