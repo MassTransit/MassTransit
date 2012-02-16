@@ -12,97 +12,99 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-	using System;
-	using Advanced;
-	using BusConfigurators;
-	using Configuration;
-	using Magnum;
-	using Magnum.Extensions;
-	using Magnum.Reflection;
-	using Saga;
+    using System;
+    using Advanced;
+    using BusConfigurators;
+    using Configuration;
+    using Magnum.Extensions;
+    using Magnum.Reflection;
+    using Saga;
 
-	public static class ExtensionsForDistributor
-	{
-		/// <summary>
-		/// Implements a distributor-to-worker pattern for the given message type. 
-		/// </summary>
-		/// <typeparam name="T">The type of message to use the distributor</typeparam>
-		/// <param name="configurator">Service bus to implement the distributor</param>
-		public static void UseDistributorFor<T>(this ServiceBusConfigurator configurator)
-			where T : class
-		{
-			configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<T>());
+    public static class ExtensionsForDistributor
+    {
+        /// <summary>
+        /// Implements a distributor-to-worker pattern for the given message type. 
+        /// </summary>
+        /// <typeparam name="T">The type of message to use the distributor</typeparam>
+        /// <param name="configurator">Service bus to implement the distributor</param>
+        public static void UseDistributorFor<T>(this ServiceBusConfigurator configurator)
+            where T : class
+        {
+            configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<T>());
 
-			configurator.SetReceiveTimeout(50.Milliseconds());
-		}
+            configurator.SetReceiveTimeout(50.Milliseconds());
+        }
 
-		/// <summary>
-		/// Implements a distributor-to-worker pattern for the given message type. 
-		/// </summary>
-		/// <typeparam name="TMessage">The type of to use the distributor</typeparam>
-		/// <typeparam name="TSelectionStrategy">The <code>IWorkerSelectionStrategy</code> used to pick 
-		/// which worker node to send a message</typeparam>
-		/// <param name="configurator">Service bus to implement the distributor</param>
-		public static void UseDistributorFor<TMessage, TSelectionStrategy>(this ServiceBusConfigurator configurator)
-			where TMessage : class
-			where TSelectionStrategy : class, IWorkerSelectionStrategy<TMessage>, new()
-		{
-			configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<TMessage>(new TSelectionStrategy()));
+        /// <summary>
+        /// Implements a distributor-to-worker pattern for the given message type. 
+        /// </summary>
+        /// <typeparam name="TMessage">The type of to use the distributor</typeparam>
+        /// <typeparam name="TSelectionStrategy">The <code>IWorkerSelectionStrategy</code> used to pick 
+        /// which worker node to send a message</typeparam>
+        /// <param name="configurator">Service bus to implement the distributor</param>
+        public static void UseDistributorFor<TMessage, TSelectionStrategy>(this ServiceBusConfigurator configurator)
+            where TMessage : class
+            where TSelectionStrategy : class, IWorkerSelectionStrategy<TMessage>, new()
+        {
+            configurator.AddService(BusServiceLayer.Presentation,
+                () => new Distributor<TMessage>(new TSelectionStrategy()));
 
-			configurator.SetReceiveTimeout(50.Milliseconds());
-		}
+            configurator.SetReceiveTimeout(50.Milliseconds());
+        }
 
-		/// <summary>
-		/// Implements a distributor-to-worker pattern for the given message type. 
-		/// </summary>
-		/// <typeparam name="TMessage">The type of to use the distributor</typeparam>
-		/// <param name="configurator">Service bus to implement the distributor</param>
-		/// <param name="workerSelectionStrategy">The <code>IWorkerSelectionStrategy</code> 
-		/// used to pick which worker node to send a message</param>
-		public static void UseDistributorFor<TMessage>(this ServiceBusConfigurator configurator,
-		                                        IWorkerSelectionStrategy<TMessage> workerSelectionStrategy)
-			where TMessage : class
-		{
-			configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<TMessage>(workerSelectionStrategy));
+        /// <summary>
+        /// Implements a distributor-to-worker pattern for the given message type. 
+        /// </summary>
+        /// <typeparam name="TMessage">The type of to use the distributor</typeparam>
+        /// <param name="configurator">Service bus to implement the distributor</param>
+        /// <param name="workerSelectionStrategy">The <code>IWorkerSelectionStrategy</code> 
+        /// used to pick which worker node to send a message</param>
+        public static void UseDistributorFor<TMessage>(this ServiceBusConfigurator configurator,
+                                                       IWorkerSelectionStrategy<TMessage> workerSelectionStrategy)
+            where TMessage : class
+        {
+            configurator.AddService(BusServiceLayer.Presentation,
+                () => new Distributor<TMessage>(workerSelectionStrategy));
 
-			configurator.SetReceiveTimeout(50.Milliseconds());
-		}
+            configurator.SetReceiveTimeout(50.Milliseconds());
+        }
 
-		public static void ImplementDistributorWorker<TMessage>(this ServiceBusConfigurator configurator,
-		                                                 Func<TMessage, Action<TMessage>> getConsumer)
-			where TMessage : class
-		{
-			configurator.AddService(BusServiceLayer.Presentation, () => new Worker<TMessage>(getConsumer));
-		}
+        public static void ImplementDistributorWorker<TMessage>(this ServiceBusConfigurator configurator,
+                                                                Func<TMessage, Action<TMessage>> getConsumer)
+            where TMessage : class
+        {
+            configurator.AddService(BusServiceLayer.Presentation, () => new Worker<TMessage>(getConsumer));
+        }
 
-		public static void ImplementDistributorWorker<TMessage>(this ServiceBusConfigurator configurator,
-		                                                 Func<TMessage, Action<TMessage>> getConsumer, int inProgressLimit, int pendingLimit)
-			where TMessage : class
-		{
-			var settings = new WorkerSettings
-				{
-					InProgressLimit = inProgressLimit, 
-					PendingLimit = pendingLimit
-				};
+        public static void ImplementDistributorWorker<TMessage>(this ServiceBusConfigurator configurator,
+                                                                Func<TMessage, Action<TMessage>> getConsumer,
+                                                                int inProgressLimit, int pendingLimit)
+            where TMessage : class
+        {
+            var settings = new WorkerSettings
+                {
+                    InProgressLimit = inProgressLimit,
+                    PendingLimit = pendingLimit
+                };
 
-			configurator.AddService(BusServiceLayer.Presentation, () => new Worker<TMessage>(getConsumer, settings));
-		}
+            configurator.AddService(BusServiceLayer.Presentation, () => new Worker<TMessage>(getConsumer, settings));
+        }
 
-		public static void UseSagaDistributorFor<T>(this ServiceBusConfigurator configurator)
-			where T : SagaStateMachine<T>, ISaga
-		{
-			T saga = FastActivator<T>.Create(CombGuid.Generate());
+        public static void UseSagaDistributorFor<T>(this ServiceBusConfigurator configurator)
+            where T : SagaStateMachine<T>, ISaga
+        {
+            T saga = FastActivator<T>.Create(NewId.NextGuid());
 
-			var serviceConfigurator = new SagaDistributorConfigurator(configurator);
+            var serviceConfigurator = new SagaDistributorConfigurator(configurator);
 
-			saga.EnumerateDataEvents(serviceConfigurator.AddService);
-		}
+            saga.EnumerateDataEvents(serviceConfigurator.AddService);
+        }
 
-		public static void ImplementSagaDistributorWorker<T>(this ServiceBusConfigurator configurator,
-		                                                     ISagaRepository<T> repository)
-			where T : SagaStateMachine<T>, ISaga
-		{
-			configurator.AddService(BusServiceLayer.Presentation, bus => new SagaWorker<T>(repository));
-		}
-	}
+        public static void ImplementSagaDistributorWorker<T>(this ServiceBusConfigurator configurator,
+                                                             ISagaRepository<T> repository)
+            where T : SagaStateMachine<T>, ISaga
+        {
+            configurator.AddService(BusServiceLayer.Presentation, bus => new SagaWorker<T>(repository));
+        }
+    }
 }

@@ -12,56 +12,55 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Loopback
 {
-	using System;
-	using System.IO;
-	using Magnum;
+    using System;
+    using System.IO;
 
-	public class LoopbackMessage :
-		IDisposable
-	{
-		Stream _body;
-		bool _disposed;
+    public class LoopbackMessage :
+        IDisposable
+    {
+        Stream _body;
+        bool _disposed;
 
-		public LoopbackMessage()
-		{
-			Body = new MemoryStream();
-			MessageId = CombGuid.Generate().ToString();
-		}
+        public LoopbackMessage()
+        {
+            Body = new MemoryStream();
+            MessageId = NewId.Next().ToString();
+        }
 
-		public Stream Body
-		{
-			get
-			{
-				_body.Seek(0, SeekOrigin.Begin);
-				return _body;
-			}
-			private set { _body = value; }
-		}
+        public Stream Body
+        {
+            get
+            {
+                _body.Seek(0, SeekOrigin.Begin);
+                return _body;
+            }
+            private set { _body = value; }
+        }
 
-		public string ContentType { get; set; }
-		public DateTime? ExpirationTime { get; set; }
-		public string MessageId { get; private set; }
+        public string ContentType { get; set; }
+        public DateTime? ExpirationTime { get; set; }
+        public string MessageId { get; private set; }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				Body.Dispose();
-			}
+        void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                Body.Dispose();
+            }
 
-			_disposed = true;
-		}
+            _disposed = true;
+        }
 
-		~LoopbackMessage()
-		{
-			Dispose(false);
-		}
-	}
+        ~LoopbackMessage()
+        {
+            Dispose(false);
+        }
+    }
 }

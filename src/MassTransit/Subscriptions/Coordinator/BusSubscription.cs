@@ -15,7 +15,6 @@ namespace MassTransit.Subscriptions.Coordinator
     using System;
     using System.Collections.Generic;
     using Logging;
-    using Magnum;
     using Messages;
 
     public class BusSubscription :
@@ -76,7 +75,7 @@ namespace MassTransit.Subscriptions.Coordinator
             if (!wasAdded || _ids.Count != 1)
                 return;
 
-            _subscriptionId = CombGuid.Generate();
+            _subscriptionId = NewId.NextGuid();
             _endpointUri = added.EndpointUri;
 
             var add = new SubscriptionAddedMessage

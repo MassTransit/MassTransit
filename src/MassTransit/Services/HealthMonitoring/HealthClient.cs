@@ -15,7 +15,6 @@ namespace MassTransit.Services.HealthMonitoring
     using System;
     using Diagnostics.Introspection;
     using Logging;
-    using Magnum;
     using Magnum.Extensions;
     using Messages;
     using Stact;
@@ -26,10 +25,9 @@ namespace MassTransit.Services.HealthMonitoring
         Consumes<PingEndpoint>.All,
         DiagnosticsSource
     {
-        readonly ILog _log = Logger.Get(typeof (HealthClient));
-
         readonly int _heartbeatIntervalInMilliseconds;
         readonly int _heartbeatIntervalInSeconds;
+        readonly ILog _log = Logger.Get(typeof (HealthClient));
         IServiceBus _bus;
         Uri _controlUri;
         Uri _dataUri;
@@ -59,7 +57,7 @@ namespace MassTransit.Services.HealthMonitoring
             _heartbeatIntervalInSeconds = intervalInSeconds;
             _heartbeatIntervalInMilliseconds = (int) TimeSpan.FromSeconds(_heartbeatIntervalInSeconds).TotalMilliseconds;
 
-            SystemId = CombGuid.Generate();
+            SystemId = NewId.NextGuid();
         }
 
         public Guid SystemId { get; private set; }

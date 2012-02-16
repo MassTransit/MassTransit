@@ -177,6 +177,11 @@
     <Compile Include="MessageInterceptor_Specs.cs" />
     <Compile Include="MessageRetryTracker_Specs.cs" />
     <Compile Include="Messages\PartialSerializationTestMessage.cs" />
+    <Compile Include="NewId_\GuidInterop_Specs.cs" />
+    <Compile Include="NewId_\LongTerm_Specs.cs" />
+    <Compile Include="NewId_\NetworkAddress_Specs.cs" />
+    <Compile Include="NewId_\NewId_Specs.cs" />
+    <Compile Include="NewId_\Usage_Specs.cs" />
     <Compile Include="Performance\EndpointLoadTest.cs" />
     <Compile Include="Performance\LoadedRequest.cs" />
     <Compile Include="Performance\LoadedResponse.cs" />

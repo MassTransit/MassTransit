@@ -283,6 +283,14 @@
     <Compile Include="Logging\Tracing\LogLevel.cs" />
     <Compile Include="Logging\Tracing\TraceLog.cs" />
     <Compile Include="Logging\Tracing\TraceLogger.cs" />
+    <Compile Include="NewId\ITickProvider.cs" />
+    <Compile Include="NewId\IWorkerIdProvider.cs" />
+    <Compile Include="NewId\NewId.cs" />
+    <Compile Include="NewId\NewIdExtensions.cs" />
+    <Compile Include="NewId\NewIdGenerator.cs" />
+    <Compile Include="NewId\NewIdProviders\DateTimeTickProvider.cs" />
+    <Compile Include="NewId\NewIdProviders\NetworkAddressWorkerIdProvider.cs" />
+    <Compile Include="NewId\NewIdProviders\StopwatchTickProvider.cs" />
     <Compile Include="Pipeline\Configuration\InboundRequestMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\InboundRequestMessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\HandlerSelector.cs" />
