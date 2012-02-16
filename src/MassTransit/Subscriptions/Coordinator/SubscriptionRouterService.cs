@@ -12,179 +12,178 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Coordinator
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Diagnostics.Introspection;
-	using Magnum;
-	using Magnum.Extensions;
-	using Messages;
-	using Stact;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Diagnostics.Introspection;
+    using Magnum.Extensions;
+    using Messages;
+    using Stact;
 
-	public class SubscriptionRouterService :
-		IBusService,
-		SubscriptionRouter,
-		SubscriptionObserver,
+    public class SubscriptionRouterService :
+        IBusService,
+        SubscriptionRouter,
+        SubscriptionObserver,
         DiagnosticsSource
-	{
-		readonly Guid _peerId;
-		readonly Uri _peerUri;
-		readonly IList<BusSubscriptionEventListener> _listeners;
-		readonly string _network;
-		readonly IList<SubscriptionObserver> _observers;
+    {
+        readonly IList<BusSubscriptionEventListener> _listeners;
+        readonly string _network;
+        readonly IList<SubscriptionObserver> _observers;
         readonly ActorRef _peerCache;
-		bool _disposed;
-		UnsubscribeAction _unregister;
+        readonly Guid _peerId;
+        readonly Uri _peerUri;
+        bool _disposed;
+        UnsubscribeAction _unregister;
 
-		public SubscriptionRouterService(IServiceBus bus, string network)
-		{
-			_peerUri = bus.ControlBus.Endpoint.Address.Uri;
+        public SubscriptionRouterService(IServiceBus bus, string network)
+        {
+            _peerUri = bus.ControlBus.Endpoint.Address.Uri;
 
-			_network = network;
+            _network = network;
 
-			_peerId = CombGuid.Generate();
+            _peerId = NewId.NextGuid();
 
-			_observers = new List<SubscriptionObserver>();
-			_listeners = new List<BusSubscriptionEventListener>();
+            _observers = new List<SubscriptionObserver>();
+            _listeners = new List<BusSubscriptionEventListener>();
 
-			_unregister = () => true;
+            _unregister = () => true;
 
-			_peerUri = bus.ControlBus.Endpoint.Address.Uri;
+            _peerUri = bus.ControlBus.Endpoint.Address.Uri;
 
-			var connector = new BusSubscriptionConnector(bus);
+            var connector = new BusSubscriptionConnector(bus);
 
-			_peerCache = ActorFactory.Create<PeerCache>(x =>
-				{
-					x.ConstructedBy((fiber, scheduler, inbox) =>
-					                new PeerCache(fiber, scheduler, connector, _peerId, _peerUri));
-					x.UseSharedScheduler();
-					x.HandleOnPoolFiber();
-				})
-				.GetActor();
-		}
+            _peerCache = ActorFactory.Create<PeerCache>(x =>
+                {
+                    x.ConstructedBy((fiber, scheduler, inbox) =>
+                                    new PeerCache(fiber, scheduler, connector, _peerId, _peerUri));
+                    x.UseSharedScheduler();
+                    x.HandleOnPoolFiber();
+                })
+                .GetActor();
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public void Inspect(DiagnosticsProbe probe)
+        {
+            probe.Add("mt.network", _network);
+        }
 
-		public void Start(IServiceBus bus)
-		{
-			ListenToBus(bus);
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		public void Stop()
-		{
-			_unregister();
-		}
+        public void Start(IServiceBus bus)
+        {
+            ListenToBus(bus);
+        }
 
-		public void OnSubscriptionAdded(SubscriptionAdded message)
-		{
-			lock (_observers)
-				_observers.Each(x => x.OnSubscriptionAdded(message));
-		}
+        public void Stop()
+        {
+            _unregister();
+        }
 
-		public void OnSubscriptionRemoved(SubscriptionRemoved message)
-		{
-			lock (_observers)
-				_observers.Each(x => x.OnSubscriptionRemoved(message));
-		}
+        public void OnSubscriptionAdded(SubscriptionAdded message)
+        {
+            lock (_observers)
+                _observers.Each(x => x.OnSubscriptionAdded(message));
+        }
 
-		public void OnComplete()
-		{
-		}
+        public void OnSubscriptionRemoved(SubscriptionRemoved message)
+        {
+            lock (_observers)
+                _observers.Each(x => x.OnSubscriptionRemoved(message));
+        }
 
-		public IEnumerable<Subscription> LocalSubscriptions
-		{
-			get { return _listeners.SelectMany(x => x.Subscriptions); }
-		}
+        public void OnComplete()
+        {
+        }
 
-		public void Send(AddPeerSubscription message)
-		{
-			if (_peerCache != null)
-				_peerCache.Send(message);
-		}
+        public IEnumerable<Subscription> LocalSubscriptions
+        {
+            get { return _listeners.SelectMany(x => x.Subscriptions); }
+        }
 
-		public void Send(RemovePeerSubscription message)
-		{
-			if (_peerCache != null)
-				_peerCache.Send(message);
-		}
+        public void Send(AddPeerSubscription message)
+        {
+            if (_peerCache != null)
+                _peerCache.Send(message);
+        }
 
-		public void Send(AddPeer message)
-		{
-			if (_peerCache != null)
-				_peerCache.Send(message);
-		}
+        public void Send(RemovePeerSubscription message)
+        {
+            if (_peerCache != null)
+                _peerCache.Send(message);
+        }
 
-		public void Send(RemovePeer message)
-		{
-			if (_peerCache != null)
-				_peerCache.Send(message);
-		}
+        public void Send(AddPeer message)
+        {
+            if (_peerCache != null)
+                _peerCache.Send(message);
+        }
 
-		public string Network
-		{
-			get { return _network; }
-		}
+        public void Send(RemovePeer message)
+        {
+            if (_peerCache != null)
+                _peerCache.Send(message);
+        }
 
-		public Guid PeerId
-		{
-			get { return _peerId; }
-		}
+        public string Network
+        {
+            get { return _network; }
+        }
 
-		public Uri PeerUri
-		{
-			get { return _peerUri; }
-		}
+        public Guid PeerId
+        {
+            get { return _peerId; }
+        }
 
-		public void AddObserver(SubscriptionObserver observer)
-		{
-			lock (_observers)
-				_observers.Add(observer);
-		}
+        public Uri PeerUri
+        {
+            get { return _peerUri; }
+        }
 
-		void ListenToBus(IServiceBus bus)
-		{
-			var subscriptionEventListener = new BusSubscriptionEventListener(bus, this);
+        public void AddObserver(SubscriptionObserver observer)
+        {
+            lock (_observers)
+                _observers.Add(observer);
+        }
 
-			_unregister += bus.Configure(x =>
-				{
-					UnregisterAction unregisterAction = x.Register(subscriptionEventListener);
+        void ListenToBus(IServiceBus bus)
+        {
+            var subscriptionEventListener = new BusSubscriptionEventListener(bus, this);
 
-					return () => unregisterAction();
-				});
+            _unregister += bus.Configure(x =>
+                {
+                    UnregisterAction unregisterAction = x.Register(subscriptionEventListener);
 
-			_listeners.Add(subscriptionEventListener);
+                    return () => unregisterAction();
+                });
 
-			IServiceBus controlBus = bus.ControlBus;
-			if (controlBus != bus)
-			{
-				ListenToBus(controlBus);
-			}
-		}
+            _listeners.Add(subscriptionEventListener);
 
-	    public void Inspect(DiagnosticsProbe probe)
-	    {
-	        probe.Add("mt.network", _network);
-	    }
+            IServiceBus controlBus = bus.ControlBus;
+            if (controlBus != bus)
+            {
+                ListenToBus(controlBus);
+            }
+        }
 
-	    void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				lock (_observers)
-					_observers.Each(x => x.OnComplete());
-			}
+        void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                lock (_observers)
+                    _observers.Each(x => x.OnComplete());
+            }
 
-			_disposed = true;
-		}
+            _disposed = true;
+        }
 
-		~SubscriptionRouterService()
-		{
-			Dispose(false);
-		}
-	}
+        ~SubscriptionRouterService()
+        {
+            Dispose(false);
+        }
+    }
 }

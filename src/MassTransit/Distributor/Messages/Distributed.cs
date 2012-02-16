@@ -13,7 +13,6 @@
 namespace MassTransit.Distributor.Messages
 {
     using System;
-    using Magnum;
 
     /// <summary>
     ///   Wraps a message type as a distributed message so that it can be sent separately from the actual
@@ -34,7 +33,7 @@ namespace MassTransit.Distributor.Messages
         {
             Payload = message;
             ResponseAddress = responseAddress;
-            CorrelationId = CombGuid.Generate();
+            CorrelationId = NewId.NextGuid();
         }
 
         protected Distributed()

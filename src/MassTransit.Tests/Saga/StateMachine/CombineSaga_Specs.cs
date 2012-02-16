@@ -13,7 +13,6 @@
 namespace MassTransit.Tests.Saga.StateMachine
 {
     using System;
-    using Magnum;
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using MassTransit.Pipeline.Inspectors;
@@ -25,15 +24,15 @@ namespace MassTransit.Tests.Saga.StateMachine
     [TestFixture]
     public class CombineSaga_Specs : LoopbackTestFixture
     {
-        private ISagaRepository<CombineSaga> _repository;
-        private Guid _transactionId;
+        ISagaRepository<CombineSaga> _repository;
+        Guid _transactionId;
 
         protected override void EstablishContext()
         {
             base.EstablishContext();
 
             _repository = SetupSagaRepository<CombineSaga>();
-            _transactionId = CombGuid.Generate();
+            _transactionId = NewId.NextGuid();
         }
 
         [Test]
@@ -46,7 +45,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 
             LocalBus.Publish(new Second {CorrelationId = _transactionId});
 
-            var saga = _repository.ShouldContainSaga(_transactionId, 8.Seconds());
+            CombineSaga saga = _repository.ShouldContainSaga(_transactionId, 8.Seconds());
             saga.ShouldBeInState(CombineSaga.Initial);
             saga.Combined.ShouldEqual(2);
 

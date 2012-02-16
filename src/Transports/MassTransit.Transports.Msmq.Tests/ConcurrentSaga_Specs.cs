@@ -16,7 +16,6 @@ namespace MassTransit.Transports.Msmq.Tests
     using System.Diagnostics;
     using System.Threading;
     using BusConfigurators;
-    using Magnum;
     using Magnum.TestFramework;
     using NHibernateIntegration.Saga;
     using NHibernateIntegration.Tests.Sagas;
@@ -47,13 +46,14 @@ namespace MassTransit.Transports.Msmq.Tests
         [Test]
         public void Should_process_the_messages_in_order_and_not_at_the_same_time()
         {
-            Guid transactionId = CombGuid.Generate();
+            Guid transactionId = NewId.NextGuid();
 
             Trace.WriteLine("Creating transaction for " + transactionId);
 
             int startValue = 1;
 
-            var startConcurrentSaga = new StartConcurrentSaga { CorrelationId = transactionId, Name = "Chris", Value = startValue };
+            var startConcurrentSaga = new StartConcurrentSaga
+                {CorrelationId = transactionId, Name = "Chris", Value = startValue};
 
             LocalBus.Publish(startConcurrentSaga);
             LocalBus.Publish(startConcurrentSaga);
@@ -62,7 +62,7 @@ namespace MassTransit.Transports.Msmq.Tests
             _sagaRepository.ShouldContainSaga(transactionId).ShouldNotBeNull();
 
             int nextValue = 2;
-            var continueConcurrentSaga = new ContinueConcurrentSaga { CorrelationId = transactionId, Value = nextValue };
+            var continueConcurrentSaga = new ContinueConcurrentSaga {CorrelationId = transactionId, Value = nextValue};
 
             LocalBus.Publish(continueConcurrentSaga);
             Trace.WriteLine("Just published the continue message");
@@ -79,7 +79,7 @@ namespace MassTransit.Transports.Msmq.Tests
         [Test]
         public void Should_process_the_saga_normally()
         {
-            Guid transactionId = CombGuid.Generate();
+            Guid transactionId = NewId.NextGuid();
 
             Trace.WriteLine("Creating transaction for " + transactionId);
 

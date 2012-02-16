@@ -12,78 +12,79 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Saga.Locator
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.Linq;
-	using System.Linq.Expressions;
-	using Magnum;
-	using Magnum.Extensions;
-	using MassTransit.Pipeline;
-	using MassTransit.Saga;
-	using MassTransit.Saga.Pipeline;
-	using NUnit.Framework;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Linq.Expressions;
+    using Magnum.Extensions;
+    using MassTransit.Pipeline;
+    using MassTransit.Saga;
+    using MassTransit.Saga.Pipeline;
+    using NUnit.Framework;
 
-	[TestFixture]
-	public class SagaExpression_Specs
-	{
-		[SetUp]
-		public void Setup()
-		{
-			_repository = new InMemorySagaRepository<SimpleSaga>();
-			var initiatePolicy = new InitiatingSagaPolicy<SimpleSaga, InitiateSimpleSaga>(x => x.CorrelationId, x => false);
+    [TestFixture]
+    public class SagaExpression_Specs
+    {
+        [SetUp]
+        public void Setup()
+        {
+            _repository = new InMemorySagaRepository<SimpleSaga>();
+            var initiatePolicy = new InitiatingSagaPolicy<SimpleSaga, InitiateSimpleSaga>(x => x.CorrelationId,
+                x => false);
 
-			_sagaId = CombGuid.Generate();
-			_initiateSaga = new InitiateSimpleSaga {CorrelationId = _sagaId, Name = "Chris"};
-			var context = _initiateSaga.ToConsumeContext();
-			_repository.GetSaga(context, _sagaId,
-				(i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
-				.Each(x => x(context));
+            _sagaId = NewId.NextGuid();
+            _initiateSaga = new InitiateSimpleSaga {CorrelationId = _sagaId, Name = "Chris"};
+            IConsumeContext<InitiateSimpleSaga> context = _initiateSaga.ToConsumeContext();
+            _repository.GetSaga(context, _sagaId,
+                (i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
+                .Each(x => x(context));
 
-			_initiateOtherSaga = new InitiateSimpleSaga {CorrelationId = _otherSagaId, Name = "Dru"};
+            _initiateOtherSaga = new InitiateSimpleSaga {CorrelationId = _otherSagaId, Name = "Dru"};
 
-			_otherSagaId = Guid.NewGuid();
-			context = _initiateOtherSaga.ToConsumeContext();
-			_repository.GetSaga(context, _otherSagaId,
-				(i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
-				.Each(x => x(context));
+            _otherSagaId = Guid.NewGuid();
+            context = _initiateOtherSaga.ToConsumeContext();
+            _repository.GetSaga(context, _otherSagaId,
+                (i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
+                .Each(x => x(context));
 
-			_observeSaga = new ObservableSagaMessage {Name = "Chris"};
-		}
+            _observeSaga = new ObservableSagaMessage {Name = "Chris"};
+        }
 
-		Guid _sagaId;
-		InitiateSimpleSaga _initiateSaga;
-		InMemorySagaRepository<SimpleSaga> _repository;
-		Guid _otherSagaId;
-		ObservableSagaMessage _observeSaga;
-		InitiateSimpleSaga _initiateOtherSaga;
+        Guid _sagaId;
+        InitiateSimpleSaga _initiateSaga;
+        InMemorySagaRepository<SimpleSaga> _repository;
+        Guid _otherSagaId;
+        ObservableSagaMessage _observeSaga;
+        InitiateSimpleSaga _initiateOtherSaga;
 
-		[Test]
-		public void Matching_by_property_should_be_happy()
-		{
-			Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> selector = (s, m) => s.Name == m.Name;
+        [Test]
+        public void Matching_by_property_should_be_happy()
+        {
+            Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> selector = (s, m) => s.Name == m.Name;
 
-			Expression<Func<SimpleSaga, bool>> filter =
-				new SagaFilterExpressionConverter<SimpleSaga, ObservableSagaMessage>(_observeSaga).Convert(selector);
-			Trace.WriteLine(filter.ToString());
+            Expression<Func<SimpleSaga, bool>> filter =
+                new SagaFilterExpressionConverter<SimpleSaga, ObservableSagaMessage>(_observeSaga).Convert(selector);
+            Trace.WriteLine(filter.ToString());
 
-			IEnumerable<SimpleSaga> matches = _repository.Where(filter);
+            IEnumerable<SimpleSaga> matches = _repository.Where(filter);
 
-			Assert.AreEqual(1, matches.Count());
-		}
+            Assert.AreEqual(1, matches.Count());
+        }
 
-		[Test]
-		public void The_saga_expression_should_be_converted_down_to_a_saga_only_filter()
-		{
-			Expression<Func<SimpleSaga, InitiateSimpleSaga, bool>> selector = (s, m) => s.CorrelationId == m.CorrelationId;
+        [Test]
+        public void The_saga_expression_should_be_converted_down_to_a_saga_only_filter()
+        {
+            Expression<Func<SimpleSaga, InitiateSimpleSaga, bool>> selector =
+                (s, m) => s.CorrelationId == m.CorrelationId;
 
-			Expression<Func<SimpleSaga, bool>> filter =
-				new SagaFilterExpressionConverter<SimpleSaga, InitiateSimpleSaga>(_initiateSaga).Convert(selector);
-			Trace.WriteLine(filter.ToString());
+            Expression<Func<SimpleSaga, bool>> filter =
+                new SagaFilterExpressionConverter<SimpleSaga, InitiateSimpleSaga>(_initiateSaga).Convert(selector);
+            Trace.WriteLine(filter.ToString());
 
-			IEnumerable<SimpleSaga> matches = _repository.Where(filter);
+            IEnumerable<SimpleSaga> matches = _repository.Where(filter);
 
-			Assert.AreEqual(1, matches.Count());
-		}
-	}
+            Assert.AreEqual(1, matches.Count());
+        }
+    }
 }

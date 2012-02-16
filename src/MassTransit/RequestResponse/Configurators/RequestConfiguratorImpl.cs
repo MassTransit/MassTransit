@@ -16,7 +16,6 @@ namespace MassTransit.RequestResponse.Configurators
     using System.Collections.Generic;
     using System.Linq;
     using Exceptions;
-    using Magnum;
     using Pipeline;
     using SubscriptionConnectors;
 
@@ -33,7 +32,7 @@ namespace MassTransit.RequestResponse.Configurators
         {
             _message = message;
             _handlers = new List<Func<IInboundPipelineConfigurator, UnsubscribeAction>>();
-            _requestId = CombGuid.Generate().ToString();
+            _requestId = NewId.NextGuid().ToString();
 
             _request = new RequestImpl<TRequest>(_requestId, message);
         }

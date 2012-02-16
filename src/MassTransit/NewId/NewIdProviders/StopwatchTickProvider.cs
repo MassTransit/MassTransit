@@ -10,27 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Load
+namespace MassTransit.NewIdProviders
 {
     using System;
-    using Magnum;
+    using System.Diagnostics;
 
-    public class CommandInstance
+    public class StopwatchTickProvider :
+        ITickProvider
     {
-        public CommandInstance()
+        DateTime _start;
+        Stopwatch _stopwatch;
+
+        public StopwatchTickProvider()
         {
-            Id = NewId.NextGuid();
-            CreatedAt = SystemUtil.UtcNow;
+            _start = DateTime.UtcNow;
+            _stopwatch = Stopwatch.StartNew();
         }
 
-        public Guid Id { get; set; }
-
-        public DateTime ResponseReceivedAt { get; set; }
-
-        public Uri Worker { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime ResponseCreatedAt { get; set; }
+        public long Ticks
+        {
+            get { return _start.AddTicks(_stopwatch.ElapsedTicks).Ticks; }
+        }
     }
 }

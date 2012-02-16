@@ -12,59 +12,58 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Saga.Locator
 {
-	using System;
-	using Magnum;
-	using Magnum.Extensions;
-	using MassTransit.Pipeline;
-	using MassTransit.Saga;
-	using NUnit.Framework;
-	using TestFramework;
+    using System;
+    using Magnum.Extensions;
+    using MassTransit.Pipeline;
+    using MassTransit.Saga;
+    using NUnit.Framework;
+    using TestFramework;
 
-	[TestFixture]
-	public class When_using_the_state_machine_with_noncorrelated_messages
-	{
-		[SetUp]
-		public void Setup()
-		{
-			_sagaId = CombGuid.Generate();
+    [TestFixture]
+    public class When_using_the_state_machine_with_noncorrelated_messages
+    {
+        [SetUp]
+        public void Setup()
+        {
+            _sagaId = NewId.NextGuid();
 
-			_repository = new InMemorySagaRepository<TestSaga>();
+            _repository = new InMemorySagaRepository<TestSaga>();
 
-			var initiatePolicy = new InitiatingSagaPolicy<TestSaga, InitiateSimpleSaga>(x => x.CorrelationId, x => false);
+            var initiatePolicy = new InitiatingSagaPolicy<TestSaga, InitiateSimpleSaga>(x => x.CorrelationId, x => false);
 
 
-			var message = new InitiateSimpleSaga(_sagaId);
+            var message = new InitiateSimpleSaga(_sagaId);
 
-			IConsumeContext<InitiateSimpleSaga> context = message.ToConsumeContext();
-			_repository.GetSaga(context, message.CorrelationId,
-				(i, c) => InstanceHandlerSelector.ForDataEvent(i, TestSaga.Initiate), initiatePolicy)
-				.Each(x => x(context));
+            IConsumeContext<InitiateSimpleSaga> context = message.ToConsumeContext();
+            _repository.GetSaga(context, message.CorrelationId,
+                (i, c) => InstanceHandlerSelector.ForDataEvent(i, TestSaga.Initiate), initiatePolicy)
+                .Each(x => x(context));
 
-			message = new InitiateSimpleSaga(CombGuid.Generate());
-			context = message.ToConsumeContext();
-			_repository.GetSaga(context, message.CorrelationId,
-				(i, c) => InstanceHandlerSelector.ForDataEvent(i, TestSaga.Initiate), initiatePolicy)
-				.Each(x => x(context));
-		}
+            message = new InitiateSimpleSaga(NewId.NextGuid());
+            context = message.ToConsumeContext();
+            _repository.GetSaga(context, message.CorrelationId,
+                (i, c) => InstanceHandlerSelector.ForDataEvent(i, TestSaga.Initiate), initiatePolicy)
+                .Each(x => x(context));
+        }
 
-		[TearDown]
-		public void Teardown()
-		{
-			_repository = null;
-		}
+        [TearDown]
+        public void Teardown()
+        {
+            _repository = null;
+        }
 
-		Guid _sagaId;
-		InMemorySagaRepository<TestSaga> _repository;
+        Guid _sagaId;
+        InMemorySagaRepository<TestSaga> _repository;
 
-		[Test]
-		public void A_nice_interface_should_be_available_for_defining_saga_locators()
-		{
-			_repository.ShouldContainSaga(_sagaId);
-		}
-	}
+        [Test]
+        public void A_nice_interface_should_be_available_for_defining_saga_locators()
+        {
+            _repository.ShouldContainSaga(_sagaId);
+        }
+    }
 
-	public class NameMessage
-	{
-		public string Name { get; set; }
-	}
+    public class NameMessage
+    {
+        public string Name { get; set; }
+    }
 }

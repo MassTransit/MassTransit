@@ -12,53 +12,52 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework.Fixtures
 {
-	using System;
-	using Magnum;
-	using Magnum.Reflection;
-	using MassTransit.Transports.Loopback;
-	using NUnit.Framework;
-	using Saga;
+    using System;
+    using Magnum.Reflection;
+    using MassTransit.Transports.Loopback;
+    using NUnit.Framework;
+    using Saga;
 
-	[TestFixture]
-	public class SagaTestFixture<TSaga> :
-		LocalTestFixture<LoopbackTransportFactory>
-		where TSaga : class, ISaga
-	{
-		InMemorySagaRepository<TSaga> _repository;
+    [TestFixture]
+    public class SagaTestFixture<TSaga> :
+        LocalTestFixture<LoopbackTransportFactory>
+        where TSaga : class, ISaga
+    {
+        InMemorySagaRepository<TSaga> _repository;
 
-		public InMemorySagaRepository<TSaga> Repository
-		{
-			get { return _repository; }
-		}
+        public InMemorySagaRepository<TSaga> Repository
+        {
+            get { return _repository; }
+        }
 
-		public SagaTestFixture()
-		{
-			LocalUri = new Uri("loopback://localhost/mt_client");
-			SagaId = CombGuid.Generate();
-		}
+        public SagaTestFixture()
+        {
+            LocalUri = new Uri("loopback://localhost/mt_client");
+            SagaId = NewId.NextGuid();
+        }
 
-		[TestFixtureSetUp]
-		public void SagaTestFixtureSetup()
-		{
-			_repository = SetupSagaRepository<TSaga>();
-		}
+        [TestFixtureSetUp]
+        public void SagaTestFixtureSetup()
+        {
+            _repository = SetupSagaRepository<TSaga>();
+        }
 
-		protected Guid SagaId { get; private set; }
+        protected Guid SagaId { get; private set; }
 
-		protected TSaga Saga
-		{
-			get { return _repository.ShouldContainSaga(SagaId); }
-		}
+        protected TSaga Saga
+        {
+            get { return _repository.ShouldContainSaga(SagaId); }
+        }
 
-		protected TSaga AddExistingSaga(Guid sagaId, Action<TSaga> initializer)
-		{
-			TSaga saga = FastActivator<TSaga>.Create(sagaId);
+        protected TSaga AddExistingSaga(Guid sagaId, Action<TSaga> initializer)
+        {
+            TSaga saga = FastActivator<TSaga>.Create(sagaId);
 
-			initializer(saga);
+            initializer(saga);
 
-			_repository.Add(saga);
+            _repository.Add(saga);
 
-			return saga;
-		}
-	}
+            return saga;
+        }
+    }
 }
