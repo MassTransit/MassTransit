@@ -18,7 +18,6 @@ namespace MassTransit.Context
     using System.IO;
     using System.Runtime.Serialization;
     using Logging;
-    using Magnum;
     using Magnum.Extensions;
     using Serialization;
     using Util;
@@ -37,7 +36,7 @@ namespace MassTransit.Context
 
         ReceiveContext()
         {
-            Id = CombGuid.Generate();
+            Id = NewId.NextGuid();
             _timer = Stopwatch.StartNew();
             _sent = new List<ISent>();
             _published = new List<IPublished>();
@@ -121,7 +120,7 @@ namespace MassTransit.Context
         public void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
             where T : class
         {
-            if(Endpoint != null)
+            if (Endpoint != null)
                 Endpoint.Address.LogReceived(consumeContext.MessageId, typeof (T).ToMessageName());
 
             _received.Add(new Received<T>(consumeContext, consumerType, correlationId, _timer.ElapsedMilliseconds));
@@ -171,8 +170,8 @@ namespace MassTransit.Context
         /// <param name="contextCallback">The action to setup the context on the outbound message</param>
         public void Respond<T>(T message, [NotNull] Action<ISendContext<T>> contextCallback) where T : class
         {
-        	if (contextCallback == null) throw new ArgumentNullException("contextCallback");
-        	if (ResponseAddress != null)
+            if (contextCallback == null) throw new ArgumentNullException("contextCallback");
+            if (ResponseAddress != null)
             {
                 Bus.GetEndpoint(ResponseAddress).Send(message, context =>
                     {
@@ -191,7 +190,7 @@ namespace MassTransit.Context
             }
         }
 
-    	public static ReceiveContext FromBodyStream(Stream bodyStream)
+        public static ReceiveContext FromBodyStream(Stream bodyStream)
         {
             return new ReceiveContext(bodyStream);
         }

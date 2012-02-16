@@ -16,7 +16,6 @@ namespace MassTransit.Subscriptions.Coordinator
     using System.Collections.Generic;
     using System.Linq;
     using Logging;
-    using Magnum;
     using Magnum.Extensions;
     using Messages;
     using Stact;
@@ -24,10 +23,10 @@ namespace MassTransit.Subscriptions.Coordinator
     public class EndpointSubscription
     {
         static readonly ILog _log = Logger.Get(typeof (EndpointSubscription));
+        readonly string _correlationId;
         readonly Fiber _fiber;
         readonly IDictionary<Guid, PeerSubscription> _ids;
         readonly string _messageName;
-        readonly string _correlationId;
         readonly SubscriptionObserver _observer;
         readonly Scheduler _scheduler;
         readonly TimeSpan _unsubscribeTimeout = 4.Seconds();
@@ -58,7 +57,7 @@ namespace MassTransit.Subscriptions.Coordinator
             if (_ids.Count > 1)
                 return;
 
-            _subscriptionId = CombGuid.Generate();
+            _subscriptionId = NewId.NextGuid();
             _endpointUri = message.EndpointUri;
 
             var add = new SubscriptionAddedMessage
@@ -112,7 +111,8 @@ namespace MassTransit.Subscriptions.Coordinator
             {
                 remove.Each(x => _ids.Remove(x));
 
-                _log.DebugFormat("Removed {0} subscriptions for peer: {1} {2}", remove.Count, message.PeerId, message.PeerUri);
+                _log.DebugFormat("Removed {0} subscriptions for peer: {1} {2}", remove.Count, message.PeerId,
+                    message.PeerUri);
             }
         }
 

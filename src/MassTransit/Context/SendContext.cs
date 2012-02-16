@@ -14,7 +14,6 @@ namespace MassTransit.Context
 {
     using System;
     using System.IO;
-    using Magnum;
 
     public class SendContext<T> :
         MessageContext,
@@ -28,7 +27,7 @@ namespace MassTransit.Context
 
         public SendContext(T message)
         {
-            _id = CombGuid.Generate();
+            _id = NewId.NextGuid();
             _message = message;
 
             this.SetMessageType(typeof (T));

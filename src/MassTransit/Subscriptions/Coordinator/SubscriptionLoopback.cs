@@ -12,135 +12,130 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Coordinator
 {
-	using System;
-	using System.Collections.Generic;
-	using Logging;
-	using Magnum;
-	using Messages;
-	using Services.Subscriptions.Messages;
+    using System;
+    using System.Collections.Generic;
+    using Logging;
+    using Messages;
+    using Services.Subscriptions.Messages;
 
-	/// <summary>
-	/// 
-	/// </summary>
     public class SubscriptionLoopback :
-		SubscriptionObserver
-	{
-		static readonly ILog _log = Logger.Get(typeof (SubscriptionLoopback));
-		
-		readonly SubscriptionRouter _router;
-		readonly Guid _peerId;
-		readonly List<Action<SubscriptionRouter>> _waiting;
-		long _messageNumber;
-		SubscriptionRouter _targetRouter;
-		readonly HashSet<string> _ignoredMessageTypes;
+        SubscriptionObserver
+    {
+        static readonly ILog _log = Logger.Get(typeof (SubscriptionLoopback));
+        readonly HashSet<string> _ignoredMessageTypes;
 
-		public SubscriptionLoopback(IServiceBus bus, SubscriptionRouter router)
-		{
-			_router = router;
-			_peerId = CombGuid.Generate();
+        readonly Guid _peerId;
+        readonly SubscriptionRouter _router;
+        readonly List<Action<SubscriptionRouter>> _waiting;
+        long _messageNumber;
+        SubscriptionRouter _targetRouter;
 
-			_waiting = new List<Action<SubscriptionRouter>>();
+        public SubscriptionLoopback(IServiceBus bus, SubscriptionRouter router)
+        {
+            _router = router;
+            _peerId = NewId.NextGuid();
 
-			_ignoredMessageTypes = IgnoredMessageTypes();
+            _waiting = new List<Action<SubscriptionRouter>>();
 
-			WithTarget(x =>
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Send AddPeer: {0}, {1}", _peerId, bus.ControlBus.Endpoint.Address.Uri);
+            _ignoredMessageTypes = IgnoredMessageTypes();
 
-					x.Send(new AddPeerMessage
-						{
-							PeerId = _peerId,
-							PeerUri = bus.ControlBus.Endpoint.Address.Uri,
-							Timestamp = DateTime.UtcNow.Ticks,
-						});
-				});
-		}
+            WithTarget(x =>
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Send AddPeer: {0}, {1}", _peerId, bus.ControlBus.Endpoint.Address.Uri);
 
-		public SubscriptionRouter Router
-		{
-			get { return _router; }
-		}
+                    x.Send(new AddPeerMessage
+                        {
+                            PeerId = _peerId,
+                            PeerUri = bus.ControlBus.Endpoint.Address.Uri,
+                            Timestamp = DateTime.UtcNow.Ticks,
+                        });
+                });
+        }
 
-		public void OnSubscriptionAdded(SubscriptionAdded message)
-		{
-			if (_ignoredMessageTypes.Contains(message.MessageName))
-				return;
+        public SubscriptionRouter Router
+        {
+            get { return _router; }
+        }
 
-			WithTarget(x =>
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Send AddPeerSubscription: {0}, {1}", _peerId, message.MessageName);
+        public void OnSubscriptionAdded(SubscriptionAdded message)
+        {
+            if (_ignoredMessageTypes.Contains(message.MessageName))
+                return;
 
-					x.Send(new AddPeerSubscriptionMessage
-						{
-							PeerId = _peerId,
-							MessageNumber = ++_messageNumber,
-							EndpointUri = message.EndpointUri,
-							MessageName = message.MessageName,
-							SubscriptionId = message.SubscriptionId,
+            WithTarget(x =>
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Send AddPeerSubscription: {0}, {1}", _peerId, message.MessageName);
+
+                    x.Send(new AddPeerSubscriptionMessage
+                        {
+                            PeerId = _peerId,
+                            MessageNumber = ++_messageNumber,
+                            EndpointUri = message.EndpointUri,
+                            MessageName = message.MessageName,
+                            SubscriptionId = message.SubscriptionId,
                             CorrelationId = message.CorrelationId,
-						});
-				});
-		}
+                        });
+                });
+        }
 
-		public void OnSubscriptionRemoved(SubscriptionRemoved message)
-		{
-			if (_ignoredMessageTypes.Contains(message.MessageName))
-				return;
+        public void OnSubscriptionRemoved(SubscriptionRemoved message)
+        {
+            if (_ignoredMessageTypes.Contains(message.MessageName))
+                return;
 
-			WithTarget(x => x.Send(new RemovePeerSubscriptionMessage
-				{
-					PeerId = _peerId,
-					MessageNumber = ++_messageNumber,
-					EndpointUri = message.EndpointUri,
-					MessageName = message.MessageName,
-					SubscriptionId = message.SubscriptionId,
+            WithTarget(x => x.Send(new RemovePeerSubscriptionMessage
+                {
+                    PeerId = _peerId,
+                    MessageNumber = ++_messageNumber,
+                    EndpointUri = message.EndpointUri,
+                    MessageName = message.MessageName,
+                    SubscriptionId = message.SubscriptionId,
                     CorrelationId = message.CorrelationId,
-				}));
-		}
+                }));
+        }
 
-		public void OnComplete()
-		{
-		}
+        public void OnComplete()
+        {
+        }
 
-		public void SetTargetCoordinator(SubscriptionRouter targetRouter)
-		{
-			lock (this)
-			{
-				_targetRouter = targetRouter;
-				_waiting.ForEach(x => x(_targetRouter));
-				_waiting.Clear();
-			}
-		}
+        public void SetTargetCoordinator(SubscriptionRouter targetRouter)
+        {
+            lock (this)
+            {
+                _targetRouter = targetRouter;
+                _waiting.ForEach(x => x(_targetRouter));
+                _waiting.Clear();
+            }
+        }
 
-		void WithTarget(Action<SubscriptionRouter> callback)
-		{
-			lock (this)
-			{
-				if (_targetRouter == null)
-				{
-					_waiting.Add(callback);
-					return;
-				}
+        void WithTarget(Action<SubscriptionRouter> callback)
+        {
+            lock (this)
+            {
+                if (_targetRouter == null)
+                {
+                    _waiting.Add(callback);
+                    return;
+                }
 
-				callback(_targetRouter);
-			}
-		}
+                callback(_targetRouter);
+            }
+        }
 
-		HashSet<string> IgnoredMessageTypes()
-		{
-			var ignoredMessageTypes = new HashSet<string>
-				{
-					typeof (AddSubscription).ToMessageName(),
-					typeof (RemoveSubscription).ToMessageName(),
-					typeof (AddSubscriptionClient).ToMessageName(),
-					typeof (RemoveSubscriptionClient).ToMessageName(),
-					typeof (SubscriptionRefresh).ToMessageName()
-				};
+        HashSet<string> IgnoredMessageTypes()
+        {
+            var ignoredMessageTypes = new HashSet<string>
+                {
+                    typeof (AddSubscription).ToMessageName(),
+                    typeof (RemoveSubscription).ToMessageName(),
+                    typeof (AddSubscriptionClient).ToMessageName(),
+                    typeof (RemoveSubscriptionClient).ToMessageName(),
+                    typeof (SubscriptionRefresh).ToMessageName()
+                };
 
-			return ignoredMessageTypes;
-		}
-
-	}
+            return ignoredMessageTypes;
+        }
+    }
 }

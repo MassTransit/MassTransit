@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,88 +12,90 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Subscriptions.Messages
 {
-	using System;
-	using Magnum;
+    using System;
 
-	[Serializable]
-	public class SubscriptionInformation :
-		IEquatable<SubscriptionInformation>
-	{
-		public SubscriptionInformation(Guid clientId, long sequenceNumber, Type messageType, Uri endpointUri)
-			: this(clientId, sequenceNumber, messageType.ToMessageName(), "", endpointUri)
-		{
-		}
+    [Serializable]
+    public class SubscriptionInformation :
+        IEquatable<SubscriptionInformation>
+    {
+        public SubscriptionInformation(Guid clientId, long sequenceNumber, Type messageType, Uri endpointUri)
+            : this(clientId, sequenceNumber, messageType.ToMessageName(), "", endpointUri)
+        {
+        }
 
-		public SubscriptionInformation(Guid clientId, long sequenceNumber, Type messageType, string correlationId, Uri endpointUri)
-			: this(clientId, sequenceNumber, messageType.ToMessageName(), correlationId, endpointUri)
-		{
-		}
+        public SubscriptionInformation(Guid clientId, long sequenceNumber, Type messageType, string correlationId,
+                                       Uri endpointUri)
+            : this(clientId, sequenceNumber, messageType.ToMessageName(), correlationId, endpointUri)
+        {
+        }
 
-		public SubscriptionInformation(Guid clientId, long sequenceNumber, string messageName, string correlationId, Uri endpointUri)
-		{
-			ClientId = clientId;
-			SequenceNumber = sequenceNumber;
+        public SubscriptionInformation(Guid clientId, long sequenceNumber, string messageName, string correlationId,
+                                       Uri endpointUri)
+        {
+            ClientId = clientId;
+            SequenceNumber = sequenceNumber;
 
-			MessageName = messageName.Trim();
-			CorrelationId = correlationId;
-			EndpointUri = endpointUri;
+            MessageName = messageName.Trim();
+            CorrelationId = correlationId;
+            EndpointUri = endpointUri;
 
-			SubscriptionId = CombGuid.Generate();
-		}
+            SubscriptionId = NewId.NextGuid();
+        }
 
-		public SubscriptionInformation(Guid clientId, Guid subscriptionId, string messageName, string correlationId, Uri endpointUri)
-		{
-			ClientId = clientId;
-			SequenceNumber = 0;
+        public SubscriptionInformation(Guid clientId, Guid subscriptionId, string messageName, string correlationId,
+                                       Uri endpointUri)
+        {
+            ClientId = clientId;
+            SequenceNumber = 0;
 
-			MessageName = messageName.Trim();
-			CorrelationId = correlationId;
-			EndpointUri = endpointUri;
+            MessageName = messageName.Trim();
+            CorrelationId = correlationId;
+            EndpointUri = endpointUri;
 
-			SubscriptionId = subscriptionId;
-		}
+            SubscriptionId = subscriptionId;
+        }
 
-		protected SubscriptionInformation()
-		{
-		}
+        protected SubscriptionInformation()
+        {
+        }
 
-		public Guid ClientId { get; set; }
-		public long SequenceNumber { get; set; }
+        public Guid ClientId { get; set; }
+        public long SequenceNumber { get; set; }
 
-		public string MessageName { get; set; }
-		public string CorrelationId { get; set; }
-		public Uri EndpointUri { get; set; }
+        public string MessageName { get; set; }
+        public string CorrelationId { get; set; }
+        public Uri EndpointUri { get; set; }
 
-		public Guid SubscriptionId { get; set; }
+        public Guid SubscriptionId { get; set; }
 
-		public bool Equals(SubscriptionInformation subscription)
-		{
-			if (subscription == null) return false;
-			if (!EndpointUri.Equals(subscription.EndpointUri)) return false;
-			if (!string.Equals(MessageName, subscription.MessageName)) return false;
-			if (!string.Equals(CorrelationId, subscription.CorrelationId)) return false;
-			return true;
-		}
+        public bool Equals(SubscriptionInformation subscription)
+        {
+            if (subscription == null) return false;
+            if (!EndpointUri.Equals(subscription.EndpointUri)) return false;
+            if (!string.Equals(MessageName, subscription.MessageName)) return false;
+            if (!string.Equals(CorrelationId, subscription.CorrelationId)) return false;
+            return true;
+        }
 
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(this, obj))
-				return true;
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj))
+                return true;
 
-			return Equals(obj as SubscriptionInformation);
-		}
+            return Equals(obj as SubscriptionInformation);
+        }
 
-		public override string ToString()
-		{
-			return MessageName + " " + (CorrelationId ?? "-") + " " + EndpointUri + " [" + SubscriptionId + "]";
-		}
+        public override string ToString()
+        {
+            return MessageName + " " + (CorrelationId ?? "-") + " " + EndpointUri + " [" + SubscriptionId + "]";
+        }
 
-		public override int GetHashCode()
-		{
-			int result = EndpointUri.GetHashCode();
-			result = 29*result + MessageName.GetHashCode();
-			result = 29*result + CorrelationId.GetHashCode();
-			return result;
-		}
-	}
+        public override int GetHashCode()
+        {
+            int result = EndpointUri.GetHashCode();
+            result = 29*result + MessageName.GetHashCode();
+            result = 29*result + CorrelationId.GetHashCode();
+            return result;
+        }
+    }
 }

@@ -12,85 +12,84 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView.Core.Consumer
 {
-	using System;
-	using Distributor.Messages;
-	using Magnum;
-	using Services.Subscriptions.Messages;
-	using ViewModel;
+    using System;
+    using Distributor.Messages;
+    using Services.Subscriptions.Messages;
+    using ViewModel;
 
-	public class SubscriptionDataConsumer :
-		Consumes<SubscriptionRefresh>.All,
-		Consumes<AddSubscription>.All,
-		Consumes<RemoveSubscription>.All,
-		Consumes<IWorkerAvailable>.All,
-		IDisposable
-	{
-		readonly IServiceBus _bus;
-		readonly Guid _clientId = CombGuid.Generate();
-		readonly Uri _subscriptionServiceUri;
-		readonly UnsubscribeAction _unsubscribe;
-		IEndpoint _subscriptionServiceEndpoint;
+    public class SubscriptionDataConsumer :
+        Consumes<SubscriptionRefresh>.All,
+        Consumes<AddSubscription>.All,
+        Consumes<RemoveSubscription>.All,
+        Consumes<IWorkerAvailable>.All,
+        IDisposable
+    {
+        readonly IServiceBus _bus;
+        readonly Guid _clientId = NewId.NextGuid();
+        readonly Uri _subscriptionServiceUri;
+        readonly UnsubscribeAction _unsubscribe;
+        IEndpoint _subscriptionServiceEndpoint;
 
-		public SubscriptionDataConsumer(IServiceBus bus, Uri subscriptionServiceUri)
-		{
-			_bus = bus;
-			_subscriptionServiceUri = subscriptionServiceUri;
+        public SubscriptionDataConsumer(IServiceBus bus, Uri subscriptionServiceUri)
+        {
+            _bus = bus;
+            _subscriptionServiceUri = subscriptionServiceUri;
 
-			_unsubscribe = _bus.SubscribeInstance(this);
+            _unsubscribe = _bus.SubscribeInstance(this);
 
-			ConnectToSubscriptionService();
-		}
+            ConnectToSubscriptionService();
+        }
 
-		public void Consume(AddSubscription message)
-		{
-			LocalSubscriptionCache.Endpoints.Update(message.Subscription);
-		}
+        public void Consume(AddSubscription message)
+        {
+            LocalSubscriptionCache.Endpoints.Update(message.Subscription);
+        }
 
-		public void Consume(IWorkerAvailable message)
-		{
-			LocalSubscriptionCache.Endpoints.Update(message);
-		}
+        public void Consume(IWorkerAvailable message)
+        {
+            LocalSubscriptionCache.Endpoints.Update(message);
+        }
 
-		public void Consume(RemoveSubscription message)
-		{
-			LocalSubscriptionCache.Endpoints.Remove(message.Subscription.EndpointUri, message.Subscription.MessageName);
-		}
+        public void Consume(RemoveSubscription message)
+        {
+            LocalSubscriptionCache.Endpoints.Remove(message.Subscription.EndpointUri, message.Subscription.MessageName);
+        }
 
-		public void Consume(SubscriptionRefresh message)
-		{
-			LocalSubscriptionCache.Endpoints.Update(message.Subscriptions);
-		}
+        public void Consume(SubscriptionRefresh message)
+        {
+            LocalSubscriptionCache.Endpoints.Update(message.Subscriptions);
+        }
 
-		public void Dispose()
-		{
-			_unsubscribe();
-		}
+        public void Dispose()
+        {
+            _unsubscribe();
+        }
 
-		public void UpdateWorker(Uri controlUri, string type, int pendingLimit, int inProgressLimit)
-		{
-			IEndpoint endpoint = _bus.GetEndpoint(controlUri);
+        public void UpdateWorker(Uri controlUri, string type, int pendingLimit, int inProgressLimit)
+        {
+            IEndpoint endpoint = _bus.GetEndpoint(controlUri);
 
-			endpoint.Send(new ConfigureWorker
-				{
-					MessageType = type,
-					InProgressLimit = inProgressLimit,
-					PendingLimit = pendingLimit
-				}, context => context.SetSourceAddress(_bus.Endpoint.Address.Uri));
-		}
+            endpoint.Send(new ConfigureWorker
+                {
+                    MessageType = type,
+                    InProgressLimit = inProgressLimit,
+                    PendingLimit = pendingLimit
+                }, context => context.SetSourceAddress(_bus.Endpoint.Address.Uri));
+        }
 
-		public void RemoveSubscription(Guid clientId, string messageName, string correlationId, Uri endpointUri)
-		{
-			var subscription = new SubscriptionInformation(clientId, 0, messageName, correlationId, endpointUri);
+        public void RemoveSubscription(Guid clientId, string messageName, string correlationId, Uri endpointUri)
+        {
+            var subscription = new SubscriptionInformation(clientId, 0, messageName, correlationId, endpointUri);
 
-			_subscriptionServiceEndpoint.Send(new RemoveSubscription(subscription));
-		}
+            _subscriptionServiceEndpoint.Send(new RemoveSubscription(subscription));
+        }
 
-		void ConnectToSubscriptionService()
-		{
-			_subscriptionServiceEndpoint = _bus.GetEndpoint(_subscriptionServiceUri);
+        void ConnectToSubscriptionService()
+        {
+            _subscriptionServiceEndpoint = _bus.GetEndpoint(_subscriptionServiceUri);
 
-			_subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Address.Uri,
-				_bus.Endpoint.Address.Uri));
-		}
-	}
+            _subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Address.Uri,
+                _bus.Endpoint.Address.Uri));
+        }
+    }
 }

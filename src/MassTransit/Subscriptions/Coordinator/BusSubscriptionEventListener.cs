@@ -12,81 +12,81 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions.Coordinator
 {
-	using System;
-	using System.Collections.Generic;
-	using Logging;
-	using Magnum;
-	using Messages;
-	using Pipeline;
+    using System;
+    using System.Collections.Generic;
+    using Logging;
+    using Messages;
+    using Pipeline;
 
     public class BusSubscriptionEventListener :
-		ISubscriptionEvent
-	{
-		static readonly ILog _log = Logger.Get(typeof (BusSubscriptionEventListener));
-		readonly BusSubscriptionCache _busSubscriptionCache;
-		readonly Uri _endpointUri;
+        ISubscriptionEvent
+    {
+        static readonly ILog _log = Logger.Get(typeof (BusSubscriptionEventListener));
+        readonly BusSubscriptionCache _busSubscriptionCache;
+        readonly Uri _endpointUri;
 
-		public BusSubscriptionEventListener(IServiceBus bus, SubscriptionObserver observer)
-		{
-			_endpointUri = bus.Endpoint.Address.Uri;
+        public BusSubscriptionEventListener(IServiceBus bus, SubscriptionObserver observer)
+        {
+            _endpointUri = bus.Endpoint.Address.Uri;
 
-			_busSubscriptionCache = new BusSubscriptionCache(observer);
-		}
+            _busSubscriptionCache = new BusSubscriptionCache(observer);
+        }
 
-		public IEnumerable<Subscription> Subscriptions
-		{
-			get { return _busSubscriptionCache.Subscriptions; }
-		}
+        public IEnumerable<Subscription> Subscriptions
+        {
+            get { return _busSubscriptionCache.Subscriptions; }
+        }
 
-		public UnsubscribeAction SubscribedTo<TMessage>()
-			where TMessage : class
-		{
-			return Subscribe<TMessage>(null);
-		}
+        public UnsubscribeAction SubscribedTo<TMessage>()
+            where TMessage : class
+        {
+            return Subscribe<TMessage>(null);
+        }
 
-		public UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId)
-			where TMessage : class, CorrelatedBy<TKey>
-		{
-			return Subscribe<TMessage>(string.Format("{0}", correlationId));
-		}
+        public UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId)
+            where TMessage : class, CorrelatedBy<TKey>
+        {
+            return Subscribe<TMessage>(string.Format("{0}", correlationId));
+        }
 
-		UnsubscribeAction Subscribe<TMessage>(string correlationId)
-			where TMessage : class
-		{
-			Guid subscriptionId = CombGuid.Generate();
-			string messageName = typeof (TMessage).ToMessageName();
+        UnsubscribeAction Subscribe<TMessage>(string correlationId)
+            where TMessage : class
+        {
+            Guid subscriptionId = NewId.NextGuid();
+            string messageName = typeof (TMessage).ToMessageName();
 
-			var subscribeTo = new SubscribeToMessage
-				{
-					SubscriptionId = subscriptionId,
-					EndpointUri = _endpointUri,
-					MessageName = messageName,
-					CorrelationId = correlationId,
-				};
+            var subscribeTo = new SubscribeToMessage
+                {
+                    SubscriptionId = subscriptionId,
+                    EndpointUri = _endpointUri,
+                    MessageName = messageName,
+                    CorrelationId = correlationId,
+                };
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("SubscribeTo: {0}, {1}", subscribeTo.MessageName, subscribeTo.SubscriptionId);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("SubscribeTo: {0}, {1}", subscribeTo.MessageName, subscribeTo.SubscriptionId);
 
-			_busSubscriptionCache.OnSubscribeTo(subscribeTo);
+            _busSubscriptionCache.OnSubscribeTo(subscribeTo);
 
-			return () => Unsubscribe(subscriptionId, messageName, correlationId);
-		}
+            return () => Unsubscribe(subscriptionId, messageName, correlationId);
+        }
 
-		bool Unsubscribe(Guid subscriptionId, string messageName, string correlationId)
-		{
-			var unsubscribeFrom = new UnsubscribeFromMessage
-				{
-					SubscriptionId = subscriptionId,
-					MessageName = messageName,
-					CorrelationId = correlationId,
-				};
+        bool Unsubscribe(Guid subscriptionId, string messageName, string correlationId)
+        {
+            var unsubscribeFrom = new UnsubscribeFromMessage
+                {
+                    SubscriptionId = subscriptionId,
+                    MessageName = messageName,
+                    CorrelationId = correlationId,
+                };
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("UnsubscribeFrom: {0}, {1}", unsubscribeFrom.MessageName, unsubscribeFrom.SubscriptionId);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("UnsubscribeFrom: {0}, {1}", unsubscribeFrom.MessageName,
+                    unsubscribeFrom.SubscriptionId);
 
-			_busSubscriptionCache.OnUnsubscribeFrom(unsubscribeFrom);
+            _busSubscriptionCache.OnUnsubscribeFrom(unsubscribeFrom);
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 }

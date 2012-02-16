@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Tests.Timeouts
     using System;
     using System.Diagnostics;
     using System.Threading;
-    using Magnum;
     using Magnum.Extensions;
     using MassTransit.Saga;
     using MassTransit.Services.Timeout;
@@ -24,21 +23,21 @@ namespace MassTransit.Tests.Timeouts
     using NUnit.Framework;
     using TextFixtures;
 
-	[TestFixture]
+    [TestFixture]
     public class When_scheduling_a_timeout_for_a_new_id :
         LoopbackLocalAndRemoteTestFixture
     {
-        private TimeoutService _timeoutService;
-        private Guid _correlationId;
-		private ISagaRepository<TimeoutSaga> _timeoutSagaRepository;
+        TimeoutService _timeoutService;
+        Guid _correlationId;
+        ISagaRepository<TimeoutSaga> _timeoutSagaRepository;
 
-		protected override void EstablishContext()
+        protected override void EstablishContext()
         {
             base.EstablishContext();
 
-            _correlationId = CombGuid.Generate();
+            _correlationId = NewId.NextGuid();
 
-        	_timeoutSagaRepository = SetupSagaRepository<TimeoutSaga>();
+            _timeoutSagaRepository = SetupSagaRepository<TimeoutSaga>();
 
             _timeoutService = new TimeoutService(LocalBus, _timeoutSagaRepository);
             _timeoutService.Start();
