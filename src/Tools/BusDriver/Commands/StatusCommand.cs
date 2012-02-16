@@ -50,7 +50,7 @@ namespace BusDriver.Commands
             _log.DebugFormat("Sending status request to '{0}'", uri);
 
             _unsubscribe = bus.SubscribeInstance(this);
-            _requestId = Guid.NewGuid().ToString("N");
+            _requestId = NewId.Next().ToString("N");
 
             endpoint.Send<GetBusStatus>(new GetBusStatusImpl(), x =>
                 {
