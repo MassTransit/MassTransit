@@ -21,12 +21,12 @@ namespace MassTransit.Transports
 		TransportSettings,
 		IEndpointSettings
 	{
-		public EndpointSettings(string uri)
+		public EndpointSettings([NotNull] string uri)
 			: this(new EndpointAddress(uri))
 		{
 		}
 
-		public EndpointSettings(Uri uri)
+		public EndpointSettings([NotNull] Uri uri)
 			: this(new EndpointAddress(uri))
 		{
 		}

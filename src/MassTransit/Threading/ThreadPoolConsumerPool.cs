@@ -20,6 +20,9 @@ namespace MassTransit.Threading
 	using Magnum.Extensions;
 	using Stact;
 
+	/// <summary>
+	/// The default consumer pool that enqueues consumes on the thread pool.
+	/// </summary>
 	public class ThreadPoolConsumerPool :
 		ConsumerPool
 	{
@@ -55,6 +58,14 @@ namespace MassTransit.Threading
 			}
 		}
 
+		/// <summary>
+		/// <para>Start the receiving thread pool.</para>
+		/// 
+		/// <para>This method implements a message-based receive loop;
+		/// so instead of having a while-loop that receives non-stop, the event channel
+		/// ensures that receives are enqueued whenever <see cref="ReceiveCompleted"/> is published
+		/// in the event channel passed to this pool instance at construction time.</para>
+		/// </summary>
 		public void Start()
 		{
 			_eventConnection = _eventChannel.Connect(x =>

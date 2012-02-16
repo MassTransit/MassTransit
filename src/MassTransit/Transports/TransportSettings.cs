@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using MassTransit.Util;
+
 namespace MassTransit.Transports
 {
 	using System;
@@ -20,7 +23,7 @@ namespace MassTransit.Transports
 	public class TransportSettings :
 		ITransportSettings
 	{
-		public TransportSettings(IEndpointAddress address)
+		public TransportSettings([NotNull] IEndpointAddress address)
 		{
 			Guard.AgainstNull(address, "address");
 
@@ -35,7 +38,7 @@ namespace MassTransit.Transports
 			PurgeExistingMessages = false;
 		}
 
-		public TransportSettings(IEndpointAddress address, ITransportSettings source)
+		public TransportSettings([NotNull] IEndpointAddress address, [NotNull] ITransportSettings source)
 		{
 			Guard.AgainstNull(address, "address");
 			Guard.AgainstNull(source, "source");

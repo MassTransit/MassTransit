@@ -55,7 +55,7 @@ namespace MassTransit.Transports.RabbitMq
             get { return _address; }
         }
 
-        public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+        public void Receive(Func<IReceiveContext, Action<IReceiveContext>> lookupSinkChain, TimeSpan timeout)
         {
             AddConsumerBinding();
 
@@ -85,7 +85,7 @@ namespace MassTransit.Transports.RabbitMq
                                 context.SetContentType(Encoding.UTF8.GetString(contentType));
                             }
 
-                            Action<IReceiveContext> receive = callback(context);
+                            Action<IReceiveContext> receive = lookupSinkChain(context);
                             if (receive == null)
                             {
                                 Address.LogSkipped(result.BasicProperties.MessageId);

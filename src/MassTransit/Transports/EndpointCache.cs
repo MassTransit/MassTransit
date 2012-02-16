@@ -14,7 +14,6 @@ namespace MassTransit.Transports
 {
 	using System;
 	using System.Linq;
-	using Diagnostics;
 	using Diagnostics.Introspection;
 	using Exceptions;
 	using Logging;

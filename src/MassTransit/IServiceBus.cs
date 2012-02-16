@@ -10,10 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+
 namespace MassTransit
 {
 	using System;
 	using Diagnostics.Introspection;
+	using Util;
 	using Pipeline;
 
 	/// <summary>
@@ -38,6 +41,7 @@ namespace MassTransit
 		/// <summary>
 		///   The endpoint from which messages are received
 		/// </summary>
+		[NotNull]
 		IEndpoint Endpoint { get; }
 
 		/// <summary>
@@ -84,7 +88,7 @@ namespace MassTransit
 		/// Looks an endpoint up by its uri.
 		/// </summary>
 		/// <param name="address"></param>
-		/// <returns>The </returns>
+		/// <returns>The endpoint that corresponds to the uri passed</returns>
 		IEndpoint GetEndpoint(Uri address);
 
 		/// <summary>
