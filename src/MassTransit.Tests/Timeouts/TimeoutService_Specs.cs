@@ -14,18 +14,21 @@ namespace MassTransit.Tests.Timeouts
 {
     using System;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading;
     using Magnum.Extensions;
+    using Magnum.TestFramework;
     using MassTransit.Saga;
     using MassTransit.Services.Timeout;
     using MassTransit.Services.Timeout.Messages;
     using MassTransit.Services.Timeout.Server;
     using NUnit.Framework;
     using TextFixtures;
+    using MassTransit.Testing;
 
     [TestFixture]
     public class When_scheduling_a_timeout_for_a_new_id :
-        LoopbackLocalAndRemoteTestFixture
+        LoopbackTestFixture
     {
         TimeoutService _timeoutService;
         Guid _correlationId;
@@ -54,15 +57,18 @@ namespace MassTransit.Tests.Timeouts
         [Test]
         public void The_timeout_should_be_added_to_the_storage()
         {
-            var _timedOut = new ManualResetEvent(false);
+            var timedOut = new FutureMessage<TimeoutExpired>();
 
-            LocalBus.SubscribeHandler<TimeoutExpired>(x => _timedOut.Set());
+            LocalBus.SubscribeHandler<TimeoutExpired>(timedOut.Set);
 
-            LocalBus.Publish(new ScheduleTimeout(_correlationId, 1.Seconds()));
+            LocalBus.HasSubscription<TimeoutExpired>(8.Seconds()).Any()
+                .ShouldBeTrue("No subscription");
+
+            LocalBus.Publish(new ScheduleTimeout(_correlationId, 2.Seconds()));
 
             Stopwatch watch = Stopwatch.StartNew();
 
-            Assert.IsTrue(_timedOut.WaitOne(TimeSpan.FromSeconds(10), true));
+            timedOut.IsAvailable(8.Seconds()).ShouldBeTrue("Did not get timeout message");
 
             watch.Stop();
 
