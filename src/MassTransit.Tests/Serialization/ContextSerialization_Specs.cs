@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-	using Magnum.Extensions;
+    using System.Threading;
+    using Magnum.Extensions;
 	using MassTransit.Serialization;
 	using Messages;
 	using NUnit.Framework;
@@ -42,6 +43,8 @@ namespace MassTransit.Tests.Serialization
 					received.Set(message);
 				});
 
+            Thread.Sleep(1.Seconds());
+
 			LocalBus.Publish(ping);
 
 			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
@@ -60,6 +63,8 @@ namespace MassTransit.Tests.Serialization
 
 					received.Set(message);
 				});
+
+            Thread.Sleep(1.Seconds());
 
 			LocalBus.Publish(ping, context => context.SendFaultTo(LocalBus.Endpoint.Address.Uri));
 
@@ -80,7 +85,9 @@ namespace MassTransit.Tests.Serialization
 					received.Set(message);
 				});
 
-			LocalBus.Publish(ping);
+            Thread.Sleep(1.Seconds());
+
+            LocalBus.Publish(ping);
 
 			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
@@ -94,10 +101,13 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Address.Uri, LocalBus.Context().ResponseAddress);
+				    var context = LocalBus.Context();
+					Assert.AreEqual(LocalBus.Endpoint.Address.Uri, context.ResponseAddress);
 
 					received.Set(message);
 				});
+
+            Thread.Sleep(1.Seconds());
 
 			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus.Endpoint.Address.Uri));
 
@@ -119,6 +129,8 @@ namespace MassTransit.Tests.Serialization
 					received.Set(message);
 				});
 
+            Thread.Sleep(1.Seconds());
+
 			LocalBus.Publish(ping, context => context.SetRetryCount(retryCount));
 
 			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
@@ -137,6 +149,8 @@ namespace MassTransit.Tests.Serialization
 
 					received.Set(message);
 				});
+
+            Thread.Sleep(1.Seconds());
 
 			LocalBus.Publish(ping);
 
