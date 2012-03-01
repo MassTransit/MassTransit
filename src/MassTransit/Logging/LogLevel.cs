@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Logging.Tracing
+namespace MassTransit.Logging
 {
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -39,26 +39,6 @@ namespace MassTransit.Logging.Tracing
             _index = index;
             _sourceLevel = sourceLevel;
             _traceEventType = traceEventType;
-        }
-
-        public static bool operator >(LogLevel left, LogLevel right)
-        {
-            return right != null && (left != null && left._index > right._index);
-        }
-
-        public static bool operator <(LogLevel left, LogLevel right)
-        {
-            return right != null && (left != null && left._index < right._index);
-        }
-
-        public static bool operator >=(LogLevel left, LogLevel right)
-        {
-            return right != null && (left != null && left._index >= right._index);
-        }
-
-        public static bool operator <=(LogLevel left, LogLevel right)
-        {
-            return right != null && (left != null && left._index <= right._index);
         }
 
         public static IEnumerable<LogLevel> Values
@@ -93,6 +73,26 @@ namespace MassTransit.Logging.Tracing
         public override string ToString()
         {
             return _name;
+        }
+
+        public static bool operator >(LogLevel left, LogLevel right)
+        {
+            return right != null && (left != null && left._index > right._index);
+        }
+
+        public static bool operator <(LogLevel left, LogLevel right)
+        {
+            return right != null && (left != null && left._index < right._index);
+        }
+
+        public static bool operator >=(LogLevel left, LogLevel right)
+        {
+            return right != null && (left != null && left._index >= right._index);
+        }
+
+        public static bool operator <=(LogLevel left, LogLevel right)
+        {
+            return right != null && (left != null && left._index <= right._index);
         }
 
         public static LogLevel FromSourceLevels(SourceLevels level)
