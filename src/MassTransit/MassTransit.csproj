@@ -280,7 +280,8 @@
     <Compile Include="Logging\ILog.cs" />
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\Logger.cs" />
-    <Compile Include="Logging\Tracing\LogLevel.cs" />
+    <Compile Include="Logging\LogLevel.cs" />
+    <Compile Include="Logging\LogOutputProvider.cs" />
     <Compile Include="Logging\Tracing\TraceLog.cs" />
     <Compile Include="Logging\Tracing\TraceLogger.cs" />
     <Compile Include="NewId\ITickProvider.cs" />

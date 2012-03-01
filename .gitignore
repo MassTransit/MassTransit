@@ -2,6 +2,7 @@ build_output/*
 build_artifacts/*
 *.suo
 *.user
+packages
 
 NDependOut/*
 

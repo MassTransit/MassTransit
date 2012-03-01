@@ -34,7 +34,7 @@ namespace MassTransit.Logging.Tracing
 
         TraceLog CreateTraceLog(string name)
         {
-            return new TraceLog(name, _sources[name]);
+            return new TraceLog(_sources[name]);
         }
 
         TraceSource CreateTraceSource(string name)
@@ -73,19 +73,20 @@ namespace MassTransit.Logging.Tracing
                 source.Listeners.Add(listener);
         }
 
-        private static bool IsSourceConfigured(TraceSource source)
+        static bool IsSourceConfigured(TraceSource source)
         {
-            return source.Listeners.Count != 1 
-                || !(source.Listeners[0] is DefaultTraceListener)
-                || source.Listeners[0].Name != "Default";
+            return source.Listeners.Count != 1
+                   || !(source.Listeners[0] is DefaultTraceListener)
+                   || source.Listeners[0].Name != "Default";
         }
 
-        private static string ShortenName(string name)
+        static string ShortenName(string name)
         {
             int length = name.LastIndexOf('.');
 
-            return length != -1 ? name.Substring(0, length) : null;
+            return length != -1
+                       ? name.Substring(0, length)
+                       : null;
         }
-
     }
 }
