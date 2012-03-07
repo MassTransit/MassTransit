@@ -96,6 +96,10 @@
       <Project>{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}</Project>
       <Name>MassTransit.NinjectIntegration</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
+      <Project>{8D2BE372-A756-4676-B2EA-ED7846809BFE}</Project>
+      <Name>MassTransit.Log4NetIntegration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>

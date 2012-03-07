@@ -121,6 +121,7 @@ task :copy_services => [:compile] do
 
 	copyOutputFiles src, "MassTransit.*.{dll,exe,config,log4net.xml,sdf}", targ
 	copyOutputFiles props[:output], 'MassTransit.dll', targ
+     	copyOutputFiles src, "MassTransit.Log4NetIntegration.dll", targ
      	copyOutputFiles src, "Castle*.dll", targ
      	copyOutputFiles src, "log4net.dll", targ
      	copyOutputFiles src, "Magnum.dll", targ
@@ -129,6 +130,7 @@ task :copy_services => [:compile] do
      	copyOutputFiles src, "Iesi.Collections.dll", targ
      	copyOutputFiles src, "StructureMap.dll", targ
      	copyOutputFiles src, "Topshelf.dll", targ
+     	copyOutputFiles src, "Topshelf.Log4NetIntegration.dll", targ
 	copyOutputFiles File.join(props[:lib], 'SqlCe'), '*', targ
 	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86'), '*', File.join(targ, 'x86')
 	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'x86', 'Microsoft.VC90.CRT')
@@ -169,6 +171,8 @@ task :copy_services => [:compile] do
 
 	copyOutputFiles props[:output], "MassTransit.dll", targ
 
+     	copyOutputFiles src, "Starbucks.Barista/bin/#{BUILD_CONFIG}/MassTransit.Log4NetIntegration.dll", targ
+
 	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap}.dll", targ
 	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "{MassTransit.WindsorIntegration,Castle.Windsor,Castle.Core,Topshelf}.dll", targ
 	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "{MassTransit.NinjectIntegration,Ninject}.dll", targ
@@ -184,6 +188,7 @@ task :copy_services => [:compile] do
 	src = File.join(props[:src], "Samples", "Distributor")
 
 	copyOutputFiles props[:output], "MassTransit.dll", targ
+     	copyOutputFiles src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}/MassTransit.Log4NetIntegration.dll", targ
 
 	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap,Topshelf}.dll", targ
 	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Activator.exe", targ

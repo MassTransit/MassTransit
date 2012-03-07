@@ -10,51 +10,51 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
 namespace Starbucks.Customer
 {
-	using System;
-	using System.IO;
-	using System.Windows.Forms;
-	using log4net.Config;
-	using MassTransit;
-	using StructureMap;
+    using System;
+    using System.Windows.Forms;
+    using MassTransit;
+    using MassTransit.Log4NetIntegration.Logging;
+    using StructureMap;
 
-	internal static class Program
-	{
-		/// <summary>
-		/// The main entry point for the application.
-		/// </summary>
-		[STAThread]
-		private static void Main(string[] args)
-		{
-			XmlConfigurator.Configure(new FileInfo("customer.log4net.xml"));
+    internal static class Program
+    {
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main(string[] args)
+        {
+            Log4NetLogger.Use("customer.log4net.xml");
 
-			IContainer c = BootstrapContainer();
+            IContainer c = BootstrapContainer();
 
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new OrderDrinkForm(c.GetInstance<IServiceBus>()));
-		}
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new OrderDrinkForm(c.GetInstance<IServiceBus>()));
+        }
 
-		private static IContainer BootstrapContainer()
-		{
-			var container = new Container(x => { x.AddType(typeof (OrderDrinkForm)); });
+        static IContainer BootstrapContainer()
+        {
+            var container = new Container(x => { x.AddType(typeof (OrderDrinkForm)); });
 
-			container.Configure(cfg =>
-				{
-					cfg.For<IServiceBus>().Use(context => ServiceBusFactory.New(sbc =>
-						{
-							sbc.ReceiveFrom("msmq://localhost/starbucks_customer");
-							sbc.UseMsmq();
-							sbc.UseMulticastSubscriptionClient();
+            container.Configure(cfg =>
+                {
+                    cfg.For<IServiceBus>().Use(context => ServiceBusFactory.New(sbc =>
+                        {
+                            sbc.ReceiveFrom("msmq://localhost/starbucks_customer");
+                            sbc.UseMsmq();
+                            sbc.UseMulticastSubscriptionClient();
 
-							sbc.UseControlBus();
+                            sbc.UseControlBus();
 
-							sbc.Subscribe(subs => { subs.LoadFrom(container); });
-						}));
-				});
+                            sbc.Subscribe(subs => { subs.LoadFrom(container); });
+                        }));
+                });
 
-			return container;
-		}
-	}
+            return container;
+        }
+    }
 }
