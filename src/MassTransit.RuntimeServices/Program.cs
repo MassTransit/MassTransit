@@ -12,108 +12,104 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RuntimeServices
 {
-	using System;
-	using System.IO;
-	using Log4NetIntegration.Logging;
-	using Logging;
-	using log4net.Config;
-	using Services.HealthMonitoring;
-	using Services.Subscriptions.Server;
-	using Services.Timeout;
-	using StructureMap;
-	using StructureMap.Configuration.DSL;
-	using Topshelf;
-	using Topshelf.HostConfigurators;
+    using System;
+    using System.IO;
+    using Log4NetIntegration.Logging;
+    using Logging;
+    using log4net.Config;
+    using Services.HealthMonitoring;
+    using Services.Subscriptions.Server;
+    using Services.Timeout;
+    using StructureMap;
+    using StructureMap.Configuration.DSL;
+    using Topshelf;
+    using Topshelf.HostConfigurators;
 
-	class Program
-	{
-		static readonly ILog _log = Logger.Get(typeof (Program));
+    class Program
+    {
+        static readonly ILog _log = Logger.Get(typeof (Program));
 
-		static void Main()
-		{
-			BootstrapLogger();
+        static void Main()
+        {
+            BootstrapLogger();
 
-			ObjectFactory.Initialize(x => x.For<IConfiguration>().Use<Configuration>());
+            ObjectFactory.Initialize(x => x.For<IConfiguration>().Use<Configuration>());
 
-			var serviceConfiguration = ObjectFactory.GetInstance<IConfiguration>();
+            var serviceConfiguration = ObjectFactory.GetInstance<IConfiguration>();
 
-			HostFactory.Run(config =>
-				{
-					config.SetServiceName(typeof (Program).Namespace);
-					config.SetDisplayName(typeof (Program).Namespace);
-					config.SetDescription("MassTransit Runtime Services (Subscription, Timeout, Health Monitoring)");
+            HostFactory.Run(config =>
+                {
+                    config.SetServiceName(typeof (Program).Namespace);
+                    config.SetDisplayName(typeof (Program).Namespace);
+                    config.SetDescription("MassTransit Runtime Services (Subscription, Timeout, Health Monitoring)");
 
-					if (serviceConfiguration.UseServiceCredentials)
-					{
-						config.RunAs(serviceConfiguration.ServiceUsername, serviceConfiguration.ServicePassword);
-					}
-					else
-						config.RunAsLocalSystem();
+                    if (serviceConfiguration.UseServiceCredentials)
+                    {
+                        config.RunAs(serviceConfiguration.ServiceUsername, serviceConfiguration.ServicePassword);
+                    }
+                    else
+                        config.RunAsLocalSystem();
 
-					config.DependsOnMsmq();
+                    config.DependsOnMsmq();
 
-					if (serviceConfiguration.SubscriptionServiceEnabled)
-					{
-						config.ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(
-							c => new SubscriptionServiceRegistry(c), start => start.Start(), stop => stop.Stop());
-					}
+                    if (serviceConfiguration.SubscriptionServiceEnabled)
+                    {
+                        config.ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(
+                            c => new SubscriptionServiceRegistry(c), start => start.Start(), stop => stop.Stop());
+                    }
 
-					if (serviceConfiguration.HealthServiceEnabled)
-					{
-						config.ConfigureService<HealthService, HealthServiceRegistry>(
-							c => new HealthServiceRegistry(c), start => start.Start(), stop => stop.Stop());
-					}
+                    if (serviceConfiguration.HealthServiceEnabled)
+                    {
+                        config.ConfigureService<HealthService, HealthServiceRegistry>(
+                            c => new HealthServiceRegistry(c), start => start.Start(), stop => stop.Stop());
+                    }
 
-					if (serviceConfiguration.TimeoutServiceEnabled)
-					{
-						config.ConfigureService<TimeoutService, TimeoutServiceRegistry>(
-							c => new TimeoutServiceRegistry(c), start => start.Start(), stop => stop.Stop());
-					}
+                    if (serviceConfiguration.TimeoutServiceEnabled)
+                    {
+                        config.ConfigureService<TimeoutService, TimeoutServiceRegistry>(
+                            c => new TimeoutServiceRegistry(c), start => start.Start(), stop => stop.Stop());
+                    }
 
-					config.AfterStoppingServices(x => { _log.Info("MassTransit Runtime Services are exiting..."); });
-				});
-		}
+                    config.AfterStoppingServices(x => { _log.Info("MassTransit Runtime Services are exiting..."); });
+                });
+        }
 
-		static void BootstrapLogger()
-		{
-            Logger.UseLogger(new Log4NetLogger());
+        static void BootstrapLogger()
+        {
+            Log4NetLogger.Use(typeof (Program).Namespace + ".log4net.xml");
+            Topshelf.Logging.Log4NetLogger.Use();
 
-			string configFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-				typeof (Program).Namespace + ".log4net.xml");
+            _log.Info("Loading " + typeof (Program).Namespace + " Services...");
+        }
+    }
 
-			XmlConfigurator.ConfigureAndWatch(new FileInfo(configFileName));
+    public static class ConfigureServiceExtension
+    {
+        public static void ConfigureService<TService, TRegistry>(this HostConfigurator configurator,
+                                                                 Func<IContainer, TRegistry> registry,
+                                                                 Action<TService> start, Action<TService> stop)
+            where TRegistry : Registry
+            where TService : class
+        {
+            var container = new Container(x =>
+                {
+                    x.For<IConfiguration>()
+                        .Singleton()
+                        .Add<Configuration>();
 
-			_log.Info("Loading " + typeof (Program).Namespace + " Services...");
-		}
-	}
+                    x.For<TService>()
+                        .Singleton()
+                        .Use<TService>();
+                });
 
-	public static class ConfigureServiceExtension
-	{
-		public static void ConfigureService<TService, TRegistry>(this HostConfigurator configurator,
-		                                                         Func<IContainer, TRegistry> registry,
-		                                                         Action<TService> start, Action<TService> stop)
-			where TRegistry : Registry
-			where TService : class
-		{
-			var container = new Container(x =>
-				{
-					x.For<IConfiguration>()
-						.Singleton()
-						.Add<Configuration>();
+            container.Configure(x => x.AddRegistry(registry(container)));
 
-					x.For<TService>()
-						.Singleton()
-						.Use<TService>();
-				});
-
-			container.Configure(x => x.AddRegistry(registry(container)));
-
-			configurator.Service<TService>(service =>
-				{
-					service.ConstructUsing(builder => container.GetInstance<TService>());
-					service.WhenStarted(start);
-					service.WhenStopped(stop);
-				});
-		}
-	}
+            configurator.Service<TService>(service =>
+                {
+                    service.ConstructUsing(builder => container.GetInstance<TService>());
+                    service.WhenStarted(start);
+                    service.WhenStopped(stop);
+                });
+        }
+    }
 }

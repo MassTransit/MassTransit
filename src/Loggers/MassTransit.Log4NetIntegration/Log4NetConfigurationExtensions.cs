@@ -12,13 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Log4NetIntegration
 {
+    using System;
     using System.IO;
-    using System.Reflection;
     using BusConfigurators;
     using Logging;
-    using MassTransit.Logging;
     using Util;
-    using log4net.Config;
 
     /// <summary>
     /// Extensions for configuring MassTransit for log4net
@@ -31,7 +29,7 @@ namespace MassTransit.Log4NetIntegration
         /// <param name="configurator"></param>
         public static void UseLog4Net([CanBeNull] this ServiceBusConfigurator configurator)
         {
-            Logger.UseLogger(new Log4NetLogger());
+            Log4NetLogger.Use();
         }
 
         /// <summary>
@@ -41,19 +39,17 @@ namespace MassTransit.Log4NetIntegration
         /// <param name="configFileName">The name of the log4net xml configuration file</param>
         public static void UseLog4Net([NotNull] this ServiceBusConfigurator configurator, string configFileName)
         {
-            Logger.UseLogger(new Log4NetLogger());
+            Log4NetLogger.Use();
 
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (path == null)
-                return;
+            string path = AppDomain.CurrentDomain.BaseDirectory;
 
             string file = Path.Combine(path, configFileName);
 
             var configFile = new FileInfo(file);
-            if (!configFile.Exists)
-                return;
-
-            XmlConfigurator.Configure(configFile);
+            if (configFile.Exists)
+            {
+                Log4NetLogger.Use(file);
+            }
         }
     }
 }

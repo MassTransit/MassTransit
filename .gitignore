@@ -3,8 +3,8 @@ build_artifacts/*
 *.suo
 *.user
 packages
+*.dotCover
 
-NDependOut/*
 
 src/logs/*
 

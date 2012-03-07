@@ -84,12 +84,22 @@
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
-    <Reference Include="NHibernate, Version=2.1.2.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Topshelf" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\lib\Topshelf\net-3.5\Topshelf.dll</HintPath>
+    </Reference>
+    <Reference Include="Topshelf" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\lib\Topshelf\net-4.0\Topshelf.dll</HintPath>
+    </Reference>
+    <Reference Include="Topshelf.Log4NetIntegration" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\lib\Topshelf\net-3.5\Topshelf.Log4NetIntegration.dll</HintPath>
+    </Reference>
+    <Reference Include="Topshelf.Log4NetIntegration" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\lib\Topshelf\net-4.0\Topshelf.Log4NetIntegration.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate">
       <HintPath>..\..\lib\NHibernate\NHibernate.dll</HintPath>
     </Reference>
-    <Reference Include="StructureMap, Version=2.5.3.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="StructureMap">
       <HintPath>..\..\lib\StructureMap\StructureMap.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -103,10 +113,6 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Topshelf, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Topshelf\net-3.5\Topshelf.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
