@@ -27,7 +27,8 @@ namespace MassTransit.Containers.Tests
         public Unity_Consumer()
         {
             _container = new UnityContainer();
-            _container.RegisterType<SimpleConsumer>();
+            _container.RegisterType<SimpleConsumer>(new ContainerControlledLifetimeManager());
+            _container.RegisterType<AnotherMessageConsumer, AnotherMessageConsumerImpl>(new ContainerControlledLifetimeManager());
         }
 
         [Finally]
@@ -39,6 +40,11 @@ namespace MassTransit.Containers.Tests
         protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
         {
             subscriptionBusServiceConfigurator.LoadFrom(_container);
+        }
+
+        protected override SimpleConsumer GetSimpleConsumer()
+        {
+            return _container.Resolve<SimpleConsumer>();
         }
     }
 

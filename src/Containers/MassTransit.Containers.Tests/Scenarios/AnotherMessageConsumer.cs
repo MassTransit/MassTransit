@@ -12,14 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Scenarios
 {
-    public class SimpleMessageClass :
-        SimpleMessageInterface
+    public interface AnotherMessageConsumer :
+        Consumes<AnotherMessageInterface>.All
     {
-        public SimpleMessageClass(string name)
-        {
-            Name = name;
-        }
-
-        public string Name { get; set; }
+        AnotherMessageInterface Last { get; }
     }
 }

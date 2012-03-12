@@ -31,5 +31,25 @@ namespace MassTransit.Containers.Tests.Scenarios
             LocalBus.HasSubscription<SimpleMessageInterface>().Count()
                 .ShouldEqual(1, "No subscription for the SimpleMessageInterface was found.");
         }
+
+        [Then]
+        public void Should_have_a_subscription_for_the_nested_consumer_type()
+        {
+            LocalBus.HasSubscription<AnotherMessageInterface>().Count()
+                .ShouldEqual(1, "Only one subscription should be registered for another consumer");
+        }
+
+        [Then]
+        public void Should_receive_using_the_first_consumer()
+        {
+            const string name = "Joe";
+
+            LocalBus.Publish(new SimpleMessageClass(name));
+
+            GetSimpleConsumer()
+                .Last.Name.ShouldEqual(name);
+        }
+
+        protected abstract SimpleConsumer GetSimpleConsumer();
     }
 }

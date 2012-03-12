@@ -27,8 +27,18 @@ namespace MassTransit.Containers.Tests
         public Autofac_Consumer()
         {
             var builder = new ContainerBuilder();
-            builder.RegisterType<SimpleConsumer>();
+            builder.RegisterType<SimpleConsumer>()
+                .SingleInstance();
+            builder.RegisterType<AnotherMessageConsumerImpl>()
+                .As<AnotherMessageConsumer>()
+                .SingleInstance();
+                
             _container = builder.Build();
+        }
+
+        protected override SimpleConsumer GetSimpleConsumer()
+        {
+            return _container.Resolve<SimpleConsumer>();
         }
 
         [Finally]
