@@ -33,7 +33,9 @@ namespace MassTransit.Containers.Tests
         {
             _container = new WindsorContainer();
             _container.Register(
-                Component.For<SimpleConsumer>());
+                Component.For<SimpleConsumer>(),
+                Component.For<AnotherMessageConsumer>()
+                .ImplementedBy<AnotherMessageConsumerImpl>());
         }
 
         [Finally]
@@ -45,6 +47,11 @@ namespace MassTransit.Containers.Tests
         protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
         {
             subscriptionBusServiceConfigurator.LoadFrom(_container);
+        }
+
+        protected override SimpleConsumer GetSimpleConsumer()
+        {
+            return _container.Resolve<SimpleConsumer>();
         }
     }
 

@@ -16,29 +16,29 @@ namespace MassTransit.Containers.Tests.Scenarios
     using System.Threading;
     using Magnum.Extensions;
 
-    public class SimpleConsumer :
-        Consumes<SimpleMessageInterface>.All
+    public class AnotherMessageConsumerImpl :
+        AnotherMessageConsumer
     {
-        SimpleMessageInterface _last;
-        ManualResetEvent _received;
+        readonly ManualResetEvent _received;
+        AnotherMessageInterface _last;
 
-        public SimpleConsumer()
+        public AnotherMessageConsumerImpl()
         {
             _received = new ManualResetEvent(false);
         }
 
-        public SimpleMessageInterface Last
+        public AnotherMessageInterface Last
         {
             get
             {
-                if (_received.WaitOne(8.Seconds()))
+                if(_received.WaitOne(8.Seconds()))
                     return _last;
 
                 throw new TimeoutException("Timeout waiting for message to be consumed");
             }
         }
 
-        public void Consume(SimpleMessageInterface message)
+        public void Consume(AnotherMessageInterface message)
         {
             _last = message;
             _received.Set();

@@ -26,7 +26,15 @@ namespace MassTransit.Containers.Tests
 
         public StructureMap_Consumer()
         {
-            _container = new Container(x => { x.ForConcreteType<SimpleConsumer>(); });
+            _container = new Container(x =>
+                {
+                    x.For<SimpleConsumer>()
+                        .Singleton()
+                        .Use<SimpleConsumer>();
+                    x.For<AnotherMessageConsumer>()
+                        .Singleton()
+                        .Use<AnotherMessageConsumerImpl>();
+                });
         }
 
         [Finally]
@@ -38,6 +46,11 @@ namespace MassTransit.Containers.Tests
         protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
         {
             subscriptionBusServiceConfigurator.LoadFrom(_container);
+        }
+
+        protected override SimpleConsumer GetSimpleConsumer()
+        {
+            return _container.GetInstance<SimpleConsumer>();
         }
     }
 

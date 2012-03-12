@@ -28,7 +28,11 @@ namespace MassTransit.Containers.Tests
         {
             _container = new StandardKernel();
             _container.Bind<SimpleConsumer>()
-                .ToSelf();
+                .ToSelf()
+                .InSingletonScope();
+            _container.Bind<AnotherMessageConsumer>()
+                .To<AnotherMessageConsumerImpl>()
+                .InSingletonScope();
         }
 
         [Finally]
@@ -41,6 +45,12 @@ namespace MassTransit.Containers.Tests
         {
             // we have to do this explicitly, since the metadata is not exposed by Ninject
             subscriptionBusServiceConfigurator.Consumer<SimpleConsumer>(_container);
+            subscriptionBusServiceConfigurator.Consumer<AnotherMessageConsumerImpl>(_container);
+        }
+
+        protected override SimpleConsumer GetSimpleConsumer()
+        {
+            return _container.Get<SimpleConsumer>();
         }
     }
 

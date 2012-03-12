@@ -22,6 +22,8 @@ namespace MassTransit.Containers.Tests.Scenarios
         Orchestrates<SecondSagaMessage>,
         Observes<ThirdSagaMessage, SimpleSaga>
     {
+        FirstSagaMessage _first;
+
         public SimpleSaga(Guid correlationId)
         {
             CorrelationId = correlationId;
@@ -31,8 +33,14 @@ namespace MassTransit.Containers.Tests.Scenarios
         {
         }
 
+        public FirstSagaMessage First
+        {
+            get { return _first; }
+        }
+
         public void Consume(FirstSagaMessage message)
         {
+            _first = message;
         }
 
         public Guid CorrelationId { get; private set; }
