@@ -5,8 +5,9 @@ def commit_data
     commit = `git rev-parse --short HEAD`.chomp()[0,6]
     git_date = `git log -1 --date=iso --pretty=format:%ad`
     commit_date = DateTime.parse( git_date ).strftime("%Y-%m-%d %H%M%S")
-  rescue
-    commit = ENV['BUILD_VCS_NUMBER'][0,6] || "000000"
+  rescue Exception => e
+    puts e.inspect
+    commit = (ENV['BUILD_VCS_NUMBER'] || "000000")[0,6]
     commit_date = Time.new.strftime("%Y-%m-%d %H%M%S")
   end
   [commit, commit_date]
