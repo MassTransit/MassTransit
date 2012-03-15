@@ -60,15 +60,18 @@ namespace MassTransit.Tests.Subscriptions
 		public void Should_properly_register_the_consumers_for_each_endpoint()
 		{
 			var firstComponent = new FirstComponent();
-			LocalBus.SubscribeInstance(firstComponent);
+			var unsubFirst = LocalBus.SubscribeInstance(firstComponent);
 
 			var secondComponent = new SecondComponent();
-			LocalBus.SubscribeInstance(secondComponent);
+			var unsubSecond = LocalBus.SubscribeInstance(secondComponent);
 
 			RemoteBus.ShouldHaveSubscriptionFor<IncomingMessage>();
 
 			RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(FirstCorrelationId);
 			RemoteBus.ShouldHaveCorrelatedSubscriptionFor<IncomingMessage, string>(SecondCorrelationId);
+
+		    unsubFirst();
+		    unsubSecond();
 		}
 	}
 }

@@ -28,10 +28,10 @@ namespace MassTransit.Subscriptions.Coordinator
         Guid _peerId;
         Uri _peerUri;
 
-        public PeerHandler(Fiber fiber, Scheduler scheduler, Inbox inbox, SubscriptionObserver observer)
+        public PeerHandler(Fiber fiber, Scheduler scheduler, Inbox inbox, SubscriptionObserver observer, SubscriptionRepository repository)
         {
             _observer = observer;
-            _endpointSubscriptionCache = new EndpointSubscriptionCache(fiber, scheduler, observer);
+            _endpointSubscriptionCache = new EndpointSubscriptionCache(fiber, scheduler, observer, repository);
 
             inbox.Receive<InitializePeerHandler>(init =>
                 {

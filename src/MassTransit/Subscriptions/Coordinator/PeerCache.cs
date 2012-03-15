@@ -32,7 +32,7 @@ namespace MassTransit.Subscriptions.Coordinator
         readonly Scheduler _scheduler;
 
         public PeerCache(Fiber fiber, Scheduler scheduler, SubscriptionObserver observer, Guid clientId,
-                         Uri controlUri)
+                         Uri controlUri, SubscriptionRepository repository)
         {
             _peers = new DictionaryCache<Uri, ActorRef>();
             _peerUri = controlUri;
@@ -40,7 +40,7 @@ namespace MassTransit.Subscriptions.Coordinator
             _scheduler = scheduler;
             _peerIds = new DictionaryCache<Guid, Uri>();
 
-            _peerHandlerFactory = ActorFactory.Create((f, s, i) => new PeerHandler(f, s, i, observer));
+            _peerHandlerFactory = ActorFactory.Create((f, s, i) => new PeerHandler(f, s, i, observer, repository));
 
             // create a peer for our local client
             WithPeer(clientId, controlUri, x => { }, true);
@@ -51,7 +51,11 @@ namespace MassTransit.Subscriptions.Coordinator
         {
             try
             {
-                _peers.Each(x => x.ExitOnDispose(30.Seconds()).Dispose());
+                _peers.Each(x =>
+                    {
+                        x.Stop();
+                        x.ExitOnDispose(30.Seconds()).Dispose();
+                    });
             }
             catch (Exception ex)
             {

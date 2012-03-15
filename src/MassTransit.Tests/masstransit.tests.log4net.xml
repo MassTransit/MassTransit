@@ -10,6 +10,10 @@
     <level value="WARN" />
   </logger>
 
+  <logger name="MassTransit.Subscriptions.Coordinator.InMemorySubscriptionStorage">
+    <level value="DEBUG" />
+  </logger>
+
 <!--	<logger name="MassTransit.Subscriptions">-->
 <!--		<level value="DEBUG" />-->
 <!--	</logger>-->
