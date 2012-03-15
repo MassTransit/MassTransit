@@ -34,7 +34,6 @@ namespace MassTransit.NLogIntegration.Logging
             if (name == null)
                 throw new ArgumentNullException("name");
             _log = log;
-            _log.Debug(() => "");
         }
 
         public bool IsDebugEnabled
