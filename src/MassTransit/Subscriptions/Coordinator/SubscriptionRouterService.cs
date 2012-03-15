@@ -34,11 +34,13 @@ namespace MassTransit.Subscriptions.Coordinator
         readonly Uri _peerUri;
         bool _disposed;
         UnsubscribeAction _unregister;
+        readonly SubscriptionRepository _repository;
 
-        public SubscriptionRouterService(IServiceBus bus, string network)
+        public SubscriptionRouterService(IServiceBus bus, SubscriptionRepository repository, string network)
         {
             _peerUri = bus.ControlBus.Endpoint.Address.Uri;
 
+            _repository = repository;
             _network = network;
 
             _peerId = NewId.NextGuid();
@@ -55,7 +57,7 @@ namespace MassTransit.Subscriptions.Coordinator
             _peerCache = ActorFactory.Create<PeerCache>(x =>
                 {
                     x.ConstructedBy((fiber, scheduler, inbox) =>
-                                    new PeerCache(fiber, scheduler, connector, _peerId, _peerUri));
+                                    new PeerCache(fiber, scheduler, connector, _peerId, _peerUri, repository));
                     x.UseSharedScheduler();
                     x.HandleOnPoolFiber();
                 })
@@ -176,6 +178,13 @@ namespace MassTransit.Subscriptions.Coordinator
             {
                 lock (_observers)
                     _observers.Each(x => x.OnComplete());
+
+                _repository.Dispose();
+
+                _peerCache.Stop();
+                using (_peerCache.ExitOnDispose(30.Seconds()))
+                {
+                }
             }
 
             _disposed = true;

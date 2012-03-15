@@ -22,25 +22,27 @@ namespace MassTransit.Subscriptions.Coordinator
 
     public class EndpointSubscription
     {
-        static readonly ILog _log = Logger.Get(typeof (EndpointSubscription));
+        static readonly ILog _log = Logger.Get(typeof(EndpointSubscription));
         readonly string _correlationId;
         readonly Fiber _fiber;
         readonly IDictionary<Guid, PeerSubscription> _ids;
         readonly string _messageName;
         readonly SubscriptionObserver _observer;
+        readonly SubscriptionRepository _repository;
         readonly Scheduler _scheduler;
         readonly TimeSpan _unsubscribeTimeout = 4.Seconds();
         Uri _endpointUri;
         Guid _subscriptionId;
 
         public EndpointSubscription(Fiber fiber, Scheduler scheduler, string messageName, string correlationId,
-                                    SubscriptionObserver observer)
+                                    SubscriptionObserver observer, SubscriptionRepository repository)
         {
             _fiber = fiber;
             _scheduler = scheduler;
             _messageName = messageName;
             _correlationId = correlationId;
             _observer = observer;
+            _repository = repository;
 
             _ids = new Dictionary<Guid, PeerSubscription>();
 
@@ -53,6 +55,9 @@ namespace MassTransit.Subscriptions.Coordinator
                 return;
 
             _ids.Add(message.SubscriptionId, message);
+
+            _repository.Add(message.PeerId, message.SubscriptionId, message.EndpointUri, message.MessageName,
+                message.CorrelationId);
 
             if (_ids.Count > 1)
                 return;
@@ -76,7 +81,12 @@ namespace MassTransit.Subscriptions.Coordinator
         public void Send(RemovePeerSubscription message)
         {
             bool wasRemoved = _ids.Remove(message.SubscriptionId);
-            if (!wasRemoved || _ids.Count != 0)
+            if (!wasRemoved)
+                return;
+
+            RemoveSubscriptions(message.PeerId, Enumerable.Repeat(message.SubscriptionId, 1));
+
+            if (_ids.Count != 0)
                 return;
 
             NotifyRemoveSubscription();
@@ -84,15 +94,10 @@ namespace MassTransit.Subscriptions.Coordinator
 
         public void Send(AddPeer message)
         {
-            List<Guid> remove = _ids.Where(x => x.Value.PeerId != message.PeerId)
-                .Select(x => x.Key).ToList();
+            List<KeyValuePair<Guid, PeerSubscription>> remove =
+                _ids.Where(x => x.Value.PeerId != message.PeerId).ToList();
 
-            _log.DebugFormat("Removing {0} subscriptions for {1} {2}", remove.Count, _messageName, _endpointUri);
-
-            if (remove.Count > 0)
-            {
-                remove.Each(x => _ids.Remove(x));
-            }
+            remove.Each(kv => { RemoveSubscriptions(kv.Key, Enumerable.Repeat(kv.Value.SubscriptionId, 1)); });
 
             if (_ids.Count == 0 && _subscriptionId != Guid.Empty)
             {
@@ -107,13 +112,21 @@ namespace MassTransit.Subscriptions.Coordinator
             List<Guid> remove = _ids.Where(x => x.Value.PeerId == message.PeerId)
                 .Select(x => x.Key).ToList();
 
-            if (remove.Count > 0)
-            {
-                remove.Each(x => _ids.Remove(x));
+            RemoveSubscriptions(message.PeerId, remove);
+        }
 
-                _log.DebugFormat("Removed {0} subscriptions for peer: {1} {2}", remove.Count, message.PeerId,
-                    message.PeerUri);
-            }
+        void RemoveSubscriptions(Guid peerId, IEnumerable<Guid> remove)
+        {
+            int count = 0;
+            remove.Each(subscriptionId =>
+                {
+                    _ids.Remove(subscriptionId);
+
+                    _repository.Remove(peerId, subscriptionId, _endpointUri, _messageName, _correlationId);
+                    count++;
+                });
+
+            _log.DebugFormat("Removed {0} subscriptions for peer: {1} {2}", count, peerId, _endpointUri);
         }
 
         void NotifyRemoveSubscription()

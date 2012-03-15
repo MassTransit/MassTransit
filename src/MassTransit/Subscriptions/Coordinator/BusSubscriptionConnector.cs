@@ -24,10 +24,10 @@ namespace MassTransit.Subscriptions.Coordinator
     public class BusSubscriptionConnector :
         SubscriptionObserver
     {
-        static readonly ILog _log = Logger.Get(typeof (BusSubscriptionConnector));
-        readonly EndpointSubscriptionConnectorCache _dataBusSubscriptionCache;
-        readonly EndpointSubscriptionConnectorCache _controlBusSubscriptionCache;
+        static readonly ILog _log = Logger.Get(typeof(BusSubscriptionConnector));
         readonly Cache<Guid, UnsubscribeAction> _connectionCache;
+        readonly EndpointSubscriptionConnectorCache _controlBusSubscriptionCache;
+        readonly EndpointSubscriptionConnectorCache _dataBusSubscriptionCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BusSubscriptionConnector"/> class.
@@ -48,17 +48,18 @@ namespace MassTransit.Subscriptions.Coordinator
         public void OnSubscriptionAdded(SubscriptionAdded message)
         {
             // determine whether the message should be send over the control bus
-            var isControlMessage = message.EndpointUri.IsControlAddress();
+            bool isControlMessage = message.EndpointUri.IsControlAddress();
 
             // connect the message to the correct cache
             if (!isControlMessage)
-                _connectionCache[message.SubscriptionId] = _dataBusSubscriptionCache.Connect(message.MessageName, message.EndpointUri, message.CorrelationId);
+                _connectionCache[message.SubscriptionId] = _dataBusSubscriptionCache.Connect(message.MessageName,
+                    message.EndpointUri, message.CorrelationId);
             else
-                _connectionCache[message.SubscriptionId] = _controlBusSubscriptionCache.Connect(message.MessageName, message.EndpointUri, message.CorrelationId);
+                _connectionCache[message.SubscriptionId] = _controlBusSubscriptionCache.Connect(message.MessageName,
+                    message.EndpointUri, message.CorrelationId);
 
-            if (_log.IsInfoEnabled)
-                _log.InfoFormat("Added: {0} => {1}, {2}", message.MessageName, message.EndpointUri,
-                    message.SubscriptionId);
+            _log.Debug(() => string.Format("Added: {0} => {1}, {2}", message.MessageName, message.EndpointUri,
+                message.SubscriptionId));
         }
 
         /// <summary>
@@ -72,9 +73,8 @@ namespace MassTransit.Subscriptions.Coordinator
                     unsubscribe();
                     _connectionCache.Remove(message.SubscriptionId);
 
-                    if (_log.IsInfoEnabled)
-                        _log.InfoFormat("Removed: {0} => {1}, {2}", message.MessageName, message.EndpointUri,
-                            message.SubscriptionId);
+                    _log.Debug(() => string.Format("Removed: {0} => {1}, {2}", message.MessageName, message.EndpointUri,
+                        message.SubscriptionId));
                 });
         }
 

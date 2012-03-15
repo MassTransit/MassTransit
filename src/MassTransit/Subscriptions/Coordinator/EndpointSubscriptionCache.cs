@@ -26,14 +26,14 @@ namespace MassTransit.Subscriptions.Coordinator
         readonly SubscriptionObserver _observer;
         readonly Scheduler _scheduler;
 
-        public EndpointSubscriptionCache(Fiber fiber, Scheduler scheduler, SubscriptionObserver observer)
+        public EndpointSubscriptionCache(Fiber fiber, Scheduler scheduler, SubscriptionObserver observer, SubscriptionRepository repository)
         {
             _fiber = fiber;
             _scheduler = scheduler;
             _observer = observer;
             _messageSubscriptions =
                 new DictionaryCache<SubscriptionKey, EndpointSubscription>(
-                    key => new EndpointSubscription(_fiber, _scheduler, key.MessageName, key.CorrelationId, _observer));
+                    key => new EndpointSubscription(_fiber, _scheduler, key.MessageName, key.CorrelationId, _observer, repository));
         }
 
         public void Send(AddPeerSubscription message)

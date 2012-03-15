@@ -17,14 +17,15 @@ namespace MassTransit.SubscriptionBuilders
     using Magnum.Extensions;
     using Subscriptions.Coordinator;
 
-    public class SubscriptionRouterBuilderImpl :
-        SubscriptionRouterBuilder
-    {
-        readonly IServiceBus _bus;
-        readonly IList<Func<IServiceBus, SubscriptionRouter, SubscriptionObserver>> _observers;
-        string _network;
+	public class SubscriptionRouterBuilderImpl :
+		SubscriptionRouterBuilder
+	{
+		readonly IServiceBus _bus;
+		string _network;
+		readonly IList<Func<IServiceBus, SubscriptionRouter, SubscriptionObserver>> _observers;
+	    readonly SubscriptionRepository _repository;
 
-        public SubscriptionRouterBuilderImpl(IServiceBus bus, string network)
+	    public SubscriptionRouterBuilderImpl(IServiceBus bus, string network)
         {
             _bus = bus;
             _network = network;
@@ -32,6 +33,8 @@ namespace MassTransit.SubscriptionBuilders
                 {
                     (b, c) => new BusSubscriptionConnector(b)
                 };
+
+	        _repository = new BusSubscriptionRepository(new InMemorySubscriptionStorage());
         }
 
         public string Network
@@ -59,7 +62,7 @@ namespace MassTransit.SubscriptionBuilders
 
         public SubscriptionRouterService Build()
         {
-            var service = new SubscriptionRouterService(_bus, _network);
+			var service = new SubscriptionRouterService(_bus, _repository, _network);
 
             _observers.Each(x => service.AddObserver(x(_bus, service)));
 
