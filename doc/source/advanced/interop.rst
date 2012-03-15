@@ -20,12 +20,30 @@ MassTransit's serializers do the main work of formatting the data that goes over
     int RetryCount
     string SourceAddress
 
-These are compulsory for a message to be delivered:
+This is a minimal message:
 
- * Message
- * MessageType
- * SourceAddress
+.. sourcecode:: javascript
+	{
+		"destinationAddress": "rabbitmq://isomorphism/MassTransit.Test.Receiver",
+		"headers": {},
+		"message": {
+			"spoken": "Something wierd is going on!",
+			"seqId": 2
+		},
+		"messageType": [
+			"urn:message:MassTransit.Test.Messages:ChatMessage"
+		],
+		"retryCount": 0
+	}
+
+Which translates to these required properties:
+	
+ * message
+ * messageType
+ * destinationAddress
  
 MessageType is a list of urns. See MessageUrnSpecs for the format. Informally, it's like this::
 
 urn:message:NAMESPACE1.NAMESPACE2:TYPE
+
+'retryCount', 'headers' will be defaulted.
