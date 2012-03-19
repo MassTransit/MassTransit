@@ -10,15 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Reactive.Samples
+namespace MassTransit.Reactive.Tests
 {
 	using System;
 	using System.Reactive.Linq;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
-	using MassTransit.Reactive;
 	using NUnit.Framework;
-	using TestFramework;
+	using MassTransit.TestFramework;
 
 	[Scenario, Explicit("Fails from command-line build, don't know why, so I'm removing it from the build")]
 	public class BasicExample :
