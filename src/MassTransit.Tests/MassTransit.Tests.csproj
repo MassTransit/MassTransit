@@ -312,10 +312,6 @@
       <Project>{8D2BE372-A756-4676-B2EA-ED7846809BFE}</Project>
       <Name>MassTransit.Log4NetIntegration</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Reactive\MassTransit.Reactive.csproj">
-      <Project>{BAE719BF-A142-4EF4-84DC-788742ED7FF8}</Project>
-      <Name>MassTransit.Reactive</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
       <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>
       <Name>MassTransit.TestFramework</Name>
