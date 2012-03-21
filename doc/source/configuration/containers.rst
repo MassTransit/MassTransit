@@ -93,7 +93,7 @@ AutoFac
 
             //this will find all of the consumers in the container and
             //register them with the bus.
-            sbc.Subscribe(x => x.LoadFrom(container));
+            sbc.Subscribe(x => x.LoadFrom(c.Resolve<ILifetimeScope>()));
         })).As<IServiceBus>()
             .SingleInstance();
 
