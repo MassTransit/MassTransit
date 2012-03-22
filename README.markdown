@@ -43,14 +43,19 @@ ServiceBusFactory.New(sbc =>
 
 [MassTransit Discuss](http://groups.google.com/group/masstransit-discuss)
 
-### Source
+### Building from Source
 
 1. Clone the source down to your machine. 
   `git clone git://github.com/MassTransit/MassTransit.git`
 2. Ensure Ruby is installed. [RubyInstaller for Windows](http://rubyinstaller.org/)
-3. Ensure gems are installed.
-  `gem install albacore semver2`
-4. Run `build.bat`.
+3. **Ensure gems are installed**, run:
+
+```
+gem install albacore
+gem install semver2
+```
+
+4. Run `build.bat`
 
 ### Contributing 
 
