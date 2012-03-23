@@ -130,7 +130,8 @@ namespace MassTransit.NHibernateIntegration.Saga
                     }
                 }
 
-                transaction.Commit();
+                if (transaction.IsActive)
+                  transaction.Commit();
             }
         }
 
