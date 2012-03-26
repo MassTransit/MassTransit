@@ -141,12 +141,19 @@ namespace MassTransit.Testing.TestDecorators
             get { return _context.Endpoint; }
         }
 
-        public bool TryGetContext<T>(out IConsumeContext<T> context) where T : class
+        public bool IsContextAvailable(Type messageType)
+        {
+            return _context.IsContextAvailable(messageType);
+        }
+
+        public bool TryGetContext<T>(out IConsumeContext<T> context) 
+            where T : class
         {
             return _context.TryGetContext(out context);
         }
 
-        public void Respond<T>(T message, Action<ISendContext<T>> contextCallback) where T : class
+        public void Respond<T>(T message, Action<ISendContext<T>> contextCallback) 
+            where T : class
         {
             _context.Respond(message, contextCallback);
         }

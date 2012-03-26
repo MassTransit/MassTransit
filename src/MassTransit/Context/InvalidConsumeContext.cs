@@ -108,6 +108,11 @@ namespace MassTransit.Context
             get { throw CreateException(); }
         }
 
+        public bool IsContextAvailable(Type messageType) 
+        {
+            throw CreateException();
+        }
+
         public bool TryGetContext<T>(out IConsumeContext<T> context) 
             where T : class
         {

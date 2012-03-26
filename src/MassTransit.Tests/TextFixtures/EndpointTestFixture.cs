@@ -35,7 +35,7 @@ namespace MassTransit.Tests.TextFixtures
 				try
 				{
 					EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
-					_endpointFactoryConfigurator = null;
+				//	_endpointFactoryConfigurator = null;
 
 					_endpointCache = new EndpointCache(EndpointFactory);
 

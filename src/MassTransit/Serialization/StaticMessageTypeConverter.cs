@@ -12,31 +12,36 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System;
-	using Util;
+    using System;
+    using Util;
 
-	public class StaticMessageTypeConverter :
-		IMessageTypeConverter
-	{
-		readonly object _message;
-		readonly Type _messageType;
+    public class StaticMessageTypeConverter :
+        IMessageTypeConverter
+    {
+        readonly object _message;
+        readonly Type _messageType;
 
-		public StaticMessageTypeConverter([NotNull] object message)
-		{
-			_message = message;
-			_messageType = message.GetType();
-		}
+        public StaticMessageTypeConverter([NotNull] object message)
+        {
+            _message = message;
+            _messageType = message.GetType();
+        }
 
-		public bool TryConvert<T>(out T message) where T : class
-		{
-			if (typeof (T).IsAssignableFrom(_messageType))
-			{
-				message = (T) _message;
-				return true;
-			}
+        public bool Contains(Type messageType)
+        {
+            return messageType.IsAssignableFrom(_messageType);
+        }
 
-			message = null;
-			return false;
-		}
-	}
+        public bool TryConvert<T>(out T message) where T : class
+        {
+            if (typeof(T).IsAssignableFrom(_messageType))
+            {
+                message = (T)_message;
+                return true;
+            }
+
+            message = null;
+            return false;
+        }
+    }
 }
