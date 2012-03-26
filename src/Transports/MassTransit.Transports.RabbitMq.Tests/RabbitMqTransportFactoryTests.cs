@@ -41,7 +41,8 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
 		// need to configure mt vhost for this:
 		readonly IRabbitMqEndpointAddress _queue = RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/mt/mt-unit-tests");
-		readonly IRabbitMqEndpointAddress _exchange = RabbitMqEndpointAddress.Parse("rabbitmq://localhost/exchange/dru");
+		readonly IRabbitMqEndpointAddress _exchange = RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/mt/dru");
+        readonly IRabbitMqEndpointAddress _error = RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/mt/mt-unit-tests-error");
 
 		RabbitMqTransportFactory _factory;
 
@@ -51,7 +52,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
 			IDuplexTransport t = _factory.BuildLoopback(new TransportSettings(_queue));
 			_factory.ConnectionCount().ShouldEqual(1);
 		}
-
 
 		[Test]
 		public void EndpointSendAndReceive()
@@ -66,11 +66,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
 			var message = new BugsBunny {Food = "Carrot"};
 
 			IDuplexTransport transport = _factory.BuildLoopback(new TransportSettings(_exchange));
-			var sendEndpoint = new Endpoint(_exchange, serializer, transport, null);
+            IOutboundTransport error = _factory.BuildError(new TransportSettings(_error));
+
+			var sendEndpoint = new Endpoint(_exchange, serializer, transport, error);
 			sendEndpoint.Send(message);
 
 
-			var receiveEndpoint = new Endpoint(_queue, serializer, transport, null);
+            var receiveEndpoint = new Endpoint(_queue, serializer, transport, error);
 			receiveEndpoint.Receive(o =>
 				{
 					return b =>
