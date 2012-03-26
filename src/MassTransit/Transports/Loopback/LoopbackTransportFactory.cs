@@ -12,13 +12,18 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Loopback
 {
+    using System;
+    using Magnum.Caching;
+
     public class LoopbackTransportFactory :
         ITransportFactory
     {
-        IMessageNameFormatter _messageNameFormatter;
+        readonly Cache<Uri, LoopbackTransport> _transports;
+        readonly IMessageNameFormatter _messageNameFormatter;
 
         public LoopbackTransportFactory()
         {
+            _transports = new ConcurrentCache<Uri, LoopbackTransport>();
             _messageNameFormatter = new DefaultMessageNameFormatter("::", "--", ":", "-");
         }
 
@@ -29,7 +34,7 @@ namespace MassTransit.Transports.Loopback
 
         public IDuplexTransport BuildLoopback(ITransportSettings settings)
         {
-            return new LoopbackTransport(settings.Address);
+            return _transports.Get(settings.Address.Uri, _ => new LoopbackTransport(settings.Address));
         }
 
         public IInboundTransport BuildInbound(ITransportSettings settings)
@@ -44,7 +49,7 @@ namespace MassTransit.Transports.Loopback
 
         public IOutboundTransport BuildError(ITransportSettings settings)
         {
-            return new LoopbackTransport(settings.Address);
+            return _transports.Get(settings.Address.Uri, _ => new LoopbackTransport(settings.Address));
         }
 
         public IMessageNameFormatter MessageNameFormatter

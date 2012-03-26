@@ -18,7 +18,6 @@ namespace MassTransit.Context
     using System.IO;
     using System.Runtime.Serialization;
     using Logging;
-    using Magnum.Extensions;
     using Serialization;
     using Util;
 
@@ -26,7 +25,7 @@ namespace MassTransit.Context
         MessageContext,
         IReceiveContext
     {
-        static readonly ILog _log = Logger.Get(typeof (ReceiveContext));
+        static readonly ILog _log = Logger.Get(typeof(ReceiveContext));
         readonly IList<IPublished> _published;
         readonly IList<IReceived> _received;
         readonly IList<ISent> _sent;
@@ -77,11 +76,12 @@ namespace MassTransit.Context
 
         public void SetBodyStream(Stream stream)
         {
-        	if (stream == null) throw new ArgumentNullException("stream");
-        	_bodyStream = stream;
+            if (stream == null)
+                throw new ArgumentNullException("stream");
+            _bodyStream = stream;
         }
 
-    	public void CopyBodyTo(Stream stream)
+        public void CopyBodyTo(Stream stream)
         {
             _bodyStream.Seek(0, SeekOrigin.Begin);
             _bodyStream.CopyTo(stream);
@@ -122,7 +122,7 @@ namespace MassTransit.Context
             where T : class
         {
             if (Endpoint != null)
-                Endpoint.Address.LogReceived(consumeContext.MessageId, typeof (T).ToMessageName());
+                Endpoint.Address.LogReceived(consumeContext.MessageId, typeof(T).ToMessageName());
 
             _received.Add(new Received<T>(consumeContext, consumerType, correlationId, _timer.ElapsedMilliseconds));
         }
@@ -139,6 +139,11 @@ namespace MassTransit.Context
 
         public Guid Id { get; private set; }
 
+        public bool IsContextAvailable(Type messageType)
+        {
+            return _typeConverter.Contains(messageType);
+        }
+
         public bool TryGetContext<T>(out IConsumeContext<T> context)
             where T : class
         {
@@ -150,16 +155,18 @@ namespace MassTransit.Context
                     context = new ConsumeContext<T>(this, message);
                     return true;
                 }
+
+                context = null;
+                return false;
             }
             catch (Exception ex)
             {
                 var exception = new SerializationException("Failed to deserialize the message", ex);
 
-                _log.Error("Exception converting message to type: " + typeof (T).ToShortTypeName(), exception);
-            }
+                throw exception;
 
-            context = null;
-            return false;
+//                _log.Error("Exception converting message to type: " + typeof (T).ToShortTypeName(), exception);
+            }
         }
 
         /// <summary>
@@ -171,7 +178,8 @@ namespace MassTransit.Context
         /// <param name="contextCallback">The action to setup the context on the outbound message</param>
         public void Respond<T>(T message, [NotNull] Action<ISendContext<T>> contextCallback) where T : class
         {
-            if (contextCallback == null) throw new ArgumentNullException("contextCallback");
+            if (contextCallback == null)
+                throw new ArgumentNullException("contextCallback");
             if (ResponseAddress != null)
             {
                 Bus.GetEndpoint(ResponseAddress).Send(message, context =>
@@ -191,24 +199,24 @@ namespace MassTransit.Context
             }
         }
 
-		/// <summary>
-		/// Create a new <see cref="ReceiveContext"/> from the incoming 
-		/// stream; the stream should contain the MassTransit <see cref="Envelope"/>
-		/// which in turn contains both payload and meta-data/out-of-band data.
-		/// </summary>
-		/// <param name="bodyStream">Body stream to create receive context from</param>
-		/// <returns>The receive context</returns>
-		[NotNull]
+        /// <summary>
+        /// Create a new <see cref="ReceiveContext"/> from the incoming 
+        /// stream; the stream should contain the MassTransit <see cref="Envelope"/>
+        /// which in turn contains both payload and meta-data/out-of-band data.
+        /// </summary>
+        /// <param name="bodyStream">Body stream to create receive context from</param>
+        /// <returns>The receive context</returns>
+        [NotNull]
         public static ReceiveContext FromBodyStream(Stream bodyStream)
         {
             return new ReceiveContext(bodyStream);
         }
 
-		/// <summary>
-		/// Create a new empty receive context
-		/// </summary>
-		/// <returns></returns>
-		[NotNull]
+        /// <summary>
+        /// Create a new empty receive context
+        /// </summary>
+        /// <returns></returns>
+        [NotNull]
         public static ReceiveContext Empty()
         {
             return new ReceiveContext(null);

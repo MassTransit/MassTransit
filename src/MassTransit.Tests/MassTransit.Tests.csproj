@@ -192,6 +192,7 @@
     <Compile Include="Serialization\DateTime_Specs.cs" />
     <Compile Include="Serialization\GenericMessageType_Specs.cs" />
     <Compile Include="Serialization\DefaultConstructor_Specs.cs" />
+    <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="Services\HealthMonitoring\HealthClient_Integration_Specs.cs" />
     <Compile Include="Services\Timeout\TimeoutService_Specs.cs" />
     <Compile Include="Subscriptions\DynamicAndStaticSubscriptions_Specs.cs" />

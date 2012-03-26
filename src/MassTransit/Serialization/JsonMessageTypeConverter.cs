@@ -12,80 +12,98 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Magnum.Reflection;
-	using Newtonsoft.Json;
-	using Newtonsoft.Json.Linq;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Magnum.Reflection;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
-	public class JsonMessageTypeConverter :
-		IMessageTypeConverter
-	{
-		readonly JsonSerializer _serializer;
-		readonly IEnumerable<string> _supportedTypes;
-		readonly JToken _token;
-		readonly IDictionary<Type, object> _mapped;
+    public class JsonMessageTypeConverter :
+        IMessageTypeConverter
+    {
+        readonly IDictionary<Type, object> _mapped;
+        readonly JsonSerializer _serializer;
+        readonly IEnumerable<string> _supportedTypes;
+        readonly JToken _token;
 
-		public JsonMessageTypeConverter(JsonSerializer serializer, JToken token, IEnumerable<string> supportedTypes)
-		{
-			_token = token;
-			_supportedTypes = supportedTypes;
-			_serializer = serializer;
-			_mapped = new Dictionary<Type, object>();
-		}
+        public JsonMessageTypeConverter(JsonSerializer serializer, JToken token, IEnumerable<string> supportedTypes)
+        {
+            _token = token;
+            _supportedTypes = supportedTypes;
+            _serializer = serializer;
+            _mapped = new Dictionary<Type, object>();
+        }
 
-		public bool TryConvert<T>(out T message)
-			where T : class
-		{
-			object existing;
-			if (_mapped.TryGetValue(typeof(T), out existing))
-			{
-				message = (T) existing;
-				return message != null;
-			}
+        public bool Contains(Type messageType)
+        {
+            object existing;
+            if (_mapped.TryGetValue(messageType, out existing))
+            {
+                return existing != null;
+            }
 
-			string typeUrn = new MessageUrn(typeof (T)).ToString();
+            string typeUrn = new MessageUrn(messageType).ToString();
 
-			if (_supportedTypes.Any(typeUrn.Equals))
-			{
-				object obj;
-				if (typeof (T).IsInterface && typeof (T).IsAllowedMessageType())
-				{
-					Type proxyType = InterfaceImplementationBuilder.GetProxyFor(typeof (T));
+            if (_supportedTypes.Any(typeUrn.Equals))
+            {
+                return true;
+            }
 
-					obj = FastActivator.Create(proxyType);
+            return false;
+        }
 
-					UsingReader(jsonReader => _serializer.Populate(jsonReader, obj));
-				}
-				else
-				{
-					obj = FastActivator<T>.Create();
+        public bool TryConvert<T>(out T message)
+            where T : class
+        {
+            object existing;
+            if (_mapped.TryGetValue(typeof(T), out existing))
+            {
+                message = (T)existing;
+                return message != null;
+            }
 
-					UsingReader(jsonReader => _serializer.Populate(jsonReader, obj));
-				}
+            string typeUrn = new MessageUrn(typeof(T)).ToString();
 
-				_mapped[typeof (T)] = obj;
+            if (_supportedTypes.Any(typeUrn.Equals))
+            {
+                object obj;
+                if (typeof(T).IsInterface && typeof(T).IsAllowedMessageType())
+                {
+                    Type proxyType = InterfaceImplementationBuilder.GetProxyFor(typeof(T));
 
-				message = (T) obj;
-				return true;
-			}
+                    obj = FastActivator.Create(proxyType);
 
-			_mapped[typeof (T)] = null;
+                    UsingReader(jsonReader => _serializer.Populate(jsonReader, obj));
+                }
+                else
+                {
+                    obj = FastActivator<T>.Create();
 
-			message = null;
-			return false;
-		}
+                    UsingReader(jsonReader => _serializer.Populate(jsonReader, obj));
+                }
 
-		void UsingReader(Action<JsonReader> callback)
-		{
-			if (_token == null)
-				return;
+                _mapped[typeof(T)] = obj;
 
-			using (var jsonReader = new JTokenReader(_token))
-			{
-				callback(jsonReader);
-			}
-		}
-	}
+                message = (T)obj;
+                return true;
+            }
+
+            _mapped[typeof(T)] = null;
+
+            message = null;
+            return false;
+        }
+
+        void UsingReader(Action<JsonReader> callback)
+        {
+            if (_token == null)
+                return;
+
+            using (var jsonReader = new JTokenReader(_token))
+            {
+                callback(jsonReader);
+            }
+        }
+    }
 }

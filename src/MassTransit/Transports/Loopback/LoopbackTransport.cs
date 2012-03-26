@@ -39,6 +39,22 @@ namespace MassTransit.Transports
             Address = address;
         }
 
+        public int Count
+        {
+            get
+            {
+                int messageCount;
+                lock (_messageLock)
+                {
+                    GuardAgainstDisposed();
+
+                    messageCount = _messages.Count;
+                }
+
+                return messageCount;
+            }
+        }
+
         public IEndpointAddress Address { get; private set; }
 
         public IOutboundTransport OutboundTransport
@@ -90,13 +106,7 @@ namespace MassTransit.Transports
 
         public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
         {
-            int messageCount;
-            lock (_messageLock)
-            {
-                GuardAgainstDisposed();
-
-                messageCount = _messages.Count;
-            }
+            int messageCount = Count;
 
             bool waited = false;
 
@@ -177,7 +187,8 @@ namespace MassTransit.Transports
 
         void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+                return;
             if (disposing)
             {
                 lock (_messageLock)

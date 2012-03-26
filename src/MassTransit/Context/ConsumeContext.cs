@@ -125,6 +125,18 @@ namespace MassTransit.Context
             get { return _message; }
         }
 
+        public bool IsContextAvailable<T>()
+            where T : class
+        {
+            T messageOfT = Message as T;
+            return messageOfT != null;
+        }
+
+        public bool IsContextAvailable(Type messageType)
+        {
+            return messageType.IsAssignableFrom(Message.GetType());
+        }
+
         public bool TryGetContext<T>(out IConsumeContext<T> context)
             where T : class
         {
