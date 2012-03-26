@@ -155,6 +155,8 @@ namespace MassTransit.Transports
                             if (receive == null)
                             {
                                 Address.LogSkipped(acceptContext.MessageId);
+
+                                _tracker.IncrementRetryCount(acceptContext.MessageId, null);
                                 return null;
                             }
                         }
