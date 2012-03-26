@@ -384,7 +384,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "Castle.Windsor", "2.5.2"
+    nuspec.dependency "Castle.Windsor", "3.0.0"
     nuspec.output_file = 'nuspecs/MassTransit.CastleWindsor.nuspec'
 
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.WindsorIntegration.{dll,pdb,xml}')}", nuspec
@@ -400,7 +400,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "RabbitMQ.Client", "2.7.1"
+    nuspec.dependency "RabbitMQ.Client", "2.8.1"
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
 
 	add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.Transports.RabbitMq.{dll,pdb,xml}')}", nuspec

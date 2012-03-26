@@ -880,6 +880,24 @@
             immediately.
             </remarks>
         </member>
+        <member name="M:RabbitMQ.Client.IModel.WaitForConfirms(System.TimeSpan,System.Boolean@)">
+            <summary>Wait until all published messages have been confirmed.
+            </summary>
+            <returns>true if no nacks were received within the timeout,
+            otherwise false</returns>
+            <param name="timeout">How long to wait (at most) before returning
+            whether or not any nacks were returned</param>
+            <param name="timedOut">True if the method returned because
+            the timeout elapsed, not because all messages were ack'd
+            or at least one nack'd.</param>
+            <remarks>
+            Waits until all messages published since the last call have
+            been either ack'd or nack'd by the broker.  Returns whether
+            all the messages were ack'd (and none were nack'd). Note,
+            when called on a non-Confirm channel, returns true
+            immediately.
+            </remarks>
+        </member>
         <member name="M:RabbitMQ.Client.IModel.WaitForConfirmsOrDie">
             <summary>Wait until all published messages have been confirmed.
             </summary>
@@ -887,6 +905,16 @@
             Waits until all messages published since the last call have
             been ack'd by the broker.  If a nack is received, throws an
             OperationInterrupedException exception immediately.
+            </remarks>
+        </member>
+        <member name="M:RabbitMQ.Client.IModel.WaitForConfirmsOrDie(System.TimeSpan)">
+            <summary>Wait until all published messages have been confirmed.
+            </summary>
+            <remarks>
+            Waits until all messages published since the last call have
+            been ack'd by the broker.  If a nack is received or the timeout
+            elapses, throws an OperationInterrupedException exception
+            immediately.
             </remarks>
         </member>
         <member name="M:RabbitMQ.Client.IModel.BasicConsume(System.String,System.Boolean,RabbitMQ.Client.IBasicConsumer)">
