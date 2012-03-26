@@ -75,6 +75,7 @@ namespace MassTransit.Transports.RabbitMq
                         {
                             ReceiveContext context = ReceiveContext.FromBodyStream(body);
                             context.SetMessageId(result.BasicProperties.MessageId ?? result.DeliveryTag.ToString());
+                            result.BasicProperties.MessageId = context.MessageId;
                             context.SetInputAddress(_address);
 
                             byte[] contentType = result.BasicProperties.IsHeadersPresent()
@@ -112,7 +113,7 @@ namespace MassTransit.Transports.RabbitMq
                         _log.Error("Failed to consume message from endpoint", ex);
 
                         if (result != null)
-                            _consumer.MessageFailed(result.DeliveryTag, true);
+                            _consumer.MessageFailed(result, true);
 
                         throw;
                     }

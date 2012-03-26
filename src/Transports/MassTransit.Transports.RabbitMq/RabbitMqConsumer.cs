@@ -75,9 +75,14 @@ namespace MassTransit.Transports.RabbitMq
             _channel.BasicAck(deliveryTag, false);
         }
 
-        public void MessageFailed(ulong deliveryTag, bool requeue)
+        public void MessageFailed(BasicGetResult result, bool requeue)
         {
-            _channel.BasicNack(deliveryTag, false, requeue);
+            if (requeue)
+            {
+                _channel.BasicPublish(_address.Name, "", result.BasicProperties, result.Body);
+            }
+
+            _channel.BasicAck(result.DeliveryTag, false);
         }
     }
 }
