@@ -54,10 +54,16 @@
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core">
+    <Reference Include="Castle.Core" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\..\..\lib\Castle.Core\net35\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Core" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\..\lib\Castle.Core\net40\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Castle.Windsor">
+    <Reference Include="Castle.Windsor" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\..\..\lib\Castle.Windsor\net35\Castle.Windsor.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Windsor" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\..\lib\Castle.Windsor\net40\Castle.Windsor.dll</HintPath>
     </Reference>
     <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
@@ -74,7 +80,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Data" />
