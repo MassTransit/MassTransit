@@ -112,7 +112,7 @@ namespace MassTransit.Tests.Distributor
 			PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);
 		}
 
-		[Test]
+		[Test, Explicit]
 		public void Using_the_load_generator_should_share_the_load()
 		{
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
