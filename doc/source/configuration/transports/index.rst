@@ -7,3 +7,4 @@ Each transport has different configuration options.
 
   msmq.rst
   rabbitmq.rst
+  loopback.rst
