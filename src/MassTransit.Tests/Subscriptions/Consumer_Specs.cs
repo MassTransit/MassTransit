@@ -160,5 +160,29 @@ namespace MassTransit.Tests.Subscriptions
 
             TestConsumerBase<B>.OnlyOneShouldHaveReceivedMessage(message, 8.Seconds());
         }
+
+        [Test]
+        public void Should_have_received_a_on_an_instance()
+        {
+            var consumer = new ConsumerOfAAndB();
+            RemoteBus.SubscribeInstance(consumer);
+
+            var message = new A();
+            LocalBus.Publish(message);
+
+            consumer.ConsumerA.ShouldHaveReceivedMessage(message, 8.Seconds());
+        }
+
+        [Test]
+        public void Should_have_received_b_on_an_instance()
+        {
+            var consumer = new ConsumerOfAAndB();
+            RemoteBus.SubscribeInstance(consumer);
+
+            var message = new B();
+            LocalBus.Publish(message);
+
+            consumer.ConsumerB.ShouldHaveReceivedMessage(message, 8.Seconds());
+        }
     }
 }
