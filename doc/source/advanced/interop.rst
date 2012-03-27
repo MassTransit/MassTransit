@@ -5,27 +5,45 @@ MassTransit's serializers do the main work of formatting the data that goes over
 
 .. sourcecode:: csharp
 
-    string RequestId { get; set; }
-    string ConversationId { get; set; }
-    string CorrelationId { get; set; }
-    string DestinationAddress { get; set; }
-    DateTime? ExpirationTime { get; set; }
-    string FaultAddress { get; set; }
-    IDictionary<string, string> Headers { get; set; }
-    object Message { get; set; }
-    string MessageId { get; set; }
-    IList<string> MessageType { get; set; }
-    string Network { get; set; }
-    string ResponseAddress { get; set; }
-    int RetryCount { get; set; }
-    string SourceAddress { get; set; }
+    string RequestId
+    string ConversationId
+    string CorrelationId
+    string DestinationAddress
+    DateTime? ExpirationTime
+    string FaultAddress
+    IDictionary<string, string> Headers
+    object Message
+    string MessageId
+    IList<string> MessageType
+    string Network
+    string ResponseAddress
+    int RetryCount
+    string SourceAddress
 
-These are compulsory for a message to be delivered:
+This is a minimal message:
 
- * Message
- * MessageType
- * SourceAddress
+.. sourcecode:: javascript
+	{
+		"destinationAddress": "rabbitmq://isomorphism/MassTransit.Test.Receiver",
+		"headers": {},
+		"message": {
+			"spoken": "Something wierd is going on!",
+			"seqId": 2
+		},
+		"messageType": [
+			"urn:message:MassTransit.Test.Messages:ChatMessage"
+		],
+		"retryCount": 0
+	}
+
+Which translates to these required properties:
+	
+ * message
+ * messageType
+ * destinationAddress
  
 MessageType is a list of urns. See MessageUrnSpecs for the format. Informally, it's like this::
 
 urn:message:NAMESPACE1.NAMESPACE2:TYPE
+
+'retryCount', 'headers' will be defaulted.
