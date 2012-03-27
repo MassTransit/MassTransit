@@ -31,24 +31,29 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Magnum">
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum.TestFramework">
+    <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\lib\Magnum\net-3.5\TestFramework\Magnum.TestFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\lib\Magnum\net-4.0\TestFramework\Magnum.TestFramework.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="nunit.framework">
       <HintPath>..\..\lib\NUnit\net-2.0\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Reactive">
+    <Reference Include="System.Reactive" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\lib\Rx\Net35\System.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\lib\Rx\Net4\System.Reactive.dll</HintPath>
     </Reference>
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -71,7 +76,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
