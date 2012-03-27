@@ -12,9 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
+    using System;
     using System.Diagnostics;
     using System.IO;
-    using System.Reflection;
     using Log4NetIntegration.Logging;
     using Logging;
     using NUnit.Framework;
@@ -27,7 +27,7 @@ namespace MassTransit.Tests
         [SetUp]
         public void Before_any()
         {
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string path = AppDomain.CurrentDomain.BaseDirectory;
 
             string file = Path.Combine(path, "masstransit.tests.log4net.xml");
 

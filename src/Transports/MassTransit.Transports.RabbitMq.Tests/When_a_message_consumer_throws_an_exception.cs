@@ -12,71 +12,71 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq.Tests
 {
-	using System;
-	using BusConfigurators;
-	using Magnum.Extensions;
-	using Magnum.TestFramework;
-	using TestFramework;
+    using System;
+    using BusConfigurators;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using TestFramework;
 
-	[Scenario]
-	public class When_a_message_consumer_throws_an_exception :
-		Given_a_rabbitmq_bus
-	{
-		Future<A> _received;
-		A _message;
+    [Scenario]
+    public class When_a_message_consumer_throws_an_exception :
+        Given_a_rabbitmq_bus
+    {
+        Future<A> _received;
+        A _message;
 
-		protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
-		{
-			base.ConfigureServiceBus(uri, configurator);
+        protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
+        {
+            base.ConfigureServiceBus(uri, configurator);
 
-			_received = new Future<A>();
+            _received = new Future<A>();
 
-			configurator.Subscribe(s =>
-				{
-					s.Handler<A>(message =>
-						{
-							_received.Complete(message);
+            configurator.Subscribe(s =>
+                {
+                    s.Handler<A>(message =>
+                        {
+                            _received.Complete(message);
 
-							throw new NullReferenceException("This is supposed to happen, cause this handler is naughty.");
-						});
-				});
-		}
+                            throw new NullReferenceException("This is supposed to happen, cause this handler is naughty.");
+                        });
+                });
+        }
 
-		[When]
-		public void A_message_is_published()
-		{
-			_message = new A
-				{
-					StringA = "ValueA",
-				};
+        [When]
+        public void A_message_is_published()
+        {
+            _message = new A
+                {
+                    StringA = "ValueA",
+                };
             
-			LocalBus.Publish(_message);
-		}
+            LocalBus.Publish(_message);
+        }
 
-		[Then]
-		public void Should_be_received_by_the_handler()
-		{
-			_received.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
-			_received.Value.StringA.ShouldEqual("ValueA");
-		}
+        [Then]
+        public void Should_be_received_by_the_handler()
+        {
+            _received.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+            _received.Value.StringA.ShouldEqual("ValueA");
+        }
 
-		[Then]
-		public void Should_have_a_copy_of_the_error_in_the_error_queue()
-		{
-			_received.WaitUntilCompleted(8.Seconds());
+        [Then]
+        public void Should_have_a_copy_of_the_error_in_the_error_queue()
+        {
+            _received.WaitUntilCompleted(8.Seconds());
 
-			LocalBus.GetEndpoint(LocalErrorUri).ShouldContain(_message, 8.Seconds());
-		}
+            LocalBus.GetEndpoint(LocalErrorUri).ShouldContain(_message, 8.Seconds());
+        }
 
-		class A :
-			CorrelatedBy<Guid>
-		{
-			public string StringA { get; set; }
+        class A :
+            CorrelatedBy<Guid>
+        {
+            public string StringA { get; set; }
 
-			public Guid CorrelationId
-			{
-				get { return Guid.Empty; }
-			}
-		}
-	}
+            public Guid CorrelationId
+            {
+                get { return Guid.Empty; }
+            }
+        }
+    }
 }
