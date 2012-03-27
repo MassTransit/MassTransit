@@ -58,7 +58,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core">
-      <HintPath>..\..\..\lib\Castle.Core\Castle.Core.dll</HintPath>
+      <HintPath>..\..\..\lib\Castle.Core\net40\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="FluentNHibernate">
       <HintPath>..\..\..\lib\FluentNHibernate\FluentNHibernate.dll</HintPath>

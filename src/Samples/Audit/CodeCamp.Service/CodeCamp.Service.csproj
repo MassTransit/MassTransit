@@ -56,11 +56,11 @@
   <ItemGroup>
     <Reference Include="Castle.Core, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\Castle.Core\Castle.Core.dll</HintPath>
+      <HintPath>..\..\..\..\lib\Castle.Core\net40\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="Castle.Windsor, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\Castle.Windsor\Castle.Windsor.dll</HintPath>
+      <HintPath>..\..\..\..\lib\Castle.Windsor\net40\Castle.Windsor.dll</HintPath>
     </Reference>
     <Reference Include="Iesi.Collections">
       <HintPath>..\..\..\..\lib\NHibernate\Iesi.Collections.dll</HintPath>
