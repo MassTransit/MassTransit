@@ -85,8 +85,8 @@ namespace MassTransit.Subscriptions.Coordinator
             {
                 WithPeer(message.Body.PeerId, message.Body.PeerUri, x =>
                     {
-                        if (_log.IsInfoEnabled)
-                            _log.InfoFormat("RemovePeer: {0}, {1}", message.Body.PeerId, message.Body.PeerUri);
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("RemovePeer: {0}, {1}", message.Body.PeerId, message.Body.PeerUri);
 
                         x.Send(message);
                     }, false);
@@ -104,8 +104,8 @@ namespace MassTransit.Subscriptions.Coordinator
             {
                 WithPeer(message.Body.PeerId, x =>
                     {
-                        if (_log.IsInfoEnabled)
-                            _log.InfoFormat("AddPeerSubscription: {0}, {1} - {2}", message.Body.MessageName,
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("AddPeerSubscription: {0}, {1} - {2}", message.Body.MessageName,
                                 message.Body.SubscriptionId,
                                 message.Body.PeerId);
 
@@ -125,8 +125,8 @@ namespace MassTransit.Subscriptions.Coordinator
             {
                 WithPeer(message.Body.PeerId, x =>
                     {
-                        if (_log.IsInfoEnabled)
-                            _log.InfoFormat("RemovePeerSubscription: {0}, {1} - {2}", message.Body.MessageName,
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("RemovePeerSubscription: {0}, {1} - {2}", message.Body.MessageName,
                                 message.Body.SubscriptionId,
                                 message.Body.PeerId);
 

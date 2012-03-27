@@ -87,7 +87,7 @@ namespace MassTransit.Subscriptions.Coordinator
             List<Guid> remove = _ids.Where(x => x.Value.PeerId != message.PeerId)
                 .Select(x => x.Key).ToList();
 
-            _log.InfoFormat("Removing {0} subscriptions for {1} {2}", remove.Count, _messageName, _endpointUri);
+            _log.DebugFormat("Removing {0} subscriptions for {1} {2}", remove.Count, _messageName, _endpointUri);
 
             if (remove.Count > 0)
             {
@@ -96,7 +96,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
             if (_ids.Count == 0 && _subscriptionId != Guid.Empty)
             {
-                _log.InfoFormat("Removing expired subscription for {0} {1}", _messageName, _endpointUri);
+                _log.DebugFormat("Removing expired subscription for {0} {1}", _messageName, _endpointUri);
 
                 NotifyRemoveSubscription();
             }
