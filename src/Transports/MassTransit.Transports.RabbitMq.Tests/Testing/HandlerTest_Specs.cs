@@ -15,7 +15,7 @@ namespace MassTransit.Transports.RabbitMq.Tests.Testing
 	using Magnum.TestFramework;
 	using MassTransit.Testing;
 
-	[Scenario]
+	[Scenario, NotYetImplemented("This is broken because RabbitMQ does not have subscriptions")]
 	public class Using_the_handler_test_factory
 	{
 		HandlerTest<A> _test;

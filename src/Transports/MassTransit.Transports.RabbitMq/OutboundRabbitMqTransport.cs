@@ -52,6 +52,7 @@ namespace MassTransit.Transports.RabbitMq
                         IBasicProperties properties = _producer.Channel.CreateBasicProperties();
 
                         properties.SetPersistent(true);
+                        properties.MessageId = context.MessageId ?? properties.MessageId ?? NewId.Next().ToString();
                         if (context.ExpirationTime.HasValue)
                         {
                             DateTime value = context.ExpirationTime.Value;
@@ -67,7 +68,7 @@ namespace MassTransit.Transports.RabbitMq
 
                             _producer.Channel.BasicPublish(_address.Name, "", properties, body.ToArray());
 
-                            _address.LogSent("", context.MessageType);
+                            _address.LogSent(context.MessageId ?? "", context.MessageType);
                         }
                     }
                     catch (EndOfStreamException ex)

@@ -107,20 +107,28 @@ namespace MassTransit.TestFramework
         {
             var future = new Future<TMessage>();
 
-            endpoint.Receive(context =>
-                {
-                    context.ShouldNotBeNull();
-                    context.ShouldBeAnInstanceOf<IReceiveContext>();
+            DateTime start = DateTime.UtcNow;
+            DateTime finish = start + timeout;
 
-                    IConsumeContext<TMessage> messageContext;
-                    if (context.TryGetContext(out messageContext))
+            TimeSpan remaining;
+            while (!future.IsCompleted && (remaining = finish - DateTime.UtcNow) > TimeSpan.Zero)
+            {
+                endpoint.Receive(context =>
                     {
-                        if (messageContext.Message.CorrelationId == expectedMessage.CorrelationId && !future.IsCompleted)
-                            future.Complete(messageContext.Message);
-                    }
+                        context.ShouldNotBeNull();
+                        context.ShouldBeAnInstanceOf<IReceiveContext>();
 
-                    return null;
-                }, timeout);
+                        IConsumeContext<TMessage> messageContext;
+                        if (context.TryGetContext(out messageContext))
+                        {
+                            if (messageContext.Message.CorrelationId == expectedMessage.CorrelationId &&
+                                !future.IsCompleted)
+                                future.Complete(messageContext.Message);
+                        }
+
+                        return null;
+                    }, remaining);
+            }
 
             future.IsCompleted.ShouldBeTrue(endpoint.Address + " should contain a message of type " +
                                             typeof(TMessage).Name +
