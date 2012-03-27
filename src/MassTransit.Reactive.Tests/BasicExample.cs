@@ -12,87 +12,92 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Reactive.Tests
 {
-	using System;
-	using System.Reactive.Linq;
-	using Magnum.Extensions;
-	using Magnum.TestFramework;
-	using NUnit.Framework;
-	using MassTransit.TestFramework;
+    using System;
+    using System.Reactive.Linq;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using NUnit.Framework;
+    using TestFramework;
 
-	[Scenario, Explicit("Fails from command-line build, don't know why, so I'm removing it from the build")]
-	public class BasicExample :
-		Given_a_standalone_service_bus
-	{
-		[Given]
-		public void A_reactive_query_is_observing_a_bus_message()
-		{
-			_observable = LocalBus.AsObservable<PingMessage>();
+    [Scenario, Explicit("Fails from command-line build, don't know why, so I'm removing it from the build")]
+    public class BasicExample :
+        Given_a_standalone_service_bus
+    {
+        [Given]
+        public void A_reactive_query_is_observing_a_bus_message()
+        {
+            _observable = LocalBus.AsObservable<PingMessage>();
 
-			_thatJustHappened = new Future<PingMessage>();
-			_subscription = _observable.Subscribe(m => _thatJustHappened.Complete(m));
+            _thatJustHappened = new Future<PingMessage>();
+            _subscription = _observable.Subscribe(m => _thatJustHappened.Complete(m));
 
-			LocalBus.Publish(new PingMessage());
-		}
+            LocalBus.Publish(new PingMessage());
+        }
 
-		IObservable<PingMessage> _observable;
-		Future<PingMessage> _thatJustHappened;
-		IDisposable _subscription;
+        IObservable<PingMessage> _observable;
+        Future<PingMessage> _thatJustHappened;
+        IDisposable _subscription;
 
-		[Finally]
-		public void Finally()
-		{
-			_subscription.Dispose();
-		}
+        [Finally]
+        public void Finally()
+        {
+            _subscription.Dispose();
+        }
 
-		[Then]
-		public void The_message_should_be_observed()
-		{
-			Assert.IsNotNull(_observable.Timeout(8.Seconds()).Take(1).Single());
+        [Then]
+        public void The_message_should_be_observed()
+        {
+            Assert.IsNotNull(_observable.Timeout(8.Seconds()).Take(1).Single());
 
-			_thatJustHappened.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
-		}
-	}
-	[Serializable]
-	public class PingMessage :
-		IEquatable<PingMessage>,
-		CorrelatedBy<Guid>
-	{
-		private Guid _id = new Guid("D62C9B1C-8E31-4D54-ADD7-C624D56085A4");
+            _thatJustHappened.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+        }
+    }
 
-		public PingMessage()
-		{
-		}
+    [Serializable]
+    public class PingMessage :
+        IEquatable<PingMessage>,
+        CorrelatedBy<Guid>
+    {
+        Guid _id = new Guid("D62C9B1C-8E31-4D54-ADD7-C624D56085A4");
 
-		public PingMessage(Guid id)
-		{
-			_id = id;
-		}
+        public PingMessage()
+        {
+        }
 
-		public Guid CorrelationId
-		{
-			get { return _id; }
-			set { _id = value; }
-		}
+        public PingMessage(Guid id)
+        {
+            _id = id;
+        }
 
-		public bool Equals(PingMessage obj)
-		{
-			if (ReferenceEquals(null, obj)) return false;
-			if (ReferenceEquals(this, obj)) return true;
-			return obj._id.Equals(_id);
-		}
+        public Guid CorrelationId
+        {
+            get { return _id; }
+            set { _id = value; }
+        }
 
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(null, obj)) return false;
-			if (ReferenceEquals(this, obj)) return true;
-			if (obj.GetType() != typeof(PingMessage)) return false;
-			return Equals((PingMessage)obj);
-		}
+        public bool Equals(PingMessage obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            return obj._id.Equals(_id);
+        }
 
-		public override int GetHashCode()
-		{
-			return _id.GetHashCode();
-		}
-	}
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != typeof(PingMessage))
+                return false;
+            return Equals((PingMessage)obj);
+        }
 
+        public override int GetHashCode()
+        {
+            return _id.GetHashCode();
+        }
+    }
 }

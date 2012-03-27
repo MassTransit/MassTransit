@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,26 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using Magnum.Extensions;
-	using Messages;
-	using NUnit.Framework;
-	using TestConsumers;
-	using TextFixtures;
+    using Magnum.Extensions;
+    using Messages;
+    using NUnit.Framework;
+    using TestConsumers;
+    using TextFixtures;
 
-	[TestFixture]
-	public class PublishSubscribe_Specs :
-		LoopbackTestFixture
-	{
-		[Test]
-		public void A_simple_bus_should_be_able_to_subscribe_and_publish()
-		{
-			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-			LocalBus.SubscribeInstance(consumer);
+    [TestFixture]
+    public class PublishSubscribe_Specs :
+        LoopbackTestFixture
+    {
+        [Test]
+        public void A_simple_bus_should_be_able_to_subscribe_and_publish()
+        {
+            var consumer = new TestMessageConsumer<PingMessage>();
+            LocalBus.SubscribeInstance(consumer);
 
-			PingMessage message = new PingMessage();
-			LocalBus.Publish(message);
+            var message = new PingMessage();
+            LocalBus.Publish(message);
 
-			consumer.ShouldHaveReceivedMessage(message, 500.Milliseconds());
-		}
-	}
+            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+        }
+    }
 }
