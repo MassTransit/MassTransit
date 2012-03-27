@@ -6,7 +6,7 @@ Msmq Configuration Options
   ServiceBusFactory.New(sbc => 
   {
     sbc.UseMsmq();
-    sbc.VerifyMsmqConfiguratio();
+    sbc.VerifyMsmqConfiguration();
     sbc.VerifyMsDtcConfiguration():
   });
 
@@ -27,7 +27,7 @@ the install by adding missing components.
 
 .. note::
 
-    A post on public vs privet queues: http://technet.microsoft.com/en-us/library/cc776346.aspx
+    A post on public vs private queues: http://technet.microsoft.com/en-us/library/cc776346.aspx
 
 Installing MSMQ Step by step (12/21/2011)
 #. Get to 'Computer Management'
