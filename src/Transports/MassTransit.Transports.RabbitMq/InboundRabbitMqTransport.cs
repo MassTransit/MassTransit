@@ -17,7 +17,6 @@ namespace MassTransit.Transports.RabbitMq
     using System.Text;
     using System.Threading;
     using Context;
-    using Exceptions;
     using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
@@ -91,13 +90,14 @@ namespace MassTransit.Transports.RabbitMq
                             {
                                 Address.LogSkipped(result.BasicProperties.MessageId);
 
-                                throw new MessageNotConsumedException(Address.Uri,
-                                    string.Format("Message Not Received: {0}", result.BasicProperties.MessageId));
+                                _consumer.MessageSkipped(result);
                             }
+                            else
+                            {
+                                receive(context);
 
-                            receive(context);
-
-                            _consumer.MessageCompleted(result.DeliveryTag);
+                                _consumer.MessageCompleted(result);
+                            }
                         }
                     }
                     catch (EndOfStreamException ex)
@@ -113,7 +113,7 @@ namespace MassTransit.Transports.RabbitMq
                         _log.Error("Failed to consume message from endpoint", ex);
 
                         if (result != null)
-                            _consumer.MessageFailed(result, true);
+                            _consumer.MessageFailed(result);
 
                         throw;
                     }

@@ -18,7 +18,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using NUnit.Framework;
-    using TestFramework;
 
     [Scenario]
     public class When_sending_a_request_to_a_rabbitmq_endpoint :
@@ -89,7 +88,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                         .SendRequest<PlinkMessage>(new PlinkMessageImpl(), LocalBus, req =>
                             {
                                 req.Handle<PongMessage>(x => { });
-                                req.SetTimeout(4.Seconds());
+                                req.SetTimeout(8.Seconds());
                             });
                 });
         }

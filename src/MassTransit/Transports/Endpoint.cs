@@ -23,9 +23,9 @@ namespace MassTransit.Transports
     using Logging;
     using Serialization;
 
-	/// <summary>
-	/// See <see cref="IEndpoint"/> for docs.
-	/// </summary>
+    /// <summary>
+    /// See <see cref="IEndpoint"/> for docs.
+    /// </summary>
     [DebuggerDisplay("{Address}")]
     public class Endpoint :
         IEndpoint
@@ -40,15 +40,15 @@ namespace MassTransit.Transports
         IDuplexTransport _transport;
 
         public Endpoint([NotNull] IEndpointAddress address,
-			[NotNull] IMessageSerializer serializer,
-			[NotNull] IDuplexTransport transport,
-			[NotNull] IOutboundTransport errorTransport)
+            [NotNull] IMessageSerializer serializer,
+            [NotNull] IDuplexTransport transport,
+            [NotNull] IOutboundTransport errorTransport)
         {
-        	if (address == null) throw new ArgumentNullException("address");
-        	if (serializer == null) throw new ArgumentNullException("serializer");
-        	if (transport == null) throw new ArgumentNullException("transport");
-        	if (errorTransport == null) throw new ArgumentNullException("errorTransport");
-        	_address = address;
+            if (address == null) throw new ArgumentNullException("address");
+            if (serializer == null) throw new ArgumentNullException("serializer");
+            if (transport == null) throw new ArgumentNullException("transport");
+            if (errorTransport == null) throw new ArgumentNullException("errorTransport");
+            _address = address;
             _transport = transport;
             _errorTransport = errorTransport;
             _serializer = serializer;

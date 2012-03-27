@@ -70,19 +70,20 @@ namespace MassTransit.Transports.RabbitMq
             return _channel.BasicGet(_address.Name, false);
         }
 
-        public void MessageCompleted(ulong deliveryTag)
+        public void MessageCompleted(BasicGetResult result)
         {
-            _channel.BasicAck(deliveryTag, false);
+            _channel.BasicAck(result.DeliveryTag, false);
         }
 
-        public void MessageFailed(BasicGetResult result, bool requeue)
+        public void MessageFailed(BasicGetResult result)
         {
-            if (requeue)
-            {
-                _channel.BasicPublish(_address.Name, "", result.BasicProperties, result.Body);
-            }
-
+            _channel.BasicPublish(_address.Name, "", result.BasicProperties, result.Body);
             _channel.BasicAck(result.DeliveryTag, false);
+        }
+
+        public void MessageSkipped(BasicGetResult result)
+        {
+            _channel.BasicNack(result.DeliveryTag, false, true);
         }
     }
 }
