@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Serialization
 
 	public abstract class Performance_Specs<TSerializer> where TSerializer : IMessageSerializer, new()
 	{
-		[Test, Category("Integration")]
+		[Test, Explicit]
 		public void Just_how_fast_are_you()
 		{
 			Trace.WriteLine("Serializer: " + typeof(TSerializer).Name);
