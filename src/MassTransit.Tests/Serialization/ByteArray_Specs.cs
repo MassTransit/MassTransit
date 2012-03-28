@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, Simon Guindon, et. al.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-    using System;
     using Magnum.TestFramework;
     using MassTransit.Testing;
 
@@ -28,15 +27,15 @@ namespace MassTransit.Tests.Serialization
         {
             _test = TestFactory.ForHandler<A>()
                 .New(x =>
-                {
-                    _sent = new A
                     {
-                        Contents = new byte[] {0x56, 0x34, 0xf3}                        
-                    };
-                    x.Send(_sent);
+                        _sent = new A
+                            {
+                                Contents = new byte[] {0x56, 0x34, 0xf3}
+                            };
+                        x.Send(_sent);
 
-                    x.Handler((context, message) => { _received = message; });
-                });
+                        x.Handler((context, message) => { _received = message; });
+                    });
 
             _test.Execute();
 
@@ -58,7 +57,7 @@ namespace MassTransit.Tests.Serialization
 
         class A
         {
-            public byte[] Contents { get; set; }            
+            public byte[] Contents { get; set; }
         }
     }
 }

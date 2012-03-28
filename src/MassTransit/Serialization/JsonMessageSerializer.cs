@@ -47,9 +47,10 @@ namespace MassTransit.Serialization
                         ContractResolver = new JsonContractResolver(),
                         Converters = new List<JsonConverter>(new JsonConverter[]
                             {
+                                new ByteArrayConverter(), 
                                 new ListJsonConverter(),
                                 new InterfaceProxyConverter(),
-                                new StringDecimalConverter(), 
+                                new StringDecimalConverter(),
                                 new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
                             })
                     }));
@@ -70,6 +71,7 @@ namespace MassTransit.Serialization
                         ContractResolver = new JsonContractResolver(),
                         Converters = new List<JsonConverter>(new JsonConverter[]
                             {
+                                new ByteArrayConverter(), 
                                 new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
                             }),
                     }));
