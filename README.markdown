@@ -51,8 +51,9 @@ If you want to use ZeroMQ, have a look at that branch and consider adding to it.
 
  1. Clone the source down to your machine. 
    `git clone git://github.com/MassTransit/MassTransit.git`
- 2. Ensure Ruby is installed. [RubyInstaller for Windows](http://rubyinstaller.org/)
- 3. **Ensure gems are installed**, run:
+ 1. Ensure Ruby is installed. [RubyInstaller for Windows](http://rubyinstaller.org/)
+ 1. Ensure `git` is on your path. `git.exe` and `git.cmd` work equally well.
+ 1. **Ensure gems are installed**, run:
 
 ```
 gem install albacore
@@ -64,9 +65,8 @@ gem install semver2
 ## Contributing
 
  1. `git config --global core.autoclrf false`
- 2. Build it: `rake`
- 3. Hack!
- 4. Make a pull request.
+ 1. Hack!
+ 1. Make a pull request.
  
 # REQUIREMENTS
 * .Net 3.5
