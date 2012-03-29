@@ -24,6 +24,8 @@ namespace MassTransit.Containers.Tests.Scenarios
 
         public AnotherMessageConsumerImpl()
         {
+            Console.WriteLine("AnotherMessageConsumer()");
+
             _received = new ManualResetEvent(false);
         }
 

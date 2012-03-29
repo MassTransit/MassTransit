@@ -24,6 +24,8 @@ namespace MassTransit.Containers.Tests.Scenarios
 
         public SimpleConsumer()
         {
+            Console.WriteLine("SimpleConsumer()");
+
             _received = new ManualResetEvent(false);
         }
 
