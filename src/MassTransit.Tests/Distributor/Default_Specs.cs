@@ -170,7 +170,7 @@ namespace MassTransit.Tests.Distributor
 			configurator.UseDistributorFor(mock);
 		}
 
-		[Test]
+		[Test, Explicit]
 		public void Node_a_should_recieve_all_the_work()
 		{
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
