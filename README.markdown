@@ -3,28 +3,13 @@ Mass Transit - A Service Bus Implementation for .NET
 
 ![Mass Transit](http://www.phatboyg.com/mt-logo.png "Mass Transit")
 
-# LICENSE
-Apache 2.0 - see LICENSE
+MassTransit is lean service bus implementation for building loosely coupled applications using the .NET Framework.
 
-# IMPORTANT
-NOTE: If you are looking at the source - please run build.bat before opening the solution. It creates the SolutionVersion.cs file that is necessary for a successful build.
-
-# INFO
-## Overview
-MassTransit is lean service bus implementation for building loosely coupled applications using the .NET framework.
+MassTransit is Apache 2.0 licensed.
 
 ## Getting started with Mass Transit
-### Documentation
 
-Documentation is located at [http://docs.masstransit-project.com/](http://docs.masstransit-project.com/).
-
-### Downloads
- Download straight from NuGet 'MassTransit' [Search NuGet for MassTransit](http://nuget.org/packages?q=masstransit)
- 
- Download officially released builds from 
- [Github](http://github.com/masstransit/masstransit/downloads/).
- 
- Download Nightly Binaries from [TeamCity](http://teamcity.codebetter.com/viewType.html?buildTypeId=bt8&tab=buildTypeStatusDiv).
+In order to get started with MassTransit, you can have a look at the documentation, which is located at [http://docs.masstransit-project.com/](http://docs.masstransit-project.com/).
 
 ### Simplest possible thing:
 
@@ -39,11 +24,30 @@ ServiceBusFactory.New(sbc =>
 });
 ```
 
-### Mailing List
+You will also need to set up RabbitMQ; 
+
+ 1. **Install Erlang** using the [installer](http://www.erlang.org/download.html). (Next -> Next ...)
+ 2. **Install RabbitMQ** using the [installer](http://www.rabbitmq.com/download.html). (Next -> Next ...) You now have a RabbitMQ broker (look in `services.msc` for it) that you can [log into](http://localhost:55672/#/) using `guest`, `guest`. You can see message rates, routings and active consumers using this interface.
+
+### Downloads
+
+Download from NuGet 'MassTransit' [Search NuGet for MassTransit](http://nuget.org/packages?q=masstransit)
+ 
+Download the officially released builds from [Github](http://github.com/masstransit/masstransit/downloads/).
+ 
+Download the continuously integrated Binaries from [TeamCity](http://teamcity.codebetter.com/viewType.html?buildTypeId=bt8&tab=buildTypeStatusDiv).
+
+### Supported Transports
+
+We support [MSMQ](http://readthedocs.org/docs/masstransit/en/latest/configuration/quickstart.html) if you already have that installed, [Azure Service Bus](https://github.com/mpsbroadband/MassTransit-AzureServiceBus) and [Stomp](https://github.com/enix/MassTransit-Stomp) transports. 
+
+If you want to use ZeroMQ, have a look at that branch and consider adding to it. It may make an appearance in v 3.0.
+
+## Mailing List
 
 [MassTransit Discuss](http://groups.google.com/group/masstransit-discuss)
 
-### Building from Source
+## Building from Source
 
 1. Clone the source down to your machine. 
   `git clone git://github.com/MassTransit/MassTransit.git`
@@ -57,15 +61,15 @@ gem install semver2
 
 4. Run `build.bat`
 
-### Contributing 
+## Contributing
 
 1. `git config --global core.autoclrf false`
 2. Shared ReSharper settings are under src/MassTransit.resharper.xml
 3. Make a pull request. `rake global_version` generates the global version if you prefer building with MsBuild/Visual Studio. 
  
 # REQUIREMENTS
-* .NET Framework 3.5
-* (Will also try to build for .Net 4.0)
+* .Net 3.5
+* .Net 4.0
 
 # CREDITS
 Logo Design by [The Agile Badger](http://www.theagilebadger.com)
