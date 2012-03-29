@@ -49,10 +49,10 @@ If you want to use ZeroMQ, have a look at that branch and consider adding to it.
 
 ## Building from Source
 
-1. Clone the source down to your machine. 
-  `git clone git://github.com/MassTransit/MassTransit.git`
-2. Ensure Ruby is installed. [RubyInstaller for Windows](http://rubyinstaller.org/)
-3. **Ensure gems are installed**, run:
+ 1. Clone the source down to your machine. 
+   `git clone git://github.com/MassTransit/MassTransit.git`
+ 2. Ensure Ruby is installed. [RubyInstaller for Windows](http://rubyinstaller.org/)
+ 3. **Ensure gems are installed**, run:
 
 ```
 gem install albacore
@@ -63,9 +63,10 @@ gem install semver2
 
 ## Contributing
 
-1. `git config --global core.autoclrf false`
-2. Shared ReSharper settings are under src/MassTransit.resharper.xml
-3. Make a pull request. `rake global_version` generates the global version if you prefer building with MsBuild/Visual Studio. 
+ 1. `git config --global core.autoclrf false`
+ 2. Build it: `rake`
+ 3. Hack!
+ 4. Make a pull request.
  
 # REQUIREMENTS
 * .Net 3.5
