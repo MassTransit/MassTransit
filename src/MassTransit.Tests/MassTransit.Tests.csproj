@@ -325,6 +325,7 @@
   <ItemGroup>
     <Content Include="masstransit.tests.log4net.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>

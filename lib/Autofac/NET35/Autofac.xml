@@ -188,6 +188,52 @@
             <param name="lifetimeScopeTag">Tag applied to matching lifetime scopes.</param>
             <returns>A registration builder allowing further configuration of the component.</returns>
         </member>
+        <member name="M:Autofac.Builder.IRegistrationBuilder`3.InstancePerOwned``1">
+            <summary>
+            Configure the component so that every dependent component or call to Resolve()
+            within a ILifetimeScope created by an owned instance gets the same, shared instance.
+            Dependent components in lifetime scopes that are children of the owned instance scope will
+            share the parent's instance. If no appropriate owned instance scope can be found in the
+            hierarchy an <see cref="T:Autofac.Core.DependencyResolutionException"/> is thrown.
+            </summary>
+            <typeparam name="TService">Service type.</typeparam>
+            <returns>A registration builder allowing further configuration of the component.</returns>
+        </member>
+        <member name="M:Autofac.Builder.IRegistrationBuilder`3.InstancePerOwned(System.Type)">
+            <summary>
+            Configure the component so that every dependent component or call to Resolve()
+            within a ILifetimeScope created by an owned instance gets the same, shared instance.
+            Dependent components in lifetime scopes that are children of the owned instance scope will
+            share the parent's instance. If no appropriate owned instance scope can be found in the
+            hierarchy an <see cref="T:Autofac.Core.DependencyResolutionException"/> is thrown.
+            </summary>
+            <param name="serviceType">Service type.</param>
+            <returns>A registration builder allowing further configuration of the component.</returns>
+        </member>
+        <member name="M:Autofac.Builder.IRegistrationBuilder`3.InstancePerOwned``1(System.Object)">
+            <summary>
+            Configure the component so that every dependent component or call to Resolve()
+            within a ILifetimeScope created by an owned instance gets the same, shared instance.
+            Dependent components in lifetime scopes that are children of the owned instance scope will
+            share the parent's instance. If no appropriate owned instance scope can be found in the
+            hierarchy an <see cref="T:Autofac.Core.DependencyResolutionException"/> is thrown.
+            </summary>
+            <typeparam name="TService">The service type provided by the component.</typeparam>
+            <param name="serviceKey">Key to associate with the component.</param>
+            <returns>A registration builder allowing further configuration of the component.</returns>
+        </member>
+        <member name="M:Autofac.Builder.IRegistrationBuilder`3.InstancePerOwned(System.Object,System.Type)">
+            <summary>
+            Configure the component so that every dependent component or call to Resolve()
+            within a ILifetimeScope created by an owned instance gets the same, shared instance.
+            Dependent components in lifetime scopes that are children of the owned instance scope will
+            share the parent's instance. If no appropriate owned instance scope can be found in the
+            hierarchy an <see cref="T:Autofac.Core.DependencyResolutionException"/> is thrown.
+            </summary>
+            <param name="serviceKey">Key to associate with the component.</param>
+            <param name="serviceType">The service type provided by the component.</param>
+            <returns>A registration builder allowing further configuration of the component.</returns>
+        </member>
         <member name="M:Autofac.Builder.IRegistrationBuilder`3.As``1">
             <summary>
             Configure the services that the component will provide. The generic parameter(s) to As()
@@ -4122,6 +4168,52 @@
             hierarchy an <see cref="T:Autofac.Core.DependencyResolutionException"/> is thrown.
             </summary>
             <param name="lifetimeScopeTag">Tag applied to matching lifetime scopes.</param>
+            <returns>A registration builder allowing further configuration of the component.</returns>
+        </member>
+        <member name="M:Autofac.Builder.RegistrationBuilder`3.InstancePerOwned``1">
+            <summary>
+            Configure the component so that every dependent component or call to Resolve()
+            within a ILifetimeScope created by an owned instance gets the same, shared instance.
+            Dependent components in lifetime scopes that are children of the owned instance scope will
+            share the parent's instance. If no appropriate owned instance scope can be found in the
+            hierarchy an <see cref="T:Autofac.Core.DependencyResolutionException"/> is thrown.
+            </summary>
+            <typeparam name="TService">The service type provided by the component.</typeparam>
+            <returns>A registration builder allowing further configuration of the component.</returns>
+        </member>
+        <member name="M:Autofac.Builder.RegistrationBuilder`3.InstancePerOwned(System.Type)">
+            <summary>
+            Configure the component so that every dependent component or call to Resolve()
+            within a ILifetimeScope created by an owned instance gets the same, shared instance.
+            Dependent components in lifetime scopes that are children of the owned instance scope will
+            share the parent's instance. If no appropriate owned instance scope can be found in the
+            hierarchy an <see cref="T:Autofac.Core.DependencyResolutionException"/> is thrown.
+            </summary>
+            <param name="serviceType">The service type provided by the component.</param>
+            <returns>A registration builder allowing further configuration of the component.</returns>
+        </member>
+        <member name="M:Autofac.Builder.RegistrationBuilder`3.InstancePerOwned``1(System.Object)">
+            <summary>
+            Configure the component so that every dependent component or call to Resolve()
+            within a ILifetimeScope created by an owned instance gets the same, shared instance.
+            Dependent components in lifetime scopes that are children of the owned instance scope will
+            share the parent's instance. If no appropriate owned instance scope can be found in the
+            hierarchy an <see cref="T:Autofac.Core.DependencyResolutionException"/> is thrown.
+            </summary>
+            <typeparam name="TService">The service type provided by the component.</typeparam>
+            <param name="serviceKey">Key to associate with the component.</param>
+            <returns>A registration builder allowing further configuration of the component.</returns>
+        </member>
+        <member name="M:Autofac.Builder.RegistrationBuilder`3.InstancePerOwned(System.Object,System.Type)">
+            <summary>
+            Configure the component so that every dependent component or call to Resolve()
+            within a ILifetimeScope created by an owned instance gets the same, shared instance.
+            Dependent components in lifetime scopes that are children of the owned instance scope will
+            share the parent's instance. If no appropriate owned instance scope can be found in the
+            hierarchy an <see cref="T:Autofac.Core.DependencyResolutionException"/> is thrown.
+            </summary>
+            <param name="serviceKey">Key to associate with the component.</param>
+            <param name="serviceType">The service type provided by the component.</param>
             <returns>A registration builder allowing further configuration of the component.</returns>
         </member>
         <member name="M:Autofac.Builder.RegistrationBuilder`3.As``1">
