@@ -61,21 +61,16 @@
     <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\lib\Magnum\net-4.0\TestFramework\Magnum.TestFramework.dll</HintPath>
     </Reference>
-    <Reference Include="Castle.Core, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Castle.Core" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\lib\Castle.Core\net35\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Castle.Core, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Castle.Core" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\lib\Castle.Core\net40\Castle.Core.dll</HintPath>
     </Reference>
-    
-    <Reference Include="Castle.Windsor, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Castle.Windsor" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\lib\Castle.Windsor\net35\Castle.Windsor.dll</HintPath>
     </Reference>
-    <Reference Include="Castle.Windsor, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Castle.Windsor" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\lib\Castle.Windsor\net40\Castle.Windsor.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Practices.Unity">
