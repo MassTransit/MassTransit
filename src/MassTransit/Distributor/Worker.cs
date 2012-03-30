@@ -48,6 +48,11 @@ namespace MassTransit.Distributor
 
         public Worker(Func<TMessage, Action<TMessage>> getConsumer, WorkerSettings settings)
         {
+            if(getConsumer == null)
+                throw new ArgumentNullException("getConsumer");
+            if(settings == null)
+                throw new ArgumentNullException("settings");
+
             _getConsumer = getConsumer;
 
             _inProgress = 0;

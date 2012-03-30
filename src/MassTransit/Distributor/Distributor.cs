@@ -43,6 +43,9 @@ namespace MassTransit.Distributor
 
 		public Distributor(IWorkerSelectionStrategy<TMessage> workerSelectionStrategy)
 		{
+            if(workerSelectionStrategy == null)
+                throw new ArgumentNullException("workerSelectionStrategy");
+
 			_selectionStrategy = workerSelectionStrategy;
 
 			_fiber = new PoolFiber();

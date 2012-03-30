@@ -50,6 +50,11 @@ namespace MassTransit.Distributor
 
         public SagaWorker(ISagaRepository<TSaga> sagaRepository, WorkerSettings settings)
         {
+            if(sagaRepository == null)
+                throw new ArgumentNullException("sagaRepository");
+            if(settings == null)
+                throw new ArgumentNullException("settings");
+
             _sagaRepository = sagaRepository;
             _inProgress = 0;
             _inProgressLimit = settings.InProgressLimit;
