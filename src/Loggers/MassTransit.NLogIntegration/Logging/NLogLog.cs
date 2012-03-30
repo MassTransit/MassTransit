@@ -68,7 +68,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Log(MassTransit.Logging.LogLevel level, object obj, Exception exception)
         {
-            _log.Log(GetNLogLevel(level), obj == null ? "" : obj.ToString(), exception);
+            _log.LogException(GetNLogLevel(level), obj == null ? "" : obj.ToString(), exception);
         }
 
         public void Log(MassTransit.Logging.LogLevel level, LogOutputProvider messageProvider)
@@ -94,7 +94,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Debug(object obj, Exception exception)
         {
-            _log.Log(NLog.LogLevel.Debug, obj == null ? "" : obj.ToString(), exception);
+            _log.LogException(NLog.LogLevel.Debug, obj == null ? "" : obj.ToString(), exception);
         }
 
         public void Debug(LogOutputProvider messageProvider)
@@ -109,7 +109,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Info(object obj, Exception exception)
         {
-            _log.Log(NLog.LogLevel.Info, obj == null ? "" : obj.ToString(), exception);
+            _log.LogException(NLog.LogLevel.Info, obj == null ? "" : obj.ToString(), exception);
         }
 
         public void Info(LogOutputProvider messageProvider)
@@ -124,7 +124,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Warn(object obj, Exception exception)
         {
-            _log.Log(NLog.LogLevel.Warn, obj == null ? "" : obj.ToString(), exception);
+            _log.LogException(NLog.LogLevel.Warn, obj == null ? "" : obj.ToString(), exception);
         }
 
         public void Warn(LogOutputProvider messageProvider)
@@ -139,7 +139,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Error(object obj, Exception exception)
         {
-            _log.Log(NLog.LogLevel.Error, obj == null ? "" : obj.ToString(), exception);
+            _log.LogException(NLog.LogLevel.Error, obj == null ? "" : obj.ToString(), exception);
         }
 
         public void Error(LogOutputProvider messageProvider)
@@ -154,7 +154,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Fatal(object obj, Exception exception)
         {
-            _log.Log(NLog.LogLevel.Fatal, obj == null ? "" : obj.ToString(), exception);
+            _log.LogException(NLog.LogLevel.Fatal, obj == null ? "" : obj.ToString(), exception);
         }
 
         public void Fatal(LogOutputProvider messageProvider)
