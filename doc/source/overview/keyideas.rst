@@ -5,6 +5,27 @@ When getting started using MassTransit, it is a good idea to have a handle on th
 used in messaging. To ensure that you are on the right path when looking at a class or interface,
 here are some of the terms used when working with MassTransit.
 
+Messages and Serialization
+--------------------------
+
+MassTransit is a service bus, and a service bus is designed to move *messages*. At the lowest 
+level, a message is a chunk of JSON, XML, or even binary data. When using a statically typed
+language (such as C#), a message is represented by an instance of a class (or interface) that
+has relevant properties, each of which can be a value, list, dictionary, or even another nested
+class.
+
+When using MassTransit, messages are sent and received, published and subscribed, as types. The
+translation (called serialization) between the textual representation of the message (which is
+JSON, XML, etc.) and a type is handled using a *message serializer*. The default serialization
+varies (for MSMQ, the framework uses XML by default, for RabbitMQ JSON is used instead). The 
+default serialization can be changed when a service bus is being configured.
+
+.. sourcecode:: csharp
+
+    sbc.UseJsonSerializer(); // uses JSON by default
+    sbc.UseXmlSerializer();  // uses XML by default
+    sbc.UseBsonSerializer(); // uses BSON (binary JSON) by default
+    
 Receiving Messages
 ------------------
 
@@ -154,29 +175,6 @@ to hundreds of saga instances which may cause database performance issues.
         public void Consume(MyFollowUpMessage message)
         {}
     }
-
-
-Messages and Serialization
---------------------------
-
-MassTransit is a service bus, and a service bus is designed to move *messages*. At the lowest 
-level, a message is a chunk of JSON, XML, or even binary data. When using a statically typed
-language (such as C#), a message is represented by an instance of a class (or interface) that
-has relevant properties, each of which can be a value, list, dictionary, or even another nested
-class.
-
-When using MassTransit, messages are sent and received, published and subscribed, as types. The
-translation (called serialization) between the textual representation of the message (which is
-JSON, XML, etc.) and a type is handled using a *message serializer*. The default serialization
-varies (for MSMQ, the framework uses XML by default, for RabbitMQ JSON is used instead). The 
-default serialization can be changed when a service bus is being configured.
-
-.. sourcecode:: csharp
-
-    sbc.UseJsonSerializer(); // uses JSON by default
-    sbc.UseXmlSerializer();  // uses XML by default
-    sbc.UseBsonSerializer(); // uses BSON (binary JSON) by default
-
 
 Transports and Endpoints
 ------------------------
