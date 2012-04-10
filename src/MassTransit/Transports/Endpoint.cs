@@ -202,7 +202,7 @@ namespace MassTransit.Transports
                                     if (_log.IsErrorEnabled)
                                         _log.Error("An exception was thrown by a message consumer", ex);
 
-                                    _tracker.IncrementRetryCount(receiveContext.MessageId, ex);
+                                    _tracker.MessageWasReceivedSuccessfully(receiveContext.MessageId);
                                     MoveMessageToErrorTransport(receiveContext);
                                 }
 
