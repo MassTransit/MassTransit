@@ -228,7 +228,7 @@ msbuild :build do |msb|
 end
 
 msbuild :build_starbucks do |msb|
-	msb.properties :Configuration => "Build",
+	msb.properties :Configuration => BUILD_CONFIG,
 	    :BuildConfigKey => BUILD_CONFIG_KEY,
 	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
 	    :Platform => 'Any CPU'
@@ -239,7 +239,7 @@ msbuild :build_starbucks do |msb|
 end
 
 msbuild :build_distributor do |msb|
-	msb.properties :Configuration => "Build",
+	msb.properties :Configuration => BUILD_CONFIG,
 	    :BuildConfigKey => BUILD_CONFIG_KEY,
 	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
 	    :Platform => 'Any CPU'
