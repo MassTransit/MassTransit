@@ -98,6 +98,14 @@ namespace MassTransit.Transports.Msmq
 			{
 				_queue.MulticastAddress = _multicastAddress;
 			}
+			
+            //https://connect.microsoft.com/VisualStudio/feedback/details/736877/msmq-multicast-in-system-messaging
+            // ReSharper disable EmptyGeneralCatchClause
+            // ReSharper disable UnusedVariable
+            try { var touch = _queue.FormatName; } catch { }
+            // ReSharper restore UnusedVariable
+            // ReSharper restore EmptyGeneralCatchClause
+
 
 			var filter = new MessagePropertyFilter();
 			filter.SetAll();
