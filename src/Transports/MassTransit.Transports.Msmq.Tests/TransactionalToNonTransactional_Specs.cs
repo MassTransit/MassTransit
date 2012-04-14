@@ -32,10 +32,17 @@ namespace MassTransit.Transports.Msmq.Tests
         [SetUp]
         public void Setup()
         {
-            MessageQueue.Delete(new MsmqEndpointAddress(new Uri(_transactionalUri)).LocalName);
-            MessageQueue.Delete(new MsmqEndpointAddress(new Uri(_nonTransactionalUri)).LocalName);
-            MessageQueue.Delete(new MsmqEndpointAddress(new Uri(_transactionalUri + "_subscriptions")).LocalName);
-            MessageQueue.Delete(new MsmqEndpointAddress(new Uri(_nonTransactionalUri + "_subscriptions")).LocalName);
+            if (MessageQueue.Exists(new MsmqEndpointAddress(new Uri(_transactionalUri)).LocalName))
+                MessageQueue.Delete(new MsmqEndpointAddress(new Uri(_transactionalUri)).LocalName);
+
+            if (MessageQueue.Exists(new MsmqEndpointAddress(new Uri(_nonTransactionalUri)).LocalName))
+                MessageQueue.Delete(new MsmqEndpointAddress(new Uri(_nonTransactionalUri)).LocalName);
+
+            if (MessageQueue.Exists(new MsmqEndpointAddress(new Uri(_transactionalUri + "_subscriptions")).LocalName))
+                MessageQueue.Delete(new MsmqEndpointAddress(new Uri(_transactionalUri + "_subscriptions")).LocalName);
+
+            if (MessageQueue.Exists(new MsmqEndpointAddress(new Uri(_nonTransactionalUri + "_subscriptions")).LocalName))
+                MessageQueue.Delete(new MsmqEndpointAddress(new Uri(_nonTransactionalUri + "_subscriptions")).LocalName);
         }
 
         [Test]
