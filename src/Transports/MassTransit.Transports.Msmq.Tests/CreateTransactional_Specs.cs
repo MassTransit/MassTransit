@@ -13,7 +13,8 @@
         [When]
         public void Creating_a_queue_with_transactional_enabled()
         {
-            _address = new MsmqEndpointAddress(new Uri("msmq://localhost/created_transactional"));
+            Uri uri = new Uri("msmq://localhost/created_transactional");
+            _address = new MsmqEndpointAddress(uri);
 
             if(MessageQueue.Exists(_address.LocalName))
                 MessageQueue.Delete(_address.LocalName);
@@ -21,7 +22,7 @@
             _bus = ServiceBusFactory.New(x =>
                 {
                     x.UseMsmq();
-                    x.ReceiveFrom(_address.Uri);
+                    x.ReceiveFrom(uri);
 
                     x.SetCreateMissingQueues(true);
                     x.SetCreateTransactionalQueues(true);
@@ -57,7 +58,8 @@
         [When]
         public void Creating_a_queue_with_transactional_enabled()
         {
-            _address = new MsmqEndpointAddress(new Uri("msmq://localhost/created_nontransactional"));
+            Uri uri = new Uri("msmq://localhost/created_nontransactional");
+            _address = new MsmqEndpointAddress(uri);
 
             if(MessageQueue.Exists(_address.LocalName))
                 MessageQueue.Delete(_address.LocalName);
@@ -65,7 +67,7 @@
             _bus = ServiceBusFactory.New(x =>
                 {
                     x.UseMsmq();
-                    x.ReceiveFrom(_address.Uri);
+                    x.ReceiveFrom(uri);
 
                     x.SetCreateMissingQueues(true);
                 });
