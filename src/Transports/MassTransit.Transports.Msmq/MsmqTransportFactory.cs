@@ -35,7 +35,7 @@ namespace MassTransit.Transports.Msmq
         {
             try
             {
-                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional);
                 TransportSettings msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IInboundTransport inboundTransport = BuildInbound(settings);
@@ -84,7 +84,7 @@ namespace MassTransit.Transports.Msmq
         {
             try
             {
-                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri);
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional);
                 TransportSettings msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
@@ -127,7 +127,12 @@ namespace MassTransit.Transports.Msmq
         {
             var msmqSettings = new TransportSettings(msmqEndpointAddress, settings)
                 {
+                    CreateIfMissing = settings.CreateIfMissing,
+                    IsolationLevel = settings.IsolationLevel,
+                    PurgeExistingMessages = settings.PurgeExistingMessages,
+                    RequireTransactional = settings.RequireTransactional,
                     Transactional = msmqEndpointAddress.IsTransactional,
+                    TransactionTimeout = settings.TransactionTimeout,
                 };
             return msmqSettings;
         }
