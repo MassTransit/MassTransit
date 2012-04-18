@@ -31,7 +31,9 @@ namespace MassTransit.Distributor
             lock (this)
             {
                 InProgress++;
-                LastUpdate = SystemUtil.UtcNow;
+                var now = SystemUtil.UtcNow;
+                if(now > LastUpdate)
+                    LastUpdate = now;
             }
         }
 

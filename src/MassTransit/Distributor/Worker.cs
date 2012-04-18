@@ -15,6 +15,7 @@ namespace MassTransit.Distributor
     using System;
     using System.Threading;
     using Context;
+    using Magnum;
     using Magnum.Extensions;
     using Messages;
     using Stact;
@@ -125,6 +126,7 @@ namespace MassTransit.Distributor
         }
 
         bool _disposed;
+        TimeSpan _availabilityInterval;
 
         public void Dispose()
         {
@@ -166,7 +168,9 @@ namespace MassTransit.Distributor
             _unsubscribeAction += bus.SubscribeInstance(this);
 
             _scheduler = new TimerScheduler(new PoolFiber());
-            _scheduled = _scheduler.Schedule(3.Seconds(), 3.Seconds(), _fiber, PublishWorkerAvailability);
+
+            _availabilityInterval = 3.Seconds();
+            _scheduled = _scheduler.Schedule(_availabilityInterval, _availabilityInterval, _fiber, PublishWorkerAvailability);
         }
 
         public void Stop()
@@ -252,7 +256,10 @@ namespace MassTransit.Distributor
                     _pendingMessages.PendingMessageCount(), _pendingLimit);
                 _updatePending = false;
 
-                _bus.Publish(message);
+                _bus.Publish(message, context =>
+                    {
+                        context.SetExpirationTime(SystemUtil.UtcNow + _availabilityInterval);
+                    });
             }
             catch
             {

@@ -23,22 +23,19 @@ namespace MassTransit.Distributor
     using Stact;
     using Stact.Internal;
 
-    /// <summary>
-    /// <see cref="IDistributor"/>
-    /// </summary>
-    /// <typeparam name="TMessage"></typeparam>
     public class Distributor<TMessage> :
         IDistributor<TMessage>
         where TMessage : class
     {
-        static readonly ILog _log = Logger.Get(typeof(Distributor<TMessage>));
+        static readonly ILog _log = Logger.Get<Distributor<TMessage>>();
+
         readonly TimeSpan _pingTimeout = 5.Seconds();
         readonly IWorkerSelectionStrategy<TMessage> _selectionStrategy;
+        readonly Cache<Uri, WorkerDetails> _workers;
 
         readonly Cache<Uri, WorkerDetails> _workers;
         IServiceBus _bus;
         bool _disposed;
-
         Fiber _fiber;
         ScheduledOperation _scheduled;
         Scheduler _scheduler;
@@ -147,18 +144,15 @@ namespace MassTransit.Distributor
             WorkerDetails worker;
             lock (_workers)
             {
-                worker = _workers.Get(message.ControlUri, x =>
+                worker = _workers.Get(message.ControlUri, x => new WorkerDetails
                     {
-                        return new WorkerDetails
-                            {
-                                ControlUri = message.ControlUri,
-                                DataUri = message.DataUri,
-                                InProgress = message.InProgress,
-                                InProgressLimit = message.InProgressLimit,
-                                Pending = message.Pending,
-                                PendingLimit = message.PendingLimit,
-                                LastUpdate = message.Updated,
-                            };
+                        ControlUri = message.ControlUri,
+                        DataUri = message.DataUri,
+                        InProgress = message.InProgress,
+                        InProgressLimit = message.InProgressLimit,
+                        Pending = message.Pending,
+                        PendingLimit = message.PendingLimit,
+                        LastUpdate = message.Updated,
                     });
             }
 
@@ -180,7 +174,7 @@ namespace MassTransit.Distributor
                     .ToList();
             }
 
-            expired.ForEach(x =>
+            expired.Each(x =>
                 {
                     _bus.GetEndpoint(x.ControlUri).Send(new PingWorker(),
                         context =>
