@@ -10,16 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionConfigurators
+namespace MassTransit
 {
-    using Configurators;
+    using System;
+    using Distributor.Configuration;
+    using Saga;
+    using SubscriptionConfigurators;
 
-    /// <summary>
-    /// The configuration scope for subscriptions on the bus
-    /// </summary>
-    public interface SubscriptionBusServiceConfigurator :
-        Configurator
+    public static class WorkerConfiguratorExtensions
     {
-        void AddConfigurator(SubscriptionBusServiceBuilderConfigurator configurator);
+        public static void Worker(this SubscriptionBusServiceConfigurator configurator,
+            Action<WorkerConfigurator> configure)
+        {
+            var subscriptionConfigurator = new WorkerConfiguratorImpl(configurator);
+
+            configure(subscriptionConfigurator);
+        }
     }
 }
