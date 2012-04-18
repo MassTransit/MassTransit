@@ -52,6 +52,12 @@ namespace MassTransit.Transports.RabbitMq.Tests
             _addr.ForQueue("anotherone")
                 .Uri.ToString().ShouldEqual("rabbitmq://some_server/thehost/anotherone");
         }
+
+        [Then]
+        public void TtlQueue()
+        {
+            _addr.QueueArguments()["x-message-ttl"].ShouldBeNull();
+        }
 	}
 
 	[Scenario]
@@ -310,6 +316,45 @@ namespace MassTransit.Transports.RabbitMq.Tests
         public void HighAvailabilityQueue()
         {
             _addr.QueueArguments()["x-ha-policy"].ShouldEqual("all");
+        }
+
+        [Then]
+        public void TheQueueName()
+        {
+            _addr.Name.ShouldEqual("somequeue");
+        }
+
+        [Then]
+        public void should_not_use_query_string_of_uri()
+        {
+            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/anotherone");
+            _addr.ForQueue("anotherone").Name.ShouldEqual("anotherone");
+        }
+    }
+
+
+    [Scenario]
+    public class GivenATtl
+    {
+        public string uri = "rabbitmq://localhost/somequeue?ttl=20";
+        RabbitMqEndpointAddress _addr;
+
+        [When]
+        public void WhenParsed()
+        {
+            _addr = RabbitMqEndpointAddress.Parse(uri);
+        }
+
+        [Then]
+        public void TheQueueArguments()
+        {
+            _addr.QueueArguments().ShouldNotBeNull();
+        }
+
+        [Then]
+        public void TtlQueue()
+        {
+            _addr.QueueArguments()["x-message-ttl"].ShouldEqual(20);
         }
 
         [Then]
