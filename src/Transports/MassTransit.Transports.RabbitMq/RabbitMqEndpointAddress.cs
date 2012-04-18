@@ -37,6 +37,7 @@ namespace MassTransit.Transports.RabbitMq
         readonly string _name;
         readonly Uri _uri;
         Func<bool> _isLocal;
+        int _ttl;
 
 
         public RabbitMqEndpointAddress(Uri uri, ConnectionFactory connectionFactory, string name)
@@ -48,6 +49,7 @@ namespace MassTransit.Transports.RabbitMq
             _isTransactional = uri.Query.GetValueFromQueryString("tx", false);
             _isLocal = () => DetermineIfEndpointIsLocal(_uri);
             _isHighAvailable = uri.Query.GetValueFromQueryString("ha", false);
+            _ttl = uri.Query.GetValueFromQueryString("ttl", 0);
         }
 
         public ConnectionFactory ConnectionFactory
@@ -84,7 +86,17 @@ namespace MassTransit.Transports.RabbitMq
 
         public IDictionary QueueArguments()
         {
-            return !_isHighAvailable ? null : new Hashtable {{"x-ha-policy", "all"}};
+            var ht = new Hashtable();
+
+            if(!_isHighAvailable) ht.Add("x-ha-policy","all");
+            if(_ttl > 0) ht.Add("x-message-ttl", _ttl);
+
+            return ht.Keys.Count == 0 ? null : ht;
+        }
+
+        public void SetTtl(TimeSpan ttl)
+        {
+            _ttl = ttl.Milliseconds;
         }
 
         public override string ToString()
