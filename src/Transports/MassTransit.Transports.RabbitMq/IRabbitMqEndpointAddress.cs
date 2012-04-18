@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
+    using System;
     using System.Collections;
     using RabbitMQ.Client;
 
@@ -23,5 +24,6 @@ namespace MassTransit.Transports.RabbitMq
 
 		IRabbitMqEndpointAddress ForQueue(string name);
 	    IDictionary QueueArguments();
+	    void SetTtl(TimeSpan ttl);
 	}
 }
