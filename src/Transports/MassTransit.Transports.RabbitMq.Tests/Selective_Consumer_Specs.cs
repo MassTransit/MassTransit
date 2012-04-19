@@ -25,6 +25,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     public interface Sometimes
     {
         Guid Id { get; }
+        bool Accept { get; }
     }
 
     class SelectiveConsumer : 
@@ -40,8 +41,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             _consumed = new ConcurrentCache<Guid, int>();
             _observed = new ConcurrentCache<Guid, int>();
-
-
         }
 
         public int Consumed
@@ -64,10 +63,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             _observed[message.Id] = _observed.Get(message.Id, x => 0) + 1;
 
-            var accept = _observed[message.Id] > IgnoreCount;
+            _log.Info(string.Format("Accepting: {0}", message.Accept));
 
-            _log.Info(string.Format("Accepting: {0}", accept));
-            return accept;
+            return message.Accept;
         }
     }
 
@@ -76,7 +74,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         : Given_a_rabbitmq_bus
     {
         SelectiveConsumer _consumer;
-        const int TotalMsgs = 3;
+        const int TotalMsgs = 10;
 
         protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
         {
@@ -93,7 +91,8 @@ namespace MassTransit.Transports.RabbitMq.Tests
             {
                 LocalBus.Publish<Sometimes>(new
                     {
-                        Id = NewId.NextGuid()
+                        Id = NewId.NextGuid(),
+                        Accept = i % 2 == 0,
                     });
             }
         }
@@ -101,13 +100,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void Should_have_observed_each_message_at_least_twice()
         {
-            Assert.LessOrEqual(TotalMsgs * SelectiveConsumer.IgnoreCount, _consumer.Observed);
+            Assert.AreEqual(TotalMsgs / 2 * 6, _consumer.Observed);
         }
 
         [Then]
         public void Should_have_consumed_all_messages()
         {
-            if (!SpinWait.SpinUntil(() => _consumer.Consumed == 3, 8.Seconds()))
+            if (!SpinWait.SpinUntil(() => _consumer.Consumed == TotalMsgs / 2, 8.Seconds()))
                 Assert.Fail("should have consumed two messages, skipping the one in the middle!");
         }
     }
