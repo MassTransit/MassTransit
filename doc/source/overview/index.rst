@@ -23,3 +23,5 @@ How MassTransit Works
     standardservices.rst
     runtimeservices.rst
     videos.rst
+    backstory.rst
+    correlation.rst
