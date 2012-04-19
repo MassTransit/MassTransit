@@ -12,87 +12,103 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq.Tests
 {
-	using System;
-	using System.Threading;
-	using BusConfigurators;
-	using Logging;
-	using Magnum.Extensions;
-	using Magnum.TestFramework;
-	using NUnit.Framework;
+    using System;
+    using System.Linq;
+    using System.Threading;
+    using BusConfigurators;
+    using Logging;
+    using Magnum.Caching;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using NUnit.Framework;
 
-	public interface SometimesInterestingMsg
-	{
-		string Msg { get; }
-	}
+    public interface Sometimes
+    {
+        Guid Id { get; }
+    }
 
-	class SelectiveConsumer : Consumes<SometimesInterestingMsg>.Selected
-	{
-		static ILog logger = Logger.Get(typeof(SelectiveConsumer));
+    class SelectiveConsumer : 
+        Consumes<Sometimes>.Selected
+    {
+        static readonly ILog _log = Logger.Get(typeof(SelectiveConsumer));
 
-		int _no;
-		int _consumed;
+        Cache<Guid, int> _consumed; 
+        Cache<Guid, int> _observed;
+        public const int IgnoreCount = 3;
 
-		public int No
-		{
-			get { return _no; }
-		}
+        public SelectiveConsumer()
+        {
+            _consumed = new ConcurrentCache<Guid, int>();
+            _observed = new ConcurrentCache<Guid, int>();
 
-		public int Consumed
-		{
-			get { return _consumed; }
-		}
 
-		public void Consume(SometimesInterestingMsg message)
-		{
-			logger.Info("Consuming");
-			Interlocked.Increment(ref _consumed);
-		}
+        }
 
-		public bool Accept(SometimesInterestingMsg message)
-		{
-			var accept = Interlocked.Increment(ref _no)%2 != 0;
-			logger.Info(string.Format("Accepting: {0}", accept));
-			return accept;
-		}
-	}
+        public int Consumed
+        {
+            get { return _consumed.Sum(); }
+        }
 
-	public class Selective_Consumer_Specs
-		: Given_a_rabbitmq_bus
-	{
-		SelectiveConsumer cons;
-		const int TotalMsgs = 3;
+        public int Observed
+        {
+            get { return _observed.Sum(); }
+        }
 
-		protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
-		{
-			base.ConfigureServiceBus(uri, configurator);
+        public void Consume(Sometimes message)
+        {
+            _log.Info("Consuming");
+            _consumed[message.Id] = _consumed.Get(message.Id, x => 0) + 1;
+        }
 
-			cons = new SelectiveConsumer();
-			configurator.Subscribe(s => s.Consumer(() => cons));
-		}
+        public bool Accept(Sometimes message)
+        {
+            _observed[message.Id] = _observed.Get(message.Id, x => 0) + 1;
 
-		[When]
-		public void A_message_is_published()
-		{
-			for (var i = 0; i < TotalMsgs; i++)
-			{
-				LocalBus.Publish<SometimesInterestingMsg>(new
-					{
-						Msg = string.Format("Hooray #{0}", i)
-					});
-			}
-		}
+            var accept = _observed[message.Id] > IgnoreCount;
 
-		[Then]
-		public void should_only_have_received_same_number_as_sent()
-		{
-			cons.No.ShouldBeEqualTo(TotalMsgs);
-		}
+            _log.Info(string.Format("Accepting: {0}", accept));
+            return accept;
+        }
+    }
 
-		[Then]
-		public void should_have_consumed_twice()
-		{
-			if (!SpinWait.SpinUntil(() => cons.Consumed == 2, 8.Seconds()))
-				Assert.Fail("should have consumed two messages, skipping the one in the middle!");
-		}
-	}
+    [Scenario]
+    public class Selective_Consumer_Specs
+        : Given_a_rabbitmq_bus
+    {
+        SelectiveConsumer _consumer;
+        const int TotalMsgs = 3;
+
+        protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
+        {
+            base.ConfigureServiceBus(uri, configurator);
+
+            _consumer = new SelectiveConsumer();
+            configurator.Subscribe(s => s.Instance(_consumer));
+        }
+
+        [When]
+        public void A_message_is_published()
+        {
+            for (var i = 0; i < TotalMsgs; i++)
+            {
+                LocalBus.Publish<Sometimes>(new
+                    {
+                        Id = NewId.NextGuid()
+                    });
+            }
+        }
+
+        [Then]
+        public void Should_have_observed_each_message_at_least_twice()
+        {
+            Assert.LessOrEqual(TotalMsgs * SelectiveConsumer.IgnoreCount, _consumer.Observed);
+        }
+
+        [Then]
+        public void Should_have_consumed_all_messages()
+        {
+            if (!SpinWait.SpinUntil(() => _consumer.Consumed == 3, 8.Seconds()))
+                Assert.Fail("should have consumed two messages, skipping the one in the middle!");
+        }
+    }
 }
