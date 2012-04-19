@@ -94,6 +94,7 @@
     <Compile Include="Bytes_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Request_Specs.cs" />
+    <Compile Include="Selective_Consumer_Specs.cs" />
     <Compile Include="TestFactory.cs" />
     <Compile Include="Given_a_rabbitmq_bus.cs" />
     <Compile Include="Given_a_rabbitmq_bus_with_vhost_mt_and_credentials.cs" />
