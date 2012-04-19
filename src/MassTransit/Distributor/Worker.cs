@@ -104,9 +104,19 @@ namespace MassTransit.Distributor
             return true;
         }
 
-        void Consume(PingWorker message)
+        void Consume(IConsumeContext<PingWorker> context)
         {
-            PublishWorkerAvailability();
+            try
+            {
+                var message = new WorkerAvailable<TMessage>(_controlUri, _dataUri, _inProgress, _inProgressLimit,
+                    _pendingMessages.PendingMessageCount(), _pendingLimit);
+                _updatePending = false;
+
+                context.Respond(message);
+            }
+            catch
+            {
+            }
         }
 
         public void Consume(WakeUpWorker message)
@@ -151,7 +161,7 @@ namespace MassTransit.Distributor
             _controlUri = _controlBus.Endpoint.Address.Uri;
 
             _unsubscribeAction = bus.ControlBus.SubscribeHandler<ConfigureWorker>(Consume, Accept);
-            _unsubscribeAction += bus.ControlBus.SubscribeHandler<PingWorker>(Consume);
+            _unsubscribeAction += bus.ControlBus.SubscribeContextHandler<PingWorker>(x => Consume(x));
 
             _unsubscribeAction += bus.SubscribeInstance(this);
 
