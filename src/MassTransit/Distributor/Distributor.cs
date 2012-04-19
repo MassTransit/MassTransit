@@ -1,186 +1,194 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Logging;
-	using Magnum;
-	using Magnum.Extensions;
-	using Messages;
-	using Stact;
-	using Stact.Internal;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Logging;
+    using Magnum;
+    using Magnum.Caching;
+    using Magnum.Extensions;
+    using Messages;
+    using Stact;
+    using Stact.Internal;
 
-	/// <summary>
-	/// <see cref="IDistributor"/>
-	/// </summary>
-	/// <typeparam name="TMessage"></typeparam>
-	public class Distributor<TMessage> :
-		IDistributor<TMessage>
-		where TMessage : class
-	{
-		readonly int _pingTimeout = (int) 5.Seconds().TotalMilliseconds;
-		readonly IWorkerSelectionStrategy<TMessage> _selectionStrategy;
+    /// <summary>
+    /// <see cref="IDistributor"/>
+    /// </summary>
+    /// <typeparam name="TMessage"></typeparam>
+    public class Distributor<TMessage> :
+        IDistributor<TMessage>
+        where TMessage : class
+    {
+        static readonly ILog _log = Logger.Get(typeof(Distributor<TMessage>));
+        readonly TimeSpan _pingTimeout = 5.Seconds();
+        readonly IWorkerSelectionStrategy<TMessage> _selectionStrategy;
 
-		readonly IDictionary<Uri,WorkerDetails> _workers = new Dictionary<Uri,WorkerDetails>();
+        readonly Cache<Uri, WorkerDetails> _workers;
+        IServiceBus _bus;
+        bool _disposed;
 
-		Fiber _fiber;
-		ScheduledOperation _scheduled;
-		Scheduler _scheduler;
-		UnsubscribeAction _unsubscribeAction = () => false;
-		IServiceBus _bus;
+        Fiber _fiber;
+        ScheduledOperation _scheduled;
+        Scheduler _scheduler;
+        UnsubscribeAction _unsubscribeAction = () => false;
 
-		public Distributor(IWorkerSelectionStrategy<TMessage> workerSelectionStrategy)
-		{
-            if(workerSelectionStrategy == null)
+        public Distributor(IWorkerSelectionStrategy<TMessage> workerSelectionStrategy)
+        {
+            _workers = new ConcurrentCache<Uri, WorkerDetails>();
+
+            if (workerSelectionStrategy == null)
                 throw new ArgumentNullException("workerSelectionStrategy");
 
-			_selectionStrategy = workerSelectionStrategy;
+            _selectionStrategy = workerSelectionStrategy;
 
-			_fiber = new PoolFiber();
-			_scheduler = new TimerScheduler(new PoolFiber());
-		}
+            _fiber = new PoolFiber();
+            _scheduler = new TimerScheduler(new PoolFiber());
+        }
 
-		public Distributor()
-			: this(new DefaultWorkerSelectionStrategy<TMessage>())
-		{
-		}
+        public Distributor()
+            : this(new DefaultWorkerSelectionStrategy<TMessage>())
+        {
+        }
 
-		public void Consume(TMessage message)
-		{
-			WorkerDetails worker;
-			lock (_workers)
-			{
-				worker = _selectionStrategy.SelectWorker(_workers.Values, message);
-				if (worker == null)
-				{
-					_bus.MessageContext<TMessage>().RetryLater();
-					return;
-				}
+        public void Consume(TMessage message)
+        {
+            WorkerDetails worker;
+            lock (_workers)
+            {
+                worker = _selectionStrategy.SelectWorker(_workers, message);
+                if (worker == null)
+                {
+                    this.MessageContext().RetryLater();
+                    return;
+                }
 
-				worker.Add();
-			}
+                worker.Add();
+            }
 
-			IEndpoint endpoint = _bus.GetEndpoint(worker.DataUri);
+            IEndpoint endpoint = _bus.GetEndpoint(worker.DataUri);
 
-			var distributed = new Distributed<TMessage>(message, _bus.Context().ResponseAddress);
+            var distributed = new Distributed<TMessage>(message, _bus.Context().ResponseAddress);
 
-			endpoint.Send(distributed);
-		}
+            endpoint.Send(distributed);
+        }
 
-		public bool Accept(TMessage message)
-		{
-			lock(_workers)
-				return _selectionStrategy.HasAvailableWorker(_workers.Values, message);
-		}
+        public bool Accept(TMessage message)
+        {
+            lock (_workers)
+                return _selectionStrategy.HasAvailableWorker(_workers, message);
+        }
 
-		bool _disposed;
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public void Start(IServiceBus bus)
+        {
+            _bus = bus;
 
-		~Distributor()
-		{
-			Dispose(false);
-		}
+            _unsubscribeAction = bus.ControlBus.SubscribeHandler<WorkerAvailable<TMessage>>(Consume);
 
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_scheduler.Stop(60.Seconds());
-				_scheduler = null;
+            // don't plan to unsubscribe this since it's an important thing
+            bus.SubscribeInstance(this);
 
-				_fiber.Shutdown(60.Seconds());
-				_fiber = null;
-			}
+            _scheduled = _scheduler.Schedule(_pingTimeout, _pingTimeout, _fiber, PingWorkers);
 
-			_disposed = true;
-		}
-		public void Start(IServiceBus bus)
-		{
-			_bus = bus;
+            _bus.Publish(new PingWorker());
+        }
 
-			_unsubscribeAction = bus.SubscribeHandler<WorkerAvailable<TMessage>>(Consume);
+        public void Stop()
+        {
+            _scheduled.Cancel();
+            _scheduled = null;
 
-			// don't plan to unsubscribe this since it's an important thing
-			bus.SubscribeInstance(this);
+            lock (_workers)
+                _workers.Clear();
 
-			_scheduled = _scheduler.Schedule(_pingTimeout, _pingTimeout, _fiber, PingWorkers);
+            _unsubscribeAction();
+        }
 
-			_bus.Publish(new PingWorker());
-		}
+        ~Distributor()
+        {
+            Dispose(false);
+        }
 
-		public void Stop()
-		{
-			_scheduled.Cancel();
-			_scheduled = null;
+        void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+            if (disposing)
+            {
+                _scheduler.Stop(60.Seconds());
+                _scheduler = null;
 
-			lock(_workers)
-				_workers.Clear();
+                _fiber.Shutdown(60.Seconds());
+                _fiber = null;
+            }
 
-			_unsubscribeAction();
-		}
+            _disposed = true;
+        }
 
-		void Consume(WorkerAvailable<TMessage> message)
-		{
-			WorkerDetails worker;
-			lock (_workers)
-			{
-				worker = _workers.Retrieve(message.ControlUri, () =>
-					{
-						return new WorkerDetails
-							{
-								ControlUri = message.ControlUri,
-								DataUri = message.DataUri,
-								InProgress = message.InProgress,
-								InProgressLimit = message.InProgressLimit,
-								Pending = message.Pending,
-								PendingLimit = message.PendingLimit,
-								LastUpdate = message.Updated,
-							};
-					});
-			}
+        void Consume(WorkerAvailable<TMessage> message)
+        {
+            WorkerDetails worker;
+            lock (_workers)
+            {
+                worker = _workers.Get(message.ControlUri, x =>
+                    {
+                        return new WorkerDetails
+                            {
+                                ControlUri = message.ControlUri,
+                                DataUri = message.DataUri,
+                                InProgress = message.InProgress,
+                                InProgressLimit = message.InProgressLimit,
+                                Pending = message.Pending,
+                                PendingLimit = message.PendingLimit,
+                                LastUpdate = message.Updated,
+                            };
+                    });
+            }
 
-			worker.UpdateInProgress(message.InProgress, message.InProgressLimit, message.Pending, message.PendingLimit,
-				message.Updated);
+            worker.UpdateInProgress(message.InProgress, message.InProgressLimit, message.Pending, message.PendingLimit,
+                message.Updated);
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Worker {0}: {1} in progress, {2} pending", message.DataUri, message.InProgress, message.Pending);
-		}
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Worker {0}: {1} in progress, {2} pending", message.DataUri, message.InProgress,
+                    message.Pending);
+        }
 
-		static readonly ILog _log = Logger.Get(typeof (Distributor<TMessage>));
+        void PingWorkers()
+        {
+            List<WorkerDetails> expired;
+            lock (_workers)
+            {
+                expired = _workers
+                    .Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(_pingTimeout))
+                    .ToList();
+            }
 
-		void PingWorkers()
-		{
-			List<WorkerDetails> expired;
-			lock(_workers)
-			{
-				expired = _workers.Values
-					.Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(_pingTimeout.Milliseconds()))
-					.ToList();
-			}
-
-			expired.ForEach(x =>
-					{
-						_bus.GetEndpoint(x.ControlUri).Send(new PingWorker(),
-							context => context.SetResponseAddress(_bus.Endpoint.Address.Uri));
-					});
-		}
-	}
+            expired.ForEach(x =>
+                {
+                    _bus.GetEndpoint(x.ControlUri).Send(new PingWorker(),
+                        context =>
+                            {
+                                context.SendResponseTo(_bus);
+                                context.ExpiresAt(SystemUtil.UtcNow + _pingTimeout);
+                            });
+                });
+        }
+    }
 }

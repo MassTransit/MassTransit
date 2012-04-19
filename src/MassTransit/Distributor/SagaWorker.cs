@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -27,9 +27,9 @@ namespace MassTransit.Distributor
         Consumes<WakeUpWorker>.All
         where TSaga : SagaStateMachine<TSaga>, ISaga
     {
-        readonly Fiber _fiber = new PoolFiber();
-        readonly IList<Type> _messageTypes = new List<Type>();
-        readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
+        readonly Fiber _fiber;
+        readonly IList<Type> _messageTypes;
+        readonly IPendingMessageTracker<Guid> _pendingMessages;
         readonly ISagaRepository<TSaga> _sagaRepository;
         IServiceBus _bus;
         IServiceBus _controlBus;
@@ -50,9 +50,12 @@ namespace MassTransit.Distributor
 
         public SagaWorker(ISagaRepository<TSaga> sagaRepository, WorkerSettings settings)
         {
-            if(sagaRepository == null)
+            _fiber = new PoolFiber();
+            _messageTypes = new List<Type>();
+            _pendingMessages = new WorkerPendingMessageTracker<Guid>();
+            if (sagaRepository == null)
                 throw new ArgumentNullException("sagaRepository");
-            if(settings == null)
+            if (settings == null)
                 throw new ArgumentNullException("settings");
 
             _sagaRepository = sagaRepository;
@@ -83,6 +86,7 @@ namespace MassTransit.Distributor
             _controlUri = _controlBus.Endpoint.Address.Uri;
 
             _unsubscribeAction = bus.ControlBus.SubscribeHandler<ConfigureWorker>(Consume, Accept);
+            _unsubscribeAction += bus.ControlBus.SubscribeContextHandler<PingWorker>(Consume);
             _unsubscribeAction += bus.SubscribeInstance(this);
             _unsubscribeAction += bus.SubscribeSagaWorker(this, _sagaRepository);
 
@@ -116,6 +120,25 @@ namespace MassTransit.Distributor
                 _unsubscribeAction();
                 _unsubscribeAction = null;
             }
+        }
+
+        void Consume(IConsumeContext<PingWorker> context)
+        {
+            try
+            {
+                _messageTypes.Each(type => this.FastInvoke(new[] { type }, "RespondToPingWorker", context));
+            }
+            catch
+            {
+            }
+        }
+
+        void RespondToPingWorker<TMessage>(IConsumeContext<PingWorker> context)
+        {
+            var message = new WorkerAvailable<TMessage>(_controlUri, _dataUri, _inProgress, _inProgressLimit,
+                _pendingMessages.PendingMessageCount(), _pendingLimit);
+
+            context.Respond(message);
         }
 
         public bool CanAcceptMessage<TMessage>(Distributed<TMessage> message)
@@ -159,7 +182,7 @@ namespace MassTransit.Distributor
 
         bool Accept(ConfigureWorker message)
         {
-            return typeof (TSaga).GetType().FullName == message.MessageType;
+            return typeof(TSaga).GetType().FullName == message.MessageType;
         }
 
         void Consume(ConfigureWorker message)
