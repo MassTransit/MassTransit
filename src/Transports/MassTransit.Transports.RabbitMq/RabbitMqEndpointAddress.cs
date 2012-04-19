@@ -88,7 +88,7 @@ namespace MassTransit.Transports.RabbitMq
         {
             var ht = new Hashtable();
 
-            if(!_isHighAvailable) ht.Add("x-ha-policy","all");
+            if(_isHighAvailable) ht.Add("x-ha-policy","all");
             if(_ttl > 0) ht.Add("x-message-ttl", _ttl);
 
             return ht.Keys.Count == 0 ? null : ht;

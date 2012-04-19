@@ -54,9 +54,15 @@ namespace MassTransit.Transports.RabbitMq.Tests
         }
 
         [Then]
-        public void TtlQueue()
+        public void ShouldNotBeHa()
         {
-            _addr.QueueArguments()["x-message-ttl"].ShouldBeNull();
+            _addr.QueueArguments().ShouldBeNull();
+        }
+
+        [Then]
+        public void ShouldNotHaveATtl()
+        {
+            _addr.QueueArguments().ShouldBeNull();
         }
 	}
 
@@ -319,6 +325,12 @@ namespace MassTransit.Transports.RabbitMq.Tests
         }
 
         [Then]
+        public void ShouldNotHaveATtl()
+        {
+            _addr.QueueArguments()["x-message-ttl"].ShouldBeNull();
+        }
+
+        [Then]
         public void TheQueueName()
         {
             _addr.Name.ShouldEqual("somequeue");
@@ -355,6 +367,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
         public void TtlQueue()
         {
             _addr.QueueArguments()["x-message-ttl"].ShouldEqual(20);
+        }
+
+
+        [Then]
+        public void ShouldNotBeHa()
+        {
+            _addr.QueueArguments()["x-ha-policy"].ShouldBeNull();
         }
 
         [Then]
