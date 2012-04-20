@@ -10,10 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Configuration
+namespace MassTransit.Distributor.DistributorConfigurators
 {
-    public interface DistributorConfigurator
+    using System;
+    using Builders;
+    using Saga;
+
+    public class SagaDistributorConfiguratorImpl<TSaga> :
+        DistributorConfiguratorImpl<SagaDistributorConfigurator<TSaga>>,
+        SagaDistributorConfigurator<TSaga>,
+        DistributorBuilderConfigurator
+        where TSaga : class, ISaga
     {
-        void AddConfigurator(DistributorBuilderConfigurator configurator);
+        public void Configure(DistributorBuilder builder)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

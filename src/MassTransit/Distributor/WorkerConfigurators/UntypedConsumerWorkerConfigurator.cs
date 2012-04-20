@@ -12,23 +12,27 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.WorkerConfigurators
 {
+    using System;
     using System.Collections.Generic;
     using Builders;
     using Configuration;
     using Configurators;
+    using MassTransit.Configuration;
     using SubscriptionConfigurators;
+    using WorkerConnectors;
 
-    public class WorkerConsumerConfiguratorImpl<TConsumer> :
-        SubscriptionConfiguratorImpl<WorkerConsumerConfigurator<TConsumer>>,
-        WorkerConsumerConfigurator<TConsumer>,
+    public class UntypedConsumerWorkerConfigurator<TConsumer> :
+        SubscriptionConfiguratorImpl<ConsumerWorkerConfigurator>,
+        ConsumerWorkerConfigurator,
         WorkerBuilderConfigurator
         where TConsumer : class
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-        public WorkerConsumerConfiguratorImpl(IConsumerFactory<TConsumer> consumerFactory)
+        public UntypedConsumerWorkerConfigurator(Func<Type, object> consumerFactory)
         {
-            _consumerFactory = consumerFactory;
+            _consumerFactory =
+                new DelegateConsumerFactory<TConsumer>(() => (TConsumer)consumerFactory(typeof(TConsumer)));
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -38,9 +42,9 @@ namespace MassTransit.Distributor.WorkerConfigurators
 
         public void Configure(WorkerBuilder builder)
         {
-//            var configurator = new WorkerConsumerConnector<TConsumer>(_consumerFactory, ReferenceFactory);
+            var configurator = new ConsumerWorkerConnector<TConsumer>(ReferenceFactory, _consumerFactory);
 
-  //          builder.Add(configurator);
+            builder.Add(configurator);
         }
     }
 }

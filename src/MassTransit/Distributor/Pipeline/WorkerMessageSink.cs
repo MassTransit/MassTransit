@@ -16,7 +16,6 @@ namespace MassTransit.Distributor.Pipeline
     using System.Collections.Generic;
     using System.Linq;
     using Context;
-    using Magnum.Extensions;
     using MassTransit.Pipeline;
     using Messages;
 
@@ -24,13 +23,13 @@ namespace MassTransit.Distributor.Pipeline
         IPipelineSink<IConsumeContext<Distributed<TMessage>>>
         where TMessage : class
     {
-        readonly MultipleHandlerSelector<Distributed<TMessage>> _selector;
+        readonly IPipelineSink<IConsumeContext<TMessage>> _output;
         readonly IWorkerLoad<TMessage> _workerLoad;
 
-        public WorkerMessageSink(IWorkerLoad<TMessage> workerLoad, MultipleHandlerSelector<TMessage> selector)
+        public WorkerMessageSink(IWorkerLoad<TMessage> workerLoad, IPipelineSink<IConsumeContext<TMessage>> output)
         {
             _workerLoad = workerLoad;
-            _selector = context => DistributedHandler(context, selector);
+            _output = output;
         }
 
         public IEnumerable<Action<IConsumeContext<Distributed<TMessage>>>> Enumerate(
@@ -44,17 +43,6 @@ namespace MassTransit.Distributor.Pipeline
             return inspector.Inspect(this);
         }
 
-        IEnumerable<Action<IConsumeContext<Distributed<TMessage>>>> DistributedHandler(
-            IConsumeContext<Distributed<TMessage>> context,
-            MultipleHandlerSelector<TMessage> selector)
-        {
-            TMessage payload = context.Message.Payload;
-            var payloadContext = new ConsumeContext<TMessage>(context.BaseContext, payload);
-
-            return selector(payloadContext)
-                .Select(handler => (Action<IConsumeContext<Distributed<TMessage>>>)(x => handler(payloadContext)));
-        }
-
         void RetryLaterHandler(IConsumeContext<Distributed<TMessage>> context)
         {
             context.RetryLater();
@@ -63,13 +51,11 @@ namespace MassTransit.Distributor.Pipeline
         IEnumerable<Action<IConsumeContext<Distributed<TMessage>>>> Handle(
             IConsumeContext<Distributed<TMessage>> context)
         {
-            foreach (var result in _selector(context))
-            {
-                context.BaseContext.NotifyConsume(context, typeof(WorkerMessageSink<TMessage>).ToShortTypeName(),
-                    null);
+            TMessage payload = context.Message.Payload;
+            var payloadContext = new ConsumeContext<TMessage>(context.BaseContext, payload);
 
-                yield return result;
-            }
+            return _output.Enumerate(payloadContext)
+                .Select(handler => (Action<IConsumeContext<Distributed<TMessage>>>)(x => handler(payloadContext)));
         }
     }
 }

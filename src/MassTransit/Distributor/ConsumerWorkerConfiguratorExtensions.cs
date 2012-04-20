@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using Configuration;
-    using Distributor.Configuration;
     using Distributor.WorkerConfigurators;
     using Logging;
     using Magnum.Reflection;
@@ -24,8 +23,8 @@ namespace MassTransit
     {
         static readonly ILog _log = Logger.Get(typeof(ConsumerSubscriptionExtensions));
 
-        public static WorkerConsumerConfigurator<TConsumer> Consumer<TConsumer>(
-            [NotNull] this WorkerConfigurator configurator,
+        public static ConsumerWorkerConfigurator<TConsumer> Consumer<TConsumer>(
+            [NotNull] this WorkerBusServiceConfigurator configurator,
             [NotNull] IConsumerFactory<TConsumer> consumerFactory)
             where TConsumer : class, IConsumer
         {
@@ -35,8 +34,8 @@ namespace MassTransit
             return CreateWorkerConsumerConfigurator(configurator, consumerFactory);
         }
 
-        public static WorkerConsumerConfigurator<TConsumer> Consumer<TConsumer>(
-            [NotNull] this WorkerConfigurator configurator)
+        public static ConsumerWorkerConfigurator<TConsumer> Consumer<TConsumer>(
+            [NotNull] this WorkerBusServiceConfigurator configurator)
             where TConsumer : class, IConsumer, new()
         {
             if (_log.IsDebugEnabled)
@@ -47,8 +46,8 @@ namespace MassTransit
             return CreateWorkerConsumerConfigurator(configurator, delegateConsumerFactory);
         }
 
-        public static WorkerConsumerConfigurator<TConsumer> Consumer<TConsumer>(
-            [NotNull] this WorkerConfigurator configurator, [NotNull] Func<TConsumer> consumerFactory)
+        public static ConsumerWorkerConfigurator<TConsumer> Consumer<TConsumer>(
+            [NotNull] this WorkerBusServiceConfigurator configurator, [NotNull] Func<TConsumer> consumerFactory)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -59,8 +58,8 @@ namespace MassTransit
             return CreateWorkerConsumerConfigurator(configurator, delegateConsumerFactory);
         }
 
-        public static WorkerConsumerConfigurator Consumer(
-            [NotNull] this WorkerConfigurator configurator,
+        public static ConsumerWorkerConfigurator Consumer(
+            [NotNull] this WorkerBusServiceConfigurator configurator,
             [NotNull] Type consumerType,
             [NotNull] Func<Type, object> consumerFactory)
         {
@@ -69,19 +68,19 @@ namespace MassTransit
                     consumerType);
 
             object consumerConfigurator =
-                FastActivator.Create(typeof(UntypedWorkerConsumerConfigurator<>),
+                FastActivator.Create(typeof(UntypedConsumerWorkerConfigurator<>),
                     new[] {consumerType}, new object[] {consumerFactory});
 
             configurator.AddConfigurator((WorkerBuilderConfigurator)consumerConfigurator);
 
-            return (WorkerConsumerConfigurator)consumerConfigurator;
+            return (ConsumerWorkerConfigurator)consumerConfigurator;
         }
 
-        static WorkerConsumerConfigurator<TConsumer> CreateWorkerConsumerConfigurator<TConsumer>(
-            WorkerConfigurator configurator,
+        static ConsumerWorkerConfigurator<TConsumer> CreateWorkerConsumerConfigurator<TConsumer>(
+            WorkerBusServiceConfigurator configurator,
             IConsumerFactory<TConsumer> consumerFactory) where TConsumer : class, IConsumer
         {
-            var consumerConfigurator = new WorkerConsumerConfiguratorImpl<TConsumer>(consumerFactory);
+            var consumerConfigurator = new ConsumerWorkerConfiguratorImpl<TConsumer>(consumerFactory);
 
             configurator.AddConfigurator(consumerConfigurator);
 

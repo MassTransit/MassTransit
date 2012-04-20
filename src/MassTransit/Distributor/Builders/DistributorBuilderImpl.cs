@@ -13,7 +13,7 @@
 namespace MassTransit.Distributor.Builders
 {
     using System.Collections.Generic;
-    using Connectors;
+    using DistributorConnectors;
 
     public class DistributorBuilderImpl :
         DistributorBuilder

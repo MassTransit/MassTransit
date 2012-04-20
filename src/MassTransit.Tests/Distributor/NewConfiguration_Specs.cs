@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Distributor
 {
     using System;
     using MassTransit.Distributor;
+    using MassTransit.Distributor.DistributorConfigurators;
     using MassTransit.Saga;
     using NUnit.Framework;
 

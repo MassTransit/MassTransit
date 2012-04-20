@@ -18,7 +18,6 @@ namespace MassTransit.Distributor.DistributorConfigurators
     using Builders;
     using BusConfigurators;
     using BusServiceConfigurators;
-    using Configuration;
     using Configurators;
     using MassTransit.Builders;
 

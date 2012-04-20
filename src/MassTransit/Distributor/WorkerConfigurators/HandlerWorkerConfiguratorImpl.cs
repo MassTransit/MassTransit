@@ -17,33 +17,39 @@ namespace MassTransit.Distributor.WorkerConfigurators
     using Builders;
     using Configuration;
     using Configurators;
-    using MassTransit.Configuration;
+    using MassTransit.Pipeline;
     using SubscriptionConfigurators;
+    using WorkerConnectors;
 
-    public class UntypedWorkerConsumerConfigurator<TConsumer> :
-        SubscriptionConfiguratorImpl<WorkerConsumerConfigurator>,
-        WorkerConsumerConfigurator,
+    public class HandlerWorkerConfiguratorImpl<TMessage> :
+        SubscriptionConfiguratorImpl<HandlerWorkerConfigurator<TMessage>>,
+        HandlerWorkerConfigurator<TMessage>,
         WorkerBuilderConfigurator
-        where TConsumer : class
+        where TMessage : class
     {
-        readonly IConsumerFactory<TConsumer> _consumerFactory;
+        readonly HandlerSelector<TMessage> _handler;
 
-        public UntypedWorkerConsumerConfigurator(Func<Type, object> consumerFactory)
+        public HandlerWorkerConfiguratorImpl(Action<IConsumeContext<TMessage>, TMessage> handler)
         {
-            _consumerFactory =
-                new DelegateConsumerFactory<TConsumer>(() => (TConsumer)consumerFactory(typeof(TConsumer)));
+            _handler = x => context => handler(context, context.Message);
+        }
+
+        public HandlerWorkerConfiguratorImpl(Action<TMessage> handler)
+        {
+            _handler = HandlerSelector.ForHandler(handler);
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return _consumerFactory.Validate();
+            if (_handler == null)
+                yield return this.Failure("Handler", "must not be null");
         }
 
         public void Configure(WorkerBuilder builder)
         {
-//            var configurator = new WorkerConsumerConnector<TConsumer>(_consumerFactory, ReferenceFactory);
+            var configurator = new HandlerWorkerConnector<TMessage>(_handler, ReferenceFactory);
 
-  //          builder.Add(configurator);
+            builder.Add(configurator);
         }
     }
 }

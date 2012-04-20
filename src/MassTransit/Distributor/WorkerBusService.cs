@@ -15,13 +15,13 @@ namespace MassTransit.Distributor
     using System;
     using System.Collections.Generic;
     using Configuration;
-    using Connectors;
     using Magnum.Caching;
     using Magnum.Extensions;
     using Stact;
     using Stact.Executors;
     using Stact.Internal;
     using Subscriptions;
+    using WorkerConnectors;
 
     public class WorkerBusService :
         IWorker,
@@ -36,7 +36,7 @@ namespace MassTransit.Distributor
         IServiceBus _bus;
         IServiceBus _controlBus;
         bool _disposed;
-        TimeSpan _publishInterval = 1.Seconds();
+        TimeSpan _publishInterval = 5.Seconds();
 
         public WorkerBusService(IList<WorkerConnector> connectors)
         {

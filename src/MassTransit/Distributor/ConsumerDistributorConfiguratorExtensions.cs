@@ -24,18 +24,18 @@ namespace MassTransit
     {
         static readonly ILog _log = Logger.Get(typeof(ConsumerDistributorConfiguratorExtensions));
 
-        public static DistributorConsumerConfigurator<TConsumer> Consumer<TConsumer>(
+        public static ConsumerDistributorConfigurator<TConsumer> Consumer<TConsumer>(
             this DistributorBusServiceConfigurator configurator)
             where TConsumer : class
         {
-            var consumerConfigurator = new DistributorConsumerConfiguratorImpl<TConsumer>();
+            var consumerConfigurator = new ConsumerDistributorConfiguratorImpl<TConsumer>();
 
             configurator.AddConfigurator(consumerConfigurator);
 
             return consumerConfigurator;
         }
 
-        public static DistributorConsumerConfigurator Consumer(
+        public static ConsumerDistributorConfigurator Consumer(
             [NotNull] this DistributorBusServiceConfigurator configurator,
             [NotNull] Type consumerType,
             [NotNull] Func<Type, object> consumerFactory)
@@ -45,12 +45,12 @@ namespace MassTransit
                     consumerType);
 
             object consumerConfigurator =
-                FastActivator.Create(typeof(UntypedDistributorConsumerConfigurator<>),
+                FastActivator.Create(typeof(UntypedConsumerDistributorConfigurator<>),
                     new[] { consumerType }, new object[] { consumerFactory });
 
             configurator.AddConfigurator((DistributorBuilderConfigurator)consumerConfigurator);
 
-            return (DistributorConsumerConfigurator)consumerConfigurator;
+            return (ConsumerDistributorConfigurator)consumerConfigurator;
         }
     }
 }

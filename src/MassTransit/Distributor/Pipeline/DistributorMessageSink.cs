@@ -15,6 +15,7 @@ namespace MassTransit.Distributor.Pipeline
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Logging;
     using Magnum.Extensions;
     using MassTransit.Pipeline;
     using Messages;
@@ -23,6 +24,8 @@ namespace MassTransit.Distributor.Pipeline
         IPipelineSink<IConsumeContext<TMessage>>
         where TMessage : class
     {
+        readonly ILog _log = Logger.Get<DistributorMessageSink<TMessage>>();
+
         readonly IWorkerAvailability<TMessage> _workerAvailability;
         readonly IWorkerSelector<TMessage> _workerSelector;
 
@@ -35,7 +38,8 @@ namespace MassTransit.Distributor.Pipeline
 
         public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
         {
-            return _workerAvailability.GetWorker(context, Handle, _workerSelector).DefaultIfEmpty(RetryLaterHandler);
+            return _workerAvailability.GetWorker(context, Handle, _workerSelector)
+                .DefaultIfEmpty(RetryLaterHandler);
         }
 
         public bool Inspect(IPipelineInspector inspector)
@@ -57,9 +61,29 @@ namespace MassTransit.Distributor.Pipeline
 
                     IEndpoint endpoint = context.Bus.GetEndpoint(worker.DataUri);
 
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Sending {0}[{1}] to {2}", typeof(TMessage).ToShortTypeName(),
+                            context.MessageId, worker.DataUri);
+
                     var distributed = new Distributed<TMessage>(context.Message, context.ResponseAddress);
 
-                    endpoint.Send(distributed, x => { x.SetUsing(context); });
+                    endpoint.Send(distributed, x =>
+                        {
+                            x.SetRequestId(context.RequestId);
+                            x.SetConversationId(context.ConversationId);
+                            x.SetCorrelationId(context.CorrelationId);
+                            x.SetSourceAddress(context.SourceAddress);
+                            x.SetDestinationAddress(context.DestinationAddress);
+                            x.SetResponseAddress(context.ResponseAddress);
+                            x.SetFaultAddress(context.FaultAddress);
+                            x.SetNetwork(context.Network);
+                            if (context.ExpirationTime.HasValue)
+                                x.SetExpirationTime(context.ExpirationTime.Value);
+
+                            context.Headers.Each(header => x.SetHeader(header.Key, header.Value));
+
+                            x.SetHeader("mt.worker.uri", worker.DataUri.ToString());
+                        });
                 };
         }
     }

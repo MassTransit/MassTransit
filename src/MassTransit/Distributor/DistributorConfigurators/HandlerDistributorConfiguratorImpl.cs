@@ -12,28 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.DistributorConfigurators
 {
-    using System.Collections.Generic;
-    using System.Linq;
     using Builders;
     using Configuration;
-    using Configurators;
     using DistributorConnectors;
-    using SubscriptionConfigurators;
 
-    public class DistributorConsumerConfiguratorImpl<TConsumer> :
-        DistributorConfiguratorImpl<DistributorConsumerConfigurator<TConsumer>>,
-        DistributorConsumerConfigurator<TConsumer>,
+    public class HandlerDistributorConfiguratorImpl<TMessage> :
+        DistributorConfiguratorImpl<HandlerDistributorConfigurator<TMessage>>,
+        HandlerDistributorConfigurator<TMessage>,
         DistributorBuilderConfigurator
-        where TConsumer : class
+        where TMessage : class
     {
-        public override IEnumerable<ValidationResult> Validate()
-        {
-            return base.Validate().Concat(this.ValidateConsumer<TConsumer>());
-        }
-
         public void Configure(DistributorBuilder builder)
         {
-            var configurator = new ConsumerDistributorConnector<TConsumer>(ReferenceFactory, WorkerSelectorFactory);
+            var configurator = new HandlerDistributorConnector<TMessage>(ReferenceFactory, WorkerSelectorFactory);
 
             builder.Add(configurator);
         }

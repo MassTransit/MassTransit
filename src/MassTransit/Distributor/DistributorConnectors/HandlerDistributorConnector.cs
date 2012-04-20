@@ -10,10 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Connectors
+namespace MassTransit.Distributor.DistributorConnectors
 {
     using Configuration;
-    using DistributorConnectors;
     using MassTransit.Pipeline;
     using Subscriptions;
 
@@ -21,10 +20,11 @@ namespace MassTransit.Distributor.Connectors
         DistributorConnector
         where TMessage : class
     {
-        readonly ReferenceFactory _referenceFactory;
         readonly MessageDistributorConnector _messageConnector;
+        readonly ReferenceFactory _referenceFactory;
 
-        public HandlerDistributorConnector(ReferenceFactory referenceFactory, IWorkerSelectorFactory workerSelectorFactory)
+        public HandlerDistributorConnector(ReferenceFactory referenceFactory,
+            IWorkerSelectorFactory workerSelectorFactory)
         {
             _referenceFactory = referenceFactory;
 

@@ -10,25 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Configuration
+namespace MassTransit.Distributor.WorkerConfigurators
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Builders;
     using BusConfigurators;
+    using BusServiceConfigurators;
     using Configurators;
     using MassTransit.Builders;
 
-    /// <summary>
-    /// Decorates subscriptions added through this interface to the subscription
-    /// bus service with the distributor components
-    /// </summary>
-    public class WorkerConfiguratorImpl :
-        WorkerConfigurator,
+    public class WorkerBusServiceConfiguratorImpl :
+        WorkerBusServiceConfigurator,
+        BusServiceConfigurator,
         BusBuilderConfigurator
     {
         readonly IList<WorkerBuilderConfigurator> _configurators;
 
-        public WorkerConfiguratorImpl()
+        public WorkerBusServiceConfiguratorImpl()
         {
             _configurators = new List<WorkerBuilderConfigurator>();
         }
@@ -41,11 +41,31 @@ namespace MassTransit.Distributor.Configuration
 
         public BusBuilder Configure(BusBuilder builder)
         {
-            var configurator = new WorkerBusServiceConfigurator(_configurators);
-
-            builder.AddBusServiceConfigurator(configurator);
+            builder.AddBusServiceConfigurator(this);
 
             return builder;
+        }
+
+        public Type ServiceType
+        {
+            get { return typeof(WorkerBusService); }
+        }
+
+        public BusServiceLayer Layer
+        {
+            get { return BusServiceLayer.Presentation; }
+        }
+
+        public IBusService Create(IServiceBus bus)
+        {
+            var builder = new WorkerBuilderImpl();
+
+            foreach (WorkerBuilderConfigurator configurator in _configurators)
+            {
+                configurator.Configure(builder);
+            }
+
+            return builder.Build();
         }
 
         public void AddConfigurator(WorkerBuilderConfigurator configurator)

@@ -14,15 +14,16 @@ namespace MassTransit
 {
     using Distributor;
     using Distributor.Configuration;
+    using Distributor.DistributorConfigurators;
     using Saga;
 
     public static class SagaDistributorConfiguratorExtensions
     {
-        public static DistributorSagaConfigurator<TSaga> Saga<TSaga>(
+        public static SagaDistributorConfigurator<TSaga> Saga<TSaga>(
             this DistributorBusServiceConfigurator configurator)
             where TSaga : class, ISaga
         {
-            var consumerConfigurator = new DistributorSagaConfiguratorImpl<TSaga>();
+            var consumerConfigurator = new SagaDistributorConfiguratorImpl<TSaga>();
 
             configurator.AddConfigurator(consumerConfigurator);
 
