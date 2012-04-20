@@ -16,6 +16,7 @@ namespace MassTransit.Distributor
     using Advanced;
     using BusConfigurators;
     using Configuration;
+    using DistributorConfigurators;
     using Magnum.Extensions;
     using Magnum.Reflection;
     using Saga;
@@ -95,9 +96,9 @@ namespace MassTransit.Distributor
         {
             T saga = FastActivator<T>.Create(NewId.NextGuid());
 
-            var serviceConfigurator = new SagaDistributorConfigurator(configurator);
+//            var serviceConfigurator = new SagaDistributorConfigurator(configurator);
 
-            saga.EnumerateDataEvents(serviceConfigurator.AddService);
+//            saga.EnumerateDataEvents(serviceConfigurator.AddService);
         }
 
         public static void ImplementSagaDistributorWorker<T>(this ServiceBusConfigurator configurator,

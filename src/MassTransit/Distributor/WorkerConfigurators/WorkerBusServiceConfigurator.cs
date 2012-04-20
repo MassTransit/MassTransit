@@ -10,43 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Configuration
+namespace MassTransit.Distributor.WorkerConfigurators
 {
-    using System;
-    using System.Collections.Generic;
-    using Builders;
-    using BusServiceConfigurators;
-
-    public class WorkerBusServiceConfigurator :
-        BusServiceConfigurator
+    public interface WorkerBusServiceConfigurator
     {
-        readonly IList<WorkerBuilderConfigurator> _configurators;
-
-        public WorkerBusServiceConfigurator(IList<WorkerBuilderConfigurator> configurators)
-        {
-            _configurators = configurators;
-        }
-
-        public Type ServiceType
-        {
-            get { return typeof(WorkerBusService); }
-        }
-
-        public BusServiceLayer Layer
-        {
-            get { return BusServiceLayer.Presentation; }
-        }
-
-        public IBusService Create(IServiceBus bus)
-        {
-            var builder = new WorkerBuilderImpl();
-
-            foreach (WorkerBuilderConfigurator configurator in _configurators)
-            {
-                configurator.Configure(builder);
-            }
-
-            return builder.Build();
-        }
+        void AddConfigurator(WorkerBuilderConfigurator configurator);
     }
 }

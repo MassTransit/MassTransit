@@ -16,7 +16,6 @@ namespace MassTransit.Distributor.DistributorConnectors
     using System.Collections.Generic;
     using System.Linq;
     using Configuration;
-    using Connectors;
     using Exceptions;
     using Magnum.Extensions;
     using Magnum.Reflection;
@@ -34,7 +33,8 @@ namespace MassTransit.Distributor.DistributorConnectors
         readonly ReferenceFactory _referenceFactory;
         readonly IWorkerSelectorFactory _workerSelectorFactory;
 
-        public ConsumerDistributorConnector(ReferenceFactory referenceFactory, IWorkerSelectorFactory workerSelectorFactory)
+        public ConsumerDistributorConnector(ReferenceFactory referenceFactory,
+            IWorkerSelectorFactory workerSelectorFactory)
         {
             _workerSelectorFactory = workerSelectorFactory;
             _referenceFactory = referenceFactory;

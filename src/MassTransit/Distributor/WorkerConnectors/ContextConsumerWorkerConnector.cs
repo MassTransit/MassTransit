@@ -10,29 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Builders
+namespace MassTransit.Distributor.WorkerConnectors
 {
-    using System.Collections.Generic;
-    using WorkerConnectors;
+    using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Sinks;
 
-    public class WorkerBuilderImpl :
-        WorkerBuilder
+    public class ContextConsumerWorkerConnector<TConsumer, TMessage> :
+        ConsumerWorkerConnectorImpl<TConsumer, TMessage>
+        where TMessage : class
+        where TConsumer : class, Consumes<TMessage>.Context
     {
-        readonly IList<WorkerConnector> _connectors;
-
-        public WorkerBuilderImpl()
+        public ContextConsumerWorkerConnector(IConsumerFactory<TConsumer> consumerFactory)
+            : base(consumerFactory)
         {
-            _connectors = new List<WorkerConnector>();
         }
 
-        public void Add(WorkerConnector builder)
+        protected override IPipelineSink<IConsumeContext<TMessage>> GetConsumerSink(
+            IConsumerFactory<TConsumer> consumerFactory)
         {
-            _connectors.Add(builder);
-        }
-
-        public IBusService Build()
-        {
-            return new WorkerBusService(_connectors);
+            return new ContextConsumerMessageSink<TConsumer, TMessage>(consumerFactory);
         }
     }
 }

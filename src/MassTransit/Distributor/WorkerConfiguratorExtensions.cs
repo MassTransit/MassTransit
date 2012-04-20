@@ -14,14 +14,14 @@ namespace MassTransit
 {
     using System;
     using BusConfigurators;
-    using Distributor.Configuration;
+    using Distributor.WorkerConfigurators;
 
     public static class WorkerConfiguratorExtensions
     {
         public static void Worker(this ServiceBusConfigurator configurator,
-            Action<WorkerConfigurator> configure)
+            Action<WorkerBusServiceConfigurator> configure)
         {
-            var workerConfigurator = new WorkerConfiguratorImpl();
+            var workerConfigurator = new WorkerBusServiceConfiguratorImpl();
 
             configure(workerConfigurator);
 

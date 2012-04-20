@@ -32,19 +32,14 @@ namespace MassTransit.Distributor
 
         public IWorkerInfo<TMessage> GetWorker<TMessage>(Uri uri, Func<Uri, IWorkerInfo> getWorker) where TMessage : class
         {
-            CachedWorker result = _workers.Get(uri, x =>
+            CachedWorker result = _workers.Get(uri, x => new CachedWorker(getWorker(x)));
+
+            return result.MessageWorkers.Get(typeof(TMessage), type =>
                 {
-                    IWorkerInfo worker = getWorker(x);
+                    _typeWorkers[typeof(TMessage)].Add(result);
 
-                    var cachedWorker = new CachedWorker(worker);
-                    
-                    _typeWorkers[typeof(TMessage)].Add(cachedWorker);
-
-                    return cachedWorker;
-                });
-
-            return result.MessageWorkers.Get(typeof(TMessage), type => new WorkerInfo<TMessage>(result.Worker))
-                   as IWorkerInfo<TMessage>;
+                    return new WorkerInfo<TMessage>(result.Worker);
+                }) as IWorkerInfo<TMessage>;
         }
 
         public IEnumerable<IWorkerInfo<TMessage>> GetAvailableWorkers<TMessage>(IConsumeContext<TMessage> context,

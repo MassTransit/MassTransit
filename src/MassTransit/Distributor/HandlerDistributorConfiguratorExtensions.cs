@@ -18,11 +18,11 @@ namespace MassTransit
 
     public static class HandlerDistributorConfiguratorExtensions
     {
-        public static DistributorHandlerConfigurator<TMessage> Handler<TMessage>(
+        public static HandlerDistributorConfigurator<TMessage> Handler<TMessage>(
             this DistributorBusServiceConfigurator configurator)
             where TMessage : class
         {
-            var handlerConfigurator = new DistributorHandlerConfiguratorImpl<TMessage>();
+            var handlerConfigurator = new HandlerDistributorConfiguratorImpl<TMessage>();
 
             configurator.AddConfigurator(handlerConfigurator);
 

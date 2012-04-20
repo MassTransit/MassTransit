@@ -10,22 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Connectors
+namespace MassTransit.Distributor.WorkerConnectors
 {
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Configuration;
+    using MassTransit.Pipeline.Sinks;
     using Messages;
     using Pipeline;
     using Subscriptions;
 
-    public class WorkerHandlerConnector<TMessage> :
+    public class HandlerWorkerConnector<TMessage> :
         WorkerConnector
         where TMessage : class
     {
         readonly HandlerSelector<TMessage> _handler;
         readonly ReferenceFactory _referenceFactory;
 
-        public WorkerHandlerConnector(HandlerSelector<TMessage> handler,
+        public HandlerWorkerConnector(HandlerSelector<TMessage> handler,
             ReferenceFactory referenceFactory)
         {
             _handler = handler;
@@ -36,7 +37,9 @@ namespace MassTransit.Distributor.Connectors
         {
             IWorkerLoad<TMessage> workerLoad = worker.GetWorkerLoad<TMessage>();
 
-            var sink = new WorkerMessageSink<TMessage>(workerLoad, MultipleHandlerSelector.ForHandler(_handler));
+            var handlerSink = new InstanceMessageSink<TMessage>(MultipleHandlerSelector.ForHandler(_handler));
+
+            var sink = new WorkerMessageSink<TMessage>(workerLoad, handlerSink);
 
             UnsubscribeAction unsubscribeAction = configurator.Pipeline.ConnectToRouter(sink,
                 () => configurator.SubscribedTo<Distributed<TMessage>>());

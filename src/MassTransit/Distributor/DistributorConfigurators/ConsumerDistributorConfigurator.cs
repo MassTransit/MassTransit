@@ -16,22 +16,22 @@ namespace MassTransit.Distributor.DistributorConfigurators
     using Configuration;
     using SubscriptionConfigurators;
 
-    public interface DistributorConsumerConfigurator :
-        SubscriptionConfigurator<DistributorConsumerConfigurator>
+    public interface ConsumerDistributorConfigurator :
+        SubscriptionConfigurator<ConsumerDistributorConfigurator>
     {
-        DistributorConsumerConfigurator UseWorkerSelector(Func<IWorkerSelectorFactory> selector);
+        ConsumerDistributorConfigurator UseWorkerSelector(Func<IWorkerSelectorFactory> selector);
 
-        DistributorConsumerConfigurator UseWorkerSelector<TFactory>()
+        ConsumerDistributorConfigurator UseWorkerSelector<TFactory>()
             where TFactory : IWorkerSelectorFactory, new();
     }
 
-    public interface DistributorConsumerConfigurator<TConsumer> :
-        SubscriptionConfigurator<DistributorConsumerConfigurator<TConsumer>>
+    public interface ConsumerDistributorConfigurator<TConsumer> :
+        SubscriptionConfigurator<ConsumerDistributorConfigurator<TConsumer>>
         where TConsumer : class
     {
-        DistributorConsumerConfigurator<TConsumer> UseWorkerSelector(Func<IWorkerSelectorFactory> selector);
+        ConsumerDistributorConfigurator<TConsumer> UseWorkerSelector(Func<IWorkerSelectorFactory> selector);
 
-        DistributorConsumerConfigurator<TConsumer> UseWorkerSelector<TFactory>()
+        ConsumerDistributorConfigurator<TConsumer> UseWorkerSelector<TFactory>()
             where TFactory : IWorkerSelectorFactory, new();
     }
 }

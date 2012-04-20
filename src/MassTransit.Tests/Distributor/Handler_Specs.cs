@@ -17,6 +17,8 @@ namespace MassTransit.Tests.Distributor
     using BusConfigurators;
     using Magnum.Extensions;
     using Magnum.TestFramework;
+    using MassTransit.Distributor;
+    using MassTransit.Distributor.DistributorConfigurators;
     using MassTransit.Distributor.Messages;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -89,46 +91,32 @@ namespace MassTransit.Tests.Distributor
         FutureMessage<A> _futureA = new FutureMessage<A>();
 
         [Test]
-        public void Should_have_the_subscription_for_the_actual_message()
-        {
-            LocalBus.HasSubscription<A>().Any()
-                .ShouldBeTrue("Message subscription was not found");
-        }
-
-        [Test]
-        public void Should_have_the_subscription_for_the_worker_availability()
-        {
-            LocalBus.HasSubscription<WorkerAvailable<A>>().Any()
-                .ShouldBeTrue("Worker available subscription was not found.");
-        }
-
-        [Test]
-        public void Should_have_the_subscription_for_the_distributed_message()
-        {
-            RemoteBus.HasSubscription<Distributed<A>>().Any()
-                .ShouldBeTrue("Message subscription was not found");
-        }
-
-        [Test]
-        public void Should_have_the_subscription_for_the_ping_worker()
-        {
-            RemoteBus.HasSubscription<PingWorker>().Any()
-                .ShouldBeTrue("PingWorker subscription was not found.");
-        }
-
-        [Test]
         public void Should_deliver_a_published_message()
         {
-            A message = new A();
+            var message = Publish<A>();
 
+            _futureA.IsAvailable(8.Seconds()).ShouldBeTrue();
+
+            _futureA.Message.CorrelationId.ShouldEqual(message.CorrelationId);
+        }
+
+        T Publish<T>()
+            where T : class, new()
+        {
+            LocalBus.HasSubscription<T>().Any()
+                .ShouldBeTrue("Message subscription was not found");
+            LocalBus.HasSubscription<WorkerAvailable<T>>().Any()
+                .ShouldBeTrue("Worker available subscription was not found.");
+            RemoteBus.HasSubscription<Distributed<T>>().Any()
+                .ShouldBeTrue("Message subscription was not found");
+
+            T message = new T();
             LocalBus.Endpoint.Send(message, context =>
                 {
                     context.SendResponseTo(LocalBus);
                 });
 
-            _futureA.IsAvailable(800.Seconds()).ShouldBeTrue();
-
-            _futureA.Message.CorrelationId.ShouldEqual(message.CorrelationId);
+            return message;
         }
 
         protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)

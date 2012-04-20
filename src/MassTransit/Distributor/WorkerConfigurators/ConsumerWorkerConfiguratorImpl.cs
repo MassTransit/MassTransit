@@ -12,42 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.WorkerConfigurators
 {
-    using System;
     using System.Collections.Generic;
     using Builders;
-    using Configuration;
     using Configurators;
-    using Connectors;
-    using MassTransit.Pipeline;
     using SubscriptionConfigurators;
+    using WorkerConnectors;
 
-    public class WorkerHandlerConfiguratorImpl<TMessage> :
-        SubscriptionConfiguratorImpl<WorkerHandlerConfigurator<TMessage>>,
-        WorkerHandlerConfigurator<TMessage>,
+    public class ConsumerWorkerConfiguratorImpl<TConsumer> :
+        SubscriptionConfiguratorImpl<ConsumerWorkerConfigurator<TConsumer>>,
+        ConsumerWorkerConfigurator<TConsumer>,
         WorkerBuilderConfigurator
-        where TMessage : class
+        where TConsumer : class
     {
-        readonly HandlerSelector<TMessage> _handler;
+        readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-        public WorkerHandlerConfiguratorImpl(Action<IConsumeContext<TMessage>, TMessage> handler)
+        public ConsumerWorkerConfiguratorImpl(IConsumerFactory<TConsumer> consumerFactory)
         {
-            _handler = x => context => handler(context, context.Message);
-        }
-
-        public WorkerHandlerConfiguratorImpl(Action<TMessage> handler)
-        {
-            _handler = HandlerSelector.ForHandler(handler);
+            _consumerFactory = consumerFactory;
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_handler == null)
-                yield return this.Failure("Handler", "must not be null");
+            return _consumerFactory.Validate();
         }
 
         public void Configure(WorkerBuilder builder)
         {
-            var configurator = new WorkerHandlerConnector<TMessage>(_handler, ReferenceFactory);
+            var configurator = new ConsumerWorkerConnector<TConsumer>(ReferenceFactory, _consumerFactory);
 
             builder.Add(configurator);
         }

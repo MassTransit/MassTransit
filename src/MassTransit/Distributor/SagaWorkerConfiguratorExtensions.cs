@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using Distributor.Configuration;
+    using Distributor.WorkerConfigurators;
     using Logging;
     using Saga;
     using Saga.SubscriptionConfigurators;
@@ -29,7 +29,7 @@ namespace MassTransit
         /// <param name="sagaRepository"></param>
         /// <returns></returns>
         public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-            this WorkerConfigurator configurator, ISagaRepository<TSaga> sagaRepository)
+            this WorkerBusServiceConfigurator configurator, ISagaRepository<TSaga> sagaRepository)
             where TSaga : class, ISaga
         {
             if (_log.IsDebugEnabled)

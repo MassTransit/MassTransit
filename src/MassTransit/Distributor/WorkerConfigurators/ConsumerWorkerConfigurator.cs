@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Configuration
+namespace MassTransit.Distributor.WorkerConfigurators
 {
-    using System;
     using SubscriptionConfigurators;
 
-    public interface DistributorHandlerConfigurator<TMessage> :
-        SubscriptionConfigurator<DistributorHandlerConfigurator<TMessage>>
-        where TMessage : class
+    public interface ConsumerWorkerConfigurator :
+        SubscriptionConfigurator<ConsumerWorkerConfigurator>
     {
-        DistributorHandlerConfigurator<TMessage> UseWorkerSelector(Func<IWorkerSelectorFactory> selector);
+    }
 
-        DistributorHandlerConfigurator<TMessage> UseWorkerSelector<TFactory>()
-            where TFactory : IWorkerSelectorFactory, new();
+    public interface ConsumerWorkerConfigurator<TConsumer> :
+        SubscriptionConfigurator<ConsumerWorkerConfigurator<TConsumer>>
+        where TConsumer : class
+    {
     }
 }
