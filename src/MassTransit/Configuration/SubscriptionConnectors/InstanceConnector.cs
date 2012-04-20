@@ -1,12 +1,12 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -15,7 +15,6 @@ namespace MassTransit.SubscriptionConnectors
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Distributor.SubscriptionConnectors;
     using Exceptions;
     using Magnum.Extensions;
     using Magnum.Reflection;
@@ -36,25 +35,26 @@ namespace MassTransit.SubscriptionConnectors
 
         public InstanceConnector()
         {
-            Type[] interfaces = typeof (T).GetInterfaces();
+            Type[] interfaces = typeof(T).GetInterfaces();
 
-            if (interfaces.Contains(typeof (ISaga)))
+            if (interfaces.Contains(typeof(ISaga)))
                 throw new ConfigurationException("A saga cannot be registered as a consumer");
 
-            if (interfaces.Implements(typeof (InitiatedBy<>))
-                || interfaces.Implements(typeof (Orchestrates<>))
-                || interfaces.Implements(typeof (Observes<,>)))
+            if (interfaces.Implements(typeof(InitiatedBy<>))
+                || interfaces.Implements(typeof(Orchestrates<>))
+                || interfaces.Implements(typeof(Observes<,>)))
                 throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
 
-            _connectors =/* Distributors()
+            _connectors = /* Distributors()
                 .Concat(Workers())
-                .Concat(*/ConsumesCorrelated()
-                .Concat(ConsumesSelectedContext())
-                .Concat(ConsumesContext())
-                .Concat(ConsumesSelected())
-                .Concat(ConsumesAll())
-                .Distinct((x, y) => x.MessageType == y.MessageType)
-                .ToList();
+                .Concat(*/
+                ConsumesCorrelated()
+                    .Concat(ConsumesSelectedContext())
+                    .Concat(ConsumesContext())
+                    .Concat(ConsumesSelected())
+                    .Concat(ConsumesAll())
+                    .Distinct((x, y) => x.MessageType == y.MessageType)
+                    .ToList();
         }
 
 
@@ -84,15 +84,15 @@ namespace MassTransit.SubscriptionConnectors
         static InstanceSubscriptionConnector CreateContextConnector(MessageInterfaceType x)
         {
             return (InstanceSubscriptionConnector)
-                   FastActivator.Create(typeof (ContextInstanceSubscriptionConnector<,>),
-                       new[] {typeof (T), x.MessageType});
+                   FastActivator.Create(typeof(ContextInstanceSubscriptionConnector<,>),
+                       new[] {typeof(T), x.MessageType});
         }
 
         static InstanceSubscriptionConnector CreateSelectedContextConnector(MessageInterfaceType x)
         {
             return (InstanceSubscriptionConnector)
-                   FastActivator.Create(typeof (SelectedContextInstanceSubscriptionConnector<,>),
-                       new[] {typeof (T), x.MessageType});
+                   FastActivator.Create(typeof(SelectedContextInstanceSubscriptionConnector<,>),
+                       new[] {typeof(T), x.MessageType});
         }
 
         static IEnumerable<InstanceSubscriptionConnector> ConsumesAll()
@@ -104,7 +104,7 @@ namespace MassTransit.SubscriptionConnectors
         static InstanceSubscriptionConnector CreateConnector(MessageInterfaceType x)
         {
             return (InstanceSubscriptionConnector)
-                   FastActivator.Create(typeof (InstanceSubscriptionConnector<,>), new[] {typeof (T), x.MessageType});
+                   FastActivator.Create(typeof(InstanceSubscriptionConnector<,>), new[] {typeof(T), x.MessageType});
         }
 
         static IEnumerable<InstanceSubscriptionConnector> ConsumesSelected()
@@ -116,8 +116,8 @@ namespace MassTransit.SubscriptionConnectors
         static InstanceSubscriptionConnector CreateSelectedConnector(MessageInterfaceType x)
         {
             return (InstanceSubscriptionConnector)
-                   FastActivator.Create(typeof (SelectedInstanceSubscriptionConnector<,>),
-                       new[] {typeof (T), x.MessageType});
+                   FastActivator.Create(typeof(SelectedInstanceSubscriptionConnector<,>),
+                       new[] {typeof(T), x.MessageType});
         }
 
         static IEnumerable<InstanceSubscriptionConnector> ConsumesCorrelated()
@@ -129,8 +129,8 @@ namespace MassTransit.SubscriptionConnectors
         static InstanceSubscriptionConnector CreateCorrelatedConnector(CorrelatedMessageInterfaceType x)
         {
             return (InstanceSubscriptionConnector)
-                   FastActivator.Create(typeof (CorrelatedInstanceSubscriptionConnector<,,>),
-                       new[] {typeof (T), x.MessageType, x.CorrelationType});
+                   FastActivator.Create(typeof(CorrelatedInstanceSubscriptionConnector<,,>),
+                       new[] {typeof(T), x.MessageType, x.CorrelationType});
         }
 
 
