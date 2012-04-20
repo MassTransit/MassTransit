@@ -15,6 +15,7 @@ namespace MassTransit.Distributor
     using System;
     using System.Collections.Generic;
     using Logging;
+    using Magnum.Extensions;
     using MassTransit.Pipeline;
     using Messages;
 
@@ -35,6 +36,8 @@ namespace MassTransit.Distributor
             _worker = worker;
 
             _pending = new WorkerPendingMessageTracker<TMessage>();
+
+            PublishWorkerAvailability(1.Minutes());
         }
 
         public void Consume(IConsumeContext<PingWorker> context)
@@ -91,6 +94,24 @@ namespace MassTransit.Distributor
         {
             foreach (var handler in selector(context))
                 yield return ctx => Handle(ctx, handler);
+        }
+
+        public void PublishWorkerAvailability(TimeSpan timeToLive)
+        {
+            try
+            {
+                var message = new WorkerAvailable<TMessage>(_worker.ControlUri, _worker.DataUri,
+                    _inProgress, _inProgressLimit, _pending.PendingMessageCount(), _pendingLimit);
+
+                _worker.Bus.Publish(message, x => x.ExpiresAt(DateTime.UtcNow + timeToLive));
+
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Worker {0}: {1} in progress, {2} pending", _worker.DataUri,
+                        _inProgress, _pending);
+            }
+            catch
+            {
+            }
         }
 
         void Handle(IConsumeContext<Distributed<TMessage>> context,

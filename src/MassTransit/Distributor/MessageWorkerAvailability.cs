@@ -36,8 +36,12 @@ namespace MassTransit.Distributor
         {
             IWorkerInfo<TMessage> worker = _workerCache.GetWorker<TMessage>(context.Message.ControlUri, x =>
                 {
-                    return new WorkerInfo(context.Message.ControlUri,
-                        context.Message.DataUri);
+                    if(_log.IsInfoEnabled)
+                        _log.InfoFormat("Discovered New Worker: {0}", context.Message.ControlUri);
+
+                    WorkerInfo workerInfo = new WorkerInfo(context.Message.ControlUri, context.Message.DataUri);
+
+                    return new WorkerInfo<TMessage>(workerInfo);
                 });
 
             worker.Update(context.Message.InProgress,

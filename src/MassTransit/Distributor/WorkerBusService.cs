@@ -17,6 +17,9 @@ namespace MassTransit.Distributor
     using Configuration;
     using Magnum.Caching;
     using Magnum.Extensions;
+    using Stact;
+    using Stact.Executors;
+    using Stact.Internal;
     using Subscriptions;
 
     public class WorkerBusService :
@@ -26,10 +29,13 @@ namespace MassTransit.Distributor
         readonly IList<WorkerConnector> _connectors;
         readonly IList<ISubscriptionReference> _subscriptions;
         readonly Cache<Type, IWorkerLoad> _workerLoadCache;
+        readonly Fiber _fiber;
+        readonly Scheduler _scheduler;
 
         IServiceBus _bus;
         IServiceBus _controlBus;
         bool _disposed;
+        TimeSpan _publishInterval = 1.Seconds();
 
         public WorkerBusService(IList<WorkerConnector> connectors)
         {
@@ -37,6 +43,14 @@ namespace MassTransit.Distributor
 
             _subscriptions = new List<ISubscriptionReference>();
             _workerLoadCache = new GenericTypeCache<IWorkerLoad>(typeof(IWorkerLoad<>));
+
+            _fiber = new PoolFiber(new TryCatchOperationExecutor());
+            _scheduler = new TimerScheduler(new PoolFiber(new TryCatchOperationExecutor()));
+        }
+
+        public IServiceBus ControlBus
+        {
+            get { return _controlBus; }
         }
 
         public void Dispose()
@@ -68,11 +82,26 @@ namespace MassTransit.Distributor
 
                     return () => true;
                 });
+
+            _scheduler.Schedule(TimeSpan.Zero, _publishInterval, _fiber, PublishWorkerAvailability);
+        }
+
+        void PublishWorkerAvailability()
+        {
+            _workerLoadCache.Each(x =>
+                {
+                    x.PublishWorkerAvailability(_publishInterval);
+                });
         }
 
         public void Stop()
         {
             StopAllSubscriptions();
+        }
+
+        public IServiceBus Bus
+        {
+            get { return _bus; }
         }
 
         public Uri ControlUri
@@ -89,7 +118,7 @@ namespace MassTransit.Distributor
             where TMessage : class
         {
             IWorkerLoad workerLoad = _workerLoadCache.Get(typeof(TMessage),
-               _ => AddWorkerLoad<TMessage>());
+                _ => AddWorkerLoad<TMessage>());
 
             return workerLoad as IWorkerLoad<TMessage>;
         }
