@@ -16,8 +16,6 @@ namespace MassTransit.Tests.Distributor
     using BusConfigurators;
     using Magnum.Extensions;
     using Magnum.TestFramework;
-    using MassTransit.Distributor;
-    using MassTransit.Distributor.DistributorConfigurators;
     using MassTransit.Distributor.Messages;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -141,15 +139,12 @@ namespace MassTransit.Tests.Distributor
             LocalBus.HasSubscription<T>().Any()
                 .ShouldBeTrue("Message subscription was not found");
             LocalBus.HasSubscription<WorkerAvailable<T>>().Any()
-               .ShouldBeTrue("Worker available subscription was not found.");
+                .ShouldBeTrue("Worker available subscription was not found.");
             RemoteBus.HasSubscription<Distributed<T>>().Any()
                 .ShouldBeTrue("Message subscription was not found");
 
-            T message = new T();
-            LocalBus.Endpoint.Send(message, context =>
-            {
-                context.SendResponseTo(LocalBus);
-            });
+            var message = new T();
+            LocalBus.Endpoint.Send(message, context => { context.SendResponseTo(LocalBus); });
         }
 
         protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
@@ -221,13 +216,6 @@ namespace MassTransit.Tests.Distributor
         }
 
         [Test]
-        public void Should_have_the_subscription_for_the_selected_consumer()
-        {
-            LocalBus.HasSubscription<Distributed<B>>().Any()
-                .ShouldBeTrue("Message subscription was not found");
-        }
-
-        [Test]
         public void Should_have_the_subscription_for_the_context_consumer()
         {
             LocalBus.HasSubscription<Distributed<C>>().Any()
@@ -239,6 +227,13 @@ namespace MassTransit.Tests.Distributor
         {
             RemoteBus.HasSubscription<PingWorker>().Any()
                 .ShouldBeTrue("PingWorker subscription was not found.");
+        }
+
+        [Test]
+        public void Should_have_the_subscription_for_the_selected_consumer()
+        {
+            LocalBus.HasSubscription<Distributed<B>>().Any()
+                .ShouldBeTrue("Message subscription was not found");
         }
 
         protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)

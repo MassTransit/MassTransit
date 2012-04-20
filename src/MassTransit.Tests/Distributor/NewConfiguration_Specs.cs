@@ -36,7 +36,7 @@ namespace MassTransit.Tests.Distributor
 
                         d.Consumer<MyConsumer>();
 
-                        d.Saga<MySaga>();
+                        d.Saga<MySaga>(new InMemorySagaRepository<MySaga>());
                     });
 
                 });

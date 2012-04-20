@@ -273,7 +273,7 @@
     <Compile Include="Distributor\Builders\WorkerBuilder.cs" />
     <Compile Include="Distributor\Builders\WorkerBuilderImpl.cs" />
     <Compile Include="Distributor\ConsumerDistributorConfiguratorExtensions.cs" />
-    <Compile Include="Distributor\DistributorBusServiceConfigurator.cs" />
+    <Compile Include="Distributor\DistributorConfigurators\DistributorBusServiceConfigurator.cs" />
     <Compile Include="Distributor\ConsumerWorkerConfiguratorExtensions.cs" />
     <Compile Include="Distributor\Builders\DistributorBuilder.cs" />
     <Compile Include="Distributor\DistributorConfigurators\DistributorBuilderConfigurator.cs" />
@@ -287,7 +287,12 @@
     <Compile Include="Distributor\DistributorConfigurators\UntypedConsumerDistributorConfigurator.cs" />
     <Compile Include="Distributor\DistributorConnectors\ConsumerDistributorConnector.cs" />
     <Compile Include="Distributor\DistributorConnectors\MessageDistributorConnector.cs" />
+    <Compile Include="Distributor\DistributorConnectors\ObservesSagaDistributorConnector.cs" />
+    <Compile Include="Distributor\DistributorConnectors\CorrelatedSagaDistributorConnector.cs" />
+    <Compile Include="Distributor\DistributorConnectors\SagaDistributorConnector.cs" />
     <Compile Include="Distributor\WorkerConfiguratorExtensions.cs" />
+    <Compile Include="Distributor\WorkerConfigurators\SagaWorkerConfigurator.cs" />
+    <Compile Include="Distributor\WorkerConfigurators\SagaWorkerConfiguratorImpl.cs" />
     <Compile Include="Distributor\WorkerConnectors\ConsumerWorkerConnector.cs" />
     <Compile Include="Distributor\HandlerDistributorConfiguratorExtensions.cs" />
     <Compile Include="Distributor\HandlerWorkerConfiguratorExtensions.cs" />

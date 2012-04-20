@@ -88,7 +88,7 @@ namespace MassTransit.Distributor
             _unsubscribeAction = bus.ControlBus.SubscribeHandler<ConfigureWorker>(Consume, Accept);
             _unsubscribeAction += bus.ControlBus.SubscribeContextHandler<PingWorker>(Consume);
             _unsubscribeAction += bus.SubscribeInstance(this);
-            _unsubscribeAction += bus.SubscribeSagaWorker(this, _sagaRepository);
+           // _unsubscribeAction += bus.SubscribeSagaWorker(this, _sagaRepository);
 
             CacheMessageTypesForSaga();
 

@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using BusConfigurators;
-    using Distributor;
     using Distributor.DistributorConfigurators;
 
     public static class DistributorConfiguratorExtensions
