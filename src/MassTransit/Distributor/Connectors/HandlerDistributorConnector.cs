@@ -12,37 +12,28 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.Connectors
 {
-    using System;
     using Configuration;
+    using DistributorConnectors;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Configuration;
-    using Pipeline;
     using Subscriptions;
 
-    public class DistributorHandlerConnector<TMessage> :
+    public class HandlerDistributorConnector<TMessage> :
         DistributorConnector
         where TMessage : class
     {
-        readonly IWorkerSelector<TMessage> _workerSelector;
-        readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
+        readonly ReferenceFactory _referenceFactory;
+        readonly MessageDistributorConnector _messageConnector;
 
-        public DistributorHandlerConnector(IWorkerSelector<TMessage> workerSelector,
-            Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)
+        public HandlerDistributorConnector(ReferenceFactory referenceFactory, IWorkerSelectorFactory workerSelectorFactory)
         {
-            _workerSelector = workerSelector;
             _referenceFactory = referenceFactory;
+
+            _messageConnector = new MessageDistributorConnector<TMessage>(workerSelectorFactory);
         }
 
         public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
         {
-            IWorkerAvailability<TMessage> workerAvailability = distributor.GetWorkerAvailability<TMessage>();
-
-            var sink = new DistributorMessageSink<TMessage>(workerAvailability, _workerSelector);
-
-            UnsubscribeAction unsubscribeAction = configurator.Pipeline.ConnectToRouter(sink,
-                () => configurator.SubscribedTo<TMessage>());
-
-            return _referenceFactory(unsubscribeAction);
+            return _referenceFactory(_messageConnector.Connect(configurator, distributor));
         }
     }
 }

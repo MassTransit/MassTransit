@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.Connectors
 {
-    using System;
-    using Configuration;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Configuration;
     using Messages;
@@ -25,10 +23,10 @@ namespace MassTransit.Distributor.Connectors
         where TMessage : class
     {
         readonly HandlerSelector<TMessage> _handler;
-        readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
+        readonly ReferenceFactory _referenceFactory;
 
         public WorkerHandlerConnector(HandlerSelector<TMessage> handler,
-            Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)
+            ReferenceFactory referenceFactory)
         {
             _handler = handler;
             _referenceFactory = referenceFactory;

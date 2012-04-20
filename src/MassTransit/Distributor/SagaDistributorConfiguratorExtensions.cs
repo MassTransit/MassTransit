@@ -10,13 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Configuration
+namespace MassTransit
 {
-    using MassTransit.Pipeline;
-    using Subscriptions;
+    using Distributor;
+    using Distributor.Configuration;
+    using Saga;
 
-    public interface DistributorConnector
+    public static class SagaDistributorConfiguratorExtensions
     {
-        ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IDistributor distributor);
+        public static DistributorSagaConfigurator<TSaga> Saga<TSaga>(
+            this DistributorBusServiceConfigurator configurator)
+            where TSaga : class, ISaga
+        {
+            var consumerConfigurator = new DistributorSagaConfiguratorImpl<TSaga>();
+
+            configurator.AddConfigurator(consumerConfigurator);
+
+            return consumerConfigurator;
+        }
     }
 }

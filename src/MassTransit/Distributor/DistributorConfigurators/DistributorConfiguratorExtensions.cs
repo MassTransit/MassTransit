@@ -10,29 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Builders
+namespace MassTransit
 {
-    using System.Collections.Generic;
-    using Connectors;
+    using System;
+    using BusConfigurators;
+    using Distributor;
+    using Distributor.Configuration;
+    using Distributor.DistributorConfigurators;
 
-    public class DistributorBuilderImpl :
-        DistributorBuilder
+    public static class DistributorConfiguratorExtensions
     {
-        readonly IList<DistributorConnector> _connectors;
-
-        public DistributorBuilderImpl()
+        public static void Distributor(this ServiceBusConfigurator configurator,
+            Action<DistributorBusServiceConfigurator> configure)
         {
-            _connectors = new List<DistributorConnector>();
-        }
+            var subscriptionConfigurator = new DistributorBusServiceConfiguratorImpl();
 
-        public void Add(DistributorConnector builder)
-        {
-            _connectors.Add(builder);
-        }
+            configure(subscriptionConfigurator);
 
-        public IBusService Build()
-        {
-            return new DistributorBusService(_connectors);
+            configurator.AddBusConfigurator(subscriptionConfigurator);
         }
     }
 }
