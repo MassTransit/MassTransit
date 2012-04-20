@@ -24,7 +24,7 @@ namespace MassTransit.Distributor.Pipeline
         where TMessage : class
     {
         readonly IWorkerAvailability<TMessage> _workerAvailability;
-        IWorkerSelector<TMessage> _workerSelector;
+        readonly IWorkerSelector<TMessage> _workerSelector;
 
         public DistributorMessageSink(IWorkerAvailability<TMessage> workerAvailability,
             IWorkerSelector<TMessage> workerSelector)

@@ -1,42 +1,41 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.SubscriptionBuilders
 {
-	using System;
-	using MassTransit.Pipeline;
-	using MassTransit.SubscriptionBuilders;
-	using SubscriptionConnectors;
-	using Subscriptions;
+    using MassTransit.Pipeline;
+    using MassTransit.SubscriptionBuilders;
+    using SubscriptionConnectors;
+    using Subscriptions;
 
-	public class SagaSubscriptionBuilder<TSaga> :
-		SubscriptionBuilder
-		where TSaga : class, ISaga
-	{
-		readonly SagaConnector<TSaga> _connector;
-		readonly Func<UnsubscribeAction, ISubscriptionReference> _referenceFactory;
+    public class SagaSubscriptionBuilder<TSaga> :
+        SubscriptionBuilder
+        where TSaga : class, ISaga
+    {
+        readonly SagaConnector<TSaga> _connector;
+        readonly ReferenceFactory _referenceFactory;
 
-		public SagaSubscriptionBuilder(ISagaRepository<TSaga> sagaRepository,
-		                               Func<UnsubscribeAction, ISubscriptionReference> referenceFactory)
-		{
-			_connector = new SagaConnector<TSaga>(sagaRepository);
-			_referenceFactory = referenceFactory;
-		}
+        public SagaSubscriptionBuilder(ISagaRepository<TSaga> sagaRepository,
+            ReferenceFactory referenceFactory)
+        {
+            _connector = new SagaConnector<TSaga>(sagaRepository);
+            _referenceFactory = referenceFactory;
+        }
 
-		public ISubscriptionReference Subscribe(IInboundPipelineConfigurator configurator)
-		{
-			UnsubscribeAction unsubscribe = _connector.Connect(configurator);
+        public ISubscriptionReference Subscribe(IInboundPipelineConfigurator configurator)
+        {
+            UnsubscribeAction unsubscribe = _connector.Connect(configurator);
 
-			return _referenceFactory(unsubscribe);
-		}
-	}
+            return _referenceFactory(unsubscribe);
+        }
+    }
 }

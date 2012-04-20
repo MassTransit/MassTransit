@@ -10,12 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Builders
+namespace MassTransit.Distributor.Connectors
 {
-    using Connectors;
+    using MassTransit.Pipeline;
+    using Subscriptions;
 
-    public interface DistributorBuilder
+    public interface WorkerConnector
     {
-        void Add(DistributorConnector builder);
+        ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker);
     }
 }

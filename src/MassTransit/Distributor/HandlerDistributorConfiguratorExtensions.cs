@@ -12,27 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
+    using Distributor;
     using Distributor.Configuration;
+    using Distributor.DistributorConfigurators;
 
-    public static class HandlerWorkerConfiguratorExtensions
+    public static class HandlerDistributorConfiguratorExtensions
     {
-        public static WorkerHandlerConfigurator<T> Handler<T>(this WorkerConfigurator configurator,
-            Action<T> handler)
-            where T : class
+        public static DistributorHandlerConfigurator<TMessage> Handler<TMessage>(
+            this DistributorBusServiceConfigurator configurator)
+            where TMessage : class
         {
-            var handlerConfigurator = new WorkerHandlerConfiguratorImpl<T>(handler);
-
-            configurator.AddConfigurator(handlerConfigurator);
-
-            return handlerConfigurator;
-        }
-
-        public static WorkerHandlerConfigurator<T> Handler<T>(this WorkerConfigurator configurator,
-            Action<IConsumeContext<T>, T> handler)
-            where T : class
-        {
-            var handlerConfigurator = new WorkerHandlerConfiguratorImpl<T>(handler);
+            var handlerConfigurator = new DistributorHandlerConfiguratorImpl<TMessage>();
 
             configurator.AddConfigurator(handlerConfigurator);
 

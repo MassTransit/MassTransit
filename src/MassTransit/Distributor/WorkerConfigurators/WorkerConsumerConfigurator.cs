@@ -12,11 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.Configuration
 {
-    using MassTransit.Pipeline;
-    using Subscriptions;
+    using SubscriptionConfigurators;
 
-    public interface WorkerConnector
+    public interface WorkerConsumerConfigurator :
+        SubscriptionConfigurator<WorkerConsumerConfigurator>
     {
-        ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker);
+    }
+
+    public interface WorkerConsumerConfigurator<TConsumer> :
+        SubscriptionConfigurator<WorkerConsumerConfigurator<TConsumer>>
+        where TConsumer : class
+    {
     }
 }

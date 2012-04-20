@@ -30,18 +30,6 @@ namespace MassTransit.Distributor
             _typeWorkers = new ConcurrentCache<Type, IList<CachedWorker>>(type => new List<CachedWorker>());
         }
 
-        public IWorkerInfo GetWorker(Uri uri, Func<Uri, IWorkerInfo> getWorker)
-        {
-            CachedWorker result = _workers.Get(uri, x =>
-                {
-                    IWorkerInfo worker = getWorker(x);
-
-                    return new CachedWorker(worker);
-                });
-
-            return result.Worker;
-        }
-
         public IWorkerInfo<TMessage> GetWorker<TMessage>(Uri uri, Func<Uri, IWorkerInfo> getWorker) where TMessage : class
         {
             CachedWorker result = _workers.Get(uri, x =>

@@ -10,34 +10,40 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Distributor.DistributorConfigurators
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using Builders;
+    using Configuration;
     using Configurators;
-    using Distributor;
-    using Distributor.Builders;
-    using Distributor.Configuration;
+    using DistributorConnectors;
+    using SubscriptionConfigurators;
 
-    public class DistributorConsumerConfiguratorImpl<TConsumer> :
-        DistributorConsumerConfigurator<TConsumer>,
+    public class UntypedDistributorConsumerConfigurator<TConsumer> :
+        DistributorConfiguratorImpl<DistributorConsumerConfigurator>,
+        DistributorConsumerConfigurator,
         DistributorBuilderConfigurator
         where TConsumer : class
     {
-        public DistributorConsumerConfigurator<TConsumer> UseWorkerSelector(
-            Func<IWorkerSelector<TConsumer>> selector)
+        readonly Func<IWorkerSelectorFactory> _workerSelectorFactory;
+
+        public UntypedDistributorConsumerConfigurator()
         {
-            throw new NotImplementedException();
+            _workerSelectorFactory = () => new LeastBusyWorkerSelectorFactory();
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public override IEnumerable<ValidationResult> Validate()
         {
-            throw new NotImplementedException();
+            return base.Validate().Concat(this.ValidateConsumer<TConsumer>());
         }
 
         public void Configure(DistributorBuilder builder)
         {
-            throw new NotImplementedException();
+            var configurator = new ConsumerDistributorConnector<TConsumer>(ReferenceFactory, _workerSelectorFactory());
+
+            builder.Add(configurator);
         }
     }
 }

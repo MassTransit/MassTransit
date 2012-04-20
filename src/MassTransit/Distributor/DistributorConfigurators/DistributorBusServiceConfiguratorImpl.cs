@@ -10,25 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Configuration
+namespace MassTransit.Distributor.DistributorConfigurators
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Builders;
     using BusConfigurators;
+    using BusServiceConfigurators;
+    using Configuration;
     using Configurators;
     using MassTransit.Builders;
 
-    /// <summary>
-    /// Decorates subscriptions added through this interface to the subscription
-    /// bus service with the distributor components
-    /// </summary>
-    public class DistributorConfiguratorImpl :
-        DistributorConfigurator,
+    public class DistributorBusServiceConfiguratorImpl :
+        DistributorBusServiceConfigurator,
+        BusServiceConfigurator,
         BusBuilderConfigurator
     {
         readonly IList<DistributorBuilderConfigurator> _configurators;
 
-        public DistributorConfiguratorImpl()
+        public DistributorBusServiceConfiguratorImpl()
         {
             _configurators = new List<DistributorBuilderConfigurator>();
         }
@@ -41,11 +42,31 @@ namespace MassTransit.Distributor.Configuration
 
         public BusBuilder Configure(BusBuilder builder)
         {
-            var configurator = new DistributorBusServiceConfigurator(_configurators);
-
-            builder.AddBusServiceConfigurator(configurator);
+            builder.AddBusServiceConfigurator(this);
 
             return builder;
+        }
+
+        public Type ServiceType
+        {
+            get { return typeof(DistributorBusService); }
+        }
+
+        public BusServiceLayer Layer
+        {
+            get { return BusServiceLayer.Presentation; }
+        }
+
+        public IBusService Create(IServiceBus bus)
+        {
+            var distributorBuilder = new DistributorBuilderImpl();
+
+            foreach (DistributorBuilderConfigurator configurator in _configurators)
+            {
+                configurator.Configure(distributorBuilder);
+            }
+
+            return distributorBuilder.Build();
         }
 
         public void AddConfigurator(DistributorBuilderConfigurator configurator)
