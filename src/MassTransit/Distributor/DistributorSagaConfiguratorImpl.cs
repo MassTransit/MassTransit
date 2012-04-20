@@ -18,14 +18,14 @@ namespace MassTransit
     using Distributor;
     using Distributor.Builders;
     using Distributor.Configuration;
+    using Saga;
 
-    public class DistributorConsumerConfiguratorImpl<TConsumer> :
-        DistributorConsumerConfigurator<TConsumer>,
+    public class DistributorSagaConfiguratorImpl<TSaga> :
+        DistributorSagaConfigurator<TSaga>,
         DistributorBuilderConfigurator
-        where TConsumer : class
+        where TSaga : class, ISaga
     {
-        public DistributorConsumerConfigurator<TConsumer> UseWorkerSelector(
-            Func<IWorkerSelector<TConsumer>> selector)
+        public DistributorSagaConfigurator<TSaga> UseWorkerSelector(Func<IWorkerSelector<TSaga>> selector)
         {
             throw new NotImplementedException();
         }

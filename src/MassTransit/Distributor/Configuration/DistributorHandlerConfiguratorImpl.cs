@@ -13,30 +13,52 @@
 namespace MassTransit.Distributor.Configuration
 {
     using System;
+    using System.Collections.Generic;
+    using Builders;
+    using Configurators;
+    using Connectors;
+    using SubscriptionConfigurators;
 
-    public class DistributorHandlerConfiguratorImpl<T> :
-        DistributorHandlerConfigurator<T>,
+    public class DistributorHandlerConfiguratorImpl<TMessage> :
+        SubscriptionConfiguratorImpl<DistributorHandlerConfigurator<TMessage>>,
+        DistributorHandlerConfigurator<TMessage>,
         DistributorBuilderConfigurator
-        where T : class
+        where TMessage : class
     {
-        Func<IWorkerSelectionStrategy<T>> _selector;
+        Func<IWorkerSelectorFactory> _workerSelectorFactory;
 
         public DistributorHandlerConfiguratorImpl()
         {
-            _selector = () => new DefaultWorkerSelectionStrategy<T>();
+            _workerSelectorFactory = () => new LeastBusyWorkerSelectorFactory();
         }
 
-        public DistributorHandlerConfigurator<T> UseWorkerSelector(Func<IWorkerSelectionStrategy<T>> selector)
+        public IEnumerable<ValidationResult> Validate()
         {
-            _selector = selector;
+            if (_workerSelectorFactory == null)
+                yield return this.Failure("Selector", "must not be null");
+        }
+
+        public void Configure(DistributorBuilder builder)
+        {
+            var workerSelector = _workerSelectorFactory().GetSelector<TMessage>();
+
+            var configurator = new DistributorHandlerConnector<TMessage>(workerSelector, ReferenceFactory);
+
+            builder.Add(configurator);
+        }
+
+        public DistributorHandlerConfigurator<TMessage> UseWorkerSelector(
+            Func<IWorkerSelectorFactory> workerSelectorFactory)
+        {
+            _workerSelectorFactory = workerSelectorFactory;
 
             return this;
         }
 
-        public DistributorHandlerConfigurator<T> UseWorkerSelector<TSelector>()
-            where TSelector : IWorkerSelectionStrategy<T>, new()
+        public DistributorHandlerConfigurator<TMessage> UseWorkerSelector<TSelector>()
+            where TSelector : IWorkerSelectorFactory, new()
         {
-            _selector = () => new TSelector();
+            _workerSelectorFactory = () => new TSelector();
 
             return this;
         }

@@ -13,10 +13,15 @@
 namespace MassTransit.Distributor.Configuration
 {
     using System;
+    using SubscriptionConfigurators;
 
-    public interface DistributorHandlerConfigurator<TMessage>
+    public interface DistributorHandlerConfigurator<TMessage> :
+        SubscriptionConfigurator<DistributorHandlerConfigurator<TMessage>>
         where TMessage : class
     {
-        DistributorHandlerConfigurator<TMessage> UseWorkerSelector(Func<IWorkerSelectionStrategy<TMessage>> selector);
+        DistributorHandlerConfigurator<TMessage> UseWorkerSelector(Func<IWorkerSelectorFactory> selector);
+
+        DistributorHandlerConfigurator<TMessage> UseWorkerSelector<TFactory>()
+            where TFactory : IWorkerSelectorFactory, new();
     }
 }

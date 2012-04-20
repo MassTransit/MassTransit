@@ -15,7 +15,8 @@ namespace MassTransit.Distributor
     using System;
     using Magnum;
 
-    public class WorkerDetails
+    public class WorkerDetails :
+        IWorker
     {
         public int InProgress;
         public int InProgressLimit;

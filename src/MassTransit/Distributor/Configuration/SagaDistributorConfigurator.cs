@@ -35,7 +35,7 @@ namespace MassTransit.Distributor.Configuration
 		private void AddServiceForDataEvent<TMessage>()
 			where TMessage : class
 		{
-			_configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<TMessage>());
+			//_configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<TMessage>());
 		}
 	}
 }

@@ -46,9 +46,9 @@ namespace MassTransit.SubscriptionConnectors
                 || interfaces.Implements(typeof (Observes<,>)))
                 throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
 
-            _connectors = Distributors()
+            _connectors =/* Distributors()
                 .Concat(Workers())
-                .Concat(ConsumesCorrelated())
+                .Concat(*/ConsumesCorrelated()
                 .Concat(ConsumesSelectedContext())
                 .Concat(ConsumesContext())
                 .Concat(ConsumesSelected())
@@ -134,18 +134,18 @@ namespace MassTransit.SubscriptionConnectors
         }
 
 
-        static IEnumerable<InstanceSubscriptionConnector> Distributors()
-        {
-            return MessageInterfaceTypeReflector<T>.GetDistributorTypes()
-                .Select(x => FastActivator.Create(typeof (DistributorSubscriptionConnector<>), new[] {x.MessageType}))
-                .Cast<InstanceSubscriptionConnector>();
-        }
-
-        static IEnumerable<InstanceSubscriptionConnector> Workers()
-        {
-            return MessageInterfaceTypeReflector<T>.GetWorkerTypes()
-                .Select(x => FastActivator.Create(typeof (WorkerSubscriptionConnector<>), new[] {x.MessageType}))
-                .Cast<InstanceSubscriptionConnector>();
-        }
+//        static IEnumerable<InstanceSubscriptionConnector> Distributors()
+//        {
+//            return MessageInterfaceTypeReflector<T>.GetDistributorTypes()
+//                .Select(x => FastActivator.Create(typeof (DistributorSubscriptionConnector<>), new[] {x.MessageType}))
+//                .Cast<InstanceSubscriptionConnector>();
+//        }
+//
+//        static IEnumerable<InstanceSubscriptionConnector> Workers()
+//        {
+//            return MessageInterfaceTypeReflector<T>.GetWorkerTypes()
+//                .Select(x => FastActivator.Create(typeof (WorkerSubscriptionConnector<>), new[] {x.MessageType}))
+//                .Cast<InstanceSubscriptionConnector>();
+//        }
     }
 }

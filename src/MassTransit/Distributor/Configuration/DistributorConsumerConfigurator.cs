@@ -17,6 +17,6 @@ namespace MassTransit.Distributor.Configuration
     public interface DistributorConsumerConfigurator<TConsumer>
         where TConsumer : class
     {
-        DistributorConsumerConfigurator<TConsumer> UseWorkerSelector(Func<IWorkerSelectionStrategy<TConsumer>> selector);
+        DistributorConsumerConfigurator<TConsumer> UseWorkerSelector(Func<IWorkerSelector<TConsumer>> selector);
     }
 }

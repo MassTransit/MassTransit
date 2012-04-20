@@ -86,15 +86,15 @@ namespace MassTransit.SubscriptionConnectors
                 .Where(IsNotContextType);
         }
 
-        internal static IEnumerable<MessageInterfaceType> GetDistributorTypes()
-        {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (IDistributor<>))
-                .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0]))
-                .Where(x => x.MessageType.IsValueType == false)
-                .Where(IsNotContextType);
-        }
+//        internal static IEnumerable<MessageInterfaceType> GetDistributorTypes()
+//        {
+//            return typeof (T).GetInterfaces()
+//                .Where(x => x.IsGenericType)
+//                .Where(x => x.GetGenericTypeDefinition() == typeof (IDistributor<>))
+//                .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0]))
+//                .Where(x => x.MessageType.IsValueType == false)
+//                .Where(IsNotContextType);
+//        }
 
         internal static IEnumerable<MessageInterfaceType> GetWorkerTypes()
         {

@@ -116,6 +116,7 @@
   <ItemGroup>
     <Compile Include="Configuration\Diagnostics_Specs.cs" />
     <Compile Include="Diagnostics\Trace_Specs.cs" />
+    <Compile Include="Distributor\Handler_Specs.cs" />
     <Compile Include="Distributor\NewConfiguration_Specs.cs" />
     <Compile Include="Environment_Specs.cs" />
     <Compile Include="InterfaceProxy_Specs.cs" />

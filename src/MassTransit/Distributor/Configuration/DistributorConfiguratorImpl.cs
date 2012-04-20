@@ -13,27 +13,44 @@
 namespace MassTransit.Distributor.Configuration
 {
     using System.Collections.Generic;
-    using SubscriptionConfigurators;
+    using System.Linq;
+    using BusConfigurators;
+    using Configurators;
+    using MassTransit.Builders;
 
     /// <summary>
     /// Decorates subscriptions added through this interface to the subscription
     /// bus service with the distributor components
     /// </summary>
     public class DistributorConfiguratorImpl :
-        DistributorConfigurator
+        DistributorConfigurator,
+        BusBuilderConfigurator
     {
-        readonly SubscriptionBusServiceConfigurator _configurator;
-        readonly IList<SubscriptionBusServiceBuilderConfigurator> _configurators;
+        readonly IList<DistributorBuilderConfigurator> _configurators;
 
-        public DistributorConfiguratorImpl(SubscriptionBusServiceConfigurator configurator)
+        public DistributorConfiguratorImpl()
         {
-            _configurator = configurator;
-            _configurators = new List<SubscriptionBusServiceBuilderConfigurator>();
+            _configurators = new List<DistributorBuilderConfigurator>();
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return _configurators.SelectMany(configurator => configurator.Validate(),
+                (configurator, result) => result.WithParentKey("Distributor"));
+        }
+
+        public BusBuilder Configure(BusBuilder builder)
+        {
+            var configurator = new DistributorBusServiceConfigurator(_configurators);
+
+            builder.AddBusServiceConfigurator(configurator);
+
+            return builder;
         }
 
         public void AddConfigurator(DistributorBuilderConfigurator configurator)
         {
-            throw new System.NotImplementedException();
+            _configurators.Add(configurator);
         }
     }
 }

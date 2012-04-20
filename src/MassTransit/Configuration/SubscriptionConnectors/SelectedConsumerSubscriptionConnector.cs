@@ -12,21 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConnectors
 {
-	using System;
-	using Magnum.Extensions;
-	using Pipeline;
-	using Pipeline.Configuration;
-	using Pipeline.Sinks;
+    using System;
+    using Magnum.Extensions;
+    using Pipeline;
+    using Pipeline.Configuration;
+    using Pipeline.Sinks;
 
-	public class SelectedConsumerSubscriptionConnector<TConsumer, TMessage> :
-		ConsumerSubscriptionConnector
-		where TConsumer : class, Consumes<TMessage>.Selected
-		where TMessage : class
-	{
-    	public Type MessageType
-		{
-			get { return typeof (TMessage); }
-		}
+    public class SelectedConsumerSubscriptionConnector<TConsumer, TMessage> :
+        ConsumerSubscriptionConnector
+        where TConsumer : class, Consumes<TMessage>.Selected
+        where TMessage : class
+    {
+        public Type MessageType
+        {
+            get { return typeof (TMessage); }
+        }
 
         public UnsubscribeAction Connect<T>(IInboundPipelineConfigurator configurator, IConsumerFactory<T> factory)
             where T : class
@@ -38,7 +38,7 @@ namespace MassTransit.SubscriptionConnectors
 
             var sink = new SelectedConsumerMessageSink<TConsumer, TMessage>(consumerFactory);
 
-			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
-		}
-	}
+            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
+        }
+    }
 }

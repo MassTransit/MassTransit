@@ -1,4 +1,4 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,28 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
 namespace MassTransit.Distributor
 {
-	/// <summary>
-	/// Interface implemented by distributor implementations - a marker
-	/// interface in general, that names the concept and specifies
-	/// that the distributor is a bus service.
-	/// </summary>
-	public interface IDistributor :
-		IBusService
-	{
-	}
-
-	/// <summary>
-	/// Interface implemented by distributor implementations - a marker
-	/// interface in general, that names the concept and specifies
-	/// that the distributor is a bus service.
-	/// </summary>
-	public interface IDistributor<TMessage> :
-		IDistributor,
-		Consumes<TMessage>.Selected
-		where TMessage : class
-	{
-	}
+    public interface IDistributor
+    {
+        IWorkerAvailability<TMessage> GetWorkerAvailability<TMessage>()
+            where TMessage : class;
+    }
 }

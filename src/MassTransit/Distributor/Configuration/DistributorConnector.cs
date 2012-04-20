@@ -12,12 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.Configuration
 {
-    using Builders;
-    using Configurators;
+    using MassTransit.Pipeline;
+    using Subscriptions;
 
-    public interface DistributorBuilderConfigurator :
-        Configurator
+    public interface DistributorConnector
     {
-        void Configure(DistributorBuilder builder);
+        ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IDistributor distributor);
     }
 }

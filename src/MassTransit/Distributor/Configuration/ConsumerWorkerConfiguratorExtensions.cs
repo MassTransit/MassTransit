@@ -17,8 +17,40 @@ namespace MassTransit
     using Distributor.Configuration;
     using Logging;
     using Magnum.Reflection;
+    using Saga;
+    using Saga.SubscriptionConfigurators;
     using SubscriptionConfigurators;
     using Util;
+
+    public static class SagaWorkerConfiguratorExtensions
+    {
+        static readonly ILog _log = Logger.Get(typeof(SagaWorkerConfiguratorExtensions));
+        /// <summary>
+        /// Configure a saga subscription
+        /// </summary>
+        /// <typeparam name="TSaga"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="sagaRepository"></param>
+        /// <returns></returns>
+        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
+            this WorkerConfigurator configurator, ISagaRepository<TSaga> sagaRepository)
+            where TSaga : class, ISaga
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
+
+            var sagaConfigurator = new SagaSubscriptionConfiguratorImpl<TSaga>(sagaRepository);
+
+    //        var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(sagaConfigurator);
+
+      //      configurator.AddConfigurator(busServiceConfigurator);
+
+            return sagaConfigurator;
+        }
+
+
+    }
+
 
     public static class ConsumerWorkerConfiguratorExtensions
     {
@@ -34,9 +66,9 @@ namespace MassTransit
 
             var consumerConfigurator = new ConsumerSubscriptionConfiguratorImpl<TConsumer>(consumerFactory);
 
-            var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(consumerConfigurator);
+//            var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(consumerConfigurator);
 
-            configurator.AddConfigurator(busServiceConfigurator);
+  //          configurator.AddConfigurator(busServiceConfigurator);
 
             return consumerConfigurator;
         }
@@ -54,7 +86,7 @@ namespace MassTransit
 
             var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(consumerConfigurator);
 
-            configurator.AddConfigurator(busServiceConfigurator);
+        //    configurator.AddConfigurator(busServiceConfigurator);
 
             return consumerConfigurator;
         }
@@ -72,7 +104,7 @@ namespace MassTransit
 
             var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(consumerConfigurator);
 
-            configurator.AddConfigurator(busServiceConfigurator);
+          //  configurator.AddConfigurator(busServiceConfigurator);
 
             return consumerConfigurator;
         }
@@ -92,7 +124,7 @@ namespace MassTransit
 
             var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(consumerConfigurator);
 
-            configurator.AddConfigurator(busServiceConfigurator);
+           // configurator.AddConfigurator(busServiceConfigurator);
 
             return consumerConfigurator as ConsumerSubscriptionConfigurator;
         }

@@ -14,55 +14,55 @@ namespace MassTransit
 {
     using Logging;
     using Magnum;
-	using Saga;
-	using Saga.SubscriptionConfigurators;
-	using Saga.SubscriptionConnectors;
-	using SubscriptionConfigurators;
+    using Saga;
+    using Saga.SubscriptionConfigurators;
+    using Saga.SubscriptionConnectors;
+    using SubscriptionConfigurators;
 
-	public static class SagaSubscriptionConfiguratorExtensions
-	{
-		static readonly ILog _log = Logger.Get(typeof (SagaSubscriptionConfiguratorExtensions));
+    public static class SagaSubscriptionConfiguratorExtensions
+    {
+        static readonly ILog _log = Logger.Get(typeof (SagaSubscriptionConfiguratorExtensions));
 
-		/// <summary>
-		/// Configure a saga subscription
-		/// </summary>
-		/// <typeparam name="TSaga"></typeparam>
-		/// <param name="configurator"></param>
-		/// <param name="sagaRepository"></param>
-		/// <returns></returns>
-		public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-			this SubscriptionBusServiceConfigurator configurator, ISagaRepository<TSaga> sagaRepository)
-			where TSaga : class, ISaga
-		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
+        /// <summary>
+        /// Configure a saga subscription
+        /// </summary>
+        /// <typeparam name="TSaga"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="sagaRepository"></param>
+        /// <returns></returns>
+        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
+            this SubscriptionBusServiceConfigurator configurator, ISagaRepository<TSaga> sagaRepository)
+            where TSaga : class, ISaga
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
 
-			var sagaConfigurator = new SagaSubscriptionConfiguratorImpl<TSaga>(sagaRepository);
+            var sagaConfigurator = new SagaSubscriptionConfiguratorImpl<TSaga>(sagaRepository);
 
-			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(sagaConfigurator);
+            var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(sagaConfigurator);
 
-			configurator.AddConfigurator(busServiceConfigurator);
+            configurator.AddConfigurator(busServiceConfigurator);
 
-			return sagaConfigurator;
-		}
+            return sagaConfigurator;
+        }
 
-		/// <summary>
-		/// Connects the saga to the service bus
-		/// </summary>
-		/// <typeparam name="TSaga">The consumer type</typeparam>
-		/// <param name="bus"></param>
-		/// <param name="sagaRepository"></param>
-		public static UnsubscribeAction SubscribeSaga<TSaga>(this IServiceBus bus, ISagaRepository<TSaga> sagaRepository)
-			where TSaga : class, ISaga
-		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
+        /// <summary>
+        /// Connects the saga to the service bus
+        /// </summary>
+        /// <typeparam name="TSaga">The consumer type</typeparam>
+        /// <param name="bus"></param>
+        /// <param name="sagaRepository"></param>
+        public static UnsubscribeAction SubscribeSaga<TSaga>(this IServiceBus bus, ISagaRepository<TSaga> sagaRepository)
+            where TSaga : class, ISaga
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
 
-			Guard.AgainstNull(sagaRepository, "sagaRepository", "A saga repository must be specified");
+            Guard.AgainstNull(sagaRepository, "sagaRepository", "A saga repository must be specified");
 
-			var connector = new SagaConnector<TSaga>(sagaRepository);
+            var connector = new SagaConnector<TSaga>(sagaRepository);
 
-			return bus.Configure(x => connector.Connect(x));
-		}
-	}
+            return bus.Configure(x => connector.Connect(x));
+        }
+    }
 }

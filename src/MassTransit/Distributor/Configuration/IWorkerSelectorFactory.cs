@@ -12,12 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.Configuration
 {
-    using Builders;
-    using Configurators;
-
-    public interface DistributorBuilderConfigurator :
-        Configurator
+    public interface IWorkerSelectorFactory
     {
-        void Configure(DistributorBuilder builder);
+        IWorkerSelector<TMessage> GetSelector<TMessage>()
+            where TMessage : class;
     }
 }
