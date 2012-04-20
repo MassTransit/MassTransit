@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,20 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using BusConfigurators;
     using Distributor.Configuration;
 
-    public static class DistributorConfiguratorExtensions
+    public static class ConsumerDistributorConfiguratorExtensions
     {
-        public static void Distributor(this ServiceBusConfigurator configurator,
-            Action<DistributorConfigurator> configure)
+        public static DistributorConsumerConfigurator<TConsumer> Consumer<TConsumer>(
+            this DistributorConfigurator configurator)
+            where TConsumer : class
         {
-            var subscriptionConfigurator = new DistributorConfiguratorImpl();
+            var consumerConfigurator = new DistributorConsumerConfiguratorImpl<TConsumer>();
 
-            configure(subscriptionConfigurator);
+            configurator.AddConfigurator(consumerConfigurator);
 
-            configurator.AddBusConfigurator(subscriptionConfigurator);
+            return consumerConfigurator;
         }
     }
 }

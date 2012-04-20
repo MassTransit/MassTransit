@@ -14,79 +14,112 @@ namespace MassTransit.Distributor
 {
     using System;
     using System.Collections.Generic;
+    using Configuration;
+    using Magnum.Caching;
     using Magnum.Extensions;
-    using SubscriptionBuilders;
     using Subscriptions;
 
     public class DistributorBusService :
-		IBusService
-	{
-		readonly IList<SubscriptionBuilder> _builders;
-		readonly IList<ISubscriptionReference> _subscriptions;
+        IDistributor,
+        IBusService
+    {
+        readonly IList<DistributorConnector> _connectors;
+        readonly IList<ISubscriptionReference> _subscriptions;
+        readonly Cache<Type, IWorkerAvailability> _workerAvailabilityCache;
+        readonly IWorkerCache _workerCache;
 
-		bool _disposed;
+        IServiceBus _bus;
+        IServiceBus _controlBus;
+        bool _disposed;
 
-		public DistributorBusService(IList<SubscriptionBuilder> builders)
-		{
-			_builders = builders;
+        public DistributorBusService(IList<DistributorConnector> connectors)
+        {
+            _connectors = connectors;
 
-			_subscriptions = new List<ISubscriptionReference>();
-		}
+            _subscriptions = new List<ISubscriptionReference>();
+            _workerAvailabilityCache = new ConcurrentCache<Type, IWorkerAvailability>();
+            _workerCache = new DistributorWorkerCache();
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		public void Start(IServiceBus bus)
-		{
-			bus.Configure(pipelineConfigurator =>
-				{
-					foreach (SubscriptionBuilder builder in _builders)
-					{
-						try
-						{
-							ISubscriptionReference subscription = builder.Subscribe(pipelineConfigurator);
-							_subscriptions.Add(subscription);
-						}
-						catch (Exception)
-						{
-							StopAllSubscriptions();
-							throw;
-						}
-					}
+        public void Start(IServiceBus bus)
+        {
+            _bus = bus;
+            _controlBus = bus.ControlBus;
 
-					return () => true;
-				});
-		}
+            bus.Configure(pipelineConfigurator =>
+                {
+                    foreach (DistributorConnector connector in _connectors)
+                    {
+                        try
+                        {
+                            ISubscriptionReference subscription = connector.Connect(pipelineConfigurator, this);
+                            _subscriptions.Add(subscription);
+                        }
+                        catch (Exception)
+                        {
+                            StopAllSubscriptions();
+                            throw;
+                        }
+                    }
 
-		public void Stop()
-		{
-			StopAllSubscriptions();
-		}
+                    return () => true;
+                });
+        }
 
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_builders.Clear();
-				_subscriptions.Clear();
-			}
+        public void Stop()
+        {
+            StopAllSubscriptions();
+        }
 
-			_disposed = true;
-		}
+        public IWorkerAvailability<TMessage> GetWorkerAvailability<TMessage>()
+            where TMessage : class
+        {
+            IWorkerAvailability workerAvailability = _workerAvailabilityCache.Get(typeof(TMessage),
+                _ => AddWorkerAvailabilityThingie<TMessage>());
 
-		void StopAllSubscriptions()
-		{
-			_subscriptions.Each(x => x.OnStop());
-			_subscriptions.Clear();
-		}
+            return workerAvailability as IWorkerAvailability<TMessage>;
+        }
 
-		~DistributorBusService()
-		{
-			Dispose(false);
-		}
-	}
+        IWorkerAvailability AddWorkerAvailabilityThingie<TMessage>()
+            where TMessage : class
+        {
+            var workerAvailability = new MessageWorkerAvailability<TMessage>(_workerCache);
+
+            UnsubscribeAction unsubscribeAction = _controlBus.SubscribeInstance(workerAvailability);
+
+            _subscriptions.Add(new TransientSubscriptionReference(unsubscribeAction));
+
+            return workerAvailability;
+        }
+
+        void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+            if (disposing)
+            {
+                _connectors.Clear();
+                _subscriptions.Clear();
+            }
+
+            _disposed = true;
+        }
+
+        void StopAllSubscriptions()
+        {
+            _subscriptions.Each(x => x.OnStop());
+            _subscriptions.Clear();
+        }
+
+        ~DistributorBusService()
+        {
+            Dispose(false);
+        }
+    }
 }

@@ -20,25 +20,25 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 	using Messages;
 	using Pipeline;
 
-	public class WorkerSubscriptionConnector<TMessage> :
-		InstanceSubscriptionConnector
-		where TMessage : class
-	{
-		public Type MessageType
-		{
-			get { return typeof (Distributed<TMessage>); }
-		}
-
-		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
-		{
-			var worker = instance as IWorker<TMessage>;
-			if (worker == null)
-				throw new ConfigurationException("The instance is not a distributor worker");
-
-			var sink = new WorkerMessageSink<Distributed<TMessage>>(MultipleHandlerSelector.ForHandler(
-				HandlerSelector.ForSelectiveHandler<Distributed<TMessage>>(worker.Accept, worker.Consume)));
-
-			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<Distributed<TMessage>>());
-		}
-	}
+//	public class WorkerSubscriptionConnector<TMessage> :
+//		InstanceSubscriptionConnector
+//		where TMessage : class
+//	{
+//		public Type MessageType
+//		{
+//			get { return typeof (Distributed<TMessage>); }
+//		}
+//
+//		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
+//		{
+//			var worker = instance as IWorker<TMessage>;
+//			if (worker == null)
+//				throw new ConfigurationException("The instance is not a distributor worker");
+//
+//			var sink = new WorkerMessageSink<Distributed<TMessage>>(MultipleHandlerSelector.ForHandler(
+//				HandlerSelector.ForSelectiveHandler<Distributed<TMessage>>(worker.Accept, worker.Consume)));
+//
+//			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<Distributed<TMessage>>());
+//		}
+//	}
 }

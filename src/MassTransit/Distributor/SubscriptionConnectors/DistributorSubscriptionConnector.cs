@@ -19,25 +19,25 @@ namespace MassTransit.Distributor.SubscriptionConnectors
 	using MassTransit.SubscriptionConnectors;
 	using Pipeline;
 
-	public class DistributorSubscriptionConnector<TMessage> :
-		InstanceSubscriptionConnector
-		where TMessage : class
-	{
-		public Type MessageType
-		{
-			get { return typeof (TMessage); }
-		}
-
-		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
-		{
-			var distributor = instance as IDistributor<TMessage>;
-			if (distributor == null)
-				throw new ConfigurationException("The connected instance is not a distributor");
-
-			var sink = new DistributorMessageSink<TMessage>(MultipleHandlerSelector.ForHandler(
-				HandlerSelector.ForSelectiveHandler<TMessage>(distributor.Accept, distributor.Consume)));
-
-			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
-		}
-	}
+//	public class DistributorSubscriptionConnector<TMessage> :
+//		InstanceSubscriptionConnector
+//		where TMessage : class
+//	{
+//		public Type MessageType
+//		{
+//			get { return typeof (TMessage); }
+//		}
+//
+//		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
+//		{
+//			var distributor = instance as IDistributor<TMessage>;
+//			if (distributor == null)
+//				throw new ConfigurationException("The connected instance is not a distributor");
+//
+//			var sink = new DistributorMessageSink<TMessage>(MultipleHandlerSelector.ForHandler(
+//				HandlerSelector.ForSelectiveHandler<TMessage>(distributor.Accept, distributor.Consume)));
+//
+//			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
+//		}
+//	}
 }

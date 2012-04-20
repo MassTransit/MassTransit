@@ -30,7 +30,7 @@ namespace MassTransit.Distributor
         public static void UseDistributorFor<T>(this ServiceBusConfigurator configurator)
             where T : class
         {
-            configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<T>());
+            //configurator.AddService(BusServiceLayer.Presentation, () => new Distributor<T>());
 
             configurator.SetReceiveTimeout(50.Milliseconds());
         }
@@ -44,10 +44,10 @@ namespace MassTransit.Distributor
         /// <param name="configurator">Service bus to implement the distributor</param>
         public static void UseDistributorFor<TMessage, TSelectionStrategy>(this ServiceBusConfigurator configurator)
             where TMessage : class
-            where TSelectionStrategy : class, IWorkerSelectionStrategy<TMessage>, new()
+            where TSelectionStrategy : class, IWorkerSelector<TMessage>, new()
         {
-            configurator.AddService(BusServiceLayer.Presentation,
-                () => new Distributor<TMessage>(new TSelectionStrategy()));
+            //configurator.AddService(BusServiceLayer.Presentation,
+           //     () => new Distributor<TMessage>(new TSelectionStrategy()));
 
             configurator.SetReceiveTimeout(50.Milliseconds());
         }
@@ -60,11 +60,11 @@ namespace MassTransit.Distributor
         /// <param name="workerSelectionStrategy">The <code>IWorkerSelectionStrategy</code> 
         /// used to pick which worker node to send a message</param>
         public static void UseDistributorFor<TMessage>(this ServiceBusConfigurator configurator,
-                                                       IWorkerSelectionStrategy<TMessage> workerSelectionStrategy)
+                                                       IWorkerSelector<TMessage> workerSelectionStrategy)
             where TMessage : class
         {
-            configurator.AddService(BusServiceLayer.Presentation,
-                () => new Distributor<TMessage>(workerSelectionStrategy));
+           // configurator.AddService(BusServiceLayer.Presentation,
+           //     () => new Distributor<TMessage>(workerSelectionStrategy));
 
             configurator.SetReceiveTimeout(50.Milliseconds());
         }
@@ -73,7 +73,7 @@ namespace MassTransit.Distributor
                                                                 Func<TMessage, Action<TMessage>> getConsumer)
             where TMessage : class
         {
-            configurator.AddService(BusServiceLayer.Presentation, () => new Worker<TMessage>(getConsumer));
+           // configurator.AddService(BusServiceLayer.Presentation, () => new Worker<TMessage>(getConsumer));
         }
 
         public static void ImplementDistributorWorker<TMessage>(this ServiceBusConfigurator configurator,
@@ -87,7 +87,7 @@ namespace MassTransit.Distributor
                     PendingLimit = pendingLimit
                 };
 
-            configurator.AddService(BusServiceLayer.Presentation, () => new Worker<TMessage>(getConsumer, settings));
+           // configurator.AddService(BusServiceLayer.Presentation, () => new Worker<TMessage>(getConsumer, settings));
         }
 
         public static void UseSagaDistributorFor<T>(this ServiceBusConfigurator configurator)

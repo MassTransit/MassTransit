@@ -10,14 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Configuration
+namespace MassTransit.Distributor
 {
-    using Builders;
-    using Configurators;
+    using System.Collections.Generic;
 
-    public interface DistributorBuilderConfigurator :
-        Configurator
+    public interface IWorkerSelector<TMessage>
+        where TMessage : class
     {
-        void Configure(DistributorBuilder builder);
+        IEnumerable<IWorker<TMessage>> SelectWorker(IEnumerable<IWorker<TMessage>> availableWorkers,
+            IConsumeContext<TMessage> context);
     }
 }

@@ -52,8 +52,8 @@ namespace MassTransit.SubscriptionConnectors
                 || interfaces.Implements(typeof (Observes<,>)))
                 throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
 
-            if (interfaces.Implements(typeof (IDistributor<>))
-                || interfaces.Implements(typeof (IWorker<>))
+            if (/*interfaces.Implements(typeof (IDistributor<>))
+                ||*/ interfaces.Implements(typeof (IWorker<>))
                 || interfaces.Implements(typeof (ISagaWorker<>)))
                 throw new ConfigurationException("Distributor classes can only be subscribed as instances");
 

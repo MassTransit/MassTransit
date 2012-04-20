@@ -26,7 +26,7 @@ namespace MassTransit
 
             var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(handlerConfigurator);
 
-            configurator.AddConfigurator(busServiceConfigurator);
+//            configurator.AddConfigurator(busServiceConfigurator);
 
             return handlerConfigurator;
         }
@@ -39,7 +39,7 @@ namespace MassTransit
 
             var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(handlerConfigurator);
 
-            configurator.AddConfigurator(busServiceConfigurator);
+  //          configurator.AddConfigurator(busServiceConfigurator);
 
             return handlerConfigurator;
         }

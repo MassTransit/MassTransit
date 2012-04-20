@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -24,25 +24,12 @@ namespace MassTransit.Tests.Distributor
     using MassTransit.Distributor.Messages;
     using MassTransit.Pipeline.Inspectors;
     using NUnit.Framework;
-    using Rhino.Mocks;
     using TestFramework;
-    using Util;
 
     [TestFixture]
     public class Default_distributor_specifications :
         LoopbackDistributorTestFixture
     {
-        protected override void EstablishContext()
-        {
-            base.EstablishContext();
-
-            AddFirstCommandInstance("A", "loopback://localhost/a");
-            AddFirstCommandInstance("B", "loopback://localhost/b");
-            AddFirstCommandInstance("C", "loopback://localhost/c");
-
-            RemoteBus.ShouldHaveRemoteSubscriptionFor<Distributed<FirstCommand>>();
-        }
-
         [Test]
         public void Can_collect_iworkeravaiable_messages()
         {
@@ -55,13 +42,8 @@ namespace MassTransit.Tests.Distributor
                     messageRecieved.Set();
                 });
 
-            Instances.ToList().ForEach(x =>
-                {
-                    x.Value.DataBus.ControlBus.Endpoint.Send(new PingWorker(), c =>
-                        {
-                            c.SendResponseTo(LocalBus);
-                        });
-                });
+            Instances.ToList().ForEach(
+                x => { x.Value.DataBus.ControlBus.Endpoint.Send(new PingWorker(), c => { c.SendResponseTo(LocalBus); }); });
 
             messageRecieved.WaitOne(8.Seconds());
 
@@ -101,8 +83,11 @@ namespace MassTransit.Tests.Distributor
                     messageRecieved.Set();
                 });
 
-            Instances.ToList().ForEach(x => { x.Value.DataBus.ControlBus.Endpoint.Send(new PingWorker(),
-                y => y.SendResponseTo(LocalBus)); });
+            Instances.ToList().ForEach(x =>
+                {
+                    x.Value.DataBus.ControlBus.Endpoint.Send(new PingWorker(),
+                        y => y.SendResponseTo(LocalBus));
+                });
 
             messageRecieved.WaitOne(8.Seconds());
 
@@ -125,15 +110,27 @@ namespace MassTransit.Tests.Distributor
             var generator = new LoadGenerator<FirstCommand, FirstResponse>();
             const int count = 100;
 
-            generator.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), count, x => new FirstCommand(x));
+            generator.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), count,
+                x => new FirstCommand(x));
 
             Dictionary<Uri, int> results = generator.GetWorkerLoad();
 
             Assert.That(results.Sum(x => x.Value), Is.EqualTo(count));
             results.ToList().ForEach(x =>
                                      Assert.That(x.Value, Is.GreaterThan(0).And.LessThanOrEqualTo(count),
-                                        string.Format("{0} did not consume between 0 and {1}",
-                                            x.Key.ToString(), count)));
+                                         string.Format("{0} did not consume between 0 and {1}",
+                                             x.Key.ToString(), count)));
+        }
+
+        protected override void EstablishContext()
+        {
+            base.EstablishContext();
+
+            AddFirstCommandInstance("A", "loopback://localhost/a");
+            AddFirstCommandInstance("B", "loopback://localhost/b");
+            AddFirstCommandInstance("C", "loopback://localhost/c");
+
+            RemoteBus.ShouldHaveRemoteSubscriptionFor<Distributed<FirstCommand>>();
         }
     }
 
@@ -141,6 +138,21 @@ namespace MassTransit.Tests.Distributor
     public class Distributor_with_custom_worker_selection_strategy :
         LoopbackDistributorTestFixture
     {
+        [Test, Explicit]
+        public void Node_a_should_recieve_all_the_work()
+        {
+            var generator = new LoadGenerator<FirstCommand, FirstResponse>();
+            const int count = 100;
+
+            generator.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), count,
+                x => new FirstCommand(x));
+
+            Dictionary<Uri, int> results = generator.GetWorkerLoad();
+
+            Assert.That(results.Sum(x => x.Value), Is.EqualTo(count));
+            Assert.That(results[_nodes["A"]], Is.EqualTo(count));
+        }
+
         Dictionary<String, Uri> _nodes = new Dictionary<string, Uri>
             {
                 {"A", new Uri("loopback://localhost/a")},
@@ -157,38 +169,26 @@ namespace MassTransit.Tests.Distributor
 
         protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
         {
-            var mock = MockRepository.GenerateStub<IWorkerSelectionStrategy<FirstCommand>>();
-            mock.Stub(x => x.SelectWorker(null, null))
-                .IgnoreArguments()
-                .Return(new WorkerDetails
-                    {
-                        ControlUri = _nodes["A"].AppendToPath("_control"),
-                        DataUri = _nodes["A"],
-                        InProgress = 0,
-                        InProgressLimit = 100,
-                        LastUpdate = DateTime.UtcNow
-                    }
-                );
+            var strategy = new CustomWorkerSelectionStrategy(_nodes["A"]);
 
-            mock.Stub(x => x.HasAvailableWorker(null, null))
-                .IgnoreArguments()
-                .Return(true);
-
-            configurator.UseDistributorFor(mock);
+            configurator.UseDistributorFor(strategy);
         }
 
-        [Test, Explicit]
-        public void Node_a_should_recieve_all_the_work()
+        class CustomWorkerSelectionStrategy :
+            IWorkerSelector<FirstCommand>
         {
-            var generator = new LoadGenerator<FirstCommand, FirstResponse>();
-            const int count = 100;
+            readonly Uri _node;
 
-            generator.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), count, x => new FirstCommand(x));
+            public CustomWorkerSelectionStrategy(Uri node)
+            {
+                _node = node;
+            }
 
-            Dictionary<Uri, int> results = generator.GetWorkerLoad();
-
-            Assert.That(results.Sum(x => x.Value), Is.EqualTo(count));
-            Assert.That(results[_nodes["A"]], Is.EqualTo(count));
+            public IEnumerable<IWorker<FirstCommand>> SelectWorker(IEnumerable<IWorker<FirstCommand>> availableWorkers,
+                IConsumeContext<FirstCommand> context)
+            {
+                return availableWorkers.Where(x => x.DataUri == _node);
+            }
         }
     }
 }

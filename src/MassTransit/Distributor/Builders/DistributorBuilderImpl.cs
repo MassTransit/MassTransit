@@ -13,27 +13,26 @@
 namespace MassTransit.Distributor.Builders
 {
     using System.Collections.Generic;
-    using SubscriptionBuilders;
-    using Subscriptions;
+    using Configuration;
 
-    public class DistributorBusServiceBuilderImpl :
-        DistributorBusServiceBuilder
+    public class DistributorBuilderImpl :
+        DistributorBuilder
     {
-        readonly IList<SubscriptionBuilder> _builders;
+        readonly IList<DistributorConnector> _connectors;
 
-        public DistributorBusServiceBuilderImpl()
+        public DistributorBuilderImpl()
         {
-            _builders = new List<SubscriptionBuilder>();
+            _connectors = new List<DistributorConnector>();
         }
 
-        public void AddSubscriptionBuilder(SubscriptionBuilder builder)
+        public void Add(DistributorConnector builder)
         {
-            _builders.Add(builder);
+            _connectors.Add(builder);
         }
 
         public IBusService Build()
         {
-            return new DistributorBusService(_builders);
+            return new DistributorBusService(_connectors);
         }
     }
 }

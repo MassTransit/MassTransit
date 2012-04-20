@@ -27,19 +27,17 @@ namespace MassTransit.Tests.Distributor
                 {
                     x.ReceiveFrom("loopback://localhost/queue");
 
+                    x.Distributor(d =>
+                    {
+                        d.Handler<A>()
+                            .UseWorkerSelector(() => new LeastBusyWorkerSelectorFactory())
+                            .UseWorkerSelector<LeastBusyWorkerSelectorFactory>();
 
-                    x.Subscribe(s =>
-                        {
-                            s.Distributor(d =>
-                                {
-                                    d.Handler<A>()
-                                        .UseWorkerSelector(() => new DefaultWorkerSelectionStrategy<A>());
+                        d.Consumer<MyConsumer>();
 
-                                    d.Consumer<MyConsumer>();
+                        d.Saga<MySaga>();
+                    });
 
-                                    d.Saga<MySaga>();
-                                });
-                        });
                 });
         }
 
@@ -62,7 +60,7 @@ namespace MassTransit.Tests.Distributor
                                     d.Consumer(() => new MyConsumer());
                                     d.Consumer(typeof(MyConsumer), Activator.CreateInstance);
 
-                                    d.Saga<MySaga>();
+                                    d.Saga(new InMemorySagaRepository<MySaga>());
                                 });
                         });
                 });
