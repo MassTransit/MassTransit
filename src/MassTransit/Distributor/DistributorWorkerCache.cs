@@ -16,6 +16,7 @@ namespace MassTransit.Distributor
     using System.Collections.Generic;
     using System.Linq;
     using Magnum.Caching;
+    using Magnum.Reflection;
 
     public class DistributorWorkerCache :
         IWorkerCache
@@ -47,7 +48,11 @@ namespace MassTransit.Distributor
                 {
                     IWorkerInfo worker = getWorker(x);
 
-                    return new CachedWorker(worker);
+                    var cachedWorker = new CachedWorker(worker);
+                    
+                    _typeWorkers[typeof(TMessage)].Add(cachedWorker);
+
+                    return cachedWorker;
                 });
 
             return result.MessageWorkers.Get(typeof(TMessage), type => new WorkerInfo<TMessage>(result.Worker))
@@ -69,7 +74,8 @@ namespace MassTransit.Distributor
             public CachedWorker(IWorkerInfo worker)
             {
                 Worker = worker;
-                MessageWorkers = new GenericTypeCache<IWorkerInfo>(typeof(IWorkerInfo<>));
+                MessageWorkers = new GenericTypeCache<IWorkerInfo>(typeof(IWorkerInfo<>),
+                    type => (IWorkerInfo)FastActivator.Create(typeof(WorkerInfo<>),new Type[] {type}));
             }
 
             public IWorkerInfo Worker { get; private set; }

@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Distributor
 {
+    using System;
     using System.Linq;
     using BusConfigurators;
+    using Magnum.Extensions;
     using Magnum.TestFramework;
     using MassTransit.Distributor.Messages;
     using MassTransit.Testing;
@@ -77,6 +79,80 @@ namespace MassTransit.Tests.Distributor
 
         class A
         {
+        }
+    }
+
+    [TestFixture]
+    public class Using_a_distributor_and_worker_handler :
+        LoopbackLocalAndRemoteTestFixture
+    {
+        FutureMessage<A> _futureA = new FutureMessage<A>();
+
+        [Test]
+        public void Should_have_the_subscription_for_the_actual_message()
+        {
+            LocalBus.HasSubscription<A>().Any()
+                .ShouldBeTrue("Message subscription was not found");
+        }
+
+        [Test]
+        public void Should_have_the_subscription_for_the_worker_availability()
+        {
+            LocalBus.HasSubscription<WorkerAvailable<A>>().Any()
+                .ShouldBeTrue("Worker available subscription was not found.");
+        }
+
+        [Test]
+        public void Should_have_the_subscription_for_the_distributed_message()
+        {
+            RemoteBus.HasSubscription<Distributed<A>>().Any()
+                .ShouldBeTrue("Message subscription was not found");
+        }
+
+        [Test]
+        public void Should_have_the_subscription_for_the_ping_worker()
+        {
+            RemoteBus.HasSubscription<PingWorker>().Any()
+                .ShouldBeTrue("PingWorker subscription was not found.");
+        }
+
+        [Test]
+        public void Should_deliver_a_published_message()
+        {
+            A message = new A();
+
+            LocalBus.Endpoint.Send(message, context =>
+                {
+                    context.SendResponseTo(LocalBus);
+                });
+
+            _futureA.IsAvailable(800.Seconds()).ShouldBeTrue();
+
+            _futureA.Message.CorrelationId.ShouldEqual(message.CorrelationId);
+        }
+
+        protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
+        {
+            base.ConfigureLocalBus(configurator);
+
+            configurator.Distributor(x => x.Handler<A>());
+        }
+
+        protected override void ConfigureRemoteBus(ServiceBusConfigurator configurator)
+        {
+            base.ConfigureRemoteBus(configurator);
+
+            configurator.Worker(x => x.Handler<A>(message => { _futureA.Set(message); }));
+        }
+
+        class A
+        {
+            public A()
+            {
+                CorrelationId = Guid.NewGuid();
+            }
+
+            public Guid CorrelationId { get; private set; }
         }
     }
 }

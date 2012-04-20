@@ -19,6 +19,7 @@ namespace MassTransit.Distributor
 
     public interface IWorkerLoad
     {
+        void PublishWorkerAvailability(TimeSpan timeToLive);
     }
 
     /// <summary>

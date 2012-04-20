@@ -17,8 +17,6 @@ namespace MassTransit.Distributor
 
     public interface IWorkerCache
     {
-        IWorkerInfo GetWorker(Uri uri, Func<Uri, IWorkerInfo> getWorker);
-
         IWorkerInfo<TMessage> GetWorker<TMessage>(Uri uri, Func<Uri, IWorkerInfo> getWorker)
             where TMessage : class;
 
