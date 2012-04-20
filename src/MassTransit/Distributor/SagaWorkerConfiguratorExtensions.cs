@@ -14,32 +14,23 @@ namespace MassTransit
 {
     using Distributor.WorkerConfigurators;
     using Logging;
+    using Magnum.Extensions;
     using Saga;
-    using Saga.SubscriptionConfigurators;
 
     public static class SagaWorkerConfiguratorExtensions
     {
         static readonly ILog _log = Logger.Get(typeof(SagaWorkerConfiguratorExtensions));
 
-        /// <summary>
-        /// Configure a saga subscription
-        /// </summary>
-        /// <typeparam name="TSaga"></typeparam>
-        /// <param name="configurator"></param>
-        /// <param name="sagaRepository"></param>
-        /// <returns></returns>
-        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
+        public static SagaWorkerConfigurator<TSaga> Saga<TSaga>(
             this WorkerBusServiceConfigurator configurator, ISagaRepository<TSaga> sagaRepository)
             where TSaga : class, ISaga
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
+                _log.DebugFormat("Subscribing Saga Worker: {0}", typeof(TSaga).ToShortTypeName());
 
-            var sagaConfigurator = new SagaSubscriptionConfiguratorImpl<TSaga>(sagaRepository);
+            var sagaConfigurator = new SagaWorkerConfiguratorImpl<TSaga>(sagaRepository);
 
-            //        var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(sagaConfigurator);
-
-            //      configurator.AddConfigurator(busServiceConfigurator);
+            configurator.AddConfigurator(sagaConfigurator);
 
             return sagaConfigurator;
         }

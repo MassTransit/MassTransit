@@ -10,43 +10,39 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.DistributorConfigurators
+namespace MassTransit.Distributor.WorkerConfigurators
 {
     using System.Collections.Generic;
     using Builders;
     using Configurators;
-    using DistributorConnectors;
     using Saga;
+    using Saga.SubscriptionConnectors;
+    using SubscriptionConfigurators;
 
-    public class SagaDistributorConfiguratorImpl<TSaga> :
-        DistributorConfiguratorImpl<SagaDistributorConfigurator<TSaga>>,
-        SagaDistributorConfigurator<TSaga>,
-        DistributorBuilderConfigurator
+    public class SagaWorkerConfiguratorImpl<TSaga> :
+        SubscriptionConfiguratorImpl<SagaWorkerConfigurator<TSaga>>,
+        SagaWorkerConfigurator<TSaga>,
+        WorkerBuilderConfigurator
         where TSaga : class, ISaga
     {
-        readonly ISagaRepository<TSaga> _sagaRepository;
+        ISagaRepository<TSaga> _sagaRepository;
 
-        public SagaDistributorConfiguratorImpl(ISagaRepository<TSaga> sagaRepository)
+        public SagaWorkerConfiguratorImpl(ISagaRepository<TSaga> sagaRepository)
         {
             _sagaRepository = sagaRepository;
         }
 
-        public override IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate()
         {
-            foreach (ValidationResult result in base.Validate())
-            {
-                yield return result;
-            }
-
             if (_sagaRepository == null)
                 yield return this.Failure("SagaRepository", "must not be null");
         }
 
-        public void Configure(DistributorBuilder builder)
+        public void Configure(WorkerBuilder builder)
         {
-            var connector = new SagaDistributorConnector<TSaga>(ReferenceFactory, WorkerSelectorFactory, _sagaRepository);
+//            var configurator = new SagaWorkerConnector<TSaga>(ReferenceFactory, _sagaRepository);
 
-            builder.Add(connector);
+            //builder.Add(configurator);
         }
     }
 }

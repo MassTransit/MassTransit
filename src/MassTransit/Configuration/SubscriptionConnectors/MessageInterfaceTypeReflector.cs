@@ -15,12 +15,15 @@ namespace MassTransit.SubscriptionConnectors
     using System.Collections.Generic;
     using System.Linq;
     using Distributor;
+    using Magnum.Reflection;
+    using Saga;
+    using Saga.SubscriptionConnectors;
 
     /// <summary>
     /// Helper class for providing the message reflection for consumers.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal static class MessageInterfaceTypeReflector<T>
+    public static class MessageInterfaceTypeReflector<T>
         where T : class
     {
         internal static IEnumerable<MessageInterfaceType> GetAllTypes()
@@ -82,26 +85,6 @@ namespace MassTransit.SubscriptionConnectors
                 .Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.For<>))
                 .Select(
                     x => new CorrelatedMessageInterfaceType(x, x.GetGenericArguments()[0], x.GetGenericArguments()[1]))
-                .Where(x => x.MessageType.IsValueType == false)
-                .Where(IsNotContextType);
-        }
-
-//        internal static IEnumerable<MessageInterfaceType> GetDistributorTypes()
-//        {
-//            return typeof (T).GetInterfaces()
-//                .Where(x => x.IsGenericType)
-//                .Where(x => x.GetGenericTypeDefinition() == typeof (IDistributor<>))
-//                .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0]))
-//                .Where(x => x.MessageType.IsValueType == false)
-//                .Where(IsNotContextType);
-//        }
-
-        internal static IEnumerable<MessageInterfaceType> GetWorkerTypes()
-        {
-            return typeof (T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (IWorkerInfo<>))
-                .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0]))
                 .Where(x => x.MessageType.IsValueType == false)
                 .Where(IsNotContextType);
         }
