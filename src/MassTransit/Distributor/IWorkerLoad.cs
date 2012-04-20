@@ -12,12 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
+    using System;
     using System.Collections.Generic;
+    using MassTransit.Pipeline;
+    using Messages;
 
-    public interface IWorkerSelector<TMessage>
+    public interface IWorkerLoad
+    {
+    }
+
+    /// <summary>
+    /// Used by a worker to determine to manage the load of messages being processed,
+    /// to ensure that message and service limits are not exceeded.
+    /// </summary>
+    /// <typeparam name="TMessage"></typeparam>
+    public interface IWorkerLoad<TMessage> :
+        IWorkerLoad
         where TMessage : class
     {
-        IEnumerable<IWorkerInfo<TMessage>> SelectWorker(IEnumerable<IWorkerInfo<TMessage>> availableWorkers,
-            IConsumeContext<TMessage> context);
+        IEnumerable<Action<IConsumeContext<Distributed<TMessage>>>> GetWorker(
+            IConsumeContext<Distributed<TMessage>> context,
+            MultipleHandlerSelector<Distributed<TMessage>> selector);
     }
 }

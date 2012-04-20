@@ -48,7 +48,7 @@ namespace MassTransit.Distributor.Pipeline
             context.RetryLater();
         }
 
-        IEnumerable<Action<IConsumeContext<TMessage>>> Handle(IWorker<TMessage> worker)
+        IEnumerable<Action<IConsumeContext<TMessage>>> Handle(IWorkerInfo<TMessage> worker)
         {
             yield return context =>
                 {

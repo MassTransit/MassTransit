@@ -29,11 +29,11 @@ namespace MassTransit.Distributor
             _typeWorkers = new ConcurrentCache<Type, IList<CachedWorker>>(type => new List<CachedWorker>());
         }
 
-        public IWorker GetWorker(Uri uri, Func<Uri, IWorker> getWorker)
+        public IWorkerInfo GetWorker(Uri uri, Func<Uri, IWorkerInfo> getWorker)
         {
             CachedWorker result = _workers.Get(uri, x =>
                 {
-                    IWorker worker = getWorker(x);
+                    IWorkerInfo worker = getWorker(x);
 
                     return new CachedWorker(worker);
                 });
@@ -41,24 +41,24 @@ namespace MassTransit.Distributor
             return result.Worker;
         }
 
-        public IWorker<TMessage> GetWorker<TMessage>(Uri uri, Func<Uri, IWorker> getWorker) where TMessage : class
+        public IWorkerInfo<TMessage> GetWorker<TMessage>(Uri uri, Func<Uri, IWorkerInfo> getWorker) where TMessage : class
         {
             CachedWorker result = _workers.Get(uri, x =>
                 {
-                    IWorker worker = getWorker(x);
+                    IWorkerInfo worker = getWorker(x);
 
                     return new CachedWorker(worker);
                 });
 
             return result.MessageWorkers.Get(typeof(TMessage), type => new WorkerInfo<TMessage>(result.Worker))
-                   as IWorker<TMessage>;
+                   as IWorkerInfo<TMessage>;
         }
 
-        public IEnumerable<IWorker<TMessage>> GetAvailableWorkers<TMessage>(IConsumeContext<TMessage> context,
+        public IEnumerable<IWorkerInfo<TMessage>> GetAvailableWorkers<TMessage>(IConsumeContext<TMessage> context,
             IWorkerSelector<TMessage> selector)
             where TMessage : class
         {
-            IEnumerable<IWorker<TMessage>> candidates =
+            IEnumerable<IWorkerInfo<TMessage>> candidates =
                 _typeWorkers[typeof(TMessage)].Select(x => x.GetWorker<TMessage>());
 
             return selector.SelectWorker(candidates, context);
@@ -66,19 +66,19 @@ namespace MassTransit.Distributor
 
         class CachedWorker
         {
-            public CachedWorker(IWorker worker)
+            public CachedWorker(IWorkerInfo worker)
             {
                 Worker = worker;
-                MessageWorkers = new GenericTypeCache<IWorker>(typeof(IWorker<>));
+                MessageWorkers = new GenericTypeCache<IWorkerInfo>(typeof(IWorkerInfo<>));
             }
 
-            public IWorker Worker { get; private set; }
-            public Cache<Type, IWorker> MessageWorkers { get; private set; }
+            public IWorkerInfo Worker { get; private set; }
+            public Cache<Type, IWorkerInfo> MessageWorkers { get; private set; }
 
-            public IWorker<T> GetWorker<T>()
+            public IWorkerInfo<T> GetWorker<T>()
                 where T : class
             {
-                return MessageWorkers[typeof(T)] as IWorker<T>;
+                return MessageWorkers[typeof(T)] as IWorkerInfo<T>;
             }
         }
     }

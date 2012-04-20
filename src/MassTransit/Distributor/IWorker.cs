@@ -18,22 +18,8 @@ namespace MassTransit.Distributor
     {
         Uri ControlUri { get; }
         Uri DataUri { get; }
-    }
 
-    public interface IWorker<TMessage> :
-        IWorker
-        where TMessage : class
-    {
-        int Pending { get; }
-        int PendingLimit { get; }
-
-        int InProgress { get; }
-        int InProgressLimit { get; }
-
-        DateTime LastUpdate { get; }
-
-        void Update(int inProgress, int inProgressLimit, int pending, int pendingLimit, DateTime updated);
-
-        void Assigned();
+        IWorkerLoad<TMessage> GetWorkerLoad<TMessage>()
+            where TMessage : class;
     }
 }

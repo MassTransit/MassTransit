@@ -48,21 +48,18 @@ namespace MassTransit.Tests.Distributor
                 {
                     x.ReceiveFrom("loopback://localhost/queue");
 
+                    x.Worker(w =>
+                    {
+                        w.Handler<A>(message => { });
+                        w.Handler<A>((context, message) => { });
 
-                    x.Subscribe(s =>
-                        {
-                            s.Worker(d =>
-                                {
-                                    d.Handler<A>(message => { });
-                                    d.Handler<A>((context, message) => { });
+                        w.Consumer<MyConsumer>();
+                        w.Consumer(() => new MyConsumer());
+                        w.Consumer(typeof(MyConsumer), Activator.CreateInstance);
 
-                                    d.Consumer<MyConsumer>();
-                                    d.Consumer(() => new MyConsumer());
-                                    d.Consumer(typeof(MyConsumer), Activator.CreateInstance);
+                        w.Saga(new InMemorySagaRepository<MySaga>());
+                    });
 
-                                    d.Saga(new InMemorySagaRepository<MySaga>());
-                                });
-                        });
                 });
         }
 

@@ -63,35 +63,35 @@ namespace MassTransit.Distributor
 //
 //        public void Consume(Distributed<TMessage> message)
 //        {
-//            _pendingMessages.Consumed(message.CorrelationId);
-//
-//            Action<TMessage> consumer = _getConsumer(message.Payload);
-//
-//            Interlocked.Increment(ref _inProgress);
-//            try
-//            {
-//                RewriteResponseAddress(message.ResponseAddress);
-//
-//                consumer(message.Payload);
-//
-//            	var consumeContext = _bus.MessageContext<Distributed<TMessage>>();
-//
-//            	consumeContext.BaseContext.NotifyConsume(consumeContext, typeof (Worker<TMessage>).ToShortTypeName(),
-//            		message.CorrelationId.ToString());
-//            }
-//            finally
-//            {
-//                Interlocked.Decrement(ref _inProgress);
-//
-//                ScheduleUpdate();
-//                ScheduleWakeUp();
-//
-//                var disposal = consumer as IDisposable;
-//                if (disposal != null)
-//                {
-//                    disposal.Dispose();
-//                }
-//            }
+    //            _pendingMessages.Consumed(message.CorrelationId);
+    //
+    //            Action<TMessage> consumer = _getConsumer(message.Payload);
+    //
+    //            Interlocked.Increment(ref _inProgress);
+    //            try
+    //            {
+    //                RewriteResponseAddress(message.ResponseAddress);
+    //
+    //                consumer(message.Payload);
+    //
+    //            	var consumeContext = _bus.MessageContext<Distributed<TMessage>>();
+    //
+    //            	consumeContext.BaseContext.NotifyConsume(consumeContext, typeof (Worker<TMessage>).ToShortTypeName(),
+    //            		message.CorrelationId.ToString());
+    //            }
+    //            finally
+    //            {
+    //                Interlocked.Decrement(ref _inProgress);
+    //
+    //                ScheduleUpdate();
+    //                ScheduleWakeUp();
+    //
+    //                var disposal = consumer as IDisposable;
+    //                if (disposal != null)
+    //                {
+    //                    disposal.Dispose();
+    //                }
+    //            }
 //        }
 //
 //        public bool Accept(Distributed<TMessage> message)

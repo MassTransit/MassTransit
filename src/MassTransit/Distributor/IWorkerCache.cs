@@ -17,12 +17,12 @@ namespace MassTransit.Distributor
 
     public interface IWorkerCache
     {
-        IWorker GetWorker(Uri uri, Func<Uri, IWorker> getWorker);
+        IWorkerInfo GetWorker(Uri uri, Func<Uri, IWorkerInfo> getWorker);
 
-        IWorker<TMessage> GetWorker<TMessage>(Uri uri, Func<Uri, IWorker> getWorker)
+        IWorkerInfo<TMessage> GetWorker<TMessage>(Uri uri, Func<Uri, IWorkerInfo> getWorker)
             where TMessage : class;
 
-        IEnumerable<IWorker<TMessage>> GetAvailableWorkers<TMessage>(IConsumeContext<TMessage> context,
+        IEnumerable<IWorkerInfo<TMessage>> GetAvailableWorkers<TMessage>(IConsumeContext<TMessage> context,
             IWorkerSelector<TMessage> selector)
             where TMessage : class;
     }

@@ -24,7 +24,7 @@ namespace MassTransit.Distributor
         where TMessage : class
     {
         IEnumerable<Action<IConsumeContext<TMessage>>> GetWorker(IConsumeContext<TMessage> context,
-            Func<IWorker<TMessage>, IEnumerable<Action<IConsumeContext<TMessage>>>> selector,
+            Func<IWorkerInfo<TMessage>, IEnumerable<Action<IConsumeContext<TMessage>>>> selector,
             IWorkerSelector<TMessage> workerSelector);
     }
 }

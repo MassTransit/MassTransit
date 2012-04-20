@@ -19,7 +19,7 @@ namespace MassTransit.Distributor
         IWorkerSelector<TMessage>
         where TMessage : class
     {
-        public IEnumerable<IWorker<TMessage>> SelectWorker(IEnumerable<IWorker<TMessage>> availableWorkers,
+        public IEnumerable<IWorkerInfo<TMessage>> SelectWorker(IEnumerable<IWorkerInfo<TMessage>> availableWorkers,
             IConsumeContext<TMessage> context)
         {
             return availableWorkers

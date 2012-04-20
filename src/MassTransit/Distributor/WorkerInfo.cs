@@ -16,7 +16,7 @@ namespace MassTransit.Distributor
     using Magnum.Extensions;
 
     public class WorkerInfo :
-        IWorker
+        IWorkerInfo
     {
         public WorkerInfo(Uri controlUri, Uri dataUri)
         {
@@ -39,15 +39,17 @@ namespace MassTransit.Distributor
 
 
     public class WorkerInfo<TMessage> :
-        IWorker<TMessage>
+        IWorkerInfo<TMessage>
         where TMessage : class
     {
         readonly object _locker = new object();
-        readonly IWorker _worker;
+        readonly IWorkerInfo _worker;
+        readonly IPendingMessageTracker<TMessage> _pending; 
 
-        public WorkerInfo(IWorker worker)
+        public WorkerInfo(IWorkerInfo worker)
         {
             _worker = worker;
+            _pending = new WorkerPendingMessageTracker<TMessage>();
         }
 
         public DateTime LastUpdate { get; private set; }

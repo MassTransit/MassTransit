@@ -34,7 +34,7 @@ namespace MassTransit.Distributor
 
         public void Consume(IConsumeContext<WorkerAvailable<TMessage>> context)
         {
-            IWorker<TMessage> worker = _workerCache.GetWorker<TMessage>(context.Message.ControlUri, x =>
+            IWorkerInfo<TMessage> worker = _workerCache.GetWorker<TMessage>(context.Message.ControlUri, x =>
                 {
                     return new WorkerInfo(context.Message.ControlUri,
                         context.Message.DataUri);
@@ -53,7 +53,7 @@ namespace MassTransit.Distributor
 
         IEnumerable<Action<IConsumeContext<TMessage>>> IWorkerAvailability<TMessage>.GetWorker(
             IConsumeContext<TMessage> context,
-            Func<IWorker<TMessage>, IEnumerable<Action<IConsumeContext<TMessage>>>> selector,
+            Func<IWorkerInfo<TMessage>, IEnumerable<Action<IConsumeContext<TMessage>>>> selector,
             IWorkerSelector<TMessage> workerSelector)
         {
             return _workerCache.GetAvailableWorkers(context, workerSelector)

@@ -14,32 +14,27 @@ namespace MassTransit
 {
     using System;
     using Distributor.Configuration;
-    using SubscriptionConfigurators;
 
     public static class HandlerWorkerConfiguratorExtensions
     {
-        public static HandlerSubscriptionConfigurator<T> Handler<T>(this WorkerConfigurator configurator,
+        public static WorkerHandlerConfigurator<T> Handler<T>(this WorkerConfigurator configurator,
             Action<T> handler)
             where T : class
         {
-            var handlerConfigurator = new HandlerSubscriptionConfiguratorImpl<T>(handler);
+            var handlerConfigurator = new WorkerHandlerConfiguratorImpl<T>(handler);
 
-            var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(handlerConfigurator);
-
-//            configurator.AddConfigurator(busServiceConfigurator);
+            configurator.AddConfigurator(handlerConfigurator);
 
             return handlerConfigurator;
         }
 
-        public static HandlerSubscriptionConfigurator<T> Handler<T>(this WorkerConfigurator configurator,
+        public static WorkerHandlerConfigurator<T> Handler<T>(this WorkerConfigurator configurator,
             Action<IConsumeContext<T>, T> handler)
             where T : class
         {
-            var handlerConfigurator = new HandlerSubscriptionConfiguratorImpl<T>(handler);
+            var handlerConfigurator = new WorkerHandlerConfiguratorImpl<T>(handler);
 
-            var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(handlerConfigurator);
-
-  //          configurator.AddConfigurator(busServiceConfigurator);
+            configurator.AddConfigurator(handlerConfigurator);
 
             return handlerConfigurator;
         }

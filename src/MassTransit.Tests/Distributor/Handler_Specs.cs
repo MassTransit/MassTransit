@@ -49,4 +49,34 @@ namespace MassTransit.Tests.Distributor
         {
         }
     }
+
+    [TestFixture]
+    public class Using_a_worker_handler :
+        LoopbackLocalAndRemoteTestFixture
+    {
+        [Test]
+        public void Should_have_the_subscription_for_the_distributed_message()
+        {
+            RemoteBus.HasSubscription<Distributed<A>>().Any()
+                .ShouldBeTrue("Message subscription was not found");
+        }
+
+        [Test]
+        public void Should_have_the_subscription_for_the_ping_worker()
+        {
+            RemoteBus.HasSubscription<PingWorker>().Any()
+                .ShouldBeTrue("PingWorker subscription was not found.");
+        }
+
+        protected override void ConfigureRemoteBus(ServiceBusConfigurator configurator)
+        {
+            base.ConfigureRemoteBus(configurator);
+
+            configurator.Worker(x => x.Handler<A>(message => { }));
+        }
+
+        class A
+        {
+        }
+    }
 }
