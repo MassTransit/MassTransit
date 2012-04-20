@@ -18,7 +18,18 @@ namespace MassTransit.NLogIntegration.Logging
     public class NLogLogger :
         ILogger
     {
-        readonly LogFactory _factory = new LogFactory();
+        private readonly LogFactory _factory;
+        
+        public NLogLogger(LogFactory factory)
+        {
+            _factory = factory;
+        }
+        
+        public NLogLogger()
+            : this(new LogFactory())
+        {
+            
+        }
 
         public ILog Get(string name)
         {
