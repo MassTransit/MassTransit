@@ -100,7 +100,7 @@ namespace MassTransit.SubscriptionConnectors
         {
             return typeof (T).GetInterfaces()
                 .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof (IWorker<>))
+                .Where(x => x.GetGenericTypeDefinition() == typeof (IWorkerInfo<>))
                 .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0]))
                 .Where(x => x.MessageType.IsValueType == false)
                 .Where(IsNotContextType);

@@ -10,22 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Distributor
 {
     using System;
-    using BusConfigurators;
-    using Distributor.Configuration;
 
-    public static class WorkerConfiguratorExtensions
+    public interface IWorkerInfo
     {
-        public static void Worker(this ServiceBusConfigurator configurator,
-            Action<WorkerConfigurator> configure)
-        {
-            var workerConfigurator = new WorkerConfiguratorImpl();
+        Uri ControlUri { get; }
+        Uri DataUri { get; }
+    }
 
-            configure(workerConfigurator);
+    public interface IWorkerInfo<TMessage> :
+        IWorkerInfo
+        where TMessage : class
+    {
+        int Pending { get; }
+        int PendingLimit { get; }
 
-            configurator.AddBusConfigurator(workerConfigurator);
-        }
+        int InProgress { get; }
+        int InProgressLimit { get; }
+
+        DateTime LastUpdate { get; }
+
+        void Update(int inProgress, int inProgressLimit, int pending, int pendingLimit, DateTime updated);
+
+        void Assigned();
     }
 }

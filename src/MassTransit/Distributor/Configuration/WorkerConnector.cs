@@ -10,22 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Distributor.Configuration
 {
-    using System;
-    using BusConfigurators;
-    using Distributor.Configuration;
+    using MassTransit.Pipeline;
+    using Subscriptions;
 
-    public static class WorkerConfiguratorExtensions
+    public interface WorkerConnector
     {
-        public static void Worker(this ServiceBusConfigurator configurator,
-            Action<WorkerConfigurator> configure)
-        {
-            var workerConfigurator = new WorkerConfiguratorImpl();
-
-            configure(workerConfigurator);
-
-            configurator.AddBusConfigurator(workerConfigurator);
-        }
+        ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker);
     }
 }

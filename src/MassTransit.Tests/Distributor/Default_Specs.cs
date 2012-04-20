@@ -184,7 +184,7 @@ namespace MassTransit.Tests.Distributor
                 _node = node;
             }
 
-            public IEnumerable<IWorker<FirstCommand>> SelectWorker(IEnumerable<IWorker<FirstCommand>> availableWorkers,
+            public IEnumerable<IWorkerInfo<FirstCommand>> SelectWorker(IEnumerable<IWorkerInfo<FirstCommand>> availableWorkers,
                 IConsumeContext<FirstCommand> context)
             {
                 return availableWorkers.Where(x => x.DataUri == _node);

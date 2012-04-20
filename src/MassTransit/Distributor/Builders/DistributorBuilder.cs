@@ -18,4 +18,9 @@ namespace MassTransit.Distributor.Builders
     {
         void Add(DistributorConnector builder);
     }
+
+    public interface WorkerBuilder
+    {
+        void Add(WorkerConnector builder);
+    }
 }

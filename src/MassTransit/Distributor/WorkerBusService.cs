@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,26 +19,24 @@ namespace MassTransit.Distributor
     using Magnum.Extensions;
     using Subscriptions;
 
-    public class DistributorBusService :
-        IDistributor,
+    public class WorkerBusService :
+        IWorker,
         IBusService
     {
-        readonly IList<DistributorConnector> _connectors;
+        readonly IList<WorkerConnector> _connectors;
         readonly IList<ISubscriptionReference> _subscriptions;
-        readonly Cache<Type, IWorkerAvailability> _workerAvailabilityCache;
-        readonly IWorkerCache _workerCache;
+        readonly Cache<Type, IWorkerLoad> _workerLoadCache;
 
         IServiceBus _bus;
         IServiceBus _controlBus;
         bool _disposed;
 
-        public DistributorBusService(IList<DistributorConnector> connectors)
+        public WorkerBusService(IList<WorkerConnector> connectors)
         {
             _connectors = connectors;
 
             _subscriptions = new List<ISubscriptionReference>();
-            _workerAvailabilityCache = new ConcurrentCache<Type, IWorkerAvailability>();
-            _workerCache = new DistributorWorkerCache();
+            _workerLoadCache = new GenericTypeCache<IWorkerLoad>(typeof(IWorkerLoad<>));
         }
 
         public void Dispose()
@@ -54,7 +52,7 @@ namespace MassTransit.Distributor
 
             bus.Configure(pipelineConfigurator =>
                 {
-                    foreach (DistributorConnector connector in _connectors)
+                    foreach (WorkerConnector connector in _connectors)
                     {
                         try
                         {
@@ -77,25 +75,35 @@ namespace MassTransit.Distributor
             StopAllSubscriptions();
         }
 
-        public IWorkerAvailability<TMessage> GetWorkerAvailability<TMessage>()
-            where TMessage : class
+        public Uri ControlUri
         {
-            IWorkerAvailability workerAvailability = _workerAvailabilityCache.Get(typeof(TMessage),
-                _ => AddMessageWorkerAvailability<TMessage>());
-
-            return workerAvailability as IWorkerAvailability<TMessage>;
+            get { return _controlBus.Endpoint.Address.Uri; }
         }
 
-        IWorkerAvailability AddMessageWorkerAvailability<TMessage>()
+        public Uri DataUri
+        {
+            get { return _bus.Endpoint.Address.Uri; }
+        }
+
+        public IWorkerLoad<TMessage> GetWorkerLoad<TMessage>()
             where TMessage : class
         {
-            var workerAvailability = new MessageWorkerAvailability<TMessage>(_workerCache);
+            IWorkerLoad workerLoad = _workerLoadCache.Get(typeof(TMessage),
+               _ => AddWorkerLoad<TMessage>());
 
-            UnsubscribeAction unsubscribeAction = _controlBus.SubscribeInstance(workerAvailability);
+            return workerLoad as IWorkerLoad<TMessage>;
+        }
+
+        IWorkerLoad AddWorkerLoad<TMessage>()
+            where TMessage : class
+        {
+            var workerLoad = new MessageWorkerLoad<TMessage>(this);
+
+            UnsubscribeAction unsubscribeAction = _controlBus.SubscribeInstance(workerLoad);
 
             _subscriptions.Add(new TransientSubscriptionReference(unsubscribeAction));
 
-            return workerAvailability;
+            return workerLoad;
         }
 
         void Dispose(bool disposing)
@@ -117,7 +125,7 @@ namespace MassTransit.Distributor
             _subscriptions.Clear();
         }
 
-        ~DistributorBusService()
+        ~WorkerBusService()
         {
             Dispose(false);
         }
