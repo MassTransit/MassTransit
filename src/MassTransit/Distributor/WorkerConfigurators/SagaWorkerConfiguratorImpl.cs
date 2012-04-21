@@ -16,8 +16,8 @@ namespace MassTransit.Distributor.WorkerConfigurators
     using Builders;
     using Configurators;
     using Saga;
-    using Saga.SubscriptionConnectors;
     using SubscriptionConfigurators;
+    using WorkerConnectors;
 
     public class SagaWorkerConfiguratorImpl<TSaga> :
         SubscriptionConfiguratorImpl<SagaWorkerConfigurator<TSaga>>,
@@ -40,9 +40,9 @@ namespace MassTransit.Distributor.WorkerConfigurators
 
         public void Configure(WorkerBuilder builder)
         {
-//            var configurator = new SagaWorkerConnector<TSaga>(ReferenceFactory, _sagaRepository);
+            var configurator = new SagaWorkerConnector<TSaga>(ReferenceFactory, _sagaRepository);
 
-            //builder.Add(configurator);
+            builder.Add(configurator);
         }
     }
 }

@@ -15,7 +15,6 @@ namespace MassTransit.Distributor.DistributorConnectors
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configuration;
     using Exceptions;
     using Magnum.Extensions;
     using Magnum.Reflection;

@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.DistributorConnectors
+namespace MassTransit.Distributor.WorkerConnectors
 {
     using System;
     using System.Collections.Generic;
@@ -20,35 +20,31 @@ namespace MassTransit.Distributor.DistributorConnectors
     using Magnum.Reflection;
     using MassTransit.Pipeline;
     using Saga;
-    using Saga.SubscriptionConnectors;
     using Subscriptions;
     using Util;
 
-    public interface SagaDistributorConnector
+    public interface SagaWorkerConnector
     {
         Type MessageType { get; }
 
-        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IDistributor distributor);
+        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IWorker worker);
     }
 
-    public class SagaDistributorConnector<T> :
-        DistributorConnector
+    public class SagaWorkerConnector<T> :
+        WorkerConnector
         where T : class, ISaga
     {
         readonly object[] _args;
-        readonly IEnumerable<SagaDistributorConnector> _connectors;
+        readonly IEnumerable<SagaWorkerConnector> _connectors;
         readonly ReferenceFactory _referenceFactory;
         readonly ISagaRepository<T> _sagaRepository;
-        readonly IWorkerSelectorFactory _workerSelectorFactory;
 
-        public SagaDistributorConnector(ReferenceFactory referenceFactory, IWorkerSelectorFactory workerSelectorFactory,
-            ISagaRepository<T> sagaRepository)
+        public SagaWorkerConnector(ReferenceFactory referenceFactory, ISagaRepository<T> sagaRepository)
         {
             _referenceFactory = referenceFactory;
-            _workerSelectorFactory = workerSelectorFactory;
             _sagaRepository = sagaRepository;
 
-            _args = new object[] { _workerSelectorFactory, _sagaRepository };
+            _args = new object[] { _sagaRepository };
 
             try
             {
@@ -70,71 +66,79 @@ namespace MassTransit.Distributor.DistributorConnectors
             }
         }
 
-        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
+        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker)
         {
-            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, distributor))
+            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, worker))
                 .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
         }
 
-        IEnumerable<SagaDistributorConnector> Initiates()
+        IEnumerable<SagaWorkerConnector> Initiates()
         {
             return typeof(T).GetInterfaces()
                 .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(InitiatedBy<>))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
+                .Select(x => new { InterfaceType = x, MessageType = x.GetGenericArguments()[0] })
                 .Where(x => x.MessageType.IsValueType == false)
-                .Select(x => CreateConnector(x.MessageType));
+                .Select(x => CreateInitiatedByConnector(x.MessageType));
         }
 
-        IEnumerable<SagaDistributorConnector> Orchestrates()
+        IEnumerable<SagaWorkerConnector> Orchestrates()
         {
             return typeof(T).GetInterfaces()
                 .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(Orchestrates<>))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
+                .Select(x => new { InterfaceType = x, MessageType = x.GetGenericArguments()[0] })
                 .Where(x => x.MessageType.IsValueType == false)
-                .Select(x => CreateConnector(x.MessageType));
+                .Select(x => CreateOrchestratesConnector(x.MessageType));
         }
 
-        IEnumerable<SagaDistributorConnector> Observes()
+        IEnumerable<SagaWorkerConnector> Observes()
         {
             return typeof(T).GetInterfaces()
                 .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(Observes<,>))
-                .Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
+                .Select(x => new { InterfaceType = x, MessageType = x.GetGenericArguments()[0] })
                 .Where(x => x.MessageType.IsValueType == false)
                 .Select(x => CreateObservesConnector(x.MessageType));
         }
 
-        IEnumerable<SagaDistributorConnector> StateMachineEvents()
+        IEnumerable<SagaWorkerConnector> StateMachineEvents()
         {
-            if (typeof(T).Implements(typeof(SagaStateMachine<>)))
-            {
-                var factory =
-                    (IEnumerable<SagaDistributorConnector>)
-                    FastActivator.Create(typeof(StateMachineSagaConnector<>),
-                        new[] {typeof(T)},
-                        _args);
+//            if (typeof(T).Implements(typeof(SagaStateMachine<>)))
+//            {
+//                var factory =
+//                    (IEnumerable<SagaWorkerConnector>)
+//                    FastActivator.Create(typeof(StateMachineSagaWorkerConnector<>),
+//                        new[] { typeof(T) },
+//                        _args);
+//
+//                return factory;
+//            }
 
-                return factory;
-            }
-
-            return Enumerable.Empty<SagaDistributorConnector>();
+            return Enumerable.Empty<SagaWorkerConnector>();
         }
 
-        SagaDistributorConnector CreateConnector(Type messageType)
+        SagaWorkerConnector CreateInitiatedByConnector(Type messageType)
         {
-            return (SagaDistributorConnector)
-                   FastActivator.Create(typeof(CorrelatedSagaDistributorConnector<,>),
-                       new[] {typeof(T), messageType},
+            return (SagaWorkerConnector)
+                   FastActivator.Create(typeof(InitiatedBySagaWorkerConnector<,>),
+                       new[] { typeof(T), messageType },
                        _args);
         }
 
-        SagaDistributorConnector CreateObservesConnector(Type messageType)
+        SagaWorkerConnector CreateOrchestratesConnector(Type messageType)
         {
-            return (SagaDistributorConnector)
-                   FastActivator.Create(typeof(ObservesSagaDistributorConnector<,>),
-                       new[] {typeof(T), messageType},
+            return (SagaWorkerConnector)
+                   FastActivator.Create(typeof(OrchestratesSagaWorkerConnector<,>),
+                       new[] { typeof(T), messageType },
+                       _args);
+        }
+
+        SagaWorkerConnector CreateObservesConnector(Type messageType)
+        {
+            return (SagaWorkerConnector)
+                   FastActivator.Create(typeof(ObservesSagaWorkerConnector<,>),
+                       new[] { typeof(T), messageType },
                        _args);
         }
     }

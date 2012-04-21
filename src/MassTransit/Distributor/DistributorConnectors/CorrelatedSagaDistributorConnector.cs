@@ -13,7 +13,6 @@
 namespace MassTransit.Distributor.DistributorConnectors
 {
     using System;
-    using Configuration;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Configuration;
     using Pipeline;

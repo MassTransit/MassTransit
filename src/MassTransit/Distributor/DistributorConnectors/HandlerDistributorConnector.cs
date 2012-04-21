@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.DistributorConnectors
 {
-    using Configuration;
     using MassTransit.Pipeline;
     using Subscriptions;
 

@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-    using Configuration;
-
     public class LeastBusyWorkerSelectorFactory :
         IWorkerSelectorFactory
     {

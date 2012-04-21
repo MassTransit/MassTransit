@@ -14,7 +14,6 @@ namespace MassTransit.Distributor.DistributorConfigurators
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
     using Configurators;
     using SubscriptionConfigurators;
 

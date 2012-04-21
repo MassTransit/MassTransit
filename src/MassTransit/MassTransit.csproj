@@ -303,6 +303,11 @@
     <Compile Include="Distributor\WorkerConfigurators\WorkerBuilderConfigurator.cs" />
     <Compile Include="Distributor\WorkerConfigurators\WorkerBusServiceConfiguratorImpl.cs" />
     <Compile Include="Distributor\WorkerConfigurators\WorkerBusServiceConfigurator.cs" />
+    <Compile Include="Distributor\WorkerConnectors\InitiatedBySagaWorkerConnector.cs" />
+    <Compile Include="Distributor\WorkerConnectors\ObservesSagaWorkerConnector.cs" />
+    <Compile Include="Distributor\WorkerConnectors\OrchestratesSagaWorkerConnector.cs" />
+    <Compile Include="Distributor\WorkerConnectors\SagaWorkerConnector.cs" />
+    <Compile Include="Distributor\WorkerConnectors\SagaWorkerConnectorBase.cs" />
     <Compile Include="Distributor\WorkerConnectors\WorkerConnector.cs" />
     <Compile Include="Distributor\WorkerConfigurators\ConsumerWorkerConfigurator.cs" />
     <Compile Include="Distributor\WorkerConfigurators\ConsumerWorkerConfiguratorImpl.cs" />

@@ -14,12 +14,12 @@ namespace MassTransit.Saga
 {
     using MassTransit.Pipeline;
 
-	public interface ISagaMessageSink<TSaga, TMessage> :
-		IPipelineSink<IConsumeContext<TMessage>>
-		where TMessage : class
-		where TSaga : class, ISaga
-	{
-		ISagaPolicy<TSaga, TMessage> Policy { get; }
-		ISagaRepository<TSaga> Repository { get; }
-	}
+    public interface ISagaMessageSink<TSaga, TMessage> :
+        IPipelineSink<IConsumeContext<TMessage>>
+        where TMessage : class
+        where TSaga : class, ISaga
+    {
+        ISagaPolicy<TSaga, TMessage> Policy { get; }
+        ISagaRepository<TSaga> Repository { get; }
+    }
 }
