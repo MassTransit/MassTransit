@@ -14,7 +14,6 @@ namespace MassTransit.Distributor
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
     using DistributorConnectors;
     using Magnum.Caching;
     using Magnum.Extensions;

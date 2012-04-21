@@ -13,7 +13,6 @@
 namespace MassTransit.Distributor.DistributorConfigurators
 {
     using System;
-    using Configuration;
     using Saga;
     using SubscriptionConfigurators;
 

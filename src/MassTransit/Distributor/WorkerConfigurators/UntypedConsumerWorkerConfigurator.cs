@@ -15,7 +15,6 @@ namespace MassTransit.Distributor.WorkerConfigurators
     using System;
     using System.Collections.Generic;
     using Builders;
-    using Configuration;
     using Configurators;
     using MassTransit.Configuration;
     using SubscriptionConfigurators;

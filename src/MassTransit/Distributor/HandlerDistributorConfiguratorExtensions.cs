@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using Distributor;
-    using Distributor.Configuration;
     using Distributor.DistributorConfigurators;
 
     public static class HandlerDistributorConfiguratorExtensions

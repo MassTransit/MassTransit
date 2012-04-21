@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using Distributor;
-    using Distributor.Configuration;
     using Distributor.DistributorConfigurators;
     using Logging;
     using Magnum.Reflection;

@@ -15,7 +15,6 @@ namespace MassTransit.Distributor.DistributorConfigurators
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
-    using Configuration;
     using Configurators;
     using DistributorConnectors;
     using SubscriptionConfigurators;

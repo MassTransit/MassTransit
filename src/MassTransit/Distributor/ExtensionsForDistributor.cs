@@ -15,7 +15,6 @@ namespace MassTransit.Distributor
     using System;
     using Advanced;
     using BusConfigurators;
-    using Configuration;
     using DistributorConfigurators;
     using Magnum.Extensions;
     using Magnum.Reflection;

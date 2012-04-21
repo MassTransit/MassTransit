@@ -13,7 +13,6 @@
 namespace MassTransit.Distributor.DistributorConfigurators
 {
     using Builders;
-    using Configuration;
     using DistributorConnectors;
 
     public class HandlerDistributorConfiguratorImpl<TMessage> :
