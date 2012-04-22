@@ -14,11 +14,23 @@ namespace MassTransit.NLogIntegration.Logging
 {
     using MassTransit.Logging;
     using NLog;
+    using Util;
 
-    public class NLogLogger :
+    public class NLogLogger : 
         ILogger
     {
-        readonly LogFactory _factory = new LogFactory();
+        readonly LogFactory _factory;
+
+        public NLogLogger([NotNull] LogFactory factory)
+        {
+            _factory = factory;
+        }
+
+        public NLogLogger()
+            : this(new LogFactory())
+        {
+            
+        }
 
         public ILog Get(string name)
         {
