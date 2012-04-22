@@ -32,6 +32,11 @@ namespace MassTransit.NLogIntegration
             Logger.UseLogger(new NLogLogger());
         }
 
+        /// <summary>
+        /// Specify that you want to use the NLog logging framework with MassTransit.
+        /// </summary>
+        /// <param name="configrator">Optional service bus configurator</param>
+        /// <param name="factory">Required log-producing factory from NLog</param>
         public static void UseNLog([CanBeNull] this ServiceBusConfigurator configrator, [NotNull] LogFactory factory)
         {
             Logger.UseLogger(new NLogLogger(factory));
