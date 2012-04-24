@@ -104,16 +104,16 @@ namespace MassTransit.Distributor.WorkerConnectors
 
         IEnumerable<SagaWorkerConnector> StateMachineEvents()
         {
-//            if (typeof(T).Implements(typeof(SagaStateMachine<>)))
-//            {
-//                var factory =
-//                    (IEnumerable<SagaWorkerConnector>)
-//                    FastActivator.Create(typeof(StateMachineSagaWorkerConnector<>),
-//                        new[] { typeof(T) },
-//                        _args);
-//
-//                return factory;
-//            }
+            if (typeof(T).Implements(typeof(SagaStateMachine<>)))
+            {
+                var factory =
+                    (IEnumerable<SagaWorkerConnector>)
+                    FastActivator.Create(typeof(SagaStateMachineWorkerConnectorFactory<>),
+                        new[] { typeof(T) },
+                        _args);
+
+                return factory;
+            }
 
             return Enumerable.Empty<SagaWorkerConnector>();
         }

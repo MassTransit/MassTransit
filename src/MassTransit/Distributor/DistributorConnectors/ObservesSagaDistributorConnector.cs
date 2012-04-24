@@ -31,6 +31,8 @@ namespace MassTransit.Distributor.DistributorConnectors
         {
             _workerSelectorFactory = workerSelectorFactory;
             _sagaRepository = sagaRepository;
+
+            // TODO get expression to compare and get Guids for saga instances
         }
 
         public Type MessageType

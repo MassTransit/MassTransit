@@ -15,7 +15,7 @@
 <!--	</logger>-->
 
    <logger name="MassTransit.Messages" additivity="false">
-    <level value="INFO" />
+    <level value="DEBUG" />
     <appender-ref ref="MessageLogAppender" />
     <appender-ref ref="console" />
   </logger>

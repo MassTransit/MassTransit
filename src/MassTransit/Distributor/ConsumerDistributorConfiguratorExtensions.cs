@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using Distributor;
     using Distributor.DistributorConfigurators;
     using Logging;
     using Magnum.Reflection;
@@ -36,8 +35,7 @@ namespace MassTransit
 
         public static ConsumerDistributorConfigurator Consumer(
             [NotNull] this DistributorBusServiceConfigurator configurator,
-            [NotNull] Type consumerType,
-            [NotNull] Func<Type, object> consumerFactory)
+            [NotNull] Type consumerType)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer Worker: {0} (by type, using object consumer factory)",
@@ -45,7 +43,7 @@ namespace MassTransit
 
             object consumerConfigurator =
                 FastActivator.Create(typeof(UntypedConsumerDistributorConfigurator<>),
-                    new[] { consumerType }, new object[] { consumerFactory });
+                    new[] {consumerType});
 
             configurator.AddConfigurator((DistributorBuilderConfigurator)consumerConfigurator);
 

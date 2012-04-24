@@ -20,7 +20,6 @@ namespace MassTransit.Distributor.DistributorConnectors
     using Magnum.Reflection;
     using MassTransit.Pipeline;
     using Saga;
-    using Saga.SubscriptionConnectors;
     using Subscriptions;
     using Util;
 
@@ -48,7 +47,7 @@ namespace MassTransit.Distributor.DistributorConnectors
             _workerSelectorFactory = workerSelectorFactory;
             _sagaRepository = sagaRepository;
 
-            _args = new object[] { _workerSelectorFactory, _sagaRepository };
+            _args = new object[] {_workerSelectorFactory, _sagaRepository};
 
             try
             {
@@ -112,7 +111,7 @@ namespace MassTransit.Distributor.DistributorConnectors
             {
                 var factory =
                     (IEnumerable<SagaDistributorConnector>)
-                    FastActivator.Create(typeof(StateMachineSagaConnector<>),
+                    FastActivator.Create(typeof(SagaStateMachineDistributorConnectorFactory<>),
                         new[] {typeof(T)},
                         _args);
 
