@@ -14,10 +14,14 @@ namespace MassTransit.Distributor
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
     using Logging;
     using Magnum.Extensions;
     using MassTransit.Pipeline;
     using Messages;
+    using Stact;
+    using Stact.Executors;
 
     public class MessageWorkerLoad<TMessage> :
         IWorkerLoad<TMessage>,
@@ -25,17 +29,20 @@ namespace MassTransit.Distributor
         where TMessage : class
     {
         static readonly ILog _log = Logger.Get<MessageWorkerLoad<TMessage>>();
-        static IPendingMessageTracker<TMessage> _pending;
+        readonly IPendingMessageTracker<Guid> _pending;
         readonly IWorker _worker;
         int _inProgress;
         int _inProgressLimit = 4;
         int _pendingLimit = 16;
+        bool _updatePending;
+        Fiber _fiber;
 
         public MessageWorkerLoad(IWorker worker)
         {
+            _fiber = new PoolFiber(new TryCatchOperationExecutor());
             _worker = worker;
 
-            _pending = new WorkerPendingMessageTracker<TMessage>();
+            _pending = new WorkerPendingMessageTracker<Guid>();
 
             PublishWorkerAvailability(1.Minutes());
         }
@@ -59,41 +66,14 @@ namespace MassTransit.Distributor
         }
 
 
-        //                    _pendingMessages.Consumed(message.CorrelationId);
-//
-//            Action<TMessage> consumer = _getConsumer(message.Payload);
-//
-//            Interlocked.Increment(ref _inProgress);
-//            try
-//            {
-//                RewriteResponseAddress(message.ResponseAddress);
-//
-//                consumer(message.Payload);
-//
-//            	var consumeContext = _bus.MessageContext<Distributed<TMessage>>();
-//
-//            	consumeContext.BaseContext.NotifyConsume(consumeContext, typeof (Worker<TMessage>).ToShortTypeName(),
-//            		message.CorrelationId.ToString());
-//            }
-//            finally
-//            {
-//                Interlocked.Decrement(ref _inProgress);
-//
-//                ScheduleUpdate();
-//                ScheduleWakeUp();
-//
-//                var disposal = consumer as IDisposable;
-//                if (disposal != null)
-//                {
-//                    disposal.Dispose();
-//                }
-//            }
         public IEnumerable<Action<IConsumeContext<Distributed<TMessage>>>> GetWorker(
             IConsumeContext<Distributed<TMessage>> context,
             MultipleHandlerSelector<Distributed<TMessage>> selector)
         {
-            foreach (var handler in selector(context))
-                yield return ctx => Handle(ctx, handler);
+            _pending.Viewed(context.Message.CorrelationId);
+
+            return selector(context)
+                .Select(handler => (Action<IConsumeContext<Distributed<TMessage>>>)(x => Handle(x, handler)));
         }
 
         public void PublishWorkerAvailability(TimeSpan timeToLive)
@@ -102,6 +82,8 @@ namespace MassTransit.Distributor
             {
                 var message = new WorkerAvailable<TMessage>(_worker.ControlUri, _worker.DataUri,
                     _inProgress, _inProgressLimit, _pending.PendingMessageCount(), _pendingLimit);
+
+                _updatePending = false;
 
                 _worker.Bus.Publish(message, x => x.ExpiresAt(DateTime.UtcNow + timeToLive));
 
@@ -113,11 +95,37 @@ namespace MassTransit.Distributor
             {
             }
         }
-
+        
+        void ScheduleUpdate()
+        {
+            if (!_updatePending)
+            {
+                _updatePending = true;
+                    _fiber.Add(() => PublishWorkerAvailability(10.Seconds()));
+            }
+        }
+        
         void Handle(IConsumeContext<Distributed<TMessage>> context,
             Action<IConsumeContext<Distributed<TMessage>>> handler)
         {
-            handler(context);
+            Interlocked.Increment(ref _inProgress);
+            try
+            {
+                _pending.Consumed(context.Message.CorrelationId);
+
+                handler(context);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _inProgress);
+                
+                ScheduleUpdate();
+            }
+            //                RewriteResponseAddress(message.ResponseAddress);
+            //            	consumeContext.BaseContext.NotifyConsume(consumeContext, typeof (Worker<TMessage>).ToShortTypeName(),
+            //            		message.CorrelationId.ToString());
+            //                ScheduleUpdate();
+            //                ScheduleWakeUp();
         }
     }
 }
