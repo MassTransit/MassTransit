@@ -169,23 +169,41 @@ namespace MassTransit.Tests.Distributor
 
         protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
         {
-            var strategy = new CustomWorkerSelectionStrategy(_nodes["A"]);
+            var selectorFactory = new CustomWorkerSelectorFactory(_nodes["A"]);
 
-            configurator.UseDistributorFor(strategy);
+            configurator.Distributor(x => x.Handler<FirstCommand>().UseWorkerSelector(() => selectorFactory));
         }
 
-        class CustomWorkerSelectionStrategy :
-            IWorkerSelector<FirstCommand>
+        class CustomWorkerSelectorFactory :
+            IWorkerSelectorFactory
         {
             readonly Uri _node;
 
-            public CustomWorkerSelectionStrategy(Uri node)
+            public CustomWorkerSelectorFactory(Uri node)
             {
                 _node = node;
             }
 
-            public IEnumerable<IWorkerInfo<FirstCommand>> SelectWorker(IEnumerable<IWorkerInfo<FirstCommand>> availableWorkers,
-                IConsumeContext<FirstCommand> context)
+            public IWorkerSelector<TMessage> GetSelector<TMessage>() 
+                where TMessage : class
+            {
+                return new CustomWorkerSelector<TMessage>(_node);
+            }
+        }
+
+        class CustomWorkerSelector<TMessage> :
+            IWorkerSelector<TMessage>
+            where TMessage : class
+        {
+            readonly Uri _node;
+
+            public CustomWorkerSelector(Uri node)
+            {
+                _node = node;
+            }
+
+            public IEnumerable<IWorkerInfo<TMessage>> SelectWorker(IEnumerable<IWorkerInfo<TMessage>> availableWorkers,
+                IConsumeContext<TMessage> context)
             {
                 return availableWorkers.Where(x => x.DataUri == _node);
             }

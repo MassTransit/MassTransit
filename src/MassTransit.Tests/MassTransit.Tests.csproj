@@ -226,7 +226,6 @@
     <Compile Include="Saga\Locator\SagaLocator_Specs.cs" />
     <Compile Include="Saga\Locator\TestSaga.cs" />
     <Compile Include="Saga\SimpleSagaMessageBase.cs" />
-    <Compile Include="Saga\StateMachineInspector_Specs.cs" />
     <Compile Include="Saga\StateMachine\AutoStateMachineSaga.cs" />
     <Compile Include="Saga\StateMachine\AutoStateMachine_Specs.cs" />
     <Compile Include="Saga\StateMachine\Inspector_Specs.cs" />
