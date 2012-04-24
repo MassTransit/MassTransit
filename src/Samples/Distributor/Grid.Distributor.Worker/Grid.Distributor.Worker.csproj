@@ -76,6 +76,7 @@
     <Compile Include="DoWork.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimpleWorkItemConsumer.cs" />
     <Compile Include="WorkerServiceProvider.cs" />
   </ItemGroup>
   <ItemGroup>
