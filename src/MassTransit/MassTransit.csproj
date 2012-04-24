@@ -692,8 +692,6 @@
     <Compile Include="Distributor\Messages\PingWorker.cs" />
     <Compile Include="Distributor\WorkerPendingMessageTracker.cs" />
     <Compile Include="Distributor\WorkerSettings.cs" />
-    <Compile Include="Distributor\ISagaWorker.cs" />
-    <Compile Include="Distributor\SagaWorker.cs" />
     <Compile Include="Distributor\IWorkerInfo.cs" />
     <Compile Include="Distributor\IWorkerSelector.cs" />
     <Compile Include="Distributor\Messages\Distributed.cs" />
@@ -705,7 +703,6 @@
     <Compile Include="Distributor\Pipeline\WorkerMessageSink.cs" />
     <Compile Include="Distributor\Messages\WakeUpWorker.cs" />
     <Compile Include="Distributor\DistributorConfigurators\SagaDistributorConfigurator.cs" />
-    <Compile Include="Distributor\WorkerDetails.cs" />
     <Compile Include="EndpointAddress.cs" />
     <Compile Include="Events\MessagePublished.cs" />
     <Compile Include="Events\ReceiverQueued.cs" />
