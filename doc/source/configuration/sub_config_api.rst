@@ -80,4 +80,5 @@ Subscription Options During Post Configuration
 
 .. note::
 
-    Need more content here. See :doc:`keyideas`
+    Subscriptions established post-configuration are assumed to be transient. If this
+    is to be a permanent subscription, it needs to be established during configuration.
