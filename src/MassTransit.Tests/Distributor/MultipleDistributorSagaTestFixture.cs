@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Distributor
 {
 	using BusConfigurators;
 	using Load.Sagas;
-	using MassTransit.Distributor;
 	using MassTransit.Saga;
 	using MassTransit.Transports;
 	using TextFixtures;
@@ -34,12 +33,12 @@ namespace MassTransit.Tests.Distributor
 
 		protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
-			configurator.UseSagaDistributorFor<FirstSaga>();
+		    configurator.Distributor(d => d.Saga(FirstSagaRepository));
 		}
 
 		protected override void ConfigureRemoteBus(ServiceBusConfigurator configurator)
 		{
-			configurator.UseSagaDistributorFor<FirstSaga>();
-		}
+            configurator.Distributor(d => d.Saga(FirstSagaRepository));
+        }
 	}
 }

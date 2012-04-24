@@ -66,7 +66,7 @@ namespace MassTransit.Configurators
 			{
 				string message = "The service bus was not properly configured:" +
 				                 Environment.NewLine +
-				                 string.Join(Environment.NewLine, result.Results.Select(x => x.Message).ToArray());
+				                 string.Join(Environment.NewLine, result.Results.Select(x => x.ToString()).ToArray());
 
 				throw new ConfigurationException(result, message);
 			}

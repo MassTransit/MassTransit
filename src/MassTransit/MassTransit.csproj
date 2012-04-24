@@ -334,7 +334,6 @@
     <Compile Include="Distributor\IWorkerLoad.cs" />
     <Compile Include="Distributor\LeastBusyWorkerSelectorFactory.cs" />
     <Compile Include="Distributor\Pipeline\DistributorMessageSink.cs" />
-    <Compile Include="Distributor\SagaWorkerSubscriptionExtensions.cs" />
     <Compile Include="Distributor\MessageWorkerAvailability.cs" />
     <Compile Include="Distributor\WorkerBusService.cs" />
     <Compile Include="Distributor\WorkerConnectors\ConsumerWorkerConnectorImpl.cs" />
@@ -424,23 +423,15 @@
     <Compile Include="Saga\SubscriptionConfigurators\SagaSubscriptionConfigurator.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\SagaSubscriptionConfiguratorImpl.cs" />
     <Compile Include="Saga\SubscriptionConnectors\CorrelatedSagaSubscriptionConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\CorrelatedSagaWorkerSubscriptionConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\InitiatedBySagaWorkerSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\InitiatedBySagaSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\ObservesSagaSubscriptionConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\ObservesSagaWorkerSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\OrchestratesSagaSubscriptionConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\OrchestratesSagaWorkerSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\PropertySagaSubscriptionConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\PropertySagaWorkerSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\SagaWorkerConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaWorkerSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaEventConnectorFactory.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaSubscriptionConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\SagaWorkerEventConnectorFactory.cs" />
     <Compile Include="Saga\SubscriptionConnectors\StateMachineSagaConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\StateMachineSagaWorkerConnector.cs" />
     <Compile Include="Serialization\BsonMessageSerializer.cs" />
     <Compile Include="Serialization\ByteArrayConverter.cs" />
     <Compile Include="Serialization\Custom\Continuation.cs" />
@@ -699,7 +690,6 @@
     <Compile Include="Distributor\LeastBusyWorkerSelector.cs" />
     <Compile Include="Distributor\Messages\IWorkerAvailable.cs" />
     <Compile Include="Distributor\Messages\PingWorker.cs" />
-    <Compile Include="Distributor\Pipeline\SagaWorkerMessageSink.cs" />
     <Compile Include="Distributor\WorkerPendingMessageTracker.cs" />
     <Compile Include="Distributor\WorkerSettings.cs" />
     <Compile Include="Distributor\ISagaWorker.cs" />
@@ -708,7 +698,6 @@
     <Compile Include="Distributor\IWorkerSelector.cs" />
     <Compile Include="Distributor\Messages\Distributed.cs" />
     <Compile Include="Distributor\Worker.cs" />
-    <Compile Include="Distributor\ExtensionsForDistributor.cs" />
     <Compile Include="Distributor\Messages\WorkerAvailable.cs" />
     <Compile Include="Distributor\Distributor.cs" />
     <Compile Include="Distributor\IDistributor.cs" />
