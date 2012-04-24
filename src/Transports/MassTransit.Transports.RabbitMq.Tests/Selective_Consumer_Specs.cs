@@ -106,8 +106,15 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void Should_have_consumed_all_messages()
         {
-            if (!SpinWait.SpinUntil(() => _consumer.Consumed == TotalMsgs / 2, 8.Seconds()))
-                Assert.Fail("should have consumed two messages, skipping the one in the middle!");
+            for (int i = 0; i < 80; i++)
+            {
+                if (_consumer.Consumed == TotalMsgs / 2)
+                    return;
+
+                Thread.Sleep(100);
+            }
+
+            Assert.Fail("should have consumed two messages, skipping the one in the middle!");
         }
     }
 }
