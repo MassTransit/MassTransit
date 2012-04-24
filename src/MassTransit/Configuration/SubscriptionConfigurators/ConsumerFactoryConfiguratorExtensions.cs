@@ -26,7 +26,7 @@ namespace MassTransit.SubscriptionConfigurators
             where TConsumer : class
         {
             if (!typeof(TConsumer).Implements<IConsumer>())
-                yield return new ValidationResultImpl(ValidationResultDisposition.Warning, "Consumer",
+                yield return configurator.Warning("Consumer",
                     string.Format("The consumer class {0} does not implement any IConsumer interfaces",
                         typeof(TConsumer).ToShortTypeName()));
 
@@ -39,7 +39,7 @@ namespace MassTransit.SubscriptionConfigurators
                               " without calling a constructor, which can lead to unpredictable behavior if the consumer" +
                               " depends upon logic in the constructor to be executed.")
                                  .FormatWith(x.MessageType.ToShortTypeName()))
-                .Select(message => new ValidationResultImpl(ValidationResultDisposition.Warning, "Consumer", message));
+                .Select(message => configurator.Warning("Consumer", message));
 
             foreach (ValidationResultImpl message in warningForMessages)
                 yield return message;
@@ -49,9 +49,7 @@ namespace MassTransit.SubscriptionConfigurators
             where TConsumer : class
         {
             if (consumerFactory == null)
-                yield return
-                    new ValidationResultImpl(ValidationResultDisposition.Failure, "ConsumerFactory", "must not be null")
-                    ;
+                yield return ValidationResultExtensions.Failure(null, "ConsumerFactory", "must not be null");
 
             foreach (ValidationResult result in ValidateConsumer<TConsumer>(null))
             {
