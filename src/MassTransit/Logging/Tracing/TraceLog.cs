@@ -25,7 +25,7 @@ namespace MassTransit.Logging.Tracing
         public TraceLog(TraceSource source)
         {
             _source = source;
-            _level = LogLevel.None;
+            _level = LogLevel.FromSourceLevels(source.Switch.Level);
         }
 
         public bool IsDebugEnabled
