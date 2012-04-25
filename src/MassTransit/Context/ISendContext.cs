@@ -20,37 +20,19 @@ namespace MassTransit
 		IMessageContext<T>
 		where T : class
 	{
-		void SetMessageType(string messageType);
+        /// <summary>
+        /// Sets the message content type that is used to deserialize the message
+        /// </summary>
+        /// <param name="value"></param>
+        void SetContentType(string value);
 
-	    void SetRequestId(string value);
+        /// <summary>
+        /// Sets the writer for the message body
+        /// </summary>
+        /// <param name="bodyWriter"></param>
+        void SetBodyWriter(Action<Stream> bodyWriter);
 
-	    void SetConversationId(string value);
-
-	    void SetCorrelationId(string value);
-
-		void SetSourceAddress(Uri uri);
-
-		void SetDestinationAddress(Uri uri);
-
-		void SetResponseAddress(Uri uri);
-
-		void SetFaultAddress(Uri uri);
-
-		void SetNetwork(string network);
-
-		void SetExpirationTime(DateTime value);
-
-		void SetRetryCount(int retryCount);
-
-		void SetUsing(IMessageContext context);
-
-		void SetBodyWriter(Action<Stream> bodyWriter);
-
-		void SetContentType(string value);
-
-	    void SetHeader(string key, string value);
-
-		/// <summary>
+        /// <summary>
 		/// Sets the receive context that the send was created in for tracing
 		/// </summary>
 		/// <param name="receiveContext"></param>
@@ -69,6 +51,32 @@ namespace MassTransit
 		/// The original message type that was sent/published
 		/// </summary>
 		Type DeclaringMessageType { get; }
+
+        void SetMessageType(string messageType);
+
+        void SetRequestId(string value);
+
+        void SetConversationId(string value);
+
+        void SetCorrelationId(string value);
+
+        void SetSourceAddress(Uri uri);
+
+        void SetDestinationAddress(Uri uri);
+
+        void SetResponseAddress(Uri uri);
+
+        void SetFaultAddress(Uri uri);
+
+        void SetNetwork(string network);
+
+        void SetExpirationTime(DateTime value);
+
+        void SetRetryCount(int retryCount);
+
+        void SetUsing(IMessageContext context);
+
+        void SetHeader(string key, string value);
 
 		/// <summary>
 		/// Serializes the message to the stream

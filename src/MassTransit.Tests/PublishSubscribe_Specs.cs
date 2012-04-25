@@ -34,4 +34,98 @@ namespace MassTransit.Tests
             consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
         }
     }
+
+    [TestFixture]
+    public class Publishing_an_object_to_the_bus :
+        LoopbackTestFixture
+    {
+        [Test]
+        public void Should_receive_the_proper_message()
+        {
+            var consumer = new TestMessageConsumer<PingMessage>();
+            LocalBus.SubscribeInstance(consumer);
+
+            var message = new PingMessage();
+
+            object unknownMessage = message;
+            LocalBus.Publish(unknownMessage);
+
+            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+        }
+
+        [Test]
+        public void Should_accept_the_type_specified()
+        {
+            var consumer = new TestMessageConsumer<PingMessage>();
+            LocalBus.SubscribeInstance(consumer);
+
+            var message = new PingMessage();
+
+            object unknownMessage = message;
+            LocalBus.Publish(unknownMessage, typeof(PingMessage));
+
+            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+        }
+
+        [Test]
+        public void Should_accept_the_type_specified_with_context()
+        {
+            var consumer = new TestMessageConsumer<PingMessage>();
+            LocalBus.SubscribeInstance(consumer);
+
+            var message = new PingMessage();
+
+            object unknownMessage = message;
+            LocalBus.Publish(unknownMessage, typeof(PingMessage), x => x.SetRequestId("27"));
+
+            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+        }
+    }
+
+    [TestFixture]
+    public class Sending_an_object_to_the_bus :
+        LoopbackTestFixture
+    {
+        [Test]
+        public void Should_receive_the_proper_message()
+        {
+            var consumer = new TestMessageConsumer<PingMessage>();
+            LocalBus.SubscribeInstance(consumer);
+
+            var message = new PingMessage();
+
+            object unknownMessage = message;
+            LocalBus.Endpoint.Send(unknownMessage);
+
+            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+        }
+
+        [Test]
+        public void Should_accept_the_type_specified()
+        {
+            var consumer = new TestMessageConsumer<PingMessage>();
+            LocalBus.SubscribeInstance(consumer);
+
+            var message = new PingMessage();
+
+            object unknownMessage = message;
+            LocalBus.Endpoint.Send(unknownMessage, typeof(PingMessage));
+
+            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+        }
+
+        [Test]
+        public void Should_accept_the_type_specified_with_context()
+        {
+            var consumer = new TestMessageConsumer<PingMessage>();
+            LocalBus.SubscribeInstance(consumer);
+
+            var message = new PingMessage();
+
+            object unknownMessage = message;
+            LocalBus.Endpoint.Send(unknownMessage, typeof(PingMessage), x => x.SetRequestId("27"));
+
+            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+        }
+    }
 }

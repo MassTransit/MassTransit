@@ -110,6 +110,8 @@
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceType.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeReflector.cs" />
+    <Compile Include="Context\BusObjectPublisher.cs" />
+    <Compile Include="Context\BusObjectPublisherImpl.cs" />
     <Compile Include="Diagnostics\IntrospectionExtensions.cs" />
     <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
     <Compile Include="Configuration\BusServiceLayer.cs" />
@@ -235,7 +237,6 @@
     <Compile Include="Context\IConsumeContext.cs" />
     <Compile Include="Context\IMessageContext.cs" />
     <Compile Include="Context\InvalidConsumeContext.cs" />
-    <Compile Include="Context\InvalidSendContext.cs" />
     <Compile Include="Context\IPublishContext.cs" />
     <Compile Include="Context\IReceiveContext.cs" />
     <Compile Include="Context\ISendContext.cs" />
@@ -343,6 +344,8 @@
     <Compile Include="Distributor\WorkerInfo.cs" />
     <Compile Include="Distributor\WorkerLoad.cs" />
     <Compile Include="EndpointLoggerExtensions.cs" />
+    <Compile Include="Context\EndpointObjectSender.cs" />
+    <Compile Include="Context\EndpointObjectSenderImpl.cs" />
     <Compile Include="Exceptions\MessageNotConsumedException.cs" />
     <Compile Include="Exceptions\MessageRetryLimitExceededException.cs" />
     <Compile Include="Exceptions\RequestException.cs" />
