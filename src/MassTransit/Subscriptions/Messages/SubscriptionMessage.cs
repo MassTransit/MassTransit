@@ -14,6 +14,7 @@ namespace MassTransit.Subscriptions.Messages
 {
 	using System;
 
+    [Serializable]
 	public abstract class SubscriptionMessage
 	{
 		public Guid SubscriptionId { get; set; }
