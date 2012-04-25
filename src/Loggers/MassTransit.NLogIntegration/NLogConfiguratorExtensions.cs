@@ -29,7 +29,7 @@ namespace MassTransit.NLogIntegration
 		/// <param name="configurator">Optional service bus configurator</param>
 		public static void UseNLog([CanBeNull] this ServiceBusConfigurator configurator)
         {
-            Logger.UseLogger(new NLogLogger());
+            NLogLogger.Use();
         }
 
         /// <summary>
