@@ -23,16 +23,53 @@ namespace MassTransit.Saga
 	public interface ISagaRepository<TSaga>
 		where TSaga : class, ISaga
 	{
+        /// <summary>
+        /// Loads/Creates the saga and makes it available for later consumption
+        /// through the Actions
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <param name="context"></param>
+        /// <param name="sagaId"></param>
+        /// <param name="selector"></param>
+        /// <param name="policy"></param>
+        /// <returns></returns>
 		IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
 																		 InstanceHandlerSelector<TSaga, TMessage> selector,
 																		 ISagaPolicy<TSaga, TMessage> policy)
 			where TMessage : class;
 
+
+        /// <summary>
+        /// Finds the CorrelationIds for the sagas that match the filter
+        /// </summary>
+        /// <param name="filter">effectively a LINQ expression</param>
+        /// <returns></returns>
 		IEnumerable<Guid> Find(ISagaFilter<TSaga> filter);
 
+        /// <summary>
+        /// Finds the sagas that match the filter
+        /// </summary>
+        /// <param name="filter">effectively a LINQ expression</param>
+        /// <returns></returns>
 		IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter);
 
+        /// <summary>
+        /// Finds all of the sagas that match the filter, and then applies a transform on them.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="filter">effectively a LINQ expression</param>
+        /// <param name="transformer"></param>
+        /// <returns></returns>
 		IEnumerable<TResult> Where<TResult>(ISagaFilter<TSaga> filter, Func<TSaga, TResult> transformer);
+
+
+        /// <summary>
+        /// Queries the underlying store for sagas, then applies a transform to them and
+        /// returns the result
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="transformer"></param>
+        /// <returns></returns>
 		IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer);
 	}
 }
