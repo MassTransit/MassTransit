@@ -36,3 +36,9 @@ So, what links two bus instances together?
 This is a common question. The binding element, really is the 
 message contract. If you want message A, then you subscribe to 
 message A. The internals of MT wires it all together.
+
+Why aren't queue / message priorities supported?
+""""""""""""""""""""""""""""""""""""""""""""""""
+
+http://www.udidahan.com/2008/01/30/podcast-message-priority-you-arent-gonna-need-it/
+
