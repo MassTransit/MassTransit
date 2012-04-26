@@ -40,5 +40,26 @@ message A. The internals of MT wires it all together.
 Why aren't queue / message priorities supported?
 """"""""""""""""""""""""""""""""""""""""""""""""
 
+Message Priorities are used to allow a message to jump to the front
+of the line. When people ask for this feature they usually have multiple
+types of messages all being delivered to the same queue. The problem
+is that each message has a different SLA (usually the one with the
+shorter time window is the one getting the priority flag). The problem
+is that w/o priorities the important message gets stuck behind the 
+less important/urgent ones.
+
+The solution is to stop sharing a single queue, and instead establish
+a second queue. In MassTransit you would establish a second instance
+of IServiceBus and have it subscribe to the important/urgent 
+message. Now you have two queues, one for the important things and one
+for the less urgent things. This helps with monitoring queue depths,
+error rates, etc. By placing each IServiceBus in its own Topshelf host
+/ process you further enhance each bus's ability to process messages, and
+isolate issues / downtime.
+
+Reading
+'''''''
+
 http://www.udidahan.com/2008/01/30/podcast-message-priority-you-arent-gonna-need-it/
+http://lostechies.com/jimmybogard/2010/11/18/queues-are-still-queues/
 
