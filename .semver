@@ -1,5 +1,5 @@
 --- 
-:patch: 2
-:special: ""
+:patch: 0
+:special: prerelease
 :major: 2
-:minor: 1
+:minor: 5
