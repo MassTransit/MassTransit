@@ -1,57 +1,60 @@
-using Castle.MicroKernel.Registration;
-using MassTransit.BusConfigurators;
-using MassTransit.EndpointConfigurators;
-using MassTransit.Transports;
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 
 namespace OpenAllNight
 {
     using System;
-    using System.IO;
     using System.Threading;
     using Castle.Core;
+    using Castle.MicroKernel.Registration;
     using Castle.Windsor;
-    using log4net.Config;
     using MassTransit;
-    using MassTransit.Services.HealthMonitoring.Configuration;
-    using MassTransit.Services.Subscriptions.Configuration;
-    using MassTransit.WindsorIntegration;
+    using MassTransit.Log4NetIntegration.Logging;
     using Testers;
 
     internal class Program
     {
-        private static readonly DateTime _startedAt = DateTime.Now;
-        private static DateTime lastPrint = DateTime.Now;
+        static readonly DateTime _startedAt = DateTime.Now;
+        static DateTime lastPrint = DateTime.Now;
 
-        private static void Main()
+        static void Main()
         {
             /////setup
-            XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
+            Log4NetLogger.Use("log4net.xml");
 
-            WindsorContainer c = new WindsorContainer();
-            c.AddComponent<SimpleMessageHandler>();
-            c.AddComponentLifeStyle("counter", typeof (Counter), LifestyleType.Singleton);
-            c.AddComponentLifeStyle("rvaoeuaoe", typeof (CacheUpdateResponseHandler), LifestyleType.Transient);
-
+            var c = new WindsorContainer();
+            c.Register(
+                Component.For<SimpleMessageHandler>().ImplementedBy<SimpleMessageHandler>(),
+                Component.For<Counter>().Named("counter").LifestyleSingleton().ImplementedBy<Counter>(),
+                Component.For<CacheUpdateResponseHandler>().Named("rvaoeuaoe").ImplementedBy<CacheUpdateResponseHandler>().LifestyleTransient()
+                );
+            
+            
             var bus = ServiceBusFactory.New(sbc =>
-            {
-                sbc.UseMsmq();
-                sbc.VerifyMsDtcConfiguration();
-                sbc.VerifyMsmqConfiguration();
-                sbc.ReceiveFrom("msmq://localhost/mt_client");
-                sbc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
-                sbc.UseHealthMonitoring(10);
+                                                {
+                                                    sbc.UseMsmq();
+                                                    sbc.VerifyMsDtcConfiguration();
+                                                    sbc.VerifyMsmqConfiguration();
+                                                    sbc.ReceiveFrom("msmq://localhost/mt_client");
+                                                    sbc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
+                                                    sbc.UseHealthMonitoring(10);
 
-                sbc.Subscribe(subs=>
-                {
-                    subs.LoadFrom(c);
-                });
-            });
+                                                    sbc.Subscribe(subs => { subs.LoadFrom(c); });
+                                                });
 
             c.Register(Component.For<IServiceBus>().Instance(bus));
 
-            
-            
-            
+
             IEndpoint ep = bus.GetEndpoint(new Uri("msmq://localhost/mt_subscriptions"));
             var subTester = new SubscriptionServiceTester(ep, bus, c.Resolve<Counter>());
             var healthTester = new HealthServiceTester(c.Resolve<Counter>(), bus);
@@ -64,7 +67,7 @@ namespace OpenAllNight
             Console.WriteLine("(use 0.1 for 6 minutes)");
             Console.WriteLine("(use 0.016 for 1 minute)");
             string input = Console.ReadLine();
-           double hours = double.Parse(input ?? "0");
+            double hours = double.Parse(input ?? "0");
             DateTime stopTime = DateTime.Now.AddHours(hours);
 
 
@@ -86,17 +89,19 @@ namespace OpenAllNight
             Console.ReadKey(true);
         }
 
-        private static void Initialize()
+        static void Initialize()
         {
         }
 
-        private static void PrintTime(IServiceBus bus, Counter counter)
+        static void PrintTime(IServiceBus bus, Counter counter)
         {
             TimeSpan ts = DateTime.Now.Subtract(lastPrint);
             if (ts.Minutes >= 1)
             {
-                Console.WriteLine("Elapsed Time: {0} mins, So far I have - Sent: {1}, Received: {2}, Published: {3}, Received: {4}",
-                                  (int) ((DateTime.Now - _startedAt).TotalMinutes), counter.MessagesSent, counter.MessagesReceived, counter.PublishCount, SimpleMessageHandler.MessageCount);
+                Console.WriteLine(
+                    "Elapsed Time: {0} mins, So far I have - Sent: {1}, Received: {2}, Published: {3}, Received: {4}",
+                    (int) ((DateTime.Now - _startedAt).TotalMinutes), counter.MessagesSent, counter.MessagesReceived,
+                    counter.PublishCount, SimpleMessageHandler.MessageCount);
 
                 lastPrint = DateTime.Now;
             }
@@ -107,7 +112,7 @@ namespace OpenAllNight
     public class SimpleMessageHandler :
         Consumes<SimpleMessage>.All
     {
-        private static long _messageCount;
+        static long _messageCount;
 
         public static long MessageCount
         {
@@ -127,6 +132,6 @@ namespace OpenAllNight
     [Serializable]
     public class SimpleMessage
     {
-        private readonly string _data = new string('*', 1024);
+        readonly string _data = new string('*', 1024);
     }
 }

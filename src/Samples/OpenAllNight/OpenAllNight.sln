@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapInt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NHibernateIntegration", "..\..\Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Log4NetIntegration", "..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj", "{8D2BE372-A756-4676-B2EA-ED7846809BFE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,5 +68,6 @@ Global
 		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9} = {77969F2D-DAB2-41ED-A1FE-E13C659D7FFC}
 		{F5E67502-2B30-484C-88C3-97710291F5AA} = {77969F2D-DAB2-41ED-A1FE-E13C659D7FFC}
 		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E} = {77969F2D-DAB2-41ED-A1FE-E13C659D7FFC}
+		{8D2BE372-A756-4676-B2EA-ED7846809BFE} = {77969F2D-DAB2-41ED-A1FE-E13C659D7FFC}
 	EndGlobalSection
 EndGlobal
