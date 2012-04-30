@@ -18,6 +18,7 @@ Contents:
    overview/index.rst
    troubleshooting/index.rst
    advanced/index.rst
+   samples/index.rst
 
 
 Indices and tables

@@ -1,0 +1,6 @@
+Samples
+=====================
+
+.. toctree::
+
+    starbucks.rst
