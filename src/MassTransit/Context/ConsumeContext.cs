@@ -134,7 +134,10 @@ namespace MassTransit.Context
 
         public bool IsContextAvailable(Type messageType)
         {
-            return messageType.IsAssignableFrom(Message.GetType());
+            if (messageType.IsInstanceOfType(Message))
+                return true;
+
+            return _context.IsContextAvailable(messageType);
         }
 
         public bool TryGetContext<T>(out IConsumeContext<T> context)
@@ -147,8 +150,7 @@ namespace MassTransit.Context
                 return true;
             }
 
-            context = null;
-            return false;
+            return _context.TryGetContext(out context);
         }
 
         public IReceiveContext BaseContext

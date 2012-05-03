@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using System.Diagnostics.Contracts;
     using NewIdProviders;
 
     /// <summary>

@@ -17,6 +17,7 @@ namespace MassTransit
     using Magnum.Caching;
     using Magnum.Reflection;
 
+
     /// <summary>
     /// Publish extensions to <see cref="IServiceBus"/>. Contains
     /// overloads for both concrete class-publishes and publish-by-interface
