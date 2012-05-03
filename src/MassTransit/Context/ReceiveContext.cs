@@ -150,7 +150,7 @@ namespace MassTransit.Context
             try
             {
                 T message;
-                if (_typeConverter.TryConvert(out message))
+                if (_typeConverter != null && _typeConverter.TryConvert(out message))
                 {
                     context = new ConsumeContext<T>(this, message);
                     return true;
