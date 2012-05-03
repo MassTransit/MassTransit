@@ -164,8 +164,6 @@ namespace MassTransit.Context
                 var exception = new SerializationException("Failed to deserialize the message", ex);
 
                 throw exception;
-
-//                _log.Error("Exception converting message to type: " + typeof (T).ToShortTypeName(), exception);
             }
         }
 
