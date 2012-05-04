@@ -643,6 +643,7 @@
     <Compile Include="Transports\ITransport.cs" />
     <Compile Include="Transports\MessageName.cs" />
     <Compile Include="Transports\ReconnectPolicy.cs" />
+    <Compile Include="Transports\RetryPolicy.cs" />
     <Compile Include="Transports\TransportSettings.cs" />
     <Compile Include="Transports\EndpointCacheExtensions.cs" />
     <Compile Include="Transports\EndpointFactory.cs" />
