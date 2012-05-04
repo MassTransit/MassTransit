@@ -69,6 +69,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Test]
         public void Should_receive_byte_array()
         {
+            _received = new Future<A>();
             _sent = new A
                 {
                     Contents = new byte[] {0x56, 0x34, 0xf3}
@@ -82,6 +83,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Test]
         public void Should_receive_byte_array_of_bigness()
         {
+            _received = new Future<A>();
             Random random = new Random();
             byte[] bytes = new byte[512];
             for (int i = 0; i < 512; i++)
