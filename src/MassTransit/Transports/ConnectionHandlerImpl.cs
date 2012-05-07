@@ -67,8 +67,6 @@ namespace MassTransit.Transports
 
         public void ForceReconnect(TimeSpan reconnectDelay)
         {
-            // now we know we need to force a reconnect, also make sure we retry the callback that initiated the reconnect.
-            _policyChain.Push(new RetryPolicy(_policyChain));
             _policyChain.Push(new ReconnectPolicy(this, _policyChain, reconnectDelay));
         }
 
