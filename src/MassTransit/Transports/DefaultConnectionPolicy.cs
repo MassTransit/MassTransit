@@ -13,6 +13,8 @@
 namespace MassTransit.Transports
 {
 	using System;
+	using System.Threading;
+	using Logging;
 	using Magnum.Extensions;
 
 	public class DefaultConnectionPolicy :
@@ -20,6 +22,8 @@ namespace MassTransit.Transports
 	{
 		readonly ConnectionHandler _connectionHandler;
 		TimeSpan _reconnectDelay;
+		readonly ILog _log = Logger.Get(typeof(DefaultConnectionPolicy));
+		readonly ReaderWriterLockSlim _connectionlLock = new ReaderWriterLockSlim();
 
 		public DefaultConnectionPolicy(ConnectionHandler connectionHandler)
 		{
@@ -31,13 +35,73 @@ namespace MassTransit.Transports
 		{
 			try
 			{
-				callback();
+				try
+				{
+					// wait here so we can be sure that there is not a reconnect in progress
+					_connectionlLock.EnterReadLock();
+					callback();
+				}
+				finally
+				{
+					_connectionlLock.ExitReadLock();
+				}
 			}
 			catch (InvalidConnectionException ex)
 			{
-				_connectionHandler.ForceReconnect(_reconnectDelay);
+				_log.Warn("Invalid Connection when executing callback", ex.InnerException);
 
-				throw ex.InnerException;
+				Reconnect();
+
+				if (_log.IsDebugEnabled)
+				{
+					_log.Debug("Retrying callback after reconnect.");
+				}
+
+				// let this one fail no need to try/catch/lock etc
+				callback();
+			}
+		}
+
+		private void Reconnect()
+		{
+			if (_connectionlLock.TryEnterWriteLock(100))
+			{
+				try
+				{
+					if (_log.IsDebugEnabled)
+					{
+						_log.Debug("Disconnecting connection handler.");
+					}
+					_connectionHandler.Disconnect();
+
+					if (_reconnectDelay > TimeSpan.Zero)
+						Thread.Sleep(_reconnectDelay);
+
+					if (_log.IsDebugEnabled)
+					{
+						_log.Debug("Re-connecting connection handler...");
+					}
+					_connectionHandler.Connect();
+				}
+				finally
+				{
+					_connectionlLock.ExitWriteLock();
+				}
+			}
+			else
+			{
+				try
+				{
+					_connectionlLock.EnterReadLock();
+					if (_log.IsDebugEnabled)
+					{
+						_log.Debug("Waiting for reconnect in another thread.");
+					}
+				}
+				finally
+				{
+					_connectionlLock.ExitReadLock();
+				}
 			}
 		}
 	}
