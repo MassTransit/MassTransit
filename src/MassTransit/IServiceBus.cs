@@ -79,17 +79,65 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name = "T">The type of the message</typeparam>
         /// <param name = "message">The messages to be published</param>
+        void Publish<T>([NotNull] T message)
+            where T : class;
+
+        /// <summary>
+        /// <para>Publishes a message to all subscribed consumers for the message type as specified
+        /// by the generic parameter. The second parameter allows the caller to customize the
+        /// outgoing publish context and set things like headers on the message.</para>
+        /// 
+        /// <para>
+        /// Read up on publishing: http://readthedocs.org/docs/masstransit/en/latest/overview/publishing.html
+        /// </para>
+        /// </summary>
+        /// <typeparam name = "T">The type of the message</typeparam>
+        /// <param name = "message">The messages to be published</param>
         /// <param name = "contextCallback">A callback that gives the caller
         /// access to the publish context.</param>
-        void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
+        void Publish<T>([NotNull] T message, [NotNull] Action<IPublishContext<T>> contextCallback)
             where T : class;
+
+        /// <summary>
+        /// Publishes an object as a message, using the message type specified. If the object cannot be cast
+        /// to the specified message type, an exception will be thrown.
+        /// </summary>
+        /// <param name="message">The message object</param>
+        void Publish([NotNull] object message);
+
+        /// <summary>
+        /// Publishes an object as a message, using the message type specified. If the object cannot be cast
+        /// to the specified message type, an exception will be thrown.
+        /// </summary>
+        /// <param name="message">The message object</param>
+        /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
+        void Publish([NotNull] object message, [NotNull] Type messageType);
+
+        /// <summary>
+        /// Publishes an object as a message, using the message type specified. If the object cannot be cast
+        /// to the specified message type, an exception will be thrown.
+        /// </summary>
+        /// <param name="message">The message object</param>
+        /// <param name = "contextCallback">A callback that gives the caller
+        /// access to the publish context.</param>
+        void Publish([NotNull] object message, [NotNull] Action<IPublishContext> contextCallback);
+
+        /// <summary>
+        /// Publishes an object as a message, using the message type specified. If the object cannot be cast
+        /// to the specified message type, an exception will be thrown.
+        /// </summary>
+        /// <param name="message">The message object</param>
+        /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
+        /// <param name = "contextCallback">A callback that gives the caller
+        /// access to the publish context.</param>
+        void Publish([NotNull] object message, [NotNull] Type messageType, [NotNull] Action<IPublishContext> contextCallback);
 
         /// <summary>
         /// Looks an endpoint up by its uri.
         /// </summary>
         /// <param name="address"></param>
         /// <returns>The endpoint that corresponds to the uri passed</returns>
-        IEndpoint GetEndpoint(Uri address);
+        IEndpoint GetEndpoint([NotNull] Uri address);
 
         /// <summary>
         ///   Not sure this is going to make it, but trying a new approach.

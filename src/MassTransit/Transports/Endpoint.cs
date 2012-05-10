@@ -21,6 +21,7 @@ namespace MassTransit.Transports
     using Context;
     using Exceptions;
     using Logging;
+    using Magnum.Caching;
     using Serialization;
 
     /// <summary>
@@ -30,6 +31,9 @@ namespace MassTransit.Transports
     public class Endpoint :
         IEndpoint
     {
+        static readonly Cache<Type, EndpointObjectSender> _typeCache =
+            new GenericTypeCache<EndpointObjectSender>(typeof(EndpointObjectSenderImpl<>));
+
         static readonly ILog _log = Logger.Get(typeof (Endpoint));
         readonly IEndpointAddress _address;
         readonly IMessageSerializer _serializer;
@@ -102,6 +106,66 @@ namespace MassTransit.Transports
             {
                 throw new SendException(typeof (T), _address.Uri, "An exception was thrown during Send", ex);
             }
+        }
+
+        public void Send<T>(T message)
+            where T : class
+        {
+            ISendContext<T> context = ContextStorage.CreateSendContext(message);
+
+            Send(context);
+        }
+
+        public void Send<T>(T message, Action<ISendContext<T>> contextCallback)
+            where T : class
+        {
+            ISendContext<T> context = ContextStorage.CreateSendContext(message);
+
+            contextCallback(context);
+
+            Send(context);
+        }
+
+        public void Send(object message)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+
+            _typeCache[message.GetType()].Send(this, message);
+        }
+
+        public void Send(object message, Type messageType)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+            if (messageType == null)
+                throw new ArgumentNullException("messageType");
+
+            _typeCache[messageType].Send(this, message);
+        }
+
+        public void Send(object message, Action<ISendContext> contextCallback)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+            if (contextCallback == null)
+                throw new ArgumentNullException("contextCallback");
+
+            Type messageType = message.GetType();
+
+            _typeCache[messageType].Send(this, message, contextCallback);
+        }
+
+        public void Send(object message, Type messageType, Action<ISendContext> contextCallback)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+            if (messageType == null)
+                throw new ArgumentNullException("messageType");
+            if (contextCallback == null)
+                throw new ArgumentNullException("contextCallback");
+
+            _typeCache[messageType].Send(this, message, contextCallback);
         }
 
         public void Dispose()

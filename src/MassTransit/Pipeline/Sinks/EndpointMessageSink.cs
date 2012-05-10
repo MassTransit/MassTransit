@@ -42,7 +42,7 @@ namespace MassTransit.Pipeline.Sinks
 					if (x.WasEndpointAlreadySent(_endpoint.Address))
 						return;
 
-					_endpoint.Send(x);
+					_endpoint.Send((ISendContext<TMessage>)x);
 				};
 		}
 

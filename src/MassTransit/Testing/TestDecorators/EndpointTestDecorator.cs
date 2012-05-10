@@ -13,6 +13,8 @@
 namespace MassTransit.Testing.TestDecorators
 {
 	using System;
+	using Context;
+	using Magnum.Caching;
 	using Scenarios;
 	using Serialization;
 	using Transports;
@@ -21,7 +23,10 @@ namespace MassTransit.Testing.TestDecorators
 	public class EndpointTestDecorator :
 		IEndpoint
 	{
-		readonly IEndpoint _endpoint;
+	    static readonly Cache<Type, EndpointObjectSender> _typeCache =
+	        new GenericTypeCache<EndpointObjectSender>(typeof(EndpointObjectSenderImpl<>));
+
+        readonly IEndpoint _endpoint;
 		readonly ReceivedMessageListImpl _received;
 		readonly SentMessageListImpl _sent;
 		EndpointTestScenarioImpl _scenario;
@@ -77,7 +82,8 @@ namespace MassTransit.Testing.TestDecorators
 			get { return _endpoint.Serializer; }
 		}
 
-		public void Send<T>(ISendContext<T> context) where T : class
+		public void Send<T>(ISendContext<T> context) 
+            where T : class
 		{
 			var send = new SentMessageImpl<T>(context);
 			try
@@ -96,7 +102,66 @@ namespace MassTransit.Testing.TestDecorators
 			}
 		}
 
-		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout)
+        public void Send<T>(T message)
+            where T : class
+        {
+            ISendContext<T> context = ContextStorage.CreateSendContext(message);
+
+            Send(context);
+        }
+
+        public void Send<T>(T message, Action<ISendContext<T>> contextCallback)
+            where T : class
+        {
+            ISendContext<T> context = ContextStorage.CreateSendContext(message);
+
+            contextCallback(context);
+
+            Send(context);
+        }
+
+        public void Send(object message)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+
+            _typeCache[message.GetType()].Send(this, message);
+        }
+
+        public void Send(object message, Type messageType)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+            if (messageType == null)
+                throw new ArgumentNullException("messageType");
+
+            _typeCache[messageType].Send(this, message);
+        }
+
+        public void Send(object message, Action<ISendContext> contextCallback)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+            if (contextCallback == null)
+                throw new ArgumentNullException("contextCallback");
+
+            Type messageType = message.GetType();
+
+            _typeCache[messageType].Send(this, message, contextCallback);
+        }
+
+        public void Send(object message, Type messageType, Action<ISendContext> contextCallback)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+            if (messageType == null)
+                throw new ArgumentNullException("messageType");
+            if (contextCallback == null)
+                throw new ArgumentNullException("contextCallback");
+
+            _typeCache[messageType].Send(this, message, contextCallback);
+        }
+        public void Receive(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout)
 		{
 			_endpoint.Receive(receiveContext =>
 				{
