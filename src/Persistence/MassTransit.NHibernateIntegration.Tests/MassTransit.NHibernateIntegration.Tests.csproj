@@ -104,13 +104,13 @@
     </Reference>
     <Reference Include="System.Data.SQLite" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\lib\SQLite\net40\System.Data.SQLite.dll</HintPath>
-      </Reference>
+    </Reference>
     <Reference Include="System.Data.SQLite.Linq" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\lib\SQLite\net20\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.SQLite.Linq" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\..\lib\SQLite\net40\System.Data.SQLite.Linq.dll</HintPath>
-      </Reference>
+    </Reference>
     <Reference Include="System.Transactions" />
     <Reference Include="System.XML" />
   </ItemGroup>
@@ -133,6 +133,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
+      <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>
+      <Name>MassTransit.TestFramework</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj">
       <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
       <Name>MassTransit.NHibernateIntegration</Name>

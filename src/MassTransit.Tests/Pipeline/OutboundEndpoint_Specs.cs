@@ -44,7 +44,7 @@ namespace MassTransit.Tests.Pipeline
 
 			var message = new PingMessage();
 
-			var context = new SendContext<PingMessage>(message);
+			ISendContext<PingMessage> context = new SendContext<PingMessage>(message);
 
 			endpoint.Expect(x => x.Send(context)).IgnoreArguments();
 

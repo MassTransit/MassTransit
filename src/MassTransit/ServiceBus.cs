@@ -20,6 +20,7 @@ namespace MassTransit
     using Exceptions;
     using Logging;
     using Magnum;
+    using Magnum.Caching;
     using Magnum.Extensions;
     using Monitoring;
     using Pipeline;
@@ -37,6 +38,10 @@ namespace MassTransit
         IControlBus
     {
         static readonly ILog _log;
+
+        static readonly Cache<Type, BusObjectPublisher> _typeCache =
+            new GenericTypeCache<BusObjectPublisher>(typeof(BusObjectPublisherImpl<>));
+
 
         ConsumerPool _consumerPool;
         int _consumerThreadLimit = Environment.ProcessorCount*4;
@@ -146,6 +151,17 @@ namespace MassTransit
             GC.SuppressFinalize(this);
         }
 
+        public void Publish<T>(T message) 
+            where T : class
+        {
+            Publish(message, NoContext);
+        }
+
+        void NoContext<T>(IPublishContext<T> context)
+            where T: class
+        {
+        }
+
         /// <summary>
         /// Publishes a message to all subscribed consumers for the message type
         /// </summary>
@@ -188,6 +204,46 @@ namespace MassTransit
                     ConsumerCount = publishedCount,
                     Duration = context.Duration,
                 });
+        }
+
+        public void Publish(object message)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+
+            _typeCache[message.GetType()].Publish(this, message);
+        }
+
+        public void Publish(object message, Type messageType)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+            if (messageType == null)
+                throw new ArgumentNullException("messageType");
+
+            _typeCache[messageType].Publish(this, message);
+        }
+
+        public void Publish(object message, Action<IPublishContext> contextCallback)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+            if (contextCallback == null)
+                throw new ArgumentNullException("contextCallback");
+
+            _typeCache[message.GetType()].Publish(this, message, contextCallback);
+        }
+
+        public void Publish(object message, Type messageType, Action<IPublishContext> contextCallback)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+            if (messageType == null)
+                throw new ArgumentNullException("messageType");
+            if (contextCallback == null)
+                throw new ArgumentNullException("contextCallback");
+
+            _typeCache[messageType].Publish(this, message);
         }
 
         public IOutboundMessagePipeline OutboundPipeline { get; private set; }

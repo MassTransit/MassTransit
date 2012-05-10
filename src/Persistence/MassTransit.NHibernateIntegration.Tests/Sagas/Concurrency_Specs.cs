@@ -22,6 +22,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
     using System.Linq;
     using System.Threading;
     using FluentNHibernate.Cfg;
+    using Magnum.Extensions;
     using MassTransit.Saga;
     using MassTransit.Tests.TextFixtures;
     using NHibernate;
@@ -29,6 +30,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
     using NHibernate.Tool.hbm2ddl;
     using NUnit.Framework;
     using Saga;
+    using TestFramework;
     using log4net;
 
 	[TestFixture, Category("Integration")]
@@ -111,26 +113,21 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
                 {CorrelationId = transactionId, Name = "Chris", Value = startValue};
 
             LocalBus.Publish(startConcurrentSaga);
-            Trace.WriteLine("Just published the start message");
 
-            Thread.Sleep(1500);
+            var saga = _sagaRepository.ShouldContainSaga(transactionId, 8.Seconds());
+            Assert.IsNotNull(saga);
 
             int nextValue = 2;
             var continueConcurrentSaga = new ContinueConcurrentSaga {CorrelationId = transactionId, Value = nextValue};
 
             LocalBus.Publish(continueConcurrentSaga);
-            Trace.WriteLine("Just published the continue message");
-            Thread.Sleep(8000);
+
+            saga = _sagaRepository.ShouldContainSaga(x => x.CorrelationId == transactionId && x.Value == nextValue, 8.Seconds());
+            Assert.IsNotNull(saga);
 
             unsubscribeAction();
-            foreach (ConcurrentSaga saga in _sagaRepository.Where(x => true))
-            {
-                Trace.WriteLine("Found saga: " + saga.CorrelationId);
-            }
 
-            int currentValue = _sagaRepository.Where(x => x.CorrelationId == transactionId).First().Value;
-
-            Assert.AreEqual(nextValue, currentValue);
+            Assert.AreEqual(nextValue, saga.Value);
         }
     }
 
