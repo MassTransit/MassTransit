@@ -13,7 +13,9 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Reflection;
     using System.Web;
+    using Magnum.Reflection;
 
     /// <summary>
     /// The default context provider using thread local storage
@@ -113,8 +115,15 @@ namespace MassTransit.Context
 
         static ContextStorageProvider GetDefaultProvider()
         {
-            if (HttpContext.Current != null)
-                return new HttpContextContextStorageProvider();
+#if NET40
+            var ctx = Type.GetType("System.Web.HttpContext, System.Web", false);
+            var provider = Type.GetType("MassTransit.Context.HttpContextContextStorageProvider, MassTransit.Web", false);
+#else
+            var ctx = Type.GetType("System.Web.HttpContext, System.Web");
+            var provider = Type.GetType("MassTransit.Context.HttpContextContextStorageProvider, MassTransit.Web");
+#endif
+            if (ctx != null && ctx.GetProperty("Current").GetValue(null, null) != null)
+                return (ContextStorageProvider)FastActivator.Create(provider);
 
             return new ThreadStaticContextStorageProvider();
         }

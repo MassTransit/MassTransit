@@ -32,8 +32,7 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <DefineConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">NET40</DefineConstants>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -85,7 +84,6 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
@@ -250,7 +248,6 @@
     <Compile Include="Context\ServiceBusReceiveContext.cs" />
     <Compile Include="Context\ThreadStaticContextStorageProvider.cs" />
     <Compile Include="Context\TransportMessageHeaders.cs" />
-    <Compile Include="Context\HttpContextContextStorageProvider.cs" />
     <Compile Include="Diagnostics\Introspection\DiagnosticsProbe.cs" />
     <Compile Include="Diagnostics\Introspection\DiagnosticsSource.cs" />
     <Compile Include="Diagnostics\TracingExtensions.cs" />

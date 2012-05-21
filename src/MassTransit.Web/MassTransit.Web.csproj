@@ -5,14 +5,13 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{F802655A-D5EC-4031-B21F-A3EECCBE02A5}</ProjectGuid>
+    <ProjectGuid>{9A0157B2-F329-4DEA-8ED4-E123A463665B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.NLogIntegration</RootNamespace>
-    <AssemblyName>MassTransit.NLogIntegration</AssemblyName>
+    <RootNamespace>MassTransit</RootNamespace>
+    <AssemblyName>MassTransit.Web</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,8 +21,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,37 +29,32 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\MassTransit.NLogIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\..\lib\NLog\net35\NLog.dll</HintPath>
-    </Reference>
-    <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\..\lib\NLog\net40\NLog.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\SolutionVersion.cs">
+    <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="NLogConfiguratorExtensions.cs" />
-    <Compile Include="Logging\NLogLog.cs" />
-    <Compile Include="Logging\NLogLogger.cs" />
+    <Compile Include="Context\HttpContextContextStorageProvider.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
