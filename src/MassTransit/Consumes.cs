@@ -21,7 +21,7 @@ namespace MassTransit
 	/// </summary>
 	/// <typeparam name="TMessage">The message type to consume.</typeparam>
 	[UsedImplicitly]
-	public class Consumes<TMessage>
+	public static class Consumes<TMessage>
 		where TMessage : class
 	{
 		static readonly Selected _null;
