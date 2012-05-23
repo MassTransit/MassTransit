@@ -15,16 +15,13 @@ namespace MassTransit.Testing.TestDecorators
     using System;
     using Context;
     using Diagnostics.Introspection;
-    using Magnum.Caching;
+    using Magnum.Reflection;
     using Pipeline;
     using Scenarios;
 
     public class ServiceBusTestDecorator :
         IServiceBus
     {
-        static readonly Cache<Type, BusObjectPublisher> _typeCache =
-            new GenericTypeCache<BusObjectPublisher>(typeof(BusObjectPublisherImpl<>));
-
         readonly IServiceBus _bus;
         readonly PublishedMessageListImpl _published;
         readonly EndpointTestScenarioImpl _scenario;
@@ -36,7 +33,6 @@ namespace MassTransit.Testing.TestDecorators
 
             _published = new PublishedMessageListImpl();
         }
-
 
         public void Inspect(DiagnosticsProbe probe)
         {
@@ -113,7 +109,7 @@ namespace MassTransit.Testing.TestDecorators
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            _typeCache[message.GetType()].Publish(this, message);
+            BusObjectPublisherCache.Instance[message.GetType()].Publish(this, message);
         }
 
         public void Publish(object message, Type messageType)
@@ -123,7 +119,7 @@ namespace MassTransit.Testing.TestDecorators
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            _typeCache[messageType].Publish(this, message);
+            BusObjectPublisherCache.Instance[messageType].Publish(this, message);
         }
 
         public void Publish(object message, Action<IPublishContext> contextCallback)
@@ -133,7 +129,7 @@ namespace MassTransit.Testing.TestDecorators
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            _typeCache[message.GetType()].Publish(this, message, contextCallback);
+            BusObjectPublisherCache.Instance[message.GetType()].Publish(this, message, contextCallback);
         }
 
         public void Publish(object message, Type messageType, Action<IPublishContext> contextCallback)
@@ -145,7 +141,29 @@ namespace MassTransit.Testing.TestDecorators
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            _typeCache[messageType].Publish(this, message);
+            BusObjectPublisherCache.Instance[messageType].Publish(this, message);
+        }
+
+        public void Publish<T>(object values)
+            where T : class
+        {
+            if (values == null)
+                throw new ArgumentNullException("values");
+
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            Publish(message, x => { });
+        }
+
+        public void Publish<T>(object values, Action<IPublishContext<T>> contextCallback) 
+            where T : class
+        {
+            if (values == null)
+                throw new ArgumentNullException("values");
+
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            Publish(message, contextCallback);
         }
 
         public IEndpoint GetEndpoint(Uri address)

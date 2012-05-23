@@ -20,8 +20,8 @@ namespace MassTransit
     using Exceptions;
     using Logging;
     using Magnum;
-    using Magnum.Caching;
     using Magnum.Extensions;
+    using Magnum.Reflection;
     using Monitoring;
     using Pipeline;
     using Pipeline.Configuration;
@@ -38,10 +38,6 @@ namespace MassTransit
         IControlBus
     {
         static readonly ILog _log;
-
-        static readonly Cache<Type, BusObjectPublisher> _typeCache =
-            new GenericTypeCache<BusObjectPublisher>(typeof(BusObjectPublisherImpl<>));
-
 
         ConsumerPool _consumerPool;
         int _consumerThreadLimit = Environment.ProcessorCount*4;
@@ -211,7 +207,7 @@ namespace MassTransit
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            _typeCache[message.GetType()].Publish(this, message);
+            BusObjectPublisherCache.Instance[message.GetType()].Publish(this, message);
         }
 
         public void Publish(object message, Type messageType)
@@ -221,7 +217,7 @@ namespace MassTransit
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            _typeCache[messageType].Publish(this, message);
+            BusObjectPublisherCache.Instance[messageType].Publish(this, message);
         }
 
         public void Publish(object message, Action<IPublishContext> contextCallback)
@@ -231,7 +227,7 @@ namespace MassTransit
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            _typeCache[message.GetType()].Publish(this, message, contextCallback);
+            BusObjectPublisherCache.Instance[message.GetType()].Publish(this, message, contextCallback);
         }
 
         public void Publish(object message, Type messageType, Action<IPublishContext> contextCallback)
@@ -243,7 +239,52 @@ namespace MassTransit
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            _typeCache[messageType].Publish(this, message);
+            BusObjectPublisherCache.Instance[messageType].Publish(this, message);
+        }
+
+        /// <summary>
+        /// <see cref="IServiceBus.Publish{T}"/>: this is a "dynamically"
+        /// typed overload - give it an interface as its type parameter,
+        /// and a loosely typed dictionary of values and the MassTransit
+        /// underlying infrastructure will populate an object instance
+        /// with the passed values. It actually does this with DynamicProxy
+        /// in the background.
+        /// </summary>
+        /// <typeparam name="T">The type of the interface or
+        /// non-sealed class with all-virtual members.</typeparam>
+        /// <param name="bus">The bus to publish on.</param>
+        /// <param name="values">The dictionary of values to place in the
+        /// object instance to implement the interface.</param>
+        public void Publish<T>(object values)
+            where T : class
+        {
+            if (values == null)
+                throw new ArgumentNullException("values");
+
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            Publish(message, x => { });
+        }
+
+        /// <summary>
+        /// <see cref="Publish{T}(MassTransit.IServiceBus,object)"/>: this
+        /// overload further takes an action; it allows you to set <see cref="IPublishContext"/>
+        /// meta-data. Also <see cref="IServiceBus.Publish{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the message to publish</typeparam>
+        /// <param name="bus">The bus to publish the message on.</param>
+        /// <param name="values">The dictionary of values to become hydrated and
+        /// published under the type of the interface.</param>
+        /// <param name="contextCallback">The context callback.</param>
+        public void Publish<T>(object values, Action<IPublishContext<T>> contextCallback)
+            where T : class
+        {
+            if (values == null)
+                throw new ArgumentNullException("values");
+
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            Publish(message, contextCallback);
         }
 
         public IOutboundMessagePipeline OutboundPipeline { get; private set; }
