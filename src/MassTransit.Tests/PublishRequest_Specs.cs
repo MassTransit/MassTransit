@@ -78,6 +78,8 @@ namespace MassTransit.Tests
 
             RemoteBus.SubscribeContextHandler<PingMessage>(x =>
                 {
+                    RemoteBus.ShouldHaveRemoteSubscriptionFor<PongMessage>();
+
                     pingReceived.Set(x.Message);
                     RemoteBus.Publish(new PongMessage {TransactionId = x.Message.TransactionId});
                 });
@@ -278,7 +280,7 @@ namespace MassTransit.Tests
             pongReceived.IsAvailable(timeout).ShouldBeFalse("The pong should not have been received");
         }
 
-        [Test, NotYetImplemented]
+        [Test]
         public void Should_call_the_timeout_handler_and_not_throw_an_exception()
         {
             var pongReceived = new FutureMessage<PongMessage>();
