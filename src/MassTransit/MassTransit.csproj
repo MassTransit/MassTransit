@@ -111,7 +111,9 @@
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeReflector.cs" />
     <Compile Include="Context\BusObjectPublisher.cs" />
+    <Compile Include="Context\BusObjectPublisherCache.cs" />
     <Compile Include="Context\BusObjectPublisherImpl.cs" />
+    <Compile Include="Context\EndpointObjectSenderCache.cs" />
     <Compile Include="Diagnostics\IntrospectionExtensions.cs" />
     <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
     <Compile Include="Configuration\BusServiceLayer.cs" />
@@ -377,7 +379,6 @@
     <Compile Include="Pipeline\Sinks\OutboundMessageFilter.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageInterceptor.cs" />
     <Compile Include="Pipeline\Sinks\SelectedContextConsumerMessageSink.cs" />
-    <Compile Include="PublishExtensions.cs" />
     <Compile Include="RequestResponseExtensions.cs" />
     <Compile Include="RequestResponse\Configurators\RequestConfigurator.cs" />
     <Compile Include="RequestResponse\Configurators\RequestConfiguratorImpl.cs" />
@@ -391,7 +392,6 @@
     <Compile Include="Saga\SagaFilter.cs" />
     <Compile Include="Saga\SagaFilterExtensions.cs" />
     <Compile Include="Saga\SagaRepositoryQuery.cs" />
-    <Compile Include="SendExtensions.cs" />
     <Compile Include="Exceptions\MassTransitException.cs" />
     <Compile Include="Exceptions\NotImplementedByDesignException.cs" />
     <Compile Include="Exceptions\SagaException.cs" />

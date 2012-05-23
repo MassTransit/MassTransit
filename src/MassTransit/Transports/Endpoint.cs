@@ -21,7 +21,7 @@ namespace MassTransit.Transports
     using Context;
     using Exceptions;
     using Logging;
-    using Magnum.Caching;
+    using Magnum.Reflection;
     using Serialization;
 
     /// <summary>
@@ -31,9 +31,6 @@ namespace MassTransit.Transports
     public class Endpoint :
         IEndpoint
     {
-        static readonly Cache<Type, EndpointObjectSender> _typeCache =
-            new GenericTypeCache<EndpointObjectSender>(typeof(EndpointObjectSenderImpl<>));
-
         static readonly ILog _log = Logger.Get(typeof (Endpoint));
         readonly IEndpointAddress _address;
         readonly IMessageSerializer _serializer;
@@ -131,7 +128,7 @@ namespace MassTransit.Transports
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            _typeCache[message.GetType()].Send(this, message);
+            EndpointObjectSenderCache.Instance[message.GetType()].Send(this, message);
         }
 
         public void Send(object message, Type messageType)
@@ -141,7 +138,7 @@ namespace MassTransit.Transports
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            _typeCache[messageType].Send(this, message);
+            EndpointObjectSenderCache.Instance[messageType].Send(this, message);
         }
 
         public void Send(object message, Action<ISendContext> contextCallback)
@@ -153,7 +150,7 @@ namespace MassTransit.Transports
 
             Type messageType = message.GetType();
 
-            _typeCache[messageType].Send(this, message, contextCallback);
+            EndpointObjectSenderCache.Instance[messageType].Send(this, message, contextCallback);
         }
 
         public void Send(object message, Type messageType, Action<ISendContext> contextCallback)
@@ -165,7 +162,38 @@ namespace MassTransit.Transports
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            _typeCache[messageType].Send(this, message, contextCallback);
+            EndpointObjectSenderCache.Instance[messageType].Send(this, message, contextCallback);
+        }
+
+        /// <summary>
+        /// Sends an interface message, initializing the properties of the interface using the anonymous
+        /// object specified
+        /// </summary>
+        /// <typeparam name="T">The interface type to send</typeparam>
+        /// <param name="endpoint">The destination endpoint</param>
+        /// <param name="values">The property values to initialize on the interface</param>
+        public void Send<T>(object values)
+            where T : class
+        {
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            Send(message, x => { });
+        }
+
+        /// <summary>
+        /// Sends an interface message, initializing the properties of the interface using the anonymous
+        /// object specified
+        /// </summary>
+        /// <typeparam name="T">The interface type to send</typeparam>
+        /// <param name="endpoint">The destination endpoint</param>
+        /// <param name="values">The property values to initialize on the interface</param>
+        /// <param name="contextCallback">A callback method to modify the send context for the message</param>
+        public void Send<T>(object values, Action<ISendContext<T>> contextCallback)
+            where T : class
+        {
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            Send(message, contextCallback);
         }
 
         public void Dispose()

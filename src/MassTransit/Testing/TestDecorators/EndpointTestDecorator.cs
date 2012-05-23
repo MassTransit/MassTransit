@@ -12,95 +12,92 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.TestDecorators
 {
-	using System;
-	using Context;
-	using Magnum.Caching;
-	using Scenarios;
-	using Serialization;
-	using Transports;
+    using System;
+    using Context;
+    using Magnum.Reflection;
+    using Scenarios;
+    using Serialization;
+    using Transports;
 
 
-	public class EndpointTestDecorator :
-		IEndpoint
-	{
-	    static readonly Cache<Type, EndpointObjectSender> _typeCache =
-	        new GenericTypeCache<EndpointObjectSender>(typeof(EndpointObjectSenderImpl<>));
-
+    public class EndpointTestDecorator :
+        IEndpoint
+    {
         readonly IEndpoint _endpoint;
-		readonly ReceivedMessageListImpl _received;
-		readonly SentMessageListImpl _sent;
-		EndpointTestScenarioImpl _scenario;
+        readonly ReceivedMessageListImpl _received;
+        readonly SentMessageListImpl _sent;
+        EndpointTestScenarioImpl _scenario;
 
-		public EndpointTestDecorator(IEndpoint endpoint, EndpointTestScenarioImpl scenario)
-		{
-			_endpoint = endpoint;
-			_scenario = scenario;
+        public EndpointTestDecorator(IEndpoint endpoint, EndpointTestScenarioImpl scenario)
+        {
+            _endpoint = endpoint;
+            _scenario = scenario;
 
-			_sent = new SentMessageListImpl();
-			_received = new ReceivedMessageListImpl();
-		}
+            _sent = new SentMessageListImpl();
+            _received = new ReceivedMessageListImpl();
+        }
 
-		public ReceivedMessageList Received
-		{
-			get { return _received; }
-		}
+        public ReceivedMessageList Received
+        {
+            get { return _received; }
+        }
 
-		public SentMessageList Sent
-		{
-			get { return _sent; }
-		}
+        public SentMessageList Sent
+        {
+            get { return _sent; }
+        }
 
-		public void Dispose()
-		{
-			_endpoint.Dispose();
-			_received.Dispose();
-			_sent.Dispose();
-		}
+        public void Dispose()
+        {
+            _endpoint.Dispose();
+            _received.Dispose();
+            _sent.Dispose();
+        }
 
-		public IEndpointAddress Address
-		{
-			get { return _endpoint.Address; }
-		}
+        public IEndpointAddress Address
+        {
+            get { return _endpoint.Address; }
+        }
 
-		public IInboundTransport InboundTransport
-		{
-			get { return _endpoint.InboundTransport; }
-		}
+        public IInboundTransport InboundTransport
+        {
+            get { return _endpoint.InboundTransport; }
+        }
 
-		public IOutboundTransport OutboundTransport
-		{
-			get { return _endpoint.OutboundTransport; }
-		}
+        public IOutboundTransport OutboundTransport
+        {
+            get { return _endpoint.OutboundTransport; }
+        }
 
-		public IOutboundTransport ErrorTransport
-		{
-			get { return _endpoint.ErrorTransport; }
-		}
+        public IOutboundTransport ErrorTransport
+        {
+            get { return _endpoint.ErrorTransport; }
+        }
 
-		public IMessageSerializer Serializer
-		{
-			get { return _endpoint.Serializer; }
-		}
+        public IMessageSerializer Serializer
+        {
+            get { return _endpoint.Serializer; }
+        }
 
-		public void Send<T>(ISendContext<T> context) 
+        public void Send<T>(ISendContext<T> context) 
             where T : class
-		{
-			var send = new SentMessageImpl<T>(context);
-			try
-			{
-				_endpoint.Send(context);
-			}
-			catch (Exception ex)
-			{
-				send.SetException(ex);
-				throw;
-			}
-			finally
-			{
-				_sent.Add(send);
-				_scenario.AddSent(send);
-			}
-		}
+        {
+            var send = new SentMessageImpl<T>(context);
+            try
+            {
+                _endpoint.Send(context);
+            }
+            catch (Exception ex)
+            {
+                send.SetException(ex);
+                throw;
+            }
+            finally
+            {
+                _sent.Add(send);
+                _scenario.AddSent(send);
+            }
+        }
 
         public void Send<T>(T message)
             where T : class
@@ -125,7 +122,7 @@ namespace MassTransit.Testing.TestDecorators
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            _typeCache[message.GetType()].Send(this, message);
+            EndpointObjectSenderCache.Instance[message.GetType()].Send(this, message);
         }
 
         public void Send(object message, Type messageType)
@@ -135,7 +132,7 @@ namespace MassTransit.Testing.TestDecorators
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            _typeCache[messageType].Send(this, message);
+            EndpointObjectSenderCache.Instance[messageType].Send(this, message);
         }
 
         public void Send(object message, Action<ISendContext> contextCallback)
@@ -147,7 +144,7 @@ namespace MassTransit.Testing.TestDecorators
 
             Type messageType = message.GetType();
 
-            _typeCache[messageType].Send(this, message, contextCallback);
+            EndpointObjectSenderCache.Instance[messageType].Send(this, message, contextCallback);
         }
 
         public void Send(object message, Type messageType, Action<ISendContext> contextCallback)
@@ -159,43 +156,58 @@ namespace MassTransit.Testing.TestDecorators
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            _typeCache[messageType].Send(this, message, contextCallback);
+            EndpointObjectSenderCache.Instance[messageType].Send(this, message, contextCallback);
         }
+
+        public void Send<T>(object values) where T : class
+        {
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            Send(message, x => { });
+        }
+
+        public void Send<T>(object values, Action<ISendContext<T>> contextCallback) where T : class
+        {
+            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+
+            Send(message, contextCallback);
+        }
+
         public void Receive(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout)
-		{
-			_endpoint.Receive(receiveContext =>
-				{
-					var decoratedReceiveContext = new ReceiveContextTestDecorator(receiveContext, _scenario);
+        {
+            _endpoint.Receive(receiveContext =>
+                {
+                    var decoratedReceiveContext = new ReceiveContextTestDecorator(receiveContext, _scenario);
 
-					Action<IReceiveContext> receive = receiver(decoratedReceiveContext);
-					if (receive == null)
-					{
-						var skipped = new ReceivedMessageImpl(receiveContext);
-						_scenario.AddSkipped(skipped);
+                    Action<IReceiveContext> receive = receiver(decoratedReceiveContext);
+                    if (receive == null)
+                    {
+                        var skipped = new ReceivedMessageImpl(receiveContext);
+                        _scenario.AddSkipped(skipped);
 
-						return null;
-					}
+                        return null;
+                    }
 
-					return context =>
-						{
-							decoratedReceiveContext = new ReceiveContextTestDecorator(context, _scenario);
-							var received = new ReceivedMessageImpl(context);
-							try
-							{
-								receive(decoratedReceiveContext);
-							}
-							catch (Exception ex)
-							{
-								received.SetException(ex);
-								throw;
-							}
-							finally
-							{
-								_received.Add(received);
-								_scenario.AddReceived(received);
-							}
-						};
-				}, timeout);
-		}
-	}
+                    return context =>
+                        {
+                            decoratedReceiveContext = new ReceiveContextTestDecorator(context, _scenario);
+                            var received = new ReceivedMessageImpl(context);
+                            try
+                            {
+                                receive(decoratedReceiveContext);
+                            }
+                            catch (Exception ex)
+                            {
+                                received.SetException(ex);
+                                throw;
+                            }
+                            finally
+                            {
+                                _received.Add(received);
+                                _scenario.AddReceived(received);
+                            }
+                        };
+                }, timeout);
+        }
+    }
 }

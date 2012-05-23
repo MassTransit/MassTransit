@@ -1,23 +1,21 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
-using MassTransit.Util;
-
 namespace MassTransit
 {
     using System;
     using Serialization;
     using Transports;
+    using Util;
 
     /// <summary>
     /// <para>IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.</para>
@@ -120,6 +118,25 @@ namespace MassTransit
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name="contextCallback">Allows the context values to be specified</param>
         void Send([NotNull] object message, [NotNull] Type messageType, [NotNull] Action<ISendContext> contextCallback);
+
+        /// <summary>
+        /// Sends an interface message, initializing the properties of the interface using the anonymous
+        /// object specified
+        /// </summary>
+        /// <typeparam name="T">The interface type to send</typeparam>
+        /// <param name="values">The property values to initialize on the interface</param>
+        void Send<T>([NotNull] object values)
+            where T : class;
+
+        /// <summary>
+        /// Sends an interface message, initializing the properties of the interface using the anonymous
+        /// object specified
+        /// </summary>
+        /// <typeparam name="T">The interface type to send</typeparam>
+        /// <param name="values">The property values to initialize on the interface</param>
+        /// <param name="contextCallback">A callback method to modify the send context for the message</param>
+        void Send<T>([NotNull] object values, [NotNull] Action<ISendContext<T>> contextCallback)
+            where T : class;
 
         /// <summary>
         /// <para>Receive from the endpoint by passing a function that can preview the message: if the caller
