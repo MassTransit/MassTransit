@@ -99,7 +99,12 @@ namespace MassTransit.RequestResponse
 
             bool result = alreadyCompleted || CompleteEvent.WaitOne(_timeout == TimeSpan.MaxValue ? Int32.MaxValue : (int)_timeout.TotalMilliseconds, true);
             if (!result)
-                Fail(RequestTimeoutException.FromCorrelationId(_requestId));
+            {
+                lock (_completionCallbacks)
+                    _completionCallbacks.Add(asyncResult => _timeoutCallback());
+
+                NotifyComplete();
+            }
 
             Close();
 
@@ -156,7 +161,7 @@ namespace MassTransit.RequestResponse
                         lock (_completionCallbacks)
                             _completionCallbacks.Add(asyncResult => _timeoutCallback());
 
-                        Fail(RequestTimeoutException.FromCorrelationId(_requestId));
+                        NotifyComplete();
                     }
                 };
 
@@ -187,6 +192,9 @@ namespace MassTransit.RequestResponse
 
         void NotifyComplete()
         {
+            if (_completed)
+                return;
+
             lock (_lock)
             {
                 _completed = true;
@@ -211,8 +219,9 @@ namespace MassTransit.RequestResponse
             }
         }
 
-        static void DefaultTimeoutCallback()
+        void DefaultTimeoutCallback()
         {
+            Fail(RequestTimeoutException.FromCorrelationId(_requestId));
         }
     }
 }
