@@ -162,9 +162,16 @@ namespace MassTransit.Monitoring
 						new CounterCreationDataCollection(counters.Select(x => (CounterCreationData) x).ToArray()));
 				}
 			}
-			catch (SecurityException ex)
+			catch (SecurityException)
 			{
-				_log.Warn("Unable to create performance counter category (Category: {0})\nTry running the program in the Administrator role to set these up.".FormatWith(CategoryName), ex);
+                //swallow the exception because having these is NOT critical
+
+			    var msg =
+			        "Unable to create performance counter category (Category: {0})" +
+                    "\nTry running the program in the Administrator role to set these up." +
+                    "\n**Hey, this just means you aren't admin or don't have/want perf counter support**"
+			            .FormatWith(CategoryName);
+				_log.Warn(msg);
 			}
 		}
 	}
