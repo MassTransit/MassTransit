@@ -84,7 +84,9 @@ AutoFac
         builder.RegisterType<YourConsumer>().As<IConsumer>();
 
         //or use Autofac's scanning capabilities -- SomeClass is any class in the correct assembly
-        builder.RegisterAssemblyTypes(typeof(SomeClass).Assembly).As<IConsumer>();
+        builder.RegisterAssemblyTypes(typeof(SomeClass).Assembly)
+            Where(t => t.Implements<IConsumer>())
+            .AsSelf();
 
         //now we add the bus
         builder.Register(c => ServiceBusFactory.New(sbc =>
