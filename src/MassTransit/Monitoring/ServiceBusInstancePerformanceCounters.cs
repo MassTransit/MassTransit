@@ -151,7 +151,7 @@ namespace MassTransit.Monitoring
 			}
 			catch (InvalidOperationException ex)
 			{
-				_log.Error("Unable to create performance counter", ex);
+				_log.Warn("Unable to create performance counter", ex);
 
 				return new NullPerformanceCounter();
 			}
