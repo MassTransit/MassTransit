@@ -164,7 +164,7 @@ namespace MassTransit.Monitoring
 			}
 			catch (SecurityException ex)
 			{
-				_log.Error("Unable to create performance counter category (Category: {0})\nTry running the program in the Administrator role to set these up.".FormatWith(CategoryName), ex);
+				_log.Warn("Unable to create performance counter category (Category: {0})\nTry running the program in the Administrator role to set these up.".FormatWith(CategoryName), ex);
 			}
 		}
 	}
