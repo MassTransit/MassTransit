@@ -21,7 +21,7 @@ namespace MassTransit.Transports
 		ConnectionPolicy
 	{
 		readonly ConnectionHandler _connectionHandler;
-		TimeSpan _reconnectDelay;
+		readonly TimeSpan _reconnectDelay;
 		readonly ILog _log = Logger.Get(typeof(DefaultConnectionPolicy));
 		readonly ReaderWriterLockSlim _connectionlLock = new ReaderWriterLockSlim();
 
