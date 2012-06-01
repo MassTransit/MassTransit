@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Log4NetIntegration.Logging
 {
+    using System;
     using System.IO;
     using MassTransit.Logging;
     using log4net;
@@ -34,6 +35,7 @@ namespace MassTransit.Log4NetIntegration.Logging
         {
             Logger.UseLogger(new Log4NetLogger());
 
+            file = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, file);
             var configFile = new FileInfo(file);
             XmlConfigurator.Configure(configFile);
         }
