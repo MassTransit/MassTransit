@@ -10,6 +10,8 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+using System;
+
 namespace MassTransit.Log4NetIntegration.Logging
 {
     using System.IO;
@@ -34,6 +36,7 @@ namespace MassTransit.Log4NetIntegration.Logging
         {
             Logger.UseLogger(new Log4NetLogger());
 
+            file = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, file);
             var configFile = new FileInfo(file);
             XmlConfigurator.Configure(configFile);
         }
