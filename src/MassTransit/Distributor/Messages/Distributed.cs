@@ -20,6 +20,7 @@ namespace MassTransit.Distributor.Messages
     ///   want it getting downgraded to a consumer of TMessage.
     /// </summary>
     /// <typeparam name = "TMessage">The message type being distributed</typeparam>
+	[Serializable]
     public class Distributed<TMessage> :
         CorrelatedBy<Guid>
     {
