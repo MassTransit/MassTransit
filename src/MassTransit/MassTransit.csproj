@@ -104,6 +104,8 @@
     <Compile Include="Configuration\Builders\EndpointFactoryBuilderImpl.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilder.cs" />
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\Configuration\InterceptingConsumerFactory.cs" />
+    <Compile Include="Configuration\InterceptingConsumerSubscriptionExtensions.cs" />
     <Compile Include="Configuration\ReferenceFactory.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\CorrelatedMessageInterfaceType.cs" />
@@ -385,6 +387,8 @@
     <Compile Include="RequestResponse\IRequest.cs" />
     <Compile Include="RequestResponse\RequestImpl.cs" />
     <Compile Include="Saga\CorrelatedSagaLocator.cs" />
+    <Compile Include="Saga\DelegatingSagaRepository.cs" />
+    <Compile Include="Saga\InjectingSagaRepository.cs" />
     <Compile Include="Saga\ISagaFilter.cs" />
     <Compile Include="Saga\ISagaLocator.cs" />
     <Compile Include="Saga\Pipeline\CorrelationExpressionToSagaIdVisitor.cs" />
