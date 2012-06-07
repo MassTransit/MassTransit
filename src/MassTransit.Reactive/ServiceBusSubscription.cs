@@ -40,9 +40,7 @@ namespace MassTransit.Reactive
 		}
 
 		public void Dispose()
-		{
-			_observer.OnCompleted();
-			
+		{		
 			_unsubscribeAction();
 		}
 	}
