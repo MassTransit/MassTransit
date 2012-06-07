@@ -104,7 +104,7 @@ namespace MassTransit.Tests
             badResponse.IsAvailable(2.Seconds()).ShouldBeFalse("Should not have received a response");
         }
 
-        [Test]
+        [Test, Category("NotOnTeamCity")]
         public void Should_support_the_asynchronous_programming_model()
         {
             var pongReceived = new FutureMessage<PongMessage>();
@@ -183,7 +183,7 @@ namespace MassTransit.Tests
             pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
         }
 
-        [Test]
+        [Test, Category("NotOnTeamCity")]
         public void Should_throw_a_handler_exception_on_the_calling_thread_using_async()
         {
             var pongReceived = new FutureMessage<PongMessage>();
@@ -225,7 +225,7 @@ namespace MassTransit.Tests
             exception.InnerException.ShouldBeAnInstanceOf<InvalidOperationException>();
         }
 
-        [Test]
+        [Test, Category("NotOnTeamCity")]
         public void Should_throw_a_timeout_exception_for_async_when_end_is_called()
         {
             var pongReceived = new FutureMessage<PongMessage>();
