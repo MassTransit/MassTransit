@@ -91,8 +91,8 @@ namespace MassTransit.Tests
         [Test]
         public void Should_be_possible()
         {
-            RemoteBus.HasSubscription<BusinessCommand>(8.Seconds()).Any().ShouldBeTrue();
-            LocalBus.HasSubscription<SecureCommand<BusinessCommand>>(8.Seconds()).Any().ShouldBeTrue();
+            LocalBus.HasSubscription<BusinessCommand>(8.Seconds()).Any().ShouldBeTrue();
+            RemoteBus.HasSubscription<SecureCommand<BusinessCommand>>(8.Seconds()).Any().ShouldBeTrue();
 
             RemoteBus.Publish(new BusinessCommandImpl
                 {
