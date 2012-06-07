@@ -134,12 +134,14 @@ namespace MassTransit.Tests
                     x.SetTimeout(timeout);
                 });
 
-            callbackCalled.IsAvailable(timeout).ShouldBeTrue("The callback was not called");
-
-            LocalBus.EndRequest(callbackCalled.Message);
-
             pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
             pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+
+            callbackCalled.IsAvailable(timeout).ShouldBeTrue("The callback was not called");
+
+            bool result = LocalBus.EndRequest(callbackCalled.Message);
+
+            Assert.IsTrue(result, "EndRequest should be true");
         }
 
         [Test]
@@ -211,6 +213,9 @@ namespace MassTransit.Tests
                     x.SetTimeout(timeout);
                 });
 
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+
             callbackCalled.IsAvailable(timeout).ShouldBeTrue("Called was not called");
 
             var exception = Assert.Throws<RequestException>(() => { LocalBus.EndRequest(callbackCalled.Message); },
@@ -218,9 +223,6 @@ namespace MassTransit.Tests
 
             exception.Response.ShouldBeAnInstanceOf<PongMessage>();
             exception.InnerException.ShouldBeAnInstanceOf<InvalidOperationException>();
-
-            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
-            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
         }
 
         [Test]
