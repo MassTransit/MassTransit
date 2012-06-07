@@ -13,10 +13,47 @@
 namespace MassTransit.Reactive
 {
     using System;
+    using System.Reactive;
     using System.Reactive.Linq;
 
     public static class ServiceBusExtensions
     {
+        /// <summary>
+        /// <para>Gets an observer that publishes messages to all subscribed consumers for 
+        /// the message type as specified by the generic parameter.</para>
+        /// 
+        /// <para>
+        /// Read up on publishing: http://readthedocs.org/docs/masstransit/en/latest/overview/publishing.html
+        /// </para>
+        /// </summary>
+        /// <typeparam name = "T">The type of the message</typeparam>
+        /// <param name = "bus">The message bus</param>
+        public static IObserver<T> AsObserver<T> (this IServiceBus bus) where T : class
+        {
+            return bus.AsObserver<T> (
+                contextCallback => { });
+        }
+
+        /// <summary>
+        /// <para>Gets an observer that publishes messages to all subscribed consumers for 
+        /// the message type as specified by the generic parameter. The second parameter 
+        /// allows the caller to customize the outgoing publish context and set things 
+        /// like headers on the message.</para>
+        /// 
+        /// <para>
+        /// Read up on publishing: http://readthedocs.org/docs/masstransit/en/latest/overview/publishing.html
+        /// </para>
+        /// </summary>
+        /// <typeparam name = "T">The type of the message</typeparam>
+        /// <param name = "bus">The message bus</param>
+        /// <param name = "contextCallback">A callback that gives the caller
+        /// access to the publish context.</param>
+        public static IObserver<T> AsObserver<T> (this IServiceBus bus, Action<IPublishContext<T>> contextCallback) where T : class
+        {
+            return Observer.Create<T> (
+                value => bus.Publish<T> (value, contextCallback));
+        }
+
         public static IObservable<T> AsObservable<T>(this IServiceBus bus) where T : class
         {
             return Observable.Create<T>(
