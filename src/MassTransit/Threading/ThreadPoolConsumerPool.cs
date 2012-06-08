@@ -36,7 +36,8 @@ namespace MassTransit.Threading
 		bool _disposed;
 		bool _enabled;
 		ChannelConnection _eventConnection;
-		int _maximumThreadCount = 25;
+		int _maximumCounsumerCount = 25;
+		int _maximumReceiverCount = 1;
 		int _receiverCount;
 
 		public ThreadPoolConsumerPool(IServiceBus bus, UntypedChannel eventChannel, TimeSpan receiveTimeout)
@@ -48,13 +49,25 @@ namespace MassTransit.Threading
 
 		public int MaximumConsumerCount
 		{
-			get { return _maximumThreadCount; }
+			get { return _maximumCounsumerCount; }
 			set
 			{
 				if (value <= 0)
-					throw new InvalidOperationException("The maximum thread count must be at least one");
+					throw new InvalidOperationException("The maximum consumer count must be at least one");
 
-				_maximumThreadCount = value;
+				_maximumCounsumerCount = value;
+			}
+		}
+
+		public int MaximumReceiverCount
+		{
+			get { return _maximumReceiverCount; }
+			set
+			{
+				if (value <= 0)
+					throw new InvalidOperationException("The maximum receiver count must be at least one");
+
+				_maximumReceiverCount = value;
 			}
 		}
 
@@ -162,10 +175,10 @@ namespace MassTransit.Threading
 
 			lock (_locker)
 			{
-				if (_receiverCount > 0)
+				if (_receiverCount >= _maximumReceiverCount)
 					return;
 
-				if (_consumerCount >= _maximumThreadCount)
+				if (_consumerCount >= _maximumCounsumerCount)
 					return;
 
 //				if (_log.IsDebugEnabled)
