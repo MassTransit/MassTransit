@@ -37,7 +37,10 @@ something to improve upon later. :)
                 sbc.ReceiveFrom("msmq://localhost/message_responder");
                 sbc.Subscribe(subs=>
                 {
-                    subs.Handler<RequestMessage>(msg=> Bus.Instance.MessageContext<RequestMessage>().Respond(new BasiceResponse{Text = "RESP"+msg.Text}));
+                    subs.Handler<RequestMessage>( (cxt, msg )=>
+                    {
+                        cxt.Respond(new BasicResponse{Text = "RESP"+msg.Text});
+                    });
                 });
             });
         }
