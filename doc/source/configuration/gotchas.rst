@@ -63,3 +63,62 @@ Reading
 http://www.udidahan.com/2008/01/30/podcast-message-priority-you-arent-gonna-need-it/
 http://lostechies.com/jimmybogard/2010/11/18/queues-are-still-queues/
 
+I want to know if another bus is subscribed to my message.
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    So, if you try to program this way, you're going to have a bad time. ;)
+
+Knowing that you have a subscriber is not the concern of your application.
+It is something the system architect should know, but not the application.
+Most likely, we just need to introduce all of the states in our protocol
+more explicitly, by using a Saga.
+
+A Sample Saga
+''''''''''''''
+
+.. code::
+
+    //Magnum.StateMachine based saga
+    public class MySaga  :
+		SagaStateMachine<MySaga>,
+		ISaga
+    {
+        static MySaga()
+        {
+            Define(() =>
+            {
+                Initially(
+                    When(CommandOccured)
+                        .Then(saga => saga.StartTimer()) //pseudo code
+                        .TransitionTo(InProcess));
+                
+                During(InProcess,
+                    When(Timeout)
+                        .TransitionTo(TimedOut),
+                    When(Succeeded)
+                        .TransitionTo(Success),
+                    When(Error)
+                        .TransitionTo(Failed));
+                
+            });
+        }
+        
+        //States
+        public static State Initial { get; set; }
+        public static State InProcess { get; set; }
+        public static State TimedOut { get; set; }
+        public static State Succeeded { get; set; }
+        public static State Error { get; set; }
+		public static State Completed { get; set; }
+        
+        //Events
+        public static Event<MyCommand> CommandOccured { get; set; }
+		public static Event<TimeoutEvent> Timeout { get; set; }
+		public static Event<MyCommandSuccess> Succeeded { get; set; }
+		public static Event<MyCommandError> Error { get; set; }
+        
+        
+        //instance data
+        public virtual Guid CorrelationId {get;set;}
+    }
+
