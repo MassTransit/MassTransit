@@ -388,6 +388,8 @@
     <Compile Include="RequestResponse\RequestImpl.cs" />
     <Compile Include="Saga\CorrelatedSagaLocator.cs" />
     <Compile Include="Saga\DelegatingSagaRepository.cs" />
+    <Compile Include="Saga\EventBinderExtensions.cs" />
+    <Compile Include="Saga\ExtensionsToStateMachine.cs" />
     <Compile Include="Saga\InjectingSagaRepository.cs" />
     <Compile Include="Saga\ISagaFilter.cs" />
     <Compile Include="Saga\ISagaLocator.cs" />

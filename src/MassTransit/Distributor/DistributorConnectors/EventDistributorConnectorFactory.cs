@@ -53,8 +53,8 @@ namespace MassTransit.Distributor.DistributorConnectors
 
         public IEnumerable<SagaDistributorConnector> Create()
         {
-            Expression<Func<TSaga, TMessage, bool>> expression;
-            if (SagaStateMachine<TSaga>.TryGetCorrelationExpressionForEvent(_dataEvent, out expression))
+            EventBinder<TSaga> eventBinder;
+            if (SagaStateMachine<TSaga>.TryGetEventBinder(_dataEvent, out eventBinder))
             {
                 yield return
                     (SagaDistributorConnector)FastActivator.Create(typeof(PropertyEventSagaDistributorConnector<,>),
@@ -62,7 +62,7 @@ namespace MassTransit.Distributor.DistributorConnectors
                         new object[]
                             {
                                 _workerSelectorFactory, _sagaRepository, _dataEvent, _states, _policyFactory,
-                                _removeExpression, expression
+                                _removeExpression, eventBinder
                             });
             }
             else if (typeof(TMessage).Implements<CorrelatedBy<Guid>>())
