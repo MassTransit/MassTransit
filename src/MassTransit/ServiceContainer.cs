@@ -40,6 +40,16 @@ namespace MassTransit
             _catalog.Add(layer, service);
         }
 
+        public IBusService GetService(Type type)
+        {
+            return _catalog.Get(type);
+        }
+
+        public bool TryGetService(Type type, out IBusService result)
+        {
+            return _catalog.TryGet(type, out result);
+        }
+
         public void Start()
         {
             IList<IBusService> started = new List<IBusService>();

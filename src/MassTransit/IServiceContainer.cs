@@ -21,7 +21,8 @@ namespace MassTransit
         DiagnosticsSource
     {
         void AddService(BusServiceLayer layer, IBusService service);
-
+        IBusService GetService(Type type);
+        bool TryGetService(Type type, out IBusService result);
         void Start();
         void Stop();
     }

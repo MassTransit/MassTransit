@@ -357,6 +357,16 @@ namespace MassTransit
             _serviceContainer.AddService(layer, service);
         }
 
+        public IBusService GetService(Type type)
+        {
+            return _serviceContainer.GetService(type);
+        }
+
+        public bool TryGetService(Type type, out IBusService result)
+        {
+            return _serviceContainer.TryGetService(type, out result);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed) return;

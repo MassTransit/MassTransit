@@ -175,5 +175,20 @@ namespace MassTransit
         /// <returns>An unsubscribe action that can be called to unsubscribe
         /// what was configured to be subscribed with the func passed. <see cref="UnsubscribeAction"/>.</returns>
         UnsubscribeAction Configure(Func<IInboundPipelineConfigurator, UnsubscribeAction> configure);
+
+        /// <summary>
+        /// Get the first service with the matching type, throwing an InvalidOperationException if none is found.
+        /// </summary>
+        /// <param name="type">The type of service to get.</param>
+        /// <returns>The first service of type T.</returns>
+        IBusService GetService(Type type);
+
+	    /// <summary>
+	    /// Try to get the first service with the matching type.
+	    /// </summary>
+	    /// <param name="type">The type of service to get.</param>
+	    /// <param name="result">The service.</param>
+	    /// <returns>Whether the service was found.</returns>
+	    bool TryGetService(Type type, out IBusService result);
     }
 }

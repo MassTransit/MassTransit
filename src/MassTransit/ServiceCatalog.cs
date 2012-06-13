@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
@@ -42,6 +43,17 @@ namespace MassTransit
         public void Add(BusServiceLayer layer, IBusService service)
         {
             _services[(int)layer].Add(service);
+        }
+
+        public IBusService Get(Type type)
+        {
+            return _services.SelectMany(x => x).First(type.IsInstanceOfType);
+        }
+
+        public bool TryGet(Type type, out IBusService result)
+        {
+            result = _services.SelectMany(x => x).FirstOrDefault(type.IsInstanceOfType);
+            return result != null;
         }
 
         [UsedImplicitly]

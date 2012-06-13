@@ -180,5 +180,15 @@ namespace MassTransit.Testing.TestDecorators
             where T : class
         {
         }
+        
+        public IBusService GetService(Type type)
+        {
+            return _bus.GetService(type);
+        }
+
+        public bool TryGetService(Type type, out IBusService result)
+        {
+            return _bus.TryGetService(type, out result);
+        }
     }
 }
