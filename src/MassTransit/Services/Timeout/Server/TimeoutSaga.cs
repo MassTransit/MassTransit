@@ -1,150 +1,156 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Timeout.Server
 {
-	using System;
-	using Magnum.StateMachine;
-	using Messages;
-	using Saga;
+    using System;
+    using Magnum.StateMachine;
+    using Messages;
+    using Saga;
 
-	public class TimeoutSaga :
-		SagaStateMachine<TimeoutSaga>,
-		ISaga
-	{
-		Guid _correlationId;
+    public class TimeoutSaga :
+        SagaStateMachine<TimeoutSaga>,
+        ISaga
+    {
+        Guid _correlationId;
 
-		static TimeoutSaga()
-		{
-			Define(() =>
-				{
-					Correlate(SchedulingTimeout).By(
-						(saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag);
-					Correlate(CancellingTimeout).By(
-						(saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag);
-					Correlate(CompletingTimeout).By(
-						(saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag);
+        static TimeoutSaga()
+        {
+            Define(() =>
+                {
+                    Correlate(SchedulingTimeout)
+                        .By((saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag)
+                        .UseNewId();
+                    Correlate(CancellingTimeout).By(
+                        (saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag);
+                    Correlate(CompletingTimeout).By(
+                        (saga, message) => saga.TimeoutId == message.CorrelationId && saga.Tag == message.Tag);
 
-					Initially(
-						When(SchedulingTimeout)
-							.Then((saga, message) =>
-								{
-									saga.TimeoutId = message.CorrelationId;
-									saga.Tag = message.Tag;
-									saga.TimeoutAt = message.TimeoutAt;
+                    Initially(
+                        When(SchedulingTimeout)
+                            .Then((saga, message) =>
+                                {
+                                    saga.TimeoutId = message.CorrelationId;
+                                    saga.Tag = message.Tag;
+                                    saga.TimeoutAt = message.TimeoutAt;
 
-									saga.NotifyTimeoutScheduled();
-								}).TransitionTo(WaitingForTime));
+                                    saga.NotifyTimeoutScheduled();
+                                }).TransitionTo(WaitingForTime));
 
-					During(WaitingForTime,
-						When(CancellingTimeout)
-							.Then((saga, message) => { saga.NotifyTimeoutCancelled(); })
-							.Complete(),
-						When(SchedulingTimeout)
-							.Then((saga, message) =>
-								{
-									saga.TimeoutAt = message.TimeoutAt;
+                    During(WaitingForTime,
+                        When(CancellingTimeout)
+                            .Then((saga, message) => { saga.NotifyTimeoutCancelled(); })
+                            .Complete(),
+                        When(SchedulingTimeout)
+                            .Then((saga, message) =>
+                                {
+                                    saga.TimeoutAt = message.TimeoutAt;
 
-									saga.NotifyTimeoutRescheduled();
-								}),
-						When(CompletingTimeout)
-							.Complete()
-						);
+                                    saga.NotifyTimeoutRescheduled();
+                                }),
+                        When(CompletingTimeout)
+                            .Complete()
+                        );
 
-					RemoveWhen(x => x.CurrentState == Completed);
-				});
-		}
+                    RemoveWhen(x => x.CurrentState == Completed);
+                });
+        }
 
-		public TimeoutSaga(Guid correlationId)
-		{
-			_correlationId = correlationId;
-		}
+        public TimeoutSaga(Guid correlationId)
+        {
+            _correlationId = correlationId;
+        }
 
-		protected TimeoutSaga()
-		{
-		}
-
-
-		public static State Initial { get; set; }
-		public static State WaitingForTime { get; set; }
-		public static State Completed { get; set; }
+        protected TimeoutSaga()
+        {
+        }
 
 
-		public static Event<ScheduleTimeout> SchedulingTimeout { get; set; }
-		public static Event<CancelTimeout> CancellingTimeout { get; set; }
-		public static Event<TimeoutExpired> CompletingTimeout { get; set; }
+        public static State Initial { get; set; }
+        public static State WaitingForTime { get; set; }
+        public static State Completed { get; set; }
 
-		public virtual Guid CorrelationId
-		{
-			get { return _correlationId; }
-			set { _correlationId = value; }
-		}
 
-		public virtual IServiceBus Bus { get; set; }
+        public static Event<ScheduleTimeout> SchedulingTimeout { get; set; }
+        public static Event<CancelTimeout> CancellingTimeout { get; set; }
+        public static Event<TimeoutExpired> CompletingTimeout { get; set; }
 
-		public virtual Guid TimeoutId { get; set; }
-		public virtual int Tag { get; set; }
-		public virtual DateTime TimeoutAt { get; set; }
+        public virtual Guid TimeoutId { get; set; }
+        public virtual int Tag { get; set; }
+        public virtual DateTime TimeoutAt { get; set; }
 
-		public virtual bool Equals(TimeoutSaga obj)
-		{
-			if (ReferenceEquals(null, obj)) return false;
-			if (ReferenceEquals(this, obj)) return true;
-			return obj.TimeoutId.Equals(TimeoutId) &&  obj.Tag == Tag;
-		}
+        public virtual Guid CorrelationId
+        {
+            get { return _correlationId; }
+            set { _correlationId = value; }
+        }
 
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(null, obj)) return false;
-			if (ReferenceEquals(this, obj)) return true;
-			if (obj.GetType() != typeof (TimeoutSaga)) return false;
-			return Equals((TimeoutSaga) obj);
-		}
+        public virtual IServiceBus Bus { get; set; }
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				return (Tag * 397) ^ TimeoutId.GetHashCode();
-			}
-		}
+        public virtual bool Equals(TimeoutSaga obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            return obj.TimeoutId.Equals(TimeoutId) && obj.Tag == Tag;
+        }
 
-		void NotifyTimeoutScheduled()
-		{
-			Bus.Publish(new TimeoutScheduled
-				{
-					CorrelationId = TimeoutId,
-					TimeoutAt = TimeoutAt,
-					Tag = Tag,
-				});
-		}
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != typeof(TimeoutSaga))
+                return false;
+            return Equals((TimeoutSaga)obj);
+        }
 
-		void NotifyTimeoutRescheduled()
-		{
-			Bus.Publish(new TimeoutRescheduled
-				{
-					CorrelationId = TimeoutId,
-					TimeoutAt = TimeoutAt,
-					Tag = Tag,
-				});
-		}
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Tag*397) ^ TimeoutId.GetHashCode();
+            }
+        }
 
-		void NotifyTimeoutCancelled()
-		{
-			Bus.Publish(new TimeoutCancelled
-				{
-					CorrelationId = TimeoutId,
-					Tag = Tag,
-				});
-		}
-	}
+        void NotifyTimeoutScheduled()
+        {
+            Bus.Publish(new TimeoutScheduled
+                {
+                    CorrelationId = TimeoutId,
+                    TimeoutAt = TimeoutAt,
+                    Tag = Tag,
+                });
+        }
+
+        void NotifyTimeoutRescheduled()
+        {
+            Bus.Publish(new TimeoutRescheduled
+                {
+                    CorrelationId = TimeoutId,
+                    TimeoutAt = TimeoutAt,
+                    Tag = Tag,
+                });
+        }
+
+        void NotifyTimeoutCancelled()
+        {
+            Bus.Publish(new TimeoutCancelled
+                {
+                    CorrelationId = TimeoutId,
+                    Tag = Tag,
+                });
+        }
+    }
 }

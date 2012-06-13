@@ -333,13 +333,13 @@ namespace MassTransit
 
             try
             {
+                _serviceContainer.Start();
+
                 _consumerPool = new ThreadPoolConsumerPool(this, _eventChannel, _receiveTimeout)
                     {
                         MaximumConsumerCount = MaximumConsumerThreads,
                     };
                 _consumerPool.Start();
-
-                _serviceContainer.Start();
             }
             catch (Exception)
             {

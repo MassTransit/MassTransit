@@ -49,12 +49,12 @@ namespace MassTransit.Saga.SubscriptionConnectors
 
 		public IEnumerable<SagaSubscriptionConnector> Create()
 		{
-			Expression<Func<TSaga, TMessage, bool>> expression;
-			if (SagaStateMachine<TSaga>.TryGetCorrelationExpressionForEvent(_dataEvent, out expression))
+			EventBinder<TSaga> eventBinder;
+			if (SagaStateMachine<TSaga>.TryGetEventBinder(_dataEvent, out eventBinder))
 			{
 				yield return (SagaSubscriptionConnector) FastActivator.Create(typeof (PropertySagaSubscriptionConnector<,>),
 					new[] {typeof (TSaga), typeof (TMessage)},
-					new object[] {_sagaRepository, _dataEvent, _states, _policyFactory, _removeExpression, expression});
+					new object[] {_sagaRepository, _dataEvent, _states, _policyFactory, _removeExpression, eventBinder});
 			}
 			else if (typeof (TMessage).Implements<CorrelatedBy<Guid>>())
 			{

@@ -15,6 +15,7 @@ namespace MassTransit.Distributor.WorkerConnectors
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
+    using Magnum.Extensions;
     using Magnum.StateMachine;
     using Saga;
     using Saga.Configuration;
@@ -26,50 +27,79 @@ namespace MassTransit.Distributor.WorkerConnectors
         where TSaga : SagaStateMachine<TSaga>, ISaga
     {
         readonly DataEvent<TSaga, TMessage> _dataEvent;
-        readonly Func<TMessage, Guid> _getNewSagaId;
         readonly ISagaPolicyFactory _policyFactory;
         readonly Expression<Func<TSaga, bool>> _removeExpression;
-        readonly Expression<Func<TSaga, TMessage, bool>> _selector;
         readonly IEnumerable<State> _states;
+        Func<TMessage, Guid> _correlationIdSelector;
+        Expression<Func<TSaga, TMessage, bool>> _bindExpression;
 
         public PropertyEventSagaWorkerConnector(ISagaRepository<TSaga> sagaRepository,
             DataEvent<TSaga, TMessage> dataEvent,
             IEnumerable<State> states,
             ISagaPolicyFactory policyFactory,
             Expression<Func<TSaga, bool>> removeExpression,
-            Expression<Func<TSaga, TMessage, bool>> selector)
+            EventBinder<TSaga> eventBinder)
             : base(sagaRepository)
         {
             _dataEvent = dataEvent;
             _states = states;
             _policyFactory = policyFactory;
             _removeExpression = removeExpression;
-            _selector = selector;
 
-            _getNewSagaId = GenerateGetSagaIdFunction(selector);
+            _bindExpression = eventBinder.GetBindExpression<TMessage>();
+
+            _correlationIdSelector = GetCorrelationIdSelector(eventBinder);
         }
 
         protected override ISagaPolicy<TSaga, TMessage> GetPolicy()
         {
-            return _policyFactory.GetPolicy(_states, _getNewSagaId, _removeExpression);
+            return _policyFactory.GetPolicy(_states, _correlationIdSelector, _removeExpression);
         }
 
         protected override ISagaMessageSink<TSaga, TMessage> GetSagaMessageSink(ISagaRepository<TSaga> sagaRepository,
             ISagaPolicy<TSaga, TMessage> policy)
         {
             return new PropertySagaStateMachineMessageSink<TSaga, TMessage>(sagaRepository, policy,
-                _selector, _dataEvent);
+                _bindExpression, _dataEvent);
         }
 
-        static Func<TMessage, Guid> GenerateGetSagaIdFunction(Expression<Func<TSaga, TMessage, bool>> selector)
+        static Func<TMessage, Guid> GetCorrelationIdSelector(EventBinder<TSaga> binder)
         {
+            Func<TMessage, Guid> correlationIdSelector = binder.GetCorrelationIdSelector<TMessage>();
+            if (correlationIdSelector != null)
+                return correlationIdSelector;
+
             var visitor = new CorrelationExpressionToSagaIdVisitor<TSaga, TMessage>();
 
-            Expression<Func<TMessage, Guid>> exp = visitor.Build(selector);
+            Expression<Func<TMessage, Guid>> exp = visitor.Build(binder.GetBindExpression<TMessage>());
+            if (exp != null)
+                return exp.Compile();
 
-            return exp != null
-                       ? exp.Compile()
-                       : (x => NewId.NextGuid());
+            if (typeof(TMessage).Implements<CorrelatedBy<Guid>>())
+            {
+                Type genericType = typeof(Correlated<>).MakeGenericType(typeof(TSaga), typeof(TMessage), typeof(TMessage));
+
+                var correlated = (ICorrelated<TMessage>)Activator.CreateInstance(genericType);
+
+                return correlated.CorrelationIdSelector;
+            }
+
+            return x => NewId.NextGuid();
+        }
+
+        class Correlated<T> :
+            ICorrelated<T>
+            where T : CorrelatedBy<Guid>
+        {
+            public Func<T, Guid> CorrelationIdSelector
+            {
+                get { return x => x.CorrelationId; }
+            }
+        }
+
+        interface ICorrelated<T>
+        {
+            Func<T, Guid> CorrelationIdSelector { get; }
         }
     }
 }

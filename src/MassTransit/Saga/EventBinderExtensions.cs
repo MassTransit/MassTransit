@@ -12,19 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga
 {
-    using System;
-    using System.Linq.Expressions;
-
-    public interface EventBinder<TSaga>
+    public static class EventBinderExtensions
     {
-        Expression<Func<TSaga, TMessage, bool>> GetBindExpression<TMessage>();
-        Func<TMessage, Guid> GetCorrelationIdSelector<TMessage>();
-    }
-
-    public interface EventBinder<TSaga, TMessage> :
-        EventBinder<TSaga>
-    {
-        EventBinder<TSaga, TMessage> By(Expression<Func<TSaga, TMessage, bool>> expression);
-        EventBinder<TSaga, TMessage> UseId(Func<TMessage, Guid> correlationIdSelector);
+        public static EventBinder<TSaga, TMessage> UseNewId<TSaga, TMessage>(this EventBinder<TSaga, TMessage> binder)
+        {
+            return binder.UseId(x => NewId.NextGuid());
+        }
     }
 }

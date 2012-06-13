@@ -15,8 +15,7 @@ namespace MassTransit.Services.Timeout.Messages
 	using System;
 
 	[Serializable]
-	public class TimeoutMessageBase : 
-		CorrelatedBy<Guid>
+	public class TimeoutMessageBase
 	{
 		/// <summary>
 		/// The tag associated with the timeout message
