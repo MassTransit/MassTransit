@@ -352,6 +352,7 @@
     <Compile Include="Context\EndpointObjectSenderImpl.cs" />
     <Compile Include="Exceptions\MessageNotConsumedException.cs" />
     <Compile Include="Exceptions\MessageRetryLimitExceededException.cs" />
+    <Compile Include="Exceptions\PublishException.cs" />
     <Compile Include="Exceptions\RequestException.cs" />
     <Compile Include="Exceptions\RequestTimeoutException.cs" />
     <Compile Include="Exceptions\SendException.cs" />

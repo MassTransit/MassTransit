@@ -1,18 +1,19 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using Context;
     using Diagnostics.Introspection;
@@ -54,7 +55,7 @@ namespace MassTransit
         {
             try
             {
-                _log = Logger.Get(typeof (ServiceBus));
+                _log = Logger.Get(typeof(ServiceBus));
             }
             catch (Exception ex)
             {
@@ -68,7 +69,7 @@ namespace MassTransit
         /// and operation.
         /// </summary>
         public ServiceBus(IEndpoint endpointToListenOn,
-                          IEndpointCache endpointCache)
+            IEndpointCache endpointCache)
         {
             ReceiveTimeout = TimeSpan.FromSeconds(3);
             Guard.AgainstNull(endpointToListenOn, "endpointToListenOn", "This parameter cannot be null");
@@ -147,15 +148,10 @@ namespace MassTransit
             GC.SuppressFinalize(this);
         }
 
-        public void Publish<T>(T message) 
+        public void Publish<T>(T message)
             where T : class
         {
             Publish(message, NoContext);
-        }
-
-        void NoContext<T>(IPublishContext<T> context)
-            where T: class
-        {
         }
 
         /// <summary>
@@ -172,6 +168,8 @@ namespace MassTransit
 
             contextCallback(context);
 
+            IList<Exception> exceptions = new List<Exception>();
+
             int publishedCount = 0;
             foreach (var consumer in OutboundPipeline.Enumerate(context))
             {
@@ -184,6 +182,8 @@ namespace MassTransit
                 {
                     _log.Error(string.Format("'{0}' threw an exception publishing message '{1}'",
                         consumer.GetType().FullName, message.GetType().FullName), ex);
+
+                    exceptions.Add(ex);
                 }
             }
 
@@ -196,10 +196,13 @@ namespace MassTransit
 
             _eventChannel.Send(new MessagePublished
                 {
-                    MessageType = typeof (T),
+                    MessageType = typeof(T),
                     ConsumerCount = publishedCount,
                     Duration = context.Duration,
                 });
+
+            if (exceptions.Count > 0)
+                throw new PublishException(typeof(T), exceptions);
         }
 
         public void Publish(object message)
@@ -326,6 +329,21 @@ namespace MassTransit
             InboundPipeline.View(pipe => probe.Add("zz.mt.inbound_pipeline", pipe));
         }
 
+        public IBusService GetService(Type type)
+        {
+            return _serviceContainer.GetService(type);
+        }
+
+        public bool TryGetService(Type type, out IBusService result)
+        {
+            return _serviceContainer.TryGetService(type, out result);
+        }
+
+        void NoContext<T>(IPublishContext<T> context)
+            where T : class
+        {
+        }
+
         public void Start()
         {
             if (_started)
@@ -357,19 +375,10 @@ namespace MassTransit
             _serviceContainer.AddService(layer, service);
         }
 
-        public IBusService GetService(Type type)
-        {
-            return _serviceContainer.GetService(type);
-        }
-
-        public bool TryGetService(Type type, out IBusService result)
-        {
-            return _serviceContainer.TryGetService(type, out result);
-        }
-
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+                return;
             if (disposing)
             {
                 if (_consumerPool != null)
@@ -426,10 +435,10 @@ namespace MassTransit
                                     _counters.ReceiveCount.Increment();
                                     _counters.ReceiveRate.Increment();
                                     _counters.ReceiveDuration.IncrementBy(
-                                        (long) message.ReceiveDuration.TotalMilliseconds);
+                                        (long)message.ReceiveDuration.TotalMilliseconds);
                                     _counters.ReceiveDurationBase.Increment();
                                     _counters.ConsumerDuration.IncrementBy(
-                                        (long) message.ConsumeDuration.TotalMilliseconds);
+                                        (long)message.ConsumeDuration.TotalMilliseconds);
                                     _counters.ConsumerDurationBase.Increment();
                                 });
 
@@ -438,7 +447,7 @@ namespace MassTransit
                                 {
                                     _counters.PublishCount.Increment();
                                     _counters.PublishRate.Increment();
-                                    _counters.PublishDuration.IncrementBy((long) message.Duration.TotalMilliseconds);
+                                    _counters.PublishDuration.IncrementBy((long)message.Duration.TotalMilliseconds);
                                     _counters.PublishDurationBase.Increment();
 
                                     _counters.SentCount.IncrementBy(message.ConsumerCount);
