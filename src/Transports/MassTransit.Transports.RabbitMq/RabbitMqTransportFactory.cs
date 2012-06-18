@@ -50,19 +50,19 @@ namespace MassTransit.Transports.RabbitMq
             GC.SuppressFinalize(this);
         }
 
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_connectionCache.Values.Each(x => x.Dispose());
-				_connectionCache.Clear();
+        void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                _connectionCache.Values.Each(x => x.Dispose());
+                _connectionCache.Clear();
 
-				_connectionCache.Dispose();
-			}
+                _connectionCache.Dispose();
+            }
 
-			_disposed = true;
-		}
+            _disposed = true;
+        }
 
         public string Scheme
         {

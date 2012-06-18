@@ -30,7 +30,7 @@ namespace MassTransit.Services.Routing.Configuration
 
 		public BusServiceLayer Layer
 		{
-			get { return BusServiceLayer.Presentation; }
+			get { return BusServiceLayer.Session; }
 		}
 
 		public IBusService Create(IServiceBus bus)

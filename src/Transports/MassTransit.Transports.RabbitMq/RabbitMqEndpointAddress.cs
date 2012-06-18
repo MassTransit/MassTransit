@@ -27,6 +27,8 @@ namespace MassTransit.Transports.RabbitMq
         const string FormatErrorMsg =
             "The path can be empty, or a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.";
 
+        const int DefaultHeartbeat = 3;
+
         static readonly string LocalMachineName = Environment.MachineName.ToLowerInvariant();
 
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
@@ -38,7 +40,6 @@ namespace MassTransit.Transports.RabbitMq
         readonly Uri _uri;
         Func<bool> _isLocal;
         int _ttl;
-
 
         public RabbitMqEndpointAddress(Uri uri, ConnectionFactory connectionFactory, string name)
         {
@@ -159,6 +160,9 @@ namespace MassTransit.Transports.RabbitMq
                 connectionFactory.VirtualHost = pathSegments[0];
                 name = pathSegments[1];
             }
+
+            var heartbeat = address.Query.GetValueFromQueryString("heartbeat", (ushort)DefaultHeartbeat);
+            connectionFactory.RequestedHeartbeat = heartbeat;
 
             VerifyQueueOrExchangeNameIsLegal(name);
 

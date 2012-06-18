@@ -262,7 +262,7 @@ desc "Runs unit tests"
 nunit :unit_tests => [:compile] do |nunit|
 
         nunit.command = File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe")
-        nunit.options = "/framework=#{CLR_TOOLS_VERSION}", '/nothread', '/exclude:NotOnTeamCity', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results.xml')}\""
+        nunit.options = "/framework=#{CLR_TOOLS_VERSION}", '/exclude:NotOnTeamCity', '/noshadow', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results.xml')}\""
 
         nunit.assemblies = FileList["tests/MassTransit.Tests.dll", "tests/MassTransit.Containers.Tests.dll"]
 end

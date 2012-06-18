@@ -27,10 +27,10 @@ namespace MassTransit.BusConfigurators
     using SubscriptionConfigurators;
     using Transports;
 
-	/// <summary>
-	/// <see cref="ServiceBusConfigurator"/>. Core implementation of service bus
-	/// configurator.
-	/// </summary>
+    /// <summary>
+    /// <see cref="ServiceBusConfigurator"/>. Core implementation of service bus
+    /// configurator.
+    /// </summary>
     public class ServiceBusConfiguratorImpl :
         ServiceBusConfigurator
     {
@@ -156,8 +156,8 @@ namespace MassTransit.BusConfigurators
 
             _subscriptionRouterConfigurator.SetNetwork(_settings.Network);
 
-			// run through all configurators that have been set and let
-			// them do their magic
+            // run through all configurators that have been set and let
+            // them do their magic
             foreach (BusBuilderConfigurator configurator in _configurators)
             {
                 builder = configurator.Configure(builder);
@@ -168,19 +168,19 @@ namespace MassTransit.BusConfigurators
             return bus;
         }
 
-		/// <summary>
-		/// This lets you change the bus settings without
-		/// having to implement a <see cref="BusBuilderConfigurator"/>
-		/// first. Use with caution.
-		/// </summary>
-		/// <param name="callback">The callback that changes the settings.</param>
+        /// <summary>
+        /// This lets you change the bus settings without
+        /// having to implement a <see cref="BusBuilderConfigurator"/>
+        /// first. Use with caution.
+        /// </summary>
+        /// <param name="callback">The callback that changes the settings.</param>
         public void ChangeSettings([NotNull] Action<ServiceBusSettings> callback)
-		{
-			if (callback == null) throw new ArgumentNullException("callback");
-			callback(_settings);
-		}
+        {
+            if (callback == null) throw new ArgumentNullException("callback");
+            callback(_settings);
+        }
 
-		IEndpointCache CreateEndpointCache()
+        IEndpointCache CreateEndpointCache()
         {
             if (_settings.EndpointCache != null)
                 return _settings.EndpointCache;

@@ -23,7 +23,7 @@ namespace MassTransit
                 {
                     var service = new MessageTraceBusService(bus.EventChannel);
 
-                    bus.AddService(BusServiceLayer.Network, service);
+                    bus.AddService(BusServiceLayer.Presentation, service);
                 });
 
             configurator.AddBusConfigurator(busConfigurator);
