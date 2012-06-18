@@ -25,7 +25,7 @@ namespace MassTransit.Diagnostics.Introspection
 
         public BusServiceLayer Layer
         {
-            get { return BusServiceLayer.Application; }
+            get { return BusServiceLayer.Presentation; }
         }
 
         public IBusService Create(IServiceBus bus)

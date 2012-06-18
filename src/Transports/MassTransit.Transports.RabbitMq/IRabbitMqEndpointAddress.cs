@@ -16,14 +16,14 @@ namespace MassTransit.Transports.RabbitMq
     using System.Collections;
     using RabbitMQ.Client;
 
-	public interface IRabbitMqEndpointAddress :
-		IEndpointAddress
-	{
-		ConnectionFactory ConnectionFactory { get; }
-		string Name { get; }
+    public interface IRabbitMqEndpointAddress :
+        IEndpointAddress
+    {
+        ConnectionFactory ConnectionFactory { get; }
+        string Name { get; }
 
-		IRabbitMqEndpointAddress ForQueue(string name);
-	    IDictionary QueueArguments();
-	    void SetTtl(TimeSpan ttl);
-	}
+        IRabbitMqEndpointAddress ForQueue(string name);
+        IDictionary QueueArguments();
+        void SetTtl(TimeSpan ttl);
+    }
 }

@@ -12,147 +12,147 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
-	using System;
-	using System.Collections.Generic;
-	using BusServiceConfigurators;
-	using Configuration;
-	using Exceptions;
-	using Magnum;
-	using Magnum.Extensions;
-	using Pipeline.Configuration;
-	using Util;
+    using System;
+    using System.Collections.Generic;
+    using BusServiceConfigurators;
+    using Configuration;
+    using Exceptions;
+    using Magnum;
+    using Magnum.Extensions;
+    using Pipeline.Configuration;
+    using Util;
 
-	public class ServiceBusBuilderImpl :
-		ServiceBusBuilder
-	{
-		readonly IList<BusServiceConfigurator> _busServiceConfigurators;
-		readonly IList<Action<ServiceBus>> _postCreateActions;
-		readonly BusSettings _settings;
+    public class ServiceBusBuilderImpl :
+        ServiceBusBuilder
+    {
+        readonly IList<BusServiceConfigurator> _busServiceConfigurators;
+        readonly IList<Action<ServiceBus>> _postCreateActions;
+        readonly BusSettings _settings;
 
-		public ServiceBusBuilderImpl(BusSettings settings)
-		{
-			Guard.AgainstNull(settings, "settings");
+        public ServiceBusBuilderImpl(BusSettings settings)
+        {
+            Guard.AgainstNull(settings, "settings");
 
-			Guard.AgainstNull(settings.EndpointCache, "endpointCache");
+            Guard.AgainstNull(settings.EndpointCache, "endpointCache");
 
-			_settings = settings;
+            _settings = settings;
 
-			_postCreateActions = new List<Action<ServiceBus>>();
-			_busServiceConfigurators = new List<BusServiceConfigurator>();
-		}
+            _postCreateActions = new List<Action<ServiceBus>>();
+            _busServiceConfigurators = new List<BusServiceConfigurator>();
+        }
 
-		public BusSettings Settings
-		{
-			get { return _settings; }
-		}
+        public BusSettings Settings
+        {
+            get { return _settings; }
+        }
 
-		public IControlBus Build()
-		{
-			ServiceBus bus = CreateServiceBus(_settings.EndpointCache);
+        public IControlBus Build()
+        {
+            ServiceBus bus = CreateServiceBus(_settings.EndpointCache);
 
-			ConfigureBusSettings(bus);
+            ConfigureBusSettings(bus);
 
-			ConfigureMessageInterceptors(bus);
+            RunPostCreateActions(bus);
 
-			RunPostCreateActions(bus);
+            ConfigureMessageInterceptors(bus);
 
-			RunBusServiceConfigurators(bus);
+            RunBusServiceConfigurators(bus);
 
-			if (_settings.AutoStart)
-			{
-				bus.Start();
-			}
+            if (_settings.AutoStart)
+            {
+                bus.Start();
+            }
 
-			return bus;
-		}
+            return bus;
+        }
 
-		public void UseControlBus(IControlBus controlBus)
-		{
-			_postCreateActions.Add(bus => bus.ControlBus = controlBus);
-		}
+        public void UseControlBus(IControlBus controlBus)
+        {
+            _postCreateActions.Add(bus => bus.ControlBus = controlBus);
+        }
 
-		public void AddPostCreateAction(Action<ServiceBus> postCreateAction)
-		{
-			_postCreateActions.Add(postCreateAction);
-		}
+        public void AddPostCreateAction(Action<ServiceBus> postCreateAction)
+        {
+            _postCreateActions.Add(postCreateAction);
+        }
 
-		public void AddBusServiceConfigurator(BusServiceConfigurator configurator)
-		{
-			_busServiceConfigurators.Add(configurator);
-		}
+        public void AddBusServiceConfigurator(BusServiceConfigurator configurator)
+        {
+            _busServiceConfigurators.Add(configurator);
+        }
 
-		public void Match<T>([NotNull] Action<T> callback)
-			where T : class, BusBuilder
-		{
-			Guard.AgainstNull(callback);
+        public void Match<T>([NotNull] Action<T> callback)
+            where T : class, BusBuilder
+        {
+            Guard.AgainstNull(callback);
 
-			if (typeof (T).IsAssignableFrom(GetType()))
-				callback(this as T);
-		}
+            if (typeof (T).IsAssignableFrom(GetType()))
+                callback(this as T);
+        }
 
-		void RunBusServiceConfigurators(ServiceBus bus)
-		{
-			foreach (BusServiceConfigurator busServiceConfigurator in _busServiceConfigurators)
-			{
-				try
-				{
-					IBusService busService = busServiceConfigurator.Create(bus);
+        void RunBusServiceConfigurators(ServiceBus bus)
+        {
+            foreach (BusServiceConfigurator busServiceConfigurator in _busServiceConfigurators)
+            {
+                try
+                {
+                    IBusService busService = busServiceConfigurator.Create(bus);
 
-					bus.AddService(busServiceConfigurator.Layer, busService);
-				}
-				catch (Exception ex)
-				{
-					throw new ConfigurationException("Failed to create the bus service: " +
-					                                 busServiceConfigurator.ServiceType.ToShortTypeName(), ex);
-				}
-			}
-		}
+                    bus.AddService(busServiceConfigurator.Layer, busService);
+                }
+                catch (Exception ex)
+                {
+                    throw new ConfigurationException("Failed to create the bus service: " +
+                                                     busServiceConfigurator.ServiceType.ToShortTypeName(), ex);
+                }
+            }
+        }
 
-		void RunPostCreateActions(ServiceBus bus)
-		{
-			foreach (var postCreateAction in _postCreateActions)
-			{
-				try
-				{
-					postCreateAction(bus);
-				}
-				catch (Exception ex)
-				{
-					throw new ConfigurationException("An exception was thrown while running post-creation actions", ex);
-				}
-			}
-		}
+        void RunPostCreateActions(ServiceBus bus)
+        {
+            foreach (var postCreateAction in _postCreateActions)
+            {
+                try
+                {
+                    postCreateAction(bus);
+                }
+                catch (Exception ex)
+                {
+                    throw new ConfigurationException("An exception was thrown while running post-creation actions", ex);
+                }
+            }
+        }
 
-		ServiceBus CreateServiceBus(IEndpointCache endpointCache)
-		{
-			IEndpoint endpoint = endpointCache.GetEndpoint(_settings.InputAddress);
+        ServiceBus CreateServiceBus(IEndpointCache endpointCache)
+        {
+            IEndpoint endpoint = endpointCache.GetEndpoint(_settings.InputAddress);
 
-			var serviceBus = new ServiceBus(endpoint, endpointCache);
+            var serviceBus = new ServiceBus(endpoint, endpointCache);
 
-			return serviceBus;
-		}
+            return serviceBus;
+        }
 
-		void ConfigureBusSettings(ServiceBus bus)
-		{
-			if (_settings.ConcurrentConsumerLimit > 0)
-				bus.MaximumConsumerThreads = _settings.ConcurrentConsumerLimit;
+        void ConfigureBusSettings(ServiceBus bus)
+        {
+            if (_settings.ConcurrentConsumerLimit > 0)
+                bus.MaximumConsumerThreads = _settings.ConcurrentConsumerLimit;
 
-			if (_settings.ConcurrentReceiverLimit > 0)
-				bus.ConcurrentReceiveThreads = _settings.ConcurrentReceiverLimit;
+            if (_settings.ConcurrentReceiverLimit > 0)
+                bus.ConcurrentReceiveThreads = _settings.ConcurrentReceiverLimit;
 
-			bus.ReceiveTimeout = _settings.ReceiveTimeout;
-		}
+            bus.ReceiveTimeout = _settings.ReceiveTimeout;
+        }
 
-		void ConfigureMessageInterceptors(IServiceBus bus)
-		{
-			if (_settings.BeforeConsume != null || _settings.AfterConsume != null)
-			{
-				var configurator = new InboundMessageInterceptorConfigurator(bus.InboundPipeline);
+        void ConfigureMessageInterceptors(IServiceBus bus)
+        {
+            if (_settings.BeforeConsume != null || _settings.AfterConsume != null)
+            {
+                var configurator = new InboundMessageInterceptorConfigurator(bus.InboundPipeline);
 
-				var interceptor = new DelegateMessageInterceptor(_settings.BeforeConsume, _settings.AfterConsume);
+                var interceptor = new DelegateMessageInterceptor(_settings.BeforeConsume, _settings.AfterConsume);
 
-				configurator.Create(interceptor);
-			}
-		}
-	}
+                configurator.Create(interceptor);
+            }
+        }
+    }
 }
