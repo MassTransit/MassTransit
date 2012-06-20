@@ -6,7 +6,7 @@ where should I do the configuration?
 
 The short answer is: Configure it when you are configuring your IoC Container.
 
-Configuring MassTransit in a Console Application / Windowws Service
+Configuring MassTransit in a Console Application / Windows Service
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 I typically do this inside of the methods that build up my IoC container
