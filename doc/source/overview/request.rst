@@ -67,7 +67,7 @@ something to improve upon later. :)
         }
     }
 
-So what is going on? The first chunk has the messages we are gonig to work with.
+So what is going on? The first chunk has the messages we are going to work with.
 
 The second chunk shows the code to simple echo back the request message as a response.
 
