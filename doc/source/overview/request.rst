@@ -37,7 +37,7 @@ something to improve upon later. :)
                 sbc.ReceiveFrom("msmq://localhost/message_responder");
                 sbc.Subscribe(subs=>
                 {
-                    subs.Handler<RequestMessage>( (cxt, msg )=>
+                    subs.Handler<BasicRequest>( (cxt, msg )=>
                     {
                         cxt.Respond(new BasicResponse{Text = "RESP"+msg.Text});
                     });
@@ -62,9 +62,9 @@ something to improve upon later. :)
                 sbc.ReceiveFrom("msmq://localhost/message_requestor");
             });
 
-            Bus.Instance.PublishRequest(new RequestMessage(), x =>
+            Bus.Instance.PublishRequest(new BasicRequest(), x =>
             {
-                x.Handle<ResponseMessage>(message => Console.WriteLine(message.Text));
+                x.Handle<BasicResponse>(message => Console.WriteLine(message.Text));
                 x.SetTimeout(30.Seconds());
             });
         }
