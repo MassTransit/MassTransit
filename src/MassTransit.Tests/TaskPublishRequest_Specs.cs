@@ -13,8 +13,10 @@
 namespace MassTransit.Tests
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using BusConfigurators;
+    using Exceptions;
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using NUnit.Framework;
@@ -48,6 +50,17 @@ namespace MassTransit.Tests
             request.Task.Wait(timeout).ShouldBeTrue("Task was not completed");
 
             continueCalled.IsAvailable(timeout).ShouldBeTrue("The continuation was not called");
+        }
+
+        [Test]
+        public void Should_throw_an_exception_from_the_timeout()
+        {
+            var ping = new PingMessage();
+            ITaskRequest<PingMessage> request = LocalBus.PublishRequestAsync(ping, x => { x.SetTimeout(1.Seconds()); });
+
+            var aggregateException = Assert.Throws<AggregateException>(() => request.Task.Wait(8.Seconds()));
+
+            Assert.IsInstanceOf<RequestTimeoutException>(aggregateException.InnerExceptions.First());
         }
 
         FutureMessage<PingMessage> _pingReceived;

@@ -48,7 +48,7 @@ namespace MassTransit.RequestResponse.Configurators
         public void HandleTimeout(TimeSpan timeout, Action timeoutCallback)
         {
             _timeout = timeout;
-            _timeoutCallback = () => { throw RequestTimeoutException.FromCorrelationId(_requestId); };
+            _timeoutCallback = timeoutCallback;
         }
 
         public void SetTimeout(TimeSpan timeout)
