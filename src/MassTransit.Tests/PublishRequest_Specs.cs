@@ -146,46 +146,6 @@ namespace MassTransit.Tests
             Assert.IsTrue(result, "EndRequest should be true");
         }
 
-#if NET40
-        [Test, Category("NotOnTeamCity")]
-        public void Should_support_the_async_tpl()
-        {
-            var pongReceived = new FutureMessage<PongMessage>();
-            var pingReceived = new FutureMessage<PingMessage>();
-            var continueCalled = new FutureMessage<Task<PongMessage>>();
-
-            RemoteBus.SubscribeContextHandler<PingMessage>(x =>
-            {
-                pingReceived.Set(x.Message);
-                x.Respond(new PongMessage { TransactionId = x.Message.TransactionId });
-            });
-            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
-
-            var ping = new PingMessage();
-
-            TimeSpan timeout = 18.Seconds();
-
-            ITaskRequest<PingMessage> request = LocalBus.PublishRequestAsync(ping, x =>
-            {
-                x.SetTimeout(timeout);
-
-                x.Handle<PongMessage>(message =>
-                {
-                    message.TransactionId.ShouldEqual(ping.TransactionId,
-                        "The response correlationId did not match");
-                    pongReceived.Set(message);
-                })
-                .ContinueWith(continueCalled.Set);
-            });
-
-            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
-            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
-
-            request.Task.Wait(timeout).ShouldBeTrue("Task was not completed");
-
-            continueCalled.IsAvailable(timeout).ShouldBeTrue("The continuation was not called");
-        }
-#endif
         [Test]
         public void Should_throw_a_handler_exception_on_the_calling_thread()
         {
