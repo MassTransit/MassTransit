@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,23 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse
 {
-    public interface IRequest
-    {
-        /// <summary>
-        /// Identifies the request for matching up request/response messages
-        /// </summary>
-        string RequestId { get; }
+    using System;
+    using Pipeline;
 
-        /// <summary>
-        /// Cancel the request, releasing any pending resources
-        /// </summary>
-        void Cancel();
-    }
-
-    public interface IRequest<out T> :
-        IRequest
-        where T : class
+    /// <summary>
+    /// A response handler is defined by the request/response DSL
+    /// </summary>
+    public interface ResponseHandler
     {
-        T RequestMessage { get; }
+        Type ResponseType { get; }
+
+        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator);
     }
 }

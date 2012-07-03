@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,42 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse.Configurators
 {
+#if NET40
     using System;
-
-    public interface RequestConfigurator
-    {
-        /// <summary>
-        /// Returns the identifier assigned to this request
-        /// </summary>
-        string RequestId { get; }
-
-        /// <summary>
-        /// Specifies a timeout period after which the request should be cancelled
-        /// </summary>
-        /// <param name="timeout">The timeout period</param>
-        /// <param name="timeoutCallback"></param>
-        void HandleTimeout(TimeSpan timeout, Action timeoutCallback);
-
-        /// <summary>
-        /// Specifies a timeout period after which the request should be cancelled and
-        /// a TimeoutException should be thrown
-        /// </summary>
-        /// <param name="timeout">The timeout period</param>
-        void SetTimeout(TimeSpan timeout);
-
-        /// <summary>
-        /// Specifies a time-to-live (TTL) for the request message after which the message
-        /// should be discarded.
-        /// </summary>
-        /// <param name="expiration">The time-to-live for the message</param>
-        void SetRequestExpiration(TimeSpan expiration);
-    }
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Configures a request and the associated response handler behavior
     /// </summary>
     /// <typeparam name="TRequest">The message type of the request</typeparam>
-    public interface RequestConfigurator<TRequest> :
+    public interface TaskRequestConfigurator<out TRequest> :
         RequestConfigurator
         where TRequest : class
     {
@@ -63,7 +36,7 @@ namespace MassTransit.RequestResponse.Configurators
         /// </summary>
         /// <typeparam name="TResponse">The message type of the response</typeparam>
         /// <param name="handler">The handler to call with the response message</param>
-        void Handle<TResponse>(Action<TResponse> handler)
+        Task<TResponse> Handle<TResponse>(Action<TResponse> handler)
             where TResponse : class;
 
         /// <summary>
@@ -73,7 +46,28 @@ namespace MassTransit.RequestResponse.Configurators
         /// </summary>
         /// <typeparam name="TResponse">The message type of the response</typeparam>
         /// <param name="handler">The handler to call with the response message</param>
-        void Handle<TResponse>(Action<IConsumeContext<TResponse>, TResponse> handler)
+        Task<TResponse> Handle<TResponse>(Action<IConsumeContext<TResponse>, TResponse> handler)
             where TResponse : class;
+
+        /// <summary>
+        /// Configures a watcher to be called when a specified type is received. Messages
+        /// received do not complete the request, but are merely observed while the request
+        /// is pending.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="watcher"></param>
+        void Watch<T>(Action<T> watcher)
+            where T : class;
+
+        /// <summary>
+        /// Configures a watcher to be called when a specified type is received. Messages
+        /// received do not complete the request, but are merely observed while the request
+        /// is pending.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="watcher"></param>
+        void Watch<T>(Action<IConsumeContext<T>, T> watcher)
+            where T : class;
     }
+#endif
 }
