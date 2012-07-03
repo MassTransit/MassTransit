@@ -13,6 +13,7 @@
 namespace MassTransit.Advanced
 {
 	using System;
+	using System.Collections.Generic;
 	using BusConfigurators;
 
 	public static class AdvancedBusConfiguratorExtensions
@@ -43,5 +44,22 @@ namespace MassTransit.Advanced
 
 			configurator.AddBusConfigurator(controlBusConfigurator);
 		}
+
+	    public static UnsubscribeAction CombineSubscriptions<T>(this IEnumerable<T> source, Func<T, UnsubscribeAction> map)
+	    {
+	        UnsubscribeAction result = null;
+	        foreach (T item in source)
+	        {
+	            UnsubscribeAction unsubscribeAction = map(item);
+	            if (result == null)
+	                result = unsubscribeAction;
+	            else
+	            {
+	                UnsubscribeAction previousResult = result;
+	                result = () => previousResult() && unsubscribeAction();
+	            }
+	        }
+	        return result ?? (() => true);
+	    }
 	}
 }

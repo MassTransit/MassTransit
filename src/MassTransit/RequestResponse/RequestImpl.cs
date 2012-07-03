@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -15,15 +15,16 @@ namespace MassTransit.RequestResponse
     using System;
     using System.Collections.Generic;
     using System.Threading;
+    using System.Threading.Tasks;
     using Exceptions;
     using Logging;
     using Magnum.Extensions;
 
     public class RequestImpl<TRequest> :
-        IRequest<TRequest>
+        IAsyncRequest<TRequest>
         where TRequest : class
     {
-        static readonly ILog _log = Logger.Get(typeof (RequestImpl<TRequest>));
+        static readonly ILog _log = Logger.Get(typeof(RequestImpl<TRequest>));
         readonly IList<AsyncCallback> _completionCallbacks;
         readonly object _lock = new object();
         readonly string _requestId;
@@ -36,6 +37,11 @@ namespace MassTransit.RequestResponse
         TimeSpan _timeout = TimeSpan.MaxValue;
         Action _timeoutCallback;
         RegisteredWaitHandle _waitHandle;
+
+#if NET40
+        TaskCompletionSource<TRequest> _source = new TaskCompletionSource<TRequest>(TaskCreationOptions.None);
+#endif
+
 
         public RequestImpl(string requestId, TRequest message)
         {
@@ -91,13 +97,23 @@ namespace MassTransit.RequestResponse
             get { return _requestId; }
         }
 
+        public void Cancel()
+        {
+        }
+
         public bool Wait()
         {
             bool alreadyCompleted;
             lock (_lock)
                 alreadyCompleted = _completed;
 
-            bool result = alreadyCompleted || CompleteEvent.WaitOne(_timeout == TimeSpan.MaxValue ? Int32.MaxValue : (int)_timeout.TotalMilliseconds, true);
+#if NET40
+            bool result = alreadyCompleted || _source.Task.Wait(_timeout == TimeSpan.MaxValue
+                                                                    ? -1
+                                                                    : (int)_timeout.TotalMilliseconds);
+#else
+            bool result = alreadyCompleted || CompleteEvent.WaitOne(_timeout == TimeSpan.MaxValue ? -1 : (int)_timeout.TotalMilliseconds, true);
+#endif
             if (!result)
             {
                 lock (_completionCallbacks)
@@ -115,7 +131,6 @@ namespace MassTransit.RequestResponse
         }
 
         public void SetUnsubscribeAction(UnsubscribeAction unsubscribeAction)
-
         {
             _completionCallbacks.Add(x => unsubscribeAction());
         }
@@ -187,6 +202,14 @@ namespace MassTransit.RequestResponse
 
                     _complete = null;
                 }
+
+#if NET40
+                if (_source != null)
+                {
+                    if (!_source.Task.IsCompleted && !_source.Task.IsFaulted)
+                        _source.TrySetCanceled();
+                }
+#endif
             }
         }
 
@@ -201,6 +224,11 @@ namespace MassTransit.RequestResponse
 
                 if (_complete != null)
                     _complete.Set();
+
+#if NET40
+                if (_source != null)
+                    _source.TrySetResult(_message);
+#endif
             }
 
             lock (_completionCallbacks)
@@ -222,6 +250,11 @@ namespace MassTransit.RequestResponse
         void DefaultTimeoutCallback()
         {
             Fail(RequestTimeoutException.FromCorrelationId(_requestId));
+        }
+
+        public TRequest RequestMessage
+        {
+            get { return _message; }
         }
     }
 }

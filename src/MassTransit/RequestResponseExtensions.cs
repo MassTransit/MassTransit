@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading.Tasks;
     using RequestResponse;
     using RequestResponse.Configurators;
 
@@ -23,7 +24,7 @@ namespace MassTransit
                                                     Action<RequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
-            IRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
+            IAsyncRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
 
             PublishRequest(bus, message, request);
 
@@ -37,7 +38,7 @@ namespace MassTransit
                                                                  Action<RequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
-            IRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
+            IAsyncRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
 
             PublishRequest(bus, message, request);
 
@@ -45,14 +46,33 @@ namespace MassTransit
         }
 
 
-        public static bool EndRequest(this IServiceBus bus, IAsyncResult asyncResult)
+        public static bool EndRequest<TRequest>(this IServiceBus bus, IAsyncResult asyncResult) 
+            where TRequest : class
         {
-            var request = asyncResult as IRequest;
+            var request = asyncResult as IAsyncRequest<TRequest>;
             if (request == null)
                 throw new ArgumentException("The argument is not an IRequest");
 
             return request.Wait();
         }
+
+#if NET40
+        public static ITaskRequest<TRequest> PublishRequestAsync<TRequest>(this IServiceBus bus, TRequest message,
+            Action<TaskRequestConfigurator<TRequest>> configureCallback) 
+            where TRequest : class
+        {
+            var requestConfigurator = new TaskRequestConfiguratorImpl<TRequest>(message);
+
+            configureCallback(requestConfigurator);
+
+            var request = requestConfigurator.Create(bus);
+
+            PublishRequest(bus, message, request);
+
+            return request;
+        }
+#endif
+
 
         public static bool SendRequest<TRequest>(this IEndpoint endpoint,
                                                  TRequest message,
@@ -60,7 +80,7 @@ namespace MassTransit
                                                  Action<RequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
-            IRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
+            IAsyncRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
 
             SendRequest(endpoint, bus, message, request);
 
@@ -75,16 +95,17 @@ namespace MassTransit
                                                               Action<RequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
-            IRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
+            IAsyncRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
 
             SendRequest(endpoint, bus, message, request);
 
             return request.BeginAsync(callback, state);
         }
 
-        public static bool EndRequest(this IEndpoint endpoint, IAsyncResult asyncResult)
+        public static bool EndRequest<TRequest>(this IEndpoint endpoint, IAsyncResult asyncResult) 
+            where TRequest : class
         {
-            var request = asyncResult as IRequest;
+            var request = asyncResult as IAsyncRequest<TRequest>;
             if (request == null)
                 throw new ArgumentException("The argument is not an IRequest");
 
