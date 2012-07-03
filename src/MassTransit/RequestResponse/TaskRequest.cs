@@ -18,7 +18,6 @@ namespace MassTransit.RequestResponse
     using System.Threading;
     using System.Threading.Tasks;
     using Advanced;
-    using Exceptions;
     using Magnum.Caching;
 
     public class TaskRequest<TRequest> :
@@ -28,13 +27,10 @@ namespace MassTransit.RequestResponse
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly TRequest _message;
         readonly string _requestId;
-
         readonly Cache<Type, TaskResponseHandler> _responseHandlers;
         readonly TaskCompletionSource<TRequest> _source;
         readonly Action _timeoutCallback;
 
-        TimeSpan _timeout;
-        Task _timeoutTask;
         UnsubscribeAction _unsubscribe;
 
         public TaskRequest(string requestId, TRequest message, TimeSpan timeout, Action timeoutCallback, IServiceBus bus,
@@ -42,7 +38,6 @@ namespace MassTransit.RequestResponse
         {
             _requestId = requestId;
             _message = message;
-            _timeout = timeout;
             _timeoutCallback = timeoutCallback;
             _cancellationTokenSource = new CancellationTokenSource();
 
@@ -55,7 +50,8 @@ namespace MassTransit.RequestResponse
 
             if (timeout > TimeSpan.Zero)
             {
-                _timeoutTask = TaskHelper.Timeout(timeout, _cancellationTokenSource.Token).ContinueWith(HandleTimeout);
+                TaskHelper.Timeout(timeout, _cancellationTokenSource.Token)
+                    .ContinueWith(HandleTimeout);
             }
         }
 
@@ -115,14 +111,11 @@ namespace MassTransit.RequestResponse
             try
             {
                 if (_timeoutCallback != null)
-                {
                     _timeoutCallback();
-                }
-                else
-                {
-                    RequestTimeoutException exception = RequestTimeoutException.FromCorrelationId(_requestId);
-                    _source.TrySetException(exception);
-                }
+            }
+            catch (Exception ex)
+            {
+                _source.TrySetException(ex);
             }
             finally
             {
