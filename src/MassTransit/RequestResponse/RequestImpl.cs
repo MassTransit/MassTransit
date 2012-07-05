@@ -252,7 +252,7 @@ namespace MassTransit.RequestResponse
             Fail(RequestTimeoutException.FromCorrelationId(_requestId));
         }
 
-        public TRequest RequestMessage
+        public TRequest Message
         {
             get { return _message; }
         }

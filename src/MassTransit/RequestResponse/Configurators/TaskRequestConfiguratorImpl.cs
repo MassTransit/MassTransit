@@ -70,51 +70,39 @@ namespace MassTransit.RequestResponse.Configurators
         public Task<TResponse> Handle<TResponse>(Action<TResponse> handler)
             where TResponse : class
         {
-            return AddHandler(() => new TaskResponseHandlerImpl<TResponse>(_requestId, handler));
+            return AddHandler(() => new CompleteTaskResponseHandler<TResponse>(_requestId, handler));
         }
 
         public Task<TResponse> Handle<TResponse>(Action<IConsumeContext<TResponse>, TResponse> handler)
             where TResponse : class
         {
-            return AddHandler(() => new TaskResponseHandlerImpl<TResponse>(_requestId, handler));
+            return AddHandler(() => new CompleteTaskResponseHandler<TResponse>(_requestId, handler));
         }
 
         public void Watch<T>(Action<T> watcher)
             where T : class
         {
-            AddWatcher<T>(() => new TaskResponseWatcherImpl<T>(_requestId, watcher));
+            AddHandler(() => new WatchTaskResponseHandler<T>(_requestId, watcher));
         }
 
         public void Watch<T>(Action<IConsumeContext<T>, T> watcher)
             where T : class
         {
-            AddWatcher<T>(() => new TaskResponseWatcherImpl<T>(_requestId, watcher));
+            AddHandler(() => new WatchTaskResponseHandler<T>(_requestId, watcher));
         }
 
-        Task<TResponse> AddHandler<TResponse>(Func<TaskResponseHandlerImpl<TResponse>> responseHandlerFactory)
+        Task<TResponse> AddHandler<TResponse>(Func<TaskResponseHandlerBase<TResponse>> responseHandlerFactory)
             where TResponse : class
         {
             if (_handlers.Has(typeof(TResponse)))
                 throw new ArgumentException("A response handler for {0} has already been declared."
-                    .FormatWith(typeof(TResponse).Name));
+                    .FormatWith(typeof(TResponse).ToShortTypeName()));
 
             TaskResponseHandler<TResponse> responseHandler = responseHandlerFactory();
 
             _handlers.Add(typeof(TResponse), responseHandler);
 
             return responseHandler.Task;
-        }
-
-        void AddWatcher<TResponse>(Func<TaskResponseHandler> responseHandlerFactory)
-            where TResponse : class
-        {
-            if (_handlers.Has(typeof(TResponse)))
-                throw new ArgumentException("A response handler for {0} has already been declared."
-                    .FormatWith(typeof(TResponse).Name));
-
-            TaskResponseHandler responseHandler = responseHandlerFactory();
-
-            _handlers.Add(typeof(TResponse), responseHandler);
         }
 
         public ITaskRequest<TRequest> Create(IServiceBus bus)

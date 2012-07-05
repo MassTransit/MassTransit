@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse
 {
+#if NET40
     using System.Threading.Tasks;
 
     /// <summary>
@@ -20,8 +21,14 @@ namespace MassTransit.RequestResponse
     public interface TaskResponseHandler :
         ResponseHandler
     {
+        /// <summary>
+        /// Returns the Task for the response handler
+        /// </summary>
         Task Task { get; }
 
+        /// <summary>
+        /// Returns the Task&lt;<typeparam name="T">T</typeparam>&gt; for the response handler
+        /// </summary>
         Task<T> GetTask<T>()
             where T : class;
     }
@@ -30,6 +37,10 @@ namespace MassTransit.RequestResponse
         TaskResponseHandler
         where T : class
     {
+        /// <summary>
+        /// Returns the Task&lt;<typeparam name="T">T</typeparam>&gt; for the response handler
+        /// </summary>
         new Task<T> Task { get; }
     }
+#endif
 }

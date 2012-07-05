@@ -19,6 +19,7 @@ namespace MassTransit.RequestResponse
     using System.Threading.Tasks;
     using Advanced;
     using Magnum.Caching;
+    using Magnum.Extensions;
 
     public class TaskRequest<TRequest> :
         ITaskRequest<TRequest>
@@ -68,7 +69,7 @@ namespace MassTransit.RequestResponse
             Cleanup();
         }
 
-        public TRequest RequestMessage
+        public TRequest Message
         {
             get { return _message; }
         }
@@ -88,7 +89,17 @@ namespace MassTransit.RequestResponse
                 return handler.GetTask<T>();
             }
 
-            throw new InvalidOperationException("The response task was not found.");
+            throw new ArgumentException("A response handler for the specified type was not found: "
+                + typeof(T).ToShortTypeName());
+        }
+
+        public Task GetResponseTask(Type responseType)
+        {
+            if(_responseHandlers.Has(responseType))
+                return _responseHandlers[responseType].Task;
+
+            throw new ArgumentException("A response handler for the specified type was not found: " 
+                + responseType.ToShortTypeName());
         }
 
         UnsubscribeAction SubscribeHandlers(IServiceBus bus)

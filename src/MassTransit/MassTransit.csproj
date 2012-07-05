@@ -383,6 +383,7 @@
     <Compile Include="Pipeline\Sinks\OutboundMessageInterceptor.cs" />
     <Compile Include="Pipeline\Sinks\SelectedContextConsumerMessageSink.cs" />
     <Compile Include="RequestResponseExtensions.cs" />
+    <Compile Include="RequestResponse\CompleteTaskResponseHandler.cs" />
     <Compile Include="RequestResponse\Configurators\RequestConfigurator.cs" />
     <Compile Include="RequestResponse\Configurators\RequestConfiguratorImpl.cs" />
     <Compile Include="RequestResponse\Configurators\TaskRequestConfigurator.cs" />
@@ -394,9 +395,9 @@
     <Compile Include="RequestResponse\ResponseHandler.cs" />
     <Compile Include="RequestResponse\TaskRequest.cs" />
     <Compile Include="RequestResponse\TaskResponseHandler.cs" />
-    <Compile Include="RequestResponse\TaskResponseHandlerImpl.cs" />
-    <Compile Include="RequestResponse\TaskResponseWatcherImpl.cs" />
-    <Compile Include="RequestResponse\TimeoutTask.cs" />
+    <Compile Include="RequestResponse\TaskResponseHandlerBase.cs" />
+    <Compile Include="RequestResponse\TaskHelper.cs" />
+    <Compile Include="RequestResponse\WatchTaskResponseHandler.cs" />
     <Compile Include="Saga\CorrelatedSagaLocator.cs" />
     <Compile Include="Saga\DelegatingSagaRepository.cs" />
     <Compile Include="Saga\EventBinderExtensions.cs" />
@@ -534,6 +535,7 @@
     <Compile Include="Subscriptions\SubscriptionBusService.cs" />
     <Compile Include="Subscriptions\TransientSubscriptionReference.cs" />
     <Compile Include="Subscriptions\UnsubscribeExtensions.cs" />
+    <Compile Include="TaskExtensions.cs" />
     <Compile Include="Testing\ActionConfigurators\PublishTestActionConfigurator.cs" />
     <Compile Include="Testing\ActionConfigurators\SendTestActionConfigurator.cs" />
     <Compile Include="Testing\ActionConfigurators\TestActionConfigurator.cs" />

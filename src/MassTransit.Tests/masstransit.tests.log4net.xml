@@ -7,7 +7,7 @@
   </root>
 
   <logger name="MassTransit">
-    <level value="INFO" />
+    <level value="WARN" />
   </logger>
 
 <!--	<logger name="MassTransit.Subscriptions">-->

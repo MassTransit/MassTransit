@@ -12,23 +12,28 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse
 {
+    /// <summary>
+    /// Handle to a request that was sent/published
+    /// </summary>
     public interface IRequest
     {
         /// <summary>
         /// Identifies the request for matching up request/response messages
         /// </summary>
         string RequestId { get; }
-
-        /// <summary>
-        /// Cancel the request, releasing any pending resources
-        /// </summary>
-        void Cancel();
     }
 
+    /// <summary>
+    /// Handle to a request that was sent/published
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IRequest<out T> :
         IRequest
         where T : class
     {
-        T RequestMessage { get; }
+        /// <summary>
+        /// The request message that was sent/published
+        /// </summary>
+        T Message { get; }
     }
 }
