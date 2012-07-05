@@ -25,6 +25,11 @@ namespace MassTransit
         where TRequest : class
     {
         /// <summary>
+        /// Cancel the request (will signal the Tasks as Cancelled)
+        /// </summary>
+        void Cancel();
+
+        /// <summary>
         /// The Task for the entire request, is completed when any of the response
         /// handlers completes.
         /// </summary>

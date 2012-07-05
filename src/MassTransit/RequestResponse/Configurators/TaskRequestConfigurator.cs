@@ -30,24 +30,39 @@ namespace MassTransit.RequestResponse.Configurators
         TRequest Request { get; }
 
         /// <summary>
-        /// Configures a handler to be called if a response of the specified type
-        /// is received. Once received, the request completes by default unless
-        /// overridden by calling Continue on the request.
+        /// Specifies a timeout period after which the request should be cancelled and
+        /// a TimeoutException should be thrown
         /// </summary>
-        /// <typeparam name="TResponse">The message type of the response</typeparam>
-        /// <param name="handler">The handler to call with the response message</param>
-        Task<TResponse> Handle<TResponse>(Action<TResponse> handler)
-            where TResponse : class;
+        /// <param name="timeout">The timeout period</param>
+        void SetTimeout(TimeSpan timeout);
+
+        /// <summary>
+        /// Specifies a timeout period after which the request should be cancelled and
+        /// the timeoutCallback invoked.
+        /// </summary>
+        /// <param name="timeout">The time period</param>
+        /// <param name="timeoutCallback">The callback to invoke</param>
+        void HandleTimeout(TimeSpan timeout, Action<TRequest> timeoutCallback);
 
         /// <summary>
         /// Configures a handler to be called if a response of the specified type
         /// is received. Once received, the request completes by default unless
         /// overridden by calling Continue on the request.
         /// </summary>
-        /// <typeparam name="TResponse">The message type of the response</typeparam>
+        /// <typeparam name="T">The message type of the response</typeparam>
         /// <param name="handler">The handler to call with the response message</param>
-        Task<TResponse> Handle<TResponse>(Action<IConsumeContext<TResponse>, TResponse> handler)
-            where TResponse : class;
+        Task<T> Handle<T>(Action<T> handler)
+            where T : class;
+
+        /// <summary>
+        /// Configures a handler to be called if a response of the specified type
+        /// is received. Once received, the request completes by default unless
+        /// overridden by calling Continue on the request.
+        /// </summary>
+        /// <typeparam name="T">The message type of the response</typeparam>
+        /// <param name="handler">The handler to call with the response message</param>
+        Task<T> Handle<T>(Action<IConsumeContext<T>, T> handler)
+            where T : class;
 
         /// <summary>
         /// Configures a watcher to be called when a specified type is received. Messages

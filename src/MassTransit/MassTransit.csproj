@@ -385,6 +385,7 @@
     <Compile Include="RequestResponseExtensions.cs" />
     <Compile Include="RequestResponse\CompleteTaskResponseHandler.cs" />
     <Compile Include="RequestResponse\Configurators\RequestConfigurator.cs" />
+    <Compile Include="RequestResponse\Configurators\RequestConfiguratorBase.cs" />
     <Compile Include="RequestResponse\Configurators\RequestConfiguratorImpl.cs" />
     <Compile Include="RequestResponse\Configurators\TaskRequestConfigurator.cs" />
     <Compile Include="RequestResponse\Configurators\TaskRequestConfiguratorImpl.cs" />
@@ -397,6 +398,7 @@
     <Compile Include="RequestResponse\TaskResponseHandler.cs" />
     <Compile Include="RequestResponse\TaskResponseHandlerBase.cs" />
     <Compile Include="RequestResponse\TaskHelper.cs" />
+    <Compile Include="RequestResponse\TimeoutHandler.cs" />
     <Compile Include="RequestResponse\WatchTaskResponseHandler.cs" />
     <Compile Include="Saga\CorrelatedSagaLocator.cs" />
     <Compile Include="Saga\DelegatingSagaRepository.cs" />

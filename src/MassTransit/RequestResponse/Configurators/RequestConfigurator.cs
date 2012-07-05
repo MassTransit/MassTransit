@@ -22,20 +22,6 @@ namespace MassTransit.RequestResponse.Configurators
         string RequestId { get; }
 
         /// <summary>
-        /// Specifies a timeout period after which the request should be cancelled
-        /// </summary>
-        /// <param name="timeout">The timeout period</param>
-        /// <param name="timeoutCallback"></param>
-        void HandleTimeout(TimeSpan timeout, Action timeoutCallback);
-
-        /// <summary>
-        /// Specifies a timeout period after which the request should be cancelled and
-        /// a TimeoutException should be thrown
-        /// </summary>
-        /// <param name="timeout">The timeout period</param>
-        void SetTimeout(TimeSpan timeout);
-
-        /// <summary>
         /// Specifies a time-to-live (TTL) for the request message after which the message
         /// should be discarded.
         /// </summary>
@@ -47,7 +33,7 @@ namespace MassTransit.RequestResponse.Configurators
     /// Configures a request and the associated response handler behavior
     /// </summary>
     /// <typeparam name="TRequest">The message type of the request</typeparam>
-    public interface RequestConfigurator<out TRequest> :
+    public interface RequestConfigurator<TRequest> :
         RequestConfigurator
         where TRequest : class
     {
@@ -55,6 +41,27 @@ namespace MassTransit.RequestResponse.Configurators
         /// The request message that was sent
         /// </summary>
         TRequest Request { get; }
+
+        /// <summary>
+        /// Specifies a timeout period after which the request should be cancelled and
+        /// a TimeoutException should be thrown
+        /// </summary>
+        /// <param name="timeout">The timeout period</param>
+        void SetTimeout(TimeSpan timeout);
+
+        /// <summary>
+        /// Specifies a timeout period after which the request should be cancelled
+        /// </summary>
+        /// <param name="timeout">The timeout period</param>
+        /// <param name="timeoutCallback"></param>
+        void HandleTimeout(TimeSpan timeout, Action timeoutCallback);
+
+        /// <summary>
+        /// Specifies a timeout period after which the request should be cancelled
+        /// </summary>
+        /// <param name="timeout">The timeout period</param>
+        /// <param name="timeoutCallback"></param>
+        void HandleTimeout(TimeSpan timeout, Action<IAsyncRequest<TRequest>> timeoutCallback);
 
         /// <summary>
         /// Configures a handler to be called if a response of the specified type
