@@ -12,15 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse.Configurators
 {
-#if NET40
     using System;
-    using System.Threading.Tasks;
 
-    /// <summary>
-    /// Configures a request and the associated response handler behavior
-    /// </summary>
-    /// <typeparam name="TRequest">The message type of the request</typeparam>
-    public interface TaskRequestConfigurator<TRequest> :
+    public interface InlineRequestConfigurator<TRequest> :
         RequestConfigurator<TRequest>
         where TRequest : class
     {
@@ -29,40 +23,19 @@ namespace MassTransit.RequestResponse.Configurators
         /// is received. Once received, the request completes by default unless
         /// overridden by calling Continue on the request.
         /// </summary>
-        /// <typeparam name="T">The message type of the response</typeparam>
+        /// <typeparam name="TResponse">The message type of the response</typeparam>
         /// <param name="handler">The handler to call with the response message</param>
-        Task<T> Handle<T>(Action<T> handler)
-            where T : class;
+        void Handle<TResponse>(Action<TResponse> handler)
+            where TResponse : class;
 
         /// <summary>
         /// Configures a handler to be called if a response of the specified type
         /// is received. Once received, the request completes by default unless
         /// overridden by calling Continue on the request.
         /// </summary>
-        /// <typeparam name="T">The message type of the response</typeparam>
+        /// <typeparam name="TResponse">The message type of the response</typeparam>
         /// <param name="handler">The handler to call with the response message</param>
-        Task<T> Handle<T>(Action<IConsumeContext<T>, T> handler)
-            where T : class;
-
-        /// <summary>
-        /// Configures a watcher to be called when a specified type is received. Messages
-        /// received do not complete the request, but are merely observed while the request
-        /// is pending.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="watcher"></param>
-        void Watch<T>(Action<T> watcher)
-            where T : class;
-
-        /// <summary>
-        /// Configures a watcher to be called when a specified type is received. Messages
-        /// received do not complete the request, but are merely observed while the request
-        /// is pending.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="watcher"></param>
-        void Watch<T>(Action<IConsumeContext<T>, T> watcher)
-            where T : class;
+        void Handle<TResponse>(Action<IConsumeContext<TResponse>, TResponse> handler)
+            where TResponse : class;
     }
-#endif
 }

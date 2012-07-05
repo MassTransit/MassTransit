@@ -57,8 +57,11 @@ namespace MassTransit.RequestResponse
 
             // this is what we call to cancel the timeout if the request is cancelled or a handler completes
             _cancelTimeout = new CancellationTokenSource();
-            Task timeoutTask = TaskHelper.Timeout(timeout, _cancelTimeout.Token);
-            timeoutTask.ContinueWith(HandleTimeout, TaskContinuationOptions.NotOnCanceled);
+            if (timeout >= TimeSpan.Zero)
+            {
+                Task timeoutTask = TaskHelper.Timeout(timeout, _cancelTimeout.Token);
+                timeoutTask.ContinueWith(HandleTimeout, TaskContinuationOptions.NotOnCanceled);
+            }
 
             _unsubscribe = SubscribeHandlers(bus);
         }

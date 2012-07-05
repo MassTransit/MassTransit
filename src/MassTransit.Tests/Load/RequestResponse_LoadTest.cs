@@ -57,5 +57,44 @@ namespace MassTransit.Tests.Load
 			Trace.WriteLine(string.Format("Elapsed Time for {0} messages = {1}", repeatCount * 2, stopwatch.Elapsed));
 			Trace.WriteLine(string.Format("Messages Per Second = {0}", repeatCount * 2000 / stopwatch.ElapsedMilliseconds));
 		}
+
+#if NET40
+	    [Test, Explicit]
+	    public void Many_publish_request_should_work()
+	    {
+	        const int repeatCount = 5000;
+
+	        LocalBus.SubscribeHandler<PingMessage>(x => LocalBus.Context().Respond(new PongMessage()));
+
+            ManualResetEvent completed = new ManualResetEvent(false);
+            int responsesReceived = 0;
+
+	        Stopwatch stopwatch = Stopwatch.StartNew();
+
+	        for (int i = 0; i < repeatCount; i++)
+	        {
+	            LocalBus.PublishRequestAsync(new PingMessage(), x =>
+	                {
+	                    x.Handle<PongMessage>(message =>
+	                        {
+                                if (Interlocked.Increment(ref responsesReceived) == repeatCount)
+                                {
+                                    completed.Set();
+                                }
+	                        });
+	                });
+	        }
+
+	        bool success = completed.WaitOne(60.Seconds());
+
+	        Assert.IsTrue(success, "The repeat series did not complete");
+
+            Trace.WriteLine(string.Format("Elapsed Time for {0} requests = {1}", repeatCount, stopwatch.Elapsed));
+            Trace.WriteLine(string.Format("Requests Per Second = {0}", repeatCount * 1000 / stopwatch.ElapsedMilliseconds));
+
+            Trace.WriteLine(string.Format("Elapsed Time for {0} messages = {1}", repeatCount * 2, stopwatch.Elapsed));
+            Trace.WriteLine(string.Format("Messages Per Second = {0}", repeatCount * 2000 / stopwatch.ElapsedMilliseconds));
+	    }
+#endif
 	}
 }

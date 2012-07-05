@@ -27,6 +27,21 @@ namespace MassTransit.RequestResponse.Configurators
         /// </summary>
         /// <param name="expiration">The time-to-live for the message</param>
         void SetRequestExpiration(TimeSpan expiration);
+
+        /// <summary>
+        /// Specifies a timeout period after which the request should be cancelled and
+        /// a TimeoutException should be thrown
+        /// </summary>
+        /// <param name="timeout">The timeout period</param>
+        void SetTimeout(TimeSpan timeout);
+
+        /// <summary>
+        /// Specifies a timeout period after which the request should be cancelled and
+        /// the timeoutCallback invoked.
+        /// </summary>
+        /// <param name="timeout">The time period</param>
+        /// <param name="timeoutCallback">The callback to invoke</param>
+        void HandleTimeout(TimeSpan timeout, Action timeoutCallback);
     }
 
     /// <summary>
@@ -43,44 +58,31 @@ namespace MassTransit.RequestResponse.Configurators
         TRequest Request { get; }
 
         /// <summary>
-        /// Specifies a timeout period after which the request should be cancelled and
-        /// a TimeoutException should be thrown
-        /// </summary>
-        /// <param name="timeout">The timeout period</param>
-        void SetTimeout(TimeSpan timeout);
-
-        /// <summary>
         /// Specifies a timeout period after which the request should be cancelled
         /// </summary>
         /// <param name="timeout">The timeout period</param>
         /// <param name="timeoutCallback"></param>
-        void HandleTimeout(TimeSpan timeout, Action timeoutCallback);
+        void HandleTimeout(TimeSpan timeout, Action<TRequest> timeoutCallback);
 
         /// <summary>
-        /// Specifies a timeout period after which the request should be cancelled
+        /// Configures a watcher to be called when a specified type is received. Messages
+        /// received do not complete the request, but are merely observed while the request
+        /// is pending.
         /// </summary>
-        /// <param name="timeout">The timeout period</param>
-        /// <param name="timeoutCallback"></param>
-        void HandleTimeout(TimeSpan timeout, Action<IAsyncRequest<TRequest>> timeoutCallback);
+        /// <typeparam name="T"></typeparam>
+        /// <param name="watcher"></param>
+        void Watch<T>(Action<T> watcher)
+            where T : class;
 
         /// <summary>
-        /// Configures a handler to be called if a response of the specified type
-        /// is received. Once received, the request completes by default unless
-        /// overridden by calling Continue on the request.
+        /// Configures a watcher to be called when a specified type is received. Messages
+        /// received do not complete the request, but are merely observed while the request
+        /// is pending.
         /// </summary>
-        /// <typeparam name="TResponse">The message type of the response</typeparam>
-        /// <param name="handler">The handler to call with the response message</param>
-        void Handle<TResponse>(Action<TResponse> handler)
-            where TResponse : class;
+        /// <typeparam name="T"></typeparam>
+        /// <param name="watcher"></param>
+        void Watch<T>(Action<IConsumeContext<T>, T> watcher)
+            where T : class;
 
-        /// <summary>
-        /// Configures a handler to be called if a response of the specified type
-        /// is received. Once received, the request completes by default unless
-        /// overridden by calling Continue on the request.
-        /// </summary>
-        /// <typeparam name="TResponse">The message type of the response</typeparam>
-        /// <param name="handler">The handler to call with the response message</param>
-        void Handle<TResponse>(Action<IConsumeContext<TResponse>, TResponse> handler)
-            where TResponse : class;
     }
 }

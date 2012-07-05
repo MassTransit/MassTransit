@@ -24,11 +24,14 @@ namespace MassTransit.RequestResponse.Configurators
         readonly Cache<Type, ResponseHandler> _handlers;
         readonly TRequest _message;
         readonly string _requestId;
+        protected TimeSpan Timeout;
+        protected TimeoutHandler<TRequest> TimeoutHandler;
 
         protected RequestConfiguratorBase(TRequest message)
         {
             _message = message;
             _requestId = NewId.NextGuid().ToString();
+            Timeout = TimeSpan.FromMilliseconds(-1);
 
             _contextActions = new List<Action<ISendContext<TRequest>>>();
             _handlers = new DictionaryCache<Type, ResponseHandler>();
@@ -49,10 +52,47 @@ namespace MassTransit.RequestResponse.Configurators
             get { return _handlers; }
         }
 
+        public void SetTimeout(TimeSpan timeout)
+        {
+            Timeout = timeout;
+        }
+
+        public void HandleTimeout(TimeSpan timeout, Action timeoutCallback)
+        {
+            Timeout = timeout;
+            TimeoutHandler = new TimeoutHandler<TRequest>(_ => timeoutCallback());
+        }
+
+        public void HandleTimeout(TimeSpan timeout, Action<TRequest> timeoutCallback)
+        {
+            Timeout = timeout;
+            TimeoutHandler = new TimeoutHandler<TRequest>(timeoutCallback);
+        }
+
         public void SetRequestExpiration(TimeSpan expiration)
         {
             _contextActions.Add(x => x.ExpiresIn(expiration));
         }
+
+        public void ApplyContext(IPublishContext<TRequest> context, Uri responseAddress)
+        {
+            context.SetRequestId(_requestId);
+            context.SendResponseTo(responseAddress);
+            context.SendFaultTo(responseAddress);
+
+            _contextActions.Each(x => x(context));
+        }
+
+        public void ApplyContext(ISendContext<TRequest> context, Uri responseAddress)
+        {
+            context.SetRequestId(_requestId);
+            context.SetSourceAddress(responseAddress);
+            context.SendResponseTo(responseAddress);
+            context.SendFaultTo(responseAddress);
+
+            _contextActions.Each(x => x(context));
+        }
+
 
         protected T AddHandler<T>(Type responseType, Func<T> responseHandlerFactory)
             where T : class, ResponseHandler
