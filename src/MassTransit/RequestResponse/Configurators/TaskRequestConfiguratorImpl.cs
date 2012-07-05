@@ -22,23 +22,9 @@ namespace MassTransit.RequestResponse.Configurators
         TaskRequestConfigurator<TRequest>
         where TRequest : class
     {
-        TimeSpan _timeout;
-        TimeoutHandler<TRequest> _timeoutHandler;
-
         public TaskRequestConfiguratorImpl(TRequest message)
             : base(message)
         {
-        }
-
-        public void SetTimeout(TimeSpan timeout)
-        {
-            _timeout = timeout;
-        }
-
-        public void HandleTimeout(TimeSpan timeout, Action<TRequest> timeoutCallback)
-        {
-            _timeout = timeout;
-            _timeoutHandler = new TimeoutHandler<TRequest>(timeoutCallback);
         }
 
         public Task<T> Handle<T>(Action<T> handler)
@@ -73,7 +59,7 @@ namespace MassTransit.RequestResponse.Configurators
 
         public ITaskRequest<TRequest> Create(IServiceBus bus)
         {
-            var request = new TaskRequest<TRequest>(RequestId, Request, _timeout, _timeoutHandler,
+            var request = new TaskRequest<TRequest>(RequestId, Request, Timeout, TimeoutHandler,
                 CancellationToken.None, bus, Handlers);
 
             return request;

@@ -14,43 +14,25 @@ namespace MassTransit.RequestResponse
 {
 #if NET40
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
-    using Exceptions;
-    using Pipeline;
-    using SubscriptionConnectors;
 
     public abstract class TaskResponseHandlerBase<TResponse> :
+        ResponseHandlerBase<TResponse>,
         TaskResponseHandler<TResponse>
         where TResponse : class
     {
         protected readonly TaskCompletionSource<TResponse> CompletionSource;
-        readonly SynchronizationContext _context;
-        readonly HandlerSelector<TResponse> _handler;
-        readonly string _requestId;
 
         protected TaskResponseHandlerBase(string requestId, Action<IConsumeContext<TResponse>, TResponse> handler)
-            : this(requestId)
+            : base(requestId, handler)
         {
-            _handler = HandlerSelector.ForHandler(handler);
+            CompletionSource = new TaskCompletionSource<TResponse>(TaskCreationOptions.None);
         }
 
         protected TaskResponseHandlerBase(string requestId, Action<TResponse> handler)
-            : this(requestId)
+            : base(requestId, handler)
         {
-            _handler = HandlerSelector.ForHandler(handler);
-        }
-
-        TaskResponseHandlerBase(string requestId)
-        {
-            _requestId = requestId;
             CompletionSource = new TaskCompletionSource<TResponse>(TaskCreationOptions.None);
-            _context = SynchronizationContext.Current;
-        }
-
-        Type ResponseHandler.ResponseType
-        {
-            get { return typeof(TResponse); }
         }
 
         Task TaskResponseHandler.Task
@@ -71,71 +53,6 @@ namespace MassTransit.RequestResponse
 
             return self.CompletionSource.Task;
         }
-
-        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
-        {
-            var connector = new RequestHandlerSubscriptionConnector<TResponse>();
-
-            HandlerSelector<TResponse> handler = HandlerSelector.ForContextHandler<TResponse>(HandleResponse);
-
-            return connector.Connect(configurator, _requestId, handler);
-        }
-
-        /// <summary>
-        /// Called when the handler completes successfully
-        /// </summary>
-        /// <param name="context">The message consumer context</param>
-        protected abstract void Success(IConsumeContext<TResponse> context);
-
-        /// <summary>
-        /// Called when the handler throws an exception (exception is wrapped as a RequestException)
-        /// </summary>
-        /// <param name="exception">The wrapped exception</param>
-        protected abstract void Failure(Exception exception);
-
-        void HandleResponse(IConsumeContext<TResponse> context)
-        {
-            try
-            {
-                if (_context != null)
-                {
-                    _context.Post(state =>
-                        {
-                            try
-                            {
-                                Action<IConsumeContext<TResponse>> handler = _handler(context);
-                                handler(context);
-
-                                Success(context);
-                            }
-                            catch (Exception ex)
-                            {
-                                Failure(context, ex);
-                            }
-                        }, state: null);
-                }
-                else
-                {
-                    Action<IConsumeContext<TResponse>> handler = _handler(context);
-                    handler(context);
-
-                    Success(context);
-                }
-            }
-            catch (Exception ex)
-            {
-                Failure(context, ex);
-            }
-        }
-
-        void Failure(IConsumeContext<TResponse> context, Exception exception)
-        {
-            var requestException = new RequestException("The response handler threw an exception", exception,
-                context.Message);
-
-            Failure(requestException);
-        }
     }
-
 #endif
 }

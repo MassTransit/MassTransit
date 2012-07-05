@@ -20,7 +20,8 @@ namespace MassTransit.RequestResponse
     using Magnum.Extensions;
 
     public class RequestImpl<TRequest> :
-        IAsyncRequest<TRequest>
+        IAsyncRequest<TRequest>,
+        IRequestComplete
         where TRequest : class
     {
         static readonly ILog _log = Logger.Get(typeof(RequestImpl<TRequest>));
@@ -34,7 +35,7 @@ namespace MassTransit.RequestResponse
         Exception _exception;
         object _state;
         TimeSpan _timeout = TimeSpan.MaxValue;
-        Action _timeoutCallback;
+        TimeoutHandler<TRequest> _timeoutHandler;
         RegisteredWaitHandle _waitHandle;
 
         public RequestImpl(string requestId, TRequest message)
@@ -42,7 +43,11 @@ namespace MassTransit.RequestResponse
             _requestId = requestId;
             _message = message;
             _completionCallbacks = new List<AsyncCallback>();
-            _timeoutCallback = DefaultTimeoutCallback;
+            _timeoutHandler = new TimeoutHandler<TRequest>(x =>
+                {
+                    //
+                    _exception = new RequestTimeoutException(_requestId);
+                });
         }
 
         ManualResetEvent CompleteEvent
@@ -93,6 +98,7 @@ namespace MassTransit.RequestResponse
 
         public void Cancel()
         {
+            Fail(new RequestCancelledException(_requestId));
         }
 
         public bool Wait()
@@ -107,7 +113,7 @@ namespace MassTransit.RequestResponse
             if (!result)
             {
                 lock (_completionCallbacks)
-                    _completionCallbacks.Add(asyncResult => _timeoutCallback());
+                    _completionCallbacks.Add(asyncResult => _timeoutHandler.HandleTimeout(_message));
 
                 NotifyComplete();
             }
@@ -136,7 +142,7 @@ namespace MassTransit.RequestResponse
                     if (timeoutExpired)
                     {
                         lock (_completionCallbacks)
-                            _completionCallbacks.Add(asyncResult => _timeoutCallback());
+                            _completionCallbacks.Add(asyncResult => _timeoutHandler.HandleTimeout(_message));
 
                         NotifyComplete();
                     }
@@ -152,21 +158,6 @@ namespace MassTransit.RequestResponse
             get { return _message; }
         }
 
-        public void SetUnsubscribeAction(UnsubscribeAction unsubscribeAction)
-        {
-            _completionCallbacks.Add(x => unsubscribeAction());
-        }
-
-        public void SetTimeout(TimeSpan timeout)
-        {
-            _timeout = timeout;
-        }
-
-        public void SetTimeoutCallback(Action timeoutCallback)
-        {
-            _timeoutCallback = timeoutCallback ?? DefaultTimeoutCallback;
-        }
-
         public void Complete<TResponse>(TResponse response)
             where TResponse : class
         {
@@ -178,6 +169,21 @@ namespace MassTransit.RequestResponse
             _exception = exception;
 
             NotifyComplete();
+        }
+
+        public void SetTimeout(TimeSpan timeout)
+        {
+            _timeout = timeout;
+        }
+
+        public void SetTimeoutHandler(TimeoutHandler<TRequest> timeoutHandler )
+        {
+            _timeoutHandler = timeoutHandler;
+        }
+
+        public void SetUnsubscribeAction(UnsubscribeAction unsubscribeAction)
+        {
+            _completionCallbacks.Add(x => unsubscribeAction());
         }
 
         void Close()
@@ -227,11 +233,6 @@ namespace MassTransit.RequestResponse
                         }
                     });
             }
-        }
-
-        void DefaultTimeoutCallback()
-        {
-            Fail(new RequestTimeoutException(_requestId));
         }
     }
 }

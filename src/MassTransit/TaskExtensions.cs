@@ -22,13 +22,13 @@ namespace MassTransit
             Action<TaskRequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
-            var requestConfigurator = new TaskRequestConfiguratorImpl<TRequest>(message);
+            var configurator = new TaskRequestConfiguratorImpl<TRequest>(message);
 
-            configureCallback(requestConfigurator);
+            configureCallback(configurator);
 
-            ITaskRequest<TRequest> request = requestConfigurator.Create(bus);
+            ITaskRequest<TRequest> request = configurator.Create(bus);
 
-            bus.Publish(message, context => context.SetRequestContext(request.RequestId, bus.Endpoint.Address.Uri));
+            bus.Publish(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
 
             return request;
         }
@@ -38,13 +38,13 @@ namespace MassTransit
             Action<TaskRequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
-            var requestConfigurator = new TaskRequestConfiguratorImpl<TRequest>(message);
+            var configurator = new TaskRequestConfiguratorImpl<TRequest>(message);
 
-            configureCallback(requestConfigurator);
+            configureCallback(configurator);
 
-            ITaskRequest<TRequest> request = requestConfigurator.Create(bus);
+            ITaskRequest<TRequest> request = configurator.Create(bus);
 
-            endpoint.Send(message, context => context.SetRequestContext(request.RequestId, bus.Endpoint.Address.Uri));
+            endpoint.Send(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
 
             return request;
         }
