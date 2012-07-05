@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using RequestResponse;
     using RequestResponse.Configurators;
 
     public static class RequestResponseExtensions
@@ -44,7 +43,6 @@ namespace MassTransit
             return request.BeginAsync(callback, state);
         }
 
-
         public static bool EndPublishRequest<TRequest>(this IServiceBus bus, IAsyncResult asyncResult)
             where TRequest : class
         {
@@ -55,9 +53,7 @@ namespace MassTransit
             return request.Wait();
         }
 
-        public static bool SendRequest<TRequest>(this IEndpoint endpoint,
-            TRequest message,
-            IServiceBus bus,
+        public static bool SendRequest<TRequest>(this IEndpoint endpoint, TRequest message, IServiceBus bus,
             Action<RequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
@@ -68,12 +64,8 @@ namespace MassTransit
             return request.Wait();
         }
 
-        public static IAsyncResult BeginSendRequest<TRequest>(this IEndpoint endpoint,
-            TRequest message,
-            IServiceBus bus,
-            AsyncCallback callback,
-            object state,
-            Action<RequestConfigurator<TRequest>> configureCallback)
+        public static IAsyncResult BeginSendRequest<TRequest>(this IEndpoint endpoint, TRequest message, IServiceBus bus,
+            AsyncCallback callback, object state, Action<RequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
             IAsyncRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
