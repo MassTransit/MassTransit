@@ -15,7 +15,6 @@ namespace MassTransit.RequestResponse
     using System;
     using System.Collections.Generic;
     using System.Threading;
-    using System.Threading.Tasks;
     using Exceptions;
     using Logging;
     using Magnum.Extensions;
@@ -27,8 +26,8 @@ namespace MassTransit.RequestResponse
         static readonly ILog _log = Logger.Get(typeof(RequestImpl<TRequest>));
         readonly IList<AsyncCallback> _completionCallbacks;
         readonly object _lock = new object();
-        readonly string _requestId;
         readonly TRequest _message;
+        readonly string _requestId;
 
         ManualResetEvent _complete;
         bool _completed;
@@ -37,11 +36,6 @@ namespace MassTransit.RequestResponse
         TimeSpan _timeout = TimeSpan.MaxValue;
         Action _timeoutCallback;
         RegisteredWaitHandle _waitHandle;
-
-#if NET40
-        TaskCompletionSource<TRequest> _source = new TaskCompletionSource<TRequest>(TaskCreationOptions.None);
-#endif
-
 
         public RequestImpl(string requestId, TRequest message)
         {
@@ -107,13 +101,9 @@ namespace MassTransit.RequestResponse
             lock (_lock)
                 alreadyCompleted = _completed;
 
-#if NET40
-            bool result = alreadyCompleted || _source.Task.Wait(_timeout == TimeSpan.MaxValue
-                                                                    ? -1
-                                                                    : (int)_timeout.TotalMilliseconds);
-#else
-            bool result = alreadyCompleted || CompleteEvent.WaitOne(_timeout == TimeSpan.MaxValue ? -1 : (int)_timeout.TotalMilliseconds, true);
-#endif
+            bool result = alreadyCompleted || CompleteEvent.WaitOne(_timeout == TimeSpan.MaxValue
+                                                                        ? -1
+                                                                        : (int)_timeout.TotalMilliseconds, true);
             if (!result)
             {
                 lock (_completionCallbacks)
@@ -128,6 +118,38 @@ namespace MassTransit.RequestResponse
                 throw _exception;
 
             return result;
+        }
+
+        public IAsyncResult BeginAsync(AsyncCallback callback, object state)
+        {
+            if (_waitHandle != null)
+            {
+                throw new InvalidOperationException("The asynchronous request was already started.");
+            }
+
+            _state = state;
+            lock (_completionCallbacks)
+                _completionCallbacks.Add(callback);
+
+            WaitOrTimerCallback timerCallback = (s, timeoutExpired) =>
+                {
+                    if (timeoutExpired)
+                    {
+                        lock (_completionCallbacks)
+                            _completionCallbacks.Add(asyncResult => _timeoutCallback());
+
+                        NotifyComplete();
+                    }
+                };
+
+            _waitHandle = ThreadPool.RegisterWaitForSingleObject(CompleteEvent, timerCallback, state, _timeout, true);
+
+            return this;
+        }
+
+        public TRequest Message
+        {
+            get { return _message; }
         }
 
         public void SetUnsubscribeAction(UnsubscribeAction unsubscribeAction)
@@ -158,33 +180,6 @@ namespace MassTransit.RequestResponse
             NotifyComplete();
         }
 
-        public IAsyncResult BeginAsync(AsyncCallback callback, object state)
-        {
-            if (_waitHandle != null)
-            {
-                throw new InvalidOperationException("The asynchronous request was already started.");
-            }
-
-            _state = state;
-            lock (_completionCallbacks)
-                _completionCallbacks.Add(callback);
-
-            WaitOrTimerCallback timerCallback = (s, timeoutExpired) =>
-                {
-                    if (timeoutExpired)
-                    {
-                        lock (_completionCallbacks)
-                            _completionCallbacks.Add(asyncResult => _timeoutCallback());
-
-                        NotifyComplete();
-                    }
-                };
-
-            _waitHandle = ThreadPool.RegisterWaitForSingleObject(CompleteEvent, timerCallback, state, _timeout, true);
-
-            return this;
-        }
-
         void Close()
         {
             if (_waitHandle != null)
@@ -202,14 +197,6 @@ namespace MassTransit.RequestResponse
 
                     _complete = null;
                 }
-
-#if NET40
-                if (_source != null)
-                {
-                    if (!_source.Task.IsCompleted && !_source.Task.IsFaulted)
-                        _source.TrySetCanceled();
-                }
-#endif
             }
         }
 
@@ -224,11 +211,6 @@ namespace MassTransit.RequestResponse
 
                 if (_complete != null)
                     _complete.Set();
-
-#if NET40
-                if (_source != null)
-                    _source.TrySetResult(_message);
-#endif
             }
 
             lock (_completionCallbacks)
@@ -249,12 +231,7 @@ namespace MassTransit.RequestResponse
 
         void DefaultTimeoutCallback()
         {
-            Fail(RequestTimeoutException.FromCorrelationId(_requestId));
-        }
-
-        public TRequest Message
-        {
-            get { return _message; }
+            Fail(new RequestTimeoutException(_requestId));
         }
     }
 }

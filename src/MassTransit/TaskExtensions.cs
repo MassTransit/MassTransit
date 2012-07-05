@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using RequestResponse;
     using RequestResponse.Configurators;
 
 #if NET40

@@ -14,6 +14,7 @@ namespace MassTransit.RequestResponse.Configurators
 {
 #if NET40
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Exceptions;
     using Magnum.Caching;
@@ -23,10 +24,10 @@ namespace MassTransit.RequestResponse.Configurators
         TaskRequestConfigurator<TRequest>
         where TRequest : class
     {
+        readonly IList<Action<ISendContext<TRequest>>> _contextActions;
         readonly Cache<Type, TaskResponseHandler> _handlers;
         readonly TRequest _message;
         readonly string _requestId;
-        TimeSpan _expiration;
         TimeSpan _timeout;
         Action _timeoutCallback;
 
@@ -36,7 +37,8 @@ namespace MassTransit.RequestResponse.Configurators
             _requestId = NewId.NextGuid().ToString();
 
             _timeout = TimeSpan.Zero;
-            _expiration = TimeSpan.MaxValue;
+
+            _contextActions = new List<Action<ISendContext<TRequest>>>();
             _handlers = new DictionaryCache<Type, TaskResponseHandler>();
         }
 
@@ -54,12 +56,12 @@ namespace MassTransit.RequestResponse.Configurators
         public void SetTimeout(TimeSpan timeout)
         {
             _timeout = timeout;
-            _timeoutCallback = () => { throw RequestTimeoutException.FromCorrelationId(_requestId); };
+            _timeoutCallback = () => { throw new RequestTimeoutException(_requestId); };
         }
 
         public void SetRequestExpiration(TimeSpan expiration)
         {
-            _expiration = expiration;
+            _contextActions.Add(x => x.ExpiresIn(expiration));
         }
 
         public TRequest Request
