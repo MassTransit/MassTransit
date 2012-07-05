@@ -14,11 +14,20 @@ namespace MassTransit.RequestResponse
 {
     using System;
 
+    /// <summary>
+    /// A handle to an asynchronous request (started using Begin/End style async pattern)
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IAsyncRequest<out T> :
         IRequest<T>,
         IAsyncResult
         where T : class
     {
+        /// <summary>
+        /// Cancel the request, releasing any pending resources
+        /// </summary>
+        void Cancel();
+
         /// <summary>
         /// Wait for the request to complete. If the timeout expires, the request
         /// completes and the timeout callback is called.

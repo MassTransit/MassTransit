@@ -47,7 +47,7 @@ namespace MassTransit.RequestResponse.Configurators
     /// Configures a request and the associated response handler behavior
     /// </summary>
     /// <typeparam name="TRequest">The message type of the request</typeparam>
-    public interface RequestConfigurator<TRequest> :
+    public interface RequestConfigurator<out TRequest> :
         RequestConfigurator
         where TRequest : class
     {

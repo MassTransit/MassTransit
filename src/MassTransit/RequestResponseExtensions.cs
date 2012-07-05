@@ -1,52 +1,51 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
     using System;
-    using System.Threading.Tasks;
     using RequestResponse;
     using RequestResponse.Configurators;
 
     public static class RequestResponseExtensions
     {
         public static bool PublishRequest<TRequest>(this IServiceBus bus,
-                                                    TRequest message,
-                                                    Action<RequestConfigurator<TRequest>> configureCallback)
+            TRequest message,
+            Action<RequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
             IAsyncRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
 
-            PublishRequest(bus, message, request);
+            bus.Publish(message, context => context.SetRequestContext(request.RequestId, bus));
 
             return request.Wait();
         }
 
         public static IAsyncResult BeginPublishRequest<TRequest>(this IServiceBus bus,
-                                                                 TRequest message,
-                                                                 AsyncCallback callback,
-                                                                 object state,
-                                                                 Action<RequestConfigurator<TRequest>> configureCallback)
+            TRequest message,
+            AsyncCallback callback,
+            object state,
+            Action<RequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
             IAsyncRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
 
-            PublishRequest(bus, message, request);
+            bus.Publish(message, context => context.SetRequestContext(request.RequestId, bus));
 
             return request.BeginAsync(callback, state);
         }
 
 
-        public static bool EndRequest<TRequest>(this IServiceBus bus, IAsyncResult asyncResult) 
+        public static bool EndPublishRequest<TRequest>(this IServiceBus bus, IAsyncResult asyncResult)
             where TRequest : class
         {
             var request = asyncResult as IAsyncRequest<TRequest>;
@@ -56,53 +55,35 @@ namespace MassTransit
             return request.Wait();
         }
 
-#if NET40
-        public static ITaskRequest<TRequest> PublishRequestAsync<TRequest>(this IServiceBus bus, TRequest message,
-            Action<TaskRequestConfigurator<TRequest>> configureCallback) 
-            where TRequest : class
-        {
-            var requestConfigurator = new TaskRequestConfiguratorImpl<TRequest>(message);
-
-            configureCallback(requestConfigurator);
-
-            var request = requestConfigurator.Create(bus);
-
-            PublishRequest(bus, message, request);
-
-            return request;
-        }
-#endif
-
-
         public static bool SendRequest<TRequest>(this IEndpoint endpoint,
-                                                 TRequest message,
-                                                 IServiceBus bus,
-                                                 Action<RequestConfigurator<TRequest>> configureCallback)
+            TRequest message,
+            IServiceBus bus,
+            Action<RequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
             IAsyncRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
 
-            SendRequest(endpoint, bus, message, request);
+            endpoint.Send(message, context => context.SetRequestContext(request.RequestId, bus));
 
             return request.Wait();
         }
 
         public static IAsyncResult BeginSendRequest<TRequest>(this IEndpoint endpoint,
-                                                              TRequest message,
-                                                              IServiceBus bus,
-                                                              AsyncCallback callback,
-                                                              object state,
-                                                              Action<RequestConfigurator<TRequest>> configureCallback)
+            TRequest message,
+            IServiceBus bus,
+            AsyncCallback callback,
+            object state,
+            Action<RequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
         {
             IAsyncRequest<TRequest> request = RequestConfiguratorImpl<TRequest>.Create(bus, message, configureCallback);
 
-            SendRequest(endpoint, bus, message, request);
+            endpoint.Send(message, context => context.SetRequestContext(request.RequestId, bus));
 
             return request.BeginAsync(callback, state);
         }
 
-        public static bool EndRequest<TRequest>(this IEndpoint endpoint, IAsyncResult asyncResult) 
+        public static bool EndSendRequest<TRequest>(this IEndpoint endpoint, IAsyncResult asyncResult)
             where TRequest : class
         {
             var request = asyncResult as IAsyncRequest<TRequest>;
@@ -112,26 +93,33 @@ namespace MassTransit
             return request.Wait();
         }
 
-        static void PublishRequest<TRequest>(IServiceBus bus, TRequest message, IRequest<TRequest> request)
-            where TRequest : class
+        public static void SetRequestContext<T>(this ISendContext<T> context, string requestId, IServiceBus bus)
+            where T : class
         {
-            bus.Publish(message, context =>
-                {
-                    context.SetRequestId(request.RequestId);
-                    context.SendResponseTo(bus.Endpoint.Address.Uri);
-                });
+            SetRequestContext(context, requestId, bus.Endpoint.Address.Uri);
         }
 
-        static void SendRequest<TRequest>(IEndpoint endpoint, IServiceBus bus, TRequest message,
-                                          IRequest<TRequest> request)
-            where TRequest : class
+        public static void SetRequestContext<T>(this ISendContext<T> context, string requestId, Uri responseAddress)
+            where T : class
         {
-            endpoint.Send(message, context =>
-                {
-                    context.SetRequestId(request.RequestId);
-                    context.SetSourceAddress(bus.Endpoint.Address.Uri);
-                    context.SendResponseTo(bus.Endpoint.Address.Uri);
-                });
+            context.SetRequestId(requestId);
+            context.SetSourceAddress(responseAddress);
+            context.SendResponseTo(responseAddress);
+            context.SendFaultTo(responseAddress);
+        }
+
+        public static void SetRequestContext<T>(this IPublishContext<T> context, string requestId, IServiceBus bus)
+            where T : class
+        {
+            SetRequestContext(context, requestId, bus.Endpoint.Address.Uri);
+        }
+
+        public static void SetRequestContext<T>(this IPublishContext<T> context, string requestId, Uri responseAddress)
+            where T : class
+        {
+            context.SetRequestId(requestId);
+            context.SendResponseTo(responseAddress);
+            context.SendFaultTo(responseAddress);
         }
     }
 }

@@ -141,7 +141,7 @@ namespace MassTransit.Tests
 
             callbackCalled.IsAvailable(timeout).ShouldBeTrue("The callback was not called");
 
-            bool result = LocalBus.EndRequest<PingMessage>(callbackCalled.Message);
+            bool result = LocalBus.EndPublishRequest<PingMessage>(callbackCalled.Message);
 
             Assert.IsTrue(result, "EndRequest should be true");
         }
@@ -220,7 +220,7 @@ namespace MassTransit.Tests
 
             callbackCalled.IsAvailable(timeout).ShouldBeTrue("Called was not called");
 
-            var exception = Assert.Throws<RequestException>(() => { LocalBus.EndRequest<PingMessage>(callbackCalled.Message); },
+            var exception = Assert.Throws<RequestException>(() => { LocalBus.EndPublishRequest<PingMessage>(callbackCalled.Message); },
                 "A request exception should have been thrown");
 
             exception.Response.ShouldBeAnInstanceOf<PongMessage>();
@@ -250,7 +250,7 @@ namespace MassTransit.Tests
 
             callbackCalled.IsAvailable(8.Seconds()).ShouldBeTrue("Callback was not invoked");
 
-            Assert.Throws<RequestTimeoutException>(() => { LocalBus.EndRequest<PingMessage>(callbackCalled.Message); },
+            Assert.Throws<RequestTimeoutException>(() => { LocalBus.EndPublishRequest<PingMessage>(callbackCalled.Message); },
                 "A timeout exception should have been thrown");
 
             pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");

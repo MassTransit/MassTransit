@@ -13,6 +13,7 @@
 namespace MassTransit.RequestResponse
 {
 #if NET40
+    using System;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -29,12 +30,19 @@ namespace MassTransit.RequestResponse
         Task Task { get; }
 
         /// <summary>
-        /// Returns the Task<typeparam name="T">T</typeparam> for the response handler.
+        /// Returns the task for the response handler of the specified message type
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="T">The response message type</typeparam>
+        /// <returns>The Task associated with the response handler</returns>
         Task<T> GetResponseTask<T>()
             where T : class;
+
+        /// <summary>
+        /// Returns the task for the response handler of the specified message type
+        /// </summary>
+        /// <param name="responseType">The response message type</param>
+        /// <returns>The Task associated with the response handler</returns>
+        Task GetResponseTask(Type responseType);
     }
 #endif
 }
