@@ -15,9 +15,11 @@ namespace MassTransit.RequestResponse
 #if NET40
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Advanced;
+    using Exceptions;
     using Magnum.Caching;
     using Magnum.Extensions;
 
@@ -25,35 +27,40 @@ namespace MassTransit.RequestResponse
         ITaskRequest<TRequest>
         where TRequest : class
     {
-        readonly CancellationTokenSource _cancellationTokenSource;
+        readonly CancellationTokenSource _cancelRequest;
+        readonly CancellationTokenSource _cancelTimeout;
         readonly TRequest _message;
+        readonly TimeoutHandler<TRequest> _timeoutHandler;
         readonly string _requestId;
         readonly Cache<Type, TaskResponseHandler> _responseHandlers;
         readonly TaskCompletionSource<TRequest> _source;
-        readonly Action _timeoutCallback;
 
+        CancellationTokenRegistration _cancelRequestRegistration;
         UnsubscribeAction _unsubscribe;
 
-        public TaskRequest(string requestId, TRequest message, TimeSpan timeout, Action timeoutCallback, IServiceBus bus,
-            IEnumerable<TaskResponseHandler> handlers)
+        public TaskRequest(string requestId, TRequest message, TimeSpan timeout, TimeoutHandler<TRequest> timeoutHandler,
+            CancellationToken cancellationToken, IServiceBus bus, IEnumerable<ResponseHandler> handlers)
         {
             _requestId = requestId;
             _message = message;
-            _timeoutCallback = timeoutCallback;
-            _cancellationTokenSource = new CancellationTokenSource();
+            _timeoutHandler = timeoutHandler;
+            _responseHandlers = new DictionaryCache<Type, TaskResponseHandler>(x => x.ResponseType,
+                handlers.Cast<TaskResponseHandler>());
 
+            // this is our task, which we complete/fail/cancel as appropriate
             _source = new TaskCompletionSource<TRequest>(TaskCreationOptions.None);
-            _source.Task.ContinueWith(_ => { _unsubscribe(); });
+            _source.Task.ContinueWith(HandleCompletion);
 
-            _responseHandlers = new DictionaryCache<Type, TaskResponseHandler>(x => x.ResponseType, handlers);
+            // this is what gets called to cancel the request, cancels the task as well
+            _cancelRequest = new CancellationTokenSource();
+            _cancelRequestRegistration = cancellationToken.Register(HandleCancel);
+
+            // this is what we call to cancel the timeout if the request is cancelled or a handler completes
+            _cancelTimeout = new CancellationTokenSource();
+            Task timeoutTask = TaskHelper.Timeout(timeout, _cancelTimeout.Token);
+            timeoutTask.ContinueWith(HandleTimeout, TaskContinuationOptions.NotOnCanceled);
 
             _unsubscribe = SubscribeHandlers(bus);
-
-            if (timeout > TimeSpan.Zero)
-            {
-                TaskHelper.Timeout(timeout, _cancellationTokenSource.Token)
-                    .ContinueWith(HandleTimeout);
-            }
         }
 
         public string RequestId
@@ -61,17 +68,14 @@ namespace MassTransit.RequestResponse
             get { return _requestId; }
         }
 
-        public void Cancel()
-        {
-            _cancellationTokenSource.Cancel();
-            _source.TrySetCanceled();
-
-            Cleanup();
-        }
-
         public TRequest Message
         {
             get { return _message; }
+        }
+
+        public void Cancel()
+        {
+            _cancelRequest.Cancel();
         }
 
         public Task Task
@@ -90,39 +94,56 @@ namespace MassTransit.RequestResponse
             }
 
             throw new ArgumentException("A response handler for the specified type was not found: "
-                + typeof(T).ToShortTypeName());
+                                        + typeof(T).ToShortTypeName());
         }
 
         public Task GetResponseTask(Type responseType)
         {
-            if(_responseHandlers.Has(responseType))
+            if (_responseHandlers.Has(responseType))
                 return _responseHandlers[responseType].Task;
 
-            throw new ArgumentException("A response handler for the specified type was not found: " 
-                + responseType.ToShortTypeName());
+            throw new ArgumentException("A response handler for the specified type was not found: "
+                                        + responseType.ToShortTypeName());
         }
 
-        UnsubscribeAction SubscribeHandlers(IServiceBus bus)
+        void HandleCompletion(Task<TRequest> task)
         {
-            foreach (TaskResponseHandler handler in _responseHandlers)
+            try
             {
-                handler.Task.ContinueWith(_ =>
-                    {
-                        _source.TrySetResult(_message);
-                        Cleanup();
-                    });
+                _cancelTimeout.Cancel();
             }
-
-            return bus.InboundPipeline
-                .Configure(configurator => _responseHandlers.CombineSubscriptions(x => x.Connect(configurator)));
+            finally
+            {
+                Cleanup();
+            }
         }
 
         void HandleTimeout(Task task)
         {
             try
             {
-                if (_timeoutCallback != null)
-                    _timeoutCallback();
+                var exception = new RequestTimeoutException(_requestId);
+                _source.TrySetException(exception);
+
+                if(_timeoutHandler != null)
+                {
+                    _timeoutHandler.HandleTimeout(_message);
+                }
+            }
+            finally
+            {
+                Cleanup();
+            }
+        }
+
+        void HandleCancel()
+        {
+            if (_source.Task.IsCompleted || _source.Task.IsFaulted)
+                return;
+
+            try
+            {
+                _source.TrySetCanceled();
             }
             catch (Exception ex)
             {
@@ -134,8 +155,21 @@ namespace MassTransit.RequestResponse
             }
         }
 
+        UnsubscribeAction SubscribeHandlers(IServiceBus bus)
+        {
+            foreach (TaskResponseHandler handler in _responseHandlers)
+            {
+                handler.Task.ContinueWith(_ => { _source.TrySetResult(_message); });
+            }
+
+            return bus.InboundPipeline
+                .Configure(x => _responseHandlers.CombineSubscriptions(h => h.Connect(x)));
+        }
+
         void Cleanup()
         {
+            _cancelRequestRegistration.Dispose();
+
             _unsubscribe();
             _unsubscribe = () => false;
         }

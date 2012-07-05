@@ -67,6 +67,11 @@ namespace MassTransit.RequestResponse.Configurators
                 x => { return connector.Connect(x, _requestId, HandlerSelector.ForContextHandler(responseHandler)); });
         }
 
+        public void HandleTimeout(TimeSpan timeout, Action<IAsyncRequest<TRequest>> timeoutCallback)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Handle<TResponse>(Action<TResponse> handler)
             where TResponse : class
         {

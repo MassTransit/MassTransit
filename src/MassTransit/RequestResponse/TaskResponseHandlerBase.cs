@@ -48,12 +48,12 @@ namespace MassTransit.RequestResponse
             _context = SynchronizationContext.Current;
         }
 
-        public Type ResponseType
+        Type ResponseHandler.ResponseType
         {
             get { return typeof(TResponse); }
         }
 
-        public Task Task
+        Task TaskResponseHandler.Task
         {
             get { return CompletionSource.Task; }
         }
@@ -63,8 +63,7 @@ namespace MassTransit.RequestResponse
             get { return CompletionSource.Task; }
         }
 
-        public Task<T> GetTask<T>()
-            where T : class
+        Task<T> TaskResponseHandler.GetTask<T>()
         {
             var self = this as TaskResponseHandlerBase<T>;
             if (self == null)

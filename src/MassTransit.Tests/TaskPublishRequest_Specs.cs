@@ -20,7 +20,7 @@ namespace MassTransit.Tests
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using NUnit.Framework;
-    using RequestResponse;
+    using TestFramework;
     using TextFixtures;
 
 #if NET40
@@ -28,6 +28,25 @@ namespace MassTransit.Tests
     public class Publishing_request_using_the_task_parallel_library :
         LoopbackLocalAndRemoteTestFixture
     {
+        [Test]
+        public void Should_call_timeout_callback_if_timeout_occurs()
+        {
+            var continueCalled = new FutureMessage<PingMessage>();
+
+            var ping = new PingMessage();
+            ITaskRequest<PingMessage> request = LocalBus.PublishRequestAsync(ping, x =>
+                {
+                    //
+                    x.HandleTimeout(1.Seconds(), continueCalled.Set);
+                });
+
+            var aggregateException = Assert.Throws<AggregateException>(() => request.Task.Wait(8.Seconds()));
+
+            Assert.IsInstanceOf<RequestTimeoutException>(aggregateException.InnerExceptions.First());
+
+            continueCalled.IsAvailable(8.Seconds()).ShouldBeTrue("The timeout continuation was not called");
+        }
+
         [Test]
         public void Should_complete_all_related_tasks()
         {
@@ -39,7 +58,7 @@ namespace MassTransit.Tests
             var ping = new PingMessage();
             ITaskRequest<PingMessage> request = LocalBus.PublishRequestAsync(ping, x =>
                 {
-                    x.SetTimeout(timeout);
+                    x.SetTimeout(4.Seconds());
 
                     x.Handle<PongMessage>(pongReceived.Set)
                         .ContinueWith(continueCalled.Set);
@@ -49,7 +68,38 @@ namespace MassTransit.Tests
 
             request.Task.Wait(timeout).ShouldBeTrue("Task was not completed");
 
+            request.GetResponseTask<PongMessage>().Wait(timeout).ShouldBeTrue("The response task was not completed");
+
             continueCalled.IsAvailable(timeout).ShouldBeTrue("The continuation was not called");
+        }
+
+        [Test]
+        public void Should_not_complete_timeout_if_handler_completes()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var continueCalled = new FutureMessage<Task<PongMessage>>();
+            var timeoutCalled = new FutureMessage<PingMessage>();
+
+            TimeSpan timeout = 8.Seconds();
+
+            var ping = new PingMessage();
+            ITaskRequest<PingMessage> request = LocalBus.PublishRequestAsync(ping, x =>
+                {
+                    x.HandleTimeout(4.Seconds(), timeoutCalled.Set);
+
+                    x.Handle<PongMessage>(pongReceived.Set)
+                        .ContinueWith(continueCalled.Set);
+                });
+
+            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+
+            request.Task.Wait(timeout).ShouldBeTrue("Task was not completed");
+
+            request.GetResponseTask<PongMessage>().Wait(timeout).ShouldBeTrue("The response task was not completed");
+
+            continueCalled.IsAvailable(timeout).ShouldBeTrue("The continuation was not called");
+
+            timeoutCalled.IsAvailable(2.Seconds()).ShouldBeFalse("The timeout should not have been called");
         }
 
         [Test]
@@ -68,6 +118,8 @@ namespace MassTransit.Tests
         protected override void EstablishContext()
         {
             base.EstablishContext();
+
+            LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
             _pingReceived = new FutureMessage<PingMessage>();
         }

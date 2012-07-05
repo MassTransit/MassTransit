@@ -14,102 +14,67 @@ namespace MassTransit.RequestResponse.Configurators
 {
 #if NET40
     using System;
-    using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
-    using Exceptions;
-    using Magnum.Caching;
-    using Magnum.Extensions;
 
     public class TaskRequestConfiguratorImpl<TRequest> :
+        RequestConfiguratorBase<TRequest>,
         TaskRequestConfigurator<TRequest>
         where TRequest : class
     {
-        readonly IList<Action<ISendContext<TRequest>>> _contextActions;
-        readonly Cache<Type, TaskResponseHandler> _handlers;
-        readonly TRequest _message;
-        readonly string _requestId;
         TimeSpan _timeout;
-        Action _timeoutCallback;
+        TimeoutHandler<TRequest> _timeoutHandler;
 
         public TaskRequestConfiguratorImpl(TRequest message)
+            : base(message)
         {
-            _message = message;
-            _requestId = NewId.NextGuid().ToString();
-
-            _timeout = TimeSpan.Zero;
-
-            _contextActions = new List<Action<ISendContext<TRequest>>>();
-            _handlers = new DictionaryCache<Type, TaskResponseHandler>();
-        }
-
-        public string RequestId
-        {
-            get { return _requestId; }
-        }
-
-        public void HandleTimeout(TimeSpan timeout, Action timeoutCallback)
-        {
-            _timeout = timeout;
-            _timeoutCallback = timeoutCallback;
         }
 
         public void SetTimeout(TimeSpan timeout)
         {
             _timeout = timeout;
-            _timeoutCallback = () => { throw new RequestTimeoutException(_requestId); };
         }
 
-        public void SetRequestExpiration(TimeSpan expiration)
+        public void HandleTimeout(TimeSpan timeout, Action<TRequest> timeoutCallback)
         {
-            _contextActions.Add(x => x.ExpiresIn(expiration));
+            _timeout = timeout;
+            _timeoutHandler = new TimeoutHandler<TRequest>(timeoutCallback);
         }
 
-        public TRequest Request
+        public Task<T> Handle<T>(Action<T> handler)
+            where T : class
         {
-            get { return _message; }
+            TaskResponseHandler<T> responseHandler = AddHandler(typeof(T),
+                () => new CompleteTaskResponseHandler<T>(RequestId, handler));
+
+            return responseHandler.Task;
         }
 
-        public Task<TResponse> Handle<TResponse>(Action<TResponse> handler)
-            where TResponse : class
+        public Task<T> Handle<T>(Action<IConsumeContext<T>, T> handler)
+            where T : class
         {
-            return AddHandler(() => new CompleteTaskResponseHandler<TResponse>(_requestId, handler));
-        }
+            TaskResponseHandler<T> responseHandler = AddHandler(typeof(T),
+                () => new CompleteTaskResponseHandler<T>(RequestId, handler));
 
-        public Task<TResponse> Handle<TResponse>(Action<IConsumeContext<TResponse>, TResponse> handler)
-            where TResponse : class
-        {
-            return AddHandler(() => new CompleteTaskResponseHandler<TResponse>(_requestId, handler));
+            return responseHandler.Task;
         }
 
         public void Watch<T>(Action<T> watcher)
             where T : class
         {
-            AddHandler(() => new WatchTaskResponseHandler<T>(_requestId, watcher));
+            AddHandler(typeof(T), () => new WatchTaskResponseHandler<T>(RequestId, watcher));
         }
 
         public void Watch<T>(Action<IConsumeContext<T>, T> watcher)
             where T : class
         {
-            AddHandler(() => new WatchTaskResponseHandler<T>(_requestId, watcher));
-        }
-
-        Task<TResponse> AddHandler<TResponse>(Func<TaskResponseHandlerBase<TResponse>> responseHandlerFactory)
-            where TResponse : class
-        {
-            if (_handlers.Has(typeof(TResponse)))
-                throw new ArgumentException("A response handler for {0} has already been declared."
-                    .FormatWith(typeof(TResponse).ToShortTypeName()));
-
-            TaskResponseHandler<TResponse> responseHandler = responseHandlerFactory();
-
-            _handlers.Add(typeof(TResponse), responseHandler);
-
-            return responseHandler.Task;
+            AddHandler(typeof(T), () => new WatchTaskResponseHandler<T>(RequestId, watcher));
         }
 
         public ITaskRequest<TRequest> Create(IServiceBus bus)
         {
-            var request = new TaskRequest<TRequest>(_requestId, _message, _timeout, _timeoutCallback, bus, _handlers);
+            var request = new TaskRequest<TRequest>(RequestId, Request, _timeout, _timeoutHandler,
+                CancellationToken.None, bus, Handlers);
 
             return request;
         }
