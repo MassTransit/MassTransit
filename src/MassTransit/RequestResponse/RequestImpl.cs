@@ -43,11 +43,6 @@ namespace MassTransit.RequestResponse
             _requestId = requestId;
             _message = message;
             _completionCallbacks = new List<AsyncCallback>();
-            _timeoutHandler = new TimeoutHandler<TRequest>(x =>
-                {
-                    //
-                    _exception = new RequestTimeoutException(_requestId);
-                });
         }
 
         ManualResetEvent CompleteEvent
@@ -113,7 +108,12 @@ namespace MassTransit.RequestResponse
             if (!result)
             {
                 lock (_completionCallbacks)
-                    _completionCallbacks.Add(asyncResult => _timeoutHandler.HandleTimeout(_message));
+                {
+                    if (_timeoutHandler != null)
+                        _completionCallbacks.Add(asyncResult => _timeoutHandler.HandleTimeout(_message));
+                    else
+                        _exception = new RequestTimeoutException(_requestId);
+                }
 
                 NotifyComplete();
             }
@@ -142,7 +142,12 @@ namespace MassTransit.RequestResponse
                     if (timeoutExpired)
                     {
                         lock (_completionCallbacks)
-                            _completionCallbacks.Add(asyncResult => _timeoutHandler.HandleTimeout(_message));
+                        {
+                            if (_timeoutHandler != null)
+                                _completionCallbacks.Add(asyncResult => _timeoutHandler.HandleTimeout(_message));
+                            else
+                                _exception = new RequestTimeoutException(_requestId);
+                        }
 
                         NotifyComplete();
                     }
