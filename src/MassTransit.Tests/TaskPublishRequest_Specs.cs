@@ -29,6 +29,21 @@ namespace MassTransit.Tests
         LoopbackLocalAndRemoteTestFixture
     {
         [Test]
+        public void Should_call_timeout_callback_if_timeout_occurs()
+        {
+            var ping = new PingMessage();
+            ITaskRequest<PingMessage> request = LocalBus.PublishRequestAsync(ping, x =>
+                {
+                    //
+                    x.SetTimeout(1.Seconds());
+                });
+
+            var aggregateException = Assert.Throws<AggregateException>(() => request.Task.Wait(8.Seconds()));
+
+            Assert.IsInstanceOf<RequestTimeoutException>(aggregateException.InnerExceptions.First());
+        }
+
+        [Test]
         public void Should_call_timeout_callback_if_timeout_occurs_and_not_fault()
         {
             var continueCalled = new FutureMessage<PingMessage>();
@@ -43,21 +58,6 @@ namespace MassTransit.Tests
             request.Task.Wait(8.Seconds()).ShouldBeTrue("Should have completed successfully");
 
             continueCalled.IsAvailable(8.Seconds()).ShouldBeTrue("The timeout continuation was not called");
-        }
-
-        [Test]
-        public void Should_call_timeout_callback_if_timeout_occurs()
-        {
-            var ping = new PingMessage();
-            ITaskRequest<PingMessage> request = LocalBus.PublishRequestAsync(ping, x =>
-                {
-                    //
-                    x.SetTimeout(1.Seconds());
-                });
-
-            var aggregateException = Assert.Throws<AggregateException>(() => request.Task.Wait(8.Seconds()));
-
-            Assert.IsInstanceOf<RequestTimeoutException>(aggregateException.InnerExceptions.First());
         }
 
         [Test]
@@ -149,6 +149,58 @@ namespace MassTransit.Tests
                             context.Respond(new PongMessage {TransactionId = message.TransactionId});
                         });
                 });
+        }
+
+        class PingMessage
+        {
+            public Guid TransactionId { get; set; }
+        }
+
+        class PongMessage
+        {
+            public Guid TransactionId { get; set; }
+        }
+    }
+
+    [TestFixture]
+    public class With_no_message_being_handled :
+        LoopbackTestFixture
+    {
+        [Test]
+        public void Should_call_timeout_callback_if_timeout_occurs()
+        {
+            var pongCompleted = new FutureMessage<PongMessage>();
+            var pongCancelled = new FutureMessage<bool>();
+
+            Task<PongMessage> pongTask;
+
+            var ping = new PingMessage();
+            ITaskRequest<PingMessage> request = LocalBus.PublishRequestAsync(ping, x =>
+                {
+                    x.SetTimeout(1.Seconds());
+
+                    pongTask = x.Handle<PongMessage>(message => { });
+                    pongTask.ContinueWith(t => pongCompleted.Set(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion);
+                    pongTask.ContinueWith((Task t) => pongCancelled.Set(t.IsCanceled), TaskContinuationOptions.OnlyOnCanceled);
+                });
+
+            var aggregateException = Assert.Throws<AggregateException>(() => request.Task.Wait(8.Seconds()));
+
+            Assert.IsInstanceOf<RequestTimeoutException>(aggregateException.InnerExceptions.First());
+
+            pongCompleted.IsAvailable(1.Seconds()).ShouldBeFalse("We only asked to be notified on success");
+            
+            pongCancelled.IsAvailable(1.Seconds()).ShouldBeTrue("We like to know we were cancelled due to timeout");
+
+        }
+
+        FutureMessage<PingMessage> _pingReceived;
+
+        protected override void EstablishContext()
+        {
+            base.EstablishContext();
+
+            _pingReceived = new FutureMessage<PingMessage>();
         }
 
         class PingMessage
