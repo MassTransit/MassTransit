@@ -135,10 +135,20 @@ namespace MassTransit.RequestResponse
                     var exception = new RequestTimeoutException(_requestId);
                     _source.TrySetException(exception);
                 }
+
+                NotifyHandlersOfTimeout();
             }
             finally
             {
                 Cleanup();
+            }
+        }
+
+        void NotifyHandlersOfTimeout()
+        {
+            foreach (TaskResponseHandler handler in _responseHandlers)
+            {
+                handler.HandleTimeout();
             }
         }
 

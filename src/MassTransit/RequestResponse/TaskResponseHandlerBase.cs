@@ -53,6 +53,11 @@ namespace MassTransit.RequestResponse
 
             return self.CompletionSource.Task;
         }
+
+        public void HandleTimeout()
+        {
+            CompletionSource.TrySetCanceled();
+        }
     }
 #endif
 }

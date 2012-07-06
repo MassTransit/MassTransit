@@ -31,6 +31,11 @@ namespace MassTransit.RequestResponse
         /// </summary>
         Task<T> GetTask<T>()
             where T : class;
+
+        /// <summary>
+        /// Notifies the handler that the request has timed out.
+        /// </summary>
+        void HandleTimeout();
     }
 
     public interface TaskResponseHandler<T> :
