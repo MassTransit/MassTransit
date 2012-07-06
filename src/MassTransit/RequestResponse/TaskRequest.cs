@@ -125,12 +125,15 @@ namespace MassTransit.RequestResponse
         {
             try
             {
-                var exception = new RequestTimeoutException(_requestId);
-                _source.TrySetException(exception);
-
                 if(_timeoutHandler != null)
                 {
                     _timeoutHandler.HandleTimeout(_message);
+                    _source.TrySetResult(_message);
+                }
+                else
+                {
+                    var exception = new RequestTimeoutException(_requestId);
+                    _source.TrySetException(exception);
                 }
             }
             finally

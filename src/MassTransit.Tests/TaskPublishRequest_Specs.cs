@@ -29,7 +29,7 @@ namespace MassTransit.Tests
         LoopbackLocalAndRemoteTestFixture
     {
         [Test]
-        public void Should_call_timeout_callback_if_timeout_occurs()
+        public void Should_call_timeout_callback_if_timeout_occurs_and_not_fault()
         {
             var continueCalled = new FutureMessage<PingMessage>();
 
@@ -40,11 +40,24 @@ namespace MassTransit.Tests
                     x.HandleTimeout(1.Seconds(), continueCalled.Set);
                 });
 
+            request.Task.Wait(8.Seconds()).ShouldBeTrue("Should have completed successfully");
+
+            continueCalled.IsAvailable(8.Seconds()).ShouldBeTrue("The timeout continuation was not called");
+        }
+
+        [Test]
+        public void Should_call_timeout_callback_if_timeout_occurs()
+        {
+            var ping = new PingMessage();
+            ITaskRequest<PingMessage> request = LocalBus.PublishRequestAsync(ping, x =>
+                {
+                    //
+                    x.SetTimeout(1.Seconds());
+                });
+
             var aggregateException = Assert.Throws<AggregateException>(() => request.Task.Wait(8.Seconds()));
 
             Assert.IsInstanceOf<RequestTimeoutException>(aggregateException.InnerExceptions.First());
-
-            continueCalled.IsAvailable(8.Seconds()).ShouldBeTrue("The timeout continuation was not called");
         }
 
         [Test]
