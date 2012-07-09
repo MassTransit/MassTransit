@@ -26,7 +26,9 @@ namespace MassTransit.Tests.Configuration
 		public void Configuring_an_endpoint_serializer()
 		{
 			_endpointCache = EndpointCacheFactory.New(x =>
-				{
+			    {
+			        x.SetDefaultRetryLimit(5);
+			        x.SetDefaultInboundMessageTrackerFactory(retryLimit => new InMemoryInboundMessageTracker(retryLimit));
 					x.AddTransportFactory<LoopbackTransportFactory>();
 					x.ConfigureEndpoint("loopback://localhost/mt_client", y =>
 						{

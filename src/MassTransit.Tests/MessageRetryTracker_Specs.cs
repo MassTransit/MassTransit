@@ -24,7 +24,7 @@ namespace MassTransit.Tests
         {
             const int retryLimit = 5;
 
-            var tracker = new MessageRetryTracker(retryLimit);
+            var tracker = new InMemoryInboundMessageTracker(retryLimit);
             const string id = "qelofjsw";
 
             Exception ex;
@@ -42,7 +42,7 @@ namespace MassTransit.Tests
         {
             const int retryLimit = 5;
 
-            var tracker = new MessageRetryTracker(retryLimit);
+            var tracker = new InMemoryInboundMessageTracker(retryLimit);
             const string id = "qelofjsw";
 
             Exception ex;
