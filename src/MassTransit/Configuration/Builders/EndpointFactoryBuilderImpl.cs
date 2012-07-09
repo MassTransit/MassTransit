@@ -63,7 +63,17 @@ namespace MassTransit.Builders
 			_defaults.IsolationLevel = isolationLevel;
 		}
 
-		public void SetCreateMissingQueues(bool createMissingQueues)
+	    public void SetDefaultRetryLimit(int retryLimit)
+	    {
+	        _defaults.RetryLimit = retryLimit;
+	    }
+
+	    public void SetDefaultInboundMessageTrackerFactory(MessageTrackerFactory messageTrackerFactory)
+	    {
+	        _defaults.TrackerFactory = messageTrackerFactory;
+	    }
+
+	    public void SetCreateMissingQueues(bool createMissingQueues)
 		{
 			_defaults.CreateMissingQueues = createMissingQueues;
 		}

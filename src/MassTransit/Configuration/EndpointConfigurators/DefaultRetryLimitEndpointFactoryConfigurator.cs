@@ -12,37 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.EndpointConfigurators
 {
-    using System;
     using System.Collections.Generic;
     using Builders;
     using Configurators;
-    using Exceptions;
-    using Serialization;
 
-    public class DefaultSerializerEndpointFactoryConfigurator :
+    public class DefaultRetryLimitEndpointFactoryConfigurator :
         EndpointFactoryBuilderConfigurator
     {
-        readonly Func<IMessageSerializer> _serializerFactory;
+        readonly int _retryLimit;
 
-        public DefaultSerializerEndpointFactoryConfigurator(Func<IMessageSerializer> serializerFactory)
+        public DefaultRetryLimitEndpointFactoryConfigurator(int retryLimit)
         {
-            _serializerFactory = serializerFactory;
+            _retryLimit = retryLimit;
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_serializerFactory == null)
-                yield return this.Failure("DefaultSerializer",
-                    "was not configured (it was null). The factory method should have been specified.");
+            if (_retryLimit < 0)
+                yield return this.Failure("RetryLimit",
+                    "must be >= 0.");
         }
 
         public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
         {
-            IMessageSerializer serializer = _serializerFactory();
-            if (serializer == null)
-                throw new ConfigurationException("The configured default serializer was not created");
-
-            builder.SetDefaultSerializer(serializer);
+            builder.SetDefaultRetryLimit(_retryLimit);
 
             return builder;
         }

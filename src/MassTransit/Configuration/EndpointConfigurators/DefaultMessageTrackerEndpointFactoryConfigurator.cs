@@ -12,37 +12,31 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.EndpointConfigurators
 {
-    using System;
     using System.Collections.Generic;
     using Builders;
     using Configurators;
-    using Exceptions;
-    using Serialization;
+    using Transports;
 
-    public class DefaultSerializerEndpointFactoryConfigurator :
+    public class DefaultMessageTrackerEndpointFactoryConfigurator :
         EndpointFactoryBuilderConfigurator
     {
-        readonly Func<IMessageSerializer> _serializerFactory;
+        readonly MessageTrackerFactory _messageTrackerFactory;
 
-        public DefaultSerializerEndpointFactoryConfigurator(Func<IMessageSerializer> serializerFactory)
+        public DefaultMessageTrackerEndpointFactoryConfigurator(MessageTrackerFactory messageTrackerFactory)
         {
-            _serializerFactory = serializerFactory;
+            _messageTrackerFactory = messageTrackerFactory;
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_serializerFactory == null)
-                yield return this.Failure("DefaultSerializer",
+            if (_messageTrackerFactory == null)
+                yield return this.Failure("MessageTrackerFactory",
                     "was not configured (it was null). The factory method should have been specified.");
         }
 
         public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
         {
-            IMessageSerializer serializer = _serializerFactory();
-            if (serializer == null)
-                throw new ConfigurationException("The configured default serializer was not created");
-
-            builder.SetDefaultSerializer(serializer);
+            builder.SetDefaultInboundMessageTrackerFactory(_messageTrackerFactory);
 
             return builder;
         }

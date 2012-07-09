@@ -13,16 +13,16 @@
 namespace MassTransit.Transports
 {
     using System;
-    using System.Threading;
     using Magnum.Caching;
 
-    public class MessageRetryTracker
+    public class InMemoryInboundMessageTracker : 
+        IInboundMessageTracker
     {
         readonly Cache<string, TrackedMessage> _messages;
 
         readonly int _retryLimit;
 
-        public MessageRetryTracker(int retryLimit)
+        public InMemoryInboundMessageTracker(int retryLimit)
         {
             _retryLimit = retryLimit;
 
@@ -47,15 +47,23 @@ namespace MassTransit.Transports
             return exceeded;
         }
 
-        public void IncrementRetryCount(string id, Exception ex)
+        public void IncrementRetryCount(string id, Exception exception)
         {
             if (string.IsNullOrEmpty(id))
                 return;
 
-            _messages[id].Increment(ex);
+            _messages[id].Increment(exception);
         }
 
         public void MessageWasReceivedSuccessfully(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return;
+
+            _messages.Remove(id);
+        }
+
+        public void MessageWasMovedToErrorQueue(string id)
         {
             if (string.IsNullOrEmpty(id))
                 return;

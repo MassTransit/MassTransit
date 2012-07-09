@@ -31,6 +31,13 @@ namespace MassTransit.EndpointConfigurators
             Serializer = new XmlMessageSerializer();
             TransactionTimeout = 30.Seconds();
             IsolationLevel = IsolationLevel.Serializable;
+            RetryLimit = 5;
+            TrackerFactory = DefaultTrackerFactory;
+        }
+
+        static IInboundMessageTracker DefaultTrackerFactory(int retryLimit)
+        {
+            return new InMemoryInboundMessageTracker(retryLimit);
         }
 
         public EndpointFactoryDefaultSettings([NotNull] IEndpointFactoryDefaultSettings defaults)
@@ -45,11 +52,15 @@ namespace MassTransit.EndpointConfigurators
             RequireTransactional = defaults.RequireTransactional;
             Serializer = defaults.Serializer;
             TransactionTimeout = defaults.TransactionTimeout;
+            RetryLimit = defaults.RetryLimit;
+            TrackerFactory = defaults.TrackerFactory;
         }
 
         public bool CreateMissingQueues { get; set; }
         public bool CreateTransactionalQueues { get; set; }
         public IsolationLevel IsolationLevel { get; set; }
+        public int RetryLimit { get; set; }
+        public MessageTrackerFactory TrackerFactory { get; set; }
         public IMessageSerializer Serializer { get; set; }
         public bool PurgeOnStartup { get; set; }
         public bool RequireTransactional { get; set; }
@@ -66,6 +77,8 @@ namespace MassTransit.EndpointConfigurators
                     RequireTransactional = RequireTransactional,
                     IsolationLevel = IsolationLevel,
                     Transactional = CreateTransactionalQueues,
+                    RetryLimit = RetryLimit,
+                    TrackerFactory = TrackerFactory
                 };
 
             return settings;

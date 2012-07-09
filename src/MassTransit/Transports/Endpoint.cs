@@ -1,18 +1,15 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
-using MassTransit.Util;
-
 namespace MassTransit.Transports
 {
     using System;
@@ -23,6 +20,7 @@ namespace MassTransit.Transports
     using Logging;
     using Magnum.Reflection;
     using Serialization;
+    using Util;
 
     /// <summary>
     /// See <see cref="IEndpoint"/> for docs.
@@ -31,10 +29,10 @@ namespace MassTransit.Transports
     public class Endpoint :
         IEndpoint
     {
-        static readonly ILog _log = Logger.Get(typeof (Endpoint));
+        static readonly ILog _log = Logger.Get(typeof(Endpoint));
         readonly IEndpointAddress _address;
         readonly IMessageSerializer _serializer;
-        readonly MessageRetryTracker _tracker;
+        readonly IInboundMessageTracker _tracker;
         bool _disposed;
         string _disposedMessage;
         IOutboundTransport _errorTransport;
@@ -43,20 +41,27 @@ namespace MassTransit.Transports
         public Endpoint([NotNull] IEndpointAddress address,
             [NotNull] IMessageSerializer serializer,
             [NotNull] IDuplexTransport transport,
-            [NotNull] IOutboundTransport errorTransport)
+            [NotNull] IOutboundTransport errorTransport,
+            [NotNull] IInboundMessageTracker messageTracker)
         {
-            if (address == null) throw new ArgumentNullException("address");
-            if (serializer == null) throw new ArgumentNullException("serializer");
-            if (transport == null) throw new ArgumentNullException("transport");
-            if (errorTransport == null) throw new ArgumentNullException("errorTransport");
+            if (address == null)
+                throw new ArgumentNullException("address");
+            if (serializer == null)
+                throw new ArgumentNullException("serializer");
+            if (transport == null)
+                throw new ArgumentNullException("transport");
+            if (errorTransport == null)
+                throw new ArgumentNullException("errorTransport");
+            if (messageTracker == null)
+                throw new ArgumentNullException("messageTracker");
+
             _address = address;
-            _transport = transport;
             _errorTransport = errorTransport;
             _serializer = serializer;
+            _tracker = messageTracker;
+            _transport = transport;
 
-            _tracker = new MessageRetryTracker(5);
-
-            SetDisposedMessage();
+            _disposedMessage = string.Format("The endpoint has already been disposed: {0}", _address);
         }
 
         public IOutboundTransport ErrorTransport
@@ -101,7 +106,7 @@ namespace MassTransit.Transports
             }
             catch (Exception ex)
             {
-                throw new SendException(typeof (T), _address.Uri, "An exception was thrown during Send", ex);
+                throw new SendException(typeof(T), _address.Uri, "An exception was thrown during Send", ex);
             }
         }
 
@@ -277,14 +282,13 @@ namespace MassTransit.Transports
                                 {
                                     receive(receiveContext);
 
-                                    //                                    _tracker.MessageWasReceivedSuccessfully(receiveContext.MessageId);
                                     receivedSuccessfully = true;
                                 }
                                 catch (MessageNotConsumedException ex)
                                 {
                                     receivedSuccessfully = false;
 
-                                    _tracker.MessageWasReceivedSuccessfully(receiveContext.MessageId);
+                                    _tracker.MessageWasMovedToErrorQueue(receiveContext.MessageId);
                                     MoveMessageToErrorTransport(receiveContext);
                                 }
                                 catch (Exception ex)
@@ -335,14 +339,10 @@ namespace MassTransit.Transports
             }
         }
 
-        void SetDisposedMessage()
-        {
-            _disposedMessage = "The endpoint has already been disposed: " + _address;
-        }
-
         void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+                return;
             if (disposing)
             {
                 _transport.Dispose();

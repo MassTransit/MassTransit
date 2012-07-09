@@ -1,160 +1,167 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
-
 namespace MassTransit.EndpointConfigurators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Transactions;
-	using Builders;
-	using Util;
-	using Configurators;
-	using Magnum.Extensions;
-	using Serialization;
-	using Transports;
+    using System;
+    using System.Collections.Generic;
+    using System.Transactions;
+    using Builders;
+    using Configurators;
+    using Magnum.Extensions;
+    using Serialization;
+    using Transports;
+    using Util;
 
-	public class EndpointConfiguratorImpl :
-		EndpointConfigurator,
-		EndpointFactoryBuilderConfigurator
-	{
-		readonly EndpointSettings _settings;
-		readonly Uri _uri;
-		IEndpointAddress _errorAddress;
-		Func<ITransportFactory, ITransportSettings, IOutboundTransport> _errorTransportFactory;
-		Func<ITransportFactory, ITransportSettings, IDuplexTransport> _transportFactory;
+    public class EndpointConfiguratorImpl :
+        EndpointConfigurator,
+        EndpointFactoryBuilderConfigurator
+    {
+        readonly EndpointSettings _settings;
+        readonly Uri _uri;
+        IEndpointAddress _errorAddress;
+        OutboundTransportFactory _errorTransportFactory;
+        DuplexTransportFactory _transportFactory;
 
-		public EndpointConfiguratorImpl([NotNull] Uri uri,
-			[NotNull] IEndpointFactoryDefaultSettings defaultSettings)
-		{
-			if (uri == null) throw new ArgumentNullException("uri");
-			if (defaultSettings == null) throw new ArgumentNullException("defaultSettings");
+        public EndpointConfiguratorImpl([NotNull] Uri uri,
+            [NotNull] IEndpointFactoryDefaultSettings defaultSettings)
+        {
+            if (uri == null)
+                throw new ArgumentNullException("uri");
+            if (defaultSettings == null)
+                throw new ArgumentNullException("defaultSettings");
 
-			_uri = uri;
+            _uri = uri;
 
-			_transportFactory = DefaultTransportFactory;
-			_errorTransportFactory = DefaultErrorTransportFactory;
+            _transportFactory = DefaultTransportFactory;
+            _errorTransportFactory = DefaultErrorTransportFactory;
 
-			_settings = defaultSettings.CreateEndpointSettings(uri);
-		}
+            _settings = defaultSettings.CreateEndpointSettings(uri);
+        }
 
-		public EndpointConfigurator UseSerializer(IMessageSerializer serializer)
-		{
-			_settings.Serializer = serializer;
-			return this;
-		}
+        public EndpointConfigurator UseSerializer(IMessageSerializer serializer)
+        {
+            _settings.Serializer = serializer;
+            return this;
+        }
 
-		public EndpointConfigurator SetErrorAddress(Uri uri)
-		{
-			_errorAddress = new EndpointAddress(uri);
-			return this;
-		}
+        public EndpointConfigurator SetErrorAddress(Uri uri)
+        {
+            _errorAddress = new EndpointAddress(uri);
+            return this;
+        }
 
-		public EndpointConfigurator SetTransportFactory(
-			Func<ITransportFactory, ITransportSettings, IDuplexTransport> transportFactory)
-		{
-			_transportFactory = transportFactory;
-			return this;
-		}
+        public EndpointConfigurator PurgeExistingMessages()
+        {
+            _settings.PurgeExistingMessages = true;
+            return this;
+        }
 
-		public EndpointConfigurator SetErrorTransportFactory(
-			Func<ITransportFactory, ITransportSettings, IOutboundTransport> errorTransportFactory)
-		{
-			_errorTransportFactory = errorTransportFactory;
-			return this;
-		}
+        public EndpointConfigurator SetInboundMessageTrackerFactory(MessageTrackerFactory messageTrackerFactory)
+        {
+            _settings.TrackerFactory = messageTrackerFactory;
+            return this;
+        }
 
-		public EndpointConfigurator PurgeExistingMessages()
-		{
-			_settings.PurgeExistingMessages = true;
+        public EndpointConfigurator SetTransactionTimeout(TimeSpan timeout)
+        {
+            _settings.TransactionTimeout = timeout;
+            return this;
+        }
 
-			return this;
-		}
+        public EndpointConfigurator SetIsolationLevel(IsolationLevel isolationLevel)
+        {
+            _settings.IsolationLevel = isolationLevel;
+            return this;
+        }
 
-		public EndpointConfigurator SetTransactionTimeout(TimeSpan timeout)
-		{
-			_settings.TransactionTimeout = timeout;
+        public EndpointConfigurator CreateTransactional()
+        {
+            _settings.Transactional = true;
+            return this;
+        }
 
-			return this;
-		}
+        public EndpointConfigurator CreateIfMissing()
+        {
+            _settings.CreateIfMissing = true;
+            return this;
+        }
 
-		public EndpointConfigurator SetIsolationLevel(IsolationLevel isolationLevel)
-		{
-			_settings.IsolationLevel = isolationLevel;
+        public EndpointConfigurator SetMessageRetryLimit(int retryLimit)
+        {
+            _settings.RetryLimit = retryLimit;
+            return this;
+        }
 
-			return this;
-		}
+        public EndpointConfigurator SetTransportFactory(DuplexTransportFactory transportFactory)
+        {
+            _transportFactory = transportFactory;
+            return this;
+        }
 
-		public EndpointConfigurator CreateTransactional()
-		{
-			_settings.Transactional = true;
+        public EndpointConfigurator SetErrorTransportFactory(OutboundTransportFactory errorTransportFactory)
+        {
+            _errorTransportFactory = errorTransportFactory;
+            return this;
+        }
 
-			return this;
-		}
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (_errorAddress != null)
+            {
+                if (string.Compare(_errorAddress.Uri.Scheme, _settings.Address.Uri.Scheme,
+                    StringComparison.InvariantCultureIgnoreCase) != 0)
+                    yield return this.Failure("ErrorAddress", _errorAddress.ToString(),
+                        "The error address ('{0}') must use the same scheme as the endpoint address ('{1}')"
+                            .FormatWith(_errorAddress.Uri, _settings.Address.Uri.Scheme));
+                else
+                    yield return this.Success("ErrorAddress", "Using specified error address: " + _errorAddress);
+            }
 
-		public EndpointConfigurator CreateIfMissing()
-		{
-			_settings.CreateIfMissing = true;
+            if (_transportFactory == null)
+                yield return this.Failure("TransportFactory", "The transport factory method is null");
 
-			return this;
-		}
+            if (_errorTransportFactory == null)
+                yield return this.Failure("ErrorTransportFactory", "The error transport factory method is null");
+        }
 
-		public IEnumerable<ValidationResult> Validate()
-		{
-			if (_errorAddress != null)
-			{
-				if (string.Compare(_errorAddress.Uri.Scheme, _settings.Address.Uri.Scheme, StringComparison.InvariantCultureIgnoreCase) != 0)
-					yield return this.Failure("ErrorAddress", _errorAddress.ToString(),
-						"The error address ('{0}') must use the same scheme as the endpoint address ('{1}')"
-							.FormatWith(_errorAddress.Uri, _settings.Address.Uri.Scheme));
-				else
-					yield return this.Success("ErrorAddress", "Using specified error address: " + _errorAddress);
-			}
+        public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
+        {
+            EndpointBuilder endpointBuilder = CreateBuilder();
 
-			if (_transportFactory == null)
-				yield return this.Failure("TransportFactory", "The transport factory method is null");
+            builder.AddEndpointBuilder(_uri, endpointBuilder);
 
-			if (_errorTransportFactory == null)
-				yield return this.Failure("ErrorTransportFactory", "The error transport factory method is null");
-		}
+            return builder;
+        }
 
-		public EndpointFactoryBuilder Configure(EndpointFactoryBuilder builder)
-		{
-			EndpointBuilder endpointBuilder = CreateBuilder();
+        public EndpointBuilder CreateBuilder()
+        {
+            ITransportSettings errorSettings = new TransportSettings(_errorAddress ?? _settings.ErrorAddress, _settings);
 
-			builder.AddEndpointBuilder(_uri, endpointBuilder);
+            var endpointBuilder = new EndpointBuilderImpl(_uri, _settings, errorSettings, _transportFactory,
+                _errorTransportFactory, () => _settings.TrackerFactory(_settings.RetryLimit));
 
-			return builder;
-		}
+            return endpointBuilder;
+        }
 
-		public EndpointBuilder CreateBuilder()
-		{
-			ITransportSettings errorSettings = new TransportSettings(_errorAddress ?? _settings.ErrorAddress, _settings);
+        static IDuplexTransport DefaultTransportFactory(ITransportFactory transportFactory, ITransportSettings settings)
+        {
+            return transportFactory.BuildLoopback(settings);
+        }
 
-			var endpointBuilder = new EndpointBuilderImpl(_uri, _settings, errorSettings, _transportFactory,
-				_errorTransportFactory);
-
-			return endpointBuilder;
-		}
-
-		static IDuplexTransport DefaultTransportFactory(ITransportFactory transportFactory, ITransportSettings settings)
-		{
-			return transportFactory.BuildLoopback(settings);
-		}
-
-		static IOutboundTransport DefaultErrorTransportFactory(ITransportFactory transportFactory, ITransportSettings settings)
-		{
-			return transportFactory.BuildError(settings);
-		}
-	}
+        static IOutboundTransport DefaultErrorTransportFactory(ITransportFactory transportFactory,
+            ITransportSettings settings)
+        {
+            return transportFactory.BuildError(settings);
+        }
+    }
 }
