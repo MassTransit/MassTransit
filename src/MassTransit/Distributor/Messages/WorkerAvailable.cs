@@ -19,6 +19,7 @@ namespace MassTransit.Distributor.Messages
     /// Published by workers that can process a message of type T
     /// </summary>
     /// <typeparam name="T">The type of message that can be processed.</typeparam>
+	[Serializable]
     public class WorkerAvailable<T> :
         Workload<T>,
         IWorkerAvailable
