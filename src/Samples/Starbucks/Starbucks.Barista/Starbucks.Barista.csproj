@@ -67,10 +67,10 @@
       <HintPath>..\..\..\..\lib\Castle.Windsor\net40\Castle.Windsor.dll</HintPath>
     </Reference>
     <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\..\..\lib\log4net\1.2.11\net35-full\log4net.dll</HintPath>
+      <HintPath>..\..\..\..\lib\log4net\net35-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\..\..\lib\log4net\1.2.11\net40-full\log4net.dll</HintPath>
+      <HintPath>..\..\..\..\lib\log4net\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
@@ -84,9 +84,11 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Topshelf, Version=1.0.0.141, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Topshelf" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\..\..\lib\Topshelf\net-3.5\Topshelf.dll</HintPath>
+    </Reference>
+    <Reference Include="Topshelf" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\..\..\..\lib\Topshelf\net-4.0\Topshelf.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

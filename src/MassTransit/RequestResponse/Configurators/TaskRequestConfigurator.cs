@@ -43,26 +43,6 @@ namespace MassTransit.RequestResponse.Configurators
         /// <param name="handler">The handler to call with the response message</param>
         Task<T> Handle<T>(Action<IConsumeContext<T>, T> handler)
             where T : class;
-
-        /// <summary>
-        /// Configures a watcher to be called when a specified type is received. Messages
-        /// received do not complete the request, but are merely observed while the request
-        /// is pending.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="watcher"></param>
-        void Watch<T>(Action<T> watcher)
-            where T : class;
-
-        /// <summary>
-        /// Configures a watcher to be called when a specified type is received. Messages
-        /// received do not complete the request, but are merely observed while the request
-        /// is pending.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="watcher"></param>
-        void Watch<T>(Action<IConsumeContext<T>, T> watcher)
-            where T : class;
     }
 #endif
 }
