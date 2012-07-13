@@ -83,6 +83,5 @@ namespace MassTransit.RequestResponse.Configurators
         /// <param name="watcher"></param>
         void Watch<T>(Action<IConsumeContext<T>, T> watcher)
             where T : class;
-
     }
 }
