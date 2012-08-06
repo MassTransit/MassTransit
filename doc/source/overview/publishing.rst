@@ -8,26 +8,58 @@ enter into the outbound pipeline to be sent to the actual transport. Once they
 hit the transport, the messages leave your .Net process and enter the process
 of the transport infrastructure.
 
-It should be noted that MassTransit prefers a dynamic routing approach. This 
-means that when you call ``Subscribe`` methonds, this information will get
-routed to all of the nodes on the network immediately. There is nothing to configure
-other than your choice of routing provider, which is usually tied to the transport
-choice at the moment.
+.. note::
 
-We do realize that some prefer a more static approach to this process, so there
-is an extension to the system to allow this called static routing. You will HAVE
-to manually set up all subscriptions on ALL endpoints for this to work. Its a lot
-of manual monkey work in my opinion, but a scalpel you shall have.
+	Transports that are currently supported are MSMQ and RabbitMQ. There are
+	also community contributed ActiveMQ and Azure Service Bus transports.
+	Finally there is a non-production In-Memory Loopback which we use for 
+	testing. 
 
-MSMQ Runtime Services & Multicast
----------------------------------
+MassTransit prefers a dynamic routing model, we do not enforce a static routing
+model, however it can be achieved with the 'static routing bits'. What this 
+means is that when you call the ``Subscribe`` methonds, MassTransit is going to
+setup the necessary routing for you. 
 
-The message is routed through an internal construct called the `Outbound Pipeline`
-the pipeline is a tree-like structure with one input point and many output
-points. When a message comes in it goes through the pipeline logic, and then
-hits an outbound transport. The outbound transport then sends the 
-message directly to the subscriber. It is the subscription service that 
-keeps all of the outbound and inbound pipelines in order.
+The 'necessary' routing will vary by transport that you use.
+
+.. note::
+
+	We do realize that some prefer a more static approach to this process, so there
+	is an extension to the system to allow this called static routing. You will HAVE
+	to manually set up all subscriptions on ALL endpoints for this to work. Its a lot
+	of manual monkey work in my opinion, but a scalpel you shall have.
+
+With that out of the way lets discuss how the transport affects routing.
+
+Multicast MSMQ
+--------------
+
+Subscription are communicated to each bus through the use of multicast MSMQ. 
+This allows us to not have single point of failure, but it does NOT tollerate
+all of the bus instances going down. This is because the subscription information
+is being held in memory.
+
+Plain MSMQ
+----------
+
+Subscription data is communicated to each bus through an intermediary known
+as the 'Subscription Service'. The subscription service is a well known location
+where each bus sends its subscription requests to, and gets the subscription
+requests of others from. 
+
+Internal detail of both MSMQ transports
+----------------------------------------
+
+Because MSMQ doesn't have any routing capabilities, MassTransit has built them
+internal using a construct called a 'Pipeline.' This pipeline is configured by the
+local subscription adapter (one for Plain MSMQ and one for Multicast MSMQ) to add
+and remove segmenst to the pipeline. When a message comes in it goes through the
+pipeline logic, and then is sent directly to the bus on the other end.
+
+.. note::
+
+	It is the subscription service that keeps all of the outbound and inbound pipelines
+	, across all of the instances,  in order.
 
 RabbitMQ
 --------
