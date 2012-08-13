@@ -355,7 +355,6 @@
     <Compile Include="EndpointLoggerExtensions.cs" />
     <Compile Include="Context\EndpointObjectSender.cs" />
     <Compile Include="Context\EndpointObjectSenderImpl.cs" />
-    <Compile Include="Exceptions\MessageNotConsumedException.cs" />
     <Compile Include="Exceptions\MessageRetryLimitExceededException.cs" />
     <Compile Include="Exceptions\PublishException.cs" />
     <Compile Include="Exceptions\RequestCancelledException.cs" />

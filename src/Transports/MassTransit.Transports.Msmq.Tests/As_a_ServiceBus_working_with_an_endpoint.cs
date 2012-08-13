@@ -66,7 +66,7 @@ namespace MassTransit.Transports.Msmq.Tests
         }
 
         [Test]
-        public void It_should_not_rollback_a_send_if_an_exception_is_thrown()
+        public void It_should_rollback_a_send_if_an_exception_is_thrown()
         {
             var consumer = new TestMessageConsumer<PongMessage>();
             LocalBus.SubscribeInstance(consumer);
@@ -84,7 +84,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			RemoteBus.ShouldHaveSubscriptionFor<PongMessage>();
 			LocalBus.Publish(message);
 
-            consumer.ShouldHaveReceivedMessage(response, _timeout);
+            consumer.ShouldNotHaveReceivedMessage(response, _timeout);
         }
     }
 

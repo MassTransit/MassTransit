@@ -42,7 +42,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
             LocalBus.SubscribeHandler<PingMessage>(
                 message => { throw new NotSupportedException("I am a naughty consumer! I go boom!"); });
-            LocalBus.SubscribeHandler<Fault<PingMessage, Guid>>(message =>
+            FaultBus.SubscribeHandler<Fault<PingMessage, Guid>>(message =>
                 {
                     if (_faultFuture.IsAvailable(TimeSpan.Zero))
                         return;
@@ -61,13 +61,13 @@ namespace MassTransit.Transports.Msmq.Tests
         [Test]
         public void A_fault_should_be_published()
         {
-            _faultFuture.IsAvailable(3.Seconds()).ShouldBeTrue();
+            _faultFuture.IsAvailable(8.Seconds()).ShouldBeTrue();
         }
 
         [Test]
         public void The_message_should_exist_in_the_error_queue()
         {
-            LocalErrorEndpoint.ShouldContain(_ping, 5.Seconds());
+            LocalErrorEndpoint.ShouldContain(_ping, 8.Seconds());
         }
 
         [Test]
