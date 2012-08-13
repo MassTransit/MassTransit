@@ -128,9 +128,9 @@ namespace MassTransit.Tests.Distributor
             Publish<C>();
             Publish<B>();
 
-            MyDistributorConsumer.FutureA.IsAvailable(8.Seconds()).ShouldBeTrue("Missing regular consumer");
-            MyDistributorConsumer.FutureC.IsAvailable(8.Seconds()).ShouldBeTrue("Missing context consumer");
-            MyDistributorConsumer.FutureB.IsAvailable(8.Seconds()).ShouldBeTrue("Missing selective consumer");
+            MyDistributorConsumer.FutureA.IsAvailable(16.Seconds()).ShouldBeTrue("Missing regular consumer");
+            MyDistributorConsumer.FutureC.IsAvailable(16.Seconds()).ShouldBeTrue("Missing context consumer");
+            MyDistributorConsumer.FutureB.IsAvailable(16.Seconds()).ShouldBeTrue("Missing selective consumer");
         }
 
         void Publish<T>()
