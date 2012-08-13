@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Distributor
 
             var response = new FirstResponse(message.CorrelationId);
 
-            LocalBus.Context().Respond(response);
+            context.Respond(response);
         }
     }
 }

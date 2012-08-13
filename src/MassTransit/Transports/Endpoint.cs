@@ -276,42 +276,29 @@ namespace MassTransit.Transports
 
                         return receiveContext =>
                             {
-                                bool receivedSuccessfully;
-
                                 try
                                 {
                                     receive(receiveContext);
 
-                                    receivedSuccessfully = true;
-                                }
-                                catch (MessageNotConsumedException ex)
-                                {
-                                    receivedSuccessfully = false;
-
-                                    _tracker.MessageWasMovedToErrorQueue(receiveContext.MessageId);
-                                    MoveMessageToErrorTransport(receiveContext);
+                                    successfulMessageId = receiveContext.MessageId;
                                 }
                                 catch (Exception ex)
                                 {
-                                    receivedSuccessfully = false;
-
                                     if (_log.IsErrorEnabled)
                                         _log.Error("An exception was thrown by a message consumer", ex);
 
                                     _tracker.IncrementRetryCount(receiveContext.MessageId, ex);
                                     MoveMessageToErrorTransport(receiveContext);
-                                }
 
-                                if (receivedSuccessfully)
-                                {
-                                    successfulMessageId = receiveContext.MessageId;
+                                    throw;
                                 }
                             };
                     }, timeout);
 
                 if (failedMessageException != null)
                 {
-                    _log.DebugFormat("Throwing Original Exception: {0}", failedMessageException.GetType());
+                    if(_log.IsErrorEnabled)
+                        _log.ErrorFormat("Throwing Original Exception: {0}", failedMessageException.GetType());
 
                     throw failedMessageException;
                 }

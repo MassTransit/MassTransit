@@ -12,96 +12,127 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
-	using System;
-	using BusConfigurators;
-	using MassTransit.Tests.TextFixtures;
-	using Subscriptions.Coordinator;
+    using System;
+    using BusConfigurators;
+    using MassTransit.Tests.TextFixtures;
+    using Subscriptions.Coordinator;
 
-	public class MsmqEndpointTestFixture :
-		EndpointTestFixture<MsmqTransportFactory>
-	{
-		protected Uri LocalEndpointUri { get; set; }
-		protected Uri LocalErrorUri { get; set; }
-		protected Uri RemoteEndpointUri { get; set; }
+    public class MsmqEndpointTestFixture :
+        EndpointTestFixture<MsmqTransportFactory>
+    {
+        protected Uri LocalEndpointUri { get; set; }
+        protected Uri LocalErrorUri { get; set; }
+        protected Uri RemoteEndpointUri { get; set; }
+        protected Uri FaultEndpointUri { get; set; }
 
-		protected IServiceBus LocalBus { get; set; }
-		protected IServiceBus RemoteBus { get; set; }
+        protected IServiceBus LocalBus { get; set; }
+        protected IServiceBus RemoteBus { get; set; }
+        protected IServiceBus FaultBus { get; set; }
 
-		public MsmqEndpointTestFixture()
-			: this(new EndpointSettings("msmq://localhost/mt_client"))
-		{
-		}
+        public MsmqEndpointTestFixture()
+            : this(new EndpointSettings("msmq://localhost/mt_client"))
+        {
+        }
 
-		public MsmqEndpointTestFixture(EndpointSettings settings)
-		{
-			LocalEndpointUri = settings.Address.Uri;
-			LocalErrorUri = settings.ErrorAddress.Uri;
-			RemoteEndpointUri = new Uri("msmq://localhost/mt_server");
+        public MsmqEndpointTestFixture(EndpointSettings settings)
+        {
+            LocalEndpointUri = settings.Address.Uri;
+            LocalErrorUri = settings.ErrorAddress.Uri;
+            RemoteEndpointUri = new Uri("msmq://localhost/mt_server");
+            FaultEndpointUri = new Uri("msmq://localhost/mt_fault?tx=false");
 
-			ConfigureEndpointFactory(x =>
-				{
-					x.SetCreateMissingQueues(true);
-					x.SetCreateTransactionalQueues(settings.Transactional);
-					x.SetPurgeOnStartup(true);
-				});
-		}
+            ConfigureEndpointFactory(x =>
+                {
+                    x.SetCreateMissingQueues(true);
+                    x.SetCreateTransactionalQueues(settings.Transactional);
+                    x.SetPurgeOnStartup(true);
+                });
+        }
 
-		protected override void EstablishContext()
-		{
-			base.EstablishContext();
+        protected override void EstablishContext()
+        {
+            base.EstablishContext();
 
-			LocalEndpoint = EndpointCache.GetEndpoint(LocalEndpointUri);
-			LocalErrorEndpoint = EndpointCache.GetEndpoint(LocalErrorUri);
-			RemoteEndpoint = EndpointCache.GetEndpoint(RemoteEndpointUri);
+            LocalEndpoint = EndpointCache.GetEndpoint(LocalEndpointUri);
+            LocalErrorEndpoint = EndpointCache.GetEndpoint(LocalErrorUri);
+            RemoteEndpoint = EndpointCache.GetEndpoint(RemoteEndpointUri);
+            FaultEndpoint = EndpointCache.GetEndpoint(RemoteEndpointUri);
 
-			LocalBus = ServiceBusFactory.New(ConfigureLocalBus);
+            LocalBus = ServiceBusFactory.New(ConfigureLocalBus);
 
-			RemoteBus = ServiceBusFactory.New(ConfigureRemoteBus);
+            RemoteBus = ServiceBusFactory.New(ConfigureRemoteBus);
 
-			_localLoopback.SetTargetCoordinator(_remoteLoopback.Router);
-			_remoteLoopback.SetTargetCoordinator(_localLoopback.Router);
-		}
+            FaultBus = ServiceBusFactory.New(ConfigureFaultBus);
 
-		SubscriptionLoopback _localLoopback;
-		SubscriptionLoopback _remoteLoopback;
+            _localLoopback.SetTargetCoordinator(_remoteLoopback.Router);
+            _remoteLoopback.SetTargetCoordinator(_localLoopback.Router);
+            _localFaultLoopback.SetTargetCoordinator(_localLoopback.Router);
+            _remoteFaultLoopback.SetTargetCoordinator(_remoteLoopback.Router);
+        }
 
-		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
-		{
-			configurator.ReceiveFrom(LocalEndpointUri);
-			configurator.AddSubscriptionObserver((bus, coordinator) =>
-				{
-					_localLoopback = new SubscriptionLoopback(bus, coordinator);
-					return _localLoopback;
-				});
-		}
+        SubscriptionLoopback _localLoopback;
+        SubscriptionLoopback _remoteLoopback;
+        SubscriptionLoopback _localFaultLoopback;
+        SubscriptionLoopback _remoteFaultLoopback;
 
-		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
-		{
-			configurator.ReceiveFrom(RemoteEndpointUri);
-			configurator.AddSubscriptionObserver((bus, coordinator) =>
-				{
-					_remoteLoopback = new SubscriptionLoopback(bus, coordinator);
-					return _remoteLoopback;
-				});
-		}
+        protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
+        {
+            configurator.ReceiveFrom(LocalEndpointUri);
+            configurator.AddSubscriptionObserver((bus, coordinator) =>
+                {
+                    _localLoopback = new SubscriptionLoopback(bus, coordinator);
+                    return _localLoopback;
+                });
+        }
 
-		protected IEndpoint LocalEndpoint { get; set; }
-		protected IEndpoint LocalErrorEndpoint { get; set; }
-		protected IEndpoint RemoteEndpoint { get; set; }
+        protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
+        {
+            configurator.ReceiveFrom(RemoteEndpointUri);
+            configurator.AddSubscriptionObserver((bus, coordinator) =>
+                {
+                    _remoteLoopback = new SubscriptionLoopback(bus, coordinator);
+                    return _remoteLoopback;
+                });
+        }
 
-		protected override void TeardownContext()
-		{
-			LocalBus.Dispose();
-			LocalBus = null;
+        protected virtual void ConfigureFaultBus(ServiceBusConfigurator configurator)
+        {
+            configurator.SetConcurrentConsumerLimit(1);
+            configurator.ReceiveFrom(FaultEndpointUri);
+            configurator.AddSubscriptionObserver((bus, coordinator) =>
+                {
+                    _localFaultLoopback = new SubscriptionLoopback(bus, coordinator);
+                    return _localFaultLoopback;
+                });
+            configurator.AddSubscriptionObserver((bus, coordinator) =>
+                {
+                    _remoteFaultLoopback = new SubscriptionLoopback(bus, coordinator);
+                    return _remoteFaultLoopback;
+                });
+        }
 
-			RemoteBus.Dispose();
-			RemoteBus = null;
+        protected IEndpoint LocalEndpoint { get; set; }
+        protected IEndpoint LocalErrorEndpoint { get; set; }
+        protected IEndpoint RemoteEndpoint { get; set; }
+        protected IEndpoint FaultEndpoint { get; set; }
 
-			LocalEndpoint = null;
-			LocalErrorEndpoint = null;
-			RemoteEndpoint = null;
+        protected override void TeardownContext()
+        {
+            LocalBus.Dispose();
+            LocalBus = null;
 
-			base.TeardownContext();
-		}
-	}
+            RemoteBus.Dispose();
+            RemoteBus = null;
+
+            FaultBus.Dispose();
+            FaultBus = null;
+
+            LocalEndpoint = null;
+            LocalErrorEndpoint = null;
+            RemoteEndpoint = null;
+            FaultEndpoint = null;
+
+            base.TeardownContext();
+        }
+    }
 }
