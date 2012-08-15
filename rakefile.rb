@@ -334,7 +334,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "Magnum", "2.0.0.4"
+    nuspec.dependency "Magnum", "2.0.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
 	add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
@@ -435,7 +435,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NHibernate", "3.3.1"
     nuspec.dependency "FluentNHibernate", "1.3"
-    nuspec.dependency "Magnum", "2.0.0.4"
+    nuspec.dependency "Magnum", "2.0.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.NHibernate.nuspec'
 
 	add_files props[:stage], "#{File.join('Persistence', 'NHibernate', 'MassTransit.NHibernateIntegration.{dll,pdb,xml}')}", nuspec
