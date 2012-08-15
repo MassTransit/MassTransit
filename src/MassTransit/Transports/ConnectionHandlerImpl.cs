@@ -58,10 +58,16 @@ namespace MassTransit.Transports
             lock (_lock)
             {
                 _connected = false;
+                try
+                {
+                    UnbindBindings();
 
-                UnbindBindings();
-
-                _connection.Disconnect();
+                    _connection.Disconnect();
+                }
+                catch (Exception ex)
+                {
+                    _log.Warn("Disconnect failed, but ignoring", ex);
+                }
             }
         }
 

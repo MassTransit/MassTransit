@@ -47,6 +47,11 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
 			_configurators.Add(configurator);
 		}
 
+		public void SetRequestedHeartbeat(ushort requestedHeartbeat)
+		{
+			_configurators.Add(new RequestedHeartbeatConnectionFactoryConfiguratorImpl(requestedHeartbeat));
+		}
+
 		public RabbitMqTransportFactoryBuilder Configure(RabbitMqTransportFactoryBuilder builder)
 		{
 			ConnectionFactoryBuilder connectionFactoryBuilder = CreateBuilder();

@@ -16,7 +16,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 	using Magnum.TestFramework;
 	using NUnit.Framework;
 
-	[Scenario]
+	[Scenario, Explicit]
 	public class When_connecting_to_a_rabbit_mq_server_using_ssl
 	{
 		IServiceBus _bus;
