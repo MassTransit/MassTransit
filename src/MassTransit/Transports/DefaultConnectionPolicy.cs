@@ -23,7 +23,7 @@ namespace MassTransit.Transports
         readonly ConnectionHandler _connectionHandler;
         readonly TimeSpan _reconnectDelay;
         readonly ILog _log = Logger.Get(typeof(DefaultConnectionPolicy));
-        readonly ReaderWriterLockSlim _connectionlLock = new ReaderWriterLockSlim();
+        readonly ReaderWriterLockSlim _connectionlLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
         public DefaultConnectionPolicy(ConnectionHandler connectionHandler)
         {
@@ -59,6 +59,7 @@ namespace MassTransit.Transports
 
                 try
                 {
+                    // wait here so we can be sure that there is not a reconnect in progress
                     _connectionlLock.EnterReadLock();
                     callback();
                 }
@@ -69,9 +70,9 @@ namespace MassTransit.Transports
             }
         }
 
-        private void Reconnect()
+        void Reconnect()
         {
-            if (_connectionlLock.TryEnterWriteLock(100))
+            if (_connectionlLock.TryEnterWriteLock((int)_reconnectDelay.TotalMilliseconds/2))
             {
                 try
                 {
@@ -89,6 +90,11 @@ namespace MassTransit.Transports
                         _log.Debug("Re-connecting connection handler...");
                     }
                     _connectionHandler.Connect();
+                }
+                catch (Exception ex)
+                {
+                    _log.Warn("Failed to reconnect, deferring to connection policy for reconnection");
+                    _connectionHandler.ForceReconnect(_reconnectDelay);
                 }
                 finally
                 {

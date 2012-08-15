@@ -19,5 +19,6 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
 		Configurator
 	{
 		void UseSsl(Action<SslConnectionFactoryConfigurator> configureSsl);
+		void SetRequestedHeartbeat(ushort requestedHeartbeat);
 	}
 }

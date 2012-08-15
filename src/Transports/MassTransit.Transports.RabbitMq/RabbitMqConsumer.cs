@@ -58,14 +58,21 @@ namespace MassTransit.Transports.RabbitMq
             {
                 _log.Error("Failed to close channel: " + _address, ex);
             }
-            finally
+
+            try
             {
                 _channel.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Failed to dispose channel: " + _address, ex);
+            }
+            finally
+            {
                 _channel = null;
             }
-        }
-
-        public BasicGetResult Get()
+ }
+  public BasicGetResult Get()
         {
             return _channel.BasicGet(_address.Name, false);
         }
@@ -85,5 +92,6 @@ namespace MassTransit.Transports.RabbitMq
         {
             _channel.BasicNack(result.DeliveryTag, false, true);
         }
+
     }
 }

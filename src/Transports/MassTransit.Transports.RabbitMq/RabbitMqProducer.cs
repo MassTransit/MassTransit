@@ -28,9 +28,20 @@ namespace MassTransit.Transports.RabbitMq
             _bindToQueue = bindToQueue;
         }
 
-        public IModel Channel
+        public IBasicProperties CreateProperties()
         {
-            get { return _channel; }
+            if (_channel == null)
+                throw new InvalidConnectionException(_address.Uri, "Channel should not be null");
+
+            return _channel.CreateBasicProperties();
+        }
+
+        public void Publish(string exchangeName, IBasicProperties properties, byte[] body)
+        {
+            if (_channel == null)
+                throw new InvalidConnectionException(_address.Uri, "Channel should not be null");
+
+            _channel.BasicPublish(exchangeName, "", properties, body);
         }
 
         public void Bind(RabbitMqConnection connection)
