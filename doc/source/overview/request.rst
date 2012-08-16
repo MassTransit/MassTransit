@@ -70,6 +70,10 @@ something to improve upon later. :)
         }
     }
 
+.. warning::
+
+    Each instance must have its own address. For more information see 'gotchas'
+
 So what is going on? The first chunk has the messages we are going to work with.
 
 The second chunk shows the code to simple echo back the request message as a response.

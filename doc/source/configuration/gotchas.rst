@@ -8,6 +8,10 @@ Each application needs it own address! If you have a website and a console appli
 each need their own address. For instance the website could listen at ``msmq://localhost/web`` and
 the console at ``msmq://localhost/console``.
 
+The reason for this is you are defining the 'receiving' queue. This is where the bus instance
+will receive its messages. It would be like sharing a mailbox with your neighbor, some times
+you get all the mail, sometimes they get all the mail.
+
 
 How to do an NServiceBus send only endpoint?
 """"""""""""""""""""""""""""""""""""""""""""
