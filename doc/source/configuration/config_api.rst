@@ -48,7 +48,7 @@ form of a URL and will look like ``msmq://localhost/queue_name`` or for RabbitMQ
 
 .. warning:: 
 
-    Each instance must have its own address.
+    Each instance must have its own address. For more information see 'gotchas'
 
 The last concern is, do you want to use a control bus or not. ``Control Bus``
 
