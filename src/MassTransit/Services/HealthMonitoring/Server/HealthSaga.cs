@@ -26,9 +26,8 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		ISaga
 	{
 		static readonly ILog _log = Logger.Get(typeof (HealthSaga));
-		Guid _correlationId;
 
-		static HealthSaga()
+	    static HealthSaga()
 		{
 			Define(() =>
 				{
@@ -89,7 +88,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		[UsedImplicitly]
 		public HealthSaga(Guid correlationId)
 		{
-			_correlationId = correlationId;
+			CorrelationId = correlationId;
 		}
 
 		[UsedImplicitly]
@@ -109,18 +108,14 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		public static Event<TimeoutExpired> TimeoutExpires { get; set; }
 		public static Event<PingEndpointResponse> EndpointRespondsToPing { get; set; }
 
-		public virtual DateTime LastHeartbeat { get; set; }
-		public virtual Uri ControlUri { get; set; }
-		public virtual Uri DataUri { get; set; }
-		public virtual int HeartbeatIntervalInSeconds { get; set; }
+		public  DateTime LastHeartbeat { get; set; }
+		public  Uri ControlUri { get; set; }
+		public  Uri DataUri { get; set; }
+		public  int HeartbeatIntervalInSeconds { get; set; }
 
-		public virtual Guid CorrelationId
-		{
-			get { return _correlationId; }
-			set { _correlationId = value; }
-		}
+	    public  Guid CorrelationId { get; set; }
 
-		public virtual IServiceBus Bus { get; set; }
+	    public  IServiceBus Bus { get; set; }
 
 		void NotifyEndpointIsDown()
 		{

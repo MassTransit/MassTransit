@@ -11,23 +11,24 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
-using FluentNHibernate.Cfg.Db;
 using NHibernate.Dialect;
 
 namespace MassTransit.RuntimeServices
 {
-	using System.IO;
-	using FluentNHibernate.Cfg;
+    using System;
+    using System.IO;
 	using Model;
 	using NHibernate;
 	using NHibernate.Tool.hbm2ddl;
+	using NHibernateIntegration;
 	using NHibernateIntegration.Saga;
 	using Saga;
 	using Services.Subscriptions.Server;
 	using StructureMap;
 	using StructureMap.Configuration.DSL;
+    using Log4NetIntegration;
 
-	public class SubscriptionServiceRegistry :
+    public class SubscriptionServiceRegistry :
 		Registry
 	{
 		public SubscriptionServiceRegistry(IContainer container)
@@ -48,7 +49,7 @@ namespace MassTransit.RuntimeServices
 					return ServiceBusFactory.New(sbc =>
 					{
 						sbc.ReceiveFrom(configuration.SubscriptionServiceUri);
-
+                        sbc.UseLog4Net();
 						sbc.UseMsmq();
 
 						sbc.SetConcurrentConsumerLimit(1);
@@ -58,14 +59,13 @@ namespace MassTransit.RuntimeServices
 
 		static ISessionFactory CreateSessionFactory()
 		{
-			return Fluently.Configure()
-				.Mappings(m =>
-					{
-						m.FluentMappings.Add<SubscriptionSagaMap>();
-						m.FluentMappings.Add<SubscriptionClientSagaMap>();
-					})
-				//.ExposeConfiguration(BuildSchema)
-				.BuildSessionFactory();
+		    var provider = new NHibernateSessionFactoryProvider(new Type[]
+		        {
+		            typeof(SubscriptionSagaMap),
+                    typeof(SubscriptionClientSagaMap),
+		        });
+
+		    return provider.GetSessionFactory();
 		}
 
 		static void BuildSchema(NHibernate.Cfg.Configuration config)

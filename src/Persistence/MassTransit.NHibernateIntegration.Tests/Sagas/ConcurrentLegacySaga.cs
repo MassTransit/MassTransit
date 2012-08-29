@@ -15,7 +15,6 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 	using System;
 	using System.Diagnostics;
 	using System.Threading;
-	using FluentNHibernate.Mapping;
 	using MassTransit.Saga;
 	using log4net;
 
@@ -39,10 +38,10 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 			Value = -1;
 		}
 
-		public virtual string Name { get; set; }
-		public virtual int Value { get; set; }
+		public  string Name { get; set; }
+		public  int Value { get; set; }
 
-		public virtual void Consume(StartConcurrentSaga message)
+		public  void Consume(StartConcurrentSaga message)
 		{
 			Trace.WriteLine("Consuming " + message.GetType());
 			Thread.Sleep(3000);
@@ -51,10 +50,10 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 			Trace.WriteLine("Completed " + message.GetType());
 		}
 
-		public virtual Guid CorrelationId { get; set; }
-		public virtual IServiceBus Bus { get; set; }
+		public  Guid CorrelationId { get; set; }
+		public  IServiceBus Bus { get; set; }
 
-		public virtual void Consume(ContinueConcurrentSaga message)
+		public  void Consume(ContinueConcurrentSaga message)
 		{
 			Trace.WriteLine("Consuming " + message.GetType());
 			Thread.Sleep(1000);
@@ -68,15 +67,12 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 	}
 
 	public class ConcurrentLegacySagaMap :
-		ClassMap<ConcurrentLegacySaga>
+		SagaClassMapping<ConcurrentLegacySaga>
 	{
 		public ConcurrentLegacySagaMap()
 		{
-			Id(x => x.CorrelationId)
-				.GeneratedBy.Assigned();
-
-			Map(x => x.Name).Length(40);
-			Map(x => x.Value);
+			Property(x => x.Name, x => x.Length(40));
+			Property(x => x.Value);
 		}
 	}
 }
