@@ -434,7 +434,6 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.requireLicenseAcceptance = "true"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NHibernate", "3.3.1"
-    nuspec.dependency "FluentNHibernate", "1.3"
     nuspec.dependency "Magnum", "2.0.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.NHibernate.nuspec'
 
