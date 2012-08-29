@@ -423,7 +423,8 @@ namespace MassTransit
         {
             try
             {
-                string instanceName = string.Format("{0}", Endpoint.Address.Uri);
+                string instanceName = string.Format("{0}_{1}{2}",
+                    Endpoint.Address.Uri.Scheme, Endpoint.Address.Uri.Host, Endpoint.Address.Uri.AbsolutePath.Replace("/", "_"));
 
                 _counters = new ServiceBusInstancePerformanceCounters(instanceName);
 
