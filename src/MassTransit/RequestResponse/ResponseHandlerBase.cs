@@ -76,7 +76,7 @@ namespace MassTransit.RequestResponse
             {
                 if (_context != null)
                 {
-                    _context.Post(state =>
+                    _context.Send(state =>
                         {
                             try
                             {

@@ -31,7 +31,7 @@ namespace MassTransit.RequestResponse
         {
             if (_context != null)
             {
-                _context.Post(state => _timeoutCallback(request), state: null);
+                _context.Send(state => _timeoutCallback(request), state: null);
             }
             else
             {

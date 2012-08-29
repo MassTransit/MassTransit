@@ -230,7 +230,8 @@ namespace MassTransit.RequestResponse
                     {
                         try
                         {
-                            callback(this);
+                            if(callback != null)
+                                callback(this);
                         }
                         catch (Exception ex)
                         {
