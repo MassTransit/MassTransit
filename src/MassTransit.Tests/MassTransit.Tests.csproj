@@ -103,6 +103,7 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
@@ -202,6 +203,7 @@
     <Compile Include="Subscriptions\NewSubscriptionSystem_Specs.cs" />
     <Compile Include="Subscriptions\MultipleSubscribers_Specs.cs" />
     <Compile Include="Subscriptions\TwoBus_Specs.cs" />
+    <Compile Include="SynchronizationContext_Specs.cs" />
     <Compile Include="TaskPublishRequest_Specs.cs" />
     <Compile Include="Testing\ConsumerMultiple_Specs.cs" />
     <Compile Include="Testing\ConsumerTest_Specs.cs" />
