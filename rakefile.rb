@@ -125,7 +125,6 @@ task :copy_services => [:compile] do
      	copyOutputFiles src, "Castle*.dll", targ
      	copyOutputFiles src, "log4net.dll", targ
      	copyOutputFiles src, "Magnum.dll", targ
-     	copyOutputFiles src, "FluentNHibernate.dll", targ
      	copyOutputFiles src, "NHibernate*.dll", targ
      	copyOutputFiles src, "Iesi.Collections.dll", targ
      	copyOutputFiles src, "StructureMap.dll", targ
