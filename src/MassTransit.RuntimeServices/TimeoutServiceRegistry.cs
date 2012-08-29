@@ -1,78 +1,82 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RuntimeServices
 {
-	using System.IO;
-	using FluentNHibernate.Cfg;
-	using Model;
-	using NHibernate;
-	using NHibernate.Tool.hbm2ddl;
-	using NHibernateIntegration.Saga;
-	using Saga;
-	using Services.Timeout;
-	using StructureMap;
-	using StructureMap.Configuration.DSL;
+    using System.IO;
+    using Log4NetIntegration;
+    using Model;
+    using NHibernate;
+    using NHibernate.Tool.hbm2ddl;
+    using NHibernateIntegration;
+    using NHibernateIntegration.Saga;
+    using Saga;
+    using Services.Timeout;
+    using StructureMap;
+    using StructureMap.Configuration.DSL;
 
-	public class TimeoutServiceRegistry :
-		Registry
-	{
-		public TimeoutServiceRegistry(IContainer container)
-		{
-			var configuration = container.GetInstance<IConfiguration>();
+    public class TimeoutServiceRegistry :
+        Registry
+    {
+        public TimeoutServiceRegistry(IContainer container)
+        {
+            var configuration = container.GetInstance<IConfiguration>();
 
-			For<ISessionFactory>()
-				.Singleton()
-				.Use(context => CreateSessionFactory());
+            For<ISessionFactory>()
+                .Singleton()
+                .Use(context => CreateSessionFactory());
 
-			For(typeof (ISagaRepository<>))
-				.Add(typeof (NHibernateSagaRepository<>));
+            For(typeof(ISagaRepository<>))
+                .Add(typeof(NHibernateSagaRepository<>));
 
-			For<IServiceBus>()
-				.Singleton()
-				.Use(context =>
-					{
-						return ServiceBusFactory.New(sbc =>
-							{
-								sbc.ReceiveFrom(configuration.TimeoutServiceDataUri);
-								sbc.UseControlBus();
+            For<IServiceBus>()
+                .Singleton()
+                .Use(context =>
+                    {
+                        return ServiceBusFactory.New(sbc =>
+                            {
+                                sbc.ReceiveFrom(configuration.TimeoutServiceDataUri);
+                                sbc.UseControlBus();
+                                sbc.UseLog4Net();
 
-								sbc.UseMsmq();
-								sbc.UseSubscriptionService(configuration.SubscriptionServiceUri);
+                                sbc.UseMsmq();
+                                sbc.UseSubscriptionService(configuration.SubscriptionServiceUri);
 
-								sbc.SetConcurrentConsumerLimit(1);
+                                sbc.SetConcurrentConsumerLimit(1);
 
-								if(configuration.HealthServiceEnabled)
-									sbc.UseHealthMonitoring(10);
-							});
-					});
-		}
+                                if (configuration.HealthServiceEnabled)
+                                    sbc.UseHealthMonitoring(10);
+                            });
+                    });
+        }
 
-		static ISessionFactory CreateSessionFactory()
-		{
-			return Fluently.Configure()
-				.Mappings(m => { m.FluentMappings.Add<TimeoutSagaMap>(); })
-				//.ExposeConfiguration(BuildSchema)
-				.BuildSessionFactory();
-		}
+        static ISessionFactory CreateSessionFactory()
+        {
+            var provider = new NHibernateSessionFactoryProvider(new[]
+                {
+                    typeof(TimeoutSagaMap),
+                });
 
-		static void BuildSchema(NHibernate.Cfg.Configuration config)
-		{
-			new SchemaUpdate(config).Execute(false, true);
+            return provider.GetSessionFactory();
+        }
 
-			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (TimeoutService).Assembly.Location),
-				typeof (TimeoutService).Name + ".sql");
+        static void BuildSchema(NHibernate.Cfg.Configuration config)
+        {
+            new SchemaUpdate(config).Execute(false, true);
 
-			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
-		}
-	}
+            string schemaFile = Path.Combine(Path.GetDirectoryName(typeof(TimeoutService).Assembly.Location),
+                typeof(TimeoutService).Name + ".sql");
+
+            new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
+        }
+    }
 }

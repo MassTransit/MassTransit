@@ -10,22 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RuntimeServices.Model
+namespace MassTransit.NHibernateIntegration
 {
-    using NHibernateIntegration;
-    using Services.Timeout.Server;
-    using Util;
+    using MassTransit.Saga;
 
-    [UsedImplicitly]
-    public class TimeoutSagaMap :
-        SagaStateMachineClassMapping<TimeoutSaga>
+    public abstract class SagaStateMachineClassMapping<T> :
+        SagaClassMapping<T>
+        where T : SagaStateMachine<T>, ISaga
     {
-        public TimeoutSagaMap()
+        protected SagaStateMachineClassMapping()
         {
-            Property(x => x.TimeoutId);
-            Property(x => x.Tag);
-
-            Property(x => x.TimeoutAt);
+            this.StateProperty(x => x.CurrentState);
         }
     }
 }

@@ -15,7 +15,6 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
     using System;
     using System.Diagnostics;
     using System.Threading;
-    using FluentNHibernate.Mapping;
     using Magnum.StateMachine;
     using MassTransit.Saga;
 
@@ -89,22 +88,12 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
     }
 
     public class ConcurrentSagaMap :
-        ClassMap<ConcurrentSaga>
+        SagaStateMachineClassMapping<ConcurrentSaga>
     {
         public ConcurrentSagaMap()
         {
-            Not.LazyLoad();
-
-            Id(x => x.CorrelationId)
-                .GeneratedBy.Assigned();
-
-            Map(x => x.CurrentState)
-                .Access.ReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
-                .CustomType<StateMachineUserType>();
-
-
-            Map(x => x.Name).Length(40);
-            Map(x => x.Value);
+            Property(x => x.Name, x => x.Length(40));
+            Property(x => x.Value);
         }
     }
 }

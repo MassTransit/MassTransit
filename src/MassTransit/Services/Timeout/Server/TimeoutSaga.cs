@@ -21,8 +21,6 @@ namespace MassTransit.Services.Timeout.Server
         SagaStateMachine<TimeoutSaga>,
         ISaga
     {
-        Guid _correlationId;
-
         static TimeoutSaga()
         {
             Define(() =>
@@ -67,7 +65,7 @@ namespace MassTransit.Services.Timeout.Server
 
         public TimeoutSaga(Guid correlationId)
         {
-            _correlationId = correlationId;
+            CorrelationId = correlationId;
         }
 
         protected TimeoutSaga()
@@ -84,19 +82,15 @@ namespace MassTransit.Services.Timeout.Server
         public static Event<CancelTimeout> CancellingTimeout { get; set; }
         public static Event<TimeoutExpired> CompletingTimeout { get; set; }
 
-        public virtual Guid TimeoutId { get; set; }
-        public virtual int Tag { get; set; }
-        public virtual DateTime TimeoutAt { get; set; }
+        public Guid TimeoutId { get; set; }
+        public int Tag { get; set; }
+        public DateTime TimeoutAt { get; set; }
 
-        public virtual Guid CorrelationId
-        {
-            get { return _correlationId; }
-            set { _correlationId = value; }
-        }
+        public Guid CorrelationId { get; set; }
 
-        public virtual IServiceBus Bus { get; set; }
+        public IServiceBus Bus { get; set; }
 
-        public virtual bool Equals(TimeoutSaga obj)
+        public bool Equals(TimeoutSaga obj)
         {
             if (ReferenceEquals(null, obj))
                 return false;
