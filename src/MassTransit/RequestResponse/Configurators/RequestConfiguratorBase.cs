@@ -14,6 +14,7 @@ namespace MassTransit.RequestResponse.Configurators
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using Magnum.Caching;
     using Magnum.Extensions;
 
@@ -24,6 +25,7 @@ namespace MassTransit.RequestResponse.Configurators
         readonly Cache<Type, ResponseHandler> _handlers;
         readonly TRequest _message;
         readonly string _requestId;
+        protected SynchronizationContext RequestSynchronizationContext;
         protected TimeSpan Timeout;
         protected TimeoutHandler<TRequest> TimeoutHandler;
 
@@ -60,13 +62,13 @@ namespace MassTransit.RequestResponse.Configurators
         public void HandleTimeout(TimeSpan timeout, Action timeoutCallback)
         {
             Timeout = timeout;
-            TimeoutHandler = new TimeoutHandler<TRequest>(_ => timeoutCallback());
+            TimeoutHandler = new TimeoutHandler<TRequest>(RequestSynchronizationContext, _ => timeoutCallback());
         }
 
         public void HandleTimeout(TimeSpan timeout, Action<TRequest> timeoutCallback)
         {
             Timeout = timeout;
-            TimeoutHandler = new TimeoutHandler<TRequest>(timeoutCallback);
+            TimeoutHandler = new TimeoutHandler<TRequest>(RequestSynchronizationContext, timeoutCallback);
         }
 
         public void SetRequestExpiration(TimeSpan expiration)
@@ -106,6 +108,16 @@ namespace MassTransit.RequestResponse.Configurators
             _handlers.Add(responseType, responseHandler);
 
             return responseHandler;
+        }
+
+        public void UseCurrentSynchronizationContext()
+        {
+            RequestSynchronizationContext = SynchronizationContext.Current;
+        }
+
+        public void SetSynchronizationContext(SynchronizationContext synchronizationContext)
+        {
+            RequestSynchronizationContext = synchronizationContext;
         }
     }
 }

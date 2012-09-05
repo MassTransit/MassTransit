@@ -13,6 +13,7 @@
 namespace MassTransit.RequestResponse
 {
     using System;
+    using System.Threading;
 
     public class CompleteResponseHandler<TResponse> :
         ResponseHandlerBase<TResponse>
@@ -21,14 +22,15 @@ namespace MassTransit.RequestResponse
         readonly IRequestComplete _complete;
 
         public CompleteResponseHandler(string requestId, IRequestComplete complete,
-            Action<IConsumeContext<TResponse>, TResponse> handler)
-            : base(requestId, handler)
+            SynchronizationContext synchronizationContext, Action<IConsumeContext<TResponse>, TResponse> handler)
+            : base(requestId, synchronizationContext, handler)
         {
             _complete = complete;
         }
 
-        public CompleteResponseHandler(string requestId, IRequestComplete complete, Action<TResponse> handler)
-            : base(requestId, handler)
+        public CompleteResponseHandler(string requestId, IRequestComplete complete,
+            SynchronizationContext synchronizationContext, Action<TResponse> handler)
+            : base(requestId, synchronizationContext, handler)
         {
             _complete = complete;
         }

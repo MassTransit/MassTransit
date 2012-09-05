@@ -31,31 +31,34 @@ namespace MassTransit.RequestResponse.Configurators
         public void Handle<T>(Action<T> handler)
             where T : class
         {
-            AddHandler(typeof(T), () => new CompleteResponseHandler<T>(RequestId, _request, handler));
+            AddHandler(typeof(T),
+                () => new CompleteResponseHandler<T>(RequestId, _request, RequestSynchronizationContext, handler));
         }
 
         public void Handle<T>(Action<IConsumeContext<T>, T> handler)
             where T : class
         {
-            AddHandler(typeof(T), () => new CompleteResponseHandler<T>(RequestId, _request, handler));
+            AddHandler(typeof(T),
+                () => new CompleteResponseHandler<T>(RequestId, _request, RequestSynchronizationContext, handler));
         }
 
         public void Watch<T>(Action<T> watcher)
             where T : class
         {
-            AddHandler(typeof(T), () => new WatchResponseHandler<T>(RequestId, watcher));
+            AddHandler(typeof(T), () => new WatchResponseHandler<T>(RequestId, RequestSynchronizationContext, watcher));
         }
 
         public void Watch<T>(Action<IConsumeContext<T>, T> watcher)
             where T : class
         {
-            AddHandler(typeof(T), () => new WatchResponseHandler<T>(RequestId, watcher));
+            AddHandler(typeof(T), () => new WatchResponseHandler<T>(RequestId, RequestSynchronizationContext, watcher));
         }
+
 
         public IAsyncRequest<TRequest> Build(IServiceBus bus)
         {
             _request.SetTimeout(Timeout);
-            if(TimeoutHandler != null)
+            if (TimeoutHandler != null)
                 _request.SetTimeoutHandler(TimeoutHandler);
 
             UnsubscribeAction unsubscribeAction = bus.Configure(x => Handlers.CombineSubscriptions(h => h.Connect(x)));

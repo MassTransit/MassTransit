@@ -24,13 +24,13 @@ namespace MassTransit.RequestResponse
         protected readonly TaskCompletionSource<TResponse> CompletionSource;
 
         protected TaskResponseHandlerBase(string requestId, Action<IConsumeContext<TResponse>, TResponse> handler)
-            : base(requestId, handler)
+            : base(requestId, null, handler)
         {
             CompletionSource = new TaskCompletionSource<TResponse>(TaskCreationOptions.None);
         }
 
         protected TaskResponseHandlerBase(string requestId, Action<TResponse> handler)
-            : base(requestId, handler)
+            : base(requestId, null, handler)
         {
             CompletionSource = new TaskCompletionSource<TResponse>(TaskCreationOptions.None);
         }
