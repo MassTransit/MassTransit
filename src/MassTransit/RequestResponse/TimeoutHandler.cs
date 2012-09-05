@@ -18,20 +18,21 @@ namespace MassTransit.RequestResponse
     public class TimeoutHandler<TRequest>
         where TRequest : class
     {
-        readonly SynchronizationContext _context;
+        readonly SynchronizationContext _synchronizationContext;
         readonly Action<TRequest> _timeoutCallback;
 
-        public TimeoutHandler(Action<TRequest> timeoutCallback)
+        public TimeoutHandler(SynchronizationContext synchronizationSynchronizationContext,
+            Action<TRequest> timeoutCallback)
         {
             _timeoutCallback = timeoutCallback;
-            _context = SynchronizationContext.Current;
+            _synchronizationContext = synchronizationSynchronizationContext;
         }
 
         public void HandleTimeout(TRequest request)
         {
-            if (_context != null)
+            if (_synchronizationContext != null)
             {
-                _context.Send(state => _timeoutCallback(request), state: null);
+                _synchronizationContext.Post(state => _timeoutCallback(request), state: null);
             }
             else
             {

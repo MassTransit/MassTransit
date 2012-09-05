@@ -22,26 +22,28 @@ namespace MassTransit.RequestResponse
         ResponseHandler
         where TResponse : class
     {
-        readonly SynchronizationContext _context;
         readonly HandlerSelector<TResponse> _handler;
         readonly string _requestId;
+        readonly SynchronizationContext _synchronizationContext;
 
-        protected ResponseHandlerBase(string requestId, Action<IConsumeContext<TResponse>, TResponse> handler)
-            : this(requestId)
+        protected ResponseHandlerBase(string requestId, SynchronizationContext synchronizationContext,
+            Action<IConsumeContext<TResponse>, TResponse> handler)
+            : this(requestId, synchronizationContext)
         {
             _handler = HandlerSelector.ForHandler(handler);
         }
 
-        protected ResponseHandlerBase(string requestId, Action<TResponse> handler)
-            : this(requestId)
+        protected ResponseHandlerBase(string requestId, SynchronizationContext synchronizationContext,
+            Action<TResponse> handler)
+            : this(requestId, synchronizationContext)
         {
             _handler = HandlerSelector.ForHandler(handler);
         }
 
-        ResponseHandlerBase(string requestId)
+        ResponseHandlerBase(string requestId, SynchronizationContext synchronizationContext)
         {
             _requestId = requestId;
-            _context = SynchronizationContext.Current;
+            _synchronizationContext = synchronizationContext;
         }
 
         Type ResponseHandler.ResponseType
@@ -74,9 +76,9 @@ namespace MassTransit.RequestResponse
         {
             try
             {
-                if (_context != null)
+                if (_synchronizationContext != null)
                 {
-                    _context.Send(state =>
+                    _synchronizationContext.Post(state =>
                         {
                             try
                             {

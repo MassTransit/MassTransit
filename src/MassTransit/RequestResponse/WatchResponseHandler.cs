@@ -13,18 +13,21 @@
 namespace MassTransit.RequestResponse
 {
     using System;
+    using System.Threading;
 
     public class WatchResponseHandler<TResponse> :
         ResponseHandlerBase<TResponse>
         where TResponse : class
     {
-        public WatchResponseHandler(string requestId, Action<IConsumeContext<TResponse>, TResponse> handler)
-            : base(requestId, handler)
+        public WatchResponseHandler(string requestId, SynchronizationContext synchronizationContext,
+            Action<IConsumeContext<TResponse>, TResponse> handler)
+            : base(requestId, synchronizationContext, handler)
         {
         }
 
-        public WatchResponseHandler(string requestId, Action<TResponse> handler)
-            : base(requestId, handler)
+        public WatchResponseHandler(string requestId, SynchronizationContext synchronizationContext,
+            Action<TResponse> handler)
+            : base(requestId, synchronizationContext, handler)
         {
         }
 
