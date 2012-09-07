@@ -32,7 +32,8 @@ namespace MassTransit.Context
 	/// broadcast that information on the passed <see cref="UntypedChannel"/>
 	/// passed in the constructor.
 	/// </summary>
-	public class ServiceBusReceiveContext
+    [DebuggerNonUserCode]
+    public class ServiceBusReceiveContext
 	{
 		static readonly ILog _log = Logger.Get(typeof (ServiceBusReceiveContext));
 
@@ -76,7 +77,8 @@ namespace MassTransit.Context
 		/// call <see cref="DeliverMessageToConsumers"/> (if there are consumers interested)</para>
 		/// <para>This method must not throw exceptions, because it might not be run on the main thread.</para>
 		/// </summary>
-		public void ReceiveFromEndpoint()
+        [DebuggerNonUserCode]
+        public void ReceiveFromEndpoint()
 		{
 			try
 			{
@@ -135,6 +137,7 @@ namespace MassTransit.Context
 		/// an exception, then a MessageException will be thrown. If multiple consumers
 		/// threw exceptions, then the last exception will be the inner exception
 		/// and the others won't be tracked.</exception>
+		[DebuggerNonUserCode]
 		void DeliverMessageToConsumers([NotNull] IReceiveContext context)
 		{
 			try
