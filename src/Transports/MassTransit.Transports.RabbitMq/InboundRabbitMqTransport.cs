@@ -72,7 +72,7 @@ namespace MassTransit.Transports.RabbitMq
 
                         using (var body = new MemoryStream(result.Body, false))
                         {
-                            ReceiveContext context = ReceiveContext.FromBodyStream(body);
+                            ReceiveContext context = ReceiveContext.FromBodyStream(body, true);
                             context.SetMessageId(result.BasicProperties.MessageId ?? result.DeliveryTag.ToString());
                             result.BasicProperties.MessageId = context.MessageId;
                             context.SetInputAddress(_address);
