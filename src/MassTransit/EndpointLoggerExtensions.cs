@@ -42,6 +42,22 @@ namespace MassTransit
             }
         }
 
+        /// <summary>
+        /// Log that a message was requeued to the transport after an exception occurred
+        /// </summary>
+        /// <param name="sourceAddress"></param>
+        /// <param name="destinationAddress"></param>
+        /// <param name="messageId"></param>
+        /// <param name="description"> </param>
+        public static void LogReQueued(this IEndpointAddress sourceAddress, IEndpointAddress destinationAddress,
+                                    string messageId, string description)
+        {
+            if (_messages.IsInfoEnabled)
+            {
+                _messages.InfoFormat("RQUE:{0}:{1}:{2}:{3}", sourceAddress, destinationAddress, messageId, description);
+            }
+        }
+
         public static void LogReceived(this IEndpointAddress sourceAddress, string messageId, string description)
         {
             if (_messages.IsDebugEnabled)

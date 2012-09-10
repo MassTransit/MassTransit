@@ -288,7 +288,10 @@ namespace MassTransit.Transports
                                         _log.Error("An exception was thrown by a message consumer", ex);
 
                                     _tracker.IncrementRetryCount(receiveContext.MessageId, ex);
-                                    MoveMessageToErrorTransport(receiveContext);
+                                    if(!receiveContext.IsTransactional)
+                                    {
+                                        SaveMessageToInboundTransport(receiveContext);
+                                    }
 
                                     throw;
                                 }
@@ -349,6 +352,15 @@ namespace MassTransit.Transports
             _errorTransport.Send(moveContext);
 
             Address.LogMoved(_errorTransport.Address, context.MessageId, "");
+        }
+
+        void SaveMessageToInboundTransport(IReceiveContext context)
+        {
+            var moveContext = new MoveMessageSendContext(context);
+
+            _transport.Send(moveContext);
+
+            Address.LogReQueued(_transport.Address, context.MessageId, "");
         }
 
         ~Endpoint()

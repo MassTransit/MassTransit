@@ -79,7 +79,7 @@ namespace MassTransit.Transports.Msmq
                             Message peekMessage = enumerator.Current;
                             using (peekMessage)
                             {
-                                IReceiveContext context = ReceiveContext.FromBodyStream(peekMessage.BodyStream);
+                                IReceiveContext context = ReceiveContext.FromBodyStream(peekMessage.BodyStream, _address.IsTransactional);
                                 context.SetMessageId(peekMessage.Id);
                                 context.SetInputAddress(_address);
 

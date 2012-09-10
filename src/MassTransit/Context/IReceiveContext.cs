@@ -101,5 +101,10 @@ namespace MassTransit
 		IEnumerable<IReceived> Received { get; }
 
 		Guid Id { get; }
+
+        /// <summary>
+        /// True if the transport is transactional and will leave the message on the queue if an exception is thrown
+        /// </summary>
+	    bool IsTransactional { get; }
 	}
 }
