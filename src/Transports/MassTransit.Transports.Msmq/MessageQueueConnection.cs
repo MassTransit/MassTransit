@@ -12,120 +12,130 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq
 {
-	using System;
-	using System.Messaging;
-	using Exceptions;
-	using Logging;
+    using System;
+    using System.Messaging;
+    using Exceptions;
+    using Logging;
 
     public class MessageQueueConnection :
-		Connection
-	{
-	    static readonly ILog _log = Logger.Get(typeof (MessageQueueConnection));
-	    
-		readonly QueueAccessMode _accessMode;
-		readonly IMsmqEndpointAddress _address;
-		readonly string _formatName;
-		readonly string _multicastAddress;
-		bool _disposed;
-		MessageQueue _queue;
+        Connection
+    {
+        static readonly ILog _log = Logger.Get(typeof (MessageQueueConnection));
+        
+        readonly QueueAccessMode _accessMode;
+        readonly IMsmqEndpointAddress _address;
+        readonly string _formatName;
+        readonly string _multicastAddress;
+        bool _disposed;
+        MessageQueue _queue;
 
-		public MessageQueueConnection(IMsmqEndpointAddress address, QueueAccessMode accessMode)
-		{
-			_address = address;
-			_accessMode = accessMode;
-			_multicastAddress = null;
+        public MessageQueueConnection(IMsmqEndpointAddress address, QueueAccessMode accessMode)
+        {
+            _address = address;
+            _accessMode = accessMode;
+            _multicastAddress = null;
 
-			switch (_accessMode)
-			{
-				case QueueAccessMode.Send:
-					_formatName = _address.OutboundFormatName;
-					break;
+            switch (_accessMode)
+            {
+                case QueueAccessMode.Send:
+                    _formatName = _address.OutboundFormatName;
+                    break;
 
-				case QueueAccessMode.Peek:
-				case QueueAccessMode.PeekAndAdmin:
-				case QueueAccessMode.Receive:
-				case QueueAccessMode.ReceiveAndAdmin:
-					_formatName = _address.InboundFormatName;
-					_multicastAddress = address.MulticastAddress;
-					break;
+                case QueueAccessMode.Peek:
+                case QueueAccessMode.PeekAndAdmin:
+                case QueueAccessMode.Receive:
+                case QueueAccessMode.ReceiveAndAdmin:
+                    _formatName = _address.InboundFormatName;
+                    _multicastAddress = address.MulticastAddress;
+                    break;
 
-				default:
-					throw new EndpointException(_address.Uri, "An endpoint connection cannot be send and receive");
-			}
-		}
+                default:
+                    throw new EndpointException(_address.Uri, "An endpoint connection cannot be send and receive");
+            }
+        }
 
-		public IMsmqEndpointAddress Address
-		{
-			get { return _address; }
-		}
+        public IMsmqEndpointAddress Address
+        {
+            get { return _address; }
+        }
 
-		public string FormatName
-		{
-			get { return _formatName; }
-		}
+        public string FormatName
+        {
+            get { return _formatName; }
+        }
 
-		public MessageQueue Queue
-		{
-			get { return _queue; }
-		}
+        public MessageQueue Queue
+        {
+            get { return _queue; }
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		public void Disconnect()
-		{
-			if (_queue != null)
-			{
-			    _log.DebugFormat("Closing: " + _formatName);
+        public void Disconnect()
+        {
+            _log.DebugFormat("Closing: " + _formatName);
 
-				_queue.Close();
-				_queue.Dispose();
-				_queue = null;
-			}
-		}
+            try
+            {
+                if (_queue != null)
+                {
+                    try
+                    {
+                        _queue.Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Warn("Exception while closing MessageQueue connection", ex);
+                    }
 
-		public void Connect()
-		{
-			Disconnect();
+                    _queue.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Exception disposing of MessageQueue connection", ex);
+            }
+            finally
+            {
+                _queue = null;
+            }
+        }
+
+        public void Connect()
+        {
+            Disconnect();
 
             _log.DebugFormat("Creating MessageQueue: " + _formatName);
 
-			_queue = new MessageQueue(_formatName, _accessMode);
-			if (_multicastAddress != null)
-			{
-				_queue.MulticastAddress = _multicastAddress;
-			}
-			
-            //https://connect.microsoft.com/VisualStudio/feedback/details/736877/msmq-multicast-in-system-messaging
-            // ReSharper disable EmptyGeneralCatchClause
-            // ReSharper disable UnusedVariable
-            try { var touch = _queue.FormatName; } catch { }
-            // ReSharper restore UnusedVariable
-            // ReSharper restore EmptyGeneralCatchClause
+            _queue = new MessageQueue(_formatName, _accessMode);
+            if (_multicastAddress != null)
+            {
+                _queue.MulticastAddress = _multicastAddress;
+            }
+            
+            var filter = new MessagePropertyFilter();
+            filter.SetAll();
+            _queue.MessageReadPropertyFilter = filter;
+        }
 
+        void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                Disconnect();
+            }
 
-			var filter = new MessagePropertyFilter();
-			filter.SetAll();
-			_queue.MessageReadPropertyFilter = filter;
-		}
+            _disposed = true;
+        }
 
-		void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				Disconnect();
-			}
-
-			_disposed = true;
-		}
-
-		~MessageQueueConnection()
-		{
-			Dispose(false);
-		}
-	}
+        ~MessageQueueConnection()
+        {
+            Dispose(false);
+        }
+    }
 }

@@ -46,7 +46,7 @@ namespace Starbucks.Customer
                         {
                             sbc.ReceiveFrom("msmq://localhost/starbucks_customer");
                             sbc.UseMsmq();
-                            sbc.UseMulticastSubscriptionClient();
+                            sbc.UseSubscriptionService("msmq://egqdspc-2008r2/mt_subscriptions");
 
                             sbc.UseControlBus();
 
