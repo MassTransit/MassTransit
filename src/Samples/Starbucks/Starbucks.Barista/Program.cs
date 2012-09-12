@@ -48,7 +48,7 @@ namespace Starbucks.Barista
                             {
                                 sbc.ReceiveFrom("msmq://localhost/starbucks_barista");
                                 sbc.UseMsmq();
-                                sbc.UseMulticastSubscriptionClient();
+                                sbc.UseSubscriptionService("msmq://egqdspc-2008r2/mt_subscriptions");
 
                                 sbc.UseControlBus();
 

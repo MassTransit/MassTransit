@@ -34,7 +34,7 @@ namespace Starbucks.Cashier
 					return ServiceBusFactory.New(sbc =>
 						{
 							sbc.UseMsmq();
-							sbc.UseMulticastSubscriptionClient();
+                            sbc.UseSubscriptionService("msmq://egqdspc-2008r2/mt_subscriptions");
 							sbc.ReceiveFrom("msmq://localhost/starbucks_cashier");
 							sbc.SetConcurrentConsumerLimit(1); //a cashier cannot multi-task
 
