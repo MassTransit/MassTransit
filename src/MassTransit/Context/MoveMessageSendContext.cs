@@ -26,6 +26,10 @@ namespace MassTransit.Context
         public MoveMessageSendContext(IReceiveContext context)
         {
             SetUsing(context);
+            SetOriginalMessageId(context.OriginalMessageId);
+
+            if(string.IsNullOrEmpty(OriginalMessageId))
+                SetOriginalMessageId(context.MessageId);
 
             Id = context.Id;
 

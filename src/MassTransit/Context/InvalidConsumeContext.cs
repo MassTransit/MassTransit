@@ -88,6 +88,11 @@ namespace MassTransit.Context
             get { throw CreateException(); }
         }
 
+        public string OriginalMessageId
+        {
+            get { throw CreateException(); }
+        }
+
         public IReceiveContext BaseContext
         {
             get { throw CreateException(); }

@@ -55,19 +55,21 @@ namespace MassTransit.Transports.Msmq
 
                 context.SerializeTo(message.BodyStream);
 
-                if (context.ContentType != null)
-                {
-                    var headers = new TransportMessageHeaders();
-                    headers.Add("Content-Type", context.ContentType);
+                var headers = new TransportMessageHeaders();
 
-                    message.Extension = headers.GetBytes();
-                }
+                if (!string.IsNullOrEmpty(context.ContentType))
+                    headers.Add("Content-Type", context.ContentType);
+                if (!string.IsNullOrEmpty(context.OriginalMessageId))
+                    headers.Add("Original-Message-Id", context.OriginalMessageId);
+                
+                message.Extension = headers.GetBytes();
 
                 try
                 {
                     _connectionHandler.Use(connection => SendMessage(connection.Queue, message));
 
                     _address.LogSent(message.Id, context.MessageType);
+
                 }
                 catch (MessageQueueException ex)
                 {

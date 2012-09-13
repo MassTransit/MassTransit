@@ -51,6 +51,11 @@ namespace MassTransit.Testing.TestDecorators
             _context.SetCorrelationId(value);
         }
 
+        public void SetOriginalMessageId(string value)
+        {
+            _context.SetOriginalMessageId(value);
+        }
+
         public string RequestId
         {
             get { return _context.RequestId; }
@@ -284,6 +289,11 @@ namespace MassTransit.Testing.TestDecorators
         public bool IsTransactional
         {
             get { return _context.IsTransactional; }
+        }
+
+        public string OriginalMessageId
+        {
+            get { return _context.OriginalMessageId; }
         }
     }
 }

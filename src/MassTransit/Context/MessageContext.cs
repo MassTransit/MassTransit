@@ -44,6 +44,13 @@ namespace MassTransit.Context
             get { return _headers; }
         }
 
+        public string OriginalMessageId { get; private set; }
+
+        public void SetOriginalMessageId(string value)
+        {
+            OriginalMessageId = value;
+        }
+
         public void SetMessageId(string value)
         {
             MessageId = value;
