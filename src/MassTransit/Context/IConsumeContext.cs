@@ -32,7 +32,7 @@ namespace MassTransit
         void RetryLater();
 
         /// <summary>
-        /// Sends the message to either the fault address if specified or publishes the fault
+        /// Generates a fault for this message, which will be published once the message is moved
         /// </summary>
         void GenerateFault(Exception ex);
     }

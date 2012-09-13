@@ -278,7 +278,10 @@ namespace MassTransit.Transports
                             if (_log.IsErrorEnabled)
                                 _log.Error("An exception was thrown preparing the message consumers", ex);
 
-                            _tracker.IncrementRetryCount(acceptMessageId, ex);
+                            if(_tracker.IncrementRetryCount(acceptMessageId, ex))
+                            {
+                                acceptContext.PublishPendingFaults();
+                            }
                             return null;
                         }
 
@@ -296,7 +299,11 @@ namespace MassTransit.Transports
                                     if (_log.IsErrorEnabled)
                                         _log.Error("An exception was thrown by a message consumer", ex);
 
-                                    _tracker.IncrementRetryCount(receiveMessageId, ex);
+                                    if(_tracker.IncrementRetryCount(receiveMessageId, ex))
+                                    {
+                                        receiveContext.PublishPendingFaults();
+                                    }
+
                                     if(!receiveContext.IsTransactional)
                                     {
                                         SaveMessageToInboundTransport(receiveContext);

@@ -88,11 +88,6 @@ namespace MassTransit.Context
             get { throw CreateException(); }
         }
 
-        public string OriginalMessageId
-        {
-            get { throw CreateException(); }
-        }
-
         public IReceiveContext BaseContext
         {
             get { throw CreateException(); }
@@ -124,21 +119,12 @@ namespace MassTransit.Context
             throw CreateException();
         }
 
-        public void RetryLater()
-        {
-            throw CreateException();
-        }
-
         public void Respond<T>(T message, Action<ISendContext<T>> contextCallback)
             where T : class
         {
             throw CreateException();
         }
 
-        public void GenerateFault(Exception ex)
-        {
-            throw CreateException();
-        }
 
         static ContextException CreateException()
         {
