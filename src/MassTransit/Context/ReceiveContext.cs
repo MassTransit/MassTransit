@@ -33,10 +33,13 @@ namespace MassTransit.Context
         Stream _bodyStream;
         Stopwatch _timer;
         IMessageTypeConverter _typeConverter;
+        readonly IList<Action<IServiceBus>> _faultCallbacks;
 
         ReceiveContext()
         {
             Id = NewId.NextGuid();
+            
+            _faultCallbacks = new List<Action<IServiceBus>>();
             _timer = Stopwatch.StartNew();
             _sent = new List<ISent>();
             _published = new List<IPublished>();
@@ -103,6 +106,11 @@ namespace MassTransit.Context
             _typeConverter = serializer;
         }
 
+        public void NotifyFault(Action<IServiceBus> faultCallback)
+        {
+            _faultCallbacks.Add(faultCallback);
+        }
+
         public void NotifySend(ISendContext context, IEndpointAddress address)
         {
             _sent.Add(new Sent(context, address, _timer.ElapsedMilliseconds));
@@ -144,6 +152,21 @@ namespace MassTransit.Context
         public bool IsTransactional
         {
             get { return _transactional; }
+        }
+
+        public void PublishPendingFaults()
+        {
+            try
+            {
+                foreach (var callback in _faultCallbacks)
+                {
+                    callback(Bus);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Failed to publish pending fault", ex);
+            }
         }
 
         public bool IsContextAvailable(Type messageType)

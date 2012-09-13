@@ -83,6 +83,7 @@ namespace MassTransit.Transports
 
                 context.SerializeTo(message.Body);
                 message.ContentType = context.ContentType;
+                message.OriginalMessageId = context.OriginalMessageId;
 
                 lock (_messageLock)
                 {
@@ -140,6 +141,7 @@ namespace MassTransit.Transports
                         ReceiveContext context = ReceiveContext.FromBodyStream(message.Body);
                         context.SetMessageId(message.MessageId);
                         context.SetContentType(message.ContentType);
+                        context.SetOriginalMessageId(message.OriginalMessageId);
                         if (message.ExpirationTime.HasValue)
                             context.SetExpirationTime(message.ExpirationTime.Value);
 

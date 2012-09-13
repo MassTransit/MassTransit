@@ -35,7 +35,7 @@ namespace MassTransit.Transports
         /// </summary>
         /// <param name="id">The message identifier</param>
         /// <param name="exception">The exception that was thrown by the consumer(s)</param>
-        void IncrementRetryCount(string id, Exception exception);
+        bool IncrementRetryCount(string id, Exception exception);
 
         /// <summary>
         /// Marks the message as received successfully. This should remove the message tracking information

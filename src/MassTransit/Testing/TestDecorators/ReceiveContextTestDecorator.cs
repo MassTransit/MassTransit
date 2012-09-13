@@ -250,6 +250,11 @@ namespace MassTransit.Testing.TestDecorators
             _context.SetMessageTypeConverter(messageTypeConverter);
         }
 
+        public void NotifyFault(Action<IServiceBus> faultCallback)
+        {
+            _context.NotifyFault(faultCallback);
+        }
+
         public void NotifySend(ISendContext context, IEndpointAddress address)
         {
             _context.NotifySend(context, address);
@@ -294,6 +299,11 @@ namespace MassTransit.Testing.TestDecorators
         public string OriginalMessageId
         {
             get { return _context.OriginalMessageId; }
+        }
+
+        public void PublishPendingFaults()
+        {
+            _context.PublishPendingFaults();
         }
     }
 }
