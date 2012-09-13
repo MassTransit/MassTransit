@@ -25,7 +25,7 @@ namespace Starbucks.Customer
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        static void Main()
         {
             Log4NetLogger.Use("customer.log4net.xml");
 
@@ -46,7 +46,7 @@ namespace Starbucks.Customer
                         {
                             sbc.ReceiveFrom("msmq://localhost/starbucks_customer");
                             sbc.UseMsmq();
-                            sbc.UseSubscriptionService("msmq://egqdspc-2008r2/mt_subscriptions");
+                            sbc.UseMulticastSubscriptionClient();
 
                             sbc.UseControlBus();
 

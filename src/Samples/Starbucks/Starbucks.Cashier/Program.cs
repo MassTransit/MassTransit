@@ -27,7 +27,7 @@ namespace Starbucks.Cashier
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        static void Main()
         {
             Log4NetLogger.Use("cashier.log4net.xml");
 
