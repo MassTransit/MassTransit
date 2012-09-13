@@ -52,6 +52,8 @@ namespace MassTransit
         /// </summary>
         Type DeclaringMessageType { get; }
 
+        string OriginalMessageId { get; }
+
         void SetMessageType(string messageType);
 
         void SetRequestId(string value);

@@ -85,6 +85,7 @@ namespace MassTransit.Transports.Msmq
                                         TransportMessageHeaders headers = TransportMessageHeaders.Create(extension);
 
                                         context.SetContentType(headers["Content-Type"]);
+                                        context.SetOriginalMessageId(headers["Original-Message-Id"]);
                                     }
 
                                     Action<IReceiveContext> receive = receiver(context);

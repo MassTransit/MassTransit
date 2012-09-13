@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
     using System;
+    using System.Diagnostics;
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using MassTransit.Tests;
@@ -61,7 +62,7 @@ namespace MassTransit.Transports.Msmq.Tests
         [Test]
         public void The_message_should_exist_in_the_error_queue()
         {
-            LocalErrorEndpoint.ShouldContain(_ping, 5.Seconds());
+            LocalErrorEndpoint.ShouldContain(_ping, Debugger.IsAttached ? 300.Seconds() : 5.Seconds());
         }
 
         [Test]
