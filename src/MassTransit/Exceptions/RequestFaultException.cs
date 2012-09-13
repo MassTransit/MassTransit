@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,45 +16,31 @@ namespace MassTransit.Exceptions
     using System.Runtime.Serialization;
 
     [Serializable]
-    public class RequestException :
-        MassTransitException
+    public class RequestFaultException :
+        RequestException
     {
-        readonly object _response;
-
-        public RequestException(string message, Exception innerException, object response)
-            : base(message, innerException)
-        {
-            _response = response;
-        }
-
-        public RequestException()
+        public RequestFaultException(string message, Exception innerException, object fault)
+            : base(message, innerException, fault)
         {
         }
 
-        public RequestException(string message)
-            : base(message)
+        public RequestFaultException()
         {
         }
 
-        public RequestException(string message, Exception innerException)
+        public RequestFaultException(string message, object fault)
+            : base(message, fault)
+        {
+        }
+
+        public RequestFaultException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
-        protected RequestException(SerializationInfo info, StreamingContext context)
+        protected RequestFaultException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-        }
-
-        protected RequestException(string message, object response)
-            : base(message)
-        {
-            _response = response;
-        }
-
-        public object Response
-        {
-            get { return _response; }
         }
     }
 }

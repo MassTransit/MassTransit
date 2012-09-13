@@ -54,6 +54,17 @@ namespace MassTransit.RequestResponse.Configurators
             AddHandler(typeof(T), () => new WatchResponseHandler<T>(RequestId, RequestSynchronizationContext, watcher));
         }
 
+        public void HandleFault(Action<Fault<TRequest>> faultCallback)
+        {
+            AddHandler(typeof(Fault<TRequest>), () => new CompleteResponseHandler<Fault<TRequest>>(RequestId, 
+                _request, RequestSynchronizationContext, faultCallback));
+        }
+
+        public void HandleFault(Action<IConsumeContext<Fault<TRequest>>, Fault<TRequest>> faultCallback)
+        {
+            AddHandler(typeof(Fault<TRequest>), () => new CompleteResponseHandler<Fault<TRequest>>(RequestId,
+                _request, RequestSynchronizationContext, faultCallback));
+        }
 
         public IAsyncRequest<TRequest> Build(IServiceBus bus)
         {
