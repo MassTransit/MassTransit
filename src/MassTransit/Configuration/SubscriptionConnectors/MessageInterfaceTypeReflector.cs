@@ -30,8 +30,10 @@ namespace MassTransit.SubscriptionConnectors
         {
             return GetConsumesSelectedContextTypes()
                 .Concat(GetConsumesContextTypes())
+                .Concat(GetConsumesAsyncContextTypes())
                 .Concat(GetConsumesSelectedTypes())
-                .Concat(GetConsumesAllTypes());
+                .Concat(GetConsumesAllTypes())
+                .Concat(GetConsumesAsyncTypes());
         }
 
         internal static IEnumerable<MessageInterfaceType> GetConsumesContextTypes()
@@ -42,6 +44,18 @@ namespace MassTransit.SubscriptionConnectors
                 .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0]))
                 .Where(x => x.MessageType.IsGenericType)
                 .Where(x => x.MessageType.GetGenericTypeDefinition() == typeof (IConsumeContext<>))
+                .Select(x => new MessageInterfaceType(x.InterfaceType, x.MessageType.GetGenericArguments()[0]))
+                .Where(x => x.MessageType.IsValueType == false);
+        }
+
+        internal static IEnumerable<MessageInterfaceType> GetConsumesAsyncContextTypes()
+        {
+            return typeof(T).GetInterfaces()
+                .Where(x => x.IsGenericType)
+                .Where(x => x.GetGenericTypeDefinition() == typeof(Consumes<>.Async))
+                .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0]))
+                .Where(x => x.MessageType.IsGenericType)
+                .Where(x => x.MessageType.GetGenericTypeDefinition() == typeof(IConsumeContext<>))
                 .Select(x => new MessageInterfaceType(x.InterfaceType, x.MessageType.GetGenericArguments()[0]))
                 .Where(x => x.MessageType.IsValueType == false);
         }
@@ -63,6 +77,16 @@ namespace MassTransit.SubscriptionConnectors
             return typeof (T).GetInterfaces()
                 .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof (Consumes<>.All))
+                .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0]))
+                .Where(x => x.MessageType.IsValueType == false)
+                .Where(IsNotContextType);
+        }
+
+        internal static IEnumerable<MessageInterfaceType> GetConsumesAsyncTypes()
+        {
+            return typeof(T).GetInterfaces()
+                .Where(x => x.IsGenericType)
+                .Where(x => x.GetGenericTypeDefinition() == typeof(Consumes<>.Async))
                 .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0]))
                 .Where(x => x.MessageType.IsValueType == false)
                 .Where(IsNotContextType);

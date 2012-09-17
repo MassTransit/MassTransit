@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System.Threading.Tasks;
     using Logging;
     using Util;
     using Magnum.Extensions;
@@ -60,7 +61,7 @@ namespace MassTransit
 
 		/// <summary>
 		/// Declares a Consume method for the message type TMessage which is called
-		/// whenever a a message is received of the specified type.
+		/// whenever a message is received of the specified type.
 		/// </summary>
 		public interface All :
 			IConsumer
@@ -74,6 +75,22 @@ namespace MassTransit
 			void Consume(TMessage message);
 		}
 
+        /// <summary>
+        /// Declares a Consume method for the message type TMessage which is called
+        /// whenever a message is received of the specified type.
+        /// </summary>
+        public interface Async :
+            IConsumer
+        {
+            /// <summary>
+            /// Called by the framework when a message is available to be consumed. This
+            /// is called by a framework thread, so care should be used when accessing
+            /// any shared objects.
+            /// </summary>
+            /// <param name="message">The message to consume.</param>
+            Task Consume(TMessage message);
+        }
+
 		/// <summary>
 		/// Declares a Consume method for the message type TMessage wrapped in the 
 		/// consume context
@@ -82,6 +99,15 @@ namespace MassTransit
 			Consumes<IConsumeContext<TMessage>>.All
 		{
 		}
+
+        /// <summary>
+        /// Declares a Consume method for the message type TMessage wrapped in the 
+        /// consume context
+        /// </summary>
+        public interface AsyncContext :
+            Consumes<IConsumeContext<TMessage>>.Async
+        {
+        }
 
 		/// <summary>
 		/// Called by the framework when a message is available to be consumed that

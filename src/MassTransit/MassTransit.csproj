@@ -113,6 +113,10 @@
     <Compile Include="Configuration\MessageTrackerConfigurationExtensions.cs" />
     <Compile Include="Configuration\ReferenceFactory.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerFactoryConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\AsyncInstanceSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\AsyncContextConsumerSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\AsyncContextInstanceSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\AsyncConsumerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\CorrelatedMessageInterfaceType.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceType.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeExtensions.cs" />
@@ -383,6 +387,8 @@
     <Compile Include="Pipeline\InstanceHandlerSelector.cs" />
     <Compile Include="Pipeline\MultipleHandlerSelector.cs" />
     <Compile Include="Pipeline\Sinks\ContextConsumerMessageSink.cs" />
+    <Compile Include="Pipeline\Sinks\AsyncContextConsumerMessageSink.cs" />
+    <Compile Include="Pipeline\Sinks\AsyncConsumerMessageSink.cs" />
     <Compile Include="Pipeline\Sinks\RequestMessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageFilter.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageInterceptor.cs" />
