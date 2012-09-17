@@ -75,6 +75,7 @@ namespace MassTransit
 			void Consume(TMessage message);
 		}
 
+#if !NET35
         /// <summary>
         /// Declares a Consume method for the message type TMessage which is called
         /// whenever a message is received of the specified type.
@@ -90,6 +91,7 @@ namespace MassTransit
             /// <param name="message">The message to consume.</param>
             Task Consume(TMessage message);
         }
+#endif
 
 		/// <summary>
 		/// Declares a Consume method for the message type TMessage wrapped in the 
@@ -100,6 +102,7 @@ namespace MassTransit
 		{
 		}
 
+#if !NET35
         /// <summary>
         /// Declares a Consume method for the message type TMessage wrapped in the 
         /// consume context
@@ -108,6 +111,7 @@ namespace MassTransit
             Consumes<IConsumeContext<TMessage>>.Async
         {
         }
+#endif
 
 		/// <summary>
 		/// Called by the framework when a message is available to be consumed that
