@@ -30,7 +30,7 @@ namespace MassTransit.SubscriptionConnectors
         {
             return GetConsumesSelectedContextTypes()
                 .Concat(GetConsumesContextTypes())
-#if !NET35
+#if NET40
                 .Concat(GetConsumesAsyncContextTypes())
                 .Concat(GetConsumesAsyncTypes())
 #endif
@@ -50,7 +50,7 @@ namespace MassTransit.SubscriptionConnectors
                 .Where(x => x.MessageType.IsValueType == false);
         }
 
-#if !NET35
+#if NET40
         internal static IEnumerable<MessageInterfaceType> GetConsumesAsyncContextTypes()
         {
             return typeof(T).GetInterfaces()

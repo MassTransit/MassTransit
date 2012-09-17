@@ -51,7 +51,7 @@ namespace MassTransit.SubscriptionConnectors
                 ConsumesCorrelated()
                 .Concat(ConsumesSelectedContext())
                 .Concat(ConsumesContext())
-#if !NET35
+#if NET40
                 .Concat(ConsumesAsyncContext())
                 .Concat(ConsumesAsync())
 #endif
@@ -92,7 +92,7 @@ namespace MassTransit.SubscriptionConnectors
                        new[] {typeof(T), x.MessageType});
         }
 
-#if !NET35
+#if NET40
         static InstanceSubscriptionConnector CreateAsyncContextConnector(MessageInterfaceType x)
         {
             return (InstanceSubscriptionConnector)
@@ -104,6 +104,18 @@ namespace MassTransit.SubscriptionConnectors
         {
             return MessageInterfaceTypeReflector<T>.GetConsumesAsyncContextTypes()
                 .Select(CreateAsyncContextConnector);
+        }
+
+        static IEnumerable<InstanceSubscriptionConnector> ConsumesAsync()
+        {
+            return MessageInterfaceTypeReflector<T>.GetConsumesAsyncTypes()
+                .Select(CreateAsyncConnector);
+        }
+
+        static InstanceSubscriptionConnector CreateAsyncConnector(MessageInterfaceType x)
+        {
+            return (InstanceSubscriptionConnector)
+                   FastActivator.Create(typeof(AsyncInstanceSubscriptionConnector<,>), new[] { typeof(T), x.MessageType });
         }
 #endif
 
@@ -120,22 +132,10 @@ namespace MassTransit.SubscriptionConnectors
                 .Select(CreateConnector);
         }
 
-        static IEnumerable<InstanceSubscriptionConnector> ConsumesAsync()
-        {
-            return MessageInterfaceTypeReflector<T>.GetConsumesAsyncTypes()
-                .Select(CreateAsyncConnector);
-        }
-
         static InstanceSubscriptionConnector CreateConnector(MessageInterfaceType x)
         {
             return (InstanceSubscriptionConnector)
                    FastActivator.Create(typeof(InstanceSubscriptionConnector<,>), new[] {typeof(T), x.MessageType});
-        }
-
-        static InstanceSubscriptionConnector CreateAsyncConnector(MessageInterfaceType x)
-        {
-            return (InstanceSubscriptionConnector)
-                   FastActivator.Create(typeof(AsyncInstanceSubscriptionConnector<,>), new[] { typeof(T), x.MessageType });
         }
 
         static IEnumerable<InstanceSubscriptionConnector> ConsumesSelected()

@@ -1,4 +1,4 @@
-﻿#if !NET35
+﻿#if NET40
 
 // Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
