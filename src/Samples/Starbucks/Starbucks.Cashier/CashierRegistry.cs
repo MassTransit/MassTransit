@@ -12,37 +12,37 @@
 // specific language governing permissions and limitations under the License.
 namespace Starbucks.Cashier
 {
-	using MassTransit;
-	using MassTransit.Saga;
-	using Ninject.Modules;
+    using MassTransit;
+    using MassTransit.Saga;
+    using Ninject.Modules;
 
-	public class CashierRegistry :
-		NinjectModule
-	{
-		public override void Load()
-		{
-			Bind<ISagaRepository<CashierSaga>>()
-				.To<InMemorySagaRepository<CashierSaga>>()
-				.InSingletonScope();
+    public class CashierRegistry :
+        NinjectModule
+    {
+        public override void Load()
+        {
+            Bind<ISagaRepository<CashierSaga>>()
+                .To<InMemorySagaRepository<CashierSaga>>()
+                .InSingletonScope();
 
-			Bind<CashierService>()
-				.To<CashierService>()
-				.InSingletonScope();
+            Bind<CashierService>()
+                .To<CashierService>()
+                .InSingletonScope();
 
-			Bind<IServiceBus>().ToMethod(context =>
-				{
-					return ServiceBusFactory.New(sbc =>
-						{
-							sbc.UseMsmq();
-							sbc.UseMulticastSubscriptionClient();
-							sbc.ReceiveFrom("msmq://localhost/starbucks_cashier");
-							sbc.SetConcurrentConsumerLimit(1); //a cashier cannot multi-task
+            Bind<IServiceBus>().ToMethod(context =>
+                {
+                    return ServiceBusFactory.New(sbc =>
+                        {
+                            sbc.UseMsmq();
+                            sbc.UseMulticastSubscriptionClient();
+                            sbc.ReceiveFrom("msmq://localhost/starbucks_cashier");
+                            sbc.SetConcurrentConsumerLimit(1); //a cashier cannot multi-task
 
-							sbc.UseControlBus();
+                            sbc.UseControlBus();
                             sbc.EnableRemoteIntrospection();
-						});
-				})
-				.InSingletonScope();
-		}
-	}
+                        });
+                })
+                .InSingletonScope();
+        }
+    }
 }

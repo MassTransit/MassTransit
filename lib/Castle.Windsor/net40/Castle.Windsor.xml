@@ -330,36 +330,33 @@
         <member name="T:Castle.Core.InterceptorAttribute">
             <summary>
               Used to declare that a component wants interceptors acting on it.
+              Out of the box recognized only if applied on component's implementation class.
             </summary>
         </member>
         <member name="M:Castle.Core.InterceptorAttribute.#ctor(System.String)">
             <summary>
-              Constructs the InterceptorAttribute pointing to
-              a key to a interceptor
+              Constructs the InterceptorAttribute pointing to a key to a interceptor
             </summary>
-            <param name = "componentKey"></param>
+            <param name="componentKey"> </param>
         </member>
         <member name="M:Castle.Core.InterceptorAttribute.#ctor(System.Type)">
             <summary>
-              Constructs the InterceptorAttribute pointing to
-              a service
+              Constructs the InterceptorAttribute pointing to a service
             </summary>
-            <param name = "interceptorType"></param>
+            <param name="interceptorType"> </param>
         </member>
         <member name="T:Castle.Core.Internal.SimpleThreadSafeDictionary`2">
             <summary>
-              Simple type for thread safe adding/reading to/from keyed store.
-              The difference between this and built in concurrent dictionary is that in this case
-              adding is happening under a lock so never more than one thread will be adding at a time.
+              Simple type for thread safe adding/reading to/from keyed store. The difference between this and built in concurrent dictionary is that in this case adding is happening under a lock so never more than one thread will be adding at a time.
             </summary>
-            <typeparam name = "TKey"></typeparam>
-            <typeparam name = "TValue"></typeparam>
+            <typeparam name="TKey"> </typeparam>
+            <typeparam name="TValue"> </typeparam>
         </member>
-        <member name="M:Castle.Core.Internal.SimpleThreadSafeDictionary`2.Dispose">
+        <member name="M:Castle.Core.Internal.SimpleThreadSafeDictionary`2.EjectAllValues">
             <summary>
-              returns all values and clears the dictionary
+              Returns all values and clears the dictionary
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.Core.Internal.StringExtensions.EqualsText(System.String,System.String)">
             <summary>
@@ -394,6 +391,28 @@
             </summary>
             <param name = "type"></param>
             <returns></returns>
+        </member>
+        <member name="M:Castle.Core.Internal.TypeUtil.IsPrimitiveTypeOrCollection(System.Type)">
+            <summary>
+              Checkis if given <paramref name="type"/> is a primitive type or collection of primitive types. Value types, <see cref="T:System.String"/> are considered primitive and can not be registered as components in Windsor
+            </summary>
+            <param name="type"> </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Castle.Core.Internal.TypeUtil.IsPrimitiveType(System.Type)">
+            <summary>
+              Checkis if given <paramref name="type"/> is a primitive type. Value types and <see cref="T:System.String"/> are considered primitive and can not be registered as components in Windsor
+            </summary>
+            <param name="type"> </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Castle.Core.Internal.TypeUtil.TryMakeGenericType(System.Type,System.Type[])">
+            <summary>
+              Calls <see cref="M:System.Type.MakeGenericType(System.Type[])"/> and if a generic constraint is violated returns <c>null</c> instead of throwing <see cref="T:System.ArgumentException"/>.
+            </summary>
+            <param name="openGeneric"> </param>
+            <param name="arguments"> </param>
+            <returns> </returns>
         </member>
         <member name="T:Castle.Core.LifestyleType">
             <summary>
@@ -897,24 +916,24 @@
             <summary>
               Constructs and initializes the handler
             </summary>
-            <param name = "model"></param>
+            <param name="model"> </param>
         </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.ReleaseCore(Castle.MicroKernel.Burden)">
             <summary>
               Should be implemented by derived classes: 
               disposes the component instance (or recycle it)
             </summary>
-            <param name = "burden"></param>
-            <returns>true if destroyed.</returns>
+            <param name="burden"> </param>
+            <returns> true if destroyed. </returns>
         </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.Resolve(Castle.MicroKernel.Context.CreationContext,System.Boolean)">
             <summary>
               Returns an instance of the component this handler
               is responsible for
             </summary>
-            <param name = "context"></param>
-            <param name = "instanceRequired">when <c>false</c>, handler can not create valid instance and return <c>null</c> instead </param>
-            <returns></returns>
+            <param name="context"> </param>
+            <param name="instanceRequired"> when <c>false</c> , handler can not create valid instance and return <c>null</c> instead </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.Init(Castle.MicroKernel.IKernelInternal)">
             <summary>
@@ -924,22 +943,22 @@
               creates the lifestyle manager instance and computes
               the handler state.
             </summary>
-            <param name="kernel"></param>
+            <param name="kernel"> </param>
         </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.Release(Castle.MicroKernel.Burden)">
             <summary>
               disposes the component instance (or recycle it).
             </summary>
-            <param name = "burden"></param>
-            <returns></returns>
+            <param name="burden"> </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.Resolve(Castle.MicroKernel.Context.CreationContext)">
             <summary>
               Returns an instance of the component this handler
               is responsible for
             </summary>
-            <param name = "context"></param>
-            <returns></returns>
+            <param name="context"> </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.AddDependency(Castle.Core.DependencyModel)">
             <summary>
@@ -953,7 +972,7 @@
               or dictionary and changes the handler state to
               <see cref="F:Castle.MicroKernel.HandlerState.WaitingDependency"/>
             </remarks>
-            <param name="dependency"></param>
+            <param name="dependency"> </param>
         </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.DependencySatisfied(System.Boolean@)">
             <summary>
@@ -965,7 +984,7 @@
               Handler for the event
               <see cref="E:Castle.MicroKernel.IKernelEvents.HandlerRegistered"/>
             </remarks>
-            <param name="stateChanged"></param>
+            <param name="stateChanged"> </param>
         </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.EnsureDependenciesCanBeSatisfied(Castle.MicroKernel.ComponentActivator.IDependencyAwareActivator)">
             <summary>
@@ -985,8 +1004,8 @@
               This method implementation checks whether the parent container
               is able to supply the dependencies for this handler.
             </remarks>
-            <param name = "sender"></param>
-            <param name = "e"></param>
+            <param name="sender"> </param>
+            <param name="e"> </param>
         </member>
         <member name="P:Castle.MicroKernel.Handlers.AbstractHandler.ComponentModel">
             <summary>
@@ -1664,8 +1683,8 @@
               Constructs a DefaultKernel with the specified
               implementation of <see cref="T:Castle.MicroKernel.IProxyFactory"/> and <see cref="T:Castle.MicroKernel.IDependencyResolver"/>
             </summary>
-            <param name="resolver"></param>
-            <param name="proxyFactory"></param>
+            <param name="resolver"> </param>
+            <param name="proxyFactory"> </param>
         </member>
         <member name="M:Castle.MicroKernel.DefaultKernel.#ctor(Castle.MicroKernel.IProxyFactory)">
             <summary>
@@ -1684,22 +1703,22 @@
               implements the specified service. 
               The check is made using IsAssignableFrom
             </summary>
-            <param name = "service"></param>
-            <returns></returns>
+            <param name="service"> </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.DefaultKernel.GetFacilities">
             <summary>
               Returns the facilities registered on the kernel.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.DefaultKernel.GetHandlers(System.Type)">
             <summary>
               Return handlers for components that 
               implements the specified service.
             </summary>
-            <param name = "service"></param>
-            <returns></returns>
+            <param name="service"> </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.DefaultKernel.Register(Castle.MicroKernel.Registration.IRegistration[])">
             <summary>
@@ -1709,17 +1728,13 @@
               Let the Intellisense drive you through the fluent API past those entry points. For details see the documentation at http://j.mp/WindsorApi
             </summary>
             <example>
-              <code>
-                kernel.Register(Component.For&lt;IService&gt;().ImplementedBy&lt;DefaultService&gt;().LifestyleTransient());
-              </code>
+              <code>kernel.Register(Component.For&lt;IService&gt;().ImplementedBy&lt;DefaultService&gt;().LifestyleTransient());</code>
             </example>
             <example>
-              <code>
-                kernel.Register(Classes.FromThisAssembly().BasedOn&lt;IService&gt;().WithServiceDefaultInterfaces().Configure(c =&gt; c.LifestyleTransient()));
-              </code>
+              <code>kernel.Register(Classes.FromThisAssembly().BasedOn&lt;IService&gt;().WithServiceDefaultInterfaces().Configure(c =&gt; c.LifestyleTransient()));</code>
             </example>
-            <param name="registrations">The component registrations created by <see cref="M:Castle.MicroKernel.Registration.Component.For``1"/>, <see cref="M:Castle.MicroKernel.Registration.AllTypes.FromThisAssembly"/> or different entry method to the fluent API.</param>
-            <returns>The kernel.</returns>
+            <param name="registrations"> The component registrations created by <see cref="M:Castle.MicroKernel.Registration.Component.For``1"/> , <see cref="M:Castle.MicroKernel.Registration.AllTypes.FromThisAssembly"/> or different entry method to the fluent API. </param>
+            <returns> The kernel. </returns>
         </member>
         <member name="M:Castle.MicroKernel.DefaultKernel.ReleaseComponent(System.Object)">
             <summary>
@@ -1727,7 +1742,7 @@
               the kernel to execute the proper decommission
               lifecycles on the component instance.
             </summary>
-            <param name = "instance"></param>
+            <param name="instance"> </param>
         </member>
         <member name="M:Castle.MicroKernel.DefaultKernel.CreateLifestyleManager(Castle.Core.ComponentModel,Castle.MicroKernel.IComponentActivator)">
             <summary>
@@ -1740,9 +1755,9 @@
               <see cref="M:Castle.MicroKernel.ILifestyleManager.Init(Castle.MicroKernel.IComponentActivator,Castle.MicroKernel.IKernel,Castle.Core.ComponentModel)"/>
               to initialize the newly created manager.
             </summary>
-            <param name="model"></param>
-            <param name="activator"></param>
-            <returns></returns>
+            <param name="model"> </param>
+            <param name="activator"> </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.DefaultKernel.DisposeHandler(Castle.MicroKernel.IHandler)">
             <remarks>
@@ -2353,42 +2368,33 @@
               otherwise the factory will not function correctly.
             </remarks>
         </member>
-        <member name="T:Castle.MicroKernel.Handlers.ParentHandlerWithChildResolver">
+        <member name="M:Castle.MicroKernel.Handlers.ParentHandlerWrapper.#ctor(Castle.MicroKernel.IHandler,Castle.MicroKernel.ISubDependencyResolver,Castle.MicroKernel.IReleasePolicy)">
             <summary>
-              Redirects resolution to the main resolver, and if not found uses
-              the parent handler.
-            </summary>
-        </member>
-        <member name="M:Castle.MicroKernel.Handlers.ParentHandlerWithChildResolver.#ctor(Castle.MicroKernel.IHandler,Castle.MicroKernel.ISubDependencyResolver)">
-            <summary>
-              Initializes a new instance of the <see cref="T:Castle.MicroKernel.Handlers.ParentHandlerWithChildResolver"/> class.
+              Initializes a new instance of the <see cref="T:Castle.MicroKernel.Handlers.ParentHandlerWrapper"/> class.
             </summary>
             <param name="parentHandler">The parent handler.</param>
             <param name="childResolver">The child resolver.</param>
-        </member>
-        <member name="M:Castle.MicroKernel.Handlers.DefaultGenericHandler.#ctor(Castle.Core.ComponentModel,Castle.MicroKernel.Handlers.IGenericImplementationMatchingStrategy)">
-            <summary>
-              Initializes a new instance of the <see cref="T:Castle.MicroKernel.Handlers.DefaultGenericHandler"/> class.
-            </summary>
-            <param name="model"></param>
-            <param name="implementationMatchingStrategy"></param>
+            <param name="parentReleasePolicy">Release policy of the parent container.</param>
         </member>
         <member name="M:Castle.MicroKernel.Handlers.DefaultGenericHandler.CloneParentProperties(Castle.Core.ComponentModel)">
             <summary>
               Clone some of the parent componentmodel properties to the generic subhandler.
             </summary>
             <remarks>
-              The following properties are copied:
-              <list type="bullet">
-                <item>
-                  <description>The <see cref="T:Castle.Core.LifestyleType"/></description>
-                </item>
-                <item>
-                  <description>The <see cref="P:Castle.Core.ComponentModel.Interceptors"/></description>
-                </item>
-              </list>
+              The following properties are copied: <list type="bullet">
+                                                     <item>
+                                                       <description>The
+                                                         <see cref="T:Castle.Core.LifestyleType"/>
+                                                       </description>
+                                                     </item>
+                                                     <item>
+                                                       <description>The
+                                                         <see cref="P:Castle.Core.ComponentModel.Interceptors"/>
+                                                       </description>
+                                                     </item>
+                                                   </list>
             </remarks>
-            <param name="newModel">the subhandler</param>
+            <param name="newModel"> the subhandler </param>
         </member>
         <member name="T:Castle.MicroKernel.IHandlerFactory">
             <summary>
@@ -2648,7 +2654,7 @@
         </member>
         <member name="T:Castle.MicroKernel.Lifestyle.Scoped.CallContextLifetimeScope">
             <summary>
-              Provides explicit lifetime scoping within logical path of execution. Used for types with <see cref="F:Castle.Core.LifestyleType.Scoped"/>.
+              Provides explicit lifetime scoping within logical path of execution. Used for types with <see cref="F:Castle.Core.LifestyleType.Scoped"/> .
             </summary>
             <remarks>
               The scope is passed on to child threads, including ThreadPool threads. The capability is limited to single <see cref="T:System.AppDomain"/> and should be used cauciously as call to <see cref="M:Castle.MicroKernel.Lifestyle.Scoped.CallContextLifetimeScope.Dispose"/> may occur while the child thread is still executing, what in turn may lead to subtle threading bugs.
@@ -3100,8 +3106,7 @@
         </member>
         <member name="T:Castle.Core.ComponentModel">
             <summary>
-              Represents the collection of information and
-              meta information collected about a component.
+              Represents the collection of information and meta information collected about a component.
             </summary>
         </member>
         <member name="F:Castle.Core.ComponentModel.dependencies">
@@ -3133,106 +3138,101 @@
             <summary>
               Adds constructor dependency to this <see cref="T:Castle.Core.ComponentModel"/>
             </summary>
-            <param name="constructor"></param>
+            <param name="constructor"> </param>
         </member>
         <member name="M:Castle.Core.ComponentModel.AddProperty(Castle.Core.PropertySet)">
             <summary>
               Adds property dependency to this <see cref="T:Castle.Core.ComponentModel"/>
             </summary>
-            <param name="property"></param>
+            <param name="property"> </param>
         </member>
         <member name="M:Castle.Core.ComponentModel.AddService(System.Type)">
             <summary>
               Add service to be exposed by this <see cref="T:Castle.Core.ComponentModel"/>
             </summary>
-            <param name="type"></param>
+            <param name="type"> </param>
         </member>
         <member name="M:Castle.Core.ComponentModel.Requires(System.Predicate{Castle.Core.PropertySet}[])">
             <summary>
               Requires the selected property dependencies.
             </summary>
-            <param name = "selectors">The property selector.</param>
+            <param name="selectors"> The property selector. </param>
         </member>
         <member name="M:Castle.Core.ComponentModel.Requires``1">
             <summary>
-              Requires the property dependencies of type <typeparamref name = "D" />.
+              Requires the property dependencies of type <typeparamref name="D" /> .
             </summary>
-            <typeparam name = "D">The dependency type.</typeparam>
+            <typeparam name="D"> The dependency type. </typeparam>
         </member>
         <member name="P:Castle.Core.ComponentModel.Configuration">
             <summary>
               Gets or sets the configuration.
             </summary>
-            <value>The configuration.</value>
+            <value> The configuration. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.Constructors">
             <summary>
               Gets the constructors candidates.
             </summary>
-            <value>The constructors.</value>
+            <value> The constructors. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.CustomComponentActivator">
             <summary>
               Gets or sets the custom component activator.
             </summary>
-            <value>The custom component activator.</value>
+            <value> The custom component activator. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.CustomDependencies">
             <summary>
               Gets the custom dependencies.
             </summary>
-            <value>The custom dependencies.</value>
+            <value> The custom dependencies. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.CustomLifestyle">
             <summary>
               Gets or sets the custom lifestyle.
             </summary>
-            <value>The custom lifestyle.</value>
+            <value> The custom lifestyle. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.Dependencies">
             <summary>
-              Dependencies are kept within constructors and
-              properties. Others dependencies must be 
-              registered here, so the kernel (as a matter 
-              of fact the handler) can check them
+              Dependencies are kept within constructors and properties. Others dependencies must be registered here, so the kernel (as a matter of fact the handler) can check them
             </summary>
         </member>
         <member name="P:Castle.Core.ComponentModel.ExtendedProperties">
             <summary>
               Gets or sets the extended properties.
             </summary>
-            <value>The extended properties.</value>
+            <value> The extended properties. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.Implementation">
             <summary>
               Gets or sets the component implementation.
             </summary>
-            <value>The implementation.</value>
+            <value> The implementation. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.InspectionBehavior">
             <summary>
-              Gets or sets the strategy for
-              inspecting public properties 
-              on the components
+              Gets or sets the strategy for inspecting public properties on the components
             </summary>
         </member>
         <member name="P:Castle.Core.ComponentModel.Interceptors">
             <summary>
               Gets the interceptors.
             </summary>
-            <value>The interceptors.</value>
+            <value> The interceptors. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.Lifecycle">
             <summary>
               Gets the lifecycle steps.
             </summary>
-            <value>The lifecycle steps.</value>
+            <value> The lifecycle steps. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.LifestyleType">
             <summary>
               Gets or sets the lifestyle type.
             </summary>
-            <value>The type of the lifestyle.</value>
+            <value> The type of the lifestyle. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.Name">
             <summary>
@@ -3243,21 +3243,19 @@
             <summary>
               Gets the parameter collection.
             </summary>
-            <value>The parameters.</value>
+            <value> The parameters. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.Properties">
             <summary>
               Gets the properties set.
             </summary>
-            <value>The properties.</value>
+            <value> The properties. </value>
         </member>
         <member name="P:Castle.Core.ComponentModel.RequiresGenericArguments">
             <summary>
               Gets or sets a value indicating whether the component requires generic arguments.
             </summary>
-            <value>
-              <c>true</c> if generic arguments are required; otherwise, <c>false</c>.
-            </value>
+            <value> <c>true</c> if generic arguments are required; otherwise, <c>false</c> . </value>
         </member>
         <member name="T:Castle.Core.ConstructorCandidate">
             <summary>
@@ -4011,7 +4009,7 @@
               <para/>
               You can create a new registration with the <see cref="T:Castle.MicroKernel.Registration.Component"/> factory.
             </summary>
-            <typeparam name="TService">The service type</typeparam>
+            <typeparam name="TService"> The service type </typeparam>
         </member>
         <member name="T:Castle.MicroKernel.Registration.IRegistration">
             <summary>
@@ -4038,97 +4036,96 @@
             <summary>
               Marks the components with one or more actors.
             </summary>
-            <param name = "actors">The component actors.</param>
-            <returns></returns>
+            <param name="actors"> The component actors. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Activator``1">
             <summary>
               Set a custom <see cref="T:Castle.MicroKernel.IComponentActivator"/> which creates and destroys the component.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.AddAttributeDescriptor(System.String,System.String)">
             <summary>
               Adds the attribute descriptor.
             </summary>
-            <param name = "key">The key.</param>
-            <param name = "value">The value.</param>
-            <returns></returns>
+            <param name="key"> The key. </param>
+            <param name="value"> The value. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.AddDescriptor(Castle.MicroKernel.ModelBuilder.IComponentModelDescriptor)">
             <summary>
               Adds the descriptor.
             </summary>
-            <param name = "descriptor">The descriptor.</param>
-            <returns></returns>
+            <param name="descriptor"> The descriptor. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Attribute(System.String)">
             <summary>
               Creates an attribute descriptor.
             </summary>
-            <param name = "key">The attribute key.</param>
-            <returns></returns>
+            <param name="key"> The attribute key. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Configuration(Castle.MicroKernel.Registration.Node[])">
             <summary>
               Apply more complex configuration to this component registration.
             </summary>
-            <param name = "configNodes">The config nodes.</param>
-            <returns></returns>
+            <param name="configNodes"> The config nodes. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Configuration(Castle.Core.Configuration.IConfiguration)">
             <summary>
               Apply more complex configuration to this component registration.
             </summary>
-            <param name="configuration">The configuration <see cref="T:Castle.Core.Configuration.MutableConfiguration"/>.</param>
-            <returns></returns>
+            <param name="configuration"> The configuration <see cref="T:Castle.Core.Configuration.MutableConfiguration"/> . </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DependsOn(Castle.MicroKernel.Registration.Dependency[])">
             <summary>
-              Specify custom dependencies using <see cref="M:Castle.MicroKernel.Registration.Property.ForKey(System.String)"/> or <see cref="M:Castle.MicroKernel.Registration.Property.ForKey(System.Type)"/>.
+              Specify custom dependencies using <see cref="M:Castle.MicroKernel.Registration.Property.ForKey(System.String)"/> or <see cref="M:Castle.MicroKernel.Registration.Property.ForKey(System.Type)"/> .
               <para/>
-              You can pass <see cref="T:Castle.MicroKernel.Registration.ServiceOverride"/>s to specify the components
-              this component should be resolved with.
+              You can pass <see cref="T:Castle.MicroKernel.Registration.ServiceOverride"/> s to specify the components this component should be resolved with.
             </summary>
-            <param name="dependencies">The dependencies.</param>
-            <returns></returns>
+            <param name="dependencies"> The dependencies. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DependsOn(System.Collections.IDictionary)">
             <summary>
               Uses a dictionary of key/value pairs, to specify custom dependencies.
               <para />
             </summary>
-            <param name = "dependencies">The dependencies.</param>
-            <returns></returns>
+            <param name="dependencies"> The dependencies. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DependsOn(System.Object)">
             <summary>
               Uses an (anonymous) object as a dictionary, to specify custom dependencies.
               <para />
             </summary>
-            <param name = "anonymous">The dependencies.</param>
-            <returns></returns>
+            <param name="anonymous"> The dependencies. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DependsOn(Castle.MicroKernel.Registration.DynamicParametersDelegate)">
             <summary>
               Allows custom dependencies to by defined dyncamically. Calling this overload is synonymous to using <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DynamicParameters(Castle.MicroKernel.Registration.DynamicParametersDelegate)"/>
             </summary>
-            <param name="resolve">The delegate used for providing dynamic parameters.</param>
-            <returns></returns>
+            <param name="resolve"> The delegate used for providing dynamic parameters. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DependsOn(Castle.MicroKernel.Registration.DynamicParametersResolveDelegate)">
             <summary>
               Allows custom dependencies to by defined dynamically with releasing capability. Calling this overload is synonymous to using <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DynamicParameters(Castle.MicroKernel.Registration.DynamicParametersResolveDelegate)"/>
             </summary>
-            <param name="resolve">The delegate used for providing dynamic parameters.</param>
-            <returns></returns>
+            <param name="resolve"> The delegate used for providing dynamic parameters. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DependsOn(Castle.MicroKernel.Registration.DynamicParametersWithContextResolveDelegate)">
             <summary>
               Allows custom dependencies to by defined dynamically with releasing capability. Calling this overload is synonymous to using <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DynamicParameters(Castle.MicroKernel.Registration.DynamicParametersWithContextResolveDelegate)"/>
             </summary>
-            <param name="resolve">The delegate used for providing dynamic parameters.</param>
-            <returns></returns>
+            <param name="resolve"> The delegate used for providing dynamic parameters. </param>
+            <returns> </returns>
             <remarks>
               Use <see cref="T:Castle.MicroKernel.Context.CreationContext"/> when resolving components from <see cref="T:Castle.MicroKernel.IKernel"/> in order to detect cycles.
             </remarks>
@@ -4137,22 +4134,22 @@
             <summary>
               Allows custom dependencies to by defined dyncamically.
             </summary>
-            <param name = "resolve">The delegate used for providing dynamic parameters.</param>
-            <returns></returns>
+            <param name="resolve"> The delegate used for providing dynamic parameters. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DynamicParameters(Castle.MicroKernel.Registration.DynamicParametersResolveDelegate)">
             <summary>
               Allows custom dependencies to by defined dynamically with releasing capability.
             </summary>
-            <param name = "resolve">The delegate used for providing dynamic parameters.</param>
-            <returns></returns>
+            <param name="resolve"> The delegate used for providing dynamic parameters. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DynamicParameters(Castle.MicroKernel.Registration.DynamicParametersWithContextResolveDelegate)">
             <summary>
               Allows custom dependencies to by defined dynamically with releasing capability.
             </summary>
-            <param name="resolve">The delegate used for providing dynamic parameters.</param>
-            <returns></returns>
+            <param name="resolve"> The delegate used for providing dynamic parameters. </param>
+            <returns> </returns>
             <remarks>
               Use <see cref="T:Castle.MicroKernel.Context.CreationContext"/> when resolving components from <see cref="T:Castle.MicroKernel.IKernel"/> in order to detect cycles.
             </remarks>
@@ -4161,471 +4158,489 @@
             <summary>
               Sets <see cref="P:Castle.Core.ComponentModel.ExtendedProperties"/> for this component.
             </summary>
-            <param name="properties">The extended properties.</param>
-            <returns></returns>
+            <param name="properties"> The extended properties. </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ExtendedProperties(Castle.MicroKernel.Registration.Property)">
+            <summary>
+              Sets <see cref="P:Castle.Core.ComponentModel.ExtendedProperties"/> for this component.
+            </summary>
+            <param name="property"> The extended properties. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ExtendedProperties(System.Object)">
             <summary>
               Sets <see cref="P:Castle.Core.ComponentModel.ExtendedProperties"/> for this component.
             </summary>
-            <param name="anonymous">The extendend properties as key/value pairs.</param>
-            <returns></returns>
+            <param name="anonymous"> The extendend properties as key/value pairs. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Forward(System.Type[])">
             <summary>
-              Adds <paramref name = "types" /> as additional services to be exposed by this component.
+              Adds <paramref name="types" /> as additional services to be exposed by this component.
             </summary>
-            <param name = "types">The types to forward.</param>
-            <returns></returns>
+            <param name="types"> The types to forward. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Forward``1">
             <summary>
-              Adds <typeparamref name = "TService2" /> as additional service to be exposed by this component.
+              Adds <typeparamref name="TService2" /> as additional service to be exposed by this component.
             </summary>
-            <typeparam name = "TService2">The forwarded type.</typeparam>
-            <returns>The component registration.</returns>
+            <typeparam name="TService2"> The forwarded type. </typeparam>
+            <returns> The component registration. </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Forward``2">
             <summary>
-              Adds <typeparamref name = "TService2" /> and <typeparamref name = "TService3" /> as additional services to be exposed by this component.
+              Adds <typeparamref name="TService2" /> and <typeparamref name="TService3" /> as additional services to be exposed by this component.
             </summary>
-            <typeparam name = "TService2">The first forwarded type.</typeparam>
-            <typeparam name = "TService3">The second forwarded type.</typeparam>
-            <returns>The component registration.</returns>
+            <typeparam name="TService2"> The first forwarded type. </typeparam>
+            <typeparam name="TService3"> The second forwarded type. </typeparam>
+            <returns> The component registration. </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Forward``3">
             <summary>
-              Adds <typeparamref name = "TService2" />, <typeparamref name = "TService3" /> and  <typeparamref name = "TService4" /> as additional services to be exposed by this component.
+              Adds <typeparamref name="TService2" /> , <typeparamref name="TService3" /> and <typeparamref name="TService4" /> as additional services to be exposed by this component.
             </summary>
-            <typeparam name = "TService2">The first forwarded type.</typeparam>
-            <typeparam name = "TService3">The second forwarded type.</typeparam>
-            <typeparam name = "TService4">The third forwarded type.</typeparam>
-            <returns>The component registration.</returns>
+            <typeparam name="TService2"> The first forwarded type. </typeparam>
+            <typeparam name="TService3"> The second forwarded type. </typeparam>
+            <typeparam name="TService4"> The third forwarded type. </typeparam>
+            <returns> The component registration. </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Forward``4">
             <summary>
-              Adds <typeparamref name = "TService2" />, <typeparamref name = "TService3" />,<typeparamref name = "TService4" /> and  <typeparamref
-                name = "TService5" /> as additional services to be exposed by this component.
+              Adds <typeparamref name="TService2" /> , <typeparamref name="TService3" /> , <typeparamref name="TService4" /> and <typeparamref
+               name="TService5" /> as additional services to be exposed by this component.
             </summary>
-            <typeparam name = "TService2">The first forwarded type.</typeparam>
-            <typeparam name = "TService3">The second forwarded type.</typeparam>
-            <typeparam name = "TService4">The third forwarded type.</typeparam>
-            <typeparam name = "TService5">The fourth forwarded type.</typeparam>
-            <returns>The component registration.</returns>
+            <typeparam name="TService2"> The first forwarded type. </typeparam>
+            <typeparam name="TService3"> The second forwarded type. </typeparam>
+            <typeparam name="TService4"> The third forwarded type. </typeparam>
+            <typeparam name="TService5"> The fourth forwarded type. </typeparam>
+            <returns> The component registration. </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Forward(System.Collections.Generic.IEnumerable{System.Type})">
             <summary>
-              Adds <paramref name = "types" /> as additional services to be exposed by this component.
+              Adds <paramref name="types" /> as additional services to be exposed by this component.
             </summary>
-            <param name = "types">The types to forward.</param>
-            <returns></returns>
+            <param name="types"> The types to forward. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ImplementedBy``1">
             <summary>
-              Sets the concrete type that implements the service to <typeparamref name = "TImpl" />.
+              Sets the concrete type that implements the service to <typeparamref name="TImpl" /> .
               <para />
               If not set, the class service type or first registered interface will be used as the implementation for this component.
             </summary>
-            <typeparam name = "TImpl">The type that is the implementation for the service.</typeparam>
-            <returns></returns>
+            <typeparam name="TImpl"> The type that is the implementation for the service. </typeparam>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ImplementedBy(System.Type)">
             <summary>
-              Sets the concrete type that implements the service to <paramref name = "type" />.
+              Sets the concrete type that implements the service to <paramref name="type" /> .
               <para />
               If not set, the class service type or first registered interface will be used as the implementation for this component.
             </summary>
-            <param name = "type">The type that is the implementation for the service.</param>
-            <returns></returns>
+            <param name="type"> The type that is the implementation for the service. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ImplementedBy(System.Type,Castle.MicroKernel.Handlers.IGenericImplementationMatchingStrategy)">
             <summary>
-              Sets the concrete type that implements the service to <paramref name = "type" />.
+              Sets the concrete type that implements the service to <paramref name="type" /> .
               <para />
               If not set, the class service type or first registered interface will be used as the implementation for this component.
             </summary>
-            <param name = "type">The type that is the implementation for the service.</param>
-            <param name = "genericImplementationMatchingStrategy">Provides ability to close open generic service. Ignored when registering closed or non-generic component.</param>
-            <returns></returns>
+            <param name="type"> The type that is the implementation for the service. </param>
+            <param name="genericImplementationMatchingStrategy"> Provides ability to close open generic service. Ignored when registering closed or non-generic component. </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ImplementedBy(System.Type,Castle.MicroKernel.Handlers.IGenericServiceStrategy)">
+            <summary>
+              Sets the concrete type that implements the service to <paramref name="type" /> .
+              <para />
+              If not set, the class service type or first registered interface will be used as the implementation for this component.
+            </summary>
+            <param name="type"> The type that is the implementation for the service. </param>
+            <param name="genericServiceStrategy"> Provides ability to select if open generic component supports particular closed version of a service. </param>
+            <returns> </returns>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ImplementedBy(System.Type,Castle.MicroKernel.Handlers.IGenericImplementationMatchingStrategy,Castle.MicroKernel.Handlers.IGenericServiceStrategy)">
+            <summary>
+              Sets the concrete type that implements the service to <paramref name="type" /> .
+              <para />
+              If not set, the class service type or first registered interface will be used as the implementation for this component.
+            </summary>
+            <param name="type"> The type that is the implementation for the service. </param>
+            <param name="genericImplementationMatchingStrategy"> Provides ability to close open generic service. Ignored when registering closed or non-generic component. </param>
+            <param name="genericServiceStrategy"> Provides ability to select if open generic component supports particular closed version of a service. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Instance(`0)">
             <summary>
               Assigns an existing instance as the component for this registration.
             </summary>
-            <param name = "instance">The component instance.</param>
-            <returns></returns>
+            <param name="instance"> The component instance. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Interceptors(Castle.Core.InterceptorReference[])">
             <summary>
               Set the interceptors for this component.
             </summary>
-            <param name = "interceptors">The interceptors.</param>
-            <returns></returns>
+            <param name="interceptors"> The interceptors. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Interceptors(System.Type[])">
             <summary>
               Set the interceptors for this component.
             </summary>
-            <param name = "interceptors">The interceptors.</param>
-            <returns></returns>
+            <param name="interceptors"> The interceptors. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Interceptors``1">
             <summary>
               Set the interceptor for this component.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Interceptors``2">
             <summary>
               Set the interceptor for this component.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Interceptors(System.String[])">
             <summary>
               Set the interceptor for this component.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.LifestyleCustom(System.Type)">
             <summary>
               Sets component lifestyle to specified one.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.LifestyleCustom``1">
             <summary>
               Sets component lifestyle to specified one.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.LifestylePerThread">
             <summary>
               Sets component lifestyle to per thread.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.LifestyleScoped(System.Type)">
             <summary>
-              Sets component lifestyle to scoped per explicit scope. If <paramref name = "scopeAccessorType" /> is provided, it will be used to access scope for the component. Otherwise the default scope accessor will be used.
+              Sets component lifestyle to scoped per explicit scope. If <paramref name="scopeAccessorType" /> is provided, it will be used to access scope for the component. Otherwise the default scope accessor will be used.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.LifestyleScoped``1">
             <summary>
               Sets component lifestyle to scoped per explicit scope.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.LifestyleBoundTo``1">
             <summary>
               Sets component lifestyle to scoped per nearest component on the resolution stack where implementation type is assignable to <typeparamref
-               name = "TBaseForRoot" />.
+               name="TBaseForRoot" /> .
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.LifestyleBoundTo(System.Func{Castle.MicroKernel.IHandler[],Castle.MicroKernel.IHandler})">
             <summary>
-              Sets component lifestyle to scoped per scope determined by <paramref name = "scopeRootBinder" />
+              Sets component lifestyle to scoped per scope determined by <paramref name="scopeRootBinder" />
             </summary>
-            <param name = "scopeRootBinder">Custom algorithm for selection which component higher up the resolution stack should be the root of the lifetime scope for current component's instances.
-              The delegate will be invoked when current component is about to be resolved and will be passed set of handlers to components higher up the resolution stack. It ought to return one which it designages
-              as the root which shall scope the lifetime of current component's instance, or <c>null</c>
-            </param>
-            <returns></returns>
+            <param name="scopeRootBinder"> Custom algorithm for selection which component higher up the resolution stack should be the root of the lifetime scope for current component's instances. The delegate will be invoked when current component is about to be resolved and will be passed set of handlers to components higher up the resolution stack. It ought to return one which it designages as the root which shall scope the lifetime of current component's instance, or <c>null</c> </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.LifestylePerWebRequest">
             <summary>
               Sets component lifestyle to instance per web request.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.LifestylePooled(System.Nullable{System.Int32},System.Nullable{System.Int32})">
             <summary>
-              Sets component lifestyle to pooled. If <paramref name = "initialSize" /> or <paramref name = "maxSize" /> are not set default values will be used.
+              Sets component lifestyle to pooled. If <paramref name="initialSize" /> or <paramref name="maxSize" /> are not set default values will be used.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.LifestyleSingleton">
             <summary>
               Sets component lifestyle to singleton.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.LifestyleTransient">
             <summary>
               Sets component lifestyle to transient.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Named(System.String)">
             <summary>
               Set a name of this registration. This is required if you have multiple components for a given service and want to be able to resolve some specific ones. Then you'd provide the name so that Windsor knows which one of the bunch you know. Otherwise don't bother setting the name.
               <para/>
-              If not set, the <see cref="P:System.Type.FullName"/> of the <see cref="P:Castle.MicroKernel.Registration.ComponentRegistration`1.Implementation"/>
-              will be used as the key to register the component.
+              If not set, the <see cref="P:System.Type.FullName"/> of the <see cref="P:Castle.MicroKernel.Registration.ComponentRegistration`1.Implementation"/> will be used as the key to register the component.
             </summary>
-            <param name="name">The name of this registration.</param>
-            <returns></returns>
+            <param name="name"> The name of this registration. </param>
+            <returns> </returns>
             <remarks>
               Names have to be globally unique in the scope of the container.
             </remarks>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.NamedAutomatically(System.String)">
             <summary>
-              This method as opposed to <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Named(System.String)"/> should be used by tools like facilities when the name is not provided by the user, but autogenerated and user has no interest in seing this name, for example in diagnostics reports.
-              Set a name of this registration. This is required if you have multiple components for a given service and want to be able to resolve some specific ones. Then you'd provide the name so that Windsor knows which one of the bunch you know. Otherwise don't bother setting the name.
+              This method as opposed to <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Named(System.String)"/> should be used by tools like facilities when the name is not provided by the user, but autogenerated and user has no interest in seing this name, for example in diagnostics reports. Set a name of this registration. This is required if you have multiple components for a given service and want to be able to resolve some specific ones. Then you'd provide the name so that Windsor knows which one of the bunch you know. Otherwise don't bother setting the name.
               <para/>
-              If not set, the <see cref="P:System.Type.FullName"/> of the <see cref="P:Castle.MicroKernel.Registration.ComponentRegistration`1.Implementation"/>
-              will be used as the key to register the component.
+              If not set, the <see cref="P:System.Type.FullName"/> of the <see cref="P:Castle.MicroKernel.Registration.ComponentRegistration`1.Implementation"/> will be used as the key to register the component.
             </summary>
-            <param name="name">The name of this registration.</param>
-            <returns></returns>
+            <param name="name"> The name of this registration. </param>
+            <returns> </returns>
             <remarks>
               Names have to be globally unique in the scope of the container.
             </remarks>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.OnCreate(System.Action{`0}[])">
             <summary>
-              Stores a set of <see cref="T:Castle.MicroKernel.LifecycleConcerns.LifecycleActionDelegate`1"/> which will be invoked when the component
-              is created and before it's returned from the container.
+              Stores a set of <see cref="T:Castle.MicroKernel.LifecycleConcerns.LifecycleActionDelegate`1"/> which will be invoked when the component is created and before it's returned from the container.
             </summary>
-            <param name="actions">A set of actions to be executed right after the component is created and before it's returned from the container.</param>
+            <param name="actions"> A set of actions to be executed right after the component is created and before it's returned from the container. </param>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.OnCreate(Castle.MicroKernel.LifecycleConcerns.LifecycleActionDelegate{`0}[])">
             <summary>
-              Stores a set of <see cref="T:Castle.MicroKernel.LifecycleConcerns.LifecycleActionDelegate`1"/> which will be invoked when the component
-              is created and before it's returned from the container.
+              Stores a set of <see cref="T:Castle.MicroKernel.LifecycleConcerns.LifecycleActionDelegate`1"/> which will be invoked when the component is created and before it's returned from the container.
             </summary>
-            <param name="actions">A set of actions to be executed right after the component is created and before it's returned from the container.</param>
+            <param name="actions"> A set of actions to be executed right after the component is created and before it's returned from the container. </param>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.OnDestroy(System.Action{`0}[])">
             <summary>
-              Stores a set of <see cref="T:Castle.MicroKernel.LifecycleConcerns.LifecycleActionDelegate`1"/> which will be invoked when the component
-              is created and before it's returned from the container.
+              Stores a set of <see cref="T:Castle.MicroKernel.LifecycleConcerns.LifecycleActionDelegate`1"/> which will be invoked when the component is created and before it's returned from the container.
             </summary>
-            <param name="actions">A set of actions to be executed right after the component is created and before it's returned from the container.</param>
+            <param name="actions"> A set of actions to be executed right after the component is created and before it's returned from the container. </param>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.OnDestroy(Castle.MicroKernel.LifecycleConcerns.LifecycleActionDelegate{`0}[])">
             <summary>
-              Stores a set of <see cref="T:Castle.MicroKernel.LifecycleConcerns.LifecycleActionDelegate`1"/> which will be invoked when the component
-              is destroyed which means when it's released or it's lifetime scope ends. Notice that usage of this method will cause instsances of the component to be tracked, even if they wouldn't be otherwise.
+              Stores a set of <see cref="T:Castle.MicroKernel.LifecycleConcerns.LifecycleActionDelegate`1"/> which will be invoked when the component is destroyed which means when it's released or it's lifetime scope ends. Notice that usage of this method will cause instsances of the component to be tracked, even if they wouldn't be otherwise.
             </summary>
-            <param name="actions">A set of actions to be executed when the component is destroyed.</param>
+            <param name="actions"> A set of actions to be executed when the component is destroyed. </param>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.OnlyNewServices">
             <summary>
               Services that are already present in the container will be skipped. If no new service is left the registration will not happen at all.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.OverWrite">
             <summary>
               With the overwrite.
             </summary>
-            <returns></returns>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Parameters(Castle.MicroKernel.Registration.Parameter[])">
             <summary>
               Set configuration parameters with string or <see cref="T:Castle.Core.Configuration.IConfiguration"/> values.
             </summary>
-            <param name="parameters">The parameters.</param>
-            <returns></returns>
+            <param name="parameters"> The parameters. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.SelectInterceptorsWith(Castle.DynamicProxy.IInterceptorSelector)">
             <summary>
               Sets the interceptor selector for this component.
             </summary>
-            <param name = "selector"></param>
-            <returns></returns>
+            <param name="selector"> </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.SelectInterceptorsWith(System.Action{Castle.MicroKernel.Registration.Proxy.ItemRegistration{Castle.DynamicProxy.IInterceptorSelector}})">
             <summary>
               Sets the interceptor selector for this component.
             </summary>
-            <param name = "selector"></param>
-            <returns></returns>
+            <param name="selector"> </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ServiceOverrides(Castle.MicroKernel.Registration.ServiceOverride[])">
             <summary>
-              Override (some of) the services that this component needs.
-              Use <see cref="M:Castle.MicroKernel.Registration.ServiceOverride.ForKey(System.String)"/> to create an override.
+              Override (some of) the services that this component needs. Use <see cref="M:Castle.MicroKernel.Registration.ServiceOverride.ForKey(System.String)"/> to create an override.
               <para/>
-              Each key represents the service dependency of this component, for example the name of a constructor argument or a property.
-              The corresponding value is the key of an other component registered to the kernel, and is used to resolve the dependency.
+              Each key represents the service dependency of this component, for example the name of a constructor argument or a property. The corresponding value is the key of an other component registered to the kernel, and is used to resolve the dependency.
               <para/>
               To specify dependencies which are not services, use <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DependsOn(Castle.MicroKernel.Registration.Dependency[])"/>
             </summary>
-            <param name="overrides">The service overrides.</param>
-            <returns></returns>
+            <param name="overrides"> The service overrides. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ServiceOverrides(System.Collections.IDictionary)">
             <summary>
               Override (some of) the services that this component needs, using a dictionary.
               <para/>
-              Each key represents the service dependency of this component, for example the name of a constructor argument or a property.
-              The corresponding value is the key of an other component registered to the kernel, and is used to resolve the dependency.
+              Each key represents the service dependency of this component, for example the name of a constructor argument or a property. The corresponding value is the key of an other component registered to the kernel, and is used to resolve the dependency.
               <para/>
               To specify dependencies which are not services, use <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DependsOn(System.Collections.IDictionary)"/>
             </summary>
-            <param name="overrides">The service overrides.</param>
-            <returns></returns>
+            <param name="overrides"> The service overrides. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ServiceOverrides(System.Object)">
             <summary>
               Override (some of) the services that this component needs, using an (anonymous) object as a dictionary.
               <para/>
-              Each key represents the service dependency of this component, for example the name of a constructor argument or a property.
-              The corresponding value is the key of an other component registered to the kernel, and is used to resolve the dependency.
+              Each key represents the service dependency of this component, for example the name of a constructor argument or a property. The corresponding value is the key of an other component registered to the kernel, and is used to resolve the dependency.
               <para/>
               To specify dependencies which are not services, use <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DependsOn(System.Object)"/>
             </summary>
-            <param name="anonymous">The service overrides.</param>
-            <returns></returns>
+            <param name="anonymous"> The service overrides. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.UsingFactory``2(System.Converter{``0,``1})">
             <summary>
               Uses a factory to instantiate the component
             </summary>
-            <typeparam name = "TFactory">Factory type. This factory has to be registered in the kernel.</typeparam>
-            <typeparam name = "TServiceImpl">Implementation type.</typeparam>
-            <param name = "factory">Factory invocation</param>
-            <returns></returns>
+            <typeparam name="TFactory"> Factory type. This factory has to be registered in the kernel. </typeparam>
+            <typeparam name="TServiceImpl"> Implementation type. </typeparam>
+            <param name="factory"> Factory invocation </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.UsingFactoryMethod``1(System.Func{``0},System.Boolean)">
             <summary>
               Uses a factory method to instantiate the component.
             </summary>
-            <typeparam name = "TImpl">Implementation type</typeparam>
-            <param name = "factoryMethod">Factory method</param>
-            <param name = "managedExternally">When set to <c>true</c> container will not assume ownership of this component, will not track it not apply and lifecycle concerns to it.</param>
-            <returns></returns>
+            <typeparam name="TImpl"> Implementation type </typeparam>
+            <param name="factoryMethod"> Factory method </param>
+            <param name="managedExternally"> When set to <c>true</c> container will not assume ownership of this component, will not track it not apply and lifecycle concerns to it. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.UsingFactoryMethod``1(System.Converter{Castle.MicroKernel.IKernel,``0},System.Boolean)">
             <summary>
               Uses a factory method to instantiate the component.
             </summary>
-            <typeparam name = "TImpl">Implementation type</typeparam>
-            <param name = "factoryMethod">Factory method</param>
-            <param name = "managedExternally">When set to <c>true</c> container will not assume ownership of this component, will not track it not apply and lifecycle concerns to it.</param>
-            <returns></returns>
+            <typeparam name="TImpl"> Implementation type </typeparam>
+            <param name="factoryMethod"> Factory method </param>
+            <param name="managedExternally"> When set to <c>true</c> container will not assume ownership of this component, will not track it not apply and lifecycle concerns to it. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.UsingFactoryMethod``1(System.Func{Castle.MicroKernel.IKernel,Castle.Core.ComponentModel,Castle.MicroKernel.Context.CreationContext,``0},System.Boolean)">
             <summary>
               Uses a factory method to instantiate the component.
             </summary>
-            <typeparam name = "TImpl">Implementation type</typeparam>
-            <param name = "factoryMethod">Factory method</param>
-            <param name = "managedExternally">When set to <c>true</c> container will not assume ownership of this component, will not track it not apply and lifecycle concerns to it.</param>
-            <returns></returns>
+            <typeparam name="TImpl"> Implementation type </typeparam>
+            <param name="factoryMethod"> Factory method </param>
+            <param name="managedExternally"> When set to <c>true</c> container will not assume ownership of this component, will not track it not apply and lifecycle concerns to it. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.UsingFactoryMethod``1(System.Func{Castle.MicroKernel.IKernel,Castle.MicroKernel.Context.CreationContext,``0})">
             <summary>
               Uses a factory method to instantiate the component.
             </summary>
-            <typeparam name = "TImpl">Implementation type</typeparam>
-            <param name = "factoryMethod">Factory method</param>
-            <returns></returns>
+            <typeparam name="TImpl"> Implementation type </typeparam>
+            <param name="factoryMethod"> Factory method </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Castle#MicroKernel#Registration#IRegistration#Register(Castle.MicroKernel.IKernelInternal)">
             <summary>
-              Registers this component with the <see cref="T:Castle.MicroKernel.IKernel"/>.
+              Registers this component with the <see cref="T:Castle.MicroKernel.IKernel"/> .
             </summary>
-            <param name="kernel">The kernel.</param>
+            <param name="kernel"> The kernel. </param>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.IsDefault(System.Predicate{System.Type})">
             <summary>
-              Overrides default behavior by making the current component the default for every service it exposes. Optional <paramref name="serviceFilter"/> allows user to narrow down the number of services which should be make defaults.
+              Overrides default behavior by making the current component the default for every service it exposes. The <paramref
+               name="serviceFilter" /> allows user to narrow down the number of services which should be make defaults.
             </summary>
-            <param name="serviceFilter">Invoked for each service exposed by given component if returns <c>true</c> this component will be the default for that service. If not specified it is assumed current component should become the default for all of its services.</param>
-            <returns></returns>
+            <param name="serviceFilter"> Invoked for each service exposed by given component if returns <c>true</c> this component will be the default for that service. </param>
+            <returns> </returns>
             <remarks>
               When specified for multiple components for any given service the one registered after will override the one selected before.
-              This does not affect order of resolution via <see cref="M:Castle.MicroKernel.IKernel.ResolveAll``1"/> methods.
             </remarks>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.IsDefault">
             <summary>
               Overrides default behavior by making the current component the default for every service it exposes.
             </summary>
-            <returns></returns>
+            <returns> </returns>
             <remarks>
               When specified for multiple components for any given service the one registered after will override the one selected before.
-              This does not affect order of resolution via <see cref="M:Castle.MicroKernel.IKernel.ResolveAll``1"/> methods.
             </remarks>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.IsFallback(System.Predicate{System.Type})">
+            <summary>
+              Overrides default behavior by making the current component the fallback for every service it exposes that <paramref
+               name="serviceFilter" /> returns <c>true</c> for. That is if another, non-fallback, component will be registered exposing any of these same services as this component,
+              that other component will take precedence over this one, regardless of order in which they are registered.
+            </summary>
+            <param name="serviceFilter"> Invoked for each service exposed by given component if returns <c>true</c> this component will be the fallback for that service. </param>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.IsFallback">
+            <summary>
+              Overrides default behavior by making the current component the fallback for every service it exposes. That is if another, non-fallback, component will be registered exposing any of the same services as this component,
+              that other component will take precedence over this one, regardless of order in which they are registered
+            </summary>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Properties(System.Predicate{System.Reflection.PropertyInfo})">
             <summary>
-              Filters properties on the implementation that will be considered 'settable' by the container.
+              Filters (settable) properties of the component's implementation type to expose in the container.
             </summary>
-            <param name = "filter">Predicate deciding whether a property is settable or not. If returns <c>false</c> container will ignore the property, otherwise property will be ignored.</param>
-            <returns></returns>
+            <param name="filter"> Predicate deciding whether a property is settable or not. If it returns <c>false</c> the property will not be added to <see cref="P:Castle.Core.ComponentModel.Properties"/> collection and Windsor will never try to set it. </param>
+            <returns> </returns>
             <remarks>
-              Matched properties will be considered optional, that is component will resolve successfully if they can not be satisfied.
+              Matched properties will be considered optional. Windsor will resolve the component even if it cannot provide value for those properties. If you want to make them mandatory use a different overload.
             </remarks>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Properties(System.Predicate{System.Reflection.PropertyInfo},System.Boolean)">
             <summary>
-              Filters properties on the implementation that will be considered 'settable' by the container and specifies if matched properties are reqired.
+              Filters (settable) properties of the component's implementation type to expose in the container and specifies if matched properties are considered mandatory.
             </summary>
-            <param name = "filter">Predicate deciding whether a property is settable or not. If returns <c>false</c> container will ignore the property.</param>
-            <param name = "isRequired"></param>
-            <returns></returns>
-            <remarks>
-              Matched properties will be considered optional if <paramref name = "isRequired" /> is<c>false</c>, that is component will resolve successfully if they can not be satisfied.
-              If the argument is <c>true</c> and the dependencies can not be resolved the component will fail to resolve.
-            </remarks>
+            <param name="filter"> Predicate deciding whether a property is settable or not. If it returns <c>false</c> the property will not be added to <see cref="P:Castle.Core.ComponentModel.Properties"/> collection and Windsor will never try to set it. </param>
+            <param name="isRequired"> if <c>true</c> the properties matched by <paramref name="filter"/> will be considered mandatory dependencies. Windsor will only successfully resole the component if it can provide value for all of these properties. If <c>false</c> Windsor will still try to provide values for these properties, but if it can't it will not stop the component from being successfully resolved. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Properties(System.Func{Castle.Core.ComponentModel,System.Reflection.PropertyInfo,System.Boolean},System.Boolean)">
             <summary>
-              Filters properties on the implementation that will be considered 'settable' by the container and specifies if matched properties are reqired.
+              Filters (settable) properties of the component's implementation type to expose in the container and specifies if matched properties are considered mandatory.
             </summary>
-            <param name = "filter">Predicate deciding whether a property is settable or not. If returns <c>false</c> container will ignore the property.</param>
-            <param name = "isRequired"></param>
-            <returns></returns>
-            <remarks>
-              Matched properties will be considered optional if <paramref name = "isRequired" /> is<c>false</c>, that is component will resolve successfully if they can not be satisfied.
-              If the argument is <c>true</c> and the dependencies can not be resolved the component will fail to resolve.
-            </remarks>
+            <param name="filter"> Predicate deciding whether a property is settable or not. If it returns <c>false</c> the property will not be added to <see cref="P:Castle.Core.ComponentModel.Properties"/> collection and Windsor will never try to set it. </param>
+            <param name="isRequired"> if <c>true</c> the properties matched by <paramref name="filter"/> will be considered mandatory dependencies. Windsor will only successfully resole the component if it can provide value for all of these properties. If <c>false</c> Windsor will still try to provide values for these properties, but if it can't it will not stop the component from being successfully resolved. </param>
+            <returns> </returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Properties(Castle.Core.PropertyFilter)">
             <summary>
-              Filters properties on the implementation that will be considered 'settable' by the container and specifies if matched properties are reqired.
+              Filters (settable) properties of the component's implementation type to expose in the container and specifies if matched properties are considered mandatory.
             </summary>
-            <param name = "filter">Rules for deciding whether a property is settable or not and if container will ignore the property.</param>
-            <returns></returns>
+            <param name="filter"> Rules for deciding whether given properties are exposed in the container or ignored and if they are mandatory, that is Windsor will only successfully resole the component if it can provide value for all of these properties. </param>
+            <returns> </returns>
         </member>
         <member name="P:Castle.MicroKernel.Registration.ComponentRegistration`1.Implementation">
             <summary>
               The concrete type that implements the service.
               <para/>
-              To set the implementation, use <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ImplementedBy(System.Type)"/>.
+              To set the implementation, use <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ImplementedBy(System.Type)"/> .
             </summary>
-            <value>The implementation of the service.</value>
+            <value> The implementation of the service. </value>
         </member>
         <member name="P:Castle.MicroKernel.Registration.ComponentRegistration`1.LifeStyle">
             <summary>
-              Set the lifestyle of this component.
-              For example singleton and transient (also known as 'factory').
+              Set the lifestyle of this component. For example singleton and transient (also known as 'factory').
             </summary>
-            <value>The with lifestyle.</value>
+            <value> The with lifestyle. </value>
         </member>
         <member name="P:Castle.MicroKernel.Registration.ComponentRegistration`1.Name">
             <summary>
               The name of the component. Will become the key for the component in the kernel.
               <para/>
-              To set the name, use <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Named(System.String)"/>.
+              To set the name, use <see cref="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Named(System.String)"/> .
               <para/>
-              If not set, the <see cref="P:System.Type.FullName"/> of the <see cref="P:Castle.MicroKernel.Registration.ComponentRegistration`1.Implementation"/>
-              will be used as the key to register the component.
+              If not set, the <see cref="P:System.Type.FullName"/> of the <see cref="P:Castle.MicroKernel.Registration.ComponentRegistration`1.Implementation"/> will be used as the key to register the component.
             </summary>
-            <value>The name.</value>
+            <value> The name. </value>
         </member>
         <member name="P:Castle.MicroKernel.Registration.ComponentRegistration`1.Proxy">
             <summary>
               Set proxy for this component.
             </summary>
-            <value>The proxy.</value>
+            <value> The proxy. </value>
         </member>
         <member name="T:Castle.MicroKernel.Registration.ComponentRegistration">
             <summary>
@@ -6430,19 +6445,12 @@
         </member>
         <member name="F:Castle.MicroKernel.SubSystems.Naming.DefaultNamingSubSystem.name2Handler">
             <summary>
-              Map(String, IHandler) to map component names
-              to <see cref="T:Castle.MicroKernel.IHandler"/>
-              Items in this dictionary are sorted in insertion order.
+              Map(String, IHandler) to map component names to <see cref="T:Castle.MicroKernel.IHandler"/> Items in this dictionary are sorted in insertion order.
             </summary>
         </member>
         <member name="F:Castle.MicroKernel.SubSystems.Naming.DefaultNamingSubSystem.service2Handler">
             <summary>
-              Map(Type, IHandler) to map a service
-              to <see cref="T:Castle.MicroKernel.IHandler"/>.
-              If there is more than a single service of the type, only the first
-              registered services is stored in this dictionary.
-              It serve as a fast lookup for the common case of having a single handler for 
-              a type.
+              Map(Type, IHandler) to map a service to <see cref="T:Castle.MicroKernel.IHandler"/> . If there is more than a single service of the type, only the first registered services is stored in this dictionary. It serve as a fast lookup for the common case of having a single handler for a type.
             </summary>
         </member>
         <member name="T:Castle.MicroKernel.IHandlerSelector">
@@ -7371,20 +7379,20 @@
             <summary>
               Creates the proxy for the supplied component.
             </summary>
-            <param name = "kernel">The kernel.</param>
-            <param name = "target">The target.</param>
-            <param name = "model">The model.</param>
-            <param name = "constructorArguments">The constructor arguments.</param>
-            <param name = "context">The creation context</param>
-            <returns>The component proxy.</returns>
+            <param name="kernel"> The kernel. </param>
+            <param name="target"> The target. </param>
+            <param name="model"> The model. </param>
+            <param name="constructorArguments"> The constructor arguments. </param>
+            <param name="context"> The creation context </param>
+            <returns> The component proxy. </returns>
         </member>
         <member name="M:Castle.Windsor.Proxy.DefaultProxyFactory.RequiresTargetInstance(Castle.MicroKernel.IKernel,Castle.Core.ComponentModel)">
             <summary>
               Determines if the component requires a target instance for proxying.
             </summary>
-            <param name = "kernel">The kernel.</param>
-            <param name = "model">The model.</param>
-            <returns>true if an instance is required.</returns>
+            <param name="kernel"> The kernel. </param>
+            <param name="model"> The model. </param>
+            <returns> true if an instance is required. </returns>
         </member>
         <member name="T:Castle.Windsor.WindsorContainer">
             <summary>

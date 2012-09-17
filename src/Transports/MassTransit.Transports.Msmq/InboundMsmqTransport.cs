@@ -1,12 +1,12 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -22,13 +22,13 @@ namespace MassTransit.Transports.Msmq
     public abstract class InboundMsmqTransport :
         IInboundTransport
     {
-        static readonly ILog _log = Logger.Get(typeof (InboundMsmqTransport));
+        static readonly ILog _log = Logger.Get(typeof(InboundMsmqTransport));
         readonly IMsmqEndpointAddress _address;
         readonly ConnectionHandler<MessageQueueConnection> _connectionHandler;
         bool _disposed;
 
         protected InboundMsmqTransport(IMsmqEndpointAddress address,
-                                       ConnectionHandler<MessageQueueConnection> connectionHandler)
+            ConnectionHandler<MessageQueueConnection> connectionHandler)
         {
             _address = address;
             _connectionHandler = connectionHandler;
@@ -41,14 +41,7 @@ namespace MassTransit.Transports.Msmq
 
         public virtual void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
         {
-            try
-            {
-                EnumerateQueue(callback, timeout);
-            }
-            catch (MessageQueueException ex)
-            {
-                HandleInboundMessageQueueException(ex);
-            }
+            EnumerateQueue(callback, timeout);
         }
 
         public void Dispose()
@@ -64,61 +57,70 @@ namespace MassTransit.Transports.Msmq
 
             _connectionHandler.Use(connection =>
                 {
-                    using (MessageEnumerator enumerator = connection.Queue.GetMessageEnumerator2())
+                    try
                     {
-                        while (enumerator.MoveNext(timeout))
+                        using (MessageEnumerator enumerator = connection.Queue.GetMessageEnumerator2())
                         {
-                            if (enumerator.Current == null)
+                            while (enumerator.MoveNext(timeout))
                             {
-                                if (_log.IsDebugEnabled)
-                                    _log.DebugFormat("Current message was null while enumerating endpoint");
-
-                                continue;
-                            }
-
-                            Message peekMessage = enumerator.Current;
-                            using (peekMessage)
-                            {
-                                IReceiveContext context = ReceiveContext.FromBodyStream(peekMessage.BodyStream);
-                                context.SetMessageId(peekMessage.Id);
-                                context.SetInputAddress(_address);
-
-                                byte[] extension = peekMessage.Extension;
-                                if (extension.Length > 0)
+                                if (enumerator.Current == null)
                                 {
-                                    TransportMessageHeaders headers = TransportMessageHeaders.Create(extension);
+                                    if (_log.IsDebugEnabled)
+                                        _log.DebugFormat("Current message was null while enumerating endpoint");
 
-                                    context.SetContentType(headers["Content-Type"]);
-                                }
-
-                                Action<IReceiveContext> receive = receiver(context);
-                                if (receive == null)
-                                {
                                     continue;
                                 }
 
-                                ReceiveMessage(enumerator, timeout, message =>
+                                Message peekMessage = enumerator.Current;
+                                using (peekMessage)
+                                {
+                                    IReceiveContext context = ReceiveContext.FromBodyStream(peekMessage.BodyStream,
+                                        _address.IsTransactional);
+                                    context.SetMessageId(peekMessage.Id);
+                                    context.SetInputAddress(_address);
+
+                                    byte[] extension = peekMessage.Extension;
+                                    if (extension.Length > 0)
                                     {
-                                        if (message == null)
-                                            throw new TransportException(Address.Uri,
-                                                "Unable to remove message from queue: " + context.MessageId);
+                                        TransportMessageHeaders headers = TransportMessageHeaders.Create(extension);
 
-                                        if (message.Id != context.MessageId)
-                                            throw new TransportException(Address.Uri,
-                                                string.Format(
-                                                    "Received message does not match current message: ({0} != {1})",
-                                                    message.Id, context.MessageId));
+                                        context.SetContentType(headers["Content-Type"]);
+                                        context.SetOriginalMessageId(headers["Original-Message-Id"]);
+                                    }
 
-                                        receive(context);
-                                    });
+                                    Action<IReceiveContext> receive = receiver(context);
+                                    if (receive == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    ReceiveMessage(enumerator, timeout, message =>
+                                        {
+                                            if (message == null)
+                                                throw new TransportException(Address.Uri,
+                                                    "Unable to remove message from queue: " + context.MessageId);
+
+                                            if (message.Id != context.MessageId)
+                                                throw new TransportException(Address.Uri,
+                                                    string.Format(
+                                                        "Received message does not match current message: ({0} != {1})",
+                                                        message.Id, context.MessageId));
+
+                                            receive(context);
+                                        });
+                                }
                             }
                         }
+                    }
+                    catch (MessageQueueException ex)
+                    {
+                        HandleInboundMessageQueueException(ex);
                     }
                 });
         }
 
         protected virtual void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout,
-                                              Action<Message> receiveAction)
+            Action<Message> receiveAction)
         {
             using (Message message = enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.None))
             {
@@ -171,7 +173,8 @@ namespace MassTransit.Transports.Msmq
 
         void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+                return;
             if (disposing)
             {
                 _connectionHandler.Dispose();

@@ -231,15 +231,23 @@ namespace MassTransit.Transports
                         }
 
                         Exception retryException;
-                        if (_tracker.IsRetryLimitExceeded(acceptContext.MessageId, out retryException))
+                        string acceptMessageId = acceptContext.OriginalMessageId ?? acceptContext.MessageId;
+                        if (_tracker.IsRetryLimitExceeded(acceptMessageId, out retryException))
                         {
                             if (_log.IsErrorEnabled)
                                 _log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address,
-                                    acceptContext.MessageId);
+                                    acceptMessageId);
 
                             failedMessageException = retryException;
 
                             return MoveMessageToErrorTransport;
+                        }
+
+                        if (acceptContext.MessageId != acceptMessageId)
+                        {
+                            if (_log.IsErrorEnabled)
+                                _log.DebugFormat("Message {0} original message id {1}", acceptContext.MessageId,
+                                    acceptContext.OriginalMessageId);
                         }
 
                         Action<IReceiveContext> receive;
@@ -251,18 +259,18 @@ namespace MassTransit.Transports
                             receive = receiver(acceptContext);
                             if (receive == null)
                             {
-                                Address.LogSkipped(acceptContext.MessageId);
+                                Address.LogSkipped(acceptMessageId);
 
-                                _tracker.IncrementRetryCount(acceptContext.MessageId, null);
+                                _tracker.IncrementRetryCount(acceptMessageId, null);
                                 return null;
                             }
                         }
                         catch (SerializationException sex)
                         {
                             if (_log.IsErrorEnabled)
-                                _log.Error("Unrecognized message " + Address + ":" + acceptContext.MessageId, sex);
+                                _log.Error("Unrecognized message " + Address + ":" + acceptMessageId, sex);
 
-                            _tracker.IncrementRetryCount(acceptContext.MessageId, sex);
+                            _tracker.IncrementRetryCount(acceptMessageId, sex);
                             return MoveMessageToErrorTransport;
                         }
                         catch (Exception ex)
@@ -270,25 +278,36 @@ namespace MassTransit.Transports
                             if (_log.IsErrorEnabled)
                                 _log.Error("An exception was thrown preparing the message consumers", ex);
 
-                            _tracker.IncrementRetryCount(acceptContext.MessageId, ex);
+                            if(_tracker.IncrementRetryCount(acceptMessageId, ex))
+                            {
+                                acceptContext.PublishPendingFaults();
+                            }
                             return null;
                         }
 
                         return receiveContext =>
                             {
+                                string receiveMessageId = receiveContext.OriginalMessageId ?? receiveContext.MessageId;
                                 try
                                 {
                                     receive(receiveContext);
 
-                                    successfulMessageId = receiveContext.MessageId;
+                                    successfulMessageId = receiveMessageId;
                                 }
                                 catch (Exception ex)
                                 {
                                     if (_log.IsErrorEnabled)
                                         _log.Error("An exception was thrown by a message consumer", ex);
 
-                                    _tracker.IncrementRetryCount(receiveContext.MessageId, ex);
-                                    MoveMessageToErrorTransport(receiveContext);
+                                    if(_tracker.IncrementRetryCount(receiveMessageId, ex))
+                                    {
+                                        receiveContext.PublishPendingFaults();
+                                    }
+
+                                    if(!receiveContext.IsTransactional)
+                                    {
+                                        SaveMessageToInboundTransport(receiveContext);
+                                    }
 
                                     throw;
                                 }
@@ -349,6 +368,15 @@ namespace MassTransit.Transports
             _errorTransport.Send(moveContext);
 
             Address.LogMoved(_errorTransport.Address, context.MessageId, "");
+        }
+
+        void SaveMessageToInboundTransport(IReceiveContext context)
+        {
+            var moveContext = new MoveMessageSendContext(context);
+
+            _transport.Send(moveContext);
+
+            Address.LogReQueued(_transport.Address, context.MessageId, "");
         }
 
         ~Endpoint()

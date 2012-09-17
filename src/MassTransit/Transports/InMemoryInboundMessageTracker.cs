@@ -47,12 +47,12 @@ namespace MassTransit.Transports
             return exceeded;
         }
 
-        public void IncrementRetryCount(string id, Exception exception)
+        public bool IncrementRetryCount(string id, Exception exception)
         {
             if (string.IsNullOrEmpty(id))
-                return;
+                return false;
 
-            _messages[id].Increment(exception);
+            return _messages[id].Increment(exception) >= _retryLimit;
         }
 
         public void MessageWasReceivedSuccessfully(string id)
@@ -76,13 +76,15 @@ namespace MassTransit.Transports
             public Exception Exception;
             public int RetryCount;
 
-            public void Increment(Exception exception)
+            public int Increment(Exception exception)
             {
                 lock(this)
                 {
                     RetryCount++;
                     Exception = exception;
                 }
+
+                return RetryCount;
             }
         }
     }

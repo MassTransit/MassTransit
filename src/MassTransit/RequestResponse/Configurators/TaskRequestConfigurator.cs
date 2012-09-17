@@ -43,6 +43,18 @@ namespace MassTransit.RequestResponse.Configurators
         /// <param name="handler">The handler to call with the response message</param>
         Task<T> Handle<T>(Action<IConsumeContext<T>, T> handler)
             where T : class;
+
+        /// <summary>
+        /// Specifies a handler for a fault published by the request handler
+        /// </summary>
+        /// <param name="faultCallback"></param>
+        Task<Fault<TRequest>> HandleFault(Action<Fault<TRequest>> faultCallback);
+
+        /// <summary>
+        /// Specifies a handler for a fault published by the request handler
+        /// </summary>
+        /// <param name="faultCallback"></param>
+        Task<Fault<TRequest>> HandleFault(Action<IConsumeContext<Fault<TRequest>>, Fault<TRequest>> faultCallback);
     }
 #endif
 }

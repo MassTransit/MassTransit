@@ -26,6 +26,14 @@
             <typeparam name="T"></typeparam>
             <returns></returns>
         </member>
+        <member name="M:StructureMap.IContext.GetInstance(System.Type,System.String)">
+            <summary>
+            Creates or finds the named instance of the pluginType
+            </summary>
+            <param name="pluginType"></param>
+            <param name="instanceKey"></param>
+            <returns></returns>
+        </member>
         <member name="M:StructureMap.IContext.RegisterDefault(System.Type,System.Object)">
             <summary>
             Register a default object for the given PluginType that will
@@ -51,6 +59,21 @@
             <param name="name"></param>
             <returns></returns>
         </member>
+        <member name="M:StructureMap.IContext.TryGetInstance(System.Type)">
+            <summary>
+            Creates or finds the default instance of the pluginType. Returns null if the pluginType is not known to the container.
+            </summary>
+            <param name="pluginType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StructureMap.IContext.TryGetInstance(System.Type,System.String)">
+            <summary>
+            Creates or finds the named instance of the pluginType. Returns null if the named instance is not known to the container.
+            </summary>
+            <param name="pluginType"></param>
+            <param name="instanceKey"></param>
+            <returns></returns>
+        </member>
         <member name="M:StructureMap.IContext.All``1">
             <summary>
             Gets all objects in the current object graph that can be cast
@@ -64,6 +87,13 @@
             Creates/Resolves every configured instance of PlutinType T
             </summary>
             <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:StructureMap.IContext.GetAllInstances(System.Type)">
+            <summary>
+            Creates or resolves all registered instances of the pluginType
+            </summary>
+            <param name="pluginType"></param>
             <returns></returns>
         </member>
         <member name="P:StructureMap.IContext.BuildStack">
@@ -554,6 +584,11 @@
             will be intercepted
             </summary>
             <param name="interception"></param>
+        </member>
+        <member name="F:StructureMap.PipelineGraph._missingFactory">
+            <summary>
+            Used for auto-mocking container. When the factory is missing, we can generate a mock for it
+            </summary>
         </member>
         <member name="T:StructureMap.Pipeline.ConfiguredInstance">
             <summary>
@@ -2069,6 +2104,14 @@
             Provides queryable access to the configured PluginType's and Instances of this Container
             </summary>
         </member>
+        <member name="P:StructureMap.IContainer.Name">
+            <summary>
+            The name of the container. By default this is set to 
+            a random Guid. This is a convience property to 
+            assist with debugging. Feel free to set to anything,
+            as this is not used in any logic.
+            </summary>
+        </member>
         <member name="T:StructureMap.InstanceFactory">
             <summary>
             Default implementation of IInstanceFactory
@@ -2316,6 +2359,14 @@
         <member name="P:StructureMap.Container.Model">
             <summary>
             Provides queryable access to the configured PluginType's and Instances of this Container
+            </summary>
+        </member>
+        <member name="P:StructureMap.Container.Name">
+            <summary>
+            The name of the container. By default this is set to 
+            a random Guid. This is a convience property to 
+            assist with debugging. Feel free to set to anything,
+            as this is not used in any logic.
             </summary>
         </member>
         <member name="T:StructureMap.InstanceMemento">

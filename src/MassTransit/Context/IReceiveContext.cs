@@ -15,91 +15,114 @@ using MassTransit.Util;
 
 namespace MassTransit
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using Context;
-	using Serialization;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using Context;
+    using Serialization;
 
-	/// <summary>
-	/// Receive context that allows receiving sinks to 
-	/// </summary>
-	public interface IReceiveContext :
-		IConsumeContext
-	{
-		/// <summary>
-		/// Set the content type that was indicated by the transport message header
-		/// </summary>
-		/// <param name="value"></param>
-		void SetContentType(string value);
+    /// <summary>
+    /// Receive context that allows receiving sinks to 
+    /// </summary>
+    public interface IReceiveContext :
+        IConsumeContext
+    {
+        /// <summary>
+        /// Set the content type that was indicated by the transport message header
+        /// </summary>
+        /// <param name="value"></param>
+        void SetContentType(string value);
 
-		void SetMessageId(string value);
+        void SetMessageId(string value);
 
-		void SetInputAddress(Uri uri);
+        void SetInputAddress(Uri uri);
 
-		void SetEndpoint(IEndpoint endpoint);
+        void SetEndpoint(IEndpoint endpoint);
 
-		/// <summary>
-		/// Sets the bus which is receiving this message/data.
-		/// </summary>
-		/// <param name="bus">Bus instance</param>
-		void SetBus([NotNull] IServiceBus bus);
+        /// <summary>
+        /// Sets the bus which is receiving this message/data.
+        /// </summary>
+        /// <param name="bus">Bus instance</param>
+        void SetBus([NotNull] IServiceBus bus);
 
-	    void SetRequestId(string value);
+        void SetRequestId(string value);
 
-	    void SetConversationId(string value);
+        void SetConversationId(string value);
 
-	    void SetCorrelationId(string value);
+        void SetCorrelationId(string value);
 
-		void SetSourceAddress(Uri uri);
+        void SetOriginalMessageId(string value);
 
-		void SetDestinationAddress(Uri uri);
+        void SetSourceAddress(Uri uri);
 
-		void SetResponseAddress(Uri uri);
+        void SetDestinationAddress(Uri uri);
 
-		void SetFaultAddress(Uri uri);
+        void SetResponseAddress(Uri uri);
 
-		void SetNetwork(string value);
+        void SetFaultAddress(Uri uri);
 
-		void SetRetryCount(int retryCount);
+        void SetNetwork(string value);
 
-		void SetExpirationTime(DateTime value);
+        void SetRetryCount(int retryCount);
 
-		void SetMessageType(string messageType);
+        void SetExpirationTime(DateTime value);
 
-	    void SetHeader(string key, string value);
+        void SetMessageType(string messageType);
 
-		/// <summary>
-		/// Sets the context's body stream;
-		/// useful for wrapped serializers 
-		/// such as encrypting serializers
-		/// and for testing.
-		/// </summary>
-		/// <param name="stream">Stream to replace the previous stream with</param>
-		void SetBodyStream([NotNull] Stream stream);
+        void SetHeader(string key, string value);
 
-		void CopyBodyTo(Stream stream);
+        /// <summary>
+        /// Sets the context's body stream;
+        /// useful for wrapped serializers 
+        /// such as encrypting serializers
+        /// and for testing.
+        /// </summary>
+        /// <param name="stream">Stream to replace the previous stream with</param>
+        void SetBodyStream([NotNull] Stream stream);
 
-		Stream BodyStream { get; }
+        void CopyBodyTo(Stream stream);
 
-		void SetMessageTypeConverter(IMessageTypeConverter messageTypeConverter);
+        Stream BodyStream { get; }
 
+        void SetMessageTypeConverter(IMessageTypeConverter messageTypeConverter);
 
-		void NotifySend(ISendContext context, IEndpointAddress address);
+        /// <summary>
+        /// Notify that a fault needs to be sent, so that the endpoint can send it when
+        /// appropriate.
+        /// </summary>
+        /// <param name="faultCallback"></param>
+        void NotifyFault(Action<IServiceBus> faultCallback);
 
-		void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address)
-			where T : class;
+        void NotifySend(ISendContext context, IEndpointAddress address);
 
-		void NotifyPublish<T>(IPublishContext<T> publishContext)
-			where T : class;
+        void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address)
+            where T : class;
 
-		void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
-			where T : class;
+        void NotifyPublish<T>(IPublishContext<T> publishContext)
+            where T : class;
 
-		IEnumerable<ISent> Sent { get; }
+        void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
+            where T : class;
 
-		IEnumerable<IReceived> Received { get; }
+        IEnumerable<ISent> Sent { get; }
 
-		Guid Id { get; }
-	}
+        IEnumerable<IReceived> Received { get; }
+
+        Guid Id { get; }
+
+        /// <summary>
+        /// True if the transport is transactional and will leave the message on the queue if an exception is thrown
+        /// </summary>
+        bool IsTransactional { get; }
+
+        /// <summary>
+        ///  The original message id that was consumed
+        /// </summary>
+        string OriginalMessageId { get; }
+
+        /// <summary>
+        /// Publish any pending faults for the context
+        /// </summary>
+        void PublishPendingFaults();
+    }
 }

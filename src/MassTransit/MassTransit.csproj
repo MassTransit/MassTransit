@@ -363,6 +363,7 @@
     <Compile Include="Exceptions\PublishException.cs" />
     <Compile Include="Exceptions\RequestCancelledException.cs" />
     <Compile Include="Exceptions\RequestException.cs" />
+    <Compile Include="Exceptions\RequestFaultException.cs" />
     <Compile Include="Exceptions\RequestTimeoutException.cs" />
     <Compile Include="Exceptions\SendException.cs" />
     <Compile Include="IOutboundMessageInterceptor.cs" />
@@ -402,6 +403,7 @@
     <Compile Include="RequestResponse\Configurators\InlineRequestConfiguratorImpl.cs" />
     <Compile Include="RequestResponse\Configurators\TaskRequestConfigurator.cs" />
     <Compile Include="RequestResponse\Configurators\TaskRequestConfiguratorImpl.cs" />
+    <Compile Include="RequestResponse\FaultHandler.cs" />
     <Compile Include="RequestResponse\IAsyncRequest.cs" />
     <Compile Include="RequestResponse\IRequest.cs" />
     <Compile Include="RequestResponse\IRequestComplete.cs" />

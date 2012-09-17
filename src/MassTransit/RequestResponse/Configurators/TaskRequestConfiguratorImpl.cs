@@ -45,6 +45,22 @@ namespace MassTransit.RequestResponse.Configurators
             return responseHandler.Task;
         }
 
+        public Task<Fault<TRequest>> HandleFault(Action<Fault<TRequest>> handler)
+        {
+            TaskResponseHandler<Fault<TRequest>> responseHandler = AddHandler(typeof(Fault<TRequest>),
+                () => new CompleteTaskResponseHandler<Fault<TRequest>>(RequestId, handler));
+
+            return responseHandler.Task;
+        }
+
+        public Task<Fault<TRequest>> HandleFault(Action<IConsumeContext<Fault<TRequest>>, Fault<TRequest>> handler)
+        {
+            TaskResponseHandler<Fault<TRequest>> responseHandler = AddHandler(typeof(Fault<TRequest>),
+                () => new CompleteTaskResponseHandler<Fault<TRequest>>(RequestId, handler));
+
+            return responseHandler.Task;
+        }
+
         public void Watch<T>(Action<T> watcher)
             where T : class
         {

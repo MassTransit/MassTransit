@@ -13,6 +13,7 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Logging;
     using Magnum.Reflection;
@@ -26,7 +27,7 @@ namespace MassTransit.Context
 
         readonly IReceiveContext _context;
         readonly TMessage _message;
-        Uri _responseAddress;
+        readonly Uri _responseAddress;
 
         public ConsumeContext(IReceiveContext context, TMessage message)
         {
@@ -197,25 +198,16 @@ namespace MassTransit.Context
             }
         }
 
-        public bool IsContextAvailable<T>()
-            where T : class
-        {
-            var messageOfT = Message as T;
-            return messageOfT != null;
-        }
-
-        public void SetResponseAddress(Uri value)
-        {
-            _responseAddress = value;
-        }
-
         [UsedImplicitly]
         void CreateAndSendFault<T>(T message, Exception exception)
             where T : class
         {
             var fault = new Fault<T>(message, exception);
 
-            SendFault(fault);
+            _context.NotifyFault(bus =>
+            {
+                SendFault(bus, FaultAddress, ResponseAddress, RequestId, fault);
+            });
         }
 
         [UsedImplicitly]
@@ -224,31 +216,34 @@ namespace MassTransit.Context
         {
             var fault = new Fault<T, TKey>(message, exception);
 
-            SendFault(fault);
+            _context.NotifyFault(bus =>
+            {
+                SendFault(bus, FaultAddress, ResponseAddress, RequestId, fault);
+            });
         }
 
-        void SendFault<T>(T message)
+        static void SendFault<T>(IServiceBus bus, Uri faultAddress, Uri responseAddress, string requestId, T message)
             where T : class
         {
-            if (FaultAddress != null)
+            if (faultAddress != null)
             {
-                Bus.GetEndpoint(FaultAddress).Send(message, context =>
+                bus.GetEndpoint(faultAddress).Send(message, context =>
                     {
-                        context.SetSourceAddress(Bus.Endpoint.Address.Uri);
-                        context.SetRequestId(RequestId);
+                        context.SetSourceAddress(bus.Endpoint.Address.Uri);
+                        context.SetRequestId(requestId);
                     });
             }
-            else if (ResponseAddress != null)
+            else if (responseAddress != null)
             {
-                Bus.GetEndpoint(ResponseAddress).Send(message, context =>
+                bus.GetEndpoint(responseAddress).Send(message, context =>
                     {
-                        context.SetSourceAddress(Bus.Endpoint.Address.Uri);
-                        context.SetRequestId(RequestId);
+                        context.SetSourceAddress(bus.Endpoint.Address.Uri);
+                        context.SetRequestId(requestId);
                     });
             }
             else
             {
-                Bus.Publish(message, context => context.SetRequestId(RequestId));
+                bus.Publish(message, context => context.SetRequestId(requestId));
             }
         }
     }

@@ -25,7 +25,7 @@ namespace Starbucks.Customer
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        static void Main()
         {
             Log4NetLogger.Use("customer.log4net.xml");
 
