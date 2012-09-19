@@ -85,7 +85,7 @@ namespace MassTransit.BusConfigurators
             _builderFactory = builderFactory;
         }
 
-        public void AddSubscriptionCoordinatorConfigurator(SubscriptionRouterBuilderConfigurator configurator)
+        public void AddSubscriptionRouterConfigurator(SubscriptionRouterBuilderConfigurator configurator)
         {
             _subscriptionRouterConfigurator.AddConfigurator(configurator);
         }

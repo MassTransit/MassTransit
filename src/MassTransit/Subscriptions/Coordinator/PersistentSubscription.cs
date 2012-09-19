@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -14,11 +14,15 @@ namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
 
-    public class PersistentSubscription
+    public class PersistentSubscription : 
+        IEquatable<PersistentSubscription>
     {
-        public PersistentSubscription(Guid peerId, Guid subscriptionId, Uri endpointUri, string messageName,
-                                      string correlationId)
+        public PersistentSubscription(Uri busUri, Guid peerId, Guid subscriptionId, Uri endpointUri, string messageName,
+            string correlationId)
         {
+            Created = DateTime.UtcNow;
+            Updated = DateTime.UtcNow;
+            BusUri = busUri;
             PeerId = peerId;
             SubscriptionId = subscriptionId;
             EndpointUri = endpointUri;
@@ -26,11 +30,18 @@ namespace MassTransit.Subscriptions.Coordinator
             CorrelationId = correlationId;
         }
 
+        protected PersistentSubscription()
+        {
+        }
+
+        public Uri BusUri { get; private set; }
         public Guid PeerId { get; private set; }
         public Guid SubscriptionId { get; private set; }
         public Uri EndpointUri { get; private set; }
         public string MessageName { get; private set; }
         public string CorrelationId { get; private set; }
+        public DateTime Created { get; private set; }
+        public DateTime Updated { get; set; }
 
         public bool Equals(PersistentSubscription other)
         {
@@ -38,7 +49,7 @@ namespace MassTransit.Subscriptions.Coordinator
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
-            return other.PeerId.Equals(PeerId) && other.SubscriptionId.Equals(SubscriptionId);
+            return Equals(other.BusUri, BusUri) && other.PeerId.Equals(PeerId) && other.SubscriptionId.Equals(SubscriptionId);
         }
 
         public override bool Equals(object obj)
@@ -56,8 +67,23 @@ namespace MassTransit.Subscriptions.Coordinator
         {
             unchecked
             {
-                return (PeerId.GetHashCode()*397) ^ SubscriptionId.GetHashCode();
+                int result = (BusUri != null
+                                  ? BusUri.GetHashCode()
+                                  : 0);
+                result = (result*397) ^ PeerId.GetHashCode();
+                result = (result*397) ^ SubscriptionId.GetHashCode();
+                return result;
             }
+        }
+
+        public static bool operator ==(PersistentSubscription left, PersistentSubscription right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(PersistentSubscription left, PersistentSubscription right)
+        {
+            return !Equals(left, right);
         }
 
         public override string ToString()

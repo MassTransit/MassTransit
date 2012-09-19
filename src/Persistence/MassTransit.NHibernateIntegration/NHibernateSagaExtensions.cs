@@ -10,12 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.NHibernateIntegration
+namespace MassTransit
 {
     using System;
     using System.Linq.Expressions;
     using Magnum.StateMachine;
     using NHibernate.Mapping.ByCode;
+    using NHibernateIntegration;
 
     public static class NHibernateSagaExtensions
     {

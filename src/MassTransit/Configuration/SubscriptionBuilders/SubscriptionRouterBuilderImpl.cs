@@ -17,15 +17,15 @@ namespace MassTransit.SubscriptionBuilders
     using Magnum.Extensions;
     using Subscriptions.Coordinator;
 
-	public class SubscriptionRouterBuilderImpl :
-		SubscriptionRouterBuilder
-	{
-		readonly IServiceBus _bus;
-		string _network;
-		readonly IList<Func<IServiceBus, SubscriptionRouter, SubscriptionObserver>> _observers;
-	    readonly SubscriptionRepository _repository;
+    public class SubscriptionRouterBuilderImpl :
+        SubscriptionRouterBuilder
+    {
+        readonly IServiceBus _bus;
+        readonly IList<Func<IServiceBus, SubscriptionRouter, SubscriptionObserver>> _observers;
+        string _network;
+        Func<SubscriptionStorage> _subscriptionStorageFactory;
 
-	    public SubscriptionRouterBuilderImpl(IServiceBus bus, string network)
+        public SubscriptionRouterBuilderImpl(IServiceBus bus, string network)
         {
             _bus = bus;
             _network = network;
@@ -34,12 +34,7 @@ namespace MassTransit.SubscriptionBuilders
                     (b, c) => new BusSubscriptionConnector(b)
                 };
 
-	        _repository = new BusSubscriptionRepository(new InMemorySubscriptionStorage());
-        }
-
-        public string Network
-        {
-            get { return _network; }
+            _subscriptionStorageFactory = () => new InMemorySubscriptionStorage();
         }
 
         public void SetNetwork(string network)
@@ -60,9 +55,18 @@ namespace MassTransit.SubscriptionBuilders
             _observers.Add(observerFactory);
         }
 
+        public void UseSubscriptionStorage(Func<SubscriptionStorage> subscriptionStorageFactory)
+        {
+            _subscriptionStorageFactory = subscriptionStorageFactory;
+        }
+
         public SubscriptionRouterService Build()
         {
-			var service = new SubscriptionRouterService(_bus, _repository, _network);
+            SubscriptionStorage storage = _subscriptionStorageFactory();
+
+            var repository = new BusSubscriptionRepository(_bus.ControlBus.Endpoint.Address.Uri, storage);
+
+            var service = new SubscriptionRouterService(_bus, repository, _network);
 
             _observers.Each(x => service.AddObserver(x(_bus, service)));
 

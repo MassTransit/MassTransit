@@ -62,7 +62,7 @@ namespace MassTransit.NHibernateIntegration
         /// built, the same instance is returned.
         /// </summary>
         /// <returns></returns>
-        public ISessionFactory GetSessionFactory()
+        public virtual ISessionFactory GetSessionFactory()
         {
             if (_computed)
                 return _sessionFactory;

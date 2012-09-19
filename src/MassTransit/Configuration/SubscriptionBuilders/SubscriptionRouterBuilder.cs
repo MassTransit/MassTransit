@@ -21,8 +21,8 @@ namespace MassTransit.SubscriptionBuilders
 		void SetObserverFactory(Func<IServiceBus, SubscriptionRouter, SubscriptionObserver> observerFactory);
 		void AddObserverFactory(Func<IServiceBus, SubscriptionRouter, SubscriptionObserver> observerFactory);
 
+	    void UseSubscriptionStorage(Func<SubscriptionStorage> subscriptionStorageFactory);
+
 		SubscriptionRouterService Build();
-		
-		string Network { get; }
 	}
 }

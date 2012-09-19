@@ -41,7 +41,7 @@ namespace MassTransit.BusConfigurators
         /// Adds a configurator to the subscription coordinator builder
         /// </summary>
         /// <param name="configurator"></param>
-        void AddSubscriptionCoordinatorConfigurator(SubscriptionRouterBuilderConfigurator configurator);
+        void AddSubscriptionRouterConfigurator(SubscriptionRouterBuilderConfigurator configurator);
 
         /// <summary>
         /// Adds a configurator for the service bus builder to the configurator

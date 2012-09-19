@@ -40,7 +40,7 @@ namespace MassTransit
 
             var routerBuilderConfigurator = new SubscriptionRouterBuilderConfiguratorImpl(x => x.SetNetwork(null));
 
-            configurator.AddSubscriptionCoordinatorConfigurator(routerBuilderConfigurator);
+            configurator.AddSubscriptionRouterConfigurator(routerBuilderConfigurator);
 
             configurator.AddSubscriptionObserver(clientConfigurator.Create);
         }
