@@ -179,12 +179,12 @@ namespace MassTransit.Subscriptions.Coordinator
                 lock (_observers)
                     _observers.Each(x => x.OnComplete());
 
-                _repository.Dispose();
-
                 _peerCache.Stop();
                 using (_peerCache.ExitOnDispose(30.Seconds()))
                 {
                 }
+
+                _repository.Dispose();
             }
 
             _disposed = true;

@@ -122,7 +122,9 @@
     <Compile Include="Sagas\SagaLocator_Specs.cs" />
     <Compile Include="Sagas\SagaRepository_Specs.cs" />
     <Compile Include="Sagas\SimpleConfiguration_Specs.cs" />
-    <Compile Include="Sagas\SingleConnectionSessionFactory.cs" />
+    <Compile Include="SingleConnectionSessionFactory.cs" />
+    <Compile Include="Subscriptions\NHibernateSubscription_Specs.cs" />
+    <Compile Include="SqlLiteSessionFactoryProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
