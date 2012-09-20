@@ -22,7 +22,7 @@ namespace MassTransit
     public static class NHibernateSubscriptionRouterExtensions
     {
         /// <summary>
-        /// Specify a custom subscription storage for the bus instance
+        /// Specify subscription storage for the bus instance using NHibernate
         /// </summary>
         /// <param name="sessionFactory">The session factory for the storage</param>
         public static void UseNHibernateSubscriptionStorage(this ServiceBusConfigurator configurator,

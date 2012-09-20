@@ -367,6 +367,9 @@ namespace MassTransit.Transports
 
             _errorTransport.Send(moveContext);
 
+            string messageId = context.OriginalMessageId ?? context.MessageId;
+            _tracker.MessageWasMovedToErrorQueue(messageId);
+
             Address.LogMoved(_errorTransport.Address, context.MessageId, "");
         }
 
