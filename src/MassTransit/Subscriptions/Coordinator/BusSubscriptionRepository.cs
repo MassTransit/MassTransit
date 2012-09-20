@@ -79,6 +79,8 @@ namespace MassTransit.Subscriptions.Coordinator
                 {
                     if (!knownPeers.Contains(subscription.PeerId))
                     {
+                        _log.DebugFormat("Loading peer: {0} {1}", subscription.PeerId, subscription.PeerUri);
+
                         router.Send(new AddPeerMessage
                             {
                                 PeerId = subscription.PeerId,
@@ -86,6 +88,8 @@ namespace MassTransit.Subscriptions.Coordinator
                                 Timestamp = subscription.Updated.Ticks,
                             });
                     }
+
+                    _log.DebugFormat("Loading subscription: {0}", subscription);
 
                     router.Send(new AddPeerSubscriptionMessage
                         {

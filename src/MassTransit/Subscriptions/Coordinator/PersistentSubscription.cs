@@ -125,7 +125,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
         public override string ToString()
         {
-            return string.Format("PeerId: {0}, PeerUri: {1} Type: {2}", PeerId, PeerUri, MessageName);
+            return string.Format("PeerId: {0}, PeerUri: {1} SubId: {2} Type: {3}", PeerId, PeerUri, SubscriptionId, MessageName);
         }
     }
 }
