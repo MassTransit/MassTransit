@@ -12,11 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.NHibernateIntegration.Tests
 {
-    using System;
-    using System.Diagnostics;
-    using System.IO;
+    using Log4NetIntegration.Logging;
     using NUnit.Framework;
-    using log4net.Config;
 
     [SetUpFixture]
     public class ContextSetup
@@ -24,13 +21,7 @@ namespace MassTransit.NHibernateIntegration.Tests
         [SetUp]
         public void Before_any()
         {
-            Trace.WriteLine("Setting Up Log4net");
-
-            string path = AppDomain.CurrentDomain.BaseDirectory;
-
-            string file = Path.Combine(path, "test.log4net.xml");
-
-            XmlConfigurator.Configure(new FileInfo(file));
+            Log4NetLogger.Use("test.log4net.xml");
         }
     }
 }

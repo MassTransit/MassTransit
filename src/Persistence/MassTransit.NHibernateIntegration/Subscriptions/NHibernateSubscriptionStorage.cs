@@ -47,17 +47,14 @@ namespace MassTransit.NHibernateIntegration.Subscriptions
 
                 if (existingSubscription != null)
                 {
-                    _log.DebugFormat("Updating: {0} {1} {2}", existingSubscription.SubscriptionId,
-                        existingSubscription.MessageName,
-                        existingSubscription.EndpointUri);
+                    _log.DebugFormat("Updating: {0}", existingSubscription);
 
                     existingSubscription.Updated = DateTime.UtcNow;
                     session.Update(existingSubscription);
                 }
                 else
                 {
-                    _log.DebugFormat("Adding: {0} {1} {2}", subscription.SubscriptionId, subscription.MessageName,
-                        subscription.EndpointUri);
+                    _log.DebugFormat("Adding: {0}", subscription);
 
                     session.Save(subscription);
                 }
@@ -79,8 +76,7 @@ namespace MassTransit.NHibernateIntegration.Subscriptions
 
                 foreach (PersistentSubscription existing in existingSubscription)
                 {
-                    _log.DebugFormat("Removing: {0} {1} {2}", existing.SubscriptionId, existing.MessageName,
-                        existing.EndpointUri);
+                    _log.DebugFormat("Removing: {0}", existing);
 
                     session.Delete(existing);
                 }
@@ -98,14 +94,6 @@ namespace MassTransit.NHibernateIntegration.Subscriptions
                     .Where(x => x.BusUri == busUri)
                     .OrderBy(x => x.PeerId).Asc
                     .List();
-
-                foreach (PersistentSubscription existing in existingSubscription)
-                {
-                    _log.DebugFormat("Removing: {0} {1} {2}", existing.SubscriptionId, existing.MessageName,
-                        existing.EndpointUri);
-
-                    session.Delete(existing);
-                }
 
                 transaction.Commit();
 

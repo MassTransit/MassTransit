@@ -24,13 +24,24 @@ namespace MassTransit.NHibernateIntegration.Tests.Subscriptions
     using Testing;
 
     [TestFixture]
-    public class NHibernateSubscription_Specs :
+    public class When_a_bus_has_peer_subscriptions :
         LoopbackLocalAndRemoteTestFixture
     {
         [Test]
-        public void FirstTestName()
+        public void Should_recover_the_subscriptions_after_restarting()
         {
-            Assert.IsTrue(LocalBus.HasSubscription<Hello>().Any());
+            Assert.IsTrue(LocalBus.HasSubscription<Hello>().Any(), "Initial subscription not found");
+
+            RemoteBus.Dispose();
+            RemoteBus = null;
+
+            LocalBus.Dispose();
+            LocalBus = null;
+
+            // now we need to reload the local bus
+            LocalBus = ServiceBusFactory.New(ConfigureLocalBus);
+
+            Assert.IsTrue(LocalBus.HasSubscription<Hello>().Any(), "Subscription not found after restart");
         }
 
         ISessionFactory _sessionFactory;
