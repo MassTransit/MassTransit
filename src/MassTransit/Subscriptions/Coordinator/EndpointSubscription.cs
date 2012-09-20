@@ -30,15 +30,17 @@ namespace MassTransit.Subscriptions.Coordinator
         readonly SubscriptionObserver _observer;
         readonly SubscriptionRepository _repository;
         readonly Scheduler _scheduler;
+        readonly Uri _peerUri;
         readonly TimeSpan _unsubscribeTimeout = 4.Seconds();
         Uri _endpointUri;
         Guid _subscriptionId;
 
-        public EndpointSubscription(Fiber fiber, Scheduler scheduler, string messageName, string correlationId,
+        public EndpointSubscription(Fiber fiber, Scheduler scheduler, Uri peerUri, string messageName, string correlationId,
                                     SubscriptionObserver observer, SubscriptionRepository repository)
         {
             _fiber = fiber;
             _scheduler = scheduler;
+            _peerUri = peerUri;
             _messageName = messageName;
             _correlationId = correlationId;
             _observer = observer;
@@ -56,8 +58,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
             _ids.Add(message.SubscriptionId, message);
 
-            _repository.Add(message.PeerId, message.SubscriptionId, message.EndpointUri, message.MessageName,
-                message.CorrelationId);
+            _repository.Add(message.PeerId, _peerUri, message.SubscriptionId, message.EndpointUri, message.MessageName, message.CorrelationId);
 
             if (_ids.Count > 1)
                 return;
@@ -122,7 +123,7 @@ namespace MassTransit.Subscriptions.Coordinator
                 {
                     _ids.Remove(subscriptionId);
 
-                    _repository.Remove(peerId, subscriptionId, _endpointUri, _messageName, _correlationId);
+                    _repository.Remove(peerId, _peerUri, subscriptionId, _endpointUri, _messageName, _correlationId);
                     count++;
                 });
 

@@ -13,11 +13,19 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
+    using System.Collections.Generic;
 
     public interface SubscriptionStorage :
         IDisposable
     {
         void Add(PersistentSubscription subscription);
         void Remove(PersistentSubscription subscription);
+
+        /// <summary>
+        /// Load the existing subscriptions for the specified BusUri
+        /// </summary>
+        /// <param name="busUri"></param>
+        /// <returns></returns>
+        IEnumerable<PersistentSubscription> Load(Uri busUri);
     }
 }

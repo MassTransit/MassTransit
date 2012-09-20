@@ -31,9 +31,10 @@ namespace MassTransit.NHibernateIntegration.Subscriptions
                     x.Property(p => p.SubscriptionId);
                 });
 
-            Property(x => x.MessageName);
+            Property(x => x.PeerUri, m => m.Length(256));
+            Property(x => x.MessageName, m => m.Length(256));
             Property(x => x.CorrelationId);
-            Property(x => x.EndpointUri);
+            Property(x => x.EndpointUri, m => m.Length(256));
             Property(x => x.Created);
             Property(x => x.Updated);
         }

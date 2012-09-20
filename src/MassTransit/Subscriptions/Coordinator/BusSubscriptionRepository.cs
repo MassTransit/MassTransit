@@ -13,7 +13,9 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
+    using System.Collections.Generic;
     using Logging;
+    using Messages;
     using Stact;
 
     public class BusSubscriptionRepository :
@@ -21,35 +23,33 @@ namespace MassTransit.Subscriptions.Coordinator
     {
         static readonly ILog _log = Logger.Get(typeof(BusSubscriptionRepository));
 
-        readonly Uri _busUri;
         readonly Fiber _fiber;
+        readonly Uri _busUri;
         readonly SubscriptionStorage _storage;
         bool _disposed;
 
         public BusSubscriptionRepository(Uri busUri, SubscriptionStorage storage)
         {
-            var uri = busUri.AbsoluteUri;
+            string uri = busUri.AbsoluteUri;
             if (busUri.Query.Length > 0)
-                 uri = uri.Replace(busUri.Query, "");
+                uri = uri.Replace(busUri.Query, "");
 
             _busUri = new Uri(uri);
             _storage = storage;
             _fiber = new PoolFiber();
-
-            _fiber.Add(LoadExistingSubscriptions);
         }
 
-        public void Add(Guid peerId, Guid subscriptionId, Uri endpointUri, string messageName, string correlationId)
+        public void Add(Guid peerId, Uri peerUri, Guid subscriptionId, Uri endpointUri, string messageName, string correlationId)
         {
-            var subscription = new PersistentSubscription(_busUri, peerId, subscriptionId, endpointUri, messageName,
+            var subscription = new PersistentSubscription(_busUri, peerId, peerUri, subscriptionId, endpointUri, messageName,
                 correlationId);
 
             _fiber.Add(() => Add(subscription));
         }
 
-        public void Remove(Guid peerId, Guid subscriptionId, Uri endpointUri, string messageName, string correlationId)
+        public void Remove(Guid peerId, Uri peerUri, Guid subscriptionId, Uri endpointUri, string messageName, string correlationId)
         {
-            var subscription = new PersistentSubscription(_busUri, peerId, subscriptionId, endpointUri, messageName,
+            var subscription = new PersistentSubscription(_busUri, peerId, peerUri, subscriptionId, endpointUri, messageName,
                 correlationId);
 
             _fiber.Add(() => Remove(subscription));
@@ -61,8 +61,47 @@ namespace MassTransit.Subscriptions.Coordinator
             GC.SuppressFinalize(this);
         }
 
-        void LoadExistingSubscriptions()
+        public void Load(SubscriptionRouter router)
         {
+            _fiber.Add(() => LoadSubscriptions(router));
+        }
+
+        void LoadSubscriptions(SubscriptionRouter router)
+        {
+            int messageNumber = 1;
+            try
+            {
+                IEnumerable<PersistentSubscription> existing = _storage.Load(_busUri);
+
+                var knownPeers = new HashSet<Guid>();
+
+                foreach (PersistentSubscription subscription in existing)
+                {
+                    if (!knownPeers.Contains(subscription.PeerId))
+                    {
+                        router.Send(new AddPeerMessage
+                            {
+                                PeerId = subscription.PeerId,
+                                PeerUri = subscription.PeerUri,
+                                Timestamp = subscription.Updated.Ticks,
+                            });
+                    }
+
+                    router.Send(new AddPeerSubscriptionMessage
+                        {
+                            PeerId = subscription.PeerId,
+                            SubscriptionId = subscription.SubscriptionId,
+                            EndpointUri = subscription.EndpointUri,
+                            MessageName = subscription.MessageName,
+                            CorrelationId = subscription.CorrelationId,
+                            MessageNumber = messageNumber++,
+                        });
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Failed to load existing subscriptions", ex);
+            }
         }
 
         void Add(PersistentSubscription subscription)

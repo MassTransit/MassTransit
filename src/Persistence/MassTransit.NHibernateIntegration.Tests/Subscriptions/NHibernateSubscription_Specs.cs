@@ -33,13 +33,13 @@ namespace MassTransit.NHibernateIntegration.Tests.Subscriptions
             Assert.IsTrue(LocalBus.HasSubscription<Hello>().Any());
         }
 
-        protected ISessionFactory SessionFactory;
+        ISessionFactory _sessionFactory;
         SqlLiteSessionFactoryProvider _provider;
 
         protected override void EstablishContext()
         {
             _provider = new SqlLiteSessionFactoryProvider(typeof(PersistentSubscriptionMap));
-            SessionFactory = _provider.GetSessionFactory();
+            _sessionFactory = _provider.GetSessionFactory();
 
             base.EstablishContext();
         }
@@ -50,8 +50,8 @@ namespace MassTransit.NHibernateIntegration.Tests.Subscriptions
 
             DumpSubscriptionContent();
 
-            if (SessionFactory != null)
-                SessionFactory.Dispose();
+            if (_sessionFactory != null)
+                _sessionFactory.Dispose();
 
             if (_provider != null)
                 _provider.Dispose();
@@ -61,11 +61,11 @@ namespace MassTransit.NHibernateIntegration.Tests.Subscriptions
         {
             IList<PersistentSubscription> subscriptions;
 
-            using (ISession session = SessionFactory.OpenSession())
+            using (ISession session = _sessionFactory.OpenSession())
             using (ITransaction transaction = session.BeginTransaction())
             {
                 subscriptions = session.QueryOver<PersistentSubscription>()
-                    .OrderBy(x => x.BusUri).Asc
+                    .OrderBy(x => x.PeerUri).Asc
                     .ThenBy(x => x.MessageName).Asc
                     .ThenBy(x => x.EndpointUri).Asc
                     .ReadOnly()
@@ -76,8 +76,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Subscriptions
 
             foreach (PersistentSubscription subscription in subscriptions)
             {
-                Console.WriteLine("{0} {1} {2} {3}", subscription.BusUri, subscription.SubscriptionId, subscription.MessageName,
-                    subscription.EndpointUri);
+                Console.WriteLine(subscription);
             }
         }
 
@@ -86,7 +85,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Subscriptions
         {
             base.ConfigureRemoteBus(configurator);
 
-            configurator.UseNHibernateSubscriptionStorage(SessionFactory);
+            configurator.UseNHibernateSubscriptionStorage(_sessionFactory);
 
             base.ConfigureLocalBus(configurator);
         }
@@ -96,7 +95,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Subscriptions
         {
             base.ConfigureRemoteBus(configurator);
 
-            configurator.UseNHibernateSubscriptionStorage(SessionFactory);
+            configurator.UseNHibernateSubscriptionStorage(_sessionFactory);
 
             configurator.Subscribe(x => { x.Handler<Hello>(message => { }); });
         }

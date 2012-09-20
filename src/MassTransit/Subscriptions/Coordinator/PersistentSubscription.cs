@@ -14,15 +14,15 @@ namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
 
-    public class PersistentSubscription : 
-        IEquatable<PersistentSubscription>
+    public class PersistentSubscription : IEquatable<PersistentSubscription>
     {
-        public PersistentSubscription(Uri busUri, Guid peerId, Guid subscriptionId, Uri endpointUri, string messageName,
-            string correlationId)
+        public PersistentSubscription(Uri busUri, Guid peerId, Uri peerUri, Guid subscriptionId, Uri endpointUri,
+            string messageName, string correlationId)
         {
             Created = DateTime.UtcNow;
             Updated = DateTime.UtcNow;
             BusUri = busUri;
+            PeerUri = peerUri;
             PeerId = peerId;
             SubscriptionId = subscriptionId;
             EndpointUri = endpointUri;
@@ -33,15 +33,6 @@ namespace MassTransit.Subscriptions.Coordinator
         protected PersistentSubscription()
         {
         }
-
-        public Uri BusUri { get; private set; }
-        public Guid PeerId { get; private set; }
-        public Guid SubscriptionId { get; private set; }
-        public Uri EndpointUri { get; private set; }
-        public string MessageName { get; private set; }
-        public string CorrelationId { get; private set; }
-        public DateTime Created { get; private set; }
-        public DateTime Updated { get; set; }
 
         public bool Equals(PersistentSubscription other)
         {
@@ -86,10 +77,55 @@ namespace MassTransit.Subscriptions.Coordinator
             return !Equals(left, right);
         }
 
+        /// <summary>
+        /// The control bus address of the instance this subscription belongs to
+        /// </summary>
+        public Uri BusUri { get; private set; }
+
+        /// <summary>
+        /// The PeerId of the remote subscription
+        /// </summary>
+        public Guid PeerId { get; private set; }
+
+        /// <summary>
+        /// The control bus address of the peer
+        /// </summary>
+        public Uri PeerUri { get; private set; }
+
+        /// <summary>
+        /// The subscription id for this instance of the subscription
+        /// </summary>
+        public Guid SubscriptionId { get; private set; }
+
+        /// <summary>
+        /// The endpointUri where messages should be delivered matching the subscription
+        /// </summary>
+        public Uri EndpointUri { get; private set; }
+
+        /// <summary>
+        /// The message name of the subscription
+        /// </summary>
+        public string MessageName { get; private set; }
+
+        /// <summary>
+        /// The correlationId of the subscription if it is correlated
+        /// </summary>
+        public string CorrelationId { get; private set; }
+
+        /// <summary>
+        /// The time the subscription was created
+        /// </summary>
+        public DateTime Created { get; private set; }
+
+        /// <summary>
+        /// The time the subscription was last updated
+        /// </summary>
+        public DateTime Updated { get; set; }
+
+
         public override string ToString()
         {
-            return string.Format("PeerId: {0}, SubscriptionId: {1}, MessageName: {2}", PeerId, SubscriptionId,
-                MessageName);
+            return string.Format("PeerId: {0}, PeerUri: {1} Type: {2}", PeerId, PeerUri, MessageName);
         }
     }
 }

@@ -62,6 +62,10 @@ namespace MassTransit.Subscriptions.Coordinator
                     x.HandleOnPoolFiber();
                 })
                 .GetActor();
+
+            // at this point, existing subscriptions need to be loaded...
+
+            _repository.Load(this);
         }
 
         public void Inspect(DiagnosticsProbe probe)

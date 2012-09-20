@@ -23,7 +23,7 @@ namespace MassTransit.Subscriptions.Coordinator
     {
         static readonly ILog _log = Logger.Get(typeof (PeerHandler));
 
-        readonly EndpointSubscriptionCache _endpointSubscriptionCache;
+        EndpointSubscriptionCache _endpointSubscriptionCache;
         readonly SubscriptionObserver _observer;
         Guid _peerId;
         Uri _peerUri;
@@ -31,12 +31,13 @@ namespace MassTransit.Subscriptions.Coordinator
         public PeerHandler(Fiber fiber, Scheduler scheduler, Inbox inbox, SubscriptionObserver observer, SubscriptionRepository repository)
         {
             _observer = observer;
-            _endpointSubscriptionCache = new EndpointSubscriptionCache(fiber, scheduler, observer, repository);
 
             inbox.Receive<InitializePeerHandler>(init =>
                 {
                     _peerId = init.PeerId;
                     _peerUri = init.PeerUri;
+
+                    _endpointSubscriptionCache = new EndpointSubscriptionCache(fiber, scheduler, observer, _peerUri, repository);
                 });
         }
 
@@ -45,7 +46,8 @@ namespace MassTransit.Subscriptions.Coordinator
         {
             try
             {
-                _endpointSubscriptionCache.Send(message.Body);
+                if(_endpointSubscriptionCache != null)
+                    _endpointSubscriptionCache.Send(message.Body);
             }
             catch (Exception ex)
             {
@@ -58,7 +60,8 @@ namespace MassTransit.Subscriptions.Coordinator
         {
             try
             {
-                _endpointSubscriptionCache.Send(message.Body);
+                if (_endpointSubscriptionCache != null)
+                    _endpointSubscriptionCache.Send(message.Body);
             }
             catch (Exception ex)
             {
@@ -71,7 +74,8 @@ namespace MassTransit.Subscriptions.Coordinator
         {
             try
             {
-                _endpointSubscriptionCache.Send(message.Body);
+                if (_endpointSubscriptionCache != null)
+                    _endpointSubscriptionCache.Send(message.Body);
             }
             catch (Exception ex)
             {
@@ -84,7 +88,8 @@ namespace MassTransit.Subscriptions.Coordinator
         {
             try
             {
-                _endpointSubscriptionCache.Send(message.Body);
+                if (_endpointSubscriptionCache != null)
+                    _endpointSubscriptionCache.Send(message.Body);
             }
             catch (Exception ex)
             {

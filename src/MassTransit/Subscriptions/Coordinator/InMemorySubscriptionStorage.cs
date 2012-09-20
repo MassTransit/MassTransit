@@ -13,8 +13,11 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using Logging;
+    using Magnum.Extensions;
     using Stact;
 
     public class InMemorySubscriptionStorage :
@@ -56,6 +59,22 @@ namespace MassTransit.Subscriptions.Coordinator
 
                     _log.DebugFormat("SubscriptionStorage.Remove: {0} [{1}]", subscription, _subscriptions.Count);
                 });
+        }
+
+        public IEnumerable<PersistentSubscription> Load(Uri peerUri)
+        {
+            var subscriptions = new Future<IList<PersistentSubscription>>();
+            _fiber.Add(() =>
+                {
+                    subscriptions.Complete(_subscriptions.ToList());
+                });
+
+            var completed = subscriptions.WaitUntilCompleted(60.Seconds());
+            if (completed)
+                return subscriptions.Value;
+
+            _log.Error("Failed to load subscriptions in the time required");
+            return Enumerable.Empty<PersistentSubscription>();
         }
 
         void Dispose(bool disposing)

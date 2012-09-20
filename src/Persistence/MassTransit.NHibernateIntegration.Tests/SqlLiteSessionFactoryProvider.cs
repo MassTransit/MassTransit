@@ -31,8 +31,13 @@ namespace MassTransit.NHibernateIntegration.Tests
         SQLiteConnection _openConnection;
         SingleConnectionSessionFactory _sessionFactory;
 
+        public SqlLiteSessionFactoryProvider(string connectionString, params Type[] mapTypes)
+            : base(mapTypes, x => Integrate(x, connectionString))
+        {
+        }
+
         public SqlLiteSessionFactoryProvider(params Type[] mapTypes)
-            : base(mapTypes, Integrate)
+            : base(mapTypes, x => Integrate(x, null))
         {
             Configuration.SetProperty(NHibernate.Cfg.Environment.UseSecondLevelCache, "true");
             Configuration.SetProperty(NHibernate.Cfg.Environment.UseQueryCache, "true");
@@ -89,10 +94,10 @@ namespace MassTransit.NHibernateIntegration.Tests
             new SchemaExport(config).Execute(true, true, false, connection, null);
         }
 
-        static void Integrate(IDbIntegrationConfigurationProperties db)
+        static void Integrate(IDbIntegrationConfigurationProperties db, string connectionString)
         {
             db.Dialect<SQLiteDialect>();
-            db.ConnectionString = "Data Source=:memory:";
+            db.ConnectionString = connectionString ?? "Data Source=:memory:;Version=3;New=True;Pooling=True;Max Pool Size=1;";
             db.BatchSize = 100;
             db.IsolationLevel = IsolationLevel.Serializable;
             db.LogSqlInConsole = false;
