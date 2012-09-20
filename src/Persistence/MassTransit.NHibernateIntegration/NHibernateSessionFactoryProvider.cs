@@ -45,7 +45,8 @@ namespace MassTransit.NHibernateIntegration
             _configuration = CreateConfiguration();
         }
 
-        public NHibernateSessionFactoryProvider(IEnumerable<Type> mappedTypes, Action<IDbIntegrationConfigurationProperties> databaseIntegration)
+        public NHibernateSessionFactoryProvider(IEnumerable<Type> mappedTypes,
+            Action<IDbIntegrationConfigurationProperties> databaseIntegration)
         {
             _mappedTypes = mappedTypes;
             _databaseIntegration = databaseIntegration;
@@ -129,8 +130,7 @@ namespace MassTransit.NHibernateIntegration
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException(
-                    string.Format("Failed to create session factory"), ex);
+                throw new InvalidOperationException(string.Format("Failed to create session factory"), ex);
             }
             finally
             {

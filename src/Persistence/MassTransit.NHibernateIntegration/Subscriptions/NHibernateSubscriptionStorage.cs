@@ -88,5 +88,29 @@ namespace MassTransit.NHibernateIntegration.Subscriptions
                 transaction.Commit();
             }
         }
+
+        public IEnumerable<PersistentSubscription> Load(Uri busUri)
+        {
+            using (ISession session = _sessionFactory.OpenSession())
+            using (ITransaction transaction = session.BeginTransaction())
+            {
+                IList<PersistentSubscription> existingSubscription = session.QueryOver<PersistentSubscription>()
+                    .Where(x => x.BusUri == busUri)
+                    .OrderBy(x => x.PeerId).Asc
+                    .List();
+
+                foreach (PersistentSubscription existing in existingSubscription)
+                {
+                    _log.DebugFormat("Removing: {0} {1} {2}", existing.SubscriptionId, existing.MessageName,
+                        existing.EndpointUri);
+
+                    session.Delete(existing);
+                }
+
+                transaction.Commit();
+
+                return existingSubscription;
+            }
+        }
     }
 }

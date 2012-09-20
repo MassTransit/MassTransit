@@ -17,7 +17,7 @@ namespace MassTransit.Subscriptions.Coordinator
 	using Messages;
 
 	/// <summary>
-	/// Implementors take care of 
+	/// Implementers take care of 
 	/// </summary>
 	public interface SubscriptionRouter
 	{
