@@ -175,7 +175,13 @@ namespace MassTransit.RequestResponse
         {
             foreach (TaskResponseHandler handler in _responseHandlers)
             {
-                handler.Task.ContinueWith(_ => { _source.TrySetResult(_message); });
+                handler.Task.ContinueWith(x =>
+                    {
+                        if (x.IsFaulted)
+                            _source.TrySetException(x.Exception);
+                        else
+                            _source.TrySetResult(_message);
+                    });
             }
 
             return bus.InboundPipeline
