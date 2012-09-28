@@ -13,6 +13,7 @@
 namespace MassTransit.Reactive
 {
 	using System;
+	using System.Reactive;
 	using Pipeline;
 
 	public class ServiceBusSubscription<T> :
@@ -24,7 +25,7 @@ namespace MassTransit.Reactive
 
 		public ServiceBusSubscription(IServiceBus bus, IObserver<T> observer, Predicate<T> condition)
 		{
-			_observer = observer;
+			 _observer = Observer.Synchronize(observer);
 
 			_unsubscribeAction = bus.SubscribeHandlerSelector(HandlerSelector.ForSelectiveHandler(condition, m =>
 				{
