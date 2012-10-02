@@ -121,9 +121,7 @@ namespace MassTransit.Services.HealthMonitoring
         {
             var message = new Heartbeat(SystemId, _controlUri, _dataUri, _heartbeatIntervalInSeconds);
             _bus.ControlBus.Publish(message,
-                context =>
-                _log.Info(
-                    "No routing entry found for the HeartBeat message. Are you sure the HealthMonitor is setup correctly?"));
+                context => context.IfNoSubscribers(() => _log.Info("No routing entry found for the HeartBeat message. Are you sure the HealthMonitor is setup correctly?")));
         }
 
         ~HealthClient()
