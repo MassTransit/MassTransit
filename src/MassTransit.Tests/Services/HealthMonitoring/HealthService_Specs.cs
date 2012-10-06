@@ -29,7 +29,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			MakeSagaSuspect();
 
 			HealthSaga saga = GetSaga();
-			LocalBus.Publish(new TimeoutExpired { CorrelationId = saga.CorrelationId, Tag = 2 });
+			LocalBus.ControlBus.Publish(new TimeoutExpired { CorrelationId = saga.CorrelationId, Tag = 2 });
 
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Down);
@@ -38,14 +38,14 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 		public void MakeSagaSuspect()
 		{
-			LocalBus.Publish(new EndpointCameOnline(Guid.NewGuid(), LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri,
+			LocalBus.ControlBus.Publish(new EndpointCameOnline(Guid.NewGuid(), LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri,
 				0));
 
 			HealthSaga saga = GetSaga();
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Healthy);
 
-			LocalBus.Publish(new TimeoutExpired {CorrelationId = saga.CorrelationId, Tag = 1});
+			LocalBus.ControlBus.Publish(new TimeoutExpired {CorrelationId = saga.CorrelationId, Tag = 1});
 
 			saga.ShouldBeInState(HealthSaga.Suspect);
 		}
@@ -71,7 +71,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			MakeSagaSuspect();
 
 			HealthSaga saga = GetSaga();
-			LocalBus.Publish(new Heartbeat(saga.CorrelationId, LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri, 0));
+			LocalBus.ControlBus.Publish(new Heartbeat(saga.CorrelationId, LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri, 0));
 
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Healthy);
@@ -83,7 +83,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			MakeSagaSuspect();
 
 			HealthSaga saga = GetSaga();
-			LocalBus.Publish(new TimeoutExpired {CorrelationId = saga.CorrelationId, Tag = 2});
+			LocalBus.ControlBus.Publish(new TimeoutExpired {CorrelationId = saga.CorrelationId, Tag = 2});
 
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Down);
@@ -95,7 +95,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			MakeSagaSuspect();
 
 			HealthSaga saga = GetSaga();
-			LocalBus.Publish(new PingEndpointResponse(saga.CorrelationId, LocalBus.ControlBus.Endpoint.Address.Uri,
+			LocalBus.ControlBus.Publish(new PingEndpointResponse(saga.CorrelationId, LocalBus.ControlBus.Endpoint.Address.Uri,
 				LocalBus.Endpoint.Address.Uri, 0));
 
 			saga.ShouldNotBeNull();
@@ -108,7 +108,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			MakeSagaDown();
 
 			HealthSaga saga = GetSaga();
-			LocalBus.Publish(new Heartbeat(saga.CorrelationId, LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri, 0));
+			LocalBus.ControlBus.Publish(new Heartbeat(saga.CorrelationId, LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri, 0));
 
 			saga.ShouldNotBeNull();
 			saga.ShouldBeInState(HealthSaga.Healthy);
@@ -123,7 +123,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		[Test]
 		public void Should_publish_heartbeats_to_the_service()
 		{
-			LocalBus.Publish(new EndpointCameOnline(Guid.NewGuid(), LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri,
+			LocalBus.ControlBus.Publish(new EndpointCameOnline(Guid.NewGuid(), LocalBus.ControlBus.Endpoint.Address.Uri, LocalBus.Endpoint.Address.Uri,
 				0));
 
 			HealthSaga saga = GetSaga();
