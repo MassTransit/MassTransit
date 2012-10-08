@@ -35,7 +35,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		{
 			base.ConfigureServiceBus(uri, configurator);
 
-			configurator.UseRabbitMqRouting();
+			configurator.UseRabbitMq();
 		}
 	}
 }

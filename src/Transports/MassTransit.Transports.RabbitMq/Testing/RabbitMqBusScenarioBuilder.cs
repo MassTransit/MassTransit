@@ -36,7 +36,7 @@ namespace MassTransit.Testing
 
 			ConfigureBus(x =>
 				{
-					x.UseRabbitMqRouting();
+					x.UseRabbitMq();
 					x.SetReceiveTimeout(100.Milliseconds());
 				});
 		}

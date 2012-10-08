@@ -29,7 +29,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
 			_bus = ServiceBusFactory.New(c =>
 				{
 					c.ReceiveFrom(inputAddress);
-					c.UseRabbitMqRouting();
 					c.UseRabbitMq(r =>
 						{
 							r.ConfigureHost(inputAddress, h =>
