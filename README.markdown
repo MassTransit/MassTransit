@@ -19,7 +19,6 @@ In order to get started with MassTransit, you can have a look at the documentati
 ServiceBusFactory.New(sbc =>
 {
 	sbc.UseRabbitMq();
-	sbc.UseRabbitMqRouting();
 	sbc.ReceiveFrom("rabbitmq://localhost/mybus");
 });
 ```
