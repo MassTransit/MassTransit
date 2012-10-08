@@ -100,6 +100,11 @@ namespace MassTransit.Services.Subscriptions.Client
             }
 
             _producer.OnComplete();
+
+            using(_ready)
+            {
+                _ready.Close();
+            }
         }
 
         void Consume(IConsumeContext<SubscriptionRefresh> context)
@@ -134,13 +139,10 @@ namespace MassTransit.Services.Subscriptions.Client
             if (_log.IsDebugEnabled)
                 _log.Debug("Waiting for response from the subscription service");
 
-            using (_ready)
+            bool received = _ready.WaitOne(_startTimeout);
+            if (!received)
             {
-                bool received = _ready.WaitOne(_startTimeout);
-                if (!received)
-                {
-                    throw new InvalidOperationException("Timeout waiting for subscription service to respond");
-                }
+                throw new InvalidOperationException("Timeout waiting for subscription service to respond");
             }
         }
 
