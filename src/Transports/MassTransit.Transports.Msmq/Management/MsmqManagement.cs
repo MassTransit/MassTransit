@@ -84,6 +84,7 @@ namespace MassTransit.Transports.Msmq.Management
 					break;
 
 				case WindowsVersion.Windows7:
+                case WindowsVersion.Windows8:
 					installer = new Windows7Installer();
 					break;
 
