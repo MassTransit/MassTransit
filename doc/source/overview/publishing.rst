@@ -47,19 +47,61 @@ as the 'Subscription Service'. The subscription service is a well known location
 where each bus sends its subscription requests to, and gets the subscription
 requests of others from. 
 
+### Publisher ####
+
+            // Setup Mass Transit.
+            Bus.Initialize(sbc =>
+            {
+                sbc.UseMsmq();
+                sbc.ReceiveFrom("msmq://localhost/BulkProcessing.Web");
+                sbc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
+                // sbc.VerifyMsmqConfiguration(); This doesn't work on Windows 8.
+            });
+
+            // Send Message
+            var sendContext = new SendContext<Message>(message);
+            sendContext.SetMessageId(Guid.NewGuid().ToString());
+            sendContext.SetCorrelationId(Guid.NewGuid().ToString());
+            sendContext.SetExpirationTime(DateTime.Now.AddDays(1));
+
+            Bus.Instance.Publish<Message>(message);
+
+### Subscriber ####
+
+        static void Main(string[] args)
+        {
+            Bus.Initialize(sbc =>
+            {
+                sbc.UseMsmq();
+                sbc.ReceiveFrom("msmq://localhost/BulkProcessing.Consumer");
+                sbc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
+                // sbc.VerifyMsmqConfiguration(); This doesn't work on Windows 8.
+
+                sbc.Subscribe(subs =>
+                {
+                    subs.Handler<Message>(msg => Console.WriteLine(msg.Text));
+                });
+            });
+
+            while (true)
+            {
+                Thread.Sleep(1000);
+            }
+        }
+
 Internal detail of both MSMQ transports
 ----------------------------------------
 
 Because MSMQ doesn't have any routing capabilities, MassTransit has built them
 internal using a construct called a 'Pipeline.' This pipeline is configured by the
 local subscription adapter (one for Plain MSMQ and one for Multicast MSMQ) to add
-and remove segmenst to the pipeline. When a message comes in it goes through the
+and remove segments to the pipeline. When a message comes in it goes through the
 pipeline logic, and then is sent directly to the bus on the other end.
 
 .. note::
 
-	It is the subscription service that keeps all of the outbound and inbound pipelines
-	, across all of the instances,  in order.
+	It is the subscription service that keeps all of the outbound and inbound pipelines, 
+	across all of the instances,  in order.
 
 RabbitMQ
 --------
