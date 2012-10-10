@@ -122,6 +122,9 @@ namespace MassTransit.Transports.Msmq.Management
 			if (osName.Contains("Windows 7"))
 				return WindowsVersion.Windows7;
 
+            if (osName.Contains("Microsoft Windows 8"))
+                return WindowsVersion.Windows8;
+
 			if (osInfo.Platform == PlatformID.Win32Windows)
 				return WindowsVersion.TooOldToCare;
 
@@ -141,8 +144,10 @@ namespace MassTransit.Transports.Msmq.Management
 					return WindowsVersion.Windows2003;
 
 				case 6:
-					if (version.Minor == 0)
-						return WindowsVersion.WindowsVista;
+                    if (version.Minor == 0)
+                    {
+                        return WindowsVersion.WindowsVista;
+                    }
 					return WindowsVersion.Windows2008R2;
 
 				default:
