@@ -14,6 +14,10 @@ MsmqMulticastSubscription manager provides similar functionality while removing 
 of failure. For users of RabbitMQ this service is not needed as the RabbitMQ approach leverages its excellent
 message routing capabilities.
 
+.. warning::
+
+  This is only needed for MSMQ or other transports that have no routing capabilities
+
 Timeout Service
 """""""""""""""
 
