@@ -8,15 +8,25 @@ services are:
 Subscription Service
 """"""""""""""""""""
 
-Because MSMQ has anemic routing capabilities MassTransit originally shipped with a central subscription registry that
-all of the busses could listen to, to learn when a new ‘subscription’ would come online. As of 2.0 the
-MsmqMulticastSubscription manager provides similar functionality while removing the need for a single point
-of failure. For users of RabbitMQ this service is not needed as the RabbitMQ approach leverages its excellent
+.. note::
+
+  This is only needed for MSMQ or other transports that have no routing capabilities
+
+Because MSMQ has anemic routing capabilities MassTransit originally shipped with
+a central subscription registry that all of the busses could listen to, to learn
+when a new ‘subscription’ would come online. As of 2.0 the MsmqMulticastSubscription
+manager provides similar functionality while removing the need for a single point
+of failure. For users of RabbitMQ this service is not needed as the RabbitMQ
+approach leverages its excellent
 message routing capabilities.
 
 .. warning::
 
-  This is only needed for MSMQ or other transports that have no routing capabilities
+  The MsmqMulticastSubscription should not be considered for production yet.
+  I doesn't persist to disk so a restart can mean a wipeout of subscriptions.
+  If we had a way to write these to disk this would be a more robust option.
+  We use it mostly for demo / unit testing.
+
 
 Timeout Service
 """""""""""""""
