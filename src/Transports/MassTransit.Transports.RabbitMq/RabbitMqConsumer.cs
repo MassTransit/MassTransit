@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -16,13 +16,15 @@ namespace MassTransit.Transports.RabbitMq
     using Logging;
     using Management;
     using RabbitMQ.Client;
+    using RabbitMQ.Client.Events;
 
     public class RabbitMqConsumer :
         ConnectionBinding<RabbitMqConnection>
     {
-        static readonly ILog _log = Logger.Get(typeof (RabbitMqConsumer));
+        static readonly ILog _log = Logger.Get(typeof(RabbitMqConsumer));
         readonly IRabbitMqEndpointAddress _address;
         IModel _channel;
+        QueueingBasicConsumer _consumer;
         bool _purgeOnBind;
 
         public RabbitMqConsumer(IRabbitMqEndpointAddress address, bool purgeOnBind)
@@ -45,7 +47,10 @@ namespace MassTransit.Transports.RabbitMq
             }
 
             _channel = connection.Connection.CreateModel();
-            _channel.BasicQos(0, 1, false);
+            _channel.BasicQos(0, 10, false);
+
+            _consumer = new QueueingBasicConsumer(_channel);
+            _channel.BasicConsume(_address.Name, false, _consumer);
         }
 
         public void Unbind(RabbitMqConnection connection)
@@ -53,6 +58,7 @@ namespace MassTransit.Transports.RabbitMq
             try
             {
                 _channel.Close(200, "unbind consumer");
+                _consumer = null;
             }
             catch (Exception ex)
             {
@@ -71,27 +77,30 @@ namespace MassTransit.Transports.RabbitMq
             {
                 _channel = null;
             }
- }
-  public BasicGetResult Get()
-        {
-            return _channel.BasicGet(_address.Name, false);
         }
 
-        public void MessageCompleted(BasicGetResult result)
+        public BasicDeliverEventArgs Get(TimeSpan timeout)
+        {
+            object result;
+            _consumer.Queue.Dequeue((int)timeout.TotalMilliseconds, out result);
+
+            return (BasicDeliverEventArgs)result;
+        }
+
+        public void MessageCompleted(BasicDeliverEventArgs result)
         {
             _channel.BasicAck(result.DeliveryTag, false);
         }
 
-        public void MessageFailed(BasicGetResult result)
+        public void MessageFailed(BasicDeliverEventArgs result)
         {
             _channel.BasicPublish(_address.Name, "", result.BasicProperties, result.Body);
             _channel.BasicAck(result.DeliveryTag, false);
         }
 
-        public void MessageSkipped(BasicGetResult result)
+        public void MessageSkipped(BasicDeliverEventArgs result)
         {
             _channel.BasicNack(result.DeliveryTag, false, true);
         }
-
     }
 }
