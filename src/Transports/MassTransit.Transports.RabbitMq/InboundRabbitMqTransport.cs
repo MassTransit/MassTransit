@@ -19,6 +19,7 @@ namespace MassTransit.Transports.RabbitMq
     using Context;
     using Logging;
     using RabbitMQ.Client;
+    using RabbitMQ.Client.Events;
     using RabbitMQ.Client.Exceptions;
 
     public class InboundRabbitMqTransport :
@@ -60,10 +61,10 @@ namespace MassTransit.Transports.RabbitMq
 
             _connectionHandler.Use(connection =>
                 {
-                    BasicGetResult result = null;
+                    BasicDeliverEventArgs result = null;
                     try
                     {
-                        result = _consumer.Get();
+                        result = _consumer.Get(timeout);
                         if (result == null)
                         {
                             Thread.Sleep(10);
