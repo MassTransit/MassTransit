@@ -17,7 +17,7 @@ namespace MassTransit.Transports.Msmq.Management
 	public class WindowsServer2008Installer :
 		MsmqInstaller
 	{
-		const string Arguments = "MSMQ-Server;MSMQ-Multicasting /passive";
+		const string Arguments = "MSMQ-Server;MSMQ-Multicast /passive";
 		const string OcSetup = "OCSETUP";
 
 		public Process Install()
