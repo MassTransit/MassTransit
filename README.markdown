@@ -63,7 +63,7 @@ gem install semver2
 
 ## Contributing
 
- 1. `git config --global core.autoclrf false`
+ 1. `git config --global core.autocrlf false`
  1. Hack!
  1. Make a pull request.
  
