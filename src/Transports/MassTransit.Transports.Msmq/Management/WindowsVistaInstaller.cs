@@ -17,7 +17,7 @@ namespace MassTransit.Transports.Msmq.Management
 	public class WindowsVistaInstaller :
 		MsmqInstaller
 	{
-		const string Arguments = "MSMQ-Container;MSMQ-Server;MSMQ-Multicasting /passive";
+		const string Arguments = "MSMQ-Container;MSMQ-Server;MSMQ-Multicast /passive";
 		const string OcSetup = "OCSETUP";
 
 		public Process Install()
