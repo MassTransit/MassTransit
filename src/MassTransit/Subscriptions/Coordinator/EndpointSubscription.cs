@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -18,28 +18,22 @@ namespace MassTransit.Subscriptions.Coordinator
     using Logging;
     using Magnum.Extensions;
     using Messages;
-    using Stact;
 
     public class EndpointSubscription
     {
         static readonly ILog _log = Logger.Get(typeof(EndpointSubscription));
         readonly string _correlationId;
-        readonly Fiber _fiber;
         readonly IDictionary<Guid, PeerSubscription> _ids;
         readonly string _messageName;
         readonly SubscriptionObserver _observer;
-        readonly SubscriptionRepository _repository;
-        readonly Scheduler _scheduler;
         readonly Uri _peerUri;
-        readonly TimeSpan _unsubscribeTimeout = 4.Seconds();
+        readonly SubscriptionRepository _repository;
         Uri _endpointUri;
         Guid _subscriptionId;
 
-        public EndpointSubscription(Fiber fiber, Scheduler scheduler, Uri peerUri, string messageName, string correlationId,
-                                    SubscriptionObserver observer, SubscriptionRepository repository)
+        public EndpointSubscription(Uri peerUri, string messageName, string correlationId,
+            SubscriptionObserver observer, SubscriptionRepository repository)
         {
-            _fiber = fiber;
-            _scheduler = scheduler;
             _peerUri = peerUri;
             _messageName = messageName;
             _correlationId = correlationId;
@@ -58,7 +52,8 @@ namespace MassTransit.Subscriptions.Coordinator
 
             _ids.Add(message.SubscriptionId, message);
 
-            _repository.Add(message.PeerId, _peerUri, message.SubscriptionId, message.EndpointUri, message.MessageName, message.CorrelationId);
+            _repository.Add(message.PeerId, _peerUri, message.SubscriptionId, message.EndpointUri, message.MessageName,
+                message.CorrelationId);
 
             if (_ids.Count > 1)
                 return;

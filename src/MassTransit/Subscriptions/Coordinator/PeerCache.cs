@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -23,43 +23,34 @@ namespace MassTransit.Subscriptions.Coordinator
     public class PeerCache :
         Actor
     {
-        static readonly ILog _log = Logger.Get(typeof (PeerCache));
-        readonly Fiber _fiber;
+        static readonly ILog _log = Logger.Get(typeof(PeerCache));
         readonly ActorFactory<PeerHandler> _peerHandlerFactory;
         readonly Cache<Guid, Uri> _peerIds;
         readonly Uri _peerUri;
         readonly Cache<Uri, ActorRef> _peers;
-        readonly Scheduler _scheduler;
 
-        public PeerCache(Fiber fiber, Scheduler scheduler, SubscriptionObserver observer, Guid clientId,
-                         Uri controlUri, SubscriptionRepository repository)
+        public PeerCache(SubscriptionObserver observer, Guid clientId, Uri controlUri, SubscriptionRepository repository)
         {
             _peers = new DictionaryCache<Uri, ActorRef>();
             _peerUri = controlUri;
-            _fiber = fiber;
-            _scheduler = scheduler;
             _peerIds = new DictionaryCache<Guid, Uri>();
 
-            _peerHandlerFactory = ActorFactory.Create((f, s, i) => new PeerHandler(f, s, i, observer, repository));
+            _peerHandlerFactory = ActorFactory.Create((f, s, i) => new PeerHandler(i, observer, repository));
 
             // create a peer for our local client
             WithPeer(clientId, controlUri, x => { }, true);
         }
 
         [UsedImplicitly]
-        public void Handle(Message<Stop> message)
+        public void Handle(Message<StopSubscriptionRouterService> message)
         {
             try
             {
-                _peers.Each(x =>
-                    {
-                        x.Stop();
-                        x.ExitOnDispose(30.Seconds()).Dispose();
-                    });
+                _peers.Each(x => x.SendRequestWaitForResponse<Exit>(new ExitImpl(), 30.Seconds()));
             }
             catch (Exception ex)
             {
-                _log.Error("Message<Stop> Exception", ex);
+                _log.Error("Message<StopSubscriptionRouterService> Exception", ex);
             }
         }
 
@@ -170,6 +161,10 @@ namespace MassTransit.Subscriptions.Coordinator
             }
 
             callback(_peers[controlUri]);
+        }
+
+        class ExitImpl : Exit
+        {
         }
     }
 }

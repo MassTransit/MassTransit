@@ -16,29 +16,24 @@ namespace MassTransit.Subscriptions.Coordinator
     using Logging;
     using Magnum.Caching;
     using Messages;
-    using Stact;
 
     public class EndpointSubscriptionCache
     {
         static readonly ILog _log = Logger.Get(typeof(EndpointSubscriptionCache));
 
-        readonly Fiber _fiber;
         readonly Cache<SubscriptionKey, EndpointSubscription> _messageSubscriptions;
         readonly SubscriptionObserver _observer;
         readonly Uri _peerUri;
-        readonly Scheduler _scheduler;
 
-        public EndpointSubscriptionCache(Fiber fiber, Scheduler scheduler, SubscriptionObserver observer, Uri peerUri,
+        public EndpointSubscriptionCache(SubscriptionObserver observer, Uri peerUri,
             SubscriptionRepository repository)
         {
-            _fiber = fiber;
-            _scheduler = scheduler;
             _observer = observer;
             _peerUri = peerUri;
             _messageSubscriptions =
                 new DictionaryCache<SubscriptionKey, EndpointSubscription>(
                     key =>
-                    new EndpointSubscription(_fiber, _scheduler, _peerUri, key.MessageName, key.CorrelationId, _observer,
+                    new EndpointSubscription(_peerUri, key.MessageName, key.CorrelationId, _observer,
                         repository));
         }
 

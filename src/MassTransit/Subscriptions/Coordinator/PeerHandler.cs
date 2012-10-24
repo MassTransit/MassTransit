@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -21,14 +21,15 @@ namespace MassTransit.Subscriptions.Coordinator
     public class PeerHandler :
         Actor
     {
-        static readonly ILog _log = Logger.Get(typeof (PeerHandler));
+        static readonly ILog _log = Logger.Get(typeof(PeerHandler));
 
-        EndpointSubscriptionCache _endpointSubscriptionCache;
         readonly SubscriptionObserver _observer;
+        EndpointSubscriptionCache _endpointSubscriptionCache;
         Guid _peerId;
         Uri _peerUri;
 
-        public PeerHandler(Fiber fiber, Scheduler scheduler, Inbox inbox, SubscriptionObserver observer, SubscriptionRepository repository)
+        public PeerHandler(Inbox inbox, SubscriptionObserver observer,
+            SubscriptionRepository repository)
         {
             _observer = observer;
 
@@ -37,7 +38,8 @@ namespace MassTransit.Subscriptions.Coordinator
                     _peerId = init.PeerId;
                     _peerUri = init.PeerUri;
 
-                    _endpointSubscriptionCache = new EndpointSubscriptionCache(fiber, scheduler, observer, _peerUri, repository);
+                    _endpointSubscriptionCache = new EndpointSubscriptionCache(observer, _peerUri,
+                        repository);
                 });
         }
 
@@ -46,7 +48,7 @@ namespace MassTransit.Subscriptions.Coordinator
         {
             try
             {
-                if(_endpointSubscriptionCache != null)
+                if (_endpointSubscriptionCache != null)
                     _endpointSubscriptionCache.Send(message.Body);
             }
             catch (Exception ex)

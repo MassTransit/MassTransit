@@ -57,7 +57,7 @@ namespace MassTransit.Subscriptions.Coordinator
             _peerCache = ActorFactory.Create<PeerCache>(x =>
                 {
                     x.ConstructedBy((fiber, scheduler, inbox) =>
-                                    new PeerCache(fiber, scheduler, connector, _peerId, _peerUri, repository));
+                                    new PeerCache(connector, _peerId, _peerUri, repository));
                     x.UseSharedScheduler();
                     x.HandleOnPoolFiber();
                 })
@@ -183,15 +183,17 @@ namespace MassTransit.Subscriptions.Coordinator
                 lock (_observers)
                     _observers.Each(x => x.OnComplete());
 
-                _peerCache.Stop();
-                using (_peerCache.ExitOnDispose(30.Seconds()))
-                {
-                }
+                _peerCache.Send<StopSubscriptionRouterService>();
+                _peerCache.SendRequestWaitForResponse<Exit>(new ExitImpl(), 30.Seconds());
 
                 _repository.Dispose();
             }
 
             _disposed = true;
+        }
+
+        class ExitImpl : Exit
+        {
         }
 
         ~SubscriptionRouterService()

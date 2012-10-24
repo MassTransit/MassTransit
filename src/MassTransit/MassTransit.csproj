@@ -505,6 +505,7 @@
     <Compile Include="Services\Timeout\TimeoutService.cs" />
     <Compile Include="Subscriptions\Coordinator\BusSubscriptionRepository.cs" />
     <Compile Include="Subscriptions\Coordinator\PersistentSubscription.cs" />
+    <Compile Include="Subscriptions\Coordinator\StopSubscriptionRouterService.cs" />
     <Compile Include="Subscriptions\Coordinator\SubscriptionKey.cs" />
     <Compile Include="Subscriptions\Coordinator\SubscriptionObserver.cs" />
     <Compile Include="Subscriptions\Coordinator\SubscriptionRepository.cs" />
