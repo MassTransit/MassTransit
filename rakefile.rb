@@ -333,7 +333,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "Magnum", "2.0.1.0"
+    nuspec.dependency "Magnum", "2.0.2.0"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
 	add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
@@ -399,7 +399,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "RabbitMQ.Client", "2.8.6"
+    nuspec.dependency "RabbitMQ.Client", "2.8.7"
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
 
 	add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.Transports.RabbitMq.{dll,pdb,xml}')}", nuspec
@@ -432,7 +432,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NHibernate", "3.3.1"
+    nuspec.dependency "NHibernate", "3.3.2"
     nuspec.dependency "Magnum", "2.0.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.NHibernate.nuspec'
 
@@ -500,7 +500,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NUnit", "2.5.9"
+    nuspec.dependency "NUnit", "2.6.2"
     nuspec.dependency "RhinoMocks", "3.6"
     nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'
 

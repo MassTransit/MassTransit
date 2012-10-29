@@ -29100,6 +29100,12 @@
             other databases.
             </remarks> 
         </member>
+        <member name="T:NHibernate.Linq.ExpressionTransformers.RemoveRedundantCast">
+            <summary>
+            Remove redundant casts to the same type or to superclass (upcast) in <see cref="F:System.Linq.Expressions.ExpressionType.Convert"/>, <see cref="F:System.Linq.Expressions.ExpressionType.ConvertChecked"/> 
+            and <see cref="F:System.Linq.Expressions.ExpressionType.TypeAs"/> <see cref="T:System.Linq.Expressions.UnaryExpression"/>s  
+            </summary>
+        </member>
         <member name="T:NHibernate.Linq.GroupBy.AggregatingGroupByRewriter">
             <summary>
             An AggregatingGroupBy is a query such as:
