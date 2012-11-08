@@ -17,7 +17,7 @@ class NUnitRunner
 	def run(assemblies)
 		assemblies.each do |assem|
 			file = File.expand_path("#{@working_directory}/#{assem}")
-			Kernel::system("#{@cmd} \"#{file}\"")
+			sh "#{@cmd} \"#{file}\""
 		end
 	end
 end
@@ -63,7 +63,7 @@ class MSBuildRunner
 			targetsValue += " /t:#{target}"
 		end
 		
-		Kernel::system("#{msbuildFile} #{projFile} #{targetsValue} #{switchesValue}")
+		sh "#{msbuildFile} #{projFile} #{targetsValue} #{switchesValue}"
 	end
 end
 
@@ -76,7 +76,7 @@ class AspNetCompilerRunner
 		frameworkDir = File.join(ENV['windir'].dup, 'Microsoft.NET', 'Framework', 'v4.0.30319')
 		aspNetCompiler = File.join(frameworkDir, 'aspnet_compiler.exe')
 
-		Kernel::system("#{aspNetCompiler} -nologo -errorstack -c -p #{webPhysDir} -v #{webVirDir}")
+		sh "#{aspNetCompiler} -nologo -errorstack -c -p #{webPhysDir} -v #{webVirDir}"
 	end
 end
 

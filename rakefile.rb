@@ -25,11 +25,12 @@ props = {
   :stage => File.expand_path("build_output"),
   :output => File.join( File.expand_path("build_output"), OUTPUT_PATH ),
   :artifacts => File.expand_path("build_artifacts"),
-  :projects => ["MassTransit", "MassTransit.RuntimeServices"]
+  :projects => ["MassTransit", "MassTransit.RuntimeServices"],
+  :keyfile => File.expand_path("MassTransit.snk")
 }
 
 desc "**Default**, cleans, compiles and runs tests"
-task :default => [:clean, :compile, :compile_samples, :ilmerge, :copy_services]
+task :default => [:clean, :compile, :copy_services, :ilmerge, :compile_samples, :copy_samples]
 
 desc "Default + tests"
 task :all => [:default, :tests]
@@ -64,10 +65,12 @@ task :clean do
 	Dir.mkdir props[:artifacts]
 end
 
-task :compile_samples => [:compile, :build_starbucks, :build_distributor] do ; end
+task :compile_samples => [:build_starbucks, :build_distributor] do ; end
 
 desc "Compiles MT into build_output"
-task :compile => [:versioning, :global_version, :build] do
+task :compile => [:versioning, :global_version, :build, :copy_signed, :build_unsigned] do ; end
+
+task :copy_signed => [:build] do
 	puts 'Copying unmerged dependencies to output folder'
 
 	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "log4net.{dll,pdb,xml}", props[:output]
@@ -111,10 +114,11 @@ ilmerge :ilmerge_masstransit do |ilm|
 	ilm.log = File.join( props[:src], "MassTransit","bin","#{BUILD_CONFIG}", 'ilmerge.log' )
 	ilm.allow_dupes = true
 	ilm.references = [ 'MassTransit.dll', 'Stact.dll', 'Newtonsoft.Json.dll']
+    ilm.keyfile = props[:keyfile]
 end
 
 desc "Copying Services"
-task :copy_services => [:compile] do
+task :copy_services => [:build_unsigned] do
 	puts "Copying services"
 	targ = File.join(props[:stage], 'Services', 'RuntimeServices')
 	src = File.join(props[:src], "MassTransit.RuntimeServices/bin/#{BUILD_CONFIG}")
@@ -164,6 +168,10 @@ task :copy_services => [:compile] do
      	copyOutputFiles src, "Magnum.dll", targ
      	copyOutputFiles src, "StructureMap.dll", targ
      	copyOutputFiles src, "WPFToolkit.dll", targ
+
+end
+
+task :copy_samples => [:compile_samples] do
 
 	targ = File.join(props[:stage], 'Samples', 'Starbucks')
 	src = File.join(props[:src], "Samples", "Starbucks")
@@ -216,13 +224,27 @@ end
 
 desc "Only compiles the application."
 msbuild :build do |msb|
-	msb.properties :Configuration => BUILD_CONFIG,
+    msb.properties :Configuration => BUILD_CONFIG,
+        :BuildConfigKey => BUILD_CONFIG_KEY,
+        :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
+        :Platform => 'Any CPU'
+    msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
+    msb.use :net4 #MSB_USE
+    msb.targets :Clean, :Build
+    msb.properties[:SignAssembly] = 'true'
+    msb.properties[:AssemblyOriginatorKeyFile] = props[:keyfile]
+    msb.solution = 'src/MassTransit.sln'
+end
+
+desc "Only compiles the application."
+msbuild :build_unsigned do |msb|
+	msb.properties :Configuration => BUILD_CONFIG + "Unsigned",
 	    :BuildConfigKey => BUILD_CONFIG_KEY,
 	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
 	    :Platform => 'Any CPU'
 	msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
 	msb.use :net4 #MSB_USE
-	msb.targets :Clean, :Build
+	msb.targets :Build
 	msb.solution = 'src/MassTransit.sln'
 end
 
@@ -233,8 +255,11 @@ msbuild :build_starbucks do |msb|
 	    :Platform => 'Any CPU'
 	msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
 	msb.use :net4 #MSB_USE
-	msb.targets :Clean, :Build
+	msb.targets :Build
 	msb.solution = 'src/Samples/Starbucks/Starbucks.sln'
+    msb.properties[:SignAssembly] = 'true'
+    msb.properties[:AssemblyOriginatorKeyFile] = props[:keyfile]
+    msb.solution = 'src/MassTransit.sln'
 end
 
 msbuild :build_distributor do |msb|
@@ -244,8 +269,11 @@ msbuild :build_distributor do |msb|
 	    :Platform => 'Any CPU'
 	msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
 	msb.use :net4 #MSB_USE
-	msb.targets :Clean, :Build
+	msb.targets :Build
 	msb.solution = 'src/Samples/Distributor/Grid.Distributor.sln'
+    msb.properties[:SignAssembly] = 'true'
+    msb.properties[:AssemblyOriginatorKeyFile] = props[:keyfile]
+    msb.solution = 'src/MassTransit.sln'
 end
 
 def copyOutputFiles(fromDir, filePattern, outDir)
@@ -333,7 +361,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "true"
-    nuspec.dependency "Magnum", "2.0.1.0"
+    nuspec.dependency "Magnum", "2.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
 	add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
@@ -433,7 +461,6 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.requireLicenseAcceptance = "true"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NHibernate", "3.3.2"
-    nuspec.dependency "Magnum", "2.0.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.NHibernate.nuspec'
 
 	add_files props[:stage], "#{File.join('Persistence', 'NHibernate', 'MassTransit.NHibernateIntegration.{dll,pdb,xml}')}", nuspec
