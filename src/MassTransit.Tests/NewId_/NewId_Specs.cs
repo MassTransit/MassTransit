@@ -41,6 +41,21 @@ namespace MassTransit.Tests.NewId_
             }
         }
 
+        [Test]
+        public void Should_be_able_to_extract_timestamp()
+        {
+            Stopwatch timer = Stopwatch.StartNew();
+            DateTime now = DateTime.UtcNow;
+            NewId id = NewId.Next();
+            timer.Stop();
+
+            DateTime timestamp = id.Timestamp;
+
+            Console.WriteLine("Now: {0}, Timestamp: {1}", now, timestamp);
+
+            Assert.LessOrEqual(timestamp - now, timer.Elapsed + TimeSpan.FromSeconds(1));
+        }
+
         [Test, Explicit]
         public void Should_generate_unique_identifiers_with_each_invocation()
         {

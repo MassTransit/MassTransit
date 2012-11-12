@@ -1,6 +1,8 @@
 ﻿namespace MassTransit.Tests.NewId_
 {
     using System;
+    using System.Data.SqlTypes;
+    using Magnum;
     using NUnit.Framework;
     using NewIdProviders;
 
@@ -24,7 +26,10 @@
             for (int i = 0; i < limit - 1; i++)
             {
                 Assert.AreNotEqual(ids[i], ids[i + 1]);
-                Assert.Less(ids[i], ids[i + 1]);
+
+                SqlGuid left = ids[i].ToGuid();
+                SqlGuid right = ids[i + 1].ToGuid();
+                Assert.Less(left, right);
                 if (i%16 == 0)
                     Console.WriteLine(ids[i]);
             }
