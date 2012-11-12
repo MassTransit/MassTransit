@@ -118,6 +118,7 @@
     <Compile Include="Sagas\Concurrency_Specs.cs" />
     <Compile Include="Sagas\ConcurrentLegacySaga.cs" />
     <Compile Include="Sagas\ConcurrentSaga.cs" />
+    <Compile Include="Sagas\GuidSave_Specs.cs" />
     <Compile Include="Sagas\SagaLoadTest.cs" />
     <Compile Include="Sagas\SagaLocator_Specs.cs" />
     <Compile Include="Sagas\SagaRepository_Specs.cs" />
