@@ -81,10 +81,10 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 
                 tx.Commit();
 
-                var merged = results.Select(x => x.CorrelationId).Zip(ids, (Left, Right) => new {Left, Right});
-
-                foreach (var items in merged)
-                    Console.WriteLine("{0} {1}", items.Left, items.Right);
+//                var merged = results.Select(x => x.CorrelationId).Zip(ids, (Left, Right) => new {Left, Right});
+//
+//                foreach (var items in merged)
+//                    Console.WriteLine("{0} {1}", items.Left, items.Right);
 
 
                 Assert.IsTrue(ids.SequenceEqual(results.Select(x => x.CorrelationId)));
