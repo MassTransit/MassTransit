@@ -53,7 +53,7 @@ namespace MassTransit.Tests.NewId_
 
             Console.WriteLine("Now: {0}, Timestamp: {1}", now, timestamp);
 
-            Assert.LessOrEqual(timestamp - now, timer.Elapsed + TimeSpan.FromSeconds(1));
+            Assert.LessOrEqual(timestamp - now, timer.Elapsed + TimeSpan.FromMinutes(1));
         }
 
         [Test, Explicit]

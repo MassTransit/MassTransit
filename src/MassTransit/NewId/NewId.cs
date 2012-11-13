@@ -50,7 +50,7 @@ namespace MassTransit
             if (bytes.Length != 16)
                 throw new ArgumentException("Exactly 16 bytes expected", "bytes");
 
-            ConvertBytes(bytes, out _a, out _b, out _c, out _d);
+            FromByteArray(bytes, out _a, out _b, out _c, out _d);
         }
 
         public NewId(string value)
@@ -62,7 +62,7 @@ namespace MassTransit
 
             byte[] bytes = guid.ToByteArray();
 
-            ConvertBytes(bytes, out _a, out _b, out _c, out _d);
+            FromByteArray(bytes, out _a, out _b, out _c, out _d);
         }
 
         public NewId(int a, int b, int c, int d)
@@ -237,22 +237,22 @@ namespace MassTransit
         {
             var bytes = new byte[16];
 
-            bytes[0] = (byte)(_a);
-            bytes[1] = (byte)(_a >> 8);
-            bytes[2] = (byte)(_a >> 16);
-            bytes[3] = (byte)(_a >> 24);
-            bytes[4] = (byte)(_b >> 16);
-            bytes[5] = (byte)(_b >> 24);
-            bytes[6] = (byte)(_b);
-            bytes[7] = (byte)(_b >> 8);
-            bytes[8] = (byte)(_c >> 24);
-            bytes[9] = (byte)(_c >> 16);
-            bytes[10] = (byte)(_c >> 8);
-            bytes[11] = (byte)(_c);
-            bytes[12] = (byte)(_d >> 24);
-            bytes[13] = (byte)(_d >> 16);
-            bytes[14] = (byte)(_d >> 8);
-            bytes[15] = (byte)(_d);
+            bytes[0] = (byte)(_d);
+            bytes[1] = (byte)(_d >> 8);
+            bytes[2] = (byte)(_d >> 16);
+            bytes[3] = (byte)(_d >> 24);
+            bytes[4] = (byte)(_c);
+            bytes[5] = (byte)(_c >> 8);
+            bytes[6] = (byte)(_c >> 16);
+            bytes[7] = (byte)(_c >> 24);
+            bytes[8] = (byte)(_b >> 8);
+            bytes[9] = (byte)(_b);
+            bytes[10] = (byte)(_a >> 24);
+            bytes[11] = (byte)(_a >> 16);
+            bytes[12] = (byte)(_a >> 8);
+            bytes[13] = (byte)(_a);
+            bytes[14] = (byte)(_b >> 24);
+            bytes[15] = (byte)(_b >> 16);
 
             return bytes;
         }
@@ -323,12 +323,12 @@ namespace MassTransit
             return Generator.Next().ToGuid();
         }
 
-        static void ConvertBytes(byte[] bytes, out Int32 a, out Int32 b, out Int32 c, out Int32 d)
+        static void FromByteArray(byte[] bytes, out Int32 a, out Int32 b, out Int32 c, out Int32 d)
         {
-            a = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
-            b = bytes[5] << 24 | bytes[4] << 16 | bytes[7] << 8 | bytes[6];
-            c = bytes[8] << 24 | bytes[9] << 16 | bytes[10] << 8 | bytes[11];
-            d = bytes[12] << 24 | bytes[13] << 16 | bytes[14] << 8 | bytes[15];
+            a = bytes[10] << 24 | bytes[11] << 16 | bytes[12] << 8 | bytes[13];
+            b = bytes[14] << 24 | bytes[15] << 16 | bytes[8] << 8 | bytes[9];
+            c = bytes[7] << 24 | bytes[6] << 16 | bytes[5] << 8 | bytes[4];
+            d = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
         }
 
         static char HexToChar(int value, int alpha)
