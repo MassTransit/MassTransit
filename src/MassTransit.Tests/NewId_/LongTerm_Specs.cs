@@ -2,7 +2,6 @@
 {
     using System;
     using System.Data.SqlTypes;
-    using Magnum;
     using NUnit.Framework;
     using NewIdProviders;
 
