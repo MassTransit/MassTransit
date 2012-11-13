@@ -44,16 +44,18 @@ namespace MassTransit.Tests.NewId_
         [Test]
         public void Should_be_able_to_extract_timestamp()
         {
-            Stopwatch timer = Stopwatch.StartNew();
             DateTime now = DateTime.UtcNow;
             NewId id = NewId.Next();
-            timer.Stop();
 
             DateTime timestamp = id.Timestamp;
 
             Console.WriteLine("Now: {0}, Timestamp: {1}", now, timestamp);
 
-            Assert.LessOrEqual(timestamp - now, timer.Elapsed + TimeSpan.FromMinutes(1));
+            var difference = (timestamp - now);
+            if (difference < TimeSpan.Zero)
+                difference = difference.Negate();
+
+            Assert.LessOrEqual(difference, TimeSpan.FromMinutes(1));
         }
 
         [Test, Explicit]
