@@ -41,7 +41,7 @@ namespace MassTransit.Tests.NewId_
             }
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_be_able_to_extract_timestamp()
         {
             DateTime now = DateTime.UtcNow;
