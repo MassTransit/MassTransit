@@ -20,21 +20,23 @@ namespace MassTransit.Transports.RabbitMq
     using Exceptions;
     using Magnum.Extensions;
     using Magnum.Threading;
+    using PublisherConfirm;
     using RabbitMQ.Client;
 
-    public class RabbitMqTransportFactory :
-        ITransportFactory
+    public class RabbitMqTransportFactory : ITransportFactory
     {
         readonly ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>> _connectionCache;
         readonly IDictionary<Uri, ConnectionFactoryBuilder> _connectionFactoryBuilders;
         readonly IMessageNameFormatter _messageNameFormatter;
+        readonly IPublisherConfirmSettings _publisherConfirmSettings;
         bool _disposed;
 
-        public RabbitMqTransportFactory(IDictionary<Uri, ConnectionFactoryBuilder> connectionFactoryBuilders)
+        public RabbitMqTransportFactory(IDictionary<Uri, ConnectionFactoryBuilder> connectionFactoryBuilders, IPublisherConfirmSettings publisherConfirmSettings)
         {
             _connectionCache = new ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>>();
             _connectionFactoryBuilders = connectionFactoryBuilders;
             _messageNameFormatter = new RabbitMqMessageNameFormatter();
+            _publisherConfirmSettings = publisherConfirmSettings;
         }
 
         public RabbitMqTransportFactory()
@@ -42,6 +44,7 @@ namespace MassTransit.Transports.RabbitMq
             _connectionCache = new ReaderWriterLockedDictionary<Uri, ConnectionHandler<RabbitMqConnection>>();
             _connectionFactoryBuilders = new Dictionary<Uri, ConnectionFactoryBuilder>();
             _messageNameFormatter = new RabbitMqMessageNameFormatter();
+            _publisherConfirmSettings = new PublisherConfirmSettings();
         }
 
         public void Dispose()
@@ -81,7 +84,6 @@ namespace MassTransit.Transports.RabbitMq
         public IInboundTransport BuildInbound(ITransportSettings settings)
         {
             RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
-
             EnsureProtocolIsCorrect(address.Uri);
 
             ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
@@ -93,23 +95,21 @@ namespace MassTransit.Transports.RabbitMq
         public IOutboundTransport BuildOutbound(ITransportSettings settings)
         {
             RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
-
             EnsureProtocolIsCorrect(address.Uri);
 
             ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
 
-            return new OutboundRabbitMqTransport(address, connectionHandler, false);
+            return new OutboundRabbitMqTransport(address, connectionHandler, _publisherConfirmSettings, false);
         }
 
         public IOutboundTransport BuildError(ITransportSettings settings)
         {
             RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
-
             EnsureProtocolIsCorrect(address.Uri);
 
             ConnectionHandler<RabbitMqConnection> connection = GetConnection(address);
 
-            return new OutboundRabbitMqTransport(address, connection, true);
+            return new OutboundRabbitMqTransport(address, connection, _publisherConfirmSettings, true);
         }
 
         public IMessageNameFormatter MessageNameFormatter
