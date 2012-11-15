@@ -22,10 +22,10 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
         PublisherConfirmFactoryConfigurator,
         RabbitMqTransportFactoryBuilderConfigurator
     {
-        bool _usePublisherConfirms;
-        Action<ulong, string> _registerMessageAction;
-        Action<ulong, bool> _acktion;
-        Action<ulong, bool> _nacktion;
+        readonly bool _usePublisherConfirms;
+        readonly Action<ulong, string> _registerMessageAction;
+        readonly Action<ulong, bool> _acktion;
+        readonly Action<ulong, bool> _nacktion;
 
         public PublisherConfirmFactoryConfiguratorImpl(bool usePublisherConfirms, Action<ulong, string> registerMessageAction, 
             Action<ulong, bool> acktion, Action<ulong, bool> nacktion)
@@ -64,24 +64,5 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
             }
         }
 
-        public void SetPublisherConfirmsEnabled(bool publisherConfirmsEnabled)
-        {
-            _usePublisherConfirms = publisherConfirmsEnabled;
-        }
-
-        public void SetRegisterMessageAction(Action<ulong, string> registerMessageAction)
-        {
-            _registerMessageAction = registerMessageAction;
-        }
-
-        public void SetAcktion(Action<ulong, bool> acktion)
-        {
-            _acktion = acktion;
-        }
-
-        public void SetNacktion(Action<ulong, bool> nacktion)
-        {
-            _nacktion = nacktion;
-        }
     }
 }
