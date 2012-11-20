@@ -48,11 +48,11 @@ namespace MassTransit.Transports.RabbitMq
             if (_publisherConfirmSettings.UsePublisherConfirms)
             {
                 var clientMessageId = (string)properties.Headers[PublisherConfirmSettings.ClientMessageId];
-                if (clientMessageId == null)
+
+                if (clientMessageId != null)
                 {
-                    throw new InvalidOperationException("When publisher confirms are used, a header called 'ClientMessageId' must be set during publish");
+                    _publisherConfirmSettings.RegisterMessageAction(_channel.NextPublishSeqNo, clientMessageId);
                 }
-                _publisherConfirmSettings.RegisterMessageAction(_channel.NextPublishSeqNo, clientMessageId);
             }
 
             _channel.BasicPublish(exchangeName, "", properties, body);
