@@ -4,6 +4,8 @@
 
     public class PublisherConfirmSettings : IPublisherConfirmSettings
     {
+        public const string ClientMessageId = "ClientMessageId";
+
         public bool UsePublisherConfirms { get; set; }
 
         public Action<ulong, string> RegisterMessageAction { get; set; }

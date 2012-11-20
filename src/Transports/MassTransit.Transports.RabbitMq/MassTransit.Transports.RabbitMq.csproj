@@ -59,6 +59,9 @@
     <Reference Include="Magnum">
       <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
+    <Reference Include="MassTransit">
+      <HintPath>..\..\packages\MassTransit.2.7.0\lib\net40\MassTransit.dll</HintPath>
+    </Reference>
     <Reference Include="RabbitMQ.Client">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\RabbitMQ\RabbitMQ.Client.dll</HintPath>
@@ -135,12 +138,6 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
-      <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
-      <Name>MassTransit</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

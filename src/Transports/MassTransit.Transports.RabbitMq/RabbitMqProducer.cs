@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
+    using System;
     using Management;
     using PublisherConfirm;
     using RabbitMQ.Client;
@@ -46,7 +47,12 @@ namespace MassTransit.Transports.RabbitMq
 
             if (_publisherConfirmSettings.UsePublisherConfirms)
             {
-                _publisherConfirmSettings.RegisterMessageAction(_channel.NextPublishSeqNo, properties.CorrelationId);
+                var clientMessageId = (string)properties.Headers[PublisherConfirmSettings.ClientMessageId];
+                if (clientMessageId == null)
+                {
+                    throw new InvalidOperationException("When publisher confirms are used, a header called 'ClientMessageId' must be set during publish");
+                }
+                _publisherConfirmSettings.RegisterMessageAction(_channel.NextPublishSeqNo, clientMessageId);
             }
 
             _channel.BasicPublish(exchangeName, "", properties, body);

@@ -57,22 +57,24 @@ namespace MassTransit.Transports.RabbitMq
 
                         properties.SetPersistent(true);
                         properties.MessageId = context.MessageId ?? properties.MessageId ?? NewId.Next().ToString();
-                        properties.CorrelationId = context.CorrelationId ?? "";
+
                         if (context.ExpirationTime.HasValue)
                         {
                             DateTime value = context.ExpirationTime.Value;
-                            properties.Expiration =
-                                (value.Kind == DateTimeKind.Utc
-                                     ? value - SystemUtil.UtcNow
-                                     : value - SystemUtil.Now).
-                                    ToString();
+                            properties.Expiration = (value.Kind == DateTimeKind.Utc ? value - SystemUtil.UtcNow : value - SystemUtil.Now).ToString();
+                        }
+
+                        properties.Headers = new Hashtable { { "Content-Type", context.ContentType } };
+
+                        if (context.Headers[PublisherConfirmSettings.ClientMessageId] != null)
+                        {
+                            properties.Headers.Add(PublisherConfirmSettings.ClientMessageId, context.Headers[PublisherConfirmSettings.ClientMessageId]);
                         }
 
                         using (var body = new MemoryStream())
                         {
                             context.SerializeTo(body);
-                            properties.Headers = new Hashtable {{"Content-Type", context.ContentType}};
-
+                            
                             _producer.Publish(_address.Name, properties, body.ToArray());
 
                             _address.LogSent(context.MessageId ?? "", context.MessageType);
