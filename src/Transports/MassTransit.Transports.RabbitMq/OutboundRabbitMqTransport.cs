@@ -59,7 +59,7 @@ namespace MassTransit.Transports.RabbitMq
                                 (value.Kind == DateTimeKind.Utc
                                      ? value - SystemUtil.UtcNow
                                      : value - SystemUtil.Now).
-                                    ToString();
+                                    TotalMilliseconds.ToString();
                         }
 
                         using (var body = new MemoryStream())
