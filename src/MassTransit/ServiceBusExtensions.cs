@@ -127,7 +127,7 @@ namespace MassTransit
         /// </returns>
         public static bool IsControlAddress(this Uri address)
         {
-            return address.ToString().EndsWith("_control");
+            return address.AbsolutePath.EndsWith("_control");
         }
     }
 }
