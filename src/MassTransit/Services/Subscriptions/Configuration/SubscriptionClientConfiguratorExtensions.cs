@@ -20,17 +20,34 @@ namespace MassTransit
 
     public static class SubscriptionClientConfiguratorExtensions
     {
+        /// <summary>
+        /// Sets the address of the Subscription Service which routes messages to multiple subscribers
+        /// from a single publisher.  The address of the Subscription Service is used by both 
+        /// publishers and subscribers, while routing is carried out by MassTransit.RuntimeServices
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="subscriptionServiceUri"></param>
         public static void UseSubscriptionService(this ServiceBusConfigurator configurator,
             string subscriptionServiceUri)
         {
             configurator.UseSubscriptionService(x => x.SetSubscriptionServiceEndpoint(subscriptionServiceUri.ToUri()));
         }
 
+        /// <summary>
+        /// Sets the address of the Subscription Service which routes messages to multiple subscribers
+        /// from a single publisher.  The address of the Subscription Service is used by both 
+        /// publishers and subscribers, while routing is carried out by MassTransit.RuntimeServices
+        /// </summary>
         public static void UseSubscriptionService(this ServiceBusConfigurator configurator, Uri subscriptionServiceUri)
         {
             configurator.UseSubscriptionService(x => x.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
         }
 
+        /// <summary>
+        /// Sets the address of the Subscription Service which routes messages to multiple subscribers
+        /// from a single publisher.  The address of the Subscription Service is used by both 
+        /// publishers and subscribers, while routing is carried out by MassTransit.RuntimeServices
+        /// </summary>
         public static void UseSubscriptionService(this ServiceBusConfigurator configurator,
             Action<SubscriptionClientConfigurator> configureCallback)
         {
