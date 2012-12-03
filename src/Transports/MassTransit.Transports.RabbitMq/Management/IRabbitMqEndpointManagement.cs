@@ -26,7 +26,5 @@ namespace MassTransit.Transports.RabbitMq.Management
         void UnbindExchange(string destination, string source, string routingKey);
 
         void Purge(string queueName);
-
-        void BindExchangesForSubscriber(Type messageType, IMessageNameFormatter messageNameFormatter);
     }
 }

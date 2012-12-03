@@ -153,6 +153,24 @@ namespace MassTransit.Transports.RabbitMq
             return messageTypes;
         }
 
+        public void BindSubscriberExchange(string exchangeName)
+        {
+            AddPublisherBinding();
+            _connectionHandler.Use(connection =>
+                {
+                    _publisher.ExchangeBind(_address.Name, exchangeName);
+                });
+        }
+
+        public void UnbindSubscriberExchange(string exchangeName)
+        {
+            AddPublisherBinding();
+            _connectionHandler.Use(connection =>
+            {
+                _publisher.ExchangeUnbind(_address.Name, exchangeName);
+            });            
+        }
+
         void AddConsumerBinding()
         {
             if (_consumer != null)

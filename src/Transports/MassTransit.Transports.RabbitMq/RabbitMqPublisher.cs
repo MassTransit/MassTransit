@@ -83,6 +83,25 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
+        public void ExchangeUnbind(string destination, string source)
+        {
+            var binding = new ExchangeBinding(destination, source);
+
+            lock (_exchangeBindings)
+                _exchangeBindings.Remove(binding);
+
+            try
+            {
+                if (_channel != null)
+                {
+                    _channel.ExchangeUnbind(destination, source, "");
+                }
+            }
+            catch
+            {
+            }
+        }
+
         void RebindExchanges(IModel channel)
         {
             lock (_exchangeBindings)

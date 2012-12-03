@@ -102,13 +102,6 @@ namespace MassTransit.Transports.RabbitMq.Management
             }
         }
 
-        public void BindExchangesForSubscriber(Type messageType, IMessageNameFormatter messageNameFormatter)
-        {
-            MessageName messageName = messageNameFormatter.GetMessageName(messageType);
-
-            BindExchange(_address.Name, messageName.ToString(), ExchangeType.Fanout, "");
-        }
-
         public void Dispose()
         {
             Dispose(true);
