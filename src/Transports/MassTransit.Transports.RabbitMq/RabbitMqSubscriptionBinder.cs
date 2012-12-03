@@ -18,8 +18,6 @@ namespace MassTransit.Transports.RabbitMq
     using Logging;
     using Magnum;
     using Magnum.Extensions;
-    using Management;
-    using RabbitMQ.Client;
     using Subscriptions.Coordinator;
     using Subscriptions.Messages;
 
@@ -59,10 +57,7 @@ namespace MassTransit.Transports.RabbitMq
 
             MessageName messageName = _messageNameFormatter.GetMessageName(messageType);
 
-            using (var management = new RabbitMqEndpointManagement(_inputAddress))
-            {
-                management.BindExchange(_inputAddress.Name, messageName.ToString(), ExchangeType.Fanout, "");
-            }
+                _inboundTransport.BindSubscriberExchange(messageName.ToString());
 
             _bindings[message.SubscriptionId] = messageName;
         }
@@ -74,10 +69,7 @@ namespace MassTransit.Transports.RabbitMq
             MessageName messageName;
             if (_bindings.TryGetValue(message.SubscriptionId, out messageName))
             {
-                using (var management = new RabbitMqEndpointManagement(_inputAddress))
-                {
-                    management.UnbindExchange(_inputAddress.Name, messageName.ToString(), "");
-                }
+                _inboundTransport.UnbindSubscriberExchange(messageName.ToString());
 
                 _bindings.Remove(message.SubscriptionId);
             }
