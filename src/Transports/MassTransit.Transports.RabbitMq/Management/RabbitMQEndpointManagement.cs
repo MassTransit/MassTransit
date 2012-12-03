@@ -14,8 +14,6 @@ namespace MassTransit.Transports.RabbitMq.Management
 {
     using System;
     using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
     using Logging;
     using RabbitMQ.Client;
 
@@ -101,30 +99,6 @@ namespace MassTransit.Transports.RabbitMq.Management
                 }
 
                 model.Close(200, "purged queue");
-            }
-        }
-
-        public IEnumerable<Type> BindExchangesForPublisher(Type messageType, IMessageNameFormatter messageNameFormatter)
-        {
-            MessageName messageName = messageNameFormatter.GetMessageName(messageType);
-
-            using (IModel model = _connection.CreateModel())
-            {
-                model.ExchangeDeclare(messageName.ToString(), ExchangeType.Fanout, true, false, null);
-
-                yield return messageType;
-
-                foreach (Type type in messageType.GetMessageTypes().Skip(1))
-                {
-                    MessageName interfaceName = messageNameFormatter.GetMessageName(type);
-
-                    model.ExchangeDeclare(interfaceName.ToString(), ExchangeType.Fanout, true, false, null);
-                    model.ExchangeBind(interfaceName.ToString(), messageName.ToString(), "");
-
-                    yield return type;
-                }
-
-                model.Close(200, "ok");
             }
         }
 
