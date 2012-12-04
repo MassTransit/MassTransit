@@ -18,6 +18,7 @@ namespace MassTransit.Transports.RabbitMq
     using Configuration.Builders;
     using Configuration.Configurators;
     using Exceptions;
+    using Logging;
     using Magnum.Caching;
     using Magnum.Extensions;
     using RabbitMQ.Client;
@@ -27,6 +28,7 @@ namespace MassTransit.Transports.RabbitMq
     {
         readonly Cache<ConnectionFactory, ConnectionFactoryBuilder> _connectionFactoryBuilders;
         readonly Cache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>> _connections;
+        readonly ILog _log = Logger.Get<RabbitMqTransportFactory>();
         readonly IMessageNameFormatter _messageNameFormatter;
         bool _disposed;
 
@@ -160,14 +162,24 @@ namespace MassTransit.Transports.RabbitMq
         {
             return _connections.Get(address.ConnectionFactory, _ =>
                 {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating RabbitMQ connection: {0}", address.Uri);
+
                     ConnectionFactoryBuilder builder = _connectionFactoryBuilders.Get(address.ConnectionFactory, __ =>
                         {
+                            if (_log.IsDebugEnabled)
+                                _log.DebugFormat("Using default configurator for connection: {0}", address.Uri);
+
                             var configurator = new ConnectionFactoryConfiguratorImpl(address);
 
                             return configurator.CreateBuilder();
                         });
 
                     ConnectionFactory connectionFactory = builder.Build();
+
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("RabbitMQ connection created: {0}:{1}{2}", connectionFactory.HostName,
+                            connectionFactory.Port, connectionFactory.VirtualHost);
 
                     var connection = new RabbitMqConnection(connectionFactory);
                     var connectionHandler = new ConnectionHandlerImpl<RabbitMqConnection>(connection);
@@ -190,10 +202,9 @@ namespace MassTransit.Transports.RabbitMq
                 return string.Equals(x.UserName, y.UserName)
                        && string.Equals(x.Password, y.Password)
                        && string.Equals(x.VirtualHost, y.VirtualHost)
-                       && Equals(x.Ssl, y.Ssl)
                        && string.Equals(x.HostName, y.HostName)
-                       && x.Port == y.Port
-                       && Equals(x.AuthMechanisms, y.AuthMechanisms);
+                       && Equals(x.Ssl, y.Ssl)
+                       && x.Port == y.Port;
             }
 
             public int GetHashCode(ConnectionFactory x)
@@ -210,15 +221,54 @@ namespace MassTransit.Transports.RabbitMq
                                                      ? x.VirtualHost.GetHashCode()
                                                      : 0);
                     hashCode = (hashCode*397) ^ (x.Ssl != null
-                                                     ? x.Ssl.GetHashCode()
+                                                     ? GetHashCode(x.Ssl)
                                                      : 0);
                     hashCode = (hashCode*397) ^ (x.HostName != null
                                                      ? x.HostName.GetHashCode()
                                                      : 0);
                     hashCode = (hashCode*397) ^ x.Port;
-                    hashCode = (hashCode*397) ^ (x.AuthMechanisms != null
-                                                     ? x.AuthMechanisms.GetHashCode()
+                    return hashCode;
+                }
+            }
+
+            bool Equals(SslOption x, SslOption y)
+            {
+                if (ReferenceEquals(x, y))
+                    return true;
+                if (ReferenceEquals(null, x))
+                    return false;
+                if (ReferenceEquals(null, y))
+                    return false;
+
+                return x.Version == y.Version
+                       && x.Enabled.Equals(y.Enabled)
+                       && string.Equals(x.CertPath, y.CertPath)
+                       && string.Equals(x.CertPassphrase, y.CertPassphrase)
+                       && Equals(x.Certs, y.Certs)
+                       && string.Equals(x.ServerName, y.ServerName)
+                       && x.AcceptablePolicyErrors == y.AcceptablePolicyErrors;
+            }
+
+
+            int GetHashCode(SslOption x)
+            {
+                unchecked
+                {
+                    var hashCode = (int)x.Version;
+                    hashCode = (hashCode*397) ^ x.Enabled.GetHashCode();
+                    hashCode = (hashCode*397) ^ (x.CertPath != null
+                                                     ? x.CertPath.GetHashCode()
                                                      : 0);
+                    hashCode = (hashCode*397) ^ (x.CertPassphrase != null
+                                                     ? x.CertPassphrase.GetHashCode()
+                                                     : 0);
+                    hashCode = (hashCode*397) ^ (x.Certs != null
+                                                     ? x.Certs.GetHashCode()
+                                                     : 0);
+                    hashCode = (hashCode*397) ^ (x.ServerName != null
+                                                     ? x.ServerName.GetHashCode()
+                                                     : 0);
+                    hashCode = (hashCode*397) ^ (int)x.AcceptablePolicyErrors;
                     return hashCode;
                 }
             }
