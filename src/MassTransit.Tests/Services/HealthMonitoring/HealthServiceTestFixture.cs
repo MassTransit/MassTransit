@@ -47,11 +47,11 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			Thread.Sleep(500);
 
-			LocalBus.ShouldHaveRemoteSubscriptionFor<EndpointCameOnline>();
-			LocalBus.ShouldHaveRemoteSubscriptionFor<Heartbeat>();
-			LocalBus.ShouldHaveRemoteSubscriptionFor<EndpointWentOffline>();
-			LocalBus.ShouldHaveRemoteSubscriptionFor<TimeoutExpired>();
-			LocalBus.ShouldHaveRemoteSubscriptionFor<PingEndpointResponse>();
+			LocalBus.ControlBus.ShouldHaveRemoteSubscriptionFor<EndpointCameOnline>();
+			LocalBus.ControlBus.ShouldHaveRemoteSubscriptionFor<Heartbeat>();
+			LocalBus.ControlBus.ShouldHaveRemoteSubscriptionFor<EndpointWentOffline>();
+			LocalBus.ControlBus.ShouldHaveRemoteSubscriptionFor<TimeoutExpired>();
+			LocalBus.ControlBus.ShouldHaveRemoteSubscriptionFor<PingEndpointResponse>();
 		}
 
 		public ISagaRepository<HealthSaga> HealthSagaRepository
