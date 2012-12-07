@@ -26,7 +26,15 @@ ServiceBusFactory.New(sbc =>
 You will also need to set up RabbitMQ; 
 
  1. **Install Erlang** using the [installer](http://www.erlang.org/download.html). (Next -> Next ...)
- 2. **Install RabbitMQ** using the [installer](http://www.rabbitmq.com/download.html). (Next -> Next ...) You now have a RabbitMQ broker (look in `services.msc` for it) that you can [log into](http://localhost:55672/#/) using `guest`, `guest`. You can see message rates, routings and active consumers using this interface.
+ 2. **Install RabbitMQ** using the [installer](http://www.rabbitmq.com/download.html). (Next -> Next ...) You now have a RabbitMQ broker (look in `services.msc` for it) that you can [log into](http://localhost:55672/#/) using `guest`, `guest`. You can see message rates, routings and active consumers using this interface. 
+ 
+**Please note** 
+
+You need to add the management interface before you can login. First, from an elevated command prompt, change directory to the sbin folder within the RabbitMQ Server installation directory e.g. `%PROGRAMFILES%\RabbitMQ Server\rabbitmq_server_2.7.1\sbin\`
+
+Next, run the following command to enable the rabbitmq management plugin:
+
+	rabbitmq-plugins.bat enable rabbitmq_management 
 
 ### Downloads
 
