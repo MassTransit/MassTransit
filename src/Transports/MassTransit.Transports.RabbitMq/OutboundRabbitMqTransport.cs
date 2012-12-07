@@ -18,6 +18,7 @@ namespace MassTransit.Transports.RabbitMq
     using Magnum;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
+    using System.Linq;
 
     public class OutboundRabbitMqTransport :
         IOutboundTransport
@@ -65,7 +66,8 @@ namespace MassTransit.Transports.RabbitMq
                         using (var body = new MemoryStream())
                         {
                             context.SerializeTo(body);
-                            properties.Headers = new Hashtable {{"Content-Type", context.ContentType}};
+                            properties.Headers = context.Headers.ToDictionary(entry => entry.Key, entry => entry.Value);
+                            properties.Headers["Content-Type"]=context.ContentType;
 
                             _producer.Publish(_address.Name, properties, body.ToArray());
 
