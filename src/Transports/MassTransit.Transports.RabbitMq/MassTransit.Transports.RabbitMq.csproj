@@ -62,9 +62,9 @@
     <Reference Include="MassTransit">
       <HintPath>..\..\packages\MassTransit.2.7.0\lib\net40\MassTransit.dll</HintPath>
     </Reference>
-    <Reference Include="RabbitMQ.Client">
+    <Reference Include="RabbitMQ.Client, Version=2.8.7.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\RabbitMQ\RabbitMQ.Client.dll</HintPath>
+      <HintPath>..\..\packages\RabbitMQ.Client.Mozu.1.0.1\lib\RabbitMQ.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
