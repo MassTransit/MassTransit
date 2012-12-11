@@ -26,5 +26,14 @@ namespace MassTransit
 
 			configurator.AddConfigurator(hostConfigurator);
 		}
+
+        public static void UsePublisherConfirms(this RabbitMqTransportFactoryConfigurator configurator, 
+            Action<ulong, string> registerMessageAction, Action<ulong, bool> acktion, Action<ulong, bool> nacktion)
+        {
+            var hostConfigurator = new PublisherConfirmFactoryConfiguratorImpl(true, registerMessageAction, acktion, nacktion);
+            
+            configurator.AddConfigurator(hostConfigurator);
+        }
+
 	}
 }

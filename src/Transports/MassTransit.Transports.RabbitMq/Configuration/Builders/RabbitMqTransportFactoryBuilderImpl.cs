@@ -14,11 +14,12 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Builders
 {
 	using System;
 	using System.Collections.Generic;
+	using PublisherConfirm;
 
-	public class RabbitMqTransportFactoryBuilderImpl :
-		RabbitMqTransportFactoryBuilder
+    public class RabbitMqTransportFactoryBuilderImpl : RabbitMqTransportFactoryBuilder
 	{
 		readonly IDictionary<Uri, ConnectionFactoryBuilder> _connectionFactoryBuilders;
+        IPublisherConfirmSettings _publisherConfirmSettings = new PublisherConfirmSettings();
 
 		public RabbitMqTransportFactoryBuilderImpl()
 		{
@@ -30,9 +31,14 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Builders
 			_connectionFactoryBuilders[uri] = connectionFactoryBuilder;
 		}
 
+        public void SetPublisherConfirmSettings(IPublisherConfirmSettings publisherConfirmSettings)
+        {
+            _publisherConfirmSettings = publisherConfirmSettings;
+        }
+
 		public RabbitMqTransportFactory Build()
 		{
-			var factory = new RabbitMqTransportFactory(_connectionFactoryBuilders);
+            var factory = new RabbitMqTransportFactory(_connectionFactoryBuilders, _publisherConfirmSettings);
 
 			return factory;
 		}

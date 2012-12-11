@@ -29,7 +29,7 @@ namespace MassTransit.Context
         {
             _id = NewId.NextGuid();
             _message = message;
-
+            
             this.SetMessageType(typeof (T));
             DeclaringMessageType = typeof (T);
         }

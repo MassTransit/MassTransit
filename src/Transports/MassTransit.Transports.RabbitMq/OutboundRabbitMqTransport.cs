@@ -16,6 +16,7 @@ namespace MassTransit.Transports.RabbitMq
     using System.Collections;
     using System.IO;
     using Magnum;
+    using PublisherConfirm;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
 
@@ -25,14 +26,18 @@ namespace MassTransit.Transports.RabbitMq
         readonly IRabbitMqEndpointAddress _address;
         readonly bool _bindToQueue;
         readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
+        readonly IPublisherConfirmSettings _publisherConfirmSettings;
         RabbitMqProducer _producer;
 
         public OutboundRabbitMqTransport(IRabbitMqEndpointAddress address,
-            ConnectionHandler<RabbitMqConnection> connectionHandler, bool bindToQueue)
+            ConnectionHandler<RabbitMqConnection> connectionHandler, 
+            IPublisherConfirmSettings publisherConfirmSettings,
+            bool bindToQueue)
         {
             _address = address;
             _connectionHandler = connectionHandler;
             _bindToQueue = bindToQueue;
+            _publisherConfirmSettings = publisherConfirmSettings;
         }
 
         public IEndpointAddress Address
@@ -52,21 +57,24 @@ namespace MassTransit.Transports.RabbitMq
 
                         properties.SetPersistent(true);
                         properties.MessageId = context.MessageId ?? properties.MessageId ?? NewId.Next().ToString();
+
                         if (context.ExpirationTime.HasValue)
                         {
                             DateTime value = context.ExpirationTime.Value;
-                            properties.Expiration =
-                                (value.Kind == DateTimeKind.Utc
-                                     ? value - SystemUtil.UtcNow
-                                     : value - SystemUtil.Now).
-                                    ToString();
+                            properties.Expiration = (value.Kind == DateTimeKind.Utc ? value - SystemUtil.UtcNow : value - SystemUtil.Now).ToString();
+                        }
+
+                        properties.Headers = new Hashtable { { "Content-Type", context.ContentType } };
+
+                        if (context.Headers[PublisherConfirmSettings.ClientMessageId] != null)
+                        {
+                            properties.Headers.Add(PublisherConfirmSettings.ClientMessageId, context.Headers[PublisherConfirmSettings.ClientMessageId]);
                         }
 
                         using (var body = new MemoryStream())
                         {
                             context.SerializeTo(body);
-                            properties.Headers = new Hashtable {{"Content-Type", context.ContentType}};
-
+                            
                             _producer.Publish(_address.Name, properties, body.ToArray());
 
                             _address.LogSent(context.MessageId ?? "", context.MessageType);
@@ -97,7 +105,7 @@ namespace MassTransit.Transports.RabbitMq
             if (_producer != null)
                 return;
 
-            _producer = new RabbitMqProducer(_address, _bindToQueue);
+            _producer = new RabbitMqProducer(_address, _publisherConfirmSettings, _bindToQueue);
 
             _connectionHandler.AddBinding(_producer);
         }

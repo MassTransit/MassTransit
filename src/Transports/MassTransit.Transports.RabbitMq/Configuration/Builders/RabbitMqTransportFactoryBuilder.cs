@@ -13,9 +13,12 @@
 namespace MassTransit.Transports.RabbitMq.Configuration.Builders
 {
 	using System;
+	using PublisherConfirm;
 
-	public interface RabbitMqTransportFactoryBuilder
+    public interface RabbitMqTransportFactoryBuilder
 	{
 		void AddConnectionFactoryBuilder(Uri uri, ConnectionFactoryBuilder connectionFactoryBuilder);
+
+	    void SetPublisherConfirmSettings(IPublisherConfirmSettings publisherConfirmSettings);
 	}
 }

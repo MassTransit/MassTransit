@@ -56,20 +56,22 @@
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
-    </Reference>
-    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="Magnum">
       <HintPath>..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
     </Reference>
-    <Reference Include="RabbitMQ.Client">
+    <Reference Include="MassTransit">
+      <HintPath>..\..\packages\MassTransit.2.7.0\lib\net40\MassTransit.dll</HintPath>
+    </Reference>
+    <Reference Include="RabbitMQ.Client, Version=2.8.7.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\RabbitMQ\RabbitMQ.Client.dll</HintPath>
+      <HintPath>..\..\packages\RabbitMQ.Client.2.8.7\lib\net30\RabbitMQ.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\SolutionVersion.cs">
@@ -82,6 +84,8 @@
     <Compile Include="Configuration\Configurators\ConnectionFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\Configurators\ConnectionFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\ConnectionFactoryConfiguratorImpl.cs" />
+    <Compile Include="Configuration\Configurators\PublisherConfirmFactoryConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\PublisherConfirmFactoryConfiguratorImpl.cs" />
     <Compile Include="Configuration\Configurators\SslConnectionFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\SslConnectionFactoryConfiguratorImpl.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqTransportFactoryBuilderConfigurator.cs" />
@@ -95,6 +99,8 @@
     <Compile Include="OutboundRabbitMqTransport.cs" />
     <Compile Include="PublishEndpointInterceptor.cs" />
     <Compile Include="PublishEndpointSinkLocator.cs" />
+    <Compile Include="PublisherConfirm\IPublisherConfirmSettings.cs" />
+    <Compile Include="PublisherConfirm\PublisherConfirmSettings.cs" />
     <Compile Include="RabbitMqConnection.cs" />
     <Compile Include="RabbitMqConsumer.cs" />
     <Compile Include="RabbitMqEndpointAddress.cs" />
@@ -109,13 +115,6 @@
     <Compile Include="RequestedHeartbeatConnectionFactoryConfiguratorImpl.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
     <Compile Include="Testing\RabbitMqBusScenarioBuilder.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
-      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
-      <Name>MassTransit</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -136,6 +135,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

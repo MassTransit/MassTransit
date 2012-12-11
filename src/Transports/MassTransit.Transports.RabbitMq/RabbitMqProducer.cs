@@ -12,20 +12,25 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
+    using System;
     using Management;
+    using PublisherConfirm;
     using RabbitMQ.Client;
+    using RabbitMQ.Client.Events;
 
-    public class RabbitMqProducer :
-        ConnectionBinding<RabbitMqConnection>
+    public class RabbitMqProducer : ConnectionBinding<RabbitMqConnection>
     {
+        readonly IPublisherConfirmSettings _publisherConfirmSettings;
         readonly IRabbitMqEndpointAddress _address;
         readonly bool _bindToQueue;
         IModel _channel;
+        readonly object _channelLock = new object();
 
-        public RabbitMqProducer(IRabbitMqEndpointAddress address, bool bindToQueue)
+        public RabbitMqProducer(IRabbitMqEndpointAddress address, IPublisherConfirmSettings publisherConfirmSettings, bool bindToQueue)
         {
             _address = address;
             _bindToQueue = bindToQueue;
+            _publisherConfirmSettings = publisherConfirmSettings;
         }
 
         public IBasicProperties CreateProperties()
@@ -41,12 +46,32 @@ namespace MassTransit.Transports.RabbitMq
             if (_channel == null)
                 throw new InvalidConnectionException(_address.Uri, "Channel should not be null");
 
-            _channel.BasicPublish(exchangeName, "", properties, body);
+            if (_publisherConfirmSettings.UsePublisherConfirms)
+            {
+                var clientMessageId = (string)properties.Headers[PublisherConfirmSettings.ClientMessageId];
+
+                if (clientMessageId != null)
+                {
+                    _publisherConfirmSettings.RegisterMessageAction(_channel.NextPublishSeqNo, clientMessageId);
+                }
+            }
+
+            lock (_channelLock)
+            {
+                _channel.BasicPublish(exchangeName, "", properties, body);
+            }
         }
 
         public void Bind(RabbitMqConnection connection)
         {
             _channel = connection.Connection.CreateModel();
+
+            if (_publisherConfirmSettings.UsePublisherConfirms)
+            {
+                _channel.ConfirmSelect();
+                _channel.BasicAcks += OnBasicAcks;
+                _channel.BasicNacks += OnBasicNacks;
+            }
 
             _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, true);
 
@@ -66,9 +91,27 @@ namespace MassTransit.Transports.RabbitMq
             {
                 if (_channel.IsOpen)
                     _channel.Close(200, "producer unbind");
+
+                if(_publisherConfirmSettings.UsePublisherConfirms)
+                {
+                    _channel.BasicAcks -= OnBasicAcks;
+                    _channel.BasicNacks -= OnBasicNacks;
+                }
                 _channel.Dispose();
                 _channel = null;
             }
+        }
+
+        private void OnBasicNacks(IModel model, BasicNackEventArgs args)
+        {
+            _publisherConfirmSettings.Acktion(args.DeliveryTag, args.Multiple);
+
+        }
+
+        private void OnBasicAcks(IModel model, BasicAckEventArgs args)
+        {
+
+            _publisherConfirmSettings.Acktion(args.DeliveryTag, args.Multiple);
         }
     }
 }
