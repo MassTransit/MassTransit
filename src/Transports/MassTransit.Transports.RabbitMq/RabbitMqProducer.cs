@@ -24,6 +24,7 @@ namespace MassTransit.Transports.RabbitMq
         readonly IRabbitMqEndpointAddress _address;
         readonly bool _bindToQueue;
         IModel _channel;
+        readonly object _channelLock = new object();
 
         public RabbitMqProducer(IRabbitMqEndpointAddress address, IPublisherConfirmSettings publisherConfirmSettings, bool bindToQueue)
         {
@@ -55,7 +56,10 @@ namespace MassTransit.Transports.RabbitMq
                 }
             }
 
-            _channel.BasicPublish(exchangeName, "", properties, body);
+            lock (_channelLock)
+            {
+                _channel.BasicPublish(exchangeName, "", properties, body);
+            }
         }
 
         public void Bind(RabbitMqConnection connection)
