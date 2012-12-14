@@ -21,6 +21,7 @@ namespace MassTransit
     using Transports.RabbitMq;
     using Transports.RabbitMq.Configuration.Configurators;
 
+
     public static class RabbitMqServiceBusExtensions
     {
         /// <summary>
@@ -50,8 +51,10 @@ namespace MassTransit
         {
             var inboundTransport = bus.Endpoint.InboundTransport as InboundRabbitMqTransport;
             if (inboundTransport == null)
+            {
                 throw new ArgumentException(
                     "The bus must be receiving from a RabbitMQ endpoint to convert message types to endpoints.");
+            }
 
             var inputAddress = inboundTransport.Address.CastAs<IRabbitMqEndpointAddress>();
 
@@ -67,10 +70,9 @@ namespace MassTransit
         /// <summary>
         /// <see cref="UseRabbitMq{T}(T,Action{RabbitMqTransportFactoryConfigurator})"/>
         /// </summary>
-        public static T UseRabbitMq<T>(this T configurator)
-            where T : EndpointFactoryConfigurator
+        public static void UseRabbitMq(this EndpointFactoryConfigurator configurator)
         {
-            return UseRabbitMq(configurator, x => { });
+            UseRabbitMq(configurator, x => { });
         }
 
         /// <summary>
@@ -83,9 +85,8 @@ namespace MassTransit
         /// <param name="configurator">configurator instance</param>
         /// <param name="configureFactory">custom action used to call APIs on the configurator</param>
         /// <returns>the configurator instance</returns>
-        public static T UseRabbitMq<T>(this T configurator,
+        public static void UseRabbitMq(this EndpointFactoryConfigurator configurator,
             Action<RabbitMqTransportFactoryConfigurator> configureFactory)
-            where T : EndpointFactoryConfigurator
         {
             var transportFactoryConfigurator = new RabbitMqTransportFactoryConfiguratorImpl();
 
@@ -94,8 +95,6 @@ namespace MassTransit
             configurator.AddTransportFactory(transportFactoryConfigurator.Build);
 
             configurator.UseJsonSerializer();
-
-            return configurator;
         }
 
         /// <summary>
@@ -103,21 +102,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <returns></returns>
-        public static ServiceBusConfigurator UseRabbitMq(this ServiceBusConfigurator configurator)
+        public static void UseRabbitMq(this ServiceBusConfigurator configurator)
         {
-            configurator.SetSubscriptionObserver((bus, coordinator) => new RabbitMqSubscriptionBinder(bus));
-
-            var busConfigurator = new PostCreateBusBuilderConfigurator(bus =>
-                {
-                    var interceptorConfigurator = new OutboundMessageInterceptorConfigurator(bus.OutboundPipeline);
-
-                    // make sure we publish correctly through this interceptor; works on the outgoing pipeline
-                    interceptorConfigurator.Create(new PublishEndpointInterceptor(bus));
-                });
-
-            configurator.AddBusConfigurator(busConfigurator);
-
-            return UseRabbitMq<ServiceBusConfigurator>(configurator);
+            UseRabbitMq(configurator, x => { });
         }
 
         /// <summary>
@@ -127,7 +114,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="configureFactory"></param>
         /// <returns></returns>
-        public static ServiceBusConfigurator UseRabbitMq(this ServiceBusConfigurator configurator,
+        public static void UseRabbitMq(this ServiceBusConfigurator configurator,
             Action<RabbitMqTransportFactoryConfigurator> configureFactory)
         {
             configurator.SetSubscriptionObserver((bus, coordinator) => new RabbitMqSubscriptionBinder(bus));
@@ -142,7 +129,7 @@ namespace MassTransit
 
             configurator.AddBusConfigurator(busConfigurator);
 
-            return UseRabbitMq<ServiceBusConfigurator>(configurator, configureFactory);
+            UseRabbitMq((EndpointFactoryConfigurator)configurator, configureFactory);
         }
     }
 }

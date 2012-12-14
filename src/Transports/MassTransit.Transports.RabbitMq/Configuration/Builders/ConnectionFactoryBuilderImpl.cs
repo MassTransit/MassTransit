@@ -15,6 +15,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Builders
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Reflection;
     using Magnum.Extensions;
     using RabbitMQ.Client;
 
@@ -45,10 +46,21 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Builders
             clientProperties.Add("process_id", Process.GetCurrentProcess().Id.ToString());
             clientProperties.Add("process_name", Process.GetCurrentProcess().ProcessName);
 
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly != null)
+            {
+                var assemblyName = entryAssembly.GetName();
+                clientProperties.Add("entry_assembly", assemblyName.Name);
+            }
 
             connectionFactory.ClientProperties = clientProperties;
 
             _connectionFactoryConfigurators.Each(x => x(connectionFactory));
+
+            if (string.IsNullOrEmpty(connectionFactory.UserName))
+                connectionFactory.UserName = "guest";
+            if (string.IsNullOrEmpty(connectionFactory.Password))
+                connectionFactory.Password = "guest";
 
             return connectionFactory;
         }

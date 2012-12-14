@@ -49,10 +49,20 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
 
 		public void SetRequestedHeartbeat(ushort requestedHeartbeat)
 		{
-			_configurators.Add(new RequestedHeartbeatConnectionFactoryConfiguratorImpl(requestedHeartbeat));
+			_configurators.Add(new RequestedHeartbeatConnectionFactoryConfigurator(requestedHeartbeat));
 		}
 
-		public RabbitMqTransportFactoryBuilder Configure(RabbitMqTransportFactoryBuilder builder)
+	    public void SetUsername(string username)
+	    {
+	        _configurators.Add(new UsernameConnectionFactoryConfigurator(username));
+	    }
+
+	    public void SetPassword(string password)
+	    {
+	        _configurators.Add(new PasswordConnectionFactoryConfigurator(password));
+	    }
+
+	    public RabbitMqTransportFactoryBuilder Configure(RabbitMqTransportFactoryBuilder builder)
 		{
 			ConnectionFactoryBuilder connectionFactoryBuilder = CreateBuilder();
 

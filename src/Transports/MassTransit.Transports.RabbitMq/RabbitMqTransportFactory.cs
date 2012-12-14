@@ -23,6 +23,7 @@ namespace MassTransit.Transports.RabbitMq
     using Magnum.Extensions;
     using RabbitMQ.Client;
 
+
     public class RabbitMqTransportFactory :
         ITransportFactory
     {
@@ -32,7 +33,8 @@ namespace MassTransit.Transports.RabbitMq
         readonly IMessageNameFormatter _messageNameFormatter;
         bool _disposed;
 
-        public RabbitMqTransportFactory(IDictionary<Uri, ConnectionFactoryBuilder> connectionFactoryBuilders)
+        public RabbitMqTransportFactory(
+            IEnumerable<KeyValuePair<Uri, ConnectionFactoryBuilder>> connectionFactoryBuilders)
         {
             _connections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
                 new ConnectionFactoryEquality());
@@ -145,9 +147,7 @@ namespace MassTransit.Transports.RabbitMq
             if (_disposed)
                 return;
             if (disposing)
-            {
                 _connections.Each(x => x.Dispose());
-            }
             _connections.Clear();
 
             _disposed = true;
@@ -160,12 +160,14 @@ namespace MassTransit.Transports.RabbitMq
 
         ConnectionHandler<RabbitMqConnection> GetConnection(IRabbitMqEndpointAddress address)
         {
-            return _connections.Get(address.ConnectionFactory, _ =>
+            ConnectionFactory factory = SanitizeConnectionFactory(address);
+
+            return _connections.Get(factory, _ =>
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Creating RabbitMQ connection: {0}", address.Uri);
 
-                    ConnectionFactoryBuilder builder = _connectionFactoryBuilders.Get(address.ConnectionFactory, __ =>
+                    ConnectionFactoryBuilder builder = _connectionFactoryBuilders.Get(factory, __ =>
                         {
                             if (_log.IsDebugEnabled)
                                 _log.DebugFormat("Using default configurator for connection: {0}", address.Uri);
@@ -178,8 +180,10 @@ namespace MassTransit.Transports.RabbitMq
                     ConnectionFactory connectionFactory = builder.Build();
 
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("RabbitMQ connection created: {0}:{1}{2}", connectionFactory.HostName,
+                    {
+                        _log.DebugFormat("RabbitMQ connection created: {0}:{1}/{2}", connectionFactory.HostName,
                             connectionFactory.Port, connectionFactory.VirtualHost);
+                    }
 
                     var connection = new RabbitMqConnection(connectionFactory);
                     var connectionHandler = new ConnectionHandlerImpl<RabbitMqConnection>(connection);
@@ -187,12 +191,39 @@ namespace MassTransit.Transports.RabbitMq
                 });
         }
 
+        ConnectionFactory SanitizeConnectionFactory(IRabbitMqEndpointAddress address)
+        {
+            ConnectionFactory factory = address.ConnectionFactory;
+
+            foreach (ConnectionFactory builder in _connectionFactoryBuilders.GetAllKeys())
+            {
+                if (string.Equals(factory.VirtualHost, builder.VirtualHost)
+                    && (string.Compare(factory.HostName, builder.HostName, StringComparison.OrdinalIgnoreCase) == 0)
+                    && Equals(factory.Ssl, builder.Ssl)
+                    && factory.Port == builder.Port)
+                {
+                    bool userNameMatch = string.IsNullOrEmpty(factory.UserName)
+                                         || string.CompareOrdinal(factory.UserName, builder.UserName) == 0;
+                    bool passwordMatch = string.IsNullOrEmpty(factory.Password)
+                                         || string.CompareOrdinal(factory.UserName, builder.Password) == 0;
+
+                    if (userNameMatch && passwordMatch)
+                        return builder;
+                }
+            }
+
+            return address.ConnectionFactory;
+        }
+
         static void EnsureProtocolIsCorrect(Uri address)
         {
             if (address.Scheme != "rabbitmq")
+            {
                 throw new EndpointException(address,
                     "Address must start with 'rabbitmq' not '{0}'".FormatWith(address.Scheme));
+            }
         }
+
 
         class ConnectionFactoryEquality :
             IEqualityComparer<ConnectionFactory>
@@ -214,19 +245,19 @@ namespace MassTransit.Transports.RabbitMq
                     int hashCode = (x.UserName != null
                                         ? x.UserName.GetHashCode()
                                         : 0);
-                    hashCode = (hashCode*397) ^ (x.Password != null
-                                                     ? x.Password.GetHashCode()
-                                                     : 0);
-                    hashCode = (hashCode*397) ^ (x.VirtualHost != null
-                                                     ? x.VirtualHost.GetHashCode()
-                                                     : 0);
-                    hashCode = (hashCode*397) ^ (x.Ssl != null
-                                                     ? GetHashCode(x.Ssl)
-                                                     : 0);
-                    hashCode = (hashCode*397) ^ (x.HostName != null
-                                                     ? x.HostName.GetHashCode()
-                                                     : 0);
-                    hashCode = (hashCode*397) ^ x.Port;
+                    hashCode = (hashCode * 397) ^ (x.Password != null
+                                                       ? x.Password.GetHashCode()
+                                                       : 0);
+                    hashCode = (hashCode * 397) ^ (x.VirtualHost != null
+                                                       ? x.VirtualHost.GetHashCode()
+                                                       : 0);
+                    hashCode = (hashCode * 397) ^ (x.Ssl != null
+                                                       ? GetHashCode(x.Ssl)
+                                                       : 0);
+                    hashCode = (hashCode * 397) ^ (x.HostName != null
+                                                       ? x.HostName.GetHashCode()
+                                                       : 0);
+                    hashCode = (hashCode * 397) ^ x.Port;
                     return hashCode;
                 }
             }
@@ -255,20 +286,20 @@ namespace MassTransit.Transports.RabbitMq
                 unchecked
                 {
                     var hashCode = (int)x.Version;
-                    hashCode = (hashCode*397) ^ x.Enabled.GetHashCode();
-                    hashCode = (hashCode*397) ^ (x.CertPath != null
-                                                     ? x.CertPath.GetHashCode()
-                                                     : 0);
-                    hashCode = (hashCode*397) ^ (x.CertPassphrase != null
-                                                     ? x.CertPassphrase.GetHashCode()
-                                                     : 0);
-                    hashCode = (hashCode*397) ^ (x.Certs != null
-                                                     ? x.Certs.GetHashCode()
-                                                     : 0);
-                    hashCode = (hashCode*397) ^ (x.ServerName != null
-                                                     ? x.ServerName.GetHashCode()
-                                                     : 0);
-                    hashCode = (hashCode*397) ^ (int)x.AcceptablePolicyErrors;
+                    hashCode = (hashCode * 397) ^ x.Enabled.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (x.CertPath != null
+                                                       ? x.CertPath.GetHashCode()
+                                                       : 0);
+                    hashCode = (hashCode * 397) ^ (x.CertPassphrase != null
+                                                       ? x.CertPassphrase.GetHashCode()
+                                                       : 0);
+                    hashCode = (hashCode * 397) ^ (x.Certs != null
+                                                       ? x.Certs.GetHashCode()
+                                                       : 0);
+                    hashCode = (hashCode * 397) ^ (x.ServerName != null
+                                                       ? x.ServerName.GetHashCode()
+                                                       : 0);
+                    hashCode = (hashCode * 397) ^ (int)x.AcceptablePolicyErrors;
                     return hashCode;
                 }
             }
