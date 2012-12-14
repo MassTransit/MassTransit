@@ -21,6 +21,7 @@ namespace MassTransit.Transports.RabbitMq
     using RabbitMQ.Client;
     using Util;
 
+
     public class RabbitMqEndpointAddress :
         IRabbitMqEndpointAddress
     {
@@ -28,11 +29,9 @@ namespace MassTransit.Transports.RabbitMq
             "The path can be empty, or a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.";
 
         static readonly string LocalMachineName = Environment.MachineName.ToLowerInvariant();
-
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
         readonly ConnectionFactory _connectionFactory;
         readonly bool _isHighAvailable;
-
         readonly bool _isTransactional;
         readonly string _name;
         readonly Uri _uri;
@@ -41,12 +40,13 @@ namespace MassTransit.Transports.RabbitMq
 
         public RabbitMqEndpointAddress(Uri uri, ConnectionFactory connectionFactory, string name)
         {
-            _uri = new Uri(uri.GetLeftPart(UriPartial.Path));
+            _uri = GetSanitizedUri(uri).Uri;
+
             _connectionFactory = connectionFactory;
             _name = name;
 
             _isTransactional = uri.Query.GetValueFromQueryString("tx", false);
-            _isLocal = () => DetermineIfEndpointIsLocal(_uri);
+            _isLocal = () => DetermineIfEndpointIsLocal(uri);
             _isHighAvailable = uri.Query.GetValueFromQueryString("ha", false);
             _ttl = uri.Query.GetValueFromQueryString("ttl", 0);
         }
@@ -102,6 +102,13 @@ namespace MassTransit.Transports.RabbitMq
             _ttl = ttl.Milliseconds;
         }
 
+        static UriBuilder GetSanitizedUri(Uri uri)
+        {
+            var uriPath = new Uri(uri.GetLeftPart(UriPartial.Path));
+            var builder = new UriBuilder(uriPath.Scheme, uriPath.Host, uriPath.Port, uriPath.PathAndQuery);
+            return builder;
+        }
+
         public override string ToString()
         {
             return _uri.ToString();
@@ -134,6 +141,8 @@ namespace MassTransit.Transports.RabbitMq
             var connectionFactory = new ConnectionFactory
                 {
                     HostName = address.Host,
+                    UserName = "",
+                    Password = "",
                 };
 
             if (address.IsDefaultPort)
@@ -150,9 +159,7 @@ namespace MassTransit.Transports.RabbitMq
                     connectionFactory.Password = parts[1];
                 }
                 else
-                {
                     connectionFactory.UserName = address.UserInfo;
-                }
             }
 
             string name = address.AbsolutePath.Substring(1);

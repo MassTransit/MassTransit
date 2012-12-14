@@ -10,22 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq
+namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
 {
     using System.Collections.Generic;
-    using Configuration.Builders;
-    using Configuration.Configurators;
-    using Configurators;
+    using Builders;
+    using MassTransit.Configurators;
     using RabbitMQ.Client;
 
-    public class RequestedHeartbeatConnectionFactoryConfiguratorImpl : 
+
+    public class PasswordConnectionFactoryConfigurator :
         ConnectionFactoryBuilderConfigurator
     {
-        readonly ushort _requestedHeartbeat;
+        readonly string _password;
 
-        public RequestedHeartbeatConnectionFactoryConfiguratorImpl(ushort requestedHeartbeat)
+        public PasswordConnectionFactoryConfigurator(string password)
         {
-            _requestedHeartbeat = requestedHeartbeat;
+            _password = password;
         }
 
         public ConnectionFactoryBuilder Configure(ConnectionFactoryBuilder builder)
@@ -36,12 +36,13 @@ namespace MassTransit.Transports.RabbitMq
 
         public IEnumerable<ValidationResult> Validate()
         {
-            yield break;
+            if (string.IsNullOrEmpty(_password))
+                yield return this.Failure("Password", "Must not be null");
         }
 
         ConnectionFactory Configure(ConnectionFactory connectionFactory)
         {
-            connectionFactory.RequestedHeartbeat = _requestedHeartbeat;
+            connectionFactory.Password = _password;
             return connectionFactory;
         }
     }
