@@ -71,7 +71,7 @@ namespace MassTransit
             return scope.ComponentRegistry.Registrations
                 .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})
                 .Where(rs => rs.s.ServiceType.Implements<T>())
-                .Select(rs => rs.r.Activator.LimitType)
+                .Select(rs => rs.s.ServiceType)
                 .Where(filter)
                 .ToList();
         }
