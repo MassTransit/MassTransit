@@ -242,7 +242,7 @@ namespace MassTransit
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            BusObjectPublisherCache.Instance[messageType].Publish(this, message);
+            BusObjectPublisherCache.Instance[messageType].Publish(this, message, contextCallback);
         }
 
         /// <summary>
