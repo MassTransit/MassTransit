@@ -13,7 +13,6 @@
 namespace MassTransit.NewIdParsers
 {
     using System;
-    using System.Diagnostics.Contracts;
 
 
     public class Base32Parser :
@@ -40,7 +39,8 @@ namespace MassTransit.NewIdParsers
 
         public NewId Parse(string text)
         {
-            Contract.Requires(text.Length == 26);
+            if (string.IsNullOrEmpty(text))
+                throw new ArgumentException("The string was null or empty", "text");
 
             var buffer = new char[32];
 
