@@ -8,7 +8,7 @@
             <summary>Object describing various overarching parameters
             associated with a particular AMQP protocol variant.</summary>
         </member>
-        <member name="M:RabbitMQ.Client.IProtocol.CreateFrameHandler(RabbitMQ.Client.AmqpTcpEndpoint)">
+        <member name="M:RabbitMQ.Client.IProtocol.CreateFrameHandler(RabbitMQ.Client.AmqpTcpEndpoint,RabbitMQ.Client.ConnectionFactory.ObtainSocket,System.Int32)">
             <summary>Construct a frame handler for a given endpoint.</summary>
         </member>
         <member name="M:RabbitMQ.Client.IProtocol.CreateConnection(RabbitMQ.Client.ConnectionFactory,System.Boolean,RabbitMQ.Client.Impl.IFrameHandler)">
@@ -961,9 +961,18 @@
             The publication occurs with mandatory=false and immediate=false.
             </remarks>
         </member>
+        <member name="M:RabbitMQ.Client.IModel.BasicPublish(System.String,System.String,System.Boolean,RabbitMQ.Client.IBasicProperties,System.Byte[])">
+            <summary>(Spec method) Convenience overload of BasicPublish.</summary>
+            <remarks>
+            The publication occurs with immediate=false.
+            </remarks>
+        </member>
         <member name="M:RabbitMQ.Client.IModel.BasicPublish(System.String,System.String,System.Boolean,System.Boolean,RabbitMQ.Client.IBasicProperties,System.Byte[])">
             <summary>(Spec method) Publish a message using the Basic
             content-class.</summary>
+            <remarks>
+            Note that the RabbitMQ server does not support the 'immediate' flag.
+            </remarks>
         </member>
         <member name="M:RabbitMQ.Client.IModel.BasicAck(System.UInt64,System.Boolean)">
             <summary>(Spec method) Acknowledge one or more delivered message(s).</summary>
@@ -3880,6 +3889,10 @@
             <summary>Default value for desired heartbeat interval, in
             seconds, with zero meaning none (value: 0)</summary>
         </member>
+        <member name="F:RabbitMQ.Client.ConnectionFactory.DefaultConnectionTimeout">
+            <summary> Default value for connection attempt timeout,
+            in milliseconds</summary>
+        </member>
         <member name="F:RabbitMQ.Client.ConnectionFactory.DefaultAuthMechanisms">
             <summary> Default SASL auth mechanisms to use.</summary>
         </member>
@@ -3901,6 +3914,9 @@
         <member name="F:RabbitMQ.Client.ConnectionFactory.RequestedHeartbeat">
             <summary>Heartbeat setting to request (in seconds)</summary>
         </member>
+        <member name="F:RabbitMQ.Client.ConnectionFactory.RequestedConnectionTimeout">
+            <summary>Timeout setting for connection attempts (in milliseconds)</summary>
+        </member>
         <member name="F:RabbitMQ.Client.ConnectionFactory.ClientProperties">
             <summary>Dictionary of client properties to be sent to the
             server</summary>
@@ -3912,14 +3928,18 @@
             <summary>The host to connect to</summary>
         </member>
         <member name="F:RabbitMQ.Client.ConnectionFactory.Port">
-            <summary>The port to connect on. AmqpTcpEndpoint.UseDefaultPort indicates the 
-             default for the protocol should be used.</summary>
+            <summary>The port to connect on.
+             AmqpTcpEndpoint.UseDefaultPort indicates the default for
+             the protocol should be used.</summary>
         </member>
         <member name="F:RabbitMQ.Client.ConnectionFactory.AuthMechanisms">
             <summary> SASL auth mechanisms to use.</summary>
         </member>
         <member name="F:RabbitMQ.Client.ConnectionFactory.Protocol">
             <summary>The AMQP protocol to be used</summary>
+        </member>
+        <member name="F:RabbitMQ.Client.ConnectionFactory.SocketFactory">
+            <summary>Set custom socket options by providing a SocketFactory</summary>
         </member>
         <member name="M:RabbitMQ.Client.ConnectionFactory.#ctor">
             <summary>Construct a fresh instance, with all fields set to
@@ -5741,10 +5761,11 @@
              the ConnectionAttempts and ConnectionErrors properties.
             </remarks>
         </member>
-        <member name="M:RabbitMQ.Client.Exceptions.BrokerUnreachableException.#ctor(System.Collections.IDictionary,System.Collections.IDictionary)">
+        <member name="M:RabbitMQ.Client.Exceptions.BrokerUnreachableException.#ctor(System.Collections.IDictionary,System.Collections.IDictionary,System.Exception)">
             <summary>Construct a BrokerUnreachableException. Expects
             maps as per the description of the ConnectionAttempts and
-            ConnectionErrors properties.</summary>
+            ConnectionErrors properties. The inner exception is associated
+            with only one connection attempt.</summary>
         </member>
         <member name="M:RabbitMQ.Client.Exceptions.BrokerUnreachableException.ToString">
             <summary>Provide a full description of the various
@@ -5785,6 +5806,9 @@
             return -1 in the case where "no more free channels" is
             being signalled, or a non-negative integer when "channel is
             in use" is being signalled.</summary>
+        </member>
+        <member name="T:RabbitMQ.Client.Exceptions.ConnectFailureException">
+            <summary>Thrown when a connection to the broker fails</summary>
         </member>
         <member name="T:RabbitMQ.Client.Exceptions.PacketNotRecognizedException">
             <summary>Thrown to indicate that the peer didn't understand

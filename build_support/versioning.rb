@@ -23,7 +23,10 @@ task :versioning do
   
   # nuget (not full semver 2.0.0-rc.1 support) see http://nuget.codeplex.com/workitem/1796
   ENV['NUGET_VERSION'] = NUGET_VERSION = ver.format("%M.%m.%p%s")
-  
+
+  # so we do not break the strong name as often, assembly version is held to last major/minor version  
+  ENV['ASSEMBLY_VERSION'] = ASSEMBLY_VERSION = "#{ SemVer.new(ver.major, ver.minor, 0).format "%M.%m.%p"}"
+
   # purely M.m.p format
   ENV['FORMAL_VERSION'] = FORMAL_VERSION = "#{ SemVer.new(ver.major, ver.minor, revision).format "%M.%m.%p"}"
   puts "##teamcity[buildNumber '#{BUILD_VERSION}']" # tell teamcity our decision

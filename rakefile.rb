@@ -1,4 +1,4 @@
-COPYRIGHT = "Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al. - All rights reserved."
+COPYRIGHT = "Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al. - All rights reserved."
 
 require File.dirname(__FILE__) + "/build_support/BuildUtils.rb"
 require File.dirname(__FILE__) + "/build_support/util.rb"
@@ -43,7 +43,7 @@ assemblyinfo :global_version => [:versioning] do |asm|
   # Assembly file config
   asm.product_name = PRODUCT
   asm.description = "MassTransit is a distributed application framework for .NET http://masstransit-project.com"
-  asm.version = FORMAL_VERSION
+  asm.version = ASSEMBLY_VERSION
   asm.file_version = FORMAL_VERSION
   asm.custom_attributes :AssemblyInformationalVersion => "#{BUILD_VERSION}",
     :ComVisibleAttribute => false,
@@ -360,7 +360,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
+    nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "Magnum", "2.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
@@ -376,7 +376,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
+    nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "log4net", "2.0.0"
     nuspec.output_file = 'nuspecs/MassTransit.Log4Net.nuspec'
@@ -393,7 +393,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
+    nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NLog", "2.0.0"
     nuspec.output_file = 'nuspecs/MassTransit.NLog.nuspec'
@@ -409,7 +409,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
+    nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Castle.Windsor", "3.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.CastleWindsor.nuspec'
@@ -425,9 +425,9 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
+    nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "RabbitMQ.Client", "2.8.7"
+    nuspec.dependency "RabbitMQ.Client", "3.0.0"
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
 
 	add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.Transports.RabbitMq.{dll,pdb,xml}')}", nuspec
@@ -442,7 +442,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
+    nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Autofac", "2.6.3"
     nuspec.output_file = 'nuspecs/MassTransit.Autofac.nuspec'
@@ -458,7 +458,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
+    nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NHibernate", "3.3.2"
     nuspec.output_file = 'nuspecs/MassTransit.NHibernate.nuspec'
@@ -475,7 +475,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
+    nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Ninject", "3.0.1"
     nuspec.output_file = 'nuspecs/MassTransit.Ninject.nuspec'
@@ -492,7 +492,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
+    nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "StructureMap", "2.6.4.1"
     nuspec.output_file = 'nuspecs/MassTransit.StructureMap.nuspec'
@@ -509,7 +509,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
+    nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Unity", "2.1.505.2"
     nuspec.output_file = 'nuspecs/MassTransit.Unity.nuspec'
@@ -525,7 +525,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
-    nuspec.requireLicenseAcceptance = "true"
+    nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NUnit", "2.6.2"
     nuspec.dependency "RhinoMocks", "3.6"
