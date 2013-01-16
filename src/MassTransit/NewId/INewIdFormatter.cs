@@ -12,14 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-
-
-    public static class NewIdExtensions
+    public interface INewIdFormatter
     {
-        public static NewId ToNewId(this Guid guid)
-        {
-            return new NewId(guid.ToByteArray());
-        }
+        string Format(byte[] bytes);
     }
 }

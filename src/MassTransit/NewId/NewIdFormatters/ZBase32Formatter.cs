@@ -10,16 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.NewIdFormatters
 {
-    using System;
-
-
-    public static class NewIdExtensions
+    public class ZBase32Formatter :
+        Base32Formatter
     {
-        public static NewId ToNewId(this Guid guid)
+        // taken from analysis done at http://philzimmermann.com/docs/human-oriented-base-32-encoding.txt
+        const string LowerCaseChars = "ybndrfg8ejkmcpqxot1uwisza345h769";
+        const string UpperCaseChars = "YBNDRFG8EJKMCPQXOT1UWISZA345H769";
+
+        public ZBase32Formatter(bool upperCase = false)
+            : base(upperCase ? UpperCaseChars : LowerCaseChars)
         {
-            return new NewId(guid.ToByteArray());
         }
     }
 }
