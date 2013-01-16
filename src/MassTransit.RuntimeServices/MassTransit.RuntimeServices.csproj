@@ -61,12 +61,6 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\..\lib\Castle.Core\net35\Castle.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Castle.Core" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\..\lib\Castle.Core\net40\Castle.Core.dll</HintPath>
-    </Reference>
     <Reference Include="Iesi.Collections, Version=1.0.1.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\NHibernate\Iesi.Collections.dll</HintPath>
@@ -104,10 +98,8 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Web.Extensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Data" />
