@@ -10,16 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.NewIdParsers
 {
-    using System;
-
-
-    public static class NewIdExtensions
+    public class ZBase32Parser :
+        Base32Parser
     {
-        public static NewId ToNewId(this Guid guid)
+        const string ConvertChars = "ybndrfg8ejkmcpqxot1uwisza345h769YBNDRFG8EJKMCPQXOT1UWISZA345H769";
+
+        const string TransposeChars = "ybndrfg8ejkmcpqx0tlvwis2a345h769YBNDRFG8EJKMCPQX0TLVWIS2A345H769";
+
+        public ZBase32Parser(bool handleTransposedCharacters = false)
+            : base(handleTransposedCharacters ? ConvertChars + TransposeChars : ConvertChars)
         {
-            return new NewId(guid.ToByteArray());
         }
     }
 }

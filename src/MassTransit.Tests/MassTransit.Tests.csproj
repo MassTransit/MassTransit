@@ -177,6 +177,7 @@
     <Compile Include="MessageInterceptor_Specs.cs" />
     <Compile Include="MessageRetryTracker_Specs.cs" />
     <Compile Include="Messages\PartialSerializationTestMessage.cs" />
+    <Compile Include="NewId_\Formatter_Specs.cs" />
     <Compile Include="NewId_\GuidInterop_Specs.cs" />
     <Compile Include="NewId_\LongTerm_Specs.cs" />
     <Compile Include="NewId_\NetworkAddress_Specs.cs" />

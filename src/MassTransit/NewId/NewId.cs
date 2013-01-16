@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using NewIdFormatters;
     using NewIdProviders;
 
 
@@ -27,10 +28,14 @@ namespace MassTransit
         IComparable,
         IFormattable
     {
-        const int LowercaseA = 0x61;
         public static readonly NewId Empty = new NewId(0, 0, 0, 0);
+        static INewIdFormatter _braceFormatter = new DashedHexFormatter('{', '}');
+        static INewIdFormatter _dashedHexFormatter = new DashedHexFormatter();
 
         static NewIdGenerator _generator;
+
+        static INewIdFormatter _hexFormatter = new HexFormatter();
+        static INewIdFormatter _parenFormatter = new DashedHexFormatter('(', ')');
         static ITickProvider _tickProvider;
         static IWorkerIdProvider _workerIdProvider;
 
@@ -55,8 +60,8 @@ namespace MassTransit
 
         public NewId(string value)
         {
-            if (string.IsNullOrEmpty(value))
-                throw new ArgumentException("A string is expected", "value");
+            if(string.IsNullOrEmpty(value))
+                throw new ArgumentException("must not be null or empty", "value");
 
             var guid = new Guid(value);
 
@@ -100,7 +105,7 @@ namespace MassTransit
         {
             get
             {
-                long ticks = (long)(((ulong)_a) << 32 | (uint)_b);
+                var ticks = (long)(((ulong)_a) << 32 | (uint)_b);
 
                 return new DateTime(ticks, DateTimeKind.Utc);
             }
@@ -147,73 +152,71 @@ namespace MassTransit
                 throw new FormatException("The format string must be exactly one character or null");
 
             char formatCh = format[0];
+            byte[] bytes = sequential ? GetSequentialFormatteryArray() : GetFormatteryArray();
 
-            var result = new char[38];
-            int offset = 0;
-            int length = 38;
-
-            bool dash = true;
-
+            if (formatCh == 'B' || formatCh == 'b')
+                return _braceFormatter.Format(bytes);
+            if (formatCh == 'P' || formatCh == 'p')
+                return _parenFormatter.Format(bytes);
             if (formatCh == 'D' || formatCh == 'd')
-                length = 36;
-            else if (formatCh == 'N' || formatCh == 'n')
-            {
-                length = 32;
-                dash = false;
-            }
-            else if (formatCh == 'B' || formatCh == 'b')
-            {
-                result[offset++] = '{';
-                result[37] = '}';
-            }
-            else if (formatCh == 'P' || formatCh == 'p')
-            {
-                result[offset++] = '(';
-                result[37] = ')';
-            }
-            else
-                throw new FormatException("The format string was not valid");
+                return _dashedHexFormatter.Format(bytes);
+            if (formatCh == 'N' || formatCh == 'n')
+                return _hexFormatter.Format(bytes);
 
-            if (sequential)
-            {
-                offset = TwoBytesToChars(result, offset, _a >> 24, _a >> 16, LowercaseA);
-                offset = TwoBytesToChars(result, offset, _a >> 8, _a, LowercaseA);
-                if (dash)
-                    result[offset++] = '-';
-                offset = TwoBytesToChars(result, offset, _b >> 24, _b >> 16, LowercaseA);
-                if (dash)
-                    result[offset++] = '-';
-                offset = TwoBytesToChars(result, offset, _b >> 8, _b, LowercaseA);
-                if (dash)
-                    result[offset++] = '-';
-                offset = TwoBytesToChars(result, offset, _c >> 24, _c >> 16, LowercaseA);
-                if (dash)
-                    result[offset++] = '-';
-                offset = TwoBytesToChars(result, offset, _c >> 8, _c, LowercaseA);
-                offset = TwoBytesToChars(result, offset, _d >> 24, _d >> 16, LowercaseA);
-                TwoBytesToChars(result, offset, _d >> 8, _d, LowercaseA);
-            }
-            else
-            {
-                offset = TwoBytesToChars(result, offset, _d >> 24, _d >> 16, LowercaseA);
-                offset = TwoBytesToChars(result, offset, _d >> 8, _d, LowercaseA);
-                if (dash)
-                    result[offset++] = '-';
-                offset = TwoBytesToChars(result, offset, _c >> 8, _c, LowercaseA);
-                if (dash)
-                    result[offset++] = '-';
-                offset = TwoBytesToChars(result, offset, _c >> 24, _c >> 16, LowercaseA);
-                if (dash)
-                    result[offset++] = '-';
-                offset = TwoBytesToChars(result, offset, _b >> 8, _b, LowercaseA);
-                if (dash)
-                    result[offset++] = '-';
-                offset = TwoBytesToChars(result, offset, _a >> 24, _a >> 16, LowercaseA);
-                offset = TwoBytesToChars(result, offset, _a >> 8, _a, LowercaseA);
-                TwoBytesToChars(result, offset, _b >> 24, _b >> 16, LowercaseA);
-            }
+            throw new FormatException("The format string was not valid");
+        }
 
-            return new string(result, 0, length);
+        public string ToString(INewIdFormatter formatter, bool sequential = false)
+        {
+            byte[] bytes = sequential ? GetSequentialFormatteryArray() : GetFormatteryArray();
+
+            return formatter.Format(bytes);
+        }
+
+        byte[] GetFormatteryArray()
+        {
+            var bytes = new byte[16];
+            bytes[0] = (byte)(_d >> 24);
+            bytes[1] = (byte)(_d >> 16);
+            bytes[2] = (byte)(_d >> 8);
+            bytes[3] = (byte)_d;
+            bytes[4] = (byte)(_c >> 8);
+            bytes[5] = (byte)_c;
+            bytes[6] = (byte)(_c >> 24);
+            bytes[7] = (byte)(_c >> 16);
+            bytes[8] = (byte)(_b >> 8);
+            bytes[9] = (byte)_b;
+            bytes[10] = (byte)(_a >> 24);
+            bytes[11] = (byte)(_a >> 16);
+            bytes[12] = (byte)(_a >> 8);
+            bytes[13] = (byte)_a;
+            bytes[14] = (byte)(_b >> 24);
+            bytes[15] = (byte)(_b >> 16);
+
+            return bytes;
+        }
+
+        byte[] GetSequentialFormatteryArray()
+        {
+            var bytes = new byte[16];
+            bytes[0] = (byte)(_a >> 24);
+            bytes[1] = (byte)(_a >> 16);
+            bytes[2] = (byte)(_a >> 8);
+            bytes[3] = (byte)_a;
+            bytes[4] = (byte)(_b >> 24);
+            bytes[5] = (byte)(_b >> 16);
+            bytes[6] = (byte)(_b >> 8);
+            bytes[7] = (byte)_b;
+            bytes[8] = (byte)(_c >> 24);
+            bytes[9] = (byte)(_c >> 16);
+            bytes[10] = (byte)(_c >> 8);
+            bytes[11] = (byte)_c;
+            bytes[12] = (byte)(_d >> 24);
+            bytes[13] = (byte)(_d >> 16);
+            bytes[14] = (byte)(_d >> 8);
+            bytes[15] = (byte)_d;
+
+            return bytes;
         }
 
         public Guid ToGuid()
@@ -229,6 +232,23 @@ namespace MassTransit
             var i = (byte)_a;
             var j = (byte)(_b >> 24);
             var k = (byte)(_b >> 16);
+
+            return new Guid(a, b, c, d, e, f, g, h, i, j, k);
+        }
+
+        public Guid ToSequentialGuid()
+        {
+            int a = _a;
+            var b = (short)(_b >> 16);
+            var c = (short)_b;
+            var d = (byte)(_c >> 24);
+            var e = (byte)(_c >> 16);
+            var f = (byte)(_c >> 8);
+            var g = (byte)(_c);
+            var h = (byte)(_d >> 24);
+            var i = (byte)(_d >> 16);
+            var j = (byte)(_d >> 8);
+            var k = (byte)(_d);
 
             return new Guid(a, b, c, d, e, f, g, h, i, j, k);
         }
@@ -329,26 +349,6 @@ namespace MassTransit
             b = bytes[14] << 24 | bytes[15] << 16 | bytes[8] << 8 | bytes[9];
             c = bytes[7] << 24 | bytes[6] << 16 | bytes[5] << 8 | bytes[4];
             d = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
-        }
-
-        static char HexToChar(int value, int alpha)
-        {
-            value = value & 0xf;
-            return (char)((value > 9) ? value - 10 + alpha : value + 0x30);
-        }
-
-        static int TwoBytesToChars(char[] chars, int offset, int first, int second, int alpha)
-        {
-            offset = ByteToChars(chars, offset, first, alpha);
-            return ByteToChars(chars, offset, second, alpha);
-        }
-
-        static int ByteToChars(char[] chars, int offset, int value, int alpha)
-        {
-            chars[offset++] = HexToChar(value >> 4, alpha);
-            chars[offset++] = HexToChar(value, alpha);
-
-            return offset;
         }
     }
 }
