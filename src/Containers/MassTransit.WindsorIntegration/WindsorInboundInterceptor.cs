@@ -10,35 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Configuration
+namespace MassTransit.WindsorIntegration
 {
-    using System;
-
-
-    public class DelegateMessageInterceptor :
+    /// <summary>
+    /// Calls by the inbound message pipeline to begin and end a message scope
+    /// in the container.
+    /// </summary>
+    public class WindsorInboundInterceptor :
         IInboundMessageInterceptor
     {
-        readonly Action _afterConsume;
-        readonly Action _beforeConsume;
-
-        public DelegateMessageInterceptor(Action beforeConsume, Action afterConsume)
-        {
-            _beforeConsume = beforeConsume ?? DoNothing;
-            _afterConsume = afterConsume ?? DoNothing;
-        }
-
         public void PreDispatch(IConsumeContext context)
         {
-            _beforeConsume();
+            MessageScope.BeginScope();
         }
 
         public void PostDispatch(IConsumeContext context)
         {
-            _afterConsume();
-        }
-
-        static void DoNothing()
-        {
+            MessageScope.EndScope();
         }
     }
 }
