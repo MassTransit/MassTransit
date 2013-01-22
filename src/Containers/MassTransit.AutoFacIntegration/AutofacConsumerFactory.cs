@@ -23,17 +23,19 @@ namespace MassTransit.AutofacIntegration
         where T : class
     {
         readonly ILifetimeScope _scope;
+        string _name;
 
-        public AutofacConsumerFactory(ILifetimeScope scope)
+        public AutofacConsumerFactory(ILifetimeScope scope, string name)
         {
             _scope = scope;
+            _name = name;
         }
 
         public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
             IConsumeContext<TMessage> context, InstanceHandlerSelector<T, TMessage> selector)
             where TMessage : class
         {
-            using (var innerScope = _scope.BeginLifetimeScope())
+            using (var innerScope = _scope.BeginLifetimeScope(_name))
             {
                 var consumer = innerScope.Resolve<T>();
                 if (consumer == null)
