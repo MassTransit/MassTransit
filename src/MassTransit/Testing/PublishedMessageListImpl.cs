@@ -12,94 +12,95 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Threading;
-	using Magnum.Extensions;
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using Magnum.Extensions;
 
-	public class PublishedMessageListImpl :
-		PublishedMessageList,
-		IDisposable
-	{
-		readonly HashSet<PublishedMessage> _messages;
-		readonly AutoResetEvent _published;
-		readonly TimeSpan _timeout = 12.Seconds();
+    public class PublishedMessageListImpl :
+        PublishedMessageList,
+        IDisposable
+    {
+        readonly HashSet<PublishedMessage> _messages;
+        readonly AutoResetEvent _published;
+        readonly TimeSpan _timeout = 12.Seconds();
 
-		public PublishedMessageListImpl()
-		{
-			_messages = new HashSet<PublishedMessage>(new MessageIdEqualityComparer());
-			_published = new AutoResetEvent(false);
-		}
+        public PublishedMessageListImpl()
+        {
+            _messages = new HashSet<PublishedMessage>(new MessageIdEqualityComparer());
+            _published = new AutoResetEvent(false);
+        }
 
-		public void Dispose()
-		{
-			using (_published)
-			{
-			}
-		}
+        public void Dispose()
+        {
+            using (_published)
+            {
+            }
+        }
 
-		public IEnumerator<PublishedMessage> GetEnumerator()
-		{
-			lock (_messages)
-				return _messages.ToList().GetEnumerator();
-		}
+        public IEnumerator<PublishedMessage> GetEnumerator()
+        {
+            lock (_messages)
+                return _messages.ToList().GetEnumerator();
+        }
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
-		public bool Any()
-		{
-			return Any(x => true);
-		}
+        public bool Any()
+        {
+            return Any(x => true);
+        }
 
-		public bool Any<T>() where T : class
-		{
-			return Any(x => x.MessageType == typeof (T));
-		}
+        public bool Any<T>()
+            where T : class
+        {
+            return Any(x => typeof(T).IsAssignableFrom(x.MessageType));
+        }
 
-		public bool Any(Func<PublishedMessage, bool> filter)
-		{
-			bool any;
-			lock (_messages)
-				any = _messages.Any(filter);
+        public bool Any(Func<PublishedMessage, bool> filter)
+        {
+            bool any;
+            lock (_messages)
+                any = _messages.Any(filter);
 
-			while (any == false)
-			{
-				if (_published.WaitOne(_timeout, true) == false)
-					return false;
+            while (any == false)
+            {
+                if (_published.WaitOne(_timeout, true) == false)
+                    return false;
 
-				lock (_messages)
-					any = _messages.Any(filter);
-			}
+                lock (_messages)
+                    any = _messages.Any(filter);
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		public void Add(PublishedMessage message)
-		{
-			lock (_messages)
-			{
-				if (_messages.Add(message))
-					_published.Set();
-			}
-		}
+        public void Add(PublishedMessage message)
+        {
+            lock (_messages)
+            {
+                if (_messages.Add(message))
+                    _published.Set();
+            }
+        }
 
-		class MessageIdEqualityComparer :
-			IEqualityComparer<PublishedMessage>
-		{
-			public bool Equals(PublishedMessage x, PublishedMessage y)
-			{
-				return x.Equals(y);
-			}
+        class MessageIdEqualityComparer :
+            IEqualityComparer<PublishedMessage>
+        {
+            public bool Equals(PublishedMessage x, PublishedMessage y)
+            {
+                return x.Equals(y);
+            }
 
-			public int GetHashCode(PublishedMessage message)
-			{
-				return message.Context.GetHashCode();
-			}
-		}
-	}
+            public int GetHashCode(PublishedMessage message)
+            {
+                return message.Context.GetHashCode();
+            }
+        }
+    }
 }

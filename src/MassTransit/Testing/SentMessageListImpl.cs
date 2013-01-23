@@ -56,9 +56,10 @@ namespace MassTransit.Testing
 			return Any(x => true);
 		}
 
-		public bool Any<T>() where T : class
+		public bool Any<T>() 
+            where T : class
 		{
-			return Any(x => x.MessageType == typeof (T));
+            return Any(x => typeof(T).IsAssignableFrom(x.MessageType));
 		}
 
 		public bool Any(Func<SentMessage, bool> filter)
