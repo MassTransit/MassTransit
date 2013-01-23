@@ -12,113 +12,121 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using System;
-	using System.Collections.Generic;
+    using System;
+    using System.Collections.Generic;
+    using Magnum.Extensions;
 
-	/// <summary>
-	/// A fault is a system-generated message that is published when an exception occurs while processing a message.
-	/// </summary>
-	/// <typeparam name="TMessage">The type of message that threw the exception</typeparam>
-	[Serializable]
-	public class Fault<TMessage>
-		where TMessage : class
-	{
-		/// <summary>
-		/// Creates a new fault message for the failed message
-		/// </summary>
-		/// <param name="ex">The exception thrown by the message consumer</param>
-		/// <param name="message">The message that was being processed when the exception was thrown</param>
-		public Fault(TMessage message, Exception ex)
-		{
-			FailedMessage = message;
-			OccurredAt = DateTime.UtcNow;
-			Messages = GetExceptionMessages(ex);
-			StackTrace = GetStackTrace(ex);
-		}
 
-		protected Fault()
-		{
-		}
+    /// <summary>
+    /// A fault is a system-generated message that is published when an exception occurs while processing a message.
+    /// </summary>
+    /// <typeparam name="TMessage">The type of message that threw the exception</typeparam>
+    [Serializable]
+    public class Fault<TMessage> :
+        IFault
+        where TMessage : class
+    {
+        /// <summary>
+        /// Creates a new fault message for the failed message
+        /// </summary>
+        /// <param name="ex">The exception thrown by the message consumer</param>
+        /// <param name="message">The message that was being processed when the exception was thrown</param>
+        public Fault(TMessage message, Exception ex)
+        {
+            FailedMessage = message;
+            OccurredAt = DateTime.UtcNow;
+            Messages = GetExceptionMessages(ex);
+            StackTrace = GetStackTrace(ex);
 
-		/// <summary>
-		/// The message that failed to be consumed
-		/// </summary>
-		public TMessage FailedMessage { get; set; }
+            FaultType = typeof(Fault<TMessage>).ToShortTypeName();
+        }
 
-		/// <summary>
-		/// Messages associated with the exception
-		/// </summary>
-		public List<string> Messages { get; set; }
+        protected Fault()
+        {
+        }
 
-		/// <summary>
-		/// When the exception occurred
-		/// </summary>
-		public DateTime OccurredAt { get; set; }
+        /// <summary>
+        /// The message that failed to be consumed
+        /// </summary>
+        public TMessage FailedMessage { get; set; }
 
-		/// <summary>
-		/// A stack trace related to the exception
-		/// </summary>
-		public List<string> StackTrace { get; set; }
+        public string FaultType { get; set; }
 
-		static List<string> GetStackTrace(Exception ex)
-		{
-			var result = new List<string> {string.IsNullOrEmpty(ex.StackTrace) ? "Stack Trace" : ex.StackTrace};
+        /// <summary>
+        /// Messages associated with the exception
+        /// </summary>
+        public List<string> Messages { get; set; }
 
-		    Exception innerException = ex.InnerException;
-			while (innerException != null)
-			{
-				string stackTrace = "InnerException Stack Trace: " + innerException.StackTrace;
-				result.Add(stackTrace);
+        /// <summary>
+        /// When the exception occurred
+        /// </summary>
+        public DateTime OccurredAt { get; set; }
 
-				innerException = innerException.InnerException;
-			}
+        /// <summary>
+        /// A stack trace related to the exception
+        /// </summary>
+        public List<string> StackTrace { get; set; }
 
-			return result;
-		}
+        static List<string> GetStackTrace(Exception ex)
+        {
+            var result = new List<string> {string.IsNullOrEmpty(ex.StackTrace) ? "Stack Trace" : ex.StackTrace};
 
-		static List<string> GetExceptionMessages(Exception ex)
-		{
-			var result = new List<string> {ex.Message};
+            Exception innerException = ex.InnerException;
+            while (innerException != null)
+            {
+                string stackTrace = "InnerException Stack Trace: " + innerException.StackTrace;
+                result.Add(stackTrace);
 
-		    Exception innerException = ex.InnerException;
-			while (innerException != null)
-			{
-				result.Add(innerException.Message);
+                innerException = innerException.InnerException;
+            }
 
-				innerException = innerException.InnerException;
-			}
+            return result;
+        }
 
-			return result;
-		}
-	}
+        static List<string> GetExceptionMessages(Exception ex)
+        {
+            var result = new List<string> {ex.Message};
 
-	/// <summary>
-	/// A fault is a system-generated message that is published when an exception occurs while processing a message.
-	/// </summary>
-	/// <typeparam name="TMessage"></typeparam>
-	/// <typeparam name="TKey"></typeparam>
-	[Serializable]
-	public class Fault<TMessage, TKey> :
-		Fault<TMessage>,
-		CorrelatedBy<TKey>
-		where TMessage : class, CorrelatedBy<TKey>
-	{
-		/// <summary>
-		/// Creates a new Fault message for the failed correlated message
-		/// </summary>
-		/// <param name="ex"></param>
-		/// <param name="message"></param>
-		public Fault(TMessage message, Exception ex)
-			:
-				base(message, ex)
-		{
-			CorrelationId = message.CorrelationId;
-		}
+            Exception innerException = ex.InnerException;
+            while (innerException != null)
+            {
+                result.Add(innerException.Message);
 
-		protected Fault()
-		{
-		}
+                innerException = innerException.InnerException;
+            }
 
-		public TKey CorrelationId { get; set; }
-	}
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// A fault is a system-generated message that is published when an exception occurs while processing a message.
+    /// </summary>
+    /// <typeparam name="TMessage"></typeparam>
+    /// <typeparam name="TKey"></typeparam>
+    [Serializable]
+    public class Fault<TMessage, TKey> :
+        Fault<TMessage>,
+        CorrelatedBy<TKey>
+        where TMessage : class, CorrelatedBy<TKey>
+    {
+        /// <summary>
+        /// Creates a new Fault message for the failed correlated message
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="message"></param>
+        public Fault(TMessage message, Exception ex)
+            : base(message, ex)
+        {
+            CorrelationId = message.CorrelationId;
+
+            FaultType = typeof(Fault<TMessage, TKey>).ToShortTypeName();
+        }
+
+        protected Fault()
+        {
+        }
+
+        public TKey CorrelationId { get; set; }
+    }
 }
