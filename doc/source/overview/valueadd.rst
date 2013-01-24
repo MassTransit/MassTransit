@@ -17,9 +17,9 @@ Exception Management
 --------------------
 If your connection to the message broker or queue server goes down, MassTransit takes care of trying to reconnect and deal with those failures, so that you don't have to.
 
-Retries & Poision Messages
+Retries & Poison Messages
 ---------------------------
-MassTransit implement some level of generic exception handling for your consumers: upon complete failure from your application to deal with a message, it's moved to an error queue which allows you to inspect the message and requeue it.
+MassTransit implements some level of generic exception handling for your consumers: upon complete failure from your application to deal with a message, it's moved to an error queue which allows you to inspect the message and requeue it.
 
 If exceptions are thrown from consumers, MassTransit by default performs a number of retries by requeueing the message, before moving it to the error queue.
 
