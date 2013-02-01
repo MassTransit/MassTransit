@@ -13,6 +13,7 @@
 namespace MassTransit.Tests
 {
     using System;
+    using System.Collections.Generic;
     using MassTransit.Transports;
     using NUnit.Framework;
 
@@ -28,13 +29,14 @@ namespace MassTransit.Tests
             const string id = "qelofjsw";
 
             Exception ex;
+            IEnumerable<Action> fa;
 
             for (int i = 0; i < retryLimit; i++)
             {
-                Assert.IsFalse(tracker.IsRetryLimitExceeded(id, out ex));
+                Assert.IsFalse(tracker.IsRetryLimitExceeded(id, out ex, out fa));
                 tracker.IncrementRetryCount(id, ex);
             }
-            Assert.IsTrue(tracker.IsRetryLimitExceeded(id, out ex));
+            Assert.IsTrue(tracker.IsRetryLimitExceeded(id, out ex, out fa));
         }
 
         [Test]
@@ -46,17 +48,18 @@ namespace MassTransit.Tests
             const string id = "qelofjsw";
 
             Exception ex;
-            Assert.IsFalse(tracker.IsRetryLimitExceeded(id, out ex));
+            IEnumerable<Action> fa;
+            Assert.IsFalse(tracker.IsRetryLimitExceeded(id, out ex, out fa));
             tracker.IncrementRetryCount(id, ex);
 
             tracker.MessageWasReceivedSuccessfully(id);
 
             for (int i = 0; i < retryLimit; i++)
             {
-                Assert.IsFalse(tracker.IsRetryLimitExceeded(id, out ex));
+                Assert.IsFalse(tracker.IsRetryLimitExceeded(id, out ex, out fa));
                 tracker.IncrementRetryCount(id, ex);
             }
-            Assert.IsTrue(tracker.IsRetryLimitExceeded(id, out ex));
+            Assert.IsTrue(tracker.IsRetryLimitExceeded(id, out ex, out fa));
         }
     }
 }

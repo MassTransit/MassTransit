@@ -12,135 +12,135 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
-	using System;
-	using System.Collections.Generic;
-	using BusServiceConfigurators;
-	using Configuration;
-	using Exceptions;
-	using Logging;
-	using Magnum;
-	using Magnum.Extensions;
-	using SubscriptionConfigurators;
-	using Util;
+    using System;
+    using System.Collections.Generic;
+    using BusServiceConfigurators;
+    using Configuration;
+    using Exceptions;
+    using Logging;
+    using Magnum;
+    using Magnum.Extensions;
+    using SubscriptionConfigurators;
+    using Util;
 
     public class ControlBusBuilderImpl :
-		ControlBusBuilder
-	{
-		static readonly ILog _log = Logger.Get(typeof (ControlBusBuilderImpl));
+        ControlBusBuilder
+    {
+        static readonly ILog _log = Logger.Get(typeof (ControlBusBuilderImpl));
 
-		readonly IList<BusServiceConfigurator> _busServiceConfigurators;
-		readonly IList<Action<ServiceBus>> _postCreateActions;
-		readonly BusSettings _settings;
+        readonly IList<BusServiceConfigurator> _busServiceConfigurators;
+        readonly IList<Action<ServiceBus>> _postCreateActions;
+        readonly BusSettings _settings;
 
-		public ControlBusBuilderImpl([NotNull] BusSettings settings)
-		{
-			Guard.AgainstNull(settings, "settings");
+        public ControlBusBuilderImpl([NotNull] BusSettings settings)
+        {
+            Guard.AgainstNull(settings, "settings");
 
-			_settings = settings;
-			_postCreateActions = new List<Action<ServiceBus>>();
-			_busServiceConfigurators = new List<BusServiceConfigurator>();
+            _settings = settings;
+            _postCreateActions = new List<Action<ServiceBus>>();
+            _busServiceConfigurators = new List<BusServiceConfigurator>();
 
-			var subscriptionCoordinatorConfigurator = new SubscriptionRouterConfiguratorImpl(_settings.Network);
-			subscriptionCoordinatorConfigurator.SetNetwork(settings.Network);
-			subscriptionCoordinatorConfigurator.Configure(this);
-		}
+            var subscriptionCoordinatorConfigurator = new SubscriptionRouterConfiguratorImpl(_settings.Network);
+            subscriptionCoordinatorConfigurator.SetNetwork(settings.Network);
+            subscriptionCoordinatorConfigurator.Configure(this);
+        }
 
-		public BusSettings Settings
-		{
-			get { return _settings; }
-		}
+        public BusSettings Settings
+        {
+            get { return _settings; }
+        }
 
-		public IControlBus Build()
-		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Creating ControlBus at {0}", _settings.InputAddress);
+        public IControlBus Build()
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Creating ControlBus at {0}", _settings.InputAddress);
 
-			ServiceBus bus = CreateServiceBus();
+            ServiceBus bus = CreateServiceBus();
 
-			ConfigureBusSettings(bus);
+            ConfigureBusSettings(bus);
 
-			RunPostCreateActions(bus);
+            RunPostCreateActions(bus);
 
-			RunBusServiceConfigurators(bus);
+            RunBusServiceConfigurators(bus);
 
-			if (_settings.AutoStart)
-			{
-				bus.Start();
-			}
+            if (_settings.AutoStart)
+            {
+                bus.Start();
+            }
 
-			return bus;
-		}
+            return bus;
+        }
 
-		public void Match<T>(Action<T> callback)
-			where T : class, BusBuilder
-		{
-			Guard.AgainstNull(callback);
+        public void Match<T>(Action<T> callback)
+            where T : class, BusBuilder
+        {
+            Guard.AgainstNull(callback);
 
-			if (typeof (T).IsAssignableFrom(GetType()))
-				callback(this as T);
-		}
+            if (typeof (T).IsAssignableFrom(GetType()))
+                callback(this as T);
+        }
 
-		public void AddPostCreateAction(Action<ServiceBus> postCreateAction)
-		{
-			_postCreateActions.Add(postCreateAction);
-		}
+        public void AddPostCreateAction(Action<ServiceBus> postCreateAction)
+        {
+            _postCreateActions.Add(postCreateAction);
+        }
 
-		public void AddBusServiceConfigurator(BusServiceConfigurator configurator)
-		{
-			_busServiceConfigurators.Add(configurator);
-		}
+        public void AddBusServiceConfigurator(BusServiceConfigurator configurator)
+        {
+            _busServiceConfigurators.Add(configurator);
+        }
 
-		ServiceBus CreateServiceBus()
-		{
-			IEndpoint endpoint = _settings.EndpointCache.GetEndpoint(_settings.InputAddress);
+        ServiceBus CreateServiceBus()
+        {
+            IEndpoint endpoint = _settings.EndpointCache.GetEndpoint(_settings.InputAddress);
 
-			var serviceBus = new ServiceBus(endpoint, _settings.EndpointCache);
+            var serviceBus = new ServiceBus(endpoint, _settings.EndpointCache);
 
-			return serviceBus;
-		}
+            return serviceBus;
+        }
 
-		void ConfigureBusSettings(ServiceBus bus)
-		{
-			if (_settings.ConcurrentConsumerLimit > 0)
-				bus.MaximumConsumerThreads = _settings.ConcurrentConsumerLimit;
+        void ConfigureBusSettings(ServiceBus bus)
+        {
+            if (_settings.ConcurrentConsumerLimit > 0)
+                bus.MaximumConsumerThreads = _settings.ConcurrentConsumerLimit;
 
-			if (_settings.ConcurrentReceiverLimit > 0)
-				bus.ConcurrentReceiveThreads = _settings.ConcurrentReceiverLimit;
+            if (_settings.ConcurrentReceiverLimit > 0)
+                bus.ConcurrentReceiveThreads = _settings.ConcurrentReceiverLimit;
 
-			bus.ReceiveTimeout = _settings.ReceiveTimeout;
-		}
+            bus.ReceiveTimeout = _settings.ReceiveTimeout;
+        }
 
-		void RunBusServiceConfigurators(ServiceBus bus)
-		{
-			foreach (BusServiceConfigurator busServiceConfigurator in _busServiceConfigurators)
-			{
-				try
-				{
-					IBusService busService = busServiceConfigurator.Create(bus);
+        void RunBusServiceConfigurators(ServiceBus bus)
+        {
+            foreach (BusServiceConfigurator busServiceConfigurator in _busServiceConfigurators)
+            {
+                try
+                {
+                    IBusService busService = busServiceConfigurator.Create(bus);
 
-					bus.AddService(busServiceConfigurator.Layer, busService);
-				}
-				catch (Exception ex)
-				{
-					throw new ConfigurationException("Failed to create the bus service: " +
-					                                 busServiceConfigurator.ServiceType.ToShortTypeName(), ex);
-				}
-			}
-		}
+                    bus.AddService(busServiceConfigurator.Layer, busService);
+                }
+                catch (Exception ex)
+                {
+                    throw new ConfigurationException("Failed to create the bus service: " +
+                                                     busServiceConfigurator.ServiceType.ToShortTypeName(), ex);
+                }
+            }
+        }
 
-		void RunPostCreateActions(ServiceBus bus)
-		{
-			foreach (var postCreateAction in _postCreateActions)
-			{
-				try
-				{
-					postCreateAction(bus);
-				}
-				catch (Exception ex)
-				{
-					throw new ConfigurationException("An exception was thrown while running post-creation actions", ex);
-				}
-			}
-		}
-	}
+        void RunPostCreateActions(ServiceBus bus)
+        {
+            foreach (var postCreateAction in _postCreateActions)
+            {
+                try
+                {
+                    postCreateAction(bus);
+                }
+                catch (Exception ex)
+                {
+                    throw new ConfigurationException("An exception was thrown while running post-creation actions", ex);
+                }
+            }
+        }
+    }
 }
