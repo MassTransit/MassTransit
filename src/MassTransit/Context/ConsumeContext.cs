@@ -203,11 +203,12 @@ namespace MassTransit.Context
             where T : class
         {
             var fault = new Fault<T>(message, exception);
+            var bus = Bus;
+            var faultAddress = FaultAddress;
+            var responseAddress = ResponseAddress;
+            var requestId = RequestId;
 
-            _context.NotifyFault(bus =>
-            {
-                SendFault(bus, FaultAddress, ResponseAddress, RequestId, fault);
-            });
+            _context.NotifyFault(() => SendFault(bus, faultAddress, responseAddress, requestId, fault));
         }
 
         [UsedImplicitly]
@@ -215,11 +216,12 @@ namespace MassTransit.Context
             where T : class, CorrelatedBy<TKey>
         {
             var fault = new Fault<T, TKey>(message, exception);
+            var bus = Bus;
+            var faultAddress = FaultAddress;
+            var responseAddress = ResponseAddress;
+            var requestId = RequestId;
 
-            _context.NotifyFault(bus =>
-            {
-                SendFault(bus, FaultAddress, ResponseAddress, RequestId, fault);
-            });
+            _context.NotifyFault(() => SendFault(bus, faultAddress, responseAddress, requestId, fault));
         }
 
         static void SendFault<T>(IServiceBus bus, Uri faultAddress, Uri responseAddress, string requestId, T message)

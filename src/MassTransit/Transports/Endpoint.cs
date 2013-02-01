@@ -13,7 +13,9 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Runtime.Serialization;
     using Context;
     using Exceptions;
@@ -232,13 +234,16 @@ namespace MassTransit.Transports
 
                         Exception retryException;
                         string acceptMessageId = acceptContext.OriginalMessageId ?? acceptContext.MessageId;
-                        if (_tracker.IsRetryLimitExceeded(acceptMessageId, out retryException))
+                        IEnumerable<Action> faultActions;
+                        if (_tracker.IsRetryLimitExceeded(acceptMessageId, out retryException, out faultActions))
                         {
                             if (_log.IsErrorEnabled)
                                 _log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address,
                                     acceptMessageId);
 
                             failedMessageException = retryException;
+
+                            acceptContext.ExecuteFaultActions(faultActions);
 
                             return MoveMessageToErrorTransport;
                         }
@@ -261,7 +266,7 @@ namespace MassTransit.Transports
                             {
                                 Address.LogSkipped(acceptMessageId);
 
-                                _tracker.IncrementRetryCount(acceptMessageId, null);
+                                _tracker.IncrementRetryCount(acceptMessageId);
                                 return null;
                             }
                         }
@@ -280,7 +285,7 @@ namespace MassTransit.Transports
 
                             if(_tracker.IncrementRetryCount(acceptMessageId, ex))
                             {
-                                acceptContext.PublishPendingFaults();
+                                acceptContext.ExecuteFaultActions(acceptContext.GetFaultActions());
                             }
                             return null;
                         }
@@ -299,9 +304,11 @@ namespace MassTransit.Transports
                                     if (_log.IsErrorEnabled)
                                         _log.Error("An exception was thrown by a message consumer", ex);
 
-                                    if(_tracker.IncrementRetryCount(receiveMessageId, ex))
+                                    faultActions = receiveContext.GetFaultActions();
+                                    if(_tracker.IncrementRetryCount(receiveMessageId, ex, faultActions))
                                     {
-                                        receiveContext.PublishPendingFaults();
+                                        // seems like this might be unnecessary if we are going to reprocess the message
+                                        receiveContext.ExecuteFaultActions(faultActions);
                                     }
 
                                     if(!receiveContext.IsTransactional)

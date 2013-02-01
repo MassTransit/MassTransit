@@ -1,18 +1,15 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
-using MassTransit.Util;
-
 namespace MassTransit
 {
     using System;
@@ -20,6 +17,8 @@ namespace MassTransit
     using System.IO;
     using Context;
     using Serialization;
+    using Util;
+
 
     /// <summary>
     /// Receive context that allows receiving sinks to 
@@ -27,6 +26,23 @@ namespace MassTransit
     public interface IReceiveContext :
         IConsumeContext
     {
+        Stream BodyStream { get; }
+        IEnumerable<ISent> Sent { get; }
+
+        IEnumerable<IReceived> Received { get; }
+
+        Guid Id { get; }
+
+        /// <summary>
+        /// True if the transport is transactional and will leave the message on the queue if an exception is thrown
+        /// </summary>
+        bool IsTransactional { get; }
+
+        /// <summary>
+        ///  The original message id that was consumed
+        /// </summary>
+        string OriginalMessageId { get; }
+
         /// <summary>
         /// Set the content type that was indicated by the transport message header
         /// </summary>
@@ -82,16 +98,14 @@ namespace MassTransit
 
         void CopyBodyTo(Stream stream);
 
-        Stream BodyStream { get; }
-
         void SetMessageTypeConverter(IMessageTypeConverter messageTypeConverter);
 
         /// <summary>
         /// Notify that a fault needs to be sent, so that the endpoint can send it when
         /// appropriate.
         /// </summary>
-        /// <param name="faultCallback"></param>
-        void NotifyFault(Action<IServiceBus> faultCallback);
+        /// <param name="faultAction"></param>
+        void NotifyFault(Action faultAction);
 
         void NotifySend(ISendContext context, IEndpointAddress address);
 
@@ -104,25 +118,15 @@ namespace MassTransit
         void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
             where T : class;
 
-        IEnumerable<ISent> Sent { get; }
-
-        IEnumerable<IReceived> Received { get; }
-
-        Guid Id { get; }
-
-        /// <summary>
-        /// True if the transport is transactional and will leave the message on the queue if an exception is thrown
-        /// </summary>
-        bool IsTransactional { get; }
-
-        /// <summary>
-        ///  The original message id that was consumed
-        /// </summary>
-        string OriginalMessageId { get; }
-
         /// <summary>
         /// Publish any pending faults for the context
         /// </summary>
-        void PublishPendingFaults();
+        void ExecuteFaultActions(IEnumerable<Action> faultActions);
+
+        /// <summary>
+        /// Returns the fault actions that were added to the context during message processing
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<Action> GetFaultActions();
     }
 }
