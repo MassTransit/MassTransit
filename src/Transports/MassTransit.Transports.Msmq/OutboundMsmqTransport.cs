@@ -46,6 +46,7 @@ namespace MassTransit.Transports.Msmq
                     message.Label = context.MessageType.Length > 250 ? context.MessageType.Substring(0, 250) : context.MessageType;
 
                 message.Recoverable = _address.IsRecoverable;
+                message.UseDeadLetterQueue = true; // in case lack of permission message will be redirected to dead letter
 
                 if (context.ExpirationTime.HasValue)
                 {
