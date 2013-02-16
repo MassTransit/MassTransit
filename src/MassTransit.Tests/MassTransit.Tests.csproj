@@ -189,6 +189,8 @@
     <Compile Include="PublishRequest_Specs.cs" />
     <Compile Include="Saga\CustomerRegistrationSaga.cs" />
     <Compile Include="Saga\CustomerRegistrationSagaTest.cs" />
+    <Compile Include="Saga\InjectingSampleSaga.cs" />
+    <Compile Include="Saga\Injecting_Specs.cs" />
     <Compile Include="Saga\StateMachine\CombineSaga.cs" />
     <Compile Include="Saga\StateMachine\CombineSaga_Specs.cs" />
     <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
