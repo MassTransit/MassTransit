@@ -1,7 +1,0 @@
-REDIST.TXT
-
-Subject to the license terms for the software, you may redistribute the files (unmodified) listed below.
-System.Reactive.dll
-System.Reactive.Providers.dll
-System.Reactive.Windows.Forms.dll
-System.Reactive.Windows.Threading.dll

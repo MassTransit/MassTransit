@@ -347,6 +347,13 @@ def add_files stage, what_dlls, nuspec
   }
 end
 
+def add_files_net40 stage, what_dlls, nuspec
+  takeFrom = File.join(stage, 'net-4.0', what_dlls)
+  Dir.glob(takeFrom).each do |f|
+    nuspec.file(f.gsub("/", "\\"), "lib\\net40")
+  end
+end
+
 task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtun_nuspec, :mtcw_nuspec, :mtnhib_nuspec, :mtrmq_nuspec, :mttf_nuspec, :mtrx_nuspec]
 
   directory 'nuspecs'
@@ -545,9 +552,12 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
+    nuspec.dependency "Rx-Core", "2.1.30214.0"
+    nuspec.dependency "Rx-Interfaces", "2.1.30214.0"
+    nuspec.dependency "Rx-Linq", "2.1.30214.0"
     nuspec.output_file = 'nuspecs/MassTransit.Reactive.nuspec'
 
-	add_files props[:stage], "#{File.join('Reactive', 'MassTransit.Reactive.{dll,pdb,xml}')}", nuspec
+	add_files_net40 props[:stage], "#{File.join('Reactive', 'MassTransit.Reactive.{dll,pdb,xml}')}", nuspec
   end
 
   # NUGET
