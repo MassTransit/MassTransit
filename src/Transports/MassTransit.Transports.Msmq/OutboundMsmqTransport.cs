@@ -45,7 +45,7 @@ namespace MassTransit.Transports.Msmq
                 if (!string.IsNullOrEmpty(context.MessageType))
                     message.Label = context.MessageType.Length > 250 ? context.MessageType.Substring(0, 250) : context.MessageType;
 
-                message.Recoverable = true;
+                message.Recoverable = _address.IsRecoverable;
 
                 if (context.ExpirationTime.HasValue)
                 {
