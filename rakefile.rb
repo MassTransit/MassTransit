@@ -30,7 +30,7 @@ props = {
 }
 
 desc "**Default**, cleans, compiles and runs tests"
-task :default => [:clean, :compile, :copy_services, :ilmerge, :compile_samples, :copy_samples]
+task :default => [:clean, :compile, :ilmerge, :compile_samples, :copy_samples, :copy_services]
 
 desc "Default + tests"
 task :all => [:default, :tests]
@@ -68,7 +68,7 @@ end
 task :compile_samples => [:build_starbucks, :build_distributor] do ; end
 
 desc "Compiles MT into build_output"
-task :compile => [:versioning, :global_version, :build, :copy_signed, :build_unsigned] do ; end
+task :compile => [:versioning, :global_version, :build, :copy_signed] do ; end
 
 task :copy_signed => [:build] do
 	puts 'Copying unmerged dependencies to output folder'
@@ -78,17 +78,16 @@ task :copy_signed => [:build] do
 
 	copyOutputFiles File.join(props[:src], "Persistence/MassTransit.NHibernateIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NHibernateIntegration.{dll,pdb,xml}", File.join(props[:output], "Persistence/NHibernate")
 
-        outtst = File.join(props[:output], "Testing")
+    outtst = File.join(props[:output], "Testing")
 	copyOutputFiles File.join(props[:src], "MassTransit.TestFramework/bin/#{BUILD_CONFIG}"), "MassTransit.TestFramework.{dll,pdb,xml}", outtst
 	copyOutputFiles File.join(props[:src], "MassTransit.TestFramework/bin/#{BUILD_CONFIG}"), "Magnum.TestFramework.{dll,pdb,xml}", outtst
 
-        outl = File.join(props[:output], "Logging")
+    outl = File.join(props[:output], "Logging")
 	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.Log4NetIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.Log4NetIntegration.{dll,pdb,xml}", outl
 	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.NLogIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NLogIntegration.{dll,pdb,xml}", outl
 
-
-	outc = File.join(props[:output], "Containers")
-        copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
+    outc = File.join(props[:output], "Containers")
+    copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
 	copyOutputFiles File.join(props[:src], "Containers/MassTransit.UnityIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.UnityIntegration.{dll,pdb,xml}", outc
 	copyOutputFiles File.join(props[:src], "Containers/MassTransit.WindsorIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.WindsorIntegration.{dll,pdb,xml}", outc
 	copyOutputFiles File.join(props[:src], "Containers/MassTransit.NinjectIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NinjectIntegration.{dll,pdb,xml}", outc
@@ -244,7 +243,7 @@ msbuild :build_unsigned do |msb|
 	    :Platform => 'Any CPU'
 	msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
 	msb.use :net4 #MSB_USE
-	msb.targets :Build
+	msb.targets :Clean, :Build
 	msb.solution = 'src/MassTransit.sln'
 end
 
