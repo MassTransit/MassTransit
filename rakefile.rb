@@ -122,17 +122,18 @@ task :copy_services => [:build_unsigned] do
 	targ = File.join(props[:stage], 'Services', 'RuntimeServices')
 	src = File.join(props[:src], "MassTransit.RuntimeServices/bin/#{BUILD_CONFIG}")
 
-	copyOutputFiles src, "MassTransit.*.{dll,exe,config,log4net.xml,sdf}", targ
-	copyOutputFiles props[:output], 'MassTransit.dll', targ
-     	copyOutputFiles src, "MassTransit.Log4NetIntegration.dll", targ
-     	copyOutputFiles src, "Castle*.dll", targ
-     	copyOutputFiles src, "log4net.dll", targ
-     	copyOutputFiles src, "Magnum.dll", targ
-     	copyOutputFiles src, "NHibernate*.dll", targ
-     	copyOutputFiles src, "Iesi.Collections.dll", targ
-     	copyOutputFiles src, "StructureMap.dll", targ
-     	copyOutputFiles src, "Topshelf.dll", targ
-     	copyOutputFiles src, "Topshelf.Log4NetIntegration.dll", targ
+    copyOutputFiles src, "MassTransit.*.{dll,exe,config,log4net.xml,sdf}", targ
+	copyOutputFiles src, "MassTransit.dll", targ
+    copyOutputFiles src, "MassTransit.Log4NetIntegration.dll", targ
+    copyOutputFiles src, "log4net.dll", targ
+    copyOutputFiles src, "Magnum.dll", targ
+    copyOutputFiles src, "Stact.dll", targ
+    copyOutputFiles src, "Newtonsoft.Json.dll", targ
+    copyOutputFiles src, "NHibernate*.dll", targ
+    copyOutputFiles src, "Iesi.Collections.dll", targ
+    copyOutputFiles src, "StructureMap.dll", targ
+    copyOutputFiles src, "Topshelf.dll", targ
+    copyOutputFiles src, "Topshelf.Log4NetIntegration.dll", targ
 	copyOutputFiles File.join(props[:lib], 'SqlCe'), '*', targ
 	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86'), '*', File.join(targ, 'x86')
 	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'x86', 'Microsoft.VC90.CRT')
