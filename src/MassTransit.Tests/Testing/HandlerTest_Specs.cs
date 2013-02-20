@@ -165,7 +165,6 @@ namespace MassTransit.Tests.Testing
 		public void Setup()
 		{
 			_test = TestFactory.ForHandler<A>()
-				//.InLocalRemoteBusScenario()
 				.New(x =>
 					{
 						x.Publish(new A());
@@ -192,6 +191,12 @@ namespace MassTransit.Tests.Testing
 		public void Should_have_published_a_message_of_type_b()
 		{
 			_test.Published.Any<B>().ShouldBeTrue();
+		}
+
+		[Then]
+		public void Should_have_published_a_message_of_type_ib()
+		{
+			_test.Published.Any<IB>().ShouldBeTrue();
 		}
 
 		[Then]
@@ -222,8 +227,14 @@ namespace MassTransit.Tests.Testing
 		{
 		}
 
-		class B
+		class B :
+            IB
 		{
 		}
-	}
+    
+        interface IB
+        {
+        }
+    }
+    
 }

@@ -107,6 +107,16 @@
     <Compile Include="Configuration\Builders\ServiceBusBuilder.cs" />
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ShutdownConfigurationExtensions.cs" />
+    <Compile Include="Configuration\InterceptorExtensions.cs" />
+    <Compile Include="IFault.cs" />
+    <Compile Include="NewId\INewIdFormatter.cs" />
+    <Compile Include="NewId\INewIdParser.cs" />
+    <Compile Include="NewId\NewIdFormatters\Base32Formatter.cs" />
+    <Compile Include="NewId\NewIdFormatters\DashedHexFormatter.cs" />
+    <Compile Include="NewId\NewIdFormatters\HexFormatter.cs" />
+    <Compile Include="NewId\NewIdFormatters\ZBase32Formatter.cs" />
+    <Compile Include="NewId\NewIdParsers\Base32Parser.cs" />
+    <Compile Include="NewId\NewIdParsers\ZBase32Parser.cs" />
     <Compile Include="Subscriptions\Coordinator\InMemorySubscriptionStorage.cs" />
     <Compile Include="Configuration\Configuration\InterceptingConsumerFactory.cs" />
     <Compile Include="Configuration\EndpointConfigurators\DefaultMessageTrackerEndpointFactoryConfigurator.cs" />

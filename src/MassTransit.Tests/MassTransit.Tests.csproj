@@ -178,6 +178,7 @@
     <Compile Include="MessageInterceptor_Specs.cs" />
     <Compile Include="MessageRetryTracker_Specs.cs" />
     <Compile Include="Messages\PartialSerializationTestMessage.cs" />
+    <Compile Include="NewId_\Formatter_Specs.cs" />
     <Compile Include="NewId_\GuidInterop_Specs.cs" />
     <Compile Include="NewId_\LongTerm_Specs.cs" />
     <Compile Include="NewId_\NetworkAddress_Specs.cs" />
@@ -211,6 +212,7 @@
     <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="Testing\SagaTest_Specs.cs" />
     <Compile Include="Testing\SagaStateMachineTest_Specs.cs" />
+    <Compile Include="Threading_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
     <None Include="app.config" />
     <Compile Include="Pipeline\Interception_Specs.cs" />

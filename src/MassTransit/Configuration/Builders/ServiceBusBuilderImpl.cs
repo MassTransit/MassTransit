@@ -14,6 +14,7 @@ namespace MassTransit.Builders
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using BusServiceConfigurators;
     using Configuration;
     using Exceptions;
@@ -142,6 +143,46 @@ namespace MassTransit.Builders
 
             bus.ReceiveTimeout = _settings.ReceiveTimeout;
             bus.ShutdownTimeout = _settings.ShutdownTimeout;
+            ConfigureThreadPool(bus.MaximumConsumerThreads);
+        }
+
+        static void ConfigureThreadPool(int consumerThreads)
+        {
+            var requiredThreads = CalculateRequiredThreads(consumerThreads);
+
+            ConfigureMinThreads(requiredThreads);
+
+            ConfigureMaxThreads(requiredThreads);
+        }
+
+        static int CalculateRequiredThreads(int consumerThreads)
+        {
+            int workerThreads;
+            int completionPortThreads;
+            ThreadPool.GetMinThreads(out workerThreads, out completionPortThreads);
+            int availableWorkerThreads;
+            int availableCompletionPortThreads;
+            ThreadPool.GetAvailableThreads(out availableWorkerThreads, out availableCompletionPortThreads);
+            var requiredThreads = consumerThreads + (workerThreads - availableWorkerThreads);
+            return requiredThreads;
+        }
+
+        static void ConfigureMinThreads(int requiredThreads)
+        {
+            int workerThreads;
+            int completionPortThreads;
+            ThreadPool.GetMinThreads(out workerThreads, out completionPortThreads);
+            workerThreads = Math.Max(workerThreads, requiredThreads);
+            ThreadPool.SetMinThreads(workerThreads, completionPortThreads);
+        }
+
+        static void ConfigureMaxThreads(int requiredThreads)
+        {
+            int workerThreads;
+            int completionPortThreads;
+            ThreadPool.GetMaxThreads(out workerThreads, out completionPortThreads);
+            workerThreads = Math.Max(workerThreads, requiredThreads);
+            ThreadPool.SetMaxThreads(workerThreads, completionPortThreads);
         }
 
         void ConfigureMessageInterceptors(IServiceBus bus)

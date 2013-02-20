@@ -14,7 +14,6 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using Logging;
-    using Management;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
 
@@ -35,22 +34,32 @@ namespace MassTransit.Transports.RabbitMq
 
         public void Bind(RabbitMqConnection connection)
         {
-            using (var management = new RabbitMqEndpointManagement(_address, connection.Connection))
-            {
-                management.BindQueue(_address.Name, _address.Name, ExchangeType.Fanout, "", _address.QueueArguments());
-
-                if (_purgeOnBind)
-                {
-                    management.Purge(_address.Name);
-                    _purgeOnBind = false;
-                }
-            }
-
             _channel = connection.Connection.CreateModel();
+
+            BindQueue();
+
+            PurgeIfRequested();
+
             _channel.BasicQos(0, 10, false);
 
             _consumer = new QueueingBasicConsumer(_channel);
             _channel.BasicConsume(_address.Name, false, _consumer);
+        }
+
+        void PurgeIfRequested()
+        {
+            if (_purgeOnBind)
+            {
+                _channel.QueuePurge(_address.Name);
+                _purgeOnBind = false;
+            }
+        }
+
+        void BindQueue()
+        {
+            string queue = _channel.QueueDeclare(_address.Name, true, false, false, _address.QueueArguments());
+            _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, true);
+            _channel.QueueBind(queue, _address.Name, "");
         }
 
         public void Unbind(RabbitMqConnection connection)

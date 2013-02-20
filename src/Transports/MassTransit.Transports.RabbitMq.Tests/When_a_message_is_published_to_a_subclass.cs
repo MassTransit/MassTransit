@@ -12,53 +12,84 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq.Tests
 {
-	using System;
-	using BusConfigurators;
-	using Magnum.Extensions;
-	using Magnum.TestFramework;
-	using TestFramework;
+    using System;
+    using BusConfigurators;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using TestFramework;
 
-	[Scenario]
-	public class When_a_message_is_published_to_a_subclass :
-		Given_a_rabbitmq_bus
-	{
-		Future<B> _receivedB;
+    [Scenario]
+    public class When_a_message_is_published_to_a_subclass :
+        Given_a_rabbitmq_bus
+    {
+        Future<B> _receivedB;
 
-		protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
-		{
-			base.ConfigureServiceBus(uri, configurator);
+        protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
+        {
+            base.ConfigureServiceBus(uri, configurator);
 
-			_receivedB = new Future<B>();
+            _receivedB = new Future<B>();
 
-			configurator.Subscribe(s => s.Handler<B>(message => _receivedB.Complete(message)));
-		}
+            configurator.Subscribe(s => s.Handler<B>(message => _receivedB.Complete(message)));
+        }
 
-		[When]
-		public void A_message_is_published()
-		{
-			LocalBus.Publish(new A
-				{
-					StringA = "ValueA",
-					StringB = "ValueB",
-				});
-		}
+        [When]
+        public void A_message_is_published()
+        {
+            LocalBus.Publish(new A
+                {
+                    StringA = "ValueA",
+                    StringB = "ValueB",
+                });
+        }
 
-		[Then]
-		public void Should_receive_the_inherited_version()
-		{
-			_receivedB.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
-			_receivedB.Value.StringB.ShouldEqual("ValueB");
-		}
+        [Then]
+        public void Should_receive_the_inherited_version()
+        {
+            _receivedB.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+            _receivedB.Value.StringB.ShouldEqual("ValueB");
+        }
 
-		class A :
-			B
-		{
-			public string StringA { get; set; }
-		}
+        class A :
+            B
+        {
+            public string StringA { get; set; }
+        }
 
-		class B
-		{
-			public string StringB { get; set; }
-		}
-	}
+        class B
+        {
+            public string StringB { get; set; }
+        }
+    }
+
+    [Scenario]
+    public class When_a_message_is_published_and_nobody_is_listening :
+        Given_a_rabbitmq_bus
+    {
+        [When]
+        public void A_message_is_published()
+        {
+            LocalBus.Publish(new Nobody_listening_parent
+                {
+                    StringA = "ValueA",
+                    StringB = "ValueB",
+                });
+        }
+
+        [Then]
+        public void Should_receive_the_inherited_version()
+        {
+        }
+
+        class Nobody_listening_child 
+        {
+            public string StringA { get; set; }
+        }
+
+        class Nobody_listening_parent : 
+            Nobody_listening_child
+        {
+            public string StringB { get; set; }
+        }
+    }
 }

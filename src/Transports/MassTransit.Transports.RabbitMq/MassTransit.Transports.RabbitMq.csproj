@@ -82,12 +82,16 @@
     <Compile Include="Configuration\Configurators\ConnectionFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\Configurators\ConnectionFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\ConnectionFactoryConfiguratorImpl.cs" />
+    <Compile Include="Configuration\Configurators\PasswordConnectionFactoryConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\RequestedHeartbeatConnectionFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\SslConnectionFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\SslConnectionFactoryConfiguratorImpl.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqTransportFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqTransportFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqTransportFactoryConfiguratorImpl.cs" />
+    <Compile Include="Configuration\Configurators\UsernameConnectionFactoryConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqTransportFactoryExtensions.cs" />
+    <Compile Include="ExchangeBinding.cs" />
     <Compile Include="InboundRabbitMqTransport.cs" />
     <Compile Include="IRabbitMqEndpointAddress.cs" />
     <Compile Include="Management\IRabbitMqEndpointManagement.cs" />
@@ -103,10 +107,10 @@
     <Compile Include="RabbitMqConfigurationExtensions.cs" />
     <Compile Include="RabbitMqMessageNameFormatter.cs" />
     <Compile Include="RabbitMqProducer.cs" />
+    <Compile Include="RabbitMqPublisher.cs" />
     <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
     <Compile Include="Configuration\RabbitMqServiceBusExtensions.cs" />
-    <Compile Include="RequestedHeartbeatConnectionFactoryConfiguratorImpl.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
     <Compile Include="Testing\RabbitMqBusScenarioBuilder.cs" />
   </ItemGroup>

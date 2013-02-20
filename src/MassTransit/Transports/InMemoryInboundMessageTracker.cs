@@ -29,7 +29,7 @@ namespace MassTransit.Transports
             _messages = new ConcurrentCache<string, TrackedMessage>(id => new TrackedMessage());
         }
 
-        public bool IsRetryLimitExceeded(string id, out Exception retryException)
+        public virtual bool IsRetryLimitExceeded(string id, out Exception retryException)
         {
             bool exceeded = false;
             Exception result = null;
@@ -47,7 +47,7 @@ namespace MassTransit.Transports
             return exceeded;
         }
 
-        public bool IncrementRetryCount(string id, Exception exception)
+        public virtual bool IncrementRetryCount(string id, Exception exception)
         {
             if (string.IsNullOrEmpty(id))
                 return false;
@@ -55,7 +55,7 @@ namespace MassTransit.Transports
             return _messages[id].Increment(exception) >= _retryLimit;
         }
 
-        public void MessageWasReceivedSuccessfully(string id)
+        public virtual void MessageWasReceivedSuccessfully(string id)
         {
             if (string.IsNullOrEmpty(id))
                 return;
@@ -63,7 +63,7 @@ namespace MassTransit.Transports
             _messages.Remove(id);
         }
 
-        public void MessageWasMovedToErrorQueue(string id)
+        public virtual void MessageWasMovedToErrorQueue(string id)
         {
             if (string.IsNullOrEmpty(id))
                 return;

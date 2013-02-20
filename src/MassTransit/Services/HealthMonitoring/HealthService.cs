@@ -59,8 +59,8 @@ namespace MassTransit.Services.HealthMonitoring
         {
             _log.Info("Health Service Starting");
 
-            _unsubscribeToken += _bus.SubscribeInstance(this);
-            _unsubscribeToken += _bus.SubscribeSaga(_healthSagas);
+            _unsubscribeToken += _bus.ControlBus.SubscribeInstance(this);
+            _unsubscribeToken += _bus.ControlBus.SubscribeSaga(_healthSagas);
 
             _log.Info("Health Service Started");
         }
