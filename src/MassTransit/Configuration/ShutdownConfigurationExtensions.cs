@@ -12,16 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using BusConfigurators;
 
-	public static class ThreadConfigurationExtensions
-	{
-		public static void SetConcurrentConsumerLimit(this ServiceBusConfigurator configurator, int concurrentConsumerLimit)
-		{
-			var controlBusConfigurator =
-				new PostCreateBusBuilderConfigurator(bus => { bus.MaximumConsumerThreads = concurrentConsumerLimit; });
+    public static class ShutdownConfigurationExtensions
+    {
+        public static void SetShutdownTimeout(this ServiceBusConfigurator configurator, TimeSpan timeout)
+        {
+            var controlBusConfigurator =
+                new PostCreateBusBuilderConfigurator(bus => { bus.ShutdownTimeout = timeout; });
 
-			configurator.AddBusConfigurator(controlBusConfigurator);
-		}
-	}
+            configurator.AddBusConfigurator(controlBusConfigurator);
+        }
+    }
 }

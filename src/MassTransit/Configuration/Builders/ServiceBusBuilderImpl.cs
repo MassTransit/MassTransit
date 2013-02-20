@@ -142,7 +142,7 @@ namespace MassTransit.Builders
                 bus.ConcurrentReceiveThreads = _settings.ConcurrentReceiverLimit;
 
             bus.ReceiveTimeout = _settings.ReceiveTimeout;
-
+            bus.ShutdownTimeout = _settings.ShutdownTimeout;
             ConfigureThreadPool(bus.MaximumConsumerThreads);
         }
 

@@ -32,6 +32,8 @@ namespace MassTransit.Configuration
 
 		TimeSpan ReceiveTimeout { get; }
 
+        TimeSpan ShutdownTimeout { get; }
+
 		int ConcurrentReceiverLimit { get; }
 
 		int ConcurrentConsumerLimit { get; }
