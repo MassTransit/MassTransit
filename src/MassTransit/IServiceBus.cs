@@ -69,6 +69,11 @@ namespace MassTransit
         IEndpointCache EndpointCache { get; }
 
         /// <summary>
+        /// Gets or Sets the timeout used to wait for consumers to finish when shutting the bus down.
+        /// </summary>
+        TimeSpan ShutdownTimeout { get; set; }
+
+        /// <summary>
         /// <para>Publishes a message to all subscribed consumers for the message type as specified
         /// by the generic parameter. The second parameter allows the caller to customize the
         /// outgoing publish context and set things like headers on the message.</para>

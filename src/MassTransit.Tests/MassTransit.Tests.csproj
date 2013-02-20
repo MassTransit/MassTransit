@@ -109,6 +109,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\Diagnostics_Specs.cs" />
+    <Compile Include="Configuration\ShutdownTimeout_Specs.cs" />
     <Compile Include="InterceptingConsumer_Specs.cs" />
     <Compile Include="Diagnostics\Trace_Specs.cs" />
     <Compile Include="Distributor\Consumer_Specs.cs" />

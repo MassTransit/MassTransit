@@ -106,7 +106,7 @@ namespace MassTransit.Threading
 						.HandleOnCallingThread();
 				}))
 			{
-				while (completed.WaitOne(60.Seconds(), true))
+				while (completed.WaitOne(_bus.ShutdownTimeout, true))
 				{
 					if (_log.IsDebugEnabled)
 						_log.DebugFormat("Consumer Pool stopped for {0}", _bus.Endpoint.Address.Uri);

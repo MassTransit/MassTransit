@@ -141,6 +141,7 @@ namespace MassTransit.Builders
                 bus.ConcurrentReceiveThreads = _settings.ConcurrentReceiverLimit;
 
             bus.ReceiveTimeout = _settings.ReceiveTimeout;
+            bus.ShutdownTimeout = _settings.ShutdownTimeout;
         }
 
         void ConfigureMessageInterceptors(IServiceBus bus)
