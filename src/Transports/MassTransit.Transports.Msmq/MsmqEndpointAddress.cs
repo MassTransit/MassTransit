@@ -110,7 +110,9 @@ namespace MassTransit.Transports.Msmq
 
 		private Uri SetUriHostToLocalMachineName()
 		{
-		    string query = String.Format("?tx={0}&recoverable={1}", IsTransactional, IsRecoverable);
+		    string query = String.Format("?tx={0}&recoverable={1}",
+                IsTransactional.ToString().ToLowerInvariant(), 
+                IsRecoverable.ToString().ToLowerInvariant());
 
 			var builder = new UriBuilder(Uri.Scheme, LocalMachineName, Uri.Port, Uri.AbsolutePath, query);
             
