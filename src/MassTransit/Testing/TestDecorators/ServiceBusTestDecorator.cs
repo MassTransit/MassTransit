@@ -69,6 +69,8 @@ namespace MassTransit.Testing.TestDecorators
             get { return _bus.EndpointCache; }
         }
 
+        public TimeSpan ShutdownTimeout { get; set; }
+
         public void Publish<T>(T message)
             where T : class
         {

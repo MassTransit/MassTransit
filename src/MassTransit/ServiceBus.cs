@@ -129,6 +129,8 @@ namespace MassTransit
             }
         }
 
+        public TimeSpan ShutdownTimeout { get; set; }
+
         public UntypedChannel EventChannel
         {
             get { return _eventChannel; }
