@@ -20,7 +20,7 @@ namespace MassTransit.Tests.Saga
 		InitiatedBy<InitiateSimpleSaga>,
 		Orchestrates<CompleteSimpleSaga>,
 		Observes<ObservableSagaMessage,SimpleSaga>,
-		ISaga
+		ISimpleSaga
 	{
 		public SimpleSaga()
 		{
@@ -31,10 +31,10 @@ namespace MassTransit.Tests.Saga
 			CorrelationId = correlationId;
 		}
 
-		public bool Completed { get; private set; }
 		public bool Initiated { get; private set; }
 		public bool Observed { get; private set; }
 		public string Name { get; private set; }
+        public bool IsCompleted { get; private set; }
 
 		public Guid Id
 		{
@@ -63,7 +63,7 @@ namespace MassTransit.Tests.Saga
 
 		public void Consume(CompleteSimpleSaga message)
 		{
-			Completed = true;
+			IsCompleted = true;
 		}
 
 		public Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> GetBindExpression()

@@ -26,7 +26,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		readonly Expression<Func<TSaga, TMessage, bool>> _selector;
 
 		public ObservesSagaSubscriptionConnector(ISagaRepository<TSaga> sagaRepository)
-			: base(sagaRepository, new ExistingOrIgnoreSagaPolicy<TSaga, TMessage>(x => false))
+            : base(sagaRepository, new ExistingOrIgnoreSagaPolicy<TSaga, TMessage>(DefaultSagaPolicySettings<TSaga>.ShouldBeRemovedExpression))
 		{
 			var instance = (Observes<TMessage, TSaga>) FastActivator<TSaga>.Create(Guid.Empty);
 

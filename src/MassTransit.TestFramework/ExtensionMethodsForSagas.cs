@@ -38,26 +38,49 @@ namespace MassTransit.TestFramework
 			return ShouldContainSaga(repository, sagaId, Timeout);
 		}
 
-		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
-			where TSaga : class, ISaga
-		{
-			DateTime giveUpAt = DateTime.Now + timeout;
+        public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
+            where TSaga : class, ISaga
+        {
+            DateTime giveUpAt = DateTime.Now + timeout;
 
-			while (DateTime.Now < giveUpAt)
-			{
-				TSaga saga = repository.Where(x => x.CorrelationId == sagaId).FirstOrDefault();
-				if (saga != null)
-				{
-					return saga;
-				}
+            while (DateTime.Now < giveUpAt)
+            {
+                TSaga saga = repository.Where(x => x.CorrelationId == sagaId).FirstOrDefault();
+                if (saga != null)
+                {
+                    return saga;
+                }
 
-				Thread.Sleep(100);
-			}
+                Thread.Sleep(100);
+            }
 
-			return null;
-		}
+            return null;
+        }
 
-		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter)
+	    public static void ShouldNotContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId)
+	        where TSaga : class, ISaga
+	    {
+            ShouldNotContainSaga(repository,sagaId,Timeout);
+	    }
+
+	    public static void ShouldNotContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
+            where TSaga : class, ISaga
+        {
+            DateTime giveUpAt = DateTime.Now + timeout;
+
+            while (DateTime.Now < giveUpAt)
+            {
+                TSaga saga = repository.Where(x => x.CorrelationId == sagaId).FirstOrDefault();
+                if (saga != null)
+                {
+                    Assert.Fail("The saga " + typeof(TSaga).Name + " still exists in the repository");
+                }
+
+                Thread.Sleep(100);
+            }
+        }
+
+        public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter)
 			where TSaga : class, ISaga
 		{
 			return ShouldContainSaga(repository, filter, Timeout);

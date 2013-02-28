@@ -63,7 +63,7 @@ namespace MassTransit.Tests.Saga
 
 			var saga = _repository.ShouldContainSaga(_sagaId);
 
-			saga.Completed.ShouldBeTrue();
+			saga.IsCompleted.ShouldBeTrue();
 		}
 
 		[Test]
@@ -79,7 +79,19 @@ namespace MassTransit.Tests.Saga
 
 			saga.Observed.ShouldBeTrue();
 		}
-	}
+
+        [Test]
+        public void The_saga_should_be_removed_from_repository_when_completed()
+        {
+            LocalBus.InboundPipeline.Dispatch(new InitiateSimpleSaga(_sagaId));
+            
+            var saga = _repository.ShouldContainSaga(_sagaId);
+
+            LocalBus.InboundPipeline.Dispatch(new CompleteSimpleSaga(_sagaId));
+            
+            _repository.ShouldNotContainSaga(_sagaId);
+        }
+    }
 
 	[TestFixture]
 	public class When_an_existing_saga_receives_an_initiating_message :
