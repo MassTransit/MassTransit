@@ -23,4 +23,12 @@ namespace MassTransit.Saga
     {
 		IServiceBus Bus { set; get; }
     }
+
+    /// <summary>
+    /// Defines a saga that asserts whether it is completed or not.
+    /// </summary>
+    public interface ISimpleSaga : ISaga
+    {
+        bool IsCompleted { get; }
+    }
 }
