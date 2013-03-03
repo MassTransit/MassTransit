@@ -358,6 +358,7 @@ namespace MassTransit
                 _consumerPool = new ThreadPoolConsumerPool(this, _eventChannel, _receiveTimeout)
                     {
                         MaximumConsumerCount = MaximumConsumerThreads,
+                        MaximumReceiverCount = ConcurrentReceiveThreads,
                     };
                 _consumerPool.Start();
             }
