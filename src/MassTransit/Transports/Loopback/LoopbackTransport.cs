@@ -29,7 +29,9 @@ namespace MassTransit.Transports
     public class LoopbackTransport :
         IDuplexTransport
     {
-        readonly object _messageLock = new object();
+        readonly object _messageReadLock = new object();
+        readonly object _messageWriteLock = new object();
+        readonly TimeSpan _deadlockTimeout = new TimeSpan(0, 1, 0);
         bool _disposed;
         AutoResetEvent _messageReady = new AutoResetEvent(false);
         LinkedList<LoopbackMessage> _messages = new LinkedList<LoopbackMessage>();
@@ -44,11 +46,18 @@ namespace MassTransit.Transports
             get
             {
                 int messageCount;
-                lock (_messageLock)
+                if (!Monitor.TryEnter(_messageReadLock, _deadlockTimeout))
+                    throw new Exception("Deadlock detected!");
+
+                try
                 {
                     GuardAgainstDisposed();
 
                     messageCount = _messages.Count;
+                }
+                finally
+                {
+                    Monitor.Exit(_messageReadLock);
                 }
 
                 return messageCount;
@@ -85,11 +94,18 @@ namespace MassTransit.Transports
                 message.ContentType = context.ContentType;
                 message.OriginalMessageId = context.OriginalMessageId;
 
-                lock (_messageLock)
+                if (!Monitor.TryEnter(_messageWriteLock, _deadlockTimeout))
+                    throw new Exception("Deadlock detected!");
+
+                try
                 {
                     GuardAgainstDisposed();
 
                     _messages.AddLast(message);
+                }
+                finally
+                {
+                    Monitor.Exit(_messageWriteLock);
                 }
 
                 Address.LogSent(message.MessageId, context.MessageType);
@@ -120,7 +136,7 @@ namespace MassTransit.Transports
             }
 
             bool monitorExitNeeded = true;
-            if (!Monitor.TryEnter(_messageLock, timeout))
+            if (!Monitor.TryEnter(_messageReadLock, timeout))
                 return;
 
             try
@@ -134,7 +150,17 @@ namespace MassTransit.Transports
                         LoopbackMessage message = iterator.Value;
                         if (message.ExpirationTime.HasValue && message.ExpirationTime <= DateTime.UtcNow)
                         {
-                            _messages.Remove(iterator);
+                            if (!Monitor.TryEnter(_messageWriteLock, _deadlockTimeout))
+                                throw new Exception("Deadlock detected!");
+
+                            try
+                            {
+                                _messages.Remove(iterator);
+                            }
+                            finally
+                            {
+                                Monitor.Exit(_messageWriteLock);
+                            }
                             return;
                         }
 
@@ -149,11 +175,21 @@ namespace MassTransit.Transports
                         if (receive == null)
                             continue;
 
-                        _messages.Remove(iterator);
+                        if (!Monitor.TryEnter(_messageWriteLock, _deadlockTimeout))
+                            throw new Exception("Deadlock detected!");
+
+                        try
+                        {
+                            _messages.Remove(iterator);
+                        }
+                        finally
+                        {
+                            Monitor.Exit(_messageWriteLock);
+                        }
 
                         using (message)
                         {
-                            Monitor.Exit(_messageLock);
+                            Monitor.Exit(_messageReadLock);
                             monitorExitNeeded = false;
 
                             receive(context);
@@ -166,12 +202,13 @@ namespace MassTransit.Transports
                     return;
 
                 // we read to the end and none were accepted, so we are going to wait until we get another in the queue
+                // make any other potential readers wait as well
                 _messageReady.WaitOne(timeout, true);
             }
             finally
             {
                 if (monitorExitNeeded)
-                    Monitor.Exit(_messageLock);
+                    Monitor.Exit(_messageReadLock);
             }
         }
 
@@ -193,11 +230,14 @@ namespace MassTransit.Transports
                 return;
             if (disposing)
             {
-                lock (_messageLock)
+                lock (_messageReadLock)
                 {
-                    _messages.Each(x => x.Dispose());
-                    _messages.Clear();
-                    _messages = null;
+                    lock (_messageWriteLock)
+                    {
+                        _messages.Each(x => x.Dispose());
+                        _messages.Clear();
+                        _messages = null;
+                    }
                 }
 
                 _messageReady.Close();
