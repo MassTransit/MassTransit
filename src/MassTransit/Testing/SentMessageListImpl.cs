@@ -62,7 +62,12 @@ namespace MassTransit.Testing
             return Any(x => typeof(T).IsAssignableFrom(x.MessageType));
 		}
 
-		public bool Any(Func<SentMessage, bool> filter)
+	    public bool Any<T>(Func<SentMessage<T>, bool> filter) where T : class
+	    {
+	        return Any(x => typeof(T).IsAssignableFrom(x.MessageType) && filter((SentMessage<T>)x));
+	    }
+
+	    public bool Any(Func<SentMessage, bool> filter)
 		{
 			bool any;
 			lock (_messages)
