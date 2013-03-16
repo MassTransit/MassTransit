@@ -19,13 +19,18 @@ namespace MassTransit.Serialization
     public class StringDecimalConverter :
         JsonConverter
     {
-        const NumberStyles stringDecimalStyle =
+        const NumberStyles StringDecimalStyle =
             NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign |
-            NumberStyles.AllowTrailingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands;
+            NumberStyles.AllowTrailingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | 
+            NumberStyles.AllowExponent;
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            throw new NotSupportedException("This converter is not writing decimal values, just reading them");
+            string text = Convert.ToString(value);
+            if (string.IsNullOrEmpty(text))
+                text = "";
+
+            writer.WriteValue(text);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
@@ -39,7 +44,7 @@ namespace MassTransit.Serialization
 
             Decimal result;
             if (reader.TokenType == JsonToken.String &&
-                decimal.TryParse((string) reader.Value,stringDecimalStyle,CultureInfo.InvariantCulture, out result))
+                decimal.TryParse((string) reader.Value,StringDecimalStyle,CultureInfo.InvariantCulture, out result))
             {
                 return result;
             }
