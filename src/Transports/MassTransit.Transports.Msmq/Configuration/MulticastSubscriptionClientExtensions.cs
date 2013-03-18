@@ -18,12 +18,19 @@ namespace MassTransit
 
 	public static class MulticastSubscriptionClientExtensions
 	{
-		public static void UseMulticastSubscriptionClient(this ServiceBusConfigurator configurator)
+        [Obsolete("The extension method on UseMsmq should be used instaed")]
+        public static void UseMulticastSubscriptionClient(this ServiceBusConfigurator configurator)
 		{
 			UseMulticastSubscriptionClient(configurator, x => { });
 		}
 
-		public static void UseMulticastSubscriptionClient(this ServiceBusConfigurator configurator,
+        public static void UseMulticastSubscriptionClient(this MsmqConfigurator configurator)
+		{
+			UseMulticastSubscriptionClient(configurator, x => { });
+		}
+
+        [Obsolete("The extension method on UseMsmq should be used instaed")]
+        public static void UseMulticastSubscriptionClient(this ServiceBusConfigurator configurator,
 		                                                  Action<MulticastSubscriptionClientConfigurator> configureCallback)
 		{
 			var clientConfigurator = new MulticastSubscriptionClientConfiguratorImpl();
@@ -31,6 +38,16 @@ namespace MassTransit
 			configureCallback(clientConfigurator);
 
 			configurator.AddSubscriptionObserver(clientConfigurator.Create);
+		}
+
+        public static void UseMulticastSubscriptionClient(this MsmqConfigurator configurator,
+		                                                  Action<MulticastSubscriptionClientConfigurator> configureCallback)
+		{
+			var clientConfigurator = new MulticastSubscriptionClientConfiguratorImpl();
+
+			configureCallback(clientConfigurator);
+
+			configurator.Configurator.AddSubscriptionObserver(clientConfigurator.Create);
 		}
 	}
 }
