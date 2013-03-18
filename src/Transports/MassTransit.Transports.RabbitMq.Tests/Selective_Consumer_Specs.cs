@@ -100,7 +100,15 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void Should_have_observed_each_message_at_least_twice()
         {
-            Assert.AreEqual(TotalMsgs / 2 * 6, _consumer.Observed);
+            for (int i = 0; i < 80; i++)
+            {
+                if (_consumer.Observed == TotalMsgs / 2 * 6)
+                    return;
+
+                Thread.Sleep(100);
+            }
+
+            Assert.Fail("should have observed messages, discarding every other one!");
         }
 
         [Then]

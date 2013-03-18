@@ -28,15 +28,19 @@ namespace MassTransit.Transports.RabbitMq
         ITransportFactory
     {
         readonly Cache<ConnectionFactory, ConnectionFactoryBuilder> _connectionFactoryBuilders;
-        readonly Cache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>> _connections;
+        readonly Cache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>> _inboundConnections;
         readonly ILog _log = Logger.Get<RabbitMqTransportFactory>();
         readonly IMessageNameFormatter _messageNameFormatter;
+        readonly Cache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>> _outboundConnections;
         bool _disposed;
 
         public RabbitMqTransportFactory(
             IEnumerable<KeyValuePair<Uri, ConnectionFactoryBuilder>> connectionFactoryBuilders)
         {
-            _connections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
+            _inboundConnections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
+                new ConnectionFactoryEquality());
+
+            _outboundConnections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
                 new ConnectionFactoryEquality());
 
             Dictionary<ConnectionFactory, ConnectionFactoryBuilder> builders = connectionFactoryBuilders
@@ -52,7 +56,9 @@ namespace MassTransit.Transports.RabbitMq
 
         public RabbitMqTransportFactory()
         {
-            _connections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
+            _inboundConnections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
+                new ConnectionFactoryEquality());
+            _outboundConnections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
                 new ConnectionFactoryEquality());
             _connectionFactoryBuilders =
                 new DictionaryCache<ConnectionFactory, ConnectionFactoryBuilder>(new ConnectionFactoryEquality());
@@ -62,7 +68,6 @@ namespace MassTransit.Transports.RabbitMq
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public string Scheme
@@ -97,7 +102,7 @@ namespace MassTransit.Transports.RabbitMq
 
             EnsureProtocolIsCorrect(address.Uri);
 
-            ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
+            ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(_inboundConnections, address);
 
             return new InboundRabbitMqTransport(address, connectionHandler, settings.PurgeExistingMessages,
                 _messageNameFormatter);
@@ -112,7 +117,7 @@ namespace MassTransit.Transports.RabbitMq
 
             EnsureProtocolIsCorrect(address.Uri);
 
-            ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(address);
+            ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(_outboundConnections, address);
 
             return new OutboundRabbitMqTransport(address, connectionHandler, false);
         }
@@ -126,7 +131,7 @@ namespace MassTransit.Transports.RabbitMq
 
             EnsureProtocolIsCorrect(address.Uri);
 
-            ConnectionHandler<RabbitMqConnection> connection = GetConnection(address);
+            ConnectionHandler<RabbitMqConnection> connection = GetConnection(_outboundConnections, address);
 
             return new OutboundRabbitMqTransport(address, connection, true);
         }
@@ -147,22 +152,27 @@ namespace MassTransit.Transports.RabbitMq
             if (_disposed)
                 return;
             if (disposing)
-                _connections.Each(x => x.Dispose());
-            _connections.Clear();
+            {
+                _inboundConnections.Each(x => x.Dispose());
+                _outboundConnections.Each(x => x.Dispose());
+            }
+            _inboundConnections.Clear();
+            _outboundConnections.Clear();
 
             _disposed = true;
         }
 
         public int ConnectionCount()
         {
-            return _connections.Count();
+            return _inboundConnections.Count() + _outboundConnections.Count;
         }
 
-        ConnectionHandler<RabbitMqConnection> GetConnection(IRabbitMqEndpointAddress address)
+        ConnectionHandler<RabbitMqConnection> GetConnection(
+            Cache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>> cache, IRabbitMqEndpointAddress address)
         {
             ConnectionFactory factory = SanitizeConnectionFactory(address);
 
-            return _connections.Get(factory, _ =>
+            return cache.Get(factory, _ =>
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Creating RabbitMQ connection: {0}", address.Uri);
