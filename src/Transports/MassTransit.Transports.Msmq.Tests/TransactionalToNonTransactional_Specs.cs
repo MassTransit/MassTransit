@@ -50,18 +50,16 @@ namespace MassTransit.Transports.Msmq.Tests
         {
             using (IServiceBus transactionalBus = ServiceBusFactory.New(x =>
                 {
-                    x.UseMsmq();
+                    x.UseMsmq(m => m.UseMulticastSubscriptionClient());
                     x.ReceiveFrom(_transactionalUri);
-                    x.UseMulticastSubscriptionClient();
                     x.SetCreateMissingQueues(true);
                     x.SetCreateTransactionalQueues(true);
                 }))
             {
                 using (IServiceBus nonTransactionalBus = ServiceBusFactory.New(x =>
                     {
-                        x.UseMsmq();
+                        x.UseMsmq(m => m.UseMulticastSubscriptionClient());
                         x.ReceiveFrom(_nonTransactionalUri);
-                        x.UseMulticastSubscriptionClient();
                         x.SetCreateMissingQueues(true);
                         x.SetCreateTransactionalQueues(false);
                     }))

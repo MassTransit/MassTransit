@@ -126,9 +126,11 @@ namespace MassTransit.Transports.Msmq.Tests
         {
             IServiceBus bus = ServiceBusFactory.New(sbc =>
                 {
-                    sbc.UseMsmq();
-                    sbc.VerifyMsmqConfiguration();
-                    sbc.UseMulticastSubscriptionClient();
+                    sbc.UseMsmq(x =>
+                    {
+                        x.UseMulticastSubscriptionClient();
+                        x.VerifyMsmqConfiguration();
+                    });
                     sbc.SetCreateTransactionalQueues(true);
                     sbc.ReceiveFrom("msmq://localhost/" + name);
                     sbc.UseJsonSerializer();
@@ -265,9 +267,11 @@ namespace MassTransit.Transports.Msmq.Tests
         {
             IServiceBus bus = ServiceBusFactory.New(sbc =>
                 {
-                    sbc.UseMsmq();
-                    sbc.VerifyMsmqConfiguration();
-                    sbc.UseMulticastSubscriptionClient();
+                    sbc.UseMsmq(x =>
+                        {
+                            x.UseMulticastSubscriptionClient();
+                            x.VerifyMsmqConfiguration();
+                        });
                     sbc.SetCreateTransactionalQueues(false);
                     sbc.ReceiveFrom("msmq://localhost/" + name);
                     sbc.UseJsonSerializer();

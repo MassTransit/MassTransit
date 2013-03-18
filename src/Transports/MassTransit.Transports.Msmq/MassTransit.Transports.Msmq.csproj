@@ -75,9 +75,12 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Configuration\MsmqConfigurator.cs" />
+    <Compile Include="Configuration\MsmqConfiguratorImpl.cs" />
     <Compile Include="Configuration\MulticastSubscriptionClientConfigurator.cs" />
     <Compile Include="Configuration\MulticastSubscriptionClientConfiguratorImpl.cs" />
     <Compile Include="Configuration\MulticastSubscriptionClientExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionClientConfiguratorExtensions.cs" />
     <Compile Include="IEndpointManagement.cs" />
     <Compile Include="IMsmqEndpointAddress.cs" />
     <Compile Include="InboundMsmqTransport.cs" />

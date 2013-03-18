@@ -47,14 +47,14 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
 			configurator.ReceiveFrom(LocalEndpointUri);
-			configurator.UseMulticastSubscriptionClient();
+			configurator.UseMsmq(x => x.UseMulticastSubscriptionClient());
 		}
 
 		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
 		{
 			configurator.ReceiveFrom(RemoteEndpointUri);
-			configurator.UseMulticastSubscriptionClient();
-		}
+            configurator.UseMsmq(x => x.UseMulticastSubscriptionClient());
+        }
 
 		protected override void TeardownContext()
 		{
