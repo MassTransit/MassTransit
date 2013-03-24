@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -46,11 +46,8 @@ namespace Starbucks.Barista
                     {
                         return ServiceBusFactory.New(sbc =>
                             {
-                                sbc.ReceiveFrom("msmq://localhost/starbucks_barista");
-                                sbc.UseMsmq();
-                                sbc.UseMulticastSubscriptionClient();
-
-                                sbc.UseControlBus();
+                                sbc.ReceiveFrom("rabbitmq://localhost/starbucks_barista");
+                                sbc.UseRabbitMq();
 
                                 sbc.Subscribe(subs => { subs.LoadFrom(container); });
                             });
@@ -60,7 +57,7 @@ namespace Starbucks.Barista
                 {
                     c.SetServiceName("StarbucksBarista");
                     c.SetDisplayName("Starbucks Barista");
-                    c.SetDescription("a Mass Transit sample service for making orders of coffee.");
+                    c.SetDescription("a MassTransit sample service for making orders of coffee.");
 
                     c.DependsOnMsmq();
                     c.RunAsLocalService();

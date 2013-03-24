@@ -1,4 +1,16 @@
-﻿namespace Starbucks.Customer
+﻿// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace Starbucks.Customer
 {
 	using System;
 	using System.ComponentModel;
@@ -12,28 +24,17 @@
 		Consumes<PaymentDueMessage>.For<Guid>,
 		Consumes<DrinkReadyMessage>.For<Guid>
 	{
-		private IServiceBus _bus;
-		private Guid _transactionId;
 		private UnsubscribeAction _unsubscribeToken;
 
 		public OrderDrinkForm(IServiceBus bus)
 		{
 			InitializeComponent();
 
-		    _bus = bus;
+		    Bus = bus;
 		}
 
-		private IServiceBus Bus
-		{
-			get
-			{
-                //todo bob
-//				if (_bus == null)
-//					_bus = ServiceLocator.Current.GetInstance<IServiceBus>();
-
-				return _bus;
-			}
-		}
+		private IServiceBus Bus { get; set; }
+		public Guid CorrelationId { get; private set; }
 
 		public void Consume(DrinkReadyMessage message)
 		{
@@ -41,11 +42,6 @@
 
 			_unsubscribeToken();
 			_unsubscribeToken = null;
-		}
-
-		public Guid CorrelationId
-		{
-			get { return _transactionId; }
 		}
 
 		public void Consume(PaymentDueMessage message)
@@ -78,7 +74,7 @@
 			string size = comboBox2.Text;
 			string name = txtName.Text;
 
-			_transactionId = CombGuid.Generate();
+			CorrelationId = CombGuid.Generate();
 
 			if (_unsubscribeToken != null)
 				_unsubscribeToken();
@@ -86,7 +82,7 @@
 
 			var message = new NewOrderMessage
 				{
-					CorrelationId = _transactionId,
+					CorrelationId = CorrelationId,
 					Item = drink,
 					Name = name,
 					Size = size,
@@ -102,10 +98,10 @@
 				_unsubscribeToken();
 				_unsubscribeToken = null;
 			}
-			if (_bus != null)
+			if (Bus != null)
 			{
-				_bus.Dispose();
-				_bus = null;
+				Bus.Dispose();
+				Bus = null;
 			}
 
 			base.OnClosing(e);
