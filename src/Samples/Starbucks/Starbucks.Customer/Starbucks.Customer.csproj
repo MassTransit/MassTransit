@@ -70,7 +70,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
-   </Reference>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
@@ -126,9 +126,9 @@
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj">
-      <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
-      <Name>MassTransit.Transports.Msmq</Name>
+    <ProjectReference Include="..\..\..\Transports\MassTransit.Transports.RabbitMq\MassTransit.Transports.RabbitMq.csproj">
+      <Project>{6c7149d7-4d97-45df-a05d-61ec7374491d}</Project>
+      <Name>MassTransit.Transports.RabbitMq</Name>
     </ProjectReference>
     <ProjectReference Include="..\Starbucks.Messages\Starbucks.Messages.csproj">
       <Project>{D9486A62-4F12-4018-802B-517DD11DE66A}</Project>
