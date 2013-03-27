@@ -44,7 +44,8 @@ namespace Starbucks.Customer
                 {
                     cfg.For<IServiceBus>().Use(context => ServiceBusFactory.New(sbc =>
                         {
-                            sbc.ReceiveFrom("rabbitmq://localhost/starbucks_customer");
+							// The queue name is randomized so that we can launch multiple customer instances at once
+                            sbc.ReceiveFrom("rabbitmq://localhost/starbucks_customer_" + Guid.NewGuid().ToString());
                             sbc.UseRabbitMq();
 
                             sbc.Subscribe(subs => { subs.LoadFrom(container); });
