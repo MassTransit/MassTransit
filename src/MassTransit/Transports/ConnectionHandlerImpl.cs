@@ -84,7 +84,13 @@ namespace MassTransit.Transports
 
         public void Use(Action<T> callback)
         {
-            _policyChain.Execute(() => callback(_connection));
+            _policyChain.Execute(() =>
+                {
+                    if (!_connected)
+                        throw new InvalidConnectionException();
+
+                    callback(_connection);
+                });
         }
 
 

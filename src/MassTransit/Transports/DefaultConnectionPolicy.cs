@@ -23,12 +23,12 @@ namespace MassTransit.Transports
         readonly ConnectionHandler _connectionHandler;
         readonly TimeSpan _reconnectDelay;
         readonly ILog _log = Logger.Get(typeof(DefaultConnectionPolicy));
-        readonly ReaderWriterLockSlim _connectionlLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+        readonly ReaderWriterLockSlim _connectionLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
         public DefaultConnectionPolicy(ConnectionHandler connectionHandler)
         {
             _connectionHandler = connectionHandler;
-            _reconnectDelay = 1.Seconds();
+            _reconnectDelay = 10.Seconds();
         }
 
         public void Execute(Action callback)
@@ -38,12 +38,12 @@ namespace MassTransit.Transports
                 try
                 {
                     // wait here so we can be sure that there is not a reconnect in progress
-                    _connectionlLock.EnterReadLock();
+                    _connectionLock.EnterReadLock();
                     callback();
                 }
                 finally
                 {
-                    _connectionlLock.ExitReadLock();
+                    _connectionLock.ExitReadLock();
                 }
             }
             catch (InvalidConnectionException ex)
@@ -60,19 +60,19 @@ namespace MassTransit.Transports
                 try
                 {
                     // wait here so we can be sure that there is not a reconnect in progress
-                    _connectionlLock.EnterReadLock();
+                    _connectionLock.EnterReadLock();
                     callback();
                 }
                 finally
                 {
-                    _connectionlLock.ExitReadLock();
+                    _connectionLock.ExitReadLock();
                 }
             }
         }
 
         void Reconnect()
         {
-            if (_connectionlLock.TryEnterWriteLock((int)_reconnectDelay.TotalMilliseconds/2))
+            if (_connectionLock.TryEnterWriteLock((int)_reconnectDelay.TotalMilliseconds/2))
             {
                 try
                 {
@@ -98,14 +98,14 @@ namespace MassTransit.Transports
                 }
                 finally
                 {
-                    _connectionlLock.ExitWriteLock();
+                    _connectionLock.ExitWriteLock();
                 }
             }
             else
             {
                 try
                 {
-                    _connectionlLock.EnterReadLock();
+                    _connectionLock.EnterReadLock();
                     if (_log.IsDebugEnabled)
                     {
                         _log.Debug("Waiting for reconnect in another thread.");
@@ -113,7 +113,7 @@ namespace MassTransit.Transports
                 }
                 finally
                 {
-                    _connectionlLock.ExitReadLock();
+                    _connectionLock.ExitReadLock();
                 }
             }
         }

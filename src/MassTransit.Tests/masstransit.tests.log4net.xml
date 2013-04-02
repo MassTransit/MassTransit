@@ -1,17 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <log4net>
   <root>
-    <level value="ALL" />
+    <level value="ERROR" />
     <appender-ref ref="LogFileAppender" />
     <appender-ref ref="console" />
   </root>
 
   <logger name="MassTransit">
     <level value="WARN" />
-  </logger>
-
-  <logger name="MassTransit.Subscriptions.Coordinator.InMemorySubscriptionStorage">
-    <level value="DEBUG" />
   </logger>
 
 <!--	<logger name="MassTransit.Subscriptions">-->

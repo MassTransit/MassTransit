@@ -92,6 +92,7 @@
     <Compile Include="Assumptions\RoutingAssumptions.cs" />
     <Compile Include="Assumptions\TransactionAssumptions.cs" />
     <Compile Include="Bytes_Specs.cs" />
+    <Compile Include="ConnectingFailure_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Given_two_rabbitmq_buses_walk_into_a_bar.cs" />
     <Compile Include="Request_Specs.cs" />
