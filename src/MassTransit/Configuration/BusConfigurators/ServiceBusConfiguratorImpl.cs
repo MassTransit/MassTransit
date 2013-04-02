@@ -17,7 +17,9 @@ namespace MassTransit.BusConfigurators
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
+    using System.Reflection;
     using Builders;
     using Configuration;
     using Configurators;
@@ -145,9 +147,7 @@ namespace MassTransit.BusConfigurators
 
         public IServiceBus CreateServiceBus()
         {
-            _log.InfoFormat("MassTransit v{0}, .NET Framework v{1}",
-                typeof (ServiceBusFactory).Assembly.GetName().Version,
-                Environment.Version);
+            LogAssemblyVersionInformation();
 
             IEndpointCache endpointCache = CreateEndpointCache();
             _settings.EndpointCache = endpointCache;
@@ -166,6 +166,24 @@ namespace MassTransit.BusConfigurators
             IServiceBus bus = builder.Build();
 
             return bus;
+        }
+
+        static void LogAssemblyVersionInformation()
+        {
+            if (_log.IsInfoEnabled)
+            {
+                var assembly = typeof(ServiceBusFactory).Assembly;
+
+                var assemblyVersion = assembly.GetName().Version;
+                FileVersionInfo assemblyFileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+
+                string assemblyFileVersion = assemblyFileVersionInfo.FileVersion;
+
+                _log.InfoFormat("MassTransit v{0}/v{1}, .NET Framework v{2}",
+                    assemblyFileVersion,
+                    assemblyVersion,
+                    Environment.Version);
+            }
         }
 
         /// <summary>
