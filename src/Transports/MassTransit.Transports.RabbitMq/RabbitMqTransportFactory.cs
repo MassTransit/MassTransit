@@ -48,7 +48,7 @@ namespace MassTransit.Transports.RabbitMq
                                  RabbitMqEndpointAddress.Parse(x.Key).ConnectionFactory, x.Value))
                 .ToDictionary(x => x.Key, x => x.Value);
 
-            _connectionFactoryBuilders = new DictionaryCache<ConnectionFactory, ConnectionFactoryBuilder>(builders,
+            _connectionFactoryBuilders = new ConcurrentCache<ConnectionFactory, ConnectionFactoryBuilder>(builders,
                 new ConnectionFactoryEquality());
 
             _messageNameFormatter = new RabbitMqMessageNameFormatter();
@@ -61,7 +61,7 @@ namespace MassTransit.Transports.RabbitMq
             _outboundConnections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
                 new ConnectionFactoryEquality());
             _connectionFactoryBuilders =
-                new DictionaryCache<ConnectionFactory, ConnectionFactoryBuilder>(new ConnectionFactoryEquality());
+                new ConcurrentCache<ConnectionFactory, ConnectionFactoryBuilder>(new ConnectionFactoryEquality());
             _messageNameFormatter = new RabbitMqMessageNameFormatter();
         }
 
