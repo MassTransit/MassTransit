@@ -155,11 +155,11 @@ namespace MassTransit.Transports.RabbitMq
                 if (address.UserInfo.Contains(":"))
                 {
                     string[] parts = address.UserInfo.Split(':');
-                    connectionFactory.UserName = parts[0];
-                    connectionFactory.Password = parts[1];
+                    connectionFactory.UserName = Uri.UnescapeDataString(parts[0]);
+                    connectionFactory.Password = Uri.UnescapeDataString(parts[1]);
                 }
                 else
-                    connectionFactory.UserName = address.UserInfo;
+                    connectionFactory.UserName = Uri.UnescapeDataString(address.UserInfo);
             }
 
             string name = address.AbsolutePath.Substring(1);
