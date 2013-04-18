@@ -113,6 +113,7 @@
     <Compile Include="CreateTransactional_Specs.cs" />
     <Compile Include="Distributor_Specs.cs" />
     <Compile Include="DoubleHandler_Specs.cs" />
+    <Compile Include="FaultTransaction_Specs.cs" />
     <Compile Include="Installer_Specs.cs" />
     <Compile Include="MessageQueue_Extensions.cs" />
     <Compile Include="Messages\VariableMessage.cs" />

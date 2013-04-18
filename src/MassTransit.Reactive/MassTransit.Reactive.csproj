@@ -56,9 +56,17 @@
     <Reference Include="System" />
     <Reference Include="System.Core">
     </Reference>
-    <Reference Include="System.Reactive" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="System.Reactive.Core" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rx\Net4\System.Reactive.dll</HintPath>
+      <HintPath>..\..\lib\Rx\Net4\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Rx\Net4\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Rx\Net4\System.Reactive.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <SpecificVersion>False</SpecificVersion>

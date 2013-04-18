@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Msmq
 {
     using System;
+    using System.Messaging;
 
     public interface IMsmqEndpointAddress :
 		IEndpointAddress
@@ -41,5 +42,10 @@ namespace MassTransit.Transports.Msmq
 		/// The format name used to send messages (may be different if multicast MSMQ is used)
 		/// </summary>
 		string OutboundFormatName { get; }
+
+        /// <summary>
+        /// For non-transactional queues only, determines how to set <see cref="Message.Recoverable"/> property on messages destined for this queue.
+        /// </summary>
+        bool IsRecoverable { get; }
 	}
 }

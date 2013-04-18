@@ -58,14 +58,13 @@ namespace MassTransit.Transports.Msmq
 
             return uri.Host;
         }
-
+      
         public static IMsmqEndpointAddress GetQueueAddress(this Uri uri)
         {
             string hostName = GetMsmqHostName(uri);
 
             return new MsmqEndpointAddress(new Uri(new UriBuilder("msmq", hostName).Uri, uri.AbsolutePath));
         }	
-
 
         public static string GetOutboundFormatName(this Uri uri)
         {

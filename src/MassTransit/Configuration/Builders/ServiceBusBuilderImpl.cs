@@ -18,6 +18,7 @@ namespace MassTransit.Builders
     using BusServiceConfigurators;
     using Configuration;
     using Exceptions;
+    using Logging;
     using Magnum;
     using Magnum.Extensions;
     using Pipeline.Configuration;
@@ -26,6 +27,7 @@ namespace MassTransit.Builders
     public class ServiceBusBuilderImpl :
         ServiceBusBuilder
     {
+        static readonly ILog _log = Logger.Get<ServiceBusBuilderImpl>();
         readonly IList<BusServiceConfigurator> _busServiceConfigurators;
         readonly IList<Action<ServiceBus>> _postCreateActions;
         readonly BusSettings _settings;
@@ -51,22 +53,39 @@ namespace MassTransit.Builders
         {
             ServiceBus bus = CreateServiceBus(_settings.EndpointCache);
 
-            ConfigureBusSettings(bus);
-
-            RunPostCreateActions(bus);
-
-            ConfigureMessageInterceptors(bus);
-
-            RunBusServiceConfigurators(bus);
-
-            if (_settings.AutoStart)
+            try
             {
-                bus.Start();
-            }
+                ConfigureBusSettings(bus);
 
-            return bus;
+                RunPostCreateActions(bus);
+
+                ConfigureMessageInterceptors(bus);
+
+                RunBusServiceConfigurators(bus);
+
+                if (_settings.AutoStart)
+                {
+                    bus.Start();
+                }
+
+                return bus;
+            }
+            catch
+            {
+                try
+                {
+                    bus.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    _log.Error("Exception disposing of failed bus instance", ex);
+                }
+
+                throw;
+            }
         }
 
+        
         public void UseControlBus(IControlBus controlBus)
         {
             _postCreateActions.Add(bus => bus.ControlBus = controlBus);
@@ -128,9 +147,7 @@ namespace MassTransit.Builders
         {
             IEndpoint endpoint = endpointCache.GetEndpoint(_settings.InputAddress);
 
-            var serviceBus = new ServiceBus(endpoint, endpointCache);
-
-            return serviceBus;
+            return new ServiceBus(endpoint, endpointCache);
         }
 
         void ConfigureBusSettings(ServiceBus bus)
@@ -142,6 +159,7 @@ namespace MassTransit.Builders
                 bus.ConcurrentReceiveThreads = _settings.ConcurrentReceiverLimit;
 
             bus.ReceiveTimeout = _settings.ReceiveTimeout;
+            bus.ShutdownTimeout = _settings.ShutdownTimeout;
             bus.ShutdownTimeout = _settings.ShutdownTimeout;
             ConfigureThreadPool(bus.MaximumConsumerThreads);
         }

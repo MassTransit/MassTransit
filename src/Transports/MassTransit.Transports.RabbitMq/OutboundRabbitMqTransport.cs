@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.Collections;
+    using System.Globalization;
     using System.IO;
     using Magnum;
     using RabbitMQ.Client;
@@ -60,7 +61,7 @@ namespace MassTransit.Transports.RabbitMq
                                 (value.Kind == DateTimeKind.Utc
                                      ? value - SystemUtil.UtcNow
                                      : value - SystemUtil.Now).
-                                    TotalMilliseconds.ToString();
+                                    TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
                         }
 
                         using (var body = new MemoryStream())

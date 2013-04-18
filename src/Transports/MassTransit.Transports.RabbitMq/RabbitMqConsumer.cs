@@ -17,6 +17,7 @@ namespace MassTransit.Transports.RabbitMq
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
 
+
     public class RabbitMqConsumer :
         ConnectionBinding<RabbitMqConnection>
     {
@@ -34,62 +35,92 @@ namespace MassTransit.Transports.RabbitMq
 
         public void Bind(RabbitMqConnection connection)
         {
-            _channel = connection.Connection.CreateModel();
-
-            BindQueue();
-
-            PurgeIfRequested();
-
-            _channel.BasicQos(0, 10, false);
-
-            _consumer = new QueueingBasicConsumer(_channel);
-            _channel.BasicConsume(_address.Name, false, _consumer);
-        }
-
-        void PurgeIfRequested()
-        {
-            if (_purgeOnBind)
+            IModel channel = null;
+            try
             {
-                _channel.QueuePurge(_address.Name);
-                _purgeOnBind = false;
-            }
-        }
+                channel = connection.Connection.CreateModel();
 
-        void BindQueue()
-        {
-            string queue = _channel.QueueDeclare(_address.Name, true, false, false, _address.QueueArguments());
-            _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, true);
-            _channel.QueueBind(queue, _address.Name, "");
+                BindQueue(channel);
+
+                PurgeIfRequested(channel);
+
+                channel.BasicQos(0, 10, false);
+
+                var consumer = new QueueingBasicConsumer(channel);
+                channel.BasicConsume(_address.Name, false, consumer);
+
+                _channel = channel;
+                _consumer = consumer;
+            }
+            catch (Exception ex)
+            {
+                if (channel != null)
+                {
+                    try
+                    {
+                        channel.Close(500, ex.Message);
+                    }
+                    catch
+                    {
+                    }
+                    channel.Dispose();
+                }
+
+                throw new InvalidConnectionException(_address.Uri, "Invalid connection to host", ex);
+            }
         }
 
         public void Unbind(RabbitMqConnection connection)
         {
-            try
+            if (_channel != null)
             {
-                _channel.Close(200, "unbind consumer");
-                _consumer = null;
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Failed to close channel: " + _address, ex);
-            }
+                try
+                {
+                    _channel.Close(200, "unbind consumer");
 
-            try
-            {
-                _channel.Dispose();
+                    _consumer = null;
+                }
+                catch (Exception ex)
+                {
+                    _log.Error("Failed to close channel: " + _address, ex);
+                }
+
+                try
+                {
+                    _channel.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    _log.Error("Failed to dispose channel: " + _address, ex);
+                }
+                finally
+                {
+                    _channel = null;
+                }
             }
-            catch (Exception ex)
+        }
+
+        void PurgeIfRequested(IModel channel)
+        {
+            if (_purgeOnBind)
             {
-                _log.Error("Failed to dispose channel: " + _address, ex);
+                channel.QueuePurge(_address.Name);
+                _purgeOnBind = false;
             }
-            finally
-            {
-                _channel = null;
-            }
+        }
+
+        void BindQueue(IModel channel)
+        {
+            string queue = channel.QueueDeclare(_address.Name, true, false, false, _address.QueueArguments());
+            channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, true);
+            channel.QueueBind(queue, _address.Name, "");
         }
 
         public BasicDeliverEventArgs Get(TimeSpan timeout)
         {
+            if (_consumer == null)
+                throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
+
             object result;
             _consumer.Queue.Dequeue((int)timeout.TotalMilliseconds, out result);
 

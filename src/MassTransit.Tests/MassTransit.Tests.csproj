@@ -190,6 +190,8 @@
     <Compile Include="PublishRequest_Specs.cs" />
     <Compile Include="Saga\CustomerRegistrationSaga.cs" />
     <Compile Include="Saga\CustomerRegistrationSagaTest.cs" />
+    <Compile Include="Saga\InjectingSampleSaga.cs" />
+    <Compile Include="Saga\Injecting_Specs.cs" />
     <Compile Include="Saga\StateMachine\CombineSaga.cs" />
     <Compile Include="Saga\StateMachine\CombineSaga_Specs.cs" />
     <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
@@ -200,6 +202,7 @@
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="Services\HealthMonitoring\HealthClient_Integration_Specs.cs" />
     <Compile Include="Services\Timeout\TimeoutService_Specs.cs" />
+    <Compile Include="SmallNumber_Specs.cs" />
     <Compile Include="Subscriptions\Consumer_Specs.cs" />
     <Compile Include="Subscriptions\DynamicAndStaticSubscriptions_Specs.cs" />
     <Compile Include="Subscriptions\NewSubscriptionSystem_Specs.cs" />

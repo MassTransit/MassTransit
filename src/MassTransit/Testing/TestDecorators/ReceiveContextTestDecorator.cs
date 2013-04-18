@@ -250,9 +250,9 @@ namespace MassTransit.Testing.TestDecorators
             _context.SetMessageTypeConverter(messageTypeConverter);
         }
 
-        public void NotifyFault(Action<IServiceBus> faultCallback)
+        public void NotifyFault(Action faultAction)
         {
-            _context.NotifyFault(faultCallback);
+            _context.NotifyFault(faultAction);
         }
 
         public void NotifySend(ISendContext context, IEndpointAddress address)
@@ -274,6 +274,11 @@ namespace MassTransit.Testing.TestDecorators
             where T : class
         {
             _context.NotifyConsume(consumeContext, consumerType, correlationId);
+        }
+
+        public void ExecuteFaultActions(IEnumerable<Action> faultActions)
+        {
+            _context.ExecuteFaultActions(faultActions);
         }
 
         public IEnumerable<ISent> Sent
@@ -301,9 +306,9 @@ namespace MassTransit.Testing.TestDecorators
             get { return _context.OriginalMessageId; }
         }
 
-        public void PublishPendingFaults()
+        public IEnumerable<Action> GetFaultActions()
         {
-            _context.PublishPendingFaults();
+            return _context.GetFaultActions();
         }
     }
 }

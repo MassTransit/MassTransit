@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using RabbitMQ.Client;
@@ -38,11 +39,35 @@ namespace MassTransit.Transports.RabbitMq
         public void Bind(RabbitMqConnection connection)
         {
             lock (_channelLock)
-                _channel = connection.Connection.CreateModel();
+            {
+                IModel channel = null;
+                try
+                {
+                    channel = connection.Connection.CreateModel();
 
-            DeclareAndBindQueue();
+                    DeclareAndBindQueue(channel);
 
-            RebindExchanges();
+                    RebindExchanges(channel);
+
+                    _channel = channel;
+                }
+                catch (Exception ex)
+                {
+                    if (channel != null)
+                    {
+                        try
+                        {
+                            channel.Close(500, ex.Message);
+                        }
+                        catch
+                        {
+                        }
+                        channel.Dispose();
+                    }
+
+                    throw new InvalidConnectionException(_address.Uri, "Invalid connection to host", ex);
+                }
+            }
         }
 
         public void Unbind(RabbitMqConnection connection)
@@ -73,21 +98,19 @@ namespace MassTransit.Transports.RabbitMq
                 _exchangeBindings.Add(binding);
         }
 
-        void DeclareAndBindQueue()
+        void DeclareAndBindQueue(IModel channel)
         {
-            lock (_channelLock)
-                _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, true);
+            channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, true);
 
             if (_bindToQueue)
             {
-                string queue = _channel.QueueDeclare(_address.Name, true, false, false, _address.QueueArguments());
+                string queue = channel.QueueDeclare(_address.Name, true, false, false, _address.QueueArguments());
 
-                lock (_channelLock)
-                    _channel.QueueBind(queue, _address.Name, "");
+                channel.QueueBind(queue, _address.Name, "");
             }
         }
 
-        void RebindExchanges()
+        void RebindExchanges(IModel channel)
         {
             lock (_exchangeBindings)
             {
@@ -98,14 +121,12 @@ namespace MassTransit.Transports.RabbitMq
 
                 foreach (string exchange in exchanges)
                 {
-                    lock (_channelLock)
-                        _channel.ExchangeDeclare(exchange, ExchangeType.Fanout, true, false, null);
+                    channel.ExchangeDeclare(exchange, ExchangeType.Fanout, true, false, null);
                 }
 
                 foreach (ExchangeBinding exchange in _exchangeBindings)
                 {
-                    lock (_channelLock)
-                        _channel.ExchangeBind(exchange.Destination, exchange.Source, "");
+                    channel.ExchangeBind(exchange.Destination, exchange.Source, "");
                 }
             }
         }
@@ -126,7 +147,7 @@ namespace MassTransit.Transports.RabbitMq
             lock (_channelLock)
             {
                 if (_channel == null)
-                    throw new InvalidConnectionException(_address.Uri, "Channel should not be null");
+                    throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
 
                 _channel.BasicPublish(exchangeName, "", properties, body);
             }

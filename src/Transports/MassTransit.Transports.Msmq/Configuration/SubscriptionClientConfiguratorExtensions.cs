@@ -10,13 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Transports.Msmq.Configuration
 {
     using System;
-    using BusConfigurators;
+    using Exceptions;
     using Services.Subscriptions.Configuration;
     using SubscriptionConfigurators;
-    using Util;
+
 
     public static class SubscriptionClientConfiguratorExtensions
     {
@@ -27,8 +27,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="subscriptionServiceUri"></param>
-        [Obsolete("The extension method on UseMsmq should be used instaed")]
-        public static void UseSubscriptionService(this ServiceBusConfigurator configurator,
+        public static void UseSubscriptionService(this MsmqConfigurator configurator,
             string subscriptionServiceUri)
         {
             configurator.UseSubscriptionService(x => x.SetSubscriptionServiceEndpoint(subscriptionServiceUri.ToUri()));
@@ -39,8 +38,7 @@ namespace MassTransit
         /// from a single publisher.  The address of the Subscription Service is used by both 
         /// publishers and subscribers, while routing is carried out by MassTransit.RuntimeServices
         /// </summary>
-        [Obsolete("The extension method on UseMsmq should be used instaed")]
-        public static void UseSubscriptionService(this ServiceBusConfigurator configurator, Uri subscriptionServiceUri)
+        public static void UseSubscriptionService(this MsmqConfigurator configurator, Uri subscriptionServiceUri)
         {
             configurator.UseSubscriptionService(x => x.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
         }
@@ -50,8 +48,7 @@ namespace MassTransit
         /// from a single publisher.  The address of the Subscription Service is used by both 
         /// publishers and subscribers, while routing is carried out by MassTransit.RuntimeServices
         /// </summary>
-        [Obsolete("The extension method on UseMsmq should be used instaed")]
-        public static void UseSubscriptionService(this ServiceBusConfigurator configurator,
+        public static void UseSubscriptionService(this MsmqConfigurator configurator,
             Action<SubscriptionClientConfigurator> configureCallback)
         {
             var clientConfigurator = new SubscriptionClientConfiguratorImpl();
@@ -60,9 +57,21 @@ namespace MassTransit
 
             var routerBuilderConfigurator = new SubscriptionRouterBuilderConfiguratorImpl(x => x.SetNetwork(null));
 
-            configurator.AddSubscriptionRouterConfigurator(routerBuilderConfigurator);
+            configurator.Configurator.AddSubscriptionRouterConfigurator(routerBuilderConfigurator);
 
-            configurator.AddSubscriptionObserver(clientConfigurator.Create);
+            configurator.Configurator.AddSubscriptionObserver(clientConfigurator.Create);
+        }
+
+        internal static Uri ToUri(this string uriString)
+        {
+            try
+            {
+                return new Uri(uriString);
+            }
+            catch (UriFormatException ex)
+            {
+                throw new ConfigurationException("The URI specified is invalid: " + uriString, ex);
+            }
         }
     }
 }

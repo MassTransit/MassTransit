@@ -20,6 +20,8 @@ namespace MassTransit.Transports.Msmq
         ITransportFactory
     {
         IMessageNameFormatter _messageNameFormatter;
+        
+        bool defaultRecoverable = true;
 
         public MsmqTransportFactory()
         {
@@ -35,7 +37,7 @@ namespace MassTransit.Transports.Msmq
         {
             try
             {
-                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional);
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional, defaultRecoverable);
                 TransportSettings msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IInboundTransport inboundTransport = BuildInbound(settings);
@@ -53,7 +55,7 @@ namespace MassTransit.Transports.Msmq
         {
             try
             {
-                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional);
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional, defaultRecoverable);
                 TransportSettings msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
@@ -84,7 +86,7 @@ namespace MassTransit.Transports.Msmq
         {
             try
             {
-                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional);
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional, defaultRecoverable);
                 TransportSettings msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();

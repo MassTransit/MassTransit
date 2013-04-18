@@ -72,17 +72,17 @@ namespace MassTransit.Testing
 		public bool Any<T>()
 			where T : class
 		{
-			return Any<T>(x => true);
+			return Any<T>((c,m) => true);
 		}
 
-		public bool Any<T>(Func<T, bool> filter)
+		public bool Any<T>(Func<ReceivedMessage, T, bool> filter)
 			where T : class
 		{
 			bool any;
 			IConsumeContext<T> consumeContext;
 
 			Func<ReceivedMessage, bool> predicate =
-				x => x.Context.TryGetContext(out consumeContext) && filter(consumeContext.Message);
+				x => x.Context.TryGetContext(out consumeContext) && filter(x, consumeContext.Message);
 
 			lock (_messages)
 				any = _messages.Any(predicate);

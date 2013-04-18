@@ -5,7 +5,7 @@
 	</configSections>
 	<log4net>
 		<root>
-			<level value="ALL" />
+			<level value="ERROR" />
 			<appender-ref ref="LogFileAppender" />
 			<appender-ref ref="console" />
 		</root>
@@ -15,7 +15,7 @@
 		</logger>
 
 		<logger name="MassTransit.Subscriptions">
-			<level value="DEBUG" />
+			<level value="ERROR" />
 		</logger>
 
 		<logger name="NHibernate">

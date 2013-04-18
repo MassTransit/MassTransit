@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using BusConfigurators;
+    using System;
+    using BusConfigurators;
 	using Transports.Msmq.Management;
 
 	public static class ManagementExtensions
@@ -21,7 +22,20 @@ namespace MassTransit
 		/// Will force an installation of MSMQ if it is not installed
 		/// </summary>
 		/// <param name="configurator"></param>
-		public static void VerifyMsmqConfiguration(this ServiceBusConfigurator configurator)
+		[Obsolete("use the method inside UseMsmq instead")]
+        public static void VerifyMsmqConfiguration(this ServiceBusConfigurator configurator)
+		{
+			var management = new MsmqManagement();
+
+			if (!management.IsInstalled())
+			{
+				management.Install();
+			}
+
+			management.Start();
+		}
+
+        public static void VerifyMsmqConfiguration(this MsmqConfigurator configurator)
 		{
 			var management = new MsmqManagement();
 

@@ -14,17 +14,18 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Messaging;
+	using Util;
 
-	public class MsmqEndpointAddress :
+    public class MsmqEndpointAddress :
 		EndpointAddress,
 		IMsmqEndpointAddress
 	{
-		public MsmqEndpointAddress(Uri uri)
-            : this(uri, false)
+        public MsmqEndpointAddress(Uri uri)
+            : this(uri, false, true)
 		{
 		}
 
-	    public MsmqEndpointAddress(Uri uri, bool defaultTransactional)
+	    public MsmqEndpointAddress(Uri uri, bool defaultTransactional, bool defaultRecoverable)
 			: base(uri)
 		{
 			PublicQueuesNotAllowed();
@@ -36,6 +37,8 @@ namespace MassTransit.Transports.Msmq
 			OutboundFormatName = uri.GetOutboundFormatName();
 
 			IsTransactional = CheckForTransactionalHint(uri, defaultTransactional);
+
+	        IsRecoverable = CheckForRecoverableHint(uri, defaultRecoverable);
 
 			MulticastAddress = uri.GetMulticastAddress();
 			if(MulticastAddress != null)
@@ -58,6 +61,8 @@ namespace MassTransit.Transports.Msmq
 	    public Uri InboundUri { get; private set; }
 
 	    public string OutboundFormatName { get; private set; }
+
+	    public bool IsRecoverable { get; private set; }
 
 	    public string LocalName { get; private set; }
 
@@ -105,11 +110,18 @@ namespace MassTransit.Transports.Msmq
 
 		private Uri SetUriHostToLocalMachineName()
 		{
-			string query = "?tx=" + IsTransactional.ToString().ToLowerInvariant();
+		    string query = String.Format("?tx={0}&recoverable={1}",
+                IsTransactional.ToString().ToLowerInvariant(), 
+                IsRecoverable.ToString().ToLowerInvariant());
 
 			var builder = new UriBuilder(Uri.Scheme, LocalMachineName, Uri.Port, Uri.AbsolutePath, query);
-
+            
 			return builder.Uri;
 		}
+
+        protected static bool CheckForRecoverableHint(Uri uri, bool defaultRecoverable)
+        {
+            return uri.Query.GetValueFromQueryString("recoverable", defaultRecoverable);
+        }
 	}
 }
