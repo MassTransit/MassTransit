@@ -280,6 +280,30 @@ namespace MassTransit.Transports.RabbitMq.Tests
         }
     }
 
+    [Scenario]
+    public class GivenAUserNameUrlWithEncodedSpecialCharacters
+    {
+        public Uri Uri = new Uri("rabbitmq://dru%40gmail.com:mt%40@some_server/thehost/the_queue");
+        RabbitMqEndpointAddress _addr;
+
+        [When]
+        public void WhenParsed()
+        {
+            _addr = RabbitMqEndpointAddress.Parse(Uri);
+        }
+
+        [Then]
+        public void TheUsername()
+        {
+            _addr.ConnectionFactory.UserName.ShouldEqual("dru@gmail.com");
+        }
+
+        [Then]
+        public void ThePassword()
+        {
+            _addr.ConnectionFactory.Password.ShouldEqual("mt@");
+        }
+    }
 
     [Scenario]
     public class GivenAHighAvailableQueue
