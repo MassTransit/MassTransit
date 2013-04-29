@@ -47,7 +47,6 @@ namespace MassTransit.Transports.Msmq
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         protected void EnumerateQueue(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout)
@@ -181,11 +180,6 @@ namespace MassTransit.Transports.Msmq
             }
 
             _disposed = true;
-        }
-
-        ~InboundMsmqTransport()
-        {
-            Dispose(false);
         }
     }
 }

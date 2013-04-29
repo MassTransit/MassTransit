@@ -35,7 +35,6 @@ namespace MassTransit.Transports
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public IEndpointAddress Address
@@ -100,11 +99,6 @@ namespace MassTransit.Transports
 			}
 
 			_disposed = true;
-		}
-
-		~Transport()
-		{
-			Dispose(false);
 		}
 	}
 }

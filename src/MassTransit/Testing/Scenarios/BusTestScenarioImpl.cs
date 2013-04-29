@@ -69,10 +69,5 @@ namespace MassTransit.Testing.Scenarios
 
 			_disposed = true;
 		}
-
-		~BusTestScenarioImpl()
-		{
-			Dispose(false);
-		}
 	}
 }

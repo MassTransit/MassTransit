@@ -72,7 +72,6 @@ namespace MassTransit.Transports.Msmq
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public void Disconnect()
@@ -131,11 +130,6 @@ namespace MassTransit.Transports.Msmq
             }
 
             _disposed = true;
-        }
-
-        ~MessageQueueConnection()
-        {
-            Dispose(false);
         }
     }
 }

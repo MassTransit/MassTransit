@@ -79,7 +79,6 @@ namespace MassTransit.Transports
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public void Use(Action<T> callback)
@@ -163,11 +162,6 @@ namespace MassTransit.Transports
             }
 
             _disposed = true;
-        }
-
-        ~ConnectionHandlerImpl()
-        {
-            Dispose(false);
         }
     }
 }

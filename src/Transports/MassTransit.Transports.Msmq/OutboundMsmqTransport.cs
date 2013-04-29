@@ -82,7 +82,6 @@ namespace MassTransit.Transports.Msmq
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         protected virtual void SendMessage(MessageQueue queue, Message message)
@@ -139,11 +138,6 @@ namespace MassTransit.Transports.Msmq
                 default:
                     throw new InvalidConnectionException(_address.Uri, "There was a problem communicating with the message queue", ex);
             }
-        }
-
-        ~OutboundMsmqTransport()
-        {
-            Dispose(false);
         }
     }
 }

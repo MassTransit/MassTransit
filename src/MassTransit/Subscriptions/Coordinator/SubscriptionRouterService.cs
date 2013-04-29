@@ -76,7 +76,6 @@ namespace MassTransit.Subscriptions.Coordinator
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public void Start(IServiceBus bus)
@@ -194,11 +193,6 @@ namespace MassTransit.Subscriptions.Coordinator
 
         class ExitImpl : Exit
         {
-        }
-
-        ~SubscriptionRouterService()
-        {
-            Dispose(false);
         }
     }
 }

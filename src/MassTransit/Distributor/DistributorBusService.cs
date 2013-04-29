@@ -44,7 +44,6 @@ namespace MassTransit.Distributor
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public void Start(IServiceBus bus)
@@ -115,11 +114,6 @@ namespace MassTransit.Distributor
         {
             _subscriptions.Each(x => x.OnStop());
             _subscriptions.Clear();
-        }
-
-        ~DistributorBusService()
-        {
-            Dispose(false);
         }
     }
 }

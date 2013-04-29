@@ -105,7 +105,6 @@ namespace MassTransit.Transports.RabbitMq.Management
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         void Dispose(bool disposing)
@@ -127,11 +126,6 @@ namespace MassTransit.Transports.RabbitMq.Management
             }
 
             _disposed = true;
-        }
-
-        ~RabbitMqEndpointManagement()
-        {
-            Dispose(false);
         }
     }
 }

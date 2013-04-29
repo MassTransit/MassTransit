@@ -112,7 +112,6 @@ namespace MassTransit
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -127,11 +126,6 @@ namespace MassTransit
                 }
             }
             _disposed = true;
-        }
-
-        ~ServiceContainer()
-        {
-            Dispose(false);
         }
     }
 }

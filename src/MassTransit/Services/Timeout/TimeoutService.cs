@@ -48,12 +48,6 @@ namespace MassTransit.Services.Timeout
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		~TimeoutService()
-		{
-			Dispose(false);
 		}
 
 		void Dispose(bool disposing)

@@ -28,7 +28,6 @@ namespace MassTransit.Subscriptions
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public void Add(UnsubscribeAction action)
@@ -44,11 +43,6 @@ namespace MassTransit.Subscriptions
 				_action();
 			}
 			_disposed = true;
-		}
-
-		~DisposableUnsubscribeAction()
-		{
-			Dispose(false);
 		}
 	}
 }
