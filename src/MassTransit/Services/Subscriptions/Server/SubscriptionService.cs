@@ -84,7 +84,6 @@ namespace MassTransit.Services.Subscriptions.Server
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public void Start()
@@ -198,11 +197,6 @@ namespace MassTransit.Services.Subscriptions.Server
             var response = new SubscriptionRefresh(subscriptions);
 
             endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Address.Uri));
-        }
-
-        ~SubscriptionService()
-        {
-            Dispose(false);
         }
     }
 }

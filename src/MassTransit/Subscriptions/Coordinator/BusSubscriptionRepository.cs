@@ -58,7 +58,6 @@ namespace MassTransit.Subscriptions.Coordinator
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public void Load(SubscriptionRouter router)
@@ -138,11 +137,6 @@ namespace MassTransit.Subscriptions.Coordinator
             {
                 _log.Error("Failed to remove persistent subscription", ex);
             }
-        }
-
-        ~BusSubscriptionRepository()
-        {
-            Dispose(false);
         }
 
         void Dispose(bool disposing)

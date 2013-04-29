@@ -59,10 +59,5 @@ namespace MassTransit.Testing.Instances
 
 			_disposed = true;
 		}
-
-		~SagaTestInstance()
-		{
-			Dispose(false);
-		}
 	}
 }

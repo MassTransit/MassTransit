@@ -77,11 +77,6 @@ namespace MassTransit.Testing.Scenarios
 			_disposed = true;
 		}
 
-		~LocalRemoteTestScenarioImpl()
-		{
-			Dispose(false);
-		}
-
 		public override IServiceBus GetDecoratedBus(IServiceBus bus)
 		{
 			if (bus == _realLocalBus)

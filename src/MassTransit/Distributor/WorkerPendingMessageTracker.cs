@@ -41,7 +41,6 @@ namespace MassTransit.Distributor
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public void Consumed(T item)
@@ -69,11 +68,6 @@ namespace MassTransit.Distributor
 			}
 
 			_disposed = true;
-		}
-
-		~WorkerPendingMessageTracker()
-		{
-			Dispose(false);
 		}
 	}
 }

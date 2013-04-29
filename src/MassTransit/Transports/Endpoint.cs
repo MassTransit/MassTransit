@@ -206,7 +206,6 @@ namespace MassTransit.Transports
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public void Receive(Func<IReceiveContext, Action<IReceiveContext>> receiver, TimeSpan timeout)
@@ -387,11 +386,6 @@ namespace MassTransit.Transports
             _transport.Send(moveContext);
 
             Address.LogReQueued(_transport.Address, context.MessageId, "");
-        }
-
-        ~Endpoint()
-        {
-            Dispose(false);
         }
     }
 }

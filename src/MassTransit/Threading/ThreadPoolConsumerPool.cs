@@ -123,7 +123,6 @@ namespace MassTransit.Threading
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		void Dispose(bool disposing)
@@ -194,11 +193,6 @@ namespace MassTransit.Threading
 					ReceiverCount = _receiverCount,
 					ConsumerCount = _consumerCount,
 				});
-		}
-
-		~ThreadPoolConsumerPool()
-		{
-			Dispose(false);
 		}
 	}
 }

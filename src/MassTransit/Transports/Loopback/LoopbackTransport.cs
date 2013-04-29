@@ -215,7 +215,6 @@ namespace MassTransit.Transports
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         void GuardAgainstDisposed()
@@ -248,11 +247,6 @@ namespace MassTransit.Transports
             }
 
             _disposed = true;
-        }
-
-        ~LoopbackTransport()
-        {
-            Dispose(false);
         }
     }
 }

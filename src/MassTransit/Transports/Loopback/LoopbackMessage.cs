@@ -45,7 +45,6 @@ namespace MassTransit.Transports.Loopback
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         void Dispose(bool disposing)
@@ -57,11 +56,6 @@ namespace MassTransit.Transports.Loopback
             }
 
             _disposed = true;
-        }
-
-        ~LoopbackMessage()
-        {
-            Dispose(false);
         }
     }
 }

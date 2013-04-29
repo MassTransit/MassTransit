@@ -38,7 +38,6 @@ namespace MassTransit.Tests.Distributor
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -49,11 +48,6 @@ namespace MassTransit.Tests.Distributor
 			DataBus = null;
 
 			_disposed = true;
-		}
-
-		~ServiceInstance()
-		{
-			Dispose(false);
 		}
 	}
 }

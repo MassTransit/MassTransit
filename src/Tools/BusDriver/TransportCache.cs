@@ -35,7 +35,6 @@ namespace BusDriver
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public IDuplexTransport GetTransport(Uri uri)
@@ -86,11 +85,6 @@ namespace BusDriver
 			}
 
 			_disposed = true;
-		}
-
-		~TransportCache()
-		{
-			Dispose(false);
 		}
 	}
 }

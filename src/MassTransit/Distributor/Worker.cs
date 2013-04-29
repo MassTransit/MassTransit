@@ -131,12 +131,6 @@ namespace MassTransit.Distributor
 //        public void Dispose()
 //        {
 //            Dispose(true);
-//            GC.SuppressFinalize(this);
-//        }
-//
-//        ~Worker()
-//        {
-//            Dispose(false);
 //        }
 //
 //        void Dispose(bool disposing)

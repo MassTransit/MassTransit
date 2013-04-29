@@ -29,7 +29,6 @@ namespace MassTransit.Util
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public UnregisterAction Register(T item)
@@ -60,11 +59,6 @@ namespace MassTransit.Util
 
 			_items = null;
 			_disposed = true;
-		}
-
-		~RegistrationList()
-		{
-			Dispose(false);
 		}
 	}
 }

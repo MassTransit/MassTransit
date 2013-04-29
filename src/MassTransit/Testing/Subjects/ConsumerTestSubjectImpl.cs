@@ -41,7 +41,6 @@ namespace MassTransit.Testing.Subjects
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public void Prepare(TScenario scenario)
@@ -66,11 +65,6 @@ namespace MassTransit.Testing.Subjects
 			}
 
 			_disposed = true;
-		}
-
-		~ConsumerTestSubjectImpl()
-		{
-			Dispose(false);
 		}
 	}
 }

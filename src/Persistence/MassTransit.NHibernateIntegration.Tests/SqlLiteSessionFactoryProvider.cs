@@ -48,12 +48,6 @@ namespace MassTransit.NHibernateIntegration.Tests
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~SqlLiteSessionFactoryProvider()
-        {
-            Dispose(false);
         }
 
         void Dispose(bool disposing)

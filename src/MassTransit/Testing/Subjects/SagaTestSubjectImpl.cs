@@ -53,7 +53,6 @@ namespace MassTransit.Testing.Subjects
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public IEnumerator<SagaInstance<TSaga>> GetEnumerator()
@@ -103,11 +102,6 @@ namespace MassTransit.Testing.Subjects
 			}
 
 			_disposed = true;
-		}
-
-		~SagaTestSubjectImpl()
-		{
-			Dispose(false);
 		}
 	}
 }

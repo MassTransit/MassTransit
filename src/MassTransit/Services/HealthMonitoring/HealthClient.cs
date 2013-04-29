@@ -78,7 +78,6 @@ namespace MassTransit.Services.HealthMonitoring
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public void Start(IServiceBus bus)
@@ -124,11 +123,6 @@ namespace MassTransit.Services.HealthMonitoring
                 context =>
                 _log.Info(
                     "No routing entry found for the HeartBeat message. Are you sure the HealthMonitor is setup correctly?"));
-        }
-
-        ~HealthClient()
-        {
-            Dispose(false);
         }
     }
 }

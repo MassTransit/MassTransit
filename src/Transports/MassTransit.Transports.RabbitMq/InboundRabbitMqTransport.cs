@@ -126,7 +126,6 @@ namespace MassTransit.Transports.RabbitMq
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public IEnumerable<Type> BindExchangesForPublisher(Type messageType, IMessageNameFormatter messageNameFormatter)
@@ -214,11 +213,6 @@ namespace MassTransit.Transports.RabbitMq
             }
 
             _disposed = true;
-        }
-
-        ~InboundRabbitMqTransport()
-        {
-            Dispose(false);
         }
     }
 }

@@ -58,10 +58,5 @@ namespace MassTransit.Testing.Instances
 
 			_disposed = true;
 		}
-
-		~ConsumerTestInstance()
-		{
-			Dispose(false);
-		}
 	}
 }

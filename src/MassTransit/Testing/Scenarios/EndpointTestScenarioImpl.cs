@@ -92,7 +92,6 @@ namespace MassTransit.Testing.Scenarios
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public void AddEndpoint(EndpointTestDecorator endpoint)
@@ -168,11 +167,6 @@ namespace MassTransit.Testing.Scenarios
 		    {
 		        _endpointCache.Inspect(probe);
 		    }
-		}
-
-		~EndpointTestScenarioImpl()
-		{
-			Dispose(false);
 		}
 
 		public virtual IServiceBus GetDecoratedBus(IServiceBus bus)

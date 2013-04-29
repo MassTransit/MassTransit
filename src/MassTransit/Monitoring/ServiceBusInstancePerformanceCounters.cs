@@ -64,7 +64,6 @@ namespace MassTransit.Monitoring
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public void Close()
@@ -166,11 +165,6 @@ namespace MassTransit.Monitoring
             }
 
             _disposed = true;
-        }
-
-        ~ServiceBusInstancePerformanceCounters()
-        {
-            Dispose(false);
         }
     }
 }

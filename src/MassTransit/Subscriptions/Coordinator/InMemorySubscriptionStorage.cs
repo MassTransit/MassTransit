@@ -38,7 +38,6 @@ namespace MassTransit.Subscriptions.Coordinator
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public void Add(PersistentSubscription subscription)
@@ -87,11 +86,6 @@ namespace MassTransit.Subscriptions.Coordinator
             }
 
             _disposed = true;
-        }
-
-        ~InMemorySubscriptionStorage()
-        {
-            Dispose(false);
         }
     }
 }

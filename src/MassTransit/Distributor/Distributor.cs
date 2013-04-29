@@ -87,7 +87,6 @@ namespace MassTransit.Distributor
 //        public void Dispose()
 //        {
 //            Dispose(true);
-//            GC.SuppressFinalize(this);
 //        }
 //
 //        public void Start(IServiceBus bus)
@@ -113,11 +112,6 @@ namespace MassTransit.Distributor
 //                _workers.Clear();
 //
 //            _unsubscribeAction();
-//        }
-//
-//        ~Distributor()
-//        {
-//            Dispose(false);
 //        }
 //
 //        void Dispose(bool disposing)

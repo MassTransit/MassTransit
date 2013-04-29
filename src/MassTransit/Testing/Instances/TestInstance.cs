@@ -59,7 +59,6 @@ namespace MassTransit.Testing.Instances
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -76,11 +75,6 @@ namespace MassTransit.Testing.Instances
 		protected void ExecuteTestActions()
 		{
 			_actions.Each(x => x.Act(_scenario));
-		}
-
-		~TestInstance()
-		{
-			Dispose(false);
 		}
 	}
 }
