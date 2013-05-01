@@ -5,6 +5,7 @@ build_artifacts/*
 packages
 *.dotCover
 
+*.ncrunch*
 
 src/logs/*
 
