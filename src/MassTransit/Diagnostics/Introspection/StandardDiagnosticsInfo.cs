@@ -14,6 +14,8 @@ namespace MassTransit.Diagnostics.Introspection
 {
     using System;
     using System.Diagnostics;
+    using System.Security;
+    using System.Security.Permissions;
 
     public class StandardDiagnosticsInfo
     {
@@ -22,6 +24,7 @@ namespace MassTransit.Diagnostics.Introspection
             AddHostValues(probe);
             AddOperatingSystemValues(probe);
             AddProcessValues(probe);
+            AddRunningInFullTrustValue(probe);
         }
 
         static void AddHostValues(DiagnosticsProbe probe)
@@ -44,6 +47,24 @@ namespace MassTransit.Diagnostics.Introspection
 #if NET40
             probe.Add("os.bits", Environment.Is64BitOperatingSystem ? "x64" : "x32");
 #endif
+        }
+
+        static void AddRunningInFullTrustValue(DiagnosticsProbe probe)
+        {
+            probe.Add("running.in.full.trust", IsRunningInFullTrust());
+        }
+
+        static bool IsRunningInFullTrust()
+        {
+            try
+            {
+                new FileIOPermission(PermissionState.Unrestricted);
+            }
+            catch (SecurityException)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
