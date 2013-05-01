@@ -51,7 +51,7 @@ namespace MassTransit.Diagnostics.Introspection
 
         static void AddRunningInFullTrustValue(DiagnosticsProbe probe)
         {
-            probe.Add("running.in.full.trust", IsRunningInFullTrust());
+            probe.Add("process.fulltrust", IsRunningInFullTrust());
         }
 
         static bool IsRunningInFullTrust()
