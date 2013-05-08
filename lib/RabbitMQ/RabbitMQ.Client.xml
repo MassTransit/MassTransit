@@ -876,8 +876,7 @@
             Waits until all messages published since the last call have
             been either ack'd or nack'd by the broker.  Returns whether
             all the messages were ack'd (and none were nack'd). Note,
-            when called on a non-Confirm channel, returns true
-            immediately.
+            throws an exception when called on a non-Confirm channel.
             </remarks>
         </member>
         <member name="M:RabbitMQ.Client.IModel.WaitForConfirms(System.TimeSpan,System.Boolean@)">
@@ -894,8 +893,7 @@
             Waits until all messages published since the last call have
             been either ack'd or nack'd by the broker.  Returns whether
             all the messages were ack'd (and none were nack'd). Note,
-            when called on a non-Confirm channel, returns true
-            immediately.
+            throws an exception when called on a non-Confirm channel.
             </remarks>
         </member>
         <member name="M:RabbitMQ.Client.IModel.WaitForConfirmsOrDie">
