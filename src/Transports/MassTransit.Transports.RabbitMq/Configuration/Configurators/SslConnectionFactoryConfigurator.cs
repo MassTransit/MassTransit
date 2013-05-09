@@ -23,6 +23,6 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
         void SetCertificatePath(string certificatePath);
         void SetCertificatePassphrase(string passphrase);
         void SetAcceptablePolicyErrors(SslPolicyErrors policyErrors);
-        void SetClientCertificateRequired(bool noClientCertificateRequired);
+        void SetClientCertificateRequired(bool clientCertificateRequired);
     }
 }
