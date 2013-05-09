@@ -22,7 +22,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		IServiceBus _bus;
 
 		[When]
-		public void Connecting_to_a_rabbit_mq_server_using_ssl()
+		public void Connecting_to_a_rabbit_mq_server_using_ssl_and_with_client_certificate()
 		{
 			Uri inputAddress = new Uri("rabbitmq://localhost:5671/test_queue");
 
@@ -36,13 +36,34 @@ namespace MassTransit.Transports.RabbitMq.Tests
 									h.UseSsl(s =>
 										{
 											s.SetServerName(System.Net.Dns.GetHostName());
-											s.SetCertificatePath("client.p12");
-											s.SetCertificatePassphrase("Passw0rd");
-										});
+                                            s.SetCertificatePath("client.p12");
+                                            s.SetCertificatePassphrase("Passw0rd");
+                                        });
 								});
 						});
 				});
 		}
+        [When]
+        public void Connecting_to_a_rabbit_mq_server_using_ssl_without_client_certificate()
+        {
+            Uri inputAddress = new Uri("rabbitmq://localhost:5671/test_queue");
+
+            _bus = ServiceBusFactory.New(c =>
+            {
+                c.ReceiveFrom(inputAddress);
+                c.UseRabbitMq(r =>
+                {
+                    r.ConfigureHost(inputAddress, h =>
+                    {
+                        h.UseSsl(s =>
+                        {
+                            s.SetClientCertificateRequired(false);
+                        });
+                    });
+                });
+            });
+        }
+
 
 		[Finally]
 		public void Finally()

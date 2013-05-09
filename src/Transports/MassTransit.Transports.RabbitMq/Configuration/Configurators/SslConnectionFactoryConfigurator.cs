@@ -10,6 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+using System.Net.Security;
 namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
 {
     /// <summary>
@@ -21,5 +22,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
         void SetServerName(string serverName);
         void SetCertificatePath(string certificatePath);
         void SetCertificatePassphrase(string passphrase);
+        void SetAcceptablePolicyErrors(SslPolicyErrors policyErrors);
+        void SetClientCertificateRequired(bool clientCertificateRequired);
     }
 }
