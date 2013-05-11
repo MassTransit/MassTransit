@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
 {
+    using System.Net.Security;
+
+
     /// <summary>
     /// Configures SSL/TLS for RabbitMQ. See http://www.rabbitmq.com/ssl.html
     /// for details on how to set up RabbitMQ for SSL.
@@ -21,5 +24,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
         void SetServerName(string serverName);
         void SetCertificatePath(string certificatePath);
         void SetCertificatePassphrase(string passphrase);
+        void SetAcceptablePolicyErrors(SslPolicyErrors policyErrors);
+        void SetClientCertificateRequired(bool noClientCertificateRequired);
     }
 }
