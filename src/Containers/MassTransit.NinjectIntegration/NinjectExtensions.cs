@@ -15,13 +15,12 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.Serialization;
+    using Magnum.Extensions;
     using Ninject;
     using NinjectIntegration;
     using Saga;
     using Saga.SubscriptionConfigurators;
     using SubscriptionConfigurators;
-    using Util;
 
     /// <summary>
     /// For NInject, it seems that using named scopes is the way to get per-message implementations
@@ -30,19 +29,29 @@ namespace MassTransit
     public static class NinjectExtensions
     {
         /// <summary>
-        /// Unable to load for NInject, sorry.
+        /// Specify that the service bus should load its subscribers from the container passed as an argument.
         /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="kernel"></param>
-        public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IKernel kernel)
+        /// <param name="configurator">The configurator the extension method works on.</param>
+        /// <param name="context">The Ninject kernel.</param>
+        public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IKernel context)
         {
-            var ex =
-                new NotImplementedByNinjectException(
-                    "Ninject does not support this option. See https://github.com/ninject/ninject/issues/35");
+            IList<Type> consumerTypes = FindTypes<IConsumer>(context, x => !x.Implements<ISaga>());
+            if (consumerTypes.Count > 0)
+            {
+                var consumerConfigurator = new NinjectConsumerFactoryConfigurator(configurator, context);
 
-            ex.HelpLink = "https://github.com/ninject/ninject/issues/35";
+                foreach (Type type in consumerTypes)
+                    consumerConfigurator.ConfigureConsumer(type);
+            }
 
-            throw ex;
+            IList<Type> sagaTypes = FindTypes<ISaga>(context, x => true);
+            if (sagaTypes.Count > 0)
+            {
+                var sagaConfigurator = new NinjectSagaFactoryConfigurator(configurator, context);
+
+                foreach (Type type in sagaTypes)
+                    sagaConfigurator.ConfigureSaga(type);
+            }
         }
 
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
@@ -63,34 +72,14 @@ namespace MassTransit
 
         static IList<Type> FindTypes<T>(IKernel kernel, Func<Type, bool> filter)
         {
-            return kernel.GetBindings(typeof(T))
-                         .Select(x => x.Service)
-                         .Distinct()
-                         .Where(filter)
-                         .ToList();
-        }
-    }
-
-
-    public class NotImplementedByNinjectException : NotImplementedException
-    {
-        public NotImplementedByNinjectException()
-        {
-        }
-
-        public NotImplementedByNinjectException(string message)
-            : base(message)
-        {
-        }
-
-        public NotImplementedByNinjectException(string message, Exception inner)
-            : base(message, inner)
-        {
-        }
-
-        protected NotImplementedByNinjectException([NotNull] SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(s => s.GetTypes())
+                .Where(typeof(T).IsAssignableFrom)
+                .SelectMany(kernel.GetBindings)
+                .Select(x => x.Service)
+                .Distinct()
+                .Where(filter)
+                .ToList();
         }
     }
 }

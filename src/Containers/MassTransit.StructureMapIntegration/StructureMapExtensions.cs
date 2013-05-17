@@ -24,6 +24,11 @@ namespace MassTransit
 
     public static class StructureMapExtensions
     {
+        /// <summary>
+        /// Specify that the service bus should load its subscribers from the container passed as an argument.
+        /// </summary>
+        /// <param name="configurator">The configurator the extension method works on.</param>
+        /// <param name="container">The StructureMap container.</param>
         public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IContainer container)
         {
             IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.Implements<ISaga>());
