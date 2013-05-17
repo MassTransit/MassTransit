@@ -34,7 +34,7 @@ namespace MassTransit
         /// Specify that the service bus should load its subscribers from the container passed as an argument.
         /// </summary>
         /// <param name="configurator">The configurator the extension method works on.</param>
-        /// <param name="container">The Windsow container.</param>
+        /// <param name="container">The Windsor container.</param>
         public static void LoadFrom(
             [NotNull] this SubscriptionBusServiceConfigurator configurator,
             [NotNull] IWindsorContainer container)

@@ -20,7 +20,6 @@ namespace MassTransit.Containers.Tests
     using Castle.Windsor;
     using Magnum.Extensions;
     using Magnum.TestFramework;
-    using NUnit.Framework;
     using Saga;
     using Scenarios;
     using SubscriptionConfigurators;

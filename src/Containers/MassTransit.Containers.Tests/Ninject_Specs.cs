@@ -46,9 +46,7 @@ namespace MassTransit.Containers.Tests
 
         protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
         {
-            // we have to do this explicitly, since the metadata is not exposed by Ninject
-            subscriptionBusServiceConfigurator.Consumer<SimpleConsumer>(_container);
-            subscriptionBusServiceConfigurator.Consumer<AnotherMessageConsumer>(_container);
+            subscriptionBusServiceConfigurator.LoadFrom(_container);
         }
 
         protected override SimpleConsumer GetSimpleConsumer()
