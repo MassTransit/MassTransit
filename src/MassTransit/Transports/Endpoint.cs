@@ -259,7 +259,9 @@ namespace MassTransit.Transports
                         try
                         {
                             acceptContext.SetEndpoint(this);
-                            _serializer.Deserialize(acceptContext);
+
+                            var serializer = MessageSerializerRepository.LookupSerializer(acceptContext.ContentType);
+                            serializer.Deserialize(acceptContext);
 
                             receive = receiver(acceptContext);
                             if (receive == null)
