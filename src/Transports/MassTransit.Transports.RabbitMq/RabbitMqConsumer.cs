@@ -44,7 +44,7 @@ namespace MassTransit.Transports.RabbitMq
 
                 PurgeIfRequested(channel);
 
-                channel.BasicQos(0, 10, false);
+                channel.BasicQos(0, _address.PrefetchCount, false);
 
                 var consumer = new QueueingBasicConsumer(channel);
                 channel.BasicConsume(_address.Name, false, consumer);
