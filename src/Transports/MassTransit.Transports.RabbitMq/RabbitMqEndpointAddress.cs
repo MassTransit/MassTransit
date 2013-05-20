@@ -36,6 +36,7 @@ namespace MassTransit.Transports.RabbitMq
         readonly string _name;
         readonly Uri _uri;
         Func<bool> _isLocal;
+        ushort _prefetch;
         int _ttl;
 
         public RabbitMqEndpointAddress(Uri uri, ConnectionFactory connectionFactory, string name)
@@ -49,6 +50,7 @@ namespace MassTransit.Transports.RabbitMq
             _isLocal = () => DetermineIfEndpointIsLocal(uri);
             _isHighAvailable = uri.Query.GetValueFromQueryString("ha", false);
             _ttl = uri.Query.GetValueFromQueryString("ttl", 0);
+            _prefetch = uri.Query.GetValueFromQueryString("prefetch", (ushort)Math.Max(Environment.ProcessorCount, 10));
         }
 
         public ConnectionFactory ConnectionFactory
@@ -59,6 +61,11 @@ namespace MassTransit.Transports.RabbitMq
         public string Name
         {
             get { return _name; }
+        }
+
+        public ushort PrefetchCount
+        {
+            get { return _prefetch; }
         }
 
         public IRabbitMqEndpointAddress ForQueue(string name)
@@ -102,6 +109,11 @@ namespace MassTransit.Transports.RabbitMq
             _ttl = ttl.Milliseconds;
         }
 
+        public void SetPrefetchCount(ushort count)
+        {
+            _prefetch = count;
+        }
+
         static UriBuilder GetSanitizedUri(Uri uri)
         {
             var uriPath = new Uri(uri.GetLeftPart(UriPartial.Path));
@@ -117,9 +129,9 @@ namespace MassTransit.Transports.RabbitMq
         bool DetermineIfEndpointIsLocal(Uri uri)
         {
             string hostName = uri.Host;
-            bool local = string.Compare(hostName, ".") == 0 ||
-                         string.Compare(hostName, "localhost", true) == 0 ||
-                         string.Compare(uri.Host, LocalMachineName, true) == 0;
+            bool local = string.CompareOrdinal(hostName, ".") == 0 ||
+                         string.Compare(hostName, "localhost", StringComparison.OrdinalIgnoreCase) == 0 ||
+                         string.Compare(uri.Host, LocalMachineName, StringComparison.OrdinalIgnoreCase) == 0;
 
             Interlocked.Exchange(ref _isLocal, () => local);
 
