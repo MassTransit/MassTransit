@@ -66,6 +66,13 @@ namespace MassTransit.Builders
 		/// </summary>
 		void AddTransportFactory(ITransportFactory transportFactory);
 
+        /// <summary>
+        /// Add a message serializer to the builder so that messages with other serialization types
+        /// can be received without conflicts
+        /// </summary>
+        /// <param name="serializer"></param>
+	    void AddMessageSerializer(IMessageSerializer serializer);
+
 		/// <summary>
 		/// Sets the default isolation level for transports that perform transactional operations
 		/// </summary>

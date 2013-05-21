@@ -62,13 +62,16 @@ namespace MassTransit.Transports.RabbitMq.Tests
             IDuplexTransport transport = _factory.BuildLoopback(new TransportSettings(_exchange));
             IOutboundTransport error = _factory.BuildError(new TransportSettings(_error));
 
+            var messageSerializers = new SupportedMessageSerializers();
+            messageSerializers.AddSerializer(serializer);
+
             var sendEndpoint = new Endpoint(_exchange, serializer, transport, error,
-                new InMemoryInboundMessageTracker(5));
+                new InMemoryInboundMessageTracker(5), messageSerializers);
             sendEndpoint.Send(message);
 
 
             var receiveEndpoint = new Endpoint(_queue, serializer, transport, error,
-                new InMemoryInboundMessageTracker(5));
+                new InMemoryInboundMessageTracker(5), messageSerializers);
             receiveEndpoint.Receive(o =>
                 {
                     return b =>

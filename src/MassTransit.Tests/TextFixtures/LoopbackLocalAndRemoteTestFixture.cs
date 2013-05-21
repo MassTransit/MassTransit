@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TextFixtures
 {
+    using System;
     using BusConfigurators;
     using MassTransit.Subscriptions.Coordinator;
     using MassTransit.Transports.Loopback;
@@ -38,10 +39,13 @@ namespace MassTransit.Tests.TextFixtures
 
         SubscriptionLoopback _localLoopback;
         SubscriptionLoopback _remoteLoopback;
+        protected Uri LocalUri;
+        protected Uri RemoteUri;
 
         protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
         {
-            configurator.ReceiveFrom("loopback://localhost/mt_client");
+            LocalUri = new Uri("loopback://localhost/mt_client");
+            configurator.ReceiveFrom(LocalUri);
             configurator.AddSubscriptionObserver((bus, coordinator) =>
                 {
                     _localLoopback = new SubscriptionLoopback(bus, coordinator);
@@ -51,7 +55,8 @@ namespace MassTransit.Tests.TextFixtures
 
         protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
         {
-            configurator.ReceiveFrom("loopback://localhost/mt_server");
+            RemoteUri = new Uri("loopback://localhost/mt_server");
+            configurator.ReceiveFrom(RemoteUri);
             configurator.AddSubscriptionObserver((bus, coordinator) =>
                 {
                     _remoteLoopback = new SubscriptionLoopback(bus, coordinator);

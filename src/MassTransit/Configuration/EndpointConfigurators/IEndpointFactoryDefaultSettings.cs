@@ -14,15 +14,16 @@ namespace MassTransit.EndpointConfigurators
 {
     using System;
     using System.Transactions;
-    using Builders;
     using Serialization;
     using Transports;
     using Util;
+
 
     public interface IEndpointFactoryDefaultSettings
     {
         MessageTrackerFactory TrackerFactory { get; }
         IMessageSerializer Serializer { get; }
+        ISupportedMessageSerializers SupportedSerializers { get; }
         bool CreateMissingQueues { get; }
         bool CreateTransactionalQueues { get; }
         bool PurgeOnStartup { get; }

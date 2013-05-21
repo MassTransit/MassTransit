@@ -195,6 +195,7 @@
     <Compile Include="Saga\StateMachine\CombineSaga.cs" />
     <Compile Include="Saga\StateMachine\CombineSaga_Specs.cs" />
     <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
+    <Compile Include="SerializationSupport_Specs.cs" />
     <Compile Include="Serialization\ByteArray_Specs.cs" />
     <Compile Include="Serialization\DateTime_Specs.cs" />
     <Compile Include="Serialization\GenericMessageType_Specs.cs" />
