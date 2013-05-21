@@ -147,7 +147,7 @@ namespace MassTransit.Transports.RabbitMq
         {
             Guard.AgainstNull(address, "address");
 
-            if (string.Compare("rabbitmq", address.Scheme, true) != 0)
+            if (string.Compare("rabbitmq", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
                 throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme ?? "(null)");
 
             var connectionFactory = new ConnectionFactory

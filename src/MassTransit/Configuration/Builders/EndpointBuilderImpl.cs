@@ -51,7 +51,8 @@ namespace MassTransit.Builders
                 IOutboundTransport errorTransport = _errorTransportFactory(transportFactory, _errorSettings);
                 IInboundMessageTracker tracker = _messageTrackerFactory();
 
-                var endpoint = new Endpoint(transport.Address, _settings.Serializer, transport, errorTransport, tracker);
+                var endpoint = new Endpoint(transport.Address, _settings.Serializer, transport, errorTransport, tracker,
+                    _settings.SupportedSerializers);
 
                 return endpoint;
             }

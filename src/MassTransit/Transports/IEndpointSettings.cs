@@ -28,6 +28,11 @@ namespace MassTransit.Transports
         IMessageSerializer Serializer { get; }
 
         /// <summary>
+        /// The message serializers supported
+        /// </summary>
+        ISupportedMessageSerializers SupportedSerializers { get; }
+
+        /// <summary>
         /// The retry limit for inbound messages
         /// </summary>
         int RetryLimit { get; }

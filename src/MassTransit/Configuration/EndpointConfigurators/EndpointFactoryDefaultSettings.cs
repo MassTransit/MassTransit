@@ -29,6 +29,9 @@ namespace MassTransit.EndpointConfigurators
             PurgeOnStartup = false;
             RequireTransactional = false;
             Serializer = new XmlMessageSerializer();
+            var messageSerializers = new SupportedMessageSerializers();
+            messageSerializers.AddSerializer(Serializer);
+            SupportedSerializers = messageSerializers;
             TransactionTimeout = 30.Seconds();
             IsolationLevel = IsolationLevel.Serializable;
             RetryLimit = 5;
@@ -51,11 +54,13 @@ namespace MassTransit.EndpointConfigurators
             PurgeOnStartup = defaults.PurgeOnStartup;
             RequireTransactional = defaults.RequireTransactional;
             Serializer = defaults.Serializer;
+            SupportedSerializers = defaults.SupportedSerializers;
             TransactionTimeout = defaults.TransactionTimeout;
             RetryLimit = defaults.RetryLimit;
             TrackerFactory = defaults.TrackerFactory;
         }
 
+        public ISupportedMessageSerializers SupportedSerializers { get; set; }
         public bool CreateMissingQueues { get; set; }
         public bool CreateTransactionalQueues { get; set; }
         public IsolationLevel IsolationLevel { get; set; }
@@ -71,6 +76,7 @@ namespace MassTransit.EndpointConfigurators
             var settings = new EndpointSettings(uri)
                 {
                     Serializer = Serializer,
+                    SupportedSerializers = SupportedSerializers,
                     CreateIfMissing = CreateMissingQueues,
                     TransactionTimeout = TransactionTimeout,
                     PurgeExistingMessages = PurgeOnStartup,
