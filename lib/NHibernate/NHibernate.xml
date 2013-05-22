@@ -13546,7 +13546,7 @@
         <member name="P:NHibernate.Dialect.InformixDialect.HasDataTypeInIdentityColumn">
             <summary>
             Whether this dialect have an Identity clause added to the data type or a
-            completely seperate identity data type
+            completely separate identity data type
             </summary>
         </member>
         <member name="P:NHibernate.Dialect.InformixDialect.IdentitySelectString">
@@ -13978,10 +13978,19 @@
         </member>
         <member name="M:NHibernate.Dialect.MySQLDialect.RegisterCastType(System.Data.DbType,System.String)">
             <summary>
-            Suclasses register a typename for the given type code, to be used in CAST()
+            Subclasses register a typename for the given type code, to be used in CAST()
             statements.
             </summary>
             <param name="code">The typecode</param>
+            <param name="name">The database type name</param>
+        </member>
+        <member name="M:NHibernate.Dialect.MySQLDialect.RegisterCastType(System.Data.DbType,System.Int32,System.String)">
+            <summary>
+            Subclasses register a typename for the given type code, to be used in CAST()
+            statements.
+            </summary>
+            <param name="code">The typecode</param>
+            <param name="capacity"></param>
             <param name="name">The database type name</param>
         </member>
         <member name="M:NHibernate.Dialect.MySQLDialect.GetCastTypeName(NHibernate.SqlTypes.SqlType)">
@@ -15003,6 +15012,44 @@
             <exception cref="T:NHibernate.HibernateException">
             Thrown when the <c>IBM.Data.DB2</c> assembly can not be loaded.
             </exception>
+        </member>
+        <member name="T:NHibernate.Driver.DotConnectMySqlDriver">
+            <summary>
+            Provides a database driver for dotConnect for MySQL by DevArt.
+            </summary>
+            <remarks>
+            <para>
+            In order to use this driver you must have the assembly <c>Devart.Data.MySql.dll</c> available for 
+            NHibernate to load, including its dependencies (<c>Devart.Data.dll</c>).
+            </para>
+            <para>
+            Please check the product's <see href="http://www.devart.com/dotconnect/mysql/">website</see>
+            for any updates and/or documentation regarding dotConnect for MySQL.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:NHibernate.Driver.DotConnectMySqlDriver.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NHibernate.Driver.DotConnectMySqlDriver"/> class.
+            </summary>
+            <exception cref="T:NHibernate.HibernateException">
+            Thrown when the <c>Devart.Data.MySql</c> assembly can not be loaded.
+            </exception>
+        </member>
+        <member name="P:NHibernate.Driver.DotConnectMySqlDriver.UseNamedPrefixInSql">
+            <summary>
+            Devart.Data.MySql uses named parameters in the sql.
+            </summary>
+            <value><see langword="true" /> - MySql uses <c>@</c> in the sql.</value>
+        </member>
+        <member name="P:NHibernate.Driver.DotConnectMySqlDriver.UseNamedPrefixInParameter">
+            <summary></summary>
+        </member>
+        <member name="P:NHibernate.Driver.DotConnectMySqlDriver.NamedPrefix">
+            <summary>
+            Devart.Data.MySql use the <c>@</c> to locate parameters in sql.
+            </summary>
+            <value><c>@</c> is used to locate parameters in sql.</value>
         </member>
         <member name="T:NHibernate.Driver.FirebirdClientDriver">
             <summary>
@@ -16398,7 +16445,7 @@
              </listheader>
              <item>
                  <term><see cref="M:NHibernate.Engine.Transaction.Isolater.DoIsolatedWork(NHibernate.Engine.Transaction.IIsolatedWork,NHibernate.Engine.ISessionImplementor)"/> </term>
-                 <description>makes sure the work to be done is performed in a seperate, distinct transaction</description>
+                 <description>makes sure the work to be done is performed in a separate, distinct transaction</description>
              </item>
              <item>
                  <term><see cref="M:NHibernate.Engine.Transaction.Isolater.DoNonTransactedWork(NHibernate.Engine.Transaction.IIsolatedWork,NHibernate.Engine.ISessionImplementor)"/> </term>
@@ -16410,7 +16457,7 @@
         <member name="M:NHibernate.Engine.Transaction.Isolater.DoIsolatedWork(NHibernate.Engine.Transaction.IIsolatedWork,NHibernate.Engine.ISessionImplementor)">
             <summary> 
             Ensures that all processing actually performed by the given work will
-            occur on a seperate transaction. 
+            occur on a separate transaction. 
             </summary>
             <param name="work">The work to be performed. </param>
             <param name="session">The session from which this request is originating. </param>
@@ -21551,7 +21598,7 @@
             all append invocations on the buf should go through this Output instance variable.
             The value of this variable may be temporarily substitued by sql function processing code
             to catch generated arguments.
-            This is because sql function templates need arguments as seperate string chunks
+            This is because sql function templates need arguments as separate string chunks
             that will be assembled into the target dialect-specific function call.
         </member>
         <member name="F:NHibernate.Hql.Ast.ANTLR.SqlGenerator.parseErrorHandler">
@@ -25200,7 +25247,7 @@
             <c>System.Int32</c>
             </p>
             <p>
-            The hi value MUST be fetched in a seperate transaction to the <c>ISession</c>
+            The hi value MUST be fetched in a separate transaction to the <c>ISession</c>
             transaction so the generator must be able to obtain a new connection and commit it.
             Hence this implementation may not be used when the user is supplying connections.
             </p>
@@ -25299,7 +25346,7 @@
             <c>schema</c> are optional.
             </p>
             <p>
-            The hi value MUST be fecthed in a seperate transaction to the <c>ISession</c>
+            The hi value MUST be fecthed in a separate transaction to the <c>ISession</c>
             transaction so the generator must be able to obtain a new connection and 
             commit it. Hence this implementation may not be used when the user is supplying
             connections.  In that case a <see cref="T:NHibernate.Id.SequenceHiLoGenerator"/> would be a 
@@ -26725,7 +26772,7 @@
             Specify an association fetching strategy.  Currently, only
             one-to-many and one-to-one associations are supported.
             </summary>
-            <param name="associationPath">A dot seperated property path.</param>
+            <param name="associationPath">A dot separated property path.</param>
             <param name="mode">The Fetch mode.</param>
             <returns></returns>
         </member>
@@ -26785,7 +26832,7 @@
             Create a new <see cref="T:NHibernate.ICriteria"/>, "rooted" at the associated entity,
             using the specified join type.
             </summary>
-            <param name="associationPath">A dot-seperated property path</param>
+            <param name="associationPath">A dot-separated property path</param>
             <param name="joinType">The type of join to use</param>
             <returns>The created "sub criteria"</returns>
         </member>
@@ -27825,7 +27872,7 @@
         <member name="M:NHibernate.IMultiQuery.SetForceCacheRefresh(System.Boolean)">
             Should the query force a refresh of the specified query cache region?
             This is particularly useful in cases where underlying data may have been
-            updated via a seperate process (i.e., not modified through Hibernate) and
+            updated via a separate process (i.e., not modified through Hibernate) and
             allows the application to selectively refresh the query cache regions
             based on its knowledge of those events.
             <param name="forceCacheRefresh">Should the query result in a forcible refresh of
@@ -29106,6 +29153,14 @@
             and <see cref="F:System.Linq.Expressions.ExpressionType.TypeAs"/> <see cref="T:System.Linq.Expressions.UnaryExpression"/>s  
             </summary>
         </member>
+        <member name="T:NHibernate.Linq.ExpressionTransformers.SimplifyCompareTransformer">
+            <summary>
+            Applications of the string.Compare(a,b) and a.CompareTo(b) (for various types)
+            that are then immediately compared to 0 can be simplified by removing the 
+            Compare/CompareTo method call. The comparison operator is then applied
+            directly to the arguments for the Compare/CompareTo call.
+            </summary>
+        </member>
         <member name="T:NHibernate.Linq.GroupBy.AggregatingGroupByRewriter">
             <summary>
             An AggregatingGroupBy is a query such as:
@@ -29213,6 +29268,12 @@
             Locates constants in the expression tree and generates parameters for each one
             </summary>
         </member>
+        <member name="M:NHibernate.Linq.Visitors.PagingRewriterSelectClauseVisitor.GetSubQuerySelectorOrNull(Remotion.Linq.Clauses.Expressions.QuerySourceReferenceExpression)">
+            <summary>
+            If the querySource is a subquery, return the SelectClause's selector if it's
+            NewExpression. Otherwise, return null.
+            </summary>
+        </member>
         <member name="T:NHibernate.Linq.Visitors.PossibleValueSet">
             <summary>
             Represents a possible set of values for a computation.  For example, an expression may
@@ -29225,12 +29286,23 @@
             null checks.
             </summary>
         </member>
+        <member name="M:NHibernate.Linq.Visitors.PossibleValueSet.DetermineBoolType(NHibernate.Linq.Visitors.PossibleValueSet)">
+            <summary>
+            Verify that ExpressionType of both this and the other set is bool or nullable bool,
+            and return the negotiated type (nullable bool if either side is nullable).
+            </summary>
+        </member>
+        <member name="M:NHibernate.Linq.Visitors.PossibleValueSet.DetermineBoolType">
+            <summary>
+            Verify that ExpressionType is bool or nullable bool.
+            </summary>
+        </member>
         <member name="T:NHibernate.Linq.Visitors.QuerySourceIdentifier">
             <summary>
             Identifies and names - using <see cref="T:NHibernate.Linq.QuerySourceNamer"/> - all QueryModel query sources
             </summary>
             <remarks>
-            It may seem expensive to do this as a seperate visitation of the query model, but unfortunately
+            It may seem expensive to do this as a separate visitation of the query model, but unfortunately
             trying to identify query sources on the fly (i.e. while parsing the query model to generate
             the HQL expression tree) means a query source may be referenced by a <c>QuerySourceReference</c>
             before it has been identified - and named.
@@ -29262,6 +29334,14 @@
             <returns>The <see cref="T:System.Reflection.MethodInfo"/> of the no-generic method or the generic-definition for a generic-method.</returns>
             <seealso cref="M:System.Reflection.MethodInfo.GetGenericMethodDefinition"/>
         </member>
+        <member name="M:NHibernate.Linq.ReflectionHelper.GetMethod``1(System.Linq.Expressions.Expression{System.Action{``0}})">
+            <summary>
+            Extract the <see cref="T:System.Reflection.MethodInfo"/> from a given expression.
+            </summary>
+            <typeparam name="TSource">The declaring-type of the method.</typeparam>
+            <param name="method">The method.</param>
+            <returns>The <see cref="T:System.Reflection.MethodInfo"/> of the method.</returns>
+        </member>
         <member name="M:NHibernate.Linq.ReflectionHelper.GetMethodDefinition(System.Linq.Expressions.Expression{System.Action})">
             <summary>
             Extract the <see cref="T:System.Reflection.MethodInfo"/> from a given expression.
@@ -29269,6 +29349,13 @@
             <param name="method">The method.</param>
             <returns>The <see cref="T:System.Reflection.MethodInfo"/> of the no-generic method or the generic-definition for a generic-method.</returns>
             <seealso cref="M:System.Reflection.MethodInfo.GetGenericMethodDefinition"/>
+        </member>
+        <member name="M:NHibernate.Linq.ReflectionHelper.GetMethod(System.Linq.Expressions.Expression{System.Action})">
+            <summary>
+            Extract the <see cref="T:System.Reflection.MethodInfo"/> from a given expression.
+            </summary>
+            <param name="method">The method.</param>
+            <returns>The <see cref="T:System.Reflection.MethodInfo"/> of the method.</returns>
         </member>
         <member name="M:NHibernate.Linq.ReflectionHelper.GetProperty``2(System.Linq.Expressions.Expression{System.Func{``0,``1}})">
             <summary>
@@ -29278,6 +29365,11 @@
             <typeparam name="TResult">The type of the property.</typeparam>
             <param name="property">The expression representing the property getter.</param>
             <returns>The <see cref="T:System.Reflection.MemberInfo"/> of the property.</returns>
+        </member>
+        <member name="M:NHibernate.Linq.LinqLogging.LogExpression(System.String,System.Linq.Expressions.Expression)">
+            <summary>
+            If debug logging is enabled, log a string such as "msg: expression.ToString()".
+            </summary>
         </member>
         <member name="T:NHibernate.Linq.NhQueryable`1">
             <summary>
@@ -29311,6 +29403,13 @@
             </summary>
             <param name="collection"></param>
             <returns></returns>
+        </member>
+        <member name="M:NHibernate.Linq.SqlMethods.Like(System.String,System.String)">
+            <summary>
+            Use the SqlMethods.Like() method in a Linq2NHibernate expression to generate
+            an SQL LIKE expression. (Any 2-argument method named Like in a class named SqlMethods
+            will be translated.)
+            </summary>
         </member>
         <member name="M:NHibernate.Linq.TypeHelperExtensionMethods.As``1(System.Object)">
             <summary>
@@ -35476,7 +35575,7 @@
              Associate the proxy with the given session.
             
              Care should be given to make certain that the proxy is added to the session's persistence context as well
-             to maintain the symmetry of the association.  That must be done seperately as this method simply sets an
+             to maintain the symmetry of the association.  That must be done separately as this method simply sets an
              internal reference.  We do also check that if there is already an associated session that the proxy
              reference was removed from that previous session's persistence context.
              </summary>
