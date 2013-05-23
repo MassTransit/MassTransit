@@ -94,7 +94,7 @@ namespace MassTransit.Builders
         {
             IEndpoint endpoint = _settings.EndpointCache.GetEndpoint(_settings.InputAddress);
 
-            var serviceBus = new ServiceBus(endpoint, _settings.EndpointCache);
+            var serviceBus = new ServiceBus(endpoint, _settings.EndpointCache, _settings.EnablePerformanceCounters);
 
             return serviceBus;
         }

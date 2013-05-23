@@ -22,5 +22,7 @@ namespace MassTransit.BusConfigurators
 		void SetConcurrentConsumerLimit(int concurrentConsumerLimit);
 		void SetConcurrentReceiverLimit(int concurrentReceiverLimit);
 		void EnableAutoStart();
+	    void DisablePerformanceCounters();
+	    void EnablePerformanceCounters();
 	}
 }
