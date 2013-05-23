@@ -107,6 +107,11 @@ namespace MassTransit.BusConfigurators
             _settings.Network = network.IsEmpty() ? null : network;
         }
 
+        public void DisablePerformanceCounters()
+        {
+            _settings.EnablePerformanceCounters = false;
+        }
+
         public void BeforeConsumingMessage(Action beforeConsume)
         {
             if (_settings.BeforeConsume == null)

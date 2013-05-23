@@ -147,7 +147,7 @@ namespace MassTransit.Builders
         {
             IEndpoint endpoint = endpointCache.GetEndpoint(_settings.InputAddress);
 
-            return new ServiceBus(endpoint, endpointCache);
+            return new ServiceBus(endpoint, endpointCache, _settings.EnablePerformanceCounters);
         }
 
         void ConfigureBusSettings(ServiceBus bus)

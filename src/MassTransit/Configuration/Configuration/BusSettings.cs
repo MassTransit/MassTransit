@@ -39,5 +39,7 @@ namespace MassTransit.Configuration
 		int ConcurrentConsumerLimit { get; }
 
 		string Network { get; }
+
+	    bool EnablePerformanceCounters { get; }
 	}
 }

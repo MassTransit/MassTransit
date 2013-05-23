@@ -65,6 +65,11 @@ namespace MassTransit.BusConfigurators
         void SetNetwork(string network);
 
         /// <summary>
+        /// Disable the performance counters
+        /// </summary>
+        void DisablePerformanceCounters();
+
+        /// <summary>
         /// Specifies an action to call before a message is consumed. Implementors
         /// should take care to not remove previously set actions so that multiple
         /// calls to this method generates calls to all those action parameters.

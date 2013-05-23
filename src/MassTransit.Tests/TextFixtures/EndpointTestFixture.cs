@@ -53,6 +53,7 @@ namespace MassTransit.Tests.TextFixtures
 					x.SetConcurrentConsumerLimit(4);
 					x.SetReceiveTimeout(50.Milliseconds());
 					x.EnableAutoStart();
+				    x.DisablePerformanceCounters();
 				});
 
 			EstablishContext();

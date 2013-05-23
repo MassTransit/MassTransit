@@ -27,6 +27,7 @@ namespace MassTransit.BusConfigurators
 		    ShutdownTimeout = defaultSettings.ShutdownTimeout;
 			EndpointCache = defaultSettings.EndpointCache;
 			Network = defaultSettings.Network;
+		    EnablePerformanceCounters = defaultSettings.EnablePerformanceCounters;
 		}
 
 		public ServiceBusSettings(BusSettings settings)
@@ -38,6 +39,7 @@ namespace MassTransit.BusConfigurators
 		    ShutdownTimeout = settings.ShutdownTimeout;
 			EndpointCache = settings.EndpointCache;
 			Network = settings.Network;
+		    EnablePerformanceCounters = settings.EnablePerformanceCounters;
 		}
 
 		public ServiceBusSettings()
@@ -51,8 +53,9 @@ namespace MassTransit.BusConfigurators
 		public int ConcurrentConsumerLimit { get; set; }
 
 		public string Network { get; set; }
+	    public bool EnablePerformanceCounters { get; set; }
 
-		public Action BeforeConsume { get; set; }
+	    public Action BeforeConsume { get; set; }
 		public Action AfterConsume { get; set; }
 
 		public bool AutoStart { get; set; }
