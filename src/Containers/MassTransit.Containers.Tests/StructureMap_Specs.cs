@@ -29,10 +29,10 @@ namespace MassTransit.Containers.Tests
             _container = new Container(x =>
                 {
                     x.For<SimpleConsumer>()
-                        .Singleton()
                         .Use<SimpleConsumer>();
+                    x.For<ISimpleConsumerDependency>()
+                     .Use<SimpleConsumerDependency>();
                     x.For<AnotherMessageConsumer>()
-                        .Singleton()
                         .Use<AnotherMessageConsumerImpl>();
                 });
         }
@@ -46,11 +46,6 @@ namespace MassTransit.Containers.Tests
         protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
         {
             subscriptionBusServiceConfigurator.LoadFrom(_container);
-        }
-
-        protected override SimpleConsumer GetSimpleConsumer()
-        {
-            return _container.GetInstance<SimpleConsumer>();
         }
     }
 

@@ -38,9 +38,14 @@ namespace MassTransit.Containers.Tests
         {
             _container = new WindsorContainer();
             _container.Register(
-                Component.For<SimpleConsumer>(),
+                Component.For<SimpleConsumer>()
+                         .LifestyleTransient(),
+                Component.For<ISimpleConsumerDependency>()
+                         .ImplementedBy<SimpleConsumerDependency>()
+                         .LifestyleTransient(),
                 Component.For<AnotherMessageConsumer>()
-                         .ImplementedBy<AnotherMessageConsumerImpl>());
+                         .ImplementedBy<AnotherMessageConsumerImpl>()
+                         .LifestyleTransient());
         }
 
         [Finally]
@@ -52,11 +57,6 @@ namespace MassTransit.Containers.Tests
         protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
         {
             subscriptionBusServiceConfigurator.LoadFrom(_container);
-        }
-
-        protected override SimpleConsumer GetSimpleConsumer()
-        {
-            return _container.Resolve<SimpleConsumer>();
         }
     }
 
@@ -206,23 +206,12 @@ namespace MassTransit.Containers.Tests
         }
 
 
-        public interface IDepedency
-        {
-        }
-
-
-        public class Depedency :
-            IDepedency
-        {
-        }
-
-
         public class CheckScopeConsumer :
             Consumes<SimpleMessageInterface>.All
         {
-            readonly IDepedency _depedency;
             static SimpleMessageInterface _last;
             static ManualResetEvent _received = new ManualResetEvent(false);
+            readonly IDepedency _depedency;
 
             public CheckScopeConsumer(IDepedency depedency)
             {
@@ -247,6 +236,17 @@ namespace MassTransit.Containers.Tests
                 _last = message;
                 _received.Set();
             }
+        }
+
+
+        public class Depedency :
+            IDepedency
+        {
+        }
+
+
+        public interface IDepedency
+        {
         }
     }
 }

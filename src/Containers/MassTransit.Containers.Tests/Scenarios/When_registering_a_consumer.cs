@@ -10,7 +10,6 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
 namespace MassTransit.Containers.Tests.Scenarios
 {
     using System.Linq;
@@ -18,6 +17,7 @@ namespace MassTransit.Containers.Tests.Scenarios
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using Testing;
+
 
     [Scenario]
     public abstract class When_registering_a_consumer :
@@ -32,14 +32,14 @@ namespace MassTransit.Containers.Tests.Scenarios
         public void Should_have_a_subscription_for_the_consumer_message_type()
         {
             LocalBus.HasSubscription<SimpleMessageInterface>().Count()
-                .ShouldEqual(1, "No subscription for the SimpleMessageInterface was found.");
+                    .ShouldEqual(1, "No subscription for the SimpleMessageInterface was found.");
         }
 
         [Then]
         public void Should_have_a_subscription_for_the_nested_consumer_type()
         {
             LocalBus.HasSubscription<AnotherMessageInterface>().Count()
-                .ShouldEqual(1, "Only one subscription should be registered for another consumer");
+                    .ShouldEqual(1, "Only one subscription should be registered for another consumer");
         }
 
         [Then]
@@ -54,10 +54,17 @@ namespace MassTransit.Containers.Tests.Scenarios
 
             complete.WaitOne(8.Seconds());
 
-            GetSimpleConsumer()
-                .Last.Name.ShouldEqual(name);
-        }
+            SimpleConsumer lastConsumer = SimpleConsumer.LastConsumer;
+            lastConsumer.ShouldNotBeNull();
 
-        protected abstract SimpleConsumer GetSimpleConsumer();
+            lastConsumer.Last.Name
+                        .ShouldEqual(name);
+
+            lastConsumer.Dependency.WasDisposed
+                        .ShouldBeTrue("Dependency was not disposed");
+            lastConsumer.Dependency.SomethingDone
+                        .ShouldBeTrue("Dependency was disposed before consumer executed");
+
+        }
     }
 }

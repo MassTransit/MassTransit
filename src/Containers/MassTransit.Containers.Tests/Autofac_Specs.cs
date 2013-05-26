@@ -1,12 +1,12 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -18,6 +18,7 @@ namespace MassTransit.Containers.Tests
     using Scenarios;
     using SubscriptionConfigurators;
 
+
     [Scenario]
     public class Autofac_Consumer :
         When_registering_a_consumer
@@ -27,18 +28,13 @@ namespace MassTransit.Containers.Tests
         public Autofac_Consumer()
         {
             var builder = new ContainerBuilder();
-            builder.RegisterType<SimpleConsumer>()
-                .SingleInstance();
+            builder.RegisterType<SimpleConsumer>();
+            builder.RegisterType<SimpleConsumerDependency>()
+                   .As<ISimpleConsumerDependency>();
             builder.RegisterType<AnotherMessageConsumerImpl>()
-                .As<AnotherMessageConsumer>()
-                .SingleInstance();
-                
-            _container = builder.Build();
-        }
+                   .As<AnotherMessageConsumer>();
 
-        protected override SimpleConsumer GetSimpleConsumer()
-        {
-            return _container.Resolve<SimpleConsumer>();
+            _container = builder.Build();
         }
 
         [Finally]
@@ -53,6 +49,7 @@ namespace MassTransit.Containers.Tests
         }
     }
 
+
     [Scenario]
     public class Autofac_Saga :
         When_registering_a_saga
@@ -63,8 +60,8 @@ namespace MassTransit.Containers.Tests
         {
             var builder = new ContainerBuilder();
             builder.RegisterGeneric(typeof(InMemorySagaRepository<>))
-                .As(typeof (ISagaRepository<>))
-                .SingleInstance();
+                   .As(typeof(ISagaRepository<>))
+                   .SingleInstance();
             builder.RegisterType<SimpleSaga>();
 
             _container = builder.Build();

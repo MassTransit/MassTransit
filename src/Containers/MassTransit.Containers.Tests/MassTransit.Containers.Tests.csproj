@@ -100,9 +100,11 @@
     <Compile Include="Autofac_Specs.cs" />
     <Compile Include="Scenarios\AnotherMessageInterface.cs" />
     <Compile Include="Scenarios\FirstSagaMessage.cs" />
+    <Compile Include="Scenarios\ISimpleConsumerDependency.cs" />
     <Compile Include="Scenarios\SecondSagaMessage.cs" />
     <Compile Include="Scenarios\AnotherMessageConsumer.cs" />
     <Compile Include="Scenarios\AnotherMessageConsumerImpl.cs" />
+    <Compile Include="Scenarios\SimpleConsumerDependency.cs" />
     <Compile Include="Scenarios\SimpleSaga.cs" />
     <Compile Include="Scenarios\ThirdSagaMessage.cs" />
     <Compile Include="Scenarios\When_registering_a_saga.cs" />
