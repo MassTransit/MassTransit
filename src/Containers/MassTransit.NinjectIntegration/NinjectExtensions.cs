@@ -22,6 +22,7 @@ namespace MassTransit
     using Saga.SubscriptionConfigurators;
     using SubscriptionConfigurators;
 
+
     /// <summary>
     /// For NInject, it seems that using named scopes is the way to get per-message implementations
     /// http://www.planetgeek.ch/2010/12/08/how-to-use-the-additional-ninject-scopes-of-namedscope/
@@ -67,19 +68,23 @@ namespace MassTransit
             this SubscriptionBusServiceConfigurator configurator, IKernel kernel)
             where TSaga : class, ISaga
         {
-            return configurator.Saga(kernel.Get<ISagaRepository<TSaga>>());
+            var sagaRepository = kernel.Get<ISagaRepository<TSaga>>();
+
+            var ninjectSagaRepository = new NinjectSagaRepository<TSaga>(sagaRepository, kernel);
+
+            return configurator.Saga(ninjectSagaRepository);
         }
 
         static IList<Type> FindTypes<T>(IKernel kernel, Func<Type, bool> filter)
         {
             return AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(s => s.GetTypes())
-                .Where(typeof(T).IsAssignableFrom)
-                .SelectMany(kernel.GetBindings)
-                .Select(x => x.Service)
-                .Distinct()
-                .Where(filter)
-                .ToList();
+                            .SelectMany(s => s.GetTypes())
+                            .Where(typeof(T).IsAssignableFrom)
+                            .SelectMany(kernel.GetBindings)
+                            .Select(x => x.Service)
+                            .Distinct()
+                            .Where(filter)
+                            .ToList();
         }
     }
 }

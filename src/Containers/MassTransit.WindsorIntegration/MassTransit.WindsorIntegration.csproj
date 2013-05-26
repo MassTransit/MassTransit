@@ -91,6 +91,7 @@
     <Compile Include="WindsorContainerExtensions.cs" />
     <Compile Include="WindsorConsumerFactory.cs" />
     <Compile Include="WindsorConsumerFactoryConfigurator.cs" />
+    <Compile Include="WindsorSagaRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">

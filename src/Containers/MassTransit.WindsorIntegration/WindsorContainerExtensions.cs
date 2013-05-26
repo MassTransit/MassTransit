@@ -101,7 +101,12 @@ namespace MassTransit
                 throw new ArgumentNullException("configurator");
             if (container == null)
                 throw new ArgumentNullException("container");
-            return configurator.Saga(container.Resolve<ISagaRepository<TSaga>>());
+
+            var sagaRepository = container.Resolve<ISagaRepository<TSaga>>();
+
+            var windsorSagaRepository = new WindsorSagaRepository<TSaga>(sagaRepository, container);
+
+            return configurator.Saga(windsorSagaRepository);
         }
 
         /// <summary>
