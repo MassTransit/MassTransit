@@ -14,6 +14,7 @@ namespace MassTransit.WindsorIntegration
 {
 	using System;
 	using System.Collections.Generic;
+	using Castle.MicroKernel.Lifestyle;
 	using Castle.Windsor;
 	using Exceptions;
 	using Pipeline;
@@ -33,21 +34,24 @@ namespace MassTransit.WindsorIntegration
 			IConsumeContext<TMessage> context, InstanceHandlerSelector<T, TMessage> selector)
 			where TMessage : class
 		{
-			var consumer = _container.Resolve<T>();
-			if (consumer == null)
-				throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ", typeof (T)));
+		    using (_container.BeginScope())
+		    {
+		        var consumer = _container.Resolve<T>();
+		        if (consumer == null)
+		            throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ", typeof(T)));
 
-			try
-			{
-				foreach (var handler in selector(consumer, context))
-				{
-					yield return handler;
-				}
-			}
-			finally
-			{
-				_container.Release(consumer);
-			}
+		        try
+		        {
+		            foreach (var handler in selector(consumer, context))
+		            {
+		                yield return handler;
+		            }
+		        }
+		        finally
+		        {
+		            _container.Release(consumer);
+		        }
+		    }
 		}
 	}
 }

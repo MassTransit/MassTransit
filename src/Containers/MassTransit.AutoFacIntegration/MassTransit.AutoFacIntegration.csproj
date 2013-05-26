@@ -59,6 +59,7 @@
     <Compile Include="AutofacConsumerFactory.cs" />
     <Compile Include="AutofacConsumerFactoryConfigurator.cs" />
     <Compile Include="AutofacExtensions.cs" />
+    <Compile Include="AutofacSagaRepository.cs" />
     <Compile Include="AutofacSagaRepositoryFactoryConfigurator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -82,6 +82,7 @@
     <Compile Include="StructureMapConsumerFactory.cs" />
     <Compile Include="StructureMapConsumerFactoryConfigurator.cs" />
     <Compile Include="StructureMapSagaFactoryConfigurator.cs" />
+    <Compile Include="StructureMapSagaRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">

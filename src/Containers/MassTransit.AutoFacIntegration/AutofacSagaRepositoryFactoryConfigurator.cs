@@ -23,11 +23,13 @@ namespace MassTransit.AutofacIntegration
 	{
 		readonly SubscriptionBusServiceConfigurator _configurator;
         readonly ILifetimeScope _scope;
+	    string _name;
 
-        public AutofacSagaRepositoryFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope)
+	    public AutofacSagaRepositoryFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope, string name)
 		{
             _scope = scope;
-			_configurator = configurator;
+	        _name = name;
+	        _configurator = configurator;
 		}
 
 		public void ConfigureSaga(Type sagaType)
@@ -39,7 +41,10 @@ namespace MassTransit.AutofacIntegration
 		public void Configure<T>()
 			where T : class, ISaga
 		{
-			_configurator.Saga(_scope.Resolve<ISagaRepository<T>>());
+		    var sagaRepository = _scope.Resolve<ISagaRepository<T>>();
+
+		    var autofacSagaRepository = new AutofacSagaRepository<T>(sagaRepository, _scope, _name);
+		    _configurator.Saga(autofacSagaRepository);
 		}
 	}
 }

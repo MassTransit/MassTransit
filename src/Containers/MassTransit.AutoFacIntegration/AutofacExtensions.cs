@@ -47,7 +47,7 @@ namespace MassTransit
             IList<Type> sagaTypes = FindTypes<ISaga>(scope, x => true);
             if (sagaTypes.Count > 0)
             {
-                var sagaConfigurator = new AutofacSagaRepositoryFactoryConfigurator(configurator, scope);
+                var sagaConfigurator = new AutofacSagaRepositoryFactoryConfigurator(configurator, scope, name);
 
                 foreach (Type type in sagaTypes)
                     sagaConfigurator.ConfigureSaga(type);
@@ -79,10 +79,14 @@ namespace MassTransit
         /// <param name="scope"></param>
         /// <returns></returns>
         public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-            this SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope)
+            this SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope, string name = "message")
             where TSaga : class, ISaga
         {
-            return configurator.Saga(scope.Resolve<ISagaRepository<TSaga>>());
+            var sagaRepository = scope.Resolve<ISagaRepository<TSaga>>();
+
+            var autofacSagaRepository = new AutofacSagaRepository<TSaga>(sagaRepository, scope, name);
+
+            return configurator.Saga(autofacSagaRepository);
         }
 
         static IList<Type> FindTypes<T>(ILifetimeScope scope, Func<Type, bool> filter)
