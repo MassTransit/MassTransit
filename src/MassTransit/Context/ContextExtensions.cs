@@ -17,13 +17,13 @@ namespace MassTransit
 
     public static class ContextExtensions
     {
-        public static void ForwardUsingOriginalContext<T>(this ISendContext target,
-            IConsumeContext<T> source)
-            where T : class
+        public static void ForwardUsingOriginalContext(this ISendContext target,
+            IConsumeContext source)
         {
             target.SetRequestId(source.RequestId);
             target.SetConversationId(source.ConversationId);
             target.SetCorrelationId(source.CorrelationId);
+            target.SetSourceAddress(source.SourceAddress);
             target.SetResponseAddress(source.ResponseAddress);
             target.SetFaultAddress(source.FaultAddress);
             target.SetNetwork(source.Network);
@@ -32,9 +32,16 @@ namespace MassTransit
             target.SetRetryCount(source.RetryCount);
 
             foreach (var header in source.Headers)
-            {
                 target.SetHeader(header.Key, header.Value);
-            }
+
+            var inputAddress = source.InputAddress != null
+                                   ? source.InputAddress.ToString()
+                                   : source.DestinationAddress != null
+                                         ? source.DestinationAddress.ToString()
+                                         : null;
+
+            if(!string.IsNullOrEmpty(inputAddress))
+                target.SetHeader("mt.forwarder.uri", source.DestinationAddress.ToString());
         }
 
         public static IConsumeContext Context(this IConsumer instance)

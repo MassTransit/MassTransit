@@ -109,6 +109,7 @@
     <Compile Include="Configuration\EndpointConfigurators\AddSerializerEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\ShutdownConfigurationExtensions.cs" />
     <Compile Include="Configuration\InterceptorExtensions.cs" />
+    <Compile Include="EndpointExtensions.cs" />
     <Compile Include="IFault.cs" />
     <Compile Include="NewId\INewIdFormatter.cs" />
     <Compile Include="NewId\INewIdParser.cs" />
