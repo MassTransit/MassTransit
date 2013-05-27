@@ -116,6 +116,11 @@ namespace MassTransit.Transports.Msmq
             get { return _messageNameFormatter; }
         }
 
+        public IEndpointAddress GetAddress(Uri uri, bool transactional)
+        {
+            return new MsmqEndpointAddress(uri);
+        }
+
         public void Dispose()
         {
         }

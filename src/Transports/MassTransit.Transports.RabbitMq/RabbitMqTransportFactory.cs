@@ -147,6 +147,11 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
+        public IEndpointAddress GetAddress(Uri uri, bool transactional)
+        {
+            return RabbitMqEndpointAddress.Parse(uri);
+        }
+
         void Dispose(bool disposing)
         {
             if (_disposed)

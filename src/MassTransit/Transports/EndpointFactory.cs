@@ -52,18 +52,20 @@ namespace MassTransit.Transports
             _endpointBuilders = new ConcurrentCache<Uri, EndpointBuilder>(endpointBuilders);
         }
 
-        public IEndpoint CreateEndpoint(Uri uri)
+        public IEndpoint CreateEndpoint(Uri requestedUri)
         {
-            string scheme = uri.Scheme.ToLowerInvariant();
+            string scheme = requestedUri.Scheme.ToLowerInvariant();
 
             if (_transportFactories.Has(scheme))
             {
                 ITransportFactory transportFactory = _transportFactories[scheme];
                 try
                 {
-                    EndpointBuilder builder = _endpointBuilders.Get(uri, key =>
+                    IEndpointAddress address = transportFactory.GetAddress(requestedUri, _defaults.RequireTransactional ||
+                        (_defaults.CreateMissingQueues && _defaults.CreateTransactionalQueues));
+                    EndpointBuilder builder = _endpointBuilders.Get(address.Uri, key =>
                         {
-                            var configurator = new EndpointConfiguratorImpl(uri, _defaults);
+                            var configurator = new EndpointConfiguratorImpl(address, _defaults);
                             return configurator.CreateBuilder();
                         });
 
@@ -71,12 +73,12 @@ namespace MassTransit.Transports
                 }
                 catch (Exception ex)
                 {
-                    throw new EndpointException(uri, "Failed to create endpoint", ex);
+                    throw new EndpointException(requestedUri, "Failed to create endpoint", ex);
                 }
             }
 
             throw new ConfigurationException(
-                "The {0} scheme was not handled by any registered transport.".FormatWith(uri.Scheme));
+                "The {0} scheme was not handled by any registered transport.".FormatWith(requestedUri.Scheme));
         }
 
         public void AddTransportFactory(ITransportFactory factory)

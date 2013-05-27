@@ -19,7 +19,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		EndpointTestFixture<MsmqTransportFactory>
 	{
 		public MsmqEndpointOnlyTestFixture()
-			: this(new EndpointSettings("msmq://localhost/mt_client"))
+			: this(new EndpointSettings(new MsmqEndpointAddress(new Uri("msmq://localhost/mt_client"))))
 		{
 			ConfigureEndpointFactory(x =>
 				{

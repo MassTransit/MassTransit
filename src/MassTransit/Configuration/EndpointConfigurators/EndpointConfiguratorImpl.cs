@@ -22,30 +22,31 @@ namespace MassTransit.EndpointConfigurators
     using Transports;
     using Util;
 
+
     public class EndpointConfiguratorImpl :
         EndpointConfigurator,
         EndpointFactoryBuilderConfigurator
     {
+        readonly Uri _baseUri;
         readonly EndpointSettings _settings;
-        readonly Uri _uri;
         IEndpointAddress _errorAddress;
         OutboundTransportFactory _errorTransportFactory;
         DuplexTransportFactory _transportFactory;
 
-        public EndpointConfiguratorImpl([NotNull] Uri uri,
+        public EndpointConfiguratorImpl([NotNull] IEndpointAddress address,
             [NotNull] IEndpointFactoryDefaultSettings defaultSettings)
         {
-            if (uri == null)
-                throw new ArgumentNullException("uri");
+            if (address == null)
+                throw new ArgumentNullException("address");
             if (defaultSettings == null)
                 throw new ArgumentNullException("defaultSettings");
 
-            _uri = uri;
+            _baseUri = new Uri(address.Uri.GetLeftPart(UriPartial.Path));
 
             _transportFactory = DefaultTransportFactory;
             _errorTransportFactory = DefaultErrorTransportFactory;
 
-            _settings = defaultSettings.CreateEndpointSettings(uri);
+            _settings = defaultSettings.CreateEndpointSettings(address);
         }
 
         public EndpointConfigurator UseSerializer(IMessageSerializer serializer)
@@ -120,9 +121,11 @@ namespace MassTransit.EndpointConfigurators
             {
                 if (string.Compare(_errorAddress.Uri.Scheme, _settings.Address.Uri.Scheme,
                     StringComparison.InvariantCultureIgnoreCase) != 0)
+                {
                     yield return this.Failure("ErrorAddress", _errorAddress.ToString(),
                         "The error address ('{0}') must use the same scheme as the endpoint address ('{1}')"
                             .FormatWith(_errorAddress.Uri, _settings.Address.Uri.Scheme));
+                }
                 else
                     yield return this.Success("ErrorAddress", "Using specified error address: " + _errorAddress);
             }
@@ -138,7 +141,7 @@ namespace MassTransit.EndpointConfigurators
         {
             EndpointBuilder endpointBuilder = CreateBuilder();
 
-            builder.AddEndpointBuilder(_uri, endpointBuilder);
+            builder.AddEndpointBuilder(_baseUri, endpointBuilder);
 
             return builder;
         }
@@ -147,7 +150,7 @@ namespace MassTransit.EndpointConfigurators
         {
             ITransportSettings errorSettings = new TransportSettings(_errorAddress ?? _settings.ErrorAddress, _settings);
 
-            var endpointBuilder = new EndpointBuilderImpl(_uri, _settings, errorSettings, _transportFactory,
+            var endpointBuilder = new EndpointBuilderImpl(_settings.Address, _settings, errorSettings, _transportFactory,
                 _errorTransportFactory, () => _settings.TrackerFactory(_settings.RetryLimit));
 
             return endpointBuilder;

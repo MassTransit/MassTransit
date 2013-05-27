@@ -325,6 +325,94 @@ namespace MassTransit.Transports.RabbitMq.Tests
         }
     }
 
+    [Scenario]
+    public class Given_a_prefetch_count
+    {
+        RabbitMqEndpointAddress _addr;
+        public string uri = "rabbitmq://localhost/somequeue?ha=true&prefetch=32";
+
+        [When]
+        public void WhenParsed()
+        {
+            _addr = RabbitMqEndpointAddress.Parse(uri);
+        }
+
+        [Then]
+        public void TheQueueArguments()
+        {
+            _addr.QueueArguments().ShouldNotBeNull();
+        }
+
+        [Then]
+        public void HighAvailabilityQueue()
+        {
+            _addr.QueueArguments()["x-ha-policy"].ShouldEqual("all");
+        }
+
+        [Then]
+        public void Should_have_the_prefetch_count_on_the_address()
+        {
+            _addr.PrefetchCount.ShouldEqual((ushort)32);
+        }
+
+        [Then]
+        public void TheQueueName()
+        {
+            _addr.Name.ShouldEqual("somequeue");
+        }
+
+        [Then]
+        public void should_not_use_query_string_of_uri()
+        {
+            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/anotherone");
+            _addr.ForQueue("anotherone").Name.ShouldEqual("anotherone");
+        }
+    }
+
+    [Scenario]
+    public class Given_a_temporary_queue_was_requested
+    {
+        RabbitMqEndpointAddress _addr;
+        public string uri = "rabbitmq://localhost/*?temporary=true";
+
+        [When]
+        public void WhenParsed()
+        {
+            _addr = RabbitMqEndpointAddress.Parse(uri);
+        }
+
+        [Then]
+        public void TheQueueArguments()
+        {
+            _addr.QueueArguments().ShouldBeNull();
+        }
+
+        [Then]
+        public void Should_not_be_durable()
+        {
+            _addr.Durable.ShouldBeFalse();
+        }
+
+        [Then]
+        public void Should_be_exclusive_to_the_consumer()
+        {
+            _addr.Exclusive.ShouldBeTrue();
+        }
+
+        [Then]
+        public void Should_be_auto_delete()
+        {
+            _addr.AutoDelete.ShouldBeTrue();
+        }
+
+        [Then]
+        public void TheQueueName()
+        {
+            var guid = new Guid(_addr.Name);
+            Assert.AreNotEqual(Guid.Empty, guid);
+        }
+    }
+
 
     [Scenario]
     public class GivenATtl

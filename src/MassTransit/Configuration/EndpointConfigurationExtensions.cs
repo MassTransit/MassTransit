@@ -39,7 +39,7 @@ namespace MassTransit
 		public static EndpointConfigurator ConfigureEndpoint<T>(this T configurator, Uri uri)
 			where T : EndpointFactoryConfigurator
 		{
-			var endpointConfigurator = new EndpointConfiguratorImpl(uri, configurator.Defaults);
+			var endpointConfigurator = new EndpointConfiguratorImpl(new EndpointAddress(uri), configurator.Defaults);
 
 			configurator.AddEndpointFactoryConfigurator(endpointConfigurator);
 
