@@ -28,5 +28,7 @@ namespace MassTransit.Transports
         /// The message name formatter associated with this transport
         /// </summary>
         IMessageNameFormatter MessageNameFormatter { get; }
+
+        IEndpointAddress GetAddress(Uri uri, bool transactional);
     }
 }

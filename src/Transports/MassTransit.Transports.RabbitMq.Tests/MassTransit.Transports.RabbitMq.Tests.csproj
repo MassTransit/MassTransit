@@ -94,12 +94,14 @@
     <Compile Include="Bytes_Specs.cs" />
     <Compile Include="ConnectingFailure_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
+    <Compile Include="Given_a_service_bus_and_a_temporary_client.cs" />
     <Compile Include="Given_two_rabbitmq_buses_walk_into_a_bar.cs" />
     <Compile Include="Request_Specs.cs" />
     <Compile Include="RetryLater_Specs.cs" />
     <Compile Include="Security_Specs.cs" />
     <Compile Include="Selective_Consumer_Specs.cs" />
     <Compile Include="SerializationSupport_Specs.cs" />
+    <Compile Include="TemporaryQueue_Specs.cs" />
     <Compile Include="TestFactory.cs" />
     <Compile Include="Given_a_rabbitmq_bus.cs" />
     <Compile Include="Given_a_rabbitmq_bus_with_vhost_mt_and_credentials.cs" />

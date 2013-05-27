@@ -19,9 +19,9 @@ namespace MassTransit.Transports.Msmq
     public class MsmqTransportFactory :
         ITransportFactory
     {
-        IMessageNameFormatter _messageNameFormatter;
+        readonly IMessageNameFormatter _messageNameFormatter;
         
-        bool defaultRecoverable = true;
+        bool _defaultRecoverable = true;
 
         public MsmqTransportFactory()
         {
@@ -37,7 +37,7 @@ namespace MassTransit.Transports.Msmq
         {
             try
             {
-                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional, defaultRecoverable);
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional, _defaultRecoverable);
                 TransportSettings msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IInboundTransport inboundTransport = BuildInbound(settings);
@@ -55,7 +55,7 @@ namespace MassTransit.Transports.Msmq
         {
             try
             {
-                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional, defaultRecoverable);
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional, _defaultRecoverable);
                 TransportSettings msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
@@ -86,7 +86,7 @@ namespace MassTransit.Transports.Msmq
         {
             try
             {
-                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional, defaultRecoverable);
+                var msmqEndpointAddress = new MsmqEndpointAddress(settings.Address.Uri, settings.Transactional, _defaultRecoverable);
                 TransportSettings msmqSettings = GetTransportSettings(settings, msmqEndpointAddress);
 
                 IMsmqEndpointAddress transportAddress = msmqSettings.MsmqAddress();
@@ -118,6 +118,11 @@ namespace MassTransit.Transports.Msmq
         public IMessageNameFormatter MessageNameFormatter
         {
             get { return _messageNameFormatter; }
+        }
+
+        public IEndpointAddress GetAddress(Uri uri, bool transactional)
+        {
+            return new MsmqEndpointAddress(uri, transactional, _defaultRecoverable);
         }
 
         public void Dispose()

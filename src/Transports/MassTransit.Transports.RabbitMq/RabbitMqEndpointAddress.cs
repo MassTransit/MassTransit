@@ -38,19 +38,41 @@ namespace MassTransit.Transports.RabbitMq
         Func<bool> _isLocal;
         ushort _prefetch;
         int _ttl;
+        readonly bool _durable = true;
+        readonly bool _autoDelete = false;
+        readonly bool _exclusive = false;
+
+        public bool Exclusive
+        {
+            get { return _exclusive; }
+        }
 
         public RabbitMqEndpointAddress(Uri uri, ConnectionFactory connectionFactory, string name)
         {
             _uri = GetSanitizedUri(uri).Uri;
 
             _connectionFactory = connectionFactory;
+
+            if (name == "*")
+                name = NewId.Next().ToString("NS");
+
             _name = name;
 
             _isTransactional = uri.Query.GetValueFromQueryString("tx", false);
             _isLocal = () => DetermineIfEndpointIsLocal(uri);
-            _isHighAvailable = uri.Query.GetValueFromQueryString("ha", false);
+
             _ttl = uri.Query.GetValueFromQueryString("ttl", 0);
             _prefetch = uri.Query.GetValueFromQueryString("prefetch", (ushort)Math.Max(Environment.ProcessorCount, 10));
+
+            bool isTemporary = uri.Query.GetValueFromQueryString("temporary", false);
+            
+            _isHighAvailable = uri.Query.GetValueFromQueryString("ha", false);
+            if(_isHighAvailable && isTemporary)
+                throw new RabbitMqAddressException("A highly available queue cannot be temporary");
+
+            _durable = uri.Query.GetValueFromQueryString("durable", !isTemporary);
+            _exclusive = uri.Query.GetValueFromQueryString("exclusive", isTemporary);
+            _autoDelete = uri.Query.GetValueFromQueryString("autodelete", isTemporary);
         }
 
         public ConnectionFactory ConnectionFactory
@@ -70,9 +92,21 @@ namespace MassTransit.Transports.RabbitMq
 
         public IRabbitMqEndpointAddress ForQueue(string name)
         {
-            string uri = _uri.ToString();
-            uri = uri.Remove(uri.Length - _name.Length);
-            return new RabbitMqEndpointAddress(new Uri(uri).AppendToPath(name), _connectionFactory, name);
+            return ForQueue(_uri, name);
+        }
+
+        public IRabbitMqEndpointAddress ForQueue(Uri originalUri, string name)
+        {
+            Uri uri = new Uri(originalUri.GetLeftPart(UriPartial.Path));
+            if (uri.AbsolutePath.EndsWith(_name, StringComparison.InvariantCultureIgnoreCase))
+            {
+                var builder = new UriBuilder(uri.Scheme, uri.Host, uri.Port, uri.AbsolutePath.Remove(uri.AbsolutePath.Length - _name.Length) + name);
+                //builder.Query = uri.Query;
+
+                return new RabbitMqEndpointAddress(builder.Uri, _connectionFactory, name);
+            }
+
+            throw new InvalidOperationException("Uri is not properly formed");
         }
 
         public Uri Uri
@@ -88,6 +122,16 @@ namespace MassTransit.Transports.RabbitMq
         public bool IsTransactional
         {
             get { return _isTransactional; }
+        }
+
+        public bool Durable
+        {
+            get { return _durable; }
+        }
+
+        public bool AutoDelete
+        {
+            get { return _autoDelete; }
         }
 
         public IDictionary QueueArguments()
@@ -185,7 +229,10 @@ namespace MassTransit.Transports.RabbitMq
             ushort heartbeat = address.Query.GetValueFromQueryString("heartbeat", connectionFactory.RequestedHeartbeat);
             connectionFactory.RequestedHeartbeat = heartbeat;
 
-            VerifyQueueOrExchangeNameIsLegal(name);
+            if(name == "*")
+                name = NewId.Next().ToString("NS");
+            else
+                VerifyQueueOrExchangeNameIsLegal(name);
 
             return new RabbitMqEndpointAddress(address, connectionFactory, name);
         }

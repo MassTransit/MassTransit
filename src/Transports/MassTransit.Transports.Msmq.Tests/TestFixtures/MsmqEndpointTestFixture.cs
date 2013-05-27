@@ -30,7 +30,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
         protected IServiceBus FaultBus { get; set; }
 
         public MsmqEndpointTestFixture()
-            : this(new EndpointSettings("msmq://localhost/mt_client"))
+            : this(new EndpointSettings(new MsmqEndpointAddress(new Uri("msmq://localhost/mt_client"))))
         {
         }
 

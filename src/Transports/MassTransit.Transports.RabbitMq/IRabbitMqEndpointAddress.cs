@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-    using System;
     using System.Collections;
     using RabbitMQ.Client;
 
@@ -28,9 +27,23 @@ namespace MassTransit.Transports.RabbitMq
         /// </summary>
         ushort PrefetchCount { get; }
 
+        /// <summary>
+        /// If bound to a queue, the queue should be exclusive
+        /// </summary>
+        bool Exclusive { get; }
+
+        /// <summary>
+        /// If bound to a queue, the queue should be durable
+        /// </summary>
+        bool Durable { get; }
+
+        /// <summary>
+        /// If bound to a queue, the queue should automatically be deleted when connection closed
+        /// </summary>
+        bool AutoDelete { get; }
+
         IRabbitMqEndpointAddress ForQueue(string name);
+
         IDictionary QueueArguments();
-        void SetTtl(TimeSpan ttl);
-        void SetPrefetchCount(ushort count);
     }
 }

@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
     using Magnum;
     using Serialization;
     using Util;
@@ -21,17 +20,7 @@ namespace MassTransit.Transports
         TransportSettings,
         IEndpointSettings
     {
-        public EndpointSettings([NotNull] string uri)
-            : this(new EndpointAddress(uri))
-        {
-        }
-
-        public EndpointSettings([NotNull] Uri uri)
-            : this(new EndpointAddress(uri))
-        {
-        }
-
-        EndpointSettings(IEndpointAddress address)
+        public EndpointSettings(IEndpointAddress address)
             : base(address)
         {
             ErrorAddress = GetErrorEndpointAddress();

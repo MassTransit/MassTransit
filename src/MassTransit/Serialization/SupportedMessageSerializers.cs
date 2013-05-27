@@ -46,8 +46,11 @@ namespace MassTransit.Serialization
 
         public bool TryGetSerializer(string contentType, out IMessageSerializer serializer)
         {
-            if (_serializers.TryGetValue(contentType, out serializer))
-                return true;
+            if (!string.IsNullOrEmpty(contentType))
+            {
+                if (_serializers.TryGetValue(contentType, out serializer))
+                    return true;
+            }
 
             serializer = _defaultSerializer();
             return serializer != null;

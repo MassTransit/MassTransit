@@ -71,9 +71,9 @@ namespace MassTransit.EndpointConfigurators
         public bool RequireTransactional { get; set; }
         public TimeSpan TransactionTimeout { get; set; }
 
-        public EndpointSettings CreateEndpointSettings(Uri uri)
+        public EndpointSettings CreateEndpointSettings(IEndpointAddress address)
         {
-            var settings = new EndpointSettings(uri)
+            var settings = new EndpointSettings(address)
                 {
                     Serializer = Serializer,
                     SupportedSerializers = SupportedSerializers,

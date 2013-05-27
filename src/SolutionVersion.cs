@@ -6,9 +6,9 @@ using System.Security;
 [assembly: AssemblyProduct("MassTransit")]
 [assembly: AssemblyCopyright("Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al. - All rights reserved.")]
 [assembly: AssemblyVersion("2.7.0")]
-[assembly: AssemblyFileVersion("2.7.2")]
+[assembly: AssemblyFileVersion("2.7.3")]
 
 [assembly: ComVisibleAttribute(false)]
 [assembly: CLSCompliantAttribute(false)]
-[assembly: AssemblyInformationalVersion("2.7.2.ff6f25")]
+[assembly: AssemblyInformationalVersion("2.7.3.a8abd9")]
 
