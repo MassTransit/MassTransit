@@ -15,18 +15,18 @@ namespace MassTransit.Transports.RabbitMq
     using System;
     using System.Collections.Generic;
     using System.Linq;
+#if NET40
     using System.Threading.Tasks;
     using Magnum.Caching;
+#endif
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
-#if !NET35
-#endif
 
 
     public class RabbitMqProducer :
         ConnectionBinding<RabbitMqConnection>
     {
-#if !NET35
+#if NET40
         readonly Cache<ulong, TaskCompletionSource<bool>> _confirms;
 #endif
         readonly IRabbitMqEndpointAddress _address;
@@ -44,7 +44,7 @@ namespace MassTransit.Transports.RabbitMq
             _bindToQueue = bindToQueue;
             _exchangeBindings = new HashSet<ExchangeBinding>();
             _exchanges = new HashSet<string>();
-#if !NET35
+#if NET40
             _confirms = new ConcurrentCache<ulong, TaskCompletionSource<bool>>();
 #endif
         }
@@ -129,6 +129,7 @@ namespace MassTransit.Transports.RabbitMq
 
         void FailPendingConfirms()
         {
+#if NET40
             try
             {
                 var exception = new InvalidOperationException("Publish not confirmed before channel closed");
@@ -140,6 +141,7 @@ namespace MassTransit.Transports.RabbitMq
             }
 
             _confirms.Clear();
+#endif
         }
 
         public void ExchangeDeclare(string name)
@@ -207,6 +209,7 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
+#if NET40
         public Task PublishAsync(string exchangeName, IBasicProperties properties, byte[] body)
         {
             lock (_channelLock)
@@ -232,6 +235,7 @@ namespace MassTransit.Transports.RabbitMq
                 return task.Task;
             }
         }
+#endif
 
         void HandleModelShutdown(IModel model, ShutdownEventArgs reason)
         {
@@ -247,6 +251,7 @@ namespace MassTransit.Transports.RabbitMq
 
         void HandleNack(IModel model, BasicNackEventArgs args)
         {
+#if NET40
             IEnumerable<ulong> ids = Enumerable.Repeat(args.DeliveryTag, 1);
             if (args.Multiple)
                 ids = _confirms.GetAllKeys().Where(x => x <= args.DeliveryTag);
@@ -258,10 +263,12 @@ namespace MassTransit.Transports.RabbitMq
                 _confirms[id].TrySetException(exception);
                 _confirms.Remove(id);
             }
+#endif
         }
 
         void HandleAck(IModel model, BasicAckEventArgs args)
         {
+#if NET40
             IEnumerable<ulong> ids = Enumerable.Repeat(args.DeliveryTag, 1);
             if (args.Multiple)
                 ids = _confirms.GetAllKeys().Where(x => x <= args.DeliveryTag);
@@ -271,6 +278,7 @@ namespace MassTransit.Transports.RabbitMq
                 _confirms[id].TrySetResult(true);
                 _confirms.Remove(id);
             }
+#endif
         }
     }
 }
