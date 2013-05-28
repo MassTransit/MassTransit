@@ -70,11 +70,22 @@ namespace MassTransit.Transports.RabbitMq
                             properties.Headers = context.Headers.ToDictionary(entry => entry.Key, entry => entry.Value);
                             properties.Headers["Content-Type"]=context.ContentType;
 
+#if !NET35
+                            var task = _producer.PublishAsync(_address.Name, properties, body.ToArray());
+                            task.Wait();
+#else
                             _producer.Publish(_address.Name, properties, body.ToArray());
+#endif
 
                             _address.LogSent(context.MessageId ?? "", context.MessageType);
                         }
                     }
+#if !NET35
+                    catch (AggregateException ex)
+                    {
+                        throw new InvalidConnectionException(_address.Uri, "Publisher did not confirm message", ex.InnerException);
+                    }
+#endif
                     catch (AlreadyClosedException ex)
                     {
                         throw new InvalidConnectionException(_address.Uri, "Connection was already closed", ex);
