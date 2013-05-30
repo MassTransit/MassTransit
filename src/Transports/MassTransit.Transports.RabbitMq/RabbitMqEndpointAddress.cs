@@ -163,6 +163,7 @@ namespace MassTransit.Transports.RabbitMq
         {
             var uriPath = new Uri(uri.GetLeftPart(UriPartial.Path));
             var builder = new UriBuilder(uriPath.Scheme, uriPath.Host, uriPath.Port, uriPath.PathAndQuery);
+            builder.Query = string.IsNullOrEmpty(uri.Query) ? "" : uri.Query.Substring(1);
             return builder;
         }
 
