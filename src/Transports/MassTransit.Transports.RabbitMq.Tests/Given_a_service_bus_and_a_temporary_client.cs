@@ -19,7 +19,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [TestFixtureSetUp]
         public void LocalAndRemoteTestFixtureSetup()
         {
-            LocalUri = new Uri("rabbitmq://localhost:5672/*?temporary=true");
+            LocalUri = new Uri("rabbitmq://localhost:5672/*?temporary=true&prefetch=1");
 
             RemoteUri = new Uri("rabbitmq://localhost:5672/test_remote_queue");
 
