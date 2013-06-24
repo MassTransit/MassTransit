@@ -57,7 +57,7 @@ namespace MassTransit.Transports.RabbitMq
 
             MessageName messageName = _messageNameFormatter.GetMessageName(messageType);
 
-                _inboundTransport.BindSubscriberExchange(messageName.ToString());
+                _inboundTransport.BindSubscriberExchange(RabbitMqEndpointAddress.Parse(message.EndpointUri), messageName.ToString());
 
             _bindings[message.SubscriptionId] = messageName;
         }
