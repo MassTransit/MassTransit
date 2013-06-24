@@ -152,12 +152,12 @@ namespace MassTransit.Transports.RabbitMq
             return messageTypes;
         }
 
-        public void BindSubscriberExchange(string exchangeName)
+        public void BindSubscriberExchange(IRabbitMqEndpointAddress address, string exchangeName)
         {
             AddPublisherBinding();
             _connectionHandler.Use(connection =>
                 {
-                    _publisher.ExchangeBind(_address.Name, exchangeName);
+                    _publisher.ExchangeBind(address.Name, exchangeName);
                 });
         }
 
