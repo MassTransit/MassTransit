@@ -55,6 +55,12 @@ namespace MassTransit.EndpointConfigurators
             return this;
         }
 
+        public EndpointConfigurator UseSupportedSerializers(ISupportedMessageSerializers serializers)
+        {
+            _settings.SupportedSerializers = serializers;
+            return this;
+        }
+
         public EndpointConfigurator SetErrorAddress(Uri uri)
         {
             _errorAddress = new EndpointAddress(uri);

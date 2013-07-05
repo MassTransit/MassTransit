@@ -29,6 +29,13 @@ namespace MassTransit.EndpointConfigurators
         EndpointConfigurator UseSerializer(IMessageSerializer serializer);
 
         /// <summary>
+        /// Specify the supported serializers for this endpoint (overrides the defaults)
+        /// </summary>
+        /// <param name="serializers"></param>
+        /// <returns></returns>
+        EndpointConfigurator UseSupportedSerializers(ISupportedMessageSerializers serializers);
+
+        /// <summary>
         /// Overrides the default error address with a new error address
         /// </summary>
         /// <param name="uri"></param>
