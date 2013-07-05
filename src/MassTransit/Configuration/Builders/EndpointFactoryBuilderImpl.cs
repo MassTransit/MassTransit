@@ -95,6 +95,11 @@ namespace MassTransit.Builders
             _defaults.PurgeOnStartup = purgeOnStartup;
         }
 
+        public void SetSupportedMessageSerializers(ISupportedMessageSerializers supportedSerializers)
+        {
+            _defaults.SupportedSerializers = supportedSerializers;
+        }
+
         public void AddEndpointBuilder(Uri uri, EndpointBuilder endpointBuilder)
         {
             _endpointBuilders[uri] = endpointBuilder;

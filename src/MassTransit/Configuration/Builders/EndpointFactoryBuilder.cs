@@ -87,5 +87,10 @@ namespace MassTransit.Builders
         /// Sets the default message tracker factory for all endpoints
         /// </summary>
 	    void SetDefaultInboundMessageTrackerFactory(MessageTrackerFactory messageTrackerFactory);
+
+        /// <summary>
+        /// Sets the supported message serializers for all endpoints
+        /// </summary>
+        void SetSupportedMessageSerializers(ISupportedMessageSerializers supportedSerializers);
 	}
 }
