@@ -58,12 +58,17 @@ namespace MassTransit.Serialization
 									Iv = Convert.ToBase64String(encryptedStream.Iv),
 								};
 
+							// Encrypt message and set context
 							var encryptedContext = new SendContext<EncryptedMessageEnvelope>(encryptedMessage);
 							encryptedContext.SetUsing(context);
 							encryptedContext.SetMessageType(typeof (EncryptedMessageEnvelope));
-							encryptedContext.SetContentType(ContentTypeHeaderValue);
 
+							// Serialize secure message to output
 							_wrappedSerializer.Serialize(output, encryptedContext);
+
+							// Set the encrypted context back into the send context
+							encryptedContext.SetContentType(ContentTypeHeaderValue);
+							context.SetUsing(encryptedContext);
 						}
 					}
 				}

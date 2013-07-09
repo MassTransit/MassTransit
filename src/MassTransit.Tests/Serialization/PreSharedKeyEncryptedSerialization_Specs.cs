@@ -25,6 +25,8 @@ namespace MassTransit.Tests.Serialization
 	{
 		PartialSerializationTestMessage _message;
 
+		string _key = "eguhidbehumjdemy1234567890123456";
+
 		[SetUp]
 		public void SetupContext()
 		{
@@ -46,9 +48,8 @@ namespace MassTransit.Tests.Serialization
 		public void The_encrypted_serializer_should_be_awesome()
 		{
 			byte[] serializedMessageData;
-			string key = "eguhidbehumjdemy1234567890123456";
 
-			var serializer = new PreSharedKeyEncryptedMessageSerializer(key, new TSerializer());
+			var serializer = new PreSharedKeyEncryptedMessageSerializer(_key, new TSerializer());
 
 			using (var output = new MemoryStream())
 			{
@@ -70,6 +71,39 @@ namespace MassTransit.Tests.Serialization
 				context.ShouldNotBeNull();
 
 				context.Message.ShouldEqual(_message);
+			}
+		}
+
+		[Test(Description = "Validates that content type is set correctly set so the right serializer is selected at reception.")]
+		public void Endpoint_receive_should_select_encrypted_serializer_based_on_content_type()
+		{
+			var serializer = new PreSharedKeyEncryptedMessageSerializer(_key, new TSerializer());
+			var pingMessage = new PingMessage(Guid.NewGuid());
+			const string self = "loopback://127.0.0.1/self";
+            
+			using (var bus = ServiceBusFactory.New(sbc =>
+			{
+				sbc.ReceiveFrom(self);
+				// Ensure outbound message are serialized and encrypted
+				sbc.SetDefaultSerializer(serializer);
+				sbc.Subscribe(s => s.Handler<PingMessage>((context, message) => context.Respond(new PongMessage(message.CorrelationId))));
+			}))
+			{
+				var selfEndpoint = bus.GetEndpoint(new Uri(self));
+				selfEndpoint.ShouldNotBeNull();
+
+				try
+				{
+					selfEndpoint.SendRequest(pingMessage, bus, x =>
+					{
+						x.SetTimeout(TimeSpan.FromSeconds(5));
+						x.Handle<PongMessage>(pongMsg => pongMsg.CorrelationId.ShouldEqual(pingMessage.CorrelationId));
+					});
+				}
+				catch (Exception e)
+				{
+					Assert.Fail(e.ToString());
+				}
 			}
 		}
 	}
