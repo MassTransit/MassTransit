@@ -48,8 +48,7 @@ namespace MassTransit.RuntimeServices
                                 sbc.UseControlBus();
                                 sbc.UseLog4Net();
 
-                                sbc.UseMsmq();
-                                sbc.UseSubscriptionService(configuration.SubscriptionServiceUri);
+                                sbc.UseMsmq(x => x.UseSubscriptionService(configuration.SubscriptionServiceUri));
 
                                 sbc.SetConcurrentConsumerLimit(1);
                             });

@@ -8,7 +8,7 @@ using System.Security;
 [assembly: AssemblyVersion("2.7.0")]
 [assembly: AssemblyFileVersion("2.7.4")]
 
+[assembly: AssemblyInformationalVersion("2.7.4.5911e2")]
 [assembly: ComVisibleAttribute(false)]
 [assembly: CLSCompliantAttribute(false)]
-[assembly: AssemblyInformationalVersion("2.7.4.280b2d")]
 

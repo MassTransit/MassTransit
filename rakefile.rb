@@ -113,7 +113,7 @@ ilmerge :ilmerge_masstransit do |ilm|
         ilm.use MSB_USE
 	ilm.log = File.join( props[:src], "MassTransit","bin","#{BUILD_CONFIG}", 'ilmerge.log' )
 	ilm.allow_dupes = true
-	ilm.references = [ 'MassTransit.dll', 'Stact.dll', 'Newtonsoft.Json.dll']
+	ilm.references = [ 'MassTransit.dll', 'Stact.dll']
     ilm.keyfile = props[:keyfile]
 end
 
@@ -369,6 +369,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "Magnum", "2.1.0"
+    nuspec.dependency "Newtonsoft.Json", "5.0.6"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
 	add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
