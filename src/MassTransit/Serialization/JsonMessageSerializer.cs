@@ -33,11 +33,22 @@ namespace MassTransit.Serialization
         [ThreadStatic]
         static JsonSerializer _serializer;
 
-        public static JsonSerializer Deserializer
-        {
-            get
-            {
-                return _deserializer ?? (_deserializer = JsonSerializer.Create(new JsonSerializerSettings
+        public static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        DefaultValueHandling = DefaultValueHandling.Ignore,
+                        MissingMemberHandling = MissingMemberHandling.Ignore,
+                        ObjectCreationHandling = ObjectCreationHandling.Auto,
+                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+                        ContractResolver = new JsonContractResolver(),
+                        Converters = new List<JsonConverter>(new JsonConverter[]
+                            {
+                                new ByteArrayConverter(), 
+                                new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
+                            }),
+                    };
+
+        public static JsonSerializerSettings DeserializerSettings = new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore,
                         DefaultValueHandling = DefaultValueHandling.Ignore,
@@ -53,7 +64,14 @@ namespace MassTransit.Serialization
                                 new StringDecimalConverter(),
                                 new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
                             })
-                    }));
+                    };
+
+
+        public static JsonSerializer Deserializer
+        {
+            get
+            {
+                return _deserializer ?? (_deserializer = JsonSerializer.Create(DeserializerSettings));
             }
         }
 
@@ -61,20 +79,7 @@ namespace MassTransit.Serialization
         {
             get
             {
-                return _serializer ?? (_serializer = JsonSerializer.Create(new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore,
-                        DefaultValueHandling = DefaultValueHandling.Ignore,
-                        MissingMemberHandling = MissingMemberHandling.Ignore,
-                        ObjectCreationHandling = ObjectCreationHandling.Auto,
-                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                        ContractResolver = new JsonContractResolver(),
-                        Converters = new List<JsonConverter>(new JsonConverter[]
-                            {
-                                new ByteArrayConverter(), 
-                                new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
-                            }),
-                    }));
+                return _serializer ?? (_serializer = JsonSerializer.Create(SerializerSettings));
             }
         }
 
