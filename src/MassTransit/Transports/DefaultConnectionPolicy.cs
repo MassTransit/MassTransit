@@ -91,7 +91,7 @@ namespace MassTransit.Transports
                     }
                     _connectionHandler.Connect();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     _log.Warn("Failed to reconnect, deferring to connection policy for reconnection");
                     _connectionHandler.ForceReconnect(_reconnectDelay);

@@ -16,6 +16,7 @@ namespace MassTransit.Distributor.Pipeline
     using System.Collections.Generic;
     using System.Linq;
     using Context;
+    using Magnum.Reflection;
     using MassTransit.Pipeline;
     using Messages;
 
@@ -52,6 +53,9 @@ namespace MassTransit.Distributor.Pipeline
             IConsumeContext<Distributed<TMessage>> context)
         {
             TMessage payload = context.Message.Payload;
+            if (payload == null)
+                payload = FastActivator<TMessage>.Create();
+
             var payloadContext = new ConsumeContext<TMessage>(context.BaseContext, payload);
 
             return _output.Enumerate(payloadContext)
