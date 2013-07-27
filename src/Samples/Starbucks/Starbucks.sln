@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "References", "References", "{1FEFCD44-83A0-4240-B321-A73A53C6DC9E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Starbucks.Messages", "Starbucks.Messages\Starbucks.Messages.csproj", "{D9486A62-4F12-4018-802B-517DD11DE66A}"
@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Starbucks.Customer", "Starb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "..\..\MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq", "..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "..\..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NinjectIntegration", "..\..\Containers\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj", "{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}"
@@ -22,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Log4NetIntegration", "..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj", "{8D2BE372-A756-4676-B2EA-ED7846809BFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.RabbitMq", "..\..\Transports\MassTransit.Transports.RabbitMq\MassTransit.Transports.RabbitMq.csproj", "{6C7149D7-4D97-45DF-A05D-61EC7374491D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,11 +59,6 @@ Global
 		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Build|Any CPU.ActiveCfg = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F5E67502-2B30-484C-88C3-97710291F5AA}.Build|Any CPU.ActiveCfg = Release|Any CPU
 		{F5E67502-2B30-484C-88C3-97710291F5AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F5E67502-2B30-484C-88C3-97710291F5AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -87,16 +82,22 @@ Global
 		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C7149D7-4D97-45DF-A05D-61EC7374491D}.Build|Any CPU.ActiveCfg = Release|Any CPU
+		{6C7149D7-4D97-45DF-A05D-61EC7374491D}.Build|Any CPU.Build.0 = Release|Any CPU
+		{6C7149D7-4D97-45DF-A05D-61EC7374491D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C7149D7-4D97-45DF-A05D-61EC7374491D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C7149D7-4D97-45DF-A05D-61EC7374491D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C7149D7-4D97-45DF-A05D-61EC7374491D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273} = {1FEFCD44-83A0-4240-B321-A73A53C6DC9E}
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {1FEFCD44-83A0-4240-B321-A73A53C6DC9E}
 		{F5E67502-2B30-484C-88C3-97710291F5AA} = {1FEFCD44-83A0-4240-B321-A73A53C6DC9E}
 		{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F} = {1FEFCD44-83A0-4240-B321-A73A53C6DC9E}
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {1FEFCD44-83A0-4240-B321-A73A53C6DC9E}
 		{8D2BE372-A756-4676-B2EA-ED7846809BFE} = {1FEFCD44-83A0-4240-B321-A73A53C6DC9E}
+		{6C7149D7-4D97-45DF-A05D-61EC7374491D} = {1FEFCD44-83A0-4240-B321-A73A53C6DC9E}
 	EndGlobalSection
 EndGlobal
