@@ -34,10 +34,6 @@ namespace MassTransit.Serialization
             if (objectType.IsArray)
             {
                 Type elementType = objectType.GetElementType();
-//                Type elementType =
-//                    objectType.GetInterfaces().First(i => typeof (IEnumerable).IsAssignableFrom(i) && i.IsGenericType).
-//                        GetGenericArguments()[0];
-
                 return this.FastInvoke<ListJsonConverter, object>(new[] {elementType}, "GetSingleItemList", reader,
                     serializer, true);
             }

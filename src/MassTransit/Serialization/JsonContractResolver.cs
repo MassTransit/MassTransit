@@ -1,49 +1,51 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System.Reflection;
-	using Newtonsoft.Json;
-	using Newtonsoft.Json.Serialization;
+    using System;
+    using System.Reflection;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
 
-	public class JsonContractResolver :
-		CamelCasePropertyNamesContractResolver
-	{
-		protected override JsonDictionaryContract CreateDictionaryContract(System.Type objectType)
-		{
-			JsonDictionaryContract contract = base.CreateDictionaryContract(objectType);
 
-			// don't camel-case the key names of a dictionary
-			contract.PropertyNameResolver = x => x;
+    public class JsonContractResolver :
+        CamelCasePropertyNamesContractResolver
+    {
+        protected override JsonDictionaryContract CreateDictionaryContract(Type objectType)
+        {
+            JsonDictionaryContract contract = base.CreateDictionaryContract(objectType);
 
-			return contract;
-		}
+            // don't camel-case the key names of a dictionary
+            contract.PropertyNameResolver = x => x;
 
-		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
-		{
-			JsonProperty property = base.CreateProperty(member, memberSerialization);
+            return contract;
+        }
 
-			if (!property.Writable)
-			{
-				var propertyInfo = member as PropertyInfo;
-				if (propertyInfo != null)
-				{
-					if (propertyInfo.GetSetMethod(true) != null)
-						property.Writable = true;
-				}
-			}
+        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+        {
+            JsonProperty property = base.CreateProperty(member, memberSerialization);
 
-			return property;
-		}
-	}
+            if (!property.Writable)
+            {
+                var propertyInfo = member as PropertyInfo;
+                if (propertyInfo != null)
+                {
+                    if (propertyInfo.GetSetMethod(true) != null)
+                        property.Writable = true;
+                }
+            }
+
+            return property;
+        }
+    }
 }
