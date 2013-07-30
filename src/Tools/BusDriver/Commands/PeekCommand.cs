@@ -36,7 +36,7 @@ namespace BusDriver.Commands
 		{
 			Uri uri = _uriString.ToUri("The from URI was invalid");
 
-			IInboundTransport fromTransport = Program.Transports.GetTransport(uri);
+			IInboundTransport fromTransport = Program.Transports.GetInboundTransport(uri);
 
 			var text = new TextBlock()
 				.BeginBlock("Peek URI: " + uri, "");

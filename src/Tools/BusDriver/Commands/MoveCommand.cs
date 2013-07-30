@@ -14,6 +14,7 @@ namespace BusDriver.Commands
 {
 	using System;
 	using Formatting;
+	using Magnum.Extensions;
 	using MassTransit.Logging;
 	using MassTransit.Context;
 	using MassTransit.Transports;
@@ -38,8 +39,8 @@ namespace BusDriver.Commands
 			Uri fromUri = _fromUriString.ToUri("The from URI was invalid");
 			Uri toUri = _toUriString.ToUri("The to URI was invalid");
 
-			IInboundTransport fromTransport = Program.Transports.GetTransport(fromUri);
-			IOutboundTransport toTransport = Program.Transports.GetTransport(toUri);
+			IInboundTransport fromTransport = Program.Transports.GetInboundTransport(fromUri);
+			IOutboundTransport toTransport = Program.Transports.GetOutboundTransport(toUri);
 
 			ITextBlock text = new TextBlock()
 				.BeginBlock("Move messages from " + fromUri + " to " + toUri, "");
@@ -59,7 +60,7 @@ namespace BusDriver.Commands
 
 								moveCount++;
 							};
-					}, TimeSpan.Zero);
+                    }, 5.Seconds());
 			}
 
 			_log.Info(text);

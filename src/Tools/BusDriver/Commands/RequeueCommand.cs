@@ -14,6 +14,7 @@ namespace BusDriver.Commands
 {
 	using System;
 	using Formatting;
+	using Magnum.Extensions;
 	using MassTransit.Logging;
 	using MassTransit.Context;
 	using MassTransit.Transports;
@@ -35,7 +36,8 @@ namespace BusDriver.Commands
 		{
 			Uri uri = _uriString.ToUri("The URI was invalid");
 
-			IDuplexTransport transport = Program.Transports.GetTransport(uri);
+			IInboundTransport inboundTransport = Program.Transports.GetInboundTransport(uri);
+			IOutboundTransport outboundTransport = Program.Transports.GetOutboundTransport(uri);
 
 			ITextBlock text = new TextBlock()
 				.BeginBlock("Requeue messages to " + uri, "");
@@ -44,19 +46,19 @@ namespace BusDriver.Commands
 			int requeueCount = 0;
 			for (int i = 0; i < _count; i++)
 			{
-				transport.Receive(receiveContext =>
+				inboundTransport.Receive(receiveContext =>
 					{
 						return context =>
 							{
 								var moveContext = new MoveMessageSendContext(context);
 
-								transport.Send(moveContext);
+                                outboundTransport.Send(moveContext);
 
 								text.BodyFormat("Message-Id: {0}", context.MessageId);
 
 								requeueCount++;
 							};
-					}, TimeSpan.Zero);
+					}, 5.Seconds());
 			}
 
 			_log.Info(text);
