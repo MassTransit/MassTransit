@@ -53,7 +53,7 @@ namespace BusDriver.Commands
 			if (!System.IO.Directory.Exists(directoryName))
 				System.IO.Directory.CreateDirectory(directoryName);
 
-			IInboundTransport fromTransport = Program.Transports.GetTransport(uri);
+			IInboundTransport fromTransport = Program.Transports.GetInboundTransport(uri);
 
 			ITextBlock text = new TextBlock()
 				.BeginBlock("Save messages from URI: " + uri, "");
@@ -81,7 +81,7 @@ namespace BusDriver.Commands
 							return context => { };
 
 						return null;
-					}, TimeSpan.Zero);
+                    }, 5.Seconds());
 			} while (_remove && saveCount < _count && saveCount != lastCount);
 
 			_log.Info(text.ToString());
