@@ -39,7 +39,7 @@ To define a saga using the state machine, a class that inherits from SagaStateMa
         SagaStateMachine<AuctionSaga>,
         ISaga
     {
-        static CombineSaga()
+        static AuctionSaga()
         {
             Define(() =>
             {
