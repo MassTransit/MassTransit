@@ -185,7 +185,7 @@ namespace MassTransit.Transports.RabbitMq
             if (_publisher != null)
                 return;
 
-            _publisher = new RabbitMqPublisher();
+            _publisher = new RabbitMqPublisher(_address);
 
             _connectionHandler.AddBinding(_publisher);
         }

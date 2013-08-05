@@ -112,7 +112,7 @@ namespace MassTransit.Transports.RabbitMq
         void BindQueue(IModel channel)
         {
             string queue = channel.QueueDeclare(_address.Name, _address.Durable, _address.Exclusive, _address.AutoDelete, _address.QueueArguments());
-            channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, true);
+            channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable, _address.AutoDelete, null);
             channel.QueueBind(queue, _address.Name, "");
         }
 
