@@ -12,19 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using RabbitMQ.Client;
 
+
     public class RabbitMqPublisher :
         ConnectionBinding<RabbitMqConnection>
     {
+        readonly IRabbitMqEndpointAddress _address;
         readonly HashSet<ExchangeBinding> _exchangeBindings;
         readonly HashSet<string> _exchanges;
         IModel _channel;
 
-        public RabbitMqPublisher()
+        public RabbitMqPublisher(IRabbitMqEndpointAddress address)
         {
+            _address = address;
             _exchangeBindings = new HashSet<ExchangeBinding>();
             _exchanges = new HashSet<string>();
         }
@@ -55,7 +59,13 @@ namespace MassTransit.Transports.RabbitMq
             try
             {
                 if (_channel != null)
-                    _channel.ExchangeDeclare(name, ExchangeType.Fanout, true, false, null);
+                {
+                    if (string.Compare(name, _address.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                        _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable,
+                            _address.AutoDelete, null);
+                    else
+                        _channel.ExchangeDeclare(name, ExchangeType.Fanout, true, false, null);
+                }
             }
             catch
             {
@@ -73,8 +83,16 @@ namespace MassTransit.Transports.RabbitMq
             {
                 if (_channel != null)
                 {
-                    _channel.ExchangeDeclare(source, ExchangeType.Fanout, true, false, null);
-                    _channel.ExchangeDeclare(destination, ExchangeType.Fanout, true, false, null);
+                    if (string.Compare(source, _address.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                        _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable,
+                            _address.AutoDelete, null);
+                    else
+                        _channel.ExchangeDeclare(source, ExchangeType.Fanout, true, false, null);
+                    if (string.Compare(destination, _address.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                        _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable,
+                            _address.AutoDelete, null);
+                    else
+                        _channel.ExchangeDeclare(destination, ExchangeType.Fanout, true, false, null);
                     _channel.ExchangeBind(destination, source, "");
                 }
             }
@@ -93,9 +111,7 @@ namespace MassTransit.Transports.RabbitMq
             try
             {
                 if (_channel != null)
-                {
                     _channel.ExchangeUnbind(destination, source, "");
-                }
             }
             catch
             {
@@ -113,13 +129,15 @@ namespace MassTransit.Transports.RabbitMq
 
                 foreach (string exchange in exchanges)
                 {
-                    channel.ExchangeDeclare(exchange, ExchangeType.Fanout, true, false, null);
+                    if (string.Compare(exchange, _address.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                        _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable,
+                            _address.AutoDelete, null);
+                    else
+                        channel.ExchangeDeclare(exchange, ExchangeType.Fanout, true, false, null);
                 }
 
                 foreach (ExchangeBinding exchange in _exchangeBindings)
-                {
                     channel.ExchangeBind(exchange.Destination, exchange.Source, "");
-                }
             }
         }
     }
