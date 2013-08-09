@@ -139,7 +139,7 @@ You can then use the ``busdriver`` to query the status. using:
 
 	busdriver status -uri:<address to control bus>
 
-Low Lever Config Api
+Low Level Config Api
 ''''''''''''''''''''
 
 .. sourcecode:: csharp
