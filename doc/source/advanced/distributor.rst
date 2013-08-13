@@ -8,7 +8,7 @@ multiple workers when using MSMQ. This would be similar to using completing
 consumers with other transports, such as RabbitMQ. If you are not using MSMQ,
 the distributor is not suggested for use. 
 
-<img src='distributor-overview.png' />
+.. image:: distributor-overview.png
 
 The distributor works by consuming the message (`TMessage`) that the workers 
 will be consuming, checking to see if a worker is free, then sending 
@@ -21,21 +21,16 @@ How do I set up the producer?
 
 When configuring the bus, use `UseDistributorFor<TMessage>()` per the example below...
 
+.. sourcecode:: csharp
     Bus.Initialize(x => 
     {
         x.ReceiveFrom("msmq://localhost/producer_queue");
-
-        x.UseMsmq();
-        x.UseMulticastSubscriptionClient();
-                                                                                        x.UseDistributorFor<MyMessageType>(); 
+        x.UseMsmq(mq => mq.UseMulticastSubscriptionClient()); 
+        x.UseDistributorFor<MyMessageType>(); 
         x.UseControlBus();
     });
 
 Replace `MyMessageType` with the message you want distributed across your workers.
-
-Additionally
-
- * Configuration for WorkerSelectionStrategy
 
 How do I set up workers?
 ''''''''''''''''''''''''
@@ -60,6 +55,6 @@ Can I use the distributor as a router inside of a service bus that would serve s
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 In theory yes. 
-<a href="http://www.enterpriseintegrationpatterns.com/ContentBasedRouter.html">Content based routing</a> 
+`Content based routing <http://www.enterpriseintegrationpatterns.com/ContentBasedRouter.html>`_
 can be supported with the `IWorkerSelectionStrategy`, however, we suggest that
 implementors consider not using this for content based routing.
