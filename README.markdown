@@ -39,9 +39,7 @@ Next, run the following command to enable the rabbitmq management plugin:
 ### Downloads
 
 Download from NuGet 'MassTransit' [Search NuGet for MassTransit](http://nuget.org/packages?q=masstransit)
- 
-Download the officially released builds from [Github](http://github.com/masstransit/masstransit/downloads/).
- 
+
 Download the continuously integrated Binaries from [TeamCity](http://teamcity.codebetter.com/viewType.html?buildTypeId=bt8&tab=buildTypeStatusDiv).
 
 ### Supported Transports
