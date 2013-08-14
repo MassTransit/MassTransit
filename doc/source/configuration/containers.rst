@@ -152,8 +152,52 @@ Ninject
 Unity
 '''''
 
-Coming soon. Feel free to write it up.
+.. sourcecode:: csharp
 
+	public static void main(string[] args) 
+    {
+		var container = new UnityContainer(); 
+		
+		// Lookup the types.
+		// You can scan for all types that implement the .All-interface of the Consumes-class.
+		var types = new TypeFinder().FindTypesWhichImplement(typeof(Consumes<>.All));
+		foreach (var type in types)
+		{
+			var interfaceType = type.GetInterfaces().FirstOrDefault(a=> a == typeof(Consumes<>.All));
+			container.RegisterType(interfaceType, type, new ContainerControlledLifetimeManager());
+		}
+		
+		// or you can register your types directly.
+		container.RegisterType<<Consumes<MessageType>.All, Type>(new ContainerControlledLifetimeManager());
+		// ...
+
+		// Register the ServiceBus.
+		container.RegisterInstance<IServiceBus>(ServiceBusFactory.New(sbc =>
+		{
+			sbc.UseRabbitMq(c =>
+			{
+				// Add configation options if required.
+				// Default JSON serialization is set by MassTransit.  
+			});
+			// Configure exchanges.
+			sbc.ReceiveFrom(receiveQueue);
+			sbc.Subscribe(s => s.LoadFrom(container));
+
+			sbc.SetConcurrentConsumerLimit(concurrentConsumers);
+			sbc.SetDefaultRetryLimit(retryLimit);
+
+			if (verifyDTCConfiguration)
+				sbc.VerifyMsDtcConfiguration();
+
+			// Configure logging.
+			if (enableLogging)
+				sbc.UseLog4Net();
+			
+			// No performance counters.
+			sbc.DisablePerformanceCounters();
+		}));
+	}
+	
 Hey! Where's my container??
 '''''''''''''''''''''''''''
 
