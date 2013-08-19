@@ -186,8 +186,9 @@ Unity
 			sbc.SetConcurrentConsumerLimit(concurrentConsumers);
 			sbc.SetDefaultRetryLimit(retryLimit);
 
-			if (verifyDTCConfiguration)
-				sbc.VerifyMsDtcConfiguration();
+			// When using MSMQ as Transport you can choose to verify the DTC configuration.
+			// if (verifyDTCConfiguration)
+			// 		sbc.VerifyMsDtcConfiguration();
 
 			// Configure logging.
 			if (enableLogging)
