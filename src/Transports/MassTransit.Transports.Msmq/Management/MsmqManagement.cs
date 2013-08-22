@@ -83,6 +83,10 @@ namespace MassTransit.Transports.Msmq.Management
 					installer = new WindowsServer2008R2Installer();
 					break;
 
+                case WindowsVersion.Windows2012:
+                    installer = new WindowsServer2012Installer();
+                    break;
+
 				case WindowsVersion.Windows7:
                 case WindowsVersion.Windows8:
 					installer = new Windows7Installer();
@@ -145,11 +149,15 @@ namespace MassTransit.Transports.Msmq.Management
 					return WindowsVersion.Windows2003;
 
 				case 6:
-                    if (version.Minor == 0)
+                    switch (version.Minor)
                     {
-                        return WindowsVersion.WindowsVista;
+                        case 0:
+                            return WindowsVersion.WindowsVista;
+                        case 1:
+                            return WindowsVersion.Windows2008R2;
+                        default:
+                            return WindowsVersion.Windows2012;
                     }
-					return WindowsVersion.Windows2008R2;
 
 				default:
 					return WindowsVersion.Unknown;
