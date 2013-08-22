@@ -20,7 +20,7 @@ namespace MassTransit.Transports.Msmq.Management
         MsmqInstaller
     {
         const string PSCommand = "Add-WindowsFeature MSMQ-Services,MSMQ-Server,MSMQ-Multicasting";
-        const string Command = "-noexit -command " + PSCommand;
+        const string Command = "-command " + PSCommand;
         const string PowerShell = @"WindowsPowerShell\v1.0\powershell.exe";
 
         public Process Install()
