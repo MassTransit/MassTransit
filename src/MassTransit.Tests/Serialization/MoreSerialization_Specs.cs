@@ -566,6 +566,26 @@ namespace MassTransit.Tests.Serialization
     public class IsoDateAsString
     {
         public String IsoDate { get; set; }
+
+        public bool Equals(IsoDateAsString other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(other.IsoDate, IsoDate);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof(IsoDateAsString)) return false;
+            return Equals((IsoDateAsString)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (IsoDate != null ? IsoDate.GetHashCode() : 0);
+        }
     }
 
         [Serializable]
