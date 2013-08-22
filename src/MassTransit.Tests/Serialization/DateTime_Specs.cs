@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -33,7 +33,6 @@ namespace MassTransit.Tests.Serialization
                             {
                                 Local = new DateTime(2001, 9, 11, 8, 46, 30, DateTimeKind.Local),
                                 Universal = new DateTime(2001, 9, 11, 9, 3, 2, DateTimeKind.Local).ToUniversalTime(),
-                                IsoFormatDate = "1994-11-05T13:15:30Z"
                             };
                         x.Send(_sent);
 
@@ -64,17 +63,10 @@ namespace MassTransit.Tests.Serialization
             _sent.Universal.ShouldEqual(_received.Universal);
         }
 
-        [Then]
-        public void Should_recieve_the_ISO_formatted_date_string_as_an_ISO_formatted_date_string()
-        {
-            _sent.IsoFormatDate.ShouldEqual(_received.IsoFormatDate);
-        }
-
         class A
         {
             public DateTime Local { get; set; }
             public DateTime Universal { get; set; }
-            public String IsoFormatDate { get; set; }
         }
     }
 }
