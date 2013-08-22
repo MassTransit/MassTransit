@@ -93,6 +93,7 @@
     <Compile Include="Management\WindowsServer2003Installer.cs" />
     <Compile Include="Management\WindowsServer2008Installer.cs" />
     <Compile Include="Management\WindowsServer2008R2Installer.cs" />
+    <Compile Include="Management\WindowsServer2012Installer.cs" />
     <Compile Include="Management\WindowsService.cs" />
     <Compile Include="Management\WindowsVersion.cs" />
     <Compile Include="Management\WindowsVistaInstaller.cs" />
