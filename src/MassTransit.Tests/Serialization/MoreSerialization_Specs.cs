@@ -549,6 +549,23 @@ namespace MassTransit.Tests.Serialization
 
             TestSerialization(message);
         }
+
+        [Test]
+        public void A_string_with_iso_date_should_be_properly_serialized()
+        {
+            IsoDateAsString message = new IsoDateAsString
+                {
+                    IsoDate = "1994-11-05T13:15:30Z"
+                };
+
+            TestSerialization(message);
+        }
+    }
+
+    [Serializable]
+    public class IsoDateAsString
+    {
+        public String IsoDate { get; set; }
     }
 
         [Serializable]
