@@ -54,8 +54,6 @@ namespace MassTransit.Tests.NewId_
 
             Assert.IsNotNull(networkId);
             Assert.AreEqual(6, networkId.Length);
-
-            Console.WriteLine(string.Join(":", networkId.Select(x => x.ToString("X2"))));
         }
 
         [Test, Explicit]
