@@ -85,6 +85,7 @@
     <Reference Include="System.Core">
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
@@ -121,6 +122,8 @@
     <Compile Include="NewId\NewIdFormatters\ZBase32Formatter.cs" />
     <Compile Include="NewId\NewIdParsers\Base32Parser.cs" />
     <Compile Include="NewId\NewIdParsers\ZBase32Parser.cs" />
+    <Compile Include="NewId\NewIdProviders\HostNameSHA1WorkerIdProvider.cs" />
+    <Compile Include="NewId\NewIdProviders\WMINetworkAddressWorkerIdProvider.cs" />
     <Compile Include="Serialization\ISupportedMessageSerializers.cs" />
     <Compile Include="Serialization\SupportedMessageSerializers.cs" />
     <Compile Include="Subscriptions\Coordinator\InMemorySubscriptionStorage.cs" />

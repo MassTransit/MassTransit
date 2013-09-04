@@ -18,6 +18,45 @@ namespace MassTransit.NewIdProviders
     using System.Net.NetworkInformation;
 
 
+    public class BestPossibleWorkerIdProvider :
+        IWorkerIdProvider
+    {
+        public byte[] GetWorkerId(int index)
+        {
+            var exceptions = new List<Exception>();
+
+            try
+            {
+                return new NetworkAddressWorkerIdProvider().GetWorkerId(index);
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(ex);
+            }
+
+            try
+            {
+                return new WmiNetworkAddressWorkerIdProvider().GetWorkerId(index);
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(ex);
+            }
+
+            try
+            {
+                return new HostNameSHA1WorkerIdProvider().GetWorkerId(index);
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(ex);
+            }
+
+            throw new AggregateException(exceptions);
+        }
+    }
+
+
     public class NetworkAddressWorkerIdProvider :
         IWorkerIdProvider
     {
@@ -28,24 +67,24 @@ namespace MassTransit.NewIdProviders
 
         static byte[] GetNetworkAddress(int index)
         {
-            NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
-
-            IEnumerable<NetworkInterface> ethernet =
-                interfaces.Where(x => x.NetworkInterfaceType == NetworkInterfaceType.Ethernet);
-            IEnumerable<NetworkInterface> gigabit =
-                interfaces.Where(x => x.NetworkInterfaceType == NetworkInterfaceType.GigabitEthernet);
-            IEnumerable<NetworkInterface> wireless =
-                interfaces.Where(x => x.NetworkInterfaceType == NetworkInterfaceType.Wireless80211);
-
-            NetworkInterface network = ethernet.Concat(gigabit).Concat(wireless)
-                                               .Skip(index)
-                                               .FirstOrDefault();
+            byte[] network = NetworkInterface
+                .GetAllNetworkInterfaces()
+                .Where(x => x.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+                            || x.NetworkInterfaceType == NetworkInterfaceType.GigabitEthernet
+                            || x.NetworkInterfaceType == NetworkInterfaceType.Wireless80211
+                            || x.NetworkInterfaceType == NetworkInterfaceType.FastEthernetFx
+                            || x.NetworkInterfaceType == NetworkInterfaceType.FastEthernetT)
+                .Select(x => x.GetPhysicalAddress())
+                .Where(x => x != null)
+                .Select(x => x.GetAddressBytes())
+                .Where(x => x.Length == 6)
+                .Skip(index)
+                .FirstOrDefault();
 
             if (network == null)
                 throw new InvalidOperationException("Unable to find usable network adapter for unique address");
 
-            byte[] address = network.GetPhysicalAddress().GetAddressBytes();
-            return address;
+            return network;
         }
     }
 }

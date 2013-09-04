@@ -32,6 +32,7 @@ namespace MassTransit
 
         public static T ConfigureJsonSerializer<T>(this T configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
+            where T : EndpointFactoryConfigurator
         {
             JsonMessageSerializer.SerializerSettings = configure(JsonMessageSerializer.SerializerSettings);
 
@@ -40,6 +41,7 @@ namespace MassTransit
 
         public static T ConfigureJsonDeserializer<T>(this T configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
+            where T : EndpointFactoryConfigurator
         {
             JsonMessageSerializer.DeserializerSettings = configure(JsonMessageSerializer.DeserializerSettings);
 

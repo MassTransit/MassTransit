@@ -16,6 +16,7 @@ namespace MassTransit.Transports
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Runtime.Serialization;
+    using System.Transactions;
     using Context;
     using Exceptions;
     using Logging;
@@ -276,7 +277,9 @@ namespace MassTransit.Transports
                             {
                                 Address.LogSkipped(acceptMessageId);
 
-                                _tracker.IncrementRetryCount(acceptMessageId);
+                                if (_tracker.IncrementRetryCount(acceptMessageId))
+                                    return MoveMessageToErrorTransport;
+
                                 return null;
                             }
                         }
@@ -320,8 +323,7 @@ namespace MassTransit.Transports
                                         // seems like this might be unnecessary if we are going to reprocess the message
                                         receiveContext.ExecuteFaultActions(faultActions);
                                     }
-
-                                    if(!receiveContext.IsTransactional)
+                                    else if(!receiveContext.IsTransactional)
                                     {
                                         SaveMessageToInboundTransport(receiveContext);
                                     }
