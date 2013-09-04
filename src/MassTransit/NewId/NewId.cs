@@ -93,7 +93,7 @@ namespace MassTransit
 
         static IWorkerIdProvider WorkerIdProvider
         {
-            get { return _workerIdProvider ?? (_workerIdProvider = new NetworkAddressWorkerIdProvider()); }
+            get { return _workerIdProvider ?? (_workerIdProvider = new BestPossibleWorkerIdProvider()); }
         }
 
         static ITickProvider TickProvider
