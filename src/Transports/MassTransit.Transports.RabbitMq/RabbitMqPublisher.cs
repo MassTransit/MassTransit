@@ -22,15 +22,16 @@ namespace MassTransit.Transports.RabbitMq
         ConnectionBinding<RabbitMqConnection>
     {
         readonly IRabbitMqEndpointAddress _address;
+        readonly object _bindings = new object();
         readonly HashSet<ExchangeBinding> _exchangeBindings;
-        readonly HashSet<string> _exchanges;
+        readonly IDictionary<string,bool> _exchanges;
         IModel _channel;
 
         public RabbitMqPublisher(IRabbitMqEndpointAddress address)
         {
             _address = address;
             _exchangeBindings = new HashSet<ExchangeBinding>();
-            _exchanges = new HashSet<string>();
+            _exchanges = new Dictionary<string, bool>();
         }
 
         public void Bind(RabbitMqConnection connection)
@@ -51,20 +52,21 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
-        public void ExchangeDeclare(string name)
+        public void ExchangeDeclare(string name, bool temporary)
         {
-            lock (_exchangeBindings)
-                _exchanges.Add(name);
+            lock (_bindings)
+            {
+                if (_exchanges.ContainsKey(name))
+                    return;
+
+                _exchanges[name] = temporary;
+            }
 
             try
             {
                 if (_channel != null)
                 {
-                    if (string.Compare(name, _address.Name, StringComparison.OrdinalIgnoreCase) == 0)
-                        _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable,
-                            _address.AutoDelete, null);
-                    else
-                        _channel.ExchangeDeclare(name, ExchangeType.Fanout, true, false, null);
+                    DeclareExchange(name, temporary);
                 }
             }
             catch
@@ -76,23 +78,17 @@ namespace MassTransit.Transports.RabbitMq
         {
             var binding = new ExchangeBinding(destination, source);
 
-            lock (_exchangeBindings)
-                _exchangeBindings.Add(binding);
+            lock (_bindings)
+                if (!_exchangeBindings.Add(binding))
+                    return;
 
             try
             {
                 if (_channel != null)
                 {
-                    if (string.Compare(source, _address.Name, StringComparison.OrdinalIgnoreCase) == 0)
-                        _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable,
-                            _address.AutoDelete, null);
-                    else
-                        _channel.ExchangeDeclare(source, ExchangeType.Fanout, true, false, null);
-                    if (string.Compare(destination, _address.Name, StringComparison.OrdinalIgnoreCase) == 0)
-                        _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable,
-                            _address.AutoDelete, null);
-                    else
-                        _channel.ExchangeDeclare(destination, ExchangeType.Fanout, true, false, null);
+                    ExchangeDeclare(destination, false);
+                    ExchangeDeclare(source, false);
+
                     _channel.ExchangeBind(destination, source, "");
                 }
             }
@@ -105,7 +101,7 @@ namespace MassTransit.Transports.RabbitMq
         {
             var binding = new ExchangeBinding(destination, source);
 
-            lock (_exchangeBindings)
+            lock (_bindings)
                 _exchangeBindings.Remove(binding);
 
             try
@@ -118,22 +114,35 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
+        void DeclareExchange(string name, bool temporary)
+        {
+            if (string.Compare(name, _address.Name, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable,
+                    _address.AutoDelete, null);
+            }
+            else
+                _channel.ExchangeDeclare(name, ExchangeType.Fanout, !temporary, temporary, null);
+        }
+
         void RebindExchanges(IModel channel)
         {
-            lock (_exchangeBindings)
+            lock (_bindings)
             {
-                IEnumerable<string> exchanges = _exchangeBindings.Select(x => x.Destination)
-                                                                 .Concat(_exchangeBindings.Select(x => x.Source))
-                                                                 .Concat(_exchanges)
-                                                                 .Distinct();
-
-                foreach (string exchange in exchanges)
+                var exchanges = new Dictionary<string,bool>(_exchanges);
+                
+                foreach (var binding in _exchangeBindings)
                 {
-                    if (string.Compare(exchange, _address.Name, StringComparison.OrdinalIgnoreCase) == 0)
-                        _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable,
-                            _address.AutoDelete, null);
-                    else
-                        channel.ExchangeDeclare(exchange, ExchangeType.Fanout, true, false, null);
+                    if (!exchanges.ContainsKey(binding.Source))
+                        exchanges.Add(binding.Source, false);
+
+                    if (!exchanges.ContainsKey(binding.Destination))
+                        exchanges.Add(binding.Destination, false);
+                }
+
+                foreach (var exchange in exchanges)
+                {
+                    DeclareExchange(exchange.Key, exchange.Value);
                 }
 
                 foreach (ExchangeBinding exchange in _exchangeBindings)

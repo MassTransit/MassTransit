@@ -137,7 +137,10 @@ namespace MassTransit.Transports.RabbitMq
                 {
                     MessageName messageName = messageNameFormatter.GetMessageName(messageType);
 
-                    _publisher.ExchangeDeclare(messageName.ToString());
+                    bool temporary = !messageType.IsPublic;
+
+                    _publisher.ExchangeDeclare(messageName.ToString(), temporary);
+
                     messageTypes.Add(messageType);
 
                     foreach (Type type in messageType.GetMessageTypes().Skip(1))
