@@ -37,50 +37,6 @@ namespace MassTransit.Transports.RabbitMq
 
         public void Dispose()
         {
-            Dispose(true);
-        }
-
-        public void Connect()
-        {
-            Disconnect();
-
-            _connection = _connectionFactory.CreateConnection();
-        }
-
-        public void Disconnect()
-        {
-            try
-            {
-                if (_connection != null)
-                {
-                    try
-                    {
-                        if (_connection.IsOpen)
-                            _connection.Close(200, "disconnected");
-                    }
-                    catch (Exception ex)
-                    {
-                        _log.Warn("Exception while closing RabbitMQ connection", ex);
-                    }
-
-                    _connection.Dispose();
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Warn("Exception disposing of RabbitMQ connection", ex);
-            }
-            finally
-            {
-                _connection = null;
-            }
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposing)
-                return;
-
             if (_disposed)
                 throw new ObjectDisposedException("RabbitMqConnection for {0}".FormatWith(_connectionFactory.GetUri()),
                     "Cannot dispose a connection twice");
@@ -93,6 +49,19 @@ namespace MassTransit.Transports.RabbitMq
             {
                 _disposed = true;
             }
+        }
+
+        public void Connect()
+        {
+            Disconnect();
+
+            _connection = _connectionFactory.CreateConnection();
+        }
+
+        public void Disconnect()
+        {
+            _connection.Cleanup(200, "Disconnect");
+            _connection = null;
         }
     }
 }

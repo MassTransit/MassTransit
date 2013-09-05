@@ -12,16 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq.Management
 {
-    using System;
     using System.Collections;
-    using Logging;
     using RabbitMQ.Client;
 
     public class RabbitMqEndpointManagement :
         IRabbitMqEndpointManagement
     {
-        static readonly ILog _log = Logger.Get(typeof (RabbitMqEndpointManagement));
-        readonly IRabbitMqEndpointAddress _address;
         readonly bool _owned;
         IConnection _connection;
         bool _disposed;
@@ -34,7 +30,6 @@ namespace MassTransit.Transports.RabbitMq.Management
 
         public RabbitMqEndpointManagement(IRabbitMqEndpointAddress address, IConnection connection)
         {
-            _address = address;
             _connection = connection;
         }
 
@@ -104,26 +99,12 @@ namespace MassTransit.Transports.RabbitMq.Management
 
         public void Dispose()
         {
-            Dispose(true);
-        }
+            if (_disposed)
+                return;
 
-        void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-            if (disposing)
-            {
-                if (_connection != null)
-                {
-                    if (_owned)
-                    {
-                        if (_connection.IsOpen)
-                            _connection.Close(200, "normal");
-                        _connection.Dispose();
-                    }
-
-                    _connection = null;
-                }
-            }
+            if (_owned)
+                _connection.Cleanup();
+            _connection = null;
 
             _disposed = true;
         }

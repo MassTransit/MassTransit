@@ -107,6 +107,7 @@
     <Compile Include="RabbitMqAddressException.cs" />
     <Compile Include="RabbitMqConfigurationExtensions.cs" />
     <Compile Include="RabbitMqEndpointExtensions.cs" />
+    <Compile Include="RabbitMqExtensions.cs" />
     <Compile Include="RabbitMqMessageNameFormatter.cs" />
     <Compile Include="RabbitMqProducer.cs" />
     <Compile Include="RabbitMqPublisher.cs" />
