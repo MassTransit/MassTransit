@@ -14,7 +14,6 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using RabbitMQ.Client;
 
 
@@ -25,6 +24,7 @@ namespace MassTransit.Transports.RabbitMq
         readonly object _bindings = new object();
         readonly HashSet<ExchangeBinding> _exchangeBindings;
         readonly IDictionary<string,bool> _exchanges;
+        readonly object _lock = new object();
         IModel _channel;
 
         public RabbitMqPublisher(IRabbitMqEndpointAddress address)
@@ -36,18 +36,19 @@ namespace MassTransit.Transports.RabbitMq
 
         public void Bind(RabbitMqConnection connection)
         {
-            _channel = connection.Connection.CreateModel();
+            lock (_lock)
+            {
+                _channel = connection.Connection.CreateModel();
 
-            RebindExchanges(_channel);
+                RebindExchanges(_channel);
+            }
         }
 
         public void Unbind(RabbitMqConnection connection)
         {
-            if (_channel != null)
+            lock (_lock)
             {
-                if (_channel.IsOpen)
-                    _channel.Close(200, "publisher unbind");
-                _channel.Dispose();
+                _channel.Cleanup(200, "Publisher Unbind");
                 _channel = null;
             }
         }
@@ -64,10 +65,9 @@ namespace MassTransit.Transports.RabbitMq
 
             try
             {
-                if (_channel != null)
-                {
-                    DeclareExchange(name, temporary);
-                }
+                lock (_lock)
+                    if (_channel != null)
+                        DeclareExchange(name, temporary);
             }
             catch
             {
@@ -84,12 +84,16 @@ namespace MassTransit.Transports.RabbitMq
 
             try
             {
-                if (_channel != null)
+                lock(_lock)
                 {
-                    ExchangeDeclare(destination, false);
-                    ExchangeDeclare(source, false);
+                    if (_channel != null)
+                    {
+                        ExchangeDeclare(destination, false);
+                        ExchangeDeclare(source, false);
 
-                    _channel.ExchangeBind(destination, source, "");
+                        _channel.ExchangeBind(destination, source, "");
+                    }
+                    
                 }
             }
             catch
@@ -106,8 +110,11 @@ namespace MassTransit.Transports.RabbitMq
 
             try
             {
-                if (_channel != null)
-                    _channel.ExchangeUnbind(destination, source, "");
+                lock (_lock)
+                {
+                    if (_channel != null)
+                        _channel.ExchangeUnbind(destination, source, "");
+                }
             }
             catch
             {

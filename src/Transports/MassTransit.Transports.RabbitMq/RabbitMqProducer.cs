@@ -30,20 +30,14 @@ namespace MassTransit.Transports.RabbitMq
         readonly Cache<ulong, TaskCompletionSource<bool>> _confirms;
 #endif
         readonly IRabbitMqEndpointAddress _address;
-        readonly bool _bindToQueue;
-        readonly object _channelLock = new object();
-        readonly HashSet<ExchangeBinding> _exchangeBindings;
-        readonly HashSet<string> _exchanges;
+        readonly object _lock = new object();
         IModel _channel;
         bool _immediate;
         bool _mandatory;
 
-        public RabbitMqProducer(IRabbitMqEndpointAddress address, bool bindToQueue)
+        public RabbitMqProducer(IRabbitMqEndpointAddress address)
         {
             _address = address;
-            _bindToQueue = bindToQueue;
-            _exchangeBindings = new HashSet<ExchangeBinding>();
-            _exchanges = new HashSet<string>();
 #if NET40
             _confirms = new ConcurrentCache<ulong, TaskCompletionSource<bool>>();
 #endif
@@ -51,16 +45,12 @@ namespace MassTransit.Transports.RabbitMq
 
         public void Bind(RabbitMqConnection connection)
         {
-            lock (_channelLock)
+            lock (_lock)
             {
                 IModel channel = null;
                 try
                 {
                     channel = connection.Connection.CreateModel();
-
-                    //DeclareAndBindQueue(channel);
-
-                    RebindExchanges(channel);
 
                     BindEvents(channel);
 
@@ -68,17 +58,7 @@ namespace MassTransit.Transports.RabbitMq
                 }
                 catch (Exception ex)
                 {
-                    if (channel != null)
-                    {
-                        try
-                        {
-                            channel.Close(500, ex.Message);
-                        }
-                        catch
-                        {
-                        }
-                        channel.Dispose();
-                    }
+                    channel.Cleanup(500, ex.Message);
 
                     throw new InvalidConnectionException(_address.Uri, "Invalid connection to host", ex);
                 }
@@ -97,22 +77,20 @@ namespace MassTransit.Transports.RabbitMq
 
         public void Unbind(RabbitMqConnection connection)
         {
-            lock (_channelLock)
+            lock (_lock)
             {
                 try
                 {
                     if (_channel != null)
                     {
                         UnbindEvents(_channel);
-
-                        if (_channel.IsOpen)
-                            _channel.Close(200, "producer unbind");
-                        _channel.Dispose();
-                        _channel = null;
+                        _channel.Cleanup(200, "Producer Unbind");
                     }
                 }
                 finally
                 {
+                    _channel = null;
+
                     FailPendingConfirms();
                 }
             }
@@ -144,52 +122,9 @@ namespace MassTransit.Transports.RabbitMq
 #endif
         }
 
-        public void ExchangeDeclare(string name)
-        {
-            lock (_exchangeBindings)
-                _exchanges.Add(name);
-        }
-
-        public void ExchangeBind(string destination, string source)
-        {
-            var binding = new ExchangeBinding(destination, source);
-
-            lock (_exchangeBindings)
-                _exchangeBindings.Add(binding);
-        }
-
-        void DeclareAndBindQueue(IModel channel)
-        {
-            channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable, _address.AutoDelete, null);
-
-            if (_bindToQueue)
-            {
-                string queue = channel.QueueDeclare(_address.Name, _address.Durable, _address.Exclusive, _address.AutoDelete, _address.QueueArguments());
-
-                channel.QueueBind(queue, _address.Name, "");
-            }
-        }
-
-        void RebindExchanges(IModel channel)
-        {
-            lock (_exchangeBindings)
-            {
-                IEnumerable<string> exchanges = _exchangeBindings.Select(x => x.Destination)
-                                                                 .Concat(_exchangeBindings.Select(x => x.Source))
-                                                                 .Concat(_exchanges)
-                                                                 .Distinct();
-
-                foreach (string exchange in exchanges)
-                    channel.ExchangeDeclare(exchange, ExchangeType.Fanout, true, false, null);
-
-                foreach (ExchangeBinding exchange in _exchangeBindings)
-                    channel.ExchangeBind(exchange.Destination, exchange.Source, "");
-            }
-        }
-
         public IBasicProperties CreateProperties()
         {
-            lock (_channelLock)
+            lock (_lock)
             {
                 if (_channel == null)
                     throw new InvalidConnectionException(_address.Uri, "Channel should not be null");
@@ -200,7 +135,7 @@ namespace MassTransit.Transports.RabbitMq
 
         public void Publish(string exchangeName, IBasicProperties properties, byte[] body)
         {
-            lock (_channelLock)
+            lock (_lock)
             {
                 if (_channel == null)
                     throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
@@ -212,7 +147,7 @@ namespace MassTransit.Transports.RabbitMq
 #if NET40
         public Task PublishAsync(string exchangeName, IBasicProperties properties, byte[] body)
         {
-            lock (_channelLock)
+            lock (_lock)
             {
                 if (_channel == null)
                     throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");

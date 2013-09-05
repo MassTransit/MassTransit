@@ -13,16 +13,16 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
-    using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using RabbitMQ.Util;
 
 
     public class RabbitMqConsumer :
         ConnectionBinding<RabbitMqConnection>
     {
-        static readonly ILog _log = Logger.Get(typeof(RabbitMqConsumer));
         readonly IRabbitMqEndpointAddress _address;
+        readonly object _lock = new object();
         IModel _channel;
         QueueingBasicConsumer _consumer;
         bool _purgeOnBind;
@@ -49,22 +49,15 @@ namespace MassTransit.Transports.RabbitMq
                 var consumer = new QueueingBasicConsumer(channel);
                 channel.BasicConsume(_address.Name, false, consumer);
 
-                _channel = channel;
-                _consumer = consumer;
+                lock (_lock)
+                {
+                    _channel = channel;
+                    _consumer = consumer;
+                }
             }
             catch (Exception ex)
             {
-                if (channel != null)
-                {
-                    try
-                    {
-                        channel.Close(500, ex.Message);
-                    }
-                    catch
-                    {
-                    }
-                    channel.Dispose();
-                }
+                channel.Cleanup(500, ex.Message);
 
                 throw new InvalidConnectionException(_address.Uri, "Invalid connection to host", ex);
             }
@@ -72,31 +65,12 @@ namespace MassTransit.Transports.RabbitMq
 
         public void Unbind(RabbitMqConnection connection)
         {
-            if (_channel != null)
+            lock (_lock)
             {
-                try
-                {
-                    _channel.Close(200, "unbind consumer");
+                _consumer = null;
 
-                    _consumer = null;
-                }
-                catch (Exception ex)
-                {
-                    _log.Error("Failed to close channel: " + _address, ex);
-                }
-
-                try
-                {
-                    _channel.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    _log.Error("Failed to dispose channel: " + _address, ex);
-                }
-                finally
-                {
-                    _channel = null;
-                }
+                _channel.Cleanup(200, "Unbind Consumer");
+                _channel = null;
             }
         }
 
@@ -111,36 +85,65 @@ namespace MassTransit.Transports.RabbitMq
 
         void BindQueue(IModel channel)
         {
-            string queue = channel.QueueDeclare(_address.Name, _address.Durable, _address.Exclusive, _address.AutoDelete, _address.QueueArguments());
+            string queue = channel.QueueDeclare(_address.Name, _address.Durable, _address.Exclusive, _address.AutoDelete,
+                _address.QueueArguments());
             channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable, _address.AutoDelete, null);
             channel.QueueBind(queue, _address.Name, "");
         }
 
         public BasicDeliverEventArgs Get(TimeSpan timeout)
         {
-            if (_consumer == null)
-                throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
+            SharedQueue queue;
+            lock (_lock)
+            {
+                if (_consumer == null)
+                    throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
+
+                if (!_consumer.IsRunning)
+                    throw new InvalidConnectionException(_address.Uri, "Consumer is not running");
+
+                queue = _consumer.Queue;
+            }
 
             object result;
-            _consumer.Queue.Dequeue((int)timeout.TotalMilliseconds, out result);
+            queue.Dequeue((int)timeout.TotalMilliseconds, out result);
 
             return (BasicDeliverEventArgs)result;
         }
 
         public void MessageCompleted(BasicDeliverEventArgs result)
         {
-            _channel.BasicAck(result.DeliveryTag, false);
+            lock (_lock)
+            {
+                if(_channel == null)
+                    throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
+
+                _channel.BasicAck(result.DeliveryTag, false);
+                
+            }
         }
 
         public void MessageFailed(BasicDeliverEventArgs result)
         {
-            _channel.BasicPublish(_address.Name, "", result.BasicProperties, result.Body);
-            _channel.BasicAck(result.DeliveryTag, false);
+            lock (_lock)
+            {
+                if (_channel == null)
+                    throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
+
+                _channel.BasicPublish(_address.Name, "", result.BasicProperties, result.Body);
+                _channel.BasicAck(result.DeliveryTag, false);
+            }
         }
 
         public void MessageSkipped(BasicDeliverEventArgs result)
         {
-            _channel.BasicNack(result.DeliveryTag, false, true);
+            lock (_lock)
+            {
+                if (_channel == null)
+                    throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
+
+                _channel.BasicNack(result.DeliveryTag, false, true);
+            }
         }
     }
 }
