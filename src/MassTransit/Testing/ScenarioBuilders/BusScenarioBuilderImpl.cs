@@ -37,7 +37,7 @@ namespace MassTransit.Testing.ScenarioBuilders
 		protected BusScenarioBuilderImpl(Uri uri)
 		{
 			_settings = new ServiceBusDefaultSettings();
-			_settings.ConcurrentConsumerLimit = 4;
+			_settings.ConcurrentConsumerLimit = 1;
 			_settings.ReceiveTimeout = 50.Milliseconds();
 
 			_configurator = new ServiceBusConfiguratorImpl(_settings);
