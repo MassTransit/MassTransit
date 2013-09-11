@@ -15,6 +15,7 @@ namespace BusDriver
 	using System;
 	using System.Collections.Generic;
 	using System.Threading;
+	using Magnum.Caching;
 	using MassTransit.Log4NetIntegration.Logging;
 	using MassTransit.Logging;
 	using log4net.Appender;
@@ -36,26 +37,32 @@ namespace BusDriver
 		static IServiceBus _bus;
 		static Uri _driverUri = new Uri("msmq://localhost/masstransit_busdriver");
 		static IList<IPendingCommand> _pending;
+	    static Cache<string, IServiceBus> _buses; 
 
-		public static IServiceBus Bus
-		{
-			get
-			{
-				if (_bus == null)
-				{
-					_log.DebugFormat("Starting service bus instance on {0}", _driverUri);
+        static Program()
+        {
+            _buses = new DictionaryCache<string, IServiceBus>(CreateBus);
+            
+        }
 
-					_bus = ServiceBusFactory.New(x =>
-						{
-							x.UseMsmq();
-							x.UseRabbitMq();
-							x.UseXmlSerializer();
-							x.ReceiveFrom(_driverUri);
-						});
-				}
+	    static IServiceBus CreateBus(string key)
+	    {
+	        var builder = new UriBuilder(_driverUri);
+	        builder.Scheme = key;
+	        var uri = builder.Uri;
 
-				return _bus;
-			}
+	        return ServiceBusFactory.New(x =>
+	            {
+                    x.UseMsmq();
+                    x.UseRabbitMq();
+	                x.UseJsonSerializer();
+	                x.ReceiveFrom(uri);
+	            });
+	    }
+
+	    public static IServiceBus GetBus(string scheme)
+	    {
+	        return _buses[scheme];
 		}
 
 		public static string CurrentUri { get; set; }
@@ -94,12 +101,12 @@ namespace BusDriver
 			{
 				WaitForPendingCommands();
 
-				if (_bus != null)
-				{
-					_log.Debug("Disposing of service bus instance");
-					_bus.Dispose();
-					_bus = null;
-				}
+			    foreach (var bus in _buses)
+			    {
+			        _log.DebugFormat("Disposing of service bus instance: {0}", bus.Endpoint.Address.Uri);
+			        bus.Dispose();
+			    }
+			    _buses.Clear();
 
 				Transports.Dispose();
 				Transports = null;
