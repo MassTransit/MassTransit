@@ -56,7 +56,7 @@ namespace BusDriver.Commands
 					peekCount++;
 
 					return null;
-				}, TimeSpan.Zero);
+				}, 5.Seconds());
 
 			_log.Info(text.ToString());
 
