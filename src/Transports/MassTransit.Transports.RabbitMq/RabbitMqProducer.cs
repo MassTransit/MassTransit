@@ -30,8 +30,8 @@ namespace MassTransit.Transports.RabbitMq
     {
 #if NET40
         readonly Cache<ulong, TaskCompletionSource<bool>> _confirms;
-#endif
         static readonly ILog _log = Logger.Get<RabbitMqProducer>();
+#endif
         readonly IRabbitMqEndpointAddress _address;
         readonly object _lock = new object();
         IModel _channel;
