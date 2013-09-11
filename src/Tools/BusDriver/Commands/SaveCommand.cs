@@ -111,7 +111,7 @@ namespace BusDriver.Commands
 			string nextFileName;
 			do
 			{
-				nextFileName = string.Format("{0}.{1}", pathName, _nextFileNumber++);
+				nextFileName = string.Format("{0}-{1:00000}.msg", pathName, _nextFileNumber++);
 			} while (System.IO.File.Exists(nextFileName));
 
 			return nextFileName;
