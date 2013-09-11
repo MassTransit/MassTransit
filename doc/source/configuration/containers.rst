@@ -72,6 +72,37 @@ Windsor
 
     We recommend that most of this type of code be placed in an IWindsorInstaller
 
+A POCO handler approach and IWindsorInstaller wrapped could be like the following:
+
+.. sourcecode:: csharp
+
+    public class MassTransitInstaller : IWindsorInstaller
+    {
+        public void Install(IWindsorContainer container, Castle.MicroKernel.SubSystems.Configuration.IConfigurationStore store)
+        {
+            var consumerConfig = container.Resolve<ConsumersConfiguration>(); // for configurations, like queue's address used below
+
+            var busBatchClose = ServiceBusFactory.New(sbc =>
+                {
+                    sbc.UseMsmq();
+                    sbc.UseMulticastSubscriptionClient();
+                    sbc.ReceiveFrom(consumerConfig.BatchCloseQueue);
+                    sbc.EnableMessageScope();
+                    sbc.Subscribe(x => x.Handler<CloseBatchMessage>(msg =>
+                        {
+                            var handler = container.Resolve<IBatchCloseHandler>();
+                            handler.CloseBatch(msg);
+                            container.Release(handler);
+                        }));
+                }
+            );
+
+            container.Register(Component.For<IServiceBus>().Instance(busBatchClose).Named("BatchCloseQueueBus"));
+
+            container.Release(consumerConfig); // irrelevant for this sample, but we need to release what we resolve.
+        }
+    }
+
 AutoFac
 '''''''
 
