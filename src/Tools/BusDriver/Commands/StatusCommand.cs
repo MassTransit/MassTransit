@@ -43,7 +43,7 @@ namespace BusDriver.Commands
         {
             Uri uri = _uriString.ToUri("The status URI was invalid");
 
-            IServiceBus bus = Program.Bus;
+            IServiceBus bus = Program.GetBus(uri.Scheme);
 
             IEndpoint endpoint = bus.GetEndpoint(uri);
 
