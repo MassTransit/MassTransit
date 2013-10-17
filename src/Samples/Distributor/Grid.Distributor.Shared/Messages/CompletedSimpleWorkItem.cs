@@ -13,24 +13,12 @@
 namespace Grid.Distributor.Shared.Messages
 {
     using System;
-    using MassTransit;
 
-    public class CompletedSimpleWorkItem :
-        CorrelatedBy<Guid>
+
+    public interface CompletedSimpleWorkItem
     {
-        public CompletedSimpleWorkItem(Guid correlationId, DateTime requestCreatedAt)
-        {
-            CorrelationId = correlationId;
-            CreatedAt = DateTime.UtcNow;
-            RequestCreatedAt = requestCreatedAt;
-        }
-
-        protected CompletedSimpleWorkItem()
-        {
-        }
-
-        public Guid CorrelationId { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime RequestCreatedAt { get; set; }
+        Guid CorrelationId { get; }
+        DateTime CreatedAt { get; }
+        DateTime RequestCreatedAt { get; }
     }
 }

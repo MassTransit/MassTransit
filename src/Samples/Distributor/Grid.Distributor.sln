@@ -1,19 +1,11 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MT", "MT", "{A9CBE7DC-AD66-4891-9C4C-C18E8D3E0E0D}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grid.Distributor.Shared", "Grid.Distributor.Shared\Grid.Distributor.Shared.csproj", "{DA5B48BC-3647-4E92-BEE5-58D920C75393}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grid.Distributor.Activator", "Grid.Distributor.Activator\Grid.Distributor.Activator.csproj", "{57CBC0A8-B439-4960-93A2-682D94D737AE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grid.Distributor.Worker", "Grid.Distributor.Worker\Grid.Distributor.Worker.csproj", "{F5898375-3A9C-4996-A570-871789C39C63}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "..\..\MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq", "..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Log4NetIntegration", "..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj", "{8D2BE372-A756-4676-B2EA-ED7846809BFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,29 +32,8 @@ Global
 		{F5898375-3A9C-4996-A570-871789C39C63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5898375-3A9C-4996-A570-871789C39C63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5898375-3A9C-4996-A570-871789C39C63}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Build|Any CPU.ActiveCfg = Release|Any CPU
-		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Build|Any CPU.ActiveCfg = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Build|Any CPU.ActiveCfg = Release|Any CPU
-		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Build|Any CPU.Build.0 = Release|Any CPU
-		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8D2BE372-A756-4676-B2EA-ED7846809BFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273} = {A9CBE7DC-AD66-4891-9C4C-C18E8D3E0E0D}
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {A9CBE7DC-AD66-4891-9C4C-C18E8D3E0E0D}
-		{8D2BE372-A756-4676-B2EA-ED7846809BFE} = {A9CBE7DC-AD66-4891-9C4C-C18E8D3E0E0D}
 	EndGlobalSection
 EndGlobal

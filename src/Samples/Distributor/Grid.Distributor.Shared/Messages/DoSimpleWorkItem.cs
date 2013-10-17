@@ -13,22 +13,10 @@
 namespace Grid.Distributor.Shared.Messages
 {
     using System;
-    using MassTransit;
 
-    public class DoSimpleWorkItem :
-        CorrelatedBy<Guid>
+    public interface DoSimpleWorkItem
     {
-        public DoSimpleWorkItem(Guid correlationId)
-        {
-            CorrelationId = correlationId;
-            CreatedAt = DateTime.UtcNow;
-        }
-
-        protected DoSimpleWorkItem()
-        {
-        }
-
-        public Guid CorrelationId { get; set; }
-        public DateTime CreatedAt { get; set; }
+         Guid CorrelationId { get;  }
+         DateTime CreatedAt { get;  }
     }
 }
