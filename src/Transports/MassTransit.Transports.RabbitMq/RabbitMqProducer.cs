@@ -87,12 +87,8 @@ namespace MassTransit.Transports.RabbitMq
                     if (_channel != null)
                     {
 #if NET40
-                        bool timedOut;
-                        _channel.WaitForConfirms(60.Seconds(), out timedOut);
-                        if (timedOut)
-                            _log.WarnFormat("Timeout waiting for all pending confirms on {0}", _address.Uri);
+                        WaitForPendingConfirms();
 #endif
-
 
                         UnbindEvents(_channel);
                         _channel.Cleanup(200, "Producer Unbind");
@@ -100,10 +96,27 @@ namespace MassTransit.Transports.RabbitMq
                 }
                 finally
                 {
+                    if (_channel != null)
+                        _channel.Dispose();
                     _channel = null;
 
                     FailPendingConfirms();
                 }
+            }
+        }
+
+        void WaitForPendingConfirms()
+        {
+            try
+            {
+                bool timedOut;
+                _channel.WaitForConfirms(60.Seconds(), out timedOut);
+                if (timedOut)
+                    _log.WarnFormat("Timeout waiting for all pending confirms on {0}", _address.Uri);
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Waiting for pending confirms threw an exception", ex);
             }
         }
 
@@ -125,8 +138,9 @@ namespace MassTransit.Transports.RabbitMq
 
                 _confirms.Each((id, task) => task.TrySetException(exception));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _log.Error("Exception while failing pending confirms", ex);
             }
 
             _confirms.Clear();
@@ -185,6 +199,14 @@ namespace MassTransit.Transports.RabbitMq
 
         void HandleModelShutdown(IModel model, ShutdownEventArgs reason)
         {
+            try
+            {
+                FailPendingConfirms();
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Fail pending confirms failed during model shutdown", ex);
+            }
         }
 
         void HandleFlowControl(IModel sender, FlowControlEventArgs args)
