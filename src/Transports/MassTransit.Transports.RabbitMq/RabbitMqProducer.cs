@@ -15,11 +15,11 @@ namespace MassTransit.Transports.RabbitMq
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Logging;
 #if NET40
     using System.Threading.Tasks;
-    using Logging;
-    using Magnum.Caching;
 #endif
+    using Magnum.Caching;
     using Magnum.Extensions;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
@@ -30,8 +30,8 @@ namespace MassTransit.Transports.RabbitMq
     {
 #if NET40
         readonly Cache<ulong, TaskCompletionSource<bool>> _confirms;
-        static readonly ILog _log = Logger.Get<RabbitMqProducer>();
 #endif
+        static readonly ILog _log = Logger.Get<RabbitMqProducer>();
         readonly IRabbitMqEndpointAddress _address;
         readonly object _lock = new object();
         IModel _channel;
