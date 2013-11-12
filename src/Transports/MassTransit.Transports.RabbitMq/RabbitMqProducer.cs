@@ -134,7 +134,8 @@ namespace MassTransit.Transports.RabbitMq
 #if NET40
             try
             {
-                var exception = new InvalidOperationException("Publish not confirmed before channel closed");
+                var exception = new MessageNotConfirmedException(_address.Uri,
+                    "Publish not confirmed before channel closed");
 
                 _confirms.Each((id, task) => task.TrySetException(exception));
             }

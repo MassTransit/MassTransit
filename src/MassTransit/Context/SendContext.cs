@@ -25,24 +25,30 @@ namespace MassTransit.Context
         Guid _id;
         IReceiveContext _receiveContext;
 
-        public SendContext(T message)
+        SendContext(Guid messageId, T message, Type declaringMessageType)
         {
-            _id = NewId.NextGuid();
+            _id = messageId;
             _message = message;
 
-            this.SetMessageType(typeof (T));
-            DeclaringMessageType = typeof (T);
+            SetMessageId(_id.ToString());
+            this.SetMessageType(typeof(T));
+            DeclaringMessageType = declaringMessageType;
+        }
+
+        public SendContext(T message)
+            : this(NewId.NextGuid(), message, typeof(T))
+        {
         }
 
         protected SendContext(T message, ISendContext context)
+            : this(context.Id, message, context.DeclaringMessageType)
         {
-            _id = context.Id;
-            _message = message;
+            SetMessageId(_id.ToString());
 
             SetUsing(context);
 
+            // need to reset this since SetUsing copies the context value
             this.SetMessageType(typeof (T));
-            DeclaringMessageType = context.DeclaringMessageType;
         }
 
         public Guid Id
