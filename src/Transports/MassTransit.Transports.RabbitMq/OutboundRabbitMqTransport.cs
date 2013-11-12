@@ -16,6 +16,7 @@ namespace MassTransit.Transports.RabbitMq
     using System.Collections;
     using System.Globalization;
     using System.IO;
+    using Exceptions;
     using Magnum;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
@@ -77,13 +78,13 @@ namespace MassTransit.Transports.RabbitMq
                             _producer.Publish(_address.Name, properties, body.ToArray());
 #endif
 
-                            _address.LogSent(context.MessageId ?? "", context.MessageType);
+                            _address.LogSent(context.MessageId ?? properties.MessageId ?? "", context.MessageType);
                         }
                     }
 #if NET40
                     catch (AggregateException ex)
                     {
-                        throw new InvalidConnectionException(_address.Uri, "Publisher did not confirm message", ex.InnerException);
+                        throw new TransportException(_address.Uri, "Publisher did not confirm message", ex.InnerException);
                     }
 #endif
                     catch (AlreadyClosedException ex)

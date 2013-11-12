@@ -97,6 +97,7 @@
     <Compile Include="IRabbitMqEndpointAddress.cs" />
     <Compile Include="Management\IRabbitMqEndpointManagement.cs" />
     <Compile Include="Management\RabbitMQEndpointManagement.cs" />
+    <Compile Include="MessageNotConfirmedException.cs" />
     <Compile Include="OutboundRabbitMqTransport.cs" />
     <Compile Include="PublishEndpointInterceptor.cs" />
     <Compile Include="PublishEndpointSinkLocator.cs" />
