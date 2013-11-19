@@ -58,3 +58,24 @@ The easiest way to configure logging is through the web.config or app.config.
 
 This will log to MassTransit.log in the root folder. There are a lot more configuration
 options explained at http://logging.apache.org/log4net/release/manual/configuration.html.
+
+Logging with MassTransit.NLog
+'''''''''''''''''''''''''''''
+
+First you need to get the latest MassTransit.NLog for NuGet or download it
+from https://nuget.org/packages/MassTransit.NLog
+
+Then add logging to your service bus initialization
+
+.. sourcecode:: csharp
+  using MassTransit.NLogIntegration;
+
+  //configure NLog
+
+  ServiceBus = ServiceBusFactory.New(sbc =>
+  {
+    /* usual stuff */
+    sbc.UseNLog();
+  });
+
+The easiest way to configure logging is through ???? (thoughs for the NLog community?)
