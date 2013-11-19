@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.Collections;
+    using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using System.Threading;
     using Magnum;
@@ -120,9 +121,9 @@ namespace MassTransit.Transports.RabbitMq
             get { return _autoDelete; }
         }
 
-        public IDictionary QueueArguments()
+        public IDictionary<string,object> QueueArguments()
         {
-            var ht = new Hashtable();
+            var ht = new Dictionary<string, object>();
 
             if (_isHighAvailable)
                 ht.Add("x-ha-policy", "all");

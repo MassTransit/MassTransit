@@ -229,6 +229,27 @@ msbuild :restore do |msb|
   msb.solution = 'src/MassTransit/MassTransit.csproj'
 end
 
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Containers/MassTransit.AutofacIntegration/MassTransit.AutofacIntegration.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Containers/MassTransit.UnityIntegration/MassTransit.UnityIntegration.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Containers/MassTransit.StructureMapIntegration/MassTransit.StructureMapIntegration.csproj'
+end
+
 desc "Only compiles the application."
 msbuild :build do |msb|
     msb.properties :Configuration => BUILD_CONFIG,
@@ -393,7 +414,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "log4net", "2.0.0"
+    nuspec.dependency "log4net", "2.0.2"
     nuspec.output_file = 'nuspecs/MassTransit.Log4Net.nuspec'
 
 	add_files props[:stage], File.join('Logging', 'MassTransit.Log4NetIntegration.{dll,pdb,xml}'), nuspec
@@ -410,7 +431,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NLog", "2.0.0"
+    nuspec.dependency "NLog", "2.1"
     nuspec.output_file = 'nuspecs/MassTransit.NLog.nuspec'
 
     add_files props[:stage], File.join('Logging', 'MassTransit.NLogIntegration.{dll,pdb,xml}'), nuspec
@@ -442,7 +463,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "RabbitMQ.Client", "3.0.4"
+    nuspec.dependency "RabbitMQ.Client", "3.2.1"
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
 
 	add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.Transports.RabbitMq.{dll,pdb,xml}')}", nuspec
@@ -492,7 +513,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "Ninject", "3.0.1"
+    nuspec.dependency "Ninject", "3.0.1.10"
     nuspec.output_file = 'nuspecs/MassTransit.Ninject.nuspec'
 
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.NinjectIntegration.{dll,pdb,xml}')}", nuspec
