@@ -66,6 +66,7 @@ If you want to use ZeroMQ, have a look at that branch and consider adding to it.
 gem install albacore
 gem install semver2
 ```
+   Recent versions of rubyzip (which albacore is dependent on) have a different interface. Also `gem install zip-zip` to provide the necessary adapter interface.
 
 4. Run `build.bat`
 
