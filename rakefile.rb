@@ -479,8 +479,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
-    nuspec.dependency "Magnum", "2.1.0"
-    nuspec.dependency "Newtonsoft.Json", "5.0.6"
+    nuspec.dependency "Magnum", "2.1.1"
+    nuspec.dependency "Newtonsoft.Json", "5.0.8"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
 	add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
@@ -514,7 +514,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NLog", "2.1"
+    nuspec.dependency "NLog", "2.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.NLog.nuspec'
 
     add_files props[:stage], File.join('Logging', 'MassTransit.NLogIntegration.{dll,pdb,xml}'), nuspec
@@ -530,7 +530,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "Castle.Windsor", "3.1.0"
+    nuspec.dependency "Castle.Windsor", "3.2.1"
     nuspec.output_file = 'nuspecs/MassTransit.CastleWindsor.nuspec'
 
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.WindsorIntegration.{dll,pdb,xml}')}", nuspec
@@ -646,8 +646,9 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NUnit", "2.6.2"
-    nuspec.dependency "RhinoMocks", "3.6"
+    nuspec.dependency "Magnum.TestFramework", "2.1.1"
+    nuspec.dependency "NUnit", "2.6.3"
+    nuspec.dependency "RhinoMocks", "3.6.1"
     nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'
 
 	add_files props[:stage], "#{File.join('Testing', 'MassTransit.TestFramework.{dll,pdb,xml}')}", nuspec
