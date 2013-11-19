@@ -45,7 +45,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
         InMemorySagaRepository<HealthSaga> _healthSagas;
 
         [SetUp]
-        void Configure()
+        public void Configure()
         {
             var subscriptionServiceUri = new Uri("loopback://localhost/mt_subscriptions");
             var healthUri = new Uri("loopback://localhost/mt_health");
@@ -97,7 +97,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
         }
 
         [TearDown]
-        protected void Cleanup()
+        public void Cleanup()
         {
             _healthService.Stop();
             _timeoutService.Stop();
@@ -119,18 +119,6 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             PipelineViewer.Trace(_serviceBus.ControlBus.OutboundPipeline);
 
             _serviceBus.ControlBus.ShouldHaveRemoteSubscriptionFor<Heartbeat>();
-        }
-
-        [Test]
-        public void Heartbeat_signals_should_be_received_by_the_health_monitor()
-        {
-            // give the health client some time to send a couple of heartbeats
-            Thread.Sleep(2.Seconds());
-
-            var s = _healthSagas.Where(filter => true).FirstOrDefault();
-
-            s.ShouldNotBeNull();
-            s.ShouldBeInState(HealthSaga.Healthy);
         }
     }
 }
