@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.NLogIntegration.Logging
 {
+    using System;
     using MassTransit.Logging;
     using NLog;
     using Util;
@@ -20,22 +21,21 @@ namespace MassTransit.NLogIntegration.Logging
     public class NLogLogger : 
         ILogger
     {
-        readonly LogFactory _factory;
-
+        readonly Func<string, NLog.Logger> _logFactory;
+ 
         public NLogLogger([NotNull] LogFactory factory)
         {
-            _factory = factory;
+            _logFactory = factory.GetLogger;
         }
 
         public NLogLogger()
-            : this(new LogFactory())
         {
-            
+            _logFactory = NLog.LogManager.GetLogger;
         }
 
         public ILog Get(string name)
         {
-            return new NLogLog(_factory.GetLogger(name), name);
+            return new NLogLog(_logFactory(name), name);
         }
 
         public static void Use()
