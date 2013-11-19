@@ -81,26 +81,25 @@ task :copy_signed do
 
 	copyOutputFiles File.join(props[:src], "Persistence/MassTransit.NHibernateIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NHibernateIntegration.{dll,pdb,xml}", File.join(props[:output], "Persistence/NHibernate")
 
-    outtst = File.join(props[:output], "Testing")
-	copyOutputFiles File.join(props[:src], "MassTransit.TestFramework/bin/#{BUILD_CONFIG}"), "MassTransit.TestFramework.{dll,pdb,xml}", outtst
-	copyOutputFiles File.join(props[:src], "MassTransit.TestFramework/bin/#{BUILD_CONFIG}"), "Magnum.TestFramework.{dll,pdb,xml}", outtst
+  outtst = File.join(props[:output], "Testing")
+  	copyOutputFiles File.join(props[:src], "MassTransit.TestFramework/bin/#{BUILD_CONFIG}"), "MassTransit.TestFramework.{dll,pdb,xml}", outtst
 
-    outl = File.join(props[:output], "Logging")
-	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.Log4NetIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.Log4NetIntegration.{dll,pdb,xml}", outl
-	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.NLogIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NLogIntegration.{dll,pdb,xml}", outl
+  outl = File.join(props[:output], "Logging")
+  	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.Log4NetIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.Log4NetIntegration.{dll,pdb,xml}", outl
+  	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.NLogIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NLogIntegration.{dll,pdb,xml}", outl
 
 	copyOutputFiles File.join(props[:src], "MassTransit.Reactive/bin/#{BUILD_CONFIG}"), "MassTransit.*.{dll,pdb,xml}", File.join(props[:output], "Reactive")
-    outc = File.join(props[:output], "Containers")
+
+  outc = File.join(props[:output], "Containers")
     copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
-	copyOutputFiles File.join(props[:src], "Containers/MassTransit.UnityIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.UnityIntegration.{dll,pdb,xml}", outc
-	copyOutputFiles File.join(props[:src], "Containers/MassTransit.WindsorIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.WindsorIntegration.{dll,pdb,xml}", outc
-	copyOutputFiles File.join(props[:src], "Containers/MassTransit.NinjectIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NinjectIntegration.{dll,pdb,xml}", outc
-	copyOutputFiles File.join(props[:src], "Containers/MassTransit.AutofacIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.AutofacIntegration.{dll,pdb,xml}", outc
+  	copyOutputFiles File.join(props[:src], "Containers/MassTransit.UnityIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.UnityIntegration.{dll,pdb,xml}", outc
+  	copyOutputFiles File.join(props[:src], "Containers/MassTransit.WindsorIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.WindsorIntegration.{dll,pdb,xml}", outc
+  	copyOutputFiles File.join(props[:src], "Containers/MassTransit.NinjectIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NinjectIntegration.{dll,pdb,xml}", outc
+  	copyOutputFiles File.join(props[:src], "Containers/MassTransit.AutofacIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.AutofacIntegration.{dll,pdb,xml}", outc
 
 	outt = File.join(props[:output], "Transports")
-	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.MSMQ/bin/#{BUILD_CONFIG}"), "MassTransit.Transports.MSMQ.{dll,pdb,xml}", File.join(outt, "MSMQ")
-	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "MassTransit.Transports.RabbitMq.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
-	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "RabbitMQ*.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
+  	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.MSMQ/bin/#{BUILD_CONFIG}"), "MassTransit.Transports.MSMQ.{dll,pdb,xml}", File.join(outt, "MSMQ")
+  	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "MassTransit.Transports.RabbitMq.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
 end
 
 task :ilmerge => [:ilmerge_masstransit] do
@@ -123,11 +122,12 @@ end
 desc "Copying Services"
 task :copy_services => [:build_unsigned] do
 	puts "Copying services"
+
 	targ = File.join(props[:stage], 'Services', 'RuntimeServices')
 	src = File.join(props[:src], "MassTransit.RuntimeServices/bin/#{BUILD_CONFIG}")
 
     copyOutputFiles src, "MassTransit.*.{dll,exe,config,log4net.xml,sdf}", targ
-	copyOutputFiles src, "MassTransit.dll", targ
+  	copyOutputFiles src, "MassTransit.dll", targ
     copyOutputFiles src, "MassTransit.Log4NetIntegration.dll", targ
     copyOutputFiles src, "log4net.dll", targ
     copyOutputFiles src, "Magnum.dll", targ
@@ -138,40 +138,30 @@ task :copy_services => [:build_unsigned] do
     copyOutputFiles src, "StructureMap.dll", targ
     copyOutputFiles src, "Topshelf.dll", targ
     copyOutputFiles src, "Topshelf.Log4NetIntegration.dll", targ
-	copyOutputFiles File.join(props[:lib], 'SqlCe'), '*', targ
-	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86'), '*', File.join(targ, 'x86')
-	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'x86', 'Microsoft.VC90.CRT')
-	copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64'), '*', File.join(targ, 'amd64')
-	copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'amd64', 'Microsoft.VC90.CRT')
+  	copyOutputFiles File.join(props[:lib], 'SqlCe'), '*', targ
+  	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86'), '*', File.join(targ, 'x86')
+  	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'x86', 'Microsoft.VC90.CRT')
+  	copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64'), '*', File.join(targ, 'amd64')
+  	copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'amd64', 'Microsoft.VC90.CRT')
 
 	targ = File.join(props[:stage], 'Services', 'SystemView')
 	src = File.join(props[:src], "MassTransit.SystemView/bin/#{BUILD_CONFIG}")
 
-	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
-	copyOutputFiles props[:output], 'MassTransit.dll', targ
-     	copyOutputFiles src, "log4net.dll", targ
-     	copyOutputFiles src, "Magnum.dll", targ
-     	copyOutputFiles src, "StructureMap.dll", targ
+  	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
+  	copyOutputFiles props[:output], 'MassTransit.dll', targ
+   	copyOutputFiles src, "log4net.dll", targ
+   	copyOutputFiles src, "Magnum.dll", targ
+   	copyOutputFiles src, "StructureMap.dll", targ
 
   targ = File.join(props[:stage], 'Services', 'BusDriver')
   src = File.join(props[:src], "Tools/BusDriver/bin/#{BUILD_CONFIG}")
 
-  copyOutputFiles src, "BusDriver.{exe}", targ
-	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
-	copyOutputFiles src, "RabbitMQ.Client.{dll}", targ
-	copyOutputFiles props[:output], 'MassTransit.dll', targ
-     	copyOutputFiles src, "log4net.dll", targ
-     	copyOutputFiles src, "Magnum.dll", targ
-
-	targ = File.join(props[:stage], 'Services', 'SystemView2')
-	src = File.join(props[:src], "MassTransit.SystemView2/bin/#{BUILD_CONFIG}")
-
-	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
-	copyOutputFiles props[:output], 'MassTransit.dll', targ
-     	copyOutputFiles src, "log4net.dll", targ
-     	copyOutputFiles src, "Magnum.dll", targ
-     	copyOutputFiles src, "StructureMap.dll", targ
-     	copyOutputFiles src, "WPFToolkit.dll", targ
+    copyOutputFiles src, "BusDriver.{exe}", targ
+  	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
+    copyOutputFiles props[:output], 'MassTransit.dll', targ
+  	copyOutputFiles src, "RabbitMQ.Client.{dll}", targ
+   	copyOutputFiles src, "log4net.dll", targ
+   	copyOutputFiles src, "Magnum.dll", targ
 end
 
 task :copy_samples => [:compile_samples] do
@@ -179,33 +169,31 @@ task :copy_samples => [:compile_samples] do
 	targ = File.join(props[:stage], 'Samples', 'Starbucks')
 	src = File.join(props[:src], "Samples", "Starbucks")
 
-	copyOutputFiles props[:output], "MassTransit.dll", targ
-
-     	copyOutputFiles src, "Starbucks.Barista/bin/#{BUILD_CONFIG}/MassTransit.Log4NetIntegration.dll", targ
-
-	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap}.dll", targ
-	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "{MassTransit.WindsorIntegration,Castle.Windsor,Castle.Core,Topshelf}.dll", targ
-	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "{MassTransit.NinjectIntegration,Ninject}.dll", targ
-	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "Starbucks.Cashier.exe", targ
-	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "cashier.log4net.xml", targ
-	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "Starbucks.Barista.exe", targ
-	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "barista.log4net.xml", targ
-	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Customer.exe", targ
-	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "customer.log4net.xml", targ
-	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Messages.dll", targ
+  	copyOutputFiles props[:output], "MassTransit.dll", targ
+   	copyOutputFiles src, "Starbucks.Barista/bin/#{BUILD_CONFIG}/MassTransit.Log4NetIntegration.dll", targ
+  	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap}.dll", targ
+  	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "{MassTransit.WindsorIntegration,Castle.Windsor,Castle.Core,Topshelf}.dll", targ
+  	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "{MassTransit.NinjectIntegration,Ninject}.dll", targ
+  	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "Starbucks.Cashier.exe", targ
+  	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "cashier.log4net.xml", targ
+  	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "Starbucks.Barista.exe", targ
+  	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "barista.log4net.xml", targ
+  	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Customer.exe", targ
+  	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "customer.log4net.xml", targ
+  	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Messages.dll", targ
 
 	targ = File.join(props[:stage], 'Samples', 'Distributor')
 	src = File.join(props[:src], "Samples", "Distributor")
 
-	copyOutputFiles props[:output], "MassTransit.dll", targ
-     	copyOutputFiles src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}/MassTransit.Log4NetIntegration.dll", targ
+  	copyOutputFiles props[:output], "MassTransit.dll", targ
+   	copyOutputFiles src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}/MassTransit.Log4NetIntegration.dll", targ
 
-	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap,Topshelf}.dll", targ
-	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Activator.exe", targ
-	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Shared.dll", targ
-	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "*.config", targ
-	copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Worker.exe", targ
-	copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "*.config", targ
+  	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap,Topshelf}.dll", targ
+  	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Activator.exe", targ
+  	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Shared.dll", targ
+  	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "*.config", targ
+  	copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Worker.exe", targ
+  	copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "*.config", targ
 end
 
 desc "restores missing packages"
@@ -369,9 +357,6 @@ msbuild :build_starbucks do |msb|
 	msb.use :net4 #MSB_USE
 	msb.targets :Build
 	msb.solution = 'src/Samples/Starbucks/Starbucks.sln'
-    msb.properties[:SignAssembly] = 'true'
-    msb.properties[:AssemblyOriginatorKeyFile] = props[:keyfile]
-    msb.solution = 'src/MassTransit.sln'
 end
 
 msbuild :build_distributor do |msb|
@@ -383,9 +368,6 @@ msbuild :build_distributor do |msb|
 	msb.use :net4 #MSB_USE
 	msb.targets :Build
 	msb.solution = 'src/Samples/Distributor/Grid.Distributor.sln'
-    msb.properties[:SignAssembly] = 'true'
-    msb.properties[:AssemblyOriginatorKeyFile] = props[:keyfile]
-    msb.solution = 'src/MassTransit.sln'
 end
 
 def copyOutputFiles(fromDir, filePattern, outDir)
@@ -483,7 +465,24 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "Newtonsoft.Json", "5.0.8"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
-	add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
+  add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
+  end
+
+  nuspec :mt_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.Msmq'
+    nuspec.version = NUGET_VERSION
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'MSMQ support for MassTransit (a distributed application framework for .NET, including support for MSMQ and RabbitMQ).'
+    # nuspec.title = Projects[:tx][:title]
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "false"
+    nuspec.dependency "MassTransit", NUGET_VERSION
+    nuspec.dependency "Magnum", "2.1.1"
+    nuspec.dependency "Newtonsoft.Json", "5.0.8"
+    nuspec.output_file = 'nuspecs/MassTransit.Msmq.nuspec'
+
 	add_files props[:stage], "#{File.join('Transports', 'MSMQ', 'MassTransit.Transports.Msmq.{dll,pdb,xml}')}", nuspec
   end
 
