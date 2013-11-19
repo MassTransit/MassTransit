@@ -17,8 +17,10 @@ namespace MassTransit.Tests.Distributor
     using Magnum;
     using Magnum.Extensions;
     using MassTransit.Transports;
+    using NUnit.Framework;
     using TextFixtures;
 
+    [TestFixture, Ignore]
     public class DistributorTestFixture<TTransportFactory> :
         SubscriptionServiceTestFixture<TTransportFactory>
         where TTransportFactory : class, ITransportFactory, new()

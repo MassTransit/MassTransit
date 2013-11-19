@@ -30,13 +30,13 @@ props = {
 }
 
 desc "**Default**, cleans, compiles and runs tests"
-task :default => [:clean, :restore, :compile, :ilmerge, :compile_samples, :copy_samples, :copy_services]
+task :default => [:clean, :restore, :compile35, :ilmerge, :tests]
 
 desc "Default + tests"
-task :all => [:default, :tests]
+task :all => [:default]
 
 desc "**DOOES NOT CLEAR OUTPUT FOLDER**, compiles and runs tests"
-task :unclean => [:compile, :ilmerge, :tests]
+task :unclean => [:compile, :ilmerge, :compile_samples, :copy_samples, :copy_services, :tests]
 
 desc "Update the common version information for the build. You can call this task without building."
 assemblyinfo :global_version => [:versioning] do |asm|
@@ -70,7 +70,10 @@ task :compile_samples => [:build_starbucks, :build_distributor] do ; end
 desc "Compiles MT into build_output"
 task :compile => [:versioning, :global_version, :build, :copy_signed] do ; end
 
-task :copy_signed => [:build] do
+desc "Compiles MT into build_output"
+task :compile35 => [:versioning, :global_version, :build35, :copy_signed] do ; end
+
+task :copy_signed do
 	puts 'Copying unmerged dependencies to output folder'
 
 	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "log4net.{dll,pdb,xml}", props[:output]
@@ -265,6 +268,20 @@ msbuild :build do |msb|
 end
 
 desc "Only compiles the application."
+msbuild :build35 do |msb|
+    msb.properties :Configuration => BUILD_CONFIG + "35",
+        :BuildConfigKey => BUILD_CONFIG_KEY,
+        :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
+        :Platform => 'Any CPU'
+    msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
+    msb.use :net4 #MSB_USE
+    msb.targets :Clean, :Build
+    msb.properties[:SignAssembly] = 'true'
+    msb.properties[:AssemblyOriginatorKeyFile] = props[:keyfile]
+    msb.solution = 'src/MassTransit.sln'
+end
+
+desc "Only compiles the application."
 msbuild :build_unsigned do |msb|
 	msb.properties :Configuration => BUILD_CONFIG + "Unsigned",
 	    :BuildConfigKey => BUILD_CONFIG_KEY,
@@ -314,12 +331,11 @@ end
 task :tests => [:unit_tests]
 
 desc "Runs unit tests"
-nunit :unit_tests => [:compile] do |nunit|
+nunit :unit_tests do |nunit|
 
-        nunit.command = File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe")
-        nunit.options = "/framework=#{CLR_TOOLS_VERSION}", '/exclude:NotOnTeamCity', '/noshadow', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], "nunit-test-results-#{OUTPUT_PATH}.xml")}\""
-
-        nunit.assemblies = FileList["tests/MassTransit.Tests.dll", "tests/MassTransit.Containers.Tests.dll"]
+	nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.3', 'tools', 'nunit-console.exe')
+	nunit.options = "/framework=#{CLR_TOOLS_VERSION}", '/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results-#{OUTPUT_PATH}.xml')}\""
+    nunit.assemblies = FileList["tests/MassTransit.Tests.dll", "tests/MassTransit.Containers.Tests.dll"]
 end
 
 desc "Runs transport tests (integration)"

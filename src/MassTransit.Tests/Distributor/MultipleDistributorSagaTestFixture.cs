@@ -16,8 +16,10 @@ namespace MassTransit.Tests.Distributor
 	using Load.Sagas;
 	using MassTransit.Saga;
 	using MassTransit.Transports;
+	using NUnit.Framework;
 	using TextFixtures;
 
+    [TestFixture, Ignore]
 	public class MultipleDistributorSagaTestFixture<TTransportFactory> :
 		SubscriptionServiceTestFixture<TTransportFactory>
 		where TTransportFactory : class, ITransportFactory, new()

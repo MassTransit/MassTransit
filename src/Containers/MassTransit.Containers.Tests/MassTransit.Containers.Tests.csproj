@@ -34,6 +34,12 @@
     <Reference Include="Autofac" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\packages\Autofac.3.1.5\lib\net40\Autofac.dll</HintPath>
     </Reference>
+    <Reference Include="Autofac" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\packages\Autofac.2.6.3.862\lib\net35\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\packages\Autofac.2.6.3.862\lib\net35\Autofac.Configuration.dll</HintPath>
+    </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\packages\Magnum.2.1.1\lib\net35\Magnum.dll</HintPath>
     </Reference>
@@ -60,8 +66,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\structuremap.2.6.4.1\lib\net40\StructureMap.dll</HintPath>
     </Reference>
-    <Reference Include="Ninject, Version=3.0.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Ninject" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
+      <HintPath>..\..\packages\Ninject.3.0.1.10\lib\net35\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\packages\Ninject.3.0.1.10\lib\net40\Ninject.dll</HintPath>
     </Reference>
     <Reference Include="Castle.Core" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">

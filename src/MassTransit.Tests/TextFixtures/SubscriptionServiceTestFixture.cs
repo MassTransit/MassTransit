@@ -22,7 +22,7 @@ namespace MassTransit.Tests.TextFixtures
 	using MassTransit.Transports;
 	using NUnit.Framework;
 
-	[TestFixture]
+	[TestFixture, Ignore]
 	public class SubscriptionServiceTestFixture<TTransportFactory> :
 		EndpointTestFixture<TTransportFactory>
 		where TTransportFactory : class, ITransportFactory, new()
