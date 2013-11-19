@@ -208,23 +208,6 @@ task :copy_samples => [:compile_samples] do
 	copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "*.config", targ
 end
 
-
-#desc "Prepare examples"
-#task :prepare_examples => [:compile] do#
-#	puts "Preparing samples"
-#	targ = File.join(props[:output], 'Services', 'clock' )
-#	copyOutputFiles File.join(props[:src], "Samples/StuffOnAShelf/bin/#{BUILD_CONFIG}"), "clock.*", targ
-#	copyOutputFiles File.join(props[:src], "Samples/StuffOnAShelf/bin/#{BUILD_CONFIG}"), "StuffOnAShelf.{dll}", targ
-#	copyOutputFiles props[:output], "Topshelf.{dll}", targ
-#	copyOutputFiles props[:output], "log4net.{dll,pdb}", targ
-#	copy('doc/Using Shelving.txt', props[:output])
-#	copy('doc/log4net.config.example', props[:output])
-#	commit_data = get_commit_hash_and_date
-#	what_commit = File.new File.join(props[:output], "#{commit_data[0]} - #{commit_data[1]}.txt"), "w"
-#	what_commit.puts "The file name denotes what commit these files were built off of. You can also find that information in the assembly info accessible through code."
-#	what_commit.close
-#end
-
 desc "restores missing packages"
 msbuild :restore do |msb|
   msb.use :net4
@@ -236,7 +219,21 @@ desc "restores missing packages"
 msbuild :restore do |msb|
   msb.use :net4
   msb.targets :RestorePackages
+  msb.solution = 'src/MassTransit.Tests/MassTransit.Tests.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
   msb.solution = 'src/Containers/MassTransit.AutofacIntegration/MassTransit.AutofacIntegration.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Containers/MassTransit.NinjectIntegration/MassTransit.NinjectIntegration.csproj'
 end
 
 desc "restores missing packages"
@@ -251,6 +248,76 @@ msbuild :restore do |msb|
   msb.use :net4
   msb.targets :RestorePackages
   msb.solution = 'src/Containers/MassTransit.StructureMapIntegration/MassTransit.StructureMapIntegration.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Loggers/MassTransit.Log4NetIntegration/MassTransit.Log4NetIntegration.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Loggers/MassTransit.NLogIntegration/MassTransit.NLogIntegration.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Persistence/MassTransit.NHibernateIntegration/MassTransit.NHibernateIntegration.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Persistence/MassTransit.NHibernateIntegration.Tests/MassTransit.NHibernateIntegration.Tests.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Transports/MassTransit.Transports.RabbitMq/MassTransit.Transports.RabbitMq.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Transports/MassTransit.Transports.RabbitMq.Tests/MassTransit.Transports.RabbitMq.Tests.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Transports/MassTransit.Transports.Msmq/MassTransit.Transports.Msmq.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/Transports/MassTransit.Transports.Msmq.Tests/MassTransit.Transports.Msmq.Tests.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/MassTransit.Reactive/MassTransit.Reactive.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/MassTransit.Reactive.Tests/MassTransit.Reactive.Tests.csproj'
 end
 
 desc "Only compiles the application."
