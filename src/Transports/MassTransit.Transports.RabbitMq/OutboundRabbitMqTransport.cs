@@ -68,7 +68,7 @@ namespace MassTransit.Transports.RabbitMq
                         using (var body = new MemoryStream())
                         {
                             context.SerializeTo(body);
-                            properties.Headers = context.Headers.ToDictionary(entry => entry.Key, entry => entry.Value);
+                            properties.Headers = context.Headers.ToDictionary(entry => entry.Key, entry => (object)entry.Value);
                             properties.Headers["Content-Type"]=context.ContentType;
 
 #if NET40

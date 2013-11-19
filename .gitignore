@@ -25,6 +25,10 @@ src/Samples/HeavyLoad/logs
 *.bak
 *.orig
 
+NuGet.exe
+
+packages
+
 TestResult.xml
 submit.xml
 tests/*

@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq.Management
 {
     using System.Collections;
+    using System.Collections.Generic;
     using RabbitMQ.Client;
 
     public class RabbitMqEndpointManagement :
@@ -34,7 +35,7 @@ namespace MassTransit.Transports.RabbitMq.Management
         }
 
         public void BindQueue(string queueName, string exchangeName, string exchangeType, string routingKey,
-                              IDictionary queueArguments)
+                              IDictionary<string,object> queueArguments)
         {
             using (IModel model = _connection.CreateModel())
             {

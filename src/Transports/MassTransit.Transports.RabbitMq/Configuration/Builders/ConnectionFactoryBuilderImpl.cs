@@ -35,7 +35,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Builders
         {
             ConnectionFactory connectionFactory = _address.ConnectionFactory;
 
-            var clientProperties = new Dictionary<string, string>();
+            var clientProperties = new Dictionary<string, object>();
 
 
             clientProperties.Add("client_api", "MassTransit");

@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 {
     using System.Collections;
+    using System.Collections.Generic;
     using System.Text;
     using Magnum.TestFramework;
     using RabbitMQ.Client;
@@ -145,7 +146,7 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
         [When]
         public void An_exchange_is_bound_to_a_highly_available_queue()
         {
-            var args = new Hashtable();
+            var args = new Dictionary<string,object>();
             args.Add("x-ha-policy", "all");
             Model.ExchangeDeclare("TypeA", ExchangeType.Fanout, true, true, null);
             _queueName = Model.QueueDeclare("TypeA", true, true, true, args);

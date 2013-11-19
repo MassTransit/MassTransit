@@ -13,13 +13,14 @@
 namespace MassTransit.Transports.RabbitMq.Management
 {
     using System;
-    using System.Collections;
+    using System.Collections.Generic;
+
 
     public interface IRabbitMqEndpointManagement :
         IDisposable
     {
         void BindQueue(string queueName, string exchangeName, string exchangeType, string routingKey = "",
-            IDictionary queueArguments = null);
+            IDictionary<string, object> queueArguments = null);
 
         void UnbindQueue(string queueName, string exchangeName, string routingKey = "");
         void BindExchange(string destination, string source, string exchangeType, string routingKey = "");

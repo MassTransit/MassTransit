@@ -16,6 +16,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using System.Diagnostics;
     using System.Threading;
     using BusConfigurators;
+    using Logging;
     using Magnum.TestFramework;
     using NHibernateIntegration.Saga;
     using NHibernateIntegration.Tests.Sagas;
@@ -23,14 +24,13 @@ namespace MassTransit.Transports.Msmq.Tests
     using Saga;
     using TestFixtures;
     using TestFramework;
-    using log4net;
 
     [TestFixture, Category("Integration")]
     public class Sending_multiple_initiating_messages_should_not_fail_badly :
         MsmqConcurrentSagaTestFixtureBase
     {
         static readonly ILog _log =
-            LogManager.GetLogger(typeof (Sending_multiple_initiating_messages_should_not_fail_badly));
+            Logger.Get(typeof (Sending_multiple_initiating_messages_should_not_fail_badly));
 
         ISagaRepository<ConcurrentSaga> _sagaRepository;
 

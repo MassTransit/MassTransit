@@ -95,7 +95,7 @@ namespace MassTransit.Transports.RabbitMq
 
         public BasicDeliverEventArgs Get(TimeSpan timeout)
         {
-            SharedQueue queue;
+            SharedQueue<BasicDeliverEventArgs> queue;
             lock (_lock)
             {
                 if (_consumer == null)
@@ -107,10 +107,10 @@ namespace MassTransit.Transports.RabbitMq
                 queue = _consumer.Queue;
             }
 
-            object result;
+            BasicDeliverEventArgs result;
             queue.Dequeue((int)timeout.TotalMilliseconds, out result);
 
-            return (BasicDeliverEventArgs)result;
+            return result;
         }
 
         public void MessageCompleted(BasicDeliverEventArgs result)
