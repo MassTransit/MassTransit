@@ -32,6 +32,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,43 +55,13 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\packages\log4net.2.0.2\lib\net40-full\log4net.dll</HintPath>
-    </Reference>
     <Reference Include="log4net, Version=1.2.12.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\log4net.2.0.2\lib\net40-full\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
+      <HintPath>..\..\..\packages\log4net.2.0.2\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Magnum, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Magnum.2.1.0\lib\NET40\Magnum.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit, Version=2.8.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MassTransit.2.8.0\lib\net40\MassTransit.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.Log4NetIntegration, Version=2.8.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MassTransit.Log4Net.2.8.0\lib\net40\MassTransit.Log4NetIntegration.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.Transports.MSMQ, Version=2.8.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MassTransit.2.8.0\lib\net40\MassTransit.Transports.MSMQ.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.Transports.RabbitMq, Version=2.8.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MassTransit.RabbitMQ.2.8.0\lib\net40\MassTransit.Transports.RabbitMq.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="RabbitMQ.Client, Version=3.1.5.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RabbitMQ.Client.3.1.5\lib\net30\RabbitMQ.Client.dll</HintPath>
+      <HintPath>..\..\..\packages\Magnum.2.1.0\lib\NET40\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -97,12 +69,11 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml" />
-    <Reference Include="Topshelf, Version=3.1.107.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Topshelf.3.1.1\lib\net40-full\Topshelf.dll</HintPath>
+    <Reference Include="Topshelf">
+      <HintPath>..\..\..\packages\Topshelf.3.1.2\lib\net40-full\Topshelf.dll</HintPath>
     </Reference>
     <Reference Include="Topshelf.Log4Net">
-      <HintPath>..\packages\Topshelf.Log4Net.3.1.1\lib\net40-full\Topshelf.Log4Net.dll</HintPath>
+      <HintPath>..\..\..\packages\Topshelf.Log4Net.3.1.2\lib\net40-full\Topshelf.Log4Net.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +83,18 @@
     <Compile Include="SimpleWorkItemConsumer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
+      <Project>{8d2be372-a756-4676-b2ea-ed7846809bfe}</Project>
+      <Name>MassTransit.Log4NetIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\MassTransit\MassTransit.csproj">
+      <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
+      <Name>MassTransit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Transports\MassTransit.Transports.RabbitMq\MassTransit.Transports.RabbitMq.csproj">
+      <Project>{6c7149d7-4d97-45df-a05d-61ec7374491d}</Project>
+      <Name>MassTransit.Transports.RabbitMq</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Grid.Distributor.Shared\Grid.Distributor.Shared.csproj">
       <Project>{DA5B48BC-3647-4E92-BEE5-58D920C75393}</Project>
       <Name>Grid.Distributor.Shared</Name>
@@ -144,6 +127,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
