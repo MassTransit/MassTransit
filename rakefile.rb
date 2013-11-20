@@ -469,11 +469,10 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
   end
 
   nuspec :mt_nuspec => ['nuspecs'] do |nuspec|
-    nuspec.id = 'MassTransit.Msmq'
+    nuspec.id = 'MassTransit.MSMQ'
     nuspec.version = NUGET_VERSION
     nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
     nuspec.description = 'MSMQ support for MassTransit (a distributed application framework for .NET, including support for MSMQ and RabbitMQ).'
-    # nuspec.title = Projects[:tx][:title]
     nuspec.projectUrl = 'http://masstransit-project.com'
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
@@ -481,7 +480,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Magnum", "2.1.1"
     nuspec.dependency "Newtonsoft.Json", "5.0.8"
-    nuspec.output_file = 'nuspecs/MassTransit.Msmq.nuspec'
+    nuspec.output_file = 'nuspecs/MassTransit.MSMQ.nuspec'
 
 	add_files props[:stage], "#{File.join('Transports', 'MSMQ', 'MassTransit.Transports.Msmq.{dll,pdb,xml}')}", nuspec
   end
@@ -688,6 +687,7 @@ task :nuget => [:versioning, 'build_artifacts', :all_nuspecs] do
 	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Unity.nuspec -o build_artifacts"
 	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.CastleWindsor.nuspec -o build_artifacts"
 	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NHibernate.nuspec -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.MSMQ.nuspec -o build_artifacts"
 	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.RabbitMQ.nuspec -o build_artifacts"
 	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.TestFramework.nuspec -o build_artifacts"
 	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Reactive.nuspec -o build_artifacts"
