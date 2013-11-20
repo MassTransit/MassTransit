@@ -142,7 +142,7 @@
         LoopbackLocalAndRemoteTestFixture
     {
         InMemorySagaRepository<MySaga> _sagaRepository;
-        TimeSpan _testTimeout = Debugger.IsAttached ? 5.Minutes() : 8.Seconds();
+        TimeSpan _testTimeout = Debugger.IsAttached ? 5.Minutes() : 30.Seconds();
 
         [Test]
         public void Should_deliver_a_published_message()
