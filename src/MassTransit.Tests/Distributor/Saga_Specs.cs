@@ -137,7 +137,7 @@
         }
     }
 
-    [TestFixture]
+    [TestFixture, Explicit]
     public class Using_a_distributor_and_worker_saga :
         LoopbackLocalAndRemoteTestFixture
     {
