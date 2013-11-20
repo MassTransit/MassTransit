@@ -68,14 +68,14 @@ from https://nuget.org/packages/MassTransit.NLog
 Then add logging to your service bus initialization
 
 .. sourcecode:: csharp
-  using MassTransit.NLogIntegration;
+    using MassTransit.NLogIntegration;
 
-  //configure NLog
+    //configure NLog
 
-  ServiceBus = ServiceBusFactory.New(sbc =>
-  {
-    /* usual stuff */
-    sbc.UseNLog();
-  });
+    ServiceBus = ServiceBusFactory.New(sbc =>
+    {
+      /* usual stuff */
+      sbc.UseNLog();
+    });
 
 The easiest way to configure logging is through ???? (thoughs for the NLog community?)
