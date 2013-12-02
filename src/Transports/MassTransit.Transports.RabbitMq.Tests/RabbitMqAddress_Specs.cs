@@ -308,7 +308,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void ShouldNotHaveATtl()
         {
-            _addr.QueueArguments()["x-message-ttl"].ShouldBeNull();
+            _addr.QueueArguments().ContainsKey("x-message-ttl").ShouldBeFalse();
         }
 
         [Then]
@@ -442,7 +442,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void ShouldNotBeHa()
         {
-            _addr.QueueArguments()["x-ha-policy"].ShouldBeNull();
+            _addr.QueueArguments().ContainsKey("x-ha-policy").ShouldBeFalse();
         }
 
         [Then]
