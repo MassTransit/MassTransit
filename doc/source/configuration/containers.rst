@@ -18,6 +18,7 @@ StructureMap
         var container = new Container(cfg =>
         {
             // register each consumer
+            cfg.ForConcreteType<YourConsumer>();
             
             //or use StructureMap's excellent scanning capabilities
         });
@@ -49,7 +50,7 @@ Windsor
         var container = new WindsorContainer();
         
         // register each consumer manually
-        container.Register(Component.For<IConsumer>().ImplementedBy<YourConsumer>);
+        container.Register(Component.For<YourConsumer>().LifestyleTransient());
         
         //or use Windsor's excellent scanning capabilities
         container.Register(AllTypes.FromThisAssembly().BasedOn<IConsumer>());
@@ -81,7 +82,7 @@ AutoFac
         var builder = new ContainerBuilder();
 
         // register each consumer manually
-        builder.RegisterType<YourConsumer>().As<IConsumer>();
+        builder.RegisterType<YourConsumer>().AsSelf();
 
         //or use Autofac's scanning capabilities -- SomeClass is any class in the correct assembly
         builder.RegisterAssemblyTypes(typeof(SomeClass).Assembly)
