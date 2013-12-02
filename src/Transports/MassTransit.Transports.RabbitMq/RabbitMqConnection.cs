@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
+    using System.Collections.Generic;
     using Logging;
     using Magnum.Extensions;
     using RabbitMQ.Client;
@@ -63,5 +64,17 @@ namespace MassTransit.Transports.RabbitMq
             _connection.Cleanup(200, "Disconnect");
             _connection = null;
         }
+
+        public void DeclareExchange(IModel channel, string name, bool durable, bool autoDelete)
+        {
+            channel.ExchangeDeclare(name, ExchangeType.Fanout, durable, autoDelete, null);
+        }
+
+        public void BindQueue(IModel channel, string name, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> queueArguments)
+        {
+            string queue = channel.QueueDeclare(name, durable, exclusive, autoDelete, queueArguments);
+            channel.QueueBind(queue, name, "");
+        }
+
     }
 }

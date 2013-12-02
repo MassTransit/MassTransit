@@ -33,14 +33,16 @@ namespace MassTransit.Transports.RabbitMq
 #endif
         static readonly ILog _log = Logger.Get<RabbitMqProducer>();
         readonly IRabbitMqEndpointAddress _address;
+        readonly bool _bindToQueue;
         readonly object _lock = new object();
         IModel _channel;
         bool _immediate;
         bool _mandatory;
 
-        public RabbitMqProducer(IRabbitMqEndpointAddress address)
+        public RabbitMqProducer(IRabbitMqEndpointAddress address, bool bindToQueue)
         {
             _address = address;
+            _bindToQueue = bindToQueue;
 #if NET40
             _confirms = new ConcurrentCache<ulong, TaskCompletionSource<bool>>();
 #endif
@@ -55,6 +57,8 @@ namespace MassTransit.Transports.RabbitMq
                 {
                     channel = connection.Connection.CreateModel();
 
+                    DeclareAndBindQueue(connection, channel);
+
                     BindEvents(channel);
 
                     _channel = channel;
@@ -65,6 +69,17 @@ namespace MassTransit.Transports.RabbitMq
 
                     throw new InvalidConnectionException(_address.Uri, "Invalid connection to host", ex);
                 }
+            }
+        }
+
+        void DeclareAndBindQueue(RabbitMqConnection connection, IModel channel)
+        {
+            if (_bindToQueue)
+            {
+                connection.DeclareExchange(channel, _address.Name, _address.Durable, _address.AutoDelete);
+
+                connection.BindQueue(channel, _address.Name, _address.Durable, _address.Exclusive, _address.AutoDelete,
+                    _address.QueueArguments());
             }
         }
 

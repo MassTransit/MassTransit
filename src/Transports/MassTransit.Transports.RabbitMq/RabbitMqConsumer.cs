@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
+    using System.Collections.Generic;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using RabbitMQ.Util;
@@ -42,7 +43,7 @@ namespace MassTransit.Transports.RabbitMq
             {
                 channel = connection.Connection.CreateModel();
 
-                BindQueue(channel);
+                BindQueue(connection, channel);
 
                 PurgeIfRequested(channel);
 
@@ -85,12 +86,11 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
-        void BindQueue(IModel channel)
+        void BindQueue(RabbitMqConnection connection, IModel channel)
         {
-            string queue = channel.QueueDeclare(_address.Name, _address.Durable, _address.Exclusive, _address.AutoDelete,
-                _address.QueueArguments());
-            channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable, _address.AutoDelete, null);
-            channel.QueueBind(queue, _address.Name, "");
+            connection.DeclareExchange(channel, _address.Name, _address.Durable, _address.AutoDelete);
+
+            connection.BindQueue(channel, _address.Name, _address.Durable, _address.Exclusive, _address.AutoDelete, _address.QueueArguments());
         }
 
         public BasicDeliverEventArgs Get(TimeSpan timeout)
