@@ -1,6 +1,10 @@
 namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
 {
+    using System.Threading;
     using NUnit.Framework;
+    using RabbitMQ.Client;
+    using RabbitMQ.Client.Events;
+
 
     [TestFixture, Explicit]
     public class BasicAckIsFasterOnGet :
@@ -73,7 +77,33 @@ namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
                 });
             });
         }
+
+
+        [Test]
+        public void BasicConsumer()
+        {
+            WithChannel(chan =>
+            {
+                int shutup = 0;
+                WithStopWatch("BasicConsumer", () =>
+                {
+                    chan.BasicQos(0, 1000, false);
+
+                    var consumer = new QueueingBasicConsumer(chan);
+                    chan.BasicConsume(theQueue, false, consumer);
+                    var queue = consumer.Queue;
+
+                    for (int i = 0; i < HowMany; i++)
+                    {
+                        BasicDeliverEventArgs result;
+                        queue.Dequeue(1000, out result);
+                        chan.BasicAck(result.DeliveryTag, false);
+                    }
+                });
+            });
+        }
     }
+
 
 
 
