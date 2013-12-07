@@ -74,7 +74,7 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
-        public void ExchangeBind(string destination, string source)
+        public void ExchangeBind(string destination, string source, bool destinationTemporary = false, bool sourceTemporary = false)
         {
             var binding = new ExchangeBinding(destination, source);
 
@@ -88,8 +88,8 @@ namespace MassTransit.Transports.RabbitMq
                 {
                     if (_channel != null)
                     {
-                        ExchangeDeclare(destination, false);
-                        ExchangeDeclare(source, false);
+                        ExchangeDeclare(destination, destinationTemporary);
+                        ExchangeDeclare(source, sourceTemporary);
 
                         _channel.ExchangeBind(destination, source, "");
                     }
@@ -141,10 +141,10 @@ namespace MassTransit.Transports.RabbitMq
                 foreach (var binding in _exchangeBindings)
                 {
                     if (!exchanges.ContainsKey(binding.Source))
-                        exchanges.Add(binding.Source, false);
+                        exchanges.Add(binding.Source, binding.SourceTemporary);
 
                     if (!exchanges.ContainsKey(binding.Destination))
-                        exchanges.Add(binding.Destination, false);
+                        exchanges.Add(binding.Destination, binding.DestinationTemporary);
                 }
 
                 foreach (var exchange in exchanges)

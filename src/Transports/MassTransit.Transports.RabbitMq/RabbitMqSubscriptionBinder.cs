@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -21,10 +21,11 @@ namespace MassTransit.Transports.RabbitMq
     using Subscriptions.Coordinator;
     using Subscriptions.Messages;
 
+
     public class RabbitMqSubscriptionBinder :
         SubscriptionObserver
     {
-        static readonly ILog _log = Logger.Get(typeof (RabbitMqSubscriptionBinder));
+        static readonly ILog _log = Logger.Get(typeof(RabbitMqSubscriptionBinder));
         readonly Dictionary<Guid, MessageName> _bindings;
         readonly InboundRabbitMqTransport _inboundTransport;
         readonly IRabbitMqEndpointAddress _inputAddress;
@@ -36,8 +37,10 @@ namespace MassTransit.Transports.RabbitMq
 
             _inboundTransport = bus.Endpoint.InboundTransport as InboundRabbitMqTransport;
             if (_inboundTransport == null)
+            {
                 throw new ConfigurationException(
                     "The bus must be receiving from a RabbitMQ endpoint for this interceptor to work");
+            }
 
             _inputAddress = _inboundTransport.Address.CastAs<IRabbitMqEndpointAddress>();
 
@@ -57,7 +60,8 @@ namespace MassTransit.Transports.RabbitMq
 
             MessageName messageName = _messageNameFormatter.GetMessageName(messageType);
 
-                _inboundTransport.BindSubscriberExchange(RabbitMqEndpointAddress.Parse(message.EndpointUri), messageName.ToString());
+            _inboundTransport.BindSubscriberExchange(RabbitMqEndpointAddress.Parse(message.EndpointUri),
+                messageName.ToString(), IsTemporaryMessageType(messageType));
 
             _bindings[message.SubscriptionId] = messageName;
         }
@@ -75,6 +79,10 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
+        static bool IsTemporaryMessageType(Type messageType)
+        {
+            return !messageType.IsPublic && messageType.IsClass;
+        }
         public void OnComplete()
         {
         }
