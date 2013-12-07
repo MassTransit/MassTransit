@@ -81,6 +81,14 @@ namespace MassTransit
         void SetHeader(string key, string value);
 
         /// <summary>
+        /// Set the delivery mode of the message
+        /// </summary>
+        /// <param name="deliveryMode"></param>
+        void SetDeliveryMode(DeliveryMode deliveryMode);
+
+        DeliveryMode DeliveryMode { get; }
+
+        /// <summary>
         /// Serializes the message to the stream
         /// </summary>
         /// <param name="stream">The target stream for the serialized message</param>

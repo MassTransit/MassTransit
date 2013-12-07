@@ -112,6 +112,7 @@
     <Compile Include="Configuration\EndpointConfigurators\SetSupportedMessageSerializersEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\ShutdownConfigurationExtensions.cs" />
     <Compile Include="Configuration\InterceptorExtensions.cs" />
+    <Compile Include="Context\DeliveryMode.cs" />
     <Compile Include="EndpointExtensions.cs" />
     <Compile Include="IFault.cs" />
     <Compile Include="NewId\INewIdFormatter.cs" />

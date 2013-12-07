@@ -58,6 +58,13 @@ namespace MassTransit.Context
 
         public Type DeclaringMessageType { get; private set; }
 
+        public void SetDeliveryMode(DeliveryMode deliveryMode)
+        {
+            DeliveryMode = deliveryMode;
+        }
+
+        public DeliveryMode DeliveryMode { get; private set; }
+
         public void SerializeTo(Stream stream)
         {
             if (_bodyWriter == null)

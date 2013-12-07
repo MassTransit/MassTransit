@@ -53,7 +53,7 @@ namespace MassTransit.Transports.RabbitMq
                     {
                         IBasicProperties properties = _producer.CreateProperties();
 
-                        properties.SetPersistent(true);
+                        properties.SetPersistent(context.DeliveryMode == DeliveryMode.Persistent);
                         properties.MessageId = context.MessageId ?? properties.MessageId ?? NewId.Next().ToString();
                         if (context.ExpirationTime.HasValue)
                         {
