@@ -140,6 +140,13 @@ namespace BusDriver.Commands
                 get { return typeof(object); }
             }
 
+            public void SetDeliveryMode(DeliveryMode deliveryMode)
+            {
+                DeliveryMode = deliveryMode;
+            }
+
+            public DeliveryMode DeliveryMode { get; private set; }
+
             public void SerializeTo(Stream stream)
             {
                 _bodyWriter(stream);

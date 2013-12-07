@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq.Tests
 {
+    using System;
     using System.Threading;
     using BusConfigurators;
     using Magnum.Extensions;
@@ -51,6 +52,28 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
         class Response
         {
+        }
+    }
+
+    [TestFixture]
+    public class When_a_temporary_queue_with_a_control_queue_is_created
+    {
+        [Test, Explicit]
+        public void Should_remove_the_queues_and_exchanges_on_shutdown()
+        {
+            var uri = new Uri("rabbitmq://localhost/temporary_test_queue?temporary=true");
+            using (IServiceBus bus = ServiceBusFactory.New(x =>
+                {
+                    x.ReceiveFrom(uri);
+                    x.UseRabbitMq();
+                    x.UseControlBus();
+                }))
+            {
+                Console.WriteLine("Using address: " + bus.Endpoint.Address.Uri);
+                Console.WriteLine("Control bus address: " + bus.ControlBus.Endpoint.Address.Uri);
+
+                Thread.Sleep(30000);
+            }
         }
     }
 }
