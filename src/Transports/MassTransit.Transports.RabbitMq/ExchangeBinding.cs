@@ -16,11 +16,15 @@ namespace MassTransit.Transports.RabbitMq
     {
         public readonly string Destination;
         public readonly string Source;
+        public readonly bool DestinationTemporary;
+        public readonly bool SourceTemporary;
 
-        public ExchangeBinding(string destination, string source)
+        public ExchangeBinding(string destination, string source, bool destinationTemporary = false, bool sourceTemporary = false)
         {
             Destination = destination;
             Source = source;
+            DestinationTemporary = destinationTemporary;
+            SourceTemporary = sourceTemporary;
         }
 
         public bool Equals(ExchangeBinding other)

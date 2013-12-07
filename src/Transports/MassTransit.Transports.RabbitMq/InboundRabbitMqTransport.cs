@@ -137,7 +137,7 @@ namespace MassTransit.Transports.RabbitMq
                 {
                     MessageName messageName = messageNameFormatter.GetMessageName(messageType);
 
-                    bool temporary = !messageType.IsPublic;
+                    bool temporary = IsTemporaryMessageType(messageType);
 
                     _publisher.ExchangeDeclare(messageName.ToString(), temporary);
 
@@ -147,7 +147,9 @@ namespace MassTransit.Transports.RabbitMq
                     {
                         MessageName interfaceName = messageNameFormatter.GetMessageName(type);
 
-                        _publisher.ExchangeBind(interfaceName.ToString(), messageName.ToString());
+                        bool isTemporary = IsTemporaryMessageType(type);
+
+                        _publisher.ExchangeBind(interfaceName.ToString(), messageName.ToString(), isTemporary, temporary);
                         messageTypes.Add(type);
                     }
                 });
@@ -155,12 +157,17 @@ namespace MassTransit.Transports.RabbitMq
             return messageTypes;
         }
 
-        public void BindSubscriberExchange(IRabbitMqEndpointAddress address, string exchangeName)
+        static bool IsTemporaryMessageType(Type messageType)
+        {
+            return !messageType.IsPublic && messageType.IsClass;
+        }
+
+        public void BindSubscriberExchange(IRabbitMqEndpointAddress address, string exchangeName, bool temporary)
         {
             AddPublisherBinding();
             _connectionHandler.Use(connection =>
                 {
-                    _publisher.ExchangeBind(address.Name, exchangeName);
+                    _publisher.ExchangeBind(address.Name, exchangeName, false, temporary);
                 });
         }
 
