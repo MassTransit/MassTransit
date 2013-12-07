@@ -47,7 +47,7 @@ assemblyinfo :global_version => [:versioning] do |asm|
   asm.file_version = FORMAL_VERSION
   asm.custom_attributes :AssemblyInformationalVersion => "#{BUILD_VERSION}",
     :ComVisibleAttribute => false,
-    :CLSCompliantAttribute => false
+    :CLSCompliantAttribute => true
   asm.copyright = COPYRIGHT
   asm.output_file = 'src/SolutionVersion.cs'
   asm.namespaces "System", "System.Reflection", "System.Runtime.InteropServices", "System.Security"

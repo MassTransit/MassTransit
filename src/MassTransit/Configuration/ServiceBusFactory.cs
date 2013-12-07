@@ -33,8 +33,6 @@ namespace MassTransit
 
 			var configurator = new ServiceBusConfiguratorImpl(_defaultSettings);
 
-			configurator.EnableMessageTracing();
-
 			configure(configurator);
 
 			var result = ConfigurationResultImpl.CompileResults(configurator.Validate());
