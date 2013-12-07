@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Exceptions;
     using Logging;
     using Magnum;
@@ -79,12 +80,15 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
-        static bool IsTemporaryMessageType(Type messageType)
-        {
-            return !messageType.IsPublic && messageType.IsClass;
-        }
         public void OnComplete()
         {
+        }
+
+        static bool IsTemporaryMessageType(Type messageType)
+        {
+            return (!messageType.IsPublic && messageType.IsClass)
+                   || (messageType.IsGenericType
+                       && messageType.GetGenericArguments().Any(x => IsTemporaryMessageType(x)));
         }
     }
 }

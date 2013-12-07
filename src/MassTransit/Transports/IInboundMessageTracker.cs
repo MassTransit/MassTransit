@@ -25,6 +25,11 @@ namespace MassTransit.Transports
     public interface IInboundMessageTracker
     {
         /// <summary>
+        /// Returns true if retries are allowed
+        /// </summary>
+        bool IsRetryEnabled { get; }
+
+        /// <summary>
         /// Check if the message retry limit has been exceeded for the id specified.
         /// </summary>
         /// <param name="id">The message identifier</param>

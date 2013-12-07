@@ -159,7 +159,9 @@ namespace MassTransit.Transports.RabbitMq
 
         static bool IsTemporaryMessageType(Type messageType)
         {
-            return !messageType.IsPublic && messageType.IsClass;
+            return (!messageType.IsPublic && messageType.IsClass)
+                   || (messageType.IsGenericType
+                       && messageType.GetGenericArguments().Any(x => IsTemporaryMessageType(x)));
         }
 
         public void BindSubscriberExchange(IRabbitMqEndpointAddress address, string exchangeName, bool temporary)

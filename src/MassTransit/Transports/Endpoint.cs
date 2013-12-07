@@ -298,7 +298,11 @@ namespace MassTransit.Transports
 
                             if(_tracker.IncrementRetryCount(acceptMessageId, ex))
                             {
-                                acceptContext.ExecuteFaultActions(acceptContext.GetFaultActions());
+                                if (!_tracker.IsRetryEnabled)
+                                {
+                                    acceptContext.ExecuteFaultActions(acceptContext.GetFaultActions());
+                                    return MoveMessageToErrorTransport;
+                                }
                             }
                             return null;
                         }
@@ -320,12 +324,18 @@ namespace MassTransit.Transports
                                     faultActions = receiveContext.GetFaultActions();
                                     if(_tracker.IncrementRetryCount(receiveMessageId, ex, faultActions))
                                     {
-                                        // seems like this might be unnecessary if we are going to reprocess the message
-                                        receiveContext.ExecuteFaultActions(faultActions);
+                                        if (!_tracker.IsRetryEnabled)
+                                        {
+                                            receiveContext.ExecuteFaultActions(faultActions);
+                                            MoveMessageToErrorTransport(receiveContext);
+
+                                            return;
+                                        }
                                     }
                                     else if(!receiveContext.IsTransactional)
                                     {
                                         SaveMessageToInboundTransport(receiveContext);
+                                        return;
                                     }
 
                                     throw;

@@ -31,13 +31,19 @@ namespace MassTransit.Transports
             _messages = new ConcurrentCache<string, TrackedMessage>(id => new TrackedMessage());
         }
 
-        public virtual bool IsRetryLimitExceeded(string id, out Exception retryException, out IEnumerable<Action> faultActions)
+        public bool IsRetryEnabled
+        {
+            get { return _retryLimit > 0; }
+        }
+
+        public virtual bool IsRetryLimitExceeded(string id, out Exception retryException,
+            out IEnumerable<Action> faultActions)
         {
             bool exceeded = false;
             Exception result = null;
 
             IEnumerable<Action> actions = Enumerable.Empty<Action>();
- 
+
             if (!string.IsNullOrEmpty(id))
             {
                 _messages.WithValue(id, x =>
