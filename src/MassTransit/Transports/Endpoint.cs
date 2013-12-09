@@ -332,7 +332,8 @@ namespace MassTransit.Transports
                                             return;
                                         }
                                     }
-                                    else if(!receiveContext.IsTransactional)
+
+                                    if(!receiveContext.IsTransactional)
                                     {
                                         SaveMessageToInboundTransport(receiveContext);
                                         return;
