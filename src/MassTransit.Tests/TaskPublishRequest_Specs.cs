@@ -31,8 +31,8 @@ namespace MassTransit.Tests
         [Test]
         public void Should_call_timeout_callback_if_timeout_occurs()
         {
-            var ping = new PingMessage();
-            ITaskRequest<PingMessage> request = LocalBus.PublishRequestAsync(ping, x =>
+            var ping = new Messages.PingMessage();
+            ITaskRequest<Messages.PingMessage> request = LocalBus.PublishRequestAsync(ping, x =>
                 {
                     //
                     x.SetTimeout(1.Seconds());

@@ -13,6 +13,7 @@
 namespace MassTransit.Tests
 {
     using System;
+    using System.Diagnostics;
     using Exceptions;
     using Magnum.Extensions;
     using Magnum.TestFramework;
@@ -267,7 +268,7 @@ namespace MassTransit.Tests
 
             var ping = new PingMessage();
 
-            TimeSpan timeout = 24.Seconds();
+            TimeSpan timeout = Debugger.IsAttached ? 5.Minutes() : 24.Seconds();
 
             LocalBus.PublishRequest(ping, x =>
                 {
