@@ -3,10 +3,12 @@ Correlation
 
 In MassTransit we can mark a message as correlated by implementing the interface
 
-public interface CorrelatedBy<TKey>
-{
+.. sourcecode:: csharp
+
+	public interface CorrelatedBy<TKey>
+	{
         TKey CorrelationId { get; }
-}
+	}
 
 Ok, that’s great, but what does it mean to be correlated? In short it means that
 this message is a part of a larger story. For instance, you may have a message that says
