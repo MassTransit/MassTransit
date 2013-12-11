@@ -25,3 +25,4 @@ How MassTransit Works
     videos.rst
     backstory.rst
     correlation.rst
+    errors.rst
