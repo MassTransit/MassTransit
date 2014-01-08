@@ -54,17 +54,11 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\..\..\lib\log4net\net40-full\log4net.dll</HintPath>
-    </Reference>
     <Reference Include="log4net">
-      <HintPath>..\..\..\packages\log4net.2.0.2\lib\net40-full\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\..\..\lib\Magnum\net-4.0\Magnum.dll</HintPath>
+      <HintPath>..\..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Magnum">
-      <HintPath>..\..\..\packages\Magnum.2.1.1\lib\NET40\Magnum.dll</HintPath>
+      <HintPath>..\..\..\packages\Magnum.2.1.2\lib\NET40\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\packages\Newtonsoft.Json.5.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
@@ -74,18 +68,14 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Topshelf" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\..\..\lib\Topshelf\net-4.0\Topshelf.dll</HintPath>
-    </Reference>
     <Reference Include="Topshelf">
-      <HintPath>..\..\..\packages\Topshelf.3.1.2\lib\net40-full\Topshelf.dll</HintPath>
+      <HintPath>..\..\..\packages\Topshelf.3.1.3\lib\net40-full\Topshelf.dll</HintPath>
     </Reference>
     <Reference Include="Topshelf.Log4Net">
-      <HintPath>..\..\..\packages\Topshelf.Log4Net.3.1.2\lib\net40-full\Topshelf.Log4Net.dll</HintPath>
+      <HintPath>..\..\..\packages\Topshelf.Log4Net.3.1.3\lib\net40-full\Topshelf.Log4Net.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

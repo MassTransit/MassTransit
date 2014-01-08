@@ -60,16 +60,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\packages\Magnum.2.1.1\lib\NET35\Magnum.dll</HintPath>
+      <HintPath>..\packages\Magnum.2.1.2\lib\NET35\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\packages\Magnum.2.1.1\lib\NET40\Magnum.dll</HintPath>
+      <HintPath>..\packages\Magnum.2.1.2\lib\NET40\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\packages\Magnum.TestFramework.2.1.1\lib\NET35\Magnum.TestFramework.dll</HintPath>
+      <HintPath>..\packages\Magnum.TestFramework.2.1.2\lib\NET35\Magnum.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\packages\Magnum.TestFramework.2.1.1\lib\NET40\Magnum.TestFramework.dll</HintPath>
+      <HintPath>..\packages\Magnum.TestFramework.2.1.2\lib\NET40\Magnum.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net35\Newtonsoft.Json.dll</HintPath>
@@ -83,7 +83,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Transactions" />
   </ItemGroup>

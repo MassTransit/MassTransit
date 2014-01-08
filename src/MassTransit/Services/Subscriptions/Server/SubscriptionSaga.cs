@@ -65,7 +65,7 @@ namespace MassTransit.Services.Subscriptions.Server
                             .Then((saga, message) => saga.NotifySubscriptionRemoved(message.Subscription))
                             .Complete(),
                         When(DuplicateSubscriptionAdded)
-                            .Then((saga, message) => saga.NotifySubscriptionRemoved(message.Subscription))
+                            .Then((saga, message) => saga.NotifySubscriptionRemoved(saga.SubscriptionInfo))
                             .Complete(),
                         When(DuplicateClientRemoved)
                             .Then((saga, message) => saga.NotifySubscriptionRemoved())
