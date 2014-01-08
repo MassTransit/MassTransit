@@ -137,7 +137,7 @@ task :copy_services => [:build_unsigned] do
     copyOutputFiles src, "Iesi.Collections.dll", targ
     copyOutputFiles src, "StructureMap.dll", targ
     copyOutputFiles src, "Topshelf.dll", targ
-    copyOutputFiles src, "Topshelf.Log4NetIntegration.dll", targ
+    copyOutputFiles src, "Topshelf.Log4Net.dll", targ
   	copyOutputFiles File.join(props[:lib], 'SqlCe'), '*', targ
   	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86'), '*', File.join(targ, 'x86')
   	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'x86', 'Microsoft.VC90.CRT')
@@ -461,7 +461,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
-    nuspec.dependency "Magnum", "2.1.1"
+    nuspec.dependency "Magnum", "2.1.2"
     nuspec.dependency "Newtonsoft.Json", "5.0.8"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
@@ -478,7 +478,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "Magnum", "2.1.1"
+    nuspec.dependency "Magnum", "2.1.2"
     nuspec.dependency "Newtonsoft.Json", "5.0.8"
     nuspec.output_file = 'nuspecs/MassTransit.MSMQ.nuspec'
 
@@ -644,7 +644,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "Magnum.TestFramework", "2.1.1"
+    nuspec.dependency "Magnum.TestFramework", "2.1.2"
     nuspec.dependency "NUnit", "2.6.3"
     nuspec.dependency "RhinoMocks", "3.6.1"
     nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'
@@ -663,9 +663,9 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "Rx-Core", "2.1.30214.0"
-    nuspec.dependency "Rx-Interfaces", "2.1.30214.0"
-    nuspec.dependency "Rx-Linq", "2.1.30214.0"
+    nuspec.dependency "Rx-Core", "2.2.2"
+    nuspec.dependency "Rx-Interfaces", "2.2.2"
+    nuspec.dependency "Rx-Linq", "2.2.2"
     nuspec.output_file = 'nuspecs/MassTransit.Reactive.nuspec'
 
 	add_files_net40 props[:stage], "#{File.join('Reactive', 'MassTransit.Reactive.{dll,pdb,xml}')}", nuspec

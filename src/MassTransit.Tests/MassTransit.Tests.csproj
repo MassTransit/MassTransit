@@ -64,16 +64,16 @@
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\Packages\Magnum.2.1.1\lib\NET35\Magnum.dll</HintPath>
+      <HintPath>..\Packages\Magnum.2.1.2\lib\NET35\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\Packages\Magnum.2.1.1\lib\NET40\Magnum.dll</HintPath>
+      <HintPath>..\Packages\Magnum.2.1.2\lib\NET40\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\Packages\Magnum.TestFramework.2.1.1\lib\NET35\Magnum.TestFramework.dll</HintPath>
+      <HintPath>..\Packages\Magnum.TestFramework.2.1.2\lib\NET35\Magnum.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\Packages\Magnum.TestFramework.2.1.1\lib\NET40\Magnum.TestFramework.dll</HintPath>
+      <HintPath>..\Packages\Magnum.TestFramework.2.1.2\lib\NET40\Magnum.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net35\Newtonsoft.Json.dll</HintPath>
@@ -90,10 +90,10 @@
       <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
     </Reference>
     <Reference Include="Stact" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\Packages\Stact.1.1.1\lib\NET35\Stact.dll</HintPath>
+      <HintPath>..\Packages\Stact.1.1.2\lib\NET35\Stact.dll</HintPath>
     </Reference>
     <Reference Include="Stact" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\Packages\Stact.1.1.1\lib\NET40\Stact.dll</HintPath>
+      <HintPath>..\Packages\Stact.1.1.2\lib\NET40\Stact.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
