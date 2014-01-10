@@ -12,8 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests
 {
+    using System;
     using Autofac;
+    using Autofac.Core;
     using Magnum.TestFramework;
+    using NUnit.Framework;
     using Saga;
     using Scenarios;
     using SubscriptionConfigurators;
@@ -77,5 +80,73 @@ namespace MassTransit.Containers.Tests
         {
             subscriptionBusServiceConfigurator.LoadFrom(_container);
         }
+    }
+
+    [Scenario]
+    public class TestLifetimeScopes
+    {
+        IContainer _container;
+
+        public TestLifetimeScopes()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<Tester>()
+                .AsSelf()
+                .InstancePerMessageScope();
+
+            _container = builder.Build();
+
+
+
+        }
+
+        [Then]
+        public void ShouldNotBePossible()
+        {
+            Assert.That(() => { _container.Resolve<Tester>(); }, Throws.InstanceOf<DependencyResolutionException>());
+            
+        }
+
+        [Then]
+        public void ShouldntShareAcrossScopes()
+        {
+            Guid id;
+            using (var messageScope = _container.BeginLifetimeScope(AutofacExtensions.MessageScopeTag))
+            {
+                var x = messageScope.Resolve<Tester>();
+                var x2 = messageScope.Resolve<Tester>();
+                x.Id.ShouldEqual(x2.Id);
+                id = x.Id;
+            }
+
+            Guid id2;
+            using (var messageScope = _container.BeginLifetimeScope(AutofacExtensions.MessageScopeTag))
+            {
+                var x = messageScope.Resolve<Tester>();
+                var x2 = messageScope.Resolve<Tester>();
+                x.Id.ShouldEqual(x2.Id);
+                id2 = x.Id;
+            }
+
+            id.ShouldNotEqual(id2);
+        }
+
+        [Then]
+        public void ShouldShareInstances()
+        {
+            using (var messageScope = _container.BeginLifetimeScope(AutofacExtensions.MessageScopeTag))
+            {
+                var x = messageScope.Resolve<Tester>();
+                var x2 = messageScope.Resolve<Tester>();
+                x.Id.ShouldEqual(x2.Id);
+            }
+        }
+
+
+        class Tester
+        {
+            public Guid Id = Guid.NewGuid();
+        }
+
     }
 }
