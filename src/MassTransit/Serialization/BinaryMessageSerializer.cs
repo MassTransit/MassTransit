@@ -16,6 +16,7 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.IO;
     using System.Runtime.Remoting.Messaging;
+    using System.Runtime.Serialization.Formatters;
     using System.Runtime.Serialization.Formatters.Binary;
     using Logging;
     using Util;
@@ -42,7 +43,7 @@ namespace MassTransit.Serialization
         const string RetryCountKey = "RetryCount";
         const string SourceAddressKey = "SourceAddress";
 
-        static readonly BinaryFormatter _formatter = new BinaryFormatter();
+        static readonly BinaryFormatter _formatter = new BinaryFormatter { AssemblyFormat = FormatterAssemblyStyle.Simple };
         static readonly ILog _log = Logger.Get(typeof (BinaryMessageSerializer));
 
         public string ContentType
