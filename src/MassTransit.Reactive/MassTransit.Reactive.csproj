@@ -82,6 +82,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="ObserverInstanceConsumer.cs" />
     <Compile Include="ServiceBusExtensions.cs" />
     <Compile Include="ServiceBusSubscription.cs" />
   </ItemGroup>
