@@ -2,6 +2,7 @@ Inheritance and Message Class Design
 ====================================
 
 That said, I would advise you to think about the following things:
+
 #. Interface-based inheritance is OK
 #. Class-based inheritance is to be approached with caution
 #. Composing messages together ends up pushing us into content-based routing which is something we don't recommend
