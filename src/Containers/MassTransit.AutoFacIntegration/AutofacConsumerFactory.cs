@@ -16,6 +16,7 @@ namespace MassTransit.AutofacIntegration
     using System.Collections.Generic;
     using Autofac;
     using Exceptions;
+    using Magnum.Extensions;
     using Pipeline;
 
     public class AutofacConsumerFactory<T> :
@@ -37,11 +38,17 @@ namespace MassTransit.AutofacIntegration
         {
             using (var innerScope = _scope.BeginLifetimeScope(_name))
             {
-                var consumer = innerScope.Resolve<T>();
-                if (consumer == null)
-                    throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ",
-                        typeof (T)));
-
+                T consumer = null;
+                try
+                {
+                    consumer = innerScope.Resolve<T>();
+                }
+                catch (Exception ex)
+                {
+                    var message = "Could not resolve '{0}' from container '{1}'->'{2}'".FormatWith(typeof(T).Name, _scope.Tag, innerScope.Tag);
+                    throw new ConfigurationException(message, ex);
+                }
+                
                 foreach (var handler in selector(consumer, context))
                 {
                     yield return handler;
