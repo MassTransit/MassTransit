@@ -72,14 +72,13 @@ namespace MassTransit.Transports.RabbitMq
                             properties.Headers["Content-Type"]=context.ContentType;
 
 #if NET40
-                            var task = _producer.PublishAsync(_address.Name, properties, body.ToArray());
-                            task.Wait();
+                            _producer.PublishAsync(_address.Name, properties, body.ToArray())
+															.ContinueWith(t => LogSent(context, properties));
 #else
                             _producer.Publish(_address.Name, properties, body.ToArray());
+														LogSent(context, properties)
 #endif
-
-                            _address.LogSent(context.MessageId ?? properties.MessageId ?? "", context.MessageType);
-                        }
+												}
                     }
 #if NET40
                     catch (AggregateException ex)
@@ -102,7 +101,12 @@ namespace MassTransit.Transports.RabbitMq
                 });
         }
 
-        public void Dispose()
+	    void LogSent(ISendContext context, IBasicProperties properties)
+	    {
+		    _address.LogSent(context.MessageId ?? properties.MessageId ?? "", context.MessageType);
+	    }
+
+	    public void Dispose()
         {
             RemoveProducer();
         }
