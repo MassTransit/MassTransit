@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using MassTransit.Services.Subscriptions;
 	using MassTransit.Transports.Loopback;
 	using Messages;
 	using NUnit.Framework;
@@ -24,8 +23,6 @@ namespace MassTransit.Tests
 	public class When_a_handler_subscription_is_added :
 		EndpointTestFixture<LoopbackTransportFactory>
 	{
-		ISubscriptionService _subscriptionService;
-
 		public IServiceBus LocalBus { get; private set; }
 		public IServiceBus LocalControlBus { get; private set; }
 
@@ -33,13 +30,9 @@ namespace MassTransit.Tests
 		{
 			base.EstablishContext();
 
-			_subscriptionService = MockRepository.GenerateMock<ISubscriptionService>();
-
 			LocalBus = ServiceBusFactory.New(x =>
 				{
-					x.AddService(BusServiceLayer.Session, () => new SubscriptionPublisher(_subscriptionService));
 					x.ReceiveFrom("loopback://localhost/mt_client");
-					x.UseControlBus();
 				});
 
 			LocalControlBus = LocalBus.ControlBus;
@@ -63,7 +56,6 @@ namespace MassTransit.Tests
 
 			LocalBus.SubscribeInstance(consumer);
 
-			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Address.Uri));
 		}
 
 
@@ -72,7 +64,6 @@ namespace MassTransit.Tests
 		{
 			LocalBus.SubscribeHandler<PingMessage>(delegate { });
 
-			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Address.Uri));
 		}
 	}
 }

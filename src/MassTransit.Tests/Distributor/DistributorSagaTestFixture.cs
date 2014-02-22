@@ -15,14 +15,12 @@ namespace MassTransit.Tests.Distributor
     using BusConfigurators;
     using Load.Sagas;
     using MassTransit.Saga;
-    using MassTransit.Transports;
     using NUnit.Framework;
     using TextFixtures;
 
     [TestFixture, Ignore]
-    public class DistributorSagaTestFixture<TTransportFactory> :
-        SubscriptionServiceTestFixture<TTransportFactory>
-        where TTransportFactory : class, ITransportFactory, new()
+    public class DistributorSagaTestFixture :
+        LoopbackLocalAndRemoteTestFixture
     {
         protected ISagaRepository<FirstSaga> FirstSagaRepository { get; private set; }
 
@@ -35,6 +33,8 @@ namespace MassTransit.Tests.Distributor
 
         protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
         {
+            base.ConfigureLocalBus(configurator);
+
             configurator.Distributor(d => d.Saga(FirstSagaRepository));
         }
     }

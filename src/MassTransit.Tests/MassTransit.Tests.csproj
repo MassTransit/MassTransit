@@ -90,7 +90,6 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration\Diagnostics_Specs.cs" />
     <Compile Include="Configuration\ShutdownTimeout_Specs.cs" />
     <Compile Include="InterceptingConsumer_Specs.cs" />
     <Compile Include="Diagnostics\Trace_Specs.cs" />
@@ -118,11 +117,9 @@
     <Compile Include="ControlBus_Specs.cs" />
     <Compile Include="Distributor\DistributorSagaTestFixture.cs" />
     <Compile Include="Distributor\DistributorSaga_Specs.cs" />
-    <Compile Include="Distributor\LoopbackDistributorSagaTestFixture.cs" />
     <Compile Include="Distributor\LoopbackMultipleDistributorSagaTestFixture.cs" />
     <Compile Include="Distributor\MultipleDistributorSagaTestFixture.cs" />
     <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message.cs" />
-    <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message_on_a_remote_bus.cs" />
     <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message_on_the_remote_bus.cs" />
     <Compile Include="Examples\Given_a_pong_service.cs" />
     <Compile Include="Examples\Messages\Ping.cs" />
@@ -138,18 +135,15 @@
     <Compile Include="Examples\Sagas\When_a_start_message_is_received.cs" />
     <Compile Include="Examples\When_a_message_is_published_to_the_bus.cs" />
     <Compile Include="Examples\When_a_message_is_published_to_the_local_bus.cs" />
-    <Compile Include="Examples\When_a_message_is_published_via_the_local_bus.cs" />
     <Compile Include="Examples\When_a_message_is_sent_to_the_bus_endpoint.cs" />
     <Compile Include="Load\CommandInstance.cs" />
     <Compile Include="Distributor\Default_Specs.cs" />
     <Compile Include="Distributor\DistributorTestFixture.cs" />
     <Compile Include="Load\Messages\First.cs" />
     <Compile Include="Load\LoadGenerator.cs" />
-    <Compile Include="Distributor\LoopbackDistributorTestFixture.cs" />
     <Compile Include="Load\Messages\FirstCommand.cs" />
     <Compile Include="Load\Messages\FirstPending.cs" />
     <Compile Include="Load\Messages\FirstResponse.cs" />
-    <Compile Include="Distributor\ServiceInstance.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="FutureMessage.cs" />
     <Compile Include="Groups\Group_Specs.cs" />
@@ -183,8 +177,6 @@
     <Compile Include="Serialization\GenericMessageType_Specs.cs" />
     <Compile Include="Serialization\DefaultConstructor_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
-    <Compile Include="Services\HealthMonitoring\HealthClient_Integration_Specs.cs" />
-    <Compile Include="Services\Timeout\TimeoutService_Specs.cs" />
     <Compile Include="SmallNumber_Specs.cs" />
     <Compile Include="Subscriptions\Consumer_Specs.cs" />
     <Compile Include="Subscriptions\DynamicAndStaticSubscriptions_Specs.cs" />
@@ -198,6 +190,7 @@
     <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="Testing\SagaTest_Specs.cs" />
     <Compile Include="Testing\SagaStateMachineTest_Specs.cs" />
+    <Compile Include="TextFixtures\ServiceInstance.cs" />
     <Compile Include="Threading_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
     <None Include="app.config" />
@@ -241,17 +234,12 @@
     <Compile Include="Serialization\SerializationTest.cs" />
     <Compile Include="Serialization\TransportContentType_Specs.cs" />
     <Compile Include="Serialization\Version_Specs.cs" />
-    <Compile Include="Services\HealthMonitoring\HealthServiceTestFixture.cs" />
-    <Compile Include="Services\HealthMonitoring\HealthService_Specs.cs" />
-    <Compile Include="Services\Routing\RoutingConfiguration_Specs.cs" />
-    <Compile Include="Services\Subscriptions\SubscriptionConsumer_Specs.cs" />
     <Compile Include="SubscribeConsumer_Specs.cs" />
     <Compile Include="Subscriptions\PolymorphicMessage_Specs.cs" />
     <Compile Include="Subscriptions\Removing_a_subscription_client.cs" />
     <Compile Include="Subscriptions\SubscriptionService_Specs.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TextFixtures\EndpointCacheProxy.cs" />
-    <Compile Include="TextFixtures\SubscriptionServiceTestFixture.cs" />
     <Compile Include="Transports\LoopbackTransportContract.cs" />
     <Compile Include="Saga\InitiateSaga_Specs.cs" />
     <Compile Include="Pipeline\MessageFilter_Specs.cs" />
@@ -294,7 +282,6 @@
     <Compile Include="TextFixtures\EndpointTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackLocalAndRemoteTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackTestFixture.cs" />
-    <Compile Include="Timeouts\TimeoutService_Specs.cs" />
     <Compile Include="Transports\TransactionalEndpointContract.cs" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -332,8 +319,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Reactive\Samples\" />
-    <Folder Include="Services\LoadBalancer\" />
-    <Folder Include="Services\Metadata\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

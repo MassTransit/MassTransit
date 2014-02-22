@@ -15,7 +15,6 @@ namespace MassTransit.Tests.Saga
 	using System;
 	using Magnum.Extensions;
 	using MassTransit.Saga;
-	using MassTransit.Services.Timeout.Messages;
 	using Messages;
 	using TestFramework;
 
@@ -99,12 +98,10 @@ namespace MassTransit.Tests.Saga
 			Bus.ShouldHaveSubscriptionFor<UserRegistrationPending>();
 
 			Bus.Publish(new UserRegistrationPending(CorrelationId));
-			Bus.Publish(new ScheduleTimeout(CorrelationId, 24.Hours().FromNow()));
 		}
 
 		private void Complete()
 		{
-			Bus.Publish(new CancelTimeout {CorrelationId = CorrelationId});
 		}
 	}
 }

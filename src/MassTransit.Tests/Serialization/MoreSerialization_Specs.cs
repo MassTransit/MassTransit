@@ -21,7 +21,6 @@ namespace MassTransit.Tests.Serialization
     using Context;
     using Magnum.TestFramework;
     using MassTransit.Serialization;
-    using MassTransit.Services.Subscriptions.Messages;
     using NUnit.Framework;
 
     [TestFixture(typeof(XmlMessageSerializer))]
@@ -296,68 +295,6 @@ namespace MassTransit.Tests.Serialization
             }
         }
 
-        [Test]
-        public void Should_serialize_an_empty_message()
-        {
-            byte[] serializedMessageData;
-
-            var serializer = new TSerializer();
-
-            var message = new SubscriptionRefresh(Enumerable.Empty<SubscriptionInformation>());
-
-            using (var output = new MemoryStream())
-            {
-                serializer.Serialize(output, new SendContext<SubscriptionRefresh>(message));
-
-                serializedMessageData = output.ToArray();
-
-                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
-            }
-
-            using (var input = new MemoryStream(serializedMessageData))
-            {
-                var receiveContext = ReceiveContext.FromBodyStream(input);
-                serializer.Deserialize(receiveContext);
-
-                IConsumeContext<SubscriptionRefresh> context;
-                receiveContext.TryGetContext(out context).ShouldBeTrue();
-
-                context.ShouldNotBeNull();
-
-                context.Message.Subscriptions.Count.ShouldEqual(message.Subscriptions.Count);
-            }
-        }
-        [Test]
-        public void Should_serialize_a_message_with_one_list_item()
-        {
-            byte[] serializedMessageData;
-
-            var serializer = new TSerializer();
-
-            var message = new SubscriptionRefresh(new[]{new SubscriptionInformation(Guid.NewGuid(),1,typeof(object),new Uri("http://localhost/"))});
-
-            using (var output = new MemoryStream())
-            {
-                serializer.Serialize(output, new SendContext<SubscriptionRefresh>(message));
-
-                serializedMessageData = output.ToArray();
-
-                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
-            }
-
-            using (var input = new MemoryStream(serializedMessageData))
-            {
-                var receiveContext = ReceiveContext.FromBodyStream(input);
-                serializer.Deserialize(receiveContext);
-
-                IConsumeContext<SubscriptionRefresh> context;
-                receiveContext.TryGetContext(out context).ShouldBeTrue();
-
-                context.ShouldNotBeNull();
-
-                context.Message.Subscriptions.Count.ShouldEqual(message.Subscriptions.Count);
-            }
-        }
 
 
         [Test]

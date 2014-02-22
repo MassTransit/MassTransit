@@ -16,17 +16,17 @@ namespace MassTransit.Tests.Distributor
     using Load.Messages;
     using Magnum;
     using Magnum.Extensions;
-    using MassTransit.Transports;
     using NUnit.Framework;
     using TextFixtures;
 
     [TestFixture, Ignore]
-    public class DistributorTestFixture<TTransportFactory> :
-        SubscriptionServiceTestFixture<TTransportFactory>
-        where TTransportFactory : class, ITransportFactory, new()
+    public class DistributorTestFixture :
+        LoopbackLocalAndRemoteTestFixture
     {
         protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
         {
+            base.ConfigureLocalBus(configurator);
+
             configurator.Distributor(d => d.Handler<FirstCommand>());
         }
 

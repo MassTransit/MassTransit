@@ -21,7 +21,7 @@ namespace MassTransit.Tests.Distributor
 
     [TestFixture, Ignore]
 	public class MultipleDistributorSagaTestFixture<TTransportFactory> :
-		SubscriptionServiceTestFixture<TTransportFactory>
+		LoopbackLocalAndRemoteTestFixture
 		where TTransportFactory : class, ITransportFactory, new()
 	{
 		protected ISagaRepository<FirstSaga> FirstSagaRepository { get; private set; }
