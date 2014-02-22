@@ -58,25 +58,16 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\log4net.2.0.3\lib\net35-full\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="log4net">
       <HintPath>..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\Magnum.2.1.2\lib\net35\Magnum.dll</HintPath>
-    </Reference>
-    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="Magnum">
       <HintPath>..\..\packages\Magnum.2.1.2\lib\net40\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Iesi.Collections">
       <HintPath>..\..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\Packages\Magnum.TestFramework.2.1.2\lib\NET35\Magnum.TestFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="Magnum.TestFramework" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="Magnum.TestFramework">
       <HintPath>..\..\Packages\Magnum.TestFramework.2.1.2\lib\NET40\Magnum.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
@@ -86,26 +77,17 @@
     <Reference Include="NHibernate">
       <HintPath>..\..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\Newtonsoft.Json.5.0.8\lib\net35\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.5.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.SQLite" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\System.Data.SQLite.1.0.89.0\lib\net20\System.Data.SQLite.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Data.SQLite" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="System.Data.SQLite">
       <HintPath>..\..\packages\System.Data.SQLite.1.0.89.0\lib\net40\System.Data.SQLite.dll</HintPath>
     </Reference>
-    <Reference Include="System.Data.SQLite.Linq" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\System.Data.SQLite.1.0.89.0\lib\net20\System.Data.SQLite.Linq.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Data.SQLite.Linq" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="System.Data.SQLite.Linq">
       <HintPath>..\..\packages\System.Data.SQLite.1.0.89.0\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Transactions" />

@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using RequestResponse.Configurators;
 
-#if NET40
     public static class TaskExtensions
     {
         public static ITaskRequest<TRequest> PublishRequestAsync<TRequest>(this IServiceBus bus, TRequest message,
@@ -68,5 +67,4 @@ namespace MassTransit
             return request;
         }
     }
-#endif
 }

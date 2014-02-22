@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse
 {
-#if NET40
     using System;
     using System.Threading;
     using System.Threading.Tasks;
@@ -80,5 +79,4 @@ namespace MassTransit.RequestResponse
             return Timeout(timeout, CancellationToken.None);
         }
     }
-#endif
 }

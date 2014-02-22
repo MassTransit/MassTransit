@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse
 {
-#if NET40
     using System;
 
     public class WatchTaskResponseHandler<TResponse> :
@@ -38,5 +37,4 @@ namespace MassTransit.RequestResponse
             throw exception;
         }
     }
-#endif
 }

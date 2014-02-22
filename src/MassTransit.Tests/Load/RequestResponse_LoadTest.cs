@@ -58,7 +58,6 @@ namespace MassTransit.Tests.Load
 			Trace.WriteLine(string.Format("Messages Per Second = {0}", repeatCount * 2000 / stopwatch.ElapsedMilliseconds));
 		}
 
-#if NET40
 	    [Test, Explicit]
 	    public void Many_publish_request_should_work()
 	    {
@@ -95,6 +94,5 @@ namespace MassTransit.Tests.Load
             Trace.WriteLine(string.Format("Elapsed Time for {0} messages = {1}", repeatCount * 2, stopwatch.Elapsed));
             Trace.WriteLine(string.Format("Messages Per Second = {0}", repeatCount * 2000 / stopwatch.ElapsedMilliseconds));
 	    }
-#endif
 	}
 }

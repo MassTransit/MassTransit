@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse
 {
-#if NET40
     using System;
 
     public class CompleteTaskResponseHandler<TResponse> :
@@ -39,6 +38,4 @@ namespace MassTransit.RequestResponse
             CompletionSource.TrySetException(exception);
         }
     }
-
-#endif
 }

@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse
 {
-#if NET40
     using System.Threading.Tasks;
 
     /// <summary>
@@ -47,5 +46,4 @@ namespace MassTransit.RequestResponse
         /// </summary>
         new Task<T> Task { get; }
     }
-#endif
 }

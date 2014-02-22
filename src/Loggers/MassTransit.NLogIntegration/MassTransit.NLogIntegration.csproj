@@ -38,10 +38,7 @@
     <NoWarn>3009,3001,3008,1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\NLog.2.1.0\lib\net35\NLog.dll</HintPath>
-    </Reference>
-    <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="NLog">
       <HintPath>..\..\packages\NLog.2.1.0\lib\net40\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />

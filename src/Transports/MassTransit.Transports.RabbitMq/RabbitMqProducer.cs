@@ -16,9 +16,7 @@ namespace MassTransit.Transports.RabbitMq
     using System.Collections.Generic;
     using System.Linq;
     using Logging;
-#if NET40
     using System.Threading.Tasks;
-#endif
     using Magnum.Caching;
     using Magnum.Extensions;
     using RabbitMQ.Client;
@@ -28,9 +26,7 @@ namespace MassTransit.Transports.RabbitMq
     public class RabbitMqProducer :
         ConnectionBinding<RabbitMqConnection>
     {
-#if NET40
         readonly Cache<ulong, TaskCompletionSource<bool>> _confirms;
-#endif
         static readonly ILog _log = Logger.Get<RabbitMqProducer>();
         readonly IRabbitMqEndpointAddress _address;
         readonly bool _bindToQueue;
@@ -43,9 +39,7 @@ namespace MassTransit.Transports.RabbitMq
         {
             _address = address;
             _bindToQueue = bindToQueue;
-#if NET40
             _confirms = new ConcurrentCache<ulong, TaskCompletionSource<bool>>();
-#endif
         }
 
         public void Bind(RabbitMqConnection connection)
@@ -101,9 +95,7 @@ namespace MassTransit.Transports.RabbitMq
                 {
                     if (_channel != null)
                     {
-#if NET40
                         WaitForPendingConfirms();
-#endif
 
                         UnbindEvents(_channel);
                         _channel.Cleanup(200, "Producer Unbind");
@@ -146,7 +138,6 @@ namespace MassTransit.Transports.RabbitMq
 
         void FailPendingConfirms()
         {
-#if NET40
             try
             {
                 var exception = new MessageNotConfirmedException(_address.Uri,
@@ -160,7 +151,6 @@ namespace MassTransit.Transports.RabbitMq
             }
 
             _confirms.Clear();
-#endif
         }
 
         public IBasicProperties CreateProperties()
@@ -185,7 +175,6 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
-#if NET40
         public Task PublishAsync(string exchangeName, IBasicProperties properties, byte[] body)
         {
             lock (_lock)
@@ -211,7 +200,6 @@ namespace MassTransit.Transports.RabbitMq
                 return task.Task;
             }
         }
-#endif
 
         void HandleModelShutdown(IModel model, ShutdownEventArgs reason)
         {
@@ -235,7 +223,6 @@ namespace MassTransit.Transports.RabbitMq
 
         void HandleNack(IModel model, BasicNackEventArgs args)
         {
-#if NET40
             IEnumerable<ulong> ids = Enumerable.Repeat(args.DeliveryTag, 1);
             if (args.Multiple)
                 ids = _confirms.GetAllKeys().Where(x => x <= args.DeliveryTag);
@@ -247,12 +234,10 @@ namespace MassTransit.Transports.RabbitMq
                 _confirms[id].TrySetException(exception);
                 _confirms.Remove(id);
             }
-#endif
         }
 
         void HandleAck(IModel model, BasicAckEventArgs args)
         {
-#if NET40
             IEnumerable<ulong> ids = Enumerable.Repeat(args.DeliveryTag, 1);
             if (args.Multiple)
                 ids = _confirms.GetAllKeys().Where(x => x <= args.DeliveryTag);
@@ -262,7 +247,6 @@ namespace MassTransit.Transports.RabbitMq
                 _confirms[id].TrySetResult(true);
                 _confirms.Remove(id);
             }
-#endif
         }
     }
 }

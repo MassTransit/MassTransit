@@ -12,31 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-#if NET40
     using System;
     using System.Threading.Tasks;
-    using RequestResponse;
+
 
     /// <summary>
-    /// A Task-based request that is designed to be used by the TPL
+    ///     A Task-based request that is designed to be used by the TPL
     /// </summary>
     public interface ITaskRequest<out TRequest> :
         IRequest<TRequest>
         where TRequest : class
     {
         /// <summary>
-        /// Cancel the request (will signal the Tasks as Cancelled)
-        /// </summary>
-        void Cancel();
-
-        /// <summary>
-        /// The Task for the entire request, is completed when any of the response
-        /// handlers completes.
+        ///     The Task for the entire request, is completed when any of the response
+        ///     handlers completes.
         /// </summary>
         Task Task { get; }
 
         /// <summary>
-        /// Returns the task for the response handler of the specified message type
+        ///     Cancel the request (will signal the Tasks as Cancelled)
+        /// </summary>
+        void Cancel();
+
+        /// <summary>
+        ///     Returns the task for the response handler of the specified message type
         /// </summary>
         /// <typeparam name="T">The response message type</typeparam>
         /// <returns>The Task associated with the response handler</returns>
@@ -44,11 +43,10 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        /// Returns the task for the response handler of the specified message type
+        ///     Returns the task for the response handler of the specified message type
         /// </summary>
         /// <param name="responseType">The response message type</param>
         /// <returns>The Task associated with the response handler</returns>
         Task GetResponseTask(Type responseType);
     }
-#endif
 }

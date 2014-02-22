@@ -34,19 +34,10 @@
     <DocumentationFile>bin\Release\MassTransit.AutofacIntegration.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="Autofac">
       <HintPath>..\..\packages\Autofac.3.3.0\lib\net40\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Autofac" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\Autofac.2.6.3.862\lib\net35\Autofac.dll</HintPath>
-    </Reference>
-    <Reference Include="Autofac" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\Autofac.2.6.3.862\lib\net35\Autofac.Configuration.dll</HintPath>
-    </Reference>
-    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\Magnum.2.1.2\lib\net35\Magnum.dll</HintPath>
-    </Reference>
-    <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="Magnum">
       <HintPath>..\..\packages\Magnum.2.1.2\lib\net40\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="System" />

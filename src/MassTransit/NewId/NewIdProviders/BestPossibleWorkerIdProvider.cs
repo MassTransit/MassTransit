@@ -50,11 +50,7 @@ namespace MassTransit.NewIdProviders
                 exceptions.Add(ex);
             }
 
-#if NET40
             throw new AggregateException(exceptions);
-#else
-            throw new InvalidOperationException("All supported methods failed to create a networkId", exceptions[0]);
-#endif
         }
     }
 }
