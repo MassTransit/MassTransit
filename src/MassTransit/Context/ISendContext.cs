@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
     using System.IO;
 
-    public interface ISendContext<T> :
+    public interface ISendContext<out T> :
         ISendContext,
         IMessageContext<T>
         where T : class

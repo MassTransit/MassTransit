@@ -24,7 +24,6 @@ namespace MassTransit.Tests
 		EndpointTestFixture<LoopbackTransportFactory>
 	{
 		public IServiceBus LocalBus { get; private set; }
-		public IServiceBus LocalControlBus { get; private set; }
 
 		protected override void EstablishContext()
 		{
@@ -35,16 +34,12 @@ namespace MassTransit.Tests
 					x.ReceiveFrom("loopback://localhost/mt_client");
 				});
 
-			LocalControlBus = LocalBus.ControlBus;
 		}
 
 		protected override void TeardownContext()
 		{
 			LocalBus.Dispose();
 			LocalBus = null;
-
-			LocalControlBus.Dispose();
-			LocalControlBus = null;
 
 			base.TeardownContext();
 		}

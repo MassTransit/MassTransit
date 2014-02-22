@@ -114,7 +114,6 @@
     <Compile Include="Configuration\When_configuring_an_endpoint.cs" />
     <Compile Include="Configuration\StateMachineSagaConfiguration_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
-    <Compile Include="ControlBus_Specs.cs" />
     <Compile Include="Distributor\DistributorSagaTestFixture.cs" />
     <Compile Include="Distributor\DistributorSaga_Specs.cs" />
     <Compile Include="Distributor\LoopbackMultipleDistributorSagaTestFixture.cs" />

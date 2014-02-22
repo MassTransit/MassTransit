@@ -38,7 +38,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
         public SubscriptionRouterService(IServiceBus bus, SubscriptionRepository repository, string network)
         {
-            _peerUri = bus.ControlBus.Endpoint.Address.Uri;
+            _peerUri = bus.Endpoint.Address.Uri;
 
             _repository = repository;
             _network = network;
@@ -50,7 +50,7 @@ namespace MassTransit.Subscriptions.Coordinator
 
             _unregister = () => true;
 
-            _peerUri = bus.ControlBus.Endpoint.Address.Uri;
+            _peerUri = bus.Endpoint.Address.Uri;
 
             var connector = new BusSubscriptionConnector(bus);
 
@@ -166,12 +166,6 @@ namespace MassTransit.Subscriptions.Coordinator
                 });
 
             _listeners.Add(subscriptionEventListener);
-
-            IServiceBus controlBus = bus.ControlBus;
-            if (controlBus != bus)
-            {
-                ListenToBus(controlBus);
-            }
         }
 
         void Dispose(bool disposing)

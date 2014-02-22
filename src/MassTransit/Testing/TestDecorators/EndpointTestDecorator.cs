@@ -122,7 +122,7 @@ namespace MassTransit.Testing.TestDecorators
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            EndpointObjectSenderCache.Instance[message.GetType()].Send(this, message);
+            SendObjectConverterCache.Instance[message.GetType()].Send(this, message);
         }
 
         public void Send(object message, Type messageType)
@@ -132,7 +132,7 @@ namespace MassTransit.Testing.TestDecorators
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            EndpointObjectSenderCache.Instance[messageType].Send(this, message);
+            SendObjectConverterCache.Instance[messageType].Send(this, message);
         }
 
         public void Send(object message, Action<ISendContext> contextCallback)
@@ -144,7 +144,7 @@ namespace MassTransit.Testing.TestDecorators
 
             Type messageType = message.GetType();
 
-            EndpointObjectSenderCache.Instance[messageType].Send(this, message, contextCallback);
+            SendObjectConverterCache.Instance[messageType].Send(this, message, contextCallback);
         }
 
         public void Send(object message, Type messageType, Action<ISendContext> contextCallback)
@@ -156,7 +156,7 @@ namespace MassTransit.Testing.TestDecorators
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            EndpointObjectSenderCache.Instance[messageType].Send(this, message, contextCallback);
+            SendObjectConverterCache.Instance[messageType].Send(this, message, contextCallback);
         }
 
         public void Send<T>(object values) where T : class

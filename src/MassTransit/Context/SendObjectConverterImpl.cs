@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,20 +13,38 @@
 namespace MassTransit.Context
 {
     using System;
+    using Magnum.Extensions;
 
-    public class EndpointObjectSenderImpl<TMessage> :
-        EndpointObjectSender
+
+    public class SendObjectConverterImpl<TMessage> :
+        SendObjectConverter
         where TMessage : class
     {
         public void Send(IEndpoint endpoint, object message)
         {
+            if (endpoint == null)
+                throw new ArgumentNullException("endpoint");
+            if (message == null)
+                throw new ArgumentNullException("message");
+
             var msg = message as TMessage;
+            if (msg == null)
+                throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
+
             endpoint.Send(msg);
         }
 
         public void Send(IEndpoint endpoint, object message, Action<ISendContext> contextCallback)
         {
+            if (endpoint == null)
+                throw new ArgumentNullException("endpoint");
+            if (message == null)
+                throw new ArgumentNullException("message");
+
             var msg = message as TMessage;
+            if (msg == null)
+                throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
+
             endpoint.Send(msg, context => contextCallback(context));
         }
     }

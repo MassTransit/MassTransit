@@ -48,11 +48,6 @@ namespace MassTransit.Distributor
             _scheduler = new TimerScheduler(new PoolFiber(new TryCatchOperationExecutor()));
         }
 
-        public IServiceBus ControlBus
-        {
-            get { return _controlBus; }
-        }
-
         public void Dispose()
         {
             Dispose(true);
@@ -61,7 +56,7 @@ namespace MassTransit.Distributor
         public void Start(IServiceBus bus)
         {
             _bus = bus;
-            _controlBus = bus.ControlBus;
+            _controlBus = bus;
 
             bus.Configure(pipelineConfigurator =>
                 {

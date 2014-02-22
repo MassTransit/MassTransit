@@ -28,12 +28,4 @@ namespace MassTransit
         /// <param name="message">The message to consume.</param>
         void Consume(TMessage message);
     }
-
-
-    public interface IContextConsumer<in TMessage> :
-        IMessageConsumer<IConsumeContext<TMessage>>
-        where TMessage : class
-    {
-        
-    }
 }

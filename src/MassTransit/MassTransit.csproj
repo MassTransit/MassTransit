@@ -88,8 +88,6 @@
     <Compile Include="Bus.cs" />
     <Compile Include="Configuration\Advanced\EnvironmentExtensions.cs" />
     <Compile Include="Configuration\Builders\BusBuilder.cs" />
-    <Compile Include="Configuration\Builders\ControlBusBuilder.cs" />
-    <Compile Include="Configuration\Builders\ControlBusBuilderImpl.cs" />
     <Compile Include="Configuration\Builders\DuplexTransportFactory.cs" />
     <Compile Include="Configuration\Builders\EndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\EndpointBuilderImpl.cs" />
@@ -106,6 +104,7 @@
     <Compile Include="EndpointExtensions.cs" />
     <Compile Include="IConsumer.cs" />
     <Compile Include="IFault.cs" />
+    <Compile Include="MessageSendCompleted.cs" />
     <Compile Include="NewId\INewIdFormatter.cs" />
     <Compile Include="NewId\INewIdParser.cs" />
     <Compile Include="NewId\NewIdFormatters\Base32Formatter.cs" />
@@ -131,10 +130,10 @@
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceType.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeReflector.cs" />
-    <Compile Include="Context\BusObjectPublisher.cs" />
-    <Compile Include="Context\BusObjectPublisherCache.cs" />
-    <Compile Include="Context\BusObjectPublisherImpl.cs" />
-    <Compile Include="Context\EndpointObjectSenderCache.cs" />
+    <Compile Include="Context\PublishObjectConverter.cs" />
+    <Compile Include="Context\PublishObjectConverterCache.cs" />
+    <Compile Include="Context\PublishObjectConverterImpl.cs" />
+    <Compile Include="Context\SendObjectConverterCache.cs" />
     <Compile Include="Diagnostics\IntrospectionExtensions.cs" />
     <Compile Include="Configuration\BusServiceConfigurationExtensions.cs" />
     <Compile Include="Configuration\BusServiceLayer.cs" />
@@ -181,8 +180,6 @@
     <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettings.cs" />
     <Compile Include="Configuration\BusConfigurators\PostCreateBusBuilderConfigurator.cs" />
     <Compile Include="Configuration\Configurators\Configurator.cs" />
-    <Compile Include="Configuration\BusConfigurators\ControlBusConfigurator.cs" />
-    <Compile Include="Configuration\BusConfigurators\ControlBusConfiguratorImpl.cs" />
     <Compile Include="Configuration\BusConfigurators\BusBuilderConfigurator.cs" />
     <Compile Include="Configuration\BusServiceConfigurators\CustomBusServiceConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\DefaultSerializerEndpointFactoryConfigurator.cs" />
@@ -198,7 +195,6 @@
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryDefaultSettingsConfiguratorImpl.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IEndpointFactoryDefaultSettings.cs" />
     <Compile Include="Configuration\EndpointConfigurators\TransportFactoryConfigurator.cs" />
-    <Compile Include="Configuration\ControlBusConfigurationExtensions.cs" />
     <Compile Include="Configuration\EndpointConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SerializerConfigurationExtensions.cs" />
     <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
@@ -360,8 +356,8 @@
     <Compile Include="Distributor\WorkerInfo.cs" />
     <Compile Include="Distributor\WorkerLoad.cs" />
     <Compile Include="EndpointLoggerExtensions.cs" />
-    <Compile Include="Context\EndpointObjectSender.cs" />
-    <Compile Include="Context\EndpointObjectSenderImpl.cs" />
+    <Compile Include="Context\SendObjectConverter.cs" />
+    <Compile Include="Context\SendObjectConverterImpl.cs" />
     <Compile Include="Exceptions\MessageRetryLimitExceededException.cs" />
     <Compile Include="Exceptions\PublishException.cs" />
     <Compile Include="Exceptions\RequestCancelledException.cs" />
@@ -745,7 +741,6 @@
     <Compile Include="Monitoring\RuntimePerformanceCounter.cs" />
     <Compile Include="Monitoring\ServiceBusInstancePerformanceCounters.cs" />
     <Compile Include="Monitoring\ServiceBusPerformanceCounters.cs" />
-    <Compile Include="IControlBus.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointConfigurator.cs" />
     <Compile Include="Configuration\BusServiceConfigurators\DefaultBusServiceConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\InboundMessageInterceptorConfigurator.cs" />

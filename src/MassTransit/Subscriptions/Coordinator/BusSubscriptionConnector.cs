@@ -26,7 +26,6 @@ namespace MassTransit.Subscriptions.Coordinator
     {
         static readonly ILog _log = Logger.Get(typeof(BusSubscriptionConnector));
         readonly Cache<Guid, UnsubscribeAction> _connectionCache;
-        readonly EndpointSubscriptionConnectorCache _controlBusSubscriptionCache;
         readonly EndpointSubscriptionConnectorCache _dataBusSubscriptionCache;
 
         /// <summary>
@@ -36,7 +35,6 @@ namespace MassTransit.Subscriptions.Coordinator
         public BusSubscriptionConnector(IServiceBus bus)
         {
             _dataBusSubscriptionCache = new EndpointSubscriptionConnectorCache(bus);
-            _controlBusSubscriptionCache = new EndpointSubscriptionConnectorCache(bus.ControlBus);
 
             _connectionCache = new ConcurrentCache<Guid, UnsubscribeAction>();
         }
@@ -47,16 +45,8 @@ namespace MassTransit.Subscriptions.Coordinator
         /// <param name="message"></param>
         public void OnSubscriptionAdded(SubscriptionAdded message)
         {
-            // determine whether the message should be send over the control bus
-            bool isControlMessage = message.EndpointUri.IsControlAddress();
-
-            // connect the message to the correct cache
-            if (!isControlMessage)
-                _connectionCache[message.SubscriptionId] = _dataBusSubscriptionCache.Connect(message.MessageName,
-                    message.EndpointUri, message.CorrelationId);
-            else
-                _connectionCache[message.SubscriptionId] = _controlBusSubscriptionCache.Connect(message.MessageName,
-                    message.EndpointUri, message.CorrelationId);
+            _connectionCache[message.SubscriptionId] = _dataBusSubscriptionCache.Connect(message.MessageName,
+                message.EndpointUri, message.CorrelationId);
 
             _log.Debug(() => string.Format("Added: {0} => {1}, {2}", message.MessageName, message.EndpointUri,
                 message.SubscriptionId));

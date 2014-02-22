@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,20 +13,38 @@
 namespace MassTransit.Context
 {
     using System;
+    using Magnum.Extensions;
 
-    public class BusObjectPublisherImpl<TMessage> :
-        BusObjectPublisher
+
+    public class PublishObjectConverterImpl<TMessage> :
+        PublishObjectConverter
         where TMessage : class
     {
         public void Publish(IServiceBus bus, object message)
         {
+            if (bus == null)
+                throw new ArgumentNullException("bus");
+            if (message == null)
+                throw new ArgumentNullException("message");
+
             var msg = message as TMessage;
+            if (msg == null)
+                throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
+
             bus.Publish(msg);
         }
 
         public void Publish(IServiceBus bus, object message, Action<IPublishContext> contextCallback)
         {
+            if (bus == null)
+                throw new ArgumentNullException("bus");
+            if (message == null)
+                throw new ArgumentNullException("message");
+
             var msg = message as TMessage;
+            if (msg == null)
+                throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
+
             bus.Publish(msg, context => contextCallback(context));
         }
     }

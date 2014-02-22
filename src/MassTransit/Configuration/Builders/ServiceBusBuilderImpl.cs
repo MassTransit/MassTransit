@@ -49,7 +49,7 @@ namespace MassTransit.Builders
             get { return _settings; }
         }
 
-        public IControlBus Build()
+        public IServiceBus Build()
         {
             ServiceBus bus = CreateServiceBus(_settings.EndpointCache);
 
@@ -85,11 +85,6 @@ namespace MassTransit.Builders
             }
         }
 
-        
-        public void UseControlBus(IControlBus controlBus)
-        {
-            _postCreateActions.Add(bus => bus.ControlBus = controlBus);
-        }
 
         public void AddPostCreateAction(Action<ServiceBus> postCreateAction)
         {

@@ -66,11 +66,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 {
                     x.ReceiveFrom(uri);
                     x.UseRabbitMq();
-                    x.UseControlBus();
                 }))
             {
                 Console.WriteLine("Using address: " + bus.Endpoint.Address.Uri);
-                Console.WriteLine("Control bus address: " + bus.ControlBus.Endpoint.Address.Uri);
 
                 Thread.Sleep(30000);
             }

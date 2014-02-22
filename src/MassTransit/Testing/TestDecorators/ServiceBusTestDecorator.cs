@@ -59,11 +59,6 @@ namespace MassTransit.Testing.TestDecorators
             get { return _bus.OutboundPipeline; }
         }
 
-        public IServiceBus ControlBus
-        {
-            get { return _bus.ControlBus; }
-        }
-
         public IEndpointCache EndpointCache
         {
             get { return _bus.EndpointCache; }
@@ -111,7 +106,7 @@ namespace MassTransit.Testing.TestDecorators
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            BusObjectPublisherCache.Instance[message.GetType()].Publish(this, message);
+            PublishObjectConverterCache.Instance[message.GetType()].Publish(this, message);
         }
 
         public void Publish(object message, Type messageType)
@@ -121,7 +116,7 @@ namespace MassTransit.Testing.TestDecorators
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            BusObjectPublisherCache.Instance[messageType].Publish(this, message);
+            PublishObjectConverterCache.Instance[messageType].Publish(this, message);
         }
 
         public void Publish(object message, Action<IPublishContext> contextCallback)
@@ -131,7 +126,7 @@ namespace MassTransit.Testing.TestDecorators
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            BusObjectPublisherCache.Instance[message.GetType()].Publish(this, message, contextCallback);
+            PublishObjectConverterCache.Instance[message.GetType()].Publish(this, message, contextCallback);
         }
 
         public void Publish(object message, Type messageType, Action<IPublishContext> contextCallback)
@@ -143,7 +138,7 @@ namespace MassTransit.Testing.TestDecorators
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            BusObjectPublisherCache.Instance[messageType].Publish(this, message);
+            PublishObjectConverterCache.Instance[messageType].Publish(this, message);
         }
 
         public void Publish<T>(object values)

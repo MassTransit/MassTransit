@@ -43,7 +43,7 @@ namespace MassTransit.Tests.Diagnostics
             _test.Sent.Any<OutputMessage>().ShouldBeTrue();
 
             _future = new FutureMessage<ReceivedMessageTraceList>();
-            _test.Scenario.Bus.GetMessageTrace(_test.Scenario.Bus.ControlBus.Endpoint, _future.Set);
+            _test.Scenario.Bus.GetMessageTrace(_test.Scenario.Bus.Endpoint, _future.Set);
 
             _future.IsAvailable(8.Seconds()).ShouldBeTrue();
             _list = _future.Message;

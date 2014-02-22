@@ -64,7 +64,7 @@ namespace MassTransit.SubscriptionBuilders
         {
             SubscriptionStorage storage = _subscriptionStorageFactory();
 
-            var repository = new BusSubscriptionRepository(_bus.ControlBus.Endpoint.Address.Uri, storage);
+            var repository = new BusSubscriptionRepository(_bus.Endpoint.Address.Uri, storage);
 
             var service = new SubscriptionRouterService(_bus, repository, _network);
 

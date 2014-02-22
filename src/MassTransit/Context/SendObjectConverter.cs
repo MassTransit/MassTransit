@@ -13,23 +13,10 @@
 namespace MassTransit.Context
 {
     using System;
-    using Magnum.Caching;
 
-    public class EndpointObjectSenderCache
+    public interface SendObjectConverter
     {
-        static EndpointObjectSenderCache _instance;
-
-        readonly Cache<Type, EndpointObjectSender> _typeCache =
-            new GenericTypeCache<EndpointObjectSender>(typeof(EndpointObjectSenderImpl<>));
-
-        public static EndpointObjectSenderCache Instance
-        {
-            get { return _instance ?? (_instance = new EndpointObjectSenderCache()); }
-        }
-
-        public EndpointObjectSender this[Type type]
-        {
-            get { return _typeCache[type]; }
-        }
+        void Send(IEndpoint endpoint, object message);
+        void Send(IEndpoint endpoint, object message, Action<ISendContext> contextCallback);
     }
 }

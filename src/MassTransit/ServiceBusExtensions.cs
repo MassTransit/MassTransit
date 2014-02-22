@@ -117,17 +117,5 @@ namespace MassTransit
                 yield return interfaceType;
             }
         }
-
-        /// <summary>
-        /// Determines whether the given <see cref="IEndpointAddress"/> is a control bus by examining the uri.
-        /// </summary>
-        /// <param name="address">The address.</param>
-        /// <returns>
-        ///   <c>true</c> if the URI of of the given <see cref="IEndpointAddress"/> end with '_control'; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsControlAddress(this Uri address)
-        {
-            return address.AbsolutePath.EndsWith("_control");
-        }
     }
 }

@@ -36,7 +36,7 @@ namespace MassTransit
     /// </summary>
     [DebuggerDisplay("{DebugDisplay}")]
     public class ServiceBus :
-        IControlBus
+        IServiceBus
     {
         static readonly ILog _log;
 
@@ -84,8 +84,6 @@ namespace MassTransit
 
             OutboundPipeline = new OutboundPipelineConfigurator(this).Pipeline;
             InboundPipeline = InboundPipelineConfigurator.CreateDefault(this);
-
-            ControlBus = this;
 
             if(enablePerformanceCounters)
                 InitializePerformanceCounters();
@@ -165,6 +163,11 @@ namespace MassTransit
         public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
             where T : class
         {
+            if (message == null)
+                throw new ArgumentNullException("message");
+            if (contextCallback == null)
+                throw new ArgumentNullException("contextCallback");
+
             PublishContext<T> context = ContextStorage.CreatePublishContext(message);
             context.SetSourceAddress(Endpoint.Address.Uri);
 
@@ -212,7 +215,7 @@ namespace MassTransit
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            BusObjectPublisherCache.Instance[message.GetType()].Publish(this, message);
+            PublishObjectConverterCache.Instance[message.GetType()].Publish(this, message);
         }
 
         public void Publish(object message, Type messageType)
@@ -222,7 +225,7 @@ namespace MassTransit
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            BusObjectPublisherCache.Instance[messageType].Publish(this, message);
+            PublishObjectConverterCache.Instance[messageType].Publish(this, message);
         }
 
         public void Publish(object message, Action<IPublishContext> contextCallback)
@@ -232,7 +235,7 @@ namespace MassTransit
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            BusObjectPublisherCache.Instance[message.GetType()].Publish(this, message, contextCallback);
+            PublishObjectConverterCache.Instance[message.GetType()].Publish(this, message, contextCallback);
         }
 
         public void Publish(object message, Type messageType, Action<IPublishContext> contextCallback)
@@ -244,7 +247,7 @@ namespace MassTransit
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            BusObjectPublisherCache.Instance[messageType].Publish(this, message, contextCallback);
+            PublishObjectConverterCache.Instance[messageType].Publish(this, message, contextCallback);
         }
 
         /// <summary>
@@ -306,8 +309,6 @@ namespace MassTransit
             return InboundPipeline.Configure(configure);
         }
 
-        public IServiceBus ControlBus { get; set; }
-
         public IEndpoint GetEndpoint(Uri address)
         {
             return EndpointCache.GetEndpoint(address);
@@ -319,7 +320,6 @@ namespace MassTransit
 
             probe.Add("mt.version", typeof(IServiceBus).Assembly.GetName().Version);
             probe.Add("mt.receive_from", Endpoint.Address);
-            probe.Add("mt.control_bus", ControlBus.Endpoint.Address);
             probe.Add("mt.max_consumer_threads", MaximumConsumerThreads);
             probe.Add("mt.concurrent_receive_threads", ConcurrentReceiveThreads);
             probe.Add("mt.receive_timeout", ReceiveTimeout);
@@ -396,9 +396,6 @@ namespace MassTransit
                     _serviceContainer.Dispose();
                     _serviceContainer = null;
                 }
-
-                if (ControlBus != this)
-                    ControlBus.Dispose();
 
                 if (_performanceCounterConnection != null)
                 {

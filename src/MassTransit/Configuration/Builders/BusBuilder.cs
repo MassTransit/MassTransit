@@ -31,7 +31,7 @@ namespace MassTransit.Builders
 		/// Builds the bus instance
 		/// </summary>
 		/// <returns></returns>
-		IControlBus Build();
+		IServiceBus Build();
 
 		/// <summary>
 		/// Adds an action to be performed after bus creation to adjust settings, etc.

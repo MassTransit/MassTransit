@@ -81,7 +81,6 @@ namespace MassTransit.Tests.Distributor
         public void The_pipeline_viewer_should_show_the_distributor()
         {
             PipelineViewer.Trace(LocalBus.InboundPipeline);
-            PipelineViewer.Trace(LocalBus.ControlBus.InboundPipeline);
             PipelineViewer.Trace(RemoteBus.InboundPipeline);
             PipelineViewer.Trace(RemoteBus.OutboundPipeline);
             PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);

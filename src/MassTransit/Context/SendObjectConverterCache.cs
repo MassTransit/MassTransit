@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,23 +13,30 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Threading;
     using Magnum.Caching;
 
-    public class BusObjectPublisherCache
+
+    public class SendObjectConverterCache
     {
-        static BusObjectPublisherCache _instance;
+        readonly Cache<Type, SendObjectConverter> _typeCache =
+            new GenericTypeCache<SendObjectConverter>(typeof(SendObjectConverterImpl<>));
 
-        readonly Cache<Type, BusObjectPublisher> _typeCache =
-            new GenericTypeCache<BusObjectPublisher>(typeof(BusObjectPublisherImpl<>));
-
-        public static BusObjectPublisherCache Instance
+        public static SendObjectConverterCache Instance
         {
-            get { return _instance ?? (_instance = new BusObjectPublisherCache()); }
+            get { return InstanceCache.Cached.Value; }
         }
 
-        public BusObjectPublisher this[Type type]
+        public SendObjectConverter this[Type type]
         {
             get { return _typeCache[type]; }
+        }
+
+
+        static class InstanceCache
+        {
+            internal static readonly Lazy<SendObjectConverterCache> Cached =
+                new Lazy<SendObjectConverterCache>(() => new SendObjectConverterCache(), LazyThreadSafetyMode.PublicationOnly);
         }
     }
 }
