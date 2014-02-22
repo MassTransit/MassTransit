@@ -51,16 +51,6 @@ namespace MassTransit.SubscriptionConnectors
                 .Where(IsNotContextType);
         }
 
-        internal static IEnumerable<CorrelatedMessageInterfaceType> GetConsumesCorrelatedTypes()
-        {
-            return typeof(T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof(Consumes<>.For<>))
-                .Select(
-                    x => new CorrelatedMessageInterfaceType(x, x.GetGenericArguments()[0], x.GetGenericArguments()[1]))
-                .Where(x => x.MessageType.IsValueType == false)
-                .Where(IsNotContextType);
-        }
 
         static bool IsNotContextType(MessageInterfaceType x)
         {

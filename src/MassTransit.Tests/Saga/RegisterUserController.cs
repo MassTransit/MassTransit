@@ -18,8 +18,8 @@ namespace MassTransit.Tests.Saga
 	using Messages;
 
 	public class RegisterUserController :
-		Consumes<UserRegistrationPending>.For<Guid>,
-		Consumes<UserRegistrationComplete>.For<Guid>
+		Consumes<UserRegistrationPending>.All,
+		Consumes<UserRegistrationComplete>.All
 	{
 		readonly IServiceBus _bus;
 		readonly ManualResetEvent _registrationComplete = new ManualResetEvent(false);
@@ -34,7 +34,8 @@ namespace MassTransit.Tests.Saga
 
 		public void Consume(UserRegistrationComplete message)
 		{
-			_registrationComplete.Set();
+            if (message.CorrelationId == _correlationId)
+                _registrationComplete.Set();
 		}
 
 		public Guid CorrelationId
@@ -44,7 +45,8 @@ namespace MassTransit.Tests.Saga
 
 		public void Consume(UserRegistrationPending message)
 		{
-			_registrationPending.Set();
+            if(message.CorrelationId == _correlationId)
+    			_registrationPending.Set();
 		}
 
 		public bool RegisterUser(string username, string password, string displayName, string email)

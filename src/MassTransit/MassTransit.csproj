@@ -104,6 +104,7 @@
     <Compile Include="Configuration\InterceptorExtensions.cs" />
     <Compile Include="Context\DeliveryMode.cs" />
     <Compile Include="EndpointExtensions.cs" />
+    <Compile Include="IConsumer.cs" />
     <Compile Include="IFault.cs" />
     <Compile Include="NewId\INewIdFormatter.cs" />
     <Compile Include="NewId\INewIdParser.cs" />
@@ -228,7 +229,6 @@
     <Compile Include="Configuration\SubscriptionConfigurators\UntypedConsumerSubscriptionConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerSubscriptionConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\CorrelatedInstanceSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\HandlerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceSubscriptionConnector.cs" />
@@ -435,7 +435,7 @@
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="Fault.cs" />
     <Compile Include="IBusService.cs" />
-    <Compile Include="IConsumer.cs" />
+    <Compile Include="IMessageConsumer.cs" />
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="MessageUrn.cs" />
     <Compile Include="IInboundMessageInterceptor.cs" />

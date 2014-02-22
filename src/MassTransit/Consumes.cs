@@ -58,7 +58,7 @@ namespace MassTransit
 		/// whenever a a message is received of the specified type.
 		/// </summary>
 		public interface All :
-			IConsumer<TMessage>
+			IMessageConsumer<TMessage>
 		{
 		}
 
@@ -68,19 +68,6 @@ namespace MassTransit
 		/// </summary>
 		public interface Context :
 			Consumes<IConsumeContext<TMessage>>.All
-		{
-		}
-
-		/// <summary>
-		/// Called by the framework when a message is available to be consumed that
-		/// matches the correlationId of the consumer object instance (exposed by the
-		/// CorrelationId property). This is called by a framework thread, so care
-		/// should be used when accessing any shared objects.
-		/// </summary>
-		/// <typeparam name="TCorrelationId">The type of the CorrelationId to match</typeparam>
-		public interface For<TCorrelationId> :
-			All,
-			CorrelatedBy<TCorrelationId>
 		{
 		}
 	}

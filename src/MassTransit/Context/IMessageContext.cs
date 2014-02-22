@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
 
 
-    public interface IMessageContext<T> :
+    public interface IMessageContext<out T> :
         IMessageContext
         where T : class
     {

@@ -47,9 +47,7 @@ namespace MassTransit.SubscriptionConnectors
 
             _connectors = /* Distributors()
                 .Concat(Workers())
-                .Concat(*/
-                ConsumesCorrelated()
-                    .Concat(ConsumesContext())
+                .Concat(*/ConsumesContext()
                     .Concat(ConsumesAll())
                     .Distinct((x, y) => x.MessageType == y.MessageType)
                     .ToList();
@@ -92,18 +90,6 @@ namespace MassTransit.SubscriptionConnectors
                    FastActivator.Create(typeof(InstanceSubscriptionConnector<,>), new[] {typeof(T), x.MessageType});
         }
 
-        static IEnumerable<InstanceSubscriptionConnector> ConsumesCorrelated()
-        {
-            return MessageInterfaceTypeReflector<T>.GetConsumesCorrelatedTypes()
-                .Select(CreateCorrelatedConnector);
-        }
-
-        static InstanceSubscriptionConnector CreateCorrelatedConnector(CorrelatedMessageInterfaceType x)
-        {
-            return (InstanceSubscriptionConnector)
-                   FastActivator.Create(typeof(CorrelatedInstanceSubscriptionConnector<,,>),
-                       new[] {typeof(T), x.MessageType, x.CorrelationType});
-        }
 
 
 //        static IEnumerable<InstanceSubscriptionConnector> Distributors()

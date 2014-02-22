@@ -62,7 +62,7 @@ namespace MassTransit.Tests
 		LoopbackTestFixture
 	{
 		public class SmartConsumer :
-			Consumes<Fault<Hello, Guid>>.For<Guid>
+			Consumes<Fault<Hello, Guid>>.All
 		{
 			readonly Guid _id = Guid.NewGuid();
 
@@ -75,7 +75,8 @@ namespace MassTransit.Tests
 
 			public void Consume(Fault<Hello, Guid> message)
 			{
-				_fault.Set(message);
+                if(message.CorrelationId == _id)
+    				_fault.Set(message);
 			}
 
 			public Guid CorrelationId

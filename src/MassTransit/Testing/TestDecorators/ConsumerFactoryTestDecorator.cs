@@ -18,7 +18,7 @@ namespace MassTransit.Testing.TestDecorators
 
 	public class ConsumerFactoryTestDecorator<TConsumer> :
 		IConsumerFactory<TConsumer>
-		where TConsumer : class
+		where TConsumer : class, IConsumer
 	{
 		readonly IConsumerFactory<TConsumer> _consumerFactory;
 		readonly ReceivedMessageListImpl _received;
