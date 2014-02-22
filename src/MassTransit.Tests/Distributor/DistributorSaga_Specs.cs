@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Distributor
 
     [TestFixture]
     public class Using_the_distributor_for_a_saga :
-        LoopbackDistributorSagaTestFixture
+        DistributorSagaTestFixture
     {
         [Test]
         public void Should_have_a_subscription_for_the_first_command()
@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Distributor
 
     [TestFixture]
     public class Using_the_distributor_saga_worker_for_a_saga :
-        LoopbackDistributorSagaTestFixture
+        DistributorSagaTestFixture
     {
         protected override void EstablishContext()
         {

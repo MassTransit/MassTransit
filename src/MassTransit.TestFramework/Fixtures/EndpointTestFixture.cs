@@ -23,7 +23,6 @@ namespace MassTransit.TestFramework.Fixtures
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Saga;
-	using Services.Subscriptions;
 
 	/// <summary>
 	/// Test fixture that tests a single endpoint, given
@@ -130,13 +129,6 @@ namespace MassTransit.TestFramework.Fixtures
 				throw new ConfigurationException("The endpoint factory configurator has already been executed.");
 
 			configure(EndpointFactoryConfigurator);
-		}
-
-		protected void ConnectSubscriptionService(ServiceBusConfigurator configurator,
-		                                          ISubscriptionService subscriptionService)
-		{
-			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionPublisher(subscriptionService));
-			configurator.AddService(BusServiceLayer.Session, () => new SubscriptionConsumer(subscriptionService));
 		}
 
 		/// <summary>

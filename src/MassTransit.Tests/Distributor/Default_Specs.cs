@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Distributor
 
     [TestFixture]
     public class Default_distributor_specifications :
-        LoopbackDistributorTestFixture
+        DistributorTestFixture
     {
         [Test]
         public void Can_collect_iworkeravaiable_messages()
@@ -136,7 +136,7 @@ namespace MassTransit.Tests.Distributor
 
     [TestFixture]
     public class Distributor_with_custom_worker_selection_strategy :
-        LoopbackDistributorTestFixture
+        DistributorTestFixture
     {
         [Test, Explicit]
         public void Node_a_should_recieve_all_the_work()

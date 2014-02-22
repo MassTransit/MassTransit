@@ -16,9 +16,6 @@ namespace MassTransit.Tests.Configuration
 	using Examples.Sagas.Messages;
 	using Magnum.TestFramework;
 	using MassTransit.Saga;
-	using MassTransit.Services.Subscriptions.Messages;
-	using MassTransit.Services.Subscriptions.Server;
-	using MassTransit.Services.Subscriptions.Server.Messages;
 	using Rhino.Mocks;
 	using TestFramework;
 
@@ -60,53 +57,6 @@ namespace MassTransit.Tests.Configuration
 		public void Should_have_subscribed_finish_message()
 		{
 			_bus.ShouldHaveSubscriptionFor<FinishSimpleSaga>();
-		}
-	}
-
-	[Scenario]
-	public class When_subscribing_a_complex_saga_to_the_bus
-	{
-		IServiceBus _bus;
-
-		[When]
-		public void Subscribing_a_complex_saga_to_the_bus()
-		{
-			_bus = ServiceBusFactory.New(x =>
-				{
-					x.ReceiveFrom("loopback://localhost/mt_test");
-
-					x.Subscribe(s => s.Saga(MockRepository.GenerateMock<ISagaRepository<SubscriptionSaga>>()));
-				});
-		}
-
-		[Finally]
-		public void Finally()
-		{
-			_bus.Dispose();
-		}
-
-		[Then]
-		public void Should_have_add_subscription()
-		{
-			_bus.ShouldHaveSagaSubscriptionFor<SubscriptionSaga, AddSubscription>(typeof(CreateOrUseExistingSagaPolicy<,>));
-		}
-
-		[Then]
-		public void Should_have_remove_subscription()
-		{
-			_bus.ShouldHaveSagaSubscriptionFor<SubscriptionSaga, RemoveSubscription>(typeof(ExistingOrIgnoreSagaPolicy<,>));
-		}
-
-		[Then]
-		public void Should_have_subscription_client_added()
-		{
-			_bus.ShouldHaveSagaSubscriptionFor<SubscriptionSaga, SubscriptionClientAdded>(typeof(ExistingOrIgnoreSagaPolicy<,>));
-		}
-
-		[Then]
-		public void Should_have_duplicate_subscription_client_removed()
-		{
-			_bus.ShouldHaveSagaSubscriptionFor<SubscriptionSaga, DuplicateSubscriptionClientRemoved>(typeof(ExistingOrIgnoreSagaPolicy<,>));
 		}
 	}
 }

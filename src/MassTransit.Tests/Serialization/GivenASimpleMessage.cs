@@ -19,7 +19,6 @@ namespace MassTransit.Tests.Serialization
     using Context;
     using Magnum.TestFramework;
     using MassTransit.Serialization;
-    using MassTransit.Services.Subscriptions.Messages;
     using Messages;
     using NUnit.Framework;
 

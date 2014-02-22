@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Subscriptions
 {
     using Magnum;
     using Magnum.Extensions;
-    using MassTransit.Transports.Loopback;
     using NUnit.Framework;
     using TestFramework;
     using TextFixtures;
@@ -22,7 +21,7 @@ namespace MassTransit.Tests.Subscriptions
 
     [TestFixture]
     public class Removing_a_subscription_client :
-        SubscriptionServiceTestFixture<LoopbackTransportFactory>
+        LoopbackLocalAndRemoteTestFixture
     {
         [Test]
         public void Should_not_remove_any_existing_subscriptions()
@@ -36,33 +35,6 @@ namespace MassTransit.Tests.Subscriptions
 
             ThreadUtil.Sleep(2.Seconds());
             LocalBus.ShouldHaveRemoteSubscriptionFor<A>();
-        }
-
-
-        class A
-        {
-        }
-    }
-
-
-    [TestFixture]
-    public class Removing_a_subscription_client_and_readding_it :
-        SubscriptionServiceTestFixture<LoopbackTransportFactory>
-    {
-        [Test]
-        public void Should_remove_any_previous_subscriptions()
-        {
-            RemoteBus.SubscribeHandler<A>(x => { });
-            RemoteBus.ShouldHaveSubscriptionFor<A>();
-            LocalBus.ShouldHaveRemoteSubscriptionFor<A>();
-
-            RemoteBus.Dispose();
-
-            ThreadUtil.Sleep(2.Seconds());
-
-            SetupRemoteBus();
-
-            LocalBus.ShouldNotHaveSubscriptionFor<A>();
         }
 
 

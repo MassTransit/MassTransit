@@ -16,8 +16,6 @@ namespace MassTransit.Tests.Subscriptions
     using System.Diagnostics;
     using Magnum.Extensions;
     using MassTransit.Pipeline.Inspectors;
-    using MassTransit.Services.Subscriptions.Messages;
-    using MassTransit.Transports.Loopback;
     using Messages;
     using NUnit.Framework;
     using TestConsumers;
@@ -26,7 +24,7 @@ namespace MassTransit.Tests.Subscriptions
 
     [TestFixture]
     public class SubscriptionService_Specs :
-        SubscriptionServiceTestFixture<LoopbackTransportFactory>
+        LoopbackLocalAndRemoteTestFixture
     {
         void DumpPipelines()
         {
@@ -41,32 +39,8 @@ namespace MassTransit.Tests.Subscriptions
 
             Trace.WriteLine("RemoteBus.OutboundPipeline");
             PipelineViewer.Trace(RemoteBus.OutboundPipeline);
-
-            Trace.WriteLine("SubscriptionBus.InboundPipeline");
-            PipelineViewer.Trace(SubscriptionBus.InboundPipeline);
-
-            Trace.WriteLine("SubscriptionBus.OutboundPipeline");
-            PipelineViewer.Trace(SubscriptionBus.OutboundPipeline);
         }
 
-        [Test]
-        public void Removing_a_subscription_twice_should_not_have_a_negative_impact()
-        {
-            Guid clientId = NewId.NextGuid();
-            var clientUri = new Uri("loopback://localhost/monster_beats");
-
-            var subscription = new SubscriptionInformation(clientId, 1, typeof (PingMessage),
-                RemoteBus.Endpoint.Address.Uri);
-
-            LocalControlBus.Endpoint.Send(new AddSubscriptionClient(clientId, clientUri, clientUri));
-            LocalControlBus.Endpoint.Send(new AddSubscription(subscription));
-            LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
-
-            LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
-            LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
-
-            LocalBus.ShouldNotHaveSubscriptionFor<PingMessage>();
-        }
 
         [Test]
         public void The_system_should_be_ready_to_use_before_getting_underway()

@@ -1,22 +1,25 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TextFixtures
 {
     using System;
+    using System.Collections.Generic;
     using BusConfigurators;
+    using Magnum.Extensions;
     using MassTransit.Subscriptions.Coordinator;
     using MassTransit.Transports.Loopback;
     using NUnit.Framework;
+
 
     [TestFixture]
     public class LoopbackLocalAndRemoteTestFixture :
@@ -24,6 +27,11 @@ namespace MassTransit.Tests.TextFixtures
     {
         public IServiceBus LocalBus { get; protected set; }
         public IServiceBus RemoteBus { get; protected set; }
+
+        public LoopbackLocalAndRemoteTestFixture()
+        {
+            Instances = new Dictionary<string, ServiceInstance>();
+        }
 
         protected override void EstablishContext()
         {
@@ -36,6 +44,35 @@ namespace MassTransit.Tests.TextFixtures
             _localLoopback.SetTargetCoordinator(_remoteLoopback.Router);
             _remoteLoopback.SetTargetCoordinator(_localLoopback.Router);
         }
+
+        protected Dictionary<string, ServiceInstance> Instances { get; private set; }
+
+        protected ServiceInstance AddInstance(string instanceName, string queueName,
+            Action<ServiceBusConfigurator> configureBus)
+        {
+            var instance = new ServiceInstance(queueName, x =>
+                {
+                    x.AddSubscriptionObserver((bus, coordinator) =>
+                    {
+                        var loopback = new SubscriptionLoopback(bus, coordinator);
+                        loopback.SetTargetCoordinator(_localLoopback.Router);
+                        return loopback;
+                    });
+                    x.AddSubscriptionObserver((bus, coordinator) =>
+                    {
+                        var loopback = new SubscriptionLoopback(bus, coordinator);
+                        loopback.SetTargetCoordinator(_remoteLoopback.Router);
+                        return loopback;
+                    });
+
+                    configureBus(x);
+                });
+
+            Instances.Add(instanceName, instance);
+
+            return instance;
+        }
+
 
         SubscriptionLoopback _localLoopback;
         SubscriptionLoopback _remoteLoopback;
@@ -51,6 +88,9 @@ namespace MassTransit.Tests.TextFixtures
                     _localLoopback = new SubscriptionLoopback(bus, coordinator);
                     return _localLoopback;
                 });
+
+            foreach (ServiceInstance activityTestContext in Instances.Values)
+                activityTestContext.ConfigureServiceBus(configurator);
         }
 
         protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
@@ -62,6 +102,9 @@ namespace MassTransit.Tests.TextFixtures
                     _remoteLoopback = new SubscriptionLoopback(bus, coordinator);
                     return _remoteLoopback;
                 });
+
+            foreach (ServiceInstance activityTestContext in Instances.Values)
+                activityTestContext.ConfigureServiceBus(configurator);
         }
 
         protected override void TeardownContext()
@@ -77,6 +120,10 @@ namespace MassTransit.Tests.TextFixtures
                 LocalBus.Dispose();
                 LocalBus = null;
             }
+
+            Instances.Each(x => x.Value.Dispose());
+
+            Instances.Clear();
 
             base.TeardownContext();
         }
