@@ -60,6 +60,11 @@ namespace MassTransit
         /// handlers around and tap runtime metrics
         /// from the service bus.
         /// </summary>
+        /// <remarks>
+        /// This method is being removed in favor of using another bus instance. See http://docs.masstransit-project.com/en/latest/overview/controlbus.html
+        /// for more information.
+        /// </remarks>
+        [Obsolete("This method is being removed in favor of just using another bus instance.", false)]
         IServiceBus ControlBus { get; }
 
         /// <summary>
