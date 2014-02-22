@@ -306,6 +306,8 @@ namespace MassTransit
             return InboundPipeline.Configure(configure);
         }
 
+
+        [Obsolete("This method is being removed in favor of just using another bus instance.", false)]
         public IServiceBus ControlBus { get; set; }
 
         public IEndpoint GetEndpoint(Uri address)
