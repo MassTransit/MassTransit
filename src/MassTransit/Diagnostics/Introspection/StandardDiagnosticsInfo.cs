@@ -36,17 +36,13 @@ namespace MassTransit.Diagnostics.Introspection
         static void AddProcessValues(DiagnosticsProbe probe)
         {
             probe.Add("process.id", Process.GetCurrentProcess().Id);
-#if NET40
             probe.Add("process.bits", Environment.Is64BitProcess ? "x64" : "x32");
-#endif
         }
 
         static void AddOperatingSystemValues(DiagnosticsProbe probe)
         {
             probe.Add("os.version", Environment.OSVersion);
-#if NET40
             probe.Add("os.bits", Environment.Is64BitOperatingSystem ? "x64" : "x32");
-#endif
         }
 
         static void AddRunningInFullTrustValue(DiagnosticsProbe probe)

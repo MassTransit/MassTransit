@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse.Configurators
 {
-#if NET40
     using System;
     using System.Threading;
     using System.Threading.Tasks;
@@ -81,5 +80,4 @@ namespace MassTransit.RequestResponse.Configurators
             return request;
         }
     }
-#endif
 }

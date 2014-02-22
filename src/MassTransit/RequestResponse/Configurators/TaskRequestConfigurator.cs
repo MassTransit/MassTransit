@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RequestResponse.Configurators
 {
-#if NET40
     using System;
     using System.Threading.Tasks;
 
@@ -56,5 +55,4 @@ namespace MassTransit.RequestResponse.Configurators
         /// <param name="faultCallback"></param>
         Task<Fault<TRequest>> HandleFault(Action<IConsumeContext<Fault<TRequest>>, Fault<TRequest>> faultCallback);
     }
-#endif
 }

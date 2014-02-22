@@ -43,17 +43,9 @@ namespace MassTransit.Configurators
 		[UsedImplicitly]
 		protected string DebuggerString()
 		{
-#if NET40
 			var debuggerString = string.Join(", ", _results);
-#else
-			var debuggerString = string.Join(", ", _results.Select(x => x.ToString()).ToArray());
-#endif
 
-#if NET40
 			return string.IsNullOrWhiteSpace(debuggerString)
-#else
-			return string.IsNullOrEmpty(debuggerString)
-#endif
 				? "No Obvious Problems says ConfigurationResult"
 				: debuggerString;
 		}

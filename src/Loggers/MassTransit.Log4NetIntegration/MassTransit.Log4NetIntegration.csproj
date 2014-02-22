@@ -37,10 +37,7 @@
     <NoWarn>3009,3001,3008,1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\log4net.2.0.3\lib\net35-full\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+    <Reference Include="log4net">
       <HintPath>..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
