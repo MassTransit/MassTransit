@@ -40,7 +40,7 @@ namespace MassTransit.SubscriptionConfigurators
 
             if (!typeof(TConsumer).Implements<IConsumer>())
                 yield return
-                    this.Warning(string.Format("The consumer class {0} does not implement any IConsumer interfaces",
+                    this.Warning(string.Format("The consumer class {0} does not implement any IMessageConsumer interfaces",
                         typeof(TConsumer).ToShortTypeName()));
         }
 

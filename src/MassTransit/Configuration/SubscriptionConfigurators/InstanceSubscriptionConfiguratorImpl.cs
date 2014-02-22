@@ -36,7 +36,7 @@ namespace MassTransit.SubscriptionConfigurators
 
             if (_instance != null && !_instance.GetType().Implements<IConsumer>())
                 yield return
-                    this.Warning(string.Format("The instance of {0} does not implement any IConsumer interfaces",
+                    this.Warning(string.Format("The instance of {0} does not implement any IMessageConsumer interfaces",
                         _instance.GetType().ToShortTypeName()));
         }
 

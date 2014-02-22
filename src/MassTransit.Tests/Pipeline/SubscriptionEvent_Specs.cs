@@ -66,7 +66,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			Guid pongGuid = Guid.NewGuid();
 
-			_subscriptionEvent.Expect(x => x.SubscribedTo<PongMessage,Guid>(pongGuid)).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PongMessage>()).Return(() =>
 				{
 					_unsubscribe();
 					return true;
@@ -144,7 +144,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			Guid pongGuid = Guid.NewGuid();
 
-			_subscriptionEvent.Expect(x => x.SubscribedTo<PongMessage,Guid>(pongGuid)).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PongMessage>()).Return(() =>
 				{
 					_unsubscribe();
 					return true;
@@ -164,7 +164,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			Guid pongGuid = Guid.NewGuid();
 
-			_subscriptionEvent.Expect(x => x.SubscribedTo<PongMessage, Guid>(pongGuid)).Repeat.Twice().Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PongMessage>()).Repeat.Twice().Return(() =>
 				{
 					_unsubscribe();
 					return true;

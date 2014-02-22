@@ -27,7 +27,7 @@ namespace MassTransit.SubscriptionConfigurators
         {
             if (!typeof(TConsumer).Implements<IConsumer>())
                 yield return configurator.Warning("Consumer",
-                    string.Format("The consumer class {0} does not implement any IConsumer interfaces",
+                    string.Format("The consumer class {0} does not implement any IMessageConsumer interfaces",
                         typeof(TConsumer).ToShortTypeName()));
 
             IEnumerable<ValidationResult> warningForMessages = MessageInterfaceTypeReflector<TConsumer>
