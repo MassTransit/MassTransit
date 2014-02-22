@@ -31,10 +31,8 @@ something to improve upon later. :)
         {
             Bus.Initialize(sbc =>
             {
-                sbc.UseMsmq();
-                sbc.VerifyMsmqConfiguration();
-                sbc.UseMulticastSubscriptionClient();
-                sbc.ReceiveFrom("msmq://localhost/message_responder");
+                sbc.UseRabbitMq();
+                sbc.ReceiveFrom("rabbitmq://localhost/message_responder");
                 sbc.Subscribe(subs=>
                 {
                     subs.Handler<BasicRequest>( (cxt, msg )=>
@@ -56,10 +54,8 @@ something to improve upon later. :)
         {
             Bus.Initialize(sbc =>
             {
-                sbc.UseMsmq();
-                sbc.VerifyMsmqConfiguration();
-                sbc.UseMulticastSubscriptionClient();
-                sbc.ReceiveFrom("msmq://localhost/message_requestor");
+                sbc.UseRabbitMq();
+                sbc.ReceiveFrom("rabbitmq://localhost/message_requestor");
             });
 
             Bus.Instance.PublishRequest(new BasicRequest(), x =>
@@ -96,5 +92,8 @@ Once the callback is invoked (or the wait handle is signaled), the EndRequest me
 method off IEndpoint or IServiceBus) must be called to complete the request (at this point, any timeout or
 response handler exceptions will be thrown).
 
-NOTE: The asynchronous model will create a wait event if requested, but the callback style is greatly
-preferred since it reduces the amount of operating system resources required.
+.. note::
+
+    The asynchronous model will create a wait event if requested, but the callback
+    style is greatlypreferred since it reduces the amount of operating system
+    resources required.

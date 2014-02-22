@@ -8,7 +8,7 @@ here are some of the terms used when working with MassTransit.
 Messages and Serialization
 --------------------------
 
-MassTransit is a service bus, and a service bus is designed to move *messages*. At the lowest 
+MassTransit is a service bus, and a service bus is designed to move *messages*. At the lowest
 level, a message is a chunk of JSON, XML, or even binary data. When using a statically typed
 language (such as C#), a message is represented by an instance of a class (or interface) that
 has relevant properties, each of which can be a value, list, dictionary, or even another nested
@@ -17,7 +17,7 @@ class.
 When using MassTransit, messages are sent and received, published and subscribed, as types. The
 translation (called serialization) between the textual representation of the message (which is
 JSON, XML, etc.) and a type is handled using a *message serializer*. The default serialization
-varies (for MSMQ, the framework uses XML by default, for RabbitMQ JSON is used instead). The 
+varies (for MSMQ, the framework uses XML by default, for RabbitMQ JSON is used instead). The
 default serialization can be changed when a service bus is being configured.
 
 .. sourcecode:: csharp
@@ -25,7 +25,7 @@ default serialization can be changed when a service bus is being configured.
     sbc.UseJsonSerializer(); // uses JSON by default
     sbc.UseXmlSerializer();  // uses XML by default
     sbc.UseBsonSerializer(); // uses BSON (binary JSON) by default
-    
+
 Receiving Messages
 ------------------
 
@@ -47,7 +47,7 @@ type and a void return type.
 
 When a message is received, MassTransit will call the method passing the message as the argument.
 With a handler, no special controls are available to manage the lifecycle of the receiver. Therefore,
-it is up to the application to deal with the fact that the handler may be called simultaneously 
+it is up to the application to deal with the fact that the handler may be called simultaneously
 from multiple threads if more than one message is being received. If your application is not
 thread-safe, it is recommended that the concurrent consumer limit be set to one in the bus
 configuration to avoid multithreading issues.
@@ -79,7 +79,7 @@ Consumers
 
 A **Consumer** is the most useful type of receiver and support a number of features that allow
 proper lifecycle management of dependencies, as well as multiple message type handling. Consumers
-are declared using the same interfaces as an *instance*, however, instead of subscribing an 
+are declared using the same interfaces as an *instance*, however, instead of subscribing an
 already created instance of the class to the bus, the consumer type is subscribed along with a
 *consumer factory*. As messages are received, MassTransit calls the consumer factory to get an
 instance of the consumer and calls the *Consume* method on the instance passing the message as
@@ -96,24 +96,24 @@ Interfaces for Consumers
 ''''''''''''''''''''''''
 
 .. sourcecode:: csharp
-    
+
     public class Consumes<TMessage>
     {
         public interface All : IConsumer
         {
             void Consume(TMessage message);
         }
-        
+
         public interface Selected : All
         {
             bool Accept(TMessage message);
         }
-        
+
         public interface For<TCorrelationId> :
             All,
             CorrelatedBy<TCorrelationId>
         {
-            
+
         }
     }
 
@@ -148,8 +148,8 @@ This interface defines how to do a correlated consumer.
 Sagas
 """""
 
-All of the receiver types above are stateless by design, the framework makes no effort to 
-correlate multiple messages to a single receiver. Often it is necessary to orchestrate 
+All of the receiver types above are stateless by design, the framework makes no effort to
+correlate multiple messages to a single receiver. Often it is necessary to orchestrate
 multiple messages, usually of different types, into a saga (sometimes called a workflow). A
 saga is a long-running transaction that is managed at the application layer (instead of, for
 example, inside of a database or a distributed transaction coordinator). MassTransit allows
@@ -158,7 +158,7 @@ sagas to be declared as a regular class or as a state machine using a fluent int
 The key difference for sagas is that the framework manages the saga instance and correlates
 messages to the proper saga instance. This correlation is typically done using a *CorrelationId*,
 which is an interface (called *CorrelatedBy*). Messages correlated an individual saga must be
-done using a **Guid**. Sagas may also *observe* messages that are not correlated directly to 
+done using a **Guid**. Sagas may also *observe* messages that are not correlated directly to
 the saga instance, but this should be done carefully to avoid potentially matching a message
 to hundreds of saga instances which may cause database performance issues.
 
@@ -185,7 +185,7 @@ running, the receivers are called by the framework as messages are received. The
 for the application to poll a message queue or repeated call a framework method in a loop.
 
 To initiate the calls into your application code, MassTransit creates an abstraction on top of
-the messaging platform (such as MSMQ or RabbitMQ).
+the messaging platform (such as RabbitMQ).
 
 Transports
 """"""""""
@@ -206,12 +206,8 @@ and outbound at the endpoint level.
 Address
 """""""
 
-In MassTransit, a URI is used as an address to an endpoint. The elements of the URI are used to 
-determine the proper transport, server, port, and queue name of the actual endpoint. For example, 
-an MSMQ endpoint on the local machine named "my_queue" would have the address shown below.
+In MassTransit, a URI is used as an address to an endpoint. The elements of the URI are used to
+determine the proper transport, server, port, and queue name of the actual endpoint. For example,
+a RabbitMQ endpoint on the local machine named "my_queue" would have the address shown below.
 
-    ``msmq://localhost/my_queue``
-
-A RabbitMQ queue on a remote server may be listed as below.
-
-    ``rabbitmq://user:password@remote_server/my_queue``
+    ``rabbitmq://localhost/my_queue``
