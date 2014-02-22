@@ -46,43 +46,8 @@ namespace MassTransit.Tests
 		}
 	}
 
-	public class SelectedFutureMessage<TMessage> :
-		Consumes<TMessage>.Selected
-		where TMessage : class
-	{
-		private readonly Func<TMessage, bool> _acceptor;
-		private readonly ManualResetEvent _received = new ManualResetEvent(false);
 
-		public TMessage Message { get; private set; }
-
-		public SelectedFutureMessage(Func<TMessage, bool> acceptor)
-		{
-			_acceptor = acceptor;
-		}
-
-		public void Consume(TMessage message)
-		{
-			Set(message);
-		}
-
-		public void Set(TMessage message)
-		{
-			Message = message;
-			_received.Set();
-		}
-
-		public bool WaitUntilAvailable(TimeSpan timeout)
-		{
-			return _received.WaitOne(timeout, true);
-		}
-
-		public bool Accept(TMessage message)
-		{
-			return _acceptor(message);
-		}
-	}
-
-	/// <summary>
+    /// <summary>
 	/// A simple class that helps to work with the async nature of messaging
 	/// </summary>
 	/// <remarks>

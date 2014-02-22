@@ -22,4 +22,23 @@ namespace MassTransit
 	public interface IConsumer
 	{
 	}
+
+
+    /// <summary>
+    /// Defines a class as a consumer of messages which implement T, either as a class or interface
+    /// </summary>
+    /// <typeparam name="TMessage">The message type</typeparam>
+    public interface IConsumer<in TMessage> :
+        IConsumer
+        where TMessage : class
+    {
+        /// <summary>
+        /// Called by the framework when a message is available to be consumed. This
+        /// is called by a framework thread, so care should be used when accessing
+        /// any shared objects.
+        /// </summary>
+        /// <param name="message">The message to consume.</param>
+        void Consume(TMessage message);
+        
+    }
 }

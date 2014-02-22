@@ -48,9 +48,7 @@ namespace MassTransit.Distributor.DistributorConnectors
                 || interfaces.Implements(typeof(Observes<,>)))
                 throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
 
-            _connectors = ConsumesSelectedContext()
-                .Concat(ConsumesContext())
-                .Concat(ConsumesSelected())
+            _connectors = ConsumesContext()
                 .Concat(ConsumesAll())
                 .Distinct((x, y) => x.MessageType == y.MessageType)
                 .ToList();
@@ -68,21 +66,9 @@ namespace MassTransit.Distributor.DistributorConnectors
                 .Select(CreateConnector);
         }
 
-        IEnumerable<MessageDistributorConnector> ConsumesSelectedContext()
-        {
-            return MessageInterfaceTypeReflector<T>.GetConsumesSelectedContextTypes()
-                .Select(CreateConnector);
-        }
-
         IEnumerable<MessageDistributorConnector> ConsumesAll()
         {
             return MessageInterfaceTypeReflector<T>.GetConsumesAllTypes()
-                .Select(CreateConnector);
-        }
-
-        IEnumerable<MessageDistributorConnector> ConsumesSelected()
-        {
-            return MessageInterfaceTypeReflector<T>.GetConsumesSelectedTypes()
                 .Select(CreateConnector);
         }
 

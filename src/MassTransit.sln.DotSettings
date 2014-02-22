@@ -7,7 +7,7 @@
 	<s:Boolean x:Key="/Default/CodeStyle/CSharpUsing/AddImportsToDeepestScope/@EntryValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeStyle/CSharpUsing/AllowAlias/@EntryValue">False</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeStyle/CSharpUsing/CanUseGlobalAlias/@EntryValue">False</s:Boolean>
-	<s:String x:Key="/Default/CodeStyle/FileHeader/FileHeaderText/@EntryValue">Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.&#xD;
+	<s:String x:Key="/Default/CodeStyle/FileHeader/FileHeaderText/@EntryValue">Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.&#xD;
  &#xD;
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use&#xD;
 this file except in compliance with the License. You may obtain a copy of the &#xD;

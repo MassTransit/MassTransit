@@ -92,35 +92,6 @@ namespace MassTransit.Tests.Pipeline
 
 			_subscriptionEvent.VerifyAllExpectations();
 		}
-
-		[Test]
-		public void for_selective_component_subscriptions()
-		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
-				{
-					_unsubscribe();
-					return true;
-				});
-
-			_pipeline.ConnectConsumer<TestSelectiveConsumer<PingMessage>>();
-
-			_subscriptionEvent.VerifyAllExpectations();
-		}
-
-		[Test]
-		public void for_selective_subscriptions()
-		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
-				{
-					_unsubscribe();
-					return true;
-				});
-
-			var consumer = new TestSelectiveConsumer<PingMessage>();
-			_pipeline.ConnectInstance(consumer);
-
-			_subscriptionEvent.VerifyAllExpectations();
-		}
 	}
 
 	[TestFixture]
@@ -226,41 +197,6 @@ namespace MassTransit.Tests.Pipeline
 				});
 
 			var consumer = new TestMessageConsumer<PingMessage>();
-			var token = _pipeline.ConnectInstance(consumer);
-
-			token();
-
-			_subscriptionEvent.VerifyAllExpectations();
-			_unsubscribe.AssertWasCalled(x => x());
-		}
-
-		[Test]
-		public void for_selective_component_subscriptions()
-		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
-				{
-					_unsubscribe();
-					return true;
-				});
-
-			var token = _pipeline.ConnectConsumer<TestSelectiveConsumer<PingMessage>>();
-
-			token();
-
-			_subscriptionEvent.VerifyAllExpectations();
-			_unsubscribe.AssertWasCalled(x => x());
-		}
-
-		[Test]
-		public void for_selective_subscriptions()
-		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
-				{
-					_unsubscribe();
-					return true;
-				});
-
-			var consumer = new TestSelectiveConsumer<PingMessage>();
 			var token = _pipeline.ConnectInstance(consumer);
 
 			token();

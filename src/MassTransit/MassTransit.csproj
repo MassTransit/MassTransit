@@ -212,8 +212,6 @@
     <Compile Include="Configuration\SubscriptionConnectors\RequestHandlerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ContextInstanceSubscriptionConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\SelectedContextConsumerSubscriptionConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\SelectedContextInstanceSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionRouterConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ThreadConfigurationExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfiguratorExtensions.cs" />
@@ -234,8 +232,6 @@
     <Compile Include="Configuration\SubscriptionConnectors\HandlerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceSubscriptionConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\SelectedConsumerSubscriptionConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\SelectedInstanceSubscriptionConnector.cs" />
     <Compile Include="Configuration\TransactionConfigurationExtensions.cs" />
     <Compile Include="Configuration\TransportConfigurationExtensions.cs" />
     <Compile Include="Configuration\TransportFactoryConfigurationExtensions.cs" />
@@ -361,8 +357,6 @@
     <Compile Include="Distributor\WorkerBusService.cs" />
     <Compile Include="Distributor\WorkerConnectors\ConsumerWorkerConnectorImpl.cs" />
     <Compile Include="Distributor\WorkerConnectors\ContextConsumerWorkerConnector.cs" />
-    <Compile Include="Distributor\WorkerConnectors\SelectedConsumerWorkerConnector.cs" />
-    <Compile Include="Distributor\WorkerConnectors\SelectedContextConsumerWorkerConnector.cs" />
     <Compile Include="Distributor\WorkerInfo.cs" />
     <Compile Include="Distributor\WorkerLoad.cs" />
     <Compile Include="EndpointLoggerExtensions.cs" />
@@ -400,7 +394,6 @@
     <Compile Include="Pipeline\Sinks\RequestMessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageFilter.cs" />
     <Compile Include="Pipeline\Sinks\OutboundMessageInterceptor.cs" />
-    <Compile Include="Pipeline\Sinks\SelectedContextConsumerMessageSink.cs" />
     <Compile Include="RequestResponseExtensions.cs" />
     <Compile Include="RequestResponse\CompleteResponseHandler.cs" />
     <Compile Include="RequestResponse\CompleteTaskResponseHandler.cs" />
@@ -946,7 +939,6 @@
     <Compile Include="Exceptions\PipelineException.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineViewer.cs" />
     <Compile Include="Pipeline\Configuration\InboundPipelineConfigurator.cs" />
-    <Compile Include="Pipeline\Sinks\SelectedConsumerMessageSink.cs" />
     <Compile Include="Serialization\MessageEnvelopeBase.cs" />
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />
     <Compile Include="Serialization\IMessageSerializer.cs" />

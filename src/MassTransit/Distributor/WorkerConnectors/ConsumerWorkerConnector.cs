@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,10 +20,11 @@ namespace MassTransit.Distributor.WorkerConnectors
     using Magnum.Reflection;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Sinks;
-    using MassTransit.SubscriptionConnectors;
     using Saga;
+    using SubscriptionConnectors;
     using Subscriptions;
     using Util;
+
 
     public interface ConsumerWorkerConnector
     {
@@ -31,6 +32,7 @@ namespace MassTransit.Distributor.WorkerConnectors
 
         UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IWorker worker);
     }
+
 
     public class ConsumerWorkerConnector<T> :
         WorkerConnector
@@ -55,9 +57,7 @@ namespace MassTransit.Distributor.WorkerConnectors
                 || interfaces.Implements(typeof(Observes<,>)))
                 throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
 
-            _connectors = ConsumesSelectedContext()
-                .Concat(ConsumesContext())
-                .Concat(ConsumesSelected())
+            _connectors = ConsumesContext()
                 .Concat(ConsumesAll())
                 .Distinct((x, y) => x.MessageType == y.MessageType)
                 .ToList();
@@ -78,21 +78,8 @@ namespace MassTransit.Distributor.WorkerConnectors
         ConsumerWorkerConnector CreateContextConnector(MessageInterfaceType x)
         {
             return (ConsumerWorkerConnector)
-                   FastActivator.Create(typeof(ContextConsumerWorkerConnector<,>),
-                       new[] {typeof(T), x.MessageType}, new object[] {_consumerFactory});
-        }
-
-        IEnumerable<ConsumerWorkerConnector> ConsumesSelectedContext()
-        {
-            return MessageInterfaceTypeReflector<T>.GetConsumesSelectedContextTypes()
-                .Select(CreateSelectedContextConnector);
-        }
-
-        ConsumerWorkerConnector CreateSelectedContextConnector(MessageInterfaceType x)
-        {
-            return (ConsumerWorkerConnector)
-                   FastActivator.Create(typeof(SelectedContextConsumerWorkerConnector<,>),
-                       new[] {typeof(T), x.MessageType}, new object[] {_consumerFactory});
+                FastActivator.Create(typeof(ContextConsumerWorkerConnector<,>),
+                    new[] {typeof(T), x.MessageType}, new object[] {_consumerFactory});
         }
 
         IEnumerable<ConsumerWorkerConnector> ConsumesAll()
@@ -104,23 +91,11 @@ namespace MassTransit.Distributor.WorkerConnectors
         ConsumerWorkerConnector CreateConnector(MessageInterfaceType x)
         {
             return (ConsumerWorkerConnector)
-                   FastActivator.Create(typeof(ConsumerWorkerConnector<,>),
-                       new[] {typeof(T), x.MessageType}, new object[] {_consumerFactory});
-        }
-
-        IEnumerable<ConsumerWorkerConnector> ConsumesSelected()
-        {
-            return MessageInterfaceTypeReflector<T>.GetConsumesSelectedTypes()
-                .Select(CreateSelectedConnector);
-        }
-
-        ConsumerWorkerConnector CreateSelectedConnector(MessageInterfaceType x)
-        {
-            return (ConsumerWorkerConnector)
-                   FastActivator.Create(typeof(SelectedConsumerWorkerConnector<,>),
-                       new[] {typeof(T), x.MessageType}, new object[] {_consumerFactory});
+                FastActivator.Create(typeof(ConsumerWorkerConnector<,>),
+                    new[] {typeof(T), x.MessageType}, new object[] {_consumerFactory});
         }
     }
+
 
     public class ConsumerWorkerConnector<TConsumer, TMessage> :
         ConsumerWorkerConnectorImpl<TConsumer, TMessage>
