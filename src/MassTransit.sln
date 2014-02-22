@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistence", "Persistence", "{56F516D7-BC3C-49E1-A639-83C5F14953F8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transports", "Transports", "{0006D6BB-1382-4B32-AD32-CA037F5CD4F6}"
@@ -10,10 +12,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Tests", "MassTransit.Tests\MassTransit.Tests.csproj", "{76646B96-936B-4D31-A053-35CD630E3C68}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq", "Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq.Tests", "Transports\MassTransit.Transports.Msmq.Tests\MassTransit.Transports.Msmq.Tests.csproj", "{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
@@ -26,10 +24,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.UnityIntegration", "Containers\MassTransit.UnityIntegration\MassTransit.UnityIntegration.csproj", "{8AB71E2F-3210-45AF-982F-FC782D9C06B7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NinjectIntegration", "Containers\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj", "{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RuntimeServices", "MassTransit.RuntimeServices\MassTransit.RuntimeServices.csproj", "{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SystemView", "MassTransit.SystemView\MassTransit.SystemView.csproj", "{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.TestFramework", "MassTransit.TestFramework\MassTransit.TestFramework.csproj", "{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}"
 EndProject
@@ -87,21 +81,6 @@ Global
 		{76646B96-936B-4D31-A053-35CD630E3C68}.Release35|Any CPU.ActiveCfg = Release|Any CPU
 		{76646B96-936B-4D31-A053-35CD630E3C68}.Release35|Any CPU.Build.0 = Release|Any CPU
 		{76646B96-936B-4D31-A053-35CD630E3C68}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release35|Any CPU.ActiveCfg = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release35|Any CPU.Build.0 = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
-		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}.Release35|Any CPU.ActiveCfg = Release|Any CPU
-		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}.Release35|Any CPU.Build.0 = Release|Any CPU
-		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -146,18 +125,6 @@ Global
 		{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}.Release35|Any CPU.ActiveCfg = Release|Any CPU
 		{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}.Release35|Any CPU.Build.0 = Release|Any CPU
 		{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.Release35|Any CPU.ActiveCfg = Release|Any CPU
-		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
-		{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}.Release35|Any CPU.ActiveCfg = Release|Any CPU
-		{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -233,8 +200,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{44E6D06D-B60E-434B-981D-D8139062A6EC} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
-		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{6C7149D7-4D97-45DF-A05D-61EC7374491D} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{E4C3F51F-B7CE-4521-80BC-E91A9B0F6FFD} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}

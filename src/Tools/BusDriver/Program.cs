@@ -27,7 +27,6 @@ namespace BusDriver
 	using Magnum.Extensions;
 	using MassTransit;
 	using MassTransit.Transports.Loopback;
-	using MassTransit.Transports.Msmq;
 	using MassTransit.Transports.RabbitMq;
 
 	class Program
@@ -53,7 +52,6 @@ namespace BusDriver
 
 	        return ServiceBusFactory.New(x =>
 	            {
-                    x.UseMsmq();
                     x.UseRabbitMq();
 	                x.UseJsonSerializer();
 	                x.ReceiveFrom(uri);
@@ -83,7 +81,6 @@ namespace BusDriver
 			{
 				Transports = new TransportCache();
 				Transports.AddTransportFactory(new LoopbackTransportFactory());
-				Transports.AddTransportFactory(new MsmqTransportFactory());
 				Transports.AddTransportFactory(new RabbitMqTransportFactory());
 
 				string line = CommandLine.GetUnparsedCommandLine().Trim();

@@ -83,7 +83,6 @@
     </Compile>
     <Compile Include="CommandParser.cs" />
     <Compile Include="Commands\Command.cs" />
-    <Compile Include="Commands\CountCommand.cs" />
     <Compile Include="Commands\ExitCommand.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\LoadCommand.cs" />
@@ -109,10 +108,6 @@
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj">
-      <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
-      <Name>MassTransit.Transports.Msmq</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Transports\MassTransit.Transports.RabbitMq\MassTransit.Transports.RabbitMq.csproj">
       <Project>{6C7149D7-4D97-45DF-A05D-61EC7374491D}</Project>
