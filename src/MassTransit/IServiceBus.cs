@@ -55,14 +55,6 @@ namespace MassTransit
         IOutboundMessagePipeline OutboundPipeline { get; }
 
         /// <summary>
-        /// Gets the control bus that can be used 
-        /// to add/remove subscripts, move message 
-        /// handlers around and tap runtime metrics
-        /// from the service bus.
-        /// </summary>
-        IServiceBus ControlBus { get; }
-
-        /// <summary>
         /// Gets the endpoint cache. This property is used
         /// by <see cref="GetEndpoint"/> method in turn.
         /// </summary>
@@ -84,7 +76,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name = "T">The type of the message</typeparam>
         /// <param name = "message">The messages to be published</param>
-        void Publish<T>([NotNull] T message)
+        void Publish<T>(T message)
             where T : class;
 
         /// <summary>

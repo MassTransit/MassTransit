@@ -20,7 +20,6 @@ namespace MassTransit.Distributor
         Uri DataUri { get; }
 
         IServiceBus Bus { get; }
-        IServiceBus ControlBus { get; }
 
         IWorkerLoad<TMessage> GetWorkerLoad<TMessage>()
             where TMessage : class;

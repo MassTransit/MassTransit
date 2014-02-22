@@ -49,7 +49,7 @@ namespace MassTransit.Distributor
         public void Start(IServiceBus bus)
         {
             _bus = bus;
-            _controlBus = bus.ControlBus;
+            _controlBus = bus;
 
             bus.Configure(pipelineConfigurator =>
                 {

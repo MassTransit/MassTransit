@@ -43,7 +43,7 @@ namespace MassTransit.Tests.Distributor
                 });
 
             Instances.ToList().ForEach(
-                x => { x.Value.DataBus.ControlBus.Endpoint.Send(new PingWorker(), c => { c.SendResponseTo(LocalBus); }); });
+                x => { x.Value.DataBus.Endpoint.Send(new PingWorker(), c => { c.SendResponseTo(LocalBus); }); });
 
             messageRecieved.WaitOne(8.Seconds());
 
@@ -58,7 +58,7 @@ namespace MassTransit.Tests.Distributor
             int pingRequestsRecieved = 0;
             var messageRecieved = new ManualResetEvent(false);
 
-            UnsubscribeAction unsubscribe = Instances["A"].DataBus.ControlBus.SubscribeHandler<PingWorker>(message =>
+            UnsubscribeAction unsubscribe = Instances["A"].DataBus.SubscribeHandler<PingWorker>(message =>
                 {
                     Interlocked.Increment(ref pingRequestsRecieved);
                     messageRecieved.Set();
@@ -85,7 +85,7 @@ namespace MassTransit.Tests.Distributor
 
             Instances.ToList().ForEach(x =>
                 {
-                    x.Value.DataBus.ControlBus.Endpoint.Send(new PingWorker(),
+                    x.Value.DataBus.Endpoint.Send(new PingWorker(),
                         y => y.SendResponseTo(LocalBus));
                 });
 

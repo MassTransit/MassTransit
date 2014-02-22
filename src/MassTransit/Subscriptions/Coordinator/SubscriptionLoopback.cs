@@ -42,12 +42,12 @@ namespace MassTransit.Subscriptions.Coordinator
             WithTarget(x =>
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Send AddPeer: {0}, {1}", _peerId, bus.ControlBus.Endpoint.Address.Uri);
+                        _log.DebugFormat("Send AddPeer: {0}, {1}", _peerId, bus.Endpoint.Address.Uri);
 
                     x.Send(new AddPeerMessage
                     {
                         PeerId = _peerId,
-                        PeerUri = bus.ControlBus.Endpoint.Address.Uri,
+                        PeerUri = bus.Endpoint.Address.Uri,
                         Timestamp = DateTime.UtcNow.Ticks,
                     });
                 });

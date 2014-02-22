@@ -20,7 +20,6 @@ namespace MassTransit.Diagnostics.Introspection
         Consumes<GetBusStatus>.Context
     {
         IServiceBus _bus;
-        IServiceBus _controlBus;
         UnsubscribeAction _unsubscribe;
 
         public void Consume(IConsumeContext<GetBusStatus> context)
@@ -42,8 +41,7 @@ namespace MassTransit.Diagnostics.Introspection
         public void Start(IServiceBus bus)
         {
             _bus = bus;
-            _controlBus = bus.ControlBus;
-            _unsubscribe = _controlBus.SubscribeInstance(this);
+            _unsubscribe = _bus.SubscribeInstance(this);
         }
 
         public void Stop()

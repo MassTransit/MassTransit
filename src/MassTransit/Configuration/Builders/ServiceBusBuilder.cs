@@ -19,10 +19,5 @@ namespace MassTransit.Builders
 	public interface ServiceBusBuilder :
 		BusBuilder
 	{
-		/// <summary>
-		/// Specifies a control bus to associate with the service bus once created
-		/// </summary>
-		/// <param name="controlBus"></param>
-		void UseControlBus(IControlBus controlBus);
 	}
 }

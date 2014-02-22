@@ -74,7 +74,7 @@ namespace MassTransit.Diagnostics.Tracing
 
 		public void Start(IServiceBus bus)
 		{
-			_controlBus = bus.ControlBus;
+			_controlBus = bus;
 			_unsubscribe = _controlBus.SubscribeInstance(this);
 		}
 
