@@ -43,20 +43,6 @@ namespace MassTransit.Testing
 			return true;
 		}
 
-		public bool Inspect<TComponent, TMessage>(SelectedConsumerMessageSink<TComponent, TMessage> sink)
-			where TComponent : class, Consumes<TMessage>.Selected
-			where TMessage : class
-		{
-			if (typeof (TMessage) == typeof (T))
-			{
-				Result = Result.Concat(new[] { sink as IPipelineSink<T> });
-
-				return false;
-			}
-
-			return true;
-		}
-
 		public bool Inspect<TMessage>(InstanceMessageSink<TMessage> sink)
 			where TMessage : class
 		{

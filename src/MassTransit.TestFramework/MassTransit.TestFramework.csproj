@@ -99,7 +99,6 @@
     <Compile Include="Given_a_subscription_service_and_two_service_buses.cs" />
     <Compile Include="Given_two_service_buses_with_shared_subscriptions.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
-    <Compile Include="SelectiveConsumerOf.cs" />
     <Compile Include="Fixtures\LocalTestFixture.cs" />
     <Compile Include="Given_a_standalone_service_bus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -257,7 +257,6 @@
     <Compile Include="Saga\InitiateSaga_Specs.cs" />
     <Compile Include="Pipeline\MessageFilter_Specs.cs" />
     <Compile Include="Pipeline\OutboundEndpoint_Specs.cs" />
-    <Compile Include="Pipeline\ParticularConsumer.cs" />
     <Compile Include="Pipeline\PipelineBuilder_Specs.cs" />
     <Compile Include="Pipeline\PipelineDispatcher_Specs.cs" />
     <Compile Include="Pipeline\IndiscriminantConsumer.cs" />
@@ -293,7 +292,6 @@
     <Compile Include="TestConsumers\TestCorrelatedConsumer.cs" />
     <Compile Include="TestConsumers\TestMessageConsumer.cs" />
     <Compile Include="TestConsumers\TestReplyService.cs" />
-    <Compile Include="TestConsumers\TestSelectiveConsumer.cs" />
     <Compile Include="TextFixtures\EndpointTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackLocalAndRemoteTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackTestFixture.cs" />

@@ -94,7 +94,6 @@
     <Compile Include="Request_Specs.cs" />
     <Compile Include="RetryLater_Specs.cs" />
     <Compile Include="Security_Specs.cs" />
-    <Compile Include="Selective_Consumer_Specs.cs" />
     <Compile Include="SerializationSupport_Specs.cs" />
     <Compile Include="TemporaryQueue_Specs.cs" />
     <Compile Include="TestFactory.cs" />

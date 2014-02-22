@@ -230,26 +230,6 @@ namespace MassTransit.Pipeline.Inspectors
             return true;
         }
 
-        public bool Inspect<TComponent, TMessage>(SelectedConsumerMessageSink<TComponent, TMessage> sink)
-            where TMessage : class
-            where TComponent : class, Consumes<TMessage>.Selected
-        {
-            Append(string.Format("Conditionally Consumed by Component {0} ({1})", GetComponentName<TComponent>(),
-                GetMessageName<TMessage>()));
-
-            return true;
-        }
-
-        public bool Inspect<TComponent, TMessage>(SelectedContextConsumerMessageSink<TComponent, TMessage> sink)
-            where TMessage : class
-            where TComponent : class, Consumes<IConsumeContext<TMessage>>.Selected
-        {
-            Append(string.Format("Conditionally Consumed by Component {0} ({1} w/Context)", GetComponentName<TComponent>(),
-                GetMessageName<TMessage>()));
-
-            return true;
-        }
-
         static string GetMessageName<TMessage>() where TMessage : class
         {
             Type messageType = typeof (TMessage);

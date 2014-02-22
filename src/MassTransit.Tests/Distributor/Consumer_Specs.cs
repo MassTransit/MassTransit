@@ -76,7 +76,7 @@ namespace MassTransit.Tests.Distributor
 
         class MyDistributorConsumer :
             Consumes<A>.All,
-            Consumes<B>.Selected,
+            Consumes<B>.All,
             Consumes<C>.Context
         {
             public static FutureMessage<A> FutureA = new FutureMessage<A>();
@@ -91,11 +91,6 @@ namespace MassTransit.Tests.Distributor
             public void Consume(B message)
             {
                 FutureB.Set(message);
-            }
-
-            public bool Accept(B message)
-            {
-                return true;
             }
 
             public void Consume(IConsumeContext<C> context)
@@ -163,7 +158,7 @@ namespace MassTransit.Tests.Distributor
 
         class MyDistributorConsumer :
             Consumes<A>.All,
-            Consumes<B>.Selected,
+            Consumes<B>.All,
             Consumes<C>.Context
         {
             public static FutureMessage<A> FutureA = new FutureMessage<A>();
@@ -178,11 +173,6 @@ namespace MassTransit.Tests.Distributor
             public void Consume(B message)
             {
                 FutureB.Set(message);
-            }
-
-            public bool Accept(B message)
-            {
-                return true;
             }
 
             public void Consume(IConsumeContext<C> context)
@@ -245,7 +235,7 @@ namespace MassTransit.Tests.Distributor
 
         class MyDistributorConsumer :
             Consumes<A>.All,
-            Consumes<B>.Selected,
+            Consumes<B>.All,
             Consumes<C>.Context
         {
             public static FutureMessage<A> FutureA = new FutureMessage<A>();
@@ -260,11 +250,6 @@ namespace MassTransit.Tests.Distributor
             public void Consume(B message)
             {
                 FutureB.Set(message);
-            }
-
-            public bool Accept(B message)
-            {
-                return true;
             }
 
             public void Consume(IConsumeContext<C> context)

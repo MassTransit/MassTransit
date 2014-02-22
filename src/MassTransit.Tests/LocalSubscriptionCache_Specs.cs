@@ -68,16 +68,6 @@ namespace MassTransit.Tests
 
 
 		[Test]
-		public void A_subscription_should_be_added_for_a_selective_consumer()
-		{
-			var consumer = new TestSelectiveConsumer<PingMessage>();
-
-			LocalBus.SubscribeInstance(consumer);
-
-			_subscriptionService.AssertWasCalled(x => x.SubscribedTo<PingMessage>(LocalBus.Endpoint.Address.Uri));
-		}
-
-		[Test]
 		public void The_bus_should_add_a_subscription_to_the_subscription_cache()
 		{
 			LocalBus.SubscribeHandler<PingMessage>(delegate { });

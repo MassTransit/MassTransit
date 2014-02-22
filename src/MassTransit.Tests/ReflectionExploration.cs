@@ -20,8 +20,7 @@ namespace MassTransit.Tests
             var bob = typeof (Bob);
             var x = bob.GetConsumerTypesFiltered();
 
-            x.Alls.Count.ShouldEqual(0, "all");
-            x.Selecteds.Count.ShouldEqual(1, "selecteds");
+            x.Alls.Count.ShouldEqual(1, "all");
             x.Correlateds.Count.ShouldEqual(0, "correlated");
             x.Orchestrates.Count.ShouldEqual(0, "orch");
             x.Initiates.Count.ShouldEqual(0, "init");
@@ -36,7 +35,6 @@ namespace MassTransit.Tests
 
 
             x.Alls.Count.ShouldEqual(0, "all");
-            x.Selecteds.Count.ShouldEqual(0, "selecteds");
             x.Correlateds.Count.ShouldEqual(0, "correlated");
             x.Orchestrates.Count.ShouldEqual(1, "orch");
             x.Initiates.Count.ShouldEqual(1, "init");
@@ -44,13 +42,8 @@ namespace MassTransit.Tests
         }
 
 
-        class Bob : Consumes<object>.Selected
+        class Bob : Consumes<object>.All
         {
-            public bool Accept(object message)
-            {
-                return true;
-            }
-
             public void Consume(object message)
             {
                 
@@ -133,25 +126,20 @@ namespace MassTransit.Tests
                                where NotInitiator(i, initiates)
                                select i;
 
-            var selected = from i in consumerTypes
-                           where i.ImplementsGeneric(typeof (Consumes<>.Selected))
-                           select i;
-
             var correlated = from i in consumerTypes
                              where i.ImplementsGeneric(typeof (Consumes<>.For<>))
                              select i;
 
             var alls = from i in consumerTypes
                        where i.ImplementsGeneric(typeof (Consumes<>.All))
-                       where !(correlated.Contains(i) || selected.Contains(i))
-                       where NotASelectedCorrelatedMessageType(i, selected, correlated, orchestrates, initiates,observers)
+                       where !(correlated.Contains(i))
+                       where NotASelectedCorrelatedMessageType(i, correlated, orchestrates, initiates,observers)
                        select i;
 
             return new SubscriptionInterfaces()
                 {
                     Alls = alls.ToList(),
                     Correlateds = correlated.ToList(),
-                    Selecteds = selected.ToList(),
                     Orchestrates = orchestrates.ToList(),
                     Initiates = initiates.ToList(),
                     Observers = observers.ToList(),
@@ -183,7 +171,6 @@ namespace MassTransit.Tests
 
     public class SubscriptionInterfaces
     {
-        public List<Type> Selecteds;
         public List<Type> Alls;
         public List<Type> Correlateds;
         public List<Type> Orchestrates;

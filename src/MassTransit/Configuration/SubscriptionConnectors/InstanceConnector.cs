@@ -49,9 +49,7 @@ namespace MassTransit.SubscriptionConnectors
                 .Concat(Workers())
                 .Concat(*/
                 ConsumesCorrelated()
-                    .Concat(ConsumesSelectedContext())
                     .Concat(ConsumesContext())
-                    .Concat(ConsumesSelected())
                     .Concat(ConsumesAll())
                     .Distinct((x, y) => x.MessageType == y.MessageType)
                     .ToList();
@@ -75,23 +73,10 @@ namespace MassTransit.SubscriptionConnectors
                 .Select(CreateContextConnector);
         }
 
-        IEnumerable<InstanceSubscriptionConnector> ConsumesSelectedContext()
-        {
-            return MessageInterfaceTypeReflector<T>.GetConsumesSelectedContextTypes()
-                .Select(CreateSelectedContextConnector);
-        }
-
         static InstanceSubscriptionConnector CreateContextConnector(MessageInterfaceType x)
         {
             return (InstanceSubscriptionConnector)
                    FastActivator.Create(typeof(ContextInstanceSubscriptionConnector<,>),
-                       new[] {typeof(T), x.MessageType});
-        }
-
-        static InstanceSubscriptionConnector CreateSelectedContextConnector(MessageInterfaceType x)
-        {
-            return (InstanceSubscriptionConnector)
-                   FastActivator.Create(typeof(SelectedContextInstanceSubscriptionConnector<,>),
                        new[] {typeof(T), x.MessageType});
         }
 
@@ -105,19 +90,6 @@ namespace MassTransit.SubscriptionConnectors
         {
             return (InstanceSubscriptionConnector)
                    FastActivator.Create(typeof(InstanceSubscriptionConnector<,>), new[] {typeof(T), x.MessageType});
-        }
-
-        static IEnumerable<InstanceSubscriptionConnector> ConsumesSelected()
-        {
-            return MessageInterfaceTypeReflector<T>.GetConsumesSelectedTypes()
-                .Select(CreateSelectedConnector);
-        }
-
-        static InstanceSubscriptionConnector CreateSelectedConnector(MessageInterfaceType x)
-        {
-            return (InstanceSubscriptionConnector)
-                   FastActivator.Create(typeof(SelectedInstanceSubscriptionConnector<,>),
-                       new[] {typeof(T), x.MessageType});
         }
 
         static IEnumerable<InstanceSubscriptionConnector> ConsumesCorrelated()

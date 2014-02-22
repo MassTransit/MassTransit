@@ -1,12 +1,12 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -15,7 +15,6 @@ namespace MassTransit.SubscriptionConnectors
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Distributor;
     using Exceptions;
     using Magnum.Extensions;
     using Magnum.Reflection;
@@ -23,16 +22,18 @@ namespace MassTransit.SubscriptionConnectors
     using Saga;
     using Util;
 
+
     /// <summary>
-    /// Interface implemented by objects that tie an inbound pipeline together with
-    /// consumers (by means of calling a consumer factory).
+    ///     Interface implemented by objects that tie an inbound pipeline together with
+    ///     consumers (by means of calling a consumer factory).
     /// </summary>
     public interface ConsumerConnector
     {
         UnsubscribeAction Connect<TConsumer>(IInboundPipelineConfigurator configurator,
-                                             IConsumerFactory<TConsumer> consumerFactory)
+            IConsumerFactory<TConsumer> consumerFactory)
             where TConsumer : class;
     }
+
 
     public class ConsumerConnector<T> :
         ConsumerConnector
@@ -42,19 +43,17 @@ namespace MassTransit.SubscriptionConnectors
 
         public ConsumerConnector()
         {
-            Type[] interfaces = typeof (T).GetInterfaces();
+            Type[] interfaces = typeof(T).GetInterfaces();
 
-            if (interfaces.Contains(typeof (ISaga)))
+            if (interfaces.Contains(typeof(ISaga)))
                 throw new ConfigurationException("A saga cannot be registered as a consumer");
 
-            if (interfaces.Implements(typeof (InitiatedBy<>))
-                || interfaces.Implements(typeof (Orchestrates<>))
-                || interfaces.Implements(typeof (Observes<,>)))
+            if (interfaces.Implements(typeof(InitiatedBy<>))
+                || interfaces.Implements(typeof(Orchestrates<>))
+                || interfaces.Implements(typeof(Observes<,>)))
                 throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
 
-            _connectors = ConsumesSelectedContext()
-                .Concat(ConsumesContext())
-                .Concat(ConsumesSelected())
+            _connectors = ConsumesContext()
                 .Concat(ConsumesAll())
                 .Distinct((x, y) => x.MessageType == y.MessageType)
                 .ToList();
@@ -66,7 +65,7 @@ namespace MassTransit.SubscriptionConnectors
         }
 
         public UnsubscribeAction Connect<TConsumer>(IInboundPipelineConfigurator configurator,
-                                                    IConsumerFactory<TConsumer> consumerFactory)
+            IConsumerFactory<TConsumer> consumerFactory)
             where TConsumer : class
         {
             return _connectors.Select(x => x.Connect(configurator, consumerFactory))
@@ -82,21 +81,8 @@ namespace MassTransit.SubscriptionConnectors
         static ConsumerSubscriptionConnector CreateContextConnector(MessageInterfaceType x)
         {
             return (ConsumerSubscriptionConnector)
-                   FastActivator.Create(typeof (ContextConsumerSubscriptionConnector<,>),
-                       new[] {typeof (T), x.MessageType});
-        }
-
-        static IEnumerable<ConsumerSubscriptionConnector> ConsumesSelectedContext()
-        {
-            return MessageInterfaceTypeReflector<T>.GetConsumesSelectedContextTypes()
-                .Select(CreateSelectedContextConnector);
-        }
-
-        static ConsumerSubscriptionConnector CreateSelectedContextConnector(MessageInterfaceType x)
-        {
-            return (ConsumerSubscriptionConnector)
-                   FastActivator.Create(typeof (SelectedContextConsumerSubscriptionConnector<,>),
-                       new[] {typeof (T), x.MessageType});
+                FastActivator.Create(typeof(ContextConsumerSubscriptionConnector<,>),
+                    new[] {typeof(T), x.MessageType});
         }
 
         static IEnumerable<ConsumerSubscriptionConnector> ConsumesAll()
@@ -108,21 +94,8 @@ namespace MassTransit.SubscriptionConnectors
         static ConsumerSubscriptionConnector CreateConnector(MessageInterfaceType x)
         {
             return (ConsumerSubscriptionConnector)
-                   FastActivator.Create(typeof (ConsumerSubscriptionConnector<,>),
-                       new[] {typeof (T), x.MessageType});
-        }
-
-        static IEnumerable<ConsumerSubscriptionConnector> ConsumesSelected()
-        {
-            return MessageInterfaceTypeReflector<T>.GetConsumesSelectedTypes()
-                .Select(CreateSelectedConnector);
-        }
-
-        static ConsumerSubscriptionConnector CreateSelectedConnector(MessageInterfaceType x)
-        {
-            return (ConsumerSubscriptionConnector)
-                   FastActivator.Create(typeof (SelectedConsumerSubscriptionConnector<,>),
-                       new[] {typeof (T), x.MessageType});
+                FastActivator.Create(typeof(ConsumerSubscriptionConnector<,>),
+                    new[] {typeof(T), x.MessageType});
         }
     }
 }
