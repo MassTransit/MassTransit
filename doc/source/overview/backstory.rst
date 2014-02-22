@@ -39,6 +39,14 @@ The near future should bring much for the MT community as RabbitMQ and
 ActiveMQ support take front center with the quest for Mono support becoming
 increasingly important.
 
+Then in 2014 a new push was started. One that embraced the now modern RabbitMQ
+and other more advanced queueing platforms. MassTransit had over the years
+grown in size, its code base reaching rotund proportions, so Chris and the
+team decided it was time to put MassTransit on a diet. MSMQ was ripped out
+and all of the code in the internal framework that was need to support it, in
+its place will be put new shining code built for a world of concurrency and
+distributed systems.
+
 The Philosophy
 --------------
 
