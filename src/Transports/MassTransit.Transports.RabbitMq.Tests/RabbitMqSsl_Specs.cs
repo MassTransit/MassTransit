@@ -26,7 +26,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [When]
         public void Connecting_to_a_rabbit_mq_server_using_ssl_and_with_client_certificate()
         {
-            var inputAddress = new Uri("rabbitmq://localhost:5671/test_queue");
+            var inputAddress = new Uri("rabbitmq://localhost:5671/mttest/test_queue");
 
             _bus = ServiceBusFactory.New(c =>
                 {
@@ -49,7 +49,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [When]
         public void Connecting_to_a_rabbit_mq_server_using_ssl_without_client_certificate()
         {
-            var inputAddress = new Uri("rabbitmq://localhost:5671/test_queue");
+            var inputAddress = new Uri("rabbitmq://localhost:5671/mttest/test_queue");
 
             _bus = ServiceBusFactory.New(c =>
                 {

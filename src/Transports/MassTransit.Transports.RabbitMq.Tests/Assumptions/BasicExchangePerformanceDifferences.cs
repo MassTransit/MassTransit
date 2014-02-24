@@ -13,7 +13,7 @@
             cf.UserName = "guest";
             cf.Password = "guest";
             cf.Port = 5672;
-            cf.VirtualHost = "/";
+            cf.VirtualHost = "mttest";
             cf.HostName = "localhost";
 
             using(var conn = cf.CreateConnection())

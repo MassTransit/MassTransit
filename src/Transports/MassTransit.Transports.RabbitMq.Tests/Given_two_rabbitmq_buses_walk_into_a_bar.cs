@@ -31,10 +31,10 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [TestFixtureSetUp]
         public void LocalAndRemoteTestFixtureSetup()
         {
-            LocalUri = new Uri("rabbitmq://localhost:5672/test_queue");
-            LocalErrorUri = new Uri("rabbitmq://localhost:5672/test_queue_error");
+            LocalUri = new Uri("rabbitmq://localhost:5672/mttest/test_queue");
+            LocalErrorUri = new Uri("rabbitmq://localhost:5672/mttest/test_queue_error");
 
-            RemoteUri = new Uri("rabbitmq://localhost:5672/test_remote_queue");
+            RemoteUri = new Uri("rabbitmq://localhost:5672/mttest/test_remote_queue");
 
             LocalBus = SetupServiceBus(LocalUri, ConfigureLocalBus);
             RemoteBus = SetupServiceBus(RemoteUri, ConfigureRemoteBus);

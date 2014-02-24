@@ -100,6 +100,7 @@
     <Compile Include="Configuration\EndpointConfigurators\SetSupportedMessageSerializersEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\ShutdownConfigurationExtensions.cs" />
     <Compile Include="Configuration\InterceptorExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ConsumerMetadataCache.cs" />
     <Compile Include="Context\DeliveryMode.cs" />
     <Compile Include="EndpointExtensions.cs" />
     <Compile Include="IConsumer.cs" />
@@ -129,7 +130,7 @@
     <Compile Include="Configuration\SubscriptionConnectors\CorrelatedMessageInterfaceType.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceType.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeExtensions.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeReflector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\IConsumerMetadataCache.cs" />
     <Compile Include="Context\PublishObjectConverter.cs" />
     <Compile Include="Context\PublishObjectConverterCache.cs" />
     <Compile Include="Context\PublishObjectConverterImpl.cs" />
@@ -465,7 +466,6 @@
     <Compile Include="Saga\SubscriptionConnectors\OrchestratesSagaSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\PropertySagaSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\SagaWorkerSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaEventConnectorFactory.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaSubscriptionConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\StateMachineSagaConnector.cs" />
@@ -701,6 +701,7 @@
     <Compile Include="Util\LambdaEqualityComparer.cs" />
     <Compile Include="Util\ObjectExtensions.cs" />
     <Compile Include="Util\ReSharperStaticAnalysis.cs" />
+    <Compile Include="Util\TypeMetadataCache.cs" />
     <Compile Include="Util\UriExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

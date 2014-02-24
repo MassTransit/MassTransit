@@ -71,8 +71,7 @@ namespace MassTransit.Distributor.WorkerConnectors
 
         IEnumerable<ConsumerWorkerConnector> ConsumesContext()
         {
-            return MessageInterfaceTypeReflector<T>.GetConsumesContextTypes()
-                .Select(CreateContextConnector);
+            return ConsumerMetadataCache<T>.ConsumerTypes.Select(CreateContextConnector);
         }
 
         ConsumerWorkerConnector CreateContextConnector(MessageInterfaceType x)
@@ -84,8 +83,7 @@ namespace MassTransit.Distributor.WorkerConnectors
 
         IEnumerable<ConsumerWorkerConnector> ConsumesAll()
         {
-            return MessageInterfaceTypeReflector<T>.GetConsumesAllTypes()
-                .Select(CreateConnector);
+            return ConsumerMetadataCache<T>.MessageConsumerTypes.Select(CreateConnector);
         }
 
         ConsumerWorkerConnector CreateConnector(MessageInterfaceType x)

@@ -285,7 +285,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     public class GivenAHighAvailableQueue
     {
         RabbitMqEndpointAddress _addr;
-        public string uri = "rabbitmq://localhost/somequeue?ha=true";
+        public string uri = "rabbitmq://localhost/mttest/somequeue?ha=true";
 
         [When]
         public void WhenParsed()
@@ -320,7 +320,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void should_not_use_query_string_of_uri()
         {
-            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/anotherone");
+            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/mttest/anotherone");
             _addr.ForQueue("anotherone").Name.ShouldEqual("anotherone");
         }
     }
@@ -329,7 +329,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     public class Given_a_prefetch_count
     {
         RabbitMqEndpointAddress _addr;
-        public string uri = "rabbitmq://localhost/somequeue?ha=true&prefetch=32";
+        public string uri = "rabbitmq://localhost/mttest/somequeue?ha=true&prefetch=32";
 
         [When]
         public void WhenParsed()
@@ -364,7 +364,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void should_not_use_query_string_of_uri()
         {
-            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/anotherone");
+            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/mttest/anotherone");
             _addr.ForQueue("anotherone").Name.ShouldEqual("anotherone");
         }
     }
@@ -373,7 +373,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     public class Given_a_temporary_queue_was_requested
     {
         RabbitMqEndpointAddress _addr;
-        public string uri = "rabbitmq://localhost/*?temporary=true";
+        public string uri = "rabbitmq://localhost/mttest/*?temporary=true";
 
         [When]
         public void WhenParsed()
@@ -418,7 +418,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     public class GivenATtl
     {
         RabbitMqEndpointAddress _addr;
-        public string uri = "rabbitmq://localhost/somequeue?ttl=20";
+        public string uri = "rabbitmq://localhost/mttest/somequeue?ttl=20";
 
         [When]
         public void WhenParsed()
@@ -454,7 +454,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Then]
         public void should_not_use_query_string_of_uri()
         {
-            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/anotherone");
+            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/mttest/anotherone");
             _addr.ForQueue("anotherone").Name.ShouldEqual("anotherone");
         }
     }

@@ -45,9 +45,7 @@ namespace MassTransit.SubscriptionConnectors
                 || interfaces.Implements(typeof(Observes<,>)))
                 throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
 
-            _connectors = /* Distributors()
-                .Concat(Workers())
-                .Concat(*/ConsumesContext()
+            _connectors = ConsumesContext()
                     .Concat(ConsumesAll())
                     .Distinct((x, y) => x.MessageType == y.MessageType)
                     .ToList();
@@ -67,8 +65,7 @@ namespace MassTransit.SubscriptionConnectors
 
         IEnumerable<InstanceSubscriptionConnector> ConsumesContext()
         {
-            return MessageInterfaceTypeReflector<T>.GetConsumesContextTypes()
-                .Select(CreateContextConnector);
+            return ConsumerMetadataCache<T>.ConsumerTypes.Select(CreateContextConnector);
         }
 
         static InstanceSubscriptionConnector CreateContextConnector(MessageInterfaceType x)
@@ -80,8 +77,7 @@ namespace MassTransit.SubscriptionConnectors
 
         static IEnumerable<InstanceSubscriptionConnector> ConsumesAll()
         {
-            return MessageInterfaceTypeReflector<T>.GetConsumesAllTypes()
-                .Select(CreateConnector);
+            return ConsumerMetadataCache<T>.MessageConsumerTypes.Select(CreateConnector);
         }
 
         static InstanceSubscriptionConnector CreateConnector(MessageInterfaceType x)
@@ -89,21 +85,5 @@ namespace MassTransit.SubscriptionConnectors
             return (InstanceSubscriptionConnector)
                    FastActivator.Create(typeof(InstanceSubscriptionConnector<,>), new[] {typeof(T), x.MessageType});
         }
-
-
-
-//        static IEnumerable<InstanceSubscriptionConnector> Distributors()
-//        {
-//            return MessageInterfaceTypeReflector<T>.GetDistributorTypes()
-//                .Select(x => FastActivator.Create(typeof (DistributorSubscriptionConnector<>), new[] {x.MessageType}))
-//                .Cast<InstanceSubscriptionConnector>();
-//        }
-//
-//        static IEnumerable<InstanceSubscriptionConnector> Workers()
-//        {
-//            return MessageInterfaceTypeReflector<T>.GetWorkerTypes()
-//                .Select(x => FastActivator.Create(typeof (WorkerSubscriptionConnector<>), new[] {x.MessageType}))
-//                .Cast<InstanceSubscriptionConnector>();
-//        }
     }
 }

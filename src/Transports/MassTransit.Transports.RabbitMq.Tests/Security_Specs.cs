@@ -23,8 +23,8 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Test]
         public void Should_remove_username_and_password_from_source_address()
         {
-            var inputAddress = new Uri("rabbitmq://testUser:test@localhost/mt/test_queue");
-            var sourceAddress = new Uri("rabbitmq://localhost/mt/test_queue");
+            var inputAddress = new Uri("rabbitmq://testUser:test@localhost/mttest/test_queue");
+            var sourceAddress = new Uri("rabbitmq://localhost/mttest/test_queue");
             var future = new Future<IConsumeContext<A>>();
 
             using (IServiceBus bus = ServiceBusFactory.New(c =>
@@ -55,7 +55,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Test]
         public void Should_support_the_username_password_for_a_host()
         {
-            var inputAddress = new Uri("rabbitmq://localhost/mt/test_queue");
+            var inputAddress = new Uri("rabbitmq://localhost/mttest/test_queue");
             var future = new Future<IConsumeContext<A>>();
 
             using (IServiceBus bus = ServiceBusFactory.New(c =>

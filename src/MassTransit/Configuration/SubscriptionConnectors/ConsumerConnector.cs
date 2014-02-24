@@ -74,8 +74,7 @@ namespace MassTransit.SubscriptionConnectors
 
         static IEnumerable<ConsumerSubscriptionConnector> ConsumesContext()
         {
-            return MessageInterfaceTypeReflector<T>.GetConsumesContextTypes()
-                .Select(CreateContextConnector);
+            return ConsumerMetadataCache<T>.ConsumerTypes.Select(CreateContextConnector);
         }
 
         static ConsumerSubscriptionConnector CreateContextConnector(MessageInterfaceType x)
@@ -87,8 +86,7 @@ namespace MassTransit.SubscriptionConnectors
 
         static IEnumerable<ConsumerSubscriptionConnector> ConsumesAll()
         {
-            return MessageInterfaceTypeReflector<T>.GetConsumesAllTypes()
-                .Select(CreateConnector);
+            return ConsumerMetadataCache<T>.MessageConsumerTypes.Select(CreateConnector);
         }
 
         static ConsumerSubscriptionConnector CreateConnector(MessageInterfaceType x)

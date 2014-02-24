@@ -62,14 +62,12 @@ namespace MassTransit.Distributor.DistributorConnectors
 
         IEnumerable<MessageDistributorConnector> ConsumesContext()
         {
-            return MessageInterfaceTypeReflector<T>.GetConsumesContextTypes()
-                .Select(CreateConnector);
+            return ConsumerMetadataCache<T>.ConsumerTypes.Select(CreateConnector);
         }
 
         IEnumerable<MessageDistributorConnector> ConsumesAll()
         {
-            return MessageInterfaceTypeReflector<T>.GetConsumesAllTypes()
-                .Select(CreateConnector);
+            return ConsumerMetadataCache<T>.MessageConsumerTypes.Select(CreateConnector);
         }
 
         MessageDistributorConnector CreateConnector(MessageInterfaceType x)

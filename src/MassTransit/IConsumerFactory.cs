@@ -38,4 +38,13 @@ namespace MassTransit
 			                      InstanceHandlerSelector<TConsumer, TMessage> selector)
 			where TMessage : class;
 	}
+
+
+    public interface IConsumerFactory<TConsumer, in TMessage>
+        where TConsumer : class 
+        where TMessage : class
+    {
+        IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer(IConsumeContext<TMessage> context);
+
+    }
 }

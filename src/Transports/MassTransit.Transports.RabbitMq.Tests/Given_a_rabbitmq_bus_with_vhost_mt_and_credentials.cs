@@ -10,7 +10,7 @@
 	{
 		protected Given_a_rabbitmq_bus_with_vhost_mt_and_credentials()
 		{
-			LocalUri = new Uri("rabbitmq://testUser:topSecret@localhost:5672/mt/test_queue");
+            LocalUri = new Uri("rabbitmq://testUser:topSecret@localhost:5672/mttest/test_queue");
 			ConfigureEndpointFactory(x => x.UseJsonSerializer());
 		}
 
