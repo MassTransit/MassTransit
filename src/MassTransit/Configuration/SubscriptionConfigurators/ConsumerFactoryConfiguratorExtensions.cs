@@ -30,8 +30,8 @@ namespace MassTransit.SubscriptionConfigurators
                     string.Format("The consumer class {0} does not implement any IMessageConsumer interfaces",
                         typeof(TConsumer).ToShortTypeName()));
 
-            IEnumerable<ValidationResult> warningForMessages = MessageInterfaceTypeReflector<TConsumer>
-                .GetAllTypes()
+            IEnumerable<ValidationResult> warningForMessages = ConsumerMetadataCache<TConsumer>
+                .ConsumerTypes.Concat(ConsumerMetadataCache<TConsumer>.MessageConsumerTypes)
                 .Distinct()
                 .Where(x => !(HasDefaultProtectedCtor(typeof(TConsumer)) || HasSinglePublicCtor(typeof(TConsumer))))
                 .Select(x => ("The {0} consumer should have a public or protected default constructor." +

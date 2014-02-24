@@ -1,19 +1,18 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Inspectors
 {
     using System;
-    using System.Linq;
     using System.Text;
     using Distributor.Pipeline;
     using Magnum.Extensions;
@@ -21,6 +20,7 @@ namespace MassTransit.Pipeline.Inspectors
     using Saga.Pipeline;
     using Sinks;
     using Util;
+
 
     public class PipelineViewer :
         PipelineInspectorBase<PipelineViewer>
@@ -112,7 +112,7 @@ namespace MassTransit.Pipeline.Inspectors
             where TMessage : class
         {
             Append(string.Format("Unknown Message Sink {0} ({1})", sink.GetType().ToFriendlyName(),
-                typeof (TMessage).ToFriendlyName()));
+                typeof(TMessage).ToFriendlyName()));
 
             return true;
         }
@@ -135,8 +135,8 @@ namespace MassTransit.Pipeline.Inspectors
             return true;
         }
 
-        public bool Inspect<T,TMessage>(RequestMessageRouter<T,TMessage> router)
-            where T : class, IConsumeContext<TMessage> 
+        public bool Inspect<T, TMessage>(RequestMessageRouter<T, TMessage> router)
+            where T : class, IConsumeContext<TMessage>
             where TMessage : class
         {
             Append(string.Format("Routed Request {0}", GetMessageName<TMessage>()));
@@ -172,9 +172,9 @@ namespace MassTransit.Pipeline.Inspectors
 
         public bool Inspect<TComponent, TMessage>(ContextConsumerMessageSink<TComponent, TMessage> sink)
             where TMessage : class
-            where TComponent : class, Consumes<IConsumeContext<TMessage>>.All
+            where TComponent : class, IConsumer<TMessage>
         {
-            Append(string.Format("Consumed by Component {0} ({1} w/Context)", GetComponentName<TComponent>(), 
+            Append(string.Format("Consumed by Component {0} ({1} w/Context)", GetComponentName<TComponent>(),
                 GetMessageName<TMessage>()));
 
             return true;
@@ -212,7 +212,7 @@ namespace MassTransit.Pipeline.Inspectors
             string policyDescription = GetPolicy(sink.Policy);
             string expression = sink.Selector.ToString();
 
-            Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, GetComponentName<TComponent>(), 
+            Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, GetComponentName<TComponent>(),
                 GetMessageName<TMessage>(), expression));
 
             return true;
@@ -232,7 +232,7 @@ namespace MassTransit.Pipeline.Inspectors
 
         static string GetMessageName<TMessage>() where TMessage : class
         {
-            Type messageType = typeof (TMessage);
+            Type messageType = typeof(TMessage);
             if (messageType.IsGenericType && messageType.GetGenericTypeDefinition().Implements<IMessageContext>())
                 messageType = messageType.GetGenericArguments()[0];
 
@@ -241,11 +241,11 @@ namespace MassTransit.Pipeline.Inspectors
 
         static string GetComponentName<TComponent>()
         {
-            Type componentType = typeof (TComponent);
+            Type componentType = typeof(TComponent);
 
             string componentName = componentType.IsGenericType
-                                       ? componentType.GetGenericTypeDefinition().ToFriendlyName()
-                                       : componentType.ToFriendlyName();
+                ? componentType.GetGenericTypeDefinition().ToFriendlyName()
+                : componentType.ToFriendlyName();
             return componentName;
         }
 
@@ -297,11 +297,11 @@ namespace MassTransit.Pipeline.Inspectors
         {
             string description;
             Type policyType = policy.GetType().GetGenericTypeDefinition();
-            if (policyType == typeof (InitiatingSagaPolicy<,>))
+            if (policyType == typeof(InitiatingSagaPolicy<,>))
                 description = "Initiates New";
-            else if (policyType == typeof (ExistingOrIgnoreSagaPolicy<,>))
+            else if (policyType == typeof(ExistingOrIgnoreSagaPolicy<,>))
                 description = "Orchestrates Existing";
-            else if (policyType == typeof (CreateOrUseExistingSagaPolicy<,>))
+            else if (policyType == typeof(CreateOrUseExistingSagaPolicy<,>))
                 description = "Initiates New Or Orchestrates Existing";
             else
                 description = policyType.ToFriendlyName();

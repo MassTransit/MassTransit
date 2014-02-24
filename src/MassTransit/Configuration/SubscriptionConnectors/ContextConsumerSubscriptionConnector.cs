@@ -20,7 +20,7 @@ namespace MassTransit.SubscriptionConnectors
 
 	public class ContextConsumerSubscriptionConnector<TConsumer, TMessage> :
 		ConsumerSubscriptionConnector
-		where TConsumer : class, Consumes<IConsumeContext<TMessage>>.All
+		where TConsumer : class, IConsumer<TMessage>
 		where TMessage : class
 	{
 		public Type MessageType

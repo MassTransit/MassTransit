@@ -61,7 +61,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Test, Explicit]
         public void Should_remove_the_queues_and_exchanges_on_shutdown()
         {
-            var uri = new Uri("rabbitmq://localhost/temporary_test_queue?temporary=true");
+            var uri = new Uri("rabbitmq://localhost/mttest/temporary_test_queue?temporary=true");
             using (IServiceBus bus = ServiceBusFactory.New(x =>
                 {
                     x.ReceiveFrom(uri);

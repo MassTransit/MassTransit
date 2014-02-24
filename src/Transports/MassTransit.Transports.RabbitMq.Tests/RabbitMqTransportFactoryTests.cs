@@ -121,13 +121,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
         // need to configure mt vhost for this:
         readonly IRabbitMqEndpointAddress _queue =
-            RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/mt/mt-unit-tests");
+            RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/mttest/mt-unit-tests");
 
         readonly IRabbitMqEndpointAddress _exchange =
-            RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/mt/dru");
+            RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/mttest/dru");
 
         readonly IRabbitMqEndpointAddress _error =
-            RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/mt/mt-unit-tests-error");
+            RabbitMqEndpointAddress.Parse("rabbitmq://guest:guest@localhost:5672/mttest/mt-unit-tests-error");
 
         RabbitMqTransportFactory _factory;
     }

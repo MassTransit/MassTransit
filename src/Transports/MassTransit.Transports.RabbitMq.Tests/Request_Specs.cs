@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq.Tests
 {
     using System;
+    using System.Threading.Tasks;
     using BusConfigurators;
     using Exceptions;
     using Magnum.Extensions;
@@ -31,7 +32,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         }
 
         class PingHandler
-            : Consumes<IConsumeContext<PingMessage>>.All
+            : Consumes<PingMessage>.Context
         {
             public void Consume(IConsumeContext<PingMessage> context)
             {
@@ -77,6 +78,24 @@ namespace MassTransit.Transports.RabbitMq.Tests
                     });
 
             result.ShouldBeTrue("No response was received.");
+        }
+
+        [Test]
+        public void Should_respond_properly_using_async()
+        {
+            Task<PongMessage> pongTask = null;
+            ITaskRequest<PingMessage> result = LocalBus.GetEndpoint(LocalBus.Endpoint.Address.Uri)
+                .SendRequestAsync<PingMessage>(LocalBus, new PingImpl(), req =>
+                    {
+                        pongTask = req.Handle<PongMessage>(x => { });
+                        req.SetTimeout(10.Seconds());
+                    });
+
+            result.Task.Wait(10.Seconds()).ShouldBeTrue("Request was not completed");
+
+            Assert.IsNotNull(pongTask, "Pong task should not be null");
+
+            pongTask.Wait(10.Seconds()).ShouldBeTrue("Pong was not completed");
         }
 
         [Test]

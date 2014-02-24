@@ -23,7 +23,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Test]
         public void CanRetryWhenUsingHandlerWithLocalBus()
         {
-            using (IServiceBus bus = ServiceBusFactory.New(sbc => sbc.ReceiveFrom("loopback://localhost/test")))
+            using (IServiceBus bus = ServiceBusFactory.New(sbc => sbc.ReceiveFrom("loopback://localhost/mttest/test")))
                 DoTest(bus, bus);
         }
 
@@ -58,7 +58,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
         static string QueueUri(string queueName)
         {
-            return string.Format("rabbitmq://{0}/{1}", RabbitMqServer, queueName);
+            return string.Format("rabbitmq://{0}/mttest/{1}", RabbitMqServer, queueName);
         }
 
         static void DoTest(IServiceBus publishingBus, IServiceBus receivingBus)
