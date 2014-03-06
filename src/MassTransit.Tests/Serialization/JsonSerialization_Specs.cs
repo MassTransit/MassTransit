@@ -51,6 +51,12 @@ namespace MassTransit.Tests.Serialization
 							new TestMessageDetail {Item = "A", Value = 27.5d},
 							new TestMessageDetail {Item = "B", Value = 13.5d},
 						},
+                    DateTimeProperty = new DateTime(2014,03,05,01,53,04,193),
+                    DateTimeStringProperty = "2014-03-05T01:53:04.193",
+                    Dictionary = new Dictionary<string, string>()
+                    {
+                        {"string-datetime-property","2014-03-05T01:53:04.193"}
+                    }
 				};
 
 			_envelope = new Envelope
@@ -145,6 +151,30 @@ namespace MassTransit.Tests.Serialization
 				message.Details.Count.ShouldEqual(2);
 			}
 		}
+
+        [Then]
+        public void Should_roundtrip_dates_as_string_or_datetime()
+        {
+            Envelope result;
+            using (var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(_body), false))
+            using (var reader = new StreamReader(memoryStream))
+            using (var jsonReader = new JsonTextReader(reader))
+            {
+                result = _deserializer.Deserialize<Envelope>(jsonReader);
+            }
+
+            using (var jsonReader = new JTokenReader(result.Message as JToken))
+            {
+                var message = (TestMessage)_serializer.Deserialize(jsonReader, typeof(TestMessage));
+
+                // DateTimes are properly serialized / deserialized
+                // however, string properties containing a date-string are somehow
+                // converted to a Datetime somewhere in deserialization
+                message.DateTimeProperty.ShouldEqual(new DateTime(2014, 03, 05, 01, 53, 04, 193),"Round ripping DateTimeProperty failed");
+                message.DateTimeStringProperty.ShouldEqual("2014-03-05T01:53:04.193","Roundtripping DateTimeStringProperty failed");
+                message.Dictionary["string-datetime-property"].ShouldEqual("2014-03-05T01:53:04.193","Roundtripping datetimestring in dictionary failed");
+            }
+        }
 
 		[Then]
 		public void Should_be_able_to_ressurect_the_message_from_xml()
@@ -271,6 +301,9 @@ namespace MassTransit.Tests.Serialization
 			public IList<TestMessageDetail> Details { get; set; }
 			public int Level { get; set; }
 			public string Name { get; set; }
+            public DateTime DateTimeProperty { get; set; }
+            public string DateTimeStringProperty { get; set; }
+            public Dictionary<string,string> Dictionary { get; set; } 
 		}
 
 
