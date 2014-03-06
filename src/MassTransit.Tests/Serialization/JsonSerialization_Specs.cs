@@ -170,6 +170,7 @@ namespace MassTransit.Tests.Serialization
                 // DateTimes are properly serialized / deserialized
                 // however, string properties containing a date-string are somehow
                 // converted to a Datetime somewhere in deserialization
+                // fixed by adding DateParseHandling = DateParseHandling.None to serializer settings
                 message.DateTimeProperty.ShouldEqual(new DateTime(2014, 03, 05, 01, 53, 04, 193),"Round ripping DateTimeProperty failed");
                 message.DateTimeStringProperty.ShouldEqual("2014-03-05T01:53:04.193","Roundtripping DateTimeStringProperty failed");
                 message.Dictionary["string-datetime-property"].ShouldEqual("2014-03-05T01:53:04.193","Roundtripping datetimestring in dictionary failed");

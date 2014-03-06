@@ -41,6 +41,7 @@ namespace MassTransit.Serialization
                         ObjectCreationHandling = ObjectCreationHandling.Auto,
                         ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
                         ContractResolver = new JsonContractResolver(),
+                        DateParseHandling = DateParseHandling.None,
                         Converters = new List<JsonConverter>(new JsonConverter[]
                             {
                                 new ByteArrayConverter(), 
@@ -56,6 +57,7 @@ namespace MassTransit.Serialization
                         ObjectCreationHandling = ObjectCreationHandling.Auto,
                         ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
                         ContractResolver = new JsonContractResolver(),
+                        DateParseHandling = DateParseHandling.None,
                         Converters = new List<JsonConverter>(new JsonConverter[]
                             {
                                 new ByteArrayConverter(), 
