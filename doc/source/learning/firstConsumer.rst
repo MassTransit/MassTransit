@@ -1,7 +1,7 @@
 Creating Your First Consumer
 ============================
 
-To create your first consumer, create a new project using Visual Studio. The project should be configured to use .NET 4.0, and should be created as a class library. In this exercise, the project name is LearningMT.Consumer.
+To create your first consumer, create a new project using Visual Studio. The project should be configured to use .NET 4.0, and should be created as a class library. In this exercise, the project name is "LearningMT.OrderConsumer".
 
 .. image:: images/newConsumerProject.png
    :alt: create new project
@@ -90,7 +90,7 @@ Create a new class in the same project called *OrderService* as shown below.
         {
             _bus = ServiceBusFactory.New(x =>
                 {
-                    x.UseRabbitMqRouting();
+                    x.UseRabbitMq();
                     x.ReceiveFrom("rabbitmq://localhost/learningmt_orderservice");
                 });
         }
@@ -107,11 +107,11 @@ In the class above, two methods have been added, *Start* and *Stop*. In the Star
 Testing the Service Bus Instance
 --------------------------------
 
-At this point, there is a lot of code written and no unit tests. To fix that, create another project in the solution called LearningMT.OrderConsumerTests. Once created, use the NuGet Package Manager to add NUnit to the project, and also add a reference to your LearningMT.OrderConsumer project. References to MassTransit and MassTransit.RabbitMQ will also need to be added using the NuGet package manager as you did above for the OrderConsumer project.
+At this point, there is a lot of code written and no unit tests. To fix that, create another project in the solution called LearningMT.OrderConsumerTests. Once created, use the NuGet Package Manager to add NUnit to the project.  (If you are running Visual Studio 2012/13, you may want to NuGet "NUnit TestAdapter including NUnit...framework" instead.) Then add a reference to your LearningMT.OrderConsumer project. Finally, NuGet "MassTransit.RabbitMQ" (which includes MassTransit) like you did for the original OrderConsumer project.  
 
 .. image:: images/newConsumerTestsProject.png
 
-After creating the tests project, create a new unit test to verify the OrderService can be started and stopped. This will ensure that your project and dependencies are all setup correctly and that RabbitMQ is installed and configured properly as well. The unit test code is shown below.
+After creating the tests project, create a new unit test (e.g., copy the following in to a new class), build the project, and then click/run "Should_create_the_service_bus" in the Test Explorer window to verify the OrderService can be started and stopped. (This will ensure that your project and dependencies are all setup correctly and that RabbitMQ is installed and configured properly as well.)  Basic unit test code is shown below.
 
 .. sourcecode:: csharp
     :linenos:
