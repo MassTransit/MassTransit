@@ -121,7 +121,7 @@ namespace MassTransit
         static IList<Type> FindTypes<T>(IWindsorContainer container, Func<Type, bool> filter)
         {
             return container.Kernel
-                            .GetAssignableHandlers(typeof(T))
+                            .GetHandlers(typeof(T))
                             .Select(h => h.ComponentModel.Implementation)
                             .Where(filter)
                             .ToList();

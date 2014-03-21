@@ -39,13 +39,15 @@ namespace MassTransit.Containers.Tests
             _container = new WindsorContainer();
             _container.Register(
                 Component.For<SimpleConsumer>()
-                         .LifestyleTransient(),
+                         .LifestyleTransient()
+                         .Forward<IConsumer>(),
                 Component.For<ISimpleConsumerDependency>()
                          .ImplementedBy<SimpleConsumerDependency>()
                          .LifestyleTransient(),
                 Component.For<AnotherMessageConsumer>()
                          .ImplementedBy<AnotherMessageConsumerImpl>()
-                         .LifestyleTransient());
+                         .LifestyleTransient()
+                         .Forward<IConsumer>());
         }
 
         [Finally]
@@ -71,10 +73,10 @@ namespace MassTransit.Containers.Tests
         {
             _container = new WindsorContainer();
             _container.Register(
-                Component.For<SimpleSaga>(),
+                Component.For<SimpleSaga>().Forward<ISaga>(),
                 Component.For(typeof(ISagaRepository<>))
                          .ImplementedBy(typeof(InMemorySagaRepository<>))
-                         .LifeStyle.Singleton);
+                         .LifestyleSingleton());
         }
 
         [Finally]
@@ -100,10 +102,10 @@ namespace MassTransit.Containers.Tests
         {
             _container = new WindsorContainer();
             _container.Register(
-                Component.For<DummySaga>(),
+                Component.For<DummySaga>().Forward<ISaga>(),
                 Component.For(typeof(ISagaRepository<>))
                          .ImplementedBy(typeof(InMemorySagaRepository<>))
-                         .LifeStyle.Singleton);
+                         .LifestyleSingleton());
         }
 
         [Finally]
@@ -171,7 +173,8 @@ namespace MassTransit.Containers.Tests
             _container = new WindsorContainer();
             _container.Register(
                 Component.For<CheckScopeConsumer>()
-                         .LifestyleScoped<MessageScope>(),
+                         .LifestyleScoped<MessageScope>()
+                         .Forward<IConsumer>(),
                 Component.For<IDepedency>()
                          .ImplementedBy<Depedency>()
                          .LifestyleScoped<MessageScope>());
