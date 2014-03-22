@@ -50,6 +50,8 @@ requests of others from.
 ### Publisher ####
 
 .. sourcecode:: csharp
+    :linenos:
+
     // Setup Mass Transit.
     Bus.Initialize(sbc =>
     {
@@ -70,6 +72,8 @@ requests of others from.
 ### Subscriber ####
 
 .. sourcecode:: csharp
+    :linenos:
+
     static void Main(string[] args)
     {
         Bus.Initialize(sbc =>
