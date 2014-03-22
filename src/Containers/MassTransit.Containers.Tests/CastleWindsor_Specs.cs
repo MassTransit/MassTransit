@@ -249,4 +249,57 @@ namespace MassTransit.Containers.Tests
         {
         }
     }
+
+
+    [Scenario]
+    public class Castle_Consumers_Load_Registered_Services_Only :
+        Given_a_service_bus_instance
+    {
+        readonly IWindsorContainer _container;
+
+        public Castle_Consumers_Load_Registered_Services_Only()
+        {
+            _container = new WindsorContainer();
+            _container.Register(
+                Component.For<SimpleConsumer>()
+                         .Forward<IConsumer>()
+                         .LifestyleTransient(),
+                Component.For<ISimpleConsumerDependency>()
+                         .ImplementedBy<SimpleConsumerDependency>()
+                         .LifestyleTransient(),
+                Component.For<AnotherMessageConsumer>()
+                         .ImplementedBy<AnotherMessageConsumerImpl>()
+                         .LifestyleTransient());
+        }
+
+        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+        {
+            subscriptionBusServiceConfigurator.LoadRegisteredServicesFrom(_container);
+        }
+
+        [When]
+        public void Registering_consumers_using_explicit_services()
+        {
+        }
+
+        [Then]
+        public void Should_have_a_subscription_for_the_first_consumer_message()
+        {
+            LocalBus.HasSubscription<SimpleMessageInterface>().Count()
+                    .ShouldEqual(1, "No subscription for the SimpleMessageInterface was found.");
+        }
+
+        [Then]
+        public void Should_not_have_a_subscription_for_the_second_consumer_message()
+        {
+            LocalBus.HasSubscription<AnotherMessageInterface>().Count()
+                    .ShouldEqual(0, "A subscription was found for AnotherMessageInterface and shouldn't have been.");
+        }
+
+        [Finally]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+    }
 }
