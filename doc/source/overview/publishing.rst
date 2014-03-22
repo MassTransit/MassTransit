@@ -49,45 +49,47 @@ requests of others from.
 
 ### Publisher ####
 
-            // Setup Mass Transit.
-            Bus.Initialize(sbc =>
-            {
-                sbc.UseMsmq();
-                sbc.ReceiveFrom("msmq://localhost/BulkProcessing.Web");
-                sbc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
-                // sbc.VerifyMsmqConfiguration(); This doesn't work on Windows 8.
-            });
-
-            // Send Message
-            var sendContext = new SendContext<Message>(message);
-            sendContext.SetMessageId(Guid.NewGuid().ToString());
-            sendContext.SetCorrelationId(Guid.NewGuid().ToString());
-            sendContext.SetExpirationTime(DateTime.Now.AddDays(1));
-
-            Bus.Instance.Publish<Message>(message);
+.. sourcecode:: csharp
+    // Setup Mass Transit.
+    Bus.Initialize(sbc =>
+    {
+        sbc.UseMsmq();
+        sbc.ReceiveFrom("msmq://localhost/BulkProcessing.Web");
+        sbc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
+        // sbc.VerifyMsmqConfiguration(); This doesn't work on Windows 8.
+    });
+    
+    // Send Message
+    var sendContext = new SendContext<Message>(message);
+    sendContext.SetMessageId(Guid.NewGuid().ToString());
+    sendContext.SetCorrelationId(Guid.NewGuid().ToString());
+    sendContext.SetExpirationTime(DateTime.Now.AddDays(1));
+    
+    Bus.Instance.Publish<Message>(message);
 
 ### Subscriber ####
 
-        static void Main(string[] args)
+.. sourcecode:: csharp
+    static void Main(string[] args)
+    {
+        Bus.Initialize(sbc =>
         {
-            Bus.Initialize(sbc =>
+            sbc.UseMsmq();
+            sbc.ReceiveFrom("msmq://localhost/BulkProcessing.Consumer");
+            sbc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
+            // sbc.VerifyMsmqConfiguration(); This doesn't work on Windows 8.
+    
+            sbc.Subscribe(subs =>
             {
-                sbc.UseMsmq();
-                sbc.ReceiveFrom("msmq://localhost/BulkProcessing.Consumer");
-                sbc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
-                // sbc.VerifyMsmqConfiguration(); This doesn't work on Windows 8.
-
-                sbc.Subscribe(subs =>
-                {
-                    subs.Handler<Message>(msg => Console.WriteLine(msg.Text));
-                });
+                subs.Handler<Message>(msg => Console.WriteLine(msg.Text));
             });
-
-            while (true)
-            {
-                Thread.Sleep(1000);
-            }
+        });
+    
+        while (true)
+        {
+            Thread.Sleep(1000);
         }
+    }
 
 Internal detail of both MSMQ transports
 ----------------------------------------
