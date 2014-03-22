@@ -23,6 +23,7 @@ namespace MassTransit
     using SubscriptionConfigurators;
     using Util;
     using WindsorIntegration;
+    using Castle.MicroKernel;
 
 
     /// <summary>
@@ -39,12 +40,33 @@ namespace MassTransit
             [NotNull] this SubscriptionBusServiceConfigurator configurator,
             [NotNull] IWindsorContainer container)
         {
+            configurator.LoadFrom(container, false);
+        }
+
+        /// <summary>
+        /// Specify that the service bus should load its subscribers from the container passed as an argument,
+        /// using only those subscribers which are explicitly registered as an IConsumer or ISaga service.
+        /// </summary>
+        /// <param name="configurator">The configurator the extension method works on.</param>
+        /// <param name="container">The Windsor container.</param>
+        public static void LoadRegisteredServicesFrom(
+            [NotNull] this SubscriptionBusServiceConfigurator configurator,
+            [NotNull] IWindsorContainer container)
+        {
+            configurator.LoadFrom(container, true);
+        }
+
+        static void LoadFrom(
+            [NotNull] this SubscriptionBusServiceConfigurator configurator,
+            [NotNull] IWindsorContainer container,
+            bool useOnlyRegisteredServices)
+        {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
             if (container == null)
                 throw new ArgumentNullException("container");
 
-            IList<Type> consumerTypes = FindTypes<IConsumer>(container, x => !x.Implements<ISaga>());
+            IList<Type> consumerTypes = container.FindTypes<IConsumer>(x => !x.Implements<ISaga>(), useOnlyRegisteredServices);
             if (consumerTypes.Count > 0)
             {
                 var consumerConfigurator = new WindsorConsumerFactoryConfigurator(configurator, container);
@@ -53,7 +75,7 @@ namespace MassTransit
                     consumerConfigurator.ConfigureConsumer(type);
             }
 
-            IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
+            IList<Type> sagaTypes = container.FindTypes<ISaga>(x => true, useOnlyRegisteredServices);
             if (sagaTypes.Count > 0)
             {
                 var sagaConfigurator = new WindsorSagaFactoryConfigurator(configurator, container);
@@ -118,13 +140,29 @@ namespace MassTransit
             configurator.AddInboundInterceptor(new WindsorInboundInterceptor());
         }
 
-        static IList<Type> FindTypes<T>(IWindsorContainer container, Func<Type, bool> filter)
+        /// <summary>
+        /// Pulls Types from the container.
+        /// </summary>
+        /// <param name="useOnlyRegisteredServices">If true, pulls only Types registered as services. If false, pulls all Types registered which are assignable from the given Type.</param>
+        static IList<Type> FindTypes<T>(
+                this IWindsorContainer container, 
+                Func<Type, bool> filter, 
+                bool useOnlyRegisteredServices)
         {
-            return container.Kernel
-                            .GetAssignableHandlers(typeof(T))
-                            .Select(h => h.ComponentModel.Implementation)
-                            .Where(filter)
-                            .ToList();
+            IHandler[] handlers;
+            if (!useOnlyRegisteredServices)
+            {
+                handlers = container.Kernel.GetAssignableHandlers(typeof(T));
+            }
+            else
+            {
+                handlers = container.Kernel.GetHandlers(typeof(T));
+            }
+
+            return handlers
+                    .Select(h => h.ComponentModel.Implementation)
+                    .Where(filter)
+                    .ToList();
         }
     }
 }
