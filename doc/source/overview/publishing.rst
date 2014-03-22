@@ -47,7 +47,8 @@ as the 'Subscription Service'. The subscription service is a well known location
 where each bus sends its subscription requests to, and gets the subscription
 requests of others from. 
 
-### Publisher ####
+Publisher
+'''''''''
 
 .. sourcecode:: csharp
     :linenos:
@@ -69,7 +70,8 @@ requests of others from.
     
     Bus.Instance.Publish<Message>(message);
 
-### Subscriber ####
+Subscriber
+''''''''''
 
 .. sourcecode:: csharp
     :linenos:
