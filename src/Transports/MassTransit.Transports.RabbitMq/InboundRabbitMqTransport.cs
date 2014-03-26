@@ -76,12 +76,17 @@ namespace MassTransit.Transports.RabbitMq
                             result.BasicProperties.MessageId = context.MessageId;
                             context.SetInputAddress(_address);
 
-                            byte[] contentType = result.BasicProperties.IsHeadersPresent()
-                                                     ? (byte[])result.BasicProperties.Headers["Content-Type"]
-                                                     : null;
-                            if (contentType != null)
+                            if (result.BasicProperties.IsHeadersPresent())
                             {
-                                context.SetContentType(Encoding.UTF8.GetString(contentType));
+                                object value;
+                                if (result.BasicProperties.Headers.TryGetValue("Content-Type", out value))
+                                {
+                                    var contentType = value as byte[];
+                                    if (contentType != null)
+                                    {
+                                        context.SetContentType(Encoding.UTF8.GetString(contentType));
+                                    }
+                                }
                             }
 
                             Action<IReceiveContext> receive = lookupSinkChain(context);
