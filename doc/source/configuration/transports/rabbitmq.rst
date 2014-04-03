@@ -7,7 +7,6 @@ This is the recommended approach for configuring MassTransit for use with Rabbit
 
   ServiceBusFactory.New(sbc => 
   {
-    // this is the recommended routing strategy, and will call 'sbc.UseRabbitMq()' on its own.
     sbc.UseRabbitMq(r => 
                     {
                         r.ConfigureHost(new Uri("rabbitmq://hostname/vhost/queue"), h =>
@@ -32,9 +31,9 @@ This also sets the default serializer to JSON.
   - networks are segregated by vhosts
   - we generate an exchange for each queue so that we can do direct sends to the queue. it is bound as a fanout exchange
   - for each message published we generate series of exchanges that go from concrete class to each of its subclass / interfaces these are linked together from most specific to least specific. This way if you subscribe to the base interface you get all the messages. or you can be more selective. all exchanges in this situation are bound as fanouts.
-  - the subscriber declares his own queue and his queue exchange � he then also declares/binds his exchange to each of the message type exchanges desired
+  - the subscriber declares his own queue and his queue exchange - he then also declares/binds his exchange to each of the message type exchanges desired
   - the publisher discovers all of the exchanges needed for a given message, binds them all up and then pushes the message into the most specific queue letting RabbitMQ do the fanout for him. (One publish, multiple receivers!)
-  - control queues are exclusive and auto-delete � they go away when you go away and are not shared.
+  - control queues are exclusive and auto-delete - they go away when you go away and are not shared.
   - we also lose the routing keys. WIN!
 
  
