@@ -34,8 +34,8 @@ container, but instead of the main method it usually happens in the
 
 .. note::
 
-    a lot of our samples show using MT with another open source project
-    Topshelf. This is a .Net Windows Service host. And should not be use
+    A lot of our samples show using MT with another open source project
+    Topshelf. This is a .Net Windows Service host, and should not be used
     with web sites.
 
 .. sourcecode:: csharp
