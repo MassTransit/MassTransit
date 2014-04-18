@@ -19,7 +19,7 @@ Subscription Options During Configuration
             s.Instance(yourObject);
             
             s.Consumer(()=> new YourConsumer() );
-            s.Consumer(consumerFactory)
+            s.Consumer(consumerFactory);
             s.Consumer(consumerType);
             s.Consumer<TConsumer>();
             
@@ -27,7 +27,7 @@ Subscription Options During Configuration
             s.Consumer<TConsumer>()
                 .Permanent();
             
-            s.Saga(sagaRepository)
+            s.Saga(sagaRepository);
             
             //if using an IoC container 
             //this will scan the container and call Consumer(type) on found
