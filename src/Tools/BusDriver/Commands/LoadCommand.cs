@@ -119,7 +119,7 @@ namespace BusDriver.Commands
 
 
         class LoadMessageSendContext :
-            MessageContext,
+            MassTransit.Context.MessageContext,
             ISendContext
         {
             readonly byte[] _body;
