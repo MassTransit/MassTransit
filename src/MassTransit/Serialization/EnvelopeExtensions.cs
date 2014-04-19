@@ -41,7 +41,7 @@ namespace MassTransit.Serialization
 
             foreach (var header in envelope.Headers)
             {
-                context.SetHeader(header.Key, header.Value);
+                context.SetHeader(header.Key, header.Value.ToString());
             }
         }
 

@@ -21,16 +21,16 @@ namespace MassTransit.Serialization
 	/// </summary>
     public class Envelope
     {
-        Envelope(object message, IEnumerable<Type> messageTypes)
+        public Envelope(object message, IEnumerable<Type> messageTypes)
         {
-            Headers = new Dictionary<string, string>();
+            Headers = new Dictionary<string, object>();
             MessageType = new List<string>(messageTypes.Select(type => new MessageUrn(type).ToString()));
             Message = message;
         }
 
         protected Envelope()
         {
-            Headers = new Dictionary<string, string>();
+            Headers = new Dictionary<string, object>();
             MessageType = new List<string>();
         }
 
@@ -40,7 +40,7 @@ namespace MassTransit.Serialization
         public string DestinationAddress { get; set; }
         public DateTime? ExpirationTime { get; set; }
         public string FaultAddress { get; set; }
-        public IDictionary<string, string> Headers { get; set; }
+        public IDictionary<string, object> Headers { get; set; }
         public object Message { get; set; }
         public string MessageId { get; set; }
         public IList<string> MessageType { get; set; }
