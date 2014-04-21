@@ -88,6 +88,7 @@
     <Compile Include="Assumptions\TransactionAssumptions.cs" />
     <Compile Include="BasicConsumer_Perf.cs" />
     <Compile Include="Bytes_Specs.cs" />
+    <Compile Include="ConfiguringRabbitMQ_Specs.cs" />
     <Compile Include="ConnectingFailure_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Given_a_service_bus_and_a_temporary_client.cs" />

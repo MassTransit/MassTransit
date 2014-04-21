@@ -21,18 +21,6 @@ namespace MassTransit.Transports.RabbitMq
     using RabbitMQ.Client.Events;
 
 
-    public interface IHaModel :
-        IModel
-    {
-        Task BasicPublishAsync(PublicationAddress addr, IBasicProperties basicProperties, byte[] body);
-        Task BasicPublishAsync(string exchange, string routingKey, IBasicProperties basicProperties, byte[] body);
-        Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body);
-
-        Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
-            byte[] body);
-    }
-
-
     public class HaModel :
         IHaModel
     {

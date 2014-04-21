@@ -17,6 +17,7 @@ namespace MassTransit
     using System.Linq;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Serialization;
     using Serialization.Custom;
 
 

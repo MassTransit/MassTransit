@@ -12,11 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-    public static class RabbitMqHeaders
+    using System.Threading.Tasks;
+    using RabbitMQ.Client;
+
+
+    public interface IHaModel :
+        IModel
     {
-        public const string Exchange = "RabbitMQ-Exchange";
-        public const string RoutingKey = "RabbitMQ-RoutingKey";
-        public const string DeliveryTag = "RabbitMQ-DeliveryTag";
-        public const string ConsumerTag = "RabbitMQ-ConsumerTag";
+        Task BasicPublishAsync(PublicationAddress addr, IBasicProperties basicProperties, byte[] body);
+        Task BasicPublishAsync(string exchange, string routingKey, IBasicProperties basicProperties, byte[] body);
+        Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body);
+        Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
+            byte[] body);
     }
 }

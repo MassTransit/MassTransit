@@ -12,22 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using System.Collections.Generic;
-
-
-    public interface MessageEnvelope
+    public interface ITransportSelector
     {
-        string MessageId { get; }
-        string RequestId { get; }
-        string CorrelationId { get; }
-        string SourceAddress { get; }
-        string DestinationAddress { get; }
-        string ResponseAddress { get; }
-        string FaultAddress { get; }
-        IList<string> MessageType { get; }
-        object Message { get; }
-        DateTime? ExpirationTime { get; }
-        IDictionary<string, object> Headers { get; }
+    }
+
+
+    public class TransportSelector :
+        ITransportSelector
+    {
+        public IServiceBus Build()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

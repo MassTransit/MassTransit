@@ -69,7 +69,7 @@ namespace MassTransit.Transports.RabbitMq
             if (current > _max)
                 _max = current;
 
-            var context = new RabbitMQReceiveContext(exchange, routingKey, _consumerTag, _inputAddress, deliveryTag, body, redelivered, properties);
+            var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, _inputAddress, deliveryTag, body, redelivered, properties);
 
             var task = _taskFactory(context);
 

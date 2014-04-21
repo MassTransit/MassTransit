@@ -27,4 +27,8 @@ namespace MassTransit
 			configurator.AddConfigurator(hostConfigurator);
 		}
 	}
+
+
+
+
 }

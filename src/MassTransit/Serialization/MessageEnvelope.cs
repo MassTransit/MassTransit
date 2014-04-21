@@ -10,13 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq
+namespace MassTransit.Serialization
 {
-    public static class RabbitMqHeaders
+    using System;
+    using System.Collections.Generic;
+
+
+    public interface MessageEnvelope
     {
-        public const string Exchange = "RabbitMQ-Exchange";
-        public const string RoutingKey = "RabbitMQ-RoutingKey";
-        public const string DeliveryTag = "RabbitMQ-DeliveryTag";
-        public const string ConsumerTag = "RabbitMQ-ConsumerTag";
+        string MessageId { get; }
+        string RequestId { get; }
+        string CorrelationId { get; }
+        string SourceAddress { get; }
+        string DestinationAddress { get; }
+        string ResponseAddress { get; }
+        string FaultAddress { get; }
+        IList<string> MessageType { get; }
+        object Message { get; }
+        DateTime? ExpirationTime { get; }
+        IDictionary<string, object> Headers { get; }
     }
 }

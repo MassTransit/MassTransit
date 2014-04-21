@@ -20,12 +20,12 @@ namespace MassTransit.Transports.RabbitMq
     ///     Encapsulates the headers included in an IBasicProperties so that they are accessible
     ///     as transport headers on the ReceiveContext
     /// </summary>
-    public class RabbitMQReceiveContextHeaders :
+    public class RabbitMqReceiveContextHeaders :
         Headers
     {
-        readonly BasicConsumeContext _context;
+        readonly RabbitMqBasicConsumeContext _context;
 
-        public RabbitMQReceiveContextHeaders(BasicConsumeContext context)
+        public RabbitMqReceiveContextHeaders(RabbitMqBasicConsumeContext context)
         {
             if (context == null)
                 throw new ArgumentNullException("context");
@@ -111,25 +111,25 @@ namespace MassTransit.Transports.RabbitMq
                 return true;
             }
 
-            if (RabbitMQHeaders.Exchange.Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (RabbitMqHeaders.Exchange.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.Exchange;
                 return true;
             }
 
-            if (RabbitMQHeaders.RoutingKey.Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (RabbitMqHeaders.RoutingKey.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.RoutingKey;
                 return true;
             }
 
-            if (RabbitMQHeaders.DeliveryTag.Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (RabbitMqHeaders.DeliveryTag.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.DeliveryTag;
                 return true;
             }
 
-            if (RabbitMQHeaders.ConsumerTag.Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (RabbitMqHeaders.ConsumerTag.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.ConsumerTag;
                 return true;

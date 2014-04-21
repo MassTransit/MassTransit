@@ -21,6 +21,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Magnum.Extensions;
     using Newtonsoft.Json;
     using NUnit.Framework;
     using RabbitMQ.Client;
@@ -85,7 +86,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 HostName = "localhost"
             };
 
-            const int limit = 20000;
+            const int limit = 100000;
             int count = 0;
             int failureCount = 0;
             int redeliviered = 0;
@@ -107,13 +108,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                                     ConsumeContext consumeContext = deserializer.Deserialize(context);
 
-                                    var person = consumeContext.Headers.Get<Person>("person");
+                                   // var person = consumeContext.Headers.Get<Person>("person");
 
-                                    ConsumeContext<ITestMessage> message;
-                                    if (!consumeContext.TryGetMessage(out message))
+                                    ConsumeContext<ITestMessage> messageContext;
+                                    if (!consumeContext.TryGetMessage(out messageContext))
                                         throw new SerializationException("The message type was not supported");
 
-                                    Interlocked.Add(ref processingTime, (int) message.ReceiveContext.ElapsedTime.TotalMilliseconds);
+                                    Interlocked.Add(ref processingTime, (int) messageContext.ReceiveContext.ElapsedTime.TotalMilliseconds);
 
                                     var number = Interlocked.Increment(ref count);
                                     if (number == limit)
@@ -122,7 +123,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                         });
 
 
-                    model.QueueDeclare("input", false, true, true, new Dictionary<string, object>());
+                    model.QueueDeclare("input", false, false, true, new Dictionary<string, object>());
                     model.QueuePurge("input");
 
                     model.ExchangeDeclare("fast", ExchangeType.Fanout, false, true, new Dictionary<string, object>());
@@ -131,14 +132,14 @@ namespace MassTransit.Transports.RabbitMq.Tests
                     model.BasicQos(0, 100, false);
                     model.BasicConsume("input", false, consumer);
 
+                    var message = new TestMessage("Joe", "American Way", 27);
+
                     byte[] body;
                     using (var output = new MemoryStream())
                     using (var nonClosingStream = new NonClosingStream(output))
                     using (var writer = new StreamWriter(nonClosingStream))
                     using (var jsonWriter = new JsonTextWriter(writer))
                     {
-                        var message = new TestMessage("Joe", "American Way", 27);
-
                         var envelope = new Envelope(message, message.GetType().GetMessageTypes());
                         envelope.SourceAddress = "rabbitmq://localhost/speed/fast";
                         envelope.DestinationAddress = "rabbitmq://localhost/speed/input";
@@ -155,22 +156,26 @@ namespace MassTransit.Transports.RabbitMq.Tests
                         body = output.ToArray();
                     }
 
-                    Console.WriteLine(Encoding.UTF8.GetString(body));
+                    //Console.WriteLine(Encoding.UTF8.GetString(body));
 
                     using (var sendModel = new HaModel(connection.CreateModel()))
                     {
+                        var sendToTransport = new RabbitMqSendToTransport(sendModel, "fast");
+                        var sendSerializer = new JsonMessageSendSerializer(JsonMessageSerializer.Serializer);
+                        var sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
                         Stopwatch timer = Stopwatch.StartNew();
                         var tasks = Enumerable.Range(0, limit)
                             .Select(x =>
                                 {
-                                    var properties = sendModel.CreateBasicProperties();
-                                    return sendModel.BasicPublishAsync("fast", "", properties, body);
+                                    return sendToEndpoint.Send(message);
+//                                    var properties = sendModel.CreateBasicProperties();
+//                                    return sendModel.BasicPublishAsync("fast", "", properties, body);
                                 }).AsParallel().ToArray();
 
-                        completed.Task.Wait();
+                        completed.Task.Wait(10.Seconds());
                         timer.Stop();
 
-                        Task.WaitAll(tasks);
+                        Task.WaitAll(tasks, 10.Seconds());
 
                         Console.WriteLine("Elapsed time for {0} messages: {1}ms", limit, timer.ElapsedMilliseconds);
                         Console.WriteLine("Messages per second: {0}", limit * 1000L / timer.ElapsedMilliseconds);

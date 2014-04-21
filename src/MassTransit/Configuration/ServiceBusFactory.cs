@@ -19,6 +19,12 @@ namespace MassTransit
 	using Magnum;
 	using Util;
 
+
+    public interface ITransportConfigurator
+    {
+        
+    }
+
 	/// <summary>
 	/// The starting point to configure and create a service bus instance
 	/// </summary>
@@ -26,7 +32,28 @@ namespace MassTransit
 	{
 		static readonly ServiceBusDefaultSettings _defaultSettings = new ServiceBusDefaultSettings();
 
-		[NotNull]
+        /// <summary>
+        /// Configures a new service bus instance using the specified transport
+        /// </summary>
+        /// <typeparam name="T">The transport configurator type</typeparam>
+        /// <param name="transportSelector">The transport selector</param>
+        /// <param name="configure">The configuration callback</param>
+        /// <returns>An initialized and started service bus instance</returns>
+	    public static IServiceBus New<T>(Func<ITransportSelector, T> transportSelector,
+	        Action<T> configure)
+            where T : ITransportConfigurator
+        {
+            var selector = new TransportSelector();
+
+            var configurator = transportSelector(selector);
+
+            configure(configurator);
+
+            return selector.Build();
+        }
+
+
+	    [NotNull]
 		public static IServiceBus New([NotNull] Action<ServiceBusConfigurator> configure)
 		{
 			Guard.AgainstNull(configure, "configure");

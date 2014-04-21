@@ -16,6 +16,7 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Net.Mime;
     using System.Runtime.Serialization;
     using Custom;
     using Newtonsoft.Json;
@@ -25,7 +26,8 @@ namespace MassTransit.Serialization
     public class JsonMessageSerializer :
         IMessageSerializer
     {
-        const string ContentTypeHeaderValue = "application/vnd.masstransit+json";
+        public const string ContentTypeHeaderValue = "application/vnd.masstransit+json";
+        public static readonly ContentType JsonContentType = new ContentType(ContentTypeHeaderValue);
 
         [ThreadStatic]
         static JsonSerializer _deserializer;
