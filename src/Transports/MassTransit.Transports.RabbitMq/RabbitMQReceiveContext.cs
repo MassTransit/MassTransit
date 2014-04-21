@@ -15,16 +15,14 @@ namespace MassTransit.Transports.RabbitMq
     using System;
     using System.Diagnostics;
     using System.IO;
-    using System.Net.Mime;
-    using System.Text;
     using RabbitMQ.Client;
 
 
-    public class RabbitMQReceiveContext :
+    public class RabbitMqReceiveContext :
         ReceiveContext,
-        BasicConsumeContext
+        RabbitMqBasicConsumeContext
     {
-        static readonly ContentType DefaultContentType = new ContentType("application/vnd.masstransit+json");
+        const string DefaultContentType = "application/vnd.masstransit+json";
 
         readonly byte[] _body;
         readonly string _consumerTag;
@@ -35,11 +33,10 @@ namespace MassTransit.Transports.RabbitMq
         readonly Stopwatch _receiveTimer;
         readonly bool _redelivered;
         readonly string _routingKey;
-        ContentType _contentType;
-        Encoding _encoding;
-        RabbitMQReceiveContextHeaders _headers;
+        string _contentType;
+        RabbitMqReceiveContextHeaders _headers;
 
-        public RabbitMQReceiveContext(string exchange, string routingKey, string consumerTag, Uri inputAddress, ulong deliveryTag,
+        public RabbitMqReceiveContext(string exchange, string routingKey, string consumerTag, Uri inputAddress, ulong deliveryTag,
             byte[] body, bool redelivered, IBasicProperties properties)
         {
             _receiveTimer = Stopwatch.StartNew();
@@ -79,16 +76,6 @@ namespace MassTransit.Transports.RabbitMq
             get { return _properties; }
         }
 
-        public Encoding ContentEncoding
-        {
-            get
-            {
-                return _encoding ?? (_encoding = string.IsNullOrWhiteSpace(ContentType.CharSet)
-                    ? Encoding.UTF8
-                    : Encoding.GetEncoding(ContentType.CharSet));
-            }
-        }
-
         public Stream Body
         {
             get { return new MemoryStream(_body, 0, _body.Length, false); }
@@ -104,7 +91,7 @@ namespace MassTransit.Transports.RabbitMq
             get { return _inputAddress; }
         }
 
-        public ContentType ContentType
+        public string ContentType
         {
             get { return _contentType ?? (_contentType = GetContentType()); }
         }
@@ -116,20 +103,17 @@ namespace MassTransit.Transports.RabbitMq
 
         public Headers Headers
         {
-            get { return _headers ?? (_headers = new RabbitMQReceiveContextHeaders(this)); }
+            get { return _headers ?? (_headers = new RabbitMqReceiveContextHeaders(this)); }
         }
 
-        ContentType GetContentType()
+        string GetContentType()
         {
             object contentTypeHeader;
             if (Headers.TryGetHeader("Content-Type", out contentTypeHeader))
             {
-                var contentType = contentTypeHeader as ContentType;
-                if (contentType != null)
-                    return contentType;
                 var s = contentTypeHeader as string;
                 if (s != null)
-                    return new ContentType(s);
+                    return s;
             }
 
             return DefaultContentType;

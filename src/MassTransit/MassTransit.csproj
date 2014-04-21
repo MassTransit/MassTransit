@@ -15,7 +15,7 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -48,6 +48,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>
     </DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -59,6 +60,7 @@
     <DocumentationFile>bin\Release\MassTransit.XML</DocumentationFile>
     <NoWarn>1587,1591,3008,3001</NoWarn>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Magnum">
@@ -98,24 +100,27 @@
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurators\AddSerializerEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\SetSupportedMessageSerializersEndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\ITransportSelector.cs" />
     <Compile Include="Configuration\ShutdownConfigurationExtensions.cs" />
     <Compile Include="Configuration\InterceptorExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerMetadataCache.cs" />
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="Context\DeliveryMode.cs" />
+    <Compile Include="Context\IEndpointSendConverter.cs" />
+    <Compile Include="Context\EndpointSendConverterCache.cs" />
+    <Compile Include="Context\EndpointSendConverter.cs" />
     <Compile Include="EndpointExtensions.cs" />
     <Compile Include="Headers.cs" />
     <Compile Include="HostContext.cs" />
     <Compile Include="IConsumer.cs" />
     <Compile Include="IFault.cs" />
     <Compile Include="IMessageDeserializer.cs" />
+    <Compile Include="ISendToEndpoint.cs" />
     <Compile Include="JsonConsumeContext.cs" />
     <Compile Include="JsonMessageConsumeContext.cs" />
-    <Compile Include="JsonMessageDeserializer.cs" />
     <Compile Include="JsonMessageHeaders.cs" />
     <Compile Include="MassTransitHostContext.cs" />
     <Compile Include="MessageContext.cs" />
-    <Compile Include="MessageEnvelope.cs" />
     <Compile Include="MessageSendCompleted.cs" />
     <Compile Include="NewId\INewIdFormatter.cs" />
     <Compile Include="NewId\INewIdParser.cs" />
@@ -128,8 +133,12 @@
     <Compile Include="NewId\NewIdProviders\BestPossibleWorkerIdProvider.cs" />
     <Compile Include="NewId\NewIdProviders\HostNameSHA1WorkerIdProvider.cs" />
     <Compile Include="NewId\NewIdProviders\WMINetworkAddressWorkerIdProvider.cs" />
+    <Compile Include="Pipeline\HandlerHolder.cs" />
     <Compile Include="ReceiveContext.cs" />
+    <Compile Include="SendContext.cs" />
     <Compile Include="Serialization\ISupportedMessageSerializers.cs" />
+    <Compile Include="Serialization\JsonMessageDeserializer.cs" />
+    <Compile Include="Serialization\MessageEnvelope.cs" />
     <Compile Include="Serialization\SupportedMessageSerializers.cs" />
     <Compile Include="Subscriptions\Coordinator\InMemorySubscriptionStorage.cs" />
     <Compile Include="Configuration\Configuration\InterceptingConsumerFactory.cs" />
@@ -680,11 +689,15 @@
     <Compile Include="Transports\IInboundMessageTracker.cs" />
     <Compile Include="Transports\IInboundTransport.cs" />
     <Compile Include="Transports\IMessageNameFormatter.cs" />
+    <Compile Include="Transports\IMessageSendSerializer.cs" />
     <Compile Include="Transports\InvalidConnectionException.cs" />
     <Compile Include="Transports\IOutboundTransport.cs" />
+    <Compile Include="Transports\ISendToTransport.cs" />
     <Compile Include="Transports\ITransport.cs" />
+    <Compile Include="Transports\JsonMessageSendSerializer.cs" />
     <Compile Include="Transports\MessageName.cs" />
     <Compile Include="Transports\MessageTrackerFactory.cs" />
+    <Compile Include="Transports\SendEndpoint.cs" />
     <Compile Include="Transports\ReconnectPolicy.cs" />
     <Compile Include="Transports\RetryPolicy.cs" />
     <Compile Include="Transports\TransportSettings.cs" />

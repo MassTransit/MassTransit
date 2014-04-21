@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,11 +13,13 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Threading.Tasks;
 
 
-    public interface SendObjectConverter
+    public interface IEndpointSendConverter
     {
-        void Send(IEndpoint endpoint, object message);
-        void Send(IEndpoint endpoint, object message, Action<ISendContext> contextCallback);
+        Task<SendContext> Send(ISendToEndpoint endpoint, object message);
+        Task<SendContext> Send(ISendToEndpoint endpoint, object message, Action<SendContext> callback);
+        Task<SendContext> Send(ISendToEndpoint endpoint, object message, Func<SendContext, Task<SendContext>> callback);
     }
 }

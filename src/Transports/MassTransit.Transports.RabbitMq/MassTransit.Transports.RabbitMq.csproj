@@ -78,7 +78,7 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="BasicConsumeContext.cs" />
+    <Compile Include="RabbitMqBasicConsumeContext.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilder.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilderImpl.cs" />
     <Compile Include="Configuration\Builders\RabbitMqTransportFactoryBuilder.cs" />
@@ -94,9 +94,21 @@
     <Compile Include="Configuration\Configurators\RabbitMqTransportFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqTransportFactoryConfiguratorImpl.cs" />
     <Compile Include="Configuration\Configurators\UsernameConnectionFactoryConfigurator.cs" />
+    <Compile Include="Configuration\RabbitMqEndpointConfigurator.cs" />
+    <Compile Include="Configuration\RabbitMqEndpointConfiguratorImpl.cs" />
+    <Compile Include="Configuration\RabbitMqEndpointSettings.cs" />
+    <Compile Include="Configuration\RabbitMqHostConfigurationExtensions.cs" />
+    <Compile Include="Configuration\RabbitMqHostConfigurator.cs" />
+    <Compile Include="Configuration\RabbitMqHostConfiguratorImpl.cs" />
+    <Compile Include="Configuration\RabbitMqPublishContext.cs" />
+    <Compile Include="Configuration\RabbitMqTransportConfigurator.cs" />
+    <Compile Include="Configuration\RabbitMqTransportConfiguratorIMpl.cs" />
+    <Compile Include="Configuration\RabbitMqHostSettings.cs" />
     <Compile Include="Configuration\RabbitMqTransportFactoryExtensions.cs" />
+    <Compile Include="Configuration\TransportConfiguratorExtensions.cs" />
     <Compile Include="ExchangeBinding.cs" />
     <Compile Include="HaModel.cs" />
+    <Compile Include="IHaModel.cs" />
     <Compile Include="InboundRabbitMqTransport.cs" />
     <Compile Include="IRabbitMqEndpointAddress.cs" />
     <Compile Include="Management\IRabbitMqEndpointManagement.cs" />
@@ -119,6 +131,9 @@
     <Compile Include="RabbitMqProducer.cs" />
     <Compile Include="RabbitMqPublisher.cs" />
     <Compile Include="RabbitMQReceiveContext.cs" />
+    <Compile Include="RabbitMqSendContext.cs" />
+    <Compile Include="RabbitMqSendContextImpl.cs" />
+    <Compile Include="RabbitMqSendToTransport.cs" />
     <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
     <Compile Include="Configuration\RabbitMqServiceBusExtensions.cs" />

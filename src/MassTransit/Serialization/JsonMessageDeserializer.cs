@@ -10,11 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Serialization
 {
     using System;
     using System.IO;
     using System.Runtime.Serialization;
+    using System.Text;
     using Newtonsoft.Json;
 
 
@@ -34,7 +35,7 @@ namespace MassTransit
             {
                 MessageEnvelope envelope;
                 using (var body = receiveContext.Body)
-                using (var reader = new StreamReader(body, receiveContext.ContentEncoding))
+                using (var reader = new StreamReader(body, Encoding.UTF8))
                 using (var jsonReader = new JsonTextReader(reader))
                 {
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);

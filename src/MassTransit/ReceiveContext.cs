@@ -14,14 +14,13 @@ namespace MassTransit
 {
     using System;
     using System.IO;
-    using System.Net.Mime;
-    using System.Text;
 
 
     public interface ReceiveContext
     {
         /// <summary>
-        ///     Returns the message body as a stream that can be deserialized
+        ///     Returns the message body as a stream that can be deserialized. The stream
+        ///     must be disposed by the caller, a reference is not retained
         /// </summary>
         Stream Body { get; }
 
@@ -36,12 +35,7 @@ namespace MassTransit
         /// <summary>
         ///     The content type of the message, as determined by the available headers
         /// </summary>
-        ContentType ContentType { get; }
-
-        /// <summary>
-        ///     The encoding type of the content, per the wire format
-        /// </summary>
-        Encoding ContentEncoding { get; }
+        string ContentType { get; }
 
         // true if we know this message is being redelivered after a fault
         bool Redelivered { get; }
