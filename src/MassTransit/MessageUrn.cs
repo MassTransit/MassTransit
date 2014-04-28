@@ -229,6 +229,13 @@ namespace MassTransit
                 if (absolutePath.StartsWith(preamble))
                     absolutePath = absolutePath.Substring(preamble.Length);
 
+                // Workaround for a bug in .NET < 4.5.1 which incorrectly
+                // escapes '[' and ']' as %5B and %5D (respectively),
+                // even though both are RFC 2396 unreserved characters.
+                // http://stackoverflow.com/questions/20003106/uri-escapeuristring-with-square-braces
+                // http://msdn.microsoft.com/en-us/library/hh367887%28v=vs.110%29.aspx
+                absolutePath = absolutePath.Replace("%5B", "[").Replace("%5D", "]");
+
                 TypeNameNode root = new TypeNameNode();
                 var current = root;
 
