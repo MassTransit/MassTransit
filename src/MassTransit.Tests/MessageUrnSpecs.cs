@@ -49,6 +49,20 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public void OpenGenericTupleMessage()
+        {
+            var urn = new MessageUrn(typeof (H<,>));
+            var expected = new Uri("urn:message:MassTransit.Tests:H[[],[]]");
+            Assert.AreEqual(expected.AbsolutePath, urn.AbsolutePath);
+        }
+
+        [Test]
+        public void OpenGenericTupleMessageLoopback()
+        {
+            LoopbackTestMessage(typeof (H<,>));
+        }
+
+        [Test]
         public void ClosedGenericMessage()
         {
             var urn = new MessageUrn(typeof (G<Ping>));
@@ -62,14 +76,29 @@ namespace MassTransit.Tests
             LoopbackTestMessage(typeof (G<Ping>));
         }
 
+        [Test]
+        public void ClosedGenericTupleMessage()
+        {
+            var urn = new MessageUrn(typeof (H<Ping, Ping>));
+            var expected = new Uri("urn:message:MassTransit.Tests:H[[MassTransit.TestFramework.Examples.Messages:Ping],[MassTransit.TestFramework.Examples.Messages:Ping]]");
+            Assert.AreEqual(expected.AbsolutePath, urn.AbsolutePath);
+        }
+
+        [Test]
+        public void ClosedGenericTupleMessageLoopback()
+        {
+            LoopbackTestMessage(typeof (H<Ping, Ping>));
+        }
+
         private static void LoopbackTestMessage(Type messageType)
         {
             var urn = new MessageUrn(messageType);
             var recreatedMessageType = urn.GetType(throwOnError: true, ignoreCase: true);
-            Assert.That(recreatedMessageType, Is.EqualTo(messageType));
+            Assert.AreEqual(recreatedMessageType, messageType);
         }
 
         class X{}
     }
     public class G<T>{}
+    public class H<T1,T2>{}
 }
