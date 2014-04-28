@@ -125,6 +125,12 @@ namespace MassTransit
             else
                 sb.Append(type.Name);
 
+            if (includeScope)
+            {
+                sb.Append(':');
+                sb.Append(type.Assembly.GetName().Name);
+            }
+
             return sb.ToString();
         }
 
