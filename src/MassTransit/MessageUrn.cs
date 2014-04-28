@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Runtime.Serialization;
     using System.Text;
 
@@ -44,21 +45,7 @@ namespace MassTransit
             if (Segments.Length == 0)
                 return null;
 
-            string[] names = Segments[0].Split(':');
-            if (names[0] != "message")
-                return null;
-
-            string typeName;
-
-            if (names.Length == 2)
-                typeName = names[1];
-            else if (names.Length == 3)
-                typeName = names[1] + "." + names[2] + ", " + names[1];
-            else if (names.Length >= 4)
-                typeName = names[1] + "." + names[2] + ", " + names[3];
-            else
-                return null;
-
+            var typeName = UrnMessageTypeParser.Parse(Segments[0]);
             Type messageType = Type.GetType(typeName, throwOnError, ignoreCase);
 
             return messageType;
@@ -139,6 +126,130 @@ namespace MassTransit
                 sb.Append(type.Name);
 
             return sb.ToString();
+        }
+
+        private static class UrnMessageTypeParser
+        {
+            private class TypeNameNode
+            {
+                public TypeNameNode Parent;
+                public List<TypeNameNode> Children = new List<TypeNameNode>();
+                public string Content { get; set; }
+
+                private string GenericParameters
+                {
+                    get { return Children.Count > 0 ? "`" + Children.Count : string.Empty; }
+                }
+
+                private string GenericArguments
+                {
+                    get
+                    {
+                        // no generic type arguments
+                        if (Children.Count == 0)
+                            return string.Empty;
+
+                        // if any of the type arguments are empty, treat current
+                        // type as an open generic - without brackets, just the backtick
+                        var childrenNames = Children.Select(c => c.ToString()).ToArray();
+                        return childrenNames.Any(c => c.Length == 0)
+                            ? string.Empty
+                            : "[" + string.Join(",", childrenNames) + "]";
+                    }
+                }
+
+                private string FormatAsNetTypeName()
+                {
+                    // I'm just an open generic argument, no antual content!
+                    if (string.IsNullOrEmpty(Content))
+                        return string.Empty;
+
+                    var nameParts = Content.Split(':');
+                    string netTypeName = string.Empty;
+
+                    if (nameParts.Length == 1)
+                    {
+                        // ClassName -> ClassName`Tn[T1, T2, ..., Tn]
+                        netTypeName = nameParts[0] + GenericParameters + GenericArguments;
+                    }
+                    else if (nameParts.Length == 2)
+                    {
+                        // Namespace:ClassName -> Namespace.ClassName`Tn[T1, T2, ..., Tn], Namespace
+                        netTypeName = nameParts[0] + "." + nameParts[1] + GenericParameters + GenericArguments + ", " + nameParts[0];
+                    }
+                    else if (nameParts.Length >= 3)
+                    {
+                        // Namespace:ClassName:AssemblyName -> Namespace.ClassName`Tn[T1, T2, ..., Tn], AssemblyName
+                        netTypeName = nameParts[0] + "." + nameParts[1] + GenericParameters + GenericArguments + ", " + nameParts[2];
+                    }
+
+                    return netTypeName;
+                }
+
+                /// <summary>
+                /// Makes sure there is no nested empty parentheses.
+                /// </summary>
+                public void Flatten()
+                {
+                    if (string.IsNullOrEmpty(Content) && Parent != null)
+                        Parent.Children = Children;
+
+                    foreach (var child in Children)
+                        child.Flatten();
+                }
+
+                /// <summary>
+                /// Returns the node formatted as a .Net type name, including its children.
+                /// </summary>
+                public override string ToString()
+                {
+                    var formattedName = FormatAsNetTypeName() ?? string.Empty;
+
+                    // for the root (outer message type) return name without brackets;
+                    // if type name is empty (I'm an open generic argument) do so too
+                    if (Parent == null || string.IsNullOrEmpty(formattedName))
+                        return formattedName;
+                    else
+                        return "[" + formattedName + "]";
+                }
+            }
+
+            /// <summary>
+            /// Transforms a type name specified in a given URN to a .Net-compatible type name.
+            /// </summary>
+            public static string Parse(string absolutePath)
+            {
+                const string preamble = "message:";
+                if (absolutePath.StartsWith(preamble))
+                    absolutePath = absolutePath.Substring(preamble.Length);
+
+                TypeNameNode root = new TypeNameNode();
+                var current = root;
+
+                foreach (char c in absolutePath)
+                {
+                    switch (c)
+                    {
+                        case '[': // go one level down
+                            var child = new TypeNameNode { Parent = current };
+                            current.Children.Add(child);
+                            current = child;
+                            break;
+                        case ']': // go one level up
+                            current = current.Parent;
+                            break;
+                        case ',': // sibling will be caugth by '['
+                        case ' ': // ignore whitespace
+                            break;
+                        default:
+                            current.Content += c;
+                            break;
+                    }
+                }
+
+                root.Flatten();
+                return root.ToString();
+            }
         }
     }
 }
