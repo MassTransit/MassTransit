@@ -45,7 +45,7 @@ namespace MassTransit
             if (Segments.Length == 0)
                 return null;
 
-            var typeName = UrnMessageTypeParser.Parse(Segments[0]);
+            var typeName = MessageTypeParser.Parse(Segments[0]);
             Type messageType = Type.GetType(typeName, throwOnError, ignoreCase);
 
             return messageType;
@@ -100,11 +100,10 @@ namespace MassTransit
             {
                 var name = type.GetGenericTypeDefinition().Name;
 
-                //remove `1
+                // remove generic parameters (`Tc)
                 int index = name.IndexOf('`');
                 if (index > 0)
                     name = name.Remove(index);
-                //
 
                 sb.Append(name);
                 sb.Append('[');
@@ -134,13 +133,13 @@ namespace MassTransit
             return sb.ToString();
         }
 
-        private static class UrnMessageTypeParser
+        private static class MessageTypeParser
         {
             private class TypeNameNode
             {
                 public TypeNameNode Parent;
                 public List<TypeNameNode> Children = new List<TypeNameNode>();
-                public string Content { get; set; }
+                public readonly StringBuilder ContentBuilder = new StringBuilder();
 
                 private string GenericParameters
                 {
@@ -167,10 +166,10 @@ namespace MassTransit
                 private string FormatAsNetTypeName()
                 {
                     // I'm just an open generic argument, no antual content!
-                    if (string.IsNullOrEmpty(Content))
+                    if (ContentBuilder.Length == 0)
                         return string.Empty;
 
-                    var nameParts = Content.Split(':');
+                    var nameParts = ContentBuilder.ToString().Split(':');
                     string netTypeName = string.Empty;
 
                     if (nameParts.Length == 1)
@@ -197,7 +196,7 @@ namespace MassTransit
                 /// </summary>
                 public void Flatten()
                 {
-                    if (string.IsNullOrEmpty(Content) && Parent != null)
+                    if (ContentBuilder.Length == 0 && Parent != null)
                         Parent.Children = Children;
 
                     foreach (var child in Children)
@@ -230,8 +229,8 @@ namespace MassTransit
                     absolutePath = absolutePath.Substring(preamble.Length);
 
                 // Workaround for a bug in .NET < 4.5.1 which incorrectly
-                // escapes '[' and ']' as %5B and %5D (respectively),
-                // even though both are RFC 2396 unreserved characters.
+                // escapes '[' and ']' as %5B and %5D (respectively) under some
+                // circumstances, even though both are RFC 2396 unreserved characters.
                 // http://stackoverflow.com/questions/20003106/uri-escapeuristring-with-square-braces
                 // http://msdn.microsoft.com/en-us/library/hh367887%28v=vs.110%29.aspx
                 absolutePath = absolutePath.Replace("%5B", "[").Replace("%5D", "]");
@@ -255,7 +254,7 @@ namespace MassTransit
                         case ' ': // ignore whitespace
                             break;
                         default:
-                            current.Content += c;
+                            current.ContentBuilder.Append(c);
                             break;
                     }
                 }
