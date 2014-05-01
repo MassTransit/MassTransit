@@ -1,4 +1,4 @@
-Comman Gotcha's
+Common Gotcha's
 ===============
 
 Trying to share a queue
