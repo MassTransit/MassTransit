@@ -77,6 +77,43 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public void Should_allow_publish_request_with_custom_headers()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
+
+            RemoteBus.SubscribeContextHandler<PingMessage>(x =>
+            {
+                pingReceived.Set(x.Message);
+                var transactionIdFromHeader = Guid.Parse(x.Headers["PingTransactionId"]);
+                x.Respond(new PongMessage { TransactionId = transactionIdFromHeader });
+            });
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+
+            var ping = new PingMessage { TransactionId = Guid.NewGuid() };
+
+            TimeSpan timeout = 8.Seconds();
+
+            LocalBus.PublishRequest(ping, x =>
+            {
+                x.Handle<PongMessage>(message =>
+                {
+                    message.TransactionId.ShouldEqual(ping.TransactionId,
+                        "The response correlationId did not match");
+                    pongReceived.Set(message);
+                });
+
+                x.SetTimeout(timeout);
+            }, ctx =>
+            {
+                ctx.SetHeader("PingTransactionId", ping.TransactionId.ToString());
+            });
+
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+        }
+
+        [Test]
         public void Should_call_the_timeout_handler_and_not_throw_an_exception()
         {
             var pongReceived = new FutureMessage<PongMessage>();
@@ -167,6 +204,43 @@ namespace MassTransit.Tests
 
                     x.SetTimeout(timeout);
                 });
+
+            pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
+            pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
+        }
+
+        [Test]
+        public void Should_allow_send_request_with_custom_headers()
+        {
+            var pongReceived = new FutureMessage<PongMessage>();
+            var pingReceived = new FutureMessage<PingMessage>();
+
+            RemoteBus.SubscribeContextHandler<PingMessage>(x =>
+            {
+                pingReceived.Set(x.Message);
+                var transactionIdFromHeader = Guid.Parse(x.Headers["PingTransactionId"]);
+                x.Respond(new PongMessage { TransactionId = transactionIdFromHeader });
+            });
+            LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
+
+            var ping = new PingMessage { TransactionId = Guid.NewGuid() };
+
+            TimeSpan timeout = 8.Seconds();
+
+            RemoteBus.Endpoint.SendRequest(ping, LocalBus, x =>
+            {
+                x.Handle<PongMessage>(message =>
+                {
+                    message.TransactionId.ShouldEqual(ping.TransactionId,
+                        "The response correlationId did not match");
+                    pongReceived.Set(message);
+                });
+
+                x.SetTimeout(timeout);
+            }, ctx =>
+            {
+                ctx.SetHeader("PingTransactionId", ping.TransactionId.ToString());
+            });
 
             pingReceived.IsAvailable(timeout).ShouldBeTrue("The ping was not received");
             pongReceived.IsAvailable(timeout).ShouldBeTrue("The pong was not received");
