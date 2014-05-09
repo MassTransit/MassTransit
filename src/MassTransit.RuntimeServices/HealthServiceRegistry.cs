@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RuntimeServices
 {
+    using System;
     using System.IO;
     using Log4NetIntegration;
     using Model;
@@ -38,21 +39,20 @@ namespace MassTransit.RuntimeServices
             For(typeof(ISagaRepository<>))
                 .Add(typeof(NHibernateSagaRepository<>));
 
+            var serviceBusFunc = new Func<IContext, IServiceBus>(context => ServiceBusFactory.New(sbc =>
+            {
+                sbc.ReceiveFrom(configuration.HealthServiceDataUri);
+                sbc.UseControlBus();
+                sbc.UseLog4Net();
+
+                sbc.UseMsmq(x => x.UseSubscriptionService(configuration.SubscriptionServiceUri));
+
+                sbc.SetConcurrentConsumerLimit(1);
+            }));
+
             For<IServiceBus>()
                 .Singleton()
-                .Use(context =>
-                    {
-                        return ServiceBusFactory.New(sbc =>
-                            {
-                                sbc.ReceiveFrom(configuration.HealthServiceDataUri);
-                                sbc.UseControlBus();
-                                sbc.UseLog4Net();
-
-                                sbc.UseMsmq(x => x.UseSubscriptionService(configuration.SubscriptionServiceUri));
-
-                                sbc.SetConcurrentConsumerLimit(1);
-                            });
-                    });
+                .Use(context => serviceBusFunc(context));
         }
 
         static ISessionFactory CreateSessionFactory()
