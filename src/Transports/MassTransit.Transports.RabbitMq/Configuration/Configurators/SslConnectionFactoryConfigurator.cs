@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
 {
     using System.Net.Security;
+    using RabbitMQ.Client;
 
 
     /// <summary>
@@ -26,5 +27,6 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
         void SetCertificatePassphrase(string passphrase);
         void SetAcceptablePolicyErrors(SslPolicyErrors policyErrors);
         void SetClientCertificateRequired(bool clientCertificateRequired);
+        void SetAuthMechanisms(params AuthMechanismFactory[] factories);
     }
 }
