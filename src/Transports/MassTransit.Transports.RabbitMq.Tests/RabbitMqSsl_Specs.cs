@@ -16,6 +16,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System.Net;
     using Magnum.TestFramework;
     using NUnit.Framework;
+    using RabbitMQ.Client;
 
 
     [Scenario, Explicit]
@@ -63,6 +64,29 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 });
         }
 
+        [When]
+        public void Connecting_to_a_rabbit_mq_server_using_ssl_client_certificate_authentication()
+        {
+            var inputAddress = new Uri("rabbitmq://localhost:5671/test_queue");
+
+            _bus = ServiceBusFactory.New(c =>
+            {
+                c.ReceiveFrom(inputAddress);
+                c.UseRabbitMq(r =>
+                {
+                    r.ConfigureHost(inputAddress, h =>
+                    {
+                        h.UseSsl(s =>
+                        {
+                            s.SetServerName(Dns.GetHostName());
+                            s.SetCertificatePath("client.p12");
+                            s.SetCertificatePassphrase("Passw0rd");
+                            s.SetAuthMechanisms(new ExternalMechanismFactory());
+                        });
+                    });
+                });
+            });
+        }
 
         [Finally]
         public void Finally()

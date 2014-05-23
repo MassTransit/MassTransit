@@ -18,6 +18,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
     using Builders;
     using Magnum.Extensions;
     using MassTransit.Configurators;
+    using RabbitMQ.Client;
 
 
     public class SslConnectionFactoryConfiguratorImpl :
@@ -29,6 +30,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
         bool _clientCertificateRequired = true; // Set to true to keep existing implementations
         string _passphrase;
         string _serverName;
+        AuthMechanismFactory[] _authMechanisms;
 
         public SslConnectionFactoryConfiguratorImpl()
         {
@@ -75,6 +77,10 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
                     connectionFactory.Ssl.AcceptablePolicyErrors = _acceptablePolicyErrors;
                     connectionFactory.Ssl.Version = SslProtocols.Tls;
 
+                    if (_authMechanisms != null && _authMechanisms.Length > 0)
+                    {
+                        connectionFactory.AuthMechanisms = _authMechanisms;
+                    }
                     return connectionFactory;
                 });
 
@@ -117,6 +123,11 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
         public void SetCertificatePassphrase(string passphrase)
         {
             _passphrase = passphrase;
+        }
+
+        public void SetAuthMechanisms(params AuthMechanismFactory[] authMechanisms)
+        {
+            _authMechanisms = authMechanisms;
         }
     }
 }
