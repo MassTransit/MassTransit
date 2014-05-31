@@ -73,6 +73,25 @@ namespace MassTransit.Transports.Msmq.Tests
 		}
 
 		[Test]
+		public void Reading_a_single_message_with_long_type_name_should_return_one_message_selector()
+		{
+			Endpoint.Send(new SomeReallyLongNamespaceA.SomeReallyLongNamespaceB.SomeReallyLongNamespaceC.SomeReallyLongNamespaceD.SomeReallyLongNamespaceE.SomeReallyLongNamespaceF.SomeReallyLongNamespaceG.SomeReallyLongNamespaceH.SomeReallyLongNamespaceI.A());
+
+			int count = 0;
+			Endpoint.Receive(context =>
+			{
+				IConsumeContext<SomeReallyLongNamespaceA.SomeReallyLongNamespaceB.SomeReallyLongNamespaceC.SomeReallyLongNamespaceD.SomeReallyLongNamespaceE.SomeReallyLongNamespaceF.SomeReallyLongNamespaceG.SomeReallyLongNamespaceH.SomeReallyLongNamespaceI.A> longNamespaceContext;
+				context.TryGetContext(out longNamespaceContext).ShouldBeTrue();
+
+				count++;
+
+				return null;
+			}, TimeSpan.Zero);
+
+			Assert.AreEqual(1, count);
+		}
+
+		[Test]
 		public void Reading_from_an_empty_queue_should_just_return_an_empty_enumerator()
 		{
 			int count = 0;
@@ -140,5 +159,12 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			Assert.AreEqual(0, count);
 		}
+	}
+}
+
+namespace MassTransit.Transports.Msmq.Tests.SomeReallyLongNamespaceA.SomeReallyLongNamespaceB.SomeReallyLongNamespaceC.SomeReallyLongNamespaceD.SomeReallyLongNamespaceE.SomeReallyLongNamespaceF.SomeReallyLongNamespaceG.SomeReallyLongNamespaceH.SomeReallyLongNamespaceI
+{
+	public class A
+	{
 	}
 }
