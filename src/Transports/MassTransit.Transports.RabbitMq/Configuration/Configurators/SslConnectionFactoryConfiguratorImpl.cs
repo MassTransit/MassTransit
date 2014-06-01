@@ -15,9 +15,11 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
     using System.Collections.Generic;
     using System.Net.Security;
     using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
     using Builders;
     using Magnum.Extensions;
     using MassTransit.Configurators;
+    using RabbitMQ.Client;
 
 
     public class SslConnectionFactoryConfiguratorImpl :
@@ -29,6 +31,9 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
         bool _clientCertificateRequired = true; // Set to true to keep existing implementations
         string _passphrase;
         string _serverName;
+        bool _useExplicitCertificate = false;
+        AuthMechanismFactory[] _authMechanisms;
+        X509Certificate[] _certificates;
 
         public SslConnectionFactoryConfiguratorImpl()
         {
@@ -68,13 +73,24 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
                     }
                     else
                     {
-                        connectionFactory.Ssl.CertPath = _certificatePath;
-                        connectionFactory.Ssl.CertPassphrase = _passphrase;
+                        if (_useExplicitCertificate)
+                        {
+                            connectionFactory.Ssl.Certs = new X509CertificateCollection(_certificates);
+                        }
+                        else
+                        {
+                            connectionFactory.Ssl.CertPath = _certificatePath;
+                            connectionFactory.Ssl.CertPassphrase = _passphrase;
+                        }
                         connectionFactory.Ssl.ServerName = _serverName;
                     }
                     connectionFactory.Ssl.AcceptablePolicyErrors = _acceptablePolicyErrors;
                     connectionFactory.Ssl.Version = SslProtocols.Tls;
 
+                    if (_authMechanisms != null && _authMechanisms.Length > 0)
+                    {
+                        connectionFactory.AuthMechanisms = _authMechanisms;
+                    }
                     return connectionFactory;
                 });
 
@@ -88,10 +104,27 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
                 yield return
                     this.Failure("ServerName", "ServerName must be set or allow remote certificate name mismatch");
             }
-            if (_certificatePath.IsEmpty())
-                yield return this.Failure("CertificatePath", "CertificatePath must be specified");
-            if (_passphrase.IsEmpty())
-                yield return this.Failure("CertificatePassphrase", "CertificatePassphrase must be specified");
+            if (!_useExplicitCertificate)
+            {
+                if (_certificatePath.IsEmpty())
+                    yield return this.Failure("CertificatePath", "CertificatePath must be specified");
+                if (_passphrase.IsEmpty())
+                    yield return this.Failure("CertificatePassphrase", "CertificatePassphrase must be specified");
+            }
+            else
+            {
+                if (_certificates == null || _certificates.Length == 0)
+                    yield return this.Failure("Certificate", "Certificates must be loaded");
+            }
+        }
+
+        public void SetCertificates(params X509Certificate[] certificates)
+        {
+            _certificates = certificates;
+            if (_certificates != null && _certificates.Length > 0)
+            {
+                _useExplicitCertificate = true;
+            }
         }
 
         public void SetAcceptablePolicyErrors(SslPolicyErrors policyErrors)
@@ -117,6 +150,11 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
         public void SetCertificatePassphrase(string passphrase)
         {
             _passphrase = passphrase;
+        }
+
+        public void SetAuthMechanisms(params AuthMechanismFactory[] authMechanisms)
+        {
+            _authMechanisms = authMechanisms;
         }
     }
 }
