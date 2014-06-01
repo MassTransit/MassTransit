@@ -18,7 +18,8 @@ namespace MassTransit
     public static class RequestResponseExtensions
     {
         public static bool PublishRequest<TRequest>(this IServiceBus bus, TRequest message,
-            Action<InlineRequestConfigurator<TRequest>> configureCallback)
+            Action<InlineRequestConfigurator<TRequest>> configureCallback,
+            Action<IPublishContext<TRequest>> contextCallback = null)
             where TRequest : class
         {
             var configurator = new InlineRequestConfiguratorImpl<TRequest>(message);
@@ -26,14 +27,20 @@ namespace MassTransit
 
             IAsyncRequest<TRequest> request = configurator.Build(bus);
 
-            bus.Publish(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
+            bus.Publish(message, context =>
+            {
+                configurator.ApplyContext(context, bus.Endpoint.Address.Uri);
+                if (contextCallback != null)
+                    contextCallback(context);
+            });
 
             return request.Wait();
         }
 
         public static IAsyncResult BeginPublishRequest<TRequest>(this IServiceBus bus, TRequest message,
             AsyncCallback callback, object state,
-            Action<InlineRequestConfigurator<TRequest>> configureCallback)
+            Action<InlineRequestConfigurator<TRequest>> configureCallback,
+            Action<IPublishContext<TRequest>> contextCallback = null)
             where TRequest : class
         {
             var configurator = new InlineRequestConfiguratorImpl<TRequest>(message);
@@ -41,7 +48,12 @@ namespace MassTransit
 
             IAsyncRequest<TRequest> request = configurator.Build(bus);
 
-            bus.Publish(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
+            bus.Publish(message, context =>
+            {
+                configurator.ApplyContext(context, bus.Endpoint.Address.Uri);
+                if (contextCallback != null)
+                    contextCallback(context);
+            });
 
             return request.BeginAsync(callback, state);
         }
@@ -57,7 +69,8 @@ namespace MassTransit
         }
 
         public static bool SendRequest<TRequest>(this IEndpoint endpoint, TRequest message, IServiceBus bus,
-            Action<InlineRequestConfigurator<TRequest>> configureCallback)
+            Action<InlineRequestConfigurator<TRequest>> configureCallback,
+            Action<ISendContext<TRequest>> contextCallback = null)
             where TRequest : class
         {
             var configurator = new InlineRequestConfiguratorImpl<TRequest>(message);
@@ -65,13 +78,19 @@ namespace MassTransit
 
             IAsyncRequest<TRequest> request = configurator.Build(bus);
 
-            endpoint.Send(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
+            endpoint.Send(message, context =>
+            {
+                configurator.ApplyContext(context, bus.Endpoint.Address.Uri);
+                if (contextCallback != null)
+                    contextCallback(context);
+            });
 
             return request.Wait();
         }
 
         public static IAsyncResult BeginSendRequest<TRequest>(this IEndpoint endpoint, TRequest message, IServiceBus bus,
-            AsyncCallback callback, object state, Action<InlineRequestConfigurator<TRequest>> configureCallback)
+            AsyncCallback callback, object state, Action<InlineRequestConfigurator<TRequest>> configureCallback,
+            Action<ISendContext<TRequest>> contextCallback = null)
             where TRequest : class
         {
             var configurator = new InlineRequestConfiguratorImpl<TRequest>(message);
@@ -79,7 +98,12 @@ namespace MassTransit
             configureCallback(configurator);
             IAsyncRequest<TRequest> request = configurator.Build(bus);
 
-            endpoint.Send(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
+            endpoint.Send(message, context =>
+            {
+                configurator.ApplyContext(context, bus.Endpoint.Address.Uri);
+                if (contextCallback != null)
+                    contextCallback(context);
+            });
 
             return request.BeginAsync(callback, state);
         }
