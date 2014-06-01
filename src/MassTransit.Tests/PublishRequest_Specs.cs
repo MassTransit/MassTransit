@@ -85,7 +85,7 @@ namespace MassTransit.Tests
             RemoteBus.SubscribeContextHandler<PingMessage>(x =>
             {
                 pingReceived.Set(x.Message);
-                var transactionIdFromHeader = Guid.Parse(x.Headers["PingTransactionId"]);
+                var transactionIdFromHeader = new Guid(x.Headers["PingTransactionId"]);
                 x.Respond(new PongMessage { TransactionId = transactionIdFromHeader });
             });
             LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
@@ -218,7 +218,7 @@ namespace MassTransit.Tests
             RemoteBus.SubscribeContextHandler<PingMessage>(x =>
             {
                 pingReceived.Set(x.Message);
-                var transactionIdFromHeader = Guid.Parse(x.Headers["PingTransactionId"]);
+                var transactionIdFromHeader = new Guid(x.Headers["PingTransactionId"]);
                 x.Respond(new PongMessage { TransactionId = transactionIdFromHeader });
             });
             LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
