@@ -13,11 +13,20 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading;
 
 
     public interface ConsumeContext :
         MessageContext
     {
+        /// <summary>
+        /// The cancellation token that is cancelled when the receive context is cancelled
+        /// </summary>
+        CancellationToken CancellationToken { get; }
+
+        /// <summary>
+        /// The original receive context
+        /// </summary>
         ReceiveContext ReceiveContext { get; }
 
         /// <summary>
@@ -35,6 +44,22 @@ namespace MassTransit
         /// <returns></returns>
         bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
             where T : class;
+
+        /// <summary>
+        /// Notify that the message has been consumed
+        /// </summary>
+        /// <param name="elapsed"></param>
+        /// <param name="messageType">The message type</param>
+        /// <param name="consumerType">The consumer type</param>
+        void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType);
+
+        /// <summary>
+        /// Notify that a message consumer has faulted
+        /// </summary>
+        /// <param name="messageType"></param>
+        /// <param name="consumerType"></param>
+        /// <param name="exception"></param>
+        void NotifyFaulted(string messageType, string consumerType, Exception exception);
     }
 
 
@@ -43,5 +68,19 @@ namespace MassTransit
         where T : class
     {
         T Message { get; }
+
+        /// <summary>
+        /// Notify that the message has been consumed
+        /// </summary>
+        /// <param name="elapsed"></param>
+        /// <param name="consumerType">The consumer type</param>
+        void NotifyConsumed(TimeSpan elapsed, string consumerType);
+
+        /// <summary>
+        /// Notify that a fault occurred during message consumption
+        /// </summary>
+        /// <param name="consumerType"></param>
+        /// <param name="exception"></param>
+        void NotifyFaulted(string consumerType, Exception exception);
     }
 }

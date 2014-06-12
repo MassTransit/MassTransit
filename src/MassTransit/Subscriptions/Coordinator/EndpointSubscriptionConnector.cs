@@ -13,7 +13,6 @@
 namespace MassTransit.Subscriptions.Coordinator
 {
     using System;
-    using Magnum.Extensions;
     using Pipeline;
 
     public interface EndpointSubscriptionConnector
@@ -37,32 +36,6 @@ namespace MassTransit.Subscriptions.Coordinator
             IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
 
             return _bus.OutboundPipeline.ConnectEndpoint<TMessage>(endpoint);
-        }
-    }
-
-    public class EndpointSubscriptionConnector<TMessage, TKey> :
-        EndpointSubscriptionConnector
-        where TMessage : class, CorrelatedBy<TKey>
-    {
-        readonly IServiceBus _bus;
-        readonly Func<string, TKey> _converter;
-
-        public EndpointSubscriptionConnector(IServiceBus bus, Func<string, TKey> converter)
-        {
-            _bus = bus;
-            _converter = converter;
-        }
-
-        public UnsubscribeAction Connect(Uri endpointUri, string correlationId)
-        {
-            IEndpoint endpoint = _bus.GetEndpoint(endpointUri);
-
-            if (correlationId.IsEmpty())
-                return _bus.OutboundPipeline.ConnectEndpoint<TMessage>(endpoint);
-
-            TKey key = _converter(correlationId);
-
-            return _bus.OutboundPipeline.ConnectEndpoint<TMessage, TKey>(key, endpoint);
         }
     }
 }

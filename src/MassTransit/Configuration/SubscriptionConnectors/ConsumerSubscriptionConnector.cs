@@ -17,12 +17,21 @@ namespace MassTransit.SubscriptionConnectors
     using Pipeline.Configuration;
     using Pipeline.Sinks;
     using Magnum.Extensions;
+    using Util;
+
 
     /// <summary>
     /// A connector for a specific message. Objects implementing this interface should be able to
     /// both do <see cref="ConsumerConnector"/> and be typed to a specific message.
     /// </summary>
     public interface ConsumerSubscriptionConnector :
+        ConsumerConnector
+    {
+        Type MessageType { get; }
+    }
+
+
+    public interface ConsumerMessageConnector :
         ConsumerConnector
     {
         Type MessageType { get; }
@@ -49,6 +58,48 @@ namespace MassTransit.SubscriptionConnectors
             var sink = new ConsumerMessageSink<TConsumer, TMessage>(consumerFactory);
 
             return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
+        }
+
+        public ConnectHandle Connect<TConsumer1>(IInboundMessagePipe pipe, IAsyncConsumerFactory<TConsumer1> consumerFactory) where TConsumer1 : class
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ConsumerMessageConnector<TConsumer, TMessage> :
+        ConsumerMessageConnector
+        where TConsumer : class, IConsumer<TMessage>
+        where TMessage : class
+    {
+        public Type MessageType
+        {
+            get { return typeof (TMessage); }
+        }
+
+        readonly IConsumerMessageAdapter<TConsumer, TMessage> _adapter;
+
+        public ConsumerMessageConnector(IConsumerMessageAdapter<TConsumer, TMessage> adapter)
+        {
+            _adapter = adapter;
+        }
+
+        public UnsubscribeAction Connect<TConsumer1>(IInboundPipelineConfigurator configurator, IConsumerFactory<TConsumer1> consumerFactory)
+            where TConsumer1 : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public ConnectHandle Connect<T>(IInboundMessagePipe pipe, IAsyncConsumerFactory<T> consumerFactory) 
+            where T : class
+        {
+            var factory = consumerFactory as IAsyncConsumerFactory<TConsumer>;
+            if (factory == null)
+                throw new ArgumentException("The consumer factory type does not match: "
+                                            + TypeMetadataCache<T>.ShortName);
+
+            var messagePipe = new ConsumerMessagePipe<TConsumer, TMessage>(factory, _adapter);
+
+            return pipe.Connect(messagePipe);
         }
     }
 }

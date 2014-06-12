@@ -62,28 +62,31 @@ namespace MassTransit.Transports.RabbitMq
             Console.WriteLine("Max consumers: {0}", _max);
         }
 
-        public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
+        public async void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange,
+            string routingKey,
             IBasicProperties properties, byte[] body)
         {
-            var current = Interlocked.Increment(ref _current);
-            if (current > _max)
-                _max = current;
+            int current = Interlocked.Increment(ref _current);
+            while (current > _max)
+                Interlocked.CompareExchange(ref _max, current, _max);
 
-            var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, _inputAddress, deliveryTag, body, redelivered, properties);
+            try
+            {
+                var context = new RabbitMQReceiveContext(exchange, routingKey, _consumerTag, _inputAddress, deliveryTag,
+                    body, redelivered, properties);
 
-            var task = _taskFactory(context);
+                await _taskFactory(context);
 
-            task.ContinueWith(innerTask =>
-                {
-                    Interlocked.Decrement(ref _current);
-
-                    if (innerTask.Status == TaskStatus.RanToCompletion)
-                        _model.BasicAck(deliveryTag, false);
-                    else
-                    {
-                        _model.BasicNack(deliveryTag, false, true);
-                    }
-                });
+                _model.BasicAck(deliveryTag, false);
+            }
+            catch (Exception)
+            {
+                _model.BasicNack(deliveryTag, false, true);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _current);
+            }
         }
 
         public IModel Model

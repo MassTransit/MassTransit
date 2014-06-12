@@ -15,6 +15,7 @@ namespace MassTransit.Transports.RabbitMq
     using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Threading;
     using RabbitMQ.Client;
 
 
@@ -35,6 +36,7 @@ namespace MassTransit.Transports.RabbitMq
         readonly string _routingKey;
         string _contentType;
         RabbitMqReceiveContextHeaders _headers;
+        CancellationTokenSource _cancellationTokenSource;
 
         public RabbitMqReceiveContext(string exchange, string routingKey, string consumerTag, Uri inputAddress, ulong deliveryTag,
             byte[] body, bool redelivered, IBasicProperties properties)
@@ -49,6 +51,8 @@ namespace MassTransit.Transports.RabbitMq
             _properties = properties;
             _inputAddress = inputAddress;
             _consumerTag = consumerTag;
+
+            _cancellationTokenSource = new CancellationTokenSource();
         }
 
         public string ConsumerTag
@@ -74,6 +78,11 @@ namespace MassTransit.Transports.RabbitMq
         public IBasicProperties Properties
         {
             get { return _properties; }
+        }
+
+        public CancellationToken CancellationToken
+        {
+            get { return _cancellationTokenSource.Token; }
         }
 
         public Stream Body
@@ -104,6 +113,16 @@ namespace MassTransit.Transports.RabbitMq
         public Headers Headers
         {
             get { return _headers ?? (_headers = new RabbitMqReceiveContextHeaders(this)); }
+        }
+
+        public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
+        {
+            
+        }
+
+        public void NotifyFaulted(string messageType, string consumerType, Exception exception)
+        {
+            
         }
 
         string GetContentType()
