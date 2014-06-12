@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,31 +13,31 @@
 namespace MassTransit.SubscriptionBuilders
 {
     using Pipeline;
-    using SubscriptionConnectors;
+    using Pipeline.Sinks;
     using Subscriptions;
+
 
     public class HandlerSubscriptionBuilder<TMessage> :
         SubscriptionBuilder
         where TMessage : class
     {
-        readonly HandlerSubscriptionConnector<TMessage> _connector;
-        readonly HandlerSelector<TMessage> _handler;
+        readonly MessageHandler<TMessage> _handler;
         readonly ReferenceFactory _referenceFactory;
+        readonly IMessageRetryPolicy _retryPolicy;
 
-        public HandlerSubscriptionBuilder(HandlerSelector<TMessage> handler,
+        public HandlerSubscriptionBuilder(MessageHandler<TMessage> handler, IMessageRetryPolicy retryPolicy,
             ReferenceFactory referenceFactory)
         {
             _handler = handler;
             _referenceFactory = referenceFactory;
-
-            _connector = new HandlerSubscriptionConnector<TMessage>();
+            _retryPolicy = retryPolicy;
         }
 
-        public ISubscriptionReference Subscribe(IInboundPipelineConfigurator configurator)
+        public ISubscriptionReference Subscribe(IInboundMessagePipe pipe)
         {
-            UnsubscribeAction unsubscribe = _connector.Connect(configurator, _handler);
+            ConnectHandle handle = pipe.ConnectHandler(_handler, _retryPolicy);
 
-            return _referenceFactory(unsubscribe);
+            return _referenceFactory(handle);
         }
     }
 }

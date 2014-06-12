@@ -67,8 +67,9 @@ namespace MassTransit.Distributor.DistributorConnectors
             IWorkerSelector<TMessage> workerSelector = _workerSelectorFactory.GetSelector<TMessage>();
 
             var sink = new DistributorMessageSink<TMessage>(workerAvailability, workerSelector);
+            throw new NotImplementedException();
 
-            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
+//            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
         }
 
         static Func<TMessage, Guid> GetCorrelationIdSelector(EventBinder<TSaga> binder)

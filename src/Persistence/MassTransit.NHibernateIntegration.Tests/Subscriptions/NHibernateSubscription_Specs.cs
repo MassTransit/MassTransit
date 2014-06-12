@@ -108,7 +108,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Subscriptions
 
             configurator.UseNHibernateSubscriptionStorage(_sessionFactory);
 
-            configurator.Subscribe(x => { x.Handler<Hello>(message => { }); });
+            configurator.Subscribe(x => { x.Handler<Hello>(async message => { }); });
         }
 
         interface Hello

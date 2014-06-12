@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Subscriptions
 	using Examples.Messages;
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
+	using MassTransit.Pipeline;
 	using MassTransit.Transports.Loopback;
 	using TestFramework;
 	using TestFramework.Fixtures;
@@ -25,7 +26,7 @@ namespace MassTransit.Tests.Subscriptions
 		TwoBusTestFixture<LoopbackTransportFactory>
 	{
 		SimpleMessage _message;
-		UnsubscribeAction _unsubscribeAction;
+		ConnectHandle _connectHandle;
 
 		public When_publishing_to_a_remote_subscriber()
 		{
@@ -37,7 +38,7 @@ namespace MassTransit.Tests.Subscriptions
 		public void Publishing_to_a_remote_subscriber()
 		{
 			Consumer = new ConsumerOf<SimpleMessage>();
-			_unsubscribeAction = RemoteBus.SubscribeInstance(Consumer);
+			_connectHandle = RemoteBus.SubscribeInstance(Consumer);
 
 			RemoteBus.ShouldHaveSubscriptionFor<SimpleMessage>();
 			
@@ -50,7 +51,7 @@ namespace MassTransit.Tests.Subscriptions
 		[Finally]
 		public void Finally()
 		{
-			_unsubscribeAction();
+			_connectHandle.Disconnect();
 		}
 
 		protected ConsumerOf<SimpleMessage> Consumer { get; private set; }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,9 @@
 namespace MassTransit.Configuration
 {
     using System;
-    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Exceptions;
-    using Pipeline;
+    using Util;
 
 
     public class DelegateConsumerFactory<TConsumer> :
@@ -29,21 +29,56 @@ namespace MassTransit.Configuration
             _factoryMethod = factoryMethod;
         }
 
-        public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
-            IConsumeContext<TMessage> context, InstanceHandlerSelector<TConsumer, TMessage> selector)
-            where TMessage : class
+        async Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
+            ConsumerFactoryCallback<TConsumer, TMessage> callback)
         {
-            TConsumer consumer = _factoryMethod();
-            if (consumer == null)
-                throw new ConfigurationException(string.Format("Unable to resolve consumer type '{0}'.",
-                    typeof(TConsumer)));
-
+            TConsumer consumer = null;
             try
             {
-                foreach (var handler in selector(consumer, context))
+                consumer = _factoryMethod();
+                if (consumer == null)
                 {
-                    yield return handler;
+                    throw new ConsumerException(string.Format("Unable to resolve consumer type '{0}'.",
+                        TypeMetadataCache<TConsumer>.ShortName));
                 }
+
+                await callback(consumer, consumeContext);
+            }
+            finally
+            {
+                var disposable = consumer as IDisposable;
+                if (disposable != null)
+                    disposable.Dispose();
+            }
+        }
+    }
+
+
+    public class DelegateAsyncConsumerFactory<TConsumer> :
+        IAsyncConsumerFactory<TConsumer>
+        where TConsumer : class
+    {
+        readonly Func<TConsumer> _factoryMethod;
+
+        public DelegateAsyncConsumerFactory(Func<TConsumer> factoryMethod)
+        {
+            _factoryMethod = factoryMethod;
+        }
+
+        async Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
+            ConsumerFactoryCallback<TConsumer, TMessage> callback)
+        {
+            TConsumer consumer = null;
+            try
+            {
+                consumer = _factoryMethod();
+                if (consumer == null)
+                {
+                    throw new ConsumerException(string.Format("Unable to resolve consumer type '{0}'.",
+                        TypeMetadataCache<TConsumer>.ShortName));
+                }
+
+                await callback(consumer, consumeContext);
             }
             finally
             {

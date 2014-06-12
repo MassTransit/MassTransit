@@ -21,6 +21,8 @@ namespace BusDriver.Commands
 	using MassTransit.Logging;
 	using Magnum.Extensions;
 	using MassTransit;
+	using MassTransit.Pipeline;
+
 
     public class TraceCommand :
 		Consumes<ReceivedMessageTraceList>.All,
@@ -31,7 +33,7 @@ namespace BusDriver.Commands
 		readonly ManualResetEvent _complete;
 		readonly int _count;
 		readonly string _uriString;
-		UnsubscribeAction _unsubscribe;
+		ConnectHandle _unsubscribe;
 
 		public TraceCommand(string uriString, int count)
 		{
@@ -61,8 +63,8 @@ namespace BusDriver.Commands
 
 		public void Consume(ReceivedMessageTraceList list)
 		{
-			if (_unsubscribe != null)
-				_unsubscribe();
+		    if (_unsubscribe != null)
+		        _unsubscribe.Disconnect();
 			_unsubscribe = null;
 
 			ITextBlock text = new TextBlock()

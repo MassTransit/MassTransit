@@ -21,7 +21,7 @@ namespace MassTransit.Distributor.DistributorConnectors
     {
         Type MessageType { get; }
 
-        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IDistributor distributor);
+        ConnectHandle Connect(IInboundMessagePipe configurator, IDistributor distributor);
     }
 
     public class MessageDistributorConnector<TMessage> :
@@ -40,6 +40,16 @@ namespace MassTransit.Distributor.DistributorConnectors
             get { return typeof(TMessage); }
         }
 
+        public ConnectHandle Connect(IInboundMessagePipe configurator, IDistributor distributor)
+        {
+            IWorkerAvailability<TMessage> workerAvailability = distributor.GetWorkerAvailability<TMessage>();
+
+            IWorkerSelector<TMessage> workerSelector = _workerSelectorFactory.GetSelector<TMessage>();
+
+            throw new NotImplementedException();
+    
+        }
+
         public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
         {
             IWorkerAvailability<TMessage> workerAvailability = distributor.GetWorkerAvailability<TMessage>();
@@ -47,8 +57,9 @@ namespace MassTransit.Distributor.DistributorConnectors
             IWorkerSelector<TMessage> workerSelector = _workerSelectorFactory.GetSelector<TMessage>();
 
             var sink = new DistributorMessageSink<TMessage>(workerAvailability, workerSelector);
+            throw new NotImplementedException();
 
-            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
+//            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
         }
     }
 }

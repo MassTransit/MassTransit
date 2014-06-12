@@ -17,12 +17,6 @@ namespace MassTransit.Pipeline.Sinks
     using Util;
 
 
-    public interface ConnectHandle
-    {
-        void Disconnect();
-    }
-
-
     /// <summary>
     ///     Routes messages to instances of subscribed components. A new instance of the component
     ///     is created from the container for each message received.
@@ -43,7 +37,8 @@ namespace MassTransit.Pipeline.Sinks
 
         public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
         {
-            return _consumerFactory.GetConsumer(context, Selector);
+            throw new NotImplementedException();
+            //            return _consumerFactory.GetConsumer(context, Selector);
         }
 
         public bool Inspect(IPipelineInspector inspector)

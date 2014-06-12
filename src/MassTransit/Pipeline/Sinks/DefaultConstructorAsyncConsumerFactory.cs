@@ -17,7 +17,7 @@ namespace MassTransit.Pipeline.Sinks
 
 
     public class DefaultConstructorAsyncConsumerFactory<TConsumer> :
-        IAsyncConsumerFactory<TConsumer>
+        IConsumerFactory<TConsumer>
         where TConsumer : class, new()
     {
         public async Task GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,

@@ -53,6 +53,10 @@ namespace MassTransit.Testing
 			_context = context;
 		}
 
+		public ReceivedMessageImpl(ConsumeContext<T> context)
+		{
+		}
+
 		public Exception Exception
 		{
 			get { return _exception; }

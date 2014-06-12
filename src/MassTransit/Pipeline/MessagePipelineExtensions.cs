@@ -128,14 +128,8 @@ namespace MassTransit.Pipeline
 		public static UnsubscribeAction ConnectConsumer<TComponent>(this IInboundMessagePipeline pipeline)
 			where TComponent : class, new()
 		{
-			return pipeline.Configure(x =>
-				{
-					var consumerFactory = new DelegateConsumerFactory<TComponent>(() => new TComponent());
-
-					ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<TComponent>();
-					return connector.Connect(x, consumerFactory);
-				});
-		}
+		    throw new NotImplementedException();
+        }
 
 		/// <summary>
 		/// Subscribe a component type to the pipeline that is resolved from the container for each message
@@ -148,14 +142,8 @@ namespace MassTransit.Pipeline
 		                                                           Func<TConsumer> consumerFactory)
 			where TConsumer : class
 		{
-			return pipeline.Configure(x =>
-				{
-					var factory = new DelegateConsumerFactory<TConsumer>(consumerFactory);
-
-					ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<TConsumer>();
-				    return connector.Connect(x, factory);
-				});
-		}
+            throw new NotImplementedException();
+        }
 
 		/// <summary>
 		/// Subscribe a component to the pipeline that handles every message
@@ -167,11 +155,12 @@ namespace MassTransit.Pipeline
 		public static UnsubscribeAction ConnectInstance<TComponent>(this IInboundMessagePipeline pipeline, TComponent instance)
 			where TComponent : class
 		{
-			return pipeline.Configure(x =>
-				{
-					InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<TComponent>();
-					return connector.Connect(x, instance);
-				});
+            throw new NotImplementedException();
+            //			return pipeline.Configure(x =>
+//				{
+//					InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<TComponent>();
+//					return connector.Connect(x, instance);
+//				});
 		}
 
 		public static UnsubscribeAction ConnectHandler<TMessage>(this IInboundMessagePipeline pipeline,

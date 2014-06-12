@@ -30,7 +30,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
             _receivedB = new Future<B>();
 
-            configurator.Subscribe(s => s.Handler<B>(message => _receivedB.Complete(message)));
+            configurator.Subscribe(s => s.Handler<B>(async message => _receivedB.Complete(message.Message)));
         }
 
         [When]

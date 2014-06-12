@@ -86,7 +86,7 @@ namespace MassTransit.Tests.Serialization
 				sbc.ReceiveFrom(self);
 				// Ensure outbound message are serialized and encrypted
 				sbc.SetDefaultSerializer(serializer);
-				sbc.Subscribe(s => s.Handler<PingMessage>((context, message) => context.Respond(new PongMessage(message.CorrelationId))));
+				sbc.Subscribe(s => s.Handler<PingMessage>(async (context) => context.Respond(new PongMessage(context.Message.CorrelationId))));
 			}))
 			{
 				var selfEndpoint = bus.GetEndpoint(new Uri(self));

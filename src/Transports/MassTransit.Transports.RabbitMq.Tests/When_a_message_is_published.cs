@@ -34,8 +34,8 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
 			configurator.Subscribe(s =>
 				{
-					s.Handler<A>(message => _received.Complete(message));
-					s.Handler<B>(message => _receivedB.Complete(message));
+					s.Handler<A>(async message => _received.Complete(message.Message));
+					s.Handler<B>(async message => _receivedB.Complete(message.Message));
 				});
 		}
 
@@ -91,8 +91,8 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
 			configurator.Subscribe(s =>
 				{
-					s.Handler<A>(message => _received.Complete(message));
-					s.Handler<B>(message => _receivedB.Complete(message));
+					s.Handler<A>(async message => _received.Complete(message.Message));
+					s.Handler<B>(async message => _receivedB.Complete(message.Message));
 				});
 		}
 

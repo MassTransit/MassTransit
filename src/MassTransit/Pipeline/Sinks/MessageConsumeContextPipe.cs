@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Sinks
 {
     using System;
     using System.Threading.Tasks;
-    using Exceptions;
     using Util;
 
 
@@ -61,10 +60,9 @@ namespace MassTransit.Pipeline.Sinks
             ConsumeContext<TMessage> consumeContext;
             if (context.TryGetMessage(out consumeContext))
             {
-                if(_connections.Count > 0)  
+                if (_connections.Count > 0)
                     await _connections.PreDispatch(consumeContext);
 
-                Exception exception = null;
                 try
                 {
                     await _output.Send(consumeContext);
@@ -74,15 +72,11 @@ namespace MassTransit.Pipeline.Sinks
                 }
                 catch (Exception ex)
                 {
-                    exception = ex;
-                }
-
-                if (exception != null)
-                {
+                    // we can't await in a catch block, so we have to wait explicitly on this one
                     if (_connections.Count > 0)
-                        await _connections.DispatchFaulted(consumeContext, exception);
+                        _connections.DispatchFaulted(consumeContext, ex).Wait(context.CancellationToken);
 
-                    throw new MessageException(typeof(TMessage), "The message consumer faulted", exception);
+                    throw;
                 }
             }
         }

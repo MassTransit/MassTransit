@@ -13,29 +13,39 @@
 namespace MassTransit.Util
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using Magnum.Extensions;
-
-
-    public interface ITypeMetadataCache<T>
-    {
-        string ShortName { get; }
-    }
+    using Saga;
 
 
     public class TypeMetadataCache<T> :
         ITypeMetadataCache<T>
     {
+        readonly Lazy<bool> _hasSagaInterfaces;
+
         readonly string _shortName;
 
-        public TypeMetadataCache()
+        TypeMetadataCache()
         {
             _shortName = typeof(T).ToShortTypeName();
+
+            _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
         }
 
         public static string ShortName
         {
             get { return InstanceCache.Cached.Value.ShortName; }
+        }
+
+        public static bool HasSagaInterfaces
+        {
+            get { return InstanceCache.Cached.Value.HasSagaInterfaces; }
+        }
+
+        bool ITypeMetadataCache<T>.HasSagaInterfaces
+        {
+            get { return _hasSagaInterfaces.Value; }
         }
 
 
@@ -44,8 +54,23 @@ namespace MassTransit.Util
             get { return _shortName; }
         }
 
+        static bool ScanForSagaInterfaces()
+        {
+            Type[] interfaces = typeof(T).GetInterfaces();
 
-        internal static class InstanceCache
+            if (interfaces.Contains(typeof(ISaga)))
+                return true;
+
+            if (interfaces.Any(x => x.GetGenericTypeDefinition() == typeof(InitiatedBy<>))
+                || interfaces.Any(x => x.GetGenericTypeDefinition() == typeof(Orchestrates<>))
+                || interfaces.Any(x => x.GetGenericTypeDefinition() == typeof(Observes<,>)))
+                return true;
+
+            return false;
+        }
+
+
+        static class InstanceCache
         {
             internal static readonly Lazy<ITypeMetadataCache<T>> Cached = new Lazy<ITypeMetadataCache<T>>(
                 () => new TypeMetadataCache<T>(), LazyThreadSafetyMode.PublicationOnly);

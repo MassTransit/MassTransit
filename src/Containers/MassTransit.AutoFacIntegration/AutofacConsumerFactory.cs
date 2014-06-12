@@ -1,29 +1,30 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration
 {
-    using System;
-    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Autofac;
     using Exceptions;
-    using Pipeline;
+    using Pipeline.Sinks;
+    using Util;
 
-    public class AutofacConsumerFactory<T> :
-        IConsumerFactory<T>
-        where T : class
+
+    public class AutofacConsumerFactory<TConsumer> :
+        IConsumerFactory<TConsumer>
+        where TConsumer : class
     {
-        readonly ILifetimeScope _scope;
         readonly string _name;
+        readonly ILifetimeScope _scope;
 
         public AutofacConsumerFactory(ILifetimeScope scope, string name)
         {
@@ -31,21 +32,19 @@ namespace MassTransit.AutofacIntegration
             _name = name;
         }
 
-        public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(
-            IConsumeContext<TMessage> context, InstanceHandlerSelector<T, TMessage> selector)
-            where TMessage : class
+        async Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
+            ConsumerFactoryCallback<TConsumer, TMessage> callback)
         {
-            using (var innerScope = _scope.BeginLifetimeScope(_name))
+            using (ILifetimeScope innerScope = _scope.BeginLifetimeScope(_name))
             {
-                var consumer = innerScope.Resolve<T>();
+                var consumer = innerScope.Resolve<TConsumer>();
                 if (consumer == null)
-                    throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ",
-                        typeof (T)));
-
-                foreach (var handler in selector(consumer, context))
                 {
-                    yield return handler;
+                    throw new ConsumerException(string.Format("Unable to resolve consumer type '{0}'.",
+                        TypeMetadataCache<TConsumer>.ShortName));
                 }
+
+                await callback(consumer, consumeContext);
             }
         }
     }

@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,15 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-    using System;
-    using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Logging;
     using Messages;
 
+
     public class MessageWorkerAvailability<TMessage> :
         IWorkerAvailability<TMessage>,
-        Consumes<WorkerAvailable<TMessage>>.Context
+        IConsumer<WorkerAvailable<TMessage>>
         where TMessage : class
     {
         static readonly ILog _log = Logger.Get<MessageWorkerAvailability<TMessage>>();
@@ -32,17 +32,17 @@ namespace MassTransit.Distributor
             _workerCache = workerCache;
         }
 
-        public void Consume(IConsumeContext<WorkerAvailable<TMessage>> context)
+        public async Task Consume(ConsumeContext<WorkerAvailable<TMessage>> context)
         {
             IWorkerInfo<TMessage> worker = _workerCache.GetWorker<TMessage>(context.Message.ControlUri, x =>
-                {
-                    if(_log.IsInfoEnabled)
-                        _log.InfoFormat("Discovered New Worker: {0}", context.Message.ControlUri);
+            {
+                if (_log.IsInfoEnabled)
+                    _log.InfoFormat("Discovered New Worker: {0}", context.Message.ControlUri);
 
-                    WorkerInfo workerInfo = new WorkerInfo(context.Message.ControlUri, context.Message.DataUri);
+                var workerInfo = new WorkerInfo(context.Message.ControlUri, context.Message.DataUri);
 
-                    return new WorkerInfo<TMessage>(workerInfo);
-                });
+                return new WorkerInfo<TMessage>(workerInfo);
+            });
 
             worker.Update(context.Message.InProgress,
                 context.Message.InProgressLimit,
@@ -51,23 +51,16 @@ namespace MassTransit.Distributor
                 context.Message.Updated);
 
             if (_log.IsDebugEnabled)
+            {
                 _log.DebugFormat("Worker {0}: {1} in progress, {2} pending", worker.DataUri, worker.InProgress,
                     worker.Pending);
+            }
         }
 
-        IEnumerable<Action<IConsumeContext<TMessage>>> IWorkerAvailability<TMessage>.GetWorker(
-            IConsumeContext<TMessage> context,
-            Func<IWorkerInfo<TMessage>, IEnumerable<Action<IConsumeContext<TMessage>>>> selector,
+        IWorkerInfo<TMessage> IWorkerAvailability<TMessage>.GetWorker(ConsumeContext<TMessage> context,
             IWorkerSelector<TMessage> workerSelector)
         {
-            return _workerCache.GetAvailableWorkers(context, workerSelector)
-                .Take(1)
-                .SelectMany(worker =>
-                    {
-                        worker.Assigned();
-
-                        return selector(worker);
-                    });
+            return _workerCache.GetAvailableWorkers(context, workerSelector).FirstOrDefault();
         }
     }
 }

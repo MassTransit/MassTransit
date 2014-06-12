@@ -31,7 +31,8 @@ namespace MassTransit.Pipeline.Sinks
         Task PreDispatch(ConsumeContext<TMessage> context);
 
         /// <summary>
-        /// Called after the message has been dispatched to all consumers
+        /// Called after the message has been dispatched to all consumers - note that in the case of an exception
+        /// this method is not called, and the DispatchFaulted method is called instead
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>

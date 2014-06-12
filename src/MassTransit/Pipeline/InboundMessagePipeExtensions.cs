@@ -12,22 +12,48 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    using System;
+    using MassTransit.Configuration;
     using Sinks;
     using SubscriptionConnectors;
 
 
     public static class InboundMessagePipeExtensions
     {
-        public static ConnectHandle ConnectHandler<T>(this IInboundMessagePipe pipe, MessageHandler<T> handler)
+        public static ConnectHandle ConnectHandler<T>(this IInboundMessagePipe pipe, MessageHandler<T> handler,
+            IMessageRetryPolicy retryPolicy = null)
             where T : class
         {
-            return HandlerMetadataCache<T>.Connector.Connect(pipe, handler);
+            return HandlerConnectorCache<T>.Connector.Connect(pipe, handler, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IInboundMessagePipe pipe, IAsyncConsumerFactory<T> consumerFactory)
+        public static ConnectHandle ConnectConsumer<T>(this IInboundMessagePipe pipe,
+            IAsyncConsumerFactory<T> consumerFactory, IMessageRetryPolicy retryPolicy = null)
             where T : class
         {
-            return ConsumerMetadataCache<T>.Connector.Connect(pipe, consumerFactory);
+            return ConsumerConnectorCache<T>.Connector.Connect(pipe, consumerFactory, retryPolicy ?? Retry.None);
+        }
+
+        public static ConnectHandle ConnectConsumer<T>(this IInboundMessagePipe pipe,
+            IMessageRetryPolicy retryPolicy = null)
+            where T : class, new()
+        {
+            var consumerFactory = new DefaultConstructorAsyncConsumerFactory<T>();
+
+            ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
+
+            return connector.Connect(pipe, consumerFactory, retryPolicy ?? Retry.None);
+        }
+
+        public static ConnectHandle ConnectConsumer<T>(this IInboundMessagePipe pipe, Func<T> factoryMethod,
+            IMessageRetryPolicy retryPolicy = null)
+            where T : class
+        {
+            var consumerFactory = new DelegateAsyncConsumerFactory<T>(factoryMethod);
+
+            ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
+
+            return connector.Connect(pipe, consumerFactory, retryPolicy ?? Retry.None);
         }
     }
 }

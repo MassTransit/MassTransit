@@ -12,25 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConnectors
 {
-    using System;
-    using Pipeline;
-    using Pipeline.Sinks;
-    using Util;
-
-    public class HandlerMessageConnector<TMessage> :
-        MessageConnector
-        where TMessage : class
+    public interface IInstanceConnectorCache<T>
     {
-        public ConnectHandle Connect<T>(IInboundMessagePipe pipe, MessageHandler<T> handler)
-            where T : class
-        {
-            var messageHandler = handler as MessageHandler<TMessage>;
-            if (messageHandler == null)
-                throw new ArgumentException("The message handler type does not match: " + TypeMetadataCache<T>.ShortName);
-
-            var messagePipe = new HandlerMessagePipe<TMessage>(messageHandler);
-
-            return pipe.Connect(messagePipe);
-        }
+        InstanceConnector Connector { get; }
     }
 }

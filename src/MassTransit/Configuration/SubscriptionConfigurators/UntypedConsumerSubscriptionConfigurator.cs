@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,9 @@ namespace MassTransit.SubscriptionConfigurators
     using Configuration;
     using Configurators;
     using Magnum.Extensions;
+    using Pipeline.Sinks;
     using SubscriptionBuilders;
+
 
     public class UntypedConsumerSubscriptionConfigurator<TConsumer> :
         SubscriptionConfiguratorImpl<ConsumerSubscriptionConfigurator>,
@@ -27,7 +29,8 @@ namespace MassTransit.SubscriptionConfigurators
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-        public UntypedConsumerSubscriptionConfigurator(Func<Type, object> consumerFactory)
+        public UntypedConsumerSubscriptionConfigurator(Func<Type, object> consumerFactory, IMessageRetryPolicy retryPolicy)
+            : base(retryPolicy)
         {
             _consumerFactory =
                 new DelegateConsumerFactory<TConsumer>(() => (TConsumer)consumerFactory(typeof(TConsumer)));
@@ -39,14 +42,17 @@ namespace MassTransit.SubscriptionConfigurators
                 yield return this.Failure("The consumer factory cannot be null.");
 
             if (!typeof(TConsumer).Implements<IConsumer>())
+            {
                 yield return
-                    this.Warning(string.Format("The consumer class {0} does not implement any IMessageConsumer interfaces",
-                        typeof(TConsumer).ToShortTypeName()));
+                    this.Warning(
+                        string.Format("The consumer class {0} does not implement any IMessageConsumer interfaces",
+                            typeof(TConsumer).ToShortTypeName()));
+            }
         }
 
         public SubscriptionBuilder Configure()
         {
-            return new ConsumerSubscriptionBuilder<TConsumer>(_consumerFactory, ReferenceFactory);
+            return new ConsumerSubscriptionBuilder<TConsumer>(_consumerFactory, RetryPolicy, ReferenceFactory);
         }
     }
 }

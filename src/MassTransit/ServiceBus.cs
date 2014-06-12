@@ -27,7 +27,6 @@ namespace MassTransit
     using Pipeline;
     using Pipeline.Configuration;
     using Stact;
-    using Threading;
     using Util;
 
     /// <summary>
@@ -40,8 +39,6 @@ namespace MassTransit
     {
         static readonly ILog _log;
 
-        ConsumerPool _consumerPool;
-        int _consumerThreadLimit = Environment.ProcessorCount*4;
         ServiceBusInstancePerformanceCounters _counters;
         volatile bool _disposed;
         UntypedChannel _eventChannel;
@@ -71,7 +68,6 @@ namespace MassTransit
         public ServiceBus(IEndpoint endpointToListenOn,
             IEndpointCache endpointCache, bool enablePerformanceCounters)
         {
-            ReceiveTimeout = TimeSpan.FromSeconds(3);
             Guard.AgainstNull(endpointToListenOn, "endpointToListenOn", "This parameter cannot be null");
             Guard.AgainstNull(endpointCache, "endpointFactory", "This parameter cannot be null");
 
@@ -84,6 +80,8 @@ namespace MassTransit
 
             OutboundPipeline = new OutboundPipelineConfigurator(this).Pipeline;
             InboundPipeline = InboundPipelineConfigurator.CreateDefault(this);
+
+            InboundPipe = new InboundMessagePipe();
 
             if(enablePerformanceCounters)
                 InitializePerformanceCounters();
@@ -102,31 +100,6 @@ namespace MassTransit
             }
         }
 
-        public int MaximumConsumerThreads
-        {
-            get { return _consumerThreadLimit; }
-            set
-            {
-                if (_started)
-                    throw new ConfigurationException(
-                        "The consumer thread limit cannot be changed once the bus is in motion. Beep! Beep!");
-
-                _consumerThreadLimit = value;
-            }
-        }
-
-        public TimeSpan ReceiveTimeout
-        {
-            get { return _receiveTimeout; }
-            set
-            {
-                if (_started)
-                    throw new ConfigurationException(
-                        "The receive timeout cannot be changed once the bus is in motion. Beep! Beep!");
-
-                _receiveTimeout = value;
-            }
-        }
 
         public TimeSpan ShutdownTimeout { get; set; }
 
@@ -297,6 +270,7 @@ namespace MassTransit
 
         public IOutboundMessagePipeline OutboundPipeline { get; private set; }
 
+        public IInboundMessagePipe InboundPipe { get; private set; }
         public IInboundMessagePipeline InboundPipeline { get; private set; }
 
         /// <summary>
@@ -320,9 +294,9 @@ namespace MassTransit
 
             probe.Add("mt.version", typeof(IServiceBus).Assembly.GetName().Version);
             probe.Add("mt.receive_from", Endpoint.Address);
-            probe.Add("mt.max_consumer_threads", MaximumConsumerThreads);
+//            probe.Add("mt.max_consumer_threads", MaximumConsumerThreads);
             probe.Add("mt.concurrent_receive_threads", ConcurrentReceiveThreads);
-            probe.Add("mt.receive_timeout", ReceiveTimeout);
+  //          probe.Add("mt.receive_timeout", ReceiveTimeout);
 
             EndpointCache.Inspect(probe);
             _serviceContainer.Inspect(probe);
@@ -351,23 +325,9 @@ namespace MassTransit
             if (_started)
                 return;
 
-            try
-            {
-                _serviceContainer.Start();
+            _serviceContainer.Start();
 
-                _consumerPool = new ThreadPoolConsumerPool(this, _eventChannel, _receiveTimeout)
-                    {
-                        MaximumConsumerCount = MaximumConsumerThreads,
-                    };
-                _consumerPool.Start();
-            }
-            catch (Exception)
-            {
-                if (_consumerPool != null)
-                    _consumerPool.Dispose();
-
-                throw;
-            }
+            // TODO start endpoints
 
             _started = true;
         }
@@ -383,13 +343,6 @@ namespace MassTransit
                 return;
             if (disposing)
             {
-                if (_consumerPool != null)
-                {
-                    _consumerPool.Stop();
-                    _consumerPool.Dispose();
-                    _consumerPool = null;
-                }
-
                 if (_serviceContainer != null)
                 {
                     _serviceContainer.Stop();

@@ -10,15 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionConnectors
+namespace MassTransit.Pipeline.Sinks
 {
-    using Pipeline;
-    using Pipeline.Sinks;
+    using System;
 
 
-    public interface MessageConnector
+    public class FilterRetryExceptionFilter<T> :
+        IRetryExceptionFilter
+        where T : Exception
     {
-        ConnectHandle Connect<T>(IInboundMessagePipe pipe, MessageHandler<T> handler)
-            where T : class;
+        readonly Func<T, bool> _filter;
+
+        public FilterRetryExceptionFilter(Func<T, bool> filter)
+        {
+            _filter = filter;
+        }
+
+        public bool CanRetry(Exception exception)
+        {
+            var ex = exception as T;
+            if (ex != null)
+                return _filter(ex);
+
+            return true;
+        }
     }
 }

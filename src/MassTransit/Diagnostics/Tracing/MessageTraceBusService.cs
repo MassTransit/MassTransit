@@ -20,6 +20,7 @@ namespace MassTransit.Diagnostics.Tracing
     using Logging;
     using Magnum.Collections;
     using Magnum.Extensions;
+    using Pipeline;
     using Stact;
 
     public class MessageTraceBusService :
@@ -35,7 +36,7 @@ namespace MassTransit.Diagnostics.Tracing
 		IServiceBus _controlBus;
 		readonly int _detailLimit;
 		readonly Fiber _fiber;
-		UnsubscribeAction _unsubscribe;
+		ConnectHandle _unsubscribe;
 
 		public MessageTraceBusService(UntypedChannel eventChannel)
 		{
@@ -80,7 +81,7 @@ namespace MassTransit.Diagnostics.Tracing
 
 		public void Stop()
 		{
-			_unsubscribe();
+			_unsubscribe.Disconnect();
 			_connection.Disconnect();
 
 			_fiber.Shutdown(30.Seconds());

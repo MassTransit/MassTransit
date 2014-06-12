@@ -92,7 +92,7 @@ namespace MassTransit.Tests.Pipeline
 
 	        var adapter = new MethodConsumerMessageAdapter<TestConsumer<PingMessage>, PingMessage>();
 
-	        var pipe = new ConsumerMessagePipe<TestConsumer<PingMessage>, PingMessage>(factory, adapter);
+	        var pipe = new ConsumerMessagePipe<TestConsumer<PingMessage>, PingMessage>(factory, adapter, Retry.None);
 
 	        IInboundMessagePipe inboundPipe = new InboundMessagePipe();
 	        var connectHandle = inboundPipe.Connect(pipe);
@@ -309,6 +309,26 @@ namespace MassTransit.Tests.Pipeline
             consumeContext = this as MassTransit.ConsumeContext<T>;
 
             return consumeContext != null;
+        }
+
+        public Task<SentContext> RespondAsync<T>(T message) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Respond<T>(T message) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RetryLater()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEndpoint GetEndpoint(Uri address)
+        {
+            throw new NotImplementedException();
         }
 
         public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)

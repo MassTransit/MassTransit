@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,22 +12,36 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
+    using Pipeline.Sinks;
     using Subscriptions;
+
 
     public class SubscriptionConfiguratorImpl<TInterface> :
         SubscriptionConfigurator<TInterface>
         where TInterface : class, SubscriptionConfigurator<TInterface>
     {
         ReferenceFactory _referenceFactory;
+        IMessageRetryPolicy _retryPolicy;
 
         protected SubscriptionConfiguratorImpl()
+            : this(Retry.None)
+        {
+        }
+
+        protected SubscriptionConfiguratorImpl(IMessageRetryPolicy retryPolicy)
         {
             Permanent();
+            _retryPolicy = Retry.None;
         }
 
         protected ReferenceFactory ReferenceFactory
         {
             get { return _referenceFactory; }
+        }
+
+        protected IMessageRetryPolicy RetryPolicy
+        {
+            get { return _retryPolicy; }
         }
 
         public TInterface Permanent()
@@ -47,6 +61,13 @@ namespace MassTransit.SubscriptionConfigurators
         public TInterface SetReferenceFactory(ReferenceFactory referenceFactory)
         {
             _referenceFactory = referenceFactory;
+
+            return this as TInterface;
+        }
+
+        public TInterface SetRetryPolicy(IMessageRetryPolicy retryPolicy)
+        {
+            _retryPolicy = retryPolicy ?? Retry.None;
 
             return this as TInterface;
         }

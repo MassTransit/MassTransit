@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,18 +13,18 @@
 namespace MassTransit.Configuration
 {
     using System;
-    using System.Collections.Generic;
-    using Pipeline;
-    using Util;
+    using System.Threading.Tasks;
+
 
     public class InterceptingConsumerFactory<TConsumer> :
         IConsumerFactory<TConsumer>
         where TConsumer : class
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
-        readonly Action<Action> _interceptor;
+        readonly ConsumerFactoryInterceptor<TConsumer> _interceptor;
 
-        public InterceptingConsumerFactory([NotNull] IConsumerFactory<TConsumer> consumerFactory, [NotNull] Action<Action> interceptor)
+        public InterceptingConsumerFactory(IConsumerFactory<TConsumer> consumerFactory,
+            ConsumerFactoryInterceptor<TConsumer> interceptor)
         {
             if (consumerFactory == null)
                 throw new ArgumentNullException("consumerFactory");
@@ -35,20 +35,11 @@ namespace MassTransit.Configuration
             _interceptor = interceptor;
         }
 
-        public IEnumerable<Action<IConsumeContext<TMessage>>> GetConsumer<TMessage>(IConsumeContext<TMessage> context,
-            InstanceHandlerSelector<TConsumer, TMessage> selector)
-            where TMessage : class
+        Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
+            ConsumerFactoryCallback<TConsumer, TMessage> callback)
         {
-            yield return x =>
-                {
-                    _interceptor(() =>
-                        {
-                            foreach (var consumer in _consumerFactory.GetConsumer(context, selector))
-                            {
-                                consumer(x);
-                            }
-                        });
-                };
+            return _consumerFactory.GetConsumer(consumeContext, (consumer, context) =>
+                _interceptor(consumer, context, () => callback(consumer, context)));
         }
     }
 }

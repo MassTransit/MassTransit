@@ -32,19 +32,6 @@ namespace MassTransit.Advanced
 			configurator.AddBusConfigurator(controlBusConfigurator);
 		}
 
-		/// <summary>
-		/// Sets the receive timeout on the service bus endpoint receiver. Settings this to a lower value has limited
-		/// benefit other than in unit testing to reduce bus disposal time
-		/// </summary>
-		/// <param name="configurator"></param>
-		/// <param name="receiveTimeout"></param>
-		public static void SetReceiveTimeout(this ServiceBusConfigurator configurator, TimeSpan receiveTimeout)
-		{
-			var controlBusConfigurator = new PostCreateBusBuilderConfigurator(bus => { bus.ReceiveTimeout = receiveTimeout; });
-
-			configurator.AddBusConfigurator(controlBusConfigurator);
-		}
-
 	    public static UnsubscribeAction CombineSubscriptions<T>(this IEnumerable<T> source, Func<T, UnsubscribeAction> map)
 	    {
 	        UnsubscribeAction result = null;

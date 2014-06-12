@@ -169,6 +169,7 @@
     <Compile Include="Performance\LoadedResponse.cs" />
     <Compile Include="Pipeline\ConnectConsumer_Specs.cs" />
     <Compile Include="Pipeline\ConnectHandler_Specs.cs" />
+    <Compile Include="Pipeline\ConnectInterceptor_Specs.cs" />
     <Compile Include="PublishRequest_Specs.cs" />
     <Compile Include="Saga\CustomerRegistrationSaga.cs" />
     <Compile Include="Saga\CustomerRegistrationSagaTest.cs" />

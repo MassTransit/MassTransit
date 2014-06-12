@@ -20,6 +20,8 @@ namespace BusDriver.Commands
     using MassTransit.Diagnostics.Introspection;
     using MassTransit.Diagnostics.Introspection.Messages;
     using MassTransit.Logging;
+    using MassTransit.Pipeline;
+
 
     public class StatusCommand :
         Consumes<BusStatus>.Context,
@@ -31,7 +33,7 @@ namespace BusDriver.Commands
         readonly ManualResetEvent _complete;
         readonly string _uriString;
         string _requestId;
-        UnsubscribeAction _unsubscribe;
+        ConnectHandle _unsubscribe;
 
         public StatusCommand(string uriString)
         {
@@ -70,7 +72,7 @@ namespace BusDriver.Commands
                 return;
 
             if (_unsubscribe != null)
-                _unsubscribe();
+                _unsubscribe.Disconnect();
             _unsubscribe = null;
 
             ITextBlock text = new TextBlock()

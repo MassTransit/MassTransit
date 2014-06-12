@@ -16,23 +16,23 @@ namespace MassTransit.SubscriptionConnectors
     using System.Threading;
 
 
-    public class HandlerMetadataCache<T> :
-        IHandlerMetadataCache<T>
+    public class HandlerConnectorCache<T> :
+        IHandlerConnectorCache<T>
         where T : class
     {
-        readonly Lazy<HandlerMessageConnector<T>> _connector;
+        readonly Lazy<HandlerConnector<T>> _connector;
 
-        public HandlerMetadataCache()
+        HandlerConnectorCache()
         {
-            _connector = new Lazy<HandlerMessageConnector<T>>(() => new HandlerMessageConnector<T>());
+            _connector = new Lazy<HandlerConnector<T>>(() => new HandlerConnector<T>());
         }
 
-        public static MessageConnector Connector
+        public static HandlerConnector Connector
         {
             get { return InstanceCache.Cached.Value.Connector; }
         }
 
-        MessageConnector IHandlerMetadataCache<T>.Connector
+        HandlerConnector IHandlerConnectorCache<T>.Connector
         {
             get { return _connector.Value; }
         }
@@ -40,8 +40,8 @@ namespace MassTransit.SubscriptionConnectors
 
         static class InstanceCache
         {
-            internal static readonly Lazy<IHandlerMetadataCache<T>> Cached = new Lazy<IHandlerMetadataCache<T>>(
-                () => new HandlerMetadataCache<T>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<IHandlerConnectorCache<T>> Cached = new Lazy<IHandlerConnectorCache<T>>(
+                () => new HandlerConnectorCache<T>(), LazyThreadSafetyMode.PublicationOnly);
         }
     }
 }

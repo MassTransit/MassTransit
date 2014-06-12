@@ -71,8 +71,9 @@ namespace MassTransit.Distributor.DistributorConnectors
 
         public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
         {
-            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, distributor))
-                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
+            throw new NotImplementedException();
+            //            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, distributor))
+//                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
         }
 
         IEnumerable<SagaDistributorConnector> Initiates()
@@ -135,6 +136,11 @@ namespace MassTransit.Distributor.DistributorConnectors
                    FastActivator.Create(typeof(ObservesSagaDistributorConnector<,>),
                        new[] {typeof(T), messageType},
                        _args);
+        }
+
+        public ISubscriptionReference Connect(IInboundMessagePipe pipe, IDistributor distributor)
+        {
+            throw new NotImplementedException();
         }
     }
 }

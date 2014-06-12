@@ -25,7 +25,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             var inputAddress = new Uri("rabbitmq://testUser:test@localhost/mttest/test_queue");
             var sourceAddress = new Uri("rabbitmq://localhost/mttest/test_queue");
-            var future = new Future<IConsumeContext<A>>();
+            var future = new Future<ConsumeContext<A>>();
 
             using (IServiceBus bus = ServiceBusFactory.New(c =>
                 {
@@ -39,7 +39,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                                 });
                         });
 
-                    c.Subscribe(s => s.Handler<A>((context, message) => future.Complete(context)));
+                    c.Subscribe(s => s.Handler<A>(async (context) => future.Complete(context)));
                 }))
             {
                 bus.Publish(new A());
@@ -56,7 +56,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         public void Should_support_the_username_password_for_a_host()
         {
             var inputAddress = new Uri("rabbitmq://localhost/mttest/test_queue");
-            var future = new Future<IConsumeContext<A>>();
+            var future = new Future<ConsumeContext<A>>();
 
             using (IServiceBus bus = ServiceBusFactory.New(c =>
                 {
@@ -70,7 +70,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                                 });
                         });
 
-                    c.Subscribe(s => s.Handler<A>((context, message) => future.Complete(context)));
+                    c.Subscribe(s => s.Handler<A>(async (context) => future.Complete(context)));
                 }))
             {
                 bus.Publish(new A());

@@ -147,16 +147,14 @@ namespace MassTransit.Builders
 
         void ConfigureBusSettings(ServiceBus bus)
         {
-            if (_settings.ConcurrentConsumerLimit > 0)
-                bus.MaximumConsumerThreads = _settings.ConcurrentConsumerLimit;
+//            if (_settings.ConcurrentConsumerLimit > 0)
+//                bus.MaximumConsumerThreads = _settings.ConcurrentConsumerLimit;
 
             if (_settings.ConcurrentReceiverLimit > 0)
                 bus.ConcurrentReceiveThreads = _settings.ConcurrentReceiverLimit;
 
-            bus.ReceiveTimeout = _settings.ReceiveTimeout;
-
             bus.ShutdownTimeout = _settings.ShutdownTimeout;
-            ConfigureThreadPool(bus.MaximumConsumerThreads);
+//            ConfigureThreadPool(bus.MaximumConsumerThreads);
         }
 
         static void ConfigureThreadPool(int consumerThreads)

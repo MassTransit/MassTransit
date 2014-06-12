@@ -59,7 +59,8 @@ namespace MassTransit.Distributor.DistributorConnectors
 
             var sink = new DistributorMessageSink<TMessage>(workerAvailability, workerSelector);
 
-            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
+            throw new NotImplementedException();
+//            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
         }
     }
 }
