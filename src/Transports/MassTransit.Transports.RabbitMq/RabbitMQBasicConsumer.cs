@@ -72,7 +72,7 @@ namespace MassTransit.Transports.RabbitMq
 
             try
             {
-                var context = new RabbitMQReceiveContext(exchange, routingKey, _consumerTag, _inputAddress, deliveryTag,
+                var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, _inputAddress, deliveryTag,
                     body, redelivered, properties);
 
                 await _taskFactory(context);
