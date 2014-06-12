@@ -20,7 +20,8 @@ namespace MassTransit
     ///     interface to allow access to details surrounding the inbound message, including headers.
     /// </summary>
     /// <typeparam name="TMessage">The message type</typeparam>
-    public interface IConsumer<in TMessage> 
+    public interface IConsumer<in TMessage> :
+        IConsumer
         where TMessage : class
     {
         Task Consume(ConsumeContext<TMessage> context);

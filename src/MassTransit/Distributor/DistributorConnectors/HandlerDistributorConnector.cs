@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,11 +15,12 @@ namespace MassTransit.Distributor.DistributorConnectors
     using MassTransit.Pipeline;
     using Subscriptions;
 
+
     public class HandlerDistributorConnector<TMessage> :
         DistributorConnector
         where TMessage : class
     {
-        readonly MessageDistributorConnector _messageConnector;
+        readonly MessageDistributorConnector _connector;
         readonly ReferenceFactory _referenceFactory;
 
         public HandlerDistributorConnector(ReferenceFactory referenceFactory,
@@ -27,12 +28,12 @@ namespace MassTransit.Distributor.DistributorConnectors
         {
             _referenceFactory = referenceFactory;
 
-            _messageConnector = new MessageDistributorConnector<TMessage>(workerSelectorFactory);
+            _connector = new MessageDistributorConnector<TMessage>(workerSelectorFactory);
         }
 
-        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
+        public ISubscriptionReference Connect(IInboundMessagePipe pipe, IDistributor distributor)
         {
-            return _referenceFactory(_messageConnector.Connect(configurator, distributor));
+            return _referenceFactory(_connector.Connect(pipe, distributor));
         }
     }
 }

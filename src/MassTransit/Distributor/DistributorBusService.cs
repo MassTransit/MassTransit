@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,9 @@ namespace MassTransit.Distributor
     using DistributorConnectors;
     using Magnum.Caching;
     using Magnum.Extensions;
+    using MassTransit.Pipeline;
     using Subscriptions;
+
 
     public class DistributorBusService :
         IDistributor,
@@ -51,24 +53,19 @@ namespace MassTransit.Distributor
             _bus = bus;
             _controlBus = bus;
 
-            bus.Configure(pipelineConfigurator =>
+            foreach (DistributorConnector connector in _connectors)
+            {
+                try
                 {
-                    foreach (DistributorConnector connector in _connectors)
-                    {
-                        try
-                        {
-                            ISubscriptionReference subscription = connector.Connect(pipelineConfigurator, this);
-                            _subscriptions.Add(subscription);
-                        }
-                        catch (Exception)
-                        {
-                            StopAllSubscriptions();
-                            throw;
-                        }
-                    }
-
-                    return () => true;
-                });
+                    ISubscriptionReference subscription = connector.Connect(bus.InboundPipe, this);
+                    _subscriptions.Add(subscription);
+                }
+                catch (Exception)
+                {
+                    StopAllSubscriptions();
+                    throw;
+                }
+            }
         }
 
         public void Stop()
@@ -90,9 +87,9 @@ namespace MassTransit.Distributor
         {
             var workerAvailability = new MessageWorkerAvailability<TMessage>(_workerCache);
 
-            UnsubscribeAction unsubscribeAction = _controlBus.SubscribeInstance(workerAvailability);
+            ConnectHandle handle = _controlBus.SubscribeInstance(workerAvailability);
 
-            _subscriptions.Add(new TransientSubscriptionReference(unsubscribeAction));
+            _subscriptions.Add(new TransientSubscriptionReference(handle));
 
             return workerAvailability;
         }

@@ -52,7 +52,7 @@ namespace MassTransit.Tests.Saga
             Stopwatch timer = Stopwatch.StartNew();
 
             var controller = new RegisterUserController(LocalBus);
-            using (IUnsubscribeAction unsubscribe = LocalBus.SubscribeInstance(controller).Disposable())
+            using (IDisposableConnectHandle unsubscribe = LocalBus.SubscribeInstance(controller).Disposable())
             {
                 RemoteBus.ShouldHaveSubscriptionFor<UserRegistrationPending>();
                 RemoteBus.ShouldHaveSubscriptionFor<UserRegistrationComplete>();

@@ -45,8 +45,8 @@ namespace MassTransit.Tests.Subscriptions
 
             configurator.Subscribe(cf =>
                 {
-                    cf.Handler<MyMessage>(message => receivedMessages.Add(1));
-                    cf.Handler<MyMessage>(message => receivedMessages.Add(2));
+                    cf.Handler<MyMessage>(async message => receivedMessages.Add(1));
+                    cf.Handler<MyMessage>(async message => receivedMessages.Add(2));
                 });
         }
 

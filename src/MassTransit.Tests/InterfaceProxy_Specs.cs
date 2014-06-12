@@ -42,7 +42,7 @@ namespace MassTransit.Tests
 
             _received = new FutureMessage<IProxyMe>();
 
-            configurator.Subscribe(x => { x.Handler<IProxyMe>((message) => _received.Set(message)); });
+            configurator.Subscribe(x => { x.Handler<IProxyMe>(async context => _received.Set(context.Message)); });
         }
 
         [Then]
@@ -101,7 +101,7 @@ namespace MassTransit.Tests
 
             _received = new FutureMessage<IProxyMe>();
 
-            configurator.Subscribe(x => { x.Handler<IProxyMe>((message) => _received.Set(message)); });
+            configurator.Subscribe(x => { x.Handler<IProxyMe>(async context => _received.Set(context.Message)); });
         }
 
         [Then]

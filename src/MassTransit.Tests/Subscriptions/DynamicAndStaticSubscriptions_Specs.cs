@@ -28,9 +28,9 @@
 
             configurator.Subscribe(x =>
                 {
-                    x.Handler<A>((context, message) => _receivedA.Set(message));
-                    x.Handler<B>((context, message) => _receivedB.Set(message));
-                    x.Handler<C>((context, message) => _receivedC.Set(message));
+                    x.Handler<A>(async (context) => _receivedA.Set(context.Message));
+                    x.Handler<B>(async (context) => _receivedB.Set(context.Message));
+                    x.Handler<C>(async (context) => _receivedC.Set(context.Message));
                 });
         }
 
@@ -49,12 +49,16 @@
             var receivedDynamic = new FutureMessage<A>();
 
             UnsubscribeAction subscription = RemoteBus.SubscribeHandler<A>(receivedDynamic.Set);
-            using (subscription.Disposable())
+            try
             {
                 LocalBus.Publish(new A());
 
                 receivedDynamic.IsAvailable(8.Seconds()).ShouldBeTrue("Dynamic not received");
                 _receivedA.IsAvailable(8.Seconds()).ShouldBeTrue("Static not received");
+            }
+            finally
+            {
+                subscription();
             }
         }
 

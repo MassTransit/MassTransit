@@ -14,37 +14,26 @@ namespace MassTransit
 {
 	using System;
 	using Pipeline;
+	using Pipeline.Sinks;
 	using SubscriptionConfigurators;
 	using SubscriptionConnectors;
 
 	public static class HandlerSubscriptionExtensions
 	{
-		/// <summary>
-		/// Subscribes a message handler (which can be any delegate of the message type,
-		/// such as a class instance method, a delegate, or a lambda expression)
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="configurator"></param>
-		/// <param name="handler"></param>
-		/// <returns></returns>
-		public static HandlerSubscriptionConfigurator<T> Handler<T>(this SubscriptionBusServiceConfigurator configurator,
-		                                                            Action<T> handler)
+	    /// <summary>
+	    /// Subscribes a message handler (which can be any delegate of the message type,
+	    /// such as a class instance method, a delegate, or a lambda expression)
+	    /// </summary>
+	    /// <typeparam name="T"></typeparam>
+	    /// <param name="configurator"></param>
+	    /// <param name="handler"></param>
+	    /// <param name="retryPolicy"></param>
+	    /// <returns></returns>
+	    public static HandlerSubscriptionConfigurator<T> Handler<T>(this SubscriptionBusServiceConfigurator configurator,
+                                                                    MessageHandler<T> handler, IMessageRetryPolicy retryPolicy = null)
 			where T : class
 		{
-			var handlerConfigurator = new HandlerSubscriptionConfiguratorImpl<T>(handler);
-
-			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(handlerConfigurator);
-
-			configurator.AddConfigurator(busServiceConfigurator);
-
-			return handlerConfigurator;
-		}
-
-		public static HandlerSubscriptionConfigurator<T> Handler<T>(this SubscriptionBusServiceConfigurator configurator,
-		                                                            Action<IConsumeContext<T>, T> handler)
-			where T : class
-		{
-			var handlerConfigurator = new HandlerSubscriptionConfiguratorImpl<T>(handler);
+			var handlerConfigurator = new HandlerSubscriptionConfiguratorImpl<T>(handler, retryPolicy ?? Retry.None);
 
 			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(handlerConfigurator);
 

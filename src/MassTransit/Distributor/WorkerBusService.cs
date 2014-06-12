@@ -16,6 +16,7 @@ namespace MassTransit.Distributor
     using System.Collections.Generic;
     using Magnum.Caching;
     using Magnum.Extensions;
+    using MassTransit.Pipeline;
     using Stact;
     using Stact.Executors;
     using Stact.Internal;
@@ -122,9 +123,9 @@ namespace MassTransit.Distributor
         {
             var workerLoad = new MessageWorkerLoad<TMessage>(this);
 
-            UnsubscribeAction unsubscribeAction = _controlBus.SubscribeInstance(workerLoad);
+            ConnectHandle handle = _controlBus.SubscribeInstance(workerLoad);
 
-            _subscriptions.Add(new TransientSubscriptionReference(unsubscribeAction));
+            _subscriptions.Add(new TransientSubscriptionReference(handle));
 
             return workerLoad;
         }

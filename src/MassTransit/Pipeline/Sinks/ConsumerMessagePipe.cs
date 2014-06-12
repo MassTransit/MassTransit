@@ -19,18 +19,20 @@ namespace MassTransit.Pipeline.Sinks
 
 
     public class ConsumerMessagePipe<TConsumer, TMessage> :
-        IConsumeContextPipe<TMessage>        
+        IConsumeContextPipe<TMessage>
         where TConsumer : class
         where TMessage : class
     {
         readonly IAsyncConsumerFactory<TConsumer> _consumerFactory;
-        readonly IConsumerMessageAdapter<TConsumer, TMessage> _consumerMessageAdapter;
+        readonly IConsumerMessageAdapter<TConsumer, TMessage> _messageAdapter;
+        readonly IMessageRetryPolicy _retryPolicy;
 
         public ConsumerMessagePipe(IAsyncConsumerFactory<TConsumer> consumerFactory,
-            IConsumerMessageAdapter<TConsumer, TMessage> consumerMessageAdapter)
+            IConsumerMessageAdapter<TConsumer, TMessage> messageAdapter, IMessageRetryPolicy retryPolicy)
         {
             _consumerFactory = consumerFactory;
-            _consumerMessageAdapter = consumerMessageAdapter;
+            _messageAdapter = messageAdapter;
+            _retryPolicy = retryPolicy;
         }
 
         public async Task Send(ConsumeContext<TMessage> context)
@@ -38,7 +40,8 @@ namespace MassTransit.Pipeline.Sinks
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
-                await _consumerFactory.GetConsumer(context, CallConsumer);
+                await _retryPolicy.Retry(context, x => _consumerFactory.GetConsumer(x, 
+                    (consumer, consumeContext) => _messageAdapter.Consume(consumer, consumeContext)));
 
                 context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName);
             }
@@ -47,11 +50,6 @@ namespace MassTransit.Pipeline.Sinks
                 context.NotifyFaulted(TypeMetadataCache<TConsumer>.ShortName, ex);
                 throw;
             }
-        }
-
-        Task CallConsumer(TConsumer consumer, ConsumeContext<TMessage> context)
-        {
-            return _consumerMessageAdapter.Consume(consumer, context);
         }
 
         public bool Inspect(IConsumeContextPipeInspector inspector)

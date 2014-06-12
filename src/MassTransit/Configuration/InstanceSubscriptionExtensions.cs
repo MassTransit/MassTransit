@@ -12,7 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using Magnum;
+    using System;
+    using Magnum;
+    using Pipeline;
+    using Pipeline.Sinks;
 	using SubscriptionConfigurators;
 	using SubscriptionConnectors;
 	using Util;
@@ -33,9 +36,9 @@ namespace MassTransit
 		[NotNull]
 		public static InstanceSubscriptionConfigurator Instance(
 			[NotNull] this SubscriptionBusServiceConfigurator configurator,
-			[NotNull] object instance)
+            [NotNull] object instance, IMessageRetryPolicy retryPolicy = null)
 		{
-			var instanceConfigurator = new InstanceSubscriptionConfiguratorImpl(instance);
+			var instanceConfigurator = new InstanceSubscriptionConfiguratorImpl(instance, retryPolicy ?? Retry.None);
 
 			var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(instanceConfigurator);
 
@@ -58,7 +61,9 @@ namespace MassTransit
 
 			InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
 
-			return bus.Configure(x => connector.Connect(x, instance));
+		    throw new NotImplementedException();
+
+			//return bus.Configure(x => connector.Connect(x, instance));
 		}
 
 		/// <summary>
@@ -69,14 +74,16 @@ namespace MassTransit
 		/// <param name="instance">The instance to subscribe.</param>
 		/// <returns>The unsubscribe action that can be called to unsubscribe the instance
 		/// passed as an argument.</returns>
-		public static UnsubscribeAction SubscribeInstance<T>([NotNull] this IServiceBus bus, [NotNull] T instance)
+		public static ConnectHandle SubscribeInstance<T>([NotNull] this IServiceBus bus, [NotNull] T instance)
 			where T : class, IConsumer
 		{
 			Guard.AgainstNull(instance, "instance", "A null instance cannot be subscribed");
 
 			InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();
 
-			return bus.Configure(x => connector.Connect(x, instance));
+		    throw new NotImplementedException();
+
+		    //return bus.Configure(x => connector.Connect(x, instance));
 		}
 	}
 }

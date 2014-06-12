@@ -12,14 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using Subscriptions;
+    using Pipeline;
+    using Subscriptions;
 	using Util;
 
 	public static class UnsubscribeExtensions
 	{
-		public static IUnsubscribeAction Disposable([NotNull] this UnsubscribeAction action)
+		public static IDisposableConnectHandle Disposable([NotNull] this ConnectHandle action)
 		{
-			return new DisposableUnsubscribeAction(action);
+			return new DisposableConnectHandle(action);
 		}
 	}
 }

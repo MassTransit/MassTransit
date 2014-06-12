@@ -31,11 +31,11 @@ namespace MassTransit.Tests.Serialization
 
         protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
         {
-            configurator.Subscribe(x => x.Handler<Message<int>>((context,message) =>
+            configurator.Subscribe(x => x.Handler<Message<int>>(async (context) =>
                 {
-                    _called.Set(message);
+                    _called.Set(context.Message);
 
-                    context.Respond(new Message<string> {Body = message.Body.ToString()});
+                    context.Respond(new Message<string> {Body = context.Message.Body.ToString()});
                 }));
         }
 

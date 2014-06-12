@@ -45,6 +45,11 @@ namespace MassTransit
         IEndpoint Endpoint { get; }
 
         /// <summary>
+        /// The inbound pipe for the bus
+        /// </summary>
+        IInboundMessagePipe InboundPipe { get; }
+
+        /// <summary>
         /// Gets the inbound message pipeline.
         /// </summary>
         IInboundMessagePipeline InboundPipeline { get; }

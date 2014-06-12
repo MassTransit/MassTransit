@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Util;
 
 
@@ -94,6 +95,28 @@ namespace MassTransit
             where T : class
         {
             return _context.TryGetMessage(out consumeContext);
+        }
+
+        public Task<SentContext> RespondAsync<T>(T message) 
+            where T : class
+        {
+            return _context.RespondAsync(message);
+        }
+
+        public void Respond<T>(T message) 
+            where T : class
+        {
+            _context.Respond(message);
+        }
+
+        public void RetryLater()
+        {
+            _context.RetryLater();
+        }
+
+        public IEndpoint GetEndpoint(Uri address)
+        {
+            return _context.GetEndpoint(address);
         }
 
         public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)

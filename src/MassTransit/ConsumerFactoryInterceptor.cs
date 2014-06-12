@@ -10,22 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit
 {
+    using System;
     using System.Threading.Tasks;
 
 
     /// <summary>
-    /// Invoked by a consumer factory within the context of the consumer (which gives lifecycle
-    /// control of the consumer to the factory itself).
+    /// An interceptor delegate that is passed the consumer, allowing the interceptor to
+    /// establish scope before returning the Task
     /// </summary>
     /// <typeparam name="TConsumer">The consumer type</typeparam>
-    /// <typeparam name="TMessage">The message type</typeparam>
     /// <param name="consumer">The consumer instance</param>
-    /// <param name="context">The message consume context</param>
+    /// <param name="context">The consume context</param>
+    /// <param name="callback">The callback to invoke to process the consumer</param>
     /// <returns></returns>
-    public delegate Task ConsumerFactoryCallback<in TConsumer, in TMessage>(TConsumer consumer,
-        ConsumeContext<TMessage> context)
-        where TConsumer : class
-        where TMessage : class;
+    public delegate Task ConsumerFactoryInterceptor<in TConsumer>(TConsumer consumer,
+        ConsumeContext context, Func<Task> callback)
+        where TConsumer : class;
 }

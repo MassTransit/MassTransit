@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.WorkerConnectors
 {
+    using System;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Configuration;
     using MassTransit.Pipeline.Sinks;
@@ -43,8 +44,9 @@ namespace MassTransit.Distributor.WorkerConnectors
 
             UnsubscribeAction unsubscribeAction = configurator.Pipeline.ConnectToRouter(sink,
                 () => configurator.SubscribedTo<Distributed<TMessage>>());
+            throw new NotImplementedException();
 
-            return _referenceFactory(unsubscribeAction);
+//            return _referenceFactory(unsubscribeAction);
         }
     }
 }

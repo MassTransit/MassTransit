@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Serialization;
@@ -161,6 +162,26 @@ namespace MassTransit
                 _messageTypes[typeof(T)] = message = null;
                 return false;
             }
+        }
+
+        public Task<SentContext> RespondAsync<T>(T message) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Respond<T>(T message) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RetryLater()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEndpoint GetEndpoint(Uri address)
+        {
+            throw new NotImplementedException();
         }
 
         public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)

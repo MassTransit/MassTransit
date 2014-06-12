@@ -42,8 +42,7 @@ namespace MassTransit.Distributor
                 }) as IWorkerInfo<TMessage>;
         }
 
-        public IEnumerable<IWorkerInfo<TMessage>> GetAvailableWorkers<TMessage>(IConsumeContext<TMessage> context,
-            IWorkerSelector<TMessage> selector)
+        public IEnumerable<IWorkerInfo<TMessage>> GetAvailableWorkers<TMessage>(ConsumeContext<TMessage> context, IWorkerSelector<TMessage> selector)
             where TMessage : class
         {
             IEnumerable<IWorkerInfo<TMessage>> candidates =

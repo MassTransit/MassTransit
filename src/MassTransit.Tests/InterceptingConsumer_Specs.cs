@@ -40,12 +40,12 @@ namespace MassTransit.Tests
 
             configurator.Subscribe(x =>
                 {
-                    x.InterceptingConsumer(() => new MyConsumer(), consumer =>
+                    x.InterceptingConsumer(() => new MyConsumer(),async (consumer,context, next) =>
                         {
                             _first.Set(1);
                             using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
                             {
-                                consumer();
+                                await next();
 
                                 scope.Complete();
                             }

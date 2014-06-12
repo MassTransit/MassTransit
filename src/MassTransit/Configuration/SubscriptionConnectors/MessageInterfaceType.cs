@@ -13,28 +13,34 @@
 namespace MassTransit.SubscriptionConnectors
 {
     using System;
+    using Pipeline.Sinks;
 
 
     public class MessageInterfaceType
     {
-        readonly Lazy<MessageConnectorFactory> _messageConnectorFactory;
+        readonly Lazy<MessageConnectorFactory> _consumerMessageConnectorFactory;
 
         public MessageInterfaceType(Type interfaceType, Type messageType, Type consumerType)
         {
             InterfaceType = interfaceType;
             MessageType = messageType;
 
-            _messageConnectorFactory = new Lazy<MessageConnectorFactory>(() => (MessageConnectorFactory)
-                Activator.CreateInstance(typeof(ConsumerMessageConnectorFactory<,>).MakeGenericType(consumerType,
+            _consumerMessageConnectorFactory = new Lazy<MessageConnectorFactory>(() => (MessageConnectorFactory)
+                Activator.CreateInstance(typeof(MessageConnectorFactory<,>).MakeGenericType(consumerType,
                     messageType)));
         }
 
         public Type InterfaceType { get; private set; }
         public Type MessageType { get; private set; }
 
-        public ConsumerMessageConnector GetMessageConnector()
+        public ConsumerMessageConnector GetConsumerMessageConnector()
         {
-            return _messageConnectorFactory.Value.CreateMessageConnector();
+            return _consumerMessageConnectorFactory.Value.CreateConsumerConnector();
+        }
+
+        public InstanceMessageConnector GetInstanceMessageConnector()
+        {
+            return _consumerMessageConnectorFactory.Value.CreateInstanceConnector();
         }
     }
 

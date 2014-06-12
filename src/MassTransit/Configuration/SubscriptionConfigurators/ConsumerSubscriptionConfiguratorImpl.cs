@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,9 @@ namespace MassTransit.SubscriptionConfigurators
 {
     using System.Collections.Generic;
     using Configurators;
+    using Pipeline.Sinks;
     using SubscriptionBuilders;
+
 
     public class ConsumerSubscriptionConfiguratorImpl<TConsumer> :
         SubscriptionConfiguratorImpl<ConsumerSubscriptionConfigurator<TConsumer>>,
@@ -24,7 +26,9 @@ namespace MassTransit.SubscriptionConfigurators
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-        public ConsumerSubscriptionConfiguratorImpl(IConsumerFactory<TConsumer> consumerFactory)
+        public ConsumerSubscriptionConfiguratorImpl(IConsumerFactory<TConsumer> consumerFactory,
+            IMessageRetryPolicy retryPolicy)
+            : base(retryPolicy)
         {
             _consumerFactory = consumerFactory;
         }
@@ -36,7 +40,7 @@ namespace MassTransit.SubscriptionConfigurators
 
         public SubscriptionBuilder Configure()
         {
-            return new ConsumerSubscriptionBuilder<TConsumer>(_consumerFactory, ReferenceFactory);
+            return new ConsumerSubscriptionBuilder<TConsumer>(_consumerFactory, RetryPolicy, ReferenceFactory);
         }
     }
 }

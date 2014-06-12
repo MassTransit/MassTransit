@@ -37,7 +37,8 @@ namespace MassTransit.Pipeline.Sinks
 
         public IEnumerable<Action<IConsumeContext<TMessage>>> Enumerate(IConsumeContext<TMessage> context)
         {
-            return _consumerFactory.GetConsumer(context, Selector);
+            throw new NotImplementedException();
+//            return _consumerFactory.GetConsumer(context, Selector);
         }
 
         public bool Inspect(IPipelineInspector inspector)

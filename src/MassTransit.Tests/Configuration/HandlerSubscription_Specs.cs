@@ -37,10 +37,10 @@ namespace MassTransit.Tests.Configuration
 					x.Subscribe(s =>
 						{
 							// a simple handler
-							s.Handler<PingMessage>(msg => _received.Complete(msg))
-								.Where(msg =>
+                            s.Handler<PingMessage>(async context => _received.Complete(context.Message))
+								.Where(context =>
 									{
-										_conditionChecked.Complete(msg);
+                                        _conditionChecked.Complete(context.Message);
 										return true;
 									});
 						});
@@ -92,7 +92,7 @@ namespace MassTransit.Tests.Configuration
 					x.Subscribe(s =>
 						{
 							// a simple handler
-							s.Handler<PingMessage>((context,message) =>_received.Complete(message));
+                            s.Handler<PingMessage>(async (context) => _received.Complete(context.Message));
 						});
 				});
 

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.SubscriptionBuilders
 {
+    using System;
     using MassTransit.Pipeline;
     using MassTransit.SubscriptionBuilders;
     using SubscriptionConnectors;
@@ -31,11 +32,12 @@ namespace MassTransit.Saga.SubscriptionBuilders
             _referenceFactory = referenceFactory;
         }
 
-        public ISubscriptionReference Subscribe(IInboundPipelineConfigurator configurator)
+        public ISubscriptionReference Subscribe(IInboundMessagePipe pipe)
         {
-            UnsubscribeAction unsubscribe = _connector.Connect(configurator);
-
-            return _referenceFactory(unsubscribe);
+            throw new NotImplementedException();
+//            UnsubscribeAction unsubscribe = _connector.Connect(pipe);
+//
+//            return _referenceFactory(unsubscribe);
         }
     }
 }

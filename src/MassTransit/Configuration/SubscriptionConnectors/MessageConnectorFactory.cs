@@ -14,6 +14,7 @@ namespace MassTransit.SubscriptionConnectors
 {
     public interface MessageConnectorFactory
     {
-        ConsumerMessageConnector CreateMessageConnector();
+        ConsumerMessageConnector CreateConsumerConnector();
+        InstanceMessageConnector CreateInstanceConnector();
     }
 }

@@ -142,10 +142,10 @@ namespace MassTransit.Tests
 
             configurator.Subscribe(x =>
                 {
-                    x.Handler<PingMessage>((context, message) =>
+                    x.Handler<PingMessage>(async (context) =>
                         {
-                            _pingReceived.Set(message);
-                            context.Respond(new PongMessage {TransactionId = message.TransactionId});
+                            _pingReceived.Set(context.Message);
+                            context.Respond(new PongMessage { TransactionId = context.Message.TransactionId });
                         });
                 });
         }

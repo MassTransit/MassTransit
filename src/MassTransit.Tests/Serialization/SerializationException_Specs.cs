@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Serialization
         {
             base.ConfigureLocalBus(configurator);
 
-            configurator.Subscribe(s => { s.Handler<BadMessage>(x => { }); });
+            configurator.Subscribe(s => { s.Handler<BadMessage>(async x => { }); });
         }
 
         [Then]

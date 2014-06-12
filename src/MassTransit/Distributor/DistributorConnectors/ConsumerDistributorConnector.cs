@@ -56,8 +56,9 @@ namespace MassTransit.Distributor.DistributorConnectors
 
         public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
         {
-            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, distributor))
-                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
+            throw new NotImplementedException();
+//            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, distributor))
+//                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
         }
 
         IEnumerable<MessageDistributorConnector> ConsumesContext()
@@ -75,6 +76,12 @@ namespace MassTransit.Distributor.DistributorConnectors
             return (MessageDistributorConnector)
                    FastActivator.Create(typeof(MessageDistributorConnector<>),
                        new[] {x.MessageType}, new object[] {_workerSelectorFactory});
+        }
+
+        public ISubscriptionReference Connect(IInboundMessagePipe pipe, IDistributor distributor)
+        {
+            var handle = new MultipleConnectHandle(_connectors.Select(x => x.Connect(pipe, distributor)));
+            return _referenceFactory(handle);
         }
     }
 }

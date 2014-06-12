@@ -31,7 +31,7 @@
             configurator.SetConcurrentConsumerLimit(100);
 
             configurator.Subscribe(s =>
-                s.Handler<A>(msg =>
+                s.Handler<A>(async msg =>
                     {
                         _before.Release();
                         _wait.WaitOne(30.Seconds());

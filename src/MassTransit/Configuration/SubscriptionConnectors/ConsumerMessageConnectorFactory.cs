@@ -15,16 +15,23 @@ namespace MassTransit.SubscriptionConnectors
     using Pipeline.Sinks;
 
 
-    public class ConsumerMessageConnectorFactory<TConsumer, TMessage> :
+    public class MessageConnectorFactory<TConsumer, TMessage> :
         MessageConnectorFactory
         where TConsumer : class, IConsumer<TMessage>
         where TMessage : class
     {
-        public ConsumerMessageConnector CreateMessageConnector()
+        public ConsumerMessageConnector CreateConsumerConnector()
         {
             var adapter = new MethodConsumerMessageAdapter<TConsumer, TMessage>();
 
             return new ConsumerMessageConnector<TConsumer, TMessage>(adapter);
+        }
+
+        public InstanceMessageConnector CreateInstanceConnector()
+        {
+            var adapter = new MethodConsumerMessageAdapter<TConsumer, TMessage>();
+
+            return new InstanceMessageConnector<TConsumer, TMessage>(adapter);
         }
     }
 }

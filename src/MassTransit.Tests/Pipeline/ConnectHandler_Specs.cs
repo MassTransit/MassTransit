@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Pipeline
 {
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Sinks;
     using Messages;
     using NUnit.Framework;
 

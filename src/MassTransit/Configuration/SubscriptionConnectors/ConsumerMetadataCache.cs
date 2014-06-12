@@ -22,7 +22,6 @@ namespace MassTransit.SubscriptionConnectors
         IConsumerMetadataCache<T>
         where T : class
     {
-        readonly Lazy<ConsumerConnector<T>> _connector;
         readonly MessageInterfaceType[] _consumerTypes;
         readonly MessageInterfaceType[] _messageConsumerTypes;
 
@@ -31,9 +30,6 @@ namespace MassTransit.SubscriptionConnectors
         {
             _consumerTypes = GetConsumerMessageTypes().ToArray();
             _messageConsumerTypes = GetMessageConsumerTypes().ToArray();
-
-            _connector = new Lazy<ConsumerConnector<T>>(() => new ConsumerConnector<T>(),
-                LazyThreadSafetyMode.PublicationOnly);
         }
 
         public static MessageInterfaceType[] ConsumerTypes
@@ -46,15 +42,6 @@ namespace MassTransit.SubscriptionConnectors
             get { return InstanceCache.Cached.Value.MessageConsumerTypes; }
         }
 
-        public static ConsumerConnector Connector
-        {
-            get { return InstanceCache.Cached.Value.Connector; }
-        }
-
-        ConsumerConnector IConsumerMetadataCache<T>.Connector
-        {
-            get { return _connector.Value; }
-        }
 
         MessageInterfaceType[] IConsumerMetadataCache<T>.ConsumerTypes
         {

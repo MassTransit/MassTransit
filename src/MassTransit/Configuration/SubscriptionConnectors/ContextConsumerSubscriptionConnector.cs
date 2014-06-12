@@ -41,10 +41,11 @@ namespace MassTransit.SubscriptionConnectors
 			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
 		}
 
-	    public ConnectHandle Connect<T>(IInboundMessagePipe pipe, IAsyncConsumerFactory<T> consumerFactory) 
-            where T : class
+	    public ConnectHandle Connect<T>(IInboundMessagePipe pipe, IAsyncConsumerFactory<T> consumerFactory,
+	        IMessageRetryPolicy retryPolicy) where T : class
 	    {
 	        throw new NotImplementedException();
 	    }
+
 	}
 }

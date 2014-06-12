@@ -12,14 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
-    using System.Threading.Tasks;
+    using System;
 
 
-    public interface IAsyncConsumerFactory<out TConsumer>
-        where TConsumer : class
+    public interface IMessageRetryPolicy
     {
-        Task GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
-            where TMessage : class;
+        /// <summary>
+        /// Returns a context that can be used to go through the retries
+        /// </summary>
+        /// <returns>A RetryInterval enumerator</returns>
+        IMessageRetryContext GetRetryContext<T>(ConsumeContext<T> context)
+            where T : class;
+
+        /// <summary>
+        /// Determines if the exception can be retried
+        /// </summary>
+        /// <param name="exception">The exception that occurred</param>
+        /// <returns>True if the task should be retried</returns>
+        bool CanRetry(Exception exception);
     }
 }

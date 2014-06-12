@@ -13,13 +13,15 @@
 namespace MassTransit.Diagnostics.Tracing
 {
     using System;
+    using Pipeline;
+
 
     public class MessageTraceClient :
 		Consumes<ReceivedMessageTraceList>.All,
 		IDisposable
 	{
 		readonly Action<ReceivedMessageTraceList> _callback;
-		UnsubscribeAction _unsubscribe;
+		ConnectHandle _unsubscribe;
 
 		public MessageTraceClient(IServiceBus bus, IEndpoint target, int count, Action<ReceivedMessageTraceList> callback)
 		{
@@ -32,7 +34,7 @@ namespace MassTransit.Diagnostics.Tracing
 		public void Consume(ReceivedMessageTraceList message)
 		{
 			if (_unsubscribe != null)
-				_unsubscribe();
+				_unsubscribe.Disconnect();
 			_unsubscribe = null;
 
 			_callback(message);
@@ -41,8 +43,8 @@ namespace MassTransit.Diagnostics.Tracing
 		public void Dispose()
 		{
 			if (_unsubscribe != null)
-				_unsubscribe();
-			_unsubscribe = null;
+                _unsubscribe.Disconnect();
+            _unsubscribe = null;
 		}
 	}
 }

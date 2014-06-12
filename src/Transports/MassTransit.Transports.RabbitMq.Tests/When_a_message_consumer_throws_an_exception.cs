@@ -42,15 +42,15 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
             configurator.Subscribe(s =>
                 {
-                    s.Handler<A>(message =>
+                    s.Handler<A>(context =>
                         {
-                            _received.Complete(message);
+                            _received.Complete(context.Message);
 
                             throw new NullReferenceException(
                                 "This is supposed to happen, cause this handler is naughty.");
                         });
 
-                    s.Handler<Fault<A, Guid>>(message => { _faultReceived.Complete(message); });
+                    s.Handler<Fault<A, Guid>>(async context => _faultReceived.Complete(context.Message));
                 });
         }
 

@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Pipeline
 
             IAsyncConsumerFactory<OneMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
-            ConnectHandle connectHandle = pipe.ConnectConsumer(factory);
+            pipe.ConnectConsumer(factory, Retry.None);
 
             var consumeContext = new TestConsumeContext<MessageA>(new MessageA());
 
@@ -48,7 +48,7 @@ namespace MassTransit.Tests.Pipeline
 
             IAsyncConsumerFactory<TwoMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
-            ConnectHandle connectHandle = pipe.ConnectConsumer(factory);
+            pipe.ConnectConsumer(factory, Retry.None);
 
             await pipe.Send(new TestConsumeContext<MessageA>(new MessageA()));
 

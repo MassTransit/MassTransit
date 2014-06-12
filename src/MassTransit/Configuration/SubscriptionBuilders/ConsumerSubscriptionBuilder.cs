@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,31 +13,34 @@
 namespace MassTransit.SubscriptionBuilders
 {
     using Pipeline;
+    using Pipeline.Sinks;
     using SubscriptionConnectors;
     using Subscriptions;
+
 
     public class ConsumerSubscriptionBuilder<TConsumer> :
         SubscriptionBuilder
         where TConsumer : class
     {
-        readonly ConsumerConnector _consumerConnector;
+        readonly ConsumerConnector _connector;
         readonly IConsumerFactory<TConsumer> _consumerFactory;
         readonly ReferenceFactory _referenceFactory;
+        readonly IMessageRetryPolicy _retryPolicy;
 
-        public ConsumerSubscriptionBuilder(IConsumerFactory<TConsumer> consumerFactory,
-            ReferenceFactory referenceFactory)
+        public ConsumerSubscriptionBuilder(IConsumerFactory<TConsumer> consumerFactory, IMessageRetryPolicy retryPolicy, ReferenceFactory referenceFactory)
         {
             _consumerFactory = consumerFactory;
             _referenceFactory = referenceFactory;
+            _retryPolicy = retryPolicy;
 
-            _consumerConnector = ConsumerConnectorCache.GetConsumerConnector<TConsumer>();
+            _connector = ConsumerConnectorCache<TConsumer>.Connector;
         }
 
-        public ISubscriptionReference Subscribe(IInboundPipelineConfigurator configurator)
+        public ISubscriptionReference Subscribe(IInboundMessagePipe pipe)
         {
-            UnsubscribeAction unsubscribe = _consumerConnector.Connect(configurator, _consumerFactory);
+            ConnectHandle handle = _connector.Connect(pipe, _consumerFactory, _retryPolicy);
 
-            return _referenceFactory(unsubscribe);
+            return _referenceFactory(handle);
         }
     }
 }

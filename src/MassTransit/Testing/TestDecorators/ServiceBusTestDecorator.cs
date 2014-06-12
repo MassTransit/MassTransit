@@ -26,6 +26,11 @@ namespace MassTransit.Testing.TestDecorators
         readonly PublishedMessageListImpl _published;
         readonly EndpointTestScenarioImpl _scenario;
 
+        public IInboundMessagePipe InboundPipe
+        {
+            get { return _bus.InboundPipe; }
+        }
+
         public ServiceBusTestDecorator(IServiceBus bus, EndpointTestScenarioImpl scenario)
         {
             _bus = bus;

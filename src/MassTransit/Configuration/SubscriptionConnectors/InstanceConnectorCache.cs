@@ -1,58 +1,78 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConnectors
 {
     using System;
-    using Magnum.Caching;
-    using Magnum.Reflection;
+    using System.Collections.Concurrent;
+    using System.Threading;
 
-    public class InstanceConnectorCache
+
+    public class InstanceConnectorCache<T> :
+        IInstanceConnectorCache<T>
+        where T : class
     {
-        [ThreadStatic]
-        static InstanceConnectorCache _current;
+        readonly Lazy<InstanceConnector<T>> _connector;
 
-        readonly GenericTypeCache<InstanceConnector> _connectors;
 
         InstanceConnectorCache()
         {
-            _connectors = new GenericTypeCache<InstanceConnector>(typeof (InstanceConnector<>));
+            _connector = new Lazy<InstanceConnector<T>>(() => new InstanceConnector<T>(),
+                LazyThreadSafetyMode.PublicationOnly);
         }
 
-        static InstanceConnectorCache Instance
+        public static InstanceConnector Connector
         {
-            get
-            {
-                if (_current == null)
-                    _current = new InstanceConnectorCache();
+            get { return InstanceCache.Cached.Value.Connector; }
+        }
 
-                return _current;
-            }
+        InstanceConnector IInstanceConnectorCache<T>.Connector
+        {
+            get { return _connector.Value; }
+        }
+
+
+        static class InstanceCache
+        {
+            internal static readonly Lazy<IInstanceConnectorCache<T>> Cached = new Lazy<IInstanceConnectorCache<T>>(
+                () => new InstanceConnectorCache<T>(), LazyThreadSafetyMode.PublicationOnly);
+        }
+    }
+
+
+    public static class InstanceConnectorCache
+    {
+        public static InstanceConnector GetInstanceConnector<T>()
+            where T : class
+        {
+            return InstanceCache.Cached.Value.GetOrAdd(typeof(T),
+                _ => new Lazy<InstanceConnector>(() => InstanceConnectorCache<T>.Connector)).Value;
         }
 
         public static InstanceConnector GetInstanceConnector(Type type)
         {
-            return Instance._connectors.Get(type, InstanceConnectorFactory);
+            return InstanceCache.Cached.Value.GetOrAdd(type,
+                _ => new Lazy<InstanceConnector>(() =>
+                    (InstanceConnector)Activator.CreateInstance(typeof(InstanceConnector<>).MakeGenericType(type))))
+                .Value;
         }
 
-        public static InstanceConnector GetInstanceConnector<T>()
-            where T : class
-        {
-            return Instance._connectors.Get(typeof (T), _ => new InstanceConnector<T>());
-        }
 
-        static InstanceConnector InstanceConnectorFactory(Type type)
+        static class InstanceCache
         {
-            return (InstanceConnector) FastActivator.Create(typeof (InstanceConnector<>), new[] {type});
+            internal static readonly Lazy<ConcurrentDictionary<Type, Lazy<InstanceConnector>>> Cached =
+                new Lazy<ConcurrentDictionary<Type, Lazy<InstanceConnector>>>(
+                    () => new ConcurrentDictionary<Type, Lazy<InstanceConnector>>(),
+                    LazyThreadSafetyMode.PublicationOnly);
         }
     }
 }

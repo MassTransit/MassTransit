@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Subscriptions
     using System;
     using System.Diagnostics;
     using Magnum.Extensions;
+    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Inspectors;
     using Messages;
     using NUnit.Framework;
@@ -46,7 +47,7 @@ namespace MassTransit.Tests.Subscriptions
         public void The_system_should_be_ready_to_use_before_getting_underway()
         {
             var consumer = new TestMessageConsumer<PingMessage>();
-            UnsubscribeAction unsubscribeAction = RemoteBus.SubscribeInstance(consumer);
+            ConnectHandle unsubscribeAction = RemoteBus.SubscribeInstance(consumer);
 
             LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 
@@ -55,7 +56,7 @@ namespace MassTransit.Tests.Subscriptions
 
             consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
 
-            unsubscribeAction();
+            unsubscribeAction.Disconnect();
         }
     }
 }

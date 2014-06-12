@@ -32,7 +32,7 @@
 
             _received = new Future<A>();
 
-            configurator.Subscribe(s => s.Handler<A>(message => _received.Complete(message)));
+            configurator.Subscribe(s => s.Handler<A>(async message => _received.Complete(message.Message)));
         }
 
         protected override void ConfigureRabbitMq(RabbitMqTransportFactoryConfigurator configurator)

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,22 +16,24 @@ namespace MassTransit.SubscriptionConnectors
     using System.Collections.Generic;
     using System.Linq;
     using Exceptions;
-    using Magnum.Extensions;
     using Magnum.Reflection;
     using Pipeline;
+    using Pipeline.Sinks;
     using Saga;
     using Util;
 
+
     public interface InstanceConnector
     {
-        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance);
+        ConnectHandle Connect(IInboundMessagePipe pipe, object instance, IMessageRetryPolicy retryPolicy);
     }
+
 
     public class InstanceConnector<T> :
         InstanceConnector
         where T : class
     {
-        readonly IEnumerable<InstanceSubscriptionConnector> _connectors;
+        readonly IEnumerable<InstanceMessageConnector> _connectors;
 
         public InstanceConnector()
         {
@@ -40,50 +42,52 @@ namespace MassTransit.SubscriptionConnectors
             if (interfaces.Contains(typeof(ISaga)))
                 throw new ConfigurationException("A saga cannot be registered as a consumer");
 
-            if (interfaces.Implements(typeof(InitiatedBy<>))
-                || interfaces.Implements(typeof(Orchestrates<>))
-                || interfaces.Implements(typeof(Observes<,>)))
+            if (interfaces.Any(x => x.GetGenericTypeDefinition() == typeof(InitiatedBy<>))
+                || interfaces.Any(x => x.GetGenericTypeDefinition() == typeof(Orchestrates<>))
+                || interfaces.Any(x => x.GetGenericTypeDefinition() == typeof(Observes<,>)))
                 throw new ConfigurationException("InitiatedBy, Orchestrates, and Observes can only be used with sagas");
 
-            _connectors = ConsumesContext()
-                    .Concat(ConsumesAll())
-                    .Distinct((x, y) => x.MessageType == y.MessageType)
-                    .ToList();
+            _connectors = Consumes()
+                .Distinct((x, y) => x.MessageType == y.MessageType)
+                .ToArray();
+
+//            _connectors = ConsumesContext()
+//                .Concat(ConsumesAll())
+//                .Distinct((x, y) => x.MessageType == y.MessageType)
+//                .ToList();
         }
 
-
-        public IEnumerable<InstanceSubscriptionConnector> Connectors
+        public ConnectHandle Connect(IInboundMessagePipe pipe, object instance, IMessageRetryPolicy retryPolicy)
         {
-            get { return _connectors; }
+            return new MultipleConnectHandle(_connectors.Select(x => x.Connect(pipe, instance, retryPolicy)));
         }
 
-        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, object instance)
+        IEnumerable<InstanceMessageConnector> Consumes()
         {
-            return _connectors.Select(x => x.Connect(configurator, instance))
-                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x());
+            return ConsumerMetadataCache<T>.ConsumerTypes.Select(x => x.GetInstanceMessageConnector());
         }
 
-        IEnumerable<InstanceSubscriptionConnector> ConsumesContext()
+        IEnumerable<InstanceMessageConnector> ConsumesContext()
         {
             return ConsumerMetadataCache<T>.ConsumerTypes.Select(CreateContextConnector);
         }
 
-        static InstanceSubscriptionConnector CreateContextConnector(MessageInterfaceType x)
+        static InstanceMessageConnector CreateContextConnector(MessageInterfaceType x)
         {
-            return (InstanceSubscriptionConnector)
-                   FastActivator.Create(typeof(ContextInstanceSubscriptionConnector<,>),
-                       new[] {typeof(T), x.MessageType});
+            return (InstanceMessageConnector)
+                FastActivator.Create(typeof(ContextInstanceSubscriptionConnector<,>),
+                    new[] {typeof(T), x.MessageType});
         }
 
-        static IEnumerable<InstanceSubscriptionConnector> ConsumesAll()
+        static IEnumerable<InstanceMessageConnector> ConsumesAll()
         {
             return ConsumerMetadataCache<T>.MessageConsumerTypes.Select(CreateConnector);
         }
 
-        static InstanceSubscriptionConnector CreateConnector(MessageInterfaceType x)
+        static InstanceMessageConnector CreateConnector(MessageInterfaceType x)
         {
-            return (InstanceSubscriptionConnector)
-                   FastActivator.Create(typeof(InstanceSubscriptionConnector<,>), new[] {typeof(T), x.MessageType});
+            return (InstanceMessageConnector)
+                FastActivator.Create(typeof(InstanceMessageConnector<,>), new[] {typeof(T), x.MessageType});
         }
     }
 }

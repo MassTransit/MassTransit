@@ -68,8 +68,9 @@ namespace MassTransit.Distributor.WorkerConnectors
 
         public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker)
         {
-            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, worker))
-                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
+            throw new NotImplementedException();
+            //            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, worker))
+//                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
         }
 
         IEnumerable<SagaWorkerConnector> Initiates()
