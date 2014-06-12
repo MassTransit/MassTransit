@@ -58,11 +58,6 @@ namespace MassTransit.Transports.RabbitMq
             return _model.CreateStreamProperties();
         }
 
-        public void ChannelFlow(bool active)
-        {
-            _model.ChannelFlow(active);
-        }
-
         public void ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
         {
             _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments);
@@ -359,6 +354,11 @@ namespace MassTransit.Transports.RabbitMq
         public bool IsOpen
         {
             get { return _model.IsOpen; }
+        }
+
+        public bool IsClosed
+        {
+            get { return _model.IsClosed; }
         }
 
         public ulong NextPublishSeqNo
