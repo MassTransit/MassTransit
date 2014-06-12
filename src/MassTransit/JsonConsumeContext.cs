@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Serialization;
@@ -31,6 +32,7 @@ namespace MassTransit
         readonly ReceiveContext _receiveContext;
         readonly string[] _supportedTypes;
         Guid? _correlationId;
+
 
         Uri _destinationAddress;
         Uri _faultAddress;
@@ -96,6 +98,11 @@ namespace MassTransit
             get { return _headers ?? (_headers = new JsonMessageHeaders(_deserializer, _envelope.Headers)); }
         }
 
+        public CancellationToken CancellationToken
+        {
+            get { return _receiveContext.CancellationToken; }
+        }
+
         public ReceiveContext ReceiveContext
         {
             get { return _receiveContext; }
@@ -154,6 +161,16 @@ namespace MassTransit
                 _messageTypes[typeof(T)] = message = null;
                 return false;
             }
+        }
+
+        public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
+        {
+            _receiveContext.NotifyConsumed(elapsed, messageType, consumerType);
+        }
+
+        public void NotifyFaulted(string messageType, string consumerType, Exception exception)
+        {
+            _receiveContext.NotifyFaulted(messageType, consumerType, exception);
         }
 
         static JToken GetMessageToken(object message)

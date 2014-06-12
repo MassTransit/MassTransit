@@ -67,7 +67,7 @@ namespace MassTransit
 		/// consume context
 		/// </summary>
 		public interface Context :
-			IConsumer<TMessage>
+            IMessageConsumer<IConsumeContext<TMessage>>
 		{
 		}
 	}

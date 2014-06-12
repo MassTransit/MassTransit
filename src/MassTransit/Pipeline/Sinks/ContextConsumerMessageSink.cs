@@ -26,7 +26,7 @@ namespace MassTransit.Pipeline.Sinks
     public class ContextConsumerMessageSink<TConsumer, TMessage> :
         IPipelineSink<IConsumeContext<TMessage>>
         where TMessage : class
-        where TConsumer : class, IConsumer<TMessage>
+        where TConsumer : class, IMessageConsumer<IConsumeContext<TMessage>>
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
 

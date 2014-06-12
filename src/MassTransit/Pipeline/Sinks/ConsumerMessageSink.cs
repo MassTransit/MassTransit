@@ -17,6 +17,12 @@ namespace MassTransit.Pipeline.Sinks
     using Util;
 
 
+    public interface ConnectHandle
+    {
+        void Disconnect();
+    }
+
+
     /// <summary>
     ///     Routes messages to instances of subscribed components. A new instance of the component
     ///     is created from the container for each message received.
@@ -45,17 +51,18 @@ namespace MassTransit.Pipeline.Sinks
             return inspector.Inspect(this);
         }
 
-        IEnumerable<Action<IConsumeContext<TMessage>>> Selector(TConsumer instance, IConsumeContext<TMessage> messageContext)
+        IEnumerable<Action<IConsumeContext<TMessage>>> Selector(TConsumer instance,
+            IConsumeContext<TMessage> messageContext)
         {
             yield return context =>
-                {
-                    context.BaseContext.NotifyConsume(context, TypeMetadataCache<TConsumer>.ShortName, null);
+            {
+                context.BaseContext.NotifyConsume(context, TypeMetadataCache<TConsumer>.ShortName, null);
 
-                    using (context.CreateScope())
-                    {
-                        instance.Consume(context.Message);
-                    }
-                };
+                using (context.CreateScope())
+                {
+                    instance.Consume(context.Message);
+                }
+            };
         }
     }
 }

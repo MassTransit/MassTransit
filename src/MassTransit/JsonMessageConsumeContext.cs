@@ -13,6 +13,8 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading;
+    using Util;
 
 
     public class JsonMessageConsumeContext<TMessage> :
@@ -73,6 +75,11 @@ namespace MassTransit
             get { return _context.Headers; }
         }
 
+        public CancellationToken CancellationToken
+        {
+            get { return _context.CancellationToken; }
+        }
+
         public ReceiveContext ReceiveContext
         {
             get { return _context.ReceiveContext; }
@@ -89,9 +96,29 @@ namespace MassTransit
             return _context.TryGetMessage(out consumeContext);
         }
 
+        public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
+        {
+            _context.NotifyConsumed(elapsed, messageType, consumerType);
+        }
+
+        public void NotifyFaulted(string messageType, string consumerType, Exception exception)
+        {
+            
+        }
+
         public TMessage Message
         {
             get { return _message; }
+        }
+
+        public void NotifyConsumed(TimeSpan elapsed, string consumerType)
+        {
+            _context.NotifyConsumed(elapsed, TypeMetadataCache<TMessage>.ShortName, consumerType);
+        }
+
+        public void NotifyFaulted(string consumerType, Exception exception)
+        {
+            _context.NotifyFaulted(TypeMetadataCache<TMessage>.ShortName, consumerType, exception);
         }
     }
 }

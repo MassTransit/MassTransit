@@ -136,28 +136,5 @@ namespace MassTransit.TestFramework
 
 			Assert.Fail("A subscription for " + typeof (TMessage).ToFriendlyName() + " was found on " + bus.Endpoint.Address.Uri);
 		}
-
-		public static void ShouldHaveCorrelatedSubscriptionFor<TMessage, TKey>(this IServiceBus bus, string correlationId)
-			where TMessage : CorrelatedBy<TKey>
-		{
-			DateTime giveUpAt = DateTime.Now + Timeout;
-
-			while (DateTime.Now < giveUpAt)
-			{
-				var inspector = new CorrelatedMessageSinkLocator(typeof (TMessage), typeof (TKey), correlationId.Equals);
-
-				bus.OutboundPipeline.Inspect(inspector);
-
-				if (inspector.Success)
-					return;
-
-				Thread.Sleep(20);
-			}
-
-			var message = string.Format("A correlated subscription for {0}({1}) was not found on {2}", 
-				typeof(TMessage).ToShortTypeName(), correlationId, bus.Endpoint.Address.Uri);
-
-			Assert.Fail(message);
-		}
 	}
 }

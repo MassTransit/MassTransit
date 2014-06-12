@@ -80,6 +80,20 @@ namespace MassTransit.Pipeline
 			return consumed;
 		}
 
+		public static bool Dispatch(this IInboundMessagePipeline pipeline, IConsumeContext context)
+		{
+			bool consumed = false;
+
+			foreach (var consumer in pipeline.Enumerate(context))
+			{
+				consumed = true;
+
+				consumer(context);
+			}
+
+			return consumed;
+		}
+
 		/// <summary>
 		/// <see cref="Dispatch{T}(MassTransit.Pipeline.IInboundMessagePipeline,T)"/>: this one is for the outbound pipeline.
 		/// </summary>
@@ -186,21 +200,6 @@ namespace MassTransit.Pipeline
 			var sink = new EndpointMessageSink<TMessage>(endpoint);
 
 			return pipeline.ConnectToRouter(sink);
-		}
-
-	    public static UnsubscribeAction ConnectEndpoint<TMessage, TKey>(this IOutboundMessagePipeline pipeline,
-		                                                                TKey correlationId,
-		                                                                IEndpoint endpoint)
-			where TMessage : class, CorrelatedBy<TKey>
-		{
-			var correlatedConfigurator = new OutboundCorrelatedMessageRouterConfigurator(pipeline);
-
-			CorrelatedMessageRouter<IBusPublishContext<TMessage>, TMessage, TKey> router =
-				correlatedConfigurator.FindOrCreate<TMessage, TKey>();
-
-			UnsubscribeAction result = router.Connect(correlationId, new EndpointMessageSink<TMessage>(endpoint));
-
-			return result;
 		}
 	}
 }

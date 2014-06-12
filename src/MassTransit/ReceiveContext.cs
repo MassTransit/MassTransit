@@ -14,10 +14,16 @@ namespace MassTransit
 {
     using System;
     using System.IO;
+    using System.Threading;
 
 
     public interface ReceiveContext
     {
+        /// <summary>
+        /// This token is cancelled when the message reception should no longer be processed
+        /// </summary>
+        CancellationToken CancellationToken { get; }
+
         /// <summary>
         ///     Returns the message body as a stream that can be deserialized. The stream
         ///     must be disposed by the caller, a reference is not retained
@@ -44,5 +50,21 @@ namespace MassTransit
         ///     Headers specific to the transport
         /// </summary>
         Headers Headers { get; }
+
+        /// <summary>
+        /// Notify that a message has been consumed from the received context
+        /// </summary>
+        /// <param name="elapsed"></param>
+        /// <param name="messageType"></param>
+        /// <param name="consumerType"></param>
+        void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType);
+
+        /// <summary>
+        /// Notify that a message consumer faulted
+        /// </summary>
+        /// <param name="messageType"></param>
+        /// <param name="consumerType"></param>
+        /// <param name="exception"></param>
+        void NotifyFaulted(string messageType, string consumerType, Exception exception);
     }
 }

@@ -117,24 +117,6 @@ namespace MassTransit.Pipeline.Inspectors
             return true;
         }
 
-        public bool Inspect<T, TMessage, TKey>(CorrelatedMessageRouter<T, TMessage, TKey> sink)
-            where TMessage : class, CorrelatedBy<TKey>
-            where T : class, IMessageContext<TMessage>
-        {
-            Append(string.Format("Correlated by {1} ({0})", GetMessageName<TMessage>(), typeof(TKey).ToFriendlyName()));
-
-            return true;
-        }
-
-        public bool Inspect<T, TMessage, TKey>(CorrelatedMessageSinkRouter<T, TMessage, TKey> sink)
-            where T : class
-            where TMessage : class, CorrelatedBy<TKey>
-        {
-            Append(string.Format("Routed for Correlation Id {1} ({0})", GetMessageName<TMessage>(), sink.CorrelationId));
-
-            return true;
-        }
-
         public bool Inspect<T, TMessage>(RequestMessageRouter<T, TMessage> router)
             where T : class, IConsumeContext<TMessage>
             where TMessage : class
@@ -172,7 +154,7 @@ namespace MassTransit.Pipeline.Inspectors
 
         public bool Inspect<TComponent, TMessage>(ContextConsumerMessageSink<TComponent, TMessage> sink)
             where TMessage : class
-            where TComponent : class, IConsumer<TMessage>
+            where TComponent : class, IMessageConsumer<IConsumeContext<TMessage>>
         {
             Append(string.Format("Consumed by Component {0} ({1} w/Context)", GetComponentName<TComponent>(),
                 GetMessageName<TMessage>()));

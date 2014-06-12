@@ -19,6 +19,7 @@ namespace MassTransit.SubscriptionConnectors
     using Magnum.Extensions;
     using Magnum.Reflection;
     using Pipeline;
+    using Pipeline.Sinks;
     using Saga;
     using Util;
 
@@ -32,6 +33,9 @@ namespace MassTransit.SubscriptionConnectors
         UnsubscribeAction Connect<TConsumer>(IInboundPipelineConfigurator configurator,
             IConsumerFactory<TConsumer> consumerFactory)
             where TConsumer : class;
+
+        ConnectHandle Connect<TConsumer>(IInboundMessagePipe pipe, IAsyncConsumerFactory<TConsumer> consumerFactory)
+            where TConsumer : class;
     }
 
 
@@ -40,6 +44,7 @@ namespace MassTransit.SubscriptionConnectors
         where T : class
     {
         readonly IEnumerable<ConsumerSubscriptionConnector> _connectors;
+        readonly IEnumerable<ConsumerMessageConnector> _messageConnectors;
 
         public ConsumerConnector()
         {
@@ -57,6 +62,8 @@ namespace MassTransit.SubscriptionConnectors
                 .Concat(ConsumesAll())
                 .Distinct((x, y) => x.MessageType == y.MessageType)
                 .ToList();
+
+            _messageConnectors = Consumes().ToList();
         }
 
         public IEnumerable<ConsumerSubscriptionConnector> Connectors
@@ -72,9 +79,42 @@ namespace MassTransit.SubscriptionConnectors
                 .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x());
         }
 
+        public ConnectHandle Connect<TConsumer>(IInboundMessagePipe pipe, IAsyncConsumerFactory<TConsumer> consumerFactory) 
+            where TConsumer : class
+        {
+            return new ConsumerHandle(_messageConnectors.Select(x => x.Connect(pipe, consumerFactory)));
+        }
+
+
+        class ConsumerHandle :
+            ConnectHandle
+        {
+            readonly ConnectHandle[] _handles;
+
+            public ConsumerHandle(IEnumerable<ConnectHandle> handles)
+            {
+                _handles = handles.ToArray();
+            }
+
+            public void Disconnect()
+            {
+                for (int i = 0; i < _handles.Length; i++)
+                {
+                    _handles[i].Disconnect();
+                }
+            }
+        }
+
         static IEnumerable<ConsumerSubscriptionConnector> ConsumesContext()
         {
-            return ConsumerMetadataCache<T>.ConsumerTypes.Select(CreateContextConnector);
+            yield break;
+//            return ConsumerMetadataCache<T>.ConsumerTypes.Select(CreateContextConnector);
+        }
+
+        
+        static IEnumerable<ConsumerMessageConnector> Consumes()
+        {
+            return ConsumerMetadataCache<T>.ConsumerTypes.Select(x => x.GetMessageConnector());
         }
 
         static ConsumerSubscriptionConnector CreateContextConnector(MessageInterfaceType x)

@@ -16,5 +16,8 @@ namespace MassTransit.SubscriptionConnectors
     {
         MessageInterfaceType[] ConsumerTypes { get; }
         MessageInterfaceType[] MessageConsumerTypes { get; }
+
+
+        ConsumerConnector Connector { get; }
     }
 }

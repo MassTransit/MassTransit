@@ -17,30 +17,30 @@ namespace MassTransit.SubscriptionConnectors
 
     public class MessageInterfaceType
     {
-        public MessageInterfaceType(Type interfaceType, Type messageType)
+        readonly Lazy<MessageConnectorFactory> _messageConnectorFactory;
+
+        public MessageInterfaceType(Type interfaceType, Type messageType, Type consumerType)
         {
             InterfaceType = interfaceType;
             MessageType = messageType;
+
+            _messageConnectorFactory = new Lazy<MessageConnectorFactory>(() => (MessageConnectorFactory)
+                Activator.CreateInstance(typeof(ConsumerMessageConnectorFactory<,>).MakeGenericType(consumerType,
+                    messageType)));
         }
 
         public Type InterfaceType { get; private set; }
         public Type MessageType { get; private set; }
+
+        public ConsumerMessageConnector GetMessageConnector()
+        {
+            return _messageConnectorFactory.Value.CreateMessageConnector();
+        }
     }
 
 
     public interface ConnectorFactory
     {
         ConsumerSubscriptionConnector CreateSubscriptionConnector();
-    }
-
-    public class MessageConsumerConnectorFactory<TConsumer, TMessage> :
-        ConnectorFactory
-        where TConsumer : class, IMessageConsumer<TMessage>
-        where TMessage : class
-    {
-        public ConsumerSubscriptionConnector CreateSubscriptionConnector()
-        {
-            return new ConsumerSubscriptionConnector<TConsumer, TMessage>();
-        }
     }
 }

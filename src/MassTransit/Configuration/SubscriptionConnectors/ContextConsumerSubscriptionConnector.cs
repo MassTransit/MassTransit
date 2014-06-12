@@ -20,7 +20,7 @@ namespace MassTransit.SubscriptionConnectors
 
 	public class ContextConsumerSubscriptionConnector<TConsumer, TMessage> :
 		ConsumerSubscriptionConnector
-		where TConsumer : class, IConsumer<TMessage>
+		where TConsumer : class, IMessageConsumer<IConsumeContext<TMessage>>
 		where TMessage : class
 	{
 		public Type MessageType
@@ -40,5 +40,11 @@ namespace MassTransit.SubscriptionConnectors
 
 			return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
 		}
+
+	    public ConnectHandle Connect<T>(IInboundMessagePipe pipe, IAsyncConsumerFactory<T> consumerFactory) 
+            where T : class
+	    {
+	        throw new NotImplementedException();
+	    }
 	}
 }
