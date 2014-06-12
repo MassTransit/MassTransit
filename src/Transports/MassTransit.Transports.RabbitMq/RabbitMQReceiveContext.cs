@@ -15,6 +15,7 @@ namespace MassTransit.Transports.RabbitMq
     using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Net.Mime;
     using System.Threading;
     using RabbitMQ.Client;
 
@@ -23,7 +24,7 @@ namespace MassTransit.Transports.RabbitMq
         ReceiveContext,
         RabbitMqBasicConsumeContext
     {
-        const string DefaultContentType = "application/vnd.masstransit+json";
+        static readonly ContentType DefaultContentType = new ContentType("application/vnd.masstransit+json");
 
         readonly byte[] _body;
         readonly string _consumerTag;
@@ -34,7 +35,7 @@ namespace MassTransit.Transports.RabbitMq
         readonly Stopwatch _receiveTimer;
         readonly bool _redelivered;
         readonly string _routingKey;
-        string _contentType;
+        ContentType _contentType;
         RabbitMqReceiveContextHeaders _headers;
         CancellationTokenSource _cancellationTokenSource;
 
@@ -100,7 +101,7 @@ namespace MassTransit.Transports.RabbitMq
             get { return _inputAddress; }
         }
 
-        public string ContentType
+        public ContentType ContentType
         {
             get { return _contentType ?? (_contentType = GetContentType()); }
         }
@@ -125,14 +126,14 @@ namespace MassTransit.Transports.RabbitMq
             
         }
 
-        string GetContentType()
+        ContentType GetContentType()
         {
             object contentTypeHeader;
             if (Headers.TryGetHeader("Content-Type", out contentTypeHeader))
             {
                 var s = contentTypeHeader as string;
                 if (s != null)
-                    return s;
+                    return new ContentType(s);
             }
 
             return DefaultContentType;

@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.IO;
+    using System.Net.Mime;
     using System.Threading;
 
 
@@ -41,7 +42,7 @@ namespace MassTransit
         /// <summary>
         ///     The content type of the message, as determined by the available headers
         /// </summary>
-        string ContentType { get; }
+        ContentType ContentType { get; }
 
         // true if we know this message is being redelivered after a fault
         bool Redelivered { get; }
