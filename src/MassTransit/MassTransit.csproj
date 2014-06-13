@@ -124,7 +124,6 @@
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="ConsumeContextExtensions.cs" />
     <Compile Include="ConsumeContextTuple.cs" />
-    <Compile Include="IConsumeEnricher.cs" />
     <Compile Include="IConsumePipe.cs" />
     <Compile Include="ConsumerFactoryCallback.cs" />
     <Compile Include="ConsumerFactoryInterceptor.cs" />
@@ -162,16 +161,18 @@
     <Compile Include="NewId\NewIdProviders\BestPossibleWorkerIdProvider.cs" />
     <Compile Include="NewId\NewIdProviders\HostNameSHA1WorkerIdProvider.cs" />
     <Compile Include="NewId\NewIdProviders\WMINetworkAddressWorkerIdProvider.cs" />
-    <Compile Include="IPipe.cs" />
     <Compile Include="IFilter.cs" />
     <Compile Include="PipeContext.cs" />
+    <Compile Include="Pipeline\IConsumeEnricher.cs" />
     <Compile Include="Pipeline\IConsumeFilter.cs" />
     <Compile Include="Pipeline\HandlerHolder.cs" />
     <Compile Include="Pipeline\ConnectHandle.cs" />
-    <Compile Include="Pipeline\IConsumeContextPipeInspector.cs" />
+    <Compile Include="Pipeline\IPipe.cs" />
+    <Compile Include="Pipeline\IPipeInspector.cs" />
     <Compile Include="Pipeline\IInboundPipe.cs" />
     <Compile Include="Pipeline\InboundPipe.cs" />
     <Compile Include="Pipeline\InboundMessagePipeExtensions.cs" />
+    <Compile Include="Pipeline\PipeInspectorBase.cs" />
     <Compile Include="Pipeline\PipeInspectorCallback.cs" />
     <Compile Include="Pipeline\ISendFilter.cs" />
     <Compile Include="Pipeline\Sinks\ConsumerMessageFilter.cs" />
@@ -209,6 +210,7 @@
     <Compile Include="Pipeline\Sinks\RetryExceptRetryExceptionFilter.cs" />
     <Compile Include="Pipeline\Sinks\RetrySelectedRetryExceptionFilter.cs" />
     <Compile Include="Pipeline\Sinks\TeeConsumeContextPipe.cs" />
+    <Compile Include="Pipeline\StringPipeInspector.cs" />
     <Compile Include="ReceiveContext.cs" />
     <Compile Include="SendContext.cs" />
     <Compile Include="SentContext.cs" />

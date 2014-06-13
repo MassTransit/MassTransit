@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System.Threading.Tasks;
+    using Pipeline;
 
 
     /// <summary>
@@ -40,6 +41,11 @@ namespace MassTransit
             return _filter.Send(context, Cache.LastPipe);
         }
 
+        public bool Inspect(IPipeInspector inspector)
+        {
+            return inspector.Inspect(this, (x, p) => _filter.Inspect(x));
+        }
+
 
         static class Cache
         {
@@ -52,6 +58,11 @@ namespace MassTransit
         {
             async Task IPipe<T>.Send(T context)
             {
+            }
+
+            public bool Inspect(IPipeInspector inspector)
+            {
+                return true;
             }
         }
     }

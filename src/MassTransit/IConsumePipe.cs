@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using Pipeline;
+
+
     public interface IConsumePipe :
         IPipe<ConsumeContext>
     {

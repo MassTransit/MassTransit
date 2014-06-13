@@ -28,7 +28,8 @@ namespace MassTransit.Pipeline.Sinks
         where TConsumer : class, IMessageConsumer<TMessage>
         where TMessage : class
     {
-        public async Task Send(ConsumeContext<TConsumer, TMessage> context, IPipe<ConsumeContext<TConsumer, TMessage>> next)
+        public async Task Send(ConsumeContext<TConsumer, TMessage> context,
+            IPipe<ConsumeContext<TConsumer, TMessage>> next)
         {
             var messageConsumer = context.Item1 as IMessageConsumer<TMessage>;
             if (messageConsumer == null)
@@ -45,6 +46,11 @@ namespace MassTransit.Pipeline.Sinks
             {
                 messageConsumer.Consume(consumeContext.Message);
             }
+        }
+
+        public bool Inspect(IPipeInspector inspector)
+        {
+            return inspector.Inspect(this);
         }
     }
 }

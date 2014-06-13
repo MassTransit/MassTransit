@@ -16,6 +16,7 @@ namespace MassTransit.NinjectIntegration
     using Exceptions;
     using Ninject;
     using Ninject.Activation.Blocks;
+    using Pipeline;
     using Util;
 
 

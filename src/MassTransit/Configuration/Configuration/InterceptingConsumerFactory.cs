@@ -14,6 +14,7 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Threading.Tasks;
+    using Pipeline;
 
 
     public class InterceptingConsumerFactory<TConsumer> :
@@ -59,6 +60,11 @@ namespace MassTransit.Configuration
             public Task Send(ConsumeContext<TConsumer, T> context)
             {
                 return _interceptor(context.Item1, context, () => _next.Send(context));
+            }
+
+            public bool Inspect(IPipeInspector inspector)
+            {
+                return inspector.Inspect(this, (x, p) => _next.Inspect(x));
             }
         }
     }

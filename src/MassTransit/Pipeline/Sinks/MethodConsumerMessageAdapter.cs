@@ -40,5 +40,10 @@ namespace MassTransit.Pipeline.Sinks
 
             return messageConsumer.Consume(context);
         }
+
+        public bool Inspect(IPipeInspector inspector)
+        {
+            return inspector.Inspect(this);
+        }
     }
 }

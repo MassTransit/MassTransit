@@ -81,7 +81,7 @@ namespace MassTransit.Pipeline.Sinks
             }
         }
 
-        public bool Inspect(IConsumeContextPipeInspector inspector)
+        public bool Inspect(IPipeInspector inspector)
         {
             return inspector.Inspect(this, (x, _) => _output.Inspect(x));
         }

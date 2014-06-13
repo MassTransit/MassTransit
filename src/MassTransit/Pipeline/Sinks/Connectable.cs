@@ -20,7 +20,6 @@ namespace MassTransit.Pipeline.Sinks
 
 
     public abstract class Connectable<T>
-        where T : class
     {
         readonly ConcurrentDictionary<long, T> _connections;
         long _nextId;
@@ -51,6 +50,9 @@ namespace MassTransit.Pipeline.Sinks
 
         protected async Task ForEach(Func<T, Task> callback)
         {
+            if (callback == null)
+                throw new ArgumentNullException("callback");
+
             if (_connections.Count == 0)
                 return;
 
