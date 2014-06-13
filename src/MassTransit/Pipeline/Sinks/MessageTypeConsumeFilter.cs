@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline.Sinks
     using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading.Tasks;
-    using Util;
 
 
     public class MessageTypeConsumeFilter :
@@ -31,7 +30,7 @@ namespace MassTransit.Pipeline.Sinks
             _pipes = new ConcurrentDictionary<Type, IConsumeFilter>();
         }
 
-        public ConnectHandle Connect<T>([NotNull] IMessageInterceptor<T> interceptor)
+        public ConnectHandle Connect<T>(IMessageInterceptor<T> interceptor)
             where T : class
         {
             if (interceptor == null)
@@ -42,6 +41,17 @@ namespace MassTransit.Pipeline.Sinks
             ConnectHandle handle = messagePipe.Connect(interceptor);
 
             return handle;
+        }
+
+        public async Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
+        {
+            foreach (IConsumeFilter pipe in _pipes.Values)
+                await pipe.Send(context, next);
+        }
+
+        public bool Inspect(IPipeInspector inspector)
+        {
+            return inspector.Inspect(this, (x, _) => _pipes.Values.All(pipe => pipe.Inspect(x)));
         }
 
         public ConnectHandle Connect<T>(IConsumeFilter<T> filter)
@@ -55,17 +65,6 @@ namespace MassTransit.Pipeline.Sinks
             ConnectHandle handle = messagePipe.Connect(filter);
 
             return handle;
-        }
-
-        public async Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
-        {
-            foreach (IConsumeFilter pipe in _pipes.Values)
-                await pipe.Send(context, next);
-        }
-
-        public bool Inspect(IConsumeContextPipeInspector inspector)
-        {
-            return inspector.Inspect(this, (x, _) => _pipes.Values.All(pipe => pipe.Inspect(x)));
         }
 
         TResult GetPipe<T, TResult>()

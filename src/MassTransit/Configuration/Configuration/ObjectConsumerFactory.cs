@@ -14,6 +14,7 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Threading.Tasks;
+    using Pipeline;
 
 
     public class ObjectConsumerFactory<TConsumer> :

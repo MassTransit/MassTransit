@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Pipeline
 {
+    using System;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Sinks;
     using NUnit.Framework;
@@ -37,6 +38,23 @@ namespace MassTransit.Tests.Pipeline
             await filter.Send(consumeContext);
 
             await consumer.Task;
+        }
+
+        [Test, Explicit]
+        public void Should_receive_a_message_pipeline_view()
+        {
+            IInboundPipe filter = new InboundPipe();
+
+            OneMessageConsumer consumer = GetOneMessageConsumer();
+
+            IConsumerFactory<OneMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
+
+            filter.ConnectConsumer(factory, Retry.None);
+
+            var inspector = new StringPipeInspector();
+            filter.Inspect(inspector);
+
+            Console.WriteLine(inspector.ToString());
         }
 
         [Test]

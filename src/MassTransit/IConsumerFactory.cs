@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using Pipeline;
+
+
     /// <summary>
     /// Maps an instance of a consumer to one or more Consume methods for the specified message type
     /// 

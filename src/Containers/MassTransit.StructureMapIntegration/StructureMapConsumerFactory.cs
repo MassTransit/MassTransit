@@ -14,6 +14,7 @@ namespace MassTransit.StructureMapIntegration
 {
     using System.Threading.Tasks;
     using Exceptions;
+    using Pipeline;
     using StructureMap;
     using Util;
 

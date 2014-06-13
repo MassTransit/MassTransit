@@ -83,7 +83,7 @@ namespace MassTransit.Distributor.Pipeline
             await next.Send(context);
         }
 
-        public bool Inspect(IConsumeContextPipeInspector inspector)
+        public bool Inspect(IPipeInspector inspector)
         {
             return inspector.Inspect(this);
         }

@@ -53,7 +53,7 @@ namespace MassTransit.Pipeline.Sinks
                 await filter.Send(context, next);
         }
 
-        public bool Inspect(IConsumeContextPipeInspector inspector)
+        public bool Inspect(IPipeInspector inspector)
         {
             return inspector.Inspect(this,
                 (x, _) => _pipes.Values.Cast<IConsumeFilter<T>>().All(pipe => pipe.Inspect(x)));

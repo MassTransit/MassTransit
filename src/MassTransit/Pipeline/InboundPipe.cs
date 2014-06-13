@@ -43,7 +43,7 @@ namespace MassTransit.Pipeline
             return _filter.Connect(interceptor);
         }
 
-        public bool Inspect(IConsumeContextPipeInspector inspector)
+        public bool Inspect(IPipeInspector inspector)
         {
             return _filter.Inspect(inspector);
         }
@@ -60,6 +60,11 @@ namespace MassTransit.Pipeline
         {
             async Task IPipe<ConsumeContext>.Send(ConsumeContext context)
             {
+            }
+
+            public bool Inspect(IPipeInspector inspector)
+            {
+                return true;
             }
         }
     }

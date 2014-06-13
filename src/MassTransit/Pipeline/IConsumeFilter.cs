@@ -15,7 +15,7 @@ namespace MassTransit.Pipeline
     public interface IConsumeFilter :
         IFilter<ConsumeContext>
     {
-        bool Inspect(IConsumeContextPipeInspector inspector);
+        bool Inspect(IPipeInspector inspector);
     }
 
 
@@ -23,6 +23,6 @@ namespace MassTransit.Pipeline
         IFilter<ConsumeContext<T>>
         where T : class
     {
-        bool Inspect(IConsumeContextPipeInspector inspector);
+        bool Inspect(IPipeInspector inspector);
     }
 }

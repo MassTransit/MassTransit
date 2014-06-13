@@ -15,6 +15,7 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Exceptions;
     using Microsoft.Practices.Unity;
+    using Pipeline;
     using Util;
 
 

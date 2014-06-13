@@ -14,6 +14,7 @@ namespace MassTransit.Testing.TestDecorators
 {
     using System;
     using System.Threading.Tasks;
+    using Pipeline;
 
 
     public class ConsumerFactoryTestDecorator<TConsumer> :
@@ -66,6 +67,11 @@ namespace MassTransit.Testing.TestDecorators
                 {
                     _received.Add(received);
                 }
+            }
+
+            public bool Inspect(IPipeInspector inspector)
+            {
+                return inspector.Inspect(this, (x, f) => _next.Inspect(x));
             }
         }
     }
