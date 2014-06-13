@@ -33,9 +33,9 @@ namespace MassTransit.SubscriptionBuilders
             _retryPolicy = retryPolicy;
         }
 
-        public ISubscriptionReference Subscribe(IInboundMessagePipe pipe)
+        public ISubscriptionReference Subscribe(IInboundPipe filter)
         {
-            ConnectHandle handle = pipe.ConnectHandler(_handler, _retryPolicy);
+            ConnectHandle handle = filter.ConnectHandler(_handler, _retryPolicy);
 
             return _referenceFactory(handle);
         }

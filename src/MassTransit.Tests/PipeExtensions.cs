@@ -10,24 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
 
 
-    public interface IConsumeContextPipe<T>
-        where T : class
+    public static class PipeExtensions
     {
-        Task Send(ConsumeContext<T> context);
-
-        bool Inspect(IConsumeContextPipeInspector inspector);
-    }
-
-
-    public interface IConsumeContextPipe
-    {
-        Task Send(ConsumeContext context);
-
-        bool Inspect(IConsumeContextPipeInspector inspector);
+        public static Task Send<T>(this Filter<T> filter, T context)
+            where T : class, PipeContext
+        {
+            return filter.Send(context, LastPipe<T>.Next);
+        }
     }
 }

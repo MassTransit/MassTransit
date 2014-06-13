@@ -17,6 +17,6 @@ namespace MassTransit.SubscriptionBuilders
 
 	public interface SubscriptionBuilder
 	{
-		ISubscriptionReference Subscribe(IInboundMessagePipe pipe);
+		ISubscriptionReference Subscribe(IInboundPipe filter);
 	}
 }

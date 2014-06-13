@@ -32,7 +32,7 @@ namespace MassTransit.Transports
             _destinationAddress = destinationAddress;
         }
 
-        public Task<MassTransit.SendContext<T>> Send<T>(T message)
+        public Task<SentContext<T>> Send<T>(T message)
             where T : class
         {
             return _sendToTransport.Send(message, context =>
@@ -44,7 +44,7 @@ namespace MassTransit.Transports
                 });
         }
 
-        public Task<MassTransit.SendContext<T>> Send<T>(T message, Action<MassTransit.SendContext<T>> callback)
+        public Task<SentContext<T>> Send<T>(T message, Action<MassTransit.SendContext<T>> callback)
             where T : class
         {
             return _sendToTransport.Send(message, context =>
@@ -58,7 +58,7 @@ namespace MassTransit.Transports
                 });
         }
 
-        public Task<MassTransit.SendContext<T>> Send<T>(T message,
+        public Task<SentContext<T>> Send<T>(T message,
             Func<MassTransit.SendContext<T>, Task<MassTransit.SendContext<T>>> callback)
             where T : class
         {
@@ -73,7 +73,7 @@ namespace MassTransit.Transports
                 });
         }
 
-        public Task<SendContext> Send(object message)
+        public Task<SentContext> Send(object message)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -83,7 +83,7 @@ namespace MassTransit.Transports
             return EndpointSendConverterCache.Instance[messageType].Send(this, message);
         }
 
-        public Task<SendContext> Send(object message, Type messageType)
+        public Task<SentContext> Send(object message, Type messageType)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -93,7 +93,7 @@ namespace MassTransit.Transports
             return EndpointSendConverterCache.Instance[messageType].Send(this, message);
         }
 
-        public Task<SendContext> Send(object message, Action<SendContext> callback)
+        public Task<SentContext> Send(object message, Action<SendContext> callback)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -105,7 +105,7 @@ namespace MassTransit.Transports
             return EndpointSendConverterCache.Instance[messageType].Send(this, message, callback);
         }
 
-        public Task<SendContext> Send(object message, Func<SendContext, Task<SendContext>> callback)
+        public Task<SentContext> Send(object message, Func<SendContext, Task<SendContext>> callback)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -117,7 +117,7 @@ namespace MassTransit.Transports
             return EndpointSendConverterCache.Instance[messageType].Send(this, message, callback);
         }
 
-        public Task<SendContext> Send(object message, Type messageType, Action<SendContext> callback)
+        public Task<SentContext> Send(object message, Type messageType, Action<SendContext> callback)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -130,7 +130,7 @@ namespace MassTransit.Transports
             return EndpointSendConverterCache.Instance[messageType].Send(this, message, callback);
         }
 
-        public Task<SendContext> Send(object message, Type messageType, Func<SendContext, Task<SendContext>> callback)
+        public Task<SentContext> Send(object message, Type messageType, Func<SendContext, Task<SendContext>> callback)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -142,7 +142,7 @@ namespace MassTransit.Transports
             return EndpointSendConverterCache.Instance[messageType].Send(this, message, callback);
         }
 
-        public Task<MassTransit.SendContext<T>> Send<T>(object values)
+        public Task<SentContext<T>> Send<T>(object values)
             where T : class
         {
             if (values == null)
@@ -153,7 +153,7 @@ namespace MassTransit.Transports
             return Send(message);
         }
 
-        public Task<MassTransit.SendContext<T>> Send<T>(object values, Action<MassTransit.SendContext<T>> callback)
+        public Task<SentContext<T>> Send<T>(object values, Action<MassTransit.SendContext<T>> callback)
             where T : class
         {
             if (values == null)
@@ -164,7 +164,7 @@ namespace MassTransit.Transports
             return Send(message, callback);
         }
 
-        public Task<MassTransit.SendContext<T>> Send<T>(object values,
+        public Task<SentContext<T>> Send<T>(object values,
             Func<MassTransit.SendContext<T>, Task<MassTransit.SendContext<T>>> callback)
             where T : class
         {

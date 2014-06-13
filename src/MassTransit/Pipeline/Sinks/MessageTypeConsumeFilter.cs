@@ -19,16 +19,16 @@ namespace MassTransit.Pipeline.Sinks
     using Util;
 
 
-    public class MessageTypeConsumeContextPipe :
-        IConsumeContextPipe,
-        IConnectPipe,
+    public class MessageTypeConsumeFilter :
+        IConsumeFilter,
+        IConsumeFilterConnector,
         IConnectMessageInterceptor
     {
-        readonly ConcurrentDictionary<Type, IConsumeContextPipe> _pipes;
+        readonly ConcurrentDictionary<Type, IConsumeFilter> _pipes;
 
-        public MessageTypeConsumeContextPipe()
+        public MessageTypeConsumeFilter()
         {
-            _pipes = new ConcurrentDictionary<Type, IConsumeContextPipe>();
+            _pipes = new ConcurrentDictionary<Type, IConsumeFilter>();
         }
 
         public ConnectHandle Connect<T>([NotNull] IMessageInterceptor<T> interceptor)
@@ -44,23 +44,23 @@ namespace MassTransit.Pipeline.Sinks
             return handle;
         }
 
-        public ConnectHandle Connect<T>(IConsumeContextPipe<T> pipe)
+        public ConnectHandle Connect<T>(IConsumeFilter<T> filter)
             where T : class
         {
-            if (pipe == null)
-                throw new ArgumentNullException("pipe");
+            if (filter == null)
+                throw new ArgumentNullException("filter");
 
-            IConnectPipe messagePipe = GetPipe<T, IConnectPipe>();
+            IConsumeFilterConnector messagePipe = GetPipe<T, IConsumeFilterConnector>();
 
-            ConnectHandle handle = messagePipe.Connect(pipe);
+            ConnectHandle handle = messagePipe.Connect(filter);
 
             return handle;
         }
 
-        public async Task Send(ConsumeContext context)
+        public async Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
-            foreach (IConsumeContextPipe pipe in _pipes.Values)
-                await pipe.Send(context);
+            foreach (IConsumeFilter pipe in _pipes.Values)
+                await pipe.Send(context, next);
         }
 
         public bool Inspect(IConsumeContextPipeInspector inspector)
@@ -72,7 +72,7 @@ namespace MassTransit.Pipeline.Sinks
             where T : class
             where TResult : class
         {
-            return (TResult)_pipes.GetOrAdd(typeof(T), x => (IConsumeContextPipe)new MessageConsumeContextPipe<T>());
+            return (TResult)_pipes.GetOrAdd(typeof(T), x => (IConsumeFilter)new MessageConsumeFilter<T>());
         }
     }
 }

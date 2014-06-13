@@ -15,7 +15,8 @@ namespace MassTransit
     using System;
 
 
-    public interface MessageContext
+    public interface MessageContext :
+        PipeContext
     {
         Guid? MessageId { get; }
         Guid? RequestId { get; }

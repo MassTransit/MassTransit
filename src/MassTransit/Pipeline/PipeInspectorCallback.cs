@@ -15,9 +15,9 @@ namespace MassTransit.Pipeline
     using Sinks;
 
 
-    public delegate bool PipeInspectorCallback(IConsumeContextPipeInspector inspector, IConsumeContextPipe pipe);
+    public delegate bool PipeInspectorCallback(IConsumeContextPipeInspector inspector, IConsumeFilter filter);
 
 
-    public delegate bool PipeInspectorCallback<T>(IConsumeContextPipeInspector inspector, IConsumeContextPipe<T> pipe)
+    public delegate bool PipeInspectorCallback<T>(IConsumeContextPipeInspector inspector, IConsumeFilter<T> filter)
         where T : class;
 }

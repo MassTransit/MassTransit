@@ -32,7 +32,7 @@ namespace MassTransit.Saga.SubscriptionBuilders
             _referenceFactory = referenceFactory;
         }
 
-        public ISubscriptionReference Subscribe(IInboundMessagePipe pipe)
+        public ISubscriptionReference Subscribe(IInboundPipe filter)
         {
             throw new NotImplementedException();
 //            UnsubscribeAction unsubscribe = _connector.Connect(pipe);

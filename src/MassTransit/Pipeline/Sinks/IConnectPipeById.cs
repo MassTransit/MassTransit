@@ -15,6 +15,6 @@ namespace MassTransit.Pipeline.Sinks
     public interface IConnectPipeById<T, in TKey>
         where T : class
     {
-        ConnectHandle Connect(TKey key, IConsumeContextPipe<T> pipe);
+        ConnectHandle Connect(TKey key, IConsumeFilter<T> filter);
     }
 }

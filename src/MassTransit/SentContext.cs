@@ -12,8 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    public interface SentContext
+    public interface SentContext :
+        PipeContext
     {
-         
+    }
+
+
+    public interface SentContext<T> : 
+        SentContext
+        where T : class
+    {
     }
 }

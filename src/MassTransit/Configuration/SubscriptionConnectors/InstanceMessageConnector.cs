@@ -37,7 +37,7 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect(IInboundMessagePipe pipe, object instance, IMessageRetryPolicy retryPolicy)
+        public ConnectHandle Connect(IInboundPipe filter, object instance, IMessageRetryPolicy retryPolicy)
         {
             if (instance == null)
                 throw new ArgumentNullException("instance");
@@ -49,9 +49,9 @@ namespace MassTransit.SubscriptionConnectors
                     TypeMetadataCache<TConsumer>.ShortName, instance.GetType().ToShortTypeName()));
             }
 
-            var instancePipe = new InstanceMessagePipe<TConsumer, TMessage>(consumer, _adapter, retryPolicy);
+            var instancePipe = new InstanceMessageFilter<TConsumer, TMessage>(consumer, _adapter, retryPolicy);
 
-            return pipe.Connect(instancePipe);
+            return filter.Connect(instancePipe);
         }
     }
 }

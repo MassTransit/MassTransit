@@ -16,6 +16,7 @@ namespace MassTransit.Transports
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Net.Mime;
     using Newtonsoft.Json;
     using Serialization;
 
@@ -33,7 +34,7 @@ namespace MassTransit.Transports
         public void Serialize<T>(Stream stream, SendContext<T> context)
             where T : class
         {
-            context.ContentType = JsonMessageSerializer.ContentTypeHeaderValue;
+            context.ContentType = JsonMessageSerializer.JsonContentType;
 
             var envelope = new Envelope(context, context.Message, typeof(T).GetMessageTypes());
 
@@ -49,9 +50,9 @@ namespace MassTransit.Transports
             }
         }
 
-        public string ContentType
+        public ContentType ContentType
         {
-            get { return JsonMessageSerializer.ContentTypeHeaderValue; }
+            get { return JsonMessageSerializer.JsonContentType; }
         }
 
 

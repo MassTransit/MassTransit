@@ -13,11 +13,12 @@
 namespace MassTransit.Transports
 {
     using System.IO;
+    using System.Net.Mime;
 
 
     public interface IMessageSendSerializer
     {
-        string ContentType { get; }
+        ContentType ContentType { get; }
 
         void Serialize<T>(Stream stream, SendContext<T> context)
             where T : class;

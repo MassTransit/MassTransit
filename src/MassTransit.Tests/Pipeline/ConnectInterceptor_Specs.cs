@@ -26,18 +26,18 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_invoke_pre()
         {
-            IInboundMessagePipe pipe = new InboundMessagePipe();
+            IInboundPipe filter = new InboundMessageFilter();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
-            pipe.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
+            filter.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
 
             var interceptor = GetMessageInterceptor<MessageA>();
-            pipe.Connect(interceptor);
+            filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
 
-            await pipe.Send(consumeContext);
+            await filter.Send(consumeContext);
 
             await received.Task;
 
@@ -47,18 +47,18 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_invoke_post()
         {
-            IInboundMessagePipe pipe = new InboundMessagePipe();
+            IInboundPipe filter = new InboundMessageFilter();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
-            pipe.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
+            filter.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
 
             var interceptor = GetMessageInterceptor<MessageA>();
-            pipe.Connect(interceptor);
+            filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
 
-            await pipe.Send(consumeContext);
+            await filter.Send(consumeContext);
 
             await received.Task;
 
@@ -68,16 +68,16 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public void Should_invoke_faulted()
         {
-            IInboundMessagePipe pipe = new InboundMessagePipe();
+            IInboundPipe filter = new InboundMessageFilter();
 
-            pipe.ConnectHandler<MessageA>(async context => { throw new InvalidOperationException("This is a test"); });
+            filter.ConnectHandler<MessageA>(async context => { throw new InvalidOperationException("This is a test"); });
 
             var interceptor = GetMessageInterceptor<MessageA>();
-            pipe.Connect(interceptor);
+            filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
 
-            Assert.Throws<AggregateException>(async () => await pipe.Send(consumeContext));
+            Assert.Throws<AggregateException>(async () => await filter.Send(consumeContext));
 
             var exception = Assert.Throws<AggregateException>(async () => await interceptor.DispatchedFaulted);
 

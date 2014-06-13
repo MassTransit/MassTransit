@@ -25,17 +25,17 @@ namespace MassTransit.Pipeline.Sinks
     /// Connects multiple output pipes to a single input pipe
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TeeConsumeContextPipe<T> :
-        IConsumeContextPipe<T>,
-        IConnectPipe<T>
+    public class TeeConsumeFilter<T> :
+        IConsumeFilter<T>,
+        IConsumeFilterConnector<T>
         where T : class
     {
-        readonly ConcurrentDictionary<long, IConsumeContextPipe<T>> _pipes;
+        readonly ConcurrentDictionary<long, IConsumeFilter<T>> _pipes;
         long _nextPipeId;
 
-        public TeeConsumeContextPipe()
+        public TeeConsumeFilter()
         {
-            _pipes = new ConcurrentDictionary<long, IConsumeContextPipe<T>>();
+            _pipes = new ConcurrentDictionary<long, IConsumeFilter<T>>();
         }
 
         public int Count
@@ -43,21 +43,21 @@ namespace MassTransit.Pipeline.Sinks
             get { return _pipes.Count; }
         }
 
-        public ConnectHandle Connect(IConsumeContextPipe<T> pipe)
+        public ConnectHandle Connect(IConsumeFilter<T> filter)
         {
-            if (pipe == null)
-                throw new ArgumentNullException("pipe");
+            if (filter == null)
+                throw new ArgumentNullException("filter");
 
             long pipeId = Interlocked.Increment(ref _nextPipeId);
 
-            bool added = _pipes.TryAdd(pipeId, pipe);
+            bool added = _pipes.TryAdd(pipeId, filter);
             if (!added)
                 throw new PipelineException("Unable to add pipe");
 
             return new TeeConnectHandle(pipeId, RemovePipe);
         }
 
-        public async Task Send(ConsumeContext<T> context)
+        public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
             var exceptions = new List<Exception>();
 
@@ -65,7 +65,7 @@ namespace MassTransit.Pipeline.Sinks
             {
                 try
                 {
-                    await pipe.Send(context);
+                    await pipe.Send(context, next);
                 }
                 catch (Exception ex)
                 {
@@ -84,7 +84,7 @@ namespace MassTransit.Pipeline.Sinks
 
         void RemovePipe(long id)
         {
-            IConsumeContextPipe<T> ignored;
+            IConsumeFilter<T> ignored;
             _pipes.TryRemove(id, out ignored);
         }
 

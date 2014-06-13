@@ -25,16 +25,16 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_receive_a_test_message()
         {
-            IInboundMessagePipe pipe = new InboundMessagePipe();
+            IInboundPipe filter = new InboundMessageFilter();
 
             TaskCompletionSource<PingMessage> received = GetTask<PingMessage>();
 
-            ConnectHandle connectHandle = pipe.ConnectHandler<PingMessage>(async context =>
+            ConnectHandle connectHandle = filter.ConnectHandler<PingMessage>(async context =>
                 received.TrySetResult(context.Message));
 
             var consumeContext = new TestConsumeContext<PingMessage>(new PingMessage());
 
-            await pipe.Send(consumeContext);
+            await filter.Send(consumeContext);
 
             await received.Task;
         }

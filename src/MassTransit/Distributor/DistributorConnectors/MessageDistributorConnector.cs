@@ -21,7 +21,7 @@ namespace MassTransit.Distributor.DistributorConnectors
     {
         Type MessageType { get; }
 
-        ConnectHandle Connect(IInboundMessagePipe configurator, IDistributor distributor);
+        ConnectHandle Connect(IInboundPipe configurator, IDistributor distributor);
     }
 
     public class MessageDistributorConnector<TMessage> :
@@ -40,7 +40,7 @@ namespace MassTransit.Distributor.DistributorConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect(IInboundMessagePipe configurator, IDistributor distributor)
+        public ConnectHandle Connect(IInboundPipe configurator, IDistributor distributor)
         {
             IWorkerAvailability<TMessage> workerAvailability = distributor.GetWorkerAvailability<TMessage>();
 

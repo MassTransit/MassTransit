@@ -22,7 +22,7 @@ namespace MassTransit.Distributor.Pipeline
 
 
     public class DistributorMessageSink<TMessage> :
-        IConsumeContextPipe<TMessage>
+        IConsumeFilter<TMessage>
         where TMessage : class
     {
         readonly ILog _log = Logger.Get<DistributorMessageSink<TMessage>>();
@@ -37,7 +37,7 @@ namespace MassTransit.Distributor.Pipeline
             _workerSelector = workerSelector;
         }
 
-        public async Task Send(ConsumeContext<TMessage> context)
+        public async Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
             Stopwatch timer = Stopwatch.StartNew();
 
@@ -79,6 +79,8 @@ namespace MassTransit.Distributor.Pipeline
             timer.Stop();
             context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TMessage>.ShortName,
                 TypeMetadataCache<DistributorMessageSink<TMessage>>.ShortName);
+
+            await next.Send(context);
         }
 
         public bool Inspect(IConsumeContextPipeInspector inspector)

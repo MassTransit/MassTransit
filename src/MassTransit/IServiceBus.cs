@@ -47,7 +47,7 @@ namespace MassTransit
         /// <summary>
         /// The inbound pipe for the bus
         /// </summary>
-        IInboundMessagePipe InboundPipe { get; }
+        IInboundPipe InboundPipe { get; }
 
         /// <summary>
         /// Gets the inbound message pipeline.

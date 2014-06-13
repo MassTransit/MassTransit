@@ -22,7 +22,8 @@ namespace MassTransit
     /// Unlike the old world, the send context is returned from the endpoint and used to configure the message sending.
     /// That way the message is captured by the endpoint and then any configuration is done at the higher level.
     /// </summary>
-    public interface SendContext
+    public interface SendContext :
+        PipeContext
     {
         Uri SourceAddress { get; set; }
         Uri DestinationAddress { get; set; }
@@ -35,7 +36,7 @@ namespace MassTransit
 
         TimeSpan? TimeToLive { get; set; }
 
-        string ContentType { get; set; }
+        ContentType ContentType { get; set; }
 
         /// <summary>
         /// True if the message should be persisted to disk to survive a broker restart

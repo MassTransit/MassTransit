@@ -42,7 +42,7 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect<T>(IInboundMessagePipe pipe, IAsyncConsumerFactory<T> consumerFactory,
+        public ConnectHandle Connect<T>(IInboundPipe filter, IAsyncConsumerFactory<T> consumerFactory,
             IMessageRetryPolicy retryPolicy)
             where T : class
         {
@@ -53,9 +53,9 @@ namespace MassTransit.SubscriptionConnectors
                                             + TypeMetadataCache<T>.ShortName);
             }
 
-            var messagePipe = new ConsumerMessagePipe<TConsumer, TMessage>(factory, _adapter, retryPolicy);
+            var messagePipe = new ConsumerMessageFilter<TConsumer, TMessage>(factory, _adapter, retryPolicy);
 
-            return pipe.Connect(messagePipe);
+            return filter.Connect(messagePipe);
         }
     }
 }

@@ -17,14 +17,14 @@ namespace MassTransit.Pipeline
 
     public interface IConsumeContextPipeInspector
     {
-        bool Inspect(IConsumeContextPipe pipe);
+        bool Inspect(IConsumeFilter filter);
 
-        bool Inspect(IConsumeContextPipe pipe, PipeInspectorCallback callback);
+        bool Inspect(IConsumeFilter filter, PipeInspectorCallback callback);
 
-        bool Inspect<T>(IConsumeContextPipe<T> pipe)
+        bool Inspect<T>(IConsumeFilter<T> filter)
             where T : class;
 
-        bool Inspect<T>(IConsumeContextPipe<T> pipe, PipeInspectorCallback<T> callback)
+        bool Inspect<T>(IConsumeFilter<T> filter, PipeInspectorCallback<T> callback)
             where T : class;
     }
 }

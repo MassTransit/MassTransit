@@ -35,9 +35,9 @@ namespace MassTransit.SubscriptionBuilders
             _connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
         }
 
-        public ISubscriptionReference Subscribe(IInboundMessagePipe pipe)
+        public ISubscriptionReference Subscribe(IInboundPipe filter)
         {
-            ConnectHandle handle = _connector.Connect(pipe, _instance, _retryPolicy);
+            ConnectHandle handle = _connector.Connect(filter, _instance, _retryPolicy);
 
             return _referenceFactory(handle);
         }

@@ -81,7 +81,7 @@ namespace MassTransit
             OutboundPipeline = new OutboundPipelineConfigurator(this).Pipeline;
             InboundPipeline = InboundPipelineConfigurator.CreateDefault(this);
 
-            InboundPipe = new InboundMessagePipe();
+            InboundPipe = new InboundMessageFilter();
 
             if(enablePerformanceCounters)
                 InitializePerformanceCounters();
@@ -270,7 +270,7 @@ namespace MassTransit
 
         public IOutboundMessagePipeline OutboundPipeline { get; private set; }
 
-        public IInboundMessagePipe InboundPipe { get; private set; }
+        public IInboundPipe InboundPipe { get; private set; }
         public IInboundMessagePipeline InboundPipeline { get; private set; }
 
         /// <summary>

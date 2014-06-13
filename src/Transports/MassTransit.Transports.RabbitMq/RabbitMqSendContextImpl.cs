@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.IO;
+    using System.Net.Mime;
     using System.Runtime.Serialization;
     using System.Security.Cryptography;
     using Exceptions;
@@ -50,7 +51,7 @@ namespace MassTransit.Transports.RabbitMq
         
         public TimeSpan? TimeToLive { get; set; }
         
-        public string ContentType { get; set; }
+        public ContentType ContentType { get; set; }
 
         public IMessageSendSerializer Serializer
         {

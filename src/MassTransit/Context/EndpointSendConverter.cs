@@ -21,7 +21,7 @@ namespace MassTransit.Context
         IEndpointSendConverter
         where TMessage : class
     {
-        public async Task<SendContext> Send(ISendToEndpoint endpoint, object message)
+        public async Task<SentContext> Send(ISendToEndpoint endpoint, object message)
         {
             if (endpoint == null)
                 throw new ArgumentNullException("endpoint");
@@ -35,7 +35,7 @@ namespace MassTransit.Context
             return await endpoint.Send(msg);
         }
 
-        public async Task<SendContext> Send(ISendToEndpoint endpoint, object message, Action<SendContext> callback)
+        public async Task<SentContext> Send(ISendToEndpoint endpoint, object message, Action<SendContext> callback)
         {
             if (endpoint == null)
                 throw new ArgumentNullException("endpoint");
@@ -51,7 +51,7 @@ namespace MassTransit.Context
             return await endpoint.Send(msg, context => callback(context));
         }
 
-        public async Task<SendContext> Send(ISendToEndpoint endpoint, object message, Func<SendContext, Task<SendContext>> callback)
+        public async Task<SentContext> Send(ISendToEndpoint endpoint, object message, Func<SendContext, Task<SendContext>> callback)
         {
             if (endpoint == null)
                 throw new ArgumentNullException("endpoint");
