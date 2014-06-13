@@ -16,7 +16,7 @@ namespace MassTransit.BusConfigurators
     using Builders;
     using Configuration;
     using EndpointConfigurators;
-    using SubscriptionConfigurators;
+
 
     /// <summary>
     /// <para>The configurator to call methods on, as well as extension methods on,
@@ -38,12 +38,6 @@ namespace MassTransit.BusConfigurators
         void UseBusBuilder(Func<BusSettings, BusBuilder> builderFactory);
 
         /// <summary>
-        /// Adds a configurator to the subscription coordinator builder
-        /// </summary>
-        /// <param name="configurator"></param>
-        void AddSubscriptionRouterConfigurator(SubscriptionRouterBuilderConfigurator configurator);
-
-        /// <summary>
         /// Adds a configurator for the service bus builder to the configurator
         /// </summary>
         /// <param name="configurator"></param>
@@ -57,12 +51,6 @@ namespace MassTransit.BusConfigurators
         /// receive message from.
         /// </param>
         void ReceiveFrom(Uri uri);
-
-        /// <summary>
-        /// Sets the network key for subscriptions
-        /// </summary>
-        /// <param name="network"></param>
-        void SetNetwork(string network);
 
         /// <summary>
         /// Disable the performance counters

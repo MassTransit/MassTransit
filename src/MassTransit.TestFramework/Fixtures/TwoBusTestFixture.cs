@@ -16,9 +16,9 @@ namespace MassTransit.TestFramework.Fixtures
 	using BusConfigurators;
 	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Subscriptions.Coordinator; 
 
-	/// <summary>
+
+    /// <summary>
 	/// <para>WARN: this bus test fixture DOES NOT call <see cref="EndpointTestFixture{TTransportFactory}.ConfigureServiceBus"/></para>
 	/// <para>Test fixture that creates two buses, one "remote" and one "local". Of course, both are in-memory;
 	/// but this test fixture makes sure that the two buses uses the same loopback router, while still having 
@@ -39,9 +39,6 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			LocalBus = SetupServiceBus(LocalUri, ConfigureLocalBus);
 			RemoteBus = SetupServiceBus(RemoteUri, ConfigureRemoteBus);
-
-			_localLoopback.SetTargetCoordinator(_remoteLoopback.Router);
-			_remoteLoopback.SetTargetCoordinator(_localLoopback.Router);
 		}
 
 		/// <summary>
@@ -76,9 +73,6 @@ namespace MassTransit.TestFramework.Fixtures
 		/// </summary>
 		protected IServiceBus RemoteBus { get; private set; }
 
-		SubscriptionLoopback _localLoopback;
-		SubscriptionLoopback _remoteLoopback;
-
 		/// <summary>
 		/// You can override to configure the local bus; but if you don't call base method,
 		/// you will not get the subscription loopback router.
@@ -86,11 +80,6 @@ namespace MassTransit.TestFramework.Fixtures
 		/// <param name="configurator"></param>
 		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
-			configurator.AddSubscriptionObserver((bus, coordinator) =>
-				{
-					_localLoopback = new SubscriptionLoopback(bus, coordinator);
-					return _localLoopback;
-				});
 		}
 
 		/// <summary>
@@ -100,11 +89,6 @@ namespace MassTransit.TestFramework.Fixtures
 		/// <param name="configurator"></param>
 		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
 		{
-			configurator.AddSubscriptionObserver((bus, coordinator) =>
-				{
-					_remoteLoopback = new SubscriptionLoopback(bus, coordinator);
-					return _remoteLoopback;
-				});
 		}
 	}
 }

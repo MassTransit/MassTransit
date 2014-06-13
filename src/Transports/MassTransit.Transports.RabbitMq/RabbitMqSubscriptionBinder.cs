@@ -19,12 +19,9 @@ namespace MassTransit.Transports.RabbitMq
     using Logging;
     using Magnum;
     using Magnum.Extensions;
-    using Subscriptions.Coordinator;
-    using Subscriptions.Messages;
 
 
-    public class RabbitMqSubscriptionBinder :
-        SubscriptionObserver
+    public class RabbitMqSubscriptionBinder 
     {
         static readonly ILog _log = Logger.Get(typeof(RabbitMqSubscriptionBinder));
         readonly Dictionary<Guid, MessageName> _bindings;
@@ -48,37 +45,37 @@ namespace MassTransit.Transports.RabbitMq
             _messageNameFormatter = _inboundTransport.MessageNameFormatter;
         }
 
-        public void OnSubscriptionAdded(SubscriptionAdded message)
-        {
-            Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
-
-            Type messageType = Type.GetType(message.MessageName);
-            if (messageType == null)
-            {
-                _log.InfoFormat("Unknown message type '{0}', unable to add subscription", message.MessageName);
-                return;
-            }
-
-            MessageName messageName = _messageNameFormatter.GetMessageName(messageType);
-
-            _inboundTransport.BindSubscriberExchange(RabbitMqEndpointAddress.Parse(message.EndpointUri),
-                messageName.ToString(), IsTemporaryMessageType(messageType));
-
-            _bindings[message.SubscriptionId] = messageName;
-        }
-
-        public void OnSubscriptionRemoved(SubscriptionRemoved message)
-        {
-            Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
-
-            MessageName messageName;
-            if (_bindings.TryGetValue(message.SubscriptionId, out messageName))
-            {
-                _inboundTransport.UnbindSubscriberExchange(messageName.ToString());
-
-                _bindings.Remove(message.SubscriptionId);
-            }
-        }
+//        public void OnSubscriptionAdded(SubscriptionAdded message)
+//        {
+//            Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
+//
+//            Type messageType = Type.GetType(message.MessageName);
+//            if (messageType == null)
+//            {
+//                _log.InfoFormat("Unknown message type '{0}', unable to add subscription", message.MessageName);
+//                return;
+//            }
+//
+//            MessageName messageName = _messageNameFormatter.GetMessageName(messageType);
+//
+//            _inboundTransport.BindSubscriberExchange(RabbitMqEndpointAddress.Parse(message.EndpointUri),
+//                messageName.ToString(), IsTemporaryMessageType(messageType));
+//
+//            _bindings[message.SubscriptionId] = messageName;
+//        }
+//
+//        public void OnSubscriptionRemoved(SubscriptionRemoved message)
+//        {
+//            Guard.AgainstNull(_inputAddress, "InputAddress", "The input address was not set");
+//
+//            MessageName messageName;
+//            if (_bindings.TryGetValue(message.SubscriptionId, out messageName))
+//            {
+//                _inboundTransport.UnbindSubscriberExchange(messageName.ToString());
+//
+//                _bindings.Remove(message.SubscriptionId);
+//            }
+//        }
 
         public void OnComplete()
         {

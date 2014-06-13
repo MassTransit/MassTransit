@@ -19,14 +19,12 @@ namespace MassTransit.BusConfigurators
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using System.Reflection;
     using Builders;
     using Configuration;
     using Configurators;
     using EndpointConfigurators;
     using Logging;
     using Magnum.Extensions;
-    using SubscriptionConfigurators;
     using Transports;
 
     /// <summary>
@@ -42,7 +40,6 @@ namespace MassTransit.BusConfigurators
         readonly EndpointFactoryConfigurator _endpointFactoryConfigurator;
         readonly ServiceBusSettings _settings;
 
-        readonly SubscriptionRouterConfiguratorImpl _subscriptionRouterConfigurator;
         Func<BusSettings, BusBuilder> _builderFactory;
 
         public ServiceBusConfiguratorImpl(ServiceBusDefaultSettings defaultSettings)
@@ -53,9 +50,6 @@ namespace MassTransit.BusConfigurators
             _configurators = new List<BusBuilderConfigurator>();
 
             _endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(new EndpointFactoryDefaultSettings());
-
-            _subscriptionRouterConfigurator = new SubscriptionRouterConfiguratorImpl(_settings.Network);
-            _configurators.Add(_subscriptionRouterConfigurator);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -77,19 +71,11 @@ namespace MassTransit.BusConfigurators
 
             foreach (ValidationResult result in _configurators.SelectMany(configurator => configurator.Validate()))
                 yield return result;
-
-            foreach (ValidationResult result in _subscriptionRouterConfigurator.Validate())
-                yield return result;
         }
 
         public void UseBusBuilder(Func<BusSettings, BusBuilder> builderFactory)
         {
             _builderFactory = builderFactory;
-        }
-
-        public void AddSubscriptionRouterConfigurator(SubscriptionRouterBuilderConfigurator configurator)
-        {
-            _subscriptionRouterConfigurator.AddConfigurator(configurator);
         }
 
         public void AddBusConfigurator(BusBuilderConfigurator configurator)
@@ -100,11 +86,6 @@ namespace MassTransit.BusConfigurators
         public void ReceiveFrom(Uri uri)
         {
             _settings.InputAddress = uri;
-        }
-
-        public void SetNetwork(string network)
-        {
-            _settings.Network = network.IsEmpty() ? null : network;
         }
 
         public void DisablePerformanceCounters()
@@ -158,8 +139,6 @@ namespace MassTransit.BusConfigurators
             _settings.EndpointCache = endpointCache;
 
             BusBuilder builder = _builderFactory(_settings);
-
-            _subscriptionRouterConfigurator.SetNetwork(_settings.Network);
 
             // run through all configurators that have been set and let
             // them do their magic

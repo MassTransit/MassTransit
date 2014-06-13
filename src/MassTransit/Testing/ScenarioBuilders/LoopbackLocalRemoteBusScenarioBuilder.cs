@@ -16,7 +16,6 @@ namespace MassTransit.Testing.ScenarioBuilders
 	using BusConfigurators;
 	using Magnum.Extensions;
 	using Scenarios;
-	using Subscriptions.Coordinator;
 	using Transports;
 
 	public class LoopbackLocalRemoteBusScenarioBuilder :
@@ -29,8 +28,6 @@ namespace MassTransit.Testing.ScenarioBuilders
 		readonly ServiceBusConfiguratorImpl _localConfigurator;
 		readonly ServiceBusConfiguratorImpl _remoteConfigurator;
 		readonly ServiceBusDefaultSettings _settings;
-		SubscriptionLoopback _localLoopback;
-		SubscriptionLoopback _remoteLoopback;
 
 		public LoopbackLocalRemoteBusScenarioBuilder()
 		{
@@ -64,9 +61,6 @@ namespace MassTransit.Testing.ScenarioBuilders
 			BuildLocalBus(scenario);
 			BuildRemoteBus(scenario);
 
-			_localLoopback.SetTargetCoordinator(_remoteLoopback.Router);
-			_remoteLoopback.SetTargetCoordinator(_localLoopback.Router);
-
 			return scenario;
 		}
 
@@ -74,24 +68,12 @@ namespace MassTransit.Testing.ScenarioBuilders
 		{
 			_localConfigurator.ChangeSettings(x => { x.EndpointCache = scenario.EndpointCache; });
 
-			_localConfigurator.AddSubscriptionObserver((bus, coordinator) =>
-				{
-					_localLoopback = new SubscriptionLoopback(bus, coordinator);
-					return _localLoopback;
-				});
-
 			scenario.LocalBus = _localConfigurator.CreateServiceBus();
 		}
 
 		protected virtual void BuildRemoteBus(LocalRemoteTestScenarioImpl scenario)
 		{
 			_remoteConfigurator.ChangeSettings(x => { x.EndpointCache = scenario.EndpointCache; });
-
-			_remoteConfigurator.AddSubscriptionObserver((bus, coordinator) =>
-				{
-					_remoteLoopback = new SubscriptionLoopback(bus, coordinator);
-					return _remoteLoopback;
-				});
 
 			scenario.RemoteBus = _remoteConfigurator.CreateServiceBus();
 		}
