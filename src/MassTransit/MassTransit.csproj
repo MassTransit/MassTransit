@@ -101,6 +101,8 @@
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurators\AddSerializerEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\SetSupportedMessageSerializersEndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\ITransportBuilder.cs" />
+    <Compile Include="Configuration\ITransportConfigurator.cs" />
     <Compile Include="Configuration\ITransportSelector.cs" />
     <Compile Include="Configuration\ShutdownConfigurationExtensions.cs" />
     <Compile Include="Configuration\InterceptorExtensions.cs" />
@@ -115,6 +117,7 @@
     <Compile Include="Configuration\SubscriptionConnectors\InstanceMessageConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageConnectorFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MultipleConnectHandle.cs" />
+    <Compile Include="Configuration\TransportConfigurators\TransportSelector.cs" />
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="ConsumerFactoryCallback.cs" />
     <Compile Include="ConsumerFactoryInterceptor.cs" />
@@ -124,7 +127,7 @@
     <Compile Include="Context\EndpointSendConverter.cs" />
     <Compile Include="EndpointExtensions.cs" />
     <Compile Include="Exceptions\ConsumerMessageException.cs" />
-    <Compile Include="Headers.cs" />
+    <Compile Include="ContextHeaders.cs" />
     <Compile Include="HostContext.cs" />
     <Compile Include="IAsyncConsumerFactory.cs" />
     <Compile Include="IConsumer.cs" />
@@ -133,7 +136,7 @@
     <Compile Include="ISendToEndpoint.cs" />
     <Compile Include="JsonConsumeContext.cs" />
     <Compile Include="JsonMessageConsumeContext.cs" />
-    <Compile Include="JsonMessageHeaders.cs" />
+    <Compile Include="JsonMessageContextHeaders.cs" />
     <Compile Include="MassTransitHostContext.cs" />
     <Compile Include="MessageContext.cs" />
     <Compile Include="MessageHandler.cs" />

@@ -20,38 +20,39 @@ namespace MassTransit.Transports.RabbitMq.Tests
     public class ConfiguringRabbitMQ_Specs
     {
         [Test]
-        public void Should_support_the_new_syntax()
+        public async void Should_support_the_new_syntax()
         {
-            using (var bus = ServiceBusFactory.New(x => x.RabbitMQ(), x =>
-                {
-                    // configure a host, using an existing URI
-                    x.Host(new Uri("rabbitmq://server/vhost"), r =>
-                        {
-                            r.Username("Joe");
-                            r.Password("Blow");
-                            r.Heartbeat(30);
-                        });
-
-                    x.Mandatory();
-
-                    x.OnPublish<A>(context =>
-                        {
-                            context.Mandatory = true;
-                        });
-
-                    x.OnPublish(context => context.Mandatory = true);
-
-                    x.Endpoint("input_queue", e =>
-                        {
-                            e.Durable(false);
-                            e.Exclusive();
-                        });
-                }))
+            using (IServiceBus bus = ServiceBusFactory.New(x => x.RabbitMQ(), x =>
             {
+                // configure a host, using an existing URI
+                x.Host(new Uri("rabbitmq://server/vhost"), r =>
+                {
+                    r.Username("Joe");
+                    r.Password("Blow");
+                    r.Heartbeat(30);
+                });
+
+                x.Mandatory();
+
+                x.OnPublish<A>(context => { context.Mandatory = true; });
+
+                x.OnPublish(context => context.Mandatory = true);
+
+                x.Endpoint("input_queue", e =>
+                {
+                    e.ConcurrencyLimit(16);
+                    e.Durable(false);
+                    e.Exclusive();
+                });
+            }))
+            {
+                bus.Publish(new A());
             }
         }
 
+
         class A
-        { }
+        {
+        }
     }
 }

@@ -12,12 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using Transports.RabbitMq.Configuration;
+
+
     public static class TransportConfiguratorExtensions
     {
+        /// <summary>
+        /// Select RabbitMQ as the transport for the service bus
+        /// </summary>
         public static RabbitMqTransportConfigurator RabbitMQ(this ITransportSelector selector)
         {
-            return new RabbitMqTransportConfiguratorImpl(selector);
+            var configurator = new RabbitMqTransportConfiguratorImpl(selector);
+
+            selector.SelectTransport(configurator);
+
+            return configurator;
         }
-         
     }
 }

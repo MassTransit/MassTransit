@@ -179,7 +179,7 @@ namespace MassTransit.AzureServiceBusTransport
             get { return _contentType ?? (_contentType = GetContentType()); }
         }
 
-        public Headers Headers
+        public ContextHeaders ContextHeaders
         {
             get { return _headers ?? (_headers = new AzureServiceBusReceiveContextHeaders(this)); }
         }
@@ -197,7 +197,7 @@ namespace MassTransit.AzureServiceBusTransport
         ContentType GetContentType()
         {
             object contentTypeHeader;
-            if (Headers.TryGetHeader("Content-Type", out contentTypeHeader))
+            if (ContextHeaders.TryGetHeader("Content-Type", out contentTypeHeader))
             {
                 var contentType = contentTypeHeader as ContentType;
                 if (contentType != null)

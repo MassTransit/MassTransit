@@ -28,6 +28,6 @@ namespace MassTransit
         Uri ResponseAddress { get; }
         Uri FaultAddress { get; }
 
-        Headers Headers { get; }
+        ContextHeaders ContextHeaders { get; }
     }
 }

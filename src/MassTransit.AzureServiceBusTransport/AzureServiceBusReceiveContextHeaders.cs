@@ -17,7 +17,7 @@ namespace MassTransit.AzureServiceBusTransport
 
 
     public class AzureServiceBusReceiveContextHeaders :
-        Headers
+        ContextHeaders
     {
         readonly AzureServiceBusMessageContext _context;
 
@@ -29,7 +29,7 @@ namespace MassTransit.AzureServiceBusTransport
             _context = context;
         }
 
-        T Headers.Get<T>(string key, T defaultValue)
+        T ContextHeaders.Get<T>(string key, T defaultValue)
         {
             if (key == null)
                 throw new ArgumentNullException("key");
@@ -52,7 +52,7 @@ namespace MassTransit.AzureServiceBusTransport
             return value;
         }
 
-        T? Headers.Get<T>(string key, T? defaultValue)
+        T? ContextHeaders.Get<T>(string key, T? defaultValue)
         {
             if (key == null)
                 throw new ArgumentNullException("key");
@@ -67,7 +67,7 @@ namespace MassTransit.AzureServiceBusTransport
             return value;
         }
 
-        bool Headers.TryGetHeader(string key, out object value)
+        bool ContextHeaders.TryGetHeader(string key, out object value)
         {
             if (key == null)
                 throw new ArgumentNullException("key");

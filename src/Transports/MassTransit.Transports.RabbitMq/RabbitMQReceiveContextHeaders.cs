@@ -21,7 +21,7 @@ namespace MassTransit.Transports.RabbitMq
     ///     as transport headers on the ReceiveContext
     /// </summary>
     public class RabbitMqReceiveContextHeaders :
-        Headers
+        ContextHeaders
     {
         readonly RabbitMqBasicConsumeContext _context;
 
@@ -33,7 +33,7 @@ namespace MassTransit.Transports.RabbitMq
             _context = context;
         }
 
-        T Headers.Get<T>(string key, T defaultValue)
+        T ContextHeaders.Get<T>(string key, T defaultValue)
         {
             if (key == null)
                 throw new ArgumentNullException("key");
@@ -56,7 +56,7 @@ namespace MassTransit.Transports.RabbitMq
             return value as T ?? defaultValue;
         }
 
-        T? Headers.Get<T>(string key, T? defaultValue)
+        T? ContextHeaders.Get<T>(string key, T? defaultValue)
         {
             if (key == null)
                 throw new ArgumentNullException("key");
@@ -90,7 +90,7 @@ namespace MassTransit.Transports.RabbitMq
             return (T) value;
         }
 
-        bool Headers.TryGetHeader(string key, out object value)
+        bool ContextHeaders.TryGetHeader(string key, out object value)
         {
             if (key == null)
                 throw new ArgumentNullException("key");

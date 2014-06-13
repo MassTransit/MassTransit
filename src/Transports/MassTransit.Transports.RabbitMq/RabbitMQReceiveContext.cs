@@ -111,7 +111,7 @@ namespace MassTransit.Transports.RabbitMq
             get { return _redelivered; }
         }
 
-        public Headers Headers
+        public ContextHeaders ContextHeaders
         {
             get { return _headers ?? (_headers = new RabbitMqReceiveContextHeaders(this)); }
         }
@@ -129,7 +129,7 @@ namespace MassTransit.Transports.RabbitMq
         ContentType GetContentType()
         {
             object contentTypeHeader;
-            if (Headers.TryGetHeader("Content-Type", out contentTypeHeader))
+            if (ContextHeaders.TryGetHeader("Content-Type", out contentTypeHeader))
             {
                 var s = contentTypeHeader as string;
                 if (s != null)

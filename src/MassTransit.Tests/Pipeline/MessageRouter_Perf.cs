@@ -133,7 +133,7 @@ namespace MassTransit.Tests.Pipeline
 	        public ContentType ContentType { get; private set; }
 	        public Encoding ContentEncoding { get; private set; }
 	        public bool Redelivered { get; private set; }
-	        public Headers Headers { get; private set; }
+	        public ContextHeaders ContextHeaders { get; private set; }
 	        public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
 	        {
 	        }
@@ -295,7 +295,7 @@ namespace MassTransit.Tests.Pipeline
         public Uri DestinationAddress { get; private set; }
         public Uri ResponseAddress { get; private set; }
         public Uri FaultAddress { get; private set; }
-        public Headers Headers { get; private set; }
+        public ContextHeaders ContextHeaders { get; private set; }
         public CancellationToken CancellationToken { get; private set; }
         public MassTransit.ReceiveContext ReceiveContext { get; private set; }
         public bool HasMessageType(Type messageType)

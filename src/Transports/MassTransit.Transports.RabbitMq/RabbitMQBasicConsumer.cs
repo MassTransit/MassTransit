@@ -20,7 +20,7 @@ namespace MassTransit.Transports.RabbitMq
     using RabbitMQ.Client.Events;
 
 
-    public class RabbitMQBasicConsumer :
+    public class RabbitMqBasicConsumer :
         IBasicConsumer
     {
         readonly Uri _inputAddress;
@@ -33,7 +33,7 @@ namespace MassTransit.Transports.RabbitMq
         int _max;
 
 
-        public RabbitMQBasicConsumer(IModel model, Uri inputAddress, Func<ReceiveContext, Task> taskFactory)
+        public RabbitMqBasicConsumer(IModel model, Uri inputAddress, Func<ReceiveContext, Task> taskFactory)
         {
             _model = model;
             _taskFactory = taskFactory;

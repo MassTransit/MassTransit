@@ -14,18 +14,17 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
-    using Magnum.CommandLineParser;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
 
-    public class JsonMessageHeaders :
-        Headers
+    public class JsonMessageContextHeaders :
+        ContextHeaders
     {
         readonly JsonSerializer _deserializer;
         readonly IDictionary<string, object> _headers;
 
-        public JsonMessageHeaders(JsonSerializer deserializer, IDictionary<string, object> headers)
+        public JsonMessageContextHeaders(JsonSerializer deserializer, IDictionary<string, object> headers)
         {
             _deserializer = deserializer;
             _headers = headers;
@@ -41,27 +40,15 @@ namespace MassTransit
             if (!_headers.TryGetValue(key, out obj))
                 return defaultValue;
 
-            var token = obj as JToken;
-            if (token == null)
-            {
-                if (typeof(T) == typeof(string))
-                {
-                    if (obj == null)
-                        return defaultValue;
+            if (obj == null)
+                return defaultValue;
 
-                    if (obj is string)
-                        return (T) obj;
-
-                    return (T) (object) obj.ToString();
-                }
-
-                token = new JObject();
-            }
+            var token = obj as JToken ?? new JValue(obj);
 
             if (token.Type == JTokenType.Null)
                 return defaultValue;
 
-            using (var jsonReader = token.CreateReader())
+            using (JsonReader jsonReader = token.CreateReader())
                 return (T)_deserializer.Deserialize(jsonReader, typeof(T)) ?? defaultValue;
         }
 
@@ -75,15 +62,19 @@ namespace MassTransit
             if (!_headers.TryGetValue(key, out obj))
                 return defaultValue;
 
-            var token = obj as JToken;
-            if (token == null)
+            if (obj == null)
                 return defaultValue;
+
+            var token = obj as JToken ?? new JValue(obj);
+
+            if (token.Type == JTokenType.Null)
+                token = new JObject();
 
             if (token.Type == JTokenType.Null)
                 return defaultValue;
 
-            using (var jsonReader = token.CreateReader())
-                return (T) _deserializer.Deserialize(jsonReader, typeof(T));
+            using (JsonReader jsonReader = token.CreateReader())
+                return (T)_deserializer.Deserialize(jsonReader, typeof(T));
         }
 
         public bool TryGetHeader(string key, out object value)

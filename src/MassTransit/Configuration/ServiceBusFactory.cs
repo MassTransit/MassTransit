@@ -17,15 +17,11 @@ namespace MassTransit
 	using Configurators;
 	using Exceptions;
 	using Magnum;
+	using TransportConfigurators;
 	using Util;
 
 
-    public interface ITransportConfigurator
-    {
-        
-    }
-
-	/// <summary>
+    /// <summary>
 	/// The starting point to configure and create a service bus instance
 	/// </summary>
 	public static class ServiceBusFactory
