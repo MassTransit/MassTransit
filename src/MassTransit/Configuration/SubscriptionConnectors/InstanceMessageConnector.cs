@@ -22,7 +22,7 @@ namespace MassTransit.SubscriptionConnectors
 
     public class InstanceMessageConnector<TConsumer, TMessage> :
         InstanceMessageConnector
-        where TConsumer : class, IConsumer<TMessage>
+        where TConsumer : class
         where TMessage : class
     {
         readonly IConsumerMessageAdapter<TConsumer, TMessage> _adapter;

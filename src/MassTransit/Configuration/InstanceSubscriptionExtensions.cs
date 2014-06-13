@@ -66,24 +66,23 @@ namespace MassTransit
 			//return bus.Configure(x => connector.Connect(x, instance));
 		}
 
-		/// <summary>
-		/// Connects any consumers for the component to the message dispatcher
-		/// </summary>
-		/// <typeparam name="T">The consumer type</typeparam>
-		/// <param name="bus">The service bus instance to call this method on.</param>
-		/// <param name="instance">The instance to subscribe.</param>
-		/// <returns>The unsubscribe action that can be called to unsubscribe the instance
-		/// passed as an argument.</returns>
-		public static ConnectHandle SubscribeInstance<T>([NotNull] this IServiceBus bus, [NotNull] T instance)
+	    /// <summary>
+	    /// Connects any consumers for the component to the message dispatcher
+	    /// </summary>
+	    /// <typeparam name="T">The consumer type</typeparam>
+	    /// <param name="bus">The service bus instance to call this method on.</param>
+	    /// <param name="instance">The instance to subscribe.</param>
+	    /// <param name="retryPolicy"></param>
+	    /// <returns>The unsubscribe action that can be called to unsubscribe the instance
+	    /// passed as an argument.</returns>
+	    public static ConnectHandle SubscribeInstance<T>([NotNull] this IServiceBus bus, [NotNull] T instance, IMessageRetryPolicy retryPolicy = null)
 			where T : class, IConsumer
 		{
 			Guard.AgainstNull(instance, "instance", "A null instance cannot be subscribed");
 
 			InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();
 
-		    throw new NotImplementedException();
-
-		    //return bus.Configure(x => connector.Connect(x, instance));
+		    return connector.Connect(bus.InboundPipe, instance, retryPolicy ?? Retry.None);
 		}
 	}
 }

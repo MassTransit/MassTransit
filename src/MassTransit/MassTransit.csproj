@@ -116,15 +116,21 @@
     <Compile Include="Configuration\SubscriptionConnectors\IInstanceConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceMessageConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageConnectorFactory.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\MessageSubscriptionConnectorFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MultipleConnectHandle.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ContextSubscriptionConnectorFactory.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\SubscriptionConnectorFactory.cs" />
     <Compile Include="Configuration\TransportConfigurators\TransportSelector.cs" />
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="ConsumerFactoryCallback.cs" />
     <Compile Include="ConsumerFactoryInterceptor.cs" />
+    <Compile Include="Context\ConsumeContextAdapter.cs" />
     <Compile Include="Context\DeliveryMode.cs" />
     <Compile Include="Context\IEndpointSendConverter.cs" />
     <Compile Include="Context\EndpointSendConverterCache.cs" />
     <Compile Include="Context\EndpointSendConverter.cs" />
+    <Compile Include="Context\MessageHeadersAdapter.cs" />
+    <Compile Include="Context\ReceiveContextAdapter.cs" />
     <Compile Include="EndpointExtensions.cs" />
     <Compile Include="Exceptions\ConsumerMessageException.cs" />
     <Compile Include="ContextHeaders.cs" />
@@ -182,6 +188,8 @@
     <Compile Include="Pipeline\Sinks\IRetryExceptionFilter.cs" />
     <Compile Include="Pipeline\Sinks\KeyAccessor.cs" />
     <Compile Include="Pipeline\Sinks\KeyedConsumeContextPipe.cs" />
+    <Compile Include="Pipeline\Sinks\LegacyContextMethodConsumerMessageAdapter.cs" />
+    <Compile Include="Pipeline\Sinks\LegacyMethodConsumerMessageAdapter.cs" />
     <Compile Include="Pipeline\Sinks\MessageConsumeContextPipe.cs" />
     <Compile Include="Pipeline\Sinks\MessageInterceptorConnectable.cs" />
     <Compile Include="Pipeline\Sinks\MessageRetryPolicyExtensions.cs" />
@@ -280,7 +288,6 @@
     <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ServiceBusFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnectorCache.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\ContextConsumerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\RequestHandlerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ContextInstanceSubscriptionConnector.cs" />
@@ -298,7 +305,6 @@
     <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfiguratorImpl.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\UntypedConsumerSubscriptionConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\ConsumerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\HandlerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceSubscriptionConnector.cs" />

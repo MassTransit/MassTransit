@@ -12,10 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConnectors
 {
-    public interface IConsumerMetadataCache<T>
+    public interface SubscriptionConnectorFactory
     {
-        MessageInterfaceType[] ConsumerTypes { get; }
-        MessageInterfaceType[] MessageConsumerTypes { get; }
-        MessageInterfaceType[] ContextConsumerTypes { get; }
+        ConsumerMessageConnector CreateSubscriptionConnector();
+        InstanceMessageConnector CreateInstanceConnector();
     }
 }

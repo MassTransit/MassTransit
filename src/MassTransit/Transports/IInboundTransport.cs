@@ -17,6 +17,14 @@ namespace MassTransit.Transports
 {
 	using System;
 
+    /// <summary>
+    /// A service endpoint has a inbound transport that pushes messages to consumers
+    /// </summary>
+    public interface IServiceEndpoint
+    {
+        
+    }
+
 	/// <summary>
 	/// The inbound transport takes messages from the underlying transport technology and hands it to the
 	/// Action{IReceiveContext} that can be gotten from the lookup function 

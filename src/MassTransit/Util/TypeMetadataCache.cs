@@ -61,9 +61,9 @@ namespace MassTransit.Util
             if (interfaces.Contains(typeof(ISaga)))
                 return true;
 
-            if (interfaces.Any(x => x.GetGenericTypeDefinition() == typeof(InitiatedBy<>))
-                || interfaces.Any(x => x.GetGenericTypeDefinition() == typeof(Orchestrates<>))
-                || interfaces.Any(x => x.GetGenericTypeDefinition() == typeof(Observes<,>)))
+            if (interfaces.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(InitiatedBy<>))
+                || interfaces.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(Orchestrates<>))
+                || interfaces.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(Observes<,>)))
                 return true;
 
             return false;

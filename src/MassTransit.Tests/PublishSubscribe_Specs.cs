@@ -15,6 +15,7 @@ namespace MassTransit.Tests
     using Magnum.Extensions;
     using Messages;
     using NUnit.Framework;
+    using Pipeline;
     using TestConsumers;
     using TextFixtures;
 
@@ -30,6 +31,23 @@ namespace MassTransit.Tests
 
             var message = new PingMessage();
             LocalBus.Publish(message);
+
+            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+        }
+    }
+
+    [TestFixture]
+    public class Sending_a_message_through_the_bus_pipeline :
+        LoopbackTestFixture
+    {
+        [Test]
+        public void A_simple_bus_should_be_able_to_subscribe_and_publish()
+        {
+            var consumer = new TestMessageConsumer<PingMessage>();
+            LocalBus.SubscribeInstance(consumer);
+
+            var message = new PingMessage();
+            LocalBus.InboundPipe.Send(new TestConsumeContext<PingMessage>(message));
 
             consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
         }
