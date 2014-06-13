@@ -27,10 +27,11 @@ namespace MassTransit.Configuration
             _delegate = new DelegateConsumerFactory<TConsumer>(() => (TConsumer)objectFactory(typeof(TConsumer)));
         }
 
-        Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
+        public Task Send<TMessage>(ConsumeContext<TMessage> context,
+            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            where TMessage : class
         {
-            return _delegate.GetConsumer(consumeContext, callback);
+            return _delegate.Send(context, next);
         }
     }
 }

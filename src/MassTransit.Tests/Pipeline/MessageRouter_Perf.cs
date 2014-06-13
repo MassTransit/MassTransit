@@ -88,22 +88,15 @@ namespace MassTransit.Tests.Pipeline
 	    {
 	        var consumer = new TestConsumer<PingMessage>(1500000);
 
-	        var factory = new InstanceAsyncConsumerFactory<TestConsumer<PingMessage>>(consumer);
-
-	        var adapter = new MethodConsumerMessageAdapter<TestConsumer<PingMessage>, PingMessage>();
-
-	        var pipe = new ConsumerMessageFilter<TestConsumer<PingMessage>, PingMessage>(factory, adapter, Retry.None);
-
-	        IInboundPipe inboundFilter = new InboundMessageFilter();
-	        var connectHandle = inboundFilter.Connect(pipe);
-
+	        var inboundPipe = new InboundPipe();
+            var connectHandle = inboundPipe.ConnectInstance(consumer);
 
 	        var message = new PingMessage();
 	        var context = new TestConsumeContext<PingMessage>(message);
 
 	        for (int i = 0; i < 10; i++)
 	        {
-                await inboundFilter.Send(context);
+                await inboundPipe.Send(context);
 	        }
 
 	        Stopwatch timer = Stopwatch.StartNew();
@@ -111,7 +104,7 @@ namespace MassTransit.Tests.Pipeline
 	        const int loopCount = 1500000;
 	        for (int i = 0; i < loopCount; i++)
 	        {
-                await inboundFilter.Send(context);
+                await inboundPipe.Send(context);
 	        }
 
 	        await consumer.Task;

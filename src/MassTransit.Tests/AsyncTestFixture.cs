@@ -69,10 +69,10 @@ namespace MassTransit.Tests
             return new TwoMessageConsumer(GetTask<MessageA>(), GetTask<MessageB>());
         }
 
-        protected IAsyncConsumerFactory<T> GetInstanceConsumerFactory<T>(T consumer)
+        protected IConsumerFactory<T> GetInstanceConsumerFactory<T>(T consumer)
             where T : class
         {
-            return new InstanceAsyncConsumerFactory<T>(consumer);
+            return new InstanceConsumerFactory<T>(consumer);
         }
     }
 

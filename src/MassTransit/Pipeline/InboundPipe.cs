@@ -16,12 +16,12 @@ namespace MassTransit.Pipeline
     using Sinks;
 
 
-    public class InboundMessageFilter :
+    public class InboundPipe :
         IInboundPipe
     {
         readonly MessageTypeConsumeFilter _filter;
 
-        public InboundMessageFilter()
+        public InboundPipe()
         {
             _filter = new MessageTypeConsumeFilter();
         }

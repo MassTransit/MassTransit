@@ -16,7 +16,6 @@ namespace MassTransit.NinjectIntegration
     using Exceptions;
     using Ninject;
     using Ninject.Activation.Blocks;
-    using Pipeline.Sinks;
     using Util;
 
 
@@ -31,8 +30,9 @@ namespace MassTransit.NinjectIntegration
             _kernel = kernel;
         }
 
-        async Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
+        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
+            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            where TMessage : class
         {
             using (IActivationBlock block = _kernel.BeginBlock())
             {
@@ -43,7 +43,7 @@ namespace MassTransit.NinjectIntegration
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await callback(consumer, consumeContext);
+                await next.Send(context.Push(consumer));
             }
         }
     }

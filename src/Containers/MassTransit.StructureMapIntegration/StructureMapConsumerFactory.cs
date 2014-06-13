@@ -14,7 +14,6 @@ namespace MassTransit.StructureMapIntegration
 {
     using System.Threading.Tasks;
     using Exceptions;
-    using Pipeline.Sinks;
     using StructureMap;
     using Util;
 
@@ -30,8 +29,9 @@ namespace MassTransit.StructureMapIntegration
             _container = container;
         }
 
-        async Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
+        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
+            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            where TMessage : class
         {
             using (IContainer nestedContainer = _container.GetNestedContainer())
             {
@@ -42,7 +42,7 @@ namespace MassTransit.StructureMapIntegration
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await callback(consumer, consumeContext);
+                await next.Send(context.Push(consumer));
             }
         }
     }

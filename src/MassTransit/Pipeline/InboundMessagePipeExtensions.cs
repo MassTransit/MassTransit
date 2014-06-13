@@ -28,7 +28,7 @@ namespace MassTransit.Pipeline
         }
 
         public static ConnectHandle ConnectConsumer<T>(this IInboundPipe filter,
-            IAsyncConsumerFactory<T> consumerFactory, IMessageRetryPolicy retryPolicy = null)
+            IConsumerFactory<T> consumerFactory, IMessageRetryPolicy retryPolicy = null)
             where T : class
         {
             return ConsumerConnectorCache<T>.Connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
@@ -49,11 +49,18 @@ namespace MassTransit.Pipeline
             IMessageRetryPolicy retryPolicy = null)
             where T : class
         {
-            var consumerFactory = new DelegateAsyncConsumerFactory<T>(factoryMethod);
+            var consumerFactory = new DelegateConsumerFactory<T>(factoryMethod);
 
             ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 
             return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
+        }
+
+        public static ConnectHandle ConnectInstance<T>(this IInboundPipe filter,
+            T instance, IMessageRetryPolicy retryPolicy = null)
+            where T : class
+        {
+            return InstanceConnectorCache<T>.Connector.Connect(filter, instance, retryPolicy ?? Retry.None);
         }
     }
 }

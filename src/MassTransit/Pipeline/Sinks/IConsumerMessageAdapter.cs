@@ -12,18 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
-    using System.Threading.Tasks;
-
-
     /// <summary>
     /// Adapts a consumer to consume the message type
     /// </summary>
     /// <typeparam name="TConsumer"></typeparam>
     /// <typeparam name="TMessage"></typeparam>
-    public interface IConsumerMessageAdapter<in TConsumer, in TMessage>
+    public interface IConsumerMessageAdapter<TConsumer, TMessage> :
+        IFilter<ConsumeContext<TConsumer, TMessage>>
         where TConsumer : class
         where TMessage : class
     {
-        Task Consume(TConsumer consumer, ConsumeContext<TMessage> context);
     }
 }

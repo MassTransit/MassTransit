@@ -161,7 +161,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                     using (var sendModel = new HaModel(connection.CreateModel()))
                     {
                         var sendToTransport = new RabbitMqSendToTransport(sendModel, "fast");
-                        var sendSerializer = new JsonMessageSendSerializer(JsonMessageSerializer.Serializer);
+                        var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
                         var sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
                         Stopwatch timer = Stopwatch.StartNew();
                         var tasks = Enumerable.Range(0, limit)

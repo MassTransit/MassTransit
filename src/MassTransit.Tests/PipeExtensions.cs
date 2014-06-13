@@ -17,7 +17,7 @@ namespace MassTransit.Tests
 
     public static class PipeExtensions
     {
-        public static Task Send<T>(this Filter<T> filter, T context)
+        public static Task Send<T>(this IFilter<T> filter, T context)
             where T : class, PipeContext
         {
             return filter.Send(context, LastPipe<T>.Next);

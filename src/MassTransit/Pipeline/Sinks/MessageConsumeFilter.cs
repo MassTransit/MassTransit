@@ -55,7 +55,7 @@ namespace MassTransit.Pipeline.Sinks
             return output.Connect(filter);
         }
 
-        async Task Filter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
+        async Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
             ConsumeContext<TMessage> consumeContext;
             if (context.TryGetMessage(out consumeContext))

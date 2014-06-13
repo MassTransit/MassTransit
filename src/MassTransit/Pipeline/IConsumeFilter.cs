@@ -13,14 +13,14 @@
 namespace MassTransit.Pipeline
 {
     public interface IConsumeFilter :
-        Filter<ConsumeContext>
+        IFilter<ConsumeContext>
     {
         bool Inspect(IConsumeContextPipeInspector inspector);
     }
 
 
     public interface IConsumeFilter<T> :
-        Filter<ConsumeContext<T>>
+        IFilter<ConsumeContext<T>>
         where T : class
     {
         bool Inspect(IConsumeContextPipeInspector inspector);

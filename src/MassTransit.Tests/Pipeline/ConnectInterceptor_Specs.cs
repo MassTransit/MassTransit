@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_invoke_pre()
         {
-            IInboundPipe filter = new InboundMessageFilter();
+            IInboundPipe filter = new InboundPipe();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
@@ -47,7 +47,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_invoke_post()
         {
-            IInboundPipe filter = new InboundMessageFilter();
+            IInboundPipe filter = new InboundPipe();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
@@ -68,7 +68,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public void Should_invoke_faulted()
         {
-            IInboundPipe filter = new InboundMessageFilter();
+            IInboundPipe filter = new InboundPipe();
 
             filter.ConnectHandler<MessageA>(async context => { throw new InvalidOperationException("This is a test"); });
 

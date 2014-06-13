@@ -16,7 +16,7 @@ namespace MassTransit
 
 
     public interface IPipe<in T>
-        where T : class
+        where T : class, PipeContext
     {
         Task Send(T context);
     }

@@ -15,7 +15,7 @@ namespace MassTransit
     using System.Threading.Tasks;
 
 
-    public interface Filter<T>
+    public interface IFilter<T>
         where T : class, PipeContext
     {
         Task Send(T context, IPipe<T> next);

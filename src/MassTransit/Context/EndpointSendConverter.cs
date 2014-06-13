@@ -51,7 +51,8 @@ namespace MassTransit.Context
             return await endpoint.Send(msg, context => callback(context));
         }
 
-        public async Task<SentContext> Send(ISendToEndpoint endpoint, object message, Func<SendContext, Task<SendContext>> callback)
+        public async Task<SentContext> Send(ISendToEndpoint endpoint, object message,
+            Func<SendContext, Task<SendContext>> callback)
         {
             if (endpoint == null)
                 throw new ArgumentNullException("endpoint");
@@ -65,11 +66,11 @@ namespace MassTransit.Context
                 throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
 
             return await endpoint.Send(msg, async context =>
-                {
-                    await callback(context);
+            {
+                await callback(context);
 
-                    return context;
-                });
+                return context;
+            });
         }
     }
 }

@@ -21,12 +21,12 @@ namespace MassTransit.Transports
     using Serialization;
 
 
-    public class JsonMessageSendSerializer :
-        IMessageSendSerializer
+    public class JsonSendMessageSerializer :
+        ISendMessageSerializer
     {
         readonly JsonSerializer _serializer;
 
-        public JsonMessageSendSerializer(JsonSerializer serializer)
+        public JsonSendMessageSerializer(JsonSerializer serializer)
         {
             _serializer = serializer;
         }
@@ -61,7 +61,7 @@ namespace MassTransit.Transports
         {
             public Envelope(SendContext context, object message, IEnumerable<Type> messageTypes)
             {
-                if(context.MessageId.HasValue)  
+                if (context.MessageId.HasValue)
                     MessageId = context.MessageId.Value.ToString("N");
 
                 if (context.RequestId.HasValue)
@@ -78,10 +78,10 @@ namespace MassTransit.Transports
 
                 if (context.ResponseAddress != null)
                     ResponseAddress = context.ResponseAddress.ToString();
-                
+
                 if (context.FaultAddress != null)
                     FaultAddress = context.FaultAddress.ToString();
-               
+
                 MessageType = new List<string>(messageTypes.Select(type => new MessageUrn(type).ToString()));
 
                 Message = message;

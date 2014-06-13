@@ -15,7 +15,6 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Exceptions;
     using Microsoft.Practices.Unity;
-    using Pipeline.Sinks;
     using Util;
 
 
@@ -30,8 +29,9 @@ namespace MassTransit
             _container = container;
         }
 
-        async Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
+        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
+            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            where TMessage : class
         {
             using (IUnityContainer childContainer = _container.CreateChildContainer())
             {
@@ -42,7 +42,7 @@ namespace MassTransit
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await callback(consumer, consumeContext);
+                await next.Send(context.Push(consumer));
             }
         }
     }
