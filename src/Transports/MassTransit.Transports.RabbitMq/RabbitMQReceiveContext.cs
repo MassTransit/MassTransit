@@ -27,6 +27,7 @@ namespace MassTransit.Transports.RabbitMq
         static readonly ContentType DefaultContentType = new ContentType("application/vnd.masstransit+json");
 
         readonly byte[] _body;
+        readonly CancellationTokenSource _cancellationTokenSource;
         readonly string _consumerTag;
         readonly ulong _deliveryTag;
         readonly string _exchange;
@@ -35,11 +36,12 @@ namespace MassTransit.Transports.RabbitMq
         readonly Stopwatch _receiveTimer;
         readonly bool _redelivered;
         readonly string _routingKey;
+
         ContentType _contentType;
         RabbitMqReceiveContextHeaders _headers;
-        CancellationTokenSource _cancellationTokenSource;
 
-        public RabbitMqReceiveContext(string exchange, string routingKey, string consumerTag, Uri inputAddress, ulong deliveryTag,
+        public RabbitMqReceiveContext(string exchange, string routingKey, string consumerTag, Uri inputAddress,
+            ulong deliveryTag,
             byte[] body, bool redelivered, IBasicProperties properties)
         {
             _receiveTimer = Stopwatch.StartNew();
@@ -118,12 +120,10 @@ namespace MassTransit.Transports.RabbitMq
 
         public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
         {
-            
         }
 
         public void NotifyFaulted(string messageType, string consumerType, Exception exception)
         {
-            
         }
 
         ContentType GetContentType()

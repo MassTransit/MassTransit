@@ -18,8 +18,8 @@ namespace MassTransit.Context
 
     public interface IEndpointSendConverter
     {
-        Task<SendContext> Send(ISendToEndpoint endpoint, object message);
-        Task<SendContext> Send(ISendToEndpoint endpoint, object message, Action<SendContext> callback);
-        Task<SendContext> Send(ISendToEndpoint endpoint, object message, Func<SendContext, Task<SendContext>> callback);
+        Task<SentContext> Send(ISendToEndpoint endpoint, object message);
+        Task<SentContext> Send(ISendToEndpoint endpoint, object message, Action<SendContext> callback);
+        Task<SentContext> Send(ISendToEndpoint endpoint, object message, Func<SendContext, Task<SendContext>> callback);
     }
 }

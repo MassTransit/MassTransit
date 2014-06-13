@@ -20,7 +20,7 @@ namespace MassTransit.SubscriptionConnectors
 
     public interface HandlerConnector
     {
-        ConnectHandle Connect<T>(IInboundMessagePipe pipe, MessageHandler<T> handler, IMessageRetryPolicy retryPolicy)
+        ConnectHandle Connect<T>(IInboundPipe filter, MessageHandler<T> handler, IMessageRetryPolicy retryPolicy)
             where T : class;
     }
 
@@ -29,16 +29,16 @@ namespace MassTransit.SubscriptionConnectors
         HandlerConnector
         where TMessage : class
     {
-        public ConnectHandle Connect<T>(IInboundMessagePipe pipe, MessageHandler<T> handler, IMessageRetryPolicy retryPolicy)
+        public ConnectHandle Connect<T>(IInboundPipe filter, MessageHandler<T> handler, IMessageRetryPolicy retryPolicy)
             where T : class
         {
             var messageHandler = handler as MessageHandler<TMessage>;
             if (messageHandler == null)
                 throw new ArgumentException("The message handler type does not match: " + TypeMetadataCache<T>.ShortName);
 
-            var messagePipe = new HandlerMessagePipe<TMessage>(messageHandler, retryPolicy);
+            var messagePipe = new HandlerMessageFilter<TMessage>(messageHandler, retryPolicy);
 
-            return pipe.Connect(messagePipe);
+            return filter.Connect(messagePipe);
         }
     }
 }

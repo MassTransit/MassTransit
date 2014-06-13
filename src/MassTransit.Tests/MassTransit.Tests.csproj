@@ -168,6 +168,7 @@
     <Compile Include="Performance\EndpointLoadTest.cs" />
     <Compile Include="Performance\LoadedRequest.cs" />
     <Compile Include="Performance\LoadedResponse.cs" />
+    <Compile Include="PipeExtensions.cs" />
     <Compile Include="Pipeline\ConnectConsumer_Specs.cs" />
     <Compile Include="Pipeline\ConnectHandler_Specs.cs" />
     <Compile Include="Pipeline\ConnectInterceptor_Specs.cs" />

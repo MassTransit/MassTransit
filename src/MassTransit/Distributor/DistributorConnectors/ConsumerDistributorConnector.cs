@@ -78,9 +78,9 @@ namespace MassTransit.Distributor.DistributorConnectors
                        new[] {x.MessageType}, new object[] {_workerSelectorFactory});
         }
 
-        public ISubscriptionReference Connect(IInboundMessagePipe pipe, IDistributor distributor)
+        public ISubscriptionReference Connect(IInboundPipe filter, IDistributor distributor)
         {
-            var handle = new MultipleConnectHandle(_connectors.Select(x => x.Connect(pipe, distributor)));
+            var handle = new MultipleConnectHandle(_connectors.Select(x => x.Connect(filter, distributor)));
             return _referenceFactory(handle);
         }
     }

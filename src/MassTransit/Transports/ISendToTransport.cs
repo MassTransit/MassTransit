@@ -28,7 +28,7 @@ namespace MassTransit.Transports
         /// <param name="message">The message</param>
         /// <param name="callback">The callback to modify the SendContext</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<SendContext<T>> Send<T>(T message, Func<SendContext<T>, Task<SendContext<T>>> callback)
+        Task<SentContext<T>> Send<T>(T message, Func<SendContext<T>, Task<SendContext<T>>> callback)
             where T : class;
     }
 }

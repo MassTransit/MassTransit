@@ -31,9 +31,9 @@ namespace MassTransit.Distributor.DistributorConnectors
             _connector = new MessageDistributorConnector<TMessage>(workerSelectorFactory);
         }
 
-        public ISubscriptionReference Connect(IInboundMessagePipe pipe, IDistributor distributor)
+        public ISubscriptionReference Connect(IInboundPipe filter, IDistributor distributor)
         {
-            return _referenceFactory(_connector.Connect(pipe, distributor));
+            return _referenceFactory(_connector.Connect(filter, distributor));
         }
     }
 }

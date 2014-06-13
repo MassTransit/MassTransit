@@ -20,21 +20,21 @@ namespace MassTransit.Pipeline
 
     public static class InboundMessagePipeExtensions
     {
-        public static ConnectHandle ConnectHandler<T>(this IInboundMessagePipe pipe, MessageHandler<T> handler,
+        public static ConnectHandle ConnectHandler<T>(this IInboundPipe filter, MessageHandler<T> handler,
             IMessageRetryPolicy retryPolicy = null)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.Connect(pipe, handler, retryPolicy ?? Retry.None);
+            return HandlerConnectorCache<T>.Connector.Connect(filter, handler, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IInboundMessagePipe pipe,
+        public static ConnectHandle ConnectConsumer<T>(this IInboundPipe filter,
             IAsyncConsumerFactory<T> consumerFactory, IMessageRetryPolicy retryPolicy = null)
             where T : class
         {
-            return ConsumerConnectorCache<T>.Connector.Connect(pipe, consumerFactory, retryPolicy ?? Retry.None);
+            return ConsumerConnectorCache<T>.Connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IInboundMessagePipe pipe,
+        public static ConnectHandle ConnectConsumer<T>(this IInboundPipe filter,
             IMessageRetryPolicy retryPolicy = null)
             where T : class, new()
         {
@@ -42,10 +42,10 @@ namespace MassTransit.Pipeline
 
             ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 
-            return connector.Connect(pipe, consumerFactory, retryPolicy ?? Retry.None);
+            return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IInboundMessagePipe pipe, Func<T> factoryMethod,
+        public static ConnectHandle ConnectConsumer<T>(this IInboundPipe filter, Func<T> factoryMethod,
             IMessageRetryPolicy retryPolicy = null)
             where T : class
         {
@@ -53,7 +53,7 @@ namespace MassTransit.Pipeline
 
             ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 
-            return connector.Connect(pipe, consumerFactory, retryPolicy ?? Retry.None);
+            return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
         }
     }
 }

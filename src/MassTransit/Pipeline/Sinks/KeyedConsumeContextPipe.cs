@@ -18,58 +18,58 @@ namespace MassTransit.Pipeline.Sinks
     using System.Threading.Tasks;
 
 
-    public class KeyedConsumeContextPipe<T, TKey> :
-        IConsumeContextPipe<T>,
+    public class KeyedConsumeFilter<T, TKey> :
+        IConsumeFilter<T>,
         IConnectPipeById<T, TKey>
         where T : class
     {
         readonly KeyAccessor<T, TKey> _keyAccessor;
-        readonly ConcurrentDictionary<TKey, TeeConsumeContextPipe<T>> _pipes;
+        readonly ConcurrentDictionary<TKey, TeeConsumeFilter<T>> _pipes;
 
-        public KeyedConsumeContextPipe(KeyAccessor<T, TKey> keyAccessor)
+        public KeyedConsumeFilter(KeyAccessor<T, TKey> keyAccessor)
         {
             _keyAccessor = keyAccessor;
-            _pipes = new ConcurrentDictionary<TKey, TeeConsumeContextPipe<T>>();
+            _pipes = new ConcurrentDictionary<TKey, TeeConsumeFilter<T>>();
         }
 
-        public ConnectHandle Connect(TKey key, IConsumeContextPipe<T> pipe)
+        public ConnectHandle Connect(TKey key, IConsumeFilter<T> filter)
         {
-            if (pipe == null)
-                throw new ArgumentNullException("pipe");
+            if (filter == null)
+                throw new ArgumentNullException("filter");
 
-            TeeConsumeContextPipe<T> added = _pipes.GetOrAdd(key, x => new TeeConsumeContextPipe<T>());
+            TeeConsumeFilter<T> added = _pipes.GetOrAdd(key, x => new TeeConsumeFilter<T>());
 
-            ConnectHandle handle = added.Connect(pipe);
+            ConnectHandle handle = added.Connect(filter);
 
             return new Handle(key, handle, RemovePipe);
         }
 
-        public async Task Send(ConsumeContext<T> context)
+        public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
             TKey key = _keyAccessor(context.Message);
 
-            TeeConsumeContextPipe<T> pipe;
-            if (_pipes.TryGetValue(key, out pipe))
-                await pipe.Send(context);
+            TeeConsumeFilter<T> filter;
+            if (_pipes.TryGetValue(key, out filter))
+                await filter.Send(context, next);
         }
 
         public bool Inspect(IConsumeContextPipeInspector inspector)
         {
             return inspector.Inspect(this,
-                (x, _) => _pipes.Values.Cast<IConsumeContextPipe<T>>().All(pipe => pipe.Inspect(x)));
+                (x, _) => _pipes.Values.Cast<IConsumeFilter<T>>().All(pipe => pipe.Inspect(x)));
         }
 
         void RemovePipe(TKey key, ConnectHandle connectHandle)
         {
             connectHandle.Disconnect();
 
-            TeeConsumeContextPipe<T> pipe;
-            if (_pipes.TryGetValue(key, out pipe) && pipe.Count == 0)
+            TeeConsumeFilter<T> filter;
+            if (_pipes.TryGetValue(key, out filter) && filter.Count == 0)
             {
-                TeeConsumeContextPipe<T> removedPipe;
-                if (_pipes.TryRemove(key, out removedPipe))
+                TeeConsumeFilter<T> removedFilter;
+                if (_pipes.TryRemove(key, out removedFilter))
                 {
-                    if (removedPipe.Count > 0)
+                    if (removedFilter.Count > 0)
                         throw new InvalidOperationException("Keys must not be reused");
                 }
             }

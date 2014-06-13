@@ -19,20 +19,20 @@ namespace MassTransit.Pipeline.Sinks
     using Util;
 
 
-    public class HandlerMessagePipe<TMessage> :
-        IConsumeContextPipe<TMessage>
+    public class HandlerMessageFilter<TMessage> :
+        IConsumeFilter<TMessage>
         where TMessage : class
     {
         readonly MessageHandler<TMessage> _handler;
         readonly IMessageRetryPolicy _retryPolicy;
 
-        public HandlerMessagePipe(MessageHandler<TMessage> handler, IMessageRetryPolicy retryPolicy)
+        public HandlerMessageFilter(MessageHandler<TMessage> handler, IMessageRetryPolicy retryPolicy)
         {
             _handler = handler;
             _retryPolicy = retryPolicy;
         }
 
-        public async Task Send(ConsumeContext<TMessage> context)
+        public async Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
             Stopwatch timer = Stopwatch.StartNew();
             try
@@ -40,6 +40,8 @@ namespace MassTransit.Pipeline.Sinks
                 await _retryPolicy.Retry(context, x => _handler(context));
 
                 context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName);
+
+                await next.Send(context);
             }
             catch (Exception ex)
             {

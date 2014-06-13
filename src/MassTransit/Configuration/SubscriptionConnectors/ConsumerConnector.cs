@@ -26,7 +26,7 @@ namespace MassTransit.SubscriptionConnectors
     /// </summary>
     public interface ConsumerConnector
     {
-        ConnectHandle Connect<TConsumer>(IInboundMessagePipe pipe, IAsyncConsumerFactory<TConsumer> consumerFactory,
+        ConnectHandle Connect<TConsumer>(IInboundPipe filter, IAsyncConsumerFactory<TConsumer> consumerFactory,
             IMessageRetryPolicy retryPolicy)
             where TConsumer : class;
     }
@@ -55,11 +55,11 @@ namespace MassTransit.SubscriptionConnectors
             get { return _connectors; }
         }
 
-        public ConnectHandle Connect<TConsumer>(IInboundMessagePipe pipe,
+        public ConnectHandle Connect<TConsumer>(IInboundPipe filter,
             IAsyncConsumerFactory<TConsumer> consumerFactory, IMessageRetryPolicy retryPolicy)
             where TConsumer : class
         {
-            return new MultipleConnectHandle(_connectors.Select(x => x.Connect(pipe, consumerFactory, retryPolicy)));
+            return new MultipleConnectHandle(_connectors.Select(x => x.Connect(filter, consumerFactory, retryPolicy)));
         }
 
         static IEnumerable<ConsumerMessageConnector> ConsumesContext()

@@ -24,6 +24,13 @@ namespace MassTransit.Transports.RabbitMq
     }
 
 
+    public class RabbitMqSentContext<T> :
+        SentContext<T>
+        where T : class
+    {
+        
+    }
+
     public class RabbitMqSendToTransport :
         ISendToTransport
     {
@@ -36,7 +43,7 @@ namespace MassTransit.Transports.RabbitMq
             _exchange = exchange;
         }
 
-        public async Task<SendContext<T>> Send<T>(T message, Func<SendContext<T>, Task<SendContext<T>>> callback)
+        public async Task<SentContext<T>> Send<T>(T message, Func<SendContext<T>, Task<SendContext<T>>> callback)
             where T : class
         {
             var properties = _model.CreateBasicProperties();
@@ -65,7 +72,7 @@ namespace MassTransit.Transports.RabbitMq
                 context.BasicProperties,
                 context.Body);
 
-            return context;
+            return new RabbitMqSentContext<T>();
         }
     }
 }

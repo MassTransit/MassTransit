@@ -22,18 +22,18 @@ namespace MassTransit.Pipeline.Sinks
     /// the output pipe. Supports interception by message type.
     /// </summary>
     /// <typeparam name="TMessage">The message type</typeparam>
-    public class MessageConsumeContextPipe<TMessage> :
-        IConsumeContextPipe,
-        IConnectPipe,
+    public class MessageConsumeFilter<TMessage> :
+        IConsumeFilter,
+        IConsumeFilterConnector,
         IConnectMessageInterceptor
         where TMessage : class
     {
         readonly MessageInterceptorConnectable<TMessage> _connections;
-        readonly TeeConsumeContextPipe<TMessage> _output;
+        readonly TeeConsumeFilter<TMessage> _output;
 
-        public MessageConsumeContextPipe()
+        public MessageConsumeFilter()
         {
-            _output = new TeeConsumeContextPipe<TMessage>();
+            _output = new TeeConsumeFilter<TMessage>();
             _connections = new MessageInterceptorConnectable<TMessage>();
         }
 
@@ -46,16 +46,16 @@ namespace MassTransit.Pipeline.Sinks
             return self.Connect(interceptor);
         }
 
-        ConnectHandle IConnectPipe.Connect<T>(IConsumeContextPipe<T> pipe)
+        ConnectHandle IConsumeFilterConnector.Connect<T>(IConsumeFilter<T> filter)
         {
-            var output = _output as IConnectPipe<T>;
+            var output = _output as IConsumeFilterConnector<T>;
             if (output == null)
                 throw new ArgumentException("Invalid pipe type specified: " + TypeMetadataCache<T>.ShortName);
 
-            return output.Connect(pipe);
+            return output.Connect(filter);
         }
 
-        async Task IConsumeContextPipe.Send(ConsumeContext context)
+        async Task Filter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
             ConsumeContext<TMessage> consumeContext;
             if (context.TryGetMessage(out consumeContext))
@@ -65,7 +65,7 @@ namespace MassTransit.Pipeline.Sinks
 
                 try
                 {
-                    await _output.Send(consumeContext);
+                    await _output.Send(consumeContext, next);
 
                     if (_connections.Count > 0)
                         await _connections.PostDispatch(consumeContext);

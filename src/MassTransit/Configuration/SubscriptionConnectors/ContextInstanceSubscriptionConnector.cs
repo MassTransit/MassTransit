@@ -28,7 +28,7 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect(IInboundMessagePipe pipe, object instance, IMessageRetryPolicy retryPolicy)
+        public ConnectHandle Connect(IInboundPipe filter, object instance, IMessageRetryPolicy retryPolicy)
         {
             throw new NotImplementedException();
         }

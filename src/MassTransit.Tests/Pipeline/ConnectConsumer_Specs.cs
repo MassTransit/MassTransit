@@ -24,17 +24,17 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_receive_a_message()
         {
-            IInboundMessagePipe pipe = new InboundMessagePipe();
+            IInboundPipe filter = new InboundMessageFilter();
 
             OneMessageConsumer consumer = GetOneMessageConsumer();
 
             IAsyncConsumerFactory<OneMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
-            pipe.ConnectConsumer(factory, Retry.None);
+            filter.ConnectConsumer(factory, Retry.None);
 
             var consumeContext = new TestConsumeContext<MessageA>(new MessageA());
 
-            await pipe.Send(consumeContext);
+            await filter.Send(consumeContext);
 
             await consumer.Task;
         }
@@ -42,17 +42,17 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_receive_a_two_messages()
         {
-            IInboundMessagePipe pipe = new InboundMessagePipe();
+            IInboundPipe filter = new InboundMessageFilter();
 
             TwoMessageConsumer consumer = GetTwoMessageConsumer();
 
             IAsyncConsumerFactory<TwoMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
-            pipe.ConnectConsumer(factory, Retry.None);
+            filter.ConnectConsumer(factory, Retry.None);
 
-            await pipe.Send(new TestConsumeContext<MessageA>(new MessageA()));
+            await filter.Send(new TestConsumeContext<MessageA>(new MessageA()));
 
-            await pipe.Send(new TestConsumeContext<MessageB>(new MessageB()));
+            await filter.Send(new TestConsumeContext<MessageB>(new MessageB()));
 
             await consumer.TaskA;
             await consumer.TaskB;
