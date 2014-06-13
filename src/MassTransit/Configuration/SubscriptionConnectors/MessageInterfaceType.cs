@@ -13,40 +13,64 @@
 namespace MassTransit.SubscriptionConnectors
 {
     using System;
-    using Pipeline.Sinks;
 
 
     public class MessageInterfaceType
     {
-        readonly Lazy<MessageConnectorFactory> _consumerMessageConnectorFactory;
+        readonly Lazy<MessageConnectorFactory> _messageConnectorFactory;
+        readonly Lazy<SubscriptionConnectorFactory> _messageSubscriptionConnectorFactory;
+        readonly Lazy<SubscriptionConnectorFactory> _subscriptionConnectorFactory;
 
         public MessageInterfaceType(Type interfaceType, Type messageType, Type consumerType)
         {
             InterfaceType = interfaceType;
             MessageType = messageType;
 
-            _consumerMessageConnectorFactory = new Lazy<MessageConnectorFactory>(() => (MessageConnectorFactory)
+            _messageConnectorFactory = new Lazy<MessageConnectorFactory>(() => (MessageConnectorFactory)
                 Activator.CreateInstance(typeof(MessageConnectorFactory<,>).MakeGenericType(consumerType,
                     messageType)));
+
+            _subscriptionConnectorFactory = new Lazy<SubscriptionConnectorFactory>(() => (SubscriptionConnectorFactory)
+                Activator.CreateInstance(typeof(ContextSubscriptionConnectorFactory<,>).MakeGenericType(consumerType,
+                    messageType)));
+
+            _messageSubscriptionConnectorFactory =
+                new Lazy<SubscriptionConnectorFactory>(() => (SubscriptionConnectorFactory)
+                    Activator.CreateInstance(typeof(MessageSubscriptionConnectorFactory<,>).MakeGenericType(
+                        consumerType, messageType)));
         }
 
         public Type InterfaceType { get; private set; }
         public Type MessageType { get; private set; }
 
+        public ConsumerMessageConnector GetConsumerConnector()
+        {
+            return _messageConnectorFactory.Value.CreateConsumerConnector();
+        }
+
+        public ConsumerMessageConnector GetConsumerContextConnector()
+        {
+            return _subscriptionConnectorFactory.Value.CreateSubscriptionConnector();
+        }
+
+        public InstanceMessageConnector GetInstanceContextConnector()
+        {
+            return _subscriptionConnectorFactory.Value.CreateInstanceConnector();
+        }
+
         public ConsumerMessageConnector GetConsumerMessageConnector()
         {
-            return _consumerMessageConnectorFactory.Value.CreateConsumerConnector();
+            return _messageSubscriptionConnectorFactory.Value.CreateSubscriptionConnector();
         }
 
         public InstanceMessageConnector GetInstanceMessageConnector()
         {
-            return _consumerMessageConnectorFactory.Value.CreateInstanceConnector();
+            return _messageSubscriptionConnectorFactory.Value.CreateInstanceConnector();
         }
-    }
 
-
-    public interface ConnectorFactory
-    {
-        ConsumerSubscriptionConnector CreateSubscriptionConnector();
+        public InstanceMessageConnector GetInstanceConnector()
+        {
+            return _messageConnectorFactory.Value.CreateInstanceConnector();
+        }
     }
 }

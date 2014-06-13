@@ -23,6 +23,7 @@ namespace MassTransit.SubscriptionConnectors
         where T : class
     {
         readonly MessageInterfaceType[] _consumerTypes;
+        readonly MessageInterfaceType[] _contextConsumerTypes;
         readonly MessageInterfaceType[] _messageConsumerTypes;
 
 
@@ -30,6 +31,7 @@ namespace MassTransit.SubscriptionConnectors
         {
             _consumerTypes = GetConsumerMessageTypes().ToArray();
             _messageConsumerTypes = GetMessageConsumerTypes().ToArray();
+            _contextConsumerTypes = GetContextConsumerTypes().ToArray();
         }
 
         public static MessageInterfaceType[] ConsumerTypes
@@ -42,6 +44,10 @@ namespace MassTransit.SubscriptionConnectors
             get { return InstanceCache.Cached.Value.MessageConsumerTypes; }
         }
 
+        public static MessageInterfaceType[] ContextConsumerTypes
+        {
+            get { return InstanceCache.Cached.Value.ContextConsumerTypes; }
+        }
 
         MessageInterfaceType[] IConsumerMetadataCache<T>.ConsumerTypes
         {
@@ -51,6 +57,11 @@ namespace MassTransit.SubscriptionConnectors
         MessageInterfaceType[] IConsumerMetadataCache<T>.MessageConsumerTypes
         {
             get { return _messageConsumerTypes; }
+        }
+
+        MessageInterfaceType[] IConsumerMetadataCache<T>.ContextConsumerTypes
+        {
+            get { return _contextConsumerTypes; }
         }
 
         static IEnumerable<MessageInterfaceType> GetConsumerMessageTypes()
@@ -71,6 +82,16 @@ namespace MassTransit.SubscriptionConnectors
                 .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0], typeof(T)))
                 .Where(x => x.MessageType.IsValueType == false)
                 .Where(IsNotContextType);
+        }
+
+        static IEnumerable<MessageInterfaceType> GetContextConsumerTypes()
+        {
+            return typeof(T).GetInterfaces()
+                .Where(x => x.IsGenericType)
+                .Where(x => x.GetGenericTypeDefinition() == typeof(IMessageConsumer<>))
+                .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0], typeof(T)))
+                .Where(x => x.MessageType.IsValueType == false)
+                .Where(type => !IsNotContextType(type));
         }
 
         static bool IsNotContextType(MessageInterfaceType x)

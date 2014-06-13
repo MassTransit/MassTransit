@@ -99,7 +99,7 @@ namespace MassTransit.Distributor.WorkerConnectors
     public class ConsumerWorkerConnector<TConsumer, TMessage> :
         ConsumerWorkerConnectorImpl<TConsumer, TMessage>
         where TMessage : class
-        where TConsumer : class, Consumes<TMessage>.All
+        where TConsumer : class, IMessageConsumer<TMessage>
     {
         public ConsumerWorkerConnector(IConsumerFactory<TConsumer> consumerFactory)
             : base(consumerFactory)

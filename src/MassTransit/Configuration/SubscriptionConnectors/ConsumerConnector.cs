@@ -15,7 +15,6 @@ namespace MassTransit.SubscriptionConnectors
     using System.Collections.Generic;
     using System.Linq;
     using Exceptions;
-    using Magnum.Reflection;
     using Pipeline;
     using Pipeline.Sinks;
     using Util;
@@ -44,7 +43,11 @@ namespace MassTransit.SubscriptionConnectors
             if (TypeMetadataCache<T>.HasSagaInterfaces)
                 throw new ConfigurationException("A saga cannot be registered as a consumer");
 
-            _connectors = Consumes().ToList();
+            _connectors = Consumes()
+                .Concat(ConsumesContext())
+                .Concat(ConsumesAll())
+                .Distinct((x, y) => x.MessageType == y.MessageType)
+                .ToList();
         }
 
         public IEnumerable<ConsumerMessageConnector> Connectors
@@ -59,36 +62,19 @@ namespace MassTransit.SubscriptionConnectors
             return new MultipleConnectHandle(_connectors.Select(x => x.Connect(pipe, consumerFactory, retryPolicy)));
         }
 
-
-        static IEnumerable<ConsumerSubscriptionConnector> ConsumesContext()
+        static IEnumerable<ConsumerMessageConnector> ConsumesContext()
         {
-            yield break;
-//            return ConsumerMetadataCache<T>.ConsumerTypes.Select(CreateContextConnector);
+            return ConsumerMetadataCache<T>.ContextConsumerTypes.Select(x => x.GetConsumerContextConnector());
         }
-
 
         static IEnumerable<ConsumerMessageConnector> Consumes()
         {
-            return ConsumerMetadataCache<T>.ConsumerTypes.Select(x => x.GetConsumerMessageConnector());
+            return ConsumerMetadataCache<T>.ConsumerTypes.Select(x => x.GetConsumerConnector());
         }
 
-        static ConsumerSubscriptionConnector CreateContextConnector(MessageInterfaceType x)
+        static IEnumerable<ConsumerMessageConnector> ConsumesAll()
         {
-            return (ConsumerSubscriptionConnector)
-                FastActivator.Create(typeof(ContextConsumerSubscriptionConnector<,>),
-                    new[] {typeof(T), x.MessageType});
-        }
-
-        static IEnumerable<ConsumerSubscriptionConnector> ConsumesAll()
-        {
-            return ConsumerMetadataCache<T>.MessageConsumerTypes.Select(CreateConnector);
-        }
-
-        static ConsumerSubscriptionConnector CreateConnector(MessageInterfaceType x)
-        {
-            return (ConsumerSubscriptionConnector)
-                FastActivator.Create(typeof(ConsumerSubscriptionConnector<,>),
-                    new[] {typeof(T), x.MessageType});
+            return ConsumerMetadataCache<T>.MessageConsumerTypes.Select(x => x.GetConsumerMessageConnector());
         }
     }
 }

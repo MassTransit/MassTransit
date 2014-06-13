@@ -19,6 +19,7 @@ namespace MassTransit.Context
     using Magnum.Reflection;
     using Util;
 
+
     public class ConsumeContext<TMessage> :
         IConsumeContext<TMessage>
         where TMessage : class
