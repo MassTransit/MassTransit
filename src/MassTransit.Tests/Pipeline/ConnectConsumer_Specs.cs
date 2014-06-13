@@ -24,11 +24,11 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_receive_a_message()
         {
-            IInboundPipe filter = new InboundMessageFilter();
+            IInboundPipe filter = new InboundPipe();
 
             OneMessageConsumer consumer = GetOneMessageConsumer();
 
-            IAsyncConsumerFactory<OneMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
+            IConsumerFactory<OneMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
             filter.ConnectConsumer(factory, Retry.None);
 
@@ -42,11 +42,11 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_receive_a_two_messages()
         {
-            IInboundPipe filter = new InboundMessageFilter();
+            IInboundPipe filter = new InboundPipe();
 
             TwoMessageConsumer consumer = GetTwoMessageConsumer();
 
-            IAsyncConsumerFactory<TwoMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
+            IConsumerFactory<TwoMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
             filter.ConnectConsumer(factory, Retry.None);
 

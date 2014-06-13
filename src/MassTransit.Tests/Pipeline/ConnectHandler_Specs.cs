@@ -25,7 +25,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_receive_a_test_message()
         {
-            IInboundPipe filter = new InboundMessageFilter();
+            IInboundPipe filter = new InboundPipe();
 
             TaskCompletionSource<PingMessage> received = GetTask<PingMessage>();
 

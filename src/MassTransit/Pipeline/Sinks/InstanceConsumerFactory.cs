@@ -15,22 +15,22 @@ namespace MassTransit.Pipeline.Sinks
     using System.Threading.Tasks;
 
 
-    public class InstanceAsyncConsumerFactory<TConsumer> :
-        IAsyncConsumerFactory<TConsumer>
+    public class InstanceConsumerFactory<TConsumer> :
+        IConsumerFactory<TConsumer>
         where TConsumer : class
     {
         readonly TConsumer _consumer;
 
-        public InstanceAsyncConsumerFactory(TConsumer consumer)
+        public InstanceConsumerFactory(TConsumer consumer)
         {
             _consumer = consumer;
         }
 
-        public Task GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
+        public Task Send<TMessage>(ConsumeContext<TMessage> context,
+            IPipe<ConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
-            return callback(_consumer, consumeContext);
+            return next.Send(context.Push(_consumer));
         }
     }
 }

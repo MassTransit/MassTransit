@@ -35,11 +35,31 @@ namespace MassTransit.Configuration
             _interceptor = interceptor;
         }
 
-        Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
+        public Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            where TMessage : class
         {
-            return _consumerFactory.GetConsumer(consumeContext, (consumer, context) =>
-                _interceptor(consumer, context, () => callback(consumer, context)));
+            return _consumerFactory.Send(context, new TestDecoratorPipe<TMessage>(_interceptor, next));
+        }
+
+
+        class TestDecoratorPipe<T> :
+            IPipe<ConsumeContext<TConsumer, T>>
+            where T : class
+        {
+            readonly ConsumerFactoryInterceptor<TConsumer> _interceptor;
+            readonly IPipe<ConsumeContext<TConsumer, T>> _next;
+
+            public TestDecoratorPipe(ConsumerFactoryInterceptor<TConsumer> interceptor,
+                IPipe<ConsumeContext<TConsumer, T>> next)
+            {
+                _interceptor = interceptor;
+                _next = next;
+            }
+
+            public Task Send(ConsumeContext<TConsumer, T> context)
+            {
+                return _interceptor(context.Item1, context, () => _next.Send(context));
+            }
         }
     }
 }

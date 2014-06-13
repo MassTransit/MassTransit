@@ -16,7 +16,6 @@ namespace MassTransit.WindsorIntegration
     using Castle.MicroKernel.Lifestyle;
     using Castle.Windsor;
     using Exceptions;
-    using Pipeline.Sinks;
     using Util;
 
 
@@ -31,8 +30,9 @@ namespace MassTransit.WindsorIntegration
             _container = container;
         }
 
-        async Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
+        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
+            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            where TMessage : class
         {
             using (_container.BeginScope())
             {
@@ -45,7 +45,7 @@ namespace MassTransit.WindsorIntegration
 
                 try
                 {
-                    await callback(consumer, consumeContext);
+                    await next.Send(context.Push(consumer));
                 }
                 finally
                 {

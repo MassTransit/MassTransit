@@ -114,6 +114,15 @@ namespace MassTransit
         /// <param name="consumerType"></param>
         /// <param name="exception"></param>
         void NotifyFaulted(string consumerType, Exception exception);
+    }
 
+
+    public interface ConsumeContext<out T1, out T> :
+        ConsumeContext<T>
+        where T : class
+    {
+        T1 Item1 { get; }
+
+        ConsumeContext<T> Pop();
     }
 }

@@ -47,7 +47,7 @@ namespace MassTransit
         /// <summary>
         /// The serializer to use when serializing the message to the transport
         /// </summary>
-        IMessageSendSerializer Serializer { get; set; }
+        ISendMessageSerializer Serializer { get; set; }
 
         void Match<T>(Action<T> callback)
             where T : class, SendContext;

@@ -10,17 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit
 {
-    using System.IO;
-    using System.Net.Mime;
+    using System.Threading.Tasks;
 
 
-    public interface IMessageSendSerializer
+    public interface IConsumeEnricher<out T>
+        where T : class
     {
-        ContentType ContentType { get; }
-
-        void Serialize<T>(Stream stream, SendContext<T> context)
-            where T : class;
+        Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumeContext<T, TMessage>> next)
+            where TMessage : class;
     }
 }

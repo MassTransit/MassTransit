@@ -42,11 +42,11 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect<T>(IInboundPipe filter, IAsyncConsumerFactory<T> consumerFactory,
+        public ConnectHandle Connect<T>(IInboundPipe filter, IConsumerFactory<T> consumerFactory,
             IMessageRetryPolicy retryPolicy)
             where T : class
         {
-            var factory = consumerFactory as IAsyncConsumerFactory<TConsumer>;
+            var factory = consumerFactory as IConsumerFactory<TConsumer>;
             if (factory == null)
             {
                 throw new ArgumentException("The consumer factory type does not match: "

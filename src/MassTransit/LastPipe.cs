@@ -23,9 +23,9 @@ namespace MassTransit
         IPipe<T>
         where T : class, PipeContext
     {
-        readonly Filter<T> _filter;
+        readonly IFilter<T> _filter;
 
-        public LastPipe(Filter<T> filter)
+        public LastPipe(IFilter<T> filter)
         {
             _filter = filter;
         }

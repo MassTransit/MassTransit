@@ -13,13 +13,13 @@
 namespace MassTransit.Pipeline
 {
     public interface ISendFilter :
-        Filter<SendContext>
+        IFilter<SendContext>
     {
     }
 
 
     public interface ISendFilter<T> :
-        Filter<SendContext<T>>
+        IFilter<SendContext<T>>
         where T : class
     {
     }

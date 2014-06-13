@@ -29,8 +29,9 @@ namespace MassTransit.Configuration
             _factoryMethod = factoryMethod;
         }
 
-        async Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
+        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
+            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            where TMessage : class
         {
             TConsumer consumer = null;
             try
@@ -42,43 +43,7 @@ namespace MassTransit.Configuration
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await callback(consumer, consumeContext);
-            }
-            finally
-            {
-                var disposable = consumer as IDisposable;
-                if (disposable != null)
-                    disposable.Dispose();
-            }
-        }
-    }
-
-
-    public class DelegateAsyncConsumerFactory<TConsumer> :
-        IAsyncConsumerFactory<TConsumer>
-        where TConsumer : class
-    {
-        readonly Func<TConsumer> _factoryMethod;
-
-        public DelegateAsyncConsumerFactory(Func<TConsumer> factoryMethod)
-        {
-            _factoryMethod = factoryMethod;
-        }
-
-        async Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
-        {
-            TConsumer consumer = null;
-            try
-            {
-                consumer = _factoryMethod();
-                if (consumer == null)
-                {
-                    throw new ConsumerException(string.Format("Unable to resolve consumer type '{0}'.",
-                        TypeMetadataCache<TConsumer>.ShortName));
-                }
-
-                await callback(consumer, consumeContext);
+                await next.Send(context.Push(consumer));
             }
             finally
             {

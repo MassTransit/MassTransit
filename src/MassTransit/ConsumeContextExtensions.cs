@@ -12,16 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    /// <summary>
-    /// Maps an instance of a consumer to one or more Consume methods for the specified message type
-    /// 
-    /// The whole purpose for this interface is to allow the creator of the consumer to manage the lifecycle
-    /// of the consumer, along with anything else that needs to be managed by the factory, container, etc.
-    /// </summary>
-    /// <typeparam name="TConsumer">The Consumer type</typeparam>
-    public interface IConsumerFactory<out TConsumer> :
-        IConsumeEnricher<TConsumer>
-        where TConsumer : class
+    public static class ConsumeContextExtensions
     {
+        public static ConsumeContext<T1, T> Push<T1, T>(this ConsumeContext<T> context, T1 item1)
+            where T : class
+        {
+            return new ConsumeContextTuple<T1, T>(context, item1);
+        }
     }
 }

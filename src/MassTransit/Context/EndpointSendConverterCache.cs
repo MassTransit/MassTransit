@@ -13,8 +13,9 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Threading;
-    using Magnum.Caching;
+
 
     /// <summary>
     /// Caches the converters that allow a raw object to be published using the object's type through
@@ -22,8 +23,8 @@ namespace MassTransit.Context
     /// </summary>
     public class EndpointSendConverterCache
     {
-        readonly Cache<Type, IEndpointSendConverter> _typeCache =
-            new GenericTypeCache<IEndpointSendConverter>(typeof(EndpointSendConverter<>));
+        readonly ConcurrentDictionary<Type, Lazy<IEndpointSendConverter>> _types =
+            new ConcurrentDictionary<Type, Lazy<IEndpointSendConverter>>();
 
         public static EndpointSendConverterCache Instance
         {
@@ -32,14 +33,27 @@ namespace MassTransit.Context
 
         public IEndpointSendConverter this[Type type]
         {
-            get { return _typeCache[type]; }
+            get { return _types.GetOrAdd(type, CreateTypeConverter).Value; }
+        }
+
+        static Lazy<IEndpointSendConverter> CreateTypeConverter(Type type)
+        {
+            return new Lazy<IEndpointSendConverter>(() => CreateConverter(type));
+        }
+
+        static IEndpointSendConverter CreateConverter(Type type)
+        {
+            Type converterType = typeof(EndpointSendConverter<>).MakeGenericType(type);
+
+            return (IEndpointSendConverter)Activator.CreateInstance(converterType);
         }
 
 
         static class InstanceCache
         {
             internal static readonly Lazy<EndpointSendConverterCache> Cached =
-                new Lazy<EndpointSendConverterCache>(() => new EndpointSendConverterCache(), LazyThreadSafetyMode.PublicationOnly);
+                new Lazy<EndpointSendConverterCache>(() => new EndpointSendConverterCache(),
+                    LazyThreadSafetyMode.PublicationOnly);
         }
     }
 }

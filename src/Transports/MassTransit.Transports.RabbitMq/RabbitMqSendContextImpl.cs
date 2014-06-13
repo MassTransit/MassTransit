@@ -25,7 +25,7 @@ namespace MassTransit.Transports.RabbitMq
         RabbitMqSendContext<T>
         where T : class
     {
-        IMessageSendSerializer _serializer;
+        ISendMessageSerializer _serializer;
         byte[] _body;
 
         public RabbitMqSendContextImpl(IBasicProperties basicProperties, T message, string exchange, string routingKey = "")
@@ -53,7 +53,7 @@ namespace MassTransit.Transports.RabbitMq
         
         public ContentType ContentType { get; set; }
 
-        public IMessageSendSerializer Serializer
+        public ISendMessageSerializer Serializer
         {
             get { return _serializer; }
             set

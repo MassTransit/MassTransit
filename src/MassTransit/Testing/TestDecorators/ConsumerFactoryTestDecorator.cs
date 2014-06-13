@@ -30,16 +30,33 @@ namespace MassTransit.Testing.TestDecorators
             _received = received;
         }
 
-        Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
+        public Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            where TMessage : class
         {
-            return _consumerFactory.GetConsumer(consumeContext, async (consumer, context) =>
+            return _consumerFactory.Send(context, new TestDecoratorPipe<TMessage>(_received, next));
+        }
+
+
+        class TestDecoratorPipe<T> :
+            IPipe<ConsumeContext<TConsumer, T>>
+            where T : class
+        {
+            readonly IPipe<ConsumeContext<TConsumer, T>> _next;
+            readonly ReceivedMessageListImpl _received;
+
+            public TestDecoratorPipe(ReceivedMessageListImpl received, IPipe<ConsumeContext<TConsumer, T>> next)
             {
-                var received = new ReceivedMessageImpl<TMessage>(context);
+                _received = received;
+                _next = next;
+            }
+
+            public async Task Send(ConsumeContext<TConsumer, T> context)
+            {
+                var received = new ReceivedMessageImpl<T>(context);
 
                 try
                 {
-                    await callback(consumer, context);
+                    await _next.Send(context);
                 }
                 catch (Exception ex)
                 {
@@ -49,7 +66,7 @@ namespace MassTransit.Testing.TestDecorators
                 {
                     _received.Add(received);
                 }
-            });
+            }
         }
     }
 }

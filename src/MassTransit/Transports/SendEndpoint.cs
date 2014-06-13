@@ -22,39 +22,39 @@ namespace MassTransit.Transports
         ISendToEndpoint
     {
         readonly Uri _destinationAddress;
-        readonly IMessageSendSerializer _sendSerializer;
-        readonly ISendToTransport _sendToTransport;
+        readonly ISendMessageSerializer _serializer;
+        readonly ISendToTransport _transport;
 
-        public SendEndpoint(ISendToTransport sendToTransport, IMessageSendSerializer sendSerializer, Uri destinationAddress)
+        public SendEndpoint(ISendToTransport transport, ISendMessageSerializer serializer, Uri destinationAddress)
         {
-            _sendToTransport = sendToTransport;
-            _sendSerializer = sendSerializer;
+            _transport = transport;
+            _serializer = serializer;
             _destinationAddress = destinationAddress;
         }
 
         public Task<SentContext<T>> Send<T>(T message)
             where T : class
         {
-            return _sendToTransport.Send(message, context =>
+            return _transport.Send(message, async context =>
                 {
-                    context.Serializer = _sendSerializer;
+                    context.Serializer = _serializer;
                     context.DestinationAddress = _destinationAddress;
 
-                    return Task.FromResult(context);
+                    return context;
                 });
         }
 
         public Task<SentContext<T>> Send<T>(T message, Action<MassTransit.SendContext<T>> callback)
             where T : class
         {
-            return _sendToTransport.Send(message, context =>
+            return _transport.Send(message, async context =>
                 {
-                    context.Serializer = _sendSerializer;
+                    context.Serializer = _serializer;
                     context.DestinationAddress = _destinationAddress;
 
                     callback(context);
 
-                    return Task.FromResult(context);
+                    return context;
                 });
         }
 
@@ -62,9 +62,9 @@ namespace MassTransit.Transports
             Func<MassTransit.SendContext<T>, Task<MassTransit.SendContext<T>>> callback)
             where T : class
         {
-            return _sendToTransport.Send(message, async context =>
+            return _transport.Send(message, async context =>
                 {
-                    context.Serializer = _sendSerializer;
+                    context.Serializer = _serializer;
                     context.DestinationAddress = _destinationAddress;
 
                     await callback(context);

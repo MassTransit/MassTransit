@@ -15,7 +15,6 @@ namespace MassTransit.AutofacIntegration
     using System.Threading.Tasks;
     using Autofac;
     using Exceptions;
-    using Pipeline.Sinks;
     using Util;
 
 
@@ -32,8 +31,9 @@ namespace MassTransit.AutofacIntegration
             _name = name;
         }
 
-        async Task IAsyncConsumerFactory<TConsumer>.GetConsumer<TMessage>(ConsumeContext<TMessage> consumeContext,
-            ConsumerFactoryCallback<TConsumer, TMessage> callback)
+        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
+            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            where TMessage : class
         {
             using (ILifetimeScope innerScope = _scope.BeginLifetimeScope(_name))
             {
@@ -44,7 +44,7 @@ namespace MassTransit.AutofacIntegration
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await callback(consumer, consumeContext);
+                await next.Send(context.Push(consumer));
             }
         }
     }
