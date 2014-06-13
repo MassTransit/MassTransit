@@ -99,7 +99,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             {
                 using (var model = connection.CreateModel())
                 {
-                    var consumer = new RabbitMQBasicConsumer(model, new Uri("rabbitmq://localhost/speed/input"), context =>
+                    var consumer = new RabbitMqBasicConsumer(model, new Uri("rabbitmq://localhost/speed/input"), context =>
                         {
                             return Task.Run(() =>
                                 {
@@ -207,7 +207,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             {
                 using (var model = connection.CreateModel())
                 {
-                    var consumer = new RabbitMQBasicConsumer(model, new Uri("rabbitmq://localhost/speed/input"), context =>
+                    var consumer = new RabbitMqBasicConsumer(model, new Uri("rabbitmq://localhost/speed/input"), context =>
                         {
                             return Task.Run(() =>
                                 {

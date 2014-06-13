@@ -67,7 +67,7 @@ namespace MassTransit
         IEndpoint GetDestinationEndpoint(object message, Type messageType);
     }
 
-    public interface SendContext<T> :
+    public interface SendContext<out T> :
         SendContext
         where T : class
     {

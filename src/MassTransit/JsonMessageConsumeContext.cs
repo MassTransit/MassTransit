@@ -71,9 +71,9 @@ namespace MassTransit
             get { return _context.FaultAddress; }
         }
 
-        public Headers Headers
+        public ContextHeaders ContextHeaders
         {
-            get { return _context.Headers; }
+            get { return _context.ContextHeaders; }
         }
 
         public CancellationToken CancellationToken

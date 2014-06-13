@@ -37,7 +37,7 @@ namespace MassTransit
 
         Uri _destinationAddress;
         Uri _faultAddress;
-        Headers _headers;
+        ContextHeaders _headers;
         Guid? _messageId;
         Guid? _requestId;
         Uri _responseAddress;
@@ -94,9 +94,9 @@ namespace MassTransit
             get { return _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress)); }
         }
 
-        public Headers Headers
+        public ContextHeaders ContextHeaders
         {
-            get { return _headers ?? (_headers = new JsonMessageHeaders(_deserializer, _envelope.Headers)); }
+            get { return _headers ?? (_headers = new JsonMessageContextHeaders(_deserializer, _envelope.Headers)); }
         }
 
         public CancellationToken CancellationToken

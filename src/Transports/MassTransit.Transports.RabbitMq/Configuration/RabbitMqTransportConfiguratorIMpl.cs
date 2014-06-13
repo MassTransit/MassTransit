@@ -10,14 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Transports.RabbitMq.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using MassTransit.Configurators;
 
 
     public class RabbitMqTransportConfiguratorImpl :
-        RabbitMqTransportConfigurator
+        RabbitMqTransportConfigurator,
+        ITransportBuilder
     {
         readonly ITransportSelector _selector;
         readonly IList<RabbitMqHostSettings> _hosts;
@@ -55,6 +57,17 @@ namespace MassTransit
         public void OnPublish(Action<RabbitMqPublishContext> callback)
         {
             throw new NotImplementedException();
+        }
+
+        public IServiceBus Build()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            yield break;
+
         }
     }
 }

@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using Transports.RabbitMq.Configuration;
 
 
     public static class RabbitMqHostConfigurationExtensions

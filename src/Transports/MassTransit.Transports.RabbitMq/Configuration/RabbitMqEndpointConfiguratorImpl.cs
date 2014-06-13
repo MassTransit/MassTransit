@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using Transports.RabbitMq.Configuration;
+
+
     public class RabbitMqEndpointConfiguratorImpl :
         RabbitMqEndpointConfigurator
     {
@@ -48,6 +51,11 @@ namespace MassTransit
         public void Exclusive(bool exclusive = true)
         {
             _settings.Exclusive = exclusive;
+        }
+
+        public void ConcurrencyLimit(int limit)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

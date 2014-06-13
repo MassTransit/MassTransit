@@ -50,7 +50,7 @@ namespace MassTransit
         /// <summary>
         ///     Headers specific to the transport
         /// </summary>
-        Headers Headers { get; }
+        ContextHeaders ContextHeaders { get; }
 
         /// <summary>
         /// Notify that a message has been consumed from the received context

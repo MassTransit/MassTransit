@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    public interface Headers
+    public interface ContextHeaders
     {
         T Get<T>(string key, T defaultValue = default(T))
             where T : class;

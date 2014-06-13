@@ -12,8 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    public interface ITransportSelector
+    using Configurators;
+
+
+    public interface ITransportBuilder :
+        Configurator
     {
-        void SelectTransport(ITransportBuilder builder);
+        IServiceBus Build();
     }
 }
