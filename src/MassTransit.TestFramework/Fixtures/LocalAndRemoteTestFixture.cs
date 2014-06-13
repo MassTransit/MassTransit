@@ -16,9 +16,9 @@ namespace MassTransit.TestFramework.Fixtures
 	using BusConfigurators;
 	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Subscriptions.Coordinator;
 
-	[TestFixture]
+
+    [TestFixture]
 	public class LocalAndRemoteTestFixture<TTransportFactory> :
 		EndpointTestFixture<TTransportFactory>
 		where TTransportFactory : class, ITransportFactory, new()
@@ -28,9 +28,6 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			LocalBus = SetupServiceBus(LocalUri, ConfigureLocalBus);
 			RemoteBus = SetupServiceBus(RemoteUri, ConfigureRemoteBus);
-
-			_localLoopback.SetTargetCoordinator(_remoteLoopback.Router);
-			_remoteLoopback.SetTargetCoordinator(_localLoopback.Router);
 		}
 
 		[TestFixtureTearDown]
@@ -46,25 +43,12 @@ namespace MassTransit.TestFramework.Fixtures
 		protected IServiceBus LocalBus { get; private set; }
 		protected IServiceBus RemoteBus { get; private set; }
 
-		SubscriptionLoopback _localLoopback;
-		SubscriptionLoopback _remoteLoopback;
-
 		protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
 		{
-			configurator.AddSubscriptionObserver((bus, coordinator) =>
-				{
-					_localLoopback = new SubscriptionLoopback(bus, coordinator);
-					return _localLoopback;
-				});
 		}
 
 		protected virtual void ConfigureRemoteBus(ServiceBusConfigurator configurator)
 		{
-			configurator.AddSubscriptionObserver((bus, coordinator) =>
-				{
-					_remoteLoopback = new SubscriptionLoopback(bus, coordinator);
-					return _remoteLoopback;
-				});
 		}
 	}
 }

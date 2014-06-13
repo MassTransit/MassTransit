@@ -117,7 +117,7 @@ namespace MassTransit
         public static void UseRabbitMq(this ServiceBusConfigurator configurator,
             Action<RabbitMqTransportFactoryConfigurator> configureFactory)
         {
-            configurator.SetSubscriptionObserver((bus, coordinator) => new RabbitMqSubscriptionBinder(bus));
+//            configurator.SetSubscriptionObserver((bus, coordinator) => new RabbitMqSubscriptionBinder(bus));
 
             var busConfigurator = new PostCreateBusBuilderConfigurator(bus =>
                 {

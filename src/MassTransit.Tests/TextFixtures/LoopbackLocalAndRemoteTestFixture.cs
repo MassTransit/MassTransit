@@ -16,7 +16,6 @@ namespace MassTransit.Tests.TextFixtures
     using System.Collections.Generic;
     using BusConfigurators;
     using Magnum.Extensions;
-    using MassTransit.Subscriptions.Coordinator;
     using MassTransit.Transports.Loopback;
     using NUnit.Framework;
 
@@ -40,9 +39,6 @@ namespace MassTransit.Tests.TextFixtures
             LocalBus = ServiceBusFactory.New(ConfigureLocalBus);
 
             RemoteBus = ServiceBusFactory.New(ConfigureRemoteBus);
-
-            _localLoopback.SetTargetCoordinator(_remoteLoopback.Router);
-            _remoteLoopback.SetTargetCoordinator(_localLoopback.Router);
         }
 
         protected Dictionary<string, ServiceInstance> Instances { get; private set; }
@@ -52,19 +48,6 @@ namespace MassTransit.Tests.TextFixtures
         {
             var instance = new ServiceInstance(queueName, x =>
                 {
-                    x.AddSubscriptionObserver((bus, coordinator) =>
-                    {
-                        var loopback = new SubscriptionLoopback(bus, coordinator);
-                        loopback.SetTargetCoordinator(_localLoopback.Router);
-                        return loopback;
-                    });
-                    x.AddSubscriptionObserver((bus, coordinator) =>
-                    {
-                        var loopback = new SubscriptionLoopback(bus, coordinator);
-                        loopback.SetTargetCoordinator(_remoteLoopback.Router);
-                        return loopback;
-                    });
-
                     configureBus(x);
                 });
 
@@ -74,8 +57,6 @@ namespace MassTransit.Tests.TextFixtures
         }
 
 
-        SubscriptionLoopback _localLoopback;
-        SubscriptionLoopback _remoteLoopback;
         protected Uri LocalUri;
         protected Uri RemoteUri;
 
@@ -83,11 +64,6 @@ namespace MassTransit.Tests.TextFixtures
         {
             LocalUri = new Uri("loopback://localhost/mt_client");
             configurator.ReceiveFrom(LocalUri);
-            configurator.AddSubscriptionObserver((bus, coordinator) =>
-                {
-                    _localLoopback = new SubscriptionLoopback(bus, coordinator);
-                    return _localLoopback;
-                });
 
             foreach (ServiceInstance activityTestContext in Instances.Values)
                 activityTestContext.ConfigureServiceBus(configurator);
@@ -97,11 +73,6 @@ namespace MassTransit.Tests.TextFixtures
         {
             RemoteUri = new Uri("loopback://localhost/mt_server");
             configurator.ReceiveFrom(RemoteUri);
-            configurator.AddSubscriptionObserver((bus, coordinator) =>
-                {
-                    _remoteLoopback = new SubscriptionLoopback(bus, coordinator);
-                    return _remoteLoopback;
-                });
 
             foreach (ServiceInstance activityTestContext in Instances.Values)
                 activityTestContext.ConfigureServiceBus(configurator);

@@ -14,30 +14,22 @@ namespace MassTransit.Tests.TextFixtures
 {
     using System;
     using BusConfigurators;
-    using MassTransit.Subscriptions.Coordinator;
 
 
     public class ServiceInstance :
         IDisposable
     {
         volatile bool _disposed;
-        SubscriptionLoopback _loopback;
 
         public ServiceInstance(string name, Action<ServiceBusConfigurator> configurator)
         {
             DataBus = ServiceBusFactory.New(x =>
-                {
-                    x.ReceiveFrom(name);
-                    x.SetConcurrentConsumerLimit(5);
+            {
+                x.ReceiveFrom(name);
+                x.SetConcurrentConsumerLimit(5);
 
-                    x.AddSubscriptionObserver((bus, coordinator) =>
-                        {
-                            _loopback = new SubscriptionLoopback(bus, coordinator);
-                            return _loopback;
-                        });
-
-                    configurator(x);
-                });
+                configurator(x);
+            });
         }
 
         public IServiceBus DataBus { get; private set; }
@@ -49,12 +41,6 @@ namespace MassTransit.Tests.TextFixtures
 
         public void ConfigureServiceBus(ServiceBusConfigurator configurator)
         {
-            configurator.AddSubscriptionObserver((bus, coordinator) =>
-                {
-                    var loopback = new SubscriptionLoopback(bus, coordinator);
-                    loopback.SetTargetCoordinator(_loopback.Router);
-                    return loopback;
-                });
         }
 
         protected virtual void Dispose(bool disposing)
