@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Sinks
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Policies;
     using Util;
 
 
@@ -25,10 +26,10 @@ namespace MassTransit.Pipeline.Sinks
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
         readonly IPipe<ConsumeContext<TConsumer, TMessage>> _messageAdapter;
-        readonly IMessageRetryPolicy _retryPolicy;
+        readonly IRetryPolicy _retryPolicy;
 
         public ConsumerMessageFilter(IConsumerFactory<TConsumer> consumerFactory,
-            IConsumerMessageAdapter<TConsumer, TMessage> messageAdapter, IMessageRetryPolicy retryPolicy)
+            IConsumerMessageAdapter<TConsumer, TMessage> messageAdapter, IRetryPolicy retryPolicy)
         {
             _consumerFactory = consumerFactory;
             _messageAdapter = new LastPipe<ConsumeContext<TConsumer,TMessage>>(messageAdapter);

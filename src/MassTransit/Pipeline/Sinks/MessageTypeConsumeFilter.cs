@@ -21,26 +21,13 @@ namespace MassTransit.Pipeline.Sinks
     public class MessageTypeConsumeFilter :
         IConsumeFilter,
         IConsumeFilterConnector,
-        IConnectMessageInterceptor
+        IConsumeObserverConnector
     {
         readonly ConcurrentDictionary<Type, IConsumeFilter> _pipes;
 
         public MessageTypeConsumeFilter()
         {
             _pipes = new ConcurrentDictionary<Type, IConsumeFilter>();
-        }
-
-        public ConnectHandle Connect<T>(IMessageInterceptor<T> interceptor)
-            where T : class
-        {
-            if (interceptor == null)
-                throw new ArgumentNullException("interceptor");
-
-            IConnectMessageInterceptor messagePipe = GetPipe<T, IConnectMessageInterceptor>();
-
-            ConnectHandle handle = messagePipe.Connect(interceptor);
-
-            return handle;
         }
 
         public async Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
@@ -52,6 +39,27 @@ namespace MassTransit.Pipeline.Sinks
         public bool Inspect(IPipeInspector inspector)
         {
             return inspector.Inspect(this, (x, _) => _pipes.Values.All(pipe => pipe.Inspect(x)));
+        }
+
+        public ConnectHandle Connect<T>(params IFilter<ConsumeContext<T>>[] filters)
+            where T : class
+        {
+            IConsumeFilterConnector messagePipe = GetPipe<T, IConsumeFilterConnector>();
+
+            return messagePipe.Connect(filters);
+        }
+
+        public ConnectHandle Connect<T>(IConsumeObserver<T> observer)
+            where T : class
+        {
+            if (observer == null)
+                throw new ArgumentNullException("observer");
+
+            IConsumeObserverConnector messagePipe = GetPipe<T, IConsumeObserverConnector>();
+
+            ConnectHandle handle = messagePipe.Connect(observer);
+
+            return handle;
         }
 
         public ConnectHandle Connect<T>(IConsumeFilter<T> filter)

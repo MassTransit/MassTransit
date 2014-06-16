@@ -18,8 +18,6 @@ namespace MassTransit.Distributor
     using Magnum;
     using Magnum.Extensions;
     using Messages;
-    using Stact;
-    using Stact.Internal;
 
 //    public class Worker<TMessage> :
 //        IWorker<TMessage>,

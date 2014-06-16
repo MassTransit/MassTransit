@@ -16,11 +16,17 @@ namespace MassTransit
     using Pipeline;
 
 
-    public interface IFilter<T>
+    public class EmptyPipe<T> :
+        IPipe<T>
         where T : class, PipeContext
     {
-        Task Send(T context, IPipe<T> next);
+        public async Task Send(T context)
+        {
+        }
 
-        bool Inspect(IPipeInspector inspector);
+        public bool Inspect(IPipeInspector inspector)
+        {
+            return inspector.Inspect(this);
+        }
     }
 }

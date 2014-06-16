@@ -150,9 +150,6 @@ namespace MassTransit.Builders
 //            if (_settings.ConcurrentConsumerLimit > 0)
 //                bus.MaximumConsumerThreads = _settings.ConcurrentConsumerLimit;
 
-            if (_settings.ConcurrentReceiverLimit > 0)
-                bus.ConcurrentReceiveThreads = _settings.ConcurrentReceiverLimit;
-
             bus.ShutdownTimeout = _settings.ShutdownTimeout;
 //            ConfigureThreadPool(bus.MaximumConsumerThreads);
         }

@@ -18,6 +18,7 @@ namespace MassTransit.SubscriptionConfigurators
     using Configurators;
     using Magnum.Extensions;
     using Pipeline.Sinks;
+    using Policies;
     using SubscriptionBuilders;
 
 
@@ -29,7 +30,7 @@ namespace MassTransit.SubscriptionConfigurators
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-        public UntypedConsumerSubscriptionConfigurator(Func<Type, object> consumerFactory, IMessageRetryPolicy retryPolicy)
+        public UntypedConsumerSubscriptionConfigurator(Func<Type, object> consumerFactory, IRetryPolicy retryPolicy)
             : base(retryPolicy)
         {
             _consumerFactory =

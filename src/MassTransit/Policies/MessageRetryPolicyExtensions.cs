@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Policies
 {
     using System;
     using System.Threading.Tasks;
@@ -18,17 +18,17 @@ namespace MassTransit.Pipeline.Sinks
 
     public static class MessageRetryPolicyExtensions
     {
-        public static async Task Retry<T>(this IMessageRetryPolicy retryPolicy, ConsumeContext<T> context,
+        public static async Task Retry<T>(this IRetryPolicy retryPolicy, ConsumeContext<T> context,
             Func<ConsumeContext<T>, Task> retryMethod)
             where T : class
         {
-            using (IMessageRetryContext retryContext = retryPolicy.GetRetryContext(context))
+            using (IRetryContext retryContext = retryPolicy.GetRetryContext(context))
             {
                 await Attempt(retryContext, context, retryMethod);
             }
         }
 
-        static async Task Attempt<T>(IMessageRetryContext retryContext, ConsumeContext<T> context,
+        static async Task Attempt<T>(IRetryContext retryContext, ConsumeContext<T> context,
             Func<ConsumeContext<T>, Task> retryMethod)
             where T : class
         {

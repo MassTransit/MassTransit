@@ -13,7 +13,8 @@
 namespace MassTransit.SubscriptionConnectors
 {
     public interface IHandlerConnectorCache<T>
+        where T : class
     {
-        HandlerConnector Connector { get; }
+        HandlerConnector<T> Connector { get; }
     }
 }

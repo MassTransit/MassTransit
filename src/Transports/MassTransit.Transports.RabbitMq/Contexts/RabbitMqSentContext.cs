@@ -10,11 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Transports.RabbitMq.Contexts
 {
-    public interface IConnectMessageInterceptor
+    public class RabbitMqSentContext<T> :
+        SentContext<T>
+        where T : class
     {
-        ConnectHandle Connect<TMessage>(IMessageInterceptor<TMessage> interceptor)
-            where TMessage : class;
     }
 }

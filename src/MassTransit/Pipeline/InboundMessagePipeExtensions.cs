@@ -13,29 +13,39 @@
 namespace MassTransit.Pipeline
 {
     using System;
+    using Filters;
     using MassTransit.Configuration;
+    using Policies;
     using Sinks;
     using SubscriptionConnectors;
 
 
     public static class InboundMessagePipeExtensions
     {
-        public static ConnectHandle ConnectHandler<T>(this IInboundPipe filter, MessageHandler<T> handler,
-            IMessageRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectHandler<T>(this IInboundPipe filter, MessageHandler<T> handler)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.Connect(filter, handler, retryPolicy ?? Retry.None);
+            return HandlerConnectorCache<T>.Connector.Connect(filter, handler);
+        }
+
+        public static ConnectHandle ConnectHandler<T>(this IInboundPipe filter, MessageHandler<T> handler,
+            IRetryPolicy retryPolicy)
+            where T : class
+        {
+            var retryFilter = new RetryFilter<ConsumeContext<T>>(retryPolicy);
+
+            return HandlerConnectorCache<T>.Connector.Connect(filter, handler, retryFilter);
         }
 
         public static ConnectHandle ConnectConsumer<T>(this IInboundPipe filter,
-            IConsumerFactory<T> consumerFactory, IMessageRetryPolicy retryPolicy = null)
+            IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy = null)
             where T : class
         {
             return ConsumerConnectorCache<T>.Connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
         }
 
         public static ConnectHandle ConnectConsumer<T>(this IInboundPipe filter,
-            IMessageRetryPolicy retryPolicy = null)
+            IRetryPolicy retryPolicy = null)
             where T : class, new()
         {
             var consumerFactory = new DefaultConstructorAsyncConsumerFactory<T>();
@@ -46,7 +56,7 @@ namespace MassTransit.Pipeline
         }
 
         public static ConnectHandle ConnectConsumer<T>(this IInboundPipe filter, Func<T> factoryMethod,
-            IMessageRetryPolicy retryPolicy = null)
+            IRetryPolicy retryPolicy = null)
             where T : class
         {
             var consumerFactory = new DelegateConsumerFactory<T>(factoryMethod);
@@ -57,7 +67,7 @@ namespace MassTransit.Pipeline
         }
 
         public static ConnectHandle ConnectInstance<T>(this IInboundPipe filter,
-            T instance, IMessageRetryPolicy retryPolicy = null)
+            T instance, IRetryPolicy retryPolicy = null)
             where T : class
         {
             return InstanceConnectorCache<T>.Connector.Connect(filter, instance, retryPolicy ?? Retry.None);

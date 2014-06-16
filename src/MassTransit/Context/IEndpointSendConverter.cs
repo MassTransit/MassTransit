@@ -12,14 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-    using System;
     using System.Threading.Tasks;
+    using Pipeline;
 
 
     public interface IEndpointSendConverter
     {
-        Task<SentContext> Send(ISendToEndpoint endpoint, object message);
-        Task<SentContext> Send(ISendToEndpoint endpoint, object message, Action<SendContext> callback);
-        Task<SentContext> Send(ISendToEndpoint endpoint, object message, Func<SendContext, Task<SendContext>> callback);
+        Task Send(ISendToEndpoint endpoint, object message);
+        Task Send(ISendToEndpoint endpoint, object message, ISendPipe pipe);
     }
 }

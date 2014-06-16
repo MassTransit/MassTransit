@@ -12,14 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Distributor
 {
+    using System;
     using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Load;
     using Load.Messages;
     using Magnum.Extensions;
     using MassTransit.Distributor.Messages;
     using MassTransit.Pipeline.Inspectors;
     using NUnit.Framework;
-    using Stact;
     using TestFramework;
 
     [TestFixture]
@@ -66,15 +68,15 @@ namespace MassTransit.Tests.Distributor
         }
 
         [Test, Explicit]
-        public void Using_the_load_generator_should_share_the_load()
+        public async void Using_the_load_generator_should_share_the_load()
         {
-            Fiber thread1 = new ThreadFiber();
-            thread1.Add(() => {
-                    var generator1 = new LoadGenerator<FirstCommand, FirstResponse>();
-                    generator1.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
-                });
+            await Task.Run(() =>
+            {
+                var generator1 = new LoadGenerator<FirstCommand, FirstResponse>();
+                generator1.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100,
+                    x => new FirstCommand(x));
 
-            thread1.Shutdown(3.Minutes());
+            }, new CancellationTokenSource(TimeSpan.FromSeconds(3)).Token);
         }
 
         [Test, Explicit]
@@ -106,24 +108,23 @@ namespace MassTransit.Tests.Distributor
         }
 
         [Test, Explicit]
-        public void Using_the_load_generator_should_share_the_load()
+        public async void Using_the_load_generator_should_share_the_load()
         {
-            Fiber thread1 = new ThreadFiber();
-            thread1.Add(() =>
+            var source = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+
+            var task1 = Task.Run(() =>
                 {
                     var generator1 = new LoadGenerator<FirstCommand, FirstResponse>();
                     generator1.Run(RemoteBus, RemoteBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
-                });
+                }, source.Token);
 
-            Fiber thread2 = new ThreadFiber();
-            thread2.Add(() =>
+            var task2 = Task.Run(() =>
                 {
                     var generator2 = new LoadGenerator<FirstCommand, FirstResponse>();
                     generator2.Run(RemoteBus, LocalBus.Endpoint, Instances.Values.Select(x => x.DataBus), 100, x => new FirstCommand(x));
-                });
+                }, source.Token);
 
-            thread1.Shutdown(3.Minutes());
-            thread2.Shutdown(3.Minutes());
+            await Task.WhenAll(task1, task2);
         }
     }
 }

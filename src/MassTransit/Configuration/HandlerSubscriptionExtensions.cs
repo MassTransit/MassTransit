@@ -15,6 +15,7 @@ namespace MassTransit
 	using System;
 	using Pipeline;
 	using Pipeline.Sinks;
+	using Policies;
 	using SubscriptionConfigurators;
 	using SubscriptionConnectors;
 
@@ -30,7 +31,7 @@ namespace MassTransit
 	    /// <param name="retryPolicy"></param>
 	    /// <returns></returns>
 	    public static HandlerSubscriptionConfigurator<T> Handler<T>(this SubscriptionBusServiceConfigurator configurator,
-                                                                    MessageHandler<T> handler, IMessageRetryPolicy retryPolicy = null)
+                                                                    MessageHandler<T> handler, IRetryPolicy retryPolicy = null)
 			where T : class
 		{
 			var handlerConfigurator = new HandlerSubscriptionConfiguratorImpl<T>(handler, retryPolicy ?? Retry.None);

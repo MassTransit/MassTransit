@@ -34,11 +34,7 @@ namespace MassTransit.Configuration
 
         TimeSpan ShutdownTimeout { get; }
 
-		int ConcurrentReceiverLimit { get; }
-
 		int ConcurrentConsumerLimit { get; }
-
-		string Network { get; }
 
 	    bool EnablePerformanceCounters { get; }
 	}

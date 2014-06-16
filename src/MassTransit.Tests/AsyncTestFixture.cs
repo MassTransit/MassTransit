@@ -15,6 +15,7 @@ namespace MassTransit.Tests
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Sinks;
     using NUnit.Framework;
     using Pipeline;
@@ -54,10 +55,10 @@ namespace MassTransit.Tests
             return new TestConsumeContext<T>(message);
         }
 
-        protected TestMessageInterceptor<T> GetMessageInterceptor<T>()
+        protected TestObserver<T> GetMessageInterceptor<T>()
             where T : class
         {
-            return new TestMessageInterceptor<T>(GetTask<T>(), GetTask<T>(), GetTask<T>());
+            return new TestObserver<T>(GetTask<T>(), GetTask<T>(), GetTask<T>());
         }
         protected OneMessageConsumer GetOneMessageConsumer()
         {
@@ -77,15 +78,15 @@ namespace MassTransit.Tests
     }
 
 
-    public class TestMessageInterceptor<T> :
-        IMessageInterceptor<T>
+    public class TestObserver<T> :
+        IConsumeObserver<T>
         where T : class
     {
         readonly TaskCompletionSource<T> _preDispatched;
         readonly TaskCompletionSource<T> _postDispatched;
         readonly TaskCompletionSource<T> _dispatchFaulted;
 
-        public TestMessageInterceptor(TaskCompletionSource<T> preDispatched, TaskCompletionSource<T> postDispatched, TaskCompletionSource<T> dispatchFaulted)
+        public TestObserver(TaskCompletionSource<T> preDispatched, TaskCompletionSource<T> postDispatched, TaskCompletionSource<T> dispatchFaulted)
         {
             _preDispatched = preDispatched;
             _postDispatched = postDispatched;
@@ -107,17 +108,17 @@ namespace MassTransit.Tests
             get { return _dispatchFaulted.Task; }
         }
 
-        async Task IMessageInterceptor<T>.PreDispatch(ConsumeContext<T> context)
+        async Task IConsumeObserver<T>.PreDispatch(ConsumeContext<T> context)
         {
             _preDispatched.TrySetResult(context.Message);
         }
 
-        async Task IMessageInterceptor<T>.PostDispatch(ConsumeContext<T> context)
+        async Task IConsumeObserver<T>.PostDispatch(ConsumeContext<T> context)
         {
             _postDispatched.TrySetResult(context.Message);
         }
 
-        async Task IMessageInterceptor<T>.DispatchFaulted(ConsumeContext<T> context, Exception exception)
+        async Task IConsumeObserver<T>.DispatchFaulted(ConsumeContext<T> context, Exception exception)
         {
             _dispatchFaulted.TrySetException(exception);
         }

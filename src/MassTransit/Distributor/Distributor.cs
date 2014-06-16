@@ -20,8 +20,6 @@ namespace MassTransit.Distributor
     using Magnum.Caching;
     using Magnum.Extensions;
     using Messages;
-    using Stact;
-    using Stact.Internal;
 
 //    public class Distributor<TMessage> 
 //        where TMessage : class

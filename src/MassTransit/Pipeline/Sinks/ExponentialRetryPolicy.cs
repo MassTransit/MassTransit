@@ -15,10 +15,11 @@ namespace MassTransit.Pipeline.Sinks
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Policies;
 
 
-    public class ExponentialMessageRetryPolicy :
-        IMessageRetryPolicy
+    public class ExponentialRetryPolicy :
+        IRetryPolicy
     {
         readonly IRetryExceptionFilter _filter;
         readonly int _highInterval;
@@ -27,7 +28,7 @@ namespace MassTransit.Pipeline.Sinks
         readonly int _minInterval;
         readonly int _retryLimit;
 
-        public ExponentialMessageRetryPolicy(IRetryExceptionFilter filter, int retryLimit, TimeSpan minInterval,
+        public ExponentialRetryPolicy(IRetryExceptionFilter filter, int retryLimit, TimeSpan minInterval,
             TimeSpan maxInterval, TimeSpan intervalDelta)
         {
             _filter = filter;
@@ -39,10 +40,10 @@ namespace MassTransit.Pipeline.Sinks
             _highInterval = (int)(intervalDelta.TotalMilliseconds * 1.2);
         }
 
-        public IMessageRetryContext GetRetryContext<T>(ConsumeContext<T> context)
+        public IRetryContext GetRetryContext<T>(T context)
             where T : class
         {
-            return new IntervalMessageRetryContext(this, GetIntervals().ToArray());
+            return new IntervalRetryContext(this, GetIntervals().ToArray());
         }
 
         public bool CanRetry(Exception exception)

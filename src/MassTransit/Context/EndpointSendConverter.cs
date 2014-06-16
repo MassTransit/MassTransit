@@ -15,62 +15,41 @@ namespace MassTransit.Context
     using System;
     using System.Threading.Tasks;
     using Magnum.Extensions;
+    using Pipeline;
 
 
-    public class EndpointSendConverter<TMessage> :
+    public class EndpointSendConverter<T> :
         IEndpointSendConverter
-        where TMessage : class
+        where T : class
     {
-        public async Task<SentContext> Send(ISendToEndpoint endpoint, object message)
+        public async Task Send(ISendToEndpoint endpoint, object message)
         {
             if (endpoint == null)
                 throw new ArgumentNullException("endpoint");
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            var msg = message as TMessage;
+            var msg = message as T;
             if (msg == null)
                 throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
 
-            return await endpoint.Send(msg);
+            await endpoint.Send(msg);
         }
 
-        public async Task<SentContext> Send(ISendToEndpoint endpoint, object message, Action<SendContext> callback)
+        public async Task Send(ISendToEndpoint endpoint, object message, ISendPipe pipe)
         {
             if (endpoint == null)
                 throw new ArgumentNullException("endpoint");
             if (message == null)
                 throw new ArgumentNullException("message");
-            if (callback == null)
-                throw new ArgumentNullException("callback");
+            if (pipe == null)
+                throw new ArgumentNullException("pipe");
 
-            var msg = message as TMessage;
+            var msg = message as T;
             if (msg == null)
                 throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
 
-            return await endpoint.Send(msg, context => callback(context));
-        }
-
-        public async Task<SentContext> Send(ISendToEndpoint endpoint, object message,
-            Func<SendContext, Task<SendContext>> callback)
-        {
-            if (endpoint == null)
-                throw new ArgumentNullException("endpoint");
-            if (message == null)
-                throw new ArgumentNullException("message");
-            if (callback == null)
-                throw new ArgumentNullException("callback");
-
-            var msg = message as TMessage;
-            if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
-
-            return await endpoint.Send(msg, async context =>
-            {
-                await callback(context);
-
-                return context;
-            });
+            await endpoint.Send(msg, pipe);
         }
     }
 }

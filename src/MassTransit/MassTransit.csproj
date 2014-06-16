@@ -70,9 +70,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Stact">
-      <HintPath>..\packages\Stact.1.1.2\lib\NET40\Stact.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core">
@@ -112,7 +109,7 @@
     <Compile Include="Configuration\SubscriptionConnectors\HandlerConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\IConsumerConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\IHandlerConnectorCache.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\HandlerConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\HandlerConnectorImpl.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\IInstanceConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceMessageConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageConnectorFactory.cs" />
@@ -124,6 +121,7 @@
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="ConsumeContextExtensions.cs" />
     <Compile Include="ConsumeContextTuple.cs" />
+    <Compile Include="EmptyPipe.cs" />
     <Compile Include="IConsumePipe.cs" />
     <Compile Include="ConsumerFactoryCallback.cs" />
     <Compile Include="ConsumerFactoryInterceptor.cs" />
@@ -161,56 +159,64 @@
     <Compile Include="NewId\NewIdProviders\BestPossibleWorkerIdProvider.cs" />
     <Compile Include="NewId\NewIdProviders\HostNameSHA1WorkerIdProvider.cs" />
     <Compile Include="NewId\NewIdProviders\WMINetworkAddressWorkerIdProvider.cs" />
-    <Compile Include="IFilter.cs" />
+    <Compile Include="FilterPipe.cs" />
     <Compile Include="PipeContext.cs" />
+    <Compile Include="Pipeline\DelegateFilter.cs" />
+    <Compile Include="Pipeline\FilterConnectorExtensions.cs" />
+    <Compile Include="Pipeline\Filters\RetryFilter.cs" />
     <Compile Include="Pipeline\IConsumeEnricher.cs" />
     <Compile Include="Pipeline\IConsumeFilter.cs" />
     <Compile Include="Pipeline\HandlerHolder.cs" />
     <Compile Include="Pipeline\ConnectHandle.cs" />
+    <Compile Include="Pipeline\IConsumeFilterConnector.cs" />
+    <Compile Include="Pipeline\IConsumeObserver.cs" />
+    <Compile Include="Pipeline\IConsumeObserverConnector.cs" />
+    <Compile Include="Pipeline\IFilter.cs" />
     <Compile Include="Pipeline\IPipe.cs" />
     <Compile Include="Pipeline\IPipeInspector.cs" />
     <Compile Include="Pipeline\IInboundPipe.cs" />
     <Compile Include="Pipeline\InboundPipe.cs" />
     <Compile Include="Pipeline\InboundMessagePipeExtensions.cs" />
+    <Compile Include="Pipeline\IReceivePipe.cs" />
+    <Compile Include="Pipeline\ISendInterceptor.cs" />
+    <Compile Include="Pipeline\ISendPipe.cs" />
+    <Compile Include="Pipeline\PipeExtensions.cs" />
     <Compile Include="Pipeline\PipeInspectorBase.cs" />
     <Compile Include="Pipeline\PipeInspectorCallback.cs" />
     <Compile Include="Pipeline\ISendFilter.cs" />
     <Compile Include="Pipeline\Sinks\ConsumerMessageFilter.cs" />
-    <Compile Include="Pipeline\Sinks\ExponentialMessageRetryPolicy.cs" />
+    <Compile Include="Pipeline\Sinks\ExponentialRetryPolicy.cs" />
     <Compile Include="Pipeline\Sinks\FilterRetryExceptionFilter.cs" />
     <Compile Include="Pipeline\Sinks\HandlerMessageFilter.cs" />
-    <Compile Include="Pipeline\Sinks\IConnectMessageInterceptor.cs" />
-    <Compile Include="Pipeline\Sinks\IConsumeFilterConnector.cs" />
     <Compile Include="Pipeline\Sinks\IConnectPipeById.cs" />
     <Compile Include="Pipeline\Sinks\IConsumerMessageAdapter.cs" />
     <Compile Include="Pipeline\Sinks\DefaultConstructorAsyncConsumerFactory.cs" />
     <Compile Include="Pipeline\Sinks\Connectable.cs" />
-    <Compile Include="Pipeline\Sinks\IMessageInterceptor.cs" />
-    <Compile Include="Pipeline\Sinks\IMessageRetryContext.cs" />
-    <Compile Include="Pipeline\Sinks\IMessageRetryPolicy.cs" />
-    <Compile Include="Pipeline\Sinks\ImmediateMessageRetryPolicy.cs" />
-    <Compile Include="Pipeline\Sinks\IncrementalMessageRetryPolicy.cs" />
     <Compile Include="Pipeline\Sinks\InstanceConsumerFactory.cs" />
     <Compile Include="Pipeline\Sinks\InstanceMessageFilter.cs" />
-    <Compile Include="Pipeline\Sinks\IntervalMessageRetryContext.cs" />
-    <Compile Include="Pipeline\Sinks\IntervalMessageRetryPolicy.cs" />
-    <Compile Include="Pipeline\Sinks\IRetryExceptionFilter.cs" />
     <Compile Include="Pipeline\Sinks\KeyAccessor.cs" />
     <Compile Include="Pipeline\Sinks\KeyedConsumeContextPipe.cs" />
     <Compile Include="Pipeline\Sinks\LegacyContextMethodConsumerMessageAdapter.cs" />
     <Compile Include="Pipeline\Sinks\LegacyMethodConsumerMessageAdapter.cs" />
     <Compile Include="Pipeline\Sinks\MessageConsumeFilter.cs" />
-    <Compile Include="Pipeline\Sinks\MessageInterceptorConnectable.cs" />
-    <Compile Include="Pipeline\Sinks\MessageRetryPolicyExtensions.cs" />
+    <Compile Include="Pipeline\Sinks\ObserverConnectable.cs" />
     <Compile Include="Pipeline\Sinks\MessageTypeConsumeFilter.cs" />
     <Compile Include="Pipeline\Sinks\MethodConsumerMessageAdapter.cs" />
-    <Compile Include="Pipeline\Sinks\NoRetryPolicy.cs" />
-    <Compile Include="Pipeline\Sinks\Retry.cs" />
-    <Compile Include="Pipeline\Sinks\RetryAllRetryExceptionFilter.cs" />
-    <Compile Include="Pipeline\Sinks\RetryExceptRetryExceptionFilter.cs" />
-    <Compile Include="Pipeline\Sinks\RetrySelectedRetryExceptionFilter.cs" />
     <Compile Include="Pipeline\Sinks\TeeConsumeContextPipe.cs" />
     <Compile Include="Pipeline\StringPipeInspector.cs" />
+    <Compile Include="Policies\IRetryContext.cs" />
+    <Compile Include="Policies\IRetryPolicy.cs" />
+    <Compile Include="Policies\ImmediateRetryPolicy.cs" />
+    <Compile Include="Policies\IncrementalRetryPolicy.cs" />
+    <Compile Include="Policies\IntervalRetryContext.cs" />
+    <Compile Include="Policies\IntervalRetryPolicy.cs" />
+    <Compile Include="Policies\IRetryExceptionFilter.cs" />
+    <Compile Include="Policies\MessageRetryPolicyExtensions.cs" />
+    <Compile Include="Policies\NoRetryPolicy.cs" />
+    <Compile Include="Policies\Retry.cs" />
+    <Compile Include="Policies\RetryAllRetryExceptionFilter.cs" />
+    <Compile Include="Policies\RetryExceptRetryExceptionFilter.cs" />
+    <Compile Include="Policies\RetrySelectedRetryExceptionFilter.cs" />
     <Compile Include="ReceiveContext.cs" />
     <Compile Include="SendContext.cs" />
     <Compile Include="SentContext.cs" />
@@ -357,7 +363,6 @@
     <Compile Include="Context\HttpContextContextStorageProvider.cs" />
     <Compile Include="Diagnostics\Introspection\DiagnosticsProbe.cs" />
     <Compile Include="Diagnostics\Introspection\DiagnosticsSource.cs" />
-    <Compile Include="Diagnostics\TracingExtensions.cs" />
     <Compile Include="Diagnostics\Tracing\GetMessageTraceList.cs" />
     <Compile Include="Diagnostics\Introspection\InMemoryDiagnosticsProbe.cs" />
     <Compile Include="Diagnostics\Tracing\MessageTraceBusService.cs" />
@@ -773,7 +778,6 @@
     <Compile Include="Distributor\DistributorConfigurators\SagaDistributorConfigurator.cs" />
     <Compile Include="EndpointAddress.cs" />
     <Compile Include="Events\MessagePublished.cs" />
-    <Compile Include="Events\ReceiverQueued.cs" />
     <Compile Include="Events\ThreadPoolEvent.cs" />
     <Compile Include="Exceptions\AbstractUriException.cs" />
     <Compile Include="Exceptions\TransportException.cs" />
@@ -948,6 +952,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

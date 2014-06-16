@@ -14,24 +14,10 @@ namespace MassTransit.Advanced
 {
 	using System;
 	using System.Collections.Generic;
-	using BusConfigurators;
 
-	public static class AdvancedBusConfiguratorExtensions
+
+    public static class AdvancedBusConfiguratorExtensions
 	{
-		/// <summary>
-		/// Sets the number of concurrent receive threads that can execute simultaneously. In many cases, such as when
-		/// using non-transactional transports, this can lead to very-bad-things(TM)
-		/// </summary>
-		/// <param name="configurator"></param>
-		/// <param name="concurrentReceiverLimit"></param>
-		public static void SetConcurrentReceiverLimit(this ServiceBusConfigurator configurator, int concurrentReceiverLimit)
-		{
-			var controlBusConfigurator =
-				new PostCreateBusBuilderConfigurator(bus => { bus.ConcurrentReceiveThreads = concurrentReceiverLimit; });
-
-			configurator.AddBusConfigurator(controlBusConfigurator);
-		}
-
 	    public static UnsubscribeAction CombineSubscriptions<T>(this IEnumerable<T> source, Func<T, UnsubscribeAction> map)
 	    {
 	        UnsubscribeAction result = null;

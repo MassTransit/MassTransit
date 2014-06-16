@@ -23,7 +23,6 @@ namespace MassTransit.Context
 	using Exceptions;
 	using Logging;
 	using Magnum;
-	using Stact;
 
 	/// <summary>
 	/// The context keeps track of some statistics about the consumption
@@ -39,7 +38,6 @@ namespace MassTransit.Context
 
 		readonly IServiceBus _bus;
 
-		readonly UntypedChannel _eventChannel;
 		readonly TimeSpan _receiveTimeout;
 		IEnumerator<Action<IConsumeContext>> _consumers;
 
@@ -61,10 +59,9 @@ namespace MassTransit.Context
 		/// <param name="bus">The Service Bus instance</param>
 		/// <param name="eventChannel">The Event Channel to broadcast timing information on</param>
 		/// <param name="receiveTimeout">The receive timeout</param>
-		public ServiceBusReceiveContext(IServiceBus bus, UntypedChannel eventChannel, TimeSpan receiveTimeout)
+		public ServiceBusReceiveContext(IServiceBus bus, TimeSpan receiveTimeout)
 		{
 			_bus = bus;
-			_eventChannel = eventChannel;
 			_receiveTimeout = receiveTimeout;
 			_receiveTime = new Stopwatch();
 			_consumeTime = new Stopwatch();
@@ -119,11 +116,6 @@ namespace MassTransit.Context
 			{
 				_log.Error("Consumer Exception Exposed", ex);
 			}
-			finally
-			{
-				NotifyReceiveCompleted();
-				NotifyConsumeCompleted();
-			}
 		}
 
 		/// <summary>
@@ -142,8 +134,6 @@ namespace MassTransit.Context
 		{
 			try
 			{
-				NotifyReceiveCompleted();
-
 				_receiveTime.Stop();
 				_consumeTime.Start();
 
@@ -186,53 +176,7 @@ namespace MassTransit.Context
 
 				_consumers.Dispose();
 				_consumers = null;
-
-				ReportConsumerTime(_startTime, _receiveTime.Elapsed, _consumeTime.Elapsed, context);
-				ReportConsumerCount(context, _consumeCount);
 			}
-		}
-
-		void ReportConsumerTime(DateTime startTime, TimeSpan receiveDuration, TimeSpan consumeDuration,
-		                        IReceiveContext context)
-		{
-			var message = new MessageReceived
-				{
-					Context = context,
-					ReceivedAt = startTime,
-					ReceiveDuration = receiveDuration,
-					ConsumeDuration = consumeDuration,
-				};
-
-			_eventChannel.Send(message);
-		}
-
-		void ReportConsumerCount(IConsumeContext context, int count)
-		{
-			var message = new MessageConsumed
-				{
-					Context = context,
-					ConsumeCount = count,
-				};
-
-			_eventChannel.Send(message);
-		}
-
-		void NotifyReceiveCompleted()
-		{
-			if (_receiveNotified)
-				return;
-
-			_eventChannel.Send(new ReceiveCompleted());
-			_receiveNotified = true;
-		}
-
-		void NotifyConsumeCompleted()
-		{
-			if (_consumeNotified)
-				return;
-
-			_eventChannel.Send(new ConsumeCompleted());
-			_consumeNotified = true;
 		}
 	}
 }

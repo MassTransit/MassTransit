@@ -31,21 +31,20 @@ namespace MassTransit.Pipeline
             return _filter.Send(context, Cache.EndPipe);
         }
 
-        public ConnectHandle Connect<T>(IConsumeFilter<T> filter)
-            where T : class
-        {
-            return _filter.Connect(filter);
-        }
-
-        public ConnectHandle Connect<TMessage>(IMessageInterceptor<TMessage> interceptor)
+        public ConnectHandle Connect<TMessage>(IConsumeObserver<TMessage> observer)
             where TMessage : class
         {
-            return _filter.Connect(interceptor);
+            return _filter.Connect(observer);
         }
 
         public bool Inspect(IPipeInspector inspector)
         {
             return _filter.Inspect(inspector);
+        }
+
+        public ConnectHandle Connect<T>(params IFilter<ConsumeContext<T>>[] filters) where T : class
+        {
+            return _filter.Connect(filters);
         }
 
 

@@ -14,7 +14,10 @@ namespace MassTransit.Pipeline
 {
     using System.Threading.Tasks;
 
-
+    /// <summary>
+    /// Pushes T to the left of the consume context, making both values available via the context
+    /// </summary>
+    /// <typeparam name="T">The enriched type</typeparam>
     public interface IConsumeEnricher<out T>
         where T : class
     {

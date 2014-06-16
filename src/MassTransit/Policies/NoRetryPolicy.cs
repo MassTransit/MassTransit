@@ -10,22 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Policies
 {
     using System;
 
 
     public class NoRetryPolicy :
-        IMessageRetryPolicy
+        IRetryPolicy
     {
-        readonly IMessageRetryContext _retryContext;
+        readonly IRetryContext _retryContext;
 
         public NoRetryPolicy()
         {
             _retryContext = new NoRetryContext();
         }
 
-        public IMessageRetryContext GetRetryContext<T>(ConsumeContext<T> context)
+        public IRetryContext GetRetryContext<T>(T context)
             where T : class
         {
             return _retryContext;
@@ -38,7 +38,7 @@ namespace MassTransit.Pipeline.Sinks
 
 
         class NoRetryContext :
-            IMessageRetryContext
+            IRetryContext
         {
             public bool CanRetry(Exception exception, out TimeSpan delay)
             {

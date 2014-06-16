@@ -13,6 +13,7 @@
 namespace MassTransit.SubscriptionConfigurators
 {
     using Pipeline.Sinks;
+    using Policies;
     using Subscriptions;
 
 
@@ -21,14 +22,14 @@ namespace MassTransit.SubscriptionConfigurators
         where TInterface : class, SubscriptionConfigurator<TInterface>
     {
         ReferenceFactory _referenceFactory;
-        IMessageRetryPolicy _retryPolicy;
+        IRetryPolicy _retryPolicy;
 
         protected SubscriptionConfiguratorImpl()
             : this(Retry.None)
         {
         }
 
-        protected SubscriptionConfiguratorImpl(IMessageRetryPolicy retryPolicy)
+        protected SubscriptionConfiguratorImpl(IRetryPolicy retryPolicy)
         {
             Permanent();
             _retryPolicy = Retry.None;
@@ -39,7 +40,7 @@ namespace MassTransit.SubscriptionConfigurators
             get { return _referenceFactory; }
         }
 
-        protected IMessageRetryPolicy RetryPolicy
+        protected IRetryPolicy RetryPolicy
         {
             get { return _retryPolicy; }
         }
@@ -65,7 +66,7 @@ namespace MassTransit.SubscriptionConfigurators
             return this as TInterface;
         }
 
-        public TInterface SetRetryPolicy(IMessageRetryPolicy retryPolicy)
+        public TInterface SetRetryPolicy(IRetryPolicy retryPolicy)
         {
             _retryPolicy = retryPolicy ?? Retry.None;
 

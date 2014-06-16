@@ -79,9 +79,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
     </Reference>
-    <Reference Include="Stact">
-      <HintPath>..\Packages\Stact.1.1.2\lib\NET40\Stact.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
     </Reference>

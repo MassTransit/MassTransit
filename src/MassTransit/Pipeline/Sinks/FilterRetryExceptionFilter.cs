@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Sinks
 {
     using System;
+    using Policies;
 
 
     public class FilterRetryExceptionFilter<T> :

@@ -14,31 +14,36 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
+    using Pipeline;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
 
-
+    /// <summary>
+    /// Receives messages from RabbitMQ, pushing them to the InboundPipe of the service endpoint.
+    /// </summary>
     public class RabbitMqBasicConsumer :
         IBasicConsumer
     {
         readonly Uri _inputAddress;
         readonly IModel _model;
-        readonly ConcurrentDictionary<ulong, Task> _pending;
-        readonly Func<ReceiveContext, Task> _taskFactory;
+        readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
+        readonly IReceivePipe _receivePipe;
         string _consumerTag;
 
         int _current;
         int _max;
 
 
-        public RabbitMqBasicConsumer(IModel model, Uri inputAddress, Func<ReceiveContext, Task> taskFactory)
+        public RabbitMqBasicConsumer(IModel model, Uri inputAddress, IReceivePipe receivePipe)
         {
             _model = model;
-            _taskFactory = taskFactory;
             _inputAddress = inputAddress;
-            _pending = new ConcurrentDictionary<ulong, Task>();
+            _receivePipe = receivePipe;
+            _pending = new ConcurrentDictionary<ulong, RabbitMqReceiveContext>();
         }
 
         public void HandleBasicConsumeOk(string consumerTag)
@@ -48,12 +53,16 @@ namespace MassTransit.Transports.RabbitMq
 
         public void HandleBasicCancelOk(string consumerTag)
         {
-            Console.WriteLine("CancelOk: {0}", consumerTag);
         }
 
         public void HandleBasicCancel(string consumerTag)
         {
-            Console.WriteLine("Cancel: {0}", consumerTag);
+            foreach (var context in _pending.Values)
+            {
+                context.Cancel();
+            }
+
+            // TODO notify serviceEndpoint that the consumer must be rebuilt and reconnected to RMQ
         }
 
         public void HandleModelShutdown(IModel model, ShutdownEventArgs reason)
@@ -75,7 +84,12 @@ namespace MassTransit.Transports.RabbitMq
                 var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, _inputAddress, deliveryTag,
                     body, redelivered, properties);
 
-                await _taskFactory(context);
+                if (!_pending.TryAdd(deliveryTag, context))
+                {
+                    // should not happen, duplicate delivery tag??
+                }
+
+                await _receivePipe.Send(context);
 
                 _model.BasicAck(deliveryTag, false);
             }
@@ -86,6 +100,10 @@ namespace MassTransit.Transports.RabbitMq
             finally
             {
                 Interlocked.Decrement(ref _current);
+
+                RabbitMqReceiveContext ignored;
+                _pending.TryRemove(deliveryTag, out ignored);
+
             }
         }
 
