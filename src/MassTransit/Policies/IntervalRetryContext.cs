@@ -10,19 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Policies
 {
     using System;
 
 
-    public class IntervalMessageRetryContext :
-        IMessageRetryContext
+    public class IntervalRetryContext :
+        IRetryContext
     {
         readonly TimeSpan[] _delays;
-        readonly IMessageRetryPolicy _policy;
+        readonly IRetryPolicy _policy;
         int _retryNumber;
 
-        public IntervalMessageRetryContext(IMessageRetryPolicy policy, TimeSpan[] delays)
+        public IntervalRetryContext(IRetryPolicy policy, TimeSpan[] delays)
         {
             _policy = policy;
             _delays = delays;

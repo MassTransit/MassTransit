@@ -16,6 +16,7 @@ namespace MassTransit.SubscriptionConnectors
     using Pipeline;
     using Pipeline.Configuration;
     using Pipeline.Sinks;
+    using Policies;
 
 
     public class ContextInstanceSubscriptionConnector<TConsumer, TMessage> :
@@ -28,7 +29,7 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect(IInboundPipe filter, object instance, IMessageRetryPolicy retryPolicy)
+        public ConnectHandle Connect(IInboundPipe filter, object instance, IRetryPolicy retryPolicy)
         {
             throw new NotImplementedException();
         }

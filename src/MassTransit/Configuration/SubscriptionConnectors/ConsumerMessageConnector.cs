@@ -15,6 +15,7 @@ namespace MassTransit.SubscriptionConnectors
     using System;
     using Pipeline;
     using Pipeline.Sinks;
+    using Policies;
     using Util;
 
 
@@ -42,8 +43,7 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect<T>(IInboundPipe filter, IConsumerFactory<T> consumerFactory,
-            IMessageRetryPolicy retryPolicy)
+        public ConnectHandle Connect<T>(IInboundPipe inboundPipe, IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy)
             where T : class
         {
             var factory = consumerFactory as IConsumerFactory<TConsumer>;
@@ -53,9 +53,9 @@ namespace MassTransit.SubscriptionConnectors
                                             + TypeMetadataCache<T>.ShortName);
             }
 
-            var messagePipe = new ConsumerMessageFilter<TConsumer, TMessage>(factory, _adapter, retryPolicy);
+            var filter = new ConsumerMessageFilter<TConsumer, TMessage>(factory, _adapter, retryPolicy);
 
-            return filter.Connect(messagePipe);
+            return inboundPipe.Connect(filter);
         }
     }
 }

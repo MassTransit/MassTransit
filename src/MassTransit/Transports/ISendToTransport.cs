@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
     using System.Threading.Tasks;
+    using Pipeline;
 
 
     public interface ISendToTransport
@@ -26,9 +26,9 @@ namespace MassTransit.Transports
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="message">The message</param>
-        /// <param name="callback">The callback to modify the SendContext</param>
+        /// <param name="pipe"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<SentContext<T>> Send<T>(T message, Func<SendContext<T>, Task<SendContext<T>>> callback)
+        Task Send<T>(T message, ISendPipe<T> pipe)
             where T : class;
     }
 }

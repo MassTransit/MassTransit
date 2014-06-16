@@ -17,9 +17,6 @@ namespace MassTransit.Distributor
     using Magnum.Caching;
     using Magnum.Extensions;
     using MassTransit.Pipeline;
-    using Stact;
-    using Stact.Executors;
-    using Stact.Internal;
     using Subscriptions;
     using WorkerConnectors;
 
@@ -30,8 +27,6 @@ namespace MassTransit.Distributor
         readonly IList<WorkerConnector> _connectors;
         readonly IList<ISubscriptionReference> _subscriptions;
         readonly Cache<Type, IWorkerLoad> _workerLoadCache;
-        readonly Fiber _fiber;
-        readonly Scheduler _scheduler;
 
         IServiceBus _bus;
         IServiceBus _controlBus;
@@ -44,9 +39,6 @@ namespace MassTransit.Distributor
 
             _subscriptions = new List<ISubscriptionReference>();
             _workerLoadCache = new GenericTypeCache<IWorkerLoad>(typeof(IWorkerLoad<>));
-
-            _fiber = new PoolFiber(new TryCatchOperationExecutor());
-            _scheduler = new TimerScheduler(new PoolFiber(new TryCatchOperationExecutor()));
         }
 
         public void Dispose()
@@ -78,7 +70,8 @@ namespace MassTransit.Distributor
                     return () => true;
                 });
 
-            _scheduler.Schedule(TimeSpan.Zero, _publishInterval, _fiber, PublishWorkerAvailability);
+            // TODO replace with TPL variant
+//            _scheduler.Schedule(TimeSpan.Zero, _publishInterval, _fiber, PublishWorkerAvailability);
         }
 
         void PublishWorkerAvailability()

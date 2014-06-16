@@ -79,6 +79,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Configuration\EndpointConfigurator.cs" />
+    <Compile Include="Contexts\RabbitMqSentContext.cs" />
     <Compile Include="RabbitMqBasicConsumeContext.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilder.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilderImpl.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="PublishEndpointSinkLocator.cs" />
     <Compile Include="RabbitMqBasicConsumer.cs" />
     <Compile Include="RabbitMqConnection.cs" />
+    <Compile Include="RabbitMqConnectionEventSource.cs" />
     <Compile Include="RabbitMqConsumer.cs" />
     <Compile Include="RabbitMqEndpointAddress.cs" />
     <Compile Include="RabbitMqAddressException.cs" />
@@ -166,6 +168,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>

@@ -15,6 +15,7 @@ namespace MassTransit.SubscriptionConfigurators
     using System.Collections.Generic;
     using Configurators;
     using Pipeline.Sinks;
+    using Policies;
     using SubscriptionBuilders;
 
 
@@ -27,7 +28,7 @@ namespace MassTransit.SubscriptionConfigurators
         readonly IConsumerFactory<TConsumer> _consumerFactory;
 
         public ConsumerSubscriptionConfiguratorImpl(IConsumerFactory<TConsumer> consumerFactory,
-            IMessageRetryPolicy retryPolicy)
+            IRetryPolicy retryPolicy)
             : base(retryPolicy)
         {
             _consumerFactory = consumerFactory;

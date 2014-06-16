@@ -14,6 +14,7 @@ namespace MassTransit.SubscriptionBuilders
 {
     using Pipeline;
     using Pipeline.Sinks;
+    using Policies;
     using Subscriptions;
 
 
@@ -23,9 +24,9 @@ namespace MassTransit.SubscriptionBuilders
     {
         readonly MessageHandler<TMessage> _handler;
         readonly ReferenceFactory _referenceFactory;
-        readonly IMessageRetryPolicy _retryPolicy;
+        readonly IRetryPolicy _retryPolicy;
 
-        public HandlerSubscriptionBuilder(MessageHandler<TMessage> handler, IMessageRetryPolicy retryPolicy,
+        public HandlerSubscriptionBuilder(MessageHandler<TMessage> handler, IRetryPolicy retryPolicy,
             ReferenceFactory referenceFactory)
         {
             _handler = handler;

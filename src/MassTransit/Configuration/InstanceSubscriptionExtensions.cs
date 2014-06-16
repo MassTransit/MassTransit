@@ -16,7 +16,8 @@ namespace MassTransit
     using Magnum;
     using Pipeline;
     using Pipeline.Sinks;
-	using SubscriptionConfigurators;
+    using Policies;
+    using SubscriptionConfigurators;
 	using SubscriptionConnectors;
 	using Util;
 
@@ -36,7 +37,7 @@ namespace MassTransit
 		[NotNull]
 		public static InstanceSubscriptionConfigurator Instance(
 			[NotNull] this SubscriptionBusServiceConfigurator configurator,
-            [NotNull] object instance, IMessageRetryPolicy retryPolicy = null)
+            [NotNull] object instance, IRetryPolicy retryPolicy = null)
 		{
 			var instanceConfigurator = new InstanceSubscriptionConfiguratorImpl(instance, retryPolicy ?? Retry.None);
 
@@ -75,7 +76,7 @@ namespace MassTransit
 	    /// <param name="retryPolicy"></param>
 	    /// <returns>The unsubscribe action that can be called to unsubscribe the instance
 	    /// passed as an argument.</returns>
-	    public static ConnectHandle SubscribeInstance<T>([NotNull] this IServiceBus bus, [NotNull] T instance, IMessageRetryPolicy retryPolicy = null)
+	    public static ConnectHandle SubscribeInstance<T>([NotNull] this IServiceBus bus, [NotNull] T instance, IRetryPolicy retryPolicy = null)
 			where T : class, IConsumer
 		{
 			Guard.AgainstNull(instance, "instance", "A null instance cannot be subscribed");

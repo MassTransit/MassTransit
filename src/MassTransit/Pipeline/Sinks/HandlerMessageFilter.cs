@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.Sinks
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using SubscriptionConnectors;
     using Util;
 
 
@@ -24,12 +23,10 @@ namespace MassTransit.Pipeline.Sinks
         where TMessage : class
     {
         readonly MessageHandler<TMessage> _handler;
-        readonly IMessageRetryPolicy _retryPolicy;
 
-        public HandlerMessageFilter(MessageHandler<TMessage> handler, IMessageRetryPolicy retryPolicy)
+        public HandlerMessageFilter(MessageHandler<TMessage> handler)
         {
             _handler = handler;
-            _retryPolicy = retryPolicy;
         }
 
         public async Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
@@ -37,7 +34,7 @@ namespace MassTransit.Pipeline.Sinks
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
-                await _retryPolicy.Retry(context, x => _handler(context));
+                await _handler(context);
 
                 context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName);
 

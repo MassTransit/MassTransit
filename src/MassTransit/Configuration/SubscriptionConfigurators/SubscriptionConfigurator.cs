@@ -13,6 +13,7 @@
 namespace MassTransit.SubscriptionConfigurators
 {
     using Pipeline.Sinks;
+    using Policies;
 
 
     /// <summary>
@@ -30,6 +31,6 @@ namespace MassTransit.SubscriptionConfigurators
         /// </summary>
         /// <param name="retryPolicy"></param>
         /// <returns></returns>
-        TInterface SetRetryPolicy(IMessageRetryPolicy retryPolicy);
+        TInterface SetRetryPolicy(IRetryPolicy retryPolicy);
     }
 }

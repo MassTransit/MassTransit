@@ -10,18 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Policies
 {
-    public interface IConsumeFilterConnector<T>
-        where T : class
-    {
-        ConnectHandle Connect(IConsumeFilter<T> filter);
-    }
+    using System;
 
 
-    public interface IConsumeFilterConnector
+    public class RetrySelectedRetryExceptionFilter :
+        IRetryExceptionFilter
     {
-        ConnectHandle Connect<T>(IConsumeFilter<T> filter)
-            where T : class;
+        readonly Type[] _exceptionTypes;
+
+        public RetrySelectedRetryExceptionFilter(params Type[] exceptionTypes)
+        {
+            _exceptionTypes = exceptionTypes;
+        }
+
+        public bool CanRetry(Exception exception)
+        {
+            for (int i = 0; i < _exceptionTypes.Length; i++)
+            {
+                if (_exceptionTypes[i].IsInstanceOfType(exception))
+                    return true;
+            }
+
+            return false;
+        }
     }
 }

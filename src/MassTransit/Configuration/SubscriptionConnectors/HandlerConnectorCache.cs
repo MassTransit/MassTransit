@@ -20,19 +20,19 @@ namespace MassTransit.SubscriptionConnectors
         IHandlerConnectorCache<T>
         where T : class
     {
-        readonly Lazy<HandlerConnector<T>> _connector;
+        readonly Lazy<HandlerConnectorImpl<T>> _connector;
 
         HandlerConnectorCache()
         {
-            _connector = new Lazy<HandlerConnector<T>>(() => new HandlerConnector<T>());
+            _connector = new Lazy<HandlerConnectorImpl<T>>(() => new HandlerConnectorImpl<T>());
         }
 
-        public static HandlerConnector Connector
+        public static HandlerConnector<T> Connector
         {
             get { return InstanceCache.Cached.Value.Connector; }
         }
 
-        HandlerConnector IHandlerConnectorCache<T>.Connector
+        HandlerConnector<T> IHandlerConnectorCache<T>.Connector
         {
             get { return _connector.Value; }
         }

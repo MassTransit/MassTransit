@@ -18,7 +18,8 @@ namespace MassTransit
     using System.Threading;
 
 
-    public interface ReceiveContext
+    public interface ReceiveContext :
+        PipeContext
     {
         /// <summary>
         /// This token is cancelled when the message reception should no longer be processed

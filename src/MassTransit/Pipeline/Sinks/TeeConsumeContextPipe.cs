@@ -30,31 +30,17 @@ namespace MassTransit.Pipeline.Sinks
         IConsumeFilterConnector<T>
         where T : class
     {
-        readonly ConcurrentDictionary<long, IConsumeFilter<T>> _pipes;
+        readonly ConcurrentDictionary<long, IPipe<ConsumeContext<T>>> _pipes;
         long _nextPipeId;
 
         public TeeConsumeFilter()
         {
-            _pipes = new ConcurrentDictionary<long, IConsumeFilter<T>>();
+            _pipes = new ConcurrentDictionary<long, IPipe<ConsumeContext<T>>>();
         }
 
         public int Count
         {
             get { return _pipes.Count; }
-        }
-
-        public ConnectHandle Connect(IConsumeFilter<T> filter)
-        {
-            if (filter == null)
-                throw new ArgumentNullException("filter");
-
-            long pipeId = Interlocked.Increment(ref _nextPipeId);
-
-            bool added = _pipes.TryAdd(pipeId, filter);
-            if (!added)
-                throw new PipelineException("Unable to add pipe");
-
-            return new TeeConnectHandle(pipeId, RemovePipe);
         }
 
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
@@ -65,7 +51,7 @@ namespace MassTransit.Pipeline.Sinks
             {
                 try
                 {
-                    await pipe.Send(context, next);
+                    await pipe.Send(context);
                 }
                 catch (Exception ex)
                 {
@@ -75,6 +61,8 @@ namespace MassTransit.Pipeline.Sinks
 
             if (exceptions.Count > 0)
                 throw new AggregateException(exceptions);
+
+            await next.Send(context);
         }
 
         public bool Inspect(IPipeInspector inspector)
@@ -82,9 +70,22 @@ namespace MassTransit.Pipeline.Sinks
             return inspector.Inspect(this, (x, _) => _pipes.Values.All(pipe => pipe.Inspect(x)));
         }
 
+        public ConnectHandle Connect(params IFilter<ConsumeContext<T>>[] filters)
+        {
+            long pipeId = Interlocked.Increment(ref _nextPipeId);
+
+            var pipe = filters.Combine();
+
+            bool added = _pipes.TryAdd(pipeId, pipe);
+            if (!added)
+                throw new PipelineException("Unable to add pipe");
+
+            return new TeeConnectHandle(pipeId, RemovePipe);
+        }
+
         void RemovePipe(long id)
         {
-            IConsumeFilter<T> ignored;
+            IPipe<ConsumeContext<T>> ignored;
             _pipes.TryRemove(id, out ignored);
         }
 

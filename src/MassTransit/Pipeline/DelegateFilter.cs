@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,30 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Pipeline
 {
     using System;
+    using System.Threading.Tasks;
 
 
-    public class RetrySelectedRetryExceptionFilter :
-        IRetryExceptionFilter
+    public class DelegateFilter<T> :
+        IFilter<T>
+        where T : class, PipeContext
     {
-        readonly Type[] _exceptionTypes;
+        readonly Action<T> _callback;
 
-        public RetrySelectedRetryExceptionFilter(params Type[] exceptionTypes)
+        public DelegateFilter(Action<T> callback)
         {
-            _exceptionTypes = exceptionTypes;
+            _callback = callback;
         }
 
-        public bool CanRetry(Exception exception)
+        public Task Send(T context, IPipe<T> next)
         {
-            for (int i = 0; i < _exceptionTypes.Length; i++)
-            {
-                if (_exceptionTypes[i].IsInstanceOfType(exception))
-                    return true;
-            }
+            _callback(context);
 
-            return false;
+            return next.Send(context);
+        }
+
+        public bool Inspect(IPipeInspector inspector)
+        {
+            return inspector.Inspect(this);
         }
     }
 }

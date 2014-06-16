@@ -10,21 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Policies
 {
     using System;
 
 
-    /// <summary>
-    /// Filters exceptions for retry
-    /// </summary>
-    public interface IRetryExceptionFilter
+    public interface IRetryContext :
+        IDisposable
     {
         /// <summary>
-        /// Returns true if the exception can be retried
+        /// Determines if the exception can be retried per the retry policy
         /// </summary>
         /// <param name="exception"></param>
+        /// <param name="delay">The delay before the retry</param>
         /// <returns></returns>
-        bool CanRetry(Exception exception);
+        bool CanRetry(Exception exception, out TimeSpan delay);
     }
 }

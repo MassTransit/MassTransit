@@ -16,6 +16,7 @@ namespace MassTransit.SubscriptionConfigurators
     using System.Collections.Generic;
     using Configurators;
     using Pipeline.Sinks;
+    using Policies;
     using SubscriptionBuilders;
 
 
@@ -28,7 +29,7 @@ namespace MassTransit.SubscriptionConfigurators
         MessageHandler<TMessage> _handler;
 
         public HandlerSubscriptionConfiguratorImpl(MessageHandler<TMessage> handler,
-            IMessageRetryPolicy retryPolicy)
+            IRetryPolicy retryPolicy)
             : base(retryPolicy)
         {
             _handler = handler;

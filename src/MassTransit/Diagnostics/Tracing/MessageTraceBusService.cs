@@ -21,36 +21,23 @@ namespace MassTransit.Diagnostics.Tracing
     using Magnum.Collections;
     using Magnum.Extensions;
     using Pipeline;
-    using Stact;
 
     public class MessageTraceBusService :
 		IBusService,
 		Consumes<GetMessageTraceList>.All
 	{
 		static readonly ILog _log = Logger.Get(typeof (MessageTraceBusService));
-		readonly ChannelConnection _connection;
-		readonly UntypedChannel _eventChannel;
 
 		readonly Deque<ReceivedMessageTraceDetail> _messages;
 
 		IServiceBus _controlBus;
 		readonly int _detailLimit;
-		readonly Fiber _fiber;
 		ConnectHandle _unsubscribe;
 
-		public MessageTraceBusService(UntypedChannel eventChannel)
+		public MessageTraceBusService()
 		{
-			_eventChannel = eventChannel;
-			_fiber = new PoolFiber();
 			_messages = new Deque<ReceivedMessageTraceDetail>();
 			_detailLimit = 100;
-
-			_connection = _eventChannel.Connect(x =>
-				{
-					x.AddConsumerOf<MessageReceived>()
-						.UsingConsumer(Handle)
-						.HandleOnFiber(_fiber);
-				});
 		}
 
 		public void Consume(GetMessageTraceList message)
@@ -65,12 +52,11 @@ namespace MassTransit.Diagnostics.Tracing
 
 			IEndpoint responseEndpoint = context.Bus.GetEndpoint(responseAddress);
 
-			_fiber.Add(() => SendLastTraceMessagesTo(responseEndpoint, count));
+//			_fiber.Add(() => SendLastTraceMessagesTo(responseEndpoint, count));
 		}
 
 		public void Dispose()
 		{
-			_connection.Dispose();
 		}
 
 		public void Start(IServiceBus bus)
@@ -82,9 +68,6 @@ namespace MassTransit.Diagnostics.Tracing
 		public void Stop()
 		{
 			_unsubscribe.Disconnect();
-			_connection.Disconnect();
-
-			_fiber.Shutdown(30.Seconds());
 		}
 
 		void Handle(MessageReceived message)

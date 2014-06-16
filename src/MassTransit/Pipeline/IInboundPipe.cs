@@ -12,13 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    using Sinks;
-
-
     public interface IInboundPipe :
         IConsumePipe,
         IConsumeFilterConnector,
-        IConnectMessageInterceptor
+        IConsumeObserverConnector
     {
     }
 }

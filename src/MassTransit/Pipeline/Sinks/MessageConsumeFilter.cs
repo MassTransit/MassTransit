@@ -25,34 +25,16 @@ namespace MassTransit.Pipeline.Sinks
     public class MessageConsumeFilter<TMessage> :
         IConsumeFilter,
         IConsumeFilterConnector,
-        IConnectMessageInterceptor
+        IConsumeObserverConnector
         where TMessage : class
     {
-        readonly MessageInterceptorConnectable<TMessage> _connections;
+        readonly ObserverConnectable<TMessage> _connections;
         readonly TeeConsumeFilter<TMessage> _output;
 
         public MessageConsumeFilter()
         {
             _output = new TeeConsumeFilter<TMessage>();
-            _connections = new MessageInterceptorConnectable<TMessage>();
-        }
-
-        ConnectHandle IConnectMessageInterceptor.Connect<T>(IMessageInterceptor<T> interceptor)
-        {
-            var self = _connections as MessageInterceptorConnectable<T>;
-            if (self == null)
-                throw new InvalidOperationException("The connection type is invalid: " + TypeMetadataCache<T>.ShortName);
-
-            return self.Connect(interceptor);
-        }
-
-        ConnectHandle IConsumeFilterConnector.Connect<T>(IConsumeFilter<T> filter)
-        {
-            var output = _output as IConsumeFilterConnector<T>;
-            if (output == null)
-                throw new ArgumentException("Invalid pipe type specified: " + TypeMetadataCache<T>.ShortName);
-
-            return output.Connect(filter);
+            _connections = new ObserverConnectable<TMessage>();
         }
 
         async Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
@@ -84,6 +66,25 @@ namespace MassTransit.Pipeline.Sinks
         public bool Inspect(IPipeInspector inspector)
         {
             return inspector.Inspect(this, (x, _) => _output.Inspect(x));
+        }
+
+        public ConnectHandle Connect<T>(params IFilter<ConsumeContext<T>>[] filters)
+            where T : class
+        {
+            var output = _output as IConsumeFilterConnector<T>;
+            if (output == null)
+                throw new ArgumentException("Invalid pipe type specified: " + TypeMetadataCache<T>.ShortName);
+
+            return output.Connect(filters);
+        }
+
+        ConnectHandle IConsumeObserverConnector.Connect<T>(IConsumeObserver<T> observer)
+        {
+            var self = _connections as ObserverConnectable<T>;
+            if (self == null)
+                throw new InvalidOperationException("The connection type is invalid: " + TypeMetadataCache<T>.ShortName);
+
+            return self.Connect(observer);
         }
     }
 }

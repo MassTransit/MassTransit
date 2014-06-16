@@ -61,7 +61,6 @@ namespace MassTransit.Testing.ScenarioBuilders
 			var scenario = new BusTestScenarioImpl(endpointFactory);
 
 			_configurator.ChangeSettings(x => { x.EndpointCache = scenario.EndpointCache; });
-			_configurator.EnableMessageTracing();
 
 			scenario.Bus = _configurator.CreateServiceBus();
 

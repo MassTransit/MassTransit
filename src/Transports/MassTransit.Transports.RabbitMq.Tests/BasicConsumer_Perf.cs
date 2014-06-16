@@ -24,6 +24,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using Magnum.Extensions;
     using Newtonsoft.Json;
     using NUnit.Framework;
+    using Pipeline;
     using RabbitMQ.Client;
     using Serialization;
     using Serialization.Custom;
@@ -95,33 +96,32 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
             var deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
 
+            var testPipe = new TestReceivePipe(async context =>
+            {
+                if (context.Redelivered)
+                    Interlocked.Increment(ref redeliviered);
+
+                ConsumeContext consumeContext = deserializer.Deserialize(context);
+
+                // var person = consumeContext.Headers.Get<Person>("person");
+
+                ConsumeContext<ITestMessage> messageContext;
+                if (!consumeContext.TryGetMessage(out messageContext))
+                    throw new SerializationException("The message type was not supported");
+
+                Interlocked.Add(ref processingTime, (int)messageContext.ReceiveContext.ElapsedTime.TotalMilliseconds);
+
+                var number = Interlocked.Increment(ref count);
+                if (number == limit)
+                    completed.TrySetResult(true);                
+            });
+
             using (var connection = connectionFactory.CreateConnection())
             {
                 using (var model = connection.CreateModel())
                 {
-                    var consumer = new RabbitMqBasicConsumer(model, new Uri("rabbitmq://localhost/speed/input"), context =>
-                        {
-                            return Task.Run(() =>
-                                {
-                                    if (context.Redelivered)
-                                        Interlocked.Increment(ref redeliviered);
-
-                                    ConsumeContext consumeContext = deserializer.Deserialize(context);
-
-                                   // var person = consumeContext.Headers.Get<Person>("person");
-
-                                    ConsumeContext<ITestMessage> messageContext;
-                                    if (!consumeContext.TryGetMessage(out messageContext))
-                                        throw new SerializationException("The message type was not supported");
-
-                                    Interlocked.Add(ref processingTime, (int) messageContext.ReceiveContext.ElapsedTime.TotalMilliseconds);
-
-                                    var number = Interlocked.Increment(ref count);
-                                    if (number == limit)
-                                        completed.TrySetResult(true);
-                                });
-                        });
-
+                    var consumer = new RabbitMqBasicConsumer(model, new Uri("rabbitmq://localhost/speed/input"),
+                        testPipe);
 
                     model.QueueDeclare("input", false, false, true, new Dictionary<string, object>());
                     model.QueuePurge("input");
@@ -188,6 +188,30 @@ namespace MassTransit.Transports.RabbitMq.Tests
             }
         }
 
+
+        class TestReceivePipe :
+            IReceivePipe
+        {
+            readonly Func<ReceiveContext, Task> _callback;
+
+            public TestReceivePipe(Func<ReceiveContext, Task> callback)
+            {
+                _callback = callback;
+            }
+
+            public async Task Send(ReceiveContext context)
+            {
+                await Task.Yield();
+
+                await _callback(context);
+            }
+
+            public bool Inspect(IPipeInspector inspector)
+            {
+                return true;
+            }
+        }
+
         [Test]
         public void No_jacket_required_raw_in_memory_speed_no_serialization()
         {
@@ -203,26 +227,25 @@ namespace MassTransit.Transports.RabbitMq.Tests
             int redeliviered = 0;
             var completed = new TaskCompletionSource<bool>();
 
+            var testPipe = new TestReceivePipe(async context =>
+            {
+                if (context.Redelivered)
+                    Interlocked.Increment(ref redeliviered);
+                if (Interlocked.Increment(ref failureCount) % 50 == 0)
+                {
+                    throw new InvalidOperationException();
+                }
+                var number = Interlocked.Increment(ref count);
+                if (number == limit)
+                    completed.TrySetResult(true);
+            });
+
             using (var connection = connectionFactory.CreateConnection())
             {
                 using (var model = connection.CreateModel())
                 {
-                    var consumer = new RabbitMqBasicConsumer(model, new Uri("rabbitmq://localhost/speed/input"), context =>
-                        {
-                            return Task.Run(() =>
-                                {
-                                    if (context.Redelivered)
-                                        Interlocked.Increment(ref redeliviered);
-                                    if (Interlocked.Increment(ref failureCount) % 50 == 0)
-                                    {
-                                        throw new InvalidOperationException();
-                                    }
-                                    var number = Interlocked.Increment(ref count);
-                                    if (number == limit)
-                                        completed.TrySetResult(true);
-                                });
-                        });
-
+                    var consumer = new RabbitMqBasicConsumer(model, new Uri("rabbitmq://localhost/speed/input"),
+                        testPipe);
 
                     model.QueueDeclare("input", false, true, true, new Dictionary<string, object>());
                     model.QueuePurge("input");

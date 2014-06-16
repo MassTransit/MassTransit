@@ -10,25 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Pipeline
 {
     using System;
     using System.Threading.Tasks;
 
 
     /// <summary>
-    /// Intercepts a specific message type
+    /// Intercepts the ConsumeContext<typeparam name="T">T</typeparam>
     /// </summary>
-    /// <typeparam name="TMessage"></typeparam>
-    public interface IMessageInterceptor<in TMessage>
-        where TMessage : class
+    /// <typeparam name="T">The message type</typeparam>
+    public interface IConsumeObserver<in T>
+        where T : class
     {
         /// <summary>
         /// Called before a message is dispatched to any consumers
         /// </summary>
         /// <param name="context">The consume context</param>
         /// <returns></returns>
-        Task PreDispatch(ConsumeContext<TMessage> context);
+        Task PreDispatch(ConsumeContext<T> context);
 
         /// <summary>
         /// Called after the message has been dispatched to all consumers - note that in the case of an exception
@@ -36,7 +36,7 @@ namespace MassTransit.Pipeline.Sinks
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        Task PostDispatch(ConsumeContext<TMessage> context);
+        Task PostDispatch(ConsumeContext<T> context);
 
         /// <summary>
         /// Called after the message has been dispatched to all consumers when one or more exceptions have occurred
@@ -44,6 +44,6 @@ namespace MassTransit.Pipeline.Sinks
         /// <param name="context"></param>
         /// <param name="exception"></param>
         /// <returns></returns>
-        Task DispatchFaulted(ConsumeContext<TMessage> context, Exception exception);
+        Task DispatchFaulted(ConsumeContext<T> context, Exception exception);
     }
 }

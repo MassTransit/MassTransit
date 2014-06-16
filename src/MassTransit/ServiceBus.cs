@@ -21,12 +21,10 @@ namespace MassTransit
     using Exceptions;
     using Logging;
     using Magnum;
-    using Magnum.Extensions;
     using Magnum.Reflection;
     using Monitoring;
     using Pipeline;
     using Pipeline.Configuration;
-    using Stact;
     using Util;
 
     /// <summary>
@@ -41,10 +39,6 @@ namespace MassTransit
 
         ServiceBusInstancePerformanceCounters _counters;
         volatile bool _disposed;
-        UntypedChannel _eventChannel;
-        ChannelConnection _performanceCounterConnection;
-        int _receiveThreadLimit = 1;
-        TimeSpan _receiveTimeout = 3.Seconds();
         IServiceContainer _serviceContainer;
         volatile bool _started;
 
@@ -74,8 +68,6 @@ namespace MassTransit
             Endpoint = endpointToListenOn;
             EndpointCache = endpointCache;
 
-            _eventChannel = new ChannelAdapter();
-
             _serviceContainer = new ServiceContainer(this);
 
             OutboundPipeline = new OutboundPipelineConfigurator(this).Pipeline;
@@ -87,26 +79,7 @@ namespace MassTransit
                 InitializePerformanceCounters();
         }
 
-        public int ConcurrentReceiveThreads
-        {
-            get { return _receiveThreadLimit; }
-            set
-            {
-                if (_started)
-                    throw new ConfigurationException(
-                        "The receive thread limit cannot be changed once the bus is in motion. Beep! Beep!");
-
-                _receiveThreadLimit = value;
-            }
-        }
-
-
         public TimeSpan ShutdownTimeout { get; set; }
-
-        public UntypedChannel EventChannel
-        {
-            get { return _eventChannel; }
-        }
 
         [UsedImplicitly]
         protected string DebugDisplay
@@ -141,7 +114,7 @@ namespace MassTransit
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
 
-            PublishContext<T> context = ContextStorage.CreatePublishContext(message);
+            Context.PublishContext<T> context = ContextStorage.CreatePublishContext(message);
             context.SetSourceAddress(Endpoint.Address.Uri);
 
             contextCallback(context);
@@ -171,13 +144,6 @@ namespace MassTransit
             {
                 context.NotifyNoSubscribers();
             }
-
-            _eventChannel.Send(new MessagePublished
-                {
-                    MessageType = typeof(T),
-                    ConsumerCount = publishedCount,
-                    Duration = context.Duration,
-                });
 
             if (exceptions.Count > 0)
                 throw new PublishException(typeof(T), exceptions);
@@ -295,7 +261,6 @@ namespace MassTransit
             probe.Add("mt.version", typeof(IServiceBus).Assembly.GetName().Version);
             probe.Add("mt.receive_from", Endpoint.Address);
 //            probe.Add("mt.max_consumer_threads", MaximumConsumerThreads);
-            probe.Add("mt.concurrent_receive_threads", ConcurrentReceiveThreads);
   //          probe.Add("mt.receive_timeout", ReceiveTimeout);
 
             EndpointCache.Inspect(probe);
@@ -350,14 +315,6 @@ namespace MassTransit
                     _serviceContainer = null;
                 }
 
-                if (_performanceCounterConnection != null)
-                {
-                    _performanceCounterConnection.Dispose();
-                    _performanceCounterConnection = null;
-                }
-
-                _eventChannel = null;
-
                 Endpoint = null;
 
                 if (_counters != null)
@@ -380,40 +337,40 @@ namespace MassTransit
 
                 _counters = new ServiceBusInstancePerformanceCounters(instanceName);
 
-                _performanceCounterConnection = _eventChannel.Connect(x =>
-                    {
-                        x.AddConsumerOf<MessageReceived>()
-                            .UsingConsumer(message =>
-                                {
-                                    _counters.ReceiveCount.Increment();
-                                    _counters.ReceiveRate.Increment();
-                                    _counters.ReceiveDuration.IncrementBy(
-                                        (long)message.ReceiveDuration.TotalMilliseconds);
-                                    _counters.ReceiveDurationBase.Increment();
-                                    _counters.ConsumerDuration.IncrementBy(
-                                        (long)message.ConsumeDuration.TotalMilliseconds);
-                                    _counters.ConsumerDurationBase.Increment();
-                                });
-
-                        x.AddConsumerOf<MessagePublished>()
-                            .UsingConsumer(message =>
-                                {
-                                    _counters.PublishCount.Increment();
-                                    _counters.PublishRate.Increment();
-                                    _counters.PublishDuration.IncrementBy((long)message.Duration.TotalMilliseconds);
-                                    _counters.PublishDurationBase.Increment();
-
-                                    _counters.SentCount.IncrementBy(message.ConsumerCount);
-                                    _counters.SendRate.IncrementBy(message.ConsumerCount);
-                                });
-
-                        x.AddConsumerOf<ThreadPoolEvent>()
-                            .UsingConsumer(message =>
-                                {
-                                    _counters.ReceiveThreadCount.Set(message.ReceiverCount);
-                                    _counters.ConsumerThreadCount.Set(message.ConsumerCount);
-                                });
-                    });
+//                _performanceCounterConnection = _eventChannel.Connect(x =>
+//                    {
+//                        x.AddConsumerOf<MessageReceived>()
+//                            .UsingConsumer(message =>
+//                                {
+//                                    _counters.ReceiveCount.Increment();
+//                                    _counters.ReceiveRate.Increment();
+//                                    _counters.ReceiveDuration.IncrementBy(
+//                                        (long)message.ReceiveDuration.TotalMilliseconds);
+//                                    _counters.ReceiveDurationBase.Increment();
+//                                    _counters.ConsumerDuration.IncrementBy(
+//                                        (long)message.ConsumeDuration.TotalMilliseconds);
+//                                    _counters.ConsumerDurationBase.Increment();
+//                                });
+//
+//                        x.AddConsumerOf<MessagePublished>()
+//                            .UsingConsumer(message =>
+//                                {
+//                                    _counters.PublishCount.Increment();
+//                                    _counters.PublishRate.Increment();
+//                                    _counters.PublishDuration.IncrementBy((long)message.Duration.TotalMilliseconds);
+//                                    _counters.PublishDurationBase.Increment();
+//
+//                                    _counters.SentCount.IncrementBy(message.ConsumerCount);
+//                                    _counters.SendRate.IncrementBy(message.ConsumerCount);
+//                                });
+//
+//                        x.AddConsumerOf<ThreadPoolEvent>()
+//                            .UsingConsumer(message =>
+//                                {
+//                                    _counters.ReceiveThreadCount.Set(message.ReceiverCount);
+//                                    _counters.ConsumerThreadCount.Set(message.ConsumerCount);
+//                                });
+//                    });
             }
             catch (Exception ex)
             {

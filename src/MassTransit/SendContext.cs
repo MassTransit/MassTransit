@@ -68,6 +68,21 @@ namespace MassTransit
         IEndpoint GetDestinationEndpoint(object message, Type messageType);
     }
 
+
+    public interface PublishContext<out T> :
+        PipeContext
+        where T : class
+    {
+        /// <summary>
+        /// True if the message must be delivered to a subscriber
+        /// </summary>
+        bool Mandatory { get; set; }
+
+        T Message { get; }
+
+    }
+
+
     public interface SendContext<out T> :
         SendContext
         where T : class

@@ -14,8 +14,8 @@ namespace MassTransit.Tests.Pipeline
 {
     using System;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Sinks;
     using NUnit.Framework;
+    using Policies;
 
 
     [TestFixture]

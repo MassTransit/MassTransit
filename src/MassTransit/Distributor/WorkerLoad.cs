@@ -20,8 +20,6 @@ namespace MassTransit.Distributor
     using Magnum.Extensions;
     using MassTransit.Pipeline;
     using Messages;
-    using Stact;
-    using Stact.Executors;
 
     public class MessageWorkerLoad<TMessage> :
         IWorkerLoad<TMessage>,
@@ -35,11 +33,9 @@ namespace MassTransit.Distributor
         int _inProgressLimit = 4;
         int _pendingLimit = 16;
         bool _updatePending;
-        Fiber _fiber;
 
         public MessageWorkerLoad(IWorker worker)
         {
-            _fiber = new PoolFiber(new TryCatchOperationExecutor());
             _worker = worker;
 
             _pending = new WorkerPendingMessageTracker<Guid>();
@@ -101,7 +97,7 @@ namespace MassTransit.Distributor
             if (!_updatePending)
             {
                 _updatePending = true;
-                    _fiber.Add(() => PublishWorkerAvailability(10.Seconds()));
+//                    _fiber.Add(() => PublishWorkerAvailability(10.Seconds()));
             }
         }
         

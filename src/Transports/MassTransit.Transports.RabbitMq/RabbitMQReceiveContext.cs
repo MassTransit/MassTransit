@@ -138,5 +138,10 @@ namespace MassTransit.Transports.RabbitMq
 
             return DefaultContentType;
         }
+
+        public void Cancel()
+        {
+            _cancellationTokenSource.Cancel();
+        }
     }
 }

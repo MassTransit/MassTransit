@@ -16,6 +16,7 @@ namespace MassTransit.SubscriptionConfigurators
     using Configurators;
     using Magnum.Extensions;
     using Pipeline.Sinks;
+    using Policies;
     using SubscriptionBuilders;
 
 
@@ -26,7 +27,7 @@ namespace MassTransit.SubscriptionConfigurators
     {
         readonly object _instance;
 
-        public InstanceSubscriptionConfiguratorImpl(object instance, IMessageRetryPolicy retryPolicy)
+        public InstanceSubscriptionConfiguratorImpl(object instance, IRetryPolicy retryPolicy)
             : base(retryPolicy)
         {
             _instance = instance;

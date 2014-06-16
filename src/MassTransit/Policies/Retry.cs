@@ -10,21 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Policies
 {
     using System;
     using System.Linq;
+    using Pipeline.Sinks;
 
 
     public static class Retry
     {
         static readonly IRetryExceptionFilter _all = new RetryAllRetryExceptionFilter();
-        static readonly IMessageRetryPolicy _none = new NoRetryPolicy();
+        static readonly IRetryPolicy _none = new NoRetryPolicy();
 
         /// <summary>
         /// Create a policy that does not retry any messages
         /// </summary>
-        public static IMessageRetryPolicy None
+        public static IRetryPolicy None
         {
             get { return _none; }
         }
@@ -35,9 +36,9 @@ namespace MassTransit.Pipeline.Sinks
         /// </summary>
         /// <param name="retryLimit">The number of retries to attempt</param>
         /// <returns></returns>
-        public static IMessageRetryPolicy Immediate(int retryLimit)
+        public static IRetryPolicy Immediate(int retryLimit)
         {
-            return new ImmediateMessageRetryPolicy(All(), retryLimit);
+            return new ImmediateRetryPolicy(All(), retryLimit);
         }
 
         /// <summary>
@@ -47,9 +48,9 @@ namespace MassTransit.Pipeline.Sinks
         /// <param name="filter"></param>
         /// <param name="retryLimit">The number of retries to attempt</param>
         /// <returns></returns>
-        public static IMessageRetryPolicy Immediate(this IRetryExceptionFilter filter, int retryLimit)
+        public static IRetryPolicy Immediate(this IRetryExceptionFilter filter, int retryLimit)
         {
-            return new ImmediateMessageRetryPolicy(filter, retryLimit);
+            return new ImmediateRetryPolicy(filter, retryLimit);
         }
 
         /// <summary>
@@ -58,33 +59,9 @@ namespace MassTransit.Pipeline.Sinks
         /// </summary>
         /// <param name="intervals">The intervals before each subsequent retry attempt</param>
         /// <returns></returns>
-        public static IMessageRetryPolicy Intervals(params TimeSpan[] intervals)
+        public static IRetryPolicy Intervals(params TimeSpan[] intervals)
         {
-            return new IntervalMessageRetryPolicy(All(), intervals);
-        }
-
-        /// <summary>
-        /// Create an interval retry policy with the specified intervals. The retry count equals
-        /// the number of intervals provided
-        /// </summary>
-        /// <param name="filter"></param>
-        /// <param name="intervals">The intervals before each subsequent retry attempt</param>
-        /// <returns></returns>
-        public static IMessageRetryPolicy Intervals(this IRetryExceptionFilter filter, params TimeSpan[] intervals)
-        {
-            return new IntervalMessageRetryPolicy(filter, intervals);
-        }
-
-
-        /// <summary>
-        /// Create an interval retry policy with the specified intervals. The retry count equals
-        /// the number of intervals provided
-        /// </summary>
-        /// <param name="intervals">The intervals before each subsequent retry attempt</param>
-        /// <returns></returns>
-        public static IMessageRetryPolicy Intervals(params int[] intervals)
-        {
-            return new IntervalMessageRetryPolicy(All(), intervals);
+            return new IntervalRetryPolicy(All(), intervals);
         }
 
         /// <summary>
@@ -94,9 +71,33 @@ namespace MassTransit.Pipeline.Sinks
         /// <param name="filter"></param>
         /// <param name="intervals">The intervals before each subsequent retry attempt</param>
         /// <returns></returns>
-        public static IMessageRetryPolicy Intervals(this IRetryExceptionFilter filter, params int[] intervals)
+        public static IRetryPolicy Intervals(this IRetryExceptionFilter filter, params TimeSpan[] intervals)
         {
-            return new IntervalMessageRetryPolicy(filter, intervals);
+            return new IntervalRetryPolicy(filter, intervals);
+        }
+
+
+        /// <summary>
+        /// Create an interval retry policy with the specified intervals. The retry count equals
+        /// the number of intervals provided
+        /// </summary>
+        /// <param name="intervals">The intervals before each subsequent retry attempt</param>
+        /// <returns></returns>
+        public static IRetryPolicy Intervals(params int[] intervals)
+        {
+            return new IntervalRetryPolicy(All(), intervals);
+        }
+
+        /// <summary>
+        /// Create an interval retry policy with the specified intervals. The retry count equals
+        /// the number of intervals provided
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <param name="intervals">The intervals before each subsequent retry attempt</param>
+        /// <returns></returns>
+        public static IRetryPolicy Intervals(this IRetryExceptionFilter filter, params int[] intervals)
+        {
+            return new IntervalRetryPolicy(filter, intervals);
         }
 
         /// <summary>
@@ -105,9 +106,9 @@ namespace MassTransit.Pipeline.Sinks
         /// <param name="retryCount">The number of retry attempts</param>
         /// <param name="interval">The interval between each retry attempt</param>
         /// <returns></returns>
-        public static IMessageRetryPolicy Interval(int retryCount, TimeSpan interval)
+        public static IRetryPolicy Interval(int retryCount, TimeSpan interval)
         {
-            return new IntervalMessageRetryPolicy(All(), Enumerable.Repeat(interval, retryCount).ToArray());
+            return new IntervalRetryPolicy(All(), Enumerable.Repeat(interval, retryCount).ToArray());
         }
 
         /// <summary>
@@ -117,9 +118,9 @@ namespace MassTransit.Pipeline.Sinks
         /// <param name="retryCount">The number of retry attempts</param>
         /// <param name="interval">The interval between each retry attempt</param>
         /// <returns></returns>
-        public static IMessageRetryPolicy Interval(this IRetryExceptionFilter filter, int retryCount, TimeSpan interval)
+        public static IRetryPolicy Interval(this IRetryExceptionFilter filter, int retryCount, TimeSpan interval)
         {
-            return new IntervalMessageRetryPolicy(filter, Enumerable.Repeat(interval, retryCount).ToArray());
+            return new IntervalRetryPolicy(filter, Enumerable.Repeat(interval, retryCount).ToArray());
         }
 
         /// <summary>
@@ -131,10 +132,10 @@ namespace MassTransit.Pipeline.Sinks
         /// <param name="maxInterval"></param>
         /// <param name="intervalDelta"></param>
         /// <returns></returns>
-        public static IMessageRetryPolicy Exponential(int retryLimit, TimeSpan minInterval, TimeSpan maxInterval,
+        public static IRetryPolicy Exponential(int retryLimit, TimeSpan minInterval, TimeSpan maxInterval,
             TimeSpan intervalDelta)
         {
-            return new ExponentialMessageRetryPolicy(All(), retryLimit, minInterval, maxInterval, intervalDelta);
+            return new ExponentialRetryPolicy(All(), retryLimit, minInterval, maxInterval, intervalDelta);
         }
 
         /// <summary>
@@ -147,11 +148,11 @@ namespace MassTransit.Pipeline.Sinks
         /// <param name="maxInterval"></param>
         /// <param name="intervalDelta"></param>
         /// <returns></returns>
-        public static IMessageRetryPolicy Exponential(this IRetryExceptionFilter filter, int retryLimit,
+        public static IRetryPolicy Exponential(this IRetryExceptionFilter filter, int retryLimit,
             TimeSpan minInterval, TimeSpan maxInterval,
             TimeSpan intervalDelta)
         {
-            return new ExponentialMessageRetryPolicy(filter, retryLimit, minInterval, maxInterval, intervalDelta);
+            return new ExponentialRetryPolicy(filter, retryLimit, minInterval, maxInterval, intervalDelta);
         }
 
         /// <summary>
@@ -162,10 +163,10 @@ namespace MassTransit.Pipeline.Sinks
         /// <param name="initialInterval">The initial retry interval</param>
         /// <param name="intervalIncrement">The interval to add to the retry interval with each subsequent retry</param>
         /// <returns></returns>
-        public static IMessageRetryPolicy Incremental(int retryLimit, TimeSpan initialInterval,
+        public static IRetryPolicy Incremental(int retryLimit, TimeSpan initialInterval,
             TimeSpan intervalIncrement)
         {
-            return new IncrementalMessageRetryPolicy(All(), retryLimit, initialInterval, intervalIncrement);
+            return new IncrementalRetryPolicy(All(), retryLimit, initialInterval, intervalIncrement);
         }
 
         /// <summary>
@@ -177,11 +178,11 @@ namespace MassTransit.Pipeline.Sinks
         /// <param name="initialInterval">The initial retry interval</param>
         /// <param name="intervalIncrement">The interval to add to the retry interval with each subsequent retry</param>
         /// <returns></returns>
-        public static IMessageRetryPolicy Incremental(this IRetryExceptionFilter filter, int retryLimit,
+        public static IRetryPolicy Incremental(this IRetryExceptionFilter filter, int retryLimit,
             TimeSpan initialInterval,
             TimeSpan intervalIncrement)
         {
-            return new IncrementalMessageRetryPolicy(filter, retryLimit, initialInterval, intervalIncrement);
+            return new IncrementalRetryPolicy(filter, retryLimit, initialInterval, intervalIncrement);
         }
 
         /// <summary>

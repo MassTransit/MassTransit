@@ -10,19 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Policies
 {
     using System;
     using System.Linq;
 
 
-    public class IntervalMessageRetryPolicy :
-        IMessageRetryPolicy
+    public class IntervalRetryPolicy :
+        IRetryPolicy
     {
         readonly IRetryExceptionFilter _filter;
         readonly TimeSpan[] _intervals;
 
-        public IntervalMessageRetryPolicy(IRetryExceptionFilter filter, params TimeSpan[] intervals)
+        public IntervalRetryPolicy(IRetryExceptionFilter filter, params TimeSpan[] intervals)
         {
             if (intervals == null)
                 throw new ArgumentNullException("intervals");
@@ -33,7 +33,7 @@ namespace MassTransit.Pipeline.Sinks
             _intervals = intervals;
         }
 
-        public IntervalMessageRetryPolicy(IRetryExceptionFilter filter, params int[] intervals)
+        public IntervalRetryPolicy(IRetryExceptionFilter filter, params int[] intervals)
         {
             if (intervals == null)
                 throw new ArgumentNullException("intervals");
@@ -44,10 +44,10 @@ namespace MassTransit.Pipeline.Sinks
             _intervals = intervals.Select(x => TimeSpan.FromMilliseconds(x)).ToArray();
         }
 
-        public IMessageRetryContext GetRetryContext<T>(ConsumeContext<T> context)
+        public IRetryContext GetRetryContext<T>(T context)
             where T : class
         {
-            return new IntervalMessageRetryContext(this, _intervals);
+            return new IntervalRetryContext(this, _intervals);
         }
 
         public bool CanRetry(Exception exception)

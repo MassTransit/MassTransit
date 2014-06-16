@@ -14,6 +14,7 @@ namespace MassTransit.SubscriptionBuilders
 {
     using Pipeline;
     using Pipeline.Sinks;
+    using Policies;
     using SubscriptionConnectors;
     using Subscriptions;
 
@@ -24,9 +25,9 @@ namespace MassTransit.SubscriptionBuilders
         readonly InstanceConnector _connector;
         readonly object _instance;
         readonly ReferenceFactory _referenceFactory;
-        readonly IMessageRetryPolicy _retryPolicy;
+        readonly IRetryPolicy _retryPolicy;
 
-        public InstanceSubscriptionBuilder(object instance, IMessageRetryPolicy retryPolicy, ReferenceFactory referenceFactory)
+        public InstanceSubscriptionBuilder(object instance, IRetryPolicy retryPolicy, ReferenceFactory referenceFactory)
         {
             _instance = instance;
             _referenceFactory = referenceFactory;

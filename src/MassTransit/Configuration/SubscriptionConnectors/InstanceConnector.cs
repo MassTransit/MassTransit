@@ -17,12 +17,13 @@ namespace MassTransit.SubscriptionConnectors
     using Exceptions;
     using Pipeline;
     using Pipeline.Sinks;
+    using Policies;
     using Util;
 
 
     public interface InstanceConnector
     {
-        ConnectHandle Connect(IInboundPipe filter, object instance, IMessageRetryPolicy retryPolicy);
+        ConnectHandle Connect(IInboundPipe filter, object instance, IRetryPolicy retryPolicy);
     }
 
 
@@ -44,7 +45,7 @@ namespace MassTransit.SubscriptionConnectors
                 .ToList();
         }
 
-        public ConnectHandle Connect(IInboundPipe filter, object instance, IMessageRetryPolicy retryPolicy)
+        public ConnectHandle Connect(IInboundPipe filter, object instance, IRetryPolicy retryPolicy)
         {
             return new MultipleConnectHandle(_connectors.Select(x => x.Connect(filter, instance, retryPolicy)));
         }

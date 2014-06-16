@@ -17,6 +17,7 @@ namespace MassTransit.SubscriptionConnectors
     using Magnum.Extensions;
     using Pipeline;
     using Pipeline.Sinks;
+    using Policies;
     using Util;
 
 
@@ -37,7 +38,7 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect(IInboundPipe filter, object instance, IMessageRetryPolicy retryPolicy)
+        public ConnectHandle Connect(IInboundPipe filter, object instance, IRetryPolicy retryPolicy)
         {
             if (instance == null)
                 throw new ArgumentNullException("instance");

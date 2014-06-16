@@ -16,9 +16,9 @@ namespace MassTransit.Pipeline.Sinks
     using System.Threading.Tasks;
 
 
-    public class MessageInterceptorConnectable<T> :
-        Connectable<IMessageInterceptor<T>>,
-        IMessageInterceptor<T>
+    public class ObserverConnectable<T> :
+        Connectable<IConsumeObserver<T>>,
+        IConsumeObserver<T>
         where T : class
     {
         public Task PreDispatch(ConsumeContext<T> context)
