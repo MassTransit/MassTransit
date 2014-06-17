@@ -10,21 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Policies
 {
     using System.Threading;
-    using System.Threading.Tasks;
-    using Pipeline;
 
 
-    public interface IReceiveTransport
+    public static class Repeat
     {
         /// <summary>
-        /// Start receiving on a transport, sending messages to the specified pipe.
+        /// Repeat until cancelled using the cancellationToken
         /// </summary>
-        /// <param name="pipe">The receiving pipe</param>
-        /// <param name="cancellationToken">The cancellationToken for cancelling the receiver</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task Start(IPipe<ReceiveContext> pipe, CancellationToken cancellationToken);
+        public static IRepeatPolicy UntilCancelled(CancellationToken cancellationToken)
+        {
+            return new UntilCancelledRepeatPolicy(cancellationToken);
+        }
     }
 }

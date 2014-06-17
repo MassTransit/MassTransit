@@ -164,6 +164,7 @@
     <Compile Include="PipeContext.cs" />
     <Compile Include="Pipeline\DelegateFilter.cs" />
     <Compile Include="Pipeline\FilterConnectorExtensions.cs" />
+    <Compile Include="Pipeline\Filters\RepeatFilter.cs" />
     <Compile Include="Pipeline\Filters\RetryFilter.cs" />
     <Compile Include="Pipeline\IConsumeEnricher.cs" />
     <Compile Include="Pipeline\IConsumeFilter.cs" />
@@ -205,6 +206,8 @@
     <Compile Include="Pipeline\Sinks\MethodConsumerMessageAdapter.cs" />
     <Compile Include="Pipeline\Sinks\TeeConsumeContextPipe.cs" />
     <Compile Include="Pipeline\StringPipeInspector.cs" />
+    <Compile Include="Policies\CancelRetryContext.cs" />
+    <Compile Include="Policies\CancelRetryPolicy.cs" />
     <Compile Include="Policies\IRetryContext.cs" />
     <Compile Include="Policies\IRetryPolicy.cs" />
     <Compile Include="Policies\ImmediateRetryPolicy.cs" />
@@ -214,10 +217,14 @@
     <Compile Include="Policies\IRetryExceptionFilter.cs" />
     <Compile Include="Policies\MessageRetryPolicyExtensions.cs" />
     <Compile Include="Policies\NoRetryPolicy.cs" />
+    <Compile Include="Policies\PipeRetryExtensions.cs" />
+    <Compile Include="Policies\Repeat.cs" />
     <Compile Include="Policies\Retry.cs" />
     <Compile Include="Policies\RetryAllRetryExceptionFilter.cs" />
     <Compile Include="Policies\RetryExceptRetryExceptionFilter.cs" />
     <Compile Include="Policies\RetrySelectedRetryExceptionFilter.cs" />
+    <Compile Include="Policies\UntilCancelledRepeatContext.cs" />
+    <Compile Include="Policies\UntilCancelledRepeatPolicy.cs" />
     <Compile Include="ReceiveContext.cs" />
     <Compile Include="SendContext.cs" />
     <Compile Include="SentContext.cs" />

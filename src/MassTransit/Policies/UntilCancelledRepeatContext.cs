@@ -13,41 +13,32 @@
 namespace MassTransit.Policies
 {
     using System;
+    using System.Threading;
 
 
-    public class NoRetryPolicy :
-        IRetryPolicy
+    public class UntilCancelledRepeatContext :
+        IRepeatContext
     {
-        readonly IRetryContext _retryContext;
+        readonly CancellationToken _cancellationToken;
 
-        public NoRetryPolicy()
+        public UntilCancelledRepeatContext(CancellationToken cancellationToken)
         {
-            _retryContext = new NoRetryContext();
+            _cancellationToken = cancellationToken;
         }
 
-        public IRetryContext GetRetryContext()
+        public void Dispose()
         {
-            return _retryContext;
         }
 
-        public bool CanRetry(Exception exception)
+        public CancellationToken CancellationToken
         {
-            return false;
+            get { return _cancellationToken; }
         }
 
-
-        class NoRetryContext :
-            IRetryContext
+        public bool CanRepeat(out TimeSpan delay)
         {
-            public bool CanRetry(Exception exception, out TimeSpan delay)
-            {
-                delay = TimeSpan.Zero;
-                return false;
-            }
-
-            public void Dispose()
-            {
-            }
+            delay = TimeSpan.Zero;
+            return !_cancellationToken.IsCancellationRequested;
         }
     }
 }

@@ -42,7 +42,7 @@ namespace MassTransit.Policies
             _intervals = GetIntervals(retryLimit, initialInterval, intervalIncrement).ToArray();
         }
 
-        public IRetryContext GetRetryContext<T>(T context) where T : class
+        public IRetryContext GetRetryContext()
         {
             return new IntervalRetryContext(this, _intervals);
         }

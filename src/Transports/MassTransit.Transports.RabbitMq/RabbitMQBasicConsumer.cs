@@ -14,13 +14,12 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Threading;
-    using System.Threading.Tasks;
+    using Logging;
     using Pipeline;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+
 
     /// <summary>
     /// Receives messages from RabbitMQ, pushing them to the InboundPipe of the service endpoint.
@@ -29,6 +28,7 @@ namespace MassTransit.Transports.RabbitMq
         IBasicConsumer
     {
         readonly Uri _inputAddress;
+        readonly ILog _log = Logger.Get<RabbitMqBasicConsumer>();
         readonly IModel _model;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly IPipe<ReceiveContext> _receivePipe;
@@ -48,6 +48,9 @@ namespace MassTransit.Transports.RabbitMq
 
         public void HandleBasicConsumeOk(string consumerTag)
         {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("RabbitMQ Consumer Ok: {0}", consumerTag);
+
             _consumerTag = consumerTag;
         }
 
@@ -57,18 +60,19 @@ namespace MassTransit.Transports.RabbitMq
 
         public void HandleBasicCancel(string consumerTag)
         {
-            foreach (var context in _pending.Values)
-            {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("RabbitMQ Consumer Cancelled: {0}", consumerTag);
+
+            foreach (RabbitMqReceiveContext context in _pending.Values)
                 context.Cancel();
-            }
 
             // TODO notify serviceEndpoint that the consumer must be rebuilt and reconnected to RMQ
         }
 
         public void HandleModelShutdown(IModel model, ShutdownEventArgs reason)
         {
-            Console.WriteLine("Model shutdown: {0}", reason);
-            Console.WriteLine("Max consumers: {0}", _max);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("RabbitMQ Model Shutdown on consumer: {0}, max concurrent consumers: {1}", _consumerTag, _max);
         }
 
         public async void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange,
@@ -91,19 +95,18 @@ namespace MassTransit.Transports.RabbitMq
 
                 await _receivePipe.Send(context);
 
+                Interlocked.Decrement(ref _current);
                 _model.BasicAck(deliveryTag, false);
             }
             catch (Exception)
             {
+                Interlocked.Decrement(ref _current);
                 _model.BasicNack(deliveryTag, false, true);
             }
             finally
             {
-                Interlocked.Decrement(ref _current);
-
                 RabbitMqReceiveContext ignored;
                 _pending.TryRemove(deliveryTag, out ignored);
-
             }
         }
 

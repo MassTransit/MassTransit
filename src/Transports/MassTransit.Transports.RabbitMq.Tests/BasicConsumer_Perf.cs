@@ -25,6 +25,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using Newtonsoft.Json;
     using NUnit.Framework;
     using Pipeline;
+    using Policies;
     using RabbitMQ.Client;
     using Serialization;
     using Serialization.Custom;
@@ -185,6 +186,119 @@ namespace MassTransit.Transports.RabbitMq.Tests
                         Console.WriteLine("Redelivered: {0}", redeliviered);
                     }
                 }
+            }
+        }
+
+        [Test]
+        public void Using_the_real_components()
+        {
+            var connectionFactory = new ConnectionFactory
+            {
+                VirtualHost = "speed",
+                HostName = "localhost"
+            };
+
+            const int limit = 100000;
+            int count = 0;
+            int failureCount = 0;
+            int redeliviered = 0;
+            var completed = new TaskCompletionSource<bool>();
+            int processingTime = 0;
+
+            var deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
+
+            var testPipe = new TestReceivePipe(async context =>
+            {
+                if (context.Redelivered)
+                    Interlocked.Increment(ref redeliviered);
+
+                ConsumeContext consumeContext = deserializer.Deserialize(context);
+
+                // var person = consumeContext.Headers.Get<Person>("person");
+
+                ConsumeContext<ITestMessage> messageContext;
+                if (!consumeContext.TryGetMessage(out messageContext))
+                    throw new SerializationException("The message type was not supported");
+
+                Interlocked.Add(ref processingTime, (int)messageContext.ReceiveContext.ElapsedTime.TotalMilliseconds);
+
+                var number = Interlocked.Increment(ref count);
+                if (number == limit)
+                    completed.TrySetResult(true);
+            });
+
+            var retryPolicy = Retry.Exponential(int.MaxValue, 1.Seconds(), 60.Seconds(), 2.Seconds());
+            var connectionMaker = new RabbitMqConnector(connectionFactory, retryPolicy);
+
+            var transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, new RabbitMqReceiveConsumerSettings
+            {
+                QueueName = "input",
+                ExchangeName = "fast",
+                AutoDelete = true,
+                Durable = false,
+                Exclusive = false,
+                PrefetchCount = 100,
+            });
+
+            var cancelReceive = new CancellationTokenSource();
+
+            var consumerTask = transport.Start(testPipe, cancelReceive.Token);
+
+
+            var message = new TestMessage("Joe", "American Way", 27);
+
+            byte[] body;
+            using (var output = new MemoryStream())
+            using (var nonClosingStream = new NonClosingStream(output))
+            using (var writer = new StreamWriter(nonClosingStream))
+            using (var jsonWriter = new JsonTextWriter(writer))
+            {
+                var envelope = new Envelope(message, message.GetType().GetMessageTypes());
+                envelope.SourceAddress = "rabbitmq://localhost/speed/fast";
+                envelope.DestinationAddress = "rabbitmq://localhost/speed/input";
+                envelope.MessageId = NewId.NextGuid().ToString();
+                envelope.Headers["person"] = new Person("Joe", "Blow");
+
+                jsonWriter.Formatting = Formatting.Indented;
+
+                JsonMessageSerializer.Serializer.Serialize(jsonWriter, envelope);
+
+                jsonWriter.Flush();
+                writer.Flush();
+
+                body = output.ToArray();
+            }
+
+            //Console.WriteLine(Encoding.UTF8.GetString(body));
+            using (var connection = connectionFactory.CreateConnection())
+            using (var sendModel = new HaModel(connection.CreateModel()))
+            {
+                var sendToTransport = new RabbitMqSendToTransport(sendModel, "fast");
+                var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
+                var sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
+                Stopwatch timer = Stopwatch.StartNew();
+                var tasks = Enumerable.Range(0, limit)
+                    .Select(x =>
+                    {
+                        return sendToEndpoint.Send(message);
+//                                    var properties = sendModel.CreateBasicProperties();
+//                                    return sendModel.BasicPublishAsync("fast", "", properties, body);
+                    }).AsParallel().ToArray();
+
+                completed.Task.Wait(10.Seconds());
+                timer.Stop();
+
+                cancelReceive.Cancel();
+                consumerTask.Wait(10.Seconds());
+
+                Task.WaitAll(tasks, 10.Seconds());
+
+                Console.WriteLine("Elapsed time for {0} messages: {1}ms", limit, timer.ElapsedMilliseconds);
+                Console.WriteLine("Messages per second: {0}", limit * 1000L / timer.ElapsedMilliseconds);
+                Console.WriteLine("Processing time per message: {0}ms", processingTime / count);
+
+                Console.WriteLine("Messages: {0}", count);
+                Console.WriteLine("Redelivered: {0}", redeliviered);
             }
         }
 

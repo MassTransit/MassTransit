@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,41 +13,29 @@
 namespace MassTransit.Policies
 {
     using System;
+    using System.Threading;
 
 
-    public class NoRetryPolicy :
+    public class CancelRetryPolicy :
         IRetryPolicy
     {
-        readonly IRetryContext _retryContext;
+        readonly CancellationToken _cancellationToken;
+        readonly IRetryPolicy _retryPolicy;
 
-        public NoRetryPolicy()
+        public CancelRetryPolicy(IRetryPolicy retryPolicy, CancellationToken cancellationToken)
         {
-            _retryContext = new NoRetryContext();
+            _retryPolicy = retryPolicy;
+            _cancellationToken = cancellationToken;
         }
 
         public IRetryContext GetRetryContext()
         {
-            return _retryContext;
+            return new CancelRetryContext(_retryPolicy.GetRetryContext(), _cancellationToken);
         }
 
         public bool CanRetry(Exception exception)
         {
-            return false;
-        }
-
-
-        class NoRetryContext :
-            IRetryContext
-        {
-            public bool CanRetry(Exception exception, out TimeSpan delay)
-            {
-                delay = TimeSpan.Zero;
-                return false;
-            }
-
-            public void Dispose()
-            {
-            }
+            return !_cancellationToken.IsCancellationRequested && _retryPolicy.CanRetry(exception);
         }
     }
 }

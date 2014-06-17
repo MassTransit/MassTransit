@@ -13,48 +13,62 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Logging;
     using Pipeline;
+    using Pipeline.Filters;
     using Policies;
-    using RabbitMQ.Client;
 
 
     public class RabbitMqReceiveTransport :
         IReceiveTransport
     {
-        readonly ConnectionFactory _connectionFactory;
+        readonly IRabbitMqConnector _connector;
+        readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
         readonly IRetryPolicy _retryPolicy;
+        readonly ReceiveConsumerSettings _settings;
 
-        public RabbitMqReceiveTransport(ConnectionFactory connectionFactory, IRetryPolicy retryPolicy)
+        public RabbitMqReceiveTransport(IRabbitMqConnector connector, IRetryPolicy retryPolicy, ReceiveConsumerSettings settings)
         {
-            _connectionFactory = connectionFactory;
+            _connector = connector;
             _retryPolicy = retryPolicy;
+            _settings = settings;
         }
 
         public async Task Start(IPipe<ReceiveContext> pipe, CancellationToken cancellationToken)
         {
-            using (var connection = _connectionFactory.CreateConnection())
+            IRepeatPolicy repeatPolicy = Repeat.UntilCancelled(cancellationToken);
+            var retryPolicy = new CancelRetryPolicy(_retryPolicy, cancellationToken);
+
+            IFilter<ModelContext> modelConsumer = new ReceiveConsumerFilter(pipe, _settings);
+
+            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(modelConsumer.Combine());
+            IFilter<ConnectionContext> retryFilter = new RetryFilter<ConnectionContext>(retryPolicy);
+
+            IPipe<ConnectionContext> receivePipe = retryFilter.Combine(modelFilter);
+
+            IRepeatContext repeatContext = repeatPolicy.GetRepeatContext();
+            TimeSpan delay = TimeSpan.Zero;
+            do
             {
-                using (var model = connection.CreateModel())
+                if (delay > TimeSpan.Zero)
+                    await Task.Delay(delay, repeatContext.CancellationToken);
+
+                try
                 {
-                    var inputAddress = new Uri("rabbitmq://localhost/speed/input");
-
-                    var consumer = new RabbitMqBasicConsumer(model, inputAddress, pipe);
-
-                    model.QueueDeclare("input", false, false, true, new Dictionary<string, object>());
-                    model.QueuePurge("input");
-
-                    model.ExchangeDeclare("fast", ExchangeType.Fanout, false, true, new Dictionary<string, object>());
-                    model.QueueBind("input", "fast", "");
-
-                    model.BasicQos(0, 100, false);
-                    model.BasicConsume("input", false, consumer);
-
-
+                    await _connector.Connect(receivePipe, cancellationToken);
+                }
+                catch (TaskCanceledException)
+                {
+                }
+                catch (Exception ex)
+                {
+                    if (_log.IsErrorEnabled)
+                        _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);
                 }
             }
+            while (repeatContext.CanRepeat(out delay));
         }
     }
 }

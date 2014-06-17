@@ -28,9 +28,7 @@ namespace MassTransit.Policies
             _intervals = Enumerable.Repeat(TimeSpan.Zero, retryLimit).ToArray();
         }
 
-
-        public IRetryContext GetRetryContext<T>(T context)
-            where T : class
+        public IRetryContext GetRetryContext()
         {
             return new IntervalRetryContext(this, _intervals);
         }
