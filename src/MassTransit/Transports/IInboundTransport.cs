@@ -17,15 +17,8 @@ namespace MassTransit.Transports
 {
 	using System;
 
-    /// <summary>
-    /// A service endpoint has a inbound transport that pushes messages to consumers
-    /// </summary>
-    public interface IServiceEndpoint
-    {
-        
-    }
 
-	/// <summary>
+    /// <summary>
 	/// The inbound transport takes messages from the underlying transport technology and hands it to the
 	/// Action{IReceiveContext} that can be gotten from the lookup function 
 	/// passed to the <see cref="Receive"/> method.
@@ -43,6 +36,6 @@ namespace MassTransit.Transports
 		/// and gives back either a non-null action handler for </param>
 		/// <param name="timeout">The timeout to wait for the inbound transport technology to
 		/// yield a message before giving up.</param>
-		void Receive([NotNull] Func<IReceiveContext, Action<IReceiveContext>> lookupSinkChain, TimeSpan timeout);
+		void Receive( Func<IReceiveContext, Action<IReceiveContext>> lookupSinkChain, TimeSpan timeout);
 	}
 }

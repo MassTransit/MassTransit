@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Sinks
 {
     using System;
     using System.Threading.Tasks;
+    using Subscriptions;
 
 
     public class ObserverConnectable<T> :

@@ -23,7 +23,7 @@ namespace MassTransit.Transports
 	public class TransportSettings :
 		ITransportSettings
 	{
-		public TransportSettings([NotNull] IEndpointAddress address)
+		public TransportSettings( IEndpointAddress address)
 		{
 			Guard.AgainstNull(address, "address");
 
@@ -38,7 +38,7 @@ namespace MassTransit.Transports
 			PurgeExistingMessages = false;
 		}
 
-		public TransportSettings([NotNull] IEndpointAddress address, [NotNull] ITransportSettings source)
+		public TransportSettings( IEndpointAddress address,  ITransportSettings source)
 		{
 			Guard.AgainstNull(address, "address");
 			Guard.AgainstNull(source, "source");

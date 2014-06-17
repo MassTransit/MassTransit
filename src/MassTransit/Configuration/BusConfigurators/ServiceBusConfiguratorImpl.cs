@@ -176,7 +176,7 @@ namespace MassTransit.BusConfigurators
         /// first. Use with caution.
         /// </summary>
         /// <param name="callback">The callback that changes the settings.</param>
-        public void ChangeSettings([NotNull] Action<ServiceBusSettings> callback)
+        public void ChangeSettings( Action<ServiceBusSettings> callback)
         {
             if (callback == null) throw new ArgumentNullException("callback");
             callback(_settings);

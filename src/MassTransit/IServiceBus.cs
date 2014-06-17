@@ -41,7 +41,7 @@ namespace MassTransit
         /// <summary>
         ///   The endpoint from which messages are received
         /// </summary>
-        [NotNull]
+        
         IEndpoint Endpoint { get; }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace MassTransit
         /// <param name = "message">The messages to be published</param>
         /// <param name = "contextCallback">A callback that gives the caller
         /// access to the publish context.</param>
-        void Publish<T>([NotNull] T message, [NotNull] Action<IPublishContext<T>> contextCallback)
+        void Publish<T>( T message,  Action<IPublishContext<T>> contextCallback)
             where T : class;
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace MassTransit
         /// to the specified message type, an exception will be thrown.
         /// </summary>
         /// <param name="message">The message object</param>
-        void Publish([NotNull] object message);
+        void Publish( object message);
 
         /// <summary>
         /// Publishes an object as a message, using the message type specified. If the object cannot be cast
@@ -113,7 +113,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="message">The message object</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
-        void Publish([NotNull] object message, [NotNull] Type messageType);
+        void Publish( object message,  Type messageType);
 
         /// <summary>
         /// Publishes an object as a message, using the message type specified. If the object cannot be cast
@@ -122,7 +122,7 @@ namespace MassTransit
         /// <param name="message">The message object</param>
         /// <param name = "contextCallback">A callback that gives the caller
         /// access to the publish context.</param>
-        void Publish([NotNull] object message, [NotNull] Action<IPublishContext> contextCallback);
+        void Publish( object message,  Action<IPublishContext> contextCallback);
 
         /// <summary>
         /// Publishes an object as a message, using the message type specified. If the object cannot be cast
@@ -132,7 +132,7 @@ namespace MassTransit
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name = "contextCallback">A callback that gives the caller
         /// access to the publish context.</param>
-        void Publish([NotNull] object message, [NotNull] Type messageType, [NotNull] Action<IPublishContext> contextCallback);
+        void Publish( object message,  Type messageType,  Action<IPublishContext> contextCallback);
         
         /// <summary>
         /// <see cref="IServiceBus.Publish{T}"/>: this is a "dynamically"
@@ -168,7 +168,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="address"></param>
         /// <returns>The endpoint that corresponds to the uri passed</returns>
-        IEndpoint GetEndpoint([NotNull] Uri address);
+        IEndpoint GetEndpoint( Uri address);
 
         /// <summary>
         ///   Not sure this is going to make it, but trying a new approach.

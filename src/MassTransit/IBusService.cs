@@ -33,7 +33,7 @@ namespace MassTransit
 		/// Called when the service is being started, which is after the service bus has been started.
 		/// </summary>
 		/// <param name="bus">The service bus</param>
-		void Start([NotNull] IServiceBus bus);
+		void Start( IServiceBus bus);
 
 		/// <summary>
 		/// Called when the ServiceBus is being disposed, to allow any resources or subscriptions

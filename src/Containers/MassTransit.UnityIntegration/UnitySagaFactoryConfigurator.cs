@@ -36,7 +36,7 @@ namespace MassTransit.UnityIntegration
             this.FastInvoke(new[] {sagaType}, "Configure");
         }
 
-        [UsedImplicitly]
+        
         public void Configure<T>()
             where T : class, ISaga
         {

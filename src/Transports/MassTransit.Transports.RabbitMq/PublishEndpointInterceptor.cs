@@ -108,7 +108,7 @@ namespace MassTransit.Transports.RabbitMq
             this.FastInvoke(new[] {messageType}, "CreateEndpointSink", endpoint);
         }
 
-        [UsedImplicitly]
+        
         void CreateEndpointSink<TMessage>(IEndpoint endpoint)
             where TMessage : class
         {

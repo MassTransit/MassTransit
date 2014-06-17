@@ -59,7 +59,7 @@ namespace MassTransit
         /// Sets the bus which is receiving this message/data.
         /// </summary>
         /// <param name="bus">Bus instance</param>
-        void SetBus([NotNull] IServiceBus bus);
+        void SetBus( IServiceBus bus);
 
         void SetRequestId(string value);
 
@@ -94,7 +94,7 @@ namespace MassTransit
         /// and for testing.
         /// </summary>
         /// <param name="stream">Stream to replace the previous stream with</param>
-        void SetBodyStream([NotNull] Stream stream);
+        void SetBodyStream( Stream stream);
 
         void CopyBodyTo(Stream stream);
 

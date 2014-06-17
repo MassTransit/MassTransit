@@ -63,15 +63,6 @@ namespace MassTransit
 
             return configurator;
         }
-
-        public static T UseVersionOneXmlSerializer<T>(this T configurator)
-            where T : EndpointFactoryConfigurator
-        {
-            configurator.SetDefaultSerializer<VersionOneXmlMessageSerializer>();
-
-            return configurator;
-        }
-
         public static T UseBinarySerializer<T>(this T configurator)
             where T : EndpointFactoryConfigurator
         {
@@ -103,14 +94,6 @@ namespace MassTransit
             where T : EndpointFactoryConfigurator
         {
             configurator.SupportMessageSerializer<XmlMessageSerializer>();
-
-            return configurator;
-        }
-
-        public static T SupportVersionOneXmlSerializer<T>(this T configurator)
-            where T : EndpointFactoryConfigurator
-        {
-            configurator.SupportMessageSerializer<VersionOneXmlMessageSerializer>();
 
             return configurator;
         }

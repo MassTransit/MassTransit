@@ -43,7 +43,7 @@ namespace MassTransit.EndpointConfigurators
             return new InMemoryInboundMessageTracker(retryLimit);
         }
 
-        public EndpointFactoryDefaultSettings([NotNull] IEndpointFactoryDefaultSettings defaults)
+        public EndpointFactoryDefaultSettings( IEndpointFactoryDefaultSettings defaults)
         {
             if (defaults == null)
                 throw new ArgumentNullException("defaults");

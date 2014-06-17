@@ -24,6 +24,6 @@ namespace MassTransit.Diagnostics.Introspection
 		/// 	Lets the implementor add diagnostics to the probe instance.
 		/// </summary>
 		/// <param name="probe"> Probe instance </param>
-		void Inspect([NotNull] DiagnosticsProbe probe);
+		void Inspect( DiagnosticsProbe probe);
 	}
 }

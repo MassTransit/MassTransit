@@ -28,7 +28,7 @@ namespace MassTransit.Serialization
             _serializers = new Dictionary<string, IMessageSerializer>();
             _defaultSerializer = () =>
                 {
-                    var serializer = new VersionOneXmlMessageSerializer();
+                    var serializer = new JsonMessageSerializer();
 
                     _defaultSerializer = () => serializer;
 
@@ -56,7 +56,7 @@ namespace MassTransit.Serialization
             return serializer != null;
         }
 
-        public void AddSerializer([NotNull] IMessageSerializer serializer)
+        public void AddSerializer( IMessageSerializer serializer)
         {
             if (serializer == null)
                 throw new ArgumentNullException("serializer");

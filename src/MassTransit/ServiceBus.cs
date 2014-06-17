@@ -81,7 +81,7 @@ namespace MassTransit
 
         public TimeSpan ShutdownTimeout { get; set; }
 
-        [UsedImplicitly]
+        
         protected string DebugDisplay
         {
             get { return string.Format("{0}: ", Endpoint.Address); }

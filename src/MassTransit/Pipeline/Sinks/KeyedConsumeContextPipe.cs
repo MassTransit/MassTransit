@@ -55,8 +55,7 @@ namespace MassTransit.Pipeline.Sinks
 
         public bool Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this,
-                (x, _) => _pipes.Values.Cast<IConsumeFilter<T>>().All(pipe => pipe.Inspect(x)));
+            return inspector.Inspect(this, (x, _) => _pipes.Values.Cast<IConsumeFilter<T>>().All(pipe => pipe.Inspect(x)));
         }
 
         void RemovePipe(TKey key, ConnectHandle connectHandle)
@@ -93,6 +92,11 @@ namespace MassTransit.Pipeline.Sinks
             public void Disconnect()
             {
                 _removeKey(_key, _handle);
+            }
+
+            public void Dispose()
+            {
+                Disconnect();
             }
         }
     }

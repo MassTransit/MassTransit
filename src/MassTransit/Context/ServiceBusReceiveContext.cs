@@ -130,7 +130,7 @@ namespace MassTransit.Context
 		/// threw exceptions, then the last exception will be the inner exception
 		/// and the others won't be tracked.</exception>
 		[DebuggerNonUserCode]
-		void DeliverMessageToConsumers([NotNull] IReceiveContext context)
+		void DeliverMessageToConsumers( IReceiveContext context)
 		{
 			try
 			{

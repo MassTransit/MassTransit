@@ -36,7 +36,7 @@ namespace MassTransit.StructureMapIntegration
             this.FastInvoke(new[] {sagaType}, "Configure");
         }
 
-        [UsedImplicitly]
+        
         public void Configure<T>()
             where T : class, ISaga
         {

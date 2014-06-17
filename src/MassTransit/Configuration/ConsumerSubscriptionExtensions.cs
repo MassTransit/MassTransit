@@ -28,8 +28,8 @@ namespace MassTransit
         static readonly ILog _log = Logger.Get(typeof (ConsumerSubscriptionExtensions));
 
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-            [NotNull] this SubscriptionBusServiceConfigurator configurator,
-            [NotNull] IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy = null)
+             this SubscriptionBusServiceConfigurator configurator,
+             IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy = null)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -45,7 +45,7 @@ namespace MassTransit
         }
 
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-            [NotNull] this SubscriptionBusServiceConfigurator configurator, IRetryPolicy retryPolicy = null)
+             this SubscriptionBusServiceConfigurator configurator, IRetryPolicy retryPolicy = null)
             where TConsumer : class, IConsumer, new()
         {
             if (_log.IsDebugEnabled)
@@ -63,7 +63,7 @@ namespace MassTransit
         }
 
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-            [NotNull] this SubscriptionBusServiceConfigurator configurator, [NotNull] Func<TConsumer> consumerFactory, IRetryPolicy retryPolicy = null)
+             this SubscriptionBusServiceConfigurator configurator,  Func<TConsumer> consumerFactory, IRetryPolicy retryPolicy = null)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -81,9 +81,9 @@ namespace MassTransit
         }
 
         public static ConsumerSubscriptionConfigurator Consumer(
-            [NotNull] this SubscriptionBusServiceConfigurator configurator,
-            [NotNull] Type consumerType,
-            [NotNull] Func<Type, object> consumerFactory, IRetryPolicy retryPolicy = null)
+             this SubscriptionBusServiceConfigurator configurator,
+             Type consumerType,
+             Func<Type, object> consumerFactory, IRetryPolicy retryPolicy = null)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType.ToShortTypeName());
@@ -98,7 +98,7 @@ namespace MassTransit
             return consumerConfigurator as ConsumerSubscriptionConfigurator;
         }
 
-        public static UnsubscribeAction SubscribeConsumer<TConsumer>([NotNull] this IServiceBus bus, IRetryPolicy retryPolicy = null)
+        public static UnsubscribeAction SubscribeConsumer<TConsumer>( this IServiceBus bus, IRetryPolicy retryPolicy = null)
             where TConsumer : class, IConsumer, new()
         {
             if (_log.IsDebugEnabled)
@@ -111,8 +111,8 @@ namespace MassTransit
             throw new NotImplementedException();
         }
 
-        public static UnsubscribeAction SubscribeConsumer<TConsumer>([NotNull] this IServiceBus bus,
-                                                                     [NotNull] Func<TConsumer> consumerFactory, IRetryPolicy retryPolicy = null)
+        public static UnsubscribeAction SubscribeConsumer<TConsumer>( this IServiceBus bus,
+                                                                      Func<TConsumer> consumerFactory, IRetryPolicy retryPolicy = null)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -125,8 +125,8 @@ namespace MassTransit
             throw new NotImplementedException();
         }
 
-        public static UnsubscribeAction SubscribeConsumer<TConsumer>([NotNull] this IServiceBus bus,
-                                                                     [NotNull] IConsumerFactory<TConsumer>
+        public static UnsubscribeAction SubscribeConsumer<TConsumer>( this IServiceBus bus,
+                                                                      IConsumerFactory<TConsumer>
                                                                          consumerFactory, IRetryPolicy retryPolicy = null)
             where TConsumer : class, IConsumer
         {
@@ -138,8 +138,8 @@ namespace MassTransit
             throw new NotImplementedException();
         }
 
-        public static UnsubscribeAction SubscribeConsumer([NotNull] this IServiceBus bus, [NotNull] Type consumerType,
-                                                          [NotNull] Func<Type, object> objectFactory, IRetryPolicy retryPolicy = null)
+        public static UnsubscribeAction SubscribeConsumer( this IServiceBus bus,  Type consumerType,
+                                                           Func<Type, object> objectFactory, IRetryPolicy retryPolicy = null)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType);

@@ -36,8 +36,8 @@ namespace MassTransit
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="container">The Windsor container.</param>
         public static void LoadFrom(
-            [NotNull] this SubscriptionBusServiceConfigurator configurator,
-            [NotNull] IWindsorContainer container)
+             this SubscriptionBusServiceConfigurator configurator,
+             IWindsorContainer container)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
@@ -71,8 +71,8 @@ namespace MassTransit
         /// <param name="container">The container that the consumer should be loaded from.</param>
         /// <returns>The configurator</returns>
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-            [NotNull] this SubscriptionBusServiceConfigurator configurator,
-            [NotNull] IWindsorContainer container)
+             this SubscriptionBusServiceConfigurator configurator,
+             IWindsorContainer container)
             where TConsumer : class, IConsumer
         {
             if (configurator == null)
@@ -93,8 +93,8 @@ namespace MassTransit
         /// <param name="container">The windsor container</param>
         /// <returns>The configurator</returns>
         public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-            [NotNull] this SubscriptionBusServiceConfigurator configurator,
-            [NotNull] IWindsorContainer container)
+             this SubscriptionBusServiceConfigurator configurator,
+             IWindsorContainer container)
             where TSaga : class, ISaga
         {
             if (configurator == null)

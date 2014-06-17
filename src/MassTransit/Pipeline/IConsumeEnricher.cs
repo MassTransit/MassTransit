@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    using System;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -24,4 +25,12 @@ namespace MassTransit.Pipeline
         Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumeContext<T, TMessage>> next)
             where TMessage : class;
     }
+
+    public interface IReceiveTranslateor
+    {
+        Task Send(ReceiveContext context, IPipe<ConsumeContext> next);
+
+        bool Inspect(IPipeInspector inspector);
+    }
+
 }

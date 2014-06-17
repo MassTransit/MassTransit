@@ -137,7 +137,7 @@ namespace MassTransit.Containers.Tests
         }
 
 
-        [UsedImplicitly]
+        
         class DummySaga : ISaga,
                           InitiatedBy<FirstSagaMessage>,
                           Orchestrates<SecondSagaMessage>

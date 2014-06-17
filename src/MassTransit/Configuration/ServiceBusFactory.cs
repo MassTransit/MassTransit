@@ -49,8 +49,8 @@ namespace MassTransit
         }
 
 
-	    [NotNull]
-		public static IServiceBus New([NotNull] Action<ServiceBusConfigurator> configure)
+	    
+		public static IServiceBus New( Action<ServiceBusConfigurator> configure)
 		{
 			Guard.AgainstNull(configure, "configure");
 
@@ -70,7 +70,7 @@ namespace MassTransit
 			}
 		}
 
-		public static void ConfigureDefaultSettings([NotNull] Action<ServiceBusDefaultSettingsConfigurator> configure)
+		public static void ConfigureDefaultSettings( Action<ServiceBusDefaultSettingsConfigurator> configure)
 		{
 			Guard.AgainstNull(configure);
 

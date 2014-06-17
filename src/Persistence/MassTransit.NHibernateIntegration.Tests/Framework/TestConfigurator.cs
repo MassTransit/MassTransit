@@ -27,7 +27,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Framework
 {
 	public static class TestConfigurator
 	{
-		public static NHibernate.Cfg.Configuration CreateConfiguration([CanBeNull] string connectionString, [CanBeNull] Action<NHibernate.Cfg.Configuration> configurator)
+		public static NHibernate.Cfg.Configuration CreateConfiguration( string connectionString,  Action<NHibernate.Cfg.Configuration> configurator)
 		{
 			Assert.NotNull(typeof(SQLiteConnection));
 

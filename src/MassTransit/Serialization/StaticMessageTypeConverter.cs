@@ -21,7 +21,7 @@ namespace MassTransit.Serialization
         readonly object _message;
         readonly Type _messageType;
 
-        public StaticMessageTypeConverter([NotNull] object message)
+        public StaticMessageTypeConverter( object message)
         {
             _message = message;
             _messageType = message.GetType();

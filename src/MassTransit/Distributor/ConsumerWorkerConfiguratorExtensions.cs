@@ -24,8 +24,8 @@ namespace MassTransit
         static readonly ILog _log = Logger.Get(typeof(ConsumerSubscriptionExtensions));
 
         public static ConsumerWorkerConfigurator<TConsumer> Consumer<TConsumer>(
-            [NotNull] this WorkerBusServiceConfigurator configurator,
-            [NotNull] IConsumerFactory<TConsumer> consumerFactory)
+             this WorkerBusServiceConfigurator configurator,
+             IConsumerFactory<TConsumer> consumerFactory)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -35,7 +35,7 @@ namespace MassTransit
         }
 
         public static ConsumerWorkerConfigurator<TConsumer> Consumer<TConsumer>(
-            [NotNull] this WorkerBusServiceConfigurator configurator)
+             this WorkerBusServiceConfigurator configurator)
             where TConsumer : class, IConsumer, new()
         {
             if (_log.IsDebugEnabled)
@@ -47,7 +47,7 @@ namespace MassTransit
         }
 
         public static ConsumerWorkerConfigurator<TConsumer> Consumer<TConsumer>(
-            [NotNull] this WorkerBusServiceConfigurator configurator, [NotNull] Func<TConsumer> consumerFactory)
+             this WorkerBusServiceConfigurator configurator,  Func<TConsumer> consumerFactory)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -59,9 +59,9 @@ namespace MassTransit
         }
 
         public static ConsumerWorkerConfigurator Consumer(
-            [NotNull] this WorkerBusServiceConfigurator configurator,
-            [NotNull] Type consumerType,
-            [NotNull] Func<Type, object> consumerFactory)
+             this WorkerBusServiceConfigurator configurator,
+             Type consumerType,
+             Func<Type, object> consumerFactory)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer Worker: {0} (by type, using object consumer factory)",

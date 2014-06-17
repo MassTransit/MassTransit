@@ -30,7 +30,7 @@ namespace MassTransit.Builders
         readonly SupportedMessageSerializers _messageSerializers;
         readonly IDictionary<string, ITransportFactory> _transportFactories;
 
-        public EndpointFactoryBuilderImpl([NotNull] IEndpointFactoryDefaultSettings defaults)
+        public EndpointFactoryBuilderImpl( IEndpointFactoryDefaultSettings defaults)
         {
             if (defaults == null)
                 throw new ArgumentNullException("defaults");

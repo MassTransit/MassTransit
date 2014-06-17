@@ -24,8 +24,8 @@ namespace MassTransit
         static readonly ILog _log = Logger.Get(typeof(ConsumerSubscriptionExtensions));
 
         public static ConsumerSubscriptionConfigurator<TConsumer> InterceptingConsumer<TConsumer>(
-            [NotNull] this SubscriptionBusServiceConfigurator configurator,
-            [NotNull] IConsumerFactory<TConsumer> consumerFactory, [NotNull] ConsumerFactoryInterceptor<TConsumer> interceptor)
+             this SubscriptionBusServiceConfigurator configurator,
+             IConsumerFactory<TConsumer> consumerFactory,  ConsumerFactoryInterceptor<TConsumer> interceptor)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -38,7 +38,7 @@ namespace MassTransit
         }
 
         public static ConsumerSubscriptionConfigurator<TConsumer> InterceptingConsumer<TConsumer>(
-            [NotNull] this SubscriptionBusServiceConfigurator configurator, [NotNull] ConsumerFactoryInterceptor<TConsumer> interceptor)
+             this SubscriptionBusServiceConfigurator configurator,  ConsumerFactoryInterceptor<TConsumer> interceptor)
             where TConsumer : class, IConsumer, new()
         {
             if (_log.IsDebugEnabled)
@@ -54,8 +54,8 @@ namespace MassTransit
         }
 
         public static ConsumerSubscriptionConfigurator<TConsumer> InterceptingConsumer<TConsumer>(
-            [NotNull] this SubscriptionBusServiceConfigurator configurator, [NotNull] Func<TConsumer> consumerFactory,
-            [NotNull] ConsumerFactoryInterceptor<TConsumer> interceptor)
+             this SubscriptionBusServiceConfigurator configurator,  Func<TConsumer> consumerFactory,
+             ConsumerFactoryInterceptor<TConsumer> interceptor)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -69,8 +69,8 @@ namespace MassTransit
             return configurator.Consumer(interceptingConsumerFactory);
         }
 
-        public static UnsubscribeAction SubscribeInterceptingConsumer<TConsumer>([NotNull] this IServiceBus bus,
-            [NotNull] ConsumerFactoryInterceptor<TConsumer> interceptor)
+        public static UnsubscribeAction SubscribeInterceptingConsumer<TConsumer>( this IServiceBus bus,
+             ConsumerFactoryInterceptor<TConsumer> interceptor)
             where TConsumer : class, IConsumer, new()
         {
             if (_log.IsDebugEnabled)
@@ -86,8 +86,8 @@ namespace MassTransit
             throw new NotImplementedException();
         }
 
-        public static UnsubscribeAction SubscribeInterceptingConsumer<TConsumer>([NotNull] this IServiceBus bus,
-            [NotNull] Func<TConsumer> consumerFactory, [NotNull] ConsumerFactoryInterceptor<TConsumer> interceptor)
+        public static UnsubscribeAction SubscribeInterceptingConsumer<TConsumer>( this IServiceBus bus,
+             Func<TConsumer> consumerFactory,  ConsumerFactoryInterceptor<TConsumer> interceptor)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -102,8 +102,8 @@ namespace MassTransit
             throw new NotImplementedException();
         }
 
-        public static UnsubscribeAction SubscribeInterceptingConsumer<TConsumer>([NotNull] this IServiceBus bus,
-            [NotNull] IConsumerFactory<TConsumer> consumerFactory, [NotNull] ConsumerFactoryInterceptor<TConsumer> interceptor)
+        public static UnsubscribeAction SubscribeInterceptingConsumer<TConsumer>( this IServiceBus bus,
+             IConsumerFactory<TConsumer> consumerFactory,  ConsumerFactoryInterceptor<TConsumer> interceptor)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)

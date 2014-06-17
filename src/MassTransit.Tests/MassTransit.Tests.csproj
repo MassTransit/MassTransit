@@ -220,7 +220,6 @@
     <Compile Include="Saga\StateMachine\StateMachineSubscriberTestBase.cs" />
     <Compile Include="Saga\StateMachine\TestSaga_Specs.cs" />
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
-    <Compile Include="Internal\IdempotentHashtable_Specs.cs" />
     <Compile Include="LocalSubscriptionCache_Specs.cs" />
     <Compile Include="Messages\ResponseMessage.cs" />
     <Compile Include="Dispatcher_Specs.cs" />
@@ -239,7 +238,6 @@
     <Compile Include="Serialization\SerializationSpecificationBase.cs" />
     <Compile Include="Serialization\SerializationTest.cs" />
     <Compile Include="Serialization\TransportContentType_Specs.cs" />
-    <Compile Include="Serialization\Version_Specs.cs" />
     <Compile Include="SubscribeConsumer_Specs.cs" />
     <Compile Include="Subscriptions\PolymorphicMessage_Specs.cs" />
     <Compile Include="Subscriptions\Removing_a_subscription_client.cs" />
@@ -324,7 +322,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Reactive\Samples\" />
+    <Folder Include="Internal\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

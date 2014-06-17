@@ -207,7 +207,7 @@ namespace MassTransit.Context
         /// <typeparam name="T">Message type</typeparam>
         /// <param name="message">The message to send/publish</param>
         /// <param name="contextCallback">The action to setup the context on the outbound message</param>
-        public void Respond<T>(T message, [NotNull] Action<ISendContext<T>> contextCallback) where T : class
+        public void Respond<T>(T message,  Action<ISendContext<T>> contextCallback) where T : class
         {
             if (contextCallback == null)
                 throw new ArgumentNullException("contextCallback");
@@ -238,13 +238,13 @@ namespace MassTransit.Context
         /// <param name="bodyStream">Body stream to create receive context from</param>
         /// <param name="transactional">True if the transport is transactional and will roll back failed messages </param>
         /// <returns>The receive context</returns>
-        [NotNull]
+        
         public static ReceiveContext FromBodyStream(Stream bodyStream, bool transactional)
         {
             return new ReceiveContext(bodyStream, transactional);
         }
 
-        [NotNull]
+        
         public static ReceiveContext FromBodyStream(Stream bodyStream)
         {
             return new ReceiveContext(bodyStream, false);
@@ -254,7 +254,7 @@ namespace MassTransit.Context
         /// Create a new empty receive context
         /// </summary>
         /// <returns></returns>
-        [NotNull]
+        
         public static ReceiveContext Empty()
         {
             return new ReceiveContext(null, false);

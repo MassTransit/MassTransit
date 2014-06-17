@@ -53,7 +53,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The type of the message to respond with.</typeparam>
         /// <param name="message">The message to send in response</param>
-        Task<SentContext> RespondAsync<T>(T message)
+        Task RespondAsync<T>(T message)
             where T : class;
 
         /// <summary>

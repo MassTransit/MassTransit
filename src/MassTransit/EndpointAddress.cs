@@ -26,7 +26,7 @@ namespace MassTransit
         bool _isTransactional;
         Uri _uri;
 
-        public EndpointAddress([NotNull] Uri uri)
+        public EndpointAddress( Uri uri)
         {
             Guard.AgainstNull(uri, "uri");
 
@@ -37,7 +37,7 @@ namespace MassTransit
             _isTransactional = CheckForTransactionalHint(uri, false);
         }
 
-        public EndpointAddress([NotNull] string uriString)
+        public EndpointAddress( string uriString)
         {
             Guard.AgainstEmpty(uriString, "uriString");
 

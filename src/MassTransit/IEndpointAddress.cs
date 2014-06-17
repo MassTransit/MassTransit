@@ -24,12 +24,7 @@ namespace MassTransit
         /// </summary>
         Uri Uri { get; }
 
-        /// <summary>
-        /// True if the endpoint is local to this machine
-        /// </summary>
-        bool IsLocal { get; }
-
-        /// <summary>
+	    /// <summary>
         /// Was transactional requested by the Uri
         /// </summary>
         bool IsTransactional { get; }

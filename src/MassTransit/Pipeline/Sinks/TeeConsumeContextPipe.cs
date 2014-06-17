@@ -106,6 +106,11 @@ namespace MassTransit.Pipeline.Sinks
             {
                 _removePipe(_pipeId);
             }
+
+            public void Dispose()
+            {
+                Disconnect();
+            }
         }
     }
 }

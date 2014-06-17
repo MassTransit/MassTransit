@@ -10,11 +10,32 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Contexts
+namespace MassTransit.Pipeline
 {
-    public class RabbitMqSentContext<T> :
-        SentContext<T>
+    using System.Threading.Tasks;
+
+
+    public class LeftMergePipe<T1, T> :
+        IPipe<ConsumeContext<T>>
         where T : class
     {
+        readonly T1 _item1;
+        readonly IPipe<ConsumeContext<T1, T>> _output;
+
+        public LeftMergePipe(T1 item1, IPipe<ConsumeContext<T1, T>> output)
+        {
+            _item1 = item1;
+            _output = output;
+        }
+
+        public Task Send(ConsumeContext<T> context)
+        {
+            return _output.Send(context.Push(_item1));
+        }
+
+        public bool Inspect(IPipeInspector inspector)
+        {
+            return inspector.Inspect(this, (x, _) => _output.Inspect(x));
+        }
     }
 }

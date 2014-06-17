@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Saga
 {
     using System.Diagnostics;
     using Magnum.TestFramework;
+    using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Subscriptions;
     using Messages;
@@ -52,7 +53,7 @@ namespace MassTransit.Tests.Saga
             Stopwatch timer = Stopwatch.StartNew();
 
             var controller = new RegisterUserController(LocalBus);
-            using (IDisposableConnectHandle unsubscribe = LocalBus.SubscribeInstance(controller).Disposable())
+            using (ConnectHandle unsubscribe = LocalBus.SubscribeInstance(controller))
             {
                 RemoteBus.ShouldHaveSubscriptionFor<UserRegistrationPending>();
                 RemoteBus.ShouldHaveSubscriptionFor<UserRegistrationComplete>();
