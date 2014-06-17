@@ -22,27 +22,27 @@ namespace MassTransit.Pipeline.Filters
     /// with the policy
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RetryFilter<T> :
+    public class RepeatFilter<T> :
         IFilter<T>
         where T : class, PipeContext
     {
-        readonly IRetryPolicy _retryPolicy;
+        readonly IRepeatPolicy _repeatPolicy;
 
-        public RetryFilter(IRetryPolicy retryPolicy)
+        public RepeatFilter(IRepeatPolicy repeatPolicy)
         {
-            _retryPolicy = retryPolicy;
+            _repeatPolicy = repeatPolicy;
         }
 
-        public IRetryPolicy RetryPolicy
+        public IRepeatPolicy RepeatPolicy
         {
-            get { return _retryPolicy; }
+            get { return _repeatPolicy; }
         }
 
         public async Task Send(T context, IPipe<T> next)
         {
-            using (IRetryContext retryContext = _retryPolicy.GetRetryContext())
+            using (IRepeatContext repeatContext = _repeatPolicy.GetRepeatContext())
             {
-                await Attempt(retryContext, context, next);
+                await Attempt(repeatContext, context, next);
             }
         }
 
@@ -51,24 +51,17 @@ namespace MassTransit.Pipeline.Filters
             return inspector.Inspect(this);
         }
 
-        static async Task Attempt(IRetryContext retryContext, T context, IPipe<T> next)
+        static async Task Attempt(IRepeatContext repeatContext, T context, IPipe<T> next)
         {
-            TimeSpan delay;
-            try
+            TimeSpan delay = TimeSpan.Zero;
+            do
             {
+                if (delay > TimeSpan.Zero)
+                    await Task.Delay(delay, repeatContext.CancellationToken);
+
                 await next.Send(context);
-
-                return;
             }
-            catch (Exception ex)
-            {
-                if (!retryContext.CanRetry(ex, out delay))
-                    throw;
-            }
-
-            await Task.Delay(delay);
-
-            await Attempt(retryContext, context, next);
+            while (repeatContext.CanRepeat(out delay));
         }
     }
 }

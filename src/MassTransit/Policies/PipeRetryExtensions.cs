@@ -13,29 +13,31 @@
 namespace MassTransit.Policies
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
 
-    public static class MessageRetryPolicyExtensions
+    public static class PipeRetryExtensions
     {
-        public static async Task Retry<T>(this IRetryPolicy retryPolicy, ConsumeContext<T> context,
-            Func<ConsumeContext<T>, Task> retryMethod)
-            where T : class
+        public static async Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             using (IRetryContext retryContext = retryPolicy.GetRetryContext())
             {
-                await Attempt(retryContext, context, retryMethod);
+                await Attempt(retryContext, retryMethod, cancellationToken);
             }
         }
 
-        static async Task Attempt<T>(IRetryContext retryContext, ConsumeContext<T> context,
-            Func<ConsumeContext<T>, Task> retryMethod)
-            where T : class
+        static async Task Attempt(IRetryContext retryContext, Func<Task> retryMethod,
+            CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+
             TimeSpan delay;
             try
             {
-                await retryMethod(context);
+                await retryMethod();
 
                 return;
             }
@@ -45,9 +47,9 @@ namespace MassTransit.Policies
                     throw;
             }
 
-            await Task.Delay(delay);
+            await Task.Delay(delay, cancellationToken);
 
-            await Attempt(retryContext, context, retryMethod);
+            await Attempt(retryContext, retryMethod, cancellationToken);
         }
     }
 }

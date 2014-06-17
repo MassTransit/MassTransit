@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
+    using System.Text;
     using Logging;
     using RabbitMQ.Client;
 
@@ -33,7 +34,8 @@ namespace MassTransit.Transports.RabbitMq
             {
                 try
                 {
-                    channel.Close(replyCode, message);
+                    if (channel.IsOpen)
+                        channel.Close(replyCode, message);
                 }
                 catch (Exception ex)
                 {
@@ -63,7 +65,8 @@ namespace MassTransit.Transports.RabbitMq
             {
                 try
                 {
-                    connection.Close(replyCode, message);
+                    if (connection.IsOpen)
+                        connection.Close(replyCode, message);
                 }
                 catch (Exception ex)
                 {
@@ -79,6 +82,23 @@ namespace MassTransit.Transports.RabbitMq
                     _log.Warn("Failed to dispose connection", ex);
                 }
             }
+        }
+
+        public static string ToDebugString(this ConnectionFactory factory)
+        {
+            var sb = new StringBuilder();
+
+            if (!string.IsNullOrWhiteSpace(factory.UserName))
+                sb.Append(factory.UserName).Append('@');
+
+            sb.Append(factory.HostName);
+            if (factory.Port != -1)
+                sb.Append(':').Append(factory.Port);
+
+            if (!string.IsNullOrWhiteSpace(factory.VirtualHost))
+                sb.Append('/').Append(factory.VirtualHost);
+
+            return sb.ToString();
         }
     }
 }

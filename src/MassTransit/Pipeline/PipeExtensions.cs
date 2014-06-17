@@ -31,5 +31,19 @@ namespace MassTransit.Pipeline
 
             return new EmptyPipe<T>();
         }
+
+        public static IPipe<T> Combine<T>(this IFilter<T> filter, params IFilter<T>[] additional)
+            where T : class, PipeContext
+        {
+            IFilter<T>[] all = Enumerable.Repeat(filter,1).Concat(additional).Reverse().ToArray();
+            if (all.Any())
+            {
+                IPipe<T> last = new LastPipe<T>(all.First());
+
+                return all.Skip(1).Aggregate(last, (current, f) => new FilterPipe<T>(f, current));
+            }
+
+            return new EmptyPipe<T>();
+        }
     }
 }

@@ -79,6 +79,8 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Configuration\EndpointConfigurator.cs" />
+    <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
+    <Compile Include="IRabbitMqConnector.cs" />
     <Compile Include="RabbitMqBasicConsumeContext.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilder.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilderImpl.cs" />
@@ -120,6 +122,7 @@
     <Compile Include="PublishEndpointSinkLocator.cs" />
     <Compile Include="RabbitMqBasicConsumer.cs" />
     <Compile Include="RabbitMqConnection.cs" />
+    <Compile Include="ConnectionContext.cs" />
     <Compile Include="RabbitMqConnectionEventSource.cs" />
     <Compile Include="RabbitMqConsumer.cs" />
     <Compile Include="RabbitMqEndpointAddress.cs" />
@@ -129,13 +132,21 @@
     <Compile Include="RabbitMqExtensions.cs" />
     <Compile Include="RabbitMqHeaders.cs" />
     <Compile Include="RabbitMqMessageNameFormatter.cs" />
+    <Compile Include="RabbitMqReceiveConsumerSettings.cs" />
+    <Compile Include="ReceiveConsumerFilter.cs" />
+    <Compile Include="ModelContext.cs" />
+    <Compile Include="RabbitMqModelContext.cs" />
     <Compile Include="RabbitMqProducer.cs" />
     <Compile Include="RabbitMqPublisher.cs" />
+    <Compile Include="RabbitMqConnector.cs" />
     <Compile Include="RabbitMqReceiveContext.cs" />
+    <Compile Include="ReceiveModelFilter.cs" />
+    <Compile Include="ReceiveConsumerSettings.cs" />
     <Compile Include="RabbitMqReceiveTransport.cs" />
     <Compile Include="RabbitMqSendContext.cs" />
     <Compile Include="RabbitMqSendContextImpl.cs" />
     <Compile Include="RabbitMqSendToTransport.cs" />
+    <Compile Include="RabbitMqShutdownTokenSource.cs" />
     <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
     <Compile Include="Configuration\RabbitMqServiceBusExtensions.cs" />
@@ -173,7 +184,6 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Contexts\" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -14,17 +14,16 @@
 			<level value="INFO" />
 		</logger>
 
+		<logger name="MassTransit.Transports.RabbitMq">
+			<level value="DEBUG" />
+		</logger>
+
 		<logger name="MassTransit.Subscriptions">
 			<level value="ERROR" />
 		</logger>
 
 		<logger name="NHibernate">
 			<level value="INFO"/>
-		</logger>
-
-		<logger name="MassTransit.Msmq.MessageLog" additivity="false">
-			<level value="DEBUG" />
-			<appender-ref ref="MessageLogAppender" />
 		</logger>
 
 		<logger name="MassTransit.Messages" additivity="false">

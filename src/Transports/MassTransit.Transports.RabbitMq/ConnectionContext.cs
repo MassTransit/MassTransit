@@ -10,21 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Transports.RabbitMq
 {
     using System.Threading;
-    using System.Threading.Tasks;
-    using Pipeline;
+    using RabbitMQ.Client;
 
 
-    public interface IReceiveTransport
+    public interface ConnectionContext :
+        PipeContext
     {
         /// <summary>
-        /// Start receiving on a transport, sending messages to the specified pipe.
+        /// The RabbitMQ Connection
         /// </summary>
-        /// <param name="pipe">The receiving pipe</param>
-        /// <param name="cancellationToken">The cancellationToken for cancelling the receiver</param>
-        /// <returns></returns>
-        Task Start(IPipe<ReceiveContext> pipe, CancellationToken cancellationToken);
+        IConnection Connection { get; }
+
+        /// <summary>
+        /// Set when the initial connection request is cancelled
+        /// </summary>
+        CancellationToken CancellationToken { get; }
     }
 }

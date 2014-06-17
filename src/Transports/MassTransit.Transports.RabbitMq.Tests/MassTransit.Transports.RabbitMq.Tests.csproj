@@ -96,6 +96,7 @@
     <Compile Include="Given_a_service_bus_and_a_temporary_client.cs" />
     <Compile Include="Given_two_rabbitmq_buses_walk_into_a_bar.cs" />
     <Compile Include="PublisherConfirm_Specs.cs" />
+    <Compile Include="ReceiveConnection_Specs.cs" />
     <Compile Include="Request_Specs.cs" />
     <Compile Include="RetryLater_Specs.cs" />
     <Compile Include="Security_Specs.cs" />

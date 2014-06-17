@@ -44,8 +44,7 @@ namespace MassTransit.Policies
             _intervals = intervals.Select(x => TimeSpan.FromMilliseconds(x)).ToArray();
         }
 
-        public IRetryContext GetRetryContext<T>(T context)
-            where T : class
+        public IRetryContext GetRetryContext()
         {
             return new IntervalRetryContext(this, _intervals);
         }

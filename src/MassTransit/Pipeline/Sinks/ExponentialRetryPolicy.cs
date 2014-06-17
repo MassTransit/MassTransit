@@ -40,8 +40,7 @@ namespace MassTransit.Pipeline.Sinks
             _highInterval = (int)(intervalDelta.TotalMilliseconds * 1.2);
         }
 
-        public IRetryContext GetRetryContext<T>(T context)
-            where T : class
+        public IRetryContext GetRetryContext()
         {
             return new IntervalRetryContext(this, GetIntervals().ToArray());
         }

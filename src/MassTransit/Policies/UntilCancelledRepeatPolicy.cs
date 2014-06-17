@@ -12,42 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Policies
 {
-    using System;
+    using System.Threading;
 
 
-    public class NoRetryPolicy :
-        IRetryPolicy
+    public class UntilCancelledRepeatPolicy :
+        IRepeatPolicy
     {
-        readonly IRetryContext _retryContext;
+        readonly CancellationToken _cancellationToken;
 
-        public NoRetryPolicy()
+        public UntilCancelledRepeatPolicy(CancellationToken cancellationToken)
         {
-            _retryContext = new NoRetryContext();
+            _cancellationToken = cancellationToken;
         }
 
-        public IRetryContext GetRetryContext()
+        public IRepeatContext GetRepeatContext()
         {
-            return _retryContext;
-        }
-
-        public bool CanRetry(Exception exception)
-        {
-            return false;
-        }
-
-
-        class NoRetryContext :
-            IRetryContext
-        {
-            public bool CanRetry(Exception exception, out TimeSpan delay)
-            {
-                delay = TimeSpan.Zero;
-                return false;
-            }
-
-            public void Dispose()
-            {
-            }
+            return new UntilCancelledRepeatContext(_cancellationToken);
         }
     }
 }

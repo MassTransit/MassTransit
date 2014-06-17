@@ -13,6 +13,7 @@
 namespace MassTransit.Policies
 {
     using System;
+    using System.Threading;
 
 
     public interface IRetryPolicy
@@ -21,8 +22,7 @@ namespace MassTransit.Policies
         /// Returns a context that can be used to go through the retries
         /// </summary>
         /// <returns>A RetryInterval enumerator</returns>
-        IRetryContext GetRetryContext<T>(T context)
-            where T : class;
+        IRetryContext GetRetryContext();
 
         /// <summary>
         /// Determines if the exception can be retried
@@ -30,5 +30,20 @@ namespace MassTransit.Policies
         /// <param name="exception">The exception that occurred</param>
         /// <returns>True if the task should be retried</returns>
         bool CanRetry(Exception exception);
+    }
+
+
+    public interface IRepeatPolicy
+    {
+        IRepeatContext GetRepeatContext();
+    }
+
+
+    public interface IRepeatContext : 
+        IDisposable
+    {
+        CancellationToken CancellationToken { get; }
+
+        bool CanRepeat(out TimeSpan delay);
     }
 }
