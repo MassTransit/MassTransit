@@ -164,7 +164,7 @@ namespace MassTransit
             }
         }
 
-        public Task<SentContext> RespondAsync<T>(T message) where T : class
+        public Task RespondAsync<T>(T message) where T : class
         {
             throw new NotImplementedException();
         }

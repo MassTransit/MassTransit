@@ -23,7 +23,7 @@ namespace MassTransit.NLogIntegration.Logging
     {
         readonly Func<string, NLog.Logger> _logFactory;
  
-        public NLogLogger([NotNull] LogFactory factory)
+        public NLogLogger( LogFactory factory)
         {
             _logFactory = factory.GetLogger;
         }

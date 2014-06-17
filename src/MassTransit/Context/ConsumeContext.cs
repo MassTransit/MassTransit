@@ -199,7 +199,7 @@ namespace MassTransit.Context
             }
         }
 
-        [UsedImplicitly]
+        
         void CreateAndSendFault<T>(T message, Exception exception)
             where T : class
         {
@@ -212,7 +212,7 @@ namespace MassTransit.Context
             _context.NotifyFault(() => SendFault(bus, faultAddress, responseAddress, requestId, fault));
         }
 
-        [UsedImplicitly]
+        
         void CreateAndSendCorrelatedFault<T, TKey>(T message, Exception exception)
             where T : class, CorrelatedBy<TKey>
         {

@@ -34,10 +34,10 @@ namespace MassTransit
 		/// the action that is calling the configurator.</param>
 		/// <param name="instance">The instance to subscribe.</param>
 		/// <returns>An instance subscription configurator.</returns>
-		[NotNull]
+		
 		public static InstanceSubscriptionConfigurator Instance(
-			[NotNull] this SubscriptionBusServiceConfigurator configurator,
-            [NotNull] object instance, IRetryPolicy retryPolicy = null)
+			 this SubscriptionBusServiceConfigurator configurator,
+             object instance, IRetryPolicy retryPolicy = null)
 		{
 			var instanceConfigurator = new InstanceSubscriptionConfiguratorImpl(instance, retryPolicy ?? Retry.None);
 
@@ -56,7 +56,7 @@ namespace MassTransit
 		/// <param name="instance"></param>
 		/// <returns>The unsubscribe action that can be called to unsubscribe the instance
 		/// passed as an argument.</returns>
-		public static UnsubscribeAction SubscribeInstance([NotNull] this IServiceBus bus, [NotNull] object instance)
+		public static UnsubscribeAction SubscribeInstance( this IServiceBus bus,  object instance)
 		{
 			Guard.AgainstNull(instance, "instance", "A null instance cannot be subscribed");
 
@@ -76,7 +76,7 @@ namespace MassTransit
 	    /// <param name="retryPolicy"></param>
 	    /// <returns>The unsubscribe action that can be called to unsubscribe the instance
 	    /// passed as an argument.</returns>
-	    public static ConnectHandle SubscribeInstance<T>([NotNull] this IServiceBus bus, [NotNull] T instance, IRetryPolicy retryPolicy = null)
+	    public static ConnectHandle SubscribeInstance<T>( this IServiceBus bus,  T instance, IRetryPolicy retryPolicy = null)
 			where T : class, IConsumer
 		{
 			Guard.AgainstNull(instance, "instance", "A null instance cannot be subscribed");

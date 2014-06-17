@@ -29,7 +29,7 @@ namespace MassTransit.NLogIntegration.Logging
         /// Create a new NLog logger instance.
         /// </summary>
         /// <param name="name">Name of type to log as.</param>
-        public NLogLog([NotNull] NLog.Logger log, [NotNull] string name)
+        public NLogLog( NLog.Logger log,  string name)
         {
             if (name == null)
                 throw new ArgumentNullException("name");

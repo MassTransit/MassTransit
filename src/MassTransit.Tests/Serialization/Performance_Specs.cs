@@ -106,12 +106,6 @@ namespace MassTransit.Tests.Serialization
 	}
 
     [TestFixture]
-    public class WhenUsingVersionOneXmlInPerfTest:
-        Performance_Specs<VersionOneXmlMessageSerializer>
-    {
-    }
-
-    [TestFixture]
     public class WhenUsingCustomXmlInPerfTest:
         Performance_Specs<XmlMessageSerializer>
     {

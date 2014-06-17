@@ -32,7 +32,7 @@ namespace MassTransit.EndpointConfigurators
         IsolationLevel IsolationLevel { get; }
         int RetryLimit { get; }
 
-        [NotNull]
-        EndpointSettings CreateEndpointSettings([NotNull] IEndpointAddress address);
+        
+        EndpointSettings CreateEndpointSettings( IEndpointAddress address);
     }
 }

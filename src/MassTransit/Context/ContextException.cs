@@ -34,7 +34,7 @@ namespace MassTransit.Context
 		{
 		}
 
-		protected ContextException([NotNull] SerializationInfo info, StreamingContext context)
+		protected ContextException( SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}

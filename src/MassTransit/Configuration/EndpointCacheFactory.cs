@@ -24,8 +24,8 @@ namespace MassTransit
 	{
 		static readonly EndpointFactoryDefaultSettings _defaultSettings = new EndpointFactoryDefaultSettings();
 
-		[NotNull]
-		public static IEndpointCache New([NotNull] Action<EndpointFactoryConfigurator> configure)
+		
+		public static IEndpointCache New( Action<EndpointFactoryConfigurator> configure)
 		{
 			Guard.AgainstNull(configure, "configure");
 
@@ -49,7 +49,7 @@ namespace MassTransit
 			}
 		}
 
-		public static void ConfigureDefaultSettings([NotNull] Action<EndpointFactoryDefaultSettingsConfigurator> configure)
+		public static void ConfigureDefaultSettings( Action<EndpointFactoryDefaultSettingsConfigurator> configure)
 		{
 			Guard.AgainstNull(configure);
 

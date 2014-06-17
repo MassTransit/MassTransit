@@ -36,7 +36,7 @@ namespace MassTransit.AutofacIntegration
             this.FastInvoke(new[] {messageType}, "Configure");
         }
 
-        [UsedImplicitly]
+        
         public void Configure<T>()
             where T : class, IConsumer
         {

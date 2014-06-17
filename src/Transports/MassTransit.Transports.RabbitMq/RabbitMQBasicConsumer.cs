@@ -31,14 +31,14 @@ namespace MassTransit.Transports.RabbitMq
         readonly Uri _inputAddress;
         readonly IModel _model;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
-        readonly IReceivePipe _receivePipe;
+        readonly IPipe<ReceiveContext> _receivePipe;
         string _consumerTag;
 
         int _current;
         int _max;
 
 
-        public RabbitMqBasicConsumer(IModel model, Uri inputAddress, IReceivePipe receivePipe)
+        public RabbitMqBasicConsumer(IModel model, Uri inputAddress, IPipe<ReceiveContext> receivePipe)
         {
             _model = model;
             _inputAddress = inputAddress;

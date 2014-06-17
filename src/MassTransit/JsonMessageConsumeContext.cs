@@ -97,7 +97,7 @@ namespace MassTransit
             return _context.TryGetMessage(out consumeContext);
         }
 
-        public Task<SentContext> RespondAsync<T>(T message) 
+        public Task RespondAsync<T>(T message) 
             where T : class
         {
             return _context.RespondAsync(message);

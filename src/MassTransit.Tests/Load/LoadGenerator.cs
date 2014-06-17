@@ -56,7 +56,7 @@ namespace MassTransit.Tests.Load
 		public void Run(IServiceBus bus, IEndpoint sendTo, IEnumerable<IServiceBus> instances, int iterations,
 		                Func<Guid, TRequest> generateRequest)
 		{
-			using (bus.SubscribeInstance(this).Disposable())
+			using (bus.SubscribeInstance(this))
 			{
 				instances.Each(x => x.ShouldHaveRemoteSubscriptionFor<TResponse>());
 

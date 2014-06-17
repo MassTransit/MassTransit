@@ -30,12 +30,12 @@ namespace MassTransit.Transports
         /// </summary>
         /// <param name="uri">To uri to create the endpoint for</param>
         /// <returns>The endpoint instance that was created from the uri</returns>
-        IEndpoint CreateEndpoint([NotNull] Uri uri);
+        IEndpoint CreateEndpoint( Uri uri);
 
         /// <summary>
         /// Adds a transport factory to the endpoint factory
         /// </summary>
         /// <param name="factory">Factory to add</param>
-        void AddTransportFactory([NotNull] ITransportFactory factory);
+        void AddTransportFactory( ITransportFactory factory);
     }
 }

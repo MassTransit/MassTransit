@@ -28,13 +28,23 @@ namespace MassTransit.Builders
         readonly IEndpointSettings _settings;
         readonly DuplexTransportFactory _transportFactory;
 
-        public EndpointBuilderImpl([NotNull] IEndpointAddress address, [NotNull] IEndpointSettings settings,
-            [NotNull] ITransportSettings errorSettings, [NotNull] DuplexTransportFactory transportFactory,
-            [NotNull] OutboundTransportFactory errorTransportFactory,
-            [NotNull] Func<IInboundMessageTracker> messageTrackerFactory)
+        public EndpointBuilderImpl( IEndpointAddress address,  IEndpointSettings settings,
+             ITransportSettings errorSettings,  DuplexTransportFactory transportFactory,
+             OutboundTransportFactory errorTransportFactory,
+             Func<IInboundMessageTracker> messageTrackerFactory)
         {
             if (address == null)
                 throw new ArgumentNullException("address");
+            if (settings == null)
+                throw new ArgumentNullException("settings");
+            if (errorSettings == null)
+                throw new ArgumentNullException("errorSettings");
+            if (transportFactory == null)
+                throw new ArgumentNullException("transportFactory");
+            if (errorTransportFactory == null)
+                throw new ArgumentNullException("errorTransportFactory");
+            if (messageTrackerFactory == null)
+                throw new ArgumentNullException("messageTrackerFactory");
 
             _address = address;
             _settings = settings;

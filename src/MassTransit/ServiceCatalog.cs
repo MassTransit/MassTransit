@@ -56,7 +56,7 @@ namespace MassTransit
             return result != null;
         }
 
-        [UsedImplicitly]
+        
         string DebuggerDisplay()
         {
             return "Hosting '{0}' Services".FormatWith(NumberOfServices);

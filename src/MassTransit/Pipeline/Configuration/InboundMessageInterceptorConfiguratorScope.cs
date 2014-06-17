@@ -21,7 +21,7 @@ namespace MassTransit.Pipeline.Configuration
 	{
 		public Func<IPipelineSink<IConsumeContext>, IPipelineSink<IConsumeContext>> InsertAfter { get; private set; }
 
-		[UsedImplicitly]
+		
 		protected bool Inspect(InboundMessagePipeline pipeline)
 		{
 			InsertAfter = (sink => pipeline.ReplaceOutputSink(sink));

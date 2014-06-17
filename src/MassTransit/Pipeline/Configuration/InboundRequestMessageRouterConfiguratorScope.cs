@@ -22,7 +22,7 @@ namespace MassTransit.Pipeline.Configuration
     {
         public RequestMessageRouter<IConsumeContext<TMessage>, TMessage> Router { get; private set; }
 
-        [UsedImplicitly]
+        
         public bool Inspect<T, TM>(RequestMessageRouter<T, TM> router)
             where T : class, IMessageContext<TM>
             where TM : class

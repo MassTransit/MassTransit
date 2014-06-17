@@ -30,7 +30,7 @@ namespace MassTransit.BusConfigurators
 		/// </summary>
 		/// <param name="builder">The bus builder</param>
 		/// <returns>An updated builder.</returns>
-		[NotNull]
-		BusBuilder Configure([NotNull] BusBuilder builder);
+		
+		BusBuilder Configure( BusBuilder builder);
 	}
 }

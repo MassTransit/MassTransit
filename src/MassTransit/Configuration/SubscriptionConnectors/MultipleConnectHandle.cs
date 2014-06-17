@@ -32,5 +32,10 @@ namespace MassTransit.SubscriptionConnectors
             for (int i = 0; i < _handles.Length; i++)
                 _handles[i].Disconnect();
         }
+
+        public void Dispose()
+        {
+            Disconnect();
+        }
     }
 }

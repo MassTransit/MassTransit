@@ -33,8 +33,8 @@ namespace MassTransit.EndpointConfigurators
         OutboundTransportFactory _errorTransportFactory;
         DuplexTransportFactory _transportFactory;
 
-        public EndpointConfiguratorImpl([NotNull] IEndpointAddress address,
-            [NotNull] IEndpointFactoryDefaultSettings defaultSettings)
+        public EndpointConfiguratorImpl( IEndpointAddress address,
+             IEndpointFactoryDefaultSettings defaultSettings)
         {
             if (address == null)
                 throw new ArgumentNullException("address");

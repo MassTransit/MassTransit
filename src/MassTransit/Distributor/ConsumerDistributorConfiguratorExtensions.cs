@@ -34,8 +34,8 @@ namespace MassTransit
         }
 
         public static ConsumerDistributorConfigurator Consumer(
-            [NotNull] this DistributorBusServiceConfigurator configurator,
-            [NotNull] Type consumerType)
+             this DistributorBusServiceConfigurator configurator,
+             Type consumerType)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer Worker: {0} (by type, using object consumer factory)",

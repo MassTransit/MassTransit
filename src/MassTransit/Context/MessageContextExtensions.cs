@@ -26,7 +26,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="context">The context.</param>
         /// <param name="uriString">The URI string.</param>
-        public static void SetSourceAddress<T>(this ISendContext<T> context, [NotNull] string uriString)
+        public static void SetSourceAddress<T>(this ISendContext<T> context,  string uriString)
             where T : class
         {
             if (uriString == null)
@@ -40,7 +40,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="context">The context.</param>
         /// <param name="uriString">The URI string.</param>
-        public static void SetDestinationAddress<T>(this ISendContext<T> context, [NotNull] string uriString)
+        public static void SetDestinationAddress<T>(this ISendContext<T> context,  string uriString)
             where T : class
         {
             if (uriString == null)
@@ -54,7 +54,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="context">The context.</param>
         /// <param name="uriString">The URI string.</param>
-        public static void SetResponseAddress<T>(this ISendContext<T> context, [NotNull] string uriString)
+        public static void SetResponseAddress<T>(this ISendContext<T> context,  string uriString)
             where T : class
         {
             if (uriString == null)
@@ -69,7 +69,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="context">The context.</param>
         /// <param name="bus">The bus.</param>
-        public static void SendResponseTo<T>(this ISendContext<T> context, [NotNull] IServiceBus bus)
+        public static void SendResponseTo<T>(this ISendContext<T> context,  IServiceBus bus)
             where T : class
         {
             if (bus == null)
@@ -84,7 +84,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="context">The context.</param>
         /// <param name="endpoint">The endpoint.</param>
-        public static void SendResponseTo<T>(this ISendContext<T> context, [NotNull] IEndpoint endpoint)
+        public static void SendResponseTo<T>(this ISendContext<T> context,  IEndpoint endpoint)
             where T : class
         {
             if (endpoint == null)
@@ -111,7 +111,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="context">The context.</param>
         /// <param name="uriString">The URI string.</param>
-        public static void SetFaultAddress<T>(this ISendContext<T> context, [NotNull] string uriString)
+        public static void SetFaultAddress<T>(this ISendContext<T> context,  string uriString)
             where T : class
         {
             if (uriString == null)
@@ -125,7 +125,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="context">The context.</param>
         /// <param name="bus">The bus.</param>
-        public static void SendFaultTo<T>(this ISendContext<T> context, [NotNull] IServiceBus bus)
+        public static void SendFaultTo<T>(this ISendContext<T> context,  IServiceBus bus)
             where T : class
         {
             if (bus == null)
@@ -139,7 +139,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="context">The context.</param>
         /// <param name="endpoint">The endpoint.</param>
-        public static void SendFaultTo<T>(this ISendContext<T> context, [NotNull] IEndpoint endpoint)
+        public static void SendFaultTo<T>(this ISendContext<T> context,  IEndpoint endpoint)
             where T : class
         {
             if (endpoint == null)
@@ -153,7 +153,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="context">The context.</param>
         /// <param name="uri">The URI.</param>
-        public static void SendFaultTo<T>(this ISendContext<T> context, [NotNull] Uri uri)
+        public static void SendFaultTo<T>(this ISendContext<T> context,  Uri uri)
             where T : class
         {
             if (uri == null)
@@ -190,7 +190,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="context">The context.</param>
         /// <param name="messageType">Type of the message.</param>
-        public static void SetMessageType<T>(this ISendContext<T> context, [NotNull] Type messageType)
+        public static void SetMessageType<T>(this ISendContext<T> context,  Type messageType)
             where T : class
         {
             if (messageType == null)
@@ -203,7 +203,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="address">The address.</param>
-        public static void SetInputAddress(this IReceiveContext context, [NotNull] IEndpointAddress address)
+        public static void SetInputAddress(this IReceiveContext context,  IEndpointAddress address)
         {
             if (address == null)
                 throw new ArgumentNullException("address");

@@ -38,7 +38,7 @@ namespace MassTransit
         /// <exception cref="ConfigurationException">The scheme in the uri didn't have a corresponding
         /// <see cref="ITransportFactory"/> configured in the bus; the bus doesn't know how to
         /// send over such a scheme/transport protocol.</exception>
-        [NotNull]
-        IEndpoint GetEndpoint([NotNull] Uri uri);
+        
+        IEndpoint GetEndpoint( Uri uri);
     }
 }

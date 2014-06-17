@@ -23,7 +23,7 @@ namespace MassTransit.Pipeline.Configuration
 		public MessageRouter<IConsumeContext> InputRouter { get; private set; }
 		public MessageRouter<TOutput> OutputRouter { get; private set; }
 
-		[UsedImplicitly]
+		
 		protected bool Inspect<T>(MessageRouter<T> router)
 			where T : class
 		{

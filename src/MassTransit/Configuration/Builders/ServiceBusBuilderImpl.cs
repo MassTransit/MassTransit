@@ -96,7 +96,7 @@ namespace MassTransit.Builders
             _busServiceConfigurators.Add(configurator);
         }
 
-        public void Match<T>([NotNull] Action<T> callback)
+        public void Match<T>( Action<T> callback)
             where T : class, BusBuilder
         {
             Guard.AgainstNull(callback);

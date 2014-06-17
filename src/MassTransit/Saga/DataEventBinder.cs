@@ -22,14 +22,14 @@ namespace MassTransit.Saga
         Func<TMessage, Guid> _correlationIdSelector;
         Expression<Func<TSaga, TMessage, bool>> _expression;
 
-        public EventBinder<TSaga, TMessage> By([NotNull] Expression<Func<TSaga, TMessage, bool>> expression)
+        public EventBinder<TSaga, TMessage> By( Expression<Func<TSaga, TMessage, bool>> expression)
         {
             _expression = expression;
 
             return this;
         }
 
-        public EventBinder<TSaga, TMessage> UseId([NotNull] Func<TMessage, Guid> correlationIdSelector)
+        public EventBinder<TSaga, TMessage> UseId( Func<TMessage, Guid> correlationIdSelector)
         {
             _correlationIdSelector = correlationIdSelector;
 

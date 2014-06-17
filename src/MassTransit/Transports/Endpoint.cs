@@ -41,12 +41,12 @@ namespace MassTransit.Transports
         IOutboundTransport _errorTransport;
         IDuplexTransport _transport;
 
-        public Endpoint([NotNull] IEndpointAddress address,
-            [NotNull] IMessageSerializer serializer,
-            [NotNull] IDuplexTransport transport,
-            [NotNull] IOutboundTransport errorTransport,
-            [NotNull] IInboundMessageTracker messageTracker, 
-            [NotNull] ISupportedMessageSerializers supportedSerializers)
+        public Endpoint( IEndpointAddress address,
+             IMessageSerializer serializer,
+             IDuplexTransport transport,
+             IOutboundTransport errorTransport,
+             IInboundMessageTracker messageTracker, 
+             ISupportedMessageSerializers supportedSerializers)
         {
             if (address == null)
                 throw new ArgumentNullException("address");

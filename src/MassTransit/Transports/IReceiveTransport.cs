@@ -10,16 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions
+namespace MassTransit.Transports
 {
-    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Pipeline;
 
 
-    /// <summary>
-    /// Used to wrap an UnsubscribeAction in a disposable block
-    /// </summary>
-    public interface IDisposableConnectHandle :
-        IDisposable
+    public interface IReceiveTransport
     {
+        /// <summary>
+        /// Start receiving on a transport, sending messages to the specified pipe.
+        /// </summary>
+        /// <param name="pipe">The receiving pipe</param>
+        /// <param name="receiveCancellationToken">The cancellationToken for cancelling the receiver</param>
+        /// <returns></returns>
+        Task Start(IPipe<ReceiveContext> pipe, CancellationToken receiveCancellationToken);
     }
 }

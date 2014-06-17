@@ -32,7 +32,7 @@ namespace MassTransit.Tests.Configuration
 					x.AddTransportFactory<LoopbackTransportFactory>();
 					x.ConfigureEndpoint("loopback://localhost/mt_client", y =>
 						{
-							y.UseSerializer<VersionOneXmlMessageSerializer>()
+							y.UseSerializer<XmlMessageSerializer>()
 								.DiscardFaultingMessages();
 						});
 					x.ConfigureEndpoint("loopback://localhost/mt_other", y => { y.SetErrorAddress("loopback://localhost/mt_error"); });
@@ -69,7 +69,7 @@ namespace MassTransit.Tests.Configuration
 			IMessageSerializer serializer = endpointClass.Serializer;
 
 			serializer.ShouldNotBeNull();
-			serializer.ShouldBeAnInstanceOf<VersionOneXmlMessageSerializer>();
+			serializer.ShouldBeAnInstanceOf<XmlMessageSerializer>();
 		}
 
 		[Then]

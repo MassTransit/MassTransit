@@ -34,7 +34,7 @@ namespace MassTransit.Exceptions
         {
         }
 
-        protected RequestTimeoutException([NotNull] SerializationInfo info, StreamingContext context)
+        protected RequestTimeoutException( SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

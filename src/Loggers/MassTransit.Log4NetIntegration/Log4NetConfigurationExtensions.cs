@@ -27,7 +27,7 @@ namespace MassTransit.Log4NetIntegration
         /// Specify that you want to use the Log4net logging engine for logging with MassTransit.
         /// </summary>
         /// <param name="configurator"></param>
-        public static void UseLog4Net([CanBeNull] this ServiceBusConfigurator configurator)
+        public static void UseLog4Net(this ServiceBusConfigurator configurator)
         {
             Log4NetLogger.Use();
         }
@@ -37,7 +37,7 @@ namespace MassTransit.Log4NetIntegration
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configFileName">The name of the log4net xml configuration file</param>
-        public static void UseLog4Net([NotNull] this ServiceBusConfigurator configurator, string configFileName)
+        public static void UseLog4Net(this ServiceBusConfigurator configurator, string configFileName)
         {
             Log4NetLogger.Use();
 

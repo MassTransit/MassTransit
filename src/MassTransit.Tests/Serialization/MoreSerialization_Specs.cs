@@ -15,18 +15,12 @@ namespace MassTransit.Tests.Serialization
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using Context;
-    using Magnum.TestFramework;
     using MassTransit.Serialization;
     using NUnit.Framework;
 
     [TestFixture(typeof(XmlMessageSerializer))]
     [TestFixture(typeof(JsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
-    [TestFixture(typeof(VersionOneXmlMessageSerializer))]
     [TestFixture(typeof(BinaryMessageSerializer))]
     public class MoreSerialization_Specs<TSerializer> :
         SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()

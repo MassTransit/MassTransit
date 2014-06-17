@@ -37,9 +37,9 @@ namespace MassTransit.Transports
         /// <param name="transportFactories">Dictionary + contents owned by the EndpointFactory instance.</param>
         /// <param name="endpointBuilders"></param>
         /// <param name="defaults"></param>
-        public EndpointFactory([NotNull] IDictionary<string, ITransportFactory> transportFactories,
-            [NotNull] IDictionary<Uri, EndpointBuilder> endpointBuilders,
-            [NotNull] IEndpointFactoryDefaultSettings defaults)
+        public EndpointFactory( IDictionary<string, ITransportFactory> transportFactories,
+             IDictionary<Uri, EndpointBuilder> endpointBuilders,
+             IEndpointFactoryDefaultSettings defaults)
         {
             if (transportFactories == null)
                 throw new ArgumentNullException("transportFactories");

@@ -34,7 +34,7 @@ namespace MassTransit.Exceptions
         {
         }
 
-        protected RequestCancelledException([NotNull] SerializationInfo info, StreamingContext context)
+        protected RequestCancelledException( SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

@@ -26,7 +26,7 @@ namespace MassTransit.EndpointConfigurators
 	{
 		readonly Func<TTransport> _transportFactory;
 
-		public TransportFactoryConfigurator([NotNull] Func<TTransport> transportFactory)
+		public TransportFactoryConfigurator( Func<TTransport> transportFactory)
 		{
 			_transportFactory = transportFactory;
 		}

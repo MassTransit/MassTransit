@@ -10,13 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Subscriptions
 {
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Pipeline;
 
 
     public abstract class Connectable<T>
@@ -96,6 +97,11 @@ namespace MassTransit.Pipeline.Sinks
             public void Disconnect()
             {
                 _disconnect(_id);
+            }
+
+            public void Dispose()
+            {
+                Disconnect();
             }
         }
     }

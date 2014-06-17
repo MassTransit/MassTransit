@@ -40,7 +40,7 @@ namespace MassTransit.Configurators
 	        get { return _results.Any(x => x.Disposition == ValidationResultDisposition.Failure); }
 	    }
 
-		[UsedImplicitly]
+		
 		protected string DebuggerString()
 		{
 			var debuggerString = string.Join(", ", _results);
