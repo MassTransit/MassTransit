@@ -89,11 +89,15 @@
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />
     <Compile Include="Exceptions\RabbitMqConnectionException.cs" />
+    <Compile Include="Pipeline\ExchangeBindingSettings.cs" />
+    <Compile Include="Pipeline\ExchangeSettings.cs" />
     <Compile Include="Pipeline\IRabbitMqConnector.cs" />
     <Compile Include="Pipeline\ModelConsumerFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />
     <Compile Include="Pipeline\ReceiveModelFilter.cs" />
     <Compile Include="Pipeline\ReceiveSettingsModelFilter.cs" />
+    <Compile Include="Pipeline\SubscriptionModelFilter.cs" />
+    <Compile Include="Pipeline\SubscriptionSettings.cs" />
     <Compile Include="RabbitMqBasicConsumeContext.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilder.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilderImpl.cs" />
