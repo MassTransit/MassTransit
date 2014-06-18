@@ -49,7 +49,7 @@ namespace MassTransit.Transports.RabbitMq
         public void HandleBasicConsumeOk(string consumerTag)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("RabbitMQ Consumer Ok: {0}", consumerTag);
+                _log.DebugFormat("ConsumerOk: {0}", consumerTag);
 
             _consumerTag = consumerTag;
         }
@@ -61,18 +61,19 @@ namespace MassTransit.Transports.RabbitMq
         public void HandleBasicCancel(string consumerTag)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("RabbitMQ Consumer Cancelled: {0}", consumerTag);
+                _log.DebugFormat("Consumer Cancelled: {0}", consumerTag);
 
             foreach (RabbitMqReceiveContext context in _pending.Values)
                 context.Cancel();
 
-            // TODO notify serviceEndpoint that the consumer must be rebuilt and reconnected to RMQ
+            if (ConsumerCancelled != null)
+                ConsumerCancelled(this, new ConsumerEventArgs(consumerTag));
         }
 
         public void HandleModelShutdown(IModel model, ShutdownEventArgs reason)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("RabbitMQ Model Shutdown on consumer: {0}, max concurrent consumers: {1}", _consumerTag, _max);
+                _log.DebugFormat("ModelShutdown ({0}), Max: {1}, {2}-{3}", _consumerTag, _max, reason.ReplyCode, reason.ReplyText);
         }
 
         public async void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange,

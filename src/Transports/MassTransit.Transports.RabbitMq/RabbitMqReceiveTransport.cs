@@ -17,7 +17,6 @@ namespace MassTransit.Transports.RabbitMq
     using System.Threading.Tasks;
     using Logging;
     using Pipeline;
-    using Pipeline.Filters;
     using Policies;
 
 
@@ -36,25 +35,17 @@ namespace MassTransit.Transports.RabbitMq
             _settings = settings;
         }
 
-        public async Task Start(IPipe<ReceiveContext> pipe, CancellationToken cancellationToken)
+        public Task Start(IPipe<ReceiveContext> pipe, CancellationToken cancellationToken)
         {
-            IRepeatPolicy repeatPolicy = Repeat.UntilCancelled(cancellationToken);
-            var retryPolicy = new CancelRetryPolicy(_retryPolicy, cancellationToken);
-
-            IFilter<ModelContext> modelConsumer = new ReceiveConsumerFilter(pipe, _settings);
-
-            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(modelConsumer.Combine());
-            IFilter<ConnectionContext> retryFilter = new RetryFilter<ConnectionContext>(retryPolicy);
-
-            IPipe<ConnectionContext> receivePipe = retryFilter.Combine(modelFilter);
-
-            IRepeatContext repeatContext = repeatPolicy.GetRepeatContext();
-            TimeSpan delay = TimeSpan.Zero;
-            do
+            IPipe<ConnectionContext> receivePipe = PipeFactory.New<ConnectionContext>(x =>
             {
-                if (delay > TimeSpan.Zero)
-                    await Task.Delay(delay, repeatContext.CancellationToken);
+                x.Repeat(cancellationToken);
+                x.Retry(_retryPolicy, cancellationToken);
+                x.ModelConsumer(pipe, _settings);
+            });
 
+            return Repeat.UntilCancelled(cancellationToken, async () =>
+            {
                 try
                 {
                     await _connector.Connect(receivePipe, cancellationToken);
@@ -67,8 +58,7 @@ namespace MassTransit.Transports.RabbitMq
                     if (_log.IsErrorEnabled)
                         _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);
                 }
-            }
-            while (repeatContext.CanRepeat(out delay));
+            });
         }
     }
 }

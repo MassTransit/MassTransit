@@ -78,6 +78,8 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Configuration\ModelConsumerPipeBuilderConfigurator.cs" />
+    <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurator.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
     <Compile Include="IRabbitMqConnector.cs" />
@@ -133,7 +135,7 @@
     <Compile Include="RabbitMqHeaders.cs" />
     <Compile Include="RabbitMqMessageNameFormatter.cs" />
     <Compile Include="RabbitMqReceiveConsumerSettings.cs" />
-    <Compile Include="ReceiveConsumerFilter.cs" />
+    <Compile Include="ModelConsumerFilter.cs" />
     <Compile Include="ModelContext.cs" />
     <Compile Include="RabbitMqModelContext.cs" />
     <Compile Include="RabbitMqProducer.cs" />
