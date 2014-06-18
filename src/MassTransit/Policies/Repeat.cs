@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Policies
 {
+    using System;
     using System.Threading;
+    using System.Threading.Tasks;
 
 
     public static class Repeat
@@ -25,6 +27,23 @@ namespace MassTransit.Policies
         public static IRepeatPolicy UntilCancelled(CancellationToken cancellationToken)
         {
             return new UntilCancelledRepeatPolicy(cancellationToken);
+        }
+
+        public static async Task UntilCancelled(CancellationToken cancellationToken, Func<Task> callback)
+        {
+            IRepeatPolicy repeatPolicy = UntilCancelled(cancellationToken);
+            using (IRepeatContext repeatContext = repeatPolicy.GetRepeatContext())
+            {
+                TimeSpan delay = TimeSpan.Zero;
+                do
+                {
+                    if (delay > TimeSpan.Zero)
+                        await Task.Delay(delay, repeatContext.CancellationToken);
+
+                    await callback();
+                }
+                while (repeatContext.CanRepeat(out delay));
+            }
         }
     }
 }

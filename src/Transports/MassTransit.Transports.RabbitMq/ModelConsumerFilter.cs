@@ -19,15 +19,15 @@ namespace MassTransit.Transports.RabbitMq
     using RabbitMQ.Client;
 
 
-    public class ReceiveConsumerFilter :
+    public class ModelConsumerFilter :
         IFilter<ModelContext>
     {
-        readonly ILog _log = Logger.Get<ReceiveConsumerFilter>();
+        readonly ILog _log = Logger.Get<ModelConsumerFilter>();
 
         readonly IPipe<ReceiveContext> _pipe;
         readonly ReceiveConsumerSettings _settings;
 
-        public ReceiveConsumerFilter(IPipe<ReceiveContext> pipe, ReceiveConsumerSettings settings)
+        public ModelConsumerFilter(IPipe<ReceiveContext> pipe, ReceiveConsumerSettings settings)
         {
             _pipe = pipe;
             _settings = settings;
@@ -41,13 +41,7 @@ namespace MassTransit.Transports.RabbitMq
 
             context.Model.BasicQos(0, _settings.PrefetchCount, false);
 
-            context.Model.ModelShutdown += (m, args) =>
-            {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("RabbitMQ Model Shutdown Detected: {0} {1}", args.ReplyCode, args.ReplyText);
-
-                taskCompletion.TrySetResult(true);
-            };
+            context.Model.ModelShutdown += (m, args) => taskCompletion.TrySetResult(true);
 
             var inputAddress = new Uri("rabbitmq://localhost/speed/input");
 
@@ -71,16 +65,8 @@ namespace MassTransit.Transports.RabbitMq
 
 
             var consumer = new RabbitMqBasicConsumer(context.Model, inputAddress, _pipe);
-            consumer.ConsumerCancelled += (_, args) =>
-            {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("RabbitMQ Consumer Cancelled: {0}", args.ConsumerTag);
 
-                taskCompletion.TrySetResult(true);
-            };
-
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting RabbitMQ Consumer on {0}", queueName);
+            consumer.ConsumerCancelled += (_, args) => taskCompletion.TrySetResult(true);
 
             context.Model.BasicConsume(queueName, false, consumer);
 
@@ -91,7 +77,7 @@ namespace MassTransit.Transports.RabbitMq
 
         public bool Inspect(IPipeInspector inspector)
         {
-            throw new NotImplementedException();
+            return inspector.Inspect(this, (x, _) => _pipe.Inspect(x));
         }
     }
 }

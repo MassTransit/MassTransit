@@ -19,7 +19,8 @@ namespace MassTransit.Configurators
 	using Exceptions;
 	using Util;
 
-	[Serializable, DebuggerDisplay("{DebuggerString()}")]
+
+    [Serializable, DebuggerDisplay("{DebuggerString()}")]
 	public class ConfigurationResultImpl :
 		ConfigurationResult
 	{

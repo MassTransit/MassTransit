@@ -54,12 +54,15 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
             Task receiveTask = transport.Start(testPipe, receiveCancellationToken.Token);
 
-
-            Thread.Sleep(1000);
+            await Task.Delay(250);
 
             using (IConnection connection = connectionFactory.CreateConnection())
             using (var sendModel = new HaModel(connection.CreateModel()))
             {
+                sendModel.QueueDelete("input");
+
+                await Task.Delay(500);
+
                 var sendToTransport = new RabbitMqSendToTransport(sendModel, "fast");
                 var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
                 var sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
