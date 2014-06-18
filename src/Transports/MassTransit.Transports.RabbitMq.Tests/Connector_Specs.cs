@@ -14,43 +14,11 @@ namespace MassTransit.Transports.RabbitMq.Tests
 {
     namespace Connector_Specs
     {
-        using System.Threading;
-        using System.Threading.Tasks;
-        using MassTransit.Pipeline;
         using NUnit.Framework;
         using Pipeline;
         using Policies;
         using RabbitMQ.Client;
         using RabbitMQ.Client.Exceptions;
-
-
-        class TestConnectionFilter :
-            IFilter<ConnectionContext>
-        {
-            readonly TaskCompletionSource<ConnectionContext> _called;
-
-            public TestConnectionFilter(CancellationToken testCancellationToken)
-            {
-                _called = new TaskCompletionSource<ConnectionContext>();
-                testCancellationToken.Register(() => _called.TrySetCanceled());
-            }
-
-
-            public Task<ConnectionContext> Called
-            {
-                get { return _called.Task; }
-            }
-
-            public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)
-            {
-                _called.TrySetResult(context);
-            }
-
-            public bool Inspect(IPipeInspector inspector)
-            {
-                return inspector.Inspect(this);
-            }
-        }
 
 
         [TestFixture]
@@ -65,13 +33,12 @@ namespace MassTransit.Transports.RabbitMq.Tests
                     HostName = "localhost"
                 };
 
-                var testConnectionFilter = new TestConnectionFilter(TestCancellationToken);
-                IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x => x.Filter(testConnectionFilter));
+                var testPipe = new TestConnectionPipe(TestCancellationToken);
 
                 IRabbitMqConnector connector = new RabbitMqConnector(connectionFactory, Retry.None);
-                await connector.Connect(pipe, TestCancellationToken);
+                await connector.Connect(testPipe, TestCancellationToken);
 
-                await testConnectionFilter.Called;
+                await testPipe.Called;
             }
         }
 
@@ -81,24 +48,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
             AsyncTestFixture
         {
             [Test]
-            public void Should_throw_connection_exception()
-            {
-                var connectionFactory = new ConnectionFactory
-                {
-                    HostName = "rocalhost"
-                };
-
-                var testConnectionFilter = new TestConnectionFilter(TestCancellationToken);
-                IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x => x.Filter(testConnectionFilter));
-
-                IRabbitMqConnector connector = new RabbitMqConnector(connectionFactory, Retry.None);
-
-                var ex = Assert.Throws<RabbitMqConnectionException>(async () => { await connector.Connect(pipe, TestCancellationToken); });
-
-                Assert.IsInstanceOf<BrokerUnreachableException>(ex.InnerException);
-            }
-
-            [Test]
             public void Should_connect()
             {
                 var connectionFactory = new ConnectionFactory
@@ -106,16 +55,33 @@ namespace MassTransit.Transports.RabbitMq.Tests
                     HostName = "rocalhost"
                 };
 
-                var testConnectionFilter = new TestConnectionFilter(TestCancellationToken);
-                IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x => x.Filter(testConnectionFilter));
+                var testPipe = new TestConnectionPipe(TestCancellationToken);
 
-                IRabbitMqConnector connector = new RabbitMqConnector(connectionFactory, Retry.Intervals(100,100));
+                IRabbitMqConnector connector = new RabbitMqConnector(connectionFactory, Retry.Intervals(100, 100));
 
-                var ex = Assert.Throws<RabbitMqConnectionException>(async () => { await connector.Connect(pipe, TestCancellationToken); });
+                var ex =
+                    Assert.Throws<RabbitMqConnectionException>(async () => { await connector.Connect(testPipe, TestCancellationToken); });
+
+                Assert.IsInstanceOf<BrokerUnreachableException>(ex.InnerException);
+            }
+
+            [Test]
+            public void Should_throw_connection_exception()
+            {
+                var connectionFactory = new ConnectionFactory
+                {
+                    HostName = "rocalhost"
+                };
+
+                var testPipe = new TestConnectionPipe(TestCancellationToken);
+
+                IRabbitMqConnector connector = new RabbitMqConnector(connectionFactory, Retry.None);
+
+                var ex =
+                    Assert.Throws<RabbitMqConnectionException>(async () => { await connector.Connect(testPipe, TestCancellationToken); });
 
                 Assert.IsInstanceOf<BrokerUnreachableException>(ex.InnerException);
             }
         }
-
     }
 }

@@ -104,6 +104,7 @@
     <Compile Include="Security_Specs.cs" />
     <Compile Include="SerializationSupport_Specs.cs" />
     <Compile Include="TemporaryQueue_Specs.cs" />
+    <Compile Include="TestConnectionPipe.cs" />
     <Compile Include="TestFactory.cs" />
     <Compile Include="Given_a_rabbitmq_bus.cs" />
     <Compile Include="Given_a_rabbitmq_bus_with_vhost_mt_and_credentials.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="RabbitMqConnection_Specs.cs" />
     <Compile Include="RabbitMqSsl_Specs.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
+    <Compile Include="TestReceivePipe.cs" />
     <Compile Include="When_a_message_consumer_throws_an_exception.cs" />
     <Compile Include="When_a_message_is_published.cs" />
     <Compile Include="RabbitMqTransportFactoryTests.cs" />
