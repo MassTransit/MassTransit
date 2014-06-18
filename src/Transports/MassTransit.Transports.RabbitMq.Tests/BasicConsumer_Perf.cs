@@ -22,7 +22,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using Magnum.Extensions;
-    using MassTransit.Pipeline;
     using Newtonsoft.Json;
     using NUnit.Framework;
     using Pipeline;
@@ -303,29 +302,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
             }
         }
 
-
-        class TestReceivePipe :
-            IReceivePipe
-        {
-            readonly Func<ReceiveContext, Task> _callback;
-
-            public TestReceivePipe(Func<ReceiveContext, Task> callback)
-            {
-                _callback = callback;
-            }
-
-            public async Task Send(ReceiveContext context)
-            {
-                await Task.Yield();
-
-                await _callback(context);
-            }
-
-            public bool Inspect(IPipeInspector inspector)
-            {
-                return true;
-            }
-        }
 
         [Test]
         public void No_jacket_required_raw_in_memory_speed_no_serialization()
