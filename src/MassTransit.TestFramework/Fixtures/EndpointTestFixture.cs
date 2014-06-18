@@ -18,7 +18,6 @@ namespace MassTransit.TestFramework.Fixtures
 	using BusConfigurators;
 	using Configurators;
 	using EndpointConfigurators;
-	using Exceptions;
 	using Magnum.Extensions;
 	using MassTransit.Transports;
 	using NUnit.Framework;

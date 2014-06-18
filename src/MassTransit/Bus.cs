@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using BusConfigurators;
-    using Exceptions;
 
 
     /// <summary>

@@ -14,7 +14,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 {
 	using System;
 	using System.Linq.Expressions;
-	using Exceptions;
 	using Magnum.Reflection;
 	using Pipeline;
 

@@ -139,6 +139,20 @@ namespace MassTransit.Policies
         }
 
         /// <summary>
+        /// Create an exponential retry policy that never gives up
+        /// intervals
+        /// </summary>
+        /// <param name="retryLimit"></param>
+        /// <param name="minInterval"></param>
+        /// <param name="maxInterval"></param>
+        /// <param name="intervalDelta"></param>
+        /// <returns></returns>
+        public static IRetryPolicy Exponential(TimeSpan minInterval, TimeSpan maxInterval, TimeSpan intervalDelta)
+        {
+            return new ExponentialRetryPolicy(All(), int.MaxValue, minInterval, maxInterval, intervalDelta);
+        }
+
+        /// <summary>
         /// Create an exponential retry policy with the specified number of retries at exponential
         /// intervals
         /// </summary>

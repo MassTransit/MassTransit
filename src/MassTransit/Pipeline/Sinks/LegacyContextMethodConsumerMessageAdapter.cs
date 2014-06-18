@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Sinks
 {
     using System.Threading.Tasks;
     using Context;
-    using Exceptions;
     using Util;
 
 

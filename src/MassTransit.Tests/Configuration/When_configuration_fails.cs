@@ -15,7 +15,6 @@ namespace MassTransit.Tests.Configuration
 	using System;
 	using System.Linq;
 	using Configurators;
-	using Exceptions;
 	using Magnum.TestFramework;
 	using NUnit.Framework;
 	using TestFramework;

@@ -20,7 +20,6 @@ namespace MassTransit.Context
 	using System.Diagnostics;
 	using System.Threading;
 	using Events;
-	using Exceptions;
 	using Logging;
 	using Magnum;
 

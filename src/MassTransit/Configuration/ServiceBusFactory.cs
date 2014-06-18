@@ -15,7 +15,6 @@ namespace MassTransit
 	using System;
 	using BusConfigurators;
 	using Configurators;
-	using Exceptions;
 	using Magnum;
 	using TransportConfigurators;
 	using Util;

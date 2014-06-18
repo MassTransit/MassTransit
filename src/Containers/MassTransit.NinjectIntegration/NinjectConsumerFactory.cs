@@ -13,7 +13,6 @@
 namespace MassTransit.NinjectIntegration
 {
     using System.Threading.Tasks;
-    using Exceptions;
     using Ninject;
     using Ninject.Activation.Blocks;
     using Pipeline;

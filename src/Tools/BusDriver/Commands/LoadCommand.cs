@@ -22,7 +22,6 @@ namespace BusDriver.Commands
     using Magnum.FileSystem.Internal;
     using MassTransit;
     using MassTransit.Context;
-    using MassTransit.Exceptions;
     using MassTransit.Logging;
     using MassTransit.Transports;
 
@@ -119,7 +118,7 @@ namespace BusDriver.Commands
 
 
         class LoadMessageSendContext :
-            MassTransit.Context.MessageContext,
+            MassTransit.Context.OldMessageContext,
             ISendContext
         {
             readonly byte[] _body;

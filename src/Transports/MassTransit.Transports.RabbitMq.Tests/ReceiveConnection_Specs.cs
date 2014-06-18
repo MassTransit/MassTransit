@@ -16,6 +16,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using Magnum.Extensions;
+    using MassTransit.Pipeline;
     using NUnit.Framework;
     using Pipeline;
     using Policies;
@@ -37,10 +38,10 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
             var testPipe = new TestReceivePipe();
 
-            IRetryPolicy retryPolicy = Retry.Exponential(10, 1.Seconds(), 60.Seconds(), 2.Seconds());
+            IRetryPolicy retryPolicy = Retry.Exponential(1.Seconds(), 60.Seconds(), 2.Seconds());
             var connectionMaker = new RabbitMqConnector(connectionFactory, retryPolicy);
 
-            var transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, new RabbitMqReceiveConsumerSettings
+            IReceiveTransport transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, new RabbitMqReceiveSettings
             {
                 QueueName = "input",
                 ExchangeName = "fast",
@@ -63,7 +64,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                 await Task.Delay(500);
 
-                var sendToTransport = new RabbitMqSendToTransport(sendModel, "fast");
+                var sendToTransport = new RabbitMqSendTransport(sendModel, "fast");
                 var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
                 var sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
 

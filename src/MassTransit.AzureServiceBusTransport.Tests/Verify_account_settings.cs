@@ -19,7 +19,6 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         using System.IO;
         using System.Threading;
         using System.Threading.Tasks;
-        using Exceptions;
         using Microsoft.ServiceBus;
         using Microsoft.ServiceBus.Messaging;
         using Microsoft.ServiceBus.Messaging.Amqp;

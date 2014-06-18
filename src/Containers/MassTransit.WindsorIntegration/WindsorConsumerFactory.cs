@@ -15,7 +15,6 @@ namespace MassTransit.WindsorIntegration
     using System.Threading.Tasks;
     using Castle.MicroKernel.Lifestyle;
     using Castle.Windsor;
-    using Exceptions;
     using Pipeline;
     using Util;
 

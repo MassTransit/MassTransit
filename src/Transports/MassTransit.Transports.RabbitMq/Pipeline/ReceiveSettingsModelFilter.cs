@@ -10,74 +10,79 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq
+namespace MassTransit.Transports.RabbitMq.Pipeline
 {
-    using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using Logging;
-    using Pipeline;
+    using MassTransit.Pipeline;
     using RabbitMQ.Client;
 
 
-    public class ModelConsumerFilter :
+    public class ReceiveSettingsModelFilter :
         IFilter<ModelContext>
     {
-        readonly ILog _log = Logger.Get<ModelConsumerFilter>();
+        readonly ILog _log = Logger.Get<ReceiveSettingsModelFilter>();
 
-        readonly IPipe<ReceiveContext> _pipe;
-        readonly ReceiveConsumerSettings _settings;
+        readonly ReceiveSettings _settings;
 
-        public ModelConsumerFilter(IPipe<ReceiveContext> pipe, ReceiveConsumerSettings settings)
+        public ReceiveSettingsModelFilter(ReceiveSettings settings)
         {
-            _pipe = pipe;
             _settings = settings;
         }
 
-        public async Task Send(ModelContext context, IPipe<ModelContext> next)
+        public Task Send(ModelContext context, IPipe<ModelContext> next)
         {
-            var taskCompletion = new TaskCompletionSource<bool>();
-
-            var registration = context.CancellationToken.Register(() => taskCompletion.TrySetResult(false));
-
             context.Model.BasicQos(0, _settings.PrefetchCount, false);
-
-            context.Model.ModelShutdown += (m, args) => taskCompletion.TrySetResult(true);
-
-            var inputAddress = new Uri("rabbitmq://localhost/speed/input");
 
             QueueDeclareOk queueOk = context.Model.QueueDeclare(_settings.QueueName, _settings.Durable, _settings.Exclusive,
                 _settings.AutoDelete, _settings.QueueArguments);
 
             string queueName = queueOk.QueueName;
 
+            if (_log.IsDebugEnabled)
+            {
+                _log.DebugFormat("Queue: {0} ({1})", queueName,
+                    string.Join(", ", new[]
+                    {
+                        _settings.Durable ? "durable" : "",
+                        _settings.Exclusive ? "exclusive" : "",
+                        _settings.AutoDelete ? "auto-delete" : ""
+                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
+            }
+
             if (_settings.PurgeOnReceive)
-                context.Model.QueuePurge(_settings.QueueName);
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Purging {0} messages from queue {1}", queueOk.MessageCount, queueName);
+
+                context.Model.QueuePurge(queueName);
+            }
+
+            string exchangeName = _settings.ExchangeName ?? queueName;
 
             if (!string.IsNullOrWhiteSpace(_settings.ExchangeName) || string.IsNullOrWhiteSpace(_settings.QueueName))
             {
-                string exchangeName = _settings.ExchangeName ?? queueName;
-
                 context.Model.ExchangeDeclare(exchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
                     _settings.ExchangeArguments);
 
                 context.Model.QueueBind(queueName, exchangeName, "");
             }
 
+            ReceiveSettings settings = new RabbitMqReceiveSettings(_settings)
+            {
+                QueueName = queueName,
+                ExchangeName = exchangeName
+            };
 
-            var consumer = new RabbitMqBasicConsumer(context.Model, inputAddress, _pipe);
+            context.GetOrAddPayload(() => settings);
 
-            consumer.ConsumerCancelled += (_, args) => taskCompletion.TrySetResult(true);
-
-            context.Model.BasicConsume(queueName, false, consumer);
-
-            await taskCompletion.Task;
-
-            registration.Dispose();
+            return next.Send(context);
         }
 
         public bool Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this, (x, _) => _pipe.Inspect(x));
+            return inspector.Inspect(this);
         }
     }
 }

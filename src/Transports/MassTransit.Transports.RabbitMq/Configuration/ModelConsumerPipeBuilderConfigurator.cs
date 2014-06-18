@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 {
     using System.Collections.Generic;
     using MassTransit.Configurators;
+    using MassTransit.Pipeline;
     using PipeBuilders;
     using PipeConfigurators;
     using Pipeline;
@@ -23,9 +24,9 @@ namespace MassTransit.Transports.RabbitMq.Configuration
         IPipeBuilderConfigurator<ConnectionContext>
     {
         readonly IPipe<ReceiveContext> _pipe;
-        readonly ReceiveConsumerSettings _settings;
+        readonly ReceiveSettings _settings;
 
-        public ModelConsumerPipeBuilderConfigurator(IPipe<ReceiveContext> pipe, ReceiveConsumerSettings settings)
+        public ModelConsumerPipeBuilderConfigurator(IPipe<ReceiveContext> pipe, ReceiveSettings settings)
         {
             _settings = settings;
             _pipe = pipe;
@@ -33,9 +34,13 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 
         public void Configure(IPipeBuilder<ConnectionContext> builder)
         {
-            IFilter<ModelContext> modelConsumer = new ModelConsumerFilter(_pipe, _settings);
+            IPipe<ModelContext> pipe = Pipe.New<ModelContext>(x =>
+            {
+                x.Filter(new ReceiveSettingsModelFilter(_settings));
+                x.Filter(new ModelConsumerFilter(_pipe));
+            });
 
-            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(modelConsumer.Combine());
+            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe);
 
             builder.AddFilter(modelFilter);
         }

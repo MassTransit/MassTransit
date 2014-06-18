@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,37 +10,36 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq
+namespace MassTransit
 {
     using System;
     using System.Runtime.Serialization;
-    using Exceptions;
 
 
     [Serializable]
-    public class MessageNotConfirmedException :
-        TransportException
+    public class RabbitMqAddressException :
+        ConfigurationException
     {
-        public MessageNotConfirmedException()
+        const string DefaultHelpLink = "http://www.rabbitmq.com/specification.html";
+
+        public RabbitMqAddressException()
         {
+            HelpLink = DefaultHelpLink;
         }
 
-        public MessageNotConfirmedException(Uri uri)
-            : base(uri)
+        public RabbitMqAddressException(string message)
+            : base(message)
         {
+            HelpLink = DefaultHelpLink;
         }
 
-        public MessageNotConfirmedException(Uri uri, string message)
-            : base(uri, message)
+        public RabbitMqAddressException(string message, Exception innerException)
+            : base(message, innerException)
         {
+            HelpLink = DefaultHelpLink;
         }
 
-        public MessageNotConfirmedException(Uri uri, string message, Exception innerException)
-            : base(uri, message, innerException)
-        {
-        }
-
-        protected MessageNotConfirmedException(SerializationInfo info, StreamingContext context)
+        protected RabbitMqAddressException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

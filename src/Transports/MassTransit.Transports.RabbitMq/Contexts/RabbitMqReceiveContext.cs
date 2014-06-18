@@ -10,13 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq
+namespace MassTransit.Transports.RabbitMq.Contexts
 {
     using System;
     using System.Diagnostics;
     using System.IO;
     using System.Net.Mime;
     using System.Threading;
+    using Context;
     using RabbitMQ.Client;
 
 
@@ -32,6 +33,7 @@ namespace MassTransit.Transports.RabbitMq
         readonly ulong _deliveryTag;
         readonly string _exchange;
         readonly Uri _inputAddress;
+        readonly PayloadCache _payloadCache;
         readonly IBasicProperties _properties;
         readonly Stopwatch _receiveTimer;
         readonly bool _redelivered;
@@ -46,6 +48,9 @@ namespace MassTransit.Transports.RabbitMq
         {
             _receiveTimer = Stopwatch.StartNew();
 
+            _payloadCache = new PayloadCache();
+            _payloadCache.GetOrAddPayload<RabbitMqBasicConsumeContext>(() => this);
+
             _exchange = exchange;
             _routingKey = routingKey;
             _body = body;
@@ -56,6 +61,8 @@ namespace MassTransit.Transports.RabbitMq
             _consumerTag = consumerTag;
 
             _cancellationTokenSource = new CancellationTokenSource();
+
+
         }
 
         public string ConsumerTag
@@ -81,6 +88,23 @@ namespace MassTransit.Transports.RabbitMq
         public IBasicProperties Properties
         {
             get { return _properties; }
+        }
+
+        public bool HasPayloadType(Type contextType)
+        {
+            return _payloadCache.HasPayloadType(contextType);
+        }
+
+        public bool TryGetPayload<TPayload>(out TPayload context)
+            where TPayload : class
+        {
+            return _payloadCache.TryGetPayload(out context);
+        }
+
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+            where TPayload : class
+        {
+            return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
         public CancellationToken CancellationToken

@@ -27,7 +27,7 @@ namespace MassTransit
         /// <param name="pipe"></param>
         /// <param name="settings"></param>
         public static void ModelConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe,
-            ReceiveConsumerSettings settings)
+            ReceiveSettings settings)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");

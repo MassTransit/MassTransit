@@ -17,7 +17,6 @@ namespace MassTransit.Builders
     using System.Threading;
     using BusServiceConfigurators;
     using Configuration;
-    using Exceptions;
     using Logging;
     using Magnum;
     using Magnum.Extensions;

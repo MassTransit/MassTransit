@@ -57,9 +57,9 @@ namespace MassTransit.Pipeline
 
 			using (var bodyStream = new MemoryStream())
 			{
-				ReceiveContext receiveContext = ReceiveContext.FromBodyStream(bodyStream);
+				OldReceiveContext receiveContext = OldReceiveContext.FromBodyStream(bodyStream);
 				pipeline.Configure(x => receiveContext.SetBus(x.Bus));
-				var context = new ConsumeContext<T>(receiveContext, message);
+				var context = new OldConsumeContext<T>(receiveContext, message);
 
 				using (context.CreateScope())
 				{

@@ -16,7 +16,6 @@ namespace MassTransit.Tests
     using System.Linq;
     using System.Threading.Tasks;
     using BusConfigurators;
-    using Exceptions;
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using NUnit.Framework;

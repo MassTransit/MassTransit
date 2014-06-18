@@ -21,11 +21,11 @@ namespace MassTransit.Context
     using Serialization;
     using Util;
 
-    public class ReceiveContext :
-        MessageContext,
+    public class OldReceiveContext :
+        OldMessageContext,
         IReceiveContext
     {
-        static readonly ILog _log = Logger.Get(typeof(ReceiveContext));
+        static readonly ILog _log = Logger.Get(typeof(OldReceiveContext));
         readonly IList<IPublished> _published;
         readonly IList<IReceived> _received;
         readonly IList<ISent> _sent;
@@ -35,7 +35,7 @@ namespace MassTransit.Context
         IMessageTypeConverter _typeConverter;
         readonly IList<Action> _faultActions;
 
-        ReceiveContext()
+        OldReceiveContext()
         {
             Id = NewId.NextGuid();
             
@@ -46,7 +46,7 @@ namespace MassTransit.Context
             _received = new List<IReceived>();
         }
 
-        ReceiveContext(Stream bodyStream, bool transactional)
+        OldReceiveContext(Stream bodyStream, bool transactional)
             : this()
         {
             _bodyStream = bodyStream;
@@ -185,7 +185,7 @@ namespace MassTransit.Context
                 T message;
                 if (_typeConverter != null && _typeConverter.TryConvert(out message))
                 {
-                    context = new ConsumeContext<T>(this, message);
+                    context = new OldConsumeContext<T>(this, message);
                     return true;
                 }
 
@@ -231,7 +231,7 @@ namespace MassTransit.Context
         }
 
         /// <summary>
-        /// Create a new <see cref="ReceiveContext"/> from the incoming 
+        /// Create a new <see cref="OldReceiveContext"/> from the incoming 
         /// stream; the stream should contain the MassTransit <see cref="Envelope"/>
         /// which in turn contains both payload and meta-data/out-of-band data.
         /// </summary>
@@ -239,15 +239,15 @@ namespace MassTransit.Context
         /// <param name="transactional">True if the transport is transactional and will roll back failed messages </param>
         /// <returns>The receive context</returns>
         
-        public static ReceiveContext FromBodyStream(Stream bodyStream, bool transactional)
+        public static OldReceiveContext FromBodyStream(Stream bodyStream, bool transactional)
         {
-            return new ReceiveContext(bodyStream, transactional);
+            return new OldReceiveContext(bodyStream, transactional);
         }
 
         
-        public static ReceiveContext FromBodyStream(Stream bodyStream)
+        public static OldReceiveContext FromBodyStream(Stream bodyStream)
         {
-            return new ReceiveContext(bodyStream, false);
+            return new OldReceiveContext(bodyStream, false);
         }
 
         /// <summary>
@@ -255,9 +255,9 @@ namespace MassTransit.Context
         /// </summary>
         /// <returns></returns>
         
-        public static ReceiveContext Empty()
+        public static OldReceiveContext Empty()
         {
-            return new ReceiveContext(null, false);
+            return new OldReceiveContext(null, false);
         }
     }
 }

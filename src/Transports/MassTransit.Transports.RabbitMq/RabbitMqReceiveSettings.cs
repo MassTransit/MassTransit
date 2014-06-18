@@ -15,14 +15,28 @@ namespace MassTransit.Transports.RabbitMq
     using System.Collections.Generic;
 
 
-    public class RabbitMqReceiveConsumerSettings :
-        ReceiveConsumerSettings
+    public class RabbitMqReceiveSettings :
+        ReceiveSettings
     {
-        public RabbitMqReceiveConsumerSettings()
+        public RabbitMqReceiveSettings()
         {
             QueueArguments = new Dictionary<string, object>();
             ExchangeArguments = new Dictionary<string, object>();
             ExchangeType = RabbitMQ.Client.ExchangeType.Fanout;
+        }
+
+        public RabbitMqReceiveSettings(ReceiveSettings settings)
+        {
+            QueueName = settings.QueueName;
+            ExchangeName = settings.ExchangeName;
+            PrefetchCount = settings.PrefetchCount;
+            Durable = settings.Durable;
+            Exclusive = settings.Exclusive;
+            AutoDelete = settings.AutoDelete;
+            QueueArguments = settings.QueueArguments;
+            ExchangeArguments = settings.ExchangeArguments;
+            PurgeOnReceive = settings.PurgeOnReceive;
+            ExchangeType = settings.ExchangeType;
         }
 
         public string QueueName { get; set; }

@@ -56,7 +56,7 @@ namespace MassTransit.Distributor.Pipeline
             if (payload == null)
                 payload = FastActivator<TMessage>.Create();
 
-            var payloadContext = new ConsumeContext<TMessage>(context.BaseContext, payload);
+            var payloadContext = new OldConsumeContext<TMessage>(context.BaseContext, payload);
 
             return _output.Enumerate(payloadContext)
                 .Select(handler => (Action<IConsumeContext<Distributed<TMessage>>>)(x => handler(payloadContext)));

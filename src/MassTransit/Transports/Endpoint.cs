@@ -18,7 +18,6 @@ namespace MassTransit.Transports
     using System.Runtime.Serialization;
     using System.Transactions;
     using Context;
-    using Exceptions;
     using Logging;
     using Magnum.Reflection;
     using Serialization;

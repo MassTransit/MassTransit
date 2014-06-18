@@ -17,6 +17,7 @@ namespace MassTransit
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Serialization;
@@ -51,6 +52,23 @@ namespace MassTransit
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, object>();
+        }
+
+        public bool HasPayloadType(Type contextType)
+        {
+            return _receiveContext.HasPayloadType(contextType);
+        }
+
+        public bool TryGetPayload<TPayload>(out TPayload payload)
+            where TPayload : class
+        {
+            return _receiveContext.TryGetPayload(out payload);
+        }
+
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+            where TPayload : class
+        {
+            return _receiveContext.GetOrAddPayload(payloadFactory);
         }
 
 
@@ -111,7 +129,7 @@ namespace MassTransit
 
         public bool HasMessageType(Type messageType)
         {
-            lock(_messageTypes)
+            lock (_messageTypes)
             {
                 object existing;
                 if (_messageTypes.TryGetValue(messageType, out existing))
@@ -126,7 +144,7 @@ namespace MassTransit
         public bool TryGetMessage<T>(out ConsumeContext<T> message)
             where T : class
         {
-            lock(_messageTypes)
+            lock (_messageTypes)
             {
                 object existing;
                 if (_messageTypes.TryGetValue(typeof(T), out existing))
@@ -150,12 +168,12 @@ namespace MassTransit
                     if (deserializeType.IsInterface && deserializeType.IsAllowedMessageType())
                         deserializeType = InterfaceImplementationBuilder.GetProxyFor(deserializeType);
 
-                    using (var jsonReader = _messageToken.CreateReader())
+                    using (JsonReader jsonReader = _messageToken.CreateReader())
                     {
                         obj = _deserializer.Deserialize(jsonReader, deserializeType);
                     }
 
-                    _messageTypes[typeof(T)] = message = new JsonMessageConsumeContext<T>(this, (T) obj);
+                    _messageTypes[typeof(T)] = message = new JsonMessageConsumeContext<T>(this, (T)obj);
                     return true;
                 }
 

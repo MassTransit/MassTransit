@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq.Contexts
 {
     using System;
     using System.Threading;
+    using Context;
     using RabbitMQ.Client;
 
 
@@ -22,6 +23,7 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         IDisposable
     {
         readonly object _lock = new object();
+        readonly PayloadCache _payloadCache;
         readonly CancellationTokenSource _tokenSource;
         IConnection _connection;
         CancellationTokenRegistration _registration;
@@ -29,6 +31,7 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         public RabbitMqConnectionContext(IConnection connection, CancellationToken cancellationToken)
         {
             _connection = connection;
+            _payloadCache = new PayloadCache();
 
             _tokenSource = new CancellationTokenSource();
             _registration = cancellationToken.Register(OnCancellationRequested);
@@ -36,12 +39,23 @@ namespace MassTransit.Transports.RabbitMq.Contexts
             connection.ConnectionShutdown += OnConnectionShutdown;
         }
 
-        public void Dispose()
+        public bool HasPayloadType(Type contextType)
         {
-            _connection.ConnectionShutdown -= OnConnectionShutdown;
-
-            Close();
+            return _payloadCache.HasPayloadType(contextType);
         }
+
+        public bool TryGetPayload<TPayload>(out TPayload context)
+            where TPayload : class
+        {
+            return _payloadCache.TryGetPayload(out context);
+        }
+
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+            where TPayload : class
+        {
+            return _payloadCache.GetOrAddPayload(payloadFactory);
+        }
+
 
         public IConnection Connection
         {
@@ -60,6 +74,13 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         public CancellationToken CancellationToken
         {
             get { return _tokenSource.Token; }
+        }
+
+        public void Dispose()
+        {
+            _connection.ConnectionShutdown -= OnConnectionShutdown;
+
+            Close();
         }
 
         void OnConnectionShutdown(IConnection connection, ShutdownEventArgs reason)

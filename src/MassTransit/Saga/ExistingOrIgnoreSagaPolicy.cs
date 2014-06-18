@@ -14,7 +14,6 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Linq.Expressions;
-	using Exceptions;
 	using Logging;
 
     public class ExistingOrIgnoreSagaPolicy<TSaga, TMessage> :

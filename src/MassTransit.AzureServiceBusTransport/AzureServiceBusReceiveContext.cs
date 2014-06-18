@@ -19,11 +19,12 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Net.Mime;
     using System.Text;
     using System.Threading;
+    using Context;
     using Microsoft.ServiceBus.Messaging;
 
 
     public class AzureServiceBusReceiveContext :
-        ReceiveContext,
+        MassTransit.ReceiveContext,
         AzureServiceBusMessageContext
     {
         static readonly ContentType DefaultContentType = new ContentType("application/vnd.masstransit+json");
@@ -32,6 +33,7 @@ namespace MassTransit.AzureServiceBusTransport
         readonly Uri _inputAddress;
         readonly BrokeredMessage _message;
         readonly Stopwatch _receiveTimer;
+        readonly PayloadCache _payloadCache;
         ContentType _contentType;
         Encoding _encoding;
         AzureServiceBusReceiveContextHeaders _headers;
@@ -41,10 +43,31 @@ namespace MassTransit.AzureServiceBusTransport
         {
             _receiveTimer = Stopwatch.StartNew();
 
+            _payloadCache = new PayloadCache();
+
             _message = message;
 
             _cancellationTokenSource = new CancellationTokenSource();
         }
+
+
+        public bool HasPayloadType(Type contextType)
+        {
+            return _payloadCache.HasPayloadType(contextType);
+        }
+
+        public bool TryGetPayload<TPayload>(out TPayload context)
+            where TPayload : class
+        {
+            return _payloadCache.TryGetPayload(out context);
+        }
+
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+            where TPayload : class
+        {
+            return _payloadCache.GetOrAddPayload(payloadFactory);
+        }
+
 
         public IDictionary<string, object> Properties
         {

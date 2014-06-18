@@ -14,12 +14,12 @@ namespace MassTransit.Context
 {
     using System;
 
-    public abstract class MessageContext :
+    public abstract class OldMessageContext :
         IMessageContext
     {
         MessageHeaders _headers;
 
-        public MessageContext()
+        public OldMessageContext()
         {
             _headers = new MessageHeaders();
         }

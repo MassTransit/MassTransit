@@ -16,7 +16,6 @@ namespace BusDriver
 	using System.Collections.Generic;
 	using Magnum.Extensions;
 	using MassTransit;
-	using MassTransit.Exceptions;
 	using MassTransit.Transports;
 
 	public class TransportCache :

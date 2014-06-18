@@ -56,7 +56,7 @@ namespace MassTransit.Tests.Serialization
 				}
 				using (var input = new MemoryStream(data))
 				{
-					serializer.Deserialize(ReceiveContext.FromBodyStream(input));
+					serializer.Deserialize(OldReceiveContext.FromBodyStream(input));
 				}
 			}
 
@@ -92,7 +92,7 @@ namespace MassTransit.Tests.Serialization
 			{
 				using (var input = new MemoryStream(sample))
 				{
-					serializer.Deserialize(ReceiveContext.FromBodyStream(input));
+					serializer.Deserialize(OldReceiveContext.FromBodyStream(input));
 				}
 			}
 

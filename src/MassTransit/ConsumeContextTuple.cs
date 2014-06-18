@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
 
 
     public class ConsumeContextTuple<T1, T> :
@@ -23,6 +24,21 @@ namespace MassTransit
     {
         readonly ConsumeContext<T> _context;
         readonly T1 _item1;
+
+        public bool HasPayloadType(Type contextType)
+        {
+            return _context.HasPayloadType(contextType);
+        }
+
+        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
+        {
+            return _context.TryGetPayload(out payload);
+        }
+
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        {
+            return _context.GetOrAddPayload(payloadFactory);
+        }
 
         public ConsumeContextTuple(ConsumeContext<T> context, T1 item1)
         {

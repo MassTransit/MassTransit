@@ -15,7 +15,11 @@ namespace MassTransit.Transports.RabbitMq
     using System.Collections.Generic;
 
 
-    public interface ReceiveConsumerSettings
+
+    /// <summary>
+    /// Specify the receive settings for a receive transport
+    /// </summary>
+    public interface ReceiveSettings
     {
         /// <summary>
         /// The queue name to receive from
@@ -32,18 +36,40 @@ namespace MassTransit.Transports.RabbitMq
         /// </summary>
         ushort PrefetchCount { get; }
 
+        /// <summary>
+        /// True if messages should be persisted to disk for the queue
+        /// </summary>
         bool Durable { get; }
 
+        /// <summary>
+        /// True if the queue receive should be exclusive and not shared
+        /// </summary>
         bool Exclusive { get; }
 
-
+        /// <summary>
+        /// True if the queue/exchange should automatically be deleted
+        /// </summary>
         bool AutoDelete { get; }
 
+        /// <summary>
+        /// Arguments passed to QueueDeclare
+        /// </summary>
         IDictionary<string, object> QueueArguments { get; }
+
+        /// <summary>
+        /// Arguments passed to exchange-declare
+        /// </summary>
         IDictionary<string, object> ExchangeArguments { get; }
 
+        /// <summary>
+        /// If True, and a queue name is specified, if the queue exists and has messages, they are purged at startup
+        /// If the connection is reset, messages are not purged until the service is reset
+        /// </summary>
         bool PurgeOnReceive { get; }
 
+        /// <summary>
+        /// The RabbitMQ exchange type
+        /// </summary>
         string ExchangeType { get; }
     }
 }

@@ -16,7 +16,7 @@ namespace MassTransit.Transports
     using Pipeline;
 
 
-    public interface ISendToTransport
+    public interface ISendTransport
     {
         /// <summary>
         ///     Send a message to the transport. The transport creates the SendContext, and calls back to
@@ -26,9 +26,9 @@ namespace MassTransit.Transports
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="message">The message</param>
-        /// <param name="pipe"></param>
+        /// <param name="pipe">The pipe invoked when sending a message, to do extra stuff</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send<T>(T message, ISendPipe<T> pipe)
+        Task Send<T>(T message, IPipe<SendContext<T>> pipe)
             where T : class;
     }
 }

@@ -24,9 +24,9 @@ namespace MassTransit.Transports
     {
         readonly Uri _destinationAddress;
         readonly ISendMessageSerializer _serializer;
-        readonly ISendToTransport _transport;
+        readonly ISendTransport _transport;
 
-        public SendEndpoint(ISendToTransport transport, ISendMessageSerializer serializer, Uri destinationAddress)
+        public SendEndpoint(ISendTransport transport, ISendMessageSerializer serializer, Uri destinationAddress)
         {
             _transport = transport;
             _serializer = serializer;

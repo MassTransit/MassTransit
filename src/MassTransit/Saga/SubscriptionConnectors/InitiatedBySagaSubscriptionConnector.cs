@@ -13,7 +13,6 @@
 namespace MassTransit.Saga.SubscriptionConnectors
 {
 	using System;
-	using Exceptions;
 	using Pipeline;
 
 	public class InitiatedBySagaSubscriptionConnector<TSaga, TMessage> :

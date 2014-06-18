@@ -15,7 +15,6 @@ namespace MassTransit.Tests.TextFixtures
 	using System;
 	using Configurators;
 	using EndpointConfigurators;
-	using Exceptions;
 	using Magnum.Extensions;
 	using MassTransit.Saga;
 	using MassTransit.Transports;

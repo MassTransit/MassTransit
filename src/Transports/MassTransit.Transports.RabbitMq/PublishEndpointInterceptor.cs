@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,12 +14,11 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.Collections.Generic;
-    using Exceptions;
     using Magnum.Extensions;
     using Magnum.Reflection;
-    using Pipeline.Configuration;
-    using Pipeline.Sinks;
-    using Util;
+    using MassTransit.Pipeline.Configuration;
+    using MassTransit.Pipeline.Sinks;
+
 
     /// <summary>
     /// Makes sure that the exchange for the published message is available. This ensures
@@ -41,8 +40,10 @@ namespace MassTransit.Transports.RabbitMq
 
             _inboundTransport = _bus.Endpoint.InboundTransport as InboundRabbitMqTransport;
             if (_inboundTransport == null)
+            {
                 throw new ConfigurationException(
                     "The bus must be receiving from a RabbitMQ endpoint for this interceptor to work");
+            }
 
             _messageNameFormatter = _inboundTransport.MessageNameFormatter;
 
@@ -108,7 +109,7 @@ namespace MassTransit.Transports.RabbitMq
             this.FastInvoke(new[] {messageType}, "CreateEndpointSink", endpoint);
         }
 
-        
+
         void CreateEndpointSink<TMessage>(IEndpoint endpoint)
             where TMessage : class
         {
