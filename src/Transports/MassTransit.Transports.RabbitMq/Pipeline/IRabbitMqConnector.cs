@@ -10,23 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Transports.RabbitMq.Pipeline
 {
-    using System;
-    using PipeConfigurators;
-    using Pipeline;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using MassTransit.Pipeline;
 
 
-    public static class PipeFactory
+    public interface IRabbitMqConnector
     {
-        public static IPipe<T> New<T>(Action<IPipeConfigurator<T>> callback)
-            where T : class, PipeContext
-        {
-            var configurator = new PipeConfigurator<T>();
-
-            callback(configurator);
-
-            return configurator.Build();
-        }
+        /// <summary>
+        /// Connects to RabbitMQ, invoking the pipe when the connection is established
+        /// </summary>
+        /// <param name="pipe">The connection context pipe</param>
+        /// <param name="cancellationToken">The token that will be cancelled when the connection should no longer be used</param>
+        /// <returns></returns>
+        Task Connect(IPipe<ConnectionContext> pipe, CancellationToken cancellationToken);
     }
 }

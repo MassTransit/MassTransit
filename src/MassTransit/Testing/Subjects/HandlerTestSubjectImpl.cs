@@ -14,7 +14,6 @@ namespace MassTransit.Testing.Subjects
 {
 	using System;
 	using System.Linq;
-	using Exceptions;
 	using Magnum.Extensions;
 	using Scenarios;
 

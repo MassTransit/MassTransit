@@ -14,9 +14,9 @@ namespace MassTransit.Transports
 {
 	using System;
 	using System.Runtime.Serialization;
-	using Exceptions;
 
-	[Serializable]
+
+    [Serializable]
 	public class InvalidConnectionException :
 		TransportException
 	{

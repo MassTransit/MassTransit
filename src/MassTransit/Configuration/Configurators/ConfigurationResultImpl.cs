@@ -16,7 +16,6 @@ namespace MassTransit.Configurators
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
-	using Exceptions;
 	using Util;
 
 

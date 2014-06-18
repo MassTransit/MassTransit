@@ -12,13 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
     using Logging;
+    using MassTransit.Pipeline;
     using Pipeline;
     using Policies;
     using RabbitMQ.Client;
+    using RabbitMQ.Client.Exceptions;
 
 
     /// <summary>
@@ -42,20 +45,30 @@ namespace MassTransit.Transports.RabbitMq
             return _retryPolicy.Retry(async () =>
             {
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connecting to {0}", _connectionFactory.ToDebugString());
+                    _log.DebugFormat("Connecting: {0}", _connectionFactory.ToDebugString());
 
-                using (IConnection connection = _connectionFactory.CreateConnection())
+                try
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Connected to {0}", _connectionFactory.ToDebugString());
-
-                    using (var connectionContext = new RabbitMqConnectionContext(connection, cancellationToken))
+                    using (IConnection connection = _connectionFactory.CreateConnection())
                     {
-                        await pipe.Send(connectionContext);
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Connected: {0}", _connectionFactory.ToDebugString());
+
+                        using (var connectionContext = new RabbitMqConnectionContext(connection, cancellationToken))
+                        {
+                            await pipe.Send(connectionContext);
+                        }
+
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Disconnecting: {0}", _connectionFactory.ToDebugString());
                     }
 
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Closing connection to {0}", _connectionFactory.ToDebugString());
+                        _log.DebugFormat("Disconnected: {0}", _connectionFactory.ToDebugString());
+                }
+                catch (BrokerUnreachableException ex)
+                {
+                    throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
                 }
             }, cancellationToken);
         }

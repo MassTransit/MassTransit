@@ -16,7 +16,7 @@ namespace MassTransit.Context
     using System.IO;
 
     public class SendContext<T> :
-        MessageContext,
+        OldMessageContext,
         ISendContext<T>
         where T : class
     {

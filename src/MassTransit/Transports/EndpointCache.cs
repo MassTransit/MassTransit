@@ -14,7 +14,6 @@ namespace MassTransit.Transports
 {
     using System;
     using Diagnostics.Introspection;
-    using Exceptions;
     using Logging;
     using Magnum;
     using Magnum.Caching;

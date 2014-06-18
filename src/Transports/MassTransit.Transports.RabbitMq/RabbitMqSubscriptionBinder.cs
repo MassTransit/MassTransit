@@ -15,7 +15,6 @@ namespace MassTransit.Transports.RabbitMq
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Exceptions;
     using Logging;
     using Magnum;
     using Magnum.Extensions;

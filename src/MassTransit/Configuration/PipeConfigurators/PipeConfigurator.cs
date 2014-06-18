@@ -16,7 +16,6 @@ namespace MassTransit.PipeConfigurators
     using System.Collections.Generic;
     using System.Linq;
     using Configurators;
-    using Exceptions;
     using Logging;
     using PipeBuilders;
     using Pipeline;

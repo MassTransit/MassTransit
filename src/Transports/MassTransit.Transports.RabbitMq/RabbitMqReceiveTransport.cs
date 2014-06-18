@@ -16,6 +16,7 @@ namespace MassTransit.Transports.RabbitMq
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
+    using MassTransit.Pipeline;
     using Pipeline;
     using Policies;
 
@@ -26,21 +27,29 @@ namespace MassTransit.Transports.RabbitMq
         readonly IRabbitMqConnector _connector;
         readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
         readonly IRetryPolicy _retryPolicy;
-        readonly ReceiveConsumerSettings _settings;
+        readonly ReceiveSettings _settings;
 
-        public RabbitMqReceiveTransport(IRabbitMqConnector connector, IRetryPolicy retryPolicy, ReceiveConsumerSettings settings)
+        public RabbitMqReceiveTransport(IRabbitMqConnector connector, IRetryPolicy retryPolicy, ReceiveSettings settings)
         {
             _connector = connector;
             _retryPolicy = retryPolicy;
             _settings = settings;
         }
 
+        /// <summary>
+        /// Start the receive transport, returning a Task that can be awaited to signal the transport has 
+        /// completely shutdown once the cancellation token is cancelled.
+        /// </summary>
+        /// <param name="pipe">The receiveContext pipe</param>
+        /// <param name="cancellationToken">The cancellation token that is cancelled to terminate the receive transport</param>
+        /// <returns>A task that is completed once the transport is shut down</returns>
         public Task Start(IPipe<ReceiveContext> pipe, CancellationToken cancellationToken)
         {
-            IPipe<ConnectionContext> receivePipe = PipeFactory.New<ConnectionContext>(x =>
+            IPipe<ConnectionContext> receivePipe = Pipe.New<ConnectionContext>(x =>
             {
                 x.Repeat(cancellationToken);
                 x.Retry(_retryPolicy, cancellationToken);
+
                 x.ModelConsumer(pipe, _settings);
             });
 

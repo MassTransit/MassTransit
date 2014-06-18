@@ -20,17 +20,17 @@ namespace MassTransit.Context
     using Util;
 
 
-    public class ConsumeContext<TMessage> :
+    public class OldConsumeContext<TMessage> :
         IConsumeContext<TMessage>
         where TMessage : class
     {
-        static readonly ILog _log = Logger.Get(typeof(ReceiveContext));
+        static readonly ILog _log = Logger.Get(typeof(OldReceiveContext));
 
         readonly IReceiveContext _context;
         readonly TMessage _message;
         readonly Uri _responseAddress;
 
-        public ConsumeContext(IReceiveContext context, TMessage message)
+        public OldConsumeContext(IReceiveContext context, TMessage message)
         {
             _context = context;
             _message = message;
@@ -144,7 +144,7 @@ namespace MassTransit.Context
             var messageOfT = Message as T;
             if (messageOfT != null)
             {
-                context = new ConsumeContext<T>(_context, messageOfT);
+                context = new OldConsumeContext<T>(_context, messageOfT);
                 return true;
             }
             if (_context != null)

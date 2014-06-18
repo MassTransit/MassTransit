@@ -15,7 +15,6 @@ namespace MassTransit.Distributor.WorkerConnectors
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Exceptions;
     using Magnum.Extensions;
     using Magnum.Reflection;
     using MassTransit.Pipeline;

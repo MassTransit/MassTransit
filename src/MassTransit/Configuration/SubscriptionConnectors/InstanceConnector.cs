@@ -14,7 +14,6 @@ namespace MassTransit.SubscriptionConnectors
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Exceptions;
     using Pipeline;
     using Pipeline.Sinks;
     using Policies;

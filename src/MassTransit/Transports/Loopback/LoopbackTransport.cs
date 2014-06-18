@@ -161,7 +161,7 @@ namespace MassTransit.Transports
                             return;
                         }
 
-                        ReceiveContext context = ReceiveContext.FromBodyStream(message.Body);
+                        OldReceiveContext context = OldReceiveContext.FromBodyStream(message.Body);
                         context.SetMessageId(message.MessageId);
                         context.SetContentType(message.ContentType);
                         context.SetOriginalMessageId(message.OriginalMessageId);

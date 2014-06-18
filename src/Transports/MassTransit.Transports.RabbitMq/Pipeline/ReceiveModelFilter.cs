@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,11 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq
+namespace MassTransit.Transports.RabbitMq.Pipeline
 {
     using System.Threading.Tasks;
-    using Pipeline;
+    using Contexts;
+    using MassTransit.Pipeline;
     using RabbitMQ.Client;
+
 
     /// <summary>
     /// Creates a receiving model context using the connection
@@ -33,7 +35,7 @@ namespace MassTransit.Transports.RabbitMq
         {
             using (IModel model = context.Connection.CreateModel())
             {
-                using (var modelContext = new RabbitMqModelContext(model, context.CancellationToken))
+                using (var modelContext = new RabbitMqModelContext(context, model, context.CancellationToken))
                 {
                     await _pipe.Send(modelContext);
                 }

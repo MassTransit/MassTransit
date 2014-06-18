@@ -25,6 +25,11 @@ namespace MassTransit.Transports.RabbitMq
         IModel Model { get; }
 
         /// <summary>
+        /// The connection context on which the model was created
+        /// </summary>
+        ConnectionContext ConnectionContext { get; }
+
+        /// <summary>
         /// Set when the initial model request is cancelled
         /// </summary>
         CancellationToken CancellationToken { get; }

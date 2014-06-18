@@ -135,6 +135,9 @@
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="ConsumeContextExtensions.cs" />
     <Compile Include="ConsumeContextTuple.cs" />
+    <Compile Include="Context\PayloadCache.cs" />
+    <Compile Include="Context\PayloadException.cs" />
+    <Compile Include="Context\PayloadFactory.cs" />
     <Compile Include="EmptyPipe.cs" />
     <Compile Include="IConsumePipe.cs" />
     <Compile Include="ConsumerFactoryCallback.cs" />
@@ -176,7 +179,6 @@
     <Compile Include="FilterPipe.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
-    <Compile Include="PipeFactory.cs" />
     <Compile Include="Pipeline\DelegateFilter.cs" />
     <Compile Include="Pipeline\FilterConnectorExtensions.cs" />
     <Compile Include="Pipeline\Filters\RepeatFilter.cs" />
@@ -352,7 +354,7 @@
     <Compile Include="Configuration\TransportFactoryConfigurationExtensions.cs" />
     <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
     <Compile Include="Configuration\Xml\SettingsOptions.cs" />
-    <Compile Include="Context\ConsumeContext.cs" />
+    <Compile Include="Context\OldConsumeContext.cs" />
     <Compile Include="Context\ContextStorageProvider.cs" />
     <Compile Include="Context\ContextScopeExtensions.cs" />
     <Compile Include="Context\ContextScope.cs" />
@@ -362,8 +364,8 @@
     <Compile Include="Context\ISent.cs" />
     <Compile Include="Context\MessageHeaders.cs" />
     <Compile Include="Context\Published.cs" />
-    <Compile Include="Context\ReceiveContext.cs" />
-    <Compile Include="Context\MessageContext.cs" />
+    <Compile Include="Context\OldReceiveContext.cs" />
+    <Compile Include="Context\OldMessageContext.cs" />
     <Compile Include="Context\ContextException.cs" />
     <Compile Include="Context\ContextExtensions.cs" />
     <Compile Include="Context\IBusPublishContext.cs" />
@@ -740,7 +742,7 @@
     <Compile Include="Transports\ISendMessageSerializer.cs" />
     <Compile Include="Transports\InvalidConnectionException.cs" />
     <Compile Include="Transports\IOutboundTransport.cs" />
-    <Compile Include="Transports\ISendToTransport.cs" />
+    <Compile Include="Transports\ISendTransport.cs" />
     <Compile Include="Transports\ITransport.cs" />
     <Compile Include="Transports\JsonSendMessageSerializer.cs" />
     <Compile Include="Transports\MessageName.cs" />

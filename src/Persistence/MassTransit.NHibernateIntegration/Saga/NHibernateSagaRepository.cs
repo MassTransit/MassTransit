@@ -16,7 +16,6 @@ namespace MassTransit.NHibernateIntegration.Saga
     using System.Collections.Generic;
     using System.Linq;
     using System.Transactions;
-    using Exceptions;
     using Logging;
     using MassTransit.Saga;
     using NHibernate;

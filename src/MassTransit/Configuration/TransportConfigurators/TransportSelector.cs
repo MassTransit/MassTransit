@@ -15,7 +15,6 @@ namespace MassTransit.TransportConfigurators
     using System;
     using System.Collections.Generic;
     using Configurators;
-    using Exceptions;
 
 
     public class TransportSelector :

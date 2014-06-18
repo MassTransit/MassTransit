@@ -13,7 +13,6 @@
 namespace MassTransit.Builders
 {
     using System;
-    using Exceptions;
     using Transports;
     using Util;
 

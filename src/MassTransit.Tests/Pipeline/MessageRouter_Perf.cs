@@ -46,7 +46,7 @@ namespace MassTransit.Tests.Pipeline
                 MockRepository.GenerateMock<IInboundPipelineConfigurator>());
 
             var message = new PingMessage();
-            IConsumeContext context = new ConsumeContext<PingMessage>(ReceiveContext.Empty(), message);
+            IConsumeContext context = new OldConsumeContext<PingMessage>(OldReceiveContext.Empty(), message);
 
             for (int i = 0; i < 100; i++)
                 pipeline.Dispatch(context);
@@ -121,7 +121,7 @@ namespace MassTransit.Tests.Pipeline
             Stopwatch timer = Stopwatch.StartNew();
 
             const int loopCount = 1500000;
-            Task[] tasks = new Task[10];
+            var tasks = new Task[10];
             for (int loop = 0; loop < 10; loop++)
             {
                 tasks[loop] = Task.Run(async () =>
@@ -201,7 +201,7 @@ namespace MassTransit.Tests.Pipeline
                 get { return _completed.Task; }
             }
 
-            public async Task Consume(MassTransit.ConsumeContext<T> context)
+            public async Task Consume(ConsumeContext<T> context)
             {
                 long value = Interlocked.Increment(ref _count);
                 if (value == _limit)
@@ -216,8 +216,15 @@ namespace MassTransit.Tests.Pipeline
 
 
         class TestReceiveContext :
-            MassTransit.ReceiveContext
+            ReceiveContext
         {
+            PayloadCache _payloadCache;
+
+            public TestReceiveContext()
+            {
+                _payloadCache = new PayloadCache();
+            }
+
             public Encoding ContentEncoding { get; private set; }
             public CancellationToken CancellationToken { get; private set; }
             public Stream Body { get; private set; }
@@ -233,6 +240,23 @@ namespace MassTransit.Tests.Pipeline
 
             public void NotifyFaulted(string messageType, string consumerType, Exception exception)
             {
+            }
+
+            public bool HasPayloadType(Type contextType)
+            {
+                return _payloadCache.HasPayloadType(contextType);
+            }
+
+            public bool TryGetPayload<TPayload>(out TPayload context)
+                where TPayload : class
+            {
+                return _payloadCache.TryGetPayload(out context);
+            }
+
+            public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+                where TPayload : class
+            {
+                return _payloadCache.GetOrAddPayload(payloadFactory);
             }
         }
 
@@ -270,7 +294,7 @@ namespace MassTransit.Tests.Pipeline
         static void SendMessages(IPipelineSink<IConsumeContext<PingMessage>> sink, int primeLoopCount)
         {
             var message = new PingMessage();
-            var context = new ConsumeContext<PingMessage>(ReceiveContext.Empty(), message);
+            var context = new OldConsumeContext<PingMessage>(OldReceiveContext.Empty(), message);
 
             for (int i = 0; i < primeLoopCount; i++)
             {
@@ -282,7 +306,7 @@ namespace MassTransit.Tests.Pipeline
         static void SendMessages(IPipelineSink<IConsumeContext> sink, int primeLoopCount)
         {
             var message = new PingMessage();
-            var context = new ConsumeContext<PingMessage>(ReceiveContext.Empty(), message);
+            var context = new OldConsumeContext<PingMessage>(OldReceiveContext.Empty(), message);
 
             for (int i = 0; i < primeLoopCount; i++)
             {
@@ -293,12 +317,31 @@ namespace MassTransit.Tests.Pipeline
     }
 
 
-    class TestConsumeContext<TMessage> : MassTransit.ConsumeContext<TMessage>
+    class TestConsumeContext<TMessage> :
+        ConsumeContext<TMessage>
         where TMessage : class
     {
+        readonly PayloadCache _payloadCache = new PayloadCache();
         public TestConsumeContext(TMessage message)
         {
             Message = message;
+        }
+
+        public bool HasPayloadType(Type contextType)
+        {
+            return _payloadCache.HasPayloadType(contextType);
+        }
+
+        public bool TryGetPayload<TPayload>(out TPayload context)
+            where TPayload : class
+        {
+            return _payloadCache.TryGetPayload(out context);
+        }
+
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+            where TPayload : class
+        {
+            return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
         public Guid? MessageId { get; private set; }
@@ -311,17 +354,17 @@ namespace MassTransit.Tests.Pipeline
         public Uri FaultAddress { get; private set; }
         public ContextHeaders ContextHeaders { get; private set; }
         public CancellationToken CancellationToken { get; private set; }
-        public MassTransit.ReceiveContext ReceiveContext { get; private set; }
+        public ReceiveContext ReceiveContext { get; private set; }
 
         public bool HasMessageType(Type messageType)
         {
             return messageType.IsAssignableFrom(typeof(TMessage));
         }
 
-        public bool TryGetMessage<T>(out MassTransit.ConsumeContext<T> consumeContext)
+        public bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
             where T : class
         {
-            consumeContext = this as MassTransit.ConsumeContext<T>;
+            consumeContext = this as ConsumeContext<T>;
 
             return consumeContext != null;
         }
@@ -394,7 +437,7 @@ namespace MassTransit.Tests.Pipeline
                 MockRepository.GenerateMock<IInboundPipelineConfigurator>());
 
             var message = new ClaimModified();
-            var context = new ConsumeContext<ClaimModified>(ReceiveContext.Empty(), message);
+            var context = new OldConsumeContext<ClaimModified>(OldReceiveContext.Empty(), message);
 
             for (int i = 0; i < 100; i++)
                 pipeline.Dispatch(context);

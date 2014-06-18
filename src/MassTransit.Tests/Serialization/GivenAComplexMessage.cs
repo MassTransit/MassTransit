@@ -52,7 +52,7 @@
 
             using (var input = new MemoryStream(serializedMessageData))
             {
-            	var receiveContext = ReceiveContext.FromBodyStream(input);
+            	var receiveContext = OldReceiveContext.FromBodyStream(input);
             	serializer.Deserialize(receiveContext);
 
             	IConsumeContext<SerializationTestMessage> context;

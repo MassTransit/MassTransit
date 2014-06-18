@@ -14,10 +14,10 @@ namespace MassTransit.Context
 {
     using System;
     using System.IO;
-    using Exceptions;
+
 
     public class MoveMessageSendContext :
-        MessageContext,
+        OldMessageContext,
         ISendContext
     {
         readonly Action<Stream> _bodyWriter;

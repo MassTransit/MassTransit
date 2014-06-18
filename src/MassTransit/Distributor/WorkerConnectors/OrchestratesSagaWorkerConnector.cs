@@ -13,7 +13,6 @@
 namespace MassTransit.Distributor.WorkerConnectors
 {
     using System;
-    using Exceptions;
     using Saga;
     using Saga.Pipeline;
 

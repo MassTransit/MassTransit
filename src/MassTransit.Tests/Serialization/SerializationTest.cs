@@ -45,7 +45,7 @@ namespace MassTransit.Tests.Serialization
 
 			using (var input = new MemoryStream(serializedMessageData))
 			{
-				IReceiveContext receiveContext = ReceiveContext.FromBodyStream(input);
+				IReceiveContext receiveContext = OldReceiveContext.FromBodyStream(input);
 				_serializer.Deserialize(receiveContext);
 
 				IConsumeContext<T> context;

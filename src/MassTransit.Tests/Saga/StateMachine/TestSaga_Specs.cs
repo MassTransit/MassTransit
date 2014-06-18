@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Saga.StateMachine
 {
 	using System;
 	using System.Linq;
-	using Exceptions;
 	using Locator;
 	using Magnum.TestFramework;
 	using MassTransit.Pipeline;

@@ -45,7 +45,7 @@ namespace MassTransit.Transports.RabbitMq
     }
 
 
-    public interface RabbitMqSendContext<T> :
+    public interface RabbitMqSendContext<out T> :
         SendContext<T>,
         RabbitMqSendContext
         where T : class

@@ -13,16 +13,17 @@
 namespace MassTransit.Policies
 {
     using System;
+    using System.Collections.Generic;
 
 
     public class IntervalRetryContext :
         IRetryContext
     {
-        readonly TimeSpan[] _delays;
+        readonly IEnumerable<TimeSpan> _delays;
         readonly IRetryPolicy _policy;
-        int _retryNumber;
+        IEnumerator<TimeSpan> _enumerator;
 
-        public IntervalRetryContext(IRetryPolicy policy, TimeSpan[] delays)
+        public IntervalRetryContext(IRetryPolicy policy, IEnumerable<TimeSpan> delays)
         {
             _policy = policy;
             _delays = delays;
@@ -30,14 +31,20 @@ namespace MassTransit.Policies
 
         public void Dispose()
         {
+            if (_enumerator != null)
+                _enumerator.Dispose();
         }
 
         public bool CanRetry(Exception exception, out TimeSpan delay)
         {
             bool canRetry = _policy.CanRetry(exception);
-            if (canRetry && _retryNumber < _delays.Length)
+
+            if (_enumerator == null)
+                _enumerator = _delays.GetEnumerator();
+
+            if (canRetry && _enumerator.MoveNext())
             {
-                delay = _delays[_retryNumber++];
+                delay = _enumerator.Current;
                 return true;
             }
 

@@ -14,14 +14,15 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
 
     public class IncrementalRetryPolicy :
         IRetryPolicy
     {
         readonly IRetryExceptionFilter _filter;
-        readonly TimeSpan[] _intervals;
+        readonly TimeSpan _initialInterval;
+        readonly TimeSpan _intervalIncrement;
+        readonly int _retryLimit;
 
         public IncrementalRetryPolicy(IRetryExceptionFilter filter, int retryLimit, TimeSpan initialInterval,
             TimeSpan intervalIncrement)
@@ -39,12 +40,14 @@ namespace MassTransit.Policies
             }
 
             _filter = filter;
-            _intervals = GetIntervals(retryLimit, initialInterval, intervalIncrement).ToArray();
+            _retryLimit = retryLimit;
+            _initialInterval = initialInterval;
+            _intervalIncrement = intervalIncrement;
         }
 
         public IRetryContext GetRetryContext()
         {
-            return new IntervalRetryContext(this, _intervals);
+            return new IntervalRetryContext(this, GetIntervals(_retryLimit, _initialInterval, _intervalIncrement));
         }
 
         public bool CanRetry(Exception exception)

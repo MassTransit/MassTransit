@@ -12,11 +12,34 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
+    using PipeConfigurators;
     using Pipeline;
 
 
     public static class Pipe
     {
+        /// <summary>
+        /// Create a new pipe using the pipe configurator to add filters, etc.
+        /// </summary>
+        /// <typeparam name="T">The pipe context type</typeparam>
+        /// <param name="callback">The configuration callback</param>
+        /// <returns>An initialized pipe ready for use</returns>
+        public static IPipe<T> New<T>(Action<IPipeConfigurator<T>> callback)
+            where T : class, PipeContext
+        {
+            var configurator = new PipeConfigurator<T>();
+
+            callback(configurator);
+
+            return configurator.Build();
+        }
+
+        /// <summary>
+        /// Returns an empty pipe of the specified context type
+        /// </summary>
+        /// <typeparam name="T">The context type</typeparam>
+        /// <returns></returns>
         public static IPipe<T> Empty<T>()
             where T : class, PipeContext
         {

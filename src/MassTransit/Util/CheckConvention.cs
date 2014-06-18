@@ -13,7 +13,6 @@
 namespace MassTransit.Util
 {
 	using System;
-	using Exceptions;
 	using Magnum;
 	using Magnum.Extensions;
 

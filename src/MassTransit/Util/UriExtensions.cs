@@ -13,9 +13,9 @@
 namespace MassTransit.Util
 {
 	using System;
-	using Exceptions;
 
-	public static class UriExtensions
+
+    public static class UriExtensions
 	{
 		public static Uri AppendToPath(this Uri uri, string value)
 		{

@@ -13,29 +13,35 @@
 namespace MassTransit.Policies
 {
     using System;
-    using System.Linq;
+    using System.Collections.Generic;
 
 
     public class ImmediateRetryPolicy :
         IRetryPolicy
     {
         readonly IRetryExceptionFilter _filter;
-        readonly TimeSpan[] _intervals;
+        readonly int _retryLimit;
 
         public ImmediateRetryPolicy(IRetryExceptionFilter filter, int retryLimit)
         {
             _filter = filter;
-            _intervals = Enumerable.Repeat(TimeSpan.Zero, retryLimit).ToArray();
+            _retryLimit = retryLimit;
         }
 
         public IRetryContext GetRetryContext()
         {
-            return new IntervalRetryContext(this, _intervals);
+            return new IntervalRetryContext(this, GetIntervals());
         }
 
         public bool CanRetry(Exception exception)
         {
             return _filter.CanRetry(exception);
+        }
+
+        IEnumerable<TimeSpan> GetIntervals()
+        {
+            for (int i = 0; i < _retryLimit; i++)
+                yield return TimeSpan.Zero;
         }
     }
 }

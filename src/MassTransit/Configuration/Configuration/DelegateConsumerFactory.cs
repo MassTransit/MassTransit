@@ -14,7 +14,6 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Threading.Tasks;
-    using Exceptions;
     using Pipeline;
     using Util;
 

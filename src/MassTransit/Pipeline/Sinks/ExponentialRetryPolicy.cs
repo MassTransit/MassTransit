@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Sinks
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Policies;
 
 
@@ -42,7 +41,7 @@ namespace MassTransit.Pipeline.Sinks
 
         public IRetryContext GetRetryContext()
         {
-            return new IntervalRetryContext(this, GetIntervals().ToArray());
+            return new IntervalRetryContext(this, GetIntervals());
         }
 
         public bool CanRetry(Exception exception)
@@ -54,11 +53,9 @@ namespace MassTransit.Pipeline.Sinks
         {
             var random = new Random();
 
-            for (int i = 0; i < _retryLimit; i++)
+            for (int i = 0; _retryLimit == int.MaxValue || i < _retryLimit; i++)
             {
-                var delta =
-                    (int)
-                        Math.Min(_minInterval + Math.Pow(2, i) * random.Next(_lowInterval, _highInterval), _maxInterval);
+                var delta = (int)Math.Min(_minInterval + Math.Pow(2, i) * random.Next(_lowInterval, _highInterval), _maxInterval);
 
                 yield return TimeSpan.FromMilliseconds(delta);
             }

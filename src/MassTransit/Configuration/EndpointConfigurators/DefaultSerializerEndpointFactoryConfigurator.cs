@@ -16,7 +16,6 @@ namespace MassTransit.EndpointConfigurators
     using System.Collections.Generic;
     using Builders;
     using Configurators;
-    using Exceptions;
     using Serialization;
 
     public class DefaultSerializerEndpointFactoryConfigurator :

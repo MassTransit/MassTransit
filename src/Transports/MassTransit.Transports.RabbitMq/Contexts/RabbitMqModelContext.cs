@@ -10,10 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq
+namespace MassTransit.Transports.RabbitMq.Contexts
 {
     using System;
     using System.Threading;
+    using Context;
     using RabbitMQ.Client;
 
 
@@ -25,16 +26,37 @@ namespace MassTransit.Transports.RabbitMq
         readonly CancellationTokenSource _tokenSource;
         IModel _model;
         CancellationTokenRegistration _registration;
+        readonly PayloadCache _payloadCache;
+        readonly ConnectionContext _connectionContext;
 
-        public RabbitMqModelContext(IModel model, CancellationToken cancellationToken)
+        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
         {
             _model = model;
+            _connectionContext = connectionContext;
+            _payloadCache = new PayloadCache();
 
             _tokenSource = new CancellationTokenSource();
             _registration = cancellationToken.Register(OnCancellationRequested);
 
             model.ModelShutdown += OnModelShutdown;
         }
+        public bool HasPayloadType(Type contextType)
+        {
+            return _payloadCache.HasPayloadType(contextType);
+        }
+
+        public bool TryGetPayload<TPayload>(out TPayload context)
+            where TPayload : class
+        {
+            return _payloadCache.TryGetPayload(out context);
+        }
+
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+            where TPayload : class
+        {
+            return _payloadCache.GetOrAddPayload(payloadFactory);
+        }
+
 
         public void Dispose()
         {
@@ -46,6 +68,11 @@ namespace MassTransit.Transports.RabbitMq
         public IModel Model
         {
             get { return _model; }
+        }
+
+        public ConnectionContext ConnectionContext
+        {
+            get { return _connectionContext; }
         }
 
         public CancellationToken CancellationToken

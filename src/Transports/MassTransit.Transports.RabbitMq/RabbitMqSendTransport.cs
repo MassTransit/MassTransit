@@ -15,23 +15,24 @@ namespace MassTransit.Transports.RabbitMq
     using System.Collections.Generic;
     using System.Globalization;
     using System.Threading.Tasks;
-    using Pipeline;
+    using Contexts;
+    using MassTransit.Pipeline;
     using RabbitMQ.Client;
 
 
-    public class RabbitMqSendToTransport :
-        ISendToTransport
+    public class RabbitMqSendTransport :
+        ISendTransport
     {
         readonly string _exchange;
         readonly IHaModel _model;
 
-        public RabbitMqSendToTransport(IHaModel model, string exchange)
+        public RabbitMqSendTransport(IHaModel model, string exchange)
         {
             _model = model;
             _exchange = exchange;
         }
 
-        public async Task Send<T>(T message, ISendPipe<T> pipe)
+        public async Task Send<T>(T message, IPipe<SendContext<T>> pipe)
             where T : class
         {
             IBasicProperties properties = _model.CreateBasicProperties();
@@ -52,14 +53,10 @@ namespace MassTransit.Transports.RabbitMq
                 properties.CorrelationId = context.CorrelationId.ToString();
 
             if (context.TimeToLive.HasValue)
-            {
-                properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0",
-                    CultureInfo.InvariantCulture);
-            }
+                properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
 
             await _model.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory, context.Immediate,
-                context.BasicProperties,
-                context.Body);
+                context.BasicProperties, context.Body);
         }
     }
 }

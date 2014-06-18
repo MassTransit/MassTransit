@@ -18,7 +18,6 @@ namespace MassTransit
     using Context;
     using Diagnostics.Introspection;
     using Events;
-    using Exceptions;
     using Logging;
     using Magnum;
     using Magnum.Reflection;

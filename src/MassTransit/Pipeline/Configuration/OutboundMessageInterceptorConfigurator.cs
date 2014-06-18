@@ -13,7 +13,6 @@
 namespace MassTransit.Pipeline.Configuration
 {
     using System;
-    using Exceptions;
     using Sinks;
 
     public class OutboundMessageInterceptorConfigurator

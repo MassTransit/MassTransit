@@ -13,7 +13,6 @@
 namespace MassTransit.SubscriptionConnectors
 {
     using System;
-    using Exceptions;
     using Magnum.Extensions;
     using Pipeline;
     using Pipeline.Sinks;

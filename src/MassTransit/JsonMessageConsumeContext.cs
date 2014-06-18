@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Util;
 
 
@@ -30,6 +31,25 @@ namespace MassTransit
             _context = context;
             _message = message;
         }
+
+
+        public bool HasPayloadType(Type contextType)
+        {
+            return _context.HasPayloadType(contextType);
+        }
+
+        public bool TryGetPayload<TPayload>(out TPayload payload)
+            where TPayload : class
+        {
+            return _context.TryGetPayload(out payload);
+        }
+
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+            where TPayload : class
+        {
+            return _context.GetOrAddPayload(payloadFactory);
+        }
+
 
         public Guid? MessageId
         {

@@ -14,7 +14,6 @@ namespace MassTransit.Testing.ScenarioBuilders
 {
 	using System;
 	using EndpointConfigurators;
-	using Exceptions;
 	using Magnum.Extensions;
 	using MassTransit.Configurators;
 	using Scenarios;

@@ -22,6 +22,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using Magnum.Extensions;
+    using MassTransit.Pipeline;
     using Newtonsoft.Json;
     using NUnit.Framework;
     using Pipeline;
@@ -161,7 +162,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                     using (var sendModel = new HaModel(connection.CreateModel()))
                     {
-                        var sendToTransport = new RabbitMqSendToTransport(sendModel, "fast");
+                        var sendToTransport = new RabbitMqSendTransport(sendModel, "fast");
                         var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
                         var sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
                         Stopwatch timer = Stopwatch.StartNew();
@@ -230,7 +231,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             var retryPolicy = Retry.Exponential(int.MaxValue, 1.Seconds(), 60.Seconds(), 2.Seconds());
             var connectionMaker = new RabbitMqConnector(connectionFactory, retryPolicy);
 
-            var transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, new RabbitMqReceiveConsumerSettings
+            var transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, new RabbitMqReceiveSettings
             {
                 QueueName = "input",
                 ExchangeName = "fast",
@@ -273,7 +274,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             using (var connection = connectionFactory.CreateConnection())
             using (var sendModel = new HaModel(connection.CreateModel()))
             {
-                var sendToTransport = new RabbitMqSendToTransport(sendModel, "fast");
+                var sendToTransport = new RabbitMqSendTransport(sendModel, "fast");
                 var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
                 var sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
                 Stopwatch timer = Stopwatch.StartNew();

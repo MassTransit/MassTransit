@@ -14,7 +14,6 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Diagnostics;
-    using Exceptions;
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using NUnit.Framework;

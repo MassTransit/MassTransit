@@ -18,7 +18,6 @@ namespace MassTransit.RequestResponse
     using System.Threading;
     using System.Threading.Tasks;
     using Advanced;
-    using Exceptions;
     using Magnum.Caching;
     using Magnum.Extensions;
 
