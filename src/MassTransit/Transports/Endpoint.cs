@@ -15,6 +15,7 @@ namespace MassTransit.Transports
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Net.Mime;
     using System.Runtime.Serialization;
     using System.Transactions;
     using Context;
@@ -264,10 +265,14 @@ namespace MassTransit.Transports
                             acceptContext.SetEndpoint(this);
 
                             IMessageSerializer serializer;
-                            if (!_supportedSerializers.TryGetSerializer(acceptContext.ContentType, out serializer))
+                            var contentType = new ContentType(string.IsNullOrWhiteSpace(acceptContext.ContentType)
+                                ? "text/unknown"
+                                : acceptContext.ContentType);
+
+                            if (!_supportedSerializers.TryGetSerializer(contentType, out serializer))
                                 throw new SerializationException(
                                     string.Format("The content type could not be deserialized: {0}",
-                                        acceptContext.ContentType));
+                                        contentType));
 
                             serializer.Deserialize(acceptContext);
 

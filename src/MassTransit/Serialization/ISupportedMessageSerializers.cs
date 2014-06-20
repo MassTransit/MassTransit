@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
+    using System.Net.Mime;
+
+
     /// <summary>
     /// The supported message serializers contains an implementation for each contentType
     /// </summary>
@@ -23,6 +26,6 @@ namespace MassTransit.Serialization
         /// <param name="contentType">The content type string from the transport header</param>
         /// <param name="serializer">The serializer</param>
         /// <returns>True if the serializer was found, otherwise false</returns>
-        bool TryGetSerializer(string contentType, out IMessageSerializer serializer);
+        bool TryGetSerializer(ContentType contentType, out IMessageSerializer serializer);
     }
 }

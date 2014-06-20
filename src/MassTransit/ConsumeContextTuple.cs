@@ -18,40 +18,42 @@ namespace MassTransit
     using Context;
 
 
-    public class ConsumeContextTuple<T1, T> :
-        ConsumeContext<T1, T>
-        where T : class
+    public class ConsumerConsumeContextImpl<TConsumer, TMessage> :
+        ConsumerConsumeContext<TConsumer, TMessage>
+        where TMessage : class
     {
-        readonly ConsumeContext<T> _context;
-        readonly T1 _item1;
+        readonly TConsumer _consumer;
+        readonly ConsumeContext<TMessage> _context;
+
+        public ConsumerConsumeContextImpl(ConsumeContext<TMessage> context, TConsumer consumer)
+        {
+            _context = context;
+            _consumer = consumer;
+        }
 
         public bool HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
+        public bool TryGetPayload<TPayload>(out TPayload payload) 
+            where TPayload : class
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) 
+            where TPayload : class
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public ConsumeContextTuple(ConsumeContext<T> context, T1 item1)
+        public TConsumer Consumer
         {
-            _context = context;
-            _item1 = item1;
+            get { return _consumer; }
         }
 
-        public T1 Item1
-        {
-            get { return _item1; }
-        }
-
-        public ConsumeContext<T> Pop()
+        public ConsumeContext<TMessage> Pop()
         {
             return _context;
         }
@@ -116,17 +118,20 @@ namespace MassTransit
             return _context.HasMessageType(messageType);
         }
 
-        public bool TryGetMessage<T2>(out ConsumeContext<T2> consumeContext) where T2 : class
+        public bool TryGetMessage<T>(out ConsumeContext<T> consumeContext) 
+            where T : class
         {
             return _context.TryGetMessage(out consumeContext);
         }
 
-        public Task RespondAsync<T2>(T2 message) where T2 : class
+        public Task RespondAsync<T>(T message)
+            where T : class
         {
             return _context.RespondAsync(message);
         }
 
-        public void Respond<T2>(T2 message) where T2 : class
+        public void Respond<T>(T message) 
+            where T : class
         {
             _context.Respond(message);
         }
@@ -151,7 +156,7 @@ namespace MassTransit
             _context.NotifyFaulted(messageType, consumerType, exception);
         }
 
-        public T Message
+        public TMessage Message
         {
             get { return _context.Message; }
         }

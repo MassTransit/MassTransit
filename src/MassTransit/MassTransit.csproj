@@ -135,6 +135,7 @@
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="ConsumeContextExtensions.cs" />
     <Compile Include="ConsumeContextTuple.cs" />
+    <Compile Include="ConsumerConsumeContext.cs" />
     <Compile Include="Context\PayloadCache.cs" />
     <Compile Include="Context\PayloadException.cs" />
     <Compile Include="Context\PayloadFactory.cs" />

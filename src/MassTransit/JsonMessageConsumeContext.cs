@@ -32,7 +32,6 @@ namespace MassTransit
             _message = message;
         }
 
-
         public bool HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
@@ -49,7 +48,6 @@ namespace MassTransit
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
-
 
         public Guid? MessageId
         {
@@ -146,7 +144,7 @@ namespace MassTransit
 
         public void NotifyFaulted(string messageType, string consumerType, Exception exception)
         {
-            
+            _context.NotifyFaulted(messageType, consumerType, exception);
         }
 
         public TMessage Message

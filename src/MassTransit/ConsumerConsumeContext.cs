@@ -12,12 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    public static class ConsumeContextExtensions
+    public interface ConsumerConsumeContext<out TConsumer, out T> :
+        ConsumeContext<T>
+        where T : class
     {
-        public static ConsumerConsumeContext<TConsumer, T> PushConsumer<TConsumer, T>(this ConsumeContext<T> context, TConsumer consumer)
-            where T : class
-        {
-            return new ConsumerConsumeContextImpl<TConsumer, T>(context, consumer);
-        }
+        TConsumer Consumer { get; }
+
+        ConsumeContext<T> Pop();
+    }
+
+
+    public interface ConsumerConsumeContext<out TConsumer> :
+        ConsumeContext
+        where TConsumer : class, IConsumer
+    {
     }
 }

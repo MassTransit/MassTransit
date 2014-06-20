@@ -27,10 +27,10 @@ namespace MassTransit.Pipeline.Sinks
         where TConsumer : class, IMessageConsumer<IConsumeContext<TMessage>>
         where TMessage : class
     {
-        public async Task Send(ConsumeContext<TConsumer, TMessage> context,
-            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+        public async Task Send(ConsumerConsumeContext<TConsumer, TMessage> context,
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
-            var messageConsumer = context.Item1 as IMessageConsumer<IConsumeContext<TMessage>>;
+            var messageConsumer = context.Consumer as IMessageConsumer<IConsumeContext<TMessage>>;
             if (messageConsumer == null)
             {
                 string message = string.Format("Consumer type {0} is not a consumer of message type {1}",

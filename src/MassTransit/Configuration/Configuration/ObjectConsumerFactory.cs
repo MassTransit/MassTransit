@@ -29,7 +29,7 @@ namespace MassTransit.Configuration
         }
 
         public Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
             return _delegate.Send(context, next);

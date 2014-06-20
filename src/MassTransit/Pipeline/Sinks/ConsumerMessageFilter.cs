@@ -25,14 +25,14 @@ namespace MassTransit.Pipeline.Sinks
         where TMessage : class
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
-        readonly IPipe<ConsumeContext<TConsumer, TMessage>> _messageAdapter;
+        readonly IPipe<ConsumerConsumeContext<TConsumer, TMessage>> _messageAdapter;
         readonly IRetryPolicy _retryPolicy;
 
         public ConsumerMessageFilter(IConsumerFactory<TConsumer> consumerFactory,
             IConsumerMessageAdapter<TConsumer, TMessage> messageAdapter, IRetryPolicy retryPolicy)
         {
             _consumerFactory = consumerFactory;
-            _messageAdapter = new LastPipe<ConsumeContext<TConsumer,TMessage>>(messageAdapter);
+            _messageAdapter = new LastPipe<ConsumerConsumeContext<TConsumer,TMessage>>(messageAdapter);
             _retryPolicy = retryPolicy;
         }
 

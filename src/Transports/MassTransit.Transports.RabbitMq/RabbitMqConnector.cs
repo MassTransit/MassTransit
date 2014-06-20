@@ -54,7 +54,7 @@ namespace MassTransit.Transports.RabbitMq
                         if (_log.IsDebugEnabled)
                             _log.DebugFormat("Connected: {0}", _connectionFactory.ToDebugString());
 
-                        using (var connectionContext = new RabbitMqConnectionContext(connection, cancellationToken))
+                        using (var connectionContext = new RabbitMqConnectionContext(connection, _connectionFactory, cancellationToken))
                         {
                             await pipe.Send(connectionContext);
                         }

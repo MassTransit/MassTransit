@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,56 +14,70 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
-    using Util;
+    using System.Net.Mime;
 
 
     public class SupportedMessageSerializers :
         ISupportedMessageSerializers
     {
+        readonly HashSet<Type> _serializerTypes;
         readonly IDictionary<string, IMessageSerializer> _serializers;
         Func<IMessageSerializer> _defaultSerializer;
 
+
         public SupportedMessageSerializers(params IMessageSerializer[] serializers)
         {
-            _serializers = new Dictionary<string, IMessageSerializer>();
-            _defaultSerializer = () =>
-                {
-                    var serializer = new JsonMessageSerializer();
-
-                    _defaultSerializer = () => serializer;
-
-                    return serializer;
-                };
+            _serializers = new Dictionary<string, IMessageSerializer>(StringComparer.InvariantCultureIgnoreCase);
+            _serializerTypes = new HashSet<Type>();
 
             for (int i = 0; i < serializers.Length; i++)
                 AddSerializer(serializers[i]);
 
-            AddSerializer(new JsonMessageSerializer());
-            AddSerializer(new BsonMessageSerializer());
-            AddSerializer(new XmlMessageSerializer());
-            AddSerializer(new BinaryMessageSerializer());
+            AddSerializer<JsonMessageSerializer>();
+            AddSerializer<BsonMessageSerializer>();
+            AddSerializer<BsonMessageSerializer>();
+            AddSerializer<BinaryMessageSerializer>();
+
+            _defaultSerializer = () =>
+            {
+                IMessageSerializer serializer;
+                if (!TryGetSerializer(JsonMessageSerializer.JsonContentType, out serializer))
+                    serializer = new JsonMessageSerializer();
+
+                _defaultSerializer = () => serializer;
+
+                return serializer;
+            };
         }
 
-        public bool TryGetSerializer(string contentType, out IMessageSerializer serializer)
+        public bool TryGetSerializer(ContentType contentType, out IMessageSerializer serializer)
         {
-            if (!string.IsNullOrEmpty(contentType))
+            if (contentType == null || string.IsNullOrWhiteSpace(contentType.MediaType))
             {
-                if (_serializers.TryGetValue(contentType, out serializer))
-                    return true;
+                serializer = _defaultSerializer();
+                return _defaultSerializer != null;
             }
+
+            if (_serializers.TryGetValue(contentType.MediaType, out serializer))
+                return true;
 
             serializer = _defaultSerializer();
             return serializer != null;
         }
 
-        public void AddSerializer( IMessageSerializer serializer)
+        public void AddSerializer<T>()
+            where T : IMessageSerializer, new()
+        {
+            if (_serializerTypes.Contains(typeof(T)))
+                return;
+
+            AddSerializer(new T());
+        }
+
+        public void AddSerializer(IMessageSerializer serializer)
         {
             if (serializer == null)
                 throw new ArgumentNullException("serializer");
-
-            // so only one instance gets created, use it if it's found.
-            if (serializer.ContentType == "application/vnd.masstransit+xmlv1")
-                _defaultSerializer = () => serializer;
 
             if (_serializers.ContainsKey(serializer.ContentType))
                 return;

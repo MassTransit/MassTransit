@@ -25,7 +25,6 @@ namespace MassTransit
     /// <param name="context">The consume context</param>
     /// <param name="callback">The callback to invoke to process the consumer</param>
     /// <returns></returns>
-    public delegate Task ConsumerFactoryInterceptor<in TConsumer>(TConsumer consumer,
-        ConsumeContext context, Func<Task> callback)
+    public delegate Task ConsumerFactoryInterceptor<in TConsumer>(TConsumer consumer, ConsumeContext context, Func<Task> callback)
         where TConsumer : class;
 }

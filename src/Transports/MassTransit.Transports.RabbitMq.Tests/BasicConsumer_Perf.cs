@@ -122,7 +122,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 using (var model = connection.CreateModel())
                 {
                     var consumer = new RabbitMqBasicConsumer(model, new Uri("rabbitmq://localhost/speed/input"),
-                        testPipe);
+                        testPipe, CancellationToken.None);
 
                     model.QueueDeclare("input", false, false, true, new Dictionary<string, object>());
                     model.QueuePurge("input");
@@ -336,7 +336,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 using (var model = connection.CreateModel())
                 {
                     var consumer = new RabbitMqBasicConsumer(model, new Uri("rabbitmq://localhost/speed/input"),
-                        testPipe);
+                        testPipe, CancellationToken.None);
 
                     model.QueueDeclare("input", false, true, true, new Dictionary<string, object>());
                     model.QueuePurge("input");

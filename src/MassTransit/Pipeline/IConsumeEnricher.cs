@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    using System;
     using System.Threading.Tasks;
+
 
     /// <summary>
     /// Pushes T to the left of the consume context, making both values available via the context
@@ -22,9 +22,10 @@ namespace MassTransit.Pipeline
     public interface IConsumeEnricher<out T>
         where T : class
     {
-        Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumeContext<T, TMessage>> next)
+        Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<T, TMessage>> next)
             where TMessage : class;
     }
+
 
     public interface IReceiveTranslateor
     {
@@ -32,5 +33,4 @@ namespace MassTransit.Pipeline
 
         bool Inspect(IPipeInspector inspector);
     }
-
 }

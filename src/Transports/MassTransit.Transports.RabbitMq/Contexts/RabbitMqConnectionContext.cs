@@ -22,15 +22,17 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         ConnectionContext,
         IDisposable
     {
+        readonly ConnectionFactory _connectionFactory;
         readonly object _lock = new object();
         readonly PayloadCache _payloadCache;
         readonly CancellationTokenSource _tokenSource;
         IConnection _connection;
         CancellationTokenRegistration _registration;
 
-        public RabbitMqConnectionContext(IConnection connection, CancellationToken cancellationToken)
+        public RabbitMqConnectionContext(IConnection connection, ConnectionFactory connectionFactory, CancellationToken cancellationToken)
         {
             _connection = connection;
+            _connectionFactory = connectionFactory;
             _payloadCache = new PayloadCache();
 
             _tokenSource = new CancellationTokenSource();
@@ -74,6 +76,11 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         public CancellationToken CancellationToken
         {
             get { return _tokenSource.Token; }
+        }
+
+        public Uri GetAddress(string queueName)
+        {
+            return new EndpointAddressBuilder().GetAddress(_connectionFactory, queueName);
         }
 
         public void Dispose()

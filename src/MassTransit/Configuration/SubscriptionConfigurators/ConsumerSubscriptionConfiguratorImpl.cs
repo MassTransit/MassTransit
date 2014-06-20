@@ -14,7 +14,7 @@ namespace MassTransit.SubscriptionConfigurators
 {
     using System.Collections.Generic;
     using Configurators;
-    using Pipeline.Sinks;
+    using PipeConfigurators;
     using Policies;
     using SubscriptionBuilders;
 
@@ -23,15 +23,22 @@ namespace MassTransit.SubscriptionConfigurators
         SubscriptionConfiguratorImpl<ConsumerSubscriptionConfigurator<TConsumer>>,
         ConsumerSubscriptionConfigurator<TConsumer>,
         SubscriptionBuilderConfigurator
-        where TConsumer : class
+        where TConsumer : class, IConsumer
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
+        List<IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>> _pipeBuilderConfigurators;
 
         public ConsumerSubscriptionConfiguratorImpl(IConsumerFactory<TConsumer> consumerFactory,
             IRetryPolicy retryPolicy)
             : base(retryPolicy)
         {
             _consumerFactory = consumerFactory;
+            _pipeBuilderConfigurators = new List<IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>>();
+        }
+
+        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>> configurator)
+        {
+            _pipeBuilderConfigurators.Add(configurator);
         }
 
         public IEnumerable<ValidationResult> Validate()

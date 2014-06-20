@@ -25,10 +25,13 @@ namespace MassTransit.Transports.RabbitMq.Configuration
     {
         readonly IPipe<ReceiveContext> _pipe;
         readonly ReceiveSettings _settings;
+        readonly IEnumerable<SubscriptionSettings> _subscriptions;
 
-        public ModelConsumerPipeBuilderConfigurator(IPipe<ReceiveContext> pipe, ReceiveSettings settings)
+        public ModelConsumerPipeBuilderConfigurator(IPipe<ReceiveContext> pipe, ReceiveSettings settings,
+            IEnumerable<SubscriptionSettings> subscriptions)
         {
             _settings = settings;
+            _subscriptions = subscriptions;
             _pipe = pipe;
         }
 
@@ -37,6 +40,10 @@ namespace MassTransit.Transports.RabbitMq.Configuration
             IPipe<ModelContext> pipe = Pipe.New<ModelContext>(x =>
             {
                 x.Filter(new ReceiveSettingsModelFilter(_settings));
+
+                foreach (SubscriptionSettings subscription in _subscriptions)
+                    x.Filter(new SubscriptionModelFilter(subscription));
+
                 x.Filter(new ModelConsumerFilter(_pipe));
             });
 

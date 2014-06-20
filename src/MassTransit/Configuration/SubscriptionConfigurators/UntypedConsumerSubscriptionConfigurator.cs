@@ -17,7 +17,6 @@ namespace MassTransit.SubscriptionConfigurators
     using Configuration;
     using Configurators;
     using Magnum.Extensions;
-    using Pipeline.Sinks;
     using Policies;
     using SubscriptionBuilders;
 

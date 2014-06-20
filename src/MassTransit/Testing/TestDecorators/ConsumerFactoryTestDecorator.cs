@@ -31,7 +31,7 @@ namespace MassTransit.Testing.TestDecorators
             _received = received;
         }
 
-        public Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TConsumer, TMessage>> next)
+        public Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
             return _consumerFactory.Send(context, new TestDecoratorPipe<TMessage>(_received, next));
@@ -39,19 +39,19 @@ namespace MassTransit.Testing.TestDecorators
 
 
         class TestDecoratorPipe<T> :
-            IPipe<ConsumeContext<TConsumer, T>>
+            IPipe<ConsumerConsumeContext<TConsumer, T>>
             where T : class
         {
-            readonly IPipe<ConsumeContext<TConsumer, T>> _next;
+            readonly IPipe<ConsumerConsumeContext<TConsumer, T>> _next;
             readonly ReceivedMessageListImpl _received;
 
-            public TestDecoratorPipe(ReceivedMessageListImpl received, IPipe<ConsumeContext<TConsumer, T>> next)
+            public TestDecoratorPipe(ReceivedMessageListImpl received, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
             {
                 _received = received;
                 _next = next;
             }
 
-            public async Task Send(ConsumeContext<TConsumer, T> context)
+            public async Task Send(ConsumerConsumeContext<TConsumer, T> context)
             {
                 var received = new ReceivedMessageImpl<T>(context);
 

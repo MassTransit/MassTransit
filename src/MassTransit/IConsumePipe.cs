@@ -29,7 +29,7 @@ namespace MassTransit
 
 
     public interface IConsumePipe<in TConsumer, in T> :
-        IPipe<ConsumeContext<TConsumer, T>>
+        IPipe<ConsumerConsumeContext<TConsumer, T>>
         where T : class
     {
     }

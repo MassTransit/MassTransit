@@ -20,9 +20,9 @@ namespace MassTransit.Pipeline
         where T : class
     {
         readonly T1 _item1;
-        readonly IPipe<ConsumeContext<T1, T>> _output;
+        readonly IPipe<ConsumerConsumeContext<T1, T>> _output;
 
-        public LeftMergePipe(T1 item1, IPipe<ConsumeContext<T1, T>> output)
+        public LeftMergePipe(T1 item1, IPipe<ConsumerConsumeContext<T1, T>> output)
         {
             _item1 = item1;
             _output = output;
@@ -30,7 +30,7 @@ namespace MassTransit.Pipeline
 
         public Task Send(ConsumeContext<T> context)
         {
-            return _output.Send(context.Push(_item1));
+            return _output.Send(context.PushConsumer(_item1));
         }
 
         public bool Inspect(IPipeInspector inspector)

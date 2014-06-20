@@ -14,10 +14,29 @@ namespace MassTransit.Pipeline
 {
     using System.Collections.Generic;
     using System.Linq;
+    using Context;
+    using Util;
 
 
     public static class PipeExtensions
     {
+        /// <summary>
+        /// Get a payload from the pipe context
+        /// </summary>
+        /// <typeparam name="T">The payload type</typeparam>
+        /// <param name="context">The pipe context</param>
+        /// <returns>The payload, or throws a PayloadNotFoundException if the payload is not present</returns>
+        public static T GetPayload<T>(this PipeContext context)
+            where T : class
+        {
+            T payload;
+            if (!context.TryGetPayload(out payload))
+                throw new PayloadNotFoundException("The payload was not found: " + TypeMetadataCache<T>.ShortName);
+
+            return payload;
+        }
+
+
         public static IPipe<T> Combine<T>(this IEnumerable<IFilter<T>> filters, params IFilter<T>[] additional)
             where T : class, PipeContext
         {
@@ -27,20 +46,6 @@ namespace MassTransit.Pipeline
                 IPipe<T> last = new LastPipe<T>(all.First());
 
                 return all.Skip(1).Aggregate(last, (current, filter) => new FilterPipe<T>(filter, current));
-            }
-
-            return new EmptyPipe<T>();
-        }
-
-        public static IPipe<T> Combine<T>(this IFilter<T> filter, params IFilter<T>[] additional)
-            where T : class, PipeContext
-        {
-            IFilter<T>[] all = Enumerable.Repeat(filter,1).Concat(additional).Reverse().ToArray();
-            if (all.Any())
-            {
-                IPipe<T> last = new LastPipe<T>(all.First());
-
-                return all.Skip(1).Aggregate(last, (current, f) => new FilterPipe<T>(f, current));
             }
 
             return new EmptyPipe<T>();

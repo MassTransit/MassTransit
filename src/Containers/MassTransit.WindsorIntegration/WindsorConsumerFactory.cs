@@ -31,7 +31,7 @@ namespace MassTransit.WindsorIntegration
         }
 
         public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
             using (_container.BeginScope())
@@ -45,7 +45,7 @@ namespace MassTransit.WindsorIntegration
 
                 try
                 {
-                    await next.Send(context.Push(consumer));
+                    await next.Send(context.PushConsumer(consumer));
                 }
                 finally
                 {

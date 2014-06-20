@@ -30,7 +30,7 @@ namespace MassTransit
         }
 
         public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
             using (IUnityContainer childContainer = _container.CreateChildContainer())
@@ -42,7 +42,7 @@ namespace MassTransit
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await next.Send(context.Push(consumer));
+                await next.Send(context.PushConsumer(consumer));
             }
         }
     }

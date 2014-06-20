@@ -15,6 +15,9 @@ namespace MassTransit.SubscriptionConnectors
     using System;
     using System.Collections.Concurrent;
     using System.Threading;
+    using Configuration;
+    using Pipeline;
+    using Policies;
 
 
     public class ConsumerConnectorCache<T> :
@@ -54,24 +57,63 @@ namespace MassTransit.SubscriptionConnectors
         public static ConsumerConnector GetConsumerConnector<T>()
             where T : class
         {
-            return InstanceCache.Cached.Value.GetOrAdd(typeof(T),
-                _ => new Lazy<ConsumerConnector>(() => ConsumerConnectorCache<T>.Connector)).Value;
+            return InstanceCache.Cached.GetOrAdd(typeof(T), x => new CachedConnector<T>()).Connector;
         }
 
         public static ConsumerConnector GetConsumerConnector(Type type)
         {
-            return InstanceCache.Cached.Value.GetOrAdd(type,
-                _ => new Lazy<ConsumerConnector>(() =>
-                    (ConsumerConnector)Activator.CreateInstance(typeof(ConsumerConnector<>).MakeGenericType(type))))
-                .Value;
+            return GetOrAdd(type).Connector;
+        }
+
+        static CachedConnector GetOrAdd(Type type)
+        {
+            return InstanceCache.Cached.GetOrAdd(type, _ =>
+                (CachedConnector)Activator.CreateInstance(typeof(CachedConnector<>).MakeGenericType(type)));
+        }
+
+        public static ConnectHandle Connect(IInboundPipe inboundPipe, Type consumerType, Func<Type, object> objectFactory,
+            IRetryPolicy retryPolicy)
+        {
+            return GetOrAdd(consumerType).Connect(inboundPipe, objectFactory, retryPolicy);
+        }
+
+
+        interface CachedConnector
+        {
+            ConsumerConnector Connector { get; }
+
+            ConnectHandle Connect(IInboundPipe inboundPipe, Func<Type, object> objectFactory, IRetryPolicy retryPolicy);
+        }
+
+
+        class CachedConnector<T> :
+            CachedConnector
+            where T : class
+        {
+            readonly Lazy<ConsumerConnector> _connector;
+
+            public CachedConnector()
+            {
+                _connector = new Lazy<ConsumerConnector>(() => ConsumerConnectorCache<T>.Connector);
+            }
+
+            public ConsumerConnector Connector
+            {
+                get { return _connector.Value; }
+            }
+
+            public ConnectHandle Connect(IInboundPipe inboundPipe, Func<Type, object> objectFactory, IRetryPolicy retryPolicy)
+            {
+                var consumerFactory = new ObjectConsumerFactory<T>(objectFactory);
+
+                return _connector.Value.Connect(inboundPipe, consumerFactory, retryPolicy);
+            }
         }
 
 
         static class InstanceCache
         {
-            internal static readonly Lazy<ConcurrentDictionary<Type, Lazy<ConsumerConnector>>> Cached =
-                new Lazy<ConcurrentDictionary<Type, Lazy<ConsumerConnector>>>(
-                    () => new ConcurrentDictionary<Type, Lazy<ConsumerConnector>>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly ConcurrentDictionary<Type, CachedConnector> Cached = new ConcurrentDictionary<Type, CachedConnector>();
         }
     }
 }

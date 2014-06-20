@@ -78,6 +78,7 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Configuration\Builders\SubscriptionBuilder.cs" />
     <Compile Include="Configuration\ModelConsumerPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurator.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="Contexts\RabbitMqReceiveContext.cs" />
     <Compile Include="Contexts\RabbitMqReceiveContextHeaders.cs" />
     <Compile Include="Contexts\RabbitMqSendContextImpl.cs" />
+    <Compile Include="EndpointAddressBuilder.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />
     <Compile Include="Exceptions\RabbitMqConnectionException.cs" />
@@ -94,6 +96,7 @@
     <Compile Include="Pipeline\IRabbitMqConnector.cs" />
     <Compile Include="Pipeline\ModelConsumerFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />
+    <Compile Include="Pipeline\RabbitMqConsumerMetrics.cs" />
     <Compile Include="Pipeline\ReceiveModelFilter.cs" />
     <Compile Include="Pipeline\ReceiveSettingsModelFilter.cs" />
     <Compile Include="Pipeline\SubscriptionModelFilter.cs" />

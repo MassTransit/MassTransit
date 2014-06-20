@@ -24,16 +24,20 @@ namespace MassTransit.Transports.RabbitMq
     public class RabbitMqReceiveTransport :
         IReceiveTransport
     {
+        static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
+
         readonly IRabbitMqConnector _connector;
-        readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
         readonly IRetryPolicy _retryPolicy;
         readonly ReceiveSettings _settings;
+        readonly SubscriptionSettings[] _subscriptions;
 
-        public RabbitMqReceiveTransport(IRabbitMqConnector connector, IRetryPolicy retryPolicy, ReceiveSettings settings)
+        public RabbitMqReceiveTransport(IRabbitMqConnector connector, IRetryPolicy retryPolicy, ReceiveSettings settings,
+            params SubscriptionSettings[] subscriptions)
         {
             _connector = connector;
             _retryPolicy = retryPolicy;
             _settings = settings;
+            _subscriptions = subscriptions;
         }
 
         /// <summary>
@@ -50,7 +54,7 @@ namespace MassTransit.Transports.RabbitMq
                 x.Repeat(cancellationToken);
                 x.Retry(_retryPolicy, cancellationToken);
 
-                x.ModelConsumer(pipe, _settings);
+                x.ModelConsumer(pipe, _settings, _subscriptions);
             });
 
             return Repeat.UntilCancelled(cancellationToken, async () =>

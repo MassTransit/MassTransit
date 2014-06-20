@@ -36,7 +36,7 @@ namespace MassTransit.Configuration
             _interceptor = interceptor;
         }
 
-        public Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TConsumer, TMessage>> next)
+        public Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
             return _consumerFactory.Send(context, new TestDecoratorPipe<TMessage>(_interceptor, next));
@@ -44,22 +44,22 @@ namespace MassTransit.Configuration
 
 
         class TestDecoratorPipe<T> :
-            IPipe<ConsumeContext<TConsumer, T>>
+            IPipe<ConsumerConsumeContext<TConsumer, T>>
             where T : class
         {
             readonly ConsumerFactoryInterceptor<TConsumer> _interceptor;
-            readonly IPipe<ConsumeContext<TConsumer, T>> _next;
+            readonly IPipe<ConsumerConsumeContext<TConsumer, T>> _next;
 
             public TestDecoratorPipe(ConsumerFactoryInterceptor<TConsumer> interceptor,
-                IPipe<ConsumeContext<TConsumer, T>> next)
+                IPipe<ConsumerConsumeContext<TConsumer, T>> next)
             {
                 _interceptor = interceptor;
                 _next = next;
             }
 
-            public Task Send(ConsumeContext<TConsumer, T> context)
+            public Task Send(ConsumerConsumeContext<TConsumer, T> context)
             {
-                return _interceptor(context.Item1, context, () => _next.Send(context));
+                return _interceptor(context.Consumer, context, () => _next.Send(context));
             }
 
             public bool Inspect(IPipeInspector inspector)
