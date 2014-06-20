@@ -20,7 +20,7 @@ namespace MassTransit.Tests.Pipeline
 
 
     [TestFixture]
-    public class Connecting_an_interceptor :
+    public class Connecting_an_observer :
         AsyncTestFixture
     {
         [Test]
@@ -32,7 +32,7 @@ namespace MassTransit.Tests.Pipeline
 
             filter.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
 
-            var interceptor = GetMessageInterceptor<MessageA>();
+            var interceptor = GetMessageObserver<MessageA>();
             filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
@@ -53,7 +53,7 @@ namespace MassTransit.Tests.Pipeline
 
             filter.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
 
-            var interceptor = GetMessageInterceptor<MessageA>();
+            var interceptor = GetMessageObserver<MessageA>();
             filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
@@ -72,7 +72,7 @@ namespace MassTransit.Tests.Pipeline
 
             filter.ConnectHandler<MessageA>(async context => { throw new InvalidOperationException("This is a test"); });
 
-            var interceptor = GetMessageInterceptor<MessageA>();
+            var interceptor = GetMessageObserver<MessageA>();
             filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());

@@ -13,9 +13,11 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using Pipeline;
     using Transports.RabbitMq;
     using Transports.RabbitMq.Configuration;
+    using Transports.RabbitMq.Pipeline;
 
 
     public static class ConsumerPipeConfiguratorExtensions
@@ -26,13 +28,14 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="pipe"></param>
         /// <param name="settings"></param>
+        /// <param name="subscriptions"></param>
         public static void ModelConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe,
-            ReceiveSettings settings)
+            ReceiveSettings settings, IEnumerable<SubscriptionSettings> subscriptions)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            var pipeBuilderConfigurator = new ModelConsumerPipeBuilderConfigurator(pipe, settings);
+            var pipeBuilderConfigurator = new ModelConsumerPipeBuilderConfigurator(pipe, settings, subscriptions);
 
             configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
         }

@@ -25,14 +25,14 @@ namespace MassTransit.Pipeline.Sinks
         where TMessage : class
     {
         readonly TConsumer _instance;
-        readonly IPipe<ConsumeContext<TConsumer, TMessage>> _messageAdapter;
+        readonly IPipe<ConsumerConsumeContext<TConsumer, TMessage>> _messageAdapter;
         readonly IRetryPolicy _retryPolicy;
 
         public InstanceMessageFilter(TConsumer instance,
             IConsumerMessageAdapter<TConsumer, TMessage> messageAdapter, IRetryPolicy retryPolicy)
         {
             _instance = instance;
-            _messageAdapter = new LastPipe<ConsumeContext<TConsumer, TMessage>>(messageAdapter);
+            _messageAdapter = new LastPipe<ConsumerConsumeContext<TConsumer, TMessage>>(messageAdapter);
             _retryPolicy = retryPolicy;
         }
 
@@ -41,7 +41,7 @@ namespace MassTransit.Pipeline.Sinks
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
-                await _retryPolicy.Retry(context, x => _messageAdapter.Send(x.Push(_instance)));
+                await _retryPolicy.Retry(context, x => _messageAdapter.Send(x.PushConsumer(_instance)));
 
                 context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName);
 

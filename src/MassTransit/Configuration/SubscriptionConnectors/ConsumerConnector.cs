@@ -15,7 +15,6 @@ namespace MassTransit.SubscriptionConnectors
     using System.Collections.Generic;
     using System.Linq;
     using Pipeline;
-    using Pipeline.Sinks;
     using Policies;
     using Util;
 
@@ -54,7 +53,8 @@ namespace MassTransit.SubscriptionConnectors
             get { return _connectors; }
         }
 
-        public ConnectHandle Connect<TConsumer>(IInboundPipe inboundPipe, IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy)
+        public ConnectHandle Connect<TConsumer>(IInboundPipe inboundPipe, IConsumerFactory<TConsumer> consumerFactory,
+            IRetryPolicy retryPolicy)
             where TConsumer : class
         {
             return new MultipleConnectHandle(_connectors.Select(x => x.Connect(inboundPipe, consumerFactory, retryPolicy)));

@@ -30,7 +30,7 @@ namespace MassTransit.Configuration
         }
 
         public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
             TConsumer consumer = null;
@@ -43,7 +43,7 @@ namespace MassTransit.Configuration
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await next.Send(context.Push(consumer));
+                await next.Send(context.PushConsumer(consumer));
             }
             finally
             {

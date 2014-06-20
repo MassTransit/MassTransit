@@ -19,6 +19,12 @@ namespace MassTransit
 
     public static class FilterPipeConfiguratorExtensions
     {
+        /// <summary>
+        /// Adds a filter to the pipe
+        /// </summary>
+        /// <typeparam name="T">The context type</typeparam>
+        /// <param name="configurator">The pipe configurator</param>
+        /// <param name="filter">The filter to add</param>
         public static void Filter<T>(this IPipeConfigurator<T> configurator, IFilter<T> filter)
             where T : class, PipeContext
         {

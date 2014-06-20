@@ -21,21 +21,21 @@ namespace MassTransit.Pipeline
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="T"></typeparam>
     public class LeftSplitPipe<T1, T> :
-        IPipe<ConsumeContext<T1, T>>
+        IPipe<ConsumerConsumeContext<T1, T>>
         where T : class
     {
         readonly IFilter<ConsumeContext<T>> _next;
-        readonly IPipe<ConsumeContext<T1, T>> _output;
+        readonly IPipe<ConsumerConsumeContext<T1, T>> _output;
 
-        public LeftSplitPipe(IPipe<ConsumeContext<T1, T>> output, IFilter<ConsumeContext<T>> next)
+        public LeftSplitPipe(IPipe<ConsumerConsumeContext<T1, T>> output, IFilter<ConsumeContext<T>> next)
         {
             _next = next;
             _output = output;
         }
 
-        public Task Send(ConsumeContext<T1, T> context)
+        public Task Send(ConsumerConsumeContext<T1, T> context)
         {
-            var output = new LeftMergePipe<T1, T>(context.Item1, _output);
+            var output = new LeftMergePipe<T1, T>(context.Consumer, _output);
 
             return _next.Send(context.Pop(), output);
         }

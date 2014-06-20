@@ -13,7 +13,6 @@
 namespace MassTransit.SubscriptionBuilders
 {
     using Pipeline;
-    using Pipeline.Sinks;
     using Policies;
     using Subscriptions;
 
@@ -26,17 +25,16 @@ namespace MassTransit.SubscriptionBuilders
         readonly ReferenceFactory _referenceFactory;
         readonly IRetryPolicy _retryPolicy;
 
-        public HandlerSubscriptionBuilder(MessageHandler<TMessage> handler, IRetryPolicy retryPolicy,
-            ReferenceFactory referenceFactory)
+        public HandlerSubscriptionBuilder(MessageHandler<TMessage> handler, IRetryPolicy retryPolicy, ReferenceFactory referenceFactory)
         {
             _handler = handler;
             _referenceFactory = referenceFactory;
             _retryPolicy = retryPolicy;
         }
 
-        public ISubscriptionReference Subscribe(IInboundPipe filter)
+        public ISubscriptionReference Subscribe(IInboundPipe pipe)
         {
-            ConnectHandle handle = filter.ConnectHandler(_handler, _retryPolicy);
+            ConnectHandle handle = pipe.ConnectHandler(_handler, _retryPolicy);
 
             return _referenceFactory(handle);
         }

@@ -21,7 +21,7 @@ namespace MassTransit.Pipeline.Sinks
         where TConsumer : class, new()
     {
         public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<TConsumer, TMessage>> next)
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
             TConsumer consumer = null;
@@ -29,7 +29,7 @@ namespace MassTransit.Pipeline.Sinks
             {
                 consumer = new TConsumer();
 
-                await next.Send(context.Push(consumer));
+                await next.Send(context.PushConsumer(consumer));
             }
             finally
             {

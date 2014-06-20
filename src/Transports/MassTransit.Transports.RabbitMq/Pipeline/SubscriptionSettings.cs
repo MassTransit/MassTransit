@@ -12,15 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq.Pipeline
 {
+    using System.Collections.Generic;
+
+
     /// <summary>
     /// Settings for a subscription to be bound into the RabbitMQ exchanges
     /// </summary>
     public interface SubscriptionSettings
     {
-        string ExchangeName { get; }
-        string RoutingKey { get; }
+        ExchangeSettings Exchange { get; }
 
-        ExchangeSettings[] Exchanges { get; }
-        ExchangeBindingSettings[] Bindings { get; }
+        string RoutingKey { get; }
+        IDictionary<string, object> Arguments { get; }
     }
 }

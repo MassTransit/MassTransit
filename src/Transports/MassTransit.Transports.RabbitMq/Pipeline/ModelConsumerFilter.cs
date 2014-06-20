@@ -13,18 +13,13 @@
 namespace MassTransit.Transports.RabbitMq.Pipeline
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
-    using Context;
-    using Logging;
     using MassTransit.Pipeline;
 
 
     public class ModelConsumerFilter :
         IFilter<ModelContext>
     {
-        readonly ILog _log = Logger.Get<ModelConsumerFilter>();
-
         readonly IPipe<ReceiveContext> _pipe;
 
         public ModelConsumerFilter(IPipe<ReceiveContext> pipe)
@@ -34,29 +29,16 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
 
         public async Task Send(ModelContext context, IPipe<ModelContext> next)
         {
-            var taskCompletion = new TaskCompletionSource<bool>();
+            var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            CancellationTokenRegistration registration = context.CancellationToken.Register(() => taskCompletion.TrySetResult(false));
+            Uri inputAddress = context.ConnectionContext.GetAddress(receiveSettings.QueueName);
 
-            context.Model.ModelShutdown += (m, args) => taskCompletion.TrySetResult(true);
+            using (var consumer = new RabbitMqBasicConsumer(context.Model, inputAddress, _pipe, context.CancellationToken))
+            {
+                context.Model.BasicConsume(receiveSettings.QueueName, false, consumer);
 
-            var inputAddress = new Uri("rabbitmq://localhost/speed/input");
-
-
-            var consumer = new RabbitMqBasicConsumer(context.Model, inputAddress, _pipe);
-
-            consumer.ConsumerCancelled += (_, args) => taskCompletion.TrySetResult(true);
-
-
-            ReceiveSettings receiveSettings;
-            if (!context.TryGetPayload(out receiveSettings))
-                throw new PayloadNotFoundException("The ReceiveSettings were not present");
-
-            context.Model.BasicConsume(receiveSettings.QueueName, false, consumer);
-
-            await taskCompletion.Task;
-
-            registration.Dispose();
+                await consumer.CompleteTask;
+            }
         }
 
         public bool Inspect(IPipeInspector inspector)

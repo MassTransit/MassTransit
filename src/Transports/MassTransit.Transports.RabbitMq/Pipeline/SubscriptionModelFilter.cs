@@ -15,7 +15,7 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
     using System.Threading.Tasks;
     using Context;
     using MassTransit.Pipeline;
-    using RabbitMQ.Client;
+
 
     /// <summary>
     /// Added to the model pipeline prior to the basic consumer to ensure subscriptions are bound to the consumer properly.
@@ -37,11 +37,12 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
             if (!context.TryGetPayload(out receiveSettings))
                 throw new PayloadNotFoundException("The ReceiveSettings were not found.");
 
-            DeclareExchanges(context.Model);
+            ExchangeSettings exchange = _subscriptionSettings.Exchange;
 
-            BindExchanges(context.Model);
+            context.Model.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
+                exchange.Arguments);
 
-            context.Model.ExchangeBind(receiveSettings.ExchangeName, _subscriptionSettings.ExchangeName, _subscriptionSettings.RoutingKey);
+            context.Model.ExchangeBind(receiveSettings.ExchangeName, exchange.ExchangeName, _subscriptionSettings.RoutingKey);
 
             return next.Send(context);
         }
@@ -49,21 +50,6 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
         public bool Inspect(IPipeInspector inspector)
         {
             return inspector.Inspect(this);
-        }
-
-        void DeclareExchanges(IModel model)
-        {
-            foreach (ExchangeSettings exchange in _subscriptionSettings.Exchanges)
-            {
-                model.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
-                    exchange.Arguments);
-            }
-        }
-
-        void BindExchanges(IModel model)
-        {
-            foreach (ExchangeBindingSettings binding in _subscriptionSettings.Bindings)
-                model.ExchangeBind(binding.Destination, binding.Source, binding.RoutingKey);
         }
     }
 }

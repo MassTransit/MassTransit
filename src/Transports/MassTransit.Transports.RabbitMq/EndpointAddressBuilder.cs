@@ -13,28 +13,26 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
-    using System.Threading;
     using RabbitMQ.Client;
 
 
-    public interface ConnectionContext :
-        PipeContext
+    public class EndpointAddressBuilder
     {
-        /// <summary>
-        /// The RabbitMQ Connection
-        /// </summary>
-        IConnection Connection { get; }
+        public Uri GetAddress(ConnectionFactory connectionFactory, string queueName)
+        {
+            var builder = new UriBuilder
+            {
+                Scheme = "rabbitmq",
+                Host = connectionFactory.HostName,
+                Path = string.IsNullOrWhiteSpace(connectionFactory.VirtualHost)
+                    ? queueName
+                    : string.Join("/", connectionFactory.VirtualHost, queueName)
+            };
 
-        /// <summary>
-        /// Set when the initial connection request is cancelled
-        /// </summary>
-        CancellationToken CancellationToken { get; }
+            if (connectionFactory.Port != -1)
+                builder.Port = connectionFactory.Port;
 
-        /// <summary>
-        /// Return the address for the specified queue
-        /// </summary>
-        /// <param name="queueName"></param>
-        /// <returns></returns>
-        Uri GetAddress(string queueName);
+            return builder.Uri;
+        }
     }
 }

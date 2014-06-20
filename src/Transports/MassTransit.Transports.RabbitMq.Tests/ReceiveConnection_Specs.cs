@@ -18,7 +18,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using Magnum.Extensions;
     using MassTransit.Pipeline;
     using NUnit.Framework;
-    using Pipeline;
     using Policies;
     using RabbitMQ.Client;
     using Serialization;
@@ -60,6 +59,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             using (IConnection connection = connectionFactory.CreateConnection())
             using (var sendModel = new HaModel(connection.CreateModel()))
             {
+                // this will kill the connection above, forcing it to reconnect to the server
                 sendModel.QueueDelete("input");
 
                 await Task.Delay(500);
@@ -70,6 +70,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                 var message = new TestMessage("Joe", "American Way", 27);
 
+                // now we send and ensure the message was received, showing the consumer reconnected and queue was recreated
                 await sendToEndpoint.Send(message);
 
                 Assert.IsTrue(testPipe.Task.Wait(10.Seconds()));

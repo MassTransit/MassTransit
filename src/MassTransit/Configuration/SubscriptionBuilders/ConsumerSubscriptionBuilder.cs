@@ -13,7 +13,6 @@
 namespace MassTransit.SubscriptionBuilders
 {
     using Pipeline;
-    using Pipeline.Sinks;
     using Policies;
     using SubscriptionConnectors;
     using Subscriptions;
@@ -28,7 +27,8 @@ namespace MassTransit.SubscriptionBuilders
         readonly ReferenceFactory _referenceFactory;
         readonly IRetryPolicy _retryPolicy;
 
-        public ConsumerSubscriptionBuilder(IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy, ReferenceFactory referenceFactory)
+        public ConsumerSubscriptionBuilder(IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy,
+            ReferenceFactory referenceFactory)
         {
             _consumerFactory = consumerFactory;
             _referenceFactory = referenceFactory;
@@ -37,9 +37,9 @@ namespace MassTransit.SubscriptionBuilders
             _connector = ConsumerConnectorCache<TConsumer>.Connector;
         }
 
-        public ISubscriptionReference Subscribe(IInboundPipe filter)
+        public ISubscriptionReference Subscribe(IInboundPipe pipe)
         {
-            ConnectHandle handle = _connector.Connect(filter, _consumerFactory, _retryPolicy);
+            ConnectHandle handle = _connector.Connect(pipe, _consumerFactory, _retryPolicy);
 
             return _referenceFactory(handle);
         }

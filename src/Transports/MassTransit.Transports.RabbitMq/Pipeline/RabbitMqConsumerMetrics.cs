@@ -10,27 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Transports.RabbitMq.Pipeline
 {
-    using System.Threading.Tasks;
-
-
-    public class InstanceConsumerFactory<TConsumer> :
-        IConsumerFactory<TConsumer>
-        where TConsumer : class
+    public interface RabbitMqConsumerMetrics
     {
-        readonly TConsumer _consumer;
+        /// <summary>
+        /// The consumer tag that was assigned to the consumer by the broker
+        /// </summary>
+        string ConsumerTag { get; }
 
-        public InstanceConsumerFactory(TConsumer consumer)
-        {
-            _consumer = consumer;
-        }
+        /// <summary>
+        /// The number of messages consumed by the consumer
+        /// </summary>
+        long DeliveryCount { get; }
 
-        public Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
-            where TMessage : class
-        {
-            return next.Send(context.PushConsumer(_consumer));
-        }
+        /// <summary>
+        /// The highest concurrent message count that was received by the consumer
+        /// </summary>
+        int ConcurrentDeliveryCount { get; }
     }
 }

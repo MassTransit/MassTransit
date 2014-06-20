@@ -40,11 +40,11 @@ namespace MassTransit
         /// <summary>
         ///     Returns the specified message type if available, otherwise returns false
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TMessage"></typeparam>
         /// <param name="consumeContext"></param>
         /// <returns></returns>
-        bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
-            where T : class;
+        bool TryGetMessage<TMessage>(out ConsumeContext<TMessage> consumeContext)
+            where TMessage : class;
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the
@@ -114,15 +114,5 @@ namespace MassTransit
         /// <param name="consumerType"></param>
         /// <param name="exception"></param>
         void NotifyFaulted(string consumerType, Exception exception);
-    }
-
-
-    public interface ConsumeContext<out T1, out T> :
-        ConsumeContext<T>
-        where T : class
-    {
-        T1 Item1 { get; }
-
-        ConsumeContext<T> Pop();
     }
 }

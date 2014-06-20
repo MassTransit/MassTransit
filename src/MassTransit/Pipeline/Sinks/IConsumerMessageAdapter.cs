@@ -18,7 +18,7 @@ namespace MassTransit.Pipeline.Sinks
     /// <typeparam name="TConsumer"></typeparam>
     /// <typeparam name="TMessage"></typeparam>
     public interface IConsumerMessageAdapter<TConsumer, TMessage> :
-        IFilter<ConsumeContext<TConsumer, TMessage>>
+        IFilter<ConsumerConsumeContext<TConsumer, TMessage>>
         where TConsumer : class
         where TMessage : class
     {

@@ -55,7 +55,7 @@ namespace MassTransit.Tests
             return new TestConsumeContext<T>(message);
         }
 
-        protected TestObserver<T> GetMessageInterceptor<T>()
+        protected TestObserver<T> GetMessageObserver<T>()
             where T : class
         {
             return new TestObserver<T>(GetTask<T>(), GetTask<T>(), GetTask<T>());
