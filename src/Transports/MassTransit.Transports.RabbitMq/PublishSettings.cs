@@ -10,22 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Configuration
+namespace MassTransit.Transports.RabbitMq
 {
-    public interface RabbitMqEndpointConfigurator :
-        EndpointConfigurator
+    public interface PublishSettings
     {
         /// <summary>
-        /// Specify the queue should be durable (survives broker restart) or in-memory
+        /// True if messages published to an exchange must be received by at least one queue
         /// </summary>
-        /// <param name="durable">True for a durable queue, False for an in-memory queue</param>
-        void Durable(bool durable = true);
-
-        /// <summary>
-        /// Specify that the queue is exclusive to this process and cannot be accessed by other processes
-        /// at the same time.
-        /// </summary>
-        /// <param name="exclusive">True for exclusive, otherwise false</param>
-        void Exclusive(bool exclusive = true);
+        bool Mandatory { get; }
     }
 }

@@ -12,9 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
-    public interface IConnectPipeById<T, in TKey>
-        where T : class
+    public interface IConnectPipeById<out T, in TKey>
+        where T : class, PipeContext
     {
-        ConnectHandle Connect(TKey key, IConsumeFilter<T> filter);
+        ConnectHandle Connect(TKey key, IPipe<T> pipe);
     }
 }

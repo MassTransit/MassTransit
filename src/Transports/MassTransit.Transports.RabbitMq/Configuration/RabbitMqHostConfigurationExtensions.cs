@@ -13,7 +13,9 @@
 namespace MassTransit
 {
     using System;
+    using EndpointConfigurators;
     using Transports.RabbitMq.Configuration;
+    using Transports.RabbitMq.Configuration.Configurators;
 
 
     public static class RabbitMqHostConfigurationExtensions
@@ -24,23 +26,61 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="hostAddress">The URI host address of the RabbitMQ host (rabbitmq://host:port/vhost)</param>
         /// <param name="configure"></param>
-        public static void Host(this RabbitMqTransportConfigurator configurator, Uri hostAddress,
-            Action<RabbitMqHostConfigurator> configure)
+        public static void Host(this IRabbitMqTransportConfigurator configurator, Uri hostAddress,
+            Action<IRabbitMqHostConfigurator> configure)
         {
-            var hostConfigurator = new RabbitMqHostConfiguratorImpl(hostAddress);
+            var hostConfigurator = new RabbitMqHostConfigurator(hostAddress);
+
             configure(hostConfigurator);
 
             configurator.Host(hostConfigurator.Settings);
         }
 
-        public static void Endpoint(this RabbitMqTransportConfigurator configurator, string queueName,
-            Action<RabbitMqEndpointConfigurator> configure)
+        public static void Endpoint(this IRabbitMqTransportConfigurator configurator, string queueName,
+            Action<IEndpointConfigurator> configure)
         {
-            var endpointConfigurator = new RabbitMqEndpointConfiguratorImpl(queueName);
+            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(queueName);
 
             configure(endpointConfigurator);
 
-            configurator.Endpoint(endpointConfigurator.Settings);
+//            configurator.Endpoint(endpointConfigurator.Settings);
+        }
+
+        /// <summary>
+        /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="queueName">The input queue name</param>
+        /// <param name="configure">The configuration method</param>
+        public static void ReceiveEndpoint(this IRabbitMqTransportConfigurator configurator, string queueName,
+            Action<IRabbitMqReceiveEndpointConfigurator> configure)
+        {
+            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(queueName);
+
+            configure(endpointConfigurator);
+
+            configurator.ReceiveEndpoint(endpointConfigurator.Settings);
+        }
+
+        /// <summary>
+        /// Declare a ReceiveEndpoint using a broker-assigned queue name. This queue defaults to auto-delete
+        /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
+        /// of this type (created automatically upon the first receiver binding).
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void ReceiveEndpoint(this IRabbitMqTransportConfigurator configurator,
+            Action<IRabbitMqReceiveEndpointConfigurator> configure)
+        {
+            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator();
+
+            endpointConfigurator.AutoDelete();
+            endpointConfigurator.Durable(false);
+            endpointConfigurator.Exclusive();
+
+            configure(endpointConfigurator);
+
+            configurator.ReceiveEndpoint(endpointConfigurator.Settings);
         }
     }
 }

@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConfigurators
 {
-    using Pipeline.Sinks;
     using Policies;
 
 
@@ -33,4 +32,20 @@ namespace MassTransit.SubscriptionConfigurators
         /// <returns></returns>
         TInterface SetRetryPolicy(IRetryPolicy retryPolicy);
     }
+
+    /// <summary>
+    /// The base configuration interface for a subscription
+    /// </summary>
+    public interface IReceiverConfigurator
+    {
+    }
+
+
+    public interface IHandlerConfigurator<TMessage> :
+        IReceiverConfigurator,
+        IPipeConfigurator<ConsumeContext<TMessage>>
+        where TMessage : class
+    {
+    }
+
 }

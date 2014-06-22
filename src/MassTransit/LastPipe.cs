@@ -43,7 +43,7 @@ namespace MassTransit
 
         public bool Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this, (x, p) => _filter.Inspect(x));
+            return _filter.Inspect(inspector);
         }
 
 

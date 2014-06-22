@@ -79,6 +79,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Configuration\Builders\SubscriptionBuilder.cs" />
+    <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
     <Compile Include="Configuration\ModelConsumerPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurator.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Pipeline\ReceiveSettingsModelFilter.cs" />
     <Compile Include="Pipeline\SubscriptionModelFilter.cs" />
     <Compile Include="Pipeline\SubscriptionSettings.cs" />
+    <Compile Include="PublishSettings.cs" />
     <Compile Include="RabbitMqBasicConsumeContext.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilder.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilderImpl.cs" />
@@ -117,12 +119,11 @@
     <Compile Include="Configuration\Configurators\RabbitMqTransportFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqTransportFactoryConfiguratorImpl.cs" />
     <Compile Include="Configuration\Configurators\UsernameConnectionFactoryConfigurator.cs" />
-    <Compile Include="Configuration\RabbitMqEndpointConfigurator.cs" />
-    <Compile Include="Configuration\RabbitMqEndpointConfiguratorImpl.cs" />
+    <Compile Include="Configuration\IRabbitMqReceiveEndpointConfigurator.cs" />
+    <Compile Include="Configuration\RabbitMqReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqEndpointSettings.cs" />
     <Compile Include="Configuration\RabbitMqHostConfigurationExtensions.cs" />
     <Compile Include="Configuration\RabbitMqHostConfigurator.cs" />
-    <Compile Include="Configuration\RabbitMqHostConfiguratorImpl.cs" />
     <Compile Include="Configuration\RabbitMqPublishContext.cs" />
     <Compile Include="Configuration\RabbitMqTransportConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqTransportConfiguratorImpl.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="RabbitMqExtensions.cs" />
     <Compile Include="RabbitMqHeaders.cs" />
     <Compile Include="RabbitMqMessageNameFormatter.cs" />
+    <Compile Include="RabbitMqPublishSettings.cs" />
     <Compile Include="RabbitMqReceiveSettings.cs" />
     <Compile Include="ModelContext.cs" />
     <Compile Include="RabbitMqProducer.cs" />

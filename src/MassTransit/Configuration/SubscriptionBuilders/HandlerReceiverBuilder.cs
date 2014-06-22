@@ -10,17 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.SubscriptionBuilders
 {
-    using System;
-    using Transports.RabbitMq.Configuration.Configurators;
+    using Pipeline;
 
 
-    public interface IRabbitMqHostConfigurator
+    public class HandlerReceiverBuilder<TMessage> :
+        ReceiverBuilder
+        where TMessage : class
     {
-        void UseSsl(Action<SslConnectionFactoryConfigurator> configureSsl);
-        void Heartbeat(ushort requestedHeartbeat);
-        void Username(string username);
-        void Password(string password);
+        readonly IPipe<ConsumeContext<TMessage>> _pipe;
+
+        public HandlerReceiverBuilder(IPipe<ConsumeContext<TMessage>> pipe)
+        {
+            _pipe = pipe;
+        }
+
+        public ConnectHandle Connect(IInboundPipe pipe)
+        {
+            return pipe.Connect(_pipe);
+        }
     }
 }

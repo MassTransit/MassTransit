@@ -15,7 +15,6 @@ namespace MassTransit.SubscriptionConfigurators
     using System;
     using System.Collections.Generic;
     using Configurators;
-    using Pipeline.Sinks;
     using Policies;
     using SubscriptionBuilders;
 

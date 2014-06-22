@@ -69,11 +69,9 @@ namespace MassTransit.Pipeline.Sinks
             return inspector.Inspect(this, (x, _) => _pipes.Values.All(pipe => pipe.Inspect(x)));
         }
 
-        public ConnectHandle Connect(params IFilter<ConsumeContext<T>>[] filters)
+        public ConnectHandle Connect(IPipe<ConsumeContext<T>> pipe)
         {
             long pipeId = Interlocked.Increment(ref _nextPipeId);
-
-            var pipe = filters.Combine();
 
             bool added = _pipes.TryAdd(pipeId, pipe);
             if (!added)

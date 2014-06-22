@@ -10,17 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Transports.RabbitMq
 {
-    using System;
-    using Transports.RabbitMq.Configuration.Configurators;
-
-
-    public interface IRabbitMqHostConfigurator
+    public class RabbitMqPublishSettings :
+        PublishSettings
     {
-        void UseSsl(Action<SslConnectionFactoryConfigurator> configureSsl);
-        void Heartbeat(ushort requestedHeartbeat);
-        void Username(string username);
-        void Password(string password);
+        public bool Mandatory { get; set; }
     }
 }

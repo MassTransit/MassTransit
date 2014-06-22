@@ -247,29 +247,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
             var message = new TestMessage("Joe", "American Way", 27);
 
-            byte[] body;
-            using (var output = new MemoryStream())
-            using (var nonClosingStream = new NonClosingStream(output))
-            using (var writer = new StreamWriter(nonClosingStream))
-            using (var jsonWriter = new JsonTextWriter(writer))
-            {
-                var envelope = new Envelope(message, message.GetType().GetMessageTypes());
-                envelope.SourceAddress = "rabbitmq://localhost/speed/fast";
-                envelope.DestinationAddress = "rabbitmq://localhost/speed/input";
-                envelope.MessageId = NewId.NextGuid().ToString();
-                envelope.Headers["person"] = new Person("Joe", "Blow");
-
-                jsonWriter.Formatting = Formatting.Indented;
-
-                JsonMessageSerializer.Serializer.Serialize(jsonWriter, envelope);
-
-                jsonWriter.Flush();
-                writer.Flush();
-
-                body = output.ToArray();
-            }
-
-            //Console.WriteLine(Encoding.UTF8.GetString(body));
             using (var connection = connectionFactory.CreateConnection())
             using (var sendModel = new HaModel(connection.CreateModel()))
             {
@@ -278,17 +255,17 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 var sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
                 Stopwatch timer = Stopwatch.StartNew();
                 var tasks = Enumerable.Range(0, limit)
-                    .Select(x =>
-                    {
-                        return sendToEndpoint.Send(message);
-//                                    var properties = sendModel.CreateBasicProperties();
-//                                    return sendModel.BasicPublishAsync("fast", "", properties, body);
-                    }).AsParallel().ToArray();
+                    .Select(x => sendToEndpoint.Send(message)).AsParallel().ToArray();
+
+                Console.WriteLine("Waiting for completed {0}", limit);
 
                 completed.Task.Wait(10.Seconds());
                 timer.Stop();
 
+                Console.WriteLine("Cancelling receiver");
                 cancelReceive.Cancel();
+
+                Console.WriteLine("Waiting for consumer to complete");
                 consumerTask.Wait(10.Seconds());
 
                 Task.WaitAll(tasks, 10.Seconds());

@@ -25,11 +25,11 @@ namespace MassTransit.SubscriptionConnectors
         where TConsumer : class
         where TMessage : class
     {
-        readonly IConsumerMessageAdapter<TConsumer, TMessage> _adapter;
+        readonly IPipe<ConsumerConsumeContext<TConsumer, TMessage>> _consumerPipe;
 
-        public InstanceMessageConnector(IConsumerMessageAdapter<TConsumer, TMessage> adapter)
+        public InstanceMessageConnector(IPipe<ConsumerConsumeContext<TConsumer, TMessage>> consumerPipe)
         {
-            _adapter = adapter;
+            _consumerPipe = consumerPipe;
         }
 
         public Type MessageType
@@ -49,7 +49,11 @@ namespace MassTransit.SubscriptionConnectors
                     TypeMetadataCache<TConsumer>.ShortName, instance.GetType().ToShortTypeName()));
             }
 
-            var instancePipe = new InstanceMessageFilter<TConsumer, TMessage>(consumer, _adapter, retryPolicy);
+            IPipe<ConsumeContext<TMessage>> instancePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
+            {
+                x.Retry(retryPolicy);
+                x.Filter(new InstanceMessageFilter<TConsumer, TMessage>(consumer, _consumerPipe));
+            });
 
             return filter.Connect(instancePipe);
         }

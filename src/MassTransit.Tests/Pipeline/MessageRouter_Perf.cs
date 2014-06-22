@@ -107,7 +107,7 @@ namespace MassTransit.Tests.Pipeline
         {
             var consumer = new TestConsumer<PingMessage>(1500000);
 
-            var inboundPipe = new InboundPipe();
+            IInboundPipe inboundPipe = new InboundPipe();
             ConnectHandle connectHandle = inboundPipe.ConnectInstance(consumer);
 
             var message = new PingMessage();

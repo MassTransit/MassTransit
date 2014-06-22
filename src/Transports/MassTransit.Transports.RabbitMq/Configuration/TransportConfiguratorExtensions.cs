@@ -20,9 +20,9 @@ namespace MassTransit
         /// <summary>
         /// Select RabbitMQ as the transport for the service bus
         /// </summary>
-        public static RabbitMqTransportConfigurator RabbitMQ(this ITransportSelector selector)
+        public static IRabbitMqTransportConfigurator RabbitMQ(this ITransportSelector selector)
         {
-            var configurator = new RabbitMqTransportConfiguratorImpl(selector);
+            var configurator = new RabbitMqTransportConfigurator(selector);
 
             selector.SelectTransport(configurator);
 

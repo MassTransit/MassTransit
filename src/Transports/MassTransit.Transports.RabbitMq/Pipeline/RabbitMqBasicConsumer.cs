@@ -144,6 +144,8 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
 
         public void Dispose()
         {
+            _registration.Dispose();
+
             Complete();
         }
 
@@ -164,8 +166,6 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
 
         void Complete()
         {
-            _registration.Dispose();
-
             _consumerComplete.TrySetResult(this);
         }
     }

@@ -192,5 +192,12 @@ namespace MassTransit
 	    /// <param name="result">The service.</param>
 	    /// <returns>Whether the service was found.</returns>
 	    bool TryGetService(Type type, out IBusService result);
+
+        /// <summary>
+        /// Retrieve a destination endpoint
+        /// </summary>
+        /// <param name="address">The endpoint address</param>
+        /// <returns>A sendable endpoint</returns>
+        ISendToEndpoint GetSendEndpoint(Uri address);
     }
 }

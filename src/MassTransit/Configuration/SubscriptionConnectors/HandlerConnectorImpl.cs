@@ -12,16 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConnectors
 {
+    using PipeConfigurators;
     using Pipeline;
-    using Pipeline.Sinks;
-
-
-    public interface HandlerConnector<T>
-        where T : class
-    {
-        ConnectHandle Connect(IInboundPipe inboundPipe, MessageHandler<T> handler,
-            params IFilter<ConsumeContext<T>>[] filters);
-    }
 
 
     public class HandlerConnectorImpl<T> :
@@ -31,9 +23,15 @@ namespace MassTransit.SubscriptionConnectors
         public ConnectHandle Connect(IInboundPipe inboundPipe, MessageHandler<T> handler,
             params IFilter<ConsumeContext<T>>[] filters)
         {
-            IFilter<ConsumeContext<T>> messageFilter = new HandlerMessageFilter<T>(handler);
+            IPipe<ConsumeContext<T>> pipe = Pipe.New<ConsumeContext<T>>(x =>
+            {
+                foreach (var filter in filters)
+                    x.Filter(filter);
 
-            return inboundPipe.Connect(filters, messageFilter);
+                x.AddPipeBuilderConfigurator(new HandlerPipeBuilderConfigurator<T>(handler));
+            });
+
+            return inboundPipe.Connect(pipe);
         }
     }
 }

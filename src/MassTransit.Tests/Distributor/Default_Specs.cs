@@ -37,7 +37,7 @@ namespace MassTransit.Tests.Distributor
             int workerAvaiableCountRecieved = 0;
             var messageRecieved = new ManualResetEvent(false);
 
-            UnsubscribeAction unsubscribe = LocalBus.SubscribeHandler<IWorkerAvailable>(message =>
+            ConnectHandle unsubscribe = LocalBus.SubscribeHandler<IWorkerAvailable>(message =>
             {
                 Interlocked.Increment(ref workerAvaiableCountRecieved);
                 messageRecieved.Set();
@@ -48,7 +48,7 @@ namespace MassTransit.Tests.Distributor
 
             messageRecieved.WaitOne(8.Seconds());
 
-            unsubscribe();
+            unsubscribe.Dispose();
 
             workerAvaiableCountRecieved.ShouldBeGreaterThan(0);
         }
@@ -59,7 +59,7 @@ namespace MassTransit.Tests.Distributor
             int pingRequestsRecieved = 0;
             var messageRecieved = new ManualResetEvent(false);
 
-            UnsubscribeAction unsubscribe = Instances["A"].DataBus.SubscribeHandler<PingWorker>(message =>
+            ConnectHandle unsubscribe = Instances["A"].DataBus.SubscribeHandler<PingWorker>(message =>
             {
                 Interlocked.Increment(ref pingRequestsRecieved);
                 messageRecieved.Set();
@@ -67,7 +67,7 @@ namespace MassTransit.Tests.Distributor
 
             messageRecieved.WaitOne(120.Seconds());
 
-            unsubscribe();
+            unsubscribe.Dispose();
 
             pingRequestsRecieved.ShouldBeGreaterThan(0);
         }
@@ -78,7 +78,7 @@ namespace MassTransit.Tests.Distributor
             int workerAvaiableCountRecieved = 0;
             var messageRecieved = new ManualResetEvent(false);
 
-            UnsubscribeAction unsubscribe = LocalBus.SubscribeHandler<WorkerAvailable<FirstCommand>>(message =>
+            ConnectHandle unsubscribe = LocalBus.SubscribeHandler<WorkerAvailable<FirstCommand>>(message =>
             {
                 Interlocked.Increment(ref workerAvaiableCountRecieved);
                 messageRecieved.Set();
@@ -92,7 +92,7 @@ namespace MassTransit.Tests.Distributor
 
             messageRecieved.WaitOne(8.Seconds());
 
-            unsubscribe();
+            unsubscribe.Dispose();
 
             workerAvaiableCountRecieved.ShouldBeGreaterThan(0);
         }

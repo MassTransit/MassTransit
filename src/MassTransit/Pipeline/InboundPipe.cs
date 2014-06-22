@@ -20,51 +20,33 @@ namespace MassTransit.Pipeline
         IInboundPipe
     {
         readonly MessageTypeConsumeFilter _filter;
+        readonly IPipe<ConsumeContext> _pipe;
 
         public InboundPipe()
         {
             _filter = new MessageTypeConsumeFilter();
+
+            _pipe = Pipe.New<ConsumeContext>(x => x.Filter(_filter));
         }
 
-        public Task Send(ConsumeContext context)
+        Task IPipe<ConsumeContext>.Send(ConsumeContext context)
         {
-            return _filter.Send(context, Cache.EndPipe);
+            return _pipe.Send(context);
         }
 
-        public ConnectHandle Connect<TMessage>(IConsumeObserver<TMessage> observer)
-            where TMessage : class
+        ConnectHandle IConsumeObserverConnector.Connect<TMessage>(IConsumeObserver<TMessage> observer)
         {
             return _filter.Connect(observer);
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        bool IPipe<ConsumeContext>.Inspect(IPipeInspector inspector)
         {
-            return _filter.Inspect(inspector);
+            return _pipe.Inspect(inspector);
         }
 
-        public ConnectHandle Connect<T>(params IFilter<ConsumeContext<T>>[] filters) where T : class
+        ConnectHandle IConsumeFilterConnector.Connect<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            return _filter.Connect(filters);
-        }
-
-
-        static class Cache
-        {
-            internal static readonly IConsumePipe EndPipe = new End();
-        }
-
-
-        class End :
-            IConsumePipe
-        {
-            async Task IPipe<ConsumeContext>.Send(ConsumeContext context)
-            {
-            }
-
-            public bool Inspect(IPipeInspector inspector)
-            {
-                return true;
-            }
+            return _filter.Connect(pipe);
         }
     }
 }

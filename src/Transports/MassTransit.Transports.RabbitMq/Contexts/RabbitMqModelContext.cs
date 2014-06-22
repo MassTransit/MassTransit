@@ -22,12 +22,11 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         ModelContext,
         IDisposable
     {
-        readonly object _lock = new object();
-        readonly CancellationTokenSource _tokenSource;
-        IModel _model;
-        CancellationTokenRegistration _registration;
-        readonly PayloadCache _payloadCache;
         readonly ConnectionContext _connectionContext;
+        readonly IModel _model;
+        readonly PayloadCache _payloadCache;
+        readonly CancellationTokenSource _tokenSource;
+        CancellationTokenRegistration _registration;
 
         public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
         {
@@ -40,6 +39,16 @@ namespace MassTransit.Transports.RabbitMq.Contexts
 
             model.ModelShutdown += OnModelShutdown;
         }
+
+        public void Dispose()
+        {
+            _model.ModelShutdown -= OnModelShutdown;
+
+            _registration.Dispose();
+
+            _model.Cleanup();
+        }
+
         public bool HasPayloadType(Type contextType)
         {
             return _payloadCache.HasPayloadType(contextType);
@@ -57,13 +66,6 @@ namespace MassTransit.Transports.RabbitMq.Contexts
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-
-        public void Dispose()
-        {
-            _model.ModelShutdown -= OnModelShutdown;
-
-            Close();
-        }
 
         public IModel Model
         {
@@ -84,18 +86,7 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         {
             _tokenSource.Cancel();
 
-            Close();
-        }
-
-        void Close()
-        {
-            lock (_lock)
-            {
-                _registration.Dispose();
-
-                _model.Cleanup();
-                _model = null;
-            }
+            _model.Cleanup();
         }
 
         void OnCancellationRequested()

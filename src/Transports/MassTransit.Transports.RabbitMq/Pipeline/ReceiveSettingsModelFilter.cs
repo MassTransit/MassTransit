@@ -19,14 +19,18 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
     using RabbitMQ.Client;
 
 
-    public class ReceiveSettingsModelFilter :
+    /// <summary>
+    /// Prepares a queue for receiving messages using the ReceiveSettings specified.
+    /// </summary>
+    public class PrepareRecevieQueueFilter :
         IFilter<ModelContext>
     {
-        readonly ILog _log = Logger.Get<ReceiveSettingsModelFilter>();
+        readonly ILog _log = Logger.Get<PrepareRecevieQueueFilter>();
 
         readonly ReceiveSettings _settings;
+        bool _queuePurged;
 
-        public ReceiveSettingsModelFilter(ReceiveSettings settings)
+        public PrepareRecevieQueueFilter(ReceiveSettings settings)
         {
             _settings = settings;
         }
@@ -51,12 +55,14 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
             }
 
-            if (_settings.PurgeOnReceive)
+            if (_settings.PurgeOnStartup && !_queuePurged)
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Purging {0} messages from queue {1}", queueOk.MessageCount, queueName);
 
                 context.Model.QueuePurge(queueName);
+
+                _queuePurged = true;
             }
 
             string exchangeName = _settings.ExchangeName ?? queueName;

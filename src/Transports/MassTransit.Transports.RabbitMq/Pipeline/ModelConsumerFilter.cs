@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
 {
     using System;
     using System.Threading.Tasks;
+    using Logging;
     using MassTransit.Pipeline;
 
 
@@ -21,6 +22,7 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
         IFilter<ModelContext>
     {
         readonly IPipe<ReceiveContext> _pipe;
+        readonly ILog _log = Logger.Get<ModelConsumerFilter>();
 
         public ModelConsumerFilter(IPipe<ReceiveContext> pipe)
         {
@@ -37,7 +39,12 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
             {
                 context.Model.BasicConsume(receiveSettings.QueueName, false, consumer);
 
-                await consumer.CompleteTask;
+                var metrics = await consumer.CompleteTask;
+
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", metrics.ConsumerTag, metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+                }
             }
         }
 

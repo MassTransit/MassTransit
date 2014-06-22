@@ -108,6 +108,7 @@
     <Compile Include="Configuration\PipeBuilders\IPipeBuilder.cs" />
     <Compile Include="Configuration\PipeBuilders\PipeBuilder.cs" />
     <Compile Include="Configuration\PipeConfigurators\FilterPipeBuilderConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\HandlerPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\IPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\PipeConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\RepeatPipeBuilderConfigurator.cs" />
@@ -116,9 +117,12 @@
     <Compile Include="Configuration\RetryPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ShutdownConfigurationExtensions.cs" />
     <Compile Include="Configuration\InterceptorExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionBuilders\HandlerReceiverBuilder.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\HandlerConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerMessageConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerMessageConnectorFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerMetadataCache.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\HandlerConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\HandlerConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\IConsumerConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\IHandlerConnectorCache.cs" />
@@ -181,7 +185,6 @@
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
     <Compile Include="Pipeline\DelegateFilter.cs" />
-    <Compile Include="Pipeline\FilterConnectorExtensions.cs" />
     <Compile Include="Pipeline\Filters\RepeatFilter.cs" />
     <Compile Include="Pipeline\Filters\RetryFilter.cs" />
     <Compile Include="Pipeline\IConsumeEnricher.cs" />
