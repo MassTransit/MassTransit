@@ -41,12 +41,15 @@ namespace MassTransit.Pipeline.Sinks
             return inspector.Inspect(this, (x, _) => _pipes.Values.All(pipe => pipe.Inspect(x)));
         }
 
-        public ConnectHandle Connect<T>(params IFilter<ConsumeContext<T>>[] filters)
+        public ConnectHandle Connect<T>(IPipe<ConsumeContext<T>> pipe)
             where T : class
         {
+            if (pipe == null)
+                throw new ArgumentNullException("pipe");
+
             IConsumeFilterConnector messagePipe = GetPipe<T, IConsumeFilterConnector>();
 
-            return messagePipe.Connect(filters);
+            return messagePipe.Connect(pipe);
         }
 
         public ConnectHandle Connect<T>(IConsumeObserver<T> observer)
@@ -57,22 +60,7 @@ namespace MassTransit.Pipeline.Sinks
 
             IConsumeObserverConnector messagePipe = GetPipe<T, IConsumeObserverConnector>();
 
-            ConnectHandle handle = messagePipe.Connect(observer);
-
-            return handle;
-        }
-
-        public ConnectHandle Connect<T>(IConsumeFilter<T> filter)
-            where T : class
-        {
-            if (filter == null)
-                throw new ArgumentNullException("filter");
-
-            IConsumeFilterConnector messagePipe = GetPipe<T, IConsumeFilterConnector>();
-
-            ConnectHandle handle = messagePipe.Connect(filter);
-
-            return handle;
+            return messagePipe.Connect(observer);
         }
 
         TResult GetPipe<T, TResult>()

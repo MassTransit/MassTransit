@@ -68,14 +68,14 @@ namespace MassTransit.Pipeline.Sinks
             return inspector.Inspect(this, (x, _) => _output.Inspect(x));
         }
 
-        public ConnectHandle Connect<T>(params IFilter<ConsumeContext<T>>[] filters)
+        public ConnectHandle Connect<T>(IPipe<ConsumeContext<T>> pipe)
             where T : class
         {
             var output = _output as IConsumeFilterConnector<T>;
             if (output == null)
                 throw new ArgumentException("Invalid pipe type specified: " + TypeMetadataCache<T>.ShortName);
 
-            return output.Connect(filters);
+            return output.Connect(pipe);
         }
 
         ConnectHandle IConsumeObserverConnector.Connect<T>(IConsumeObserver<T> observer)

@@ -107,24 +107,6 @@ namespace MassTransit.Tests
 		}
 
 		[Test]
-		public void It_should_not_be_received_by_an_uninterested_consumer()
-		{
-			TestMessageConsumer<PingMessage> messageConsumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.SubscribeHandler<PingMessage>(messageConsumer.MessageHandler, x => false);
-
-			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.SubscribeInstance(consumer);
-
-			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
-			
-			PingMessage message = new PingMessage();
-			LocalBus.Publish(message);
-
-			consumer.ShouldHaveReceivedMessage(message, _timeout);
-			messageConsumer.ShouldNotHaveReceivedMessage(message, TimeSpan.FromSeconds(1));
-		}
-
-		[Test]
 		public void It_should_not_be_received_by_an_uninterested_correlated_consumer()
 		{
 			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(Guid.NewGuid());

@@ -15,7 +15,6 @@ namespace MassTransit.Transports.RabbitMq
     using System.Collections.Generic;
 
 
-
     /// <summary>
     /// Specify the receive settings for a receive transport
     /// </summary>
@@ -65,7 +64,7 @@ namespace MassTransit.Transports.RabbitMq
         /// If True, and a queue name is specified, if the queue exists and has messages, they are purged at startup
         /// If the connection is reset, messages are not purged until the service is reset
         /// </summary>
-        bool PurgeOnReceive { get; }
+        bool PurgeOnStartup { get; }
 
         /// <summary>
         /// The RabbitMQ exchange type

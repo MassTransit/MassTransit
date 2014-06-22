@@ -39,7 +39,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
         {
             IPipe<ModelContext> pipe = Pipe.New<ModelContext>(x =>
             {
-                x.Filter(new ReceiveSettingsModelFilter(_settings));
+                x.Filter(new PrepareRecevieQueueFilter(_settings));
 
                 foreach (SubscriptionSettings subscription in _subscriptions)
                     x.Filter(new SubscriptionModelFilter(subscription));

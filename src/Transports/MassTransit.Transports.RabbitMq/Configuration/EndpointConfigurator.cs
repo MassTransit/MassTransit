@@ -14,10 +14,6 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 {
     public interface EndpointConfigurator
     {
-        /// <summary>
-        /// Specify the maximum number of concurrent messages that are consumed
-        /// </summary>
-        /// <param name="limit">The limit</param>
-        void ConcurrencyLimit(int limit);
+
     }
 }

@@ -31,8 +31,7 @@ namespace MassTransit.Tests
 			bool workDid = false;
 
 			LocalBus.SubscribeHandler<PingMessage>(
-				(msg)=> {workDid = true; fm.Set(msg); },
-				delegate { return true; });
+				(msg)=> {workDid = true; fm.Set(msg); });
 
 			RemoteBus.ShouldHaveSubscriptionFor<PingMessage>();
 

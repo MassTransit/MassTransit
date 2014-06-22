@@ -238,7 +238,6 @@
     <Compile Include="Serialization\SerializationSpecificationBase.cs" />
     <Compile Include="Serialization\SerializationTest.cs" />
     <Compile Include="Serialization\TransportContentType_Specs.cs" />
-    <Compile Include="SubscribeConsumer_Specs.cs" />
     <Compile Include="Subscriptions\PolymorphicMessage_Specs.cs" />
     <Compile Include="Subscriptions\Removing_a_subscription_client.cs" />
     <Compile Include="Subscriptions\SubscriptionService_Specs.cs" />

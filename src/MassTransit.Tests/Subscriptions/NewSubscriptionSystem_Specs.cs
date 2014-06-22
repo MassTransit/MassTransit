@@ -19,7 +19,7 @@ namespace MassTransit.Tests.Subscriptions
 	public class When_the_new_subscription_system_is_used
 	{
 		ConsumerTest<BusTestScenario, Testsumer> _test;
-		UnsubscribeAction _unsub;
+		ConnectHandle _unsub;
 
 		[When]
 		public void The_new_subscription_system_is_used()
@@ -40,7 +40,7 @@ namespace MassTransit.Tests.Subscriptions
 		[Finally]
 		public void Teardown()
 		{
-			_unsub();
+			_unsub.Dispose();
 
 			_test.Dispose();
 			_test = null;

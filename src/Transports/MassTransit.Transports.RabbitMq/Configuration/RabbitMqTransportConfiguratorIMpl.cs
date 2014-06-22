@@ -14,24 +14,27 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using EndpointConfigurators;
     using MassTransit.Configurators;
 
 
-    public class RabbitMqTransportConfiguratorImpl :
-        RabbitMqTransportConfigurator,
+    public class RabbitMqTransportConfigurator :
+        IRabbitMqTransportConfigurator,
         ITransportBuilder
     {
-        readonly ITransportSelector _selector;
+        readonly IList<ReceiveSettings> _receiveSettings; 
         readonly IList<RabbitMqHostSettings> _hosts;
+        readonly IRabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
+        readonly RabbitMqPublishSettings _publishSettings;
 
-        public RabbitMqTransportConfiguratorImpl()
+        public RabbitMqTransportConfigurator(ITransportSelector selector)
         {
             _hosts = new List<RabbitMqHostSettings>();
-        }
+            _defaultEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator();
+            _publishSettings = new RabbitMqPublishSettings();
+            _receiveSettings = new List<ReceiveSettings>();
 
-        public RabbitMqTransportConfiguratorImpl(ITransportSelector selector)
-        {
-            _selector = selector;
+            selector.SelectTransport(this);
         }
 
         public void Host(RabbitMqHostSettings settings)
@@ -44,12 +47,22 @@ namespace MassTransit.Transports.RabbitMq.Configuration
             throw new NotImplementedException();
         }
 
-        public void Mandatory(bool mandatory = true)
+        public void ReceiveEndpoint(ReceiveSettings receiveSettings)
         {
-            throw new NotImplementedException();
+            if (receiveSettings == null)
+                throw new ArgumentNullException("receiveSettings");
+
+            _receiveSettings.Add(receiveSettings);
         }
 
-        public void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback) where T : class
+        public void Mandatory(bool mandatory = true)
+        {
+            _publishSettings.Mandatory = mandatory;
+
+        }
+
+        public void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback) 
+            where T : class
         {
             throw new NotImplementedException();
         }

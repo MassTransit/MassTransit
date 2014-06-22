@@ -47,7 +47,7 @@ namespace MassTransit.Tests
 		{
 			var consumer = new SmartConsumer();
 
-			LocalBus.SubscribeHandler<Hello>(delegate { throw new AccessViolationException("Crap!"); });
+			LocalBus.SubscribeHandler((ConsumeContext<Hello> context) =>  { throw new AccessViolationException("Crap!"); });
 
 			LocalBus.SubscribeInstance(consumer);
 
@@ -106,7 +106,7 @@ namespace MassTransit.Tests
 		{
 			var consumer = new SmartConsumer();
 
-			LocalBus.SubscribeHandler<Hello>(delegate { throw new AccessViolationException("Crap!"); });
+            LocalBus.SubscribeHandler((ConsumeContext<Hello> context) => { throw new AccessViolationException("Crap!"); });
 
 			LocalBus.SubscribeInstance(consumer);
 

@@ -13,15 +13,18 @@
 namespace MassTransit
 {
     using System;
+    using Transports.RabbitMq;
     using Transports.RabbitMq.Configuration;
 
 
-    public interface RabbitMqTransportConfigurator :
+    public interface IRabbitMqTransportConfigurator :
         ITransportConfigurator
     {
         void Host(RabbitMqHostSettings settings);
 
         void Endpoint(RabbitMqEndpointSettings settings);
+
+        void ReceiveEndpoint(ReceiveSettings receiveSettings);
 
         /// <summary>
         ///     Specifies that any message sent to an exchange must be delivered to a queue or it

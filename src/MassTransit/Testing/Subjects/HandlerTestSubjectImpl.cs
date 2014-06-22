@@ -25,7 +25,7 @@ namespace MassTransit.Testing.Subjects
 		readonly Action<IConsumeContext<TSubject>, TSubject> _handler;
 		readonly ReceivedMessageListImpl<TSubject> _received;
 		bool _disposed;
-		UnsubscribeAction _unsubscribe;
+		ConnectHandle _unsubscribe;
 
 		public HandlerTestSubjectImpl(Action<IConsumeContext<TSubject>, TSubject> handler)
 		{
@@ -58,7 +58,7 @@ namespace MassTransit.Testing.Subjects
 			{
 				if (_unsubscribe != null)
 				{
-					_unsubscribe();
+					_unsubscribe.Dispose();
 					_unsubscribe = null;
 				}
 

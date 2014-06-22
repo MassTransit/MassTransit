@@ -23,6 +23,9 @@ namespace MassTransit.Transports.RabbitMq
             QueueArguments = new Dictionary<string, object>();
             ExchangeArguments = new Dictionary<string, object>();
             ExchangeType = RabbitMQ.Client.ExchangeType.Fanout;
+
+            Durable = true;
+            Exclusive = false;
         }
 
         public RabbitMqReceiveSettings(ReceiveSettings settings)
@@ -35,7 +38,7 @@ namespace MassTransit.Transports.RabbitMq
             AutoDelete = settings.AutoDelete;
             QueueArguments = settings.QueueArguments;
             ExchangeArguments = settings.ExchangeArguments;
-            PurgeOnReceive = settings.PurgeOnReceive;
+            PurgeOnStartup = settings.PurgeOnStartup;
             ExchangeType = settings.ExchangeType;
         }
 
@@ -47,7 +50,7 @@ namespace MassTransit.Transports.RabbitMq
         public bool AutoDelete { get; set; }
         public IDictionary<string, object> QueueArguments { get; private set; }
         public IDictionary<string, object> ExchangeArguments { get; private set; }
-        public bool PurgeOnReceive { get; set; }
+        public bool PurgeOnStartup { get; set; }
         public string ExchangeType { get; set; }
     }
 }

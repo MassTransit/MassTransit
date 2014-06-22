@@ -13,7 +13,8 @@
 namespace MassTransit
 {
     using System;
-    using Pipeline;
+    using Context;
+    using EndpointConfigurators;
     using Policies;
     using SubscriptionConfigurators;
     using SubscriptionConnectors;
@@ -43,16 +44,36 @@ namespace MassTransit
             return handlerConfigurator;
         }
 
+        public static void Handler<T>(this IReceiveEndpointConfigurator configurator, MessageHandler<T> handler)
+            where T : class
+        {
+            var handlerConfigurator = new HandlerConfigurator<T>(handler);
+
+            configurator.AddConfigurator(handlerConfigurator);
+        }
+
+        public static void Handler<T>(this IReceiveEndpointConfigurator configurator, MessageHandler<T> handler,
+            Action<IHandlerConfigurator<T>> configure)
+            where T : class
+        {
+            var handlerConfigurator = new HandlerConfigurator<T>(handler);
+
+            configure(handlerConfigurator);
+
+            configurator.AddConfigurator(handlerConfigurator);
+        }
+
+
         /// <summary>
         /// Adds a message handler to the service bus for handling a specific type of message
         /// </summary>
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="bus"></param>
         /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        public static UnsubscribeAction SubscribeHandler<T>(this IServiceBus bus, Action<T> handler)
+        public static ConnectHandle SubscribeHandler<T>(this IServiceBus bus, MessageHandler<T> handler)
             where T : class
         {
-            return SubscribeHandlerSelector(bus, HandlerSelector.ForHandler(handler));
+            return HandlerConnectorCache<T>.Connector.Connect(bus.InboundPipe, handler);
         }
 
         /// <summary>
@@ -61,10 +82,10 @@ namespace MassTransit
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="bus"></param>
         /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        public static UnsubscribeAction SubscribeContextHandler<T>(this IServiceBus bus, Action<IConsumeContext<T>> handler)
+        public static ConnectHandle SubscribeHandler<T>(this IServiceBus bus, Action<T> handler)
             where T : class
         {
-            return SubscribeHandlerSelector(bus, HandlerSelector.ForContextHandler(handler));
+            return HandlerConnectorCache<T>.Connector.Connect(bus.InboundPipe, async context => handler(context.Message));
         }
 
         /// <summary>
@@ -73,25 +94,15 @@ namespace MassTransit
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="bus"></param>
         /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        /// <param name="condition"></param>
-        public static UnsubscribeAction SubscribeHandler<T>(this IServiceBus bus, Action<T> handler, Predicate<T> condition)
+        public static ConnectHandle SubscribeContextHandler<T>(this IServiceBus bus, Action<IConsumeContext<T>> handler)
             where T : class
         {
-            return SubscribeHandlerSelector(bus, HandlerSelector.ForSelectiveHandler(condition, handler));
-        }
+            return HandlerConnectorCache<T>.Connector.Connect(bus.InboundPipe, async context =>
+            {
+                IConsumeContext<T> consumeContext = new ConsumeContextAdapter<T>(context);
 
-        /// <summary>
-        /// Adds a message handler to the service bus for handling a specific type of message
-        /// </summary>
-        /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
-        /// <param name="bus"></param>
-        /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        public static UnsubscribeAction SubscribeHandlerSelector<T>(this IServiceBus bus, HandlerSelector<T> handler)
-            where T : class
-        {
-            var connector = new HandlerSubscriptionConnector<T>();
-
-            return bus.Configure(x => connector.Connect(x, handler));
+                handler(consumeContext);
+            });
         }
     }
 }

@@ -279,6 +279,11 @@ namespace MassTransit
             return _serviceContainer.TryGetService(type, out result);
         }
 
+        public ISendToEndpoint GetSendEndpoint(Uri address)
+        {
+            throw new NotImplementedException();
+        }
+
         void NoContext<T>(IPublishContext<T> context)
             where T : class
         {

@@ -20,8 +20,8 @@ namespace MassTransit.Pipeline.Sinks
 
     public class KeyedConsumeFilter<T, TKey> :
         IConsumeFilter<T>,
-        IConnectPipeById<T, TKey>
-        where T : class
+        IConnectPipeById<ConsumeContext<T>, TKey>
+        where T : class, PipeContext
     {
         readonly KeyAccessor<T, TKey> _keyAccessor;
         readonly ConcurrentDictionary<TKey, TeeConsumeFilter<T>> _pipes;
@@ -32,14 +32,14 @@ namespace MassTransit.Pipeline.Sinks
             _pipes = new ConcurrentDictionary<TKey, TeeConsumeFilter<T>>();
         }
 
-        public ConnectHandle Connect(TKey key, IConsumeFilter<T> filter)
+        public ConnectHandle Connect(TKey key, IPipe<ConsumeContext<T>> pipe)
         {
-            if (filter == null)
-                throw new ArgumentNullException("filter");
+            if (pipe == null)
+                throw new ArgumentNullException("pipe");
 
             TeeConsumeFilter<T> added = _pipes.GetOrAdd(key, x => new TeeConsumeFilter<T>());
 
-            ConnectHandle handle = added.Connect(filter);
+            ConnectHandle handle = added.Connect(pipe);
 
             return new Handle(key, handle, RemovePipe);
         }

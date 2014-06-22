@@ -48,7 +48,7 @@
         {
             var receivedDynamic = new FutureMessage<A>();
 
-            UnsubscribeAction subscription = RemoteBus.SubscribeHandler<A>(receivedDynamic.Set);
+            ConnectHandle subscription = RemoteBus.SubscribeHandler<A>(receivedDynamic.Set);
             try
             {
                 LocalBus.Publish(new A());
@@ -58,7 +58,7 @@
             }
             finally
             {
-                subscription();
+                subscription.Dispose();
             }
         }
 
@@ -67,11 +67,11 @@
         {
             var receivedDynamic = new FutureMessage<A>();
 
-            UnsubscribeAction subscription = RemoteBus.SubscribeHandler<A>(receivedDynamic.Set);
+            ConnectHandle subscription = RemoteBus.SubscribeHandler<A>(receivedDynamic.Set);
 
-            var result = subscription();
-
-            result.ShouldBeFalse("Should still have a static subscription");
+//            var result = subscription();
+//
+//            result.ShouldBeFalse("Should still have a static subscription");
 
             LocalBus.Publish(new A());
 
@@ -87,17 +87,17 @@
             var dynamicC = new FutureMessage<C>();
             var dynamicD = new FutureMessage<D>();
 
-            UnsubscribeAction subscriptionA = RemoteBus.SubscribeHandler<A>(dynamicA.Set);
-            UnsubscribeAction subscriptionB = RemoteBus.SubscribeHandler<B>(dynamicB.Set);
-            UnsubscribeAction subscriptionC = RemoteBus.SubscribeHandler<C>(dynamicC.Set);
-            UnsubscribeAction subscriptionD = RemoteBus.SubscribeHandler<D>(dynamicD.Set);
+            ConnectHandle subscriptionA = RemoteBus.SubscribeHandler<A>(dynamicA.Set);
+            ConnectHandle subscriptionB = RemoteBus.SubscribeHandler<B>(dynamicB.Set);
+            ConnectHandle subscriptionC = RemoteBus.SubscribeHandler<C>(dynamicC.Set);
+            ConnectHandle subscriptionD = RemoteBus.SubscribeHandler<D>(dynamicD.Set);
 
             LocalBus.HasSubscription<D>(8.Seconds()).Any().ShouldBeTrue("No D subscription");
             try
             {
-                subscriptionA().ShouldBeFalse("A static not remaining");
-                subscriptionB().ShouldBeFalse("B static not remaining");
-                subscriptionC().ShouldBeFalse("C static not remaining");
+//                subscriptionA().ShouldBeFalse("A static not remaining");
+//                subscriptionB().ShouldBeFalse("B static not remaining");
+//                subscriptionC().ShouldBeFalse("C static not remaining");
 
                 LocalBus.Publish(new A());
                 LocalBus.Publish(new B());
@@ -111,7 +111,7 @@
             }
             finally
             {
-                subscriptionD();
+                subscriptionD.Dispose();
             }
         }
 

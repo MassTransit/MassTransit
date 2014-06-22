@@ -13,41 +13,69 @@
 namespace MassTransit.Transports.RabbitMq.Tests
 {
     using System;
+    using System.Threading.Tasks;
+    using Magnum.Extensions;
     using NUnit.Framework;
+    using Policies;
 
 
     [TestFixture]
-    public class ConfiguringRabbitMQ_Specs
+    public class ConfiguringRabbitMQ_Specs :
+        AsyncTestFixture
     {
         [Test]
         public async void Should_support_the_new_syntax()
         {
+            var hostAddress = new Uri("rabbitmq://localhost/test");
+            var completed = new TaskCompletionSource<A>();
+
             using (IServiceBus bus = ServiceBusFactory.New(x => x.RabbitMQ(), x =>
             {
-                // configure a host, using an existing URI
-                x.Host(new Uri("rabbitmq://server/vhost"), r =>
+                x.Host(hostAddress, r =>
                 {
-                    r.Username("Joe");
-                    r.Password("Blow");
+                    r.Username("guest");
+                    r.Password("guest");
                     r.Heartbeat(30);
                 });
 
                 x.Mandatory();
 
-                x.OnPublish<A>(context => { context.Mandatory = true; });
+//                x.OnPublish<A>(context => { context.Mandatory = true; });
+//
+//                x.OnPublish(context => context.Mandatory = true);
+//
+//
+//                x.Endpoint("send_exchange", e =>
+//                {
+//                });
 
-                x.OnPublish(context => context.Mandatory = true);
-
-                x.Endpoint("input_queue", e =>
+                x.ReceiveEndpoint("input_queue", e =>
                 {
-                    e.ConcurrencyLimit(16);
+                    e.PrefetchCount(16);
                     e.Durable(false);
                     e.Exclusive();
+
+                    e.Handler<A>(async context => completed.TrySetResult(context.Message));
+
+                    // Add a message handler and configure the pipeline to retry the handler
+                    // if an exception is thrown
+                    e.Handler<A>(Handle, h =>
+                    {
+                        h.Retry(Retry.Interval(5, 100.Milliseconds()));
+                    });
                 });
             }))
             {
-                bus.Publish(new A());
+                var queueAddress = new Uri(hostAddress, "input_queue");
+                ISendToEndpoint endpoint = bus.GetSendEndpoint(queueAddress);
+
+                await endpoint.Send(new A());
             }
+        }
+
+        async Task Handle(ConsumeContext<A> context)
+        {
+
         }
 
 

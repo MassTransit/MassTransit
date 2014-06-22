@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
     using System.Threading.Tasks;
     using Pipeline;
 
@@ -37,7 +36,7 @@ namespace MassTransit
 
         public bool Inspect(IPipeInspector inspector)
         {
-            throw new NotImplementedException();
+            return _filter.Inspect(inspector) && _next.Inspect(inspector);
         }
     }
 }
