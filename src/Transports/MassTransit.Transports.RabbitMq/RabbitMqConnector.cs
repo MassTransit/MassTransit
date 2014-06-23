@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
