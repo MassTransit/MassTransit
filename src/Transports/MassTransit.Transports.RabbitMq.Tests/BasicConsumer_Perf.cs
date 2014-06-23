@@ -207,17 +207,15 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
             var deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
 
-            var testPipe = new TestReceivePipe(async context =>
+            var testPipe = new TestConsumePipe(async context =>
             {
-                if (context.Redelivered)
+                if (context.ReceiveContext.Redelivered)
                     Interlocked.Increment(ref redeliviered);
-
-                ConsumeContext consumeContext = deserializer.Deserialize(context);
 
                 // var person = consumeContext.Headers.Get<Person>("person");
 
                 ConsumeContext<ITestMessage> messageContext;
-                if (!consumeContext.TryGetMessage(out messageContext))
+                if (!context.TryGetMessage(out messageContext))
                     throw new SerializationException("The message type was not supported");
 
                 Interlocked.Add(ref processingTime, (int)messageContext.ReceiveContext.ElapsedTime.TotalMilliseconds);
@@ -227,7 +225,10 @@ namespace MassTransit.Transports.RabbitMq.Tests
                     completed.TrySetResult(true);
             });
 
-            var retryPolicy = Retry.Exponential(int.MaxValue, 1.Seconds(), 60.Seconds(), 2.Seconds());
+
+
+
+            var retryPolicy = Retry.Exponential(1.Seconds(), 60.Seconds(), 2.Seconds());
             var connectionMaker = new RabbitMqConnector(connectionFactory, retryPolicy);
 
             var transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, new RabbitMqReceiveSettings
@@ -242,8 +243,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
             var cancelReceive = new CancellationTokenSource();
 
-            var consumerTask = transport.Start(testPipe, cancelReceive.Token);
+            var receiveEndpoint = new ReceiveEndpoint(transport, deserializer, testPipe, x => { });
 
+            var consumerTask = receiveEndpoint.Start(cancelReceive.Token);
 
             var message = new TestMessage("Joe", "American Way", 27);
 

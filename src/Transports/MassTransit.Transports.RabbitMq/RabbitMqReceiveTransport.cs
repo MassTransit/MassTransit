@@ -63,6 +63,11 @@ namespace MassTransit.Transports.RabbitMq
                 {
                     await _connector.Connect(receivePipe, cancellationToken);
                 }
+                catch (RabbitMqConnectionException ex)
+                {
+                    if (_log.IsErrorEnabled)
+                        _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);                    
+                }
                 catch (TaskCanceledException)
                 {
                 }

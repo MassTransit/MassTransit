@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System.Collections.Generic;
+    using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
 
@@ -23,27 +24,26 @@ namespace MassTransit.Transports
     /// filters on the receive context. 
     /// </summary>
     public class ReceiveEndpoint :
-        IReceiveEndpoint,
-        IPipe<ReceiveContext>
+        IReceiveEndpoint
     {
-        readonly IPipe<ReceiveContext> _deserializePipe;
+        readonly IPipe<ReceiveContext> _receivePipe;
+        readonly IReceiveTransport _receiveTransport;
 
-        public ReceiveEndpoint(IMessageDeserializer deserializer, IPipe<ConsumeContext> inboundPipe,
-            IEnumerable<IFilter<ReceiveContext>> receiveFilters)
+        public ReceiveEndpoint(IReceiveTransport receiveTransport, IMessageDeserializer deserializer, IPipe<ConsumeContext> inboundPipe,
+            Action<IPipeConfigurator<ReceiveContext>> configure)
         {
-            var deserializerFilter = new DeserializeFilter(deserializer, inboundPipe);
+            _receiveTransport = receiveTransport;
+            _receivePipe = Pipe.New<ReceiveContext>(x =>
+            {
+                configure(x);
 
-            _deserializePipe = receiveFilters.Combine(deserializerFilter);
+                x.Filter(new DeserializeFilter(deserializer, inboundPipe));
+            });
         }
 
-        public Task Send(ReceiveContext context)
+        public Task Start(CancellationToken cancellationToken)
         {
-            return _deserializePipe.Send(context);
-        }
-
-        public bool Inspect(IPipeInspector inspector)
-        {
-            return inspector.Inspect(this, (x, _) => _deserializePipe.Inspect(x));
+            return _receiveTransport.Start(_receivePipe, cancellationToken);
         }
     }
 }
