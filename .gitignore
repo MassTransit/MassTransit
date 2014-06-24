@@ -37,7 +37,6 @@ doc/build/*
 
 # osx noise
 .DS_Store
-NuGet.Exe
 
 nuspecs/
 
