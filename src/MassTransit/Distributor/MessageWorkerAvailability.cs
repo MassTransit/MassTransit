@@ -61,7 +61,7 @@ namespace MassTransit.Distributor
             IWorkerSelector<TMessage> workerSelector)
         {
             return _workerCache.GetAvailableWorkers(context, workerSelector)
-                .Take(1)
+                //.Take(1) NOTE: commented to enable publishing an event to multiple endpoints.
                 .SelectMany(worker =>
                     {
                         worker.Assigned();
