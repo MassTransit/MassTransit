@@ -10,6 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
@@ -22,50 +23,42 @@ namespace MassTransit.AzureServiceBusTransport
     using Context;
     using Microsoft.ServiceBus.Messaging;
 
-
     public class AzureServiceBusReceiveContext :
-        MassTransit.ReceiveContext,
+        ReceiveContext,
         AzureServiceBusMessageContext
     {
         static readonly ContentType DefaultContentType = new ContentType("application/vnd.masstransit+json");
 
         readonly byte[] _body;
+        readonly CancellationTokenSource _cancellationTokenSource;
         readonly Uri _inputAddress;
         readonly BrokeredMessage _message;
-        readonly Stopwatch _receiveTimer;
         readonly PayloadCache _payloadCache;
+        readonly Stopwatch _receiveTimer;
         ContentType _contentType;
         Encoding _encoding;
         AzureServiceBusReceiveContextHeaders _headers;
-        readonly CancellationTokenSource _cancellationTokenSource;
 
-        public AzureServiceBusReceiveContext(BrokeredMessage message)
+        public AzureServiceBusReceiveContext(BrokeredMessage message, Uri inputAddress)
         {
             _receiveTimer = Stopwatch.StartNew();
 
             _payloadCache = new PayloadCache();
 
             _message = message;
+            _inputAddress = inputAddress;
 
             _cancellationTokenSource = new CancellationTokenSource();
         }
 
-
-        public bool HasPayloadType(Type contextType)
+        public Encoding ContentEncoding
         {
-            return _payloadCache.HasPayloadType(contextType);
-        }
-
-        public bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
-        {
-            return _payloadCache.TryGetPayload(out context);
-        }
-
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
-        {
-            return _payloadCache.GetOrAddPayload(payloadFactory);
+            get
+            {
+                return _encoding ?? (_encoding = string.IsNullOrWhiteSpace(ContentType.CharSet)
+                    ? Encoding.UTF8
+                    : Encoding.GetEncoding(ContentType.CharSet));
+            }
         }
 
 
@@ -162,14 +155,21 @@ namespace MassTransit.AzureServiceBusTransport
             get { return _message.ScheduledEnqueueTimeUtc; }
         }
 
-        public Encoding ContentEncoding
+        public bool HasPayloadType(Type contextType)
         {
-            get
-            {
-                return _encoding ?? (_encoding = string.IsNullOrWhiteSpace(ContentType.CharSet)
-                    ? Encoding.UTF8
-                    : Encoding.GetEncoding(ContentType.CharSet));
-            }
+            return _payloadCache.HasPayloadType(contextType);
+        }
+
+        public bool TryGetPayload<TPayload>(out TPayload context)
+            where TPayload : class
+        {
+            return _payloadCache.TryGetPayload(out context);
+        }
+
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+            where TPayload : class
+        {
+            return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
         public bool Redelivered
@@ -209,12 +209,10 @@ namespace MassTransit.AzureServiceBusTransport
 
         public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
         {
-            
         }
 
         public void NotifyFaulted(string messageType, string consumerType, Exception exception)
         {
-            
         }
 
         ContentType GetContentType()

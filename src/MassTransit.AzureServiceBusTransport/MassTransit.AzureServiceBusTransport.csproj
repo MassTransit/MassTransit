@@ -53,12 +53,19 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="ConnectionContext.cs" />
+    <Compile Include="MessageReceiverContext.cs" />
+    <Compile Include="Receiver.cs" />
     <Compile Include="AzureServiceBusReceiveContextHeaders.cs" />
+    <Compile Include="AzureServiceBusReceiveTransport.cs" />
     <Compile Include="AzureServiceBusTokenProviderSettings.cs" />
     <Compile Include="BrokeredMessageContext.cs" />
     <Compile Include="AzureServiceBusMessageContext.cs" />
     <Compile Include="AzureServiceBusReceiveContext.cs" />
     <Compile Include="IAzureServiceBusTokenProvider.cs" />
+    <Compile Include="MessageReceiverFilter.cs" />
+    <Compile Include="ReceiverMetrics.cs" />
+    <Compile Include="ReceiveSettings.cs" />
     <Compile Include="SharedAccessKeyTokenProvider.cs" />
   </ItemGroup>
   <ItemGroup>

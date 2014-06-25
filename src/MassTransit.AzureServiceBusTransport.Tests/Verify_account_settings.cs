@@ -67,7 +67,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 const int limit = 1000;
                 receiver.OnMessageAsync(async message =>
                 {
-                    var receiveContext = new AzureServiceBusReceiveContext(message);
+                    var receiveContext = new AzureServiceBusReceiveContext(message, new Uri("sb://localhost/queue"));
 
                     await message.CompleteAsync();
 
