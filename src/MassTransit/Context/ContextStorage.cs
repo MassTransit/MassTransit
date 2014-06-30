@@ -49,10 +49,10 @@ namespace MassTransit.Context
             return context;
         }
 
-        public static SendContext<T> CreateSendContext<T>(T message)
+        public static OldSendContext<T> CreateSendContext<T>(T message)
             where T : class
         {
-            var context = new SendContext<T>(message);
+            var context = new OldSendContext<T>(message);
 
             SetReceiveContextForSend(context);
 

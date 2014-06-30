@@ -17,7 +17,7 @@ namespace MassTransit.Context
     using System.Diagnostics;
 
     public class PublishContext<T> :
-        SendContext<T>,
+        OldSendContext<T>,
         IBusPublishContext<T>
         where T : class
     {

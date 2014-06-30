@@ -49,7 +49,7 @@ namespace MassTransit.Tests
 		public static ISendContext<T> ToSendContext<T>(this T obj)
 			where T : class
 		{
-			return new SendContext<T>(obj);
+			return new OldSendContext<T>(obj);
 		}
 
 		public static IConsumeContext<T> ToConsumeContext<T>(this T message) 

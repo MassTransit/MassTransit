@@ -13,14 +13,35 @@
 
 namespace MassTransit.AzureServiceBusTransport
 {
+    using System;
     using System.Threading;
     using Microsoft.ServiceBus.Messaging;
+
+
+    public interface MessagingFactoryContext :
+        PipeContext
+    {
+        CancellationToken CancellationToken { get; }
+
+        /// <summary>
+        /// The messaging factory initialized for the service bus
+        /// </summary>
+        MessagingFactory Factory { get; }
+
+        /// <summary>
+        /// Return the address for the specified queue
+        /// </summary>
+        /// <param name="queueName">The queue name</param>
+        /// <returns>The address of the queue</returns>
+        Uri GetQueueAddress(string queueName);
+
+    }
 
     public interface MessageReceiverContext :
         PipeContext
     {
         MessageReceiver MessageReceiver { get; }
-        ConnectionContext ConnectionContext { get; set; }
+        MessagingFactoryContext ConnectionContext { get; }
         CancellationToken CancellationToken { get; }
     }
 }

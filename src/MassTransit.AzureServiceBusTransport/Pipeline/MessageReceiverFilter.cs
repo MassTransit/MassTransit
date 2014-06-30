@@ -10,16 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
-namespace MassTransit.AzureServiceBusTransport
+namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
     using System;
     using System.Threading.Tasks;
     using Logging;
-    using Pipeline;
+    using MassTransit.Pipeline;
+    using Microsoft.ServiceBus.Messaging;
+
 
     public class MessageReceiverFilter :
-        IFilter<MessageReceiverContext>
+        IFilter<MessagingFactoryContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
         readonly IPipe<ReceiveContext> _pipe;
@@ -29,14 +30,16 @@ namespace MassTransit.AzureServiceBusTransport
             _pipe = pipe;
         }
 
-        public async Task Send(MessageReceiverContext context, IPipe<MessageReceiverContext> next)
+        public async Task Send(MessagingFactoryContext context, IPipe<MessagingFactoryContext> next)
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            Uri inputAddress = context.ConnectionContext.GetAddress(receiveSettings.QueueName);
+            Uri inputAddress = context.GetQueueAddress(receiveSettings.QueueName);
 
-            using (
-                var receiver = new Receiver(context.MessageReceiver, inputAddress, _pipe, receiveSettings, context.CancellationToken))
+            MessageReceiver messageReceiver = await context.Factory.CreateMessageReceiverAsync(receiveSettings.QueueName, ReceiveMode.PeekLock);
+            messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
+
+            using (var receiver = new Receiver(messageReceiver, inputAddress, _pipe, receiveSettings, context.CancellationToken))
             {
                 ReceiverMetrics metrics = await receiver.CompleteTask;
 
@@ -46,6 +49,8 @@ namespace MassTransit.AzureServiceBusTransport
                         metrics.ConcurrentDeliveryCount);
                 }
             }
+
+            await next.Send(context);
         }
 
         public bool Inspect(IPipeInspector inspector)

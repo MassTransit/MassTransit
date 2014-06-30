@@ -71,7 +71,7 @@ namespace MassTransit.TestFramework.Transports
 
         void SendMessage()
         {
-            var context = new SendContext<DeleteMessage>(new DeleteMessage());
+            var context = new OldSendContext<DeleteMessage>(new DeleteMessage());
             context.SetBodyWriter(stream => _serializer.Serialize(stream, context));
 
             _transport.Send(context);

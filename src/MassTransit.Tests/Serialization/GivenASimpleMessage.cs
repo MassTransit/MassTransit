@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Serialization
 
             using (var output = new MemoryStream())
             {
-                serializer.Serialize(output, new SendContext<PingMessage>(Message));
+                serializer.Serialize(output, new OldSendContext<PingMessage>(Message));
 
                 serializedMessageData = output.ToArray();
 

@@ -43,7 +43,7 @@
 
             using (var output = new MemoryStream())
             {
-                serializer.Serialize(output, new SendContext<SerializationTestMessage>(Message));
+                serializer.Serialize(output, new OldSendContext<SerializationTestMessage>(Message));
 
                 serializedMessageData = output.ToArray();
 
