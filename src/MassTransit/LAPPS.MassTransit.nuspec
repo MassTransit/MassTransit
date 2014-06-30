@@ -1,0 +1,14 @@
+﻿<?xml version="1.0"?>
+
+<!--
+	We will need a nuspec file per application fork, so that we will be able to identify which fork we are deploying from the octopus server.
+-->
+
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<metadata>
+		<id>LAPPS.MassTransit</id>
+		<version>1.0.0</version>
+		<authors>LAPPS Team</authors>
+		<description>LAPPS Hub Service</description>
+	</metadata>
+</package>

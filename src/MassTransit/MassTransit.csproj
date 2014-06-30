@@ -986,6 +986,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="LAPPS.MassTransit.nuspec" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
