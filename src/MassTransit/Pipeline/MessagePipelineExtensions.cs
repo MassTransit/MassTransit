@@ -102,7 +102,7 @@ namespace MassTransit.Pipeline
 		{
 			bool consumed = false;
 
-			var context = new SendContext<T>(message);
+			var context = new OldSendContext<T>(message);
 
 			foreach (var consumer in pipeline.Enumerate(context))
 			{

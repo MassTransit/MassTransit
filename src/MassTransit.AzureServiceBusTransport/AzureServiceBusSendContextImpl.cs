@@ -10,33 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Contexts
+namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.IO;
     using System.Net.Mime;
     using System.Runtime.Serialization;
     using Context;
-    using RabbitMQ.Client;
+    using Transports;
 
 
-    public class RabbitMqSendContextImpl<T> :
-        RabbitMqSendContext<T>
+    public class AzureServiceBusSendContextImpl<T> :
+        AzureServiceBusSendContext<T>
         where T : class
     {
         readonly PayloadCache _payloadCache;
         byte[] _body;
         ISendMessageSerializer _serializer;
 
-        public RabbitMqSendContextImpl(IBasicProperties basicProperties, T message, string exchange, string routingKey = "")
+        public AzureServiceBusSendContextImpl(T message)
         {
             _payloadCache = new PayloadCache();
-            _payloadCache.GetOrAddPayload<RabbitMqSendContext<T>>(() => this);
+            _payloadCache.GetOrAddPayload<AzureServiceBusSendContext<T>>(() => this);
 
-            BasicProperties = basicProperties;
+
             Message = message;
-            Exchange = exchange;
-            RoutingKey = routingKey;
 
             MessageId = NewId.NextGuid();
 
@@ -67,36 +65,6 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         }
 
         public bool Durable { get; set; }
-        public bool Immediate { get; set; }
-        public bool Mandatory { get; set; }
-
-        public string Exchange { get; private set; }
-        public string RoutingKey { get; set; }
-
-        public IBasicProperties BasicProperties { get; private set; }
-
-        public byte[] Body
-        {
-            get
-            {
-                if (_body != null)
-                    return _body;
-
-                if (Serializer == null)
-                    throw new SerializationException("No serializer specified");
-                if (Message == null)
-                    throw new SendException(typeof(T), DestinationAddress, "No message specified");
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    Serializer.Serialize(memoryStream, this);
-
-                    _body = memoryStream.ToArray();
-                    return _body;
-                }
-            }
-        }
-
         public T Message { get; private set; }
 
         public bool HasPayloadType(Type contextType)
@@ -114,6 +82,33 @@ namespace MassTransit.Transports.RabbitMq.Contexts
             where TPayload : class
         {
             return _payloadCache.GetOrAddPayload(payloadFactory);
+        }
+
+        public Stream GetBodyStream()
+        {
+            var memoryStream = new MemoryStream();
+            try
+            {
+                if (_body != null)
+                    return new MemoryStream(_body);
+
+                if (_serializer == null)
+                    throw new SerializationException("No serializer specified");
+                if (Message == null)
+                    throw new SendException(typeof(T), DestinationAddress, "No message specified");
+
+                _serializer.Serialize(memoryStream, this);
+
+                _body = memoryStream.ToArray();
+
+                memoryStream.Position = 0;
+                return memoryStream;
+            }
+            catch (Exception)
+            {
+                memoryStream.Dispose();
+                throw;
+            }
         }
     }
 }

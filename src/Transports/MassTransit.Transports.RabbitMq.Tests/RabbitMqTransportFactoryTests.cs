@@ -91,7 +91,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             }
 
             IOutboundTransport t = _factory.BuildOutbound(new TransportSettings(_exchange));
-            var context = new SendContext<string>("dru");
+            var context = new OldSendContext<string>("dru");
             context.SetBodyWriter(stream =>
                 {
                     byte[] buffer = Encoding.UTF8.GetBytes(context.Message);

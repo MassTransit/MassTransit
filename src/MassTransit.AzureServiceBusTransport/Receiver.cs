@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Pipeline;
 
@@ -26,23 +27,15 @@ namespace MassTransit.AzureServiceBusTransport
         readonly CancellationToken _cancellationToken;
         readonly TaskCompletionSource<ReceiverMetrics> _completeTask;
         readonly Uri _inputAddress;
-        readonly MessageReceiver _messageReceiver;
         readonly IPipe<ReceiveContext> _receivePipe;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         CancellationTokenRegistration _registration;
 
-//        public Receiver()
-//        {
-//            MessageReceiver receiver = await factory.CreateMessageReceiverAsync("Control");
-//            receiver.PrefetchCount = 100;
-//        }
-
         public Receiver(MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
             ReceiveSettings receiveSettings, CancellationToken cancellationToken)
         {
-            _messageReceiver = messageReceiver;
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
             _cancellationToken = cancellationToken;

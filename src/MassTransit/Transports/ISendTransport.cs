@@ -19,7 +19,7 @@ namespace MassTransit.Transports
     public interface ISendTransport
     {
         /// <summary>
-        ///     Send a message to the transport. The transport creates the SendContext, and calls back to
+        ///     Send a message to the transport. The transport creates the OldSendContext, and calls back to
         ///     allow the context to be modified to customize the message delivery.
         ///     The transport specifies the defaults for the message as configured, and then allows the
         ///     caller to modify the send context to include the required settings (durable, mandatory, etc.).

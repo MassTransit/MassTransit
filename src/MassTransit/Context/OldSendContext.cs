@@ -15,7 +15,7 @@ namespace MassTransit.Context
     using System;
     using System.IO;
 
-    public class SendContext<T> :
+    public class OldSendContext<T> :
         OldMessageContext,
         ISendContext<T>
         where T : class
@@ -25,7 +25,7 @@ namespace MassTransit.Context
         Guid _id;
         IReceiveContext _receiveContext;
 
-        SendContext(Guid messageId, T message, Type declaringMessageType)
+        OldSendContext(Guid messageId, T message, Type declaringMessageType)
         {
             _id = messageId;
             _message = message;
@@ -35,12 +35,12 @@ namespace MassTransit.Context
             DeclaringMessageType = declaringMessageType;
         }
 
-        public SendContext(T message)
+        public OldSendContext(T message)
             : this(NewId.NextGuid(), message, typeof(T))
         {
         }
 
-        protected SendContext(T message, ISendContext context)
+        protected OldSendContext(T message, ISendContext context)
             : this(context.Id, message, context.DeclaringMessageType)
         {
             SetMessageId(_id.ToString());

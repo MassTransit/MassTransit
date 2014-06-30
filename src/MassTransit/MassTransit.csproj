@@ -383,7 +383,7 @@
     <Compile Include="Context\PublishContext.cs" />
     <Compile Include="Context\MoveMessageSendContext.cs" />
     <Compile Include="Context\Received.cs" />
-    <Compile Include="Context\SendContext.cs" />
+    <Compile Include="Context\OldSendContext.cs" />
     <Compile Include="Context\ContextStorage.cs" />
     <Compile Include="Context\Sent.cs" />
     <Compile Include="Context\ServiceBusReceiveContext.cs" />

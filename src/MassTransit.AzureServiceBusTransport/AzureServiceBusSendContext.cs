@@ -12,17 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
-    using System.Threading;
-    using System.Threading.Tasks;
-    using MassTransit.Pipeline;
-    using Transports;
-
-
-    public class AzureServiceBusReceiveTransport :
-        IReceiveTransport
+    public interface AzureServiceBusSendContext<out T> :
+        SendContext<T>
+        where T : class
     {
-        public async Task Start(IPipe<ReceiveContext> pipe, CancellationToken cancellationToken)
-        {
-        }
     }
 }

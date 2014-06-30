@@ -95,7 +95,7 @@ namespace MassTransit.Tests.Serialization
 
 			using (var output = new MemoryStream())
 			{
-				var sendContext = new SendContext<PingMessage>(message);
+				var sendContext = new OldSendContext<PingMessage>(message);
 				setHeaderAction(sendContext);
 
 				serializer.Serialize(output, sendContext);
