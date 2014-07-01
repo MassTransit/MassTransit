@@ -9,6 +9,6 @@
 		<id>LAPPS.MassTransit</id>
 		<version>1.0.0</version>
 		<authors>LAPPS Team</authors>
-		<description>LAPPS Hub Service</description>
+		<description>LAPPS MassTransit Assemblies</description>
 	</metadata>
 </package>
