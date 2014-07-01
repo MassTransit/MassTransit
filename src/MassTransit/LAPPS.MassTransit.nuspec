@@ -6,9 +6,20 @@
 
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
-		<id>LAPPS.MassTransit</id>
-		<version>1.0.0</version>
-		<authors>LAPPS Team</authors>
-		<description>LAPPS MassTransit Assemblies</description>
+		<id>LAPPS-MassTransit</id>
+		<version>2.9.5</version>
+		<authors>Chris Patterson, Dru Sellers, Travis Smith</authors>
+		<owners>Chris Patterson, Dru Sellers, Travis Smith</owners>
+		<licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+		<projectUrl>http://masstransit-project.com</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>MassTransit is a distributed application framework for .NET, including support for MSMQ and RabbitMQ.</description>
+		<releaseNotes />
+		<copyright />
+		<language>en-US</language>
+		<dependencies>
+			<dependency id="Magnum" version="2.1.2" />
+			<dependency id="Newtonsoft.Json" version="5.0.8" />
+		</dependencies>
 	</metadata>
 </package>
