@@ -12,13 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.SubscriptionConnectors
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq.Expressions;
-	using Configuration;
-	using Magnum.Extensions;
-	using Magnum.Reflection;
-	using Magnum.StateMachine;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq.Expressions;
+    using Configuration;
+    using Magnum.Extensions;
+    using Magnum.Reflection;
+    using Magnum.StateMachine;
 
 	public interface SagaEventConnectorFactory
 	{
@@ -63,7 +63,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 					new object[] {_sagaRepository, _dataEvent, _states, _policyFactory, _removeExpression});
 			}
 			else
-				throw new NotSupportedException("No method to connect to event was found for " + typeof (TMessage).FullName);
+				throw new NotSupportedException("No method to connect to event was found for " + typeof(TMessage).FullName + ", probably initial event does not implement CorrelatedBy<Guid> interface");
 		}
 	}
 }
