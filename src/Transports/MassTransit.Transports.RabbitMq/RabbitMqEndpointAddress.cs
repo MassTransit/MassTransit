@@ -121,7 +121,7 @@ namespace MassTransit.Transports.RabbitMq
             get { return _autoDelete; }
         }
 
-        public IDictionary<string,object> QueueArguments()
+        public IDictionary<string, object> QueueArguments()
         {
             var ht = new Dictionary<string, object>();
 
@@ -144,6 +144,18 @@ namespace MassTransit.Transports.RabbitMq
                     uri.AbsolutePath.Remove(uri.AbsolutePath.Length - _name.Length) + name);
                 //builder.Query = uri.Query;
 
+                if (!originalUri.UserInfo.IsEmpty())
+                {
+                    if (originalUri.UserInfo.Contains(":"))
+                    {
+                        string[] parts = originalUri.UserInfo.Split(':');
+                        builder.UserName = parts[0];
+                        builder.Password = parts[1];
+                    }
+                    else
+                        builder.UserName = originalUri.UserInfo;
+                }
+
                 return new RabbitMqEndpointAddress(builder.Uri, _connectionFactory, name);
             }
 
@@ -165,6 +177,19 @@ namespace MassTransit.Transports.RabbitMq
             var uriPath = new Uri(uri.GetLeftPart(UriPartial.Path));
             var builder = new UriBuilder(uriPath.Scheme, uriPath.Host, uriPath.Port, uriPath.PathAndQuery);
             builder.Query = string.IsNullOrEmpty(uri.Query) ? "" : uri.Query.Substring(1);
+
+            if (!uri.UserInfo.IsEmpty())
+            {
+                if (uri.UserInfo.Contains(":"))
+                {
+                    string[] parts = uri.UserInfo.Split(':');
+                    builder.UserName = parts[0];
+                    builder.Password = parts[1];
+                }
+                else
+                    builder.UserName = uri.UserInfo;
+            }
+
             return builder;
         }
 
@@ -198,11 +223,11 @@ namespace MassTransit.Transports.RabbitMq
                 throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme ?? "(null)");
 
             var connectionFactory = new ConnectionFactory
-                {
-                    HostName = address.Host,
-                    UserName = "",
-                    Password = "",
-                };
+            {
+                HostName = address.Host,
+                UserName = "",
+                Password = "",
+            };
 
             if (address.IsDefaultPort)
                 connectionFactory.Port = 5672;
