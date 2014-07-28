@@ -62,6 +62,6 @@ This also sets the default serializer to JSON.
 You will need to configure RabbitMQ to support SSL also http://www.rabbitmq.com/ssl.html.
  
  
-.. [#pr] *Polymorphic Routing* is routing where ``bus.Subscribe<B>( ... )`` would receive both ``class A {}`` and ``class B : A {}`` message.
+.. [#pr] *Polymorphic Routing* is routing where ``bus.Subscribe<A>( ... )`` would receive both ``class A {}`` and ``class B : A {}`` message.
 
-.. [#ir] *Interface Routing* is routing where ``bus.Subscribe<C>( ... )``  would receive 
+.. [#ir] *Interface Routing* is routing where ``bus.Subscribe<IMessage>( ... )``  would receive both ``class A : IMessage {}`` and ``class B : IMessage {}``
