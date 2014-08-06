@@ -37,7 +37,7 @@ namespace MassTransit.AzureServiceBusTransport
         readonly Stopwatch _receiveTimer;
         ContentType _contentType;
         Encoding _encoding;
-        AzureServiceBusReceiveContextHeaders _headers;
+        ContextHeaders _headers;
 
         public AzureServiceBusReceiveContext(BrokeredMessage message, Uri inputAddress)
         {
@@ -202,9 +202,9 @@ namespace MassTransit.AzureServiceBusTransport
             get { return _contentType ?? (_contentType = GetContentType()); }
         }
 
-        public ContextHeaders ContextHeaders
+        public ContextHeaders TransportHeaders
         {
-            get { return _headers ?? (_headers = new AzureServiceBusReceiveContextHeaders(this)); }
+            get { return _headers ?? (_headers = new JsonContextHeaders(new AzureServiceBusContextHeaderProvider(this))); }
         }
 
         public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
@@ -218,7 +218,7 @@ namespace MassTransit.AzureServiceBusTransport
         ContentType GetContentType()
         {
             object contentTypeHeader;
-            if (ContextHeaders.TryGetHeader("Content-Type", out contentTypeHeader))
+            if (TransportHeaders.TryGetHeader("Content-Type", out contentTypeHeader))
             {
                 var contentType = contentTypeHeader as ContentType;
                 if (contentType != null)

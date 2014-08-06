@@ -34,7 +34,7 @@ namespace MassTransit
         /// <param name="transportSelector">The transport selector</param>
         /// <param name="configure">The configuration callback</param>
         /// <returns>An initialized and started service bus instance</returns>
-	    public static IServiceBus New<T>(Func<ITransportSelector, T> transportSelector,
+	    public static IBus New<T>(Func<ITransportSelector, T> transportSelector,
 	        Action<T> configure)
             where T : ITransportConfigurator
         {

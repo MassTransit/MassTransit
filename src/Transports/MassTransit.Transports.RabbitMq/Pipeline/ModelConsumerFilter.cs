@@ -50,7 +50,7 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
 
         public bool Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this, (x, _) => _pipe.Inspect(x));
+            return inspector.Inspect(this, x => _pipe.Inspect(x));
         }
     }
 }

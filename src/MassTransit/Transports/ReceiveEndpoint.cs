@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
@@ -29,16 +28,10 @@ namespace MassTransit.Transports
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly IReceiveTransport _receiveTransport;
 
-        public ReceiveEndpoint(IReceiveTransport receiveTransport, IMessageDeserializer deserializer, IPipe<ConsumeContext> inboundPipe,
-            Action<IPipeConfigurator<ReceiveContext>> configure)
+        public ReceiveEndpoint(IReceiveTransport receiveTransport, IPipe<ReceiveContext> receivePipe)
         {
             _receiveTransport = receiveTransport;
-            _receivePipe = Pipe.New<ReceiveContext>(x =>
-            {
-                configure(x);
-
-                x.Filter(new DeserializeFilter(deserializer, inboundPipe));
-            });
+            _receivePipe = receivePipe;
         }
 
         public Task Start(CancellationToken cancellationToken)

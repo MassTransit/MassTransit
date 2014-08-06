@@ -114,6 +114,17 @@ namespace MassTransit.Policies
         /// <summary>
         /// Create an interval retry policy with the specified number of retries at a fixed interval
         /// </summary>
+        /// <param name="retryCount">The number of retry attempts</param>
+        /// <param name="interval">The interval between each retry attempt</param>
+        /// <returns></returns>
+        public static IRetryPolicy Interval(int retryCount, int interval)
+        {
+            return new IntervalRetryPolicy(All(), Enumerable.Repeat(interval, retryCount).ToArray());
+        }
+
+        /// <summary>
+        /// Create an interval retry policy with the specified number of retries at a fixed interval
+        /// </summary>
         /// <param name="filter"></param>
         /// <param name="retryCount">The number of retry attempts</param>
         /// <param name="interval">The interval between each retry attempt</param>

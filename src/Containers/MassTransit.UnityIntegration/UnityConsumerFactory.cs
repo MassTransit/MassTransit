@@ -10,8 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.UnityIntegration
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Practices.Unity;
     using Pipeline;
@@ -30,7 +31,7 @@ namespace MassTransit
         }
 
         public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
+            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
             where TMessage : class
         {
             using (IUnityContainer childContainer = _container.CreateChildContainer())
@@ -42,7 +43,7 @@ namespace MassTransit
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await next.Send(context.PushConsumer(consumer));
+                await next.Send(context.PushLeft(consumer));
             }
         }
     }

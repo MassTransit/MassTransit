@@ -12,10 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    public delegate bool PipeInspectorCallback<out T>(IPipeInspector inspector, IPipe<T> filter)
-        where T : class, PipeContext;
+    public delegate bool PipeInspectorCallback(IPipeInspector inspector);
 
 
-    public delegate bool FilterInspectorCallback<T>(IPipeInspector inspector, IFilter<T> filter)
-        where T : class, PipeContext;
+    public delegate bool FilterInspectorCallback(IPipeInspector inspector);
 }

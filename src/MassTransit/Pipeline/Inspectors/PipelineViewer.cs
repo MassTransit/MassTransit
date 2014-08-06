@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Inspectors
     using System;
     using System.Text;
     using Distributor.Pipeline;
+    using Filters;
     using Magnum.Extensions;
     using Saga;
     using Saga.Pipeline;

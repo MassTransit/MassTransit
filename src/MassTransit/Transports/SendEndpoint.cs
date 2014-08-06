@@ -20,7 +20,7 @@ namespace MassTransit.Transports
 
 
     public class SendEndpoint :
-        ISendToEndpoint
+        ISendEndpoint
     {
         readonly Uri _destinationAddress;
         readonly ISendMessageSerializer _serializer;
@@ -33,7 +33,6 @@ namespace MassTransit.Transports
             _destinationAddress = destinationAddress;
         }
 
-
         public Task Send<T>(T message)
             where T : class
         {
@@ -45,7 +44,7 @@ namespace MassTransit.Transports
             return _transport.Send(message, settingsPipe);
         }
 
-        public Task Send<T>(T message, ISendPipe pipe) 
+        public Task Send<T>(T message, IPipe<SendContext<T>> pipe)
             where T : class
         {
             if (message == null)
@@ -65,7 +64,7 @@ namespace MassTransit.Transports
 
             Type messageType = message.GetType();
 
-            return EndpointSendConverterCache.Instance[messageType].Send(this, message);
+            return SendToEndpointConverterCache.Instance[messageType].Send(this, message);
         }
 
         public Task Send(object message, Type messageType)
@@ -75,7 +74,7 @@ namespace MassTransit.Transports
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            return EndpointSendConverterCache.Instance[messageType].Send(this, message);
+            return SendToEndpointConverterCache.Instance[messageType].Send(this, message);
         }
 
         public Task Send<T>(object values)
@@ -89,7 +88,7 @@ namespace MassTransit.Transports
             return Send(message);
         }
 
-        public Task Send<T>(T message, ISendPipe<T> pipe)
+        public Task Send<T>(T message, IPipe<SendContext> pipe)
             where T : class
         {
             if (message == null)
@@ -102,7 +101,7 @@ namespace MassTransit.Transports
             return _transport.Send(message, settingsPipe);
         }
 
-        public Task Send(object message, ISendPipe pipe)
+        public Task Send(object message, IPipe<SendContext> pipe)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -111,10 +110,10 @@ namespace MassTransit.Transports
 
             Type messageType = message.GetType();
 
-            return EndpointSendConverterCache.Instance[messageType].Send(this, message, pipe);
+            return SendToEndpointConverterCache.Instance[messageType].Send(this, message, pipe);
         }
 
-        public Task Send(object message, Type messageType, ISendPipe pipe)
+        public Task Send(object message, Type messageType, IPipe<SendContext> pipe)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -123,10 +122,10 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException("pipe");
 
-            return EndpointSendConverterCache.Instance[messageType].Send(this, message, pipe);
+            return SendToEndpointConverterCache.Instance[messageType].Send(this, message, pipe);
         }
 
-        public Task Send<T>(object values, ISendPipe<T> pipe)
+        public Task Send<T>(object values, IPipe<SendContext<T>> pipe)
             where T : class
         {
             if (values == null)
@@ -137,7 +136,7 @@ namespace MassTransit.Transports
             return Send(message, pipe);
         }
 
-        public Task Send<T>(object values, ISendPipe pipe) 
+        public Task Send<T>(object values, IPipe<SendContext> pipe)
             where T : class
         {
             if (values == null)
@@ -152,31 +151,31 @@ namespace MassTransit.Transports
 
 
         class EndpointSettingsPipe<T> :
-            ISendPipe<T>
+            IPipe<SendContext<T>>
             where T : class
         {
             readonly SendEndpoint _endpoint;
-            readonly ISendPipe<T> _pipe;
-            readonly ISendPipe _sendPipe;
+            readonly IPipe<SendContext<T>> _pipe;
+            readonly IPipe<SendContext> _sendPipe;
 
             public EndpointSettingsPipe(SendEndpoint endpoint)
             {
                 _endpoint = endpoint;
             }
 
-            public EndpointSettingsPipe(SendEndpoint endpoint, ISendPipe<T> pipe)
+            public EndpointSettingsPipe(SendEndpoint endpoint, IPipe<SendContext<T>> pipe)
             {
                 _endpoint = endpoint;
                 _pipe = pipe;
             }
 
-            public EndpointSettingsPipe(SendEndpoint endpoint, ISendPipe pipe)
+            public EndpointSettingsPipe(SendEndpoint endpoint, IPipe<SendContext> pipe)
             {
                 _endpoint = endpoint;
                 _sendPipe = pipe;
             }
 
-            public async Task Send(MassTransit.SendContext<T> context)
+            public async Task Send(SendContext<T> context)
             {
                 context.Serializer = _endpoint._serializer;
                 context.DestinationAddress = _endpoint._destinationAddress;

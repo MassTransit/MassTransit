@@ -17,7 +17,6 @@ namespace MassTransit.SubscriptionConfigurators
     using EndpointConfigurators;
     using PipeConfigurators;
     using Pipeline;
-    using SubscriptionBuilders;
 
 
     public class HandlerConfigurator<TMessage> :
@@ -44,15 +43,13 @@ namespace MassTransit.SubscriptionConfigurators
             yield break;
         }
 
-        public void Configure(ReceiveEndpointBuilder builder)
+        public void Configure(IReceiveEndpointBuilder builder)
         {
             _pipeConfigurator.AddPipeBuilderConfigurator(_handlerConfigurator);
 
             IPipe<ConsumeContext<TMessage>> pipe = _pipeConfigurator.Build();
 
-            var handlerBuilder = new HandlerReceiverBuilder<TMessage>(pipe);
-
-            builder.AddReceiver(handlerBuilder);
+            builder.Connect(pipe);
         }
     }
 }

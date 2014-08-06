@@ -10,38 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
 namespace MassTransit.AzureServiceBusTransport
 {
-    using System;
-    using System.Threading;
     using Microsoft.ServiceBus.Messaging;
 
-
-    public interface MessagingFactoryContext :
-        PipeContext
-    {
-        CancellationToken CancellationToken { get; }
-
-        /// <summary>
-        /// The messaging factory initialized for the service bus
-        /// </summary>
-        MessagingFactory Factory { get; }
-
-        /// <summary>
-        /// Return the address for the specified queue
-        /// </summary>
-        /// <param name="queueName">The queue name</param>
-        /// <returns>The address of the queue</returns>
-        Uri GetQueueAddress(string queueName);
-
-    }
 
     public interface MessageReceiverContext :
         PipeContext
     {
         MessageReceiver MessageReceiver { get; }
-        MessagingFactoryContext ConnectionContext { get; }
-        CancellationToken CancellationToken { get; }
+
+        ConnectionContext ConnectionContext { get; }
     }
 }

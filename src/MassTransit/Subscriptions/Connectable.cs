@@ -15,41 +15,58 @@ namespace MassTransit.Subscriptions
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Pipeline;
 
 
-    public abstract class Connectable<T>
+    /// <summary>
+    /// Maintains a collection of connections of the generic type
+    /// </summary>
+    /// <typeparam name="T">The connectable type</typeparam>
+    public class Connectable<T>
     {
         readonly ConcurrentDictionary<long, T> _connections;
         long _nextId;
 
-        protected Connectable()
+        public Connectable()
         {
             _connections = new ConcurrentDictionary<long, T>();
         }
 
+        /// <summary>
+        /// The number of connections
+        /// </summary>
         public int Count
         {
             get { return _connections.Count; }
         }
 
-        public ConnectHandle Connect(T interceptor)
+        /// <summary>
+        /// Connect a connectable type
+        /// </summary>
+        /// <param name="connection">The connection to add</param>
+        /// <returns>The connection handle</returns>
+        public ConnectHandle Connect(T connection)
         {
-            if (interceptor == null)
-                throw new ArgumentNullException("interceptor");
+            if (connection == null)
+                throw new ArgumentNullException("connection");
 
             long id = Interlocked.Increment(ref _nextId);
 
-            bool added = _connections.TryAdd(id, interceptor);
+            bool added = _connections.TryAdd(id, connection);
             if (!added)
                 throw new InvalidOperationException("The connection could not be added");
 
             return new Handle(id, Disconnect);
         }
 
-        protected async Task ForEach(Func<T, Task> callback)
+        /// <summary>
+        /// Enumerate the connections invoking the callback for each connection
+        /// </summary>
+        /// <param name="callback">The callback</param>
+        /// <returns>An awaitable Task for the operation</returns>
+        public async Task ForEach(Func<T, Task> callback)
         {
             if (callback == null)
                 throw new ArgumentNullException("callback");
@@ -73,6 +90,11 @@ namespace MassTransit.Subscriptions
 
             if (exceptions.Count > 0)
                 throw new AggregateException(exceptions);
+        }
+
+        public bool All(Func<T, bool> callback)
+        {
+            return _connections.Values.All(callback);
         }
 
         void Disconnect(long id)

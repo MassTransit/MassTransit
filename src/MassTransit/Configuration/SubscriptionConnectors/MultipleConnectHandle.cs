@@ -14,10 +14,9 @@ namespace MassTransit.SubscriptionConnectors
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Pipeline;
 
 
-    class MultipleConnectHandle :
+    public class MultipleConnectHandle :
         ConnectHandle
     {
         readonly ConnectHandle[] _handles;

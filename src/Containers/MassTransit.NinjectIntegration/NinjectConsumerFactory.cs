@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.NinjectIntegration
 {
+    using System;
     using System.Threading.Tasks;
     using Ninject;
     using Ninject.Activation.Blocks;
@@ -31,7 +32,7 @@ namespace MassTransit.NinjectIntegration
         }
 
         public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
+            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
             where TMessage : class
         {
             using (IActivationBlock block = _kernel.BeginBlock())
@@ -43,7 +44,7 @@ namespace MassTransit.NinjectIntegration
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await next.Send(context.PushConsumer(consumer));
+                await next.Send(context.PushLeft(consumer));
             }
         }
     }

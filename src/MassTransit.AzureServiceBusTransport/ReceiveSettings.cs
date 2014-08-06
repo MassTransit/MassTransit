@@ -14,6 +14,8 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using Microsoft.ServiceBus.Messaging;
+
 
     public interface ReceiveSettings
     {
@@ -27,7 +29,10 @@ namespace MassTransit.AzureServiceBusTransport
         /// </summary>
         int MaxConcurrentCalls { get; }
 
-        string QueueName { get; }
+        QueueDescription QueueDescription { get; }
+
         TimeSpan AutoRenewTimeout { get; }
+
+        bool PurgeOnStartup { get; }
     }
 }

@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    using System;
     using System.Threading.Tasks;
-    using Sinks;
+    using Filters;
+    using PipeConfigurators;
 
 
     public class InboundPipe :
@@ -23,10 +25,20 @@ namespace MassTransit.Pipeline
         readonly IPipe<ConsumeContext> _pipe;
 
         public InboundPipe()
+            : this(new PipeConfigurator<ConsumeContext>())
         {
+        }
+
+        public InboundPipe(PipeConfigurator<ConsumeContext> configurator)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException("configurator");
+
             _filter = new MessageTypeConsumeFilter();
 
-            _pipe = Pipe.New<ConsumeContext>(x => x.Filter(_filter));
+            configurator.Filter(_filter);
+
+            _pipe = configurator.Build();
         }
 
         Task IPipe<ConsumeContext>.Send(ConsumeContext context)

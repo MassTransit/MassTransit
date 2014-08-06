@@ -41,9 +41,7 @@ namespace MassTransit.Serialization
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);
                 }
 
-                ConsumeContext consumeContext = new JsonConsumeContext(_deserializer, receiveContext, envelope);
-
-                return consumeContext;
+                return new JsonConsumeContext(_deserializer, receiveContext, envelope);
             }
             catch (JsonSerializationException ex)
             {

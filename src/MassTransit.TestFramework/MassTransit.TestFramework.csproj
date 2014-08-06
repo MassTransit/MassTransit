@@ -86,6 +86,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="AsyncTestFixture.cs" />
     <Compile Include="ATestException.cs" />
     <Compile Include="ExtensionMethodsForSubscriptions.cs" />
     <Compile Include="ExtensionsForTestingEndpoints.cs" />

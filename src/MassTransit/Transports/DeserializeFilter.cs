@@ -41,7 +41,7 @@ namespace MassTransit.Transports
 
         public bool Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this, (x, _) => _output.Inspect(x));
+            return inspector.Inspect(this, x => _output.Inspect(x));
         }
     }
 }

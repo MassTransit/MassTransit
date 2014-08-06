@@ -18,6 +18,14 @@ namespace MassTransit
     using Transports;
 
 
+    public interface SendContext<out T> :
+        SendContext
+        where T : class
+    {
+        T Message { get; }
+    }
+
+
     /// <summary>
     /// Unlike the old world, the send context is returned from the endpoint and used to configure the message sending.
     /// That way the message is captured by the endpoint and then any configuration is done at the higher level.
@@ -34,6 +42,8 @@ namespace MassTransit
         Guid? MessageId { get; set; }
         Guid? CorrelationId { get; set; }
 
+        SendContextHeaders ContextHeaders { get; }
+
         TimeSpan? TimeToLive { get; set; }
 
         ContentType ContentType { get; set; }
@@ -42,7 +52,6 @@ namespace MassTransit
         /// True if the message should be persisted to disk to survive a broker restart
         /// </summary>
         bool Durable { get; set; }
-
 
         /// <summary>
         /// The serializer to use when serializing the message to the transport
@@ -57,33 +66,5 @@ namespace MassTransit
             where T : class;
 
         Task<SendContext> Send(object message, Type messageType);
-    }
-
-    public interface PublishConvention
-    {
-        IEndpoint GetDestinationEndpoint<T>(T message);
-        IEndpoint GetDestinationEndpoint(object message, Type messageType);
-    }
-
-
-    public interface PublishContext<out T> :
-        PipeContext
-        where T : class
-    {
-        /// <summary>
-        /// True if the message must be delivered to a subscriber
-        /// </summary>
-        bool Mandatory { get; set; }
-
-        T Message { get; }
-
-    }
-
-
-    public interface SendContext<out T> :
-        SendContext
-        where T : class
-    {
-        T Message { get; }
     }
 }

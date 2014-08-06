@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-    using System.Threading;
     using RabbitMQ.Client;
 
 
@@ -28,10 +27,5 @@ namespace MassTransit.Transports.RabbitMq
         /// The connection context on which the model was created
         /// </summary>
         ConnectionContext ConnectionContext { get; }
-
-        /// <summary>
-        /// Set when the initial model request is cancelled
-        /// </summary>
-        CancellationToken CancellationToken { get; }
     }
 }

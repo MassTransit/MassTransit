@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System.IO;
+    using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
@@ -35,8 +36,7 @@ namespace MassTransit.AzureServiceBusTransport
             _sender = sender;
         }
 
-        public async Task Send<T>(T message, IPipe<SendContext<T>> pipe)
-            where T : class
+        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             var context = new AzureServiceBusSendContextImpl<T>(message);
 

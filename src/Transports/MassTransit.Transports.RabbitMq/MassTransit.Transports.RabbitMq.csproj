@@ -83,10 +83,11 @@
     <Compile Include="Configuration\ModelConsumerPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurator.cs" />
+    <Compile Include="Contexts\RabbitMqSendContextHeaders.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
+    <Compile Include="Contexts\RabbitMqContextHeaderProvider.cs" />
     <Compile Include="Contexts\RabbitMqModelContext.cs" />
     <Compile Include="Contexts\RabbitMqReceiveContext.cs" />
-    <Compile Include="Contexts\RabbitMqReceiveContextHeaders.cs" />
     <Compile Include="Contexts\RabbitMqSendContextImpl.cs" />
     <Compile Include="EndpointAddressBuilder.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
@@ -96,10 +97,11 @@
     <Compile Include="Pipeline\ExchangeSettings.cs" />
     <Compile Include="Pipeline\IRabbitMqConnector.cs" />
     <Compile Include="Pipeline\ModelConsumerFilter.cs" />
+    <Compile Include="Pipeline\PrepareSendExchangeFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />
     <Compile Include="Pipeline\RabbitMqConsumerMetrics.cs" />
     <Compile Include="Pipeline\ReceiveModelFilter.cs" />
-    <Compile Include="Pipeline\ReceiveSettingsModelFilter.cs" />
+    <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
     <Compile Include="Pipeline\SubscriptionModelFilter.cs" />
     <Compile Include="Pipeline\SubscriptionSettings.cs" />
     <Compile Include="PublishSettings.cs" />
@@ -146,6 +148,7 @@
     <Compile Include="RabbitMqConsumer.cs" />
     <Compile Include="RabbitMqEndpointAddress.cs" />
     <Compile Include="RabbitMqConfigurationExtensions.cs" />
+    <Compile Include="RabbitMqEndpointCache.cs" />
     <Compile Include="RabbitMqEndpointExtensions.cs" />
     <Compile Include="RabbitMqExtensions.cs" />
     <Compile Include="RabbitMqHeaders.cs" />
@@ -163,6 +166,7 @@
     <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
     <Compile Include="Configuration\RabbitMqServiceBusExtensions.cs" />
+    <Compile Include="SendSettings.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
     <Compile Include="Testing\RabbitMqBusScenarioBuilder.cs" />
   </ItemGroup>

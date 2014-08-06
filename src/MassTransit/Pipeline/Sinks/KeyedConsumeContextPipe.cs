@@ -16,10 +16,11 @@ namespace MassTransit.Pipeline.Sinks
     using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading.Tasks;
+    using Filters;
 
 
     public class KeyedConsumeFilter<T, TKey> :
-        IConsumeFilter<T>,
+        IFilter<ConsumeContext<T>>,
         IConnectPipeById<ConsumeContext<T>, TKey>
         where T : class, PipeContext
     {
@@ -55,7 +56,7 @@ namespace MassTransit.Pipeline.Sinks
 
         public bool Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this, (x, _) => _pipes.Values.Cast<IConsumeFilter<T>>().All(pipe => pipe.Inspect(x)));
+            return inspector.Inspect(this, x => _pipes.Values.Cast<IFilter<ConsumeContext<T>>>().All(pipe => pipe.Inspect(x)));
         }
 
         void RemovePipe(TKey key, ConnectHandle connectHandle)

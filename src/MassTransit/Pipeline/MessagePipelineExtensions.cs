@@ -18,9 +18,9 @@ namespace MassTransit.Pipeline
 	using Context;
 	using MassTransit.Configuration;
 	using Sinks;
-	using SubscriptionConnectors;
 
-	/// <summary>
+
+    /// <summary>
 	/// Extensions for the message pipeline.
 	/// </summary>
 	public static class MessagePipelineExtensions
@@ -163,20 +163,7 @@ namespace MassTransit.Pipeline
 //				});
 		}
 
-		public static UnsubscribeAction ConnectHandler<TMessage>(this IInboundMessagePipeline pipeline,
-		                                                         Action<TMessage> handler,
-		                                                         Predicate<TMessage> condition)
-			where TMessage : class
-		{
-			return pipeline.Configure(x =>
-				{
-					var connector = new HandlerSubscriptionConnector<TMessage>();
-
-					return connector.Connect(x, HandlerSelector.ForSelectiveHandler(condition, handler));
-				});
-		}
-
-		/// <summary>
+	    /// <summary>
 		/// Connects an endpoint to the outbound pipeline by message type.
 		/// </summary>
 		/// <typeparam name="TMessage">The type of the message to route</typeparam>

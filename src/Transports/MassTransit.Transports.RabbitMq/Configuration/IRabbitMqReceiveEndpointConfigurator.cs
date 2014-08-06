@@ -13,8 +13,12 @@
 namespace MassTransit.Transports.RabbitMq.Configuration
 {
     using EndpointConfigurators;
+    using RabbitMQ.Client;
 
 
+    /// <summary>
+    /// Configure a receiving RabbitMQ endpoint
+    /// </summary>
     public interface IRabbitMqReceiveEndpointConfigurator :
         IReceiveEndpointConfigurator
     {
@@ -42,6 +46,12 @@ namespace MassTransit.Transports.RabbitMq.Configuration
         /// </summary>
         /// <param name="limit">The limit</param>
         void PrefetchCount(ushort limit);
+
+        /// <summary>
+        /// Specify the exchange type for the endpoint
+        /// </summary>
+        /// <param name="exchangeType"></param>
+        void ExchangeType(ExchangeType exchangeType);
 
         /// <summary>
         /// Purge the messages from an existing queue on startup (note that upon reconnection to the server

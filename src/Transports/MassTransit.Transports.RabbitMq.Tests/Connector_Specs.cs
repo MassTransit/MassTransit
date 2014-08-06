@@ -19,6 +19,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         using Policies;
         using RabbitMQ.Client;
         using RabbitMQ.Client.Exceptions;
+        using TestFramework;
 
 
         [TestFixture]
@@ -59,8 +60,10 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                 IRabbitMqConnector connector = new RabbitMqConnector(connectionFactory, Retry.Intervals(100, 100));
 
-                var ex =
-                    Assert.Throws<RabbitMqConnectionException>(async () => { await connector.Connect(testPipe, TestCancellationToken); });
+                var ex = Assert.Throws<RabbitMqConnectionException>(async () =>
+                {
+                    await connector.Connect(testPipe, TestCancellationToken);
+                });
 
                 Assert.IsInstanceOf<BrokerUnreachableException>(ex.InnerException);
             }
@@ -77,8 +80,10 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                 IRabbitMqConnector connector = new RabbitMqConnector(connectionFactory, Retry.None);
 
-                var ex =
-                    Assert.Throws<RabbitMqConnectionException>(async () => { await connector.Connect(testPipe, TestCancellationToken); });
+                var ex = Assert.Throws<RabbitMqConnectionException>(async () =>
+                {
+                    await connector.Connect(testPipe, TestCancellationToken);
+                });
 
                 Assert.IsInstanceOf<BrokerUnreachableException>(ex.InnerException);
             }

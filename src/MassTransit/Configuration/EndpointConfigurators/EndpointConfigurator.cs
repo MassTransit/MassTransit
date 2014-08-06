@@ -15,35 +15,14 @@ namespace MassTransit.EndpointConfigurators
     using System;
     using System.Transactions;
     using Builders;
-    using Configurators;
     using Serialization;
-    using SubscriptionBuilders;
     using SubscriptionConfigurators;
     using Transports;
-
-
-    public interface ReceiveEndpointBuilder
-    {
-        void AddReceiver(ReceiverBuilder receiverBuilder);
-    }
-
-    public interface IReceiveEndpointBuilderConfigurator :
-        Configurator
-    {
-        void Configure(ReceiveEndpointBuilder builder);
-
-    }
 
 
     public interface IEndpointConfigurator
     {
         
-    }
-
-    public interface IReceiveEndpointConfigurator :
-        IEndpointConfigurator
-    {
-        void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator);
     }
 
 

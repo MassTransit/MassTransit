@@ -36,8 +36,6 @@ namespace MassTransit.TestFramework
 
 		public Future(AsyncCallback callback, object state)
 		{
-			Guard.AgainstNull(callback, "callback");
-
 			_callback = callback;
 			_state = state;
 

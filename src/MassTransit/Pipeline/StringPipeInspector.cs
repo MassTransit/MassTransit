@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline
 {
     using System.Text;
+    using Filters;
     using Sinks;
     using Util;
 
@@ -27,16 +28,14 @@ namespace MassTransit.Pipeline
             return _builder.ToString();
         }
 
-        protected override bool Inspect<T>(TeeConsumeFilter<T> filter,
-            FilterInspectorCallback<ConsumeContext<T>> callback)
+        protected override bool Inspect<T>(TeeConsumeFilter<T> filter, FilterInspectorCallback callback)
         {
             _builder.AppendFormat("{0}", TypeMetadataCache<TeeConsumeFilter<T>>.ShortName);
 
             return base.Inspect(filter, callback);
         }
 
-        protected override bool Inspect<T>(HandlerMessageFilter<T> filter,
-            FilterInspectorCallback<ConsumeContext<T>> callback)
+        protected override bool Inspect<T>(HandlerMessageFilter<T> filter, FilterInspectorCallback callback)
         {
             _builder.AppendFormat("{0}", TypeMetadataCache<HandlerMessageFilter<T>>.ShortName);
 

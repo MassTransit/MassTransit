@@ -17,8 +17,7 @@ namespace MassTransit.SubscriptionConnectors
     using Pipeline.Configuration;
     using Pipeline.Sinks;
 
-    public class RequestHandlerSubscriptionConnector<TMessage> :
-        HandlerSubscriptionConnector<TMessage>
+    public class RequestHandlerSubscriptionConnector<TMessage>
         where TMessage : class
     {
         public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, string requestId,

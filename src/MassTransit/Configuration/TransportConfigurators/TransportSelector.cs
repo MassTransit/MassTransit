@@ -35,7 +35,7 @@ namespace MassTransit.TransportConfigurators
             _builder = builder;
         }
 
-        public IServiceBus Build()
+        public IBus Build()
         {
             ConfigurationResult result = ConfigurationResultImpl.CompileResults(_builder.Validate());
 

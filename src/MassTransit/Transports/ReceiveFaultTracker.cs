@@ -33,7 +33,7 @@ namespace MassTransit.Transports
 
         public async Task Send(ReceiveContext context, IPipe<ReceiveContext> next)
         {
-            var messageId = context.ContextHeaders.Get<string>("MessageId");
+            var messageId = context.TransportHeaders.Get<string>("MessageId");
 
             Exception exception;
             IEnumerable<Action> faultActions;

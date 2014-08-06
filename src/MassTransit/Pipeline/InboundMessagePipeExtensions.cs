@@ -48,7 +48,7 @@ namespace MassTransit.Pipeline
             IRetryPolicy retryPolicy = null)
             where T : class, new()
         {
-            var consumerFactory = new DefaultConstructorAsyncConsumerFactory<T>();
+            var consumerFactory = new DefaultConstructorConsumerFactory<T>();
 
             ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 

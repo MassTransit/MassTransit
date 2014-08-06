@@ -12,17 +12,66 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Logging;
     using MassTransit.Pipeline;
+    using Pipeline;
+    using Policies;
     using Transports;
 
 
     public class AzureServiceBusReceiveTransport :
         IReceiveTransport
     {
-        public async Task Start(IPipe<ReceiveContext> pipe, CancellationToken cancellationToken)
+        readonly ServiceBusHostSettings _hostSettings;
+        readonly ILog _log = Logger.Get<AzureServiceBusReceiveTransport>();
+        readonly IRetryPolicy _retryPolicy;
+        readonly ReceiveSettings _settings;
+
+        public AzureServiceBusReceiveTransport(ServiceBusHostSettings hostSettings, ReceiveSettings settings, IRetryPolicy retryPolicy)
         {
+            _hostSettings = hostSettings;
+            _settings = settings;
+            _retryPolicy = retryPolicy;
+        }
+
+        public Task Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Starting receive transport: {0}", new Uri(_hostSettings.ServiceUri, _settings.QueueDescription.Path));
+
+            IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
+            {
+                x.Repeat(cancellationToken);
+                x.Retry(_retryPolicy, cancellationToken);
+
+                x.Filter(new PrepareReceiveQueueFilter(_settings));
+                x.Filter(new MessageReceiverFilter(receivePipe));
+            });
+
+            return Repeat.UntilCancelled(cancellationToken, async () =>
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Connecting receive transport: {0}", new Uri(_hostSettings.ServiceUri, _settings.QueueDescription.Path));
+
+                try
+                {
+                    using (var context = new ServiceBusConnectionContext(_hostSettings, cancellationToken))
+                    {
+                        await connectionPipe.Send(context);
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                }
+                catch (Exception ex)
+                {
+                    if (_log.IsErrorEnabled)
+                        _log.ErrorFormat("Azure Service Bus connection failed: {0}", ex.Message);
+                }
+            });
         }
     }
 }

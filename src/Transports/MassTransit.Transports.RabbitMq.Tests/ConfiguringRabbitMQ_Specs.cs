@@ -17,6 +17,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using Magnum.Extensions;
     using NUnit.Framework;
     using Policies;
+    using TestFramework;
 
 
     [TestFixture]
@@ -29,9 +30,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
             var hostAddress = new Uri("rabbitmq://localhost/test");
             var completed = new TaskCompletionSource<A>();
 
-            using (IServiceBus bus = ServiceBusFactory.New(x => x.RabbitMQ(), x =>
+            using (IBus bus = ServiceBusFactory.New(x => x.RabbitMQ(), x =>
             {
-                x.Host(hostAddress, r =>
+                var host = x.Host(hostAddress, r =>
                 {
                     r.Username("guest");
                     r.Password("guest");
@@ -44,16 +45,14 @@ namespace MassTransit.Transports.RabbitMq.Tests
 //
 //                x.OnPublish(context => context.Mandatory = true);
 //
-//
-//                x.Endpoint("send_exchange", e =>
-//                {
-//                });
 
-                x.ReceiveEndpoint("input_queue", e =>
+                x.ReceiveEndpoint(host, "input_queue", e =>
                 {
                     e.PrefetchCount(16);
                     e.Durable(false);
                     e.Exclusive();
+
+                    e.Log(Console.Out, async c => string.Format("Logging: {0}", c.MessageId.Value));
 
                     e.Handler<A>(async context => completed.TrySetResult(context.Message));
 
@@ -67,7 +66,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             }))
             {
                 var queueAddress = new Uri(hostAddress, "input_queue");
-                ISendToEndpoint endpoint = bus.GetSendEndpoint(queueAddress);
+                ISendEndpoint endpoint = bus.GetSendEndpoint(queueAddress);
 
                 await endpoint.Send(new A());
             }

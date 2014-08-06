@@ -279,7 +279,7 @@ namespace MassTransit
             return _serviceContainer.TryGetService(type, out result);
         }
 
-        public ISendToEndpoint GetSendEndpoint(Uri address)
+        public ISendEndpoint GetSendEndpoint(Uri address)
         {
             throw new NotImplementedException();
         }

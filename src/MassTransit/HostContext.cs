@@ -21,6 +21,6 @@ namespace MassTransit
         string MassTransitVersion { get; }
         string FrameworkVersion { get; }
         string AssemblyVersion { get; }
-        string OSVersion { get; }
+        string OperatingSystemVersion { get; }
     }
 }
