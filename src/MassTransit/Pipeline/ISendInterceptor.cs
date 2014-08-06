@@ -17,19 +17,6 @@ namespace MassTransit.Pipeline
 
 
     /// <summary>
-    /// Allows a message to be intercepted during Publish
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IPublishInterceptor<in T>
-        where T : class, PipeContext
-    {
-        Task PreSend(PublishContext<T> context, ISendContext<T> sendContext);
-
-        Task PostSend(PublishContext<T> context, ISendContext<T> sendContext);
-    }
-
-
-    /// <summary>
     /// Allows a message to be intercepted during Send
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -62,7 +49,7 @@ namespace MassTransit.Pipeline
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        Task Acknowledged(ConsumeContext<T> context);
+        Task Acknowledged(SendContext<T> context);
 
         /// <summary>
         /// Called if the message has failed to send or was not (or negatively) acknowledged by the transport.
@@ -70,6 +57,6 @@ namespace MassTransit.Pipeline
         /// <param name="context"></param>
         /// <param name="ex"></param>
         /// <returns></returns>
-        Task SendFaulted(ConsumeContext<T> context, Exception ex);
+        Task SendFaulted(SendContext<T> context, Exception ex);
     }
 }

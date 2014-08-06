@@ -40,7 +40,7 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         readonly string _routingKey;
 
         ContentType _contentType;
-        RabbitMqReceiveContextHeaders _headers;
+        JsonContextHeaders _headers;
 
         public RabbitMqReceiveContext(string exchange, string routingKey, string consumerTag, Uri inputAddress,
             ulong deliveryTag,
@@ -137,9 +137,9 @@ namespace MassTransit.Transports.RabbitMq.Contexts
             get { return _redelivered; }
         }
 
-        public ContextHeaders ContextHeaders
+        public ContextHeaders TransportHeaders
         {
-            get { return _headers ?? (_headers = new RabbitMqReceiveContextHeaders(this)); }
+            get { return _headers ?? (_headers = new JsonContextHeaders(new RabbitMqContextHeaderProvider(this))); }
         }
 
         public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
@@ -153,7 +153,7 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         ContentType GetContentType()
         {
             object contentTypeHeader;
-            if (ContextHeaders.TryGetHeader("Content-Type", out contentTypeHeader))
+            if (TransportHeaders.TryGetHeader("Content-Type", out contentTypeHeader))
             {
                 var s = contentTypeHeader as string;
                 if (s != null)

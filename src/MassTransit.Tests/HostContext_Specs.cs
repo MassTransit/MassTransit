@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Diagnostics;
+    using Context;
     using NUnit.Framework;
 
 
@@ -38,6 +39,12 @@ namespace MassTransit.Tests
         public void Should_contain_the_machine_name()
         {
             Assert.AreEqual(Environment.MachineName, _hostContext.HostName);
+        }
+
+        [Test]
+        public void Should_contain_the_operating_system_version()
+        {
+            Assert.AreEqual(Environment.OSVersion.VersionString, _hostContext.OperatingSystemVersion);
         }
 
         [Test]

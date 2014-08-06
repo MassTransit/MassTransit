@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    using Filters;
     using Sinks;
 
 
@@ -21,68 +22,54 @@ namespace MassTransit.Pipeline
         public virtual bool Inspect<T>(IFilter<T> filter)
             where T : class, PipeContext
         {
-            return Inspect(filter, (_, __) => true);
+            return Inspect(filter, _ => true);
         }
 
-        public virtual bool Inspect<T>(IFilter<T> filter, FilterInspectorCallback<T> callback)
+        public virtual bool Inspect<T>(IFilter<T> filter, FilterInspectorCallback callback)
             where T : class, PipeContext
         {
-            return callback(this, filter);
+            return callback(this);
         }
 
-        public bool Inspect<T>(IConsumeFilter<T> filter)
+        public bool Inspect<T>(IFilter<ConsumeContext<T>> filter)
             where T : class
         {
-            return Inspect(filter, (_, __) => true);
+            return Inspect(filter, _ => true);
         }
 
-        public bool Inspect<T>(IConsumeFilter<T> filter, FilterInspectorCallback<ConsumeContext<T>> callback)
+        public bool Inspect<T>(IFilter<ConsumeContext<T>> filter, FilterInspectorCallback callback)
             where T : class
         {
             if (filter is TeeConsumeFilter<T>)
-                return Inspect((TeeConsumeFilter<T>)filter, (x, _) => callback(x, filter));
+                return Inspect((TeeConsumeFilter<T>)filter, x => callback(x));
             if (filter is HandlerMessageFilter<T>)
-                return Inspect((HandlerMessageFilter<T>)filter, (x, _) => callback(x, filter));
+                return Inspect((HandlerMessageFilter<T>)filter, x => callback(x));
 
-            return callback(this, filter);
+            return callback(this);
         }
 
         public virtual bool Inspect<T>(IPipe<T> pipe)
             where T : class, PipeContext
         {
-            return Inspect(pipe, (_, __) => true);
+            return Inspect(pipe, _ => true);
         }
 
-        public virtual bool Inspect<T>(IPipe<T> pipe, PipeInspectorCallback<T> callback)
+        public virtual bool Inspect<T>(IPipe<T> pipe, PipeInspectorCallback callback)
             where T : class, PipeContext
         {
-            return callback(this, pipe);
+            return callback(this);
         }
 
-        public bool Inspect<T>(IConsumePipe<T> pipe)
+        protected virtual bool Inspect<T>(TeeConsumeFilter<T> filter, FilterInspectorCallback callback)
             where T : class
         {
-            return Inspect(pipe, (_, __) => true);
+            return callback(this);
         }
 
-        public bool Inspect<T>(IConsumePipe<T> pipe, PipeInspectorCallback<ConsumeContext<T>> callback)
+        protected virtual bool Inspect<T>(HandlerMessageFilter<T> filter, FilterInspectorCallback callback)
             where T : class
         {
-            return callback(this, pipe);
-        }
-
-        protected virtual bool Inspect<T>(TeeConsumeFilter<T> filter,
-            FilterInspectorCallback<ConsumeContext<T>> callback)
-            where T : class
-        {
-            return callback(this, filter);
-        }
-
-        protected virtual bool Inspect<T>(HandlerMessageFilter<T> filter,
-            FilterInspectorCallback<ConsumeContext<T>> callback)
-            where T : class
-        {
-            return callback(this, filter);
+            return callback(this);
         }
     }
 }

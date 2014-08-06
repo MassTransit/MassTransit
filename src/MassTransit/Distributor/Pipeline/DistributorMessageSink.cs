@@ -12,17 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.Pipeline
 {
+    using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Sinks;
     using Messages;
     using Util;
 
 
     public class DistributorMessageSink<TMessage> :
-        IConsumeFilter<TMessage>
+        IFilter<ConsumeContext<TMessage>>
         where TMessage : class
     {
         readonly ILog _log = Logger.Get<DistributorMessageSink<TMessage>>();
@@ -48,7 +48,7 @@ namespace MassTransit.Distributor.Pipeline
                 return;
             }
 
-            IEndpoint endpoint = context.GetEndpoint(worker.DataUri);
+            ISendEndpoint endpoint = context.GetSendEndpoint(worker.DataUri);
 
             if (_log.IsDebugEnabled)
             {
@@ -58,23 +58,9 @@ namespace MassTransit.Distributor.Pipeline
 
             var distributed = new Distributed<TMessage>(context.Message, context.ResponseAddress);
 
-            endpoint.Send(distributed, x =>
-            {
-//                x.SetRequestId(context.RequestId);
-//                x.SetConversationId(context.ConversationId);
-//                x.SetCorrelationId(context.CorrelationId);
-                x.SetSourceAddress(context.SourceAddress);
-                x.SetDestinationAddress(context.DestinationAddress);
-                x.SetResponseAddress(context.ResponseAddress);
-                x.SetFaultAddress(context.FaultAddress);
-                if (context.ExpirationTime.HasValue)
-                    x.SetExpirationTime(context.ExpirationTime.Value);
+            var pipe = new WorkerPipe<TMessage>(context, worker.DataUri.ToString());
 
-//                context.Headers.Each(header => x.SetHeader(header.Key, header.Value));
-
-                x.SetHeader("mt.worker.uri", worker.DataUri.ToString());
-            });
-
+            await endpoint.Send(distributed, pipe);
 
             timer.Stop();
             context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TMessage>.ShortName,
@@ -86,6 +72,43 @@ namespace MassTransit.Distributor.Pipeline
         public bool Inspect(IPipeInspector inspector)
         {
             return inspector.Inspect(this);
+        }
+
+
+        class WorkerPipe<T> :
+            IPipe<SendContext<T>>
+            where T : class
+        {
+            readonly ConsumeContext _context;
+            readonly string _dataUri;
+
+            public WorkerPipe(ConsumeContext context, string dataUri)
+            {
+                _context = context;
+                _dataUri = dataUri;
+            }
+
+            public async Task Send(SendContext<T> context)
+            {
+                context.SourceAddress = _context.SourceAddress;
+                context.DestinationAddress = _context.DestinationAddress;
+                context.ResponseAddress = _context.ResponseAddress;
+                context.FaultAddress = _context.FaultAddress;
+
+
+                if (_context.ExpirationTime.HasValue)
+                    context.TimeToLive = _context.ExpirationTime - DateTime.UtcNow;
+
+
+                //                context.Headers.Each(header => x.SetHeader(header.Key, header.Value));
+
+                context.ContextHeaders.Set("mt.worker.uri", _dataUri);
+            }
+
+            public bool Inspect(IPipeInspector inspector)
+            {
+                return inspector.Inspect(this);
+            }
         }
     }
 }

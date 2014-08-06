@@ -243,7 +243,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
             var cancelReceive = new CancellationTokenSource();
 
-            var receiveEndpoint = new ReceiveEndpoint(transport, deserializer, testPipe, x => { });
+            var receivePipe = Pipe.New<ReceiveContext>(x =>
+            {
+                x.Filter(new DeserializeFilter(deserializer, testPipe));
+            });
+
+
+            var receiveEndpoint = new ReceiveEndpoint(transport, receivePipe);
 
             var consumerTask = receiveEndpoint.Start(cancelReceive.Token);
 

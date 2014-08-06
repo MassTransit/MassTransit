@@ -35,7 +35,6 @@ namespace MassTransit.Serialization
 
             AddSerializer<JsonMessageSerializer>();
             AddSerializer<BsonMessageSerializer>();
-            AddSerializer<BsonMessageSerializer>();
             AddSerializer<BinaryMessageSerializer>();
 
             _defaultSerializer = () =>

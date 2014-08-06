@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
     using MassTransit.Pipeline;
@@ -32,13 +33,12 @@ namespace MassTransit.Transports.RabbitMq
             _exchange = exchange;
         }
 
-        public async Task Send<T>(T message, IPipe<SendContext<T>> pipe)
-            where T : class
+        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             IBasicProperties properties = _model.CreateBasicProperties();
             properties.Headers = new Dictionary<string, object>();
 
-            var context = new RabbitMqSendContextImpl<T>(properties, message, _exchange);
+            var context = new RabbitMqSendContextImpl<T>(properties, message, _exchange, cancellationToken);
 
             await pipe.Send(context);
 

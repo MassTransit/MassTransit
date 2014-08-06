@@ -12,74 +12,24 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
-    using System;
-    using System.Collections.Generic;
+    using Context;
 
 
-    public class AzureServiceBusReceiveContextHeaders :
-        ContextHeaders
+    public class AzureServiceBusContextHeaderProvider :
+        IContextHeaderProvider
     {
-        readonly AzureServiceBusMessageContext _context;
+        readonly AzureServiceBusReceiveContext _context;
 
-        public AzureServiceBusReceiveContextHeaders(AzureServiceBusMessageContext context)
+        public AzureServiceBusContextHeaderProvider(AzureServiceBusReceiveContext context)
         {
-            if (context == null)
-                throw new ArgumentNullException("context");
-
             _context = context;
         }
 
-        T ContextHeaders.Get<T>(string key, T defaultValue)
-        {
-            if (key == null)
-                throw new ArgumentNullException("key");
-
-            T value;
-            if (!TryGetHeaderValue(key, out value))
-                return defaultValue;
-
-            if (value == default(T))
-                return defaultValue;
-
-            if (typeof(T) == typeof(string))
-            {
-                if (value is string)
-                    return value;
-
-                return (T)(object)value.ToString();
-            }
-
-            return value;
-        }
-
-        T? ContextHeaders.Get<T>(string key, T? defaultValue)
-        {
-            if (key == null)
-                throw new ArgumentNullException("key");
-
-            T? value;
-            if (!TryGetHeaderValue(key, out value))
-                throw new KeyNotFoundException("The header is not present: " + key);
-
-            if (!value.HasValue)
-                return defaultValue;
-
-            return value;
-        }
-
-        bool ContextHeaders.TryGetHeader(string key, out object value)
-        {
-            if (key == null)
-                throw new ArgumentNullException("key");
-
-            return TryGetHeaderValue(key, out value);
-        }
-
-        bool TryGetHeaderValue<T>(string key, out T value)
+        public bool TryGetHeader(string key, out object value)
         {
             if (_context.Properties == null)
             {
-                value = default(T);
+                value = null;
                 return false;
             }
 

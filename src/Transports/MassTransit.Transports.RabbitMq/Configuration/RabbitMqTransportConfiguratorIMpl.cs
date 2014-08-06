@@ -14,27 +14,30 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 {
     using System;
     using System.Collections.Generic;
-    using Diagnostics.Introspection;
-    using EndpointConfigurators;
+    using System.Linq;
+    using MassTransit.Builders;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
+    using Serialization;
 
 
     public class RabbitMqTransportConfigurator :
         IRabbitMqTransportConfigurator,
         ITransportBuilder
     {
-        readonly IList<ReceiveSettings> _receiveSettings; 
+        readonly RabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
         readonly IList<RabbitMqHostSettings> _hosts;
-        readonly IRabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
         readonly RabbitMqPublishSettings _publishSettings;
+        readonly IList<ITransportBuilderConfigurator> _transportBuilderConfigurators;
+        HostSettings _defaultHostSettings;
 
         public RabbitMqTransportConfigurator(ITransportSelector selector)
         {
             _hosts = new List<RabbitMqHostSettings>();
-            _defaultEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator();
+            _defaultHostSettings = new HostSettings();
+            _defaultEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_defaultHostSettings);
             _publishSettings = new RabbitMqPublishSettings();
-            _receiveSettings = new List<ReceiveSettings>();
+            _transportBuilderConfigurators = new List<ITransportBuilderConfigurator>();
 
             selector.SelectTransport(this);
         }
@@ -42,6 +45,17 @@ namespace MassTransit.Transports.RabbitMq.Configuration
         public void Host(RabbitMqHostSettings settings)
         {
             _hosts.Add(settings);
+
+            // use first host for default host settings :(
+            if (_hosts.Count == 1)
+            {
+                _defaultHostSettings.Host = settings.Host;
+                _defaultHostSettings.VirtualHost = settings.VirtualHost;
+                _defaultHostSettings.Port = settings.Port;
+                _defaultHostSettings.Username = settings.Username;
+                _defaultHostSettings.Password = settings.Password;
+                _defaultHostSettings.Heartbeat = settings.Heartbeat;
+            }
         }
 
         public void Endpoint(RabbitMqEndpointSettings settings)
@@ -49,12 +63,9 @@ namespace MassTransit.Transports.RabbitMq.Configuration
             throw new NotImplementedException();
         }
 
-        public void ReceiveEndpoint(ReceiveSettings receiveSettings)
+        public void AddTransportBuilderConfigurator(ITransportBuilderConfigurator configurator)
         {
-            if (receiveSettings == null)
-                throw new ArgumentNullException("receiveSettings");
-
-            _receiveSettings.Add(receiveSettings);
+            _transportBuilderConfigurators.Add(configurator);
         }
 
         public void Mandatory(bool mandatory = true)
@@ -62,7 +73,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
             _publishSettings.Mandatory = mandatory;
         }
 
-        public void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback) 
+        public void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback)
             where T : class
         {
             throw new NotImplementedException();
@@ -73,125 +84,74 @@ namespace MassTransit.Transports.RabbitMq.Configuration
             throw new NotImplementedException();
         }
 
-        public IServiceBus Build()
+        public IBus Build()
         {
-            return new RabbitMqServiceBus();
+            var builder = new RabbitMqServiceBusBuilder(_hosts, _publishSettings);
+
+            foreach (ITransportBuilderConfigurator configurator in _transportBuilderConfigurators)
+                configurator.Configure(builder);
+
+            IBusControl bus = builder.Build();
+
+            bus.Start();
+
+
+            return bus;
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            yield break;
+            return _transportBuilderConfigurators
+                .SelectMany(x => x.Validate())
+                .Concat(_defaultEndpointConfigurator.Validate());
+        }
 
+
+        class HostSettings :
+            RabbitMqHostSettings
+        {
+            public string Host { get; set; }
+            public int Port { get; set; }
+            public string VirtualHost { get; set; }
+            public string Username { get; set; }
+            public string Password { get; set; }
+            public ushort Heartbeat { get; set; }
         }
     }
 
 
-    public class RabbitMqServiceBus : 
-        IServiceBus
+    public class RabbitMqServiceBusBuilder :
+        IServiceBusBuilder
     {
-        public void Dispose()
+        readonly IEnumerable<RabbitMqHostSettings> _hosts;
+        readonly PublishSettings _publishSettings;
+        readonly IList<IReceiveEndpoint> _receiveEndpoints;
+        IMessageDeserializer _messageDeserializer;
+
+        public RabbitMqServiceBusBuilder(IEnumerable<RabbitMqHostSettings> hosts, PublishSettings publishSettings)
         {
+            _hosts = hosts;
+            _publishSettings = publishSettings;
+            _receiveEndpoints = new List<IReceiveEndpoint>();
+
+            _messageDeserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
         }
 
-        public void Inspect(DiagnosticsProbe probe)
+        public void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint)
         {
-            throw new NotImplementedException();
+            _receiveEndpoints.Add(receiveEndpoint);
         }
 
-        public IEndpoint Endpoint
+        public IMessageDeserializer MessageDeserializer
         {
-            get { throw new NotImplementedException(); }
+            get { return _messageDeserializer; }
         }
 
-        public IInboundPipe InboundPipe
+        public IBusControl Build()
         {
-            get { throw new NotImplementedException(); }
-        }
+            var inboundPipe = new InboundPipe();
 
-        public IInboundMessagePipeline InboundPipeline
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public IOutboundMessagePipeline OutboundPipeline
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public IEndpointCache EndpointCache
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public TimeSpan ShutdownTimeout
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        public void Publish<T>(T message) where T : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback) where T : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Publish(object message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Publish(object message, Type messageType)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Publish(object message, Action<IPublishContext> contextCallback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Publish(object message, Type messageType, Action<IPublishContext> contextCallback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Publish<T>(object values) where T : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Publish<T>(object values, Action<IPublishContext<T>> contextCallback) where T : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEndpoint GetEndpoint(Uri address)
-        {
-            throw new NotImplementedException();
-        }
-
-        public UnsubscribeAction Configure(Func<IInboundPipelineConfigurator, UnsubscribeAction> configure)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IBusService GetService(Type type)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryGetService(Type type, out IBusService result)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ISendToEndpoint GetSendEndpoint(Uri address)
-        {
-            throw new NotImplementedException();
+            return new SuperDuperServiceBus(inboundPipe, _receiveEndpoints);
         }
     }
 }

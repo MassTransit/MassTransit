@@ -13,7 +13,7 @@
 namespace MassTransit
 {
     using System;
-    using Transports.RabbitMq;
+    using Builders;
     using Transports.RabbitMq.Configuration;
 
 
@@ -24,7 +24,7 @@ namespace MassTransit
 
         void Endpoint(RabbitMqEndpointSettings settings);
 
-        void ReceiveEndpoint(ReceiveSettings receiveSettings);
+        void AddTransportBuilderConfigurator(ITransportBuilderConfigurator configurator);
 
         /// <summary>
         ///     Specifies that any message sent to an exchange must be delivered to a queue or it

@@ -193,7 +193,7 @@ namespace MassTransit.Testing.TestDecorators
             return _bus.TryGetService(type, out result);
         }
 
-        public ISendToEndpoint GetSendEndpoint(Uri address)
+        public ISendEndpoint GetSendEndpoint(Uri address)
         {
             return _bus.GetSendEndpoint(address);
         }

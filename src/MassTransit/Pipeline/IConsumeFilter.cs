@@ -16,11 +16,4 @@ namespace MassTransit.Pipeline
         IFilter<ConsumeContext>
     {
     }
-
-
-    public interface IConsumeFilter<T> :
-        IFilter<ConsumeContext<T>>
-        where T : class
-    {
-    }
 }

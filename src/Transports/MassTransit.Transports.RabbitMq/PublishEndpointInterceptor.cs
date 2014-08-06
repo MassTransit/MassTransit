@@ -17,6 +17,7 @@ namespace MassTransit.Transports.RabbitMq
     using Magnum.Extensions;
     using Magnum.Reflection;
     using MassTransit.Pipeline.Configuration;
+    using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Sinks;
 
 

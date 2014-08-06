@@ -44,6 +44,12 @@ namespace MassTransit
             return handlerConfigurator;
         }
 
+        /// <summary>
+        /// Subscribes a message handler to the receive endpoint
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="handler"></param>
         public static void Handler<T>(this IReceiveEndpointConfigurator configurator, MessageHandler<T> handler)
             where T : class
         {

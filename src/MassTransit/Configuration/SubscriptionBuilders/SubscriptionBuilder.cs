@@ -19,10 +19,4 @@ namespace MassTransit.SubscriptionBuilders
 	{
 		ISubscriptionReference Subscribe(IInboundPipe pipe);
 	}
-
-
-    public interface ReceiverBuilder
-    {
-        ConnectHandle Connect(IInboundPipe pipe);
-    }
 }

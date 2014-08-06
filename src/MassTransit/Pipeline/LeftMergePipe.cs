@@ -12,30 +12,31 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    using System;
     using System.Threading.Tasks;
 
 
-    public class LeftMergePipe<T1, T> :
+    public class LeftMergePipe<TLeft, T> :
         IPipe<ConsumeContext<T>>
         where T : class
     {
-        readonly T1 _item1;
-        readonly IPipe<ConsumerConsumeContext<T1, T>> _output;
+        readonly TLeft _left;
+        readonly IPipe<ConsumeContext<Tuple<TLeft, ConsumeContext<T>>>> _output;
 
-        public LeftMergePipe(T1 item1, IPipe<ConsumerConsumeContext<T1, T>> output)
+        public LeftMergePipe(TLeft left, IPipe<ConsumeContext<Tuple<TLeft, ConsumeContext<T>>>> output)
         {
-            _item1 = item1;
+            _left = left;
             _output = output;
         }
 
         public Task Send(ConsumeContext<T> context)
         {
-            return _output.Send(context.PushConsumer(_item1));
+            return _output.Send(context.PushLeft(_left));
         }
 
         public bool Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this, (x, _) => _output.Inspect(x));
+            return inspector.Inspect(this, x => _output.Inspect(x));
         }
     }
 }

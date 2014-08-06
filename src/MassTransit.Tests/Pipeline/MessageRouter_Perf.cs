@@ -232,7 +232,7 @@ namespace MassTransit.Tests.Pipeline
             public Uri InputAddress { get; private set; }
             public ContentType ContentType { get; private set; }
             public bool Redelivered { get; private set; }
-            public ContextHeaders ContextHeaders { get; private set; }
+            public ContextHeaders TransportHeaders { get; private set; }
 
             public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
             {
@@ -369,17 +369,24 @@ namespace MassTransit.Tests.Pipeline
             return consumeContext != null;
         }
 
-        public Task RespondAsync<T>(T message) where T : class
+        public Task RespondAsync<T>(T message)
+            where T : class
         {
             throw new NotImplementedException();
         }
 
-        public void Respond<T>(T message) where T : class
+        public void Respond<T>(T message) 
+            where T : class
         {
             throw new NotImplementedException();
         }
 
         public void RetryLater()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ISendEndpoint GetSendEndpoint(Uri address)
         {
             throw new NotImplementedException();
         }
@@ -405,6 +412,46 @@ namespace MassTransit.Tests.Pipeline
 
         public void NotifyFaulted(string consumerType, Exception exception)
         {
+        }
+
+        public Task Publish<TMessage1>(TMessage1 message) where TMessage1 : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish<TMessage1>(TMessage1 message, IPipe<MassTransit.PublishContext<TMessage1>> publishPipe) where TMessage1 : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish(object message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish(object message, Type messageType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish(object message, Action<PublishContext> contextCallback)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish(object message, Type messageType, Action<PublishContext> contextCallback)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish<TMessage1>(object values) where TMessage1 : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish<TMessage1>(object values, Action<MassTransit.PublishContext<TMessage1>> contextCallback) where TMessage1 : class
+        {
+            throw new NotImplementedException();
         }
     }
 

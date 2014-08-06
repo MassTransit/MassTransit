@@ -16,6 +16,7 @@ namespace MassTransit.Transports.RabbitMq.Contexts
     using System.IO;
     using System.Net.Mime;
     using System.Runtime.Serialization;
+    using System.Threading;
     using Context;
     using RabbitMQ.Client;
 
@@ -28,11 +29,14 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         byte[] _body;
         ISendMessageSerializer _serializer;
 
-        public RabbitMqSendContextImpl(IBasicProperties basicProperties, T message, string exchange, string routingKey = "")
+        public RabbitMqSendContextImpl(IBasicProperties basicProperties, T message, string exchange, CancellationToken cancellationToken,
+            string routingKey = "")
         {
+            CancellationToken = cancellationToken;
             _payloadCache = new PayloadCache();
             _payloadCache.GetOrAddPayload<RabbitMqSendContext<T>>(() => this);
 
+            ContextHeaders = new RabbitMqSendContextHeaders(basicProperties);
             BasicProperties = basicProperties;
             Message = message;
             Exchange = exchange;
@@ -43,9 +47,13 @@ namespace MassTransit.Transports.RabbitMq.Contexts
             Durable = true;
         }
 
+        public CancellationToken CancellationToken { get; private set; }
+
         public Guid? MessageId { get; set; }
         public Guid? RequestId { get; set; }
         public Guid? CorrelationId { get; set; }
+
+        public SendContextHeaders ContextHeaders { get; set; }
 
         public Uri SourceAddress { get; set; }
         public Uri DestinationAddress { get; set; }

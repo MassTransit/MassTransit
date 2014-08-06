@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
 
@@ -28,7 +29,7 @@ namespace MassTransit.Transports
         /// <param name="message">The message</param>
         /// <param name="pipe">The pipe invoked when sending a message, to do extra stuff</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send<T>(T message, IPipe<SendContext<T>> pipe)
+        Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
     }
 }

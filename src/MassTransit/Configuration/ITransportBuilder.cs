@@ -18,6 +18,6 @@ namespace MassTransit
     public interface ITransportBuilder :
         Configurator
     {
-        IServiceBus Build();
+        IBus Build();
     }
 }

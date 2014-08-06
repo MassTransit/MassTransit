@@ -16,46 +16,60 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
+    using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
 
 
+    /// <summary>
+    /// Creates a message receiver and receives messages from the input queue of the endpoint
+    /// </summary>
     public class MessageReceiverFilter :
-        IFilter<MessagingFactoryContext>
+        IFilter<ConnectionContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
-        readonly IPipe<ReceiveContext> _pipe;
+        readonly IPipe<ReceiveContext> _receivePipe;
 
-        public MessageReceiverFilter(IPipe<ReceiveContext> pipe)
+        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe)
         {
-            _pipe = pipe;
+            _receivePipe = receivePipe;
         }
 
-        public async Task Send(MessagingFactoryContext context, IPipe<MessagingFactoryContext> next)
+        async Task IFilter<ConnectionContext>.Send(ConnectionContext context, IPipe<ConnectionContext> next)
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            Uri inputAddress = context.GetQueueAddress(receiveSettings.QueueName);
+            string queuePath = receiveSettings.QueueDescription.Path;
 
-            MessageReceiver messageReceiver = await context.Factory.CreateMessageReceiverAsync(receiveSettings.QueueName, ReceiveMode.PeekLock);
+            Uri inputAddress = context.GetQueueAddress(queuePath);
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Creating message receiver for {0}", inputAddress);
+
+            MessageReceiver messageReceiver = await context.Factory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock);
             messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
+            messageReceiver.RetryPolicy = RetryPolicy.Default;
 
-            using (var receiver = new Receiver(messageReceiver, inputAddress, _pipe, receiveSettings, context.CancellationToken))
+            using (var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, context.CancellationToken))
             {
                 ReceiverMetrics metrics = await receiver.CompleteTask;
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", receiveSettings.QueueName, metrics.DeliveryCount,
+                    _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", queuePath,
+                        metrics.DeliveryCount,
                         metrics.ConcurrentDeliveryCount);
                 }
             }
+
+            if(!messageReceiver.IsClosed)
+                await messageReceiver.CloseAsync();
 
             await next.Send(context);
         }
 
         public bool Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this, (x, _) => _pipe.Inspect(inspector));
+            return inspector.Inspect(this, x => _receivePipe.Inspect(inspector));
         }
     }
 }

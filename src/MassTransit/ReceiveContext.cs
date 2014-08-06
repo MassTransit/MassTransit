@@ -15,20 +15,14 @@ namespace MassTransit
     using System;
     using System.IO;
     using System.Net.Mime;
-    using System.Threading;
 
 
     public interface ReceiveContext :
         PipeContext
     {
         /// <summary>
-        /// This token is cancelled when the message reception should no longer be processed
-        /// </summary>
-        CancellationToken CancellationToken { get; }
-
-        /// <summary>
-        ///     Returns the message body as a stream that can be deserialized. The stream
-        ///     must be disposed by the caller, a reference is not retained
+        /// Returns the message body as a stream that can be deserialized. The stream
+        /// must be disposed by the caller, a reference is not retained
         /// </summary>
         Stream Body { get; }
 
@@ -36,12 +30,12 @@ namespace MassTransit
         TimeSpan ElapsedTime { get; }
 
         /// <summary>
-        ///     The address on which the message was received
+        /// The address on which the message was received
         /// </summary>
         Uri InputAddress { get; }
 
         /// <summary>
-        ///     The content type of the message, as determined by the available headers
+        /// The content type of the message, as determined by the available headers
         /// </summary>
         ContentType ContentType { get; }
 
@@ -49,9 +43,9 @@ namespace MassTransit
         bool Redelivered { get; }
 
         /// <summary>
-        ///     Headers specific to the transport
+        /// Headers specific to the transport
         /// </summary>
-        ContextHeaders ContextHeaders { get; }
+        ContextHeaders TransportHeaders { get; }
 
         /// <summary>
         /// Notify that a message has been consumed from the received context

@@ -19,18 +19,16 @@ namespace MassTransit.Context
         IConsumeContext<TMessage>
         where TMessage : class
     {
-        readonly MassTransit.ConsumeContext<TMessage> _context;
-        readonly Lazy<IReceiveContext> _receiveContext;
+        readonly ConsumeContext<TMessage> _context;
         readonly Lazy<IMessageHeaders> _messageHeaders;
+        readonly Lazy<IReceiveContext> _receiveContext;
 
-        public ConsumeContextAdapter(MassTransit.ConsumeContext<TMessage> context)
+        public ConsumeContextAdapter(ConsumeContext<TMessage> context)
         {
             _context = context;
             _receiveContext = new Lazy<IReceiveContext>(() => new ReceiveContextAdapter(context));
             _messageHeaders = new Lazy<IMessageHeaders>(() => new MessageHeadersAdapter(context));
-
         }
-
 
         public string MessageId
         {
@@ -127,10 +125,10 @@ namespace MassTransit.Context
             return _context.HasMessageType(messageType);
         }
 
-        public bool TryGetContext<T>(out IConsumeContext<T> context) 
+        public bool TryGetContext<T>(out IConsumeContext<T> context)
             where T : class
         {
-            MassTransit.ConsumeContext<T> consumeContext;
+            ConsumeContext<T> consumeContext;
             if (_context.TryGetMessage(out consumeContext))
             {
                 context = new ConsumeContextAdapter<T>(consumeContext);

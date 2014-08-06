@@ -13,18 +13,13 @@
 namespace MassTransit
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
 
 
     public interface ConsumeContext :
-        MessageContext
+        MessageContext,
+        IPublisher
     {
-        /// <summary>
-        /// The cancellation token that is cancelled when the receive context is cancelled
-        /// </summary>
-        CancellationToken CancellationToken { get; }
-
         /// <summary>
         /// The original receive context
         /// </summary>
@@ -71,11 +66,11 @@ namespace MassTransit
         void RetryLater();
 
         /// <summary>
-        /// Return an endpoint using the specified address
+        /// Return an endpoint to which messages can be sent
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        IEndpoint GetEndpoint(Uri address);
+        ISendEndpoint GetSendEndpoint(Uri address);
 
         /// <summary>
         /// Notify that the message has been consumed

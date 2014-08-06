@@ -12,37 +12,39 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    using System;
     using System.Threading.Tasks;
+
 
     /// <summary>
     /// Splits a context item off the pipe and carries it out-of-band to be merged
     /// once the next filter has completed
     /// </summary>
-    /// <typeparam name="T1"></typeparam>
+    /// <typeparam name="TLeft"></typeparam>
     /// <typeparam name="T"></typeparam>
-    public class LeftSplitPipe<T1, T> :
-        IPipe<ConsumerConsumeContext<T1, T>>
+    public class LeftSplitPipe<TLeft, T> :
+        IPipe<ConsumeContext<Tuple<TLeft, ConsumeContext<T>>>>
         where T : class
     {
         readonly IFilter<ConsumeContext<T>> _next;
-        readonly IPipe<ConsumerConsumeContext<T1, T>> _output;
+        readonly IPipe<ConsumeContext<Tuple<TLeft, ConsumeContext<T>>>> _output;
 
-        public LeftSplitPipe(IPipe<ConsumerConsumeContext<T1, T>> output, IFilter<ConsumeContext<T>> next)
+        public LeftSplitPipe(IPipe<ConsumeContext<Tuple<TLeft, ConsumeContext<T>>>> output, IFilter<ConsumeContext<T>> next)
         {
             _next = next;
             _output = output;
         }
 
-        public Task Send(ConsumerConsumeContext<T1, T> context)
+        public Task Send(ConsumeContext<Tuple<TLeft, ConsumeContext<T>>> context)
         {
-            var output = new LeftMergePipe<T1, T>(context.Consumer, _output);
+            var output = new LeftMergePipe<TLeft, T>(context.Message.Item1, _output);
 
-            return _next.Send(context.Pop(), output);
+            return _next.Send(context.Message.Item2, output);
         }
 
         public bool Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this, (x, _) => _next.Inspect(x) && _output.Inspect(x));
+            return inspector.Inspect(this, x => _next.Inspect(x) && _output.Inspect(x));
         }
     }
 }

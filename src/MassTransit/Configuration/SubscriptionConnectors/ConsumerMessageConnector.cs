@@ -14,6 +14,7 @@ namespace MassTransit.SubscriptionConnectors
 {
     using System;
     using Pipeline;
+    using Pipeline.Filters;
     using Pipeline.Sinks;
     using Policies;
     using Util;
@@ -31,9 +32,9 @@ namespace MassTransit.SubscriptionConnectors
         where TConsumer : class
         where TMessage : class
     {
-        readonly IPipe<ConsumerConsumeContext<TConsumer, TMessage>> _consumerPipe;
+        readonly IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> _consumerPipe;
 
-        public ConsumerMessageConnector(IPipe<ConsumerConsumeContext<TConsumer, TMessage>> consumerPipe)
+        public ConsumerMessageConnector(IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> consumerPipe)
         {
             _consumerPipe = consumerPipe;
         }
@@ -43,15 +44,11 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect<T>(IInboundPipe inboundPipe, IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy)
-            where T : class
+        ConnectHandle ConsumerConnector.Connect<T>(IInboundPipe inboundPipe, IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy)
         {
             var factory = consumerFactory as IConsumerFactory<TConsumer>;
             if (factory == null)
-            {
-                throw new ArgumentException("The consumer factory type does not match: "
-                                            + TypeMetadataCache<T>.ShortName);
-            }
+                throw new ArgumentException("The consumer factory type does not match: " + TypeMetadataCache<T>.ShortName);
 
             IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {

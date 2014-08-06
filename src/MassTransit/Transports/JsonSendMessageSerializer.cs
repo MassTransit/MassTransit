@@ -90,6 +90,11 @@ namespace MassTransit.Transports
                     ExpirationTime = DateTime.UtcNow + context.TimeToLive;
 
                 Headers = new Dictionary<string, object>();
+
+                foreach (var header in context.ContextHeaders)
+                {
+                    Headers[header.Key] = header.Value;
+                }
             }
 
             public string MessageId { get; private set; }

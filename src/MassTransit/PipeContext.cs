@@ -13,11 +13,17 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading;
     using Context;
 
 
     public interface PipeContext
     {
+        /// <summary>
+        /// Used to cancel the execution of the context
+        /// </summary>
+        CancellationToken CancellationToken { get; }
+
         /// <summary>
         /// Checks if a payload is present in the context
         /// </summary>

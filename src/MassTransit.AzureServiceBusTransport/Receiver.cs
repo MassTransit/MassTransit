@@ -10,49 +10,61 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
+    using Logging;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
-    using Pipeline;
+
 
     public class Receiver :
         ReceiverMetrics,
         IDisposable
     {
+        static readonly ILog _log = Logger.Get<Receiver>();
+
         readonly CancellationToken _cancellationToken;
         readonly TaskCompletionSource<ReceiverMetrics> _completeTask;
+        readonly MessageReceiver _messageReceiver;
         readonly Uri _inputAddress;
         readonly IPipe<ReceiveContext> _receivePipe;
+        readonly ReceiveSettings _receiveSettings;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         CancellationTokenRegistration _registration;
+        bool _shuttingDown;
 
         public Receiver(MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
             ReceiveSettings receiveSettings, CancellationToken cancellationToken)
         {
+            _messageReceiver = messageReceiver;
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
+            _receiveSettings = receiveSettings;
             _cancellationToken = cancellationToken;
 
             _completeTask = new TaskCompletionSource<ReceiverMetrics>();
+
+            _registration = cancellationToken.Register(() =>
+            {
+                Shutdown();
+            });
 
             var options = new OnMessageOptions
             {
                 AutoComplete = false,
                 AutoRenewTimeout = receiveSettings.AutoRenewTimeout,
-                MaxConcurrentCalls = receiveSettings.MaxConcurrentCalls
+                MaxConcurrentCalls = receiveSettings.MaxConcurrentCalls,
             };
+
             options.ExceptionReceived += (sender, x) => _completeTask.TrySetException(x.Exception);
 
             messageReceiver.OnMessageAsync(OnMessage, options);
-
-            _registration = cancellationToken.Register(messageReceiver.Close);
         }
 
         public Task<ReceiverMetrics> CompleteTask
@@ -75,29 +87,70 @@ namespace MassTransit.AzureServiceBusTransport
             get { return _maxPendingDeliveryCount; }
         }
 
-        public async Task OnMessage(BrokeredMessage message)
+        void Shutdown()
         {
-            Interlocked.Increment(ref _deliveryCount);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Shutting down receiver: {0}", _inputAddress);
+
+            _shuttingDown = true;
+
+            try
+            {
+                _messageReceiver.Close();
+            }
+            catch (Exception ex)
+            {
+                _completeTask.TrySetException(ex);
+            }
+            finally
+            {
+                if (_currentPendingDeliveryCount == 0)
+                    _completeTask.TrySetResult(this);
+            }
+        }
+
+        async Task OnMessage(BrokeredMessage message)
+        {
+            var deliveryCount = Interlocked.Increment(ref _deliveryCount);
 
             int current = Interlocked.Increment(ref _currentPendingDeliveryCount);
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
 
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Recieving {0}:{1} - {2}", deliveryCount, message.MessageId, _receiveSettings.QueueDescription.Path);
+
+            Exception exception = null;
+            var context = new AzureServiceBusReceiveContext(message, _inputAddress);
+
             try
             {
-                var context = new AzureServiceBusReceiveContext(message, _inputAddress);
-
                 await _receivePipe.Send(context);
 
                 await message.CompleteAsync();
 
-                Interlocked.Decrement(ref _currentPendingDeliveryCount);
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Receive completed: {0}", message.MessageId);
             }
             catch (Exception ex)
             {
-                message.AbandonAsync().Wait(_cancellationToken);
+                exception = ex;
+                if (_log.IsErrorEnabled)
+                    _log.Error(string.Format("Received faulted: {0}", message.MessageId), ex);
+            }
 
-                Interlocked.Decrement(ref _currentPendingDeliveryCount);
+            try
+            {
+                if (exception != null)
+                {
+                    await message.AbandonAsync();
+                }
+            }
+            finally
+            {
+                var pendingCount = Interlocked.Decrement(ref _currentPendingDeliveryCount);
+                if (pendingCount == 0 && _shuttingDown)
+                    _completeTask.TrySetResult(this);
             }
         }
     }

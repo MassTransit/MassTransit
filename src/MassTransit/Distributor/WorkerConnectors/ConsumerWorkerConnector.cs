@@ -29,6 +29,7 @@ namespace MassTransit.Distributor.WorkerConnectors
     {
         Type MessageType { get; }
 
+
         UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IWorker worker);
     }
 

@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.IO;
     using System.Net.Mime;
     using System.Runtime.Serialization;
+    using System.Threading;
     using Context;
     using Transports;
 
@@ -27,12 +28,14 @@ namespace MassTransit.AzureServiceBusTransport
         readonly PayloadCache _payloadCache;
         byte[] _body;
         ISendMessageSerializer _serializer;
+        CancellationToken _cancellationToken;
 
         public AzureServiceBusSendContextImpl(T message)
         {
             _payloadCache = new PayloadCache();
             _payloadCache.GetOrAddPayload<AzureServiceBusSendContext<T>>(() => this);
 
+            ContextHeaders = new AzureServiceBusSendContextHeaders();
 
             Message = message;
 
@@ -44,6 +47,8 @@ namespace MassTransit.AzureServiceBusTransport
         public Guid? MessageId { get; set; }
         public Guid? RequestId { get; set; }
         public Guid? CorrelationId { get; set; }
+
+        public SendContextHeaders ContextHeaders { get; set; }
 
         public Uri SourceAddress { get; set; }
         public Uri DestinationAddress { get; set; }
@@ -66,6 +71,11 @@ namespace MassTransit.AzureServiceBusTransport
 
         public bool Durable { get; set; }
         public T Message { get; private set; }
+
+        public CancellationToken CancellationToken
+        {
+            get { return _cancellationToken; }
+        }
 
         public bool HasPayloadType(Type contextType)
         {

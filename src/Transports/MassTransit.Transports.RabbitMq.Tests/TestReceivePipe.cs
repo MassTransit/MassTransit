@@ -39,27 +39,4 @@ namespace MassTransit.Transports.RabbitMq.Tests
             return true;
         }
     }
-
-    class TestConsumePipe :
-        IConsumePipe
-    {
-        readonly Func<ConsumeContext, Task> _callback;
-
-        public TestConsumePipe(Func<ConsumeContext, Task> callback)
-        {
-            _callback = callback;
-        }
-
-        public async Task Send(ConsumeContext context)
-        {
-            await Task.Yield();
-
-            await _callback(context);
-        }
-
-        public bool Inspect(IPipeInspector inspector)
-        {
-            return true;
-        }
-    }
 }

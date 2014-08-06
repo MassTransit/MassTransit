@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
-    using System.Threading;
     using RabbitMQ.Client;
 
 
@@ -24,11 +23,6 @@ namespace MassTransit.Transports.RabbitMq
         /// The RabbitMQ Connection
         /// </summary>
         IConnection Connection { get; }
-
-        /// <summary>
-        /// Set when the initial connection request is cancelled
-        /// </summary>
-        CancellationToken CancellationToken { get; }
 
         /// <summary>
         /// Return the address for the specified queue

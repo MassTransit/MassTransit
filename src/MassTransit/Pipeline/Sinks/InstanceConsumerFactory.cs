@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
+    using System;
     using System.Threading.Tasks;
 
 
@@ -26,11 +27,10 @@ namespace MassTransit.Pipeline.Sinks
             _consumer = consumer;
         }
 
-        public Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
-            where TMessage : class
+        Task IConsumerFactory<TConsumer>.Send<TMessage>(ConsumeContext<TMessage> context,
+            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
         {
-            return next.Send(context.PushConsumer(_consumer));
+            return next.Send(context.PushLeft(_consumer));
         }
     }
 }
