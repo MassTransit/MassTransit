@@ -762,6 +762,13 @@
     <Compile Include="Transports\IInboundMessageTracker.cs" />
     <Compile Include="Transports\IInboundTransport.cs" />
     <Compile Include="Transports\IMessageNameFormatter.cs" />
+    <Compile Include="Transports\InMemoryContextHeaderProvider.cs" />
+    <Compile Include="Transports\InMemoryReceiveContext.cs" />
+    <Compile Include="Transports\InMemoryReceiveTransport.cs" />
+    <Compile Include="Transports\InMemorySendContext.cs" />
+    <Compile Include="Transports\InMemorySendContextHeaders.cs" />
+    <Compile Include="Transports\InMemoryTransport.cs" />
+    <Compile Include="Transports\InMemoryTransportMessage.cs" />
     <Compile Include="Transports\IReceiveEndpoint.cs" />
     <Compile Include="Transports\IReceiveTransport.cs" />
     <Compile Include="Transports\ISendMessageSerializer.cs" />

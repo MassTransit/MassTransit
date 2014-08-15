@@ -44,7 +44,7 @@ namespace MassTransit.Transports.RabbitMq
         /// Start the receive transport, returning a Task that can be awaited to signal the transport has 
         /// completely shutdown once the cancellation token is cancelled.
         /// </summary>
-        /// <param name="receivePipeeceiveContext pipe</param>
+        /// <param name="receivePipe"></param>
         /// <param name="cancellationToken">The cancellation token that is cancelled to terminate the receive transport</param>
         /// <returns>A task that is completed once the transport is shut down</returns>
         public Task Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
