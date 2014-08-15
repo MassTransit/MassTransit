@@ -199,6 +199,7 @@
     <Compile Include="Testing\SagaStateMachineTest_Specs.cs" />
     <Compile Include="TextFixtures\ServiceInstance.cs" />
     <Compile Include="Threading_Specs.cs" />
+    <Compile Include="Transports\InMemoryTransport_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
     <None Include="app.config" />
     <Compile Include="Pipeline\Interception_Specs.cs" />

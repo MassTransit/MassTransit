@@ -18,9 +18,10 @@ namespace MassTransit.Tests.Serialization
 	using MassTransit.Serialization;
 	using NUnit.Framework;
 	using TestConsumers;
+	using TestFramework;
 
-	
-	public abstract class Deserializing_an_interface<TSerializer> :
+
+    public abstract class Deserializing_an_interface<TSerializer> :
 		SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
 	{
 		[Test]
@@ -36,13 +37,12 @@ namespace MassTransit.Tests.Serialization
 		}
 
 		[Test]
-		public void Should_dispatch_an_interface_via_the_pipeline()
+		public async void Should_dispatch_an_interface_via_the_pipeline()
 		{
-			var pipeline = InboundPipelineConfigurator.CreateDefault(null);
-
+		    IInboundPipe pipe = new InboundPipe();
 			var consumer = new TestMessageConsumer<ComplaintAdded>();
 
-			pipeline.ConnectInstance(consumer);
+			pipe.ConnectInstance(consumer);
 
 			var user = new UserImpl("Chris", "noone@nowhere.com");
 			ComplaintAdded complaint = new ComplaintAddedImpl(user, "No toilet paper", BusinessArea.Appearance)
@@ -50,7 +50,8 @@ namespace MassTransit.Tests.Serialization
 					Body = "There was no toilet paper in the stall, forcing me to use my treasured issue of .NET Developer magazine."
 				};
 
-			pipeline.Dispatch(complaint);
+
+			await pipe.Send(new TestConsumeContext<ComplaintAdded>(complaint));
 
 			consumer.ShouldHaveReceivedMessage(complaint);
 		}

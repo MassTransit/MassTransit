@@ -34,7 +34,7 @@ namespace MassTransit.Transports.RabbitMq.Contexts
                 return false;
             }
 
-            if (!_context.Properties.Headers.TryGetValue(key, out value))
+            if (_context.Properties.Headers.TryGetValue(key, out value))
                 return true;
 
             if (RabbitMqHeaders.Exchange.Equals(key, StringComparison.OrdinalIgnoreCase))
