@@ -76,6 +76,7 @@
       <HintPath>..\..\packages\RabbitMQ.Client.3.2.1\lib\net30\RabbitMQ.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
     </Reference>
   </ItemGroup>
@@ -115,10 +116,12 @@
     <Compile Include="RabbitMqAddressException.cs" />
     <Compile Include="RabbitMqConfigurationExtensions.cs" />
     <Compile Include="RabbitMqEndpointExtensions.cs" />
+    <Compile Include="RabbitMqExchangeTypeProvider.cs" />
     <Compile Include="RabbitMqExtensions.cs" />
     <Compile Include="RabbitMqMessageNameFormatter.cs" />
     <Compile Include="RabbitMqProducer.cs" />
     <Compile Include="RabbitMqPublisher.cs" />
+    <Compile Include="RabbitMqRoutingKeyProvider.cs" />
     <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
     <Compile Include="Configuration\RabbitMqServiceBusExtensions.cs" />
