@@ -9,7 +9,7 @@ namespace ClientB
 		static void Main(string[] args)
 		{
 			var queueName = Guid.NewGuid();
-			Console.WriteLine("G'day mate! The bloody queue name to kick off the fkn bus: {0}", queueName);
+			Console.WriteLine("G'day mate! The bloody queue name to kick off the bus is: {0}", queueName);
 
 			try
 			{

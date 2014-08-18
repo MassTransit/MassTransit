@@ -83,7 +83,7 @@ namespace MassTransit.Transports.RabbitMq
                     ExchangeDeclare(destination, destinationTemporary);
                     ExchangeDeclare(source, sourceTemporary);
 
-                    _channel.ExchangeBind(destination, source, "");
+										_channel.ExchangeBind(destination, source, RabbitMqRoutingKeyProvider.RouteKey);
                 }
                     
             }
@@ -101,7 +101,7 @@ namespace MassTransit.Transports.RabbitMq
                 lock (_lock)
                 {
                     if (_channel != null)
-                        _channel.ExchangeUnbind(destination, source, "");
+											_channel.ExchangeUnbind(destination, source, RabbitMqRoutingKeyProvider.RouteKey);
                 }
             }
             catch
@@ -113,11 +113,11 @@ namespace MassTransit.Transports.RabbitMq
         {
             if (string.Compare(name, _address.Name, StringComparison.OrdinalIgnoreCase) == 0)
             {
-                _channel.ExchangeDeclare(_address.Name, ExchangeType.Fanout, _address.Durable,
+							_channel.ExchangeDeclare(_address.Name, RabbitMqExchangeTypeProvider.ExchangeType, _address.Durable,
                     _address.AutoDelete, null);
             }
             else
-                _channel.ExchangeDeclare(name, ExchangeType.Fanout, !temporary, temporary, null);
+							_channel.ExchangeDeclare(name, RabbitMqExchangeTypeProvider.ExchangeType, !temporary, temporary, null);
         }
 
         void RebindExchanges(IModel channel)
@@ -141,7 +141,7 @@ namespace MassTransit.Transports.RabbitMq
                 }
 
                 foreach (ExchangeBinding exchange in _exchangeBindings)
-                    channel.ExchangeBind(exchange.Destination, exchange.Source, "");
+									channel.ExchangeBind(exchange.Destination, exchange.Source, RabbitMqRoutingKeyProvider.RouteKey);
             }
         }
     }

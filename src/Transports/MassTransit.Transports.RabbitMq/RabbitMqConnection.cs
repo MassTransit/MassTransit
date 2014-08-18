@@ -67,13 +67,13 @@ namespace MassTransit.Transports.RabbitMq
 
         public void DeclareExchange(IModel channel, string name, bool durable, bool autoDelete)
         {
-            channel.ExchangeDeclare(name, ExchangeType.Fanout, durable, autoDelete, null);
+					channel.ExchangeDeclare(name, RabbitMqExchangeTypeProvider.ExchangeType, durable, autoDelete, null);
         }
 
         public void BindQueue(IModel channel, string name, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> queueArguments)
         {
             string queue = channel.QueueDeclare(name, durable, exclusive, autoDelete, queueArguments);
-            channel.QueueBind(queue, name, "");
+						channel.QueueBind(queue, name, RabbitMqRoutingKeyProvider.RouteKey);
         }
 
     }
