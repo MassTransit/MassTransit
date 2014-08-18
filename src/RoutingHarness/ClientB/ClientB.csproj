@@ -56,7 +56,7 @@
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Publisher\PublisherA.csproj">
+    <ProjectReference Include="..\PublisherA\PublisherA.csproj">
       <Project>{e2a8b4d3-1bcd-4187-9acc-7f5c6f1e2e46}</Project>
       <Name>PublisherA</Name>
     </ProjectReference>
