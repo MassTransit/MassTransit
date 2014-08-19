@@ -75,15 +75,6 @@ namespace MassTransit
             UseRabbitMq(configurator, x => { });
         }
 
-				/// <summary>
-				/// <see cref="UseRabbitMq{T}(T,Action{RabbitMqTransportFactoryConfigurator})"/>
-				/// </summary>
-				public static void UseRabbitMqWithRoutingKey(this EndpointFactoryConfigurator configurator, string routingKey)
-				{
-					RabbitMqRoutingKeyProvider.CreateProvider(routingKey);
-					UseRabbitMq(configurator, x => { });
-				}
-
         /// <summary>
         /// <para>This method specifies that the service bus under configuration is to 
         /// use RabbitMQ for message queueing. See http://readthedocs.org/docs/masstransit/en/latest/configuration/transports/rabbitmq.html.

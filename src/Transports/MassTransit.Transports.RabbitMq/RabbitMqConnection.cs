@@ -73,7 +73,7 @@ namespace MassTransit.Transports.RabbitMq
         public void BindQueue(IModel channel, string name, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> queueArguments)
         {
             string queue = channel.QueueDeclare(name, durable, exclusive, autoDelete, queueArguments);
-						channel.QueueBind(queue, name, RabbitMqRoutingKeyProvider.Instance.RouteKey);
+						channel.QueueBind(queue, name, RabbitMqRoutingKeyProvider.RouteKey);
         }
 
     }

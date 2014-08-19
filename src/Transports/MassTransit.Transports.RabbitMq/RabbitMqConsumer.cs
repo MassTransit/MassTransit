@@ -132,7 +132,7 @@ namespace MassTransit.Transports.RabbitMq
                 if (_channel == null)
                     throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
 
-								_channel.BasicPublish(_address.Name, RabbitMqRoutingKeyProvider.Instance.RouteKey, result.BasicProperties, result.Body);
+								_channel.BasicPublish(_address.Name, RabbitMqRoutingKeyProvider.RouteKey, result.BasicProperties, result.Body);
                 _channel.BasicAck(result.DeliveryTag, false);
             }
         }

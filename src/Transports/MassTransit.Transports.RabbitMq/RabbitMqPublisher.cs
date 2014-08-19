@@ -83,7 +83,7 @@ namespace MassTransit.Transports.RabbitMq
                     ExchangeDeclare(destination, destinationTemporary);
                     ExchangeDeclare(source, sourceTemporary);
 
-										_channel.ExchangeBind(destination, source, RabbitMqRoutingKeyProvider.Instance.RouteKey);
+										_channel.ExchangeBind(destination, source, RabbitMqRoutingKeyProvider.RouteKey);
                 }
                     
             }
@@ -101,7 +101,7 @@ namespace MassTransit.Transports.RabbitMq
                 lock (_lock)
                 {
                     if (_channel != null)
-											_channel.ExchangeUnbind(destination, source, RabbitMqRoutingKeyProvider.Instance.RouteKey);
+											_channel.ExchangeUnbind(destination, source, RabbitMqRoutingKeyProvider.RouteKey);
                 }
             }
             catch
@@ -141,8 +141,7 @@ namespace MassTransit.Transports.RabbitMq
                 }
 
                 foreach (ExchangeBinding exchange in _exchangeBindings)
-									channel.ExchangeBind(exchange.Destination,
-										exchange.Source, RabbitMqRoutingKeyProvider.Instance.RouteKey);
+									channel.ExchangeBind(exchange.Destination, exchange.Source, RabbitMqRoutingKeyProvider.RouteKey);
             }
         }
     }
