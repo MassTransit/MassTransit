@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PublisherA</RootNamespace>
     <AssemblyName>PublisherA</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -32,6 +33,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MassTransit, Version=2.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\lapps-masstransit\src\MassTransit\bin\Debug\MassTransit.dll</HintPath>
+    </Reference>
+    <Reference Include="MassTransit.Transports.RabbitMq, Version=2.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Transports\MassTransit.Transports.RabbitMq\bin\Debug\MassTransit.Transports.RabbitMq.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -51,14 +60,6 @@
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{47B6E66D-D024-4537-8048-C4A3093B0541}</Project>
       <Name>Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
-      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
-      <Name>MassTransit</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Transports\MassTransit.Transports.RabbitMq\MassTransit.Transports.RabbitMq.csproj">
-      <Project>{6c7149d7-4d97-45df-a05d-61ec7374491d}</Project>
-      <Name>MassTransit.Transports.RabbitMq</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
