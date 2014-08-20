@@ -157,6 +157,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="test.log4net.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
