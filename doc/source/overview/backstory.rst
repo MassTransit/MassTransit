@@ -3,7 +3,7 @@ What is MassTransit?
 
 MassTransit (MT) is a framework for creating distributed applications on
 the .Net platform. MT provides the ability to subscribe to messages by type
-and then connect different processing nodes though message subscriptions
+and then connect different processing nodes through message subscriptions
 building a cohesive mesh of services.
 
 A bit of the back story?
