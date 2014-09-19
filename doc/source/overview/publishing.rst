@@ -17,7 +17,7 @@ of the transport infrastructure.
 
 MassTransit prefers a dynamic routing model, we do not enforce a static routing
 model, however it can be achieved with the 'static routing bits'. What this 
-means is that when you call the ``Subscribe`` methonds, MassTransit is going to
+means is that when you call the ``Subscribe`` methods, MassTransit is going to
 setup the necessary routing for you. 
 
 The 'necessary' routing will vary by transport that you use.
