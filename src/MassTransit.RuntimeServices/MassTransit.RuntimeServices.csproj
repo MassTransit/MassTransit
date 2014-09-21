@@ -76,21 +76,17 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.5\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NHibernate" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\NHibernate.3.4.0.4000\lib\Net35\NHibernate.dll</HintPath>
-    </Reference>
     <Reference Include="NHibernate" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\packages\NHibernate.4.0.1.4000\lib\Net40\NHibernate.dll</HintPath>
+      <HintPath>..\packages\NHibernate.4.0.1.4000\lib\Net40\NHibernate.dll</HintPath>
     </Reference>
-    <Reference Include="StructureMap, Version=2.6.4.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\structuremap.2.6.4.1\lib\net40\StructureMap.dll</HintPath>
+    <Reference Include="StructureMap" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
+      <HintPath>..\packages\StructureMap.3.1.2.138\lib\net40\StructureMap.dll</HintPath>
     </Reference>
     <Reference Include="Topshelf" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\packages\Topshelf.3.1.3\lib\net40-full\Topshelf.dll</HintPath>
+      <HintPath>..\packages\Topshelf.3.1.4\lib\net40-full\Topshelf.dll</HintPath>
     </Reference>
     <Reference Include="Topshelf.Log4NetIntegration" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\packages\Topshelf.Log4Net.3.1.3\lib\net40-full\Topshelf.Log4Net.dll</HintPath>
+      <HintPath>..\packages\Topshelf.Log4Net.3.1.4\lib\net40-full\Topshelf.Log4Net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />

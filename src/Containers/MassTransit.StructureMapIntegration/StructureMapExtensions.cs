@@ -78,7 +78,11 @@ namespace MassTransit
                 .PluginTypes
                 .Where(x => x.PluginType.Implements<T>())
                 .Select(i => i.PluginType)
+#if NET40
                 .Concat(container.Model.InstancesOf<T>().Select(x => x.ReturnedType))
+#else
+                .Concat(container.Model.InstancesOf<T>().Select(x => x.ConcreteType))
+#endif
                 .Where(filter)
                 .Distinct()
                 .ToList();
