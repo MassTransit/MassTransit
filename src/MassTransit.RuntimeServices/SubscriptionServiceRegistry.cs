@@ -42,19 +42,20 @@ namespace MassTransit.RuntimeServices
 			For(typeof (ISagaRepository<>))
 				.Add(typeof (NHibernateSagaRepository<>));
 
+            var serviceBusFunc = new Func<IContext, IServiceBus>(context => ServiceBusFactory.New(sbc =>
+            {
+                sbc.ReceiveFrom(configuration.HealthServiceDataUri);
+                sbc.UseControlBus();
+                sbc.UseLog4Net();
+
+                sbc.UseMsmq(x => x.UseSubscriptionService(configuration.SubscriptionServiceUri));
+
+                sbc.SetConcurrentConsumerLimit(1);
+            }));
+
 			For<IServiceBus>()
 				.Singleton()
-				.Use(context =>
-				{
-					return ServiceBusFactory.New(sbc =>
-					{
-						sbc.ReceiveFrom(configuration.SubscriptionServiceUri);
-                        sbc.UseLog4Net();
-						sbc.UseMsmq();
-
-						sbc.SetConcurrentConsumerLimit(1);
-					});
-				});
+				.Use(context =>serviceBusFunc(context));
 		}
 
 		static ISessionFactory CreateSessionFactory()
