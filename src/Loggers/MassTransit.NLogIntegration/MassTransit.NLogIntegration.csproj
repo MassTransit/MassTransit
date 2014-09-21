@@ -39,10 +39,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\NLog.3.1.0\lib\net35\NLog.dll</HintPath>
+      <HintPath>..\..\packages\NLog.3.1.0.0\lib\net35\NLog.dll</HintPath>
     </Reference>
     <Reference Include="NLog" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\packages\NLog.3.1.0\lib\net40\NLog.dll</HintPath>
+      <HintPath>..\..\packages\NLog.3.1.0.0\lib\net40\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

@@ -88,13 +88,11 @@ namespace MassTransit.Serialization
             Envelope envelope = Envelope.Create(context);
 
             using (var outputStream = new NonClosingStream(output))
-            using (var jsonWriter = new BsonWriter(outputStream))
+            using (var bsonWriter = new BsonWriter(outputStream))
             {
-                jsonWriter.Formatting = Formatting.Indented;
+                Serializer.Serialize(bsonWriter, envelope);
 
-                Serializer.Serialize(jsonWriter, envelope);
-
-                jsonWriter.Flush();
+                bsonWriter.Flush();
             }
         }
 
@@ -102,9 +100,9 @@ namespace MassTransit.Serialization
         {
             Envelope result;
             using (var inputStream = new NonClosingStream(context.BodyStream))
-            using (var jsonReader = new BsonReader(inputStream))
+            using (var bsonReader = new BsonReader(inputStream))
             {
-                result = Deserializer.Deserialize<Envelope>(jsonReader);
+                result = Deserializer.Deserialize<Envelope>(bsonReader);
             }
 
             context.SetUsingEnvelope(result);

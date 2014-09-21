@@ -63,7 +63,7 @@
       <HintPath>..\..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\StructureMap.2.6.4.1\lib\net35\StructureMap.dll</HintPath>
+      <HintPath>..\..\packages\StructureMap.2.6.4.1\lib\net40\StructureMap.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\..\packages\StructureMap.3.1.2.138\lib\net40\StructureMap.dll</HintPath>
@@ -72,10 +72,10 @@
       <HintPath>..\..\packages\StructureMap.3.1.2.138\lib\net40\StructureMap.Net4.dll</HintPath>
     </Reference>
     <Reference Include="Ninject" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\Ninject.3.0.1.10\lib\net35\Ninject.dll</HintPath>
+      <HintPath>..\..\packages\Ninject.3.2.2.0\lib\net35\Ninject.dll</HintPath>
     </Reference>
     <Reference Include="Ninject" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\packages\Ninject.3.0.1.10\lib\net40\Ninject.dll</HintPath>
+      <HintPath>..\..\packages\Ninject.3.2.2.0\lib\net40\Ninject.dll</HintPath>
     </Reference>
     <Reference Include="Castle.Core" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\packages\Castle.Core.3.3.0\lib\net35\Castle.Core.dll</HintPath>
@@ -87,7 +87,7 @@
       <HintPath>..\..\packages\Castle.Windsor.3.3.0\lib\net35\Castle.Windsor.dll</HintPath>
     </Reference>
     <Reference Include="Castle.Windsor" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\packages\Castle.Windsor.3.3.0\lib\net40-client\Castle.Windsor.dll</HintPath>
+      <HintPath>..\..\packages\Castle.Windsor.3.3.0\lib\net40\Castle.Windsor.dll</HintPath>
     </Reference>
     <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
       <HintPath>..\..\packages\log4net.2.0.3\lib\net35-full\log4net.dll</HintPath>

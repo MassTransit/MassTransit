@@ -44,20 +44,22 @@ namespace MassTransit.RuntimeServices
 
 			For<IServiceBus>()
 				.Singleton()
-				.Use(context =>
-				{
-					return ServiceBusFactory.New(sbc =>
-					{
-						sbc.ReceiveFrom(configuration.SubscriptionServiceUri);
-                        sbc.UseLog4Net();
-						sbc.UseMsmq();
-
-						sbc.SetConcurrentConsumerLimit(1);
-					});
-				});
+				.Use(context => GetServiceBus(configuration));
 		}
 
-		static ISessionFactory CreateSessionFactory()
+        static IServiceBus GetServiceBus(IConfiguration configuration)
+        {
+            return ServiceBusFactory.New(sbc =>
+            {
+                sbc.ReceiveFrom(configuration.SubscriptionServiceUri);
+                sbc.UseLog4Net();
+                sbc.UseMsmq();
+
+                sbc.SetConcurrentConsumerLimit(1);
+            });
+        }
+
+        static ISessionFactory CreateSessionFactory()
 		{
 		    var provider = new NHibernateSessionFactoryProvider(new Type[]
 		        {

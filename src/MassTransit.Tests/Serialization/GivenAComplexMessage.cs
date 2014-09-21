@@ -87,10 +87,10 @@
 
     }
 
-	[TestFixture]
-    public class WhenUsingBsonOnComplexMessage :
-        GivenAComplexMessage<BsonMessageSerializer>
-    {
-
-    }
+//	[TestFixture]
+//    public class WhenUsingBsonOnComplexMessage :
+//        GivenAComplexMessage<BsonMessageSerializer>
+//    {
+//
+//    }
 }

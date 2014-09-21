@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Serialization
 
     [TestFixture(typeof(XmlMessageSerializer))]
     [TestFixture(typeof(JsonMessageSerializer))]
-    [TestFixture(typeof(BsonMessageSerializer))]
+//    [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(VersionOneXmlMessageSerializer))]
     [TestFixture(typeof(BinaryMessageSerializer))]
     public class MoreSerialization_Specs<TSerializer> :
@@ -342,7 +342,7 @@ namespace MassTransit.Tests.Serialization
 
                 serializedMessageData = output.ToArray();
 
-                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+                Console.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
             }
 
             using (var input = new MemoryStream(serializedMessageData))

@@ -40,22 +40,24 @@ namespace MassTransit.RuntimeServices
 
             For<IServiceBus>()
                 .Singleton()
-                .Use(context =>
-                    {
-                        return ServiceBusFactory.New(sbc =>
-                            {
-                                sbc.ReceiveFrom(configuration.TimeoutServiceDataUri);
-                                sbc.UseControlBus();
-                                sbc.UseLog4Net();
+                .Use(context => GetServiceBus(configuration));
+        }
 
-                                sbc.UseMsmq(x => x.UseSubscriptionService(configuration.SubscriptionServiceUri));
+        static IServiceBus GetServiceBus(IConfiguration configuration)
+        {
+            return ServiceBusFactory.New(sbc =>
+            {
+                sbc.ReceiveFrom(configuration.TimeoutServiceDataUri);
+                sbc.UseControlBus();
+                sbc.UseLog4Net();
 
-                                sbc.SetConcurrentConsumerLimit(1);
+                sbc.UseMsmq(x => x.UseSubscriptionService(configuration.SubscriptionServiceUri));
 
-                                if (configuration.HealthServiceEnabled)
-                                    sbc.UseHealthMonitoring(10);
-                            });
-                    });
+                sbc.SetConcurrentConsumerLimit(1);
+
+                if (configuration.HealthServiceEnabled)
+                    sbc.UseHealthMonitoring(10);
+            });
         }
 
         static ISessionFactory CreateSessionFactory()
