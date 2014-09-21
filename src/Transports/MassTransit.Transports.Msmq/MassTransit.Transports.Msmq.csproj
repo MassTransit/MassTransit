@@ -60,10 +60,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <HintPath>..\..\packages\Magnum.2.1.2\lib\NET35\Magnum.dll</HintPath>
+      <HintPath>..\..\packages\Magnum.2.1.3\lib\NET35\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\..\packages\Magnum.2.1.2\lib\NET40\Magnum.dll</HintPath>
+      <HintPath>..\..\packages\Magnum.2.1.3\lib\NET40\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
