@@ -36,7 +36,7 @@ desc "Default + tests"
 task :all => [:default]
 
 desc "**DOOES NOT CLEAR OUTPUT FOLDER**, compiles and runs tests"
-task :unclean => [:compile, :ilmerge, :compile_samples, :copy_samples, :copy_services, :tests]
+task :unclean => [:compile, :ilmerge, :unit_tests4, :compile_samples, :copy_samples, :copy_services]
 
 desc "Update the common version information for the build. You can call this task without building."
 assemblyinfo :global_version => [:versioning] do |asm|
@@ -127,6 +127,8 @@ task :copy_services => [:build_unsigned] do
 	src = File.join(props[:src], "MassTransit.RuntimeServices/bin/#{BUILD_CONFIG}")
 
     # unsigned packages ugh
+    outc = File.join(props[:output], "Containers")
+
     copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
 
     copyOutputFiles src, "MassTransit.*.{dll,exe,config,log4net.xml,sdf}", targ
@@ -384,9 +386,16 @@ task :tests => [:unit_tests]
 
 desc "Runs unit tests"
 nunit :unit_tests do |nunit|
+  nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.3', 'tools', 'nunit-console.exe')
+  nunit.parameters = "/framework=#{CLR_TOOLS_VERSION}", '/exclude:Integration', '/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results-')}#{OUTPUT_PATH}.xml\""
+  nunit.assemblies = FileList["tests/MassTransit.Tests.dll", "tests/MassTransit.Containers.Tests.dll"]
+end
+
+desc "Runs unit tests"
+nunit :unit_tests4 do |nunit|
 	nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.3', 'tools', 'nunit-console.exe')
 	nunit.parameters = "/framework=#{CLR_TOOLS_VERSION}", '/exclude:Integration', '/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results-')}#{OUTPUT_PATH}.xml\""
-  nunit.assemblies = FileList["tests/MassTransit.Tests.dll", "tests/MassTransit.Containers.Tests.dll"]
+  nunit.assemblies = FileList["tests/MassTransit.Tests.dll"]
 end
 
 desc "Runs transport tests (integration)"
