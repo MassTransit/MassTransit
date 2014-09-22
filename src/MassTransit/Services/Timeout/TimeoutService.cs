@@ -95,6 +95,7 @@ namespace MassTransit.Services.Timeout
 				_log.Info("Timeout Service Stopping");
 
 			_unsubscribeToken();
+            _fiber.Shutdown(30.Seconds());
 
 			if (_log.IsInfoEnabled)
 				_log.Info("Timeout Service Stopped");
