@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'albacore'
+gem 'albacore',  '~> 1.0.0'
 gem 'rake'
 gem 'semver2'
