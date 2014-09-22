@@ -18,7 +18,7 @@ namespace Starbucks.Cashier
 	public class CashierService
 	{
 		private IServiceBus _bus;
-		private ISagaRepository<CashierSaga> _sagaRepository;
+		private readonly ISagaRepository<CashierSaga> _sagaRepository;
 		private UnsubscribeAction _unsubscribeAction;
 
 		public CashierService(IServiceBus bus, ISagaRepository<CashierSaga> sagaRepository)
