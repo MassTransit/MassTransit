@@ -11,14 +11,14 @@ namespace MassTransit.Tests
         [Test]
         public void SimpleMessage()
         {
-            var urn = new MessageUrn(typeof (Ping));
-            Assert.AreEqual(urn.AbsolutePath, "message:MassTransit.TestFramework.Examples.Messages:Ping");
+            var urn = new MessageUrn(typeof (FlingPing));
+            Assert.AreEqual(urn.AbsolutePath, "message:MassTransit.Tests:FlingPing");
         }
 
         [Test]
         public void SimpleMessageLoopback()
         {
-            LoopbackTestMessage(typeof (Ping));
+            LoopbackTestMessage(typeof (FlingPing));
         }
 
         [Test]
@@ -65,29 +65,29 @@ namespace MassTransit.Tests
         [Test]
         public void ClosedGenericMessage()
         {
-            var urn = new MessageUrn(typeof (G<Ping>));
-            var expected = new Uri("urn:message:MassTransit.Tests:G[[MassTransit.TestFramework.Examples.Messages:Ping]]");
+            var urn = new MessageUrn(typeof (G<FlingPing>));
+            var expected = new Uri("urn:message:MassTransit.Tests:G[[MassTransit.Tests:FlingPing]]");
             Assert.AreEqual(expected.AbsolutePath,urn.AbsolutePath) ;
         }
 
         [Test]
         public void ClosedGenericMessageLoopback()
         {
-            LoopbackTestMessage(typeof (G<Ping>));
+            LoopbackTestMessage(typeof (G<FlingPing>));
         }
 
         [Test]
         public void ClosedGenericTupleMessage()
         {
-            var urn = new MessageUrn(typeof (H<Ping, Ping>));
-            var expected = new Uri("urn:message:MassTransit.Tests:H[[MassTransit.TestFramework.Examples.Messages:Ping],[MassTransit.TestFramework.Examples.Messages:Ping]]");
+            var urn = new MessageUrn(typeof (H<FlingPing, FlingPing>));
+            var expected = new Uri("urn:message:MassTransit.Tests:H[[MassTransit.Tests:FlingPing],[MassTransit.Tests:FlingPing]]");
             Assert.AreEqual(expected.AbsolutePath, urn.AbsolutePath);
         }
 
         [Test]
         public void ClosedGenericTupleMessageLoopback()
         {
-            LoopbackTestMessage(typeof (H<Ping, Ping>));
+            LoopbackTestMessage(typeof (H<FlingPing, FlingPing>));
         }
 
         private static void LoopbackTestMessage(Type messageType)
@@ -98,7 +98,13 @@ namespace MassTransit.Tests
         }
 
         class X{}
+
+
     }
-    public class G<T>{}
+    public class FlingPing
+    {
+    }
+    public class G<T> { }
     public class H<T1,T2>{}
+
 }
