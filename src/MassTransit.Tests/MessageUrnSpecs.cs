@@ -12,7 +12,7 @@ namespace MassTransit.Tests
         public void SimpleMessage()
         {
             var urn = new MessageUrn(typeof (Ping));
-            Assert.AreEqual(urn.AbsolutePath, "message:MassTransit.TestFramework.Examples.Messages:Ping:MassTransit.Tests");
+            Assert.AreEqual(urn.AbsolutePath, "message:MassTransit.TestFramework.Examples.Messages:Ping");
         }
 
         [Test]
@@ -25,7 +25,7 @@ namespace MassTransit.Tests
         public void NestedMessage()
         {
             var urn = new MessageUrn(typeof (X));
-            Assert.AreEqual(urn.AbsolutePath, "message:MassTransit.Tests:MessageUrnSpecs+X:MassTransit.Tests");
+            Assert.AreEqual(urn.AbsolutePath, "message:MassTransit.Tests:MessageUrnSpecs+X");
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace MassTransit.Tests
         public void OpenGenericMessage()
         {
             var urn = new MessageUrn(typeof (G<>));
-            var expected = new Uri("urn:message:MassTransit.Tests:G[[]]:MassTransit.Tests");
+            var expected = new Uri("urn:message:MassTransit.Tests:G[[]]");
             Assert.AreEqual(expected.AbsolutePath, urn.AbsolutePath);
         }
 
@@ -52,7 +52,7 @@ namespace MassTransit.Tests
         public void OpenGenericTupleMessage()
         {
             var urn = new MessageUrn(typeof (H<,>));
-            var expected = new Uri("urn:message:MassTransit.Tests:H[[],[]]:MassTransit.Tests");
+            var expected = new Uri("urn:message:MassTransit.Tests:H[[],[]]");
             Assert.AreEqual(expected.AbsolutePath, urn.AbsolutePath);
         }
 
@@ -66,7 +66,7 @@ namespace MassTransit.Tests
         public void ClosedGenericMessage()
         {
             var urn = new MessageUrn(typeof (G<Ping>));
-            var expected = new Uri("urn:message:MassTransit.Tests:G[[MassTransit.TestFramework.Examples.Messages:Ping:MassTransit.Tests]]:MassTransit.Tests");
+            var expected = new Uri("urn:message:MassTransit.Tests:G[[MassTransit.TestFramework.Examples.Messages:Ping]]");
             Assert.AreEqual(expected.AbsolutePath,urn.AbsolutePath) ;
         }
 
@@ -80,7 +80,7 @@ namespace MassTransit.Tests
         public void ClosedGenericTupleMessage()
         {
             var urn = new MessageUrn(typeof (H<Ping, Ping>));
-            var expected = new Uri("urn:message:MassTransit.Tests:H[[MassTransit.TestFramework.Examples.Messages:Ping:MassTransit.Tests],[MassTransit.TestFramework.Examples.Messages:Ping:MassTransit.Tests]]:MassTransit.Tests");
+            var expected = new Uri("urn:message:MassTransit.Tests:H[[MassTransit.TestFramework.Examples.Messages:Ping],[MassTransit.TestFramework.Examples.Messages:Ping]]");
             Assert.AreEqual(expected.AbsolutePath, urn.AbsolutePath);
         }
 
