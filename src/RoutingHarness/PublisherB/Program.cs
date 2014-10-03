@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace PublisherB
 {
@@ -15,13 +16,23 @@ namespace PublisherB
 				sbc.UseRabbitMq();
 				sbc.ReceiveFrom("rabbitmq://localhost/publisher_b");
 			});
-			String read;
-			while (!String.IsNullOrEmpty(read = Console.ReadLine()))
-			{
-				Bus.Instance.Publish(new ClientMessage { Text = read });
-			}
+
+			var thread = new Thread(new ThreadStart(
+				delegate
+				{
+					while (true)
+					{
+						Bus.Instance.Publish(new ClientMessage { Text = "ClientB." + Guid.NewGuid() });
+					}
+				}));
+
+			thread.Start();
 
 			Console.ReadKey();
+
+			thread.Abort();
+
+			Bus.Shutdown();
 		}
 	}
 }

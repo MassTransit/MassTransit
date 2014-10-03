@@ -1,4 +1,6 @@
-﻿namespace PublisherA
+﻿using System.Threading;
+
+namespace PublisherA
 {
 	using System;
 	using Common;
@@ -14,13 +16,23 @@
 				sbc.UseRabbitMq();
 				sbc.ReceiveFrom("rabbitmq://localhost/publisher_a");
 			});
-			String read;
-			while (!String.IsNullOrEmpty(read = Console.ReadLine()))
-			{
-				Bus.Instance.Publish(new ClientMessage { Text = read });
-			}
 
+			var thread = new Thread(new ThreadStart(
+				delegate
+				{
+					while (true)
+					{
+						Bus.Instance.Publish(new ClientMessage {Text = "ClientA." + Guid.NewGuid()});
+					}
+				}));
+
+			thread.Start();
+			
 			Console.ReadKey();
+
+			thread.Abort();
+
+			Bus.Shutdown();
 		}
 	}
 }

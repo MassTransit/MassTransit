@@ -6,8 +6,9 @@
 		{
 			get
 			{
-				return string.IsNullOrEmpty(RabbitMqRoutingKeyProvider.RouteKey) ? 
-					RabbitMQ.Client.ExchangeType.Fanout : RabbitMQ.Client.ExchangeType.Direct;
+				return string.IsNullOrEmpty(RabbitMqRoutingKeyProvider.RouteKey)
+					? RabbitMQ.Client.ExchangeType.Fanout
+					: RabbitMQ.Client.ExchangeType.Topic;
 			}
 		}
 	}

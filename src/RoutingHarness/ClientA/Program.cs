@@ -8,7 +8,7 @@ namespace ClientA
 	{
 		static void Main(string[] args)
 		{
-			var queueName = Guid.NewGuid();
+			var queueName = "ClientA." + Guid.NewGuid();
 			Console.WriteLine("G'day mate! The bloody queue name to kick off the bus is: {0}", queueName);
 			
 			try
@@ -24,10 +24,12 @@ namespace ClientA
 			}
 			catch (Exception ex)
 			{
+				Console.WriteLine(ex);
 				Console.WriteLine("Arrrrgh! You fkd up.");
 			}
 
 			Console.Read();
+			Bus.Shutdown();
 		}
 	}
 }
