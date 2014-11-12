@@ -48,7 +48,9 @@ namespace MassTransit.NinjectIntegration
 			}
 			finally
 			{
-			    _kernel.Release(consumer);
+                // Do not attempt to use Activation Blocks to mimick the same behavior, see this: https://github.com/ninject/Ninject/issues/125
+                // Also note: This does not properly Dispose of the object.
+			    var result = _kernel.Release(consumer);
 			}
 		}
 	}
