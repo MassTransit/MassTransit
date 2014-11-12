@@ -33,9 +33,7 @@ namespace MassTransit.NinjectIntegration
 			IConsumeContext<TMessage> context, InstanceHandlerSelector<T, TMessage> selector)
 			where TMessage : class
 		{
-		    var activationBlock = _kernel.BeginBlock();
-
-            var consumer = activationBlock.Get<T>();
+            var consumer = _kernel.Get<T>();
 			if (consumer == null)
 				throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ", typeof (T)));
 
@@ -50,7 +48,7 @@ namespace MassTransit.NinjectIntegration
 			}
 			finally
 			{
-                activationBlock.Dispose();
+			    _kernel.Release(consumer);
 			}
 		}
 	}
