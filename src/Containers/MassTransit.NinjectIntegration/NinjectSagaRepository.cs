@@ -41,16 +41,7 @@ namespace MassTransit.NinjectIntegration
             return _repository.GetSaga(context, sagaId, selector, policy)
                               .Select(consumer => (Action<IConsumeContext<TMessage>>)(x =>
                                   {
-                                      IActivationBlock activationBlock = _kernel.BeginBlock();
-
-                                      try
-                                      {
-                                          consumer(x);
-                                      }
-                                      finally
-                                      {
-                                          activationBlock.Dispose();
-                                      }
+                                      consumer(x);
                                   }));
         }
 
