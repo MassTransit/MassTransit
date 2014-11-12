@@ -14,6 +14,7 @@ namespace MassTransit.Containers.Tests
 {
     using Magnum.TestFramework;
     using Ninject;
+    using Ninject.Extensions.NamedScope;
     using Saga;
     using Scenarios;
     using SubscriptionConfigurators;
@@ -29,11 +30,11 @@ namespace MassTransit.Containers.Tests
         {
             _container = new StandardKernel();
             _container.Bind<SimpleConsumer>()
-                      .ToSelf();
+                      .ToSelf().InCallScope();
             _container.Bind<ISimpleConsumerDependency>()
-                      .To<SimpleConsumerDependency>();
+                      .To<SimpleConsumerDependency>().InCallScope();
             _container.Bind<AnotherMessageConsumer>()
-                      .To<AnotherMessageConsumerImpl>();
+                      .To<AnotherMessageConsumerImpl>().InCallScope();
         }
 
         [Finally]
