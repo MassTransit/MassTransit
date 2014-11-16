@@ -12,11 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TextFixtures
 {
-	using BusConfigurators;
-	using MassTransit.Transports.Loopback;
+    using BusConfigurators;
+    using MassTransit.Transports.Loopback;
 	using NUnit.Framework;
 
-	[TestFixture]
+
+    [TestFixture]
 	public class LoopbackTestFixture :
 		EndpointTestFixture<LoopbackTransportFactory>
 	{

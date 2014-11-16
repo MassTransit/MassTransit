@@ -32,8 +32,6 @@ namespace MassTransit.Transports
         {
             ConsumeContext consumeContext = _deserializer.Deserialize(context);
 
-//            acceptContext.SetEndpoint(this);
-
             await _output.Send(consumeContext);
 
             await next.Send(context);

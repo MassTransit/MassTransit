@@ -17,29 +17,27 @@ namespace MassTransit.Transports.RabbitMq.Configuration
     using System.Linq;
     using MassTransit.Builders;
     using MassTransit.Configurators;
-    using MassTransit.Pipeline;
-    using Serialization;
 
 
-    public class RabbitMqTransportConfigurator :
-        IRabbitMqTransportConfigurator,
-        ITransportBuilder
+    public class RabbitMqServiceBusFactoryConfigurator :
+        IRabbitMqServiceBusFactoryConfigurator,
+        IServiceBusFactory
     {
         readonly RabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
         readonly IList<RabbitMqHostSettings> _hosts;
         readonly RabbitMqPublishSettings _publishSettings;
-        readonly IList<ITransportBuilderConfigurator> _transportBuilderConfigurators;
+        readonly IList<IServiceBusFactoryBuilderConfigurator> _transportBuilderConfigurators;
         HostSettings _defaultHostSettings;
 
-        public RabbitMqTransportConfigurator(ITransportSelector selector)
+        public RabbitMqServiceBusFactoryConfigurator(IServiceBusFactorySelector selector)
         {
             _hosts = new List<RabbitMqHostSettings>();
             _defaultHostSettings = new HostSettings();
             _defaultEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_defaultHostSettings);
             _publishSettings = new RabbitMqPublishSettings();
-            _transportBuilderConfigurators = new List<ITransportBuilderConfigurator>();
+            _transportBuilderConfigurators = new List<IServiceBusFactoryBuilderConfigurator>();
 
-            selector.SelectTransport(this);
+            selector.SetServiceBusFactory(this);
         }
 
         public void Host(RabbitMqHostSettings settings)
@@ -58,12 +56,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
             }
         }
 
-        public void Endpoint(RabbitMqEndpointSettings settings)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddTransportBuilderConfigurator(ITransportBuilderConfigurator configurator)
+        public void AddServiceBusFactoryBuilderConfigurator(IServiceBusFactoryBuilderConfigurator configurator)
         {
             _transportBuilderConfigurators.Add(configurator);
         }
@@ -84,17 +77,14 @@ namespace MassTransit.Transports.RabbitMq.Configuration
             throw new NotImplementedException();
         }
 
-        public IBus Build()
+        public IBusControl CreateServiceBus()
         {
             var builder = new RabbitMqServiceBusBuilder(_hosts, _publishSettings);
 
-            foreach (ITransportBuilderConfigurator configurator in _transportBuilderConfigurators)
+            foreach (IServiceBusFactoryBuilderConfigurator configurator in _transportBuilderConfigurators)
                 configurator.Configure(builder);
 
             IBusControl bus = builder.Build();
-
-            bus.Start();
-
 
             return bus;
         }
@@ -116,42 +106,6 @@ namespace MassTransit.Transports.RabbitMq.Configuration
             public string Username { get; set; }
             public string Password { get; set; }
             public ushort Heartbeat { get; set; }
-        }
-    }
-
-
-    public class RabbitMqServiceBusBuilder :
-        IServiceBusBuilder
-    {
-        readonly IEnumerable<RabbitMqHostSettings> _hosts;
-        readonly PublishSettings _publishSettings;
-        readonly IList<IReceiveEndpoint> _receiveEndpoints;
-        IMessageDeserializer _messageDeserializer;
-
-        public RabbitMqServiceBusBuilder(IEnumerable<RabbitMqHostSettings> hosts, PublishSettings publishSettings)
-        {
-            _hosts = hosts;
-            _publishSettings = publishSettings;
-            _receiveEndpoints = new List<IReceiveEndpoint>();
-
-            _messageDeserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
-        }
-
-        public void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint)
-        {
-            _receiveEndpoints.Add(receiveEndpoint);
-        }
-
-        public IMessageDeserializer MessageDeserializer
-        {
-            get { return _messageDeserializer; }
-        }
-
-        public IBusControl Build()
-        {
-            var inboundPipe = new InboundPipe();
-
-            return new SuperDuperServiceBus(inboundPipe, _receiveEndpoints);
         }
     }
 }

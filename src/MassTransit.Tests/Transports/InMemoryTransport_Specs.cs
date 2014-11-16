@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Transports
 
                 var inputAddress = new Uri("loopback://localhost/input_queue");
 
-                var transport = new InMemoryReceiveTransport(inputAddress);
+                var transport = new InMemoryTransport(inputAddress);
 
                 var received = new TaskCompletionSource<int>();
 
@@ -47,7 +47,7 @@ namespace MassTransit.Tests.Transports
                     }));
                 });
 
-                Task receiveTask = transport.Start(receivePipe, shutdown.Token);
+                Task receiveTask = ((IReceiveTransport)transport).Start(receivePipe, shutdown.Token);
 
                 var sendEndpoint = new SendEndpoint(transport, new JsonSendMessageSerializer(JsonMessageSerializer.Serializer), inputAddress);
 

@@ -12,12 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
 
 
     public interface IBusControl :
-        IBus
+        IBus,
+        IDisposable
     {
         Task Start(CancellationToken cancellationToken = default(CancellationToken));
         Task Stop();

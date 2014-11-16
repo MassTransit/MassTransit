@@ -45,23 +45,23 @@ namespace MassTransit.Transports.RabbitMq
         /// completely shutdown once the cancellation token is cancelled.
         /// </summary>
         /// <param name="receivePipe"></param>
-        /// <param name="cancellationToken">The cancellation token that is cancelled to terminate the receive transport</param>
+        /// <param name="stopReceive">The cancellation token that is cancelled to terminate the receive transport</param>
         /// <returns>A task that is completed once the transport is shut down</returns>
-        public Task Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
+        public Task Start(IPipe<ReceiveContext> receivePipe, CancellationToken stopReceive)
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.Repeat(cancellationToken);
-                x.Retry(_retryPolicy, cancellationToken);
+                x.Repeat(stopReceive);
+                x.Retry(_retryPolicy, stopReceive);
 
                 x.ModelConsumer(receivePipe, _settings, _subscriptions);
             });
 
-            return Repeat.UntilCancelled(cancellationToken, async () =>
+            return Repeat.UntilCancelled(stopReceive, async () =>
             {
                 try
                 {
-                    await _connector.Connect(connectionPipe, cancellationToken);
+                    await _connector.Connect(connectionPipe, stopReceive);
                 }
                 catch (RabbitMqConnectionException ex)
                 {

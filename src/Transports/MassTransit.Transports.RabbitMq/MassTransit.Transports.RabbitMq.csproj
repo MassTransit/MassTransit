@@ -82,7 +82,7 @@
     <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
     <Compile Include="Configuration\ModelConsumerPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\EndpointConfigurator.cs" />
+    <Compile Include="Configuration\RabbitMqServiceBusBuilder.cs" />
     <Compile Include="Contexts\RabbitMqSendContextHeaders.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
     <Compile Include="Contexts\RabbitMqContextHeaderProvider.cs" />
@@ -93,6 +93,7 @@
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />
     <Compile Include="Exceptions\RabbitMqConnectionException.cs" />
+    <Compile Include="IRabbitMqConnectionCache.cs" />
     <Compile Include="Pipeline\ExchangeBindingSettings.cs" />
     <Compile Include="Pipeline\ExchangeSettings.cs" />
     <Compile Include="Pipeline\IRabbitMqConnector.cs" />
@@ -144,6 +145,7 @@
     <Compile Include="PublishEndpointSinkLocator.cs" />
     <Compile Include="RabbitMqConnection.cs" />
     <Compile Include="ConnectionContext.cs" />
+    <Compile Include="RabbitMqConnectionCache.cs" />
     <Compile Include="RabbitMqConnectionEventSource.cs" />
     <Compile Include="RabbitMqConsumer.cs" />
     <Compile Include="RabbitMqEndpointAddress.cs" />

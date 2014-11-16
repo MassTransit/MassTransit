@@ -10,7 +10,6 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
@@ -23,9 +22,10 @@ namespace MassTransit.AzureServiceBusTransport
     using Context;
     using Microsoft.ServiceBus.Messaging;
 
+
     public class AzureServiceBusReceiveContext :
         ReceiveContext,
-        AzureServiceBusMessageContext
+        BrokeredMessageContext
     {
         static readonly ContentType DefaultContentType = new ContentType("application/vnd.masstransit+json");
 
@@ -51,22 +51,10 @@ namespace MassTransit.AzureServiceBusTransport
             _cancellationTokenSource = new CancellationTokenSource();
         }
 
-        public Encoding ContentEncoding
-        {
-            get
-            {
-                return _encoding ?? (_encoding = string.IsNullOrWhiteSpace(ContentType.CharSet)
-                    ? Encoding.UTF8
-                    : Encoding.GetEncoding(ContentType.CharSet));
-            }
-        }
-
-
         public IDictionary<string, object> Properties
         {
             get { return _message.Properties; }
         }
-
 
         public int DeliveryCount
         {
@@ -76,7 +64,6 @@ namespace MassTransit.AzureServiceBusTransport
         public string Label
         {
             get { return _message.Label; }
-            set { _message.Label = value; }
         }
 
         public long SequenceNumber
@@ -122,7 +109,6 @@ namespace MassTransit.AzureServiceBusTransport
         public string To
         {
             get { return _message.To; }
-            set { _message.To = value; }
         }
 
         public string ReplyToSessionId

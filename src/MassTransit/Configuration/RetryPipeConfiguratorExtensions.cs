@@ -31,6 +31,13 @@ namespace MassTransit
             configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
         }
 
+        /// <summary>
+        /// Retry the subsequent filter pipe using the specified retry policy
+        /// </summary>
+        /// <typeparam name="T">The pipe type</typeparam>
+        /// <param name="configurator">The pipe configurator</param>
+        /// <param name="retryPolicy">The retry policy</param>
+        /// <param name="cancellationToken">The cancellation token to end the retry operations</param>
         public static void Retry<T>(this IPipeConfigurator<T> configurator, IRetryPolicy retryPolicy, CancellationToken cancellationToken)
             where T : class, PipeContext
         {

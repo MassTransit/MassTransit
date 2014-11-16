@@ -26,7 +26,7 @@ namespace MassTransit.AzureServiceBusTransport
 
     public class ServiceBusReceiveEndpointConfigurator :
         IServiceBusReceiveEndpointConfigurator,
-        ITransportBuilderConfigurator
+        IServiceBusFactoryBuilderConfigurator
     {
         readonly IList<IReceiveEndpointBuilderConfigurator> _configurators;
         readonly ServiceBusHostSettings _hostSettings;

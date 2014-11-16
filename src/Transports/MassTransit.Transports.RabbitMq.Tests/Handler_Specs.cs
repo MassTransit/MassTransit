@@ -16,6 +16,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     {
         using System;
         using System.Threading.Tasks;
+        using Configuration;
         using NUnit.Framework;
         using TestFramework;
 
@@ -24,11 +25,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
         public class ConfiguringRabbitMQ_Specs :
             AsyncTestFixture
         {
-            class A
-            {
-            }
-
-
             [Test]
             public async void Should_support_the_new_syntax()
             {
@@ -36,9 +32,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                 Task handler = null;
 
-                using (IBus bus = ServiceBusFactory.New(x => x.RabbitMQ(), x =>
+                using (IBusControl bus = ServiceBusFactory.New(x => x.RabbitMQ(), x =>
                 {
-                    var host = x.Host(hostAddress, r =>
+                    RabbitMqHostSettings host = x.Host(hostAddress, r =>
                     {
                         r.Username("guest");
                         r.Password("guest");
@@ -50,18 +46,23 @@ namespace MassTransit.Transports.RabbitMq.Tests
                         e.Durable(false);
                         e.Exclusive();
 
-                        handler = TestHandler<A>(e);
+                        handler = Handler<A>(e);
                     });
                 }))
                 {
                     var queueAddress = new Uri(hostAddress, "input_queue");
 
-                    ISendEndpoint endpoint = bus.GetSendEndpoint(queueAddress);
+                    ISendEndpoint endpoint = await bus.GetSendEndpoint(queueAddress);
 
                     await endpoint.Send(new A());
 
                     await handler;
                 }
+            }
+
+
+            class A
+            {
             }
         }
     }

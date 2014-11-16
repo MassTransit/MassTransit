@@ -185,6 +185,7 @@
     <Compile Include="Serialization\DefaultConstructor_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="SmallNumber_Specs.cs" />
+    <Compile Include="InMemoryTest_Specs.cs" />
     <Compile Include="Subscriptions\Consumer_Specs.cs" />
     <Compile Include="Subscriptions\DynamicAndStaticSubscriptions_Specs.cs" />
     <Compile Include="Subscriptions\NewSubscriptionSystem_Specs.cs" />

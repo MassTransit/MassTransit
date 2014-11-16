@@ -10,20 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Pipeline
 {
-    using System;
-
-
-    /// <summary>
-    /// Adapts a consumer to consume the message type
-    /// </summary>
-    /// <typeparam name="TConsumer"></typeparam>
-    /// <typeparam name="TMessage"></typeparam>
-    public interface IConsumerMessageAdapter<TConsumer, TMessage> :
-        IFilter<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>>
-        where TConsumer : class
-        where TMessage : class
+    public interface IConnectPipeById<out T, in TKey>
+        where T : class, PipeContext
     {
+        ConnectHandle Connect(TKey key, IPipe<T> pipe);
     }
 }

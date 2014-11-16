@@ -17,45 +17,32 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using System.Linq;
     using Builders;
     using MassTransit.Pipeline;
-    using Serialization;
     using Transports;
 
 
     public class AzureServiceBusServiceBusBuilder :
+        ServiceBusBuilderBase,
         IServiceBusBuilder
     {
         readonly ServiceBusHostSettings[] _hosts;
-        readonly IMessageDeserializer _messageDeserializer;
-        readonly IList<IReceiveEndpoint> _receiveEndpoints;
 
         public AzureServiceBusServiceBusBuilder(IEnumerable<ServiceBusHostSettings> hosts)
         {
             if (hosts == null)
                 throw new ArgumentNullException("hosts");
+
             _hosts = hosts.ToArray();
-
-            _receiveEndpoints = new List<IReceiveEndpoint>();
-            _messageDeserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
         }
 
-        public IMessageDeserializer MessageDeserializer
+        public virtual IBusControl Build()
         {
-            get { return _messageDeserializer; }
-        }
+            IInboundPipe inboundPipe = new InboundPipe();
 
-        public void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint)
-        {
-            if (receiveEndpoint == null)
-                throw new ArgumentNullException("receiveEndpoint");
+            ISendEndpointProvider sendEndpointProvider = new AzureServiceBusSendEndpointProvider(MessageSerializer, _hosts);
 
-            _receiveEndpoints.Add(receiveEndpoint);
-        }
+            var endpointCache = new SendEndpointCache(sendEndpointProvider);
 
-        public IBusControl Build()
-        {
-            var inboundPipe = new InboundPipe();
-
-            return new SuperDuperServiceBus(inboundPipe, _receiveEndpoints);
+            return new SuperDuperServiceBus(inboundPipe, endpointCache, ReceiveEndpoints);
         }
     }
 }

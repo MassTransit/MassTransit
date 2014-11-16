@@ -18,10 +18,17 @@ namespace MassTransit
     using Transports;
 
 
+    /// <summary>
+    /// The SendContext is used to tweak the send to the endpoint
+    /// </summary>
+    /// <typeparam name="T">The message type being sent</typeparam>
     public interface SendContext<out T> :
         SendContext
         where T : class
     {
+        /// <summary>
+        /// The message being sent
+        /// </summary>
         T Message { get; }
     }
 

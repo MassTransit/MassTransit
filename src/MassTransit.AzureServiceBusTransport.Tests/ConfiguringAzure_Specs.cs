@@ -46,7 +46,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 var completed = new TaskCompletionSource<A>();
 
-                using (IBus bus = ServiceBusFactory.New(x => x.AzureServiceBus(), x =>
+                using (IBusControl bus = ServiceBusFactory.New(x => x.AzureServiceBus(), x =>
                 {
                     ServiceBusHostSettings host = x.Host(serviceUri, h =>
                     {

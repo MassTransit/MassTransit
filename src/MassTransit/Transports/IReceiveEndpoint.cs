@@ -21,7 +21,14 @@ namespace MassTransit.Transports
     /// </summary>
     public interface IReceiveEndpoint
     {
-        Task Start(CancellationToken cancellationToken);
+        /// <summary>
+        /// Starts recieving from the inbound transport, returning a Task that is completed
+        /// once the transport is closed. The cancellationToken is used to stop the receive
+        /// endpoint from receiving messages from the inbound transport.
+        /// </summary>
+        /// <param name="stopToken">The token which will be cancelled once the receive endpoint should shut down</param>
+        /// <returns></returns>
+        Task Start(CancellationToken stopToken);
     }
 
 

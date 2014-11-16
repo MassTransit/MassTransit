@@ -12,8 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    using System.Linq;
+    using System.Reflection;
     using Filters;
-    using Sinks;
 
 
     public class PipeInspectorBase :
@@ -45,6 +46,26 @@ namespace MassTransit.Pipeline
             if (filter is HandlerMessageFilter<T>)
                 return Inspect((HandlerMessageFilter<T>)filter, x => callback(x));
 
+            if (filter.GetType().IsGenericType && filter.GetType().GetGenericTypeDefinition() == typeof(ConsumerMessageFilter<,>))
+            {
+                var method = GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+                    .Where(x => x.Name == "Inspect")
+                    .Where(
+                        x =>
+                            x.IsGenericMethod
+                                && x.GetParameters().First().ParameterType.GetGenericTypeDefinition() == typeof(ConsumerMessageFilter<,>))
+                    .First();
+                var genericMethod = method.MakeGenericMethod(filter.GetType().GetGenericArguments());
+
+                return (bool)genericMethod.Invoke(this, new object[] {filter, callback});
+            }
+
+            return Unknown(filter, callback);
+        }
+
+        protected virtual bool Unknown<T>(IFilter<T> filter, FilterInspectorCallback callback) 
+            where T : class, PipeContext
+        {
             return callback(this);
         }
 
@@ -67,6 +88,13 @@ namespace MassTransit.Pipeline
         }
 
         protected virtual bool Inspect<T>(HandlerMessageFilter<T> filter, FilterInspectorCallback callback)
+            where T : class
+        {
+            return callback(this);
+        }
+
+        protected virtual bool Inspect<TConsumer, T>(ConsumerMessageFilter<TConsumer, T> filter, FilterInspectorCallback callback)
+            where TConsumer : class
             where T : class
         {
             return callback(this);

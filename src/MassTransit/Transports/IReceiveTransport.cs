@@ -22,9 +22,9 @@ namespace MassTransit.Transports
         /// <summary>
         /// Start receiving on a transport, sending messages to the specified pipe.
         /// </summary>
-        /// <param name="receivePipeeceiving pipe</param>
-        /// <param name="cancellationToken">The cancellationToken for cancelling the receiver</param>
+        /// <param name="receivePipe">The receiving pipe</param>
+        /// <param name="stopReceive">The cancellationToken for cancelling the receiver</param>
         /// <returns></returns>
-        Task Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken);
+        Task Start(IPipe<ReceiveContext> receivePipe, CancellationToken stopReceive);
     }
 }

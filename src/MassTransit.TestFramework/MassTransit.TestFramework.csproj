@@ -101,6 +101,8 @@
     <Compile Include="Fixtures\EndpointTestFixture.cs" />
     <Compile Include="Fixtures\LocalAndRemoteTestFixture.cs" />
     <Compile Include="Given_two_service_buses_with_shared_subscriptions.cs" />
+    <Compile Include="InMemoryTestFixture.cs" />
+    <Compile Include="LocalBusTestFixture.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Fixtures\LocalTestFixture.cs" />
     <Compile Include="Given_a_standalone_service_bus.cs" />

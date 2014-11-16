@@ -17,31 +17,30 @@ namespace MassTransit.TransportConfigurators
     using Configurators;
 
 
-    public class TransportSelector :
-        ITransportSelector,
+    public class ServiceBusFactorySelector :
+        IServiceBusFactorySelector,
         Configurator
-
     {
-        ITransportBuilder _builder;
+        IServiceBusFactory _factory;
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_builder == null)
+            if (_factory == null)
                 yield return this.Failure("TransportBuilder", "must be configured");
         }
 
-        public void SelectTransport(ITransportBuilder builder)
+        public void SetServiceBusFactory(IServiceBusFactory factory)
         {
-            _builder = builder;
+            _factory = factory;
         }
 
-        public IBus Build()
+        public IBusControl Build()
         {
-            ConfigurationResult result = ConfigurationResultImpl.CompileResults(_builder.Validate());
+            ConfigurationResult result = ConfigurationResultImpl.CompileResults(_factory.Validate());
 
             try
             {
-                return _builder.Build();
+                return _factory.CreateServiceBus();
             }
             catch (Exception ex)
             {

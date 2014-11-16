@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -29,8 +28,8 @@ namespace MassTransit.AzureServiceBusTransport
 
         readonly CancellationToken _cancellationToken;
         readonly TaskCompletionSource<ReceiverMetrics> _completeTask;
-        readonly MessageReceiver _messageReceiver;
         readonly Uri _inputAddress;
+        readonly MessageReceiver _messageReceiver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         int _currentPendingDeliveryCount;
@@ -111,7 +110,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         async Task OnMessage(BrokeredMessage message)
         {
-            var deliveryCount = Interlocked.Increment(ref _deliveryCount);
+            long deliveryCount = Interlocked.Increment(ref _deliveryCount);
 
             int current = Interlocked.Increment(ref _currentPendingDeliveryCount);
             while (current > _maxPendingDeliveryCount)
@@ -142,13 +141,11 @@ namespace MassTransit.AzureServiceBusTransport
             try
             {
                 if (exception != null)
-                {
                     await message.AbandonAsync();
-                }
             }
             finally
             {
-                var pendingCount = Interlocked.Decrement(ref _currentPendingDeliveryCount);
+                int pendingCount = Interlocked.Decrement(ref _currentPendingDeliveryCount);
                 if (pendingCount == 0 && _shuttingDown)
                     _completeTask.TrySetResult(this);
             }

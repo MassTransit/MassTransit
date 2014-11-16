@@ -27,7 +27,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 
     public class RabbitMqReceiveEndpointConfigurator :
         IRabbitMqReceiveEndpointConfigurator,
-        ITransportBuilderConfigurator
+        IServiceBusFactoryBuilderConfigurator
     {
         readonly IList<IReceiveEndpointBuilderConfigurator> _configurators;
         readonly RabbitMqHostSettings _hostSettings;
@@ -138,7 +138,8 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 
         ReceiveEndpoint CreateReceiveEndpoint(ConnectionFactory connectionFactory, IMessageDeserializer deserializer)
         {
-            IRetryPolicy retryPolicy = Retry.Exponential(1.Seconds(), 60.Seconds(), 2.Seconds());
+            IRetryPolicy retryPolicy = Retry.Exponential(1.Seconds(), 10.Seconds(), 1.Seconds());
+
             var connectionMaker = new RabbitMqConnector(connectionFactory, retryPolicy);
 
             var transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, _settings);

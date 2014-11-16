@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-    using System;
-    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
@@ -24,102 +22,7 @@ namespace MassTransit.Transports.RabbitMq
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
 
-
     // this is a source vane, need to make it work like one - splice in the connection
-    public interface IRabbitMqConnectionCache
-    {
-        Task Connect<T>(T context, IPipe<TupleContext<ConnectionContext, T>> next)
-            where T : class, PipeContext;
-    }
-
-
-    public class RabbitMqConnectionCache : 
-        IRabbitMqConnectionCache,
-        IFilter<ConnectionContext>
-    {
-        readonly IRabbitMqConnector _connector;
-        readonly object _lock = new object();
-
-        ConnectionScope _scope;
-
-        IPipe<ConnectionContext> _connectionPipe;
-
-        public RabbitMqConnectionCache(IRabbitMqConnector connector)
-        {
-            _connector = connector;
-            _connectionPipe = Pipe.New<ConnectionContext>(x =>
-            {
-                x.Filter(new DelegateFilter<ConnectionContext>(context =>
-                {
-                }));
-            });
-        }
-
-        void RemoveConnectionContext(IConnection connection, ShutdownEventArgs reason)
-        {
-            lock (_lock)
-            {
-                _scope.ConnectionContext.Connection.ConnectionShutdown -= RemoveConnectionContext;
-                _scope.ConnectionClosed.TrySetResult(true);
-                _scope = default(ConnectionScope);
-            }
-        }
-
-        public async Task Connect<T>(T context, IPipe<TupleContext<ConnectionContext, T>> next)
-            where T : class, PipeContext
-        {
-            try
-            {
-                ConnectionScope connectionScope;
-                lock (_lock)
-                {
-                    connectionScope = _scope;
-                }
-
-                if (connectionScope.ConnectionClosed.Task.Wait(TimeSpan.Zero))
-                {
-                    await next.Send(context.PushLeft(connectionScope.ConnectionContext));
-                    return;
-                }
-
-                await _connector.Connect(_connectionPipe, context.CancellationToken);
-            }
-            catch (Exception)
-            {
-                
-                throw;
-            }
-        }
-
-        public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)
-        {
-            lock (_lock)
-            {
-                _scope = new ConnectionScope(context);
-                context.Connection.ConnectionShutdown += RemoveConnectionContext;
-            }
-        }
-
-        public bool Inspect(IPipeInspector inspector)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        struct ConnectionScope
-        {
-            public readonly ConnectionContext ConnectionContext;
-            public readonly TaskCompletionSource<bool> ConnectionClosed;
-
-            public ConnectionScope(ConnectionContext connectionContext)
-            {
-                ConnectionContext = connectionContext;
-                ConnectionClosed = new TaskCompletionSource<bool>();
-            }
-        }
-    }
-
-
 
     /// <summary>
     /// Establishes connections to RabbitMQ using the specified retry policy

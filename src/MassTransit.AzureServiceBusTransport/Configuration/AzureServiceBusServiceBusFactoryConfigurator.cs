@@ -20,23 +20,23 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using Microsoft.ServiceBus;
 
 
-    public class AzureServiceBusTransportConfigurator :
-        IServiceBusTransportConfigurator,
-        ITransportBuilder
+    public class AzureServiceBusServiceBusFactoryConfigurator :
+        IServiceBusServiceBusFactoryConfigurator,
+        IServiceBusFactory
     {
         //      readonly RabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
         readonly HostSettings _defaultHostSettings;
         readonly IList<ServiceBusHostSettings> _hosts;
-        readonly IList<ITransportBuilderConfigurator> _transportBuilderConfigurators;
+        readonly IList<IServiceBusFactoryBuilderConfigurator> _transportBuilderConfigurators;
 
-        public AzureServiceBusTransportConfigurator(ITransportSelector selector)
+        public AzureServiceBusServiceBusFactoryConfigurator(IServiceBusFactorySelector selector)
         {
             _hosts = new List<ServiceBusHostSettings>();
             _defaultHostSettings = new HostSettings();
 //            _defaultEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_defaultHostSettings);
-            _transportBuilderConfigurators = new List<ITransportBuilderConfigurator>();
+            _transportBuilderConfigurators = new List<IServiceBusFactoryBuilderConfigurator>();
 
-            selector.SelectTransport(this);
+            selector.SetServiceBusFactory(this);
         }
 
         public void Host(ServiceBusHostSettings settings)
@@ -48,7 +48,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 _defaultHostSettings.CopyFrom(settings);
         }
 
-        public void AddTransportBuilderConfigurator(ITransportBuilderConfigurator configurator)
+        public void AddServiceBusFactoryBuilderConfigurator(IServiceBusFactoryBuilderConfigurator configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
@@ -61,19 +61,14 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return _transportBuilderConfigurators.SelectMany(x => x.Validate());
         }
 
-        public IBus Build()
+        public IBusControl CreateServiceBus()
         {
             var builder = new AzureServiceBusServiceBusBuilder(_hosts);
 
-            foreach (ITransportBuilderConfigurator configurator in _transportBuilderConfigurators)
+            foreach (IServiceBusFactoryBuilderConfigurator configurator in _transportBuilderConfigurators)
                 configurator.Configure(builder);
 
-            IBusControl bus = builder.Build();
-
-            bus.Start();
-
-
-            return bus;
+            return builder.Build();
         }
 
 

@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using EndpointConfigurators;
     using Transports.RabbitMq.Configuration;
     using Transports.RabbitMq.Configuration.Configurators;
 
@@ -26,7 +25,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="hostAddress">The URI host address of the RabbitMQ host (rabbitmq://host:port/vhost)</param>
         /// <param name="configure"></param>
-        public static RabbitMqHostSettings Host(this IRabbitMqTransportConfigurator configurator, Uri hostAddress,
+        public static RabbitMqHostSettings Host(this IRabbitMqServiceBusFactoryConfigurator configurator, Uri hostAddress,
             Action<IRabbitMqHostConfigurator> configure)
         {
             var hostConfigurator = new RabbitMqHostConfigurator(hostAddress);
@@ -45,14 +44,15 @@ namespace MassTransit
         /// <param name="hostSettings">The host for this endpoint</param>
         /// <param name="queueName">The input queue name</param>
         /// <param name="configure">The configuration method</param>
-        public static void ReceiveEndpoint(this IRabbitMqTransportConfigurator configurator, RabbitMqHostSettings hostSettings, string queueName,
+        public static void ReceiveEndpoint(this IRabbitMqServiceBusFactoryConfigurator configurator, RabbitMqHostSettings hostSettings,
+            string queueName,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
             var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(hostSettings, queueName);
 
             configure(endpointConfigurator);
 
-            configurator.AddTransportBuilderConfigurator(endpointConfigurator);
+            configurator.AddServiceBusFactoryBuilderConfigurator(endpointConfigurator);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="hostSettings"></param>
         /// <param name="configure"></param>
-        public static void ReceiveEndpoint(this IRabbitMqTransportConfigurator configurator, RabbitMqHostSettings hostSettings,
+        public static void ReceiveEndpoint(this IRabbitMqServiceBusFactoryConfigurator configurator, RabbitMqHostSettings hostSettings,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
             var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(hostSettings);
@@ -74,7 +74,7 @@ namespace MassTransit
 
             configure(endpointConfigurator);
 
-            configurator.AddTransportBuilderConfigurator(endpointConfigurator);
+            configurator.AddServiceBusFactoryBuilderConfigurator(endpointConfigurator);
         }
     }
 }
