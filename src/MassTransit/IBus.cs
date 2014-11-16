@@ -13,14 +13,13 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading.Tasks;
     using Pipeline;
 
 
     public interface IBus :
-        IPublisher,
-        IDisposable
+        IPublisher
     {
-
         /// <summary>
         /// The inbound pipe for the bus
         /// </summary>
@@ -31,6 +30,6 @@ namespace MassTransit
         /// </summary>
         /// <param name="address">The endpoint address</param>
         /// <returns>A sendable endpoint</returns>
-        ISendEndpoint GetSendEndpoint(Uri address);
- }
+        Task<ISendEndpoint> GetSendEndpoint(Uri address);
+    }
 }

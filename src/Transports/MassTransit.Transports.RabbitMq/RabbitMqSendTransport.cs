@@ -33,12 +33,12 @@ namespace MassTransit.Transports.RabbitMq
             _exchange = exchange;
         }
 
-        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
         {
             IBasicProperties properties = _model.CreateBasicProperties();
             properties.Headers = new Dictionary<string, object>();
 
-            var context = new RabbitMqSendContextImpl<T>(properties, message, _exchange, cancellationToken);
+            var context = new RabbitMqSendContextImpl<T>(properties, message, _exchange, cancelSend);
 
             await pipe.Send(context);
 

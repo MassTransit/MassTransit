@@ -37,28 +37,28 @@ namespace MassTransit.AzureServiceBusTransport
             _retryPolicy = retryPolicy;
         }
 
-        public Task Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
+        public Task Start(IPipe<ReceiveContext> receivePipe, CancellationToken stopReceive)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting receive transport: {0}", new Uri(_hostSettings.ServiceUri, _settings.QueueDescription.Path));
 
             IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.Repeat(cancellationToken);
-                x.Retry(_retryPolicy, cancellationToken);
+                x.Repeat(stopReceive);
+                x.Retry(_retryPolicy, stopReceive);
 
                 x.Filter(new PrepareReceiveQueueFilter(_settings));
                 x.Filter(new MessageReceiverFilter(receivePipe));
             });
 
-            return Repeat.UntilCancelled(cancellationToken, async () =>
+            return Repeat.UntilCancelled(stopReceive, async () =>
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting receive transport: {0}", new Uri(_hostSettings.ServiceUri, _settings.QueueDescription.Path));
 
                 try
                 {
-                    using (var context = new ServiceBusConnectionContext(_hostSettings, cancellationToken))
+                    using (var context = new ServiceBusConnectionContext(_hostSettings, stopReceive))
                     {
                         await connectionPipe.Send(context);
                     }

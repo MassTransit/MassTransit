@@ -53,14 +53,16 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="AzureServiceBusHostConfigurator.cs" />
+    <Compile Include="AzureServiceBusReceiveContext.cs" />
     <Compile Include="AzureServiceBusSendContext.cs" />
     <Compile Include="AzureServiceBusSendContextHeaders.cs" />
     <Compile Include="AzureServiceBusSendContextImpl.cs" />
+    <Compile Include="AzureServiceBusSendEndpointProvider.cs" />
     <Compile Include="AzureServiceBusSendTransport.cs" />
+    <Compile Include="Configuration\AzureServiceBusHostConfigurator.cs" />
     <Compile Include="Configuration\AzureServiceBusServiceBusBuilder.cs" />
-    <Compile Include="Configuration\AzureServiceBusTransportConfigurator.cs" />
-    <Compile Include="Configuration\IServiceBusTransportConfigurator.cs" />
+    <Compile Include="Configuration\AzureServiceBusServiceBusFactoryConfigurator.cs" />
+    <Compile Include="Configuration\IServiceBusServiceBusFactoryConfigurator.cs" />
     <Compile Include="IServiceBusHostConfigurator.cs" />
     <Compile Include="IServiceBusReceiveEndpointConfigurator.cs" />
     <Compile Include="ISharedAccessSignatureTokenProviderConfigurator.cs" />
@@ -76,8 +78,6 @@
     <Compile Include="AzureServiceBusReceiveTransport.cs" />
     <Compile Include="AzureServiceBusTokenProviderSettings.cs" />
     <Compile Include="BrokeredMessageContext.cs" />
-    <Compile Include="AzureServiceBusMessageContext.cs" />
-    <Compile Include="AzureServiceBusReceiveContext.cs" />
     <Compile Include="IAzureServiceBusTokenProvider.cs" />
     <Compile Include="ReceiverMetrics.cs" />
     <Compile Include="ReceiveSettings.cs" />
@@ -89,7 +89,6 @@
     <Compile Include="TransportSelectorExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Performance\Microsoft.ServiceBus.MessagingPerformanceCounters.man" />
   </ItemGroup>
@@ -99,6 +98,7 @@
       <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

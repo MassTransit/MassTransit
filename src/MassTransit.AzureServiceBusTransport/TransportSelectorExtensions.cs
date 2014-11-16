@@ -20,11 +20,11 @@ namespace MassTransit.AzureServiceBusTransport
         /// <summary>
         /// Select RabbitMQ as the transport for the service bus
         /// </summary>
-        public static IServiceBusTransportConfigurator AzureServiceBus(this ITransportSelector selector)
+        public static IServiceBusServiceBusFactoryConfigurator AzureServiceBus(this IServiceBusFactorySelector selector)
         {
-            var configurator = new AzureServiceBusTransportConfigurator(selector);
+            var configurator = new AzureServiceBusServiceBusFactoryConfigurator(selector);
 
-            selector.SelectTransport(configurator);
+            selector.SetServiceBusFactory(configurator);
 
             return configurator;
         }

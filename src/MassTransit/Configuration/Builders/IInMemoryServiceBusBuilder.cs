@@ -10,10 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Builders
 {
-    public interface ITransportSelector
+    public interface IInMemoryServiceBusBuilder :
+        IServiceBusBuilder
     {
-        void SelectTransport(ITransportBuilder builder);
+        /// <summary>
+        /// The receive transport provider
+        /// </summary>
+        IReceiveTransportProvider ReceiveTransportProvider { get; }
+
+        /// <summary>
+        /// The send transport provider
+        /// </summary>
+        ISendTransportProvider SendTransportProvider { get; }
     }
 }

@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline
 {
     using System.Text;
     using Filters;
-    using Sinks;
     using Util;
 
 
@@ -28,16 +27,30 @@ namespace MassTransit.Pipeline
             return _builder.ToString();
         }
 
+        protected override bool Unknown<T>(IFilter<T> filter, FilterInspectorCallback callback)
+        {
+            _builder.AppendFormat("Unknown {0}", filter.GetType()).AppendLine();
+
+            return base.Unknown(filter, callback);
+        }
+
         protected override bool Inspect<T>(TeeConsumeFilter<T> filter, FilterInspectorCallback callback)
         {
-            _builder.AppendFormat("{0}", TypeMetadataCache<TeeConsumeFilter<T>>.ShortName);
+            _builder.AppendFormat("{0}", TypeMetadataCache<TeeConsumeFilter<T>>.ShortName).AppendLine();
 
             return base.Inspect(filter, callback);
         }
 
         protected override bool Inspect<T>(HandlerMessageFilter<T> filter, FilterInspectorCallback callback)
         {
-            _builder.AppendFormat("{0}", TypeMetadataCache<HandlerMessageFilter<T>>.ShortName);
+            _builder.AppendFormat("{0}", TypeMetadataCache<HandlerMessageFilter<T>>.ShortName).AppendLine(); ;
+
+            return base.Inspect(filter, callback);
+        }
+
+        protected override bool Inspect<TConsumer, T>(ConsumerMessageFilter<TConsumer, T> filter, FilterInspectorCallback callback)
+        {
+            _builder.AppendFormat("{0}", TypeMetadataCache<ConsumerMessageFilter<TConsumer, T>>.ShortName).AppendLine(); ;
 
             return base.Inspect(filter, callback);
         }

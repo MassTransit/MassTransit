@@ -25,12 +25,12 @@ namespace MassTransit.AzureServiceBusTransport
         AzureServiceBusSendContext<T>
         where T : class
     {
+        readonly CancellationToken _cancellationToken;
         readonly PayloadCache _payloadCache;
         byte[] _body;
         ISendMessageSerializer _serializer;
-        CancellationToken _cancellationToken;
 
-        public AzureServiceBusSendContextImpl(T message)
+        public AzureServiceBusSendContextImpl(T message, CancellationToken cancellationToken)
         {
             _payloadCache = new PayloadCache();
             _payloadCache.GetOrAddPayload<AzureServiceBusSendContext<T>>(() => this);
@@ -38,6 +38,7 @@ namespace MassTransit.AzureServiceBusTransport
             ContextHeaders = new AzureServiceBusSendContextHeaders();
 
             Message = message;
+            _cancellationToken = cancellationToken;
 
             MessageId = NewId.NextGuid();
 
@@ -96,17 +97,17 @@ namespace MassTransit.AzureServiceBusTransport
 
         public Stream GetBodyStream()
         {
+            if (_body != null)
+                return new MemoryStream(_body);
+
+            if (_serializer == null)
+                throw new SerializationException("No serializer specified");
+            if (Message == null)
+                throw new SendException(typeof(T), DestinationAddress, "No message specified");
+
             var memoryStream = new MemoryStream();
             try
             {
-                if (_body != null)
-                    return new MemoryStream(_body);
-
-                if (_serializer == null)
-                    throw new SerializationException("No serializer specified");
-                if (Message == null)
-                    throw new SendException(typeof(T), DestinationAddress, "No message specified");
-
                 _serializer.Serialize(memoryStream, this);
 
                 _body = memoryStream.ToArray();

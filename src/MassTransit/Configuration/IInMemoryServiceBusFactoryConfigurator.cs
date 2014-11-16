@@ -10,11 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit
 {
-    public interface IConnectPipeById<out T, in TKey>
-        where T : class, PipeContext
+    using Builders;
+
+
+    public interface IInMemoryServiceBusFactoryConfigurator :
+        IServiceBusFactoryConfigurator
     {
-        ConnectHandle Connect(TKey key, IPipe<T> pipe);
+        void SetTransportProvider<T>(T transportProvider)
+            where T : ISendTransportProvider, IReceiveTransportProvider;
+
+        void AddServiceBusFactoryBuilderConfigurator(IInMemoryServiceBusFactoryBuilderConfigurator configurator);
     }
 }

@@ -15,9 +15,25 @@ namespace MassTransit.Builders
     using Transports;
 
 
+    /// <summary>
+    /// Used to build and configure a service bus instance as it is created
+    /// </summary>
     public interface IServiceBusBuilder
     {
+        /// <summary>
+        /// The default message deserializer
+        /// </summary>
         IMessageDeserializer MessageDeserializer { get; }
+
+        /// <summary>
+        /// The default message serializer
+        /// </summary>
+        ISendMessageSerializer MessageSerializer { get; }
+
+        /// <summary>
+        /// Adds a receive endpoint to the bus
+        /// </summary>
+        /// <param name="receiveEndpoint"></param>
         void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint);
     }
 }

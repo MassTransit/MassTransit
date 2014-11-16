@@ -19,6 +19,12 @@ namespace MassTransit
 
     public static class RepeatPipeConfiguratorExtensions
     {
+        /// <summary>
+        /// Repeat the subsequent filter pipe until the cancellationToken is cancelled.
+        /// </summary>
+        /// <typeparam name="T">The pipe type</typeparam>
+        /// <param name="configurator">The pipe configurator</param>
+        /// <param name="cancellationToken">The cancellationToken to cancel the repetition</param>
         public static void Repeat<T>(this IPipeConfigurator<T> configurator, CancellationToken cancellationToken)
             where T : class, PipeContext
         {

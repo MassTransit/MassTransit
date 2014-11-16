@@ -18,7 +18,7 @@ namespace MassTransit.AzureServiceBusTransport
 
     public static class TransportConfiguratorExtensions
     {
-        public static ServiceBusHostSettings Host(this IServiceBusTransportConfigurator configurator, Uri hostAddress,
+        public static ServiceBusHostSettings Host(this IServiceBusServiceBusFactoryConfigurator configurator, Uri hostAddress,
             Action<IServiceBusHostConfigurator> configure)
         {
             var hostConfigurator = new AzureServiceBusHostConfigurator(hostAddress);
@@ -48,14 +48,14 @@ namespace MassTransit.AzureServiceBusTransport
         /// <param name="hostSettings">The host for this endpoint</param>
         /// <param name="queueName">The input queue name</param>
         /// <param name="configure">The configuration method</param>
-        public static void ReceiveEndpoint(this IServiceBusTransportConfigurator configurator, ServiceBusHostSettings hostSettings, string queueName,
+        public static void ReceiveEndpoint(this IServiceBusServiceBusFactoryConfigurator configurator, ServiceBusHostSettings hostSettings, string queueName,
             Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
             var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(hostSettings, queueName);
 
             configure(endpointConfigurator);
 
-            configurator.AddTransportBuilderConfigurator(endpointConfigurator);
+            configurator.AddServiceBusFactoryBuilderConfigurator(endpointConfigurator);
         }
 
     }

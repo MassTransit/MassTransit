@@ -10,33 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Pipeline
 {
     using System;
     using System.Threading.Tasks;
 
 
-    public class DefaultConstructorConsumerFactory<TConsumer> :
+    public class InstanceConsumerFactory<TConsumer> :
         IConsumerFactory<TConsumer>
-        where TConsumer : class, new()
+        where TConsumer : class
     {
-        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
-            where TMessage : class
-        {
-            TConsumer consumer = null;
-            try
-            {
-                consumer = new TConsumer();
+        readonly TConsumer _consumer;
 
-                await next.Send(context.PushLeft(consumer));
-            }
-            finally
-            {
-                var disposable = consumer as IDisposable;
-                if (disposable != null)
-                    disposable.Dispose();
-            }
+        public InstanceConsumerFactory(TConsumer consumer)
+        {
+            _consumer = consumer;
+        }
+
+        Task IConsumerFactory<TConsumer>.Send<TMessage>(ConsumeContext<TMessage> context,
+            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
+        {
+            return next.Send(context.PushLeft(_consumer));
         }
     }
 }

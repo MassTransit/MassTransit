@@ -17,117 +17,67 @@ namespace MassTransit.TestFramework
     using System.Threading;
     using System.Threading.Tasks;
     using EndpointConfigurators;
-    using NUnit.Framework;
+    using Logging;
 
 
-    [TestFixture]
-    public class AsyncTestFixture
+    public abstract class AsyncTestFixture
     {
+        static readonly ILog _log = Logger.Get<AsyncTestFixture>();
+
+        CancellationToken _cancellationToken;
+        Task<bool> _cancelledTask;
         CancellationTokenSource _testCancellationTokenSource;
-        readonly TimeSpan _testTimeout;
-        static TaskCompletionSource<bool> _cancelledTask;
-        CancellationTokenRegistration _cancelledTaskTimeout;
 
-        public AsyncTestFixture()
+        protected AsyncTestFixture()
         {
-            _testTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(30);
-            _cancelledTask = new TaskCompletionSource<bool>();
-        }
-
-        [TestFixtureSetUp]
-        public void AsyncTestFixtureSetUp()
-        {
-            _testCancellationTokenSource = new CancellationTokenSource(_testTimeout);
-            _cancelledTask = new TaskCompletionSource<bool>();
-
-            _cancelledTaskTimeout = _testCancellationTokenSource.Token.Register(() => _cancelledTask.TrySetCanceled());
-        }
-
-
-        [TestFixtureTearDown]
-        public void AsyncTestFixtureTearDown()
-        {
-            _cancelledTaskTimeout.Dispose();
-            _testCancellationTokenSource.Dispose();
+            TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(30);
         }
 
         protected Task TestCancelledTask
         {
-            get { return _cancelledTask.Task; }
+            get
+            {
+                CancellationToken token = TestCancellationToken;
+                return _cancelledTask;
+            }
         }
 
         protected CancellationToken TestCancellationToken
         {
-            get { return _testCancellationTokenSource.Token; }
+            get
+            {
+                if (_cancellationToken == CancellationToken.None)
+                {
+                    _testCancellationTokenSource = new CancellationTokenSource((int)TestTimeout.TotalMilliseconds);
+                    _cancellationToken = _testCancellationTokenSource.Token;
+
+                    var source = new TaskCompletionSource<bool>();
+                    _cancelledTask = source.Task;
+
+                    _cancellationToken.Register(() => source.TrySetCanceled());
+                }
+
+                return _cancellationToken;
+            }
         }
 
-        protected TimeSpan TestTimeout
+        protected TimeSpan TestTimeout { get; set; }
+
+        protected void CancelTest()
         {
-            get { return _testTimeout; }
+            _testCancellationTokenSource.Cancel();
         }
 
-        protected Task<T> SubscribeToEvent<T>()
+        protected Task<T> Handler<T>(IReceiveEndpointConfigurator configurator)
             where T : class
         {
             var source = new TaskCompletionSource<T>();
 
-//            LocalBus.SubscribeHandler<T>(source.SetResult);
+            configurator.Handler<T>(async context => source.SetResult(context.Message));
 
             TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
 
             return source.Task;
-        }
-
-
-        protected Task TestHandler<T>(IReceiveEndpointConfigurator configurator, MessageHandler<T> handler)
-            where T : class
-        {
-            TaskCompletionSource<T> source = GetTaskCompletionSource<T>();
-
-            configurator.Handler<T>(async context =>
-            {
-                try
-                {
-                    await handler(context);
-
-                    source.TrySetResult(context.Message);
-                }
-                catch (Exception ex)
-                {
-                    source.TrySetException(ex);
-                    throw;
-                }
-            });
-
-            return source.Task;
-        }
-
-        protected Task TestHandler<T>(IReceiveEndpointConfigurator configurator)
-            where T : class
-        {
-            TaskCompletionSource<T> source = GetTaskCompletionSource<T>();
-
-            configurator.Handler<T>(async context =>
-            {
-                try
-                {
-                    source.TrySetResult(context.Message);
-                }
-                catch (Exception ex)
-                {
-                    source.TrySetException(ex);
-                    throw;
-                }
-            });
-
-            return source.Task;
-        }
-
-        TaskCompletionSource<T> GetTaskCompletionSource<T>() where T : class
-        {
-            var source = new TaskCompletionSource<T>();
-            TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
-            return source;
         }
     }
 }

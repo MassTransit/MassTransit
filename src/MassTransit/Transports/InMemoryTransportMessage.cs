@@ -18,24 +18,28 @@ namespace MassTransit.Transports
 
     public class InMemoryTransportMessage
     {
+        readonly byte[] _body;
         readonly IDictionary<string, object> _headers;
         readonly Guid _messageId;
 
         public InMemoryTransportMessage(Guid messageId, byte[] body, string contentType)
         {
-            _messageId = messageId;
             _headers = new Dictionary<string, object>();
-            Body = body;
+            _messageId = messageId;
+            _body = body;
 
             _headers["MessageId"] = messageId.ToString();
             _headers["Content-Type"] = contentType;
         }
 
-        public byte[] Body { get; private set; }
-
         public Guid MessageId
         {
             get { return _messageId; }
+        }
+
+        public byte[] Body
+        {
+            get { return _body; }
         }
 
         public int DeliveryCount { get; set; }

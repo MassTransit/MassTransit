@@ -14,6 +14,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Configuration;
     using Magnum.Extensions;
     using NUnit.Framework;
     using Policies;
@@ -30,9 +31,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
             var hostAddress = new Uri("rabbitmq://localhost/test");
             var completed = new TaskCompletionSource<A>();
 
-            using (IBus bus = ServiceBusFactory.New(x => x.RabbitMQ(), x =>
+            using (IBusControl bus = ServiceBusFactory.New(x => x.RabbitMQ(), x =>
             {
-                var host = x.Host(hostAddress, r =>
+                RabbitMqHostSettings host = x.Host(hostAddress, r =>
                 {
                     r.Username("guest");
                     r.Password("guest");
@@ -66,7 +67,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             }))
             {
                 var queueAddress = new Uri(hostAddress, "input_queue");
-                ISendEndpoint endpoint = bus.GetSendEndpoint(queueAddress);
+                ISendEndpoint endpoint = await bus.GetSendEndpoint(queueAddress);
 
                 await endpoint.Send(new A());
             }
@@ -74,7 +75,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
         async Task Handle(ConsumeContext<A> context)
         {
-
         }
 
 

@@ -36,30 +36,30 @@ namespace MassTransit.AzureServiceBusTransport
             _sender = sender;
         }
 
-        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
         {
-            var context = new AzureServiceBusSendContextImpl<T>(message);
+            var context = new AzureServiceBusSendContextImpl<T>(message, cancelSend);
 
             await pipe.Send(context);
 
             using (Stream messageBodyStream = context.GetBodyStream())
             {
-                var brokeredMessage = new BrokeredMessage(messageBodyStream)
+                using (var brokeredMessage = new BrokeredMessage(messageBodyStream))
                 {
-                    ContentType = context.ContentType.MediaType,
-                    ForcePersistence = context.Durable
-                };
+                    brokeredMessage.ContentType = context.ContentType.MediaType;
+                    brokeredMessage.ForcePersistence = context.Durable;
 
-                if (context.TimeToLive.HasValue)
-                    brokeredMessage.TimeToLive = context.TimeToLive.Value;
+                    if (context.TimeToLive.HasValue)
+                        brokeredMessage.TimeToLive = context.TimeToLive.Value;
 
-                if (context.MessageId.HasValue)
-                    brokeredMessage.MessageId = context.MessageId.Value.ToString("N");
+                    if (context.MessageId.HasValue)
+                        brokeredMessage.MessageId = context.MessageId.Value.ToString("N");
 
-                if (context.CorrelationId.HasValue)
-                    brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
+                    if (context.CorrelationId.HasValue)
+                        brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
 
-                await _sender.SendAsync(brokeredMessage);
+                    await _sender.SendAsync(brokeredMessage);
+                }
             }
         }
     }

@@ -34,9 +34,9 @@ namespace MassTransit.Transports
             _receivePipe = receivePipe;
         }
 
-        public Task Start(CancellationToken cancellationToken)
+        public Task Start(CancellationToken stopToken)
         {
-            return _receiveTransport.Start(_receivePipe, cancellationToken);
+            return _receiveTransport.Start(_receivePipe, stopToken);
         }
     }
 }

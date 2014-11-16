@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Pipeline
 {
     using System;
     using System.Threading.Tasks;
@@ -23,15 +23,15 @@ namespace MassTransit.Pipeline.Sinks
     /// </summary>
     /// <typeparam name="TConsumer">The consumer type</typeparam>
     /// <typeparam name="TMessage">The message type</typeparam>
-    public class LegacyContextMethodConsumerMessageAdapter<TConsumer, TMessage> :
+    public class LegacyMethodConsumerMessageAdapter<TConsumer, TMessage> :
         IConsumerMessageAdapter<TConsumer, TMessage>
-        where TConsumer : class, IMessageConsumer<IConsumeContext<TMessage>>
+        where TConsumer : class, IMessageConsumer<TMessage>
         where TMessage : class
     {
         public async Task Send(ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>> context,
             IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
         {
-            var messageConsumer = context.Message.Item1 as IMessageConsumer<IConsumeContext<TMessage>>;
+            var messageConsumer = context.Message.Item1 as IMessageConsumer<TMessage>;
             if (messageConsumer == null)
             {
                 string message = string.Format("Consumer type {0} is not a consumer of message type {1}",
@@ -42,7 +42,10 @@ namespace MassTransit.Pipeline.Sinks
 
             IConsumeContext<TMessage> consumeContext = new ConsumeContextAdapter<TMessage>(context.Message.Item2);
 
-            messageConsumer.Consume(consumeContext);
+            using (consumeContext.CreateScope())
+            {
+                messageConsumer.Consume(consumeContext.Message);
+            }
         }
 
         public bool Inspect(IPipeInspector inspector)
