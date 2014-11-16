@@ -74,13 +74,13 @@
       <HintPath>..\packages\Magnum.2.1.3\lib\NET40\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.5\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\packages\NHibernate.4.0.1.4000\lib\Net40\NHibernate.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\packages\StructureMap.3.1.2.138\lib\net40\StructureMap.dll</HintPath>
+      <HintPath>..\packages\StructureMap.3.1.4.143\lib\net40\StructureMap.dll</HintPath>
     </Reference>
     <Reference Include="Topshelf" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\packages\Topshelf.3.1.4\lib\net40-full\Topshelf.dll</HintPath>
