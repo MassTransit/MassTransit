@@ -28,6 +28,7 @@ namespace MassTransit.Transports.RabbitMq
         readonly IRabbitMqEndpointAddress _address;
         readonly bool _bindToQueue;
         readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
+        readonly Object _lock = new object();
         RabbitMqProducer _producer;
 
         public OutboundRabbitMqTransport(IRabbitMqEndpointAddress address,
@@ -112,9 +113,16 @@ namespace MassTransit.Transports.RabbitMq
             if (_producer != null)
                 return;
 
-            _producer = new RabbitMqProducer(_address, _bindToQueue);
+            lock (_lock)
+            {
+                if (_producer != null)
+                    return;
 
-            _connectionHandler.AddBinding(_producer);
+                var producer = new RabbitMqProducer(_address, _bindToQueue);
+                _connectionHandler.AddBinding(producer);
+
+                _producer = producer;
+            }
         }
 
         void RemoveProducer()
