@@ -1,10 +1,17 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    albacore (0.3.6)
-      rubyzip (< 1.0.0)
+    albacore (1.0.0)
+      nokogiri (~> 1.5)
+      rake (~> 10.0)
+      rubyzip (~> 1.0)
+    mini_portile (0.6.1)
+    nokogiri (1.6.4.1)
+      mini_portile (~> 0.6.0)
+    nokogiri (1.6.4.1-x86-mingw32)
+      mini_portile (~> 0.6.0)
     rake (10.1.1)
-    rubyzip (0.9.9)
+    rubyzip (1.1.6)
     semver2 (3.3.3)
 
 PLATFORMS
@@ -12,6 +19,6 @@ PLATFORMS
   x86-mingw32
 
 DEPENDENCIES
-  albacore (~> 0.3.5)
+  albacore (~> 1.0.0)
   rake
   semver2
