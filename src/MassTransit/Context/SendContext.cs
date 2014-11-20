@@ -49,6 +49,8 @@ namespace MassTransit.Context
 
             // need to reset this since SetUsing copies the context value
             this.SetMessageType(typeof (T));
+
+            DeliveryMode = context.DeliveryMode;
         }
 
         public Guid Id
