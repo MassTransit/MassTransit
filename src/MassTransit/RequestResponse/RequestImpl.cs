@@ -220,8 +220,7 @@ namespace MassTransit.RequestResponse
             {
                 _completed = true;
 
-                if (_complete != null)
-                    _complete.Set();
+                CompleteEvent.Set();
             }
 
             lock (_completionCallbacks)
