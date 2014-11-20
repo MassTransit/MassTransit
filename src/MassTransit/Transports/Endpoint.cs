@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,14 +15,15 @@ namespace MassTransit.Transports
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Reflection;
     using System.Runtime.Serialization;
-    using System.Transactions;
     using Context;
     using Exceptions;
     using Logging;
     using Magnum.Reflection;
     using Serialization;
     using Util;
+
 
     /// <summary>
     /// See <see cref="IEndpoint"/> for docs.
@@ -34,8 +35,8 @@ namespace MassTransit.Transports
         static readonly ILog _log = Logger.Get(typeof(Endpoint));
         readonly IEndpointAddress _address;
         readonly IMessageSerializer _serializer;
-        readonly IInboundMessageTracker _tracker;
         readonly ISupportedMessageSerializers _supportedSerializers;
+        readonly IInboundMessageTracker _tracker;
         bool _disposed;
         string _disposedMessage;
         IOutboundTransport _errorTransport;
@@ -45,7 +46,7 @@ namespace MassTransit.Transports
             [NotNull] IMessageSerializer serializer,
             [NotNull] IDuplexTransport transport,
             [NotNull] IOutboundTransport errorTransport,
-            [NotNull] IInboundMessageTracker messageTracker, 
+            [NotNull] IInboundMessageTracker messageTracker,
             [NotNull] ISupportedMessageSerializers supportedSerializers)
         {
             if (address == null)
@@ -225,128 +226,134 @@ namespace MassTransit.Transports
                 Exception failedMessageException = null;
 
                 _transport.Receive(acceptContext =>
+                {
+                    failedMessageException = null;
+
+                    if (successfulMessageId != null)
                     {
-                        failedMessageException = null;
+                        _log.DebugFormat("Received Successfully: {0}", successfulMessageId);
 
-                        if (successfulMessageId != null)
+                        _tracker.MessageWasReceivedSuccessfully(successfulMessageId);
+                        successfulMessageId = null;
+                    }
+
+                    Exception retryException;
+                    string acceptMessageId = acceptContext.OriginalMessageId ?? acceptContext.MessageId;
+                    IEnumerable<Action> faultActions;
+                    if (_tracker.IsRetryLimitExceeded(acceptMessageId, out retryException, out faultActions))
+                    {
+                        if (_log.IsErrorEnabled)
                         {
-                            _log.DebugFormat("Received Successfully: {0}", successfulMessageId);
-
-                            _tracker.MessageWasReceivedSuccessfully(successfulMessageId);
-                            successfulMessageId = null;
+                            _log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address,
+                                acceptMessageId);
                         }
 
-                        Exception retryException;
-                        string acceptMessageId = acceptContext.OriginalMessageId ?? acceptContext.MessageId;
-                        IEnumerable<Action> faultActions;
-                        if (_tracker.IsRetryLimitExceeded(acceptMessageId, out retryException, out faultActions))
+                        failedMessageException = retryException;
+
+                        acceptContext.ExecuteFaultActions(faultActions);
+
+                        return x => MoveMessageToErrorTransport(x, retryException);
+                    }
+
+                    if (acceptContext.MessageId != acceptMessageId)
+                    {
+                        if (_log.IsErrorEnabled)
                         {
-                            if (_log.IsErrorEnabled)
-                                _log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address,
-                                    acceptMessageId);
+                            _log.DebugFormat("Message {0} original message id {1}", acceptContext.MessageId,
+                                acceptContext.OriginalMessageId);
+                        }
+                    }
 
-                            failedMessageException = retryException;
+                    Action<IReceiveContext> receive;
+                    try
+                    {
+                        acceptContext.SetEndpoint(this);
 
-                            acceptContext.ExecuteFaultActions(faultActions);
-
-                            return MoveMessageToErrorTransport;
+                        IMessageSerializer serializer;
+                        if (!_supportedSerializers.TryGetSerializer(acceptContext.ContentType, out serializer))
+                        {
+                            throw new SerializationException(
+                                string.Format("The content type could not be deserialized: {0}",
+                                    acceptContext.ContentType));
                         }
 
-                        if (acceptContext.MessageId != acceptMessageId)
+                        serializer.Deserialize(acceptContext);
+
+                        receive = receiver(acceptContext);
+                        if (receive == null)
                         {
-                            if (_log.IsErrorEnabled)
-                                _log.DebugFormat("Message {0} original message id {1}", acceptContext.MessageId,
-                                    acceptContext.OriginalMessageId);
+                            Address.LogSkipped(acceptMessageId);
+
+                            if (_tracker.IncrementRetryCount(acceptMessageId))
+                                return x => MoveMessageToErrorTransport(x);
+
+                            return null;
                         }
+                    }
+                    catch (SerializationException sex)
+                    {
+                        if (_log.IsErrorEnabled)
+                            _log.Error("Unrecognized message " + Address + ":" + acceptMessageId, sex);
 
-                        Action<IReceiveContext> receive;
-                        try
+                        _tracker.IncrementRetryCount(acceptMessageId, sex);
+                        return x => MoveMessageToErrorTransport(x, sex);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (_log.IsErrorEnabled)
+                            _log.Error("An exception was thrown preparing the message consumers", ex);
+
+                        if (_tracker.IncrementRetryCount(acceptMessageId, ex))
                         {
-                            acceptContext.SetEndpoint(this);
-
-                            IMessageSerializer serializer;
-                            if (!_supportedSerializers.TryGetSerializer(acceptContext.ContentType, out serializer))
-                                throw new SerializationException(
-                                    string.Format("The content type could not be deserialized: {0}",
-                                        acceptContext.ContentType));
-
-                            serializer.Deserialize(acceptContext);
-
-                            receive = receiver(acceptContext);
-                            if (receive == null)
+                            if (!_tracker.IsRetryEnabled)
                             {
-                                Address.LogSkipped(acceptMessageId);
-
-                                if (_tracker.IncrementRetryCount(acceptMessageId))
-                                    return MoveMessageToErrorTransport;
-
-                                return null;
+                                acceptContext.ExecuteFaultActions(acceptContext.GetFaultActions());
+                                return x => MoveMessageToErrorTransport(x, ex);
                             }
                         }
-                        catch (SerializationException sex)
-                        {
-                            if (_log.IsErrorEnabled)
-                                _log.Error("Unrecognized message " + Address + ":" + acceptMessageId, sex);
+                        return null;
+                    }
 
-                            _tracker.IncrementRetryCount(acceptMessageId, sex);
-                            return MoveMessageToErrorTransport;
+                    return receiveContext =>
+                    {
+                        string receiveMessageId = receiveContext.OriginalMessageId ?? receiveContext.MessageId;
+                        try
+                        {
+                            receive(receiveContext);
+
+                            successfulMessageId = receiveMessageId;
                         }
                         catch (Exception ex)
                         {
                             if (_log.IsErrorEnabled)
-                                _log.Error("An exception was thrown preparing the message consumers", ex);
+                                _log.Error("An exception was thrown by a message consumer", ex);
 
-                            if(_tracker.IncrementRetryCount(acceptMessageId, ex))
+                            faultActions = receiveContext.GetFaultActions();
+                            if (_tracker.IncrementRetryCount(receiveMessageId, ex, faultActions))
                             {
                                 if (!_tracker.IsRetryEnabled)
                                 {
-                                    acceptContext.ExecuteFaultActions(acceptContext.GetFaultActions());
-                                    return MoveMessageToErrorTransport;
+                                    receiveContext.ExecuteFaultActions(faultActions);
+                                    MoveMessageToErrorTransport(receiveContext, ex);
+
+                                    return;
                                 }
                             }
-                            return null;
-                        }
 
-                        return receiveContext =>
+                            if (!receiveContext.IsTransactional)
                             {
-                                string receiveMessageId = receiveContext.OriginalMessageId ?? receiveContext.MessageId;
-                                try
-                                {
-                                    receive(receiveContext);
+                                SaveMessageToInboundTransport(receiveContext);
+                                return;
+                            }
 
-                                    successfulMessageId = receiveMessageId;
-                                }
-                                catch (Exception ex)
-                                {
-                                    if (_log.IsErrorEnabled)
-                                        _log.Error("An exception was thrown by a message consumer", ex);
-
-                                    faultActions = receiveContext.GetFaultActions();
-                                    if(_tracker.IncrementRetryCount(receiveMessageId, ex, faultActions))
-                                    {
-                                        if (!_tracker.IsRetryEnabled)
-                                        {
-                                            receiveContext.ExecuteFaultActions(faultActions);
-                                            MoveMessageToErrorTransport(receiveContext);
-
-                                            return;
-                                        }
-                                    }
-
-                                    if(!receiveContext.IsTransactional)
-                                    {
-                                        SaveMessageToInboundTransport(receiveContext);
-                                        return;
-                                    }
-
-                                    throw;
-                                }
-                            };
-                    }, timeout);
+                            throw;
+                        }
+                    };
+                }, timeout);
 
                 if (failedMessageException != null)
                 {
-                    if(_log.IsErrorEnabled)
+                    if (_log.IsErrorEnabled)
                         _log.ErrorFormat("Throwing Original Exception: {0}", failedMessageException.GetType());
 
                     throw failedMessageException;
@@ -391,9 +398,25 @@ namespace MassTransit.Transports
             _disposed = true;
         }
 
-        void MoveMessageToErrorTransport(IReceiveContext context)
+        void MoveMessageToErrorTransport(IReceiveContext context, Exception exception = null)
         {
             var moveContext = new MoveMessageSendContext(context);
+
+            if (exception != null)
+            {
+                moveContext.SetHeader("MT-Fault-Message", exception.Message);
+                moveContext.SetHeader("MT-Fault-StackTrace", exception.StackTrace);
+            }
+
+            moveContext.SetHeader("MT-Error-Host", Environment.MachineName);
+            moveContext.SetHeader("MT-Error-Process", Process.GetCurrentProcess().ProcessName);
+
+            Assembly entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly != null)
+            {
+                AssemblyName assemblyName = entryAssembly.GetName();
+                moveContext.SetHeader("MT-Error-Assembly", assemblyName.Name);
+            }
 
             _errorTransport.Send(moveContext);
 
