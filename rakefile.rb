@@ -68,10 +68,10 @@ end
 task :compile_samples => [:build_starbucks, :build_distributor] do ; end
 
 desc "Compiles MT into build_output"
-task :compile => [:versioning, :global_version, :build, :copy_signed] do ; end
+task :compile => [:versioning, :global_version, :build, :copy_signed, :build_unsigned, :copy_services] do ; end
 
 desc "Compiles MT into build_output"
-task :compile35 => [:versioning, :global_version, :build35, :copy_signed] do ; end
+task :compile35 => [:versioning, :global_version, :build35, :copy_signed, :build_unsigned35, :copy_unsigned] do ; end
 
 task :copy_signed do
 	puts 'Copying unmerged dependencies to output folder'
@@ -102,6 +102,16 @@ task :copy_signed do
   	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "MassTransit.Transports.RabbitMq.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
 end
 
+task :copy_unsigned  do
+  puts "Copying unsigned assemblies"
+
+    # unsigned packages ugh
+    outc = File.join(props[:output], "Containers")
+
+    copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
+end
+
+
 task :ilmerge => [:ilmerge_masstransit] do
 end
 
@@ -120,7 +130,7 @@ ilmerge :ilmerge_masstransit do |ilm|
 end
 
 desc "Copying Services"
-task :copy_services => [:build_unsigned] do
+task :copy_services do
 	puts "Copying services"
 
 	targ = File.join(props[:stage], 'Services', 'RuntimeServices')
@@ -343,13 +353,25 @@ end
 
 desc "Only compiles the application."
 msbuild :build_unsigned do |msb|
-	msb.properties :Configuration => BUILD_CONFIG + "Unsigned",
+  msb.properties :Configuration => BUILD_CONFIG + "Unsigned",
+      :BuildConfigKey => BUILD_CONFIG_KEY,
+      :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
+      :Platform => 'Any CPU'
+  msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
+  msb.use :net4 #MSB_USE
+    msb.targets :Build
+  msb.solution = 'src/MassTransit.sln'
+end
+
+desc "Only compiles the application."
+msbuild :build_unsigned35 do |msb|
+	msb.properties :Configuration => BUILD_CONFIG + "35Unsigned",
 	    :BuildConfigKey => BUILD_CONFIG_KEY,
 	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
 	    :Platform => 'Any CPU'
 	msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
 	msb.use :net4 #MSB_USE
-    msb.targets :Rebuild
+    msb.targets :Build
 	msb.solution = 'src/MassTransit.sln'
 end
 
