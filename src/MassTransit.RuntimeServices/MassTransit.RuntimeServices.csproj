@@ -63,9 +63,8 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Iesi.Collections, Version=1.0.1.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Iesi.Collections.4.0.1.4000\lib\Net35\Iesi.Collections.dll</HintPath>
+    <Reference Include="Iesi.Collections">
+      <HintPath>..\packages\Iesi.Collections.4.0.1.4000\lib\Net40\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="log4net" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
@@ -77,7 +76,7 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
-      <HintPath>..\packages\NHibernate.4.0.1.4000\lib\Net40\NHibernate.dll</HintPath>
+      <HintPath>..\packages\NHibernate.4.0.2.4000\lib\Net40\NHibernate.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\packages\StructureMap.3.1.4.143\lib\net40\StructureMap.dll</HintPath>
