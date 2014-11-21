@@ -13,6 +13,7 @@
 namespace MassTransit.Testing.TestDecorators
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Magnum.Reflection;
@@ -36,7 +37,7 @@ namespace MassTransit.Testing.TestDecorators
             get { return _sent; }
         }
 
-        public Task Send<T>(T message)
+        public Task Send<T>(T message, CancellationToken cancellationToken)
             where T : class
         {
             if (message == null)
@@ -44,10 +45,10 @@ namespace MassTransit.Testing.TestDecorators
 
             var settingsPipe = new TestEndpointPipe<T>(this);
 
-            return _endpoint.Send(message, settingsPipe);
+            return _endpoint.Send(message, settingsPipe, cancellationToken);
         }
 
-        public Task Send<T>(T message, IPipe<SendContext<T>> pipe)
+        public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (message == null)
@@ -57,30 +58,30 @@ namespace MassTransit.Testing.TestDecorators
 
             var settingsPipe = new TestEndpointPipe<T>(this, pipe);
 
-            return _endpoint.Send(message, settingsPipe);
+            return _endpoint.Send(message, settingsPipe, cancellationToken);
         }
 
-        public Task Send(object message)
+        public Task Send(object message, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
 
             Type messageType = message.GetType();
 
-            return SendToEndpointConverterCache.Instance[messageType].Send(this, message);
+            return SendEndpointConverterCache.Instance[messageType].Send(this, message, cancellationToken);
         }
 
-        public Task Send(object message, Type messageType)
+        public Task Send(object message, Type messageType, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            return SendToEndpointConverterCache.Instance[messageType].Send(this, message);
+            return SendEndpointConverterCache.Instance[messageType].Send(this, message, cancellationToken);
         }
 
-        public Task Send<T>(object values)
+        public Task Send<T>(object values, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
@@ -88,10 +89,10 @@ namespace MassTransit.Testing.TestDecorators
 
             var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
 
-            return Send(message);
+            return Send(message, cancellationToken);
         }
 
-        public Task Send<T>(T message, IPipe<SendContext> pipe)
+        public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (message == null)
@@ -101,10 +102,10 @@ namespace MassTransit.Testing.TestDecorators
 
             var settingsPipe = new TestEndpointPipe<T>(this, pipe);
 
-            return _endpoint.Send(message, settingsPipe);
+            return _endpoint.Send(message, settingsPipe, cancellationToken);
         }
 
-        public Task Send(object message, IPipe<SendContext> pipe)
+        public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -113,10 +114,10 @@ namespace MassTransit.Testing.TestDecorators
 
             Type messageType = message.GetType();
 
-            return SendToEndpointConverterCache.Instance[messageType].Send(this, message, pipe);
+            return SendEndpointConverterCache.Instance[messageType].Send(this, message, pipe, cancellationToken);
         }
 
-        public Task Send(object message, Type messageType, IPipe<SendContext> pipe)
+        public Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -125,10 +126,10 @@ namespace MassTransit.Testing.TestDecorators
             if (pipe == null)
                 throw new ArgumentNullException("pipe");
 
-            return SendToEndpointConverterCache.Instance[messageType].Send(this, message, pipe);
+            return SendEndpointConverterCache.Instance[messageType].Send(this, message, pipe, cancellationToken);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext<T>> pipe)
+        public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
@@ -136,10 +137,10 @@ namespace MassTransit.Testing.TestDecorators
 
             var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
 
-            return Send(message, pipe);
+            return Send(message, pipe, cancellationToken);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext> pipe)
+        public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
@@ -149,7 +150,7 @@ namespace MassTransit.Testing.TestDecorators
 
             var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
 
-            return Send(message, pipe);
+            return Send(message, pipe, cancellationToken);
         }
 
         void AddMessageSent(MessageSent messageSent)

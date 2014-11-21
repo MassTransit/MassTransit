@@ -12,9 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Configurators
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
+    using EndpointConfigurators;
+    using PipeConfigurators;
     using Transports;
 
 
@@ -22,15 +25,32 @@ namespace MassTransit.Configurators
         IInMemoryServiceBusFactoryConfigurator,
         IServiceBusFactory
     {
+        readonly InMemoryReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly IList<IInMemoryServiceBusFactoryBuilderConfigurator> _configurators;
+        Uri _inputAddress;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
 
         public InMemoryServiceBusFactoryConfigurator(IServiceBusFactorySelector selector)
         {
             _configurators = new List<IInMemoryServiceBusFactoryBuilderConfigurator>();
+            string queueName = NewId.NextGuid().ToString("N");
+            _inputAddress = new Uri(string.Format("loopback://localhost/{0}", queueName));
+            _busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName);
+
+            _configurators.Add(_busEndpointConfigurator);
 
             selector.SetServiceBusFactory(this);
+        }
+
+        public void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)
+        {
+            _busEndpointConfigurator.AddConfigurator(configurator);
+        }
+
+        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
+        {
+            _busEndpointConfigurator.AddPipeBuilderConfigurator(configurator);
         }
 
         public void AddServiceBusFactoryBuilderConfigurator(IServiceBusFactoryBuilderConfigurator configurator)
@@ -60,7 +80,9 @@ namespace MassTransit.Configurators
                 _sendTransportProvider = _sendTransportProvider ?? transportProvider;
             }
 
-            var builder = new InMemoryServiceBusBuilder(_receiveTransportProvider, _sendTransportProvider);
+            var builder = new InMemoryServiceBusBuilder(_inputAddress, _receiveTransportProvider, _sendTransportProvider);
+
+            _busEndpointConfigurator.Configure(builder);
 
             foreach (IInMemoryServiceBusFactoryBuilderConfigurator configurator in _configurators)
                 configurator.Configure(builder);

@@ -13,16 +13,17 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Magnum.Extensions;
     using Pipeline;
 
 
-    public class SendToEndpointConverter<T> :
-        ISendToEndpointConverter
+    public class SendEndpointConverter<T> :
+        ISendEndpointConverter
         where T : class
     {
-        async Task ISendToEndpointConverter.Send(ISendEndpoint endpoint, object message)
+        async Task ISendEndpointConverter.Send(ISendEndpoint endpoint, object message, CancellationToken cancellationToken)
         {
             if (endpoint == null)
                 throw new ArgumentNullException("endpoint");
@@ -33,10 +34,11 @@ namespace MassTransit.Context
             if (msg == null)
                 throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
 
-            await endpoint.Send(msg);
+            await endpoint.Send(msg, cancellationToken);
         }
 
-        async Task ISendToEndpointConverter.Send(ISendEndpoint endpoint, object message, IPipe<SendContext> pipe)
+        async Task ISendEndpointConverter.Send(ISendEndpoint endpoint, object message, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken)
         {
             if (endpoint == null)
                 throw new ArgumentNullException("endpoint");
@@ -49,7 +51,7 @@ namespace MassTransit.Context
             if (msg == null)
                 throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
 
-            await endpoint.Send(msg, pipe);
+            await endpoint.Send(msg, pipe, cancellationToken);
         }
     }
 }

@@ -29,6 +29,9 @@ namespace MassTransit.Pipeline
         public virtual bool Inspect<T>(IFilter<T> filter, FilterInspectorCallback callback)
             where T : class, PipeContext
         {
+            if (filter is MessageTypeConsumeFilter)
+                return Inspect((MessageTypeConsumeFilter)filter, x => callback(x));
+
             return callback(this);
         }
 
@@ -77,6 +80,11 @@ namespace MassTransit.Pipeline
 
         public virtual bool Inspect<T>(IPipe<T> pipe, PipeInspectorCallback callback)
             where T : class, PipeContext
+        {
+            return callback(this);
+        }
+
+        protected virtual bool Inspect(MessageTypeConsumeFilter filter, FilterInspectorCallback callback)
         {
             return callback(this);
         }

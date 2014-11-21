@@ -13,6 +13,7 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
@@ -24,6 +25,10 @@ namespace MassTransit.Context
     {
         readonly ConsumeContext<T> _context;
         readonly Tuple<TLeft, ConsumeContext<T>> _message;
+        public IEnumerable<string> SupportedMessageTypes
+        {
+            get { return _context.SupportedMessageTypes; }
+        }
 
         public ConsumeContextProxy(ConsumeContext<T> context, TLeft left)
         {

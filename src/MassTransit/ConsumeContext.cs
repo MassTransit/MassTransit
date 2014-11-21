@@ -13,17 +13,23 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
 
     public interface ConsumeContext :
         MessageContext,
-        IPublisher
+        IPublishEndpoint
     {
         /// <summary>
         /// The original receive context
         /// </summary>
         ReceiveContext ReceiveContext { get; }
+
+        /// <summary>
+        /// Returns the supported message types from the message
+        /// </summary>
+        IEnumerable<string> SupportedMessageTypes { get; }
 
         /// <summary>
         ///     Returns true if the specified message type is contained in the serialized message

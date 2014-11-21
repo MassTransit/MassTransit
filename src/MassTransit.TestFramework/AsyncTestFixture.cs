@@ -17,16 +17,13 @@ namespace MassTransit.TestFramework
     using System.Threading;
     using System.Threading.Tasks;
     using EndpointConfigurators;
-    using Logging;
 
 
     public abstract class AsyncTestFixture
     {
-        static readonly ILog _log = Logger.Get<AsyncTestFixture>();
-
         CancellationToken _cancellationToken;
         Task<bool> _cancelledTask;
-        CancellationTokenSource _testCancellationTokenSource;
+        CancellationTokenSource _cancellationTokenSource;
 
         protected AsyncTestFixture()
         {
@@ -48,8 +45,8 @@ namespace MassTransit.TestFramework
             {
                 if (_cancellationToken == CancellationToken.None)
                 {
-                    _testCancellationTokenSource = new CancellationTokenSource((int)TestTimeout.TotalMilliseconds);
-                    _cancellationToken = _testCancellationTokenSource.Token;
+                    _cancellationTokenSource = new CancellationTokenSource((int)TestTimeout.TotalMilliseconds);
+                    _cancellationToken = _cancellationTokenSource.Token;
 
                     var source = new TaskCompletionSource<bool>();
                     _cancelledTask = source.Task;
@@ -65,7 +62,17 @@ namespace MassTransit.TestFramework
 
         protected void CancelTest()
         {
-            _testCancellationTokenSource.Cancel();
+            _cancellationTokenSource.Cancel();
+        }
+
+
+        protected TaskCompletionSource<T> GetTask<T>()
+        {
+            var source = new TaskCompletionSource<T>();
+
+            TestCancellationToken.Register(() => source.TrySetCanceled());
+
+            return source;
         }
 
         protected Task<T> Handler<T>(IReceiveEndpointConfigurator configurator)

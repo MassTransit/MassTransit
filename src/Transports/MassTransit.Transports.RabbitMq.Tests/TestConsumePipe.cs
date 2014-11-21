@@ -18,7 +18,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
 
     class TestConsumePipe :
-        IPipe<ConsumeContext>
+        IInboundPipe
     {
         readonly Func<ConsumeContext, Task> _callback;
 
@@ -37,6 +37,16 @@ namespace MassTransit.Transports.RabbitMq.Tests
         public bool Inspect(IPipeInspector inspector)
         {
             return true;
+        }
+
+        public ConnectHandle Connect<T>(IPipe<ConsumeContext<T>> pipe) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public ConnectHandle Connect<TMessage>(IConsumeObserver<TMessage> observer) where TMessage : class
+        {
+            throw new NotImplementedException();
         }
     }
 }

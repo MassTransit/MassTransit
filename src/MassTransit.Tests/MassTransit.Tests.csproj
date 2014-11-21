@@ -90,7 +90,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncTestFixture.cs" />
+    <Compile Include="MessageTestFixture.cs" />
     <Compile Include="Behaviors\Behavior.cs" />
     <Compile Include="Configuration\ShutdownTimeout_Specs.cs" />
     <Compile Include="HostContext_Specs.cs" />

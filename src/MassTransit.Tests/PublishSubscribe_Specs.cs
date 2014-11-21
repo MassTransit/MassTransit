@@ -12,10 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-    using System;
     using System.Threading.Tasks;
     using Magnum.Extensions;
-    using MassTransit.Pipeline;
     using Messages;
     using NUnit.Framework;
     using TestConsumers;
@@ -52,7 +50,7 @@ namespace MassTransit.Tests
             LocalBus.SubscribeInstance(consumer);
 
             var message = new PingMessage();
-            LocalBus.InboundPipe.Send(new Pipeline.TestConsumeContext<PingMessage>(message));
+            LocalBus.InboundPipe.Send(new TestConsumeContext<PingMessage>(message));
 
             consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
         }
@@ -159,47 +157,15 @@ namespace MassTransit.Tests
     public class Sending_an_object_to_the_local_bus :
         InMemoryTestFixture
     {
-//        [Test]
-//        public void Should_accept_the_type_specified()
-//        {
-//            var consumer = new TestMessageConsumer<PingMessage>();
-//            LocalBus.SubscribeInstance(consumer);
-//
-//            var message = new PingMessage();
-//
-//            object unknownMessage = message;
-//            LocalBus.Endpoint.Send(unknownMessage, typeof(PingMessage));
-//
-//            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
-//        }
-//
-//        [Test]
-//        public void Should_accept_the_type_specified_with_context()
-//        {
-//            var consumer = new TestMessageConsumer<PingMessage>();
-//            LocalBus.SubscribeInstance(consumer);
-//
-//            var message = new PingMessage();
-//
-//            object unknownMessage = message;
-//            LocalBus.Endpoint.Send(unknownMessage, typeof(PingMessage), x => x.SetRequestId("27"));
-//
-//            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
-//        }
-
         [Test]
         public async void Should_receive_the_proper_message()
         {
             Task<A> handler = SubscribeToLocalBus<A>();
 
-            var inspector = new StringPipeInspector();
-            LocalBus.InboundPipe.Inspect(inspector);
-
-            Console.WriteLine(inspector.ToString());
-
+            ISendEndpoint sendEndpoint = await LocalBusSendEndpoint;
 
             object message = new A();
-            await LocalSendEndpoint.Send(message);
+            await sendEndpoint.Send(message);
 
             await handler;
         }
@@ -209,14 +175,23 @@ namespace MassTransit.Tests
         {
             Task<A> handler = SubscribeToLocalBus<A>();
 
-            var inspector = new StringPipeInspector();
-            LocalBus.InboundPipe.Inspect(inspector);
+            ISendEndpoint sendEndpoint = await LocalBusSendEndpoint;
 
-            Console.WriteLine(inspector.ToString());
+            var message = new A();
+            await sendEndpoint.Send(message);
 
+            await handler;
+        }
 
-            A message = new A();
-            await LocalSendEndpoint.Send(message);
+        [Test]
+        public async void Should_receive_the_proper_message_as_a_with_request_id()
+        {
+            Task<A> handler = SubscribeToLocalBus<A>(x => x.RequestId.HasValue);
+
+            ISendEndpoint sendEndpoint = await LocalBusSendEndpoint;
+
+            var message = new A();
+            await sendEndpoint.Send(message, Pipe.New<SendContext<A>>(x => x.Execute(c => c.RequestId = NewId.NextGuid())));
 
             await handler;
         }

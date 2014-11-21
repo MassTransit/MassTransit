@@ -34,6 +34,13 @@ namespace MassTransit.Pipeline
             return base.Unknown(filter, callback);
         }
 
+        protected override bool Inspect(MessageTypeConsumeFilter filter, FilterInspectorCallback callback)
+        {
+            _builder.AppendFormat("MessageTypeConsumerFilter").AppendLine();
+
+            return base.Inspect(filter, callback);
+        }
+
         protected override bool Inspect<T>(TeeConsumeFilter<T> filter, FilterInspectorCallback callback)
         {
             _builder.AppendFormat("{0}", TypeMetadataCache<TeeConsumeFilter<T>>.ShortName).AppendLine();

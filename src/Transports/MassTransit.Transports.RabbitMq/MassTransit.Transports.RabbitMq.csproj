@@ -105,6 +105,7 @@
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
     <Compile Include="Pipeline\SubscriptionModelFilter.cs" />
     <Compile Include="Pipeline\SubscriptionSettings.cs" />
+    <Compile Include="Published.cs" />
     <Compile Include="PublishSettings.cs" />
     <Compile Include="RabbitMqBasicConsumeContext.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilder.cs" />

@@ -10,43 +10,38 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Filters
+namespace MassTransit.Transports.RabbitMq
 {
     using System;
-    using System.IO;
     using System.Threading.Tasks;
+    using RabbitMQ.Client;
 
 
-    public class LogFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    public class Published
     {
-        readonly Func<T, Task<string>> _formatter;
-        readonly TextWriter _writer;
+        ulong _publishTag;
+        TaskCompletionSource<ulong> _source;
 
-        public LogFilter(TextWriter writer, Func<T, Task<string>> formatter)
+        public Published(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body,
+            ulong publishTag)
         {
-            _writer = writer;
-            _formatter = formatter;
+            _publishTag = publishTag;
+            _source = new TaskCompletionSource<ulong>();
         }
 
-        Task IFilter<T>.Send(T context, IPipe<T> next)
+        public Task Task
         {
-            Task logTask = CreateLogTask(context);
-
-            return Task.WhenAll(logTask, next.Send(context));
+            get { return _source.Task; }
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public void Ack()
         {
-            return inspector.Inspect(this);
+            _source.TrySetResult(_publishTag);
         }
 
-        async Task CreateLogTask(T context)
+        public void Nack()
         {
-            string text = await _formatter(context);
-
-            await _writer.WriteLineAsync(text);
+            _source.TrySetException(new InvalidOperationException("Message was nacked"));
         }
     }
 }

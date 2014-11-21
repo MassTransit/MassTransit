@@ -13,6 +13,7 @@
 namespace MassTransit.TestFramework
 {
     using System;
+    using System.Threading.Tasks;
     using EndpointConfigurators;
     using Logging;
     using MassTransit.Transports;
@@ -27,34 +28,46 @@ namespace MassTransit.TestFramework
     {
         static readonly ILog _log = Logger.Get<InMemoryTestFixture>();
         IBusControl _localBus;
-        Uri _localBusUri;
-        SendEndpointTestDecorator _localSendEndpoint;
+        Uri _inputQueueAddress;
+        SendEndpointTestDecorator _inputQueueSendEndpoint;
         InMemoryTransportCache _transportCache;
+        readonly Lazy<Task<ISendEndpoint>> _localBusSendEndpoint;
 
         public InMemoryTestFixture()
         {
-            _localBusUri = new Uri("loopback://localhost/input_queue");
+            _inputQueueAddress = new Uri("loopback://localhost/input_queue");
+            _localBusSendEndpoint = new Lazy<Task<ISendEndpoint>>(() => _localBus.GetSendEndpoint(_localBus.InputAddress));
         }
 
-        protected ISendEndpoint LocalSendEndpoint
+        protected ISendEndpoint InputQueueSendEndpoint
         {
-            get { return _localSendEndpoint; }
+            get { return _inputQueueSendEndpoint; }
+        }
+
+        protected Task<ISendEndpoint> LocalBusSendEndpoint
+        {
+            get { return _localBusSendEndpoint.Value; }
         }
 
         protected MessageSentList Sent
         {
-            get { return _localSendEndpoint.Sent; }
+            get { return _inputQueueSendEndpoint.Sent; }
         }
 
-        protected Uri LocalBusUri
+        protected Uri LocalBusAddress
         {
-            get { return _localBusUri; }
+            get { return _localBus.InputAddress; }
+        }
+
+        protected Uri InputQueueAddress
+        {
+            get { return _inputQueueAddress; }
             set
             {
                 if (LocalBus != null)
                     throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
 
-                _localBusUri = value;
+                _inputQueueAddress = value;
             }
         }
 
@@ -72,9 +85,9 @@ namespace MassTransit.TestFramework
 
             _localBus.Start(TestCancellationToken).Wait(TestTimeout);
 
-            ISendEndpoint sendEndpoint = _localBus.GetSendEndpoint(_localBusUri).Result;
+            ISendEndpoint sendEndpoint = _localBus.GetSendEndpoint(_inputQueueAddress).Result;
 
-            _localSendEndpoint = new SendEndpointTestDecorator(sendEndpoint, TestTimeout);
+            _inputQueueSendEndpoint = new SendEndpointTestDecorator(sendEndpoint, TestTimeout);
         }
 
         [TestFixtureTearDown]
@@ -120,7 +133,11 @@ namespace MassTransit.TestFramework
                 x.ReceiveEndpoint("input_queue", e =>
                 {
                     e.Log(Console.Out, async context =>
-                        string.Format("Received (input_queue): {0}", context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A")));
+                    {
+                        return string.Format("Received (input_queue): {0}, Types = ({1})",
+                            context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A"),
+                            string.Join(",", context.SupportedMessageTypes));
+                    });
 
                     ConfigureLocalReceiveEndpoint(e);
                 });

@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Magnum.Reflection;
@@ -33,18 +34,18 @@ namespace MassTransit.Transports
             _destinationAddress = destinationAddress;
         }
 
-        public Task Send<T>(T message)
+        public Task Send<T>(T message, CancellationToken cancellationToken)
             where T : class
         {
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            var settingsPipe = new EndpointSettingsPipe<T>(this);
+            var settingsPipe = new EndpointSendContextPipe<T>(this);
 
-            return _transport.Send(message, settingsPipe);
+            return _transport.Send(message, settingsPipe, cancellationToken);
         }
 
-        public Task Send<T>(T message, IPipe<SendContext<T>> pipe)
+        public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (message == null)
@@ -52,32 +53,32 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException("pipe");
 
-            var settingsPipe = new EndpointSettingsPipe<T>(this, pipe);
+            var settingsPipe = new EndpointSendContextPipe<T>(this, pipe);
 
-            return _transport.Send(message, settingsPipe);
+            return _transport.Send(message, settingsPipe, cancellationToken);
         }
 
-        public Task Send(object message)
+        public Task Send(object message, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
 
             Type messageType = message.GetType();
 
-            return SendToEndpointConverterCache.Instance[messageType].Send(this, message);
+            return SendEndpointConverterCache.Instance[messageType].Send(this, message, cancellationToken);
         }
 
-        public Task Send(object message, Type messageType)
+        public Task Send(object message, Type messageType, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            return SendToEndpointConverterCache.Instance[messageType].Send(this, message);
+            return SendEndpointConverterCache.Instance[messageType].Send(this, message, cancellationToken);
         }
 
-        public Task Send<T>(object values)
+        public Task Send<T>(object values, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
@@ -85,10 +86,10 @@ namespace MassTransit.Transports
 
             var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
 
-            return Send(message);
+            return Send(message, cancellationToken);
         }
 
-        public Task Send<T>(T message, IPipe<SendContext> pipe)
+        public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (message == null)
@@ -96,12 +97,12 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException("pipe");
 
-            var settingsPipe = new EndpointSettingsPipe<T>(this, pipe);
+            var settingsPipe = new EndpointSendContextPipe<T>(this, pipe);
 
-            return _transport.Send(message, settingsPipe);
+            return _transport.Send(message, settingsPipe, cancellationToken);
         }
 
-        public Task Send(object message, IPipe<SendContext> pipe)
+        public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -110,10 +111,10 @@ namespace MassTransit.Transports
 
             Type messageType = message.GetType();
 
-            return SendToEndpointConverterCache.Instance[messageType].Send(this, message, pipe);
+            return SendEndpointConverterCache.Instance[messageType].Send(this, message, pipe, cancellationToken);
         }
 
-        public Task Send(object message, Type messageType, IPipe<SendContext> pipe)
+        public Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
@@ -122,10 +123,10 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException("pipe");
 
-            return SendToEndpointConverterCache.Instance[messageType].Send(this, message, pipe);
+            return SendEndpointConverterCache.Instance[messageType].Send(this, message, pipe, cancellationToken);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext<T>> pipe)
+        public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
@@ -133,10 +134,10 @@ namespace MassTransit.Transports
 
             var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
 
-            return Send(message, pipe);
+            return Send(message, pipe, cancellationToken);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext> pipe)
+        public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
@@ -146,11 +147,11 @@ namespace MassTransit.Transports
 
             var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
 
-            return Send(message, pipe);
+            return Send(message, pipe, cancellationToken);
         }
 
 
-        class EndpointSettingsPipe<T> :
+        class EndpointSendContextPipe<T> :
             IPipe<SendContext<T>>
             where T : class
         {
@@ -158,18 +159,18 @@ namespace MassTransit.Transports
             readonly IPipe<SendContext<T>> _pipe;
             readonly IPipe<SendContext> _sendPipe;
 
-            public EndpointSettingsPipe(SendEndpoint endpoint)
+            public EndpointSendContextPipe(SendEndpoint endpoint)
             {
                 _endpoint = endpoint;
             }
 
-            public EndpointSettingsPipe(SendEndpoint endpoint, IPipe<SendContext<T>> pipe)
+            public EndpointSendContextPipe(SendEndpoint endpoint, IPipe<SendContext<T>> pipe)
             {
                 _endpoint = endpoint;
                 _pipe = pipe;
             }
 
-            public EndpointSettingsPipe(SendEndpoint endpoint, IPipe<SendContext> pipe)
+            public EndpointSendContextPipe(SendEndpoint endpoint, IPipe<SendContext> pipe)
             {
                 _endpoint = endpoint;
                 _sendPipe = pipe;
@@ -188,7 +189,8 @@ namespace MassTransit.Transports
 
             public bool Inspect(IPipeInspector inspector)
             {
-                return inspector.Inspect(this);
+                return inspector.Inspect(this,
+                    x => (_pipe != null && _pipe.Inspect(inspector)) || (_sendPipe != null && _sendPipe.Inspect(inspector)));
             }
         }
     }

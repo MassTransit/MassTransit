@@ -13,42 +13,14 @@
 namespace MassTransit.Tests
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Sinks;
-    using NUnit.Framework;
-    using Pipeline;
+    using TestFramework;
 
 
-    [TestFixture]
-    public abstract class AsyncTestFixture
+    public abstract class MessageTestFixture :
+        AsyncTestFixture
     {
-        protected TimeSpan TestTimeout;
-        protected CancellationToken CancellationToken;
-
-        protected AsyncTestFixture()
-            : this(TimeSpan.FromSeconds(30))
-        {
-        }
-
-        protected AsyncTestFixture(TimeSpan testTimeout)
-        {
-            TestTimeout = testTimeout;
-
-            var cancellationTokenSource = new CancellationTokenSource(testTimeout);
-
-            CancellationToken = cancellationTokenSource.Token;
-        }
-
-        protected TaskCompletionSource<T> GetTask<T>()
-        {
-            var source = new TaskCompletionSource<T>();
-            CancellationToken.Register(() => source.TrySetCanceled());
-
-            return source;
-        }
-
         protected ConsumeContext GetConsumeContext<T>(T message)
             where T : class
         {
@@ -60,6 +32,7 @@ namespace MassTransit.Tests
         {
             return new TestObserver<T>(GetTask<T>(), GetTask<T>(), GetTask<T>());
         }
+
         protected OneMessageConsumer GetOneMessageConsumer()
         {
             return new OneMessageConsumer(GetTask<MessageA>());
@@ -82,11 +55,12 @@ namespace MassTransit.Tests
         IConsumeObserver<T>
         where T : class
     {
-        readonly TaskCompletionSource<T> _preDispatched;
-        readonly TaskCompletionSource<T> _postDispatched;
         readonly TaskCompletionSource<T> _dispatchFaulted;
+        readonly TaskCompletionSource<T> _postDispatched;
+        readonly TaskCompletionSource<T> _preDispatched;
 
-        public TestObserver(TaskCompletionSource<T> preDispatched, TaskCompletionSource<T> postDispatched, TaskCompletionSource<T> dispatchFaulted)
+        public TestObserver(TaskCompletionSource<T> preDispatched, TaskCompletionSource<T> postDispatched,
+            TaskCompletionSource<T> dispatchFaulted)
         {
             _preDispatched = preDispatched;
             _postDispatched = postDispatched;
@@ -130,6 +104,10 @@ namespace MassTransit.Tests
     {
         readonly TaskCompletionSource<MessageA> _completed;
 
+        public OneMessageConsumer()
+        {
+            _completed = new TaskCompletionSource<MessageA>();
+        }
 
         public OneMessageConsumer(TaskCompletionSource<MessageA> completed)
         {

@@ -39,16 +39,6 @@ namespace MassTransit
             _configurators = new List<IReceiveEndpointBuilderConfigurator>();
         }
 
-        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
-        {
-            _pipeConfigurator.AddPipeBuilderConfigurator(configurator);
-        }
-
-        public void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)
-        {
-            _configurators.Add(configurator);
-        }
-
         public IEnumerable<ValidationResult> Validate()
         {
             return _configurators.SelectMany(x => x.Validate());
@@ -59,7 +49,17 @@ namespace MassTransit
             builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder.MessageDeserializer, builder.ReceiveTransportProvider));
         }
 
-        ReceiveEndpoint CreateReceiveEndpoint(IMessageDeserializer deserializer, IReceiveTransportProvider receiveTransportProvider)
+        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
+        {
+            _pipeConfigurator.AddPipeBuilderConfigurator(configurator);
+        }
+
+        public void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)
+        {
+            _configurators.Add(configurator);
+        }
+
+        public ReceiveEndpoint CreateReceiveEndpoint(IMessageDeserializer deserializer, IReceiveTransportProvider receiveTransportProvider)
         {
             IReceiveTransport transport = receiveTransportProvider.GetReceiveTransport(_queueName);
 
@@ -67,7 +67,7 @@ namespace MassTransit
 
             IPipe<ReceiveContext> receivePipe = CreateReceivePipe(deserializer, inboundPipe);
 
-            return new ReceiveEndpoint(transport, receivePipe);
+            return new ReceiveEndpoint(transport, receivePipe, inboundPipe);
         }
 
         IPipe<ReceiveContext> CreateReceivePipe(IMessageDeserializer deserializer, InboundPipe inboundPipe)

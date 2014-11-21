@@ -38,6 +38,41 @@ namespace MassTransit.Transports.RabbitMq
             _model.BasicReturn += ModelOnBasicReturn;
         }
 
+        public void ExchangeBindNoWait(string destination, string source, string routingKey, IDictionary<string, object> arguments)
+        {
+            _model.ExchangeBindNoWait(destination, source, routingKey, arguments);
+        }
+
+        public void ExchangeUnbindNoWait(string destination, string source, string routingKey, IDictionary<string, object> arguments)
+        {
+            _model.ExchangeUnbindNoWait(destination, source, routingKey, arguments);
+        }
+
+        public void QueueDeclareNoWait(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
+        {
+            _model.QueueDeclareNoWait(queue, durable, exclusive, autoDelete, arguments);
+        }
+
+        public void QueueBindNoWait(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
+        {
+            _model.QueueBindNoWait(queue, exchange, routingKey, arguments);
+        }
+
+        public void QueueDeleteNoWait(string queue, bool ifUnused, bool ifEmpty)
+        {
+            _model.QueueDeleteNoWait(queue, ifUnused, ifEmpty);
+        }
+
+        public void ExchangeDeleteNoWait(string exchange, bool ifUnused)
+        {
+            _model.ExchangeDeleteNoWait(exchange, ifUnused);
+        }
+
+        public void ExchangeDeclareNoWait(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
+        {
+            _model.ExchangeDeclareNoWait(exchange, type, durable, autoDelete, arguments);
+        }
+
         public void Dispose()
         {
             _model.Dispose();
@@ -46,16 +81,6 @@ namespace MassTransit.Transports.RabbitMq
         public IBasicProperties CreateBasicProperties()
         {
             return _model.CreateBasicProperties();
-        }
-
-        public IFileProperties CreateFileProperties()
-        {
-            return _model.CreateFileProperties();
-        }
-
-        public IStreamProperties CreateStreamProperties()
-        {
-            return _model.CreateStreamProperties();
         }
 
         public void ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
@@ -162,6 +187,11 @@ namespace MassTransit.Transports.RabbitMq
         public bool WaitForConfirms()
         {
             return _model.WaitForConfirms();
+        }
+
+        public bool WaitForConfirms(TimeSpan timeout)
+        {
+            return _model.WaitForConfirms(timeout);
         }
 
         public bool WaitForConfirms(TimeSpan timeout, out bool timedOut)
@@ -310,16 +340,6 @@ namespace MassTransit.Transports.RabbitMq
             _model.TxRollback();
         }
 
-        public void DtxSelect()
-        {
-            _model.DtxSelect();
-        }
-
-        public void DtxStart(string dtxIdentifier)
-        {
-            _model.DtxStart(dtxIdentifier);
-        }
-
         public void Close()
         {
             _model.Close();
@@ -418,8 +438,8 @@ namespace MassTransit.Transports.RabbitMq
             {
                 if (args.Multiple)
                 {
-                    var ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
-                    foreach (var id in ids)
+                    ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
+                    foreach (ulong id in ids)
                     {
                         Published value;
                         if (_published.TryRemove(id, out value))
@@ -441,8 +461,8 @@ namespace MassTransit.Transports.RabbitMq
             {
                 if (args.Multiple)
                 {
-                    var ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
-                    foreach (var id in ids)
+                    ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
+                    foreach (ulong id in ids)
                     {
                         Published value;
                         if (_published.TryRemove(id, out value))
@@ -458,34 +478,4 @@ namespace MassTransit.Transports.RabbitMq
             });
         }
     }
-
-
-    public class Published
-    {
-        ulong _publishTag;
-        TaskCompletionSource<ulong> _source;
-
-        public Published(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body,
-            ulong publishTag)
-        {
-            _publishTag = publishTag;
-            _source = new TaskCompletionSource<ulong>();
-        }
-
-        public Task Task
-        {
-            get { return _source.Task; }
-        }
-
-        public void Ack()
-        {
-            _source.TrySetResult(_publishTag);
-        }
-
-        public void Nack()
-        {
-            _source.TrySetException(new InvalidOperationException("Message was nacked"));
-        }
-    }
-
 }

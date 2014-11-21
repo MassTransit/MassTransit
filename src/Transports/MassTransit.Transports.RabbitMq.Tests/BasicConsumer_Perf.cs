@@ -163,7 +163,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                     {
                         var sendToTransport = new RabbitMqSendTransport(sendModel, "fast");
                         var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
-                        var sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
+                        ISendEndpoint sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
                         Stopwatch timer = Stopwatch.StartNew();
                         var tasks = Enumerable.Range(0, limit)
                             .Select(x =>
@@ -249,7 +249,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             });
 
 
-            var receiveEndpoint = new ReceiveEndpoint(transport, receivePipe);
+            var receiveEndpoint = new ReceiveEndpoint(transport, receivePipe, testPipe);
 
             var consumerTask = receiveEndpoint.Start(cancelReceive.Token);
 
@@ -260,7 +260,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             {
                 var sendToTransport = new RabbitMqSendTransport(sendModel, "fast");
                 var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
-                var sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
+                ISendEndpoint sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
                 Stopwatch timer = Stopwatch.StartNew();
                 var tasks = Enumerable.Range(0, limit)
                     .Select(x => sendToEndpoint.Send(message)).AsParallel().ToArray();

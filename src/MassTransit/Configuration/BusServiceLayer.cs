@@ -18,17 +18,6 @@ namespace MassTransit
 	public enum BusServiceLayer
 	{
 		/// <summary>
-		/// The lowest level, and includes things that sit just above transports
-		/// </summary>
-		Network = 0,
-
-		/// <summary>
-		/// The next level, which includes subscription, timeout, health, and other services that must
-		/// be running before the application can start.
-		/// </summary>
-		Session,
-
-		/// <summary>
 		/// The next level, which includes services that sit on top of the session services but not yet
 		/// application level services, such as the distributor and workers
 		/// </summary>
