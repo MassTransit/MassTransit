@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
@@ -25,13 +26,25 @@ namespace MassTransit.Transports
     public class ReceiveEndpoint :
         IReceiveEndpoint
     {
+        readonly IInboundPipe _inputPipe;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly IReceiveTransport _receiveTransport;
 
-        public ReceiveEndpoint(IReceiveTransport receiveTransport, IPipe<ReceiveContext> receivePipe)
+        public ReceiveEndpoint(IReceiveTransport receiveTransport, IPipe<ReceiveContext> receivePipe, IInboundPipe inputPipe)
         {
             _receiveTransport = receiveTransport;
             _receivePipe = receivePipe;
+            _inputPipe = inputPipe;
+        }
+
+        public Uri InputAddress
+        {
+            get { return _receiveTransport.InputAddress; }
+        }
+
+        public IInboundPipe InputPipe
+        {
+            get { return _inputPipe; }
         }
 
         public Task Start(CancellationToken stopToken)

@@ -21,10 +21,12 @@ namespace MassTransit.Tests.Transports
         using MassTransit.Serialization;
         using MassTransit.Transports;
         using NUnit.Framework;
+        using TestFramework;
 
 
         [TestFixture]
-        public class Using_the_in_memory_transport
+        public class Using_the_in_memory_transport :
+            AsyncTestFixture
         {
             [Test]
             public async void Should_be_asynchronous()
@@ -35,7 +37,7 @@ namespace MassTransit.Tests.Transports
 
                 var transport = new InMemoryTransport(inputAddress);
 
-                var received = new TaskCompletionSource<int>();
+                var received = GetTask<int>();
 
                 IPipe<ReceiveContext> receivePipe = Pipe.New<ReceiveContext>(x =>
                 {
@@ -51,7 +53,7 @@ namespace MassTransit.Tests.Transports
 
                 var sendEndpoint = new SendEndpoint(transport, new JsonSendMessageSerializer(JsonMessageSerializer.Serializer), inputAddress);
 
-                await sendEndpoint.Send(new A());
+                await sendEndpoint.Send(new A(), TestCancellationToken);
 
                 await received.Task;
 

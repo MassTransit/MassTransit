@@ -10,19 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Context
 {
-    using Builders;
-    using EndpointConfigurators;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Pipeline;
 
 
-    public interface IInMemoryServiceBusFactoryConfigurator :
-        IServiceBusFactoryConfigurator,
-        IReceiveEndpointConfigurator
+    /// <summary>
+    /// Calls the generic version of the ISendEndpoint.Send method with the object's type
+    /// </summary>
+    public interface ISendEndpointConverter
     {
-        void SetTransportProvider<T>(T transportProvider)
-            where T : ISendTransportProvider, IReceiveTransportProvider;
+        Task Send(ISendEndpoint endpoint, object message, CancellationToken cancellationToken = default(CancellationToken));
 
-        void AddServiceBusFactoryBuilderConfigurator(IInMemoryServiceBusFactoryBuilderConfigurator configurator);
+        Task Send(ISendEndpoint endpoint, object message, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken = default(CancellationToken));
     }
 }

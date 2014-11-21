@@ -85,7 +85,7 @@ namespace MassTransit
         public static ConnectHandle SubscribeHandler<T>(this IBus bus, MessageHandler<T> handler)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.Connect(bus.InboundPipe, handler);
+            return HandlerConnectorCache<T>.Connector.Connect(bus.InputPipe, handler);
         }
 
         /// <summary>

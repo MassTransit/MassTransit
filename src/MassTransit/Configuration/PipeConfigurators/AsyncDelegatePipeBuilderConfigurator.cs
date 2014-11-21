@@ -12,32 +12,34 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.PipeConfigurators
 {
+    using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Configurators;
     using PipeBuilders;
-    using Pipeline.Filters;
+    using Pipeline;
 
 
-    public class HandlerPipeBuilderConfigurator<T> :
-        IPipeBuilderConfigurator<ConsumeContext<T>>
-        where T : class
+    public class AsyncDelegatePipeBuilderConfigurator<T> :
+        IPipeBuilderConfigurator<T>
+        where T : class, PipeContext
     {
-        readonly MessageHandler<T> _handler;
+        readonly Func<T, Task> _callback;
 
-        public HandlerPipeBuilderConfigurator(MessageHandler<T> handler)
+        public AsyncDelegatePipeBuilderConfigurator(Func<T, Task> callback)
         {
-            _handler = handler;
+            _callback = callback;
         }
 
-        public void Configure(IPipeBuilder<ConsumeContext<T>> builder)
+        public void Configure(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new HandlerMessageFilter<T>(_handler));
+            builder.AddFilter(new AsyncDelegateFilter<T>(_callback));
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_handler == null)
-                yield return this.Failure("Handler", "must not be null");
+            if (_callback == null)
+                yield return this.Failure("Callback", "must not be null");
         }
     }
 }

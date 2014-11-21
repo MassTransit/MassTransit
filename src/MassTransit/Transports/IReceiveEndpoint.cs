@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Pipeline;
 
 
     /// <summary>
@@ -21,6 +23,13 @@ namespace MassTransit.Transports
     /// </summary>
     public interface IReceiveEndpoint
     {
+        Uri InputAddress { get; }
+
+        /// <summary>
+        /// The input pipe for the endpoint
+        /// </summary>
+        IInboundPipe InputPipe { get; }
+
         /// <summary>
         /// Starts recieving from the inbound transport, returning a Task that is completed
         /// once the transport is closed. The cancellationToken is used to stop the receive

@@ -49,6 +49,11 @@ namespace MassTransit.Transports
                 _collection.Dispose();
         }
 
+        public Uri InputAddress
+        {
+            get { return _inputAddress; }
+        }
+
         async Task IReceiveTransport.Start(IPipe<ReceiveContext> receivePipe, CancellationToken stopReceive)
         {
             Task receiveTask = Task.Run(() =>

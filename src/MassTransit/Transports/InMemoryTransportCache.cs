@@ -14,6 +14,7 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Threading.Tasks;
 
 
     /// <summary>
@@ -33,8 +34,7 @@ namespace MassTransit.Transports
 
         public void Dispose()
         {
-            foreach (InMemoryTransport transport in _transports.Values)
-                transport.Dispose();
+            Parallel.ForEach(_transports.Values, x => x.Dispose());
         }
 
         public IReceiveTransport GetReceiveTransport(string queueName)

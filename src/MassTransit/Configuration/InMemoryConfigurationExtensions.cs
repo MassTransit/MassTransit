@@ -20,7 +20,7 @@ namespace MassTransit
     public static class InMemoryConfigurationExtensions
     {
         /// <summary>
-        /// Select RabbitMQ as the transport for the service bus
+        /// Select an in-memory transport for the service bus
         /// </summary>
         public static IInMemoryServiceBusFactoryConfigurator InMemory(this IServiceBusFactorySelector selector)
         {
@@ -31,6 +31,12 @@ namespace MassTransit
             return configurator;
         }
 
+        /// <summary>
+        /// Specify a receive endpoint for the bus, with the specified queue name
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="queueName">The queue name for the receiving endpoint</param>
+        /// <param name="configure">The configuration callback</param>
         public static void ReceiveEndpoint(this IInMemoryServiceBusFactoryConfigurator configurator, string queueName,
             Action<IReceiveEndpointConfigurator> configure)
         {

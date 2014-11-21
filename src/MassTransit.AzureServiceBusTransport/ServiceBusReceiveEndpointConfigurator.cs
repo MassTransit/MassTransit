@@ -145,7 +145,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
 
-            return new ReceiveEndpoint(transport, receivePipe);
+            return new ReceiveEndpoint(transport, receivePipe, inboundPipe);
         }
 
 

@@ -16,11 +16,12 @@ namespace MassTransit.Tests.Pipeline
     using MassTransit.Pipeline;
     using Messages;
     using NUnit.Framework;
+    using TestFramework;
 
 
     [TestFixture]
     public class Connecting_a_handler_to_the_inbound_pipe :
-        AsyncTestFixture
+        MessageTestFixture
     {
         [Test]
         public async void Should_receive_a_test_message()

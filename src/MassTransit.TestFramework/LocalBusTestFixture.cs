@@ -37,24 +37,35 @@ namespace MassTransit.TestFramework
             TestCancelledTask.ContinueWith(x =>
             {
                 source.TrySetCanceled();
+
                 handler.Disconnect();
             }, TaskContinuationOptions.OnlyOnCanceled);
 
             return source.Task;
         }
 
-        protected Task<T> SubscribeToLocalBus<T>(Func<T, bool> handler)
+        protected Task<T> SubscribeToLocalBus<T>(Func<ConsumeContext<T>, bool> filter)
             where T : class
         {
             var source = new TaskCompletionSource<T>();
 
-            LocalBus.SubscribeHandler<T>(async context =>
+            ConnectHandle handler = null;
+            handler = LocalBus.SubscribeHandler<T>(async context =>
             {
-                if (handler(context.Message))
+                if (filter(context))
+                {
                     source.SetResult(context.Message);
+
+                    handler.Disconnect();
+                }
             });
 
-            TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
+            TestCancelledTask.ContinueWith(x =>
+            {
+                source.TrySetCanceled();
+
+                handler.Disconnect();
+            }, TaskContinuationOptions.OnlyOnCanceled);
 
             return source.Task;
         }

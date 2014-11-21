@@ -10,31 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Pipeline
 {
     using System;
     using System.Threading.Tasks;
-    using Pipeline;
 
 
-    public interface IBus :
-        IPublishEndpoint
+    public class AsyncDelegateFilter<T> :
+        IFilter<T>
+        where T : class, PipeContext
     {
-        /// <summary>
-        /// The receive address of the bus itself, versus any receive endpoints that were created
-        /// </summary>
-        Uri InputAddress { get; }
+        readonly Func<T, Task> _callback;
 
-        /// <summary>
-        /// The inbound pipe for the bus
-        /// </summary>
-        IInboundPipe InputPipe { get; }
+        public AsyncDelegateFilter(Func<T, Task> callback)
+        {
+            _callback = callback;
+        }
 
-        /// <summary>
-        /// Retrieve a destination endpoint
-        /// </summary>
-        /// <param name="address">The endpoint address</param>
-        /// <returns>A sendable endpoint</returns>
-        Task<ISendEndpoint> GetSendEndpoint(Uri address);
+        public async Task Send(T context, IPipe<T> next)
+        {
+            await _callback(context);
+
+            await next.Send(context);
+        }
+
+        public bool Inspect(IPipeInspector inspector)
+        {
+            return inspector.Inspect(this);
+        }
     }
 }

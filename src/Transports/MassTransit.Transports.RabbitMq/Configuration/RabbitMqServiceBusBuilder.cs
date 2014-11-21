@@ -61,7 +61,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 
             ISendEndpointProvider sendEndpointProvider = new RabbitMqSendEndpointProvider(_hosts, TODO);
 
-            return new SuperDuperServiceBus(inboundPipe, sendEndpointProvider, _receiveEndpoints);
+            return new SuperDuperServiceBus(new Uri("rabbitmq://localhost"), inboundPipe, sendEndpointProvider, _receiveEndpoints);
         }
     }
 

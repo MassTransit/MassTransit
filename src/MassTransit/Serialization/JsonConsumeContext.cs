@@ -166,6 +166,11 @@ namespace MassTransit.Serialization
             get { return _receiveContext; }
         }
 
+        public IEnumerable<string> SupportedMessageTypes
+        {
+            get { return _supportedTypes; }
+        }
+
         public bool HasMessageType(Type messageType)
         {
             lock (_messageTypes)

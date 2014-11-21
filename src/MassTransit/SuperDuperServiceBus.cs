@@ -24,20 +24,24 @@ namespace MassTransit
     public class SuperDuperServiceBus :
         IBusControl
     {
-        readonly IInboundPipe _inboundPipe;
+        readonly IInboundPipe _inputPipe;
         readonly IList<IReceiveEndpoint> _receiveEndpoints;
         readonly List<Task> _runningTasks;
+        Uri _inputAddress;
         ISendEndpointProvider _sendEndpointProvider;
         CancellationTokenSource _stopTokenSource;
 
-        public SuperDuperServiceBus(IInboundPipe inboundPipe, ISendEndpointProvider sendEndpointProvider, params IReceiveEndpoint[] receiveEndpoints)
-            : this(inboundPipe, sendEndpointProvider, receiveEndpoints as IEnumerable<IReceiveEndpoint>)
+        public SuperDuperServiceBus(Uri inputAddress, IInboundPipe inputPipe, ISendEndpointProvider sendEndpointProvider,
+            params IReceiveEndpoint[] receiveEndpoints)
+            : this(inputAddress, inputPipe, sendEndpointProvider, receiveEndpoints as IEnumerable<IReceiveEndpoint>)
         {
         }
 
-        public SuperDuperServiceBus(IInboundPipe inboundPipe, ISendEndpointProvider sendEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints)
+        public SuperDuperServiceBus(Uri inputAddress, IInboundPipe inputPipe, ISendEndpointProvider sendEndpointProvider,
+            IEnumerable<IReceiveEndpoint> receiveEndpoints)
         {
-            _inboundPipe = inboundPipe;
+            _inputAddress = inputAddress;
+            _inputPipe = inputPipe;
             _sendEndpointProvider = sendEndpointProvider;
             _receiveEndpoints = receiveEndpoints.ToList();
             _runningTasks = new List<Task>();
@@ -48,49 +52,54 @@ namespace MassTransit
             Stop().Wait();
         }
 
-        Task IPublisher.Publish<T>(T message)
+        Task IPublishEndpoint.Publish<T>(T message)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublisher.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe)
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublisher.Publish(object message)
+        Task IPublishEndpoint.Publish(object message)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublisher.Publish(object message, Type messageType)
+        Task IPublishEndpoint.Publish(object message, Type messageType)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublisher.Publish(object message, Action<PublishContext> contextCallback)
+        Task IPublishEndpoint.Publish(object message, Action<PublishContext> contextCallback)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublisher.Publish(object message, Type messageType, Action<PublishContext> contextCallback)
+        Task IPublishEndpoint.Publish(object message, Type messageType, Action<PublishContext> contextCallback)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublisher.Publish<T>(object values)
+        Task IPublishEndpoint.Publish<T>(object values)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublisher.Publish<T>(object values, Action<PublishContext<T>> contextCallback)
+        Task IPublishEndpoint.Publish<T>(object values, Action<PublishContext<T>> contextCallback)
         {
             throw new NotImplementedException();
         }
 
-        IInboundPipe IBus.InboundPipe
+        public Uri InputAddress
         {
-            get { return _inboundPipe; }
+            get { return _inputAddress; }
+        }
+
+        IInboundPipe IBus.InputPipe
+        {
+            get { return _inputPipe; }
         }
 
         Task<ISendEndpoint> IBus.GetSendEndpoint(Uri address)

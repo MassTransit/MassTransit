@@ -42,7 +42,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             var endpointCache = new SendEndpointCache(sendEndpointProvider);
 
-            return new SuperDuperServiceBus(inboundPipe, endpointCache, ReceiveEndpoints);
+            return new SuperDuperServiceBus(new Uri("azure://localhost"), inboundPipe, endpointCache, ReceiveEndpoints);
         }
     }
 }

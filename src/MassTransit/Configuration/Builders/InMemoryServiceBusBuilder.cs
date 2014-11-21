@@ -12,7 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
+    using System;
+    using System.Linq;
+    using EndpointConfigurators;
     using Pipeline;
+    using Serialization;
     using Transports;
 
 
@@ -20,11 +24,20 @@ namespace MassTransit.Builders
         ServiceBusBuilderBase,
         IInMemoryServiceBusBuilder
     {
+        readonly Uri _inputAddress;
         readonly IReceiveTransportProvider _receiveTransportProvider;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryServiceBusBuilder(IReceiveTransportProvider receiveTransportProvider, ISendTransportProvider sendTransportProvider)
+        public InMemoryServiceBusBuilder(Uri inputAddress, IReceiveTransportProvider receiveTransportProvider, ISendTransportProvider sendTransportProvider)
         {
+            if (inputAddress == null)
+                throw new ArgumentNullException("inputAddress");
+            if (receiveTransportProvider == null)
+                throw new ArgumentNullException("receiveTransportProvider");
+            if (sendTransportProvider == null)
+                throw new ArgumentNullException("sendTransportProvider");
+
+            _inputAddress = inputAddress;
             _receiveTransportProvider = receiveTransportProvider;
             _sendTransportProvider = sendTransportProvider;
         }
@@ -41,11 +54,12 @@ namespace MassTransit.Builders
 
         public virtual IBusControl Build()
         {
-            IInboundPipe inboundPipe = new InboundPipe();
-
             ISendEndpointProvider sendEndpointProvider = CreateSendEndpointProvider();
 
-            return new SuperDuperServiceBus(inboundPipe, sendEndpointProvider, ReceiveEndpoints);
+            var inboundPipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
+                .Select(x => x.InputPipe).FirstOrDefault() ?? new InboundPipe();
+
+            return new SuperDuperServiceBus(_inputAddress,inboundPipe, sendEndpointProvider, ReceiveEndpoints);
         }
 
         ISendEndpointProvider CreateSendEndpointProvider()
@@ -53,6 +67,11 @@ namespace MassTransit.Builders
             var provider = new SendEndpointProvider(_sendTransportProvider, MessageSerializer);
 
             return new SendEndpointCache(provider);
+        }
+
+        InboundPipe CreateInboundPipe()
+        {
+            return new InboundPipe();
         }
     }
 }

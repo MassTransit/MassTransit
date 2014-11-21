@@ -16,14 +16,7 @@ namespace MassTransit.EndpointConfigurators
     using System.Transactions;
     using Builders;
     using Serialization;
-    using SubscriptionConfigurators;
     using Transports;
-
-
-    public interface IEndpointConfigurator
-    {
-        
-    }
 
 
     /// <summary>

@@ -13,6 +13,7 @@
 namespace MassTransit.Serialization
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -26,6 +27,10 @@ namespace MassTransit.Serialization
     {
         readonly ConsumeContext _context;
         readonly TMessage _message;
+        public IEnumerable<string> SupportedMessageTypes
+        {
+            get { return _context.SupportedMessageTypes; }
+        }
 
         public JsonMessageConsumeContext(ConsumeContext context, TMessage message)
         {

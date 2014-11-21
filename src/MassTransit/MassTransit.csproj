@@ -105,7 +105,9 @@
     <Compile Include="Configuration\Configurators\InMemoryServiceBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\PipeFactoryConfiguratorResults.cs" />
     <Compile Include="Configuration\Configurators\PipeFactoryConfiguratorResultsImpl.cs" />
+    <Compile Include="Configuration\DelegatePipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurators\AddSerializerEndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\IEndpointConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IReceiveEndpointBuilderConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IReceiveEndpointBuilder.cs" />
@@ -123,6 +125,8 @@
     <Compile Include="Configuration\LogPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\PipeBuilders\IPipeBuilder.cs" />
     <Compile Include="Configuration\PipeBuilders\PipeBuilder.cs" />
+    <Compile Include="Configuration\PipeConfigurators\AsyncDelegatePipeBuilderConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\DelegatePipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\FilterPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\HandlerPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\IPipeBuilderConfigurator.cs" />
@@ -168,9 +172,9 @@
     <Compile Include="ConsumerFactoryInterceptor.cs" />
     <Compile Include="Context\ConsumeContextAdapter.cs" />
     <Compile Include="Context\DeliveryMode.cs" />
-    <Compile Include="Context\ISendToEndpointConverter.cs" />
-    <Compile Include="Context\SendToEndpointConverterCache.cs" />
-    <Compile Include="Context\SendToEndpointConverter.cs" />
+    <Compile Include="Context\ISendEndpointConverter.cs" />
+    <Compile Include="Context\SendEndpointConverterCache.cs" />
+    <Compile Include="Context\SendEndpointConverter.cs" />
     <Compile Include="Context\MessageHeadersAdapter.cs" />
     <Compile Include="Context\ReceiveContextAdapter.cs" />
     <Compile Include="EndpointExtensions.cs" />
@@ -181,7 +185,7 @@
     <Compile Include="IConsumer.cs" />
     <Compile Include="IFault.cs" />
     <Compile Include="IMessageDeserializer.cs" />
-    <Compile Include="IPublisher.cs" />
+    <Compile Include="IPublishEndpoint.cs" />
     <Compile Include="ISendEndpoint.cs" />
     <Compile Include="ISendEndpointProvider.cs" />
     <Compile Include="MessageContext.cs" />
@@ -200,6 +204,7 @@
     <Compile Include="NewId\NewIdProviders\WMINetworkAddressWorkerIdProvider.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
+    <Compile Include="Pipeline\AsyncDelegateFilter.cs" />
     <Compile Include="Pipeline\DefaultConstructorConsumerFactory.cs" />
     <Compile Include="Pipeline\DelegateFilter.cs" />
     <Compile Include="Pipeline\EmptyPipe.cs" />
@@ -237,6 +242,7 @@
     <Compile Include="Pipeline\IPublishInterceptor.cs" />
     <Compile Include="Pipeline\IReceivePipe.cs" />
     <Compile Include="Pipeline\ISendInterceptor.cs" />
+    <Compile Include="Pipeline\ISendObserver.cs" />
     <Compile Include="Pipeline\LastPipe.cs" />
     <Compile Include="Pipeline\LeftMergePipe.cs" />
     <Compile Include="Pipeline\LeftSplitPipe.cs" />

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
@@ -19,6 +20,11 @@ namespace MassTransit.Transports
 
     public interface IReceiveTransport
     {
+        /// <summary>
+        /// The input address of the receive transport
+        /// </summary>
+        Uri InputAddress { get; }
+
         /// <summary>
         /// Start receiving on a transport, sending messages to the specified pipe.
         /// </summary>

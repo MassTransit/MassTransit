@@ -13,6 +13,9 @@
 namespace MassTransit.TestFramework
 {
     using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -158,9 +161,14 @@ namespace MassTransit.TestFramework
             get { return _receiveContext; }
         }
 
+        public IEnumerable<string> SupportedMessageTypes
+        {
+            get { return Enumerable.Repeat(new MessageUrn(typeof(T)).ToString(), 1); }
+        }
+
         public bool HasMessageType(Type messageType)
         {
-            throw new NotImplementedException();
+            return messageType.IsAssignableFrom(typeof(T));
         }
 
         public bool TryGetMessage<TMessage>(out ConsumeContext<TMessage> consumeContext)

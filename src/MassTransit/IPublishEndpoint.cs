@@ -16,8 +16,11 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Pipeline;
 
-
-    public interface IPublisher
+    /// <summary>
+    /// A publish endpoint lets the underlying transport determine the actual endpoint to which
+    /// the message is sent. For example, an exchange on RabbitMQ and a topic on Azure Service bus.
+    /// </summary>
+    public interface IPublishEndpoint
     {
         /// <summary>
         /// <para>Publishes a message to all subscribed consumers for the message type as specified
@@ -92,7 +95,6 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="TMessage">The type of the interface or
         /// non-sealed class with all-virtual members.</typeparam>
-        /// <param name="bus">The bus to publish on.</param>
         /// <param name="values">The dictionary of values to place in the
         /// object instance to implement the interface.</param>
         Task Publish<TMessage>(object values)
@@ -104,7 +106,6 @@ namespace MassTransit
         /// meta-data. Also <see cref="IServiceBus.Publish{T}"/>.
         /// </summary>
         /// <typeparam name="TMessage">The type of the message to publish</typeparam>
-        /// <param name="bus">The bus to publish the message on.</param>
         /// <param name="values">The dictionary of values to become hydrated and
         /// published under the type of the interface.</param>
         /// <param name="contextCallback">The context callback.</param>

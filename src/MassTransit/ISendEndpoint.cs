@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
 
@@ -24,8 +25,9 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="message">The message</param>
+        /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send<T>(T message)
+        Task Send<T>(T message, CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
 
         /// <summary>
@@ -34,8 +36,9 @@ namespace MassTransit
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="message">The message</param>
         /// <param name="pipe"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send<T>(T message, IPipe<SendContext<T>> pipe)
+        Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
 
         /// <summary>
@@ -44,16 +47,18 @@ namespace MassTransit
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="message">The message</param>
         /// <param name="pipe"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send<T>(T message, IPipe<SendContext> pipe)
+        Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
 
         /// <summary>
         ///     Sends an object as a message, using the type of the message instance.
         /// </summary>
         /// <param name="message">The message object</param>
+        /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send(object message);
+        Task Send(object message, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
@@ -61,8 +66,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="message">The message object</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
+        /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send(object message, Type messageType);
+        Task Send(object message, Type messageType, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
@@ -70,8 +76,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="message">The message object</param>
         /// <param name="pipe"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send(object message, IPipe<SendContext> pipe);
+        Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
@@ -80,8 +87,10 @@ namespace MassTransit
         /// <param name="message">The message object</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name="pipe"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send(object message, Type messageType, IPipe<SendContext> pipe);
+        Task Send(object message, Type messageType, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         ///     Sends an interface message, initializing the properties of the interface using the anonymous
@@ -89,8 +98,9 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="values">The property values to initialize on the interface</param>
+        /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send<T>(object values)
+        Task Send<T>(object values, CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
 
         /// <summary>
@@ -100,8 +110,9 @@ namespace MassTransit
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="values">The property values to initialize on the interface</param>
         /// <param name="pipe"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send<T>(object values, IPipe<SendContext<T>> pipe)
+        Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
 
         /// <summary>
@@ -111,8 +122,9 @@ namespace MassTransit
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="values">The property values to initialize on the interface</param>
         /// <param name="pipe"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send<T>(object values, IPipe<SendContext> pipe)
+        Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
     }
 }

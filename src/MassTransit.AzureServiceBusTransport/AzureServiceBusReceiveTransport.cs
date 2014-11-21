@@ -29,12 +29,18 @@ namespace MassTransit.AzureServiceBusTransport
         readonly ILog _log = Logger.Get<AzureServiceBusReceiveTransport>();
         readonly IRetryPolicy _retryPolicy;
         readonly ReceiveSettings _settings;
+        Uri _inputAddress;
 
         public AzureServiceBusReceiveTransport(ServiceBusHostSettings hostSettings, ReceiveSettings settings, IRetryPolicy retryPolicy)
         {
             _hostSettings = hostSettings;
             _settings = settings;
             _retryPolicy = retryPolicy;
+        }
+
+        public Uri InputAddress
+        {
+            get { return _inputAddress; }
         }
 
         public Task Start(IPipe<ReceiveContext> receivePipe, CancellationToken stopReceive)

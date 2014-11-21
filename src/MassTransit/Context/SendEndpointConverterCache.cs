@@ -21,38 +21,38 @@ namespace MassTransit.Context
     /// Caches the converters that allow a raw object to be published using the object's type through
     /// the generic Send method.
     /// </summary>
-    public class SendToEndpointConverterCache
+    public class SendEndpointConverterCache
     {
-        readonly ConcurrentDictionary<Type, Lazy<ISendToEndpointConverter>> _types =
-            new ConcurrentDictionary<Type, Lazy<ISendToEndpointConverter>>();
+        readonly ConcurrentDictionary<Type, Lazy<ISendEndpointConverter>> _types =
+            new ConcurrentDictionary<Type, Lazy<ISendEndpointConverter>>();
 
-        public static SendToEndpointConverterCache Instance
+        public static SendEndpointConverterCache Instance
         {
-            get { return InstanceCache.Cached.Value; }
+            get { return Cached.Converters.Value; }
         }
 
-        public ISendToEndpointConverter this[Type type]
+        public ISendEndpointConverter this[Type type]
         {
             get { return _types.GetOrAdd(type, CreateTypeConverter).Value; }
         }
 
-        static Lazy<ISendToEndpointConverter> CreateTypeConverter(Type type)
+        static Lazy<ISendEndpointConverter> CreateTypeConverter(Type type)
         {
-            return new Lazy<ISendToEndpointConverter>(() => CreateConverter(type));
+            return new Lazy<ISendEndpointConverter>(() => CreateConverter(type));
         }
 
-        static ISendToEndpointConverter CreateConverter(Type type)
+        static ISendEndpointConverter CreateConverter(Type type)
         {
-            Type converterType = typeof(SendToEndpointConverter<>).MakeGenericType(type);
+            Type converterType = typeof(SendEndpointConverter<>).MakeGenericType(type);
 
-            return (ISendToEndpointConverter)Activator.CreateInstance(converterType);
+            return (ISendEndpointConverter)Activator.CreateInstance(converterType);
         }
 
 
-        static class InstanceCache
+        static class Cached
         {
-            internal static readonly Lazy<SendToEndpointConverterCache> Cached =
-                new Lazy<SendToEndpointConverterCache>(() => new SendToEndpointConverterCache(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<SendEndpointConverterCache> Converters =
+                new Lazy<SendEndpointConverterCache>(() => new SendEndpointConverterCache(), LazyThreadSafetyMode.PublicationOnly);
         }
     }
 }

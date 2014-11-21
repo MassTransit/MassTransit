@@ -13,7 +13,6 @@
 namespace MassTransit.Tests.Pipeline
 {
     using System;
-    using System.IO;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using NUnit.Framework;
@@ -21,27 +20,28 @@ namespace MassTransit.Tests.Pipeline
 
     [TestFixture]
     public class Connecting_an_observer :
-        AsyncTestFixture
+        MessageTestFixture
     {
         [Test]
-        public async void Should_invoke_pre()
+        public void Should_invoke_faulted()
         {
             IInboundPipe filter = new InboundPipe();
 
-            TaskCompletionSource<MessageA> received = GetTask<MessageA>();
+            filter.ConnectHandler<MessageA>(async context =>
+            {
+                throw new InvalidOperationException("This is a test");
+            });
 
-            filter.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
-
-            var interceptor = GetMessageObserver<MessageA>();
+            TestObserver<MessageA> interceptor = GetMessageObserver<MessageA>();
             filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
 
-            await filter.Send(consumeContext);
+            Assert.Throws<AggregateException>(async () => await filter.Send(consumeContext));
 
-            await received.Task;
+            var exception = Assert.Throws<AggregateException>(async () => await interceptor.DispatchedFaulted);
 
-            await interceptor.PreDispatched;
+            Assert.IsInstanceOf<InvalidOperationException>(exception.InnerException);
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace MassTransit.Tests.Pipeline
 
             filter.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
 
-            var interceptor = GetMessageObserver<MessageA>();
+            TestObserver<MessageA> interceptor = GetMessageObserver<MessageA>();
             filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
@@ -66,22 +66,45 @@ namespace MassTransit.Tests.Pipeline
         }
 
         [Test]
-        public void Should_invoke_faulted()
+        public async void Should_invoke_post_consumer()
         {
             IInboundPipe filter = new InboundPipe();
 
-            filter.ConnectHandler<MessageA>(async context => { throw new InvalidOperationException("This is a test"); });
+            TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
-            var interceptor = GetMessageObserver<MessageA>();
+            filter.ConnectConsumer(() => new OneMessageConsumer(received));
+
+            TestObserver<MessageA> interceptor = GetMessageObserver<MessageA>();
             filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
 
-            Assert.Throws<AggregateException>(async () => await filter.Send(consumeContext));
+            await filter.Send(consumeContext);
 
-            var exception = Assert.Throws<AggregateException>(async () => await interceptor.DispatchedFaulted);
+            await received.Task;
 
-            Assert.IsInstanceOf<InvalidOperationException>(exception.InnerException);
+            await interceptor.PostDispatched;
+        }
+
+        [Test]
+        public async void Should_invoke_pre()
+        {
+            IInboundPipe filter = new InboundPipe();
+
+            TaskCompletionSource<MessageA> received = GetTask<MessageA>();
+
+            filter.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
+
+            TestObserver<MessageA> interceptor = GetMessageObserver<MessageA>();
+            filter.Connect(interceptor);
+
+            ConsumeContext consumeContext = GetConsumeContext(new MessageA());
+
+            await filter.Send(consumeContext);
+
+            await received.Task;
+
+            await interceptor.PreDispatched;
         }
     }
 }

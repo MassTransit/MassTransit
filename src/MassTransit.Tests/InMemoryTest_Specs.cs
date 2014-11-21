@@ -19,18 +19,49 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
-    public class Using_the_in_memory_transports :
+    public class Sending_a_message_to_the_endpoint :
         InMemoryTestFixture
     {
         [Test]
-        public void Should_properly_startup_and_shutdown()
+        public void Should_start_the_handler_properly()
         {
         }
 
         [Test]
-        public async void Should_send_a_message_properly()
+        public async void Should_be_received_by_the_handler()
         {
-            await LocalSendEndpoint.Send(new A());
+            await InputQueueSendEndpoint.Send(new A());
+
+            await _receivedA;
+
+            Assert.IsTrue(Sent.Any<A>());
+        }
+
+        Task<A> _receivedA;
+
+
+        class A
+        {
+        }
+
+
+        protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            _receivedA = Handler<A>(configurator);
+        }
+    }
+
+
+    [TestFixture]
+    public class Sending_an_object_to_the_endpoint :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async void Should_be_received_by_the_handler()
+        {
+            object message = new A();
+
+            await InputQueueSendEndpoint.Send(message);
 
             await _receivedA;
 
