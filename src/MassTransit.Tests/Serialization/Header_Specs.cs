@@ -22,8 +22,10 @@ namespace MassTransit.Tests.Serialization
 	using MassTransit.Serialization;
 	using Messages;
 	using NUnit.Framework;
+	using TestFramework.Messages;
 
-	public abstract class Setting_the_message_expiration<TSerializer>
+
+    public abstract class Setting_the_message_expiration<TSerializer>
 		: SerializationSpecificationBase<TSerializer>
 		where TSerializer : IMessageSerializer, new()
 	{

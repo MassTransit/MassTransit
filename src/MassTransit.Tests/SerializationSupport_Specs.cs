@@ -17,7 +17,7 @@
 
         public When_using_mixed_serialization_types()
         {
-            _requestReceived = new Future<A>();
+            _requestReceived = new Future<A>(); 
             _responseReceived = new Future<B>();
         }
 

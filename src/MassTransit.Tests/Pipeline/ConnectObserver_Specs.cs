@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Pipeline
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using NUnit.Framework;
+    using TestFramework.Messages;
 
 
     [TestFixture]

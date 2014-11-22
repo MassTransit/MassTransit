@@ -20,8 +20,9 @@ namespace MassTransit.Context
 
 
     /// <summary>
-    ///     Encapsulates the headers included in an IBasicProperties so that they are accessible
-    ///     as transport headers on the ReceiveContext
+    /// The context headers are sourced from the IContextHeaderProvider, with the use of a Json deserializer
+    /// to convert data types to objects as required. If the original headers are Json objects, those headers
+    /// are deserialized as well
     /// </summary>
     public class JsonContextHeaders :
         ContextHeaders

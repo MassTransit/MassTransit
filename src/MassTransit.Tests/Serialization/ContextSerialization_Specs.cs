@@ -17,7 +17,8 @@ namespace MassTransit.Tests.Serialization
 	using MassTransit.Serialization;
 	using Messages;
 	using NUnit.Framework;
-	using TextFixtures;
+    using TestFramework.Messages;
+    using TextFixtures;
 
 	[TestFixture]
 	public abstract class When_sending_a_message_using_the_specified_serializer<TSerializer> :

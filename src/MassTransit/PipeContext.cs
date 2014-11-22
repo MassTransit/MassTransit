@@ -17,6 +17,10 @@ namespace MassTransit
     using Context;
 
 
+    /// <summary>
+    /// The base context for all pipe types, includes the payload sidebanding of data
+    /// with the payload, as well as the cancellationToken to avoid passing it everywhere
+    /// </summary>
     public interface PipeContext
     {
         /// <summary>

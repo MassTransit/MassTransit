@@ -3,7 +3,9 @@ namespace MassTransit.Transports
     using System.Collections.Generic;
     using Context;
 
-
+    /// <summary>
+    /// A simple in-memory header collection for use with the in memory transport
+    /// </summary>
     public class InMemoryContextHeaderProvider :
         IContextHeaderProvider
     {

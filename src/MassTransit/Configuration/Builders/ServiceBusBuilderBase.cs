@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
+    using System;
     using System.Collections.Generic;
     using Serialization;
     using Transports;
@@ -19,36 +20,47 @@ namespace MassTransit.Builders
 
     public abstract class ServiceBusBuilderBase
     {
-        readonly IMessageDeserializer _messageDeserializer;
-        readonly ISendMessageSerializer _messageSerializer;
-        readonly IList<IReceiveEndpoint> _receiveEndpoints;
+        readonly Lazy<IMessageDeserializer> _deserializer;
+        readonly IList<IReceiveEndpoint> _endpoints;
+        readonly Lazy<ISendMessageSerializer> _serializer;
 
         protected ServiceBusBuilderBase()
         {
-            _receiveEndpoints = new List<IReceiveEndpoint>();
-
-            _messageDeserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
-            _messageSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
+            _endpoints = new List<IReceiveEndpoint>();
+            _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
+            _serializer = new Lazy<ISendMessageSerializer>(CreateSerializer);
         }
 
         protected IEnumerable<IReceiveEndpoint> ReceiveEndpoints
         {
-            get { return _receiveEndpoints; }
+            get { return _endpoints; }
         }
 
         public ISendMessageSerializer MessageSerializer
         {
-            get { return _messageSerializer; }
+            get { return _serializer.Value; }
         }
 
         public IMessageDeserializer MessageDeserializer
         {
-            get { return _messageDeserializer; }
+            get { return _deserializer.Value; }
+        }
+
+        JsonSendMessageSerializer CreateSerializer()
+        {
+            return new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
+        }
+
+        JsonMessageDeserializer CreateDeserializer()
+        {
+            return new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, SendEndpointProvider);
         }
 
         public void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint)
         {
-            _receiveEndpoints.Add(receiveEndpoint);
+            _endpoints.Add(receiveEndpoint);
         }
+
+        protected abstract ISendEndpointProvider SendEndpointProvider { get; }
     }
 }

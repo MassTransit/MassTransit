@@ -21,15 +21,15 @@ namespace MassTransit.TestFramework
     {
         protected abstract IBus LocalBus { get; }
 
-        protected Task<T> SubscribeToLocalBus<T>()
+        protected Task<ConsumeContext<T>> SubscribeToLocalBus<T>()
             where T : class
         {
-            var source = new TaskCompletionSource<T>();
+            var source = new TaskCompletionSource<ConsumeContext<T>>();
 
             ConnectHandle handler = null;
             handler = LocalBus.SubscribeHandler<T>(async context =>
             {
-                source.SetResult(context.Message);
+                source.SetResult(context);
 
                 handler.Disconnect();
             });
@@ -44,17 +44,17 @@ namespace MassTransit.TestFramework
             return source.Task;
         }
 
-        protected Task<T> SubscribeToLocalBus<T>(Func<ConsumeContext<T>, bool> filter)
+        protected Task<ConsumeContext<T>> SubscribeToLocalBus<T>(Func<ConsumeContext<T>, bool> filter)
             where T : class
         {
-            var source = new TaskCompletionSource<T>();
+            var source = new TaskCompletionSource<ConsumeContext<T>>();
 
             ConnectHandle handler = null;
             handler = LocalBus.SubscribeHandler<T>(async context =>
             {
                 if (filter(context))
                 {
-                    source.SetResult(context.Message);
+                    source.SetResult(context);
 
                     handler.Disconnect();
                 }

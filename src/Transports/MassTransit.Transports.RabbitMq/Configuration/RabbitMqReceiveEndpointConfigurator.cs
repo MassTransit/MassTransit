@@ -23,6 +23,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
     using PipeConfigurators;
     using Policies;
     using RabbitMQ.Client;
+    using Serialization;
 
 
     public class RabbitMqReceiveEndpointConfigurator :

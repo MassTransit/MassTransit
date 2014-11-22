@@ -26,11 +26,6 @@ namespace MassTransit.Transports
             _headers = new Dictionary<string, object>();
         }
 
-        public IDictionary<string, object> Headers
-        {
-            get { return _headers; }
-        }
-
         public void Set(string key, string value)
         {
             _headers.Add(key, value);

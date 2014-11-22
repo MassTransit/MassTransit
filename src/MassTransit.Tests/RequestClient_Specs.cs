@@ -1,0 +1,110 @@
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Tests
+{
+    using System;
+    using System.Threading.Tasks;
+    using EndpointConfigurators;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using NUnit.Framework;
+    using TestFramework;
+    using TestFramework.Messages;
+
+
+    [TestFixture]
+    public class Sending_a_request_using_the_request_client :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async void Should_receive_the_response()
+        {
+            PongMessage message = await _response;
+
+            message.CorrelationId.ShouldEqual(_ping.Result.Message.CorrelationId);
+        }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        Task<PongMessage> _response;
+        IRequestClient<PingMessage, PongMessage> _requestClient;
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(LocalBus, InputQueueAddress, 8.Seconds());
+
+            _response = _requestClient.Request(new PingMessage());
+        }
+
+        protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
+        }
+    }
+
+
+    [TestFixture]
+    public class Sending_a_request_to_a_missing_service :
+        InMemoryTestFixture
+    {
+        [Test]
+        public void Should_timeout()
+        {
+            Assert.Throws<RequestTimeoutException>(async () => await _response);
+        }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        Task<PongMessage> _response;
+        IRequestClient<PingMessage, PongMessage> _requestClient;
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(LocalBus, InputQueueAddress, 1.Seconds());
+
+            _response = _requestClient.Request(new PingMessage());
+        }
+    }
+
+    [TestFixture]
+    public class Sending_a_request_to_a_faulty_service :
+        InMemoryTestFixture
+    {
+        [Test]
+        public  void Should_receive_the_exception()
+        {
+            Assert.Throws<RequestFaultException>(async () => await _response);
+        }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        Task<PongMessage> _response;
+        IRequestClient<PingMessage, PongMessage> _requestClient;
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(LocalBus, InputQueueAddress, 8.Seconds());
+
+            _response = _requestClient.Request(new PingMessage());
+        }
+
+        protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async x =>
+            {
+                throw new InvalidOperationException("This is an expected test failure");
+            });
+        }
+    }
+
+}

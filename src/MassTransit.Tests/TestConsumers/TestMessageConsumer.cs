@@ -13,8 +13,10 @@
 namespace MassTransit.Tests.TestConsumers
 {
 	using Messages;
+	using TestFramework.Messages;
 
-	public class TestMessageConsumer<TMessage> :
+
+    public class TestMessageConsumer<TMessage> :
 		TestConsumerBase<TMessage>,
 		Consumes<TMessage>.All
 		where TMessage : class

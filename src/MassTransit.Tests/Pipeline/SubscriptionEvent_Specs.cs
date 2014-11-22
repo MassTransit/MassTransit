@@ -19,8 +19,10 @@ namespace MassTransit.Tests.Pipeline
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using TestConsumers;
+	using TestFramework.Messages;
 
-	[TestFixture]
+
+    [TestFixture]
 	public class The_SubscriptionPublisher_should_add_subscriptions
 	{
 		[SetUp]

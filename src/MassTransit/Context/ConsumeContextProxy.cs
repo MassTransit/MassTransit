@@ -180,7 +180,7 @@ namespace MassTransit.Context
             _context.RetryLater();
         }
 
-        public ISendEndpoint GetSendEndpoint(Uri address)
+        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);
         }

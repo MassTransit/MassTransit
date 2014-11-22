@@ -24,14 +24,16 @@ namespace MassTransit.Transports
         ISendEndpoint
     {
         readonly Uri _destinationAddress;
+        readonly Uri _sourceAddress;
         readonly ISendMessageSerializer _serializer;
         readonly ISendTransport _transport;
 
-        public SendEndpoint(ISendTransport transport, ISendMessageSerializer serializer, Uri destinationAddress)
+        public SendEndpoint(ISendTransport transport, ISendMessageSerializer serializer, Uri destinationAddress, Uri sourceAddress)
         {
             _transport = transport;
             _serializer = serializer;
             _destinationAddress = destinationAddress;
+            _sourceAddress = sourceAddress;
         }
 
         public Task Send<T>(T message, CancellationToken cancellationToken)
@@ -180,6 +182,9 @@ namespace MassTransit.Transports
             {
                 context.Serializer = _endpoint._serializer;
                 context.DestinationAddress = _endpoint._destinationAddress;
+
+                if (context.SourceAddress == null)
+                    context.SourceAddress = _endpoint._sourceAddress;
 
                 if (_pipe != null)
                     await _pipe.Send(context);

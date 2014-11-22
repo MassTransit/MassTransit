@@ -19,6 +19,7 @@ namespace MassTransit
     using EndpointConfigurators;
     using PipeConfigurators;
     using Pipeline;
+    using Serialization;
     using Transports;
 
 
@@ -76,6 +77,10 @@ namespace MassTransit
 
             foreach (IReceiveEndpointBuilderConfigurator builderConfigurator in _configurators)
                 builderConfigurator.Configure(builder);
+
+            // TODO insert exceptionFilter that moves to error if deserialization fails
+            // TODO insert filter that if other excpetion 'n' times move to error
+            // TODO insert dead-letter filter so that no message consumers moves to "_skipped"
 
             _receivePipeConfigurator.Filter(new DeserializeFilter(deserializer, inboundPipe));
 

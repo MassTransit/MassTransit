@@ -23,25 +23,27 @@ namespace MassTransit.Serialization
         IMessageDeserializer
     {
         readonly JsonSerializer _deserializer;
+        readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public JsonMessageDeserializer(JsonSerializer deserializer)
+        public JsonMessageDeserializer(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider)
         {
             _deserializer = deserializer;
+            _sendEndpointProvider = sendEndpointProvider;
         }
 
-        public ConsumeContext Deserialize(ReceiveContext receiveContext)
+        ConsumeContext IMessageDeserializer.Deserialize(ReceiveContext receiveContext)
         {
             try
             {
                 MessageEnvelope envelope;
-                using (var body = receiveContext.Body)
+                using (Stream body = receiveContext.Body)
                 using (var reader = new StreamReader(body, Encoding.UTF8))
                 using (var jsonReader = new JsonTextReader(reader))
                 {
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);
                 }
 
-                return new JsonConsumeContext(_deserializer, receiveContext, envelope);
+                return new JsonConsumeContext(_deserializer, _sendEndpointProvider, receiveContext, envelope);
             }
             catch (JsonSerializationException ex)
             {

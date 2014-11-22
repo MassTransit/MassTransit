@@ -14,9 +14,7 @@ namespace MassTransit.Builders
 {
     using System;
     using System.Linq;
-    using EndpointConfigurators;
     using Pipeline;
-    using Serialization;
     using Transports;
 
 
@@ -26,9 +24,11 @@ namespace MassTransit.Builders
     {
         readonly Uri _inputAddress;
         readonly IReceiveTransportProvider _receiveTransportProvider;
+        readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryServiceBusBuilder(Uri inputAddress, IReceiveTransportProvider receiveTransportProvider, ISendTransportProvider sendTransportProvider)
+        public InMemoryServiceBusBuilder(Uri inputAddress, IReceiveTransportProvider receiveTransportProvider,
+            ISendTransportProvider sendTransportProvider)
         {
             if (inputAddress == null)
                 throw new ArgumentNullException("inputAddress");
@@ -40,6 +40,13 @@ namespace MassTransit.Builders
             _inputAddress = inputAddress;
             _receiveTransportProvider = receiveTransportProvider;
             _sendTransportProvider = sendTransportProvider;
+
+            _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
+        }
+
+        protected override ISendEndpointProvider SendEndpointProvider
+        {
+            get { return _sendEndpointProvider.Value; }
         }
 
         public ISendTransportProvider SendTransportProvider
@@ -52,26 +59,19 @@ namespace MassTransit.Builders
             get { return _receiveTransportProvider; }
         }
 
-        public virtual IBusControl Build()
-        {
-            ISendEndpointProvider sendEndpointProvider = CreateSendEndpointProvider();
-
-            var inboundPipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
-                .Select(x => x.InputPipe).FirstOrDefault() ?? new InboundPipe();
-
-            return new SuperDuperServiceBus(_inputAddress,inboundPipe, sendEndpointProvider, ReceiveEndpoints);
-        }
-
         ISendEndpointProvider CreateSendEndpointProvider()
         {
-            var provider = new SendEndpointProvider(_sendTransportProvider, MessageSerializer);
+            var provider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer);
 
             return new SendEndpointCache(provider);
         }
 
-        InboundPipe CreateInboundPipe()
+        public virtual IBusControl Build()
         {
-            return new InboundPipe();
+            IInboundPipe inboundPipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
+                .Select(x => x.InputPipe).FirstOrDefault() ?? new InboundPipe();
+
+            return new SuperDuperServiceBus(_inputAddress, inboundPipe, SendEndpointProvider, ReceiveEndpoints);
         }
     }
 }

@@ -171,6 +171,7 @@
     <Compile Include="Pipeline\ConnectHandler_Specs.cs" />
     <Compile Include="Pipeline\ConnectObserver_Specs.cs" />
     <Compile Include="PublishRequest_Specs.cs" />
+    <Compile Include="RequestClient_Specs.cs" />
     <Compile Include="Saga\CustomerRegistrationSaga.cs" />
     <Compile Include="Saga\CustomerRegistrationSagaTest.cs" />
     <Compile Include="Saga\InjectingSampleSaga.cs" />
@@ -178,6 +179,7 @@
     <Compile Include="Saga\StateMachine\CombineSaga.cs" />
     <Compile Include="Saga\StateMachine\CombineSaga_Specs.cs" />
     <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
+    <Compile Include="SendReceive_Specs.cs" />
     <Compile Include="SerializationSupport_Specs.cs" />
     <Compile Include="Serialization\ByteArray_Specs.cs" />
     <Compile Include="Serialization\DateTime_Specs.cs" />
@@ -225,7 +227,6 @@
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
     <Compile Include="LocalSubscriptionCache_Specs.cs" />
     <Compile Include="Messages\ResponseMessage.cs" />
-    <Compile Include="Dispatcher_Specs.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />
     <Compile Include="Serialization\GivenAComplexMessage.cs" />
@@ -259,7 +260,6 @@
     <Compile Include="Pipeline\SubscriptionEvent_Specs.cs" />
     <Compile Include="PublishSubscribe_Specs.cs" />
     <Compile Include="PublishToConsumer_Specs.cs" />
-    <Compile Include="RequestReply_Specs.cs" />
     <Compile Include="Saga\Messages\CorrelatedMessage.cs" />
     <Compile Include="Saga\Messages\RegisterUser.cs" />
     <Compile Include="Saga\Messages\SendUserVerificationEmail.cs" />
@@ -275,8 +275,6 @@
     <Compile Include="Saga\StateMachine\SagaStateMachine_Specs.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
-    <Compile Include="Messages\PingMessage.cs" />
-    <Compile Include="Messages\PongMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MessageQueueEndpoint_MeetsCriteria.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />

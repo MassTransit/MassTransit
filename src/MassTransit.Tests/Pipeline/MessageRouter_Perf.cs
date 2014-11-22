@@ -27,6 +27,7 @@ namespace MassTransit.Tests.Pipeline
     using NUnit.Framework;
     using Rhino.Mocks;
     using TestFramework;
+    using TestFramework.Messages;
 
 
     [TestFixture]

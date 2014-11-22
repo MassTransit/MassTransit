@@ -15,8 +15,10 @@ namespace MassTransit.Tests.Configuration
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using Messages;
+	using TestFramework.Messages;
 
-	[Scenario]
+
+    [Scenario]
 	public class When_configuring_a_service_bus_easily
 	{
 		[Then]

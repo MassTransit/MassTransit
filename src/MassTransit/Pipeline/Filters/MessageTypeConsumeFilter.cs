@@ -21,6 +21,7 @@ namespace MassTransit.Pipeline.Filters
     public class MessageTypeConsumeFilter :
         IFilter<ConsumeContext>,
         IConsumeFilterConnector,
+        IRequestFilterConnector,
         IConsumeObserverConnector
     {
         readonly ConcurrentDictionary<Type, IFilter<ConsumeContext>> _pipes;
@@ -47,9 +48,20 @@ namespace MassTransit.Pipeline.Filters
             if (pipe == null)
                 throw new ArgumentNullException("pipe");
 
-            IConsumeFilterConnector messagePipe = GetPipe<T, IConsumeFilterConnector>();
+            IConsumeFilterConnector<T> messagePipe = GetPipe<T, IConsumeFilterConnector<T>>();
 
             return messagePipe.Connect(pipe);
+        }
+
+        public ConnectHandle Connect<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe) 
+            where T : class
+        {
+            if (pipe == null)
+                throw new ArgumentNullException("pipe");
+
+            IRequestFilterConnector<T> messagePipe = GetPipe<T, IRequestFilterConnector<T>>();
+
+            return messagePipe.Connect(requestId, pipe);
         }
 
         public ConnectHandle Connect<T>(IConsumeObserver<T> observer)

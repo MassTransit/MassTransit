@@ -75,12 +75,28 @@ namespace MassTransit.TestFramework
             return source;
         }
 
-        protected Task<T> Handler<T>(IReceiveEndpointConfigurator configurator)
+        protected Task<ConsumeContext<T>> Handler<T>(IReceiveEndpointConfigurator configurator)
             where T : class
         {
-            var source = new TaskCompletionSource<T>();
+            var source = new TaskCompletionSource<ConsumeContext<T>>();
 
-            configurator.Handler<T>(async context => source.SetResult(context.Message));
+            configurator.Handler<T>(async context => source.SetResult(context));
+
+            TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
+
+            return source.Task;
+        }
+
+        protected Task<ConsumeContext<T>> Handler<T>(IReceiveEndpointConfigurator configurator, MessageHandler<T> handler)
+            where T : class
+        {
+            var source = new TaskCompletionSource<ConsumeContext<T>>();
+
+            configurator.Handler<T>(async context =>
+            {
+                await handler(context);
+                source.SetResult(context);
+            });
 
             TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
 
