@@ -60,5 +60,11 @@ namespace MassTransit.Pipeline
         {
             return _filter.Connect(pipe);
         }
+
+        public ConnectHandle Connect<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+            where T : class
+        {
+            return _filter.Connect(requestId, pipe);
+        }
     }
 }

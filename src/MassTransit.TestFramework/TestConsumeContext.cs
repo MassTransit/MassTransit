@@ -193,7 +193,7 @@ namespace MassTransit.TestFramework
             throw new NotImplementedException();
         }
 
-        public ISendEndpoint GetSendEndpoint(Uri address)
+        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             throw new NotImplementedException();
         }

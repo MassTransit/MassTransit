@@ -10,33 +10,35 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Messages
+namespace MassTransit.TestFramework.Messages
 {
-	using System;
+    using System;
 
-	[Serializable]
-	public class PingMessage :
-		IEquatable<PingMessage>,
+
+    [Serializable]
+	public class PongMessage :
+		IEquatable<PongMessage>,
 		CorrelatedBy<Guid>
 	{
-		private Guid _id = new Guid("D62C9B1C-8E31-4D54-ADD7-C624D56085A4");
+		private Guid _id;
 
-		public PingMessage()
+		public PongMessage()
 		{
+			_id = Guid.NewGuid();
 		}
 
-		public PingMessage(Guid id)
+		public PongMessage(Guid correlationId)
 		{
-			_id = id;
+			_id = correlationId;
 		}
 
 		public Guid CorrelationId
 		{
 			get { return _id; }
-			set { _id = value; }
+            set { _id = value; }
 		}
 
-		public bool Equals(PingMessage obj)
+		public bool Equals(PongMessage obj)
 		{
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
@@ -47,8 +49,8 @@ namespace MassTransit.Tests.Messages
 		{
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
-			if (obj.GetType() != typeof (PingMessage)) return false;
-			return Equals((PingMessage) obj);
+			if (obj.GetType() != typeof (PongMessage)) return false;
+			return Equals((PongMessage) obj);
 		}
 
 		public override int GetHashCode()

@@ -76,7 +76,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        ISendEndpoint GetSendEndpoint(Uri address);
+        Task<ISendEndpoint> GetSendEndpoint(Uri address);
 
         /// <summary>
         /// Notify that the message has been consumed

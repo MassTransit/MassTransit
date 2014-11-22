@@ -13,7 +13,6 @@
 namespace MassTransit.Transports
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Net.Mime;
     using System.Runtime.Serialization;
@@ -25,10 +24,10 @@ namespace MassTransit.Transports
         SendContext<T>
         where T : class
     {
+        readonly InMemorySendContextHeaders _contextHeaders;
         readonly PayloadCache _payloadCache;
         byte[] _body;
         ISendMessageSerializer _serializer;
-        readonly InMemorySendContextHeaders _contextHeaders;
 
         public InMemorySendContext(T message, CancellationToken cancellationToken)
         {
@@ -99,11 +98,6 @@ namespace MassTransit.Transports
         public bool Durable { get; set; }
 
         public T Message { get; private set; }
-
-        public IDictionary<string, object> Headers
-        {
-            get { return _contextHeaders.Headers; }
-        }
 
         public bool HasPayloadType(Type contextType)
         {

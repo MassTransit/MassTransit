@@ -16,6 +16,7 @@ namespace MassTransit.Tests
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using TestFramework;
+    using TestFramework.Messages;
 
 
     public abstract class MessageTestFixture :
@@ -123,16 +124,6 @@ namespace MassTransit.Tests
         {
             _completed.TrySetResult(context.Message);
         }
-    }
-
-
-    public class MessageA
-    {
-    }
-
-
-    public class MessageB
-    {
     }
 
 

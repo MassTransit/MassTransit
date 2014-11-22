@@ -16,8 +16,10 @@ namespace MassTransit.Tests.Configuration
 	using Magnum.TestFramework;
 	using Messages;
 	using TestFramework;
+	using TestFramework.Messages;
 
-	[Scenario]
+
+    [Scenario]
 	public class When_subscribing_an_object_instance_to_the_bus
 	{
 		IServiceBus _bus;

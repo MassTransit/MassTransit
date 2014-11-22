@@ -16,8 +16,10 @@ namespace MassTransit.Tests.Configuration
 	using Magnum.TestFramework;
 	using Messages;
 	using TestFramework;
+	using TestFramework.Messages;
 
-	[Scenario]
+
+    [Scenario]
 	public class When_subscribing_a_conditional_handler_to_a_bus
 	{
 		IServiceBus _bus;

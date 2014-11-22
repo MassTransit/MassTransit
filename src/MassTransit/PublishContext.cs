@@ -21,13 +21,11 @@ namespace MassTransit
         bool Mandatory { get; set; }
     }
 
+
     public interface PublishContext<out T> :
-        SendContext<T>
+        SendContext<T>,
+        PublishContext
         where T : class
     {
-        /// <summary>
-        /// True if the message must be delivered to a subscriber
-        /// </summary>
-        bool Mandatory { get; set; }
     }
 }

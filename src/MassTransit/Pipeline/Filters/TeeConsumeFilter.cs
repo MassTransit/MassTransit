@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Filters
 {
+    using System;
     using System.Threading.Tasks;
+    using Sinks;
     using Subscriptions;
 
 
@@ -22,19 +24,33 @@ namespace MassTransit.Pipeline.Filters
     /// <typeparam name="T"></typeparam>
     public class TeeConsumeFilter<T> :
         IFilter<ConsumeContext<T>>,
-        IConsumeFilterConnector<T>
+        IConsumeFilterConnector<T>,
+        IRequestFilterConnector<T>
         where T : class
     {
         readonly Connectable<IPipe<ConsumeContext<T>>> _connections;
+        readonly Lazy<KeyedConsumeFilter<T, Guid>> _requestConnections;
+        ConnectHandle _requestFilterHandle;
 
         public TeeConsumeFilter()
         {
             _connections = new Connectable<IPipe<ConsumeContext<T>>>();
+            _requestConnections = new Lazy<KeyedConsumeFilter<T, Guid>>(ConnectRequestFilter);
         }
 
         public int Count
         {
             get { return _connections.Count; }
+        }
+
+        public ConnectHandle Connect(IPipe<ConsumeContext<T>> pipe)
+        {
+            return _connections.Connect(pipe);
+        }
+
+        public ConnectHandle Connect(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+        {
+            return _requestConnections.Value.Connect(requestId, pipe);
         }
 
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
@@ -49,9 +65,20 @@ namespace MassTransit.Pipeline.Filters
             return inspector.Inspect(this, x => _connections.All(pipe => pipe.Inspect(x)));
         }
 
-        public ConnectHandle Connect(IPipe<ConsumeContext<T>> pipe)
+        KeyedConsumeFilter<T, Guid> ConnectRequestFilter()
         {
-            return _connections.Connect(pipe);
+            var filter = new KeyedConsumeFilter<T, Guid>(GetRequestId);
+
+            IPipe<ConsumeContext<T>> pipe = Pipe.New<ConsumeContext<T>>(x => x.Filter(filter));
+
+            _requestFilterHandle = _connections.Connect(pipe);
+
+            return filter;
+        }
+
+        static Guid GetRequestId(ConsumeContext<T> context)
+        {
+            return context.RequestId.HasValue ? context.RequestId.Value : Guid.Empty;
         }
     }
 }

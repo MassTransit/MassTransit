@@ -16,7 +16,10 @@ namespace MassTransit
     using System.IO;
     using System.Net.Mime;
 
-
+    /// <summary>
+    /// The receive context is sent from the transport when a message is ready to be processed
+    /// from the transport.
+    /// </summary>
     public interface ReceiveContext :
         PipeContext
     {

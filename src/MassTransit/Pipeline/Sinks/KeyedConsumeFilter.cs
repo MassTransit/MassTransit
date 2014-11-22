@@ -22,12 +22,12 @@ namespace MassTransit.Pipeline.Sinks
     public class KeyedConsumeFilter<T, TKey> :
         IFilter<ConsumeContext<T>>,
         IConnectPipeById<ConsumeContext<T>, TKey>
-        where T : class, PipeContext
+        where T : class
     {
-        readonly KeyAccessor<T, TKey> _keyAccessor;
+        readonly KeyAccessor<ConsumeContext<T>, TKey> _keyAccessor;
         readonly ConcurrentDictionary<TKey, TeeConsumeFilter<T>> _pipes;
 
-        public KeyedConsumeFilter(KeyAccessor<T, TKey> keyAccessor)
+        public KeyedConsumeFilter(KeyAccessor<ConsumeContext<T>, TKey> keyAccessor)
         {
             _keyAccessor = keyAccessor;
             _pipes = new ConcurrentDictionary<TKey, TeeConsumeFilter<T>>();
@@ -47,7 +47,7 @@ namespace MassTransit.Pipeline.Sinks
 
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
-            TKey key = _keyAccessor(context.Message);
+            TKey key = _keyAccessor(context);
 
             TeeConsumeFilter<T> filter;
             if (_pipes.TryGetValue(key, out filter))

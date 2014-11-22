@@ -48,7 +48,7 @@ namespace MassTransit.Distributor.Pipeline
                 return;
             }
 
-            ISendEndpoint endpoint = context.GetSendEndpoint(worker.DataUri);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(worker.DataUri);
 
             if (_log.IsDebugEnabled)
             {

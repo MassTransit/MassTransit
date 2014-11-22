@@ -21,6 +21,7 @@ namespace MassTransit.Tests.Subscriptions
     using NUnit.Framework;
     using TestConsumers;
     using TestFramework;
+    using TestFramework.Messages;
     using TextFixtures;
 
     [TestFixture]

@@ -14,6 +14,7 @@ namespace MassTransit.RequestResponse.Configurators
 {
     using System;
 
+
     public interface RequestConfigurator
     {
         /// <summary>

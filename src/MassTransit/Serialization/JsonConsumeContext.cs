@@ -42,11 +42,13 @@ namespace MassTransit.Serialization
         Guid? _requestId;
         Uri _responseAddress;
         Uri _sourceAddress;
+        readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public JsonConsumeContext(JsonSerializer deserializer, ReceiveContext receiveContext, MessageEnvelope envelope)
+        public JsonConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider, ReceiveContext receiveContext, MessageEnvelope envelope)
         {
             _receiveContext = receiveContext;
             _envelope = envelope;
+            _sendEndpointProvider = sendEndpointProvider;
             _deserializer = deserializer;
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
@@ -231,7 +233,7 @@ namespace MassTransit.Serialization
         {
             if (ResponseAddress != null)
             {
-                ISendEndpoint endpoint = GetSendEndpoint(ResponseAddress);
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
 
                 IPipe<SendContext<T>> sendPipe = Pipe.New<SendContext<T>>(x =>
                 {
@@ -269,9 +271,9 @@ namespace MassTransit.Serialization
             throw new NotImplementedException();
         }
 
-        public ISendEndpoint GetSendEndpoint(Uri address)
+        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            throw new NotImplementedException();
+            return _sendEndpointProvider.GetSendEndpoint(address);
         }
 
         public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)

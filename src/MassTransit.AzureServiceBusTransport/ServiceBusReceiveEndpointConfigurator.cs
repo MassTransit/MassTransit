@@ -21,6 +21,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Microsoft.ServiceBus.Messaging;
     using PipeConfigurators;
     using Policies;
+    using Serialization;
     using Transports;
 
 

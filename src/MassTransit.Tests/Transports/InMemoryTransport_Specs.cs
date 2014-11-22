@@ -51,7 +51,7 @@ namespace MassTransit.Tests.Transports
 
                 Task receiveTask = ((IReceiveTransport)transport).Start(receivePipe, shutdown.Token);
 
-                var sendEndpoint = new SendEndpoint(transport, new JsonSendMessageSerializer(JsonMessageSerializer.Serializer), inputAddress);
+                var sendEndpoint = new SendEndpoint(transport, new JsonSendMessageSerializer(JsonMessageSerializer.Serializer), inputAddress, inputAddress);
 
                 await sendEndpoint.Send(new A(), TestCancellationToken);
 

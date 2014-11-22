@@ -28,6 +28,8 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
     using NHibernate.Tool.hbm2ddl;
     using NUnit.Framework;
     using Saga;
+    using TestFramework.Messages;
+
 
     [TestFixture, Category("Integration")]
     public class When_using_the_saga_locator_with_NHibernate

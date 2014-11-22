@@ -21,6 +21,8 @@ namespace MassTransit.Tests.Serialization
     using MassTransit.Serialization;
     using Messages;
     using NUnit.Framework;
+    using TestFramework.Messages;
+
 
     public abstract class GivenASimpleMessage<TSerializer> where TSerializer : IMessageSerializer, new()
     {

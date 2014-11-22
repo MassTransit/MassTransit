@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using RequestResponse.Configurators;
+
 
     public static class RequestResponseExtensions
     {
@@ -31,31 +32,6 @@ namespace MassTransit
             return request.Wait();
         }
 
-        public static IAsyncResult BeginPublishRequest<TRequest>(this IServiceBus bus, TRequest message,
-            AsyncCallback callback, object state,
-            Action<InlineRequestConfigurator<TRequest>> configureCallback)
-            where TRequest : class
-        {
-            var configurator = new InlineRequestConfiguratorImpl<TRequest>(message);
-            configureCallback(configurator);
-
-            IAsyncRequest<TRequest> request = configurator.Build(bus);
-
-            bus.Publish(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
-
-            return request.BeginAsync(callback, state);
-        }
-
-        public static bool EndPublishRequest<TRequest>(this IServiceBus bus, IAsyncResult asyncResult)
-            where TRequest : class
-        {
-            var request = asyncResult as IAsyncRequest<TRequest>;
-            if (request == null)
-                throw new ArgumentException("The argument is not an IRequest");
-
-            return request.Wait();
-        }
-
         public static bool SendRequest<TRequest>(this IEndpoint endpoint, TRequest message, IServiceBus bus,
             Action<InlineRequestConfigurator<TRequest>> configureCallback)
             where TRequest : class
@@ -66,30 +42,6 @@ namespace MassTransit
             IAsyncRequest<TRequest> request = configurator.Build(bus);
 
             endpoint.Send(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
-
-            return request.Wait();
-        }
-
-        public static IAsyncResult BeginSendRequest<TRequest>(this IEndpoint endpoint, TRequest message, IServiceBus bus,
-            AsyncCallback callback, object state, Action<InlineRequestConfigurator<TRequest>> configureCallback)
-            where TRequest : class
-        {
-            var configurator = new InlineRequestConfiguratorImpl<TRequest>(message);
-
-            configureCallback(configurator);
-            IAsyncRequest<TRequest> request = configurator.Build(bus);
-
-            endpoint.Send(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
-
-            return request.BeginAsync(callback, state);
-        }
-
-        public static bool EndSendRequest<TRequest>(this IEndpoint endpoint, IAsyncResult asyncResult)
-            where TRequest : class
-        {
-            var request = asyncResult as IAsyncRequest<TRequest>;
-            if (request == null)
-                throw new ArgumentException("The argument is not an IRequest");
 
             return request.Wait();
         }

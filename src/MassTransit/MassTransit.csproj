@@ -168,6 +168,8 @@
     <Compile Include="Context\PayloadCache.cs" />
     <Compile Include="Context\PayloadException.cs" />
     <Compile Include="Context\PayloadFactory.cs" />
+    <Compile Include="Context\SendRequest.cs" />
+    <Compile Include="Context\SendRequestContext.cs" />
     <Compile Include="IBus.cs" />
     <Compile Include="ConsumerFactoryInterceptor.cs" />
     <Compile Include="Context\ConsumeContextAdapter.cs" />
@@ -190,6 +192,7 @@
     <Compile Include="ISendEndpointProvider.cs" />
     <Compile Include="MessageContext.cs" />
     <Compile Include="MessageHandler.cs" />
+    <Compile Include="MessageRequestClient.cs" />
     <Compile Include="MessageSendCompleted.cs" />
     <Compile Include="NewId\INewIdFormatter.cs" />
     <Compile Include="NewId\INewIdParser.cs" />
@@ -241,6 +244,7 @@
     <Compile Include="Pipeline\InboundMessagePipeExtensions.cs" />
     <Compile Include="Pipeline\IPublishInterceptor.cs" />
     <Compile Include="Pipeline\IReceivePipe.cs" />
+    <Compile Include="Pipeline\IRequestFilterConnector.cs" />
     <Compile Include="Pipeline\ISendInterceptor.cs" />
     <Compile Include="Pipeline\ISendObserver.cs" />
     <Compile Include="Pipeline\LastPipe.cs" />
@@ -284,9 +288,13 @@
     <Compile Include="PublishContext.cs" />
     <Compile Include="PublishConvention.cs" />
     <Compile Include="ReceiveContext.cs" />
+    <Compile Include="Request.cs" />
+    <Compile Include="IRequestClient.cs" />
+    <Compile Include="RequestContext.cs" />
+    <Compile Include="RequestExtensions.cs" />
     <Compile Include="SendContext.cs" />
     <Compile Include="SendContextHeaders.cs" />
-    <Compile Include="SendEndpointProvider.cs" />
+    <Compile Include="Serialization\DeserializeFilter.cs" />
     <Compile Include="Serialization\ISupportedMessageSerializers.cs" />
     <Compile Include="Serialization\JsonConsumeContext.cs" />
     <Compile Include="Serialization\JsonMessageConsumeContext.cs" />
@@ -777,7 +785,6 @@
     <Compile Include="Transports\ConnectionPolicy.cs" />
     <Compile Include="Transports\ConnectionPolicyChain.cs" />
     <Compile Include="Transports\DefaultMessageNameFormatter.cs" />
-    <Compile Include="Transports\DeserializeFilter.cs" />
     <Compile Include="Transports\DisposedConnectionPolicy.cs" />
     <Compile Include="Transports\IDuplexTransport.cs" />
     <Compile Include="Transports\IInboundMessageTracker.cs" />
@@ -785,6 +792,7 @@
     <Compile Include="Transports\IMessageNameFormatter.cs" />
     <Compile Include="Transports\InMemoryContextHeaderProvider.cs" />
     <Compile Include="Transports\InMemoryReceiveContext.cs" />
+    <Compile Include="Transports\InMemorySendEndpointProvider.cs" />
     <Compile Include="Transports\InMemoryTransport.cs" />
     <Compile Include="Transports\InMemorySendContext.cs" />
     <Compile Include="Transports\InMemorySendContextHeaders.cs" />
@@ -963,7 +971,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

@@ -16,6 +16,7 @@ namespace MassTransit.Tests
 	using Messages;
 	using NUnit.Framework;
 	using TestFramework;
+	using TestFramework.Messages;
 	using TextFixtures;
 
 	[TestFixture]

@@ -10,30 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Transports
 {
     using System;
     using System.Threading.Tasks;
-    using Transports;
 
 
-    public class SendEndpointProvider :
+    public class InMemorySendEndpointProvider :
         ISendEndpointProvider
     {
         readonly ISendMessageSerializer _defaultSerializer;
+        readonly Uri _sourceAddress;
         readonly ISendTransportProvider _transportProvider;
 
-        public SendEndpointProvider(ISendTransportProvider transportProvider, ISendMessageSerializer defaultSerializer)
+        public InMemorySendEndpointProvider(Uri sourceAddress, ISendTransportProvider transportProvider, ISendMessageSerializer defaultSerializer)
         {
             _transportProvider = transportProvider;
             _defaultSerializer = defaultSerializer;
+            _sourceAddress = sourceAddress;
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            var sendTransport = _transportProvider.GetSendTransport(address);
+            ISendTransport sendTransport = _transportProvider.GetSendTransport(address);
 
-            return new SendEndpoint(sendTransport, _defaultSerializer, address);
+            return new SendEndpoint(sendTransport, _defaultSerializer, address, _sourceAddress);
         }
     }
 }

@@ -88,6 +88,12 @@ namespace MassTransit
             return HandlerConnectorCache<T>.Connector.Connect(bus.InputPipe, handler);
         }
 
+        public static ConnectHandle SubscribeRequestHandler<T>(this IBus bus, Guid requestId, MessageHandler<T> handler)
+            where T : class
+        {
+            return HandlerConnectorCache<T>.Connector.Connect(bus.InputPipe, requestId, handler);
+        }
+
         /// <summary>
         /// Adds a message handler to the service bus for handling a specific type of message
         /// </summary>

@@ -37,7 +37,7 @@ namespace MassTransit.Tests
             Assert.IsTrue(Sent.Any<A>());
         }
 
-        Task<A> _receivedA;
+        Task<ConsumeContext<A>> _receivedA;
 
 
         class A
@@ -68,7 +68,7 @@ namespace MassTransit.Tests
             Assert.IsTrue(Sent.Any<A>());
         }
 
-        Task<A> _receivedA;
+        Task<ConsumeContext<A>> _receivedA;
 
 
         class A

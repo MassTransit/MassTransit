@@ -28,7 +28,7 @@ namespace MassTransit
         readonly IList<IReceiveEndpoint> _receiveEndpoints;
         readonly List<Task> _runningTasks;
         Uri _inputAddress;
-        ISendEndpointProvider _sendEndpointProvider;
+        readonly ISendEndpointProvider _sendEndpointProvider;
         CancellationTokenSource _stopTokenSource;
 
         public SuperDuperServiceBus(Uri inputAddress, IInboundPipe inputPipe, ISendEndpointProvider sendEndpointProvider,

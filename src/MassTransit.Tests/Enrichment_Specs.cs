@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,12 +13,16 @@
 namespace MassTransit.Tests
 {
     using System.Linq;
+    using System.Threading.Tasks;
     using BusConfigurators;
+    using EndpointConfigurators;
     using Magnum.Extensions;
     using Magnum.TestFramework;
-    using NUnit.Framework;
-    using TextFixtures;
     using MassTransit.Testing;
+    using NUnit.Framework;
+    using TestFramework;
+    using TextFixtures;
+
 
     [TestFixture]
     public class Putting_two_bodies_into_one_message :
@@ -30,11 +34,11 @@ namespace MassTransit.Tests
             RemoteBus.HasSubscription<SecureCommand>(8.Seconds()).Any().ShouldBeTrue();
 
             RemoteBus.Publish(new CommandAndCredentials
-                {
-                    SqlText = "DROP TABLE [Users]",
-                    Username = "sa",
-                    Password = "god",
-                });
+            {
+                SqlText = "DROP TABLE [Users]",
+                Username = "sa",
+                Password = "god",
+            });
 
             CommandHandler.CredentialsReceived.IsAvailable(8.Seconds()).ShouldBeTrue();
         }
@@ -43,7 +47,10 @@ namespace MassTransit.Tests
         {
             base.ConfigureLocalBus(configurator);
 
-            configurator.Subscribe(x => { x.Consumer<CommandHandler>(); });
+            configurator.Subscribe(x =>
+            {
+                x.Consumer<CommandHandler>();
+            });
         }
 
 
@@ -56,33 +63,76 @@ namespace MassTransit.Tests
             {
                 IConsumeContext<UserCredentials> credentials;
                 if (context.TryGetContext(out credentials))
-                {
                     CredentialsReceived.Set(credentials.Message);
-                }
             }
         }
+    }
 
 
-        class CommandAndCredentials :
-            SecureCommand,
-            UserCredentials
+    [TestFixture]
+    public class Sending_two_interfaces_in_one_message :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async void Should_receive_the_secure_command()
         {
-            public string SqlText { get; set; }
-            public string Username { get; set; }
-            public string Password { get; set; }
+            await _commandHandler;
         }
 
-        public interface SecureCommand
+        [Test]
+        public async void Should_receive_the_user_credentials()
         {
-            string SqlText { get; }
+            await _credentials.Task;
         }
 
-        public interface UserCredentials
+        Task<ConsumeContext<SecureCommand>> _commandHandler;
+        TaskCompletionSource<UserCredentials> _credentials;
+
+        [TestFixtureSetUp]
+        public void Setup()
         {
-            string Username { get; }
-            string Password { get; }
+            InputQueueSendEndpoint.Send(new CommandAndCredentials
+            {
+                SqlText = "DROP TABLE [Users]",
+                Username = "sa",
+                Password = "god",
+            }).Wait(TestCancellationToken);
+        }
+
+        protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            _commandHandler = Handler<SecureCommand>(configurator, async context =>
+            {
+                ConsumeContext<UserCredentials> credentials;
+                if (context.TryGetMessage(out credentials))
+                    _credentials.SetResult(credentials.Message);
+            });
         }
     }
+
+
+    class CommandAndCredentials :
+        SecureCommand,
+        UserCredentials
+    {
+        public string SqlText { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+
+
+    public interface SecureCommand
+    {
+        string SqlText { get; }
+    }
+
+
+    public interface UserCredentials
+    {
+        string Username { get; }
+        string Password { get; }
+    }
+
 
     [TestFixture]
     public class Wrapping_a_message_in_a_generic_wrapper :
@@ -95,9 +145,9 @@ namespace MassTransit.Tests
             RemoteBus.HasSubscription<SecureCommand<BusinessCommand>>(8.Seconds()).Any().ShouldBeTrue();
 
             RemoteBus.Publish(new BusinessCommandImpl
-                {
-                    SqlText = "DROP TABLE [Users]",
-                });
+            {
+                SqlText = "DROP TABLE [Users]",
+            });
 
             CommandHandler.CommandReceived.IsAvailable(8.Seconds()).ShouldBeTrue();
         }
@@ -106,7 +156,10 @@ namespace MassTransit.Tests
         {
             base.ConfigureLocalBus(configurator);
 
-            configurator.Subscribe(x => { x.Consumer<CommandHandler>(); });
+            configurator.Subscribe(x =>
+            {
+                x.Consumer<CommandHandler>();
+            });
         }
 
         protected override void ConfigureRemoteBus(ServiceBusConfigurator configurator)
@@ -133,9 +186,10 @@ namespace MassTransit.Tests
             SecureCommand<T>
             where T : class
         {
-            public T Command { get;  set; }
-            public UserCredentials Credentials { get;  set; }
+            public T Command { get; set; }
+            public UserCredentials Credentials { get; set; }
         }
+
 
         public interface SecureCommand<T>
             where T : class
@@ -144,16 +198,19 @@ namespace MassTransit.Tests
             UserCredentials Credentials { get; }
         }
 
+
         public interface BusinessCommand
         {
             string SqlText { get; }
         }
 
-        class BusinessCommandImpl : 
+
+        class BusinessCommandImpl :
             BusinessCommand
         {
             public string SqlText { get; set; }
         }
+
 
         public interface UserCredentials
         {
@@ -161,11 +218,13 @@ namespace MassTransit.Tests
             string Password { get; }
         }
 
+
         class UserCredentialsImpl : UserCredentials
         {
-            public string Username { get;  set; }
-            public string Password { get;  set; }
+            public string Username { get; set; }
+            public string Password { get; set; }
         }
+
 
         public class CommandSecurityMaker<T> :
             Consumes<T>.Context
@@ -173,11 +232,11 @@ namespace MassTransit.Tests
         {
             public void Consume(IConsumeContext<T> message)
             {
-                var output = new SecureCommandImpl<T>()
-                    {
-                        Command = message.Message,
-                        Credentials = new UserCredentialsImpl {Username = "sa", Password = "god"},
-                    };
+                var output = new SecureCommandImpl<T>
+                {
+                    Command = message.Message,
+                    Credentials = new UserCredentialsImpl {Username = "sa", Password = "god"},
+                };
 
                 message.Bus.Publish(output, x => x.ForwardUsingOriginalContext(message));
             }
