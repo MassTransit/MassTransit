@@ -24,8 +24,8 @@ namespace MassTransit.Transports
         ISendEndpoint
     {
         readonly Uri _destinationAddress;
-        readonly Uri _sourceAddress;
         readonly ISendMessageSerializer _serializer;
+        readonly Uri _sourceAddress;
         readonly ISendTransport _transport;
 
         public SendEndpoint(ISendTransport transport, ISendMessageSerializer serializer, Uri destinationAddress, Uri sourceAddress)
@@ -34,6 +34,11 @@ namespace MassTransit.Transports
             _serializer = serializer;
             _destinationAddress = destinationAddress;
             _sourceAddress = sourceAddress;
+        }
+
+        public ConnectHandle Connect(ISendObserver observer)
+        {
+            return _transport.Connect(observer);
         }
 
         public Task Send<T>(T message, CancellationToken cancellationToken)

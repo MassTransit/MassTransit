@@ -20,7 +20,7 @@ namespace MassTransit
     /// A publish endpoint lets the underlying transport determine the actual endpoint to which
     /// the message is sent. For example, an exchange on RabbitMQ and a topic on Azure Service bus.
     /// </summary>
-    public interface IPublishEndpoint
+    public interface IPublishEndpoint 
     {
         /// <summary>
         /// <para>Publishes a message to all subscribed consumers for the message type as specified

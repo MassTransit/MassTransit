@@ -19,6 +19,7 @@ namespace MassTransit.Transports
     using System.Threading.Tasks;
     using Logging;
     using Pipeline;
+    using Subscriptions;
 
 
     /// <summary>
@@ -32,12 +33,15 @@ namespace MassTransit.Transports
     {
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
 
+        readonly Connectable<ISendObserver> _observers; 
         readonly BlockingCollection<InMemoryTransportMessage> _collection;
         readonly Uri _inputAddress;
 
         public InMemoryTransport(Uri inputAddress)
         {
             _inputAddress = inputAddress;
+
+            _observers = new Connectable<ISendObserver>();
 
             var queue = new ConcurrentQueue<InMemoryTransportMessage>();
             _collection = new BlockingCollection<InMemoryTransportMessage>(queue);
@@ -91,12 +95,24 @@ namespace MassTransit.Transports
         {
             var context = new InMemorySendContext<T>(message, cancelSend);
 
-            await pipe.Send(context);
+            try
+            {
+                await pipe.Send(context);
 
-            Guid messageId = context.MessageId ?? NewId.NextGuid();
-            var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType);
+                await _observers.ForEach(x => x.PreSend(context));
 
-            _collection.Add(transportMessage, cancelSend);
+                Guid messageId = context.MessageId ?? NewId.NextGuid();
+                var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType);
+
+                _collection.Add(transportMessage, cancelSend);
+
+                await _observers.ForEach(x => x.PostSend(context));
+            }
+            catch (Exception ex)
+            {
+                _observers.ForEach(x => x.SendFault(context, ex))
+                    .Wait(cancelSend);
+            }
         }
 
         CancellationTokenRegistration RegisterShutdown(CancellationToken cancellationToken)
@@ -106,6 +122,11 @@ namespace MassTransit.Transports
                 // signal collection that no more messages will be added, ending it
                 _collection.CompleteAdding();
             });
+        }
+
+        public ConnectHandle Connect(ISendObserver observer)
+        {
+            return _observers.Connect(observer);
         }
     }
 }

@@ -18,7 +18,8 @@ namespace MassTransit
     using Pipeline;
 
 
-    public interface ISendEndpoint
+    public interface ISendEndpoint :
+        ISendObserverConnector
     {
         /// <summary>
         /// Send a message
