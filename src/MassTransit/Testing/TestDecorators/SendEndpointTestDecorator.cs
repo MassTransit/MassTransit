@@ -37,6 +37,11 @@ namespace MassTransit.Testing.TestDecorators
             get { return _sent; }
         }
 
+        public ConnectHandle Connect(ISendObserver observer)
+        {
+            return _endpoint.Connect(observer);
+        }
+
         public Task Send<T>(T message, CancellationToken cancellationToken)
             where T : class
         {

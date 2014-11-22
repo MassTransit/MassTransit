@@ -247,6 +247,7 @@
     <Compile Include="Pipeline\IRequestFilterConnector.cs" />
     <Compile Include="Pipeline\ISendInterceptor.cs" />
     <Compile Include="Pipeline\ISendObserver.cs" />
+    <Compile Include="Pipeline\ISendObserverConnector.cs" />
     <Compile Include="Pipeline\LastPipe.cs" />
     <Compile Include="Pipeline\LeftMergePipe.cs" />
     <Compile Include="Pipeline\LeftSplitPipe.cs" />

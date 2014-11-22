@@ -17,7 +17,8 @@ namespace MassTransit.Transports
     using Pipeline;
 
 
-    public interface ISendTransport
+    public interface ISendTransport :
+        ISendObserverConnector
     {
         /// <summary>
         ///     Send a message to the transport. The transport creates the OldSendContext, and calls back to

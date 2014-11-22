@@ -17,7 +17,8 @@ namespace MassTransit.Pipeline
 
 
     /// <summary>
-    /// Intercepts the sending of a message to the transport
+    /// Observes messages as they are sent to transports. These should not be used to intercept or
+    /// filter messages, in that case a filter should be created and registered on the transport.
     /// </summary>
     public interface ISendObserver
     {
@@ -46,7 +47,7 @@ namespace MassTransit.Pipeline
         /// <param name="context">The message send context</param>
         /// <param name="exception">The exception from the transport</param>
         /// <returns></returns>
-        Task SendFaulted<T>(SendContext<T> context, Exception exception)
+        Task SendFault<T>(SendContext<T> context, Exception exception)
             where T : class;
     }
 }
