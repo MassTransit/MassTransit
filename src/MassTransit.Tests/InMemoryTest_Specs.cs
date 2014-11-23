@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
+    using System.Linq;
     using System.Threading.Tasks;
     using EndpointConfigurators;
     using NUnit.Framework;
@@ -33,8 +34,12 @@ namespace MassTransit.Tests
             await InputQueueSendEndpoint.Send(new A());
 
             await _receivedA;
+        
+            Assert.IsTrue(Sent.Select<A>().Any());
 
-            Assert.IsTrue(Sent.Any<A>());
+            var message = Sent.Select<A>().First();
+
+            Assert.AreEqual(InputQueueAddress, message.Context.DestinationAddress);
         }
 
         Task<ConsumeContext<A>> _receivedA;
@@ -65,7 +70,7 @@ namespace MassTransit.Tests
 
             await _receivedA;
 
-            Assert.IsTrue(Sent.Any<A>());
+            Assert.IsTrue(Sent.Select<A>().Any());
         }
 
         Task<ConsumeContext<A>> _receivedA;

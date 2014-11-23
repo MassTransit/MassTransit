@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,19 +13,22 @@
 namespace MassTransit.Testing
 {
     using System;
-    using System.Collections.Generic;
 
 
-    public interface MessageSentList :
-        IEnumerable<MessageSent>
+    public interface ISentMessage<out T> :
+        ISentMessage
+        where T : class
     {
-        bool Any();
-        bool Any(Func<MessageSent, bool> filter);
+        new SendContext<T> Context { get; }
+    }
 
-        bool Any<T>()
-            where T : class;
 
-        bool Any<T>(Func<MessageSent<T>, bool> filter)
-            where T : class;
+    public interface ISentMessage
+    {
+        SendContext Context { get; }
+
+        Exception Exception { get; }
+
+        Type MessageType { get; }
     }
 }
