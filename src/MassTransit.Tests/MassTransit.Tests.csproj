@@ -90,6 +90,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ContainedMessage_Specs.cs" />
     <Compile Include="MessageTestFixture.cs" />
     <Compile Include="Behaviors\Behavior.cs" />
     <Compile Include="Configuration\ShutdownTimeout_Specs.cs" />
@@ -154,7 +155,6 @@
     <Compile Include="Load\RequestResponse_LoadTest.cs" />
     <Compile Include="Load\Sagas\FirstSaga.cs" />
     <Compile Include="MessageContext_Specs.cs" />
-    <Compile Include="MessageInterceptor_Specs.cs" />
     <Compile Include="MessageRetryTracker_Specs.cs" />
     <Compile Include="Messages\PartialSerializationTestMessage.cs" />
     <Compile Include="NewId_\Formatter_Specs.cs" />
@@ -226,7 +226,6 @@
     <Compile Include="Saga\StateMachine\StateMachineSubscriberTestBase.cs" />
     <Compile Include="Saga\StateMachine\TestSaga_Specs.cs" />
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
-    <Compile Include="LocalSubscriptionCache_Specs.cs" />
     <Compile Include="Messages\ResponseMessage.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />
@@ -311,9 +310,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="loopback.castle.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <EmbeddedResource Include="Saga\RegisterUserSaga.hbm.xml" />
     <Content Include="Saga\saga.nhibernate.cfg.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -14,6 +14,7 @@ namespace MassTransit.Testing
 {
     using System;
     using System.Collections;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -105,93 +106,6 @@ namespace MassTransit.Testing
             }
 
             public int GetHashCode(SentMessage message)
-            {
-                return message.Context.GetHashCode();
-            }
-        }
-    }
-
-
-    public class MessageSentListImpl :
-        MessageSentList
-    {
-        readonly HashSet<MessageSent> _messages;
-        readonly int _timeout;
-
-        public MessageSentListImpl()
-            : this(TimeSpan.FromSeconds(8))
-        {
-        }
-
-        public MessageSentListImpl(TimeSpan timeout)
-        {
-            _messages = new HashSet<MessageSent>(new MessageIdEqualityComparer());
-            _timeout = (int)timeout.TotalMilliseconds;
-        }
-
-        public IEnumerator<MessageSent> GetEnumerator()
-        {
-            lock (_messages)
-                return _messages.ToList().GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public bool Any()
-        {
-            return Any(x => true);
-        }
-
-        public bool Any<T>()
-            where T : class
-        {
-            return Any(x => typeof(T).IsAssignableFrom(x.MessageType));
-        }
-
-        public bool Any<T>(Func<MessageSent<T>, bool> filter) where T : class
-        {
-            return Any(x => typeof(T).IsAssignableFrom(x.MessageType) && filter((MessageSent<T>)x));
-        }
-
-        public bool Any(Func<MessageSent, bool> filter)
-        {
-            lock (_messages)
-            {
-                bool any = _messages.Any(filter);
-                while (any == false)
-                {
-                    if (Monitor.Wait(_messages, _timeout) == false)
-                        return false;
-
-                    any = _messages.Any(filter);
-                }
-
-                return true;
-            }
-        }
-
-        public void Add(MessageSent message)
-        {
-            lock (_messages)
-            {
-                if (_messages.Add(message))
-                    Monitor.PulseAll(_messages);
-            }
-        }
-
-
-        class MessageIdEqualityComparer :
-            IEqualityComparer<MessageSent>
-        {
-            public bool Equals(MessageSent x, MessageSent y)
-            {
-                return x.Equals(y);
-            }
-
-            public int GetHashCode(MessageSent message)
             {
                 return message.Context.GetHashCode();
             }

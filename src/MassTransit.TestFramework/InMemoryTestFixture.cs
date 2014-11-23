@@ -29,9 +29,10 @@ namespace MassTransit.TestFramework
         static readonly ILog _log = Logger.Get<InMemoryTestFixture>();
         IBusControl _localBus;
         Uri _inputQueueAddress;
-        SendEndpointTestDecorator _inputQueueSendEndpoint;
+        ISendEndpoint _inputQueueSendEndpoint;
         InMemoryTransportCache _transportCache;
         readonly Lazy<Task<ISendEndpoint>> _localBusSendEndpoint;
+        TestSendObserver _inputQueueObserver;
 
         public InMemoryTestFixture()
         {
@@ -49,9 +50,9 @@ namespace MassTransit.TestFramework
             get { return _localBusSendEndpoint.Value; }
         }
 
-        protected MessageSentList Sent
+        protected ISentMessageList Sent
         {
-            get { return _inputQueueSendEndpoint.Sent; }
+            get { return _inputQueueObserver.Messages; }
         }
 
         protected Uri LocalBusAddress
@@ -85,9 +86,10 @@ namespace MassTransit.TestFramework
 
             _localBus.Start(TestCancellationToken).Wait(TestTimeout);
 
-            ISendEndpoint sendEndpoint = _localBus.GetSendEndpoint(_inputQueueAddress).Result;
+            _inputQueueSendEndpoint = _localBus.GetSendEndpoint(_inputQueueAddress).Result;
 
-            _inputQueueSendEndpoint = new SendEndpointTestDecorator(sendEndpoint, TestTimeout);
+            _inputQueueObserver = new TestSendObserver(TestTimeout);
+            _inputQueueSendEndpoint.Connect(_inputQueueObserver);
         }
 
         [TestFixtureTearDown]

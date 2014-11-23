@@ -696,8 +696,11 @@
     <Compile Include="Testing\Factories\SagaTestFactory.cs" />
     <Compile Include="Testing\Factories\SagaTestFactoryImpl.cs" />
     <Compile Include="Testing\Instances\SagaTestInstance.cs" />
+    <Compile Include="Testing\ISentMessage.cs" />
     <Compile Include="Testing\LocalRemoteTestScenario.cs" />
-    <Compile Include="Testing\MessageSentList.cs" />
+    <Compile Include="Testing\ISentMessageList.cs" />
+    <Compile Include="Testing\ObservedSentMessage.cs" />
+    <Compile Include="Testing\ObservedSentMessageList.cs" />
     <Compile Include="Testing\PipelineSinkLocator.cs" />
     <Compile Include="Testing\PublishedMessage.cs" />
     <Compile Include="Testing\PublishedMessageImpl.cs" />
@@ -761,7 +764,7 @@
     <Compile Include="Testing\TestDecorators\ReceiveContextTestDecorator.cs" />
     <Compile Include="Testing\TestDecorators\SagaPolicyTestDecorator.cs" />
     <Compile Include="Testing\TestDecorators\SagaRepositoryTestDecorator.cs" />
-    <Compile Include="Testing\TestDecorators\SendEndpointTestDecorator.cs" />
+    <Compile Include="Testing\TestDecorators\TestSendObserver.cs" />
     <Compile Include="Testing\TestDecorators\ServiceBusTestDecorator.cs" />
     <Compile Include="Testing\TestFactory.cs" />
     <Compile Include="Testing\TestInstance.cs" />
