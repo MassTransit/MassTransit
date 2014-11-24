@@ -129,7 +129,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new ATestException(); }
+			get { throw new IntentionalTestException(); }
 		}
 	}
 
@@ -137,7 +137,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new ATestException(); }
+			get { throw new IntentionalTestException(); }
 		}
 	}
 
@@ -145,7 +145,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new ATestException(); }
+			get { throw new IntentionalTestException(); }
 		}
 	}
 
@@ -153,7 +153,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new ATestException(); }
+			get { throw new IntentionalTestException(); }
 		}
 	}
 
@@ -163,7 +163,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 		public Guid CorrelationId
 		{
-			get { throw new ATestException(); }
+			get { throw new IntentionalTestException(); }
 		}
 	}
 
@@ -171,7 +171,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	{
 		public Guid CorrelationId
 		{
-			get { throw new ATestException(); }
+			get { throw new IntentionalTestException(); }
 		}
 	}
 }

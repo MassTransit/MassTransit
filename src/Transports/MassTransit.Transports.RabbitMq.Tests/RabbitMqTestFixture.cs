@@ -21,23 +21,23 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
 
     [TestFixture]
-    public class LocalRabbitMqTestFixture :
-        LocalBusTestFixture
+    public class RabbitMqTestFixture :
+        BusTestFixture
     {
-        static readonly ILog _log = Logger.Get<LocalRabbitMqTestFixture>();
-        IBusControl _localBus;
+        static readonly ILog _log = Logger.Get<RabbitMqTestFixture>();
+        IBusControl _bus;
         Uri _localBusUri;
         Uri _localHostUri;
 
-        public LocalRabbitMqTestFixture()
+        public RabbitMqTestFixture()
         {
             _localHostUri = new Uri("rabbitmq://localhost/test");
             _localBusUri = new Uri(_localHostUri, "input_queue");
         }
 
-        protected override IBus LocalBus
+        protected override IBus Bus
         {
-            get { return _localBus; }
+            get { return _bus; }
         }
 
         protected Uri LocalBusUri
@@ -45,7 +45,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             get { return _localBusUri; }
             set
             {
-                if (LocalBus != null)
+                if (Bus != null)
                     throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
 
                 _localBusUri = value;
@@ -57,7 +57,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             get { return _localHostUri; }
             set
             {
-                if (LocalBus != null)
+                if (Bus != null)
                     throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
 
                 _localHostUri = value;
@@ -67,9 +67,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [TestFixtureSetUp]
         public void SetupInMemoryTestFixture()
         {
-            _localBus = CreateLocalBus();
+            _bus = CreateLocalBus();
 
-            _localBus.Start(TestCancellationToken).Wait(TestTimeout);
+            _bus.Start(TestCancellationToken).Wait(TestTimeout);
 
 //            ISendEndpoint sendEndpoint = _localBus.GetSendEndpoint(_localBusUri).Result;
 //
@@ -81,8 +81,8 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             try
             {
-                if (_localBus != null)
-                    _localBus.Stop().Wait(TestTimeout);
+                if (_bus != null)
+                    _bus.Stop().Wait(TestTimeout);
             }
             catch (AggregateException ex)
             {
@@ -90,7 +90,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 throw;
             }
 
-            _localBus = null;
+            _bus = null;
         }
 
         protected virtual void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)

@@ -13,7 +13,6 @@
 namespace MassTransit.TestFramework
 {
     using System;
-    using System.Threading.Tasks;
     using EndpointConfigurators;
     using Logging;
     using MassTransit.Transports;
@@ -24,40 +23,49 @@ namespace MassTransit.TestFramework
 
     [TestFixture]
     public class InMemoryTestFixture :
-        LocalBusTestFixture
+        BusTestFixture
     {
         static readonly ILog _log = Logger.Get<InMemoryTestFixture>();
-        IBusControl _localBus;
+
+        IBusControl _bus;
         Uri _inputQueueAddress;
         ISendEndpoint _inputQueueSendEndpoint;
-        InMemoryTransportCache _transportCache;
-        readonly Lazy<Task<ISendEndpoint>> _localBusSendEndpoint;
-        TestSendObserver _inputQueueObserver;
+        readonly InMemoryTransportCache _transportCache;
+        ISendEndpoint _busSendEndpoint;
+        readonly TestSendObserver _sendObserver;
 
         public InMemoryTestFixture()
         {
+            _transportCache = new InMemoryTransportCache();
+            _sendObserver = new TestSendObserver(TestTimeout);
+
             _inputQueueAddress = new Uri("loopback://localhost/input_queue");
-            _localBusSendEndpoint = new Lazy<Task<ISendEndpoint>>(() => _localBus.GetSendEndpoint(_localBus.InputAddress));
         }
 
+        /// <summary>
+        /// The sending endpoint for the InputQueue
+        /// </summary>
         protected ISendEndpoint InputQueueSendEndpoint
         {
             get { return _inputQueueSendEndpoint; }
         }
 
-        protected Task<ISendEndpoint> LocalBusSendEndpoint
+        /// <summary>
+        /// The sending endpoint for the Bus 
+        /// </summary>
+        protected ISendEndpoint BusSendEndpoint
         {
-            get { return _localBusSendEndpoint.Value; }
+            get { return _busSendEndpoint; }
         }
 
         protected ISentMessageList Sent
         {
-            get { return _inputQueueObserver.Messages; }
+            get { return _sendObserver.Messages; }
         }
 
-        protected Uri LocalBusAddress
+        protected Uri BusAddress
         {
-            get { return _localBus.InputAddress; }
+            get { return _bus.InputAddress; }
         }
 
         protected Uri InputQueueAddress
@@ -65,31 +73,30 @@ namespace MassTransit.TestFramework
             get { return _inputQueueAddress; }
             set
             {
-                if (LocalBus != null)
+                if (Bus != null)
                     throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
 
                 _inputQueueAddress = value;
             }
         }
 
-        protected override IBus LocalBus
+        protected override IBus Bus
         {
-            get { return _localBus; }
+            get { return _bus; }
         }
 
         [TestFixtureSetUp]
         public void SetupInMemoryTestFixture()
         {
-            _transportCache = new InMemoryTransportCache();
+            _bus = CreateBus(_transportCache);
 
-            _localBus = CreateLocalBus(_transportCache);
+            _bus.Start(TestCancellationToken).Wait(TestTimeout);
 
-            _localBus.Start(TestCancellationToken).Wait(TestTimeout);
+            _busSendEndpoint = _bus.GetSendEndpoint(_bus.InputAddress).Result;
+            _busSendEndpoint.Connect(_sendObserver);
 
-            _inputQueueSendEndpoint = _localBus.GetSendEndpoint(_inputQueueAddress).Result;
-
-            _inputQueueObserver = new TestSendObserver(TestTimeout);
-            _inputQueueSendEndpoint.Connect(_inputQueueObserver);
+            _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;
+            _inputQueueSendEndpoint.Connect(_sendObserver);
         }
 
         [TestFixtureTearDown]
@@ -97,8 +104,8 @@ namespace MassTransit.TestFramework
         {
             try
             {
-                if (_localBus != null)
-                    _localBus.Stop().Wait(TestTimeout);
+                if (_bus != null)
+                    _bus.Stop().Wait(TestTimeout);
             }
             catch (AggregateException ex)
             {
@@ -117,20 +124,24 @@ namespace MassTransit.TestFramework
                 throw;
             }
 
-            _localBus = null;
+            _bus = null;
         }
 
-        protected virtual void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
         {
         }
 
-        IBusControl CreateLocalBus(InMemoryTransportCache transportCache)
+        protected virtual void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+        }
+
+        IBusControl CreateBus(InMemoryTransportCache transportCache)
         {
             return ServiceBusFactory.New(x => x.InMemory(), x =>
             {
                 x.SetTransportProvider(transportCache);
 
-                ConfigureLocalBus(x);
+                ConfigureBus(x);
 
                 x.ReceiveEndpoint("input_queue", e =>
                 {
@@ -138,13 +149,9 @@ namespace MassTransit.TestFramework
                         context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A"),
                         string.Join(",", context.SupportedMessageTypes)));
 
-                    ConfigureLocalReceiveEndpoint(e);
+                    ConfigureInputQueueEndpoint(e);
                 });
             });
-        }
-
-        protected virtual void ConfigureLocalBus(IInMemoryServiceBusFactoryConfigurator configurator)
-        {
         }
     }
 }

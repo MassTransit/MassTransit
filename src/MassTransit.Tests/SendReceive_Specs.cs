@@ -25,12 +25,10 @@ namespace MassTransit.Tests
         [Test]
         public async void Should_receive_the_proper_message()
         {
-            Task<ConsumeContext<MessageA>> handler = SubscribeToLocalBus<MessageA>();
-
-            ISendEndpoint sendEndpoint = await LocalBusSendEndpoint;
+            Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>();
 
             object message = new MessageA();
-            await sendEndpoint.Send(message);
+            await BusSendEndpoint.Send(message);
 
             await handler;
         }
@@ -38,12 +36,10 @@ namespace MassTransit.Tests
         [Test]
         public async void Should_receive_the_proper_message_type()
         {
-            Task<ConsumeContext<MessageA>> handler = SubscribeToLocalBus<MessageA>();
-
-            ISendEndpoint sendEndpoint = await LocalBusSendEndpoint;
+            Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>();
 
             object message = new MessageA();
-            await sendEndpoint.Send(message, typeof(MessageA));
+            await BusSendEndpoint.Send(message, typeof(MessageA));
 
             await handler;
         }
@@ -51,12 +47,10 @@ namespace MassTransit.Tests
         [Test]
         public async void Should_receive_the_interface_of_the_message()
         {
-            Task<ConsumeContext<IMessageA>> handler = SubscribeToLocalBus<IMessageA>();
-
-            ISendEndpoint sendEndpoint = await LocalBusSendEndpoint;
+            Task<ConsumeContext<IMessageA>> handler = SubscribeHandler<IMessageA>();
 
             var message = new MessageA();
-            await sendEndpoint.Send(message);
+            await BusSendEndpoint.Send(message);
 
             await handler;
         }
@@ -64,11 +58,9 @@ namespace MassTransit.Tests
         [Test]
         public async void Should_receive_the_interface_proxy()
         {
-            Task<ConsumeContext<IMessageA>> handler = SubscribeToLocalBus<IMessageA>();
+            Task<ConsumeContext<IMessageA>> handler = SubscribeHandler<IMessageA>();
 
-            ISendEndpoint sendEndpoint = await LocalBusSendEndpoint;
-
-            await sendEndpoint.Send<IMessageA>(new{});
+            await BusSendEndpoint.Send<IMessageA>(new{});
 
             await handler;
         }
@@ -76,12 +68,10 @@ namespace MassTransit.Tests
         [Test]
         public async void Should_receive_the_proper_message_as_a()
         {
-            Task<ConsumeContext<MessageA>> handler = SubscribeToLocalBus<MessageA>();
-
-            ISendEndpoint sendEndpoint = await LocalBusSendEndpoint;
+            Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>();
 
             var message = new MessageA();
-            await sendEndpoint.Send(message);
+            await BusSendEndpoint.Send(message);
 
             await handler;
         }
@@ -89,12 +79,10 @@ namespace MassTransit.Tests
         [Test]
         public async void Should_receive_the_proper_message_as_a_with_request_id()
         {
-            Task<ConsumeContext<MessageA>> handler = SubscribeToLocalBus<MessageA>(x => x.RequestId.HasValue);
-
-            ISendEndpoint sendEndpoint = await LocalBusSendEndpoint;
+            Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>(x => x.RequestId.HasValue);
 
             var message = new MessageA();
-            await sendEndpoint.Send(message, Pipe.New<SendContext>(x => x.Execute(c => c.RequestId = NewId.NextGuid())));
+            await BusSendEndpoint.Send(message, Pipe.New<SendContext>(x => x.Execute(c => c.RequestId = NewId.NextGuid())));
 
             await handler;
         }

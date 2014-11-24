@@ -24,14 +24,14 @@ namespace MassTransit.Tests
         [Test]
         public async void Should_deliver_the_message_to_an_both_interested_consumers()
         {
-            Task<ConsumeContext<FirstMessageContract>> first = SubscribeToLocalBus<FirstMessageContract>();
-            Task<ConsumeContext<SecondMessageContract>> second = SubscribeToLocalBus<SecondMessageContract>();
+            Task<ConsumeContext<FirstMessageContract>> first = SubscribeHandler<FirstMessageContract>();
+            Task<ConsumeContext<SecondMessageContract>> second = SubscribeHandler<SecondMessageContract>();
 
             var message = new SomeMessageContract("Joe", 27);
 
-            await (await LocalBusSendEndpoint).Send(message);
+            await BusSendEndpoint.Send(message);
 
-            await (await LocalBusSendEndpoint).Send(message);
+            await BusSendEndpoint.Send(message);
 
             await first;
             await second;
@@ -40,11 +40,11 @@ namespace MassTransit.Tests
         [Test]
         public async void Should_deliver_the_message_to_an_interested_consumer()
         {
-            Task<ConsumeContext<FirstMessageContract>> first = SubscribeToLocalBus<FirstMessageContract>();
+            Task<ConsumeContext<FirstMessageContract>> first = SubscribeHandler<FirstMessageContract>();
 
             var message = new SomeMessageContract("Joe", 27);
 
-            await (await LocalBusSendEndpoint).Send(message);
+            await BusSendEndpoint.Send(message);
 
             await first;
         }

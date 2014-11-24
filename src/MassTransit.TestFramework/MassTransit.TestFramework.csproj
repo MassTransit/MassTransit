@@ -87,7 +87,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AsyncTestFixture.cs" />
-    <Compile Include="ATestException.cs" />
+    <Compile Include="IntentionalTestException.cs" />
     <Compile Include="ExtensionMethodsForSubscriptions.cs" />
     <Compile Include="ExtensionsForTestingEndpoints.cs" />
     <Compile Include="Fixtures\EndpointCacheProxy.cs" />
@@ -102,7 +102,7 @@
     <Compile Include="Fixtures\LocalAndRemoteTestFixture.cs" />
     <Compile Include="Given_two_service_buses_with_shared_subscriptions.cs" />
     <Compile Include="InMemoryTestFixture.cs" />
-    <Compile Include="LocalBusTestFixture.cs" />
+    <Compile Include="BusTestFixture.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Fixtures\LocalTestFixture.cs" />
     <Compile Include="Given_a_standalone_service_bus.cs" />

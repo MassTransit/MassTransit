@@ -30,6 +30,9 @@ namespace MassTransit.TestFramework
             TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(30);
         }
 
+        /// <summary>
+        /// Task that is canceled when the test is aborted, for continueWith usage
+        /// </summary>
         protected Task TestCancelledTask
         {
             get
@@ -39,6 +42,9 @@ namespace MassTransit.TestFramework
             }
         }
 
+        /// <summary>
+        /// CancellationToken that is canceled when the test is being aborted
+        /// </summary>
         protected CancellationToken TestCancellationToken
         {
             get
@@ -58,49 +64,32 @@ namespace MassTransit.TestFramework
             }
         }
 
+        /// <summary>
+        /// Timeout for the test, used for any delay timers
+        /// </summary>
         protected TimeSpan TestTimeout { get; set; }
 
+        /// <summary>
+        /// Forces the test to be cancelled, aborting any awaiting tasks
+        /// </summary>
         protected void CancelTest()
         {
             _cancellationTokenSource.Cancel();
         }
 
-
+        /// <summary>
+        /// Returns a task completion that is automatically canceled when the test is canceled
+        /// </summary>
+        /// <typeparam name="T">The task type</typeparam>
+        /// <returns></returns>
         protected TaskCompletionSource<T> GetTask<T>()
         {
             var source = new TaskCompletionSource<T>();
 
-            TestCancellationToken.Register(() => source.TrySetCanceled());
+            TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
 
             return source;
         }
 
-        protected Task<ConsumeContext<T>> Handler<T>(IReceiveEndpointConfigurator configurator)
-            where T : class
-        {
-            var source = new TaskCompletionSource<ConsumeContext<T>>();
-
-            configurator.Handler<T>(async context => source.SetResult(context));
-
-            TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
-
-            return source.Task;
-        }
-
-        protected Task<ConsumeContext<T>> Handler<T>(IReceiveEndpointConfigurator configurator, MessageHandler<T> handler)
-            where T : class
-        {
-            var source = new TaskCompletionSource<ConsumeContext<T>>();
-
-            configurator.Handler<T>(async context =>
-            {
-                await handler(context);
-                source.SetResult(context);
-            });
-
-            TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
-
-            return source.Task;
-        }
     }
 }

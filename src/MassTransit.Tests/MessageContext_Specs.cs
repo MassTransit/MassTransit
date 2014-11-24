@@ -57,7 +57,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
-            ping.SourceAddress.ShouldEqual(LocalBusAddress);
+            ping.SourceAddress.ShouldEqual(BusAddress);
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
@@ -69,7 +69,7 @@ namespace MassTransit.Tests
                 .Wait(TestCancellationToken);
         }
 
-        protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator);
         }
@@ -109,7 +109,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
-            ping.ResponseAddress.ShouldEqual(LocalBusAddress);
+            ping.ResponseAddress.ShouldEqual(BusAddress);
         }
 
         [Test]
@@ -117,7 +117,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
-            ping.SourceAddress.ShouldEqual(LocalBusAddress);
+            ping.SourceAddress.ShouldEqual(BusAddress);
         }
 
         [Test]
@@ -134,9 +134,9 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _responseHandler = SubscribeToLocalBus<PongMessage>();
+            _responseHandler = SubscribeHandler<PongMessage>();
 
-            _request = LocalBus.Request(InputQueueAddress, new PingMessage(), x =>
+            _request = Bus.Request(InputQueueAddress, new PingMessage(), x =>
             {
                 _response = x.Handle<PongMessage>(async _ =>
                 {
@@ -144,7 +144,7 @@ namespace MassTransit.Tests
             });
         }
 
-        protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
         }
@@ -167,9 +167,7 @@ namespace MassTransit.Tests
         {
             await _notSupported;
 
-            var sendEndpoint = await LocalBusSendEndpoint;
-
-            await sendEndpoint.Send(new PongMessage((await _ping).Message.CorrelationId));
+            await BusSendEndpoint.Send(new PongMessage((await _ping).Message.CorrelationId));
 
             Assert.Throws<TaskCanceledException>(async () =>
             {
@@ -186,9 +184,9 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _responseHandler = SubscribeToLocalBus<PongMessage>();
+            _responseHandler = SubscribeHandler<PongMessage>();
 
-            _request = LocalBus.Request(InputQueueAddress, new PingMessage(), x =>
+            _request = Bus.Request(InputQueueAddress, new PingMessage(), x =>
             {
                 _response = x.Handle<PongMessage>(async _ =>
                 {
@@ -200,7 +198,7 @@ namespace MassTransit.Tests
             });
         }
 
-        protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PingNotSupported(x.Message.CorrelationId)));
         }
@@ -234,7 +232,7 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _request = LocalBus.Request(InputQueueAddress, new PingMessage(), x =>
+            _request = Bus.Request(InputQueueAddress, new PingMessage(), x =>
             {
                 x.Timeout = 1.Seconds();
 
