@@ -39,12 +39,12 @@ namespace MassTransit.Tests
         {
             public void Consume(X message)
             {
-                throw new ATestException();
+                throw new IntentionalTestException();
             }
 
             public void Consume(Y message)
             {
-                throw new ATestException();
+                throw new IntentionalTestException();
             }
         }
 

@@ -50,7 +50,7 @@ namespace MassTransit.Tests
         }
 
 
-        protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _receivedA = Handler<A>(configurator);
         }
@@ -81,7 +81,7 @@ namespace MassTransit.Tests
         }
 
 
-        protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _receivedA = Handler<A>(configurator);
         }

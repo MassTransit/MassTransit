@@ -16,6 +16,9 @@ namespace MassTransit.Saga
 	using System.Collections.Generic;
 	using MassTransit.Pipeline;
 
+
+
+
 	/// <summary>
 	/// A saga repository is used by the service bus to dispatch messages to sagas
 	/// </summary>

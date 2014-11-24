@@ -21,13 +21,13 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
 
         [TestFixture]
-        public class When_a_message_is_send_to_the_local_endpoint :
-            LocalRabbitMqTestFixture
+        public class WhenAMessageIsSendToTheEndpoint :
+            RabbitMqTestFixture
         {
             [Test]
             public async void Should_be_received()
             {
-                ISendEndpoint endpoint = await LocalBus.GetSendEndpoint(LocalBusUri);
+                ISendEndpoint endpoint = await Bus.GetSendEndpoint(LocalBusUri);
 
                 var message = new A {Id = Guid.NewGuid()};
                 await endpoint.Send(message);

@@ -41,12 +41,12 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(LocalBus, InputQueueAddress, 8.Seconds());
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, 8.Seconds());
 
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
         }
@@ -70,7 +70,7 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(LocalBus, InputQueueAddress, 1.Seconds());
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, 1.Seconds());
 
             _response = _requestClient.Request(new PingMessage());
         }
@@ -93,12 +93,12 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(LocalBus, InputQueueAddress, 8.Seconds());
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, 8.Seconds());
 
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x =>
             {
