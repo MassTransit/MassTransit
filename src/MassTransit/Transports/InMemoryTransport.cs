@@ -15,6 +15,7 @@ namespace MassTransit.Transports
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -33,9 +34,9 @@ namespace MassTransit.Transports
     {
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
 
-        readonly Connectable<ISendObserver> _observers; 
         readonly BlockingCollection<InMemoryTransportMessage> _collection;
         readonly Uri _inputAddress;
+        readonly Connectable<ISendObserver> _observers;
 
         public InMemoryTransport(Uri inputAddress)
         {
@@ -64,9 +65,7 @@ namespace MassTransit.Transports
             {
                 using (RegisterShutdown(stopReceive))
                 {
-                    IEnumerable<InMemoryTransportMessage> consumingEnumerable = _collection.GetConsumingEnumerable();
-
-                    Parallel.ForEach(consumingEnumerable, async message =>
+                    Parallel.ForEach(GetConsumingPartitioner(_collection), async message =>
                     {
                         if (stopReceive.IsCancellationRequested)
                             return;
@@ -99,9 +98,10 @@ namespace MassTransit.Transports
             {
                 await pipe.Send(context);
 
+                Guid messageId = context.MessageId ?? NewId.NextGuid();
+
                 await _observers.ForEach(x => x.PreSend(context));
 
-                Guid messageId = context.MessageId ?? NewId.NextGuid();
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType);
 
                 _collection.Add(transportMessage, cancelSend);
@@ -115,6 +115,11 @@ namespace MassTransit.Transports
             }
         }
 
+        public ConnectHandle Connect(ISendObserver observer)
+        {
+            return _observers.Connect(observer);
+        }
+
         CancellationTokenRegistration RegisterShutdown(CancellationToken cancellationToken)
         {
             return cancellationToken.Register(() =>
@@ -124,9 +129,43 @@ namespace MassTransit.Transports
             });
         }
 
-        public ConnectHandle Connect(ISendObserver observer)
+        Partitioner<T> GetConsumingPartitioner<T>(BlockingCollection<T> collection)
         {
-            return _observers.Connect(observer);
+            return new BlockingCollectionPartitioner<T>(collection);
+        }
+
+
+        class BlockingCollectionPartitioner<T> :
+            Partitioner<T>
+        {
+            readonly BlockingCollection<T> _collection;
+
+            internal BlockingCollectionPartitioner(BlockingCollection<T> collection)
+            {
+                if (collection == null)
+                    throw new ArgumentNullException("collection");
+                _collection = collection;
+            }
+
+            public override bool SupportsDynamicPartitions
+            {
+                get { return true; }
+            }
+
+            public override IList<IEnumerator<T>> GetPartitions(int partitionCount)
+            {
+                if (partitionCount < 1)
+                    throw new ArgumentOutOfRangeException("partitionCount");
+
+                IEnumerable<T> dynamicPartitioner = GetDynamicPartitions();
+
+                return Enumerable.Range(0, partitionCount).Select(_ => dynamicPartitioner.GetEnumerator()).ToArray();
+            }
+
+            public override IEnumerable<T> GetDynamicPartitions()
+            {
+                return _collection.GetConsumingEnumerable();
+            }
         }
     }
 }

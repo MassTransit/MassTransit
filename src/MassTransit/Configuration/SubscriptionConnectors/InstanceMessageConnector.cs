@@ -16,7 +16,6 @@ namespace MassTransit.SubscriptionConnectors
     using Magnum.Extensions;
     using Pipeline;
     using Pipeline.Filters;
-    using Pipeline.Sinks;
     using Policies;
     using Util;
 
@@ -26,11 +25,11 @@ namespace MassTransit.SubscriptionConnectors
         where TConsumer : class
         where TMessage : class
     {
-        readonly IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> _consumerPipe;
+        readonly IFilter<ConsumerConsumeContext<TConsumer, TMessage>> _consumeFilter;
 
-        public InstanceMessageConnector(IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> consumerPipe)
+        public InstanceMessageConnector(IFilter<ConsumerConsumeContext<TConsumer, TMessage>> consumeFilter)
         {
-            _consumerPipe = consumerPipe;
+            _consumeFilter = consumeFilter;
         }
 
         public Type MessageType
@@ -53,7 +52,7 @@ namespace MassTransit.SubscriptionConnectors
             IPipe<ConsumeContext<TMessage>> instancePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
                 x.Retry(retryPolicy);
-                x.Filter(new InstanceMessageFilter<TConsumer, TMessage>(consumer, _consumerPipe));
+                x.Filter(new InstanceMessageFilter<TConsumer, TMessage>(consumer, _consumeFilter));
             });
 
             return pipe.Connect(instancePipe);

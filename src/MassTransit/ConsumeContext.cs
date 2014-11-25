@@ -41,11 +41,11 @@ namespace MassTransit
         /// <summary>
         ///     Returns the specified message type if available, otherwise returns false
         /// </summary>
-        /// <typeparam name="TMessage"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <param name="consumeContext"></param>
         /// <returns></returns>
-        bool TryGetMessage<TMessage>(out ConsumeContext<TMessage> consumeContext)
-            where TMessage : class;
+        bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
+            where T : class;
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the

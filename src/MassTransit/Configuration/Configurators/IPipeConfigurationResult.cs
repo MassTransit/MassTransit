@@ -10,15 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Containers.Tests.Scenarios
+namespace MassTransit.Configurators
 {
-    using NUnit.Framework;
-    using TestFramework;
-
-
-    [TestFixture]
-    public abstract class Given_a_service_bus_instance :
-        InMemoryTestFixture
+    public interface IPipeConfigurationResult
     {
+        bool ContainsFailure { get; }
+        string GetMessage(string header);
+        bool Any();
     }
 }

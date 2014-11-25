@@ -13,7 +13,8 @@
 namespace MassTransit.SubscriptionConfigurators
 {
     /// <summary>
-    /// Configure a message handler
+    /// Configure a message handler, including specifying filters that are executed around
+    /// the handler itself
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
     public interface IHandlerConfigurator<TMessage> :

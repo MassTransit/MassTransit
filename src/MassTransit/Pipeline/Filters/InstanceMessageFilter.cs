@@ -29,17 +29,17 @@ namespace MassTransit.Pipeline.Filters
         where TMessage : class
     {
         readonly TConsumer _instance;
-        readonly IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> _instancePipe;
+        readonly IPipe<ConsumerConsumeContext<TConsumer, TMessage>> _instancePipe;
 
-        public InstanceMessageFilter(TConsumer instance, IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> instancePipe)
+        public InstanceMessageFilter(TConsumer instance, IFilter<ConsumerConsumeContext<TConsumer, TMessage>> instanceFilter)
         {
             if (instance == null)
                 throw new ArgumentNullException("instance");
-            if (instancePipe == null)
-                throw new ArgumentNullException("instancePipe");
+            if (instanceFilter == null)
+                throw new ArgumentNullException("instanceFilter");
 
             _instance = instance;
-            _instancePipe = instancePipe;
+            _instancePipe = Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x => x.Filter(instanceFilter));
         }
 
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
@@ -47,7 +47,7 @@ namespace MassTransit.Pipeline.Filters
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
-                await _instancePipe.Send(context.PushLeft(_instance));
+                await _instancePipe.Send(context.PushConsumer(_instance));
 
                 context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName);
 

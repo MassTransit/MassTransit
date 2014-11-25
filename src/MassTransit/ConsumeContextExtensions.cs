@@ -12,16 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
     using Context;
 
 
     public static class ConsumeContextExtensions
     {
-        public static ConsumeContext<Tuple<TLeft, ConsumeContext<T>>> PushLeft<TLeft, T>(this ConsumeContext<T> context, TLeft left)
+        public static ConsumerConsumeContext<TConsumer, T> PushConsumer<TConsumer, T>(this ConsumeContext<T> context, TConsumer consumer)
             where T : class
+            where TConsumer : class
         {
-            return new ConsumeContextProxy<TLeft, T>(context, left);
+            return new ConsumeContextProxy<TConsumer, T>(context, consumer);
         }
     }
 }

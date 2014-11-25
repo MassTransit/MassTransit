@@ -14,6 +14,7 @@ namespace MassTransit.SubscriptionConnectors
 {
     using System.Collections.Generic;
     using System.Linq;
+    using PipeConfigurators;
     using Pipeline;
     using Policies;
     using Util;
@@ -25,7 +26,7 @@ namespace MassTransit.SubscriptionConnectors
     /// </summary>
     public interface ConsumerConnector
     {
-        ConnectHandle Connect<TConsumer>(IInboundPipe inboundPipe, IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy)
+        ConnectHandle Connect<TConsumer>(IInboundPipe inboundPipe, IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy, params IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>[] pipeBuilderConfigurators)
             where TConsumer : class;
     }
 
@@ -54,7 +55,7 @@ namespace MassTransit.SubscriptionConnectors
         }
 
         public ConnectHandle Connect<TConsumer>(IInboundPipe inboundPipe, IConsumerFactory<TConsumer> consumerFactory,
-            IRetryPolicy retryPolicy)
+            IRetryPolicy retryPolicy, params IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>[] pipeBuilderConfigurators)
             where TConsumer : class
         {
             return new MultipleConnectHandle(_connectors.Select(x => x.Connect(inboundPipe, consumerFactory, retryPolicy)));

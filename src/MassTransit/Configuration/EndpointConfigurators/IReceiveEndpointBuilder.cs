@@ -20,6 +20,7 @@ namespace MassTransit.EndpointConfigurators
         IConsumeObserverConnector
 
     {
+        IInboundPipe InboundPipe { get; }
     }
 
 
@@ -43,6 +44,11 @@ namespace MassTransit.EndpointConfigurators
             where TMessage : class
         {
             return _inboundPipe.Connect(observer);
+        }
+
+        public IInboundPipe InboundPipe
+        {
+            get { return _inboundPipe; }
         }
     }
 }

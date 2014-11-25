@@ -31,10 +31,10 @@ namespace MassTransit
         /// Read up on publishing: http://readthedocs.org/docs/masstransit/en/latest/overview/publishing.html
         /// </para>
         /// </summary>
-        /// <typeparam name = "TMessage">The type of the message</typeparam>
+        /// <typeparam name = "T">The type of the message</typeparam>
         /// <param name = "message">The messages to be published</param>
-        Task Publish<TMessage>(TMessage message)
-            where TMessage : class;
+        Task Publish<T>(T message)
+            where T : class;
 
         /// <summary>
         /// <para>Publishes a message to all subscribed consumers for the message type as specified
@@ -45,11 +45,11 @@ namespace MassTransit
         /// Read up on publishing: http://readthedocs.org/docs/masstransit/en/latest/overview/publishing.html
         /// </para>
         /// </summary>
-        /// <typeparam name = "TMessage">The type of the message</typeparam>
+        /// <typeparam name = "T">The type of the message</typeparam>
         /// <param name = "message">The messages to be published</param>
         /// <param name="publishPipe"></param>
-        Task Publish<TMessage>(TMessage message, IPipe<PublishContext<TMessage>> publishPipe)
-            where TMessage : class;
+        Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe)
+            where T : class;
 
         /// <summary>
         /// Publishes an object as a message, using the message type specified. If the object cannot be cast
@@ -93,23 +93,23 @@ namespace MassTransit
         /// with the passed values. It actually does this with DynamicProxy
         /// in the background.
         /// </summary>
-        /// <typeparam name="TMessage">The type of the interface or
+        /// <typeparam name="T">The type of the interface or
         /// non-sealed class with all-virtual members.</typeparam>
         /// <param name="values">The dictionary of values to place in the
         /// object instance to implement the interface.</param>
-        Task Publish<TMessage>(object values)
-            where TMessage : class;
+        Task Publish<T>(object values)
+            where T : class;
 
         /// <summary>
         /// <see cref="Publish{T}(MassTransit.IServiceBus,object)"/>: this
         /// overload further takes an action; it allows you to set <see cref="IPublishContext"/>
         /// meta-data. Also <see cref="IServiceBus.Publish{T}"/>.
         /// </summary>
-        /// <typeparam name="TMessage">The type of the message to publish</typeparam>
+        /// <typeparam name="T">The type of the message to publish</typeparam>
         /// <param name="values">The dictionary of values to become hydrated and
         /// published under the type of the interface.</param>
         /// <param name="contextCallback">The context callback.</param>
-        Task Publish<TMessage>(object values, Action<PublishContext<TMessage>> contextCallback)
-            where TMessage : class;
+        Task Publish<T>(object values, Action<PublishContext<T>> contextCallback)
+            where T : class;
     }
 }

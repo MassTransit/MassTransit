@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
-    using System;
     using System.Threading.Tasks;
     using Castle.MicroKernel.Lifestyle;
     using Castle.Windsor;
@@ -31,8 +30,7 @@ namespace MassTransit.WindsorIntegration
             _container = container;
         }
 
-        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
+        public async Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
             using (_container.BeginScope())
@@ -46,7 +44,7 @@ namespace MassTransit.WindsorIntegration
 
                 try
                 {
-                    await next.Send(context.PushLeft(consumer));
+                    await next.Send(context.PushConsumer(consumer));
                 }
                 finally
                 {

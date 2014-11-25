@@ -12,9 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConnectors
 {
-    using System;
     using Pipeline;
-    using Pipeline.Sinks;
 
 
     public class ContextSubscriptionConnectorFactory<TConsumer, TMessage> :
@@ -22,25 +20,21 @@ namespace MassTransit.SubscriptionConnectors
         where TConsumer : class, IMessageConsumer<IConsumeContext<TMessage>>
         where TMessage : class
     {
-        readonly IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> _consumerPipe;
+        readonly LegacyContextMethodConsumerMessageAdapter<TConsumer, TMessage> _filter;
 
         public ContextSubscriptionConnectorFactory()
         {
-            _consumerPipe = Pipe.New<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>>(x =>
-            {
-                //
-                x.Filter(new LegacyContextMethodConsumerMessageAdapter<TConsumer, TMessage>());
-            });
+            _filter = new LegacyContextMethodConsumerMessageAdapter<TConsumer, TMessage>();
         }
 
         public ConsumerMessageConnector CreateSubscriptionConnector()
         {
-            return new ConsumerMessageConnector<TConsumer, TMessage>(_consumerPipe);
+            return new ConsumerMessageConnector<TConsumer, TMessage>(_filter);
         }
 
         public InstanceMessageConnector CreateInstanceConnector()
         {
-            return new InstanceMessageConnector<TConsumer, TMessage>(_consumerPipe);
+            return new InstanceMessageConnector<TConsumer, TMessage>(_filter);
         }
     }
 }

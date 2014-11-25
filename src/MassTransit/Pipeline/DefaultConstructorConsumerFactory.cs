@@ -20,16 +20,15 @@ namespace MassTransit.Pipeline
         IConsumerFactory<TConsumer>
         where TConsumer : class, new()
     {
-        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
-            where TMessage : class
+        public async Task Send<T>(ConsumeContext<T> context, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
+            where T : class
         {
             TConsumer consumer = null;
             try
             {
                 consumer = new TConsumer();
 
-                await next.Send(context.PushLeft(consumer));
+                await next.Send(context.PushConsumer(consumer));
             }
             finally
             {

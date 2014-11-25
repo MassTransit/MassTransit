@@ -45,7 +45,7 @@ namespace MassTransit
             _timeout = timeout;
         }
 
-        public async Task<TResponse> Request(TRequest request, CancellationToken cancellationToken)
+        async Task<TResponse> IRequestClient<TRequest, TResponse>.Request(TRequest request, CancellationToken cancellationToken)
         {
             Task<TResponse> responseTask = null;
             await _bus.Request(_address, request, x =>

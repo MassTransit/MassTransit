@@ -43,7 +43,7 @@ namespace MassTransit.StructureMapIntegration
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await next.Send(context.PushLeft(consumer));
+                await next.Send(context.PushConsumer(consumer));
             }
         }
     }

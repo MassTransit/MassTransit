@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    using System;
     using System.Threading.Tasks;
     using Util;
 
@@ -27,10 +26,9 @@ namespace MassTransit.Pipeline
         where TConsumer : class, IConsumer<TMessage>
         where TMessage : class
     {
-        public Task Send(ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>> context,
-            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
+        public Task Send(ConsumerConsumeContext<TConsumer, TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
-            var messageConsumer = context.Message.Item1 as IConsumer<TMessage>;
+            var messageConsumer = context.Consumer as IConsumer<TMessage>;
             if (messageConsumer == null)
             {
                 string message = string.Format("Consumer type {0} is not a consumer of message type {1}",
@@ -39,7 +37,7 @@ namespace MassTransit.Pipeline
                 throw new ConsumerMessageException(message);
             }
 
-            return messageConsumer.Consume(context.Message.Item2);
+            return messageConsumer.Consume(context);
         }
 
         public bool Inspect(IPipeInspector inspector)

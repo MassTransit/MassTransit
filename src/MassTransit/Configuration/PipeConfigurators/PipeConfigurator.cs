@@ -22,7 +22,8 @@ namespace MassTransit.PipeConfigurators
 
 
     public class PipeConfigurator<T> :
-        IPipeConfigurator<T>
+        IPipeConfigurator<T>,
+        Configurator
         where T : class, PipeContext
     {
         static readonly ILog _log = Logger.Get<PipeConfigurator<T>>();
@@ -34,7 +35,7 @@ namespace MassTransit.PipeConfigurators
             _pipeBuilderConfigurators = new List<IPipeBuilderConfigurator<T>>();
         }
 
-        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<T> configurator)
+        void IPipeConfigurator<T>.AddPipeBuilderConfigurator(IPipeBuilderConfigurator<T> configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
@@ -42,20 +43,24 @@ namespace MassTransit.PipeConfigurators
             _pipeBuilderConfigurators.Add(configurator);
         }
 
-        void Validate()
+        IEnumerable<ValidationResult> Configurator.Validate()
         {
-            var results = new PipeFactoryConfiguratorResultsImpl(_pipeBuilderConfigurators.SelectMany(x => x.Validate()));
-            if (results.ContainsFailure)
-                throw new ConfigurationException(results.GetMessage("The pipe configuration was invalid"));
-
-            if (_log.IsDebugEnabled && results.Any())
-                _log.Debug(results.GetMessage("The pipe configuration included messages"));
+            return _pipeBuilderConfigurators.SelectMany(x => x.Validate());
         }
 
+        void ValidatePipeConfiguration()
+        {
+            IPipeConfigurationResult result = new PipeConfigurationResult(_pipeBuilderConfigurators.SelectMany(x => x.Validate()));
+            if (result.ContainsFailure)
+                throw new ConfigurationException(result.GetMessage("The pipe configuration was invalid"));
+
+            if (_log.IsDebugEnabled && result.Any())
+                _log.Debug(result.GetMessage("The pipe configuration included messages"));
+        }
 
         public IPipe<T> Build()
         {
-            Validate();
+            ValidatePipeConfiguration();
 
             var builder = new PipeBuilder<T>();
 

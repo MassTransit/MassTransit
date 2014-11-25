@@ -13,18 +13,22 @@
 namespace MassTransit.SubscriptionConfigurators
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Configurators;
     using EndpointConfigurators;
     using PipeConfigurators;
     using Pipeline;
 
-
+    /// <summary>
+    /// Connects a handler to the inbound pipe of the receive endpoint
+    /// </summary>
+    /// <typeparam name="TMessage"></typeparam>
     public class HandlerConfigurator<TMessage> :
         IHandlerConfigurator<TMessage>,
         IReceiveEndpointBuilderConfigurator
         where TMessage : class
     {
-        readonly HandlerPipeBuilderConfigurator<TMessage> _handlerConfigurator;
+        readonly IPipeBuilderConfigurator<ConsumeContext<TMessage>> _handlerConfigurator;
         readonly PipeConfigurator<ConsumeContext<TMessage>> _pipeConfigurator;
 
         public HandlerConfigurator(MessageHandler<TMessage> handler)
@@ -35,17 +39,17 @@ namespace MassTransit.SubscriptionConfigurators
 
         public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext<TMessage>> configurator)
         {
-            _pipeConfigurator.AddPipeBuilderConfigurator(configurator);
+            ((IPipeConfigurator<ConsumeContext<TMessage>>)_pipeConfigurator).AddPipeBuilderConfigurator(configurator);
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            yield break;
+            return _handlerConfigurator.Validate().Concat(((Configurator)_pipeConfigurator).Validate());
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            _pipeConfigurator.AddPipeBuilderConfigurator(_handlerConfigurator);
+            ((IPipeConfigurator<ConsumeContext<TMessage>>)_pipeConfigurator).AddPipeBuilderConfigurator(_handlerConfigurator);
 
             IPipe<ConsumeContext<TMessage>> pipe = _pipeConfigurator.Build();
 

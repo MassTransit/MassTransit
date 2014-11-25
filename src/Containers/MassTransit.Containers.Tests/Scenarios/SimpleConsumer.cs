@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,39 +13,30 @@
 namespace MassTransit.Containers.Tests.Scenarios
 {
     using System;
-    using System.Threading;
-    using Magnum.Extensions;
+    using System.Threading.Tasks;
 
 
     public class SimpleConsumer :
-        Consumes<SimpleMessageInterface>.All
+        IConsumer<SimpleMessageInterface>
     {
-        static readonly ManualResetEvent _consumerCreated = new ManualResetEvent(false);
-        static SimpleConsumer _lastConsumer;
+        static TaskCompletionSource<SimpleConsumer> _consumerCreated = new TaskCompletionSource<SimpleConsumer>();
+
         readonly ISimpleConsumerDependency _dependency;
-        readonly ManualResetEvent _received;
-        SimpleMessageInterface _lastMessage;
+        readonly TaskCompletionSource<SimpleMessageInterface> _received;
 
         public SimpleConsumer(ISimpleConsumerDependency dependency)
         {
             _dependency = dependency;
             Console.WriteLine("SimpleConsumer()");
 
-            _received = new ManualResetEvent(false);
+            _received = new TaskCompletionSource<SimpleMessageInterface>();
 
-            _lastConsumer = this;
-            _consumerCreated.Set();
+            _consumerCreated.TrySetResult(this);
         }
 
-        public SimpleMessageInterface Last
+        public Task<SimpleMessageInterface> Last
         {
-            get
-            {
-                if (_received.WaitOne(8.Seconds()))
-                    return _lastMessage;
-
-                throw new TimeoutException("Timeout waiting for message to be consumed");
-            }
+            get { return _received.Task; }
         }
 
         public ISimpleConsumerDependency Dependency
@@ -53,24 +44,16 @@ namespace MassTransit.Containers.Tests.Scenarios
             get { return _dependency; }
         }
 
-        public static SimpleConsumer LastConsumer
+        public static Task<SimpleConsumer> LastConsumer
         {
-            get
-            {
-                if (_consumerCreated.WaitOne(8.Seconds()))
-                    return _lastConsumer;
-
-                throw new TimeoutException("Timeout waiting for consumer to be created");
-            }
+            get { return _consumerCreated.Task; }
         }
 
-        public void Consume(SimpleMessageInterface message)
+        public async Task Consume(ConsumeContext<SimpleMessageInterface> message)
         {
             _dependency.DoSomething();
 
-
-            _lastMessage = message;
-            _received.Set();
+            _received.TrySetResult(message.Message);
         }
     }
 }

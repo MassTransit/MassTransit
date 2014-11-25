@@ -15,6 +15,10 @@ namespace MassTransit
     using PipeConfigurators;
 
 
+    /// <summary>
+    /// Configure a pipe with filters
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IPipeConfigurator<T>
         where T : class, PipeContext
     {
