@@ -13,20 +13,25 @@
 namespace MassTransit.SubscriptionConfigurators
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Configurators;
+    using EndpointConfigurators;
     using PipeConfigurators;
     using Policies;
     using SubscriptionBuilders;
+    using SubscriptionConnectors;
 
 
     public class ConsumerSubscriptionConfiguratorImpl<TConsumer> :
         SubscriptionConfiguratorImpl<ConsumerSubscriptionConfigurator<TConsumer>>,
         ConsumerSubscriptionConfigurator<TConsumer>,
+        IReceiveEndpointBuilderConfigurator,
         SubscriptionBuilderConfigurator
         where TConsumer : class, IConsumer
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
-        List<IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>> _pipeBuilderConfigurators;
+
+        readonly List<IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>> _pipeBuilderConfigurators;
 
         public ConsumerSubscriptionConfiguratorImpl(IConsumerFactory<TConsumer> consumerFactory,
             IRetryPolicy retryPolicy)
@@ -43,7 +48,12 @@ namespace MassTransit.SubscriptionConfigurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return _consumerFactory.Validate();
+            return _consumerFactory.Validate().Concat(_pipeBuilderConfigurators.SelectMany(x => x.Validate()));
+        }
+
+        public void Configure(IReceiveEndpointBuilder builder)
+        {
+            ConsumerConnectorCache<TConsumer>.Connector.Connect(builder.InboundPipe, _consumerFactory, RetryPolicy);
         }
 
         public SubscriptionBuilder Configure()

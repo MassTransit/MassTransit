@@ -28,8 +28,7 @@ namespace MassTransit.Configuration
             _delegate = new DelegateConsumerFactory<TConsumer>(() => (TConsumer)objectFactory(typeof(TConsumer)));
         }
 
-        public Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
+        public Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
             return _delegate.Send(context, next);

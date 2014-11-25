@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
     using System.Threading.Tasks;
     using Pipeline;
 
@@ -24,10 +23,10 @@ namespace MassTransit
     /// of the consumer, along with anything else that needs to be managed by the factory, container, etc.
     /// </summary>
     /// <typeparam name="TConsumer">The Consumer type</typeparam>
-    public interface IConsumerFactory<TConsumer>
+    public interface IConsumerFactory<out TConsumer>
         where TConsumer : class
     {
-        Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
-            where TMessage : class;
+        Task Send<T>(ConsumeContext<T> context, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
+            where T : class;
     }
 }

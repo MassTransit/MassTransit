@@ -143,15 +143,15 @@ namespace MassTransit.TestFramework
 
                 ConfigureBus(x);
 
-                x.ReceiveEndpoint("input_queue", e =>
-                {
-                    e.Log(Console.Out, async context => string.Format("Received (input_queue): {0}, Types = ({1})",
-                        context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A"),
-                        string.Join(",", context.SupportedMessageTypes)));
-
-                    ConfigureInputQueueEndpoint(e);
-                });
+                x.ReceiveEndpoint("input_queue", ConfigureInputQueueEndpoint);
             });
+        }
+
+        protected void LogEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            configurator.Log(Console.Out, async context => string.Format("Received (input_queue): {0}, Types = ({1})",
+                context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A"),
+                string.Join(",", context.SupportedMessageTypes)));
         }
     }
 }

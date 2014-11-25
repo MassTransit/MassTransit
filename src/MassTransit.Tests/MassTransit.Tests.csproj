@@ -67,9 +67,9 @@
     <Reference Include="Magnum.TestFramework">
       <HintPath>..\Packages\Magnum.TestFramework.2.1.2\lib\NET40\Magnum.TestFramework.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -90,6 +90,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Consumer_Specs.cs" />
     <Compile Include="ContainedMessage_Specs.cs" />
     <Compile Include="MessageTestFixture.cs" />
     <Compile Include="Behaviors\Behavior.cs" />
@@ -164,6 +165,7 @@
     <Compile Include="NewId_\NewId_Specs.cs" />
     <Compile Include="NewId_\Usage_Specs.cs" />
     <Compile Include="Performance\EndpointLoadTest.cs" />
+    <Compile Include="Performance\InMemorySpeed_Specs.cs" />
     <Compile Include="Performance\LoadedRequest.cs" />
     <Compile Include="Performance\LoadedResponse.cs" />
     <Compile Include="PipeExtensions.cs" />

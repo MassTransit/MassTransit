@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    using System;
     using System.Threading.Tasks;
 
 
@@ -27,10 +26,10 @@ namespace MassTransit.Pipeline
             _consumer = consumer;
         }
 
-        Task IConsumerFactory<TConsumer>.Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
+        public Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
+            where TMessage : class
         {
-            return next.Send(context.PushLeft(_consumer));
+            return next.Send(context.PushConsumer(_consumer));
         }
     }
 }

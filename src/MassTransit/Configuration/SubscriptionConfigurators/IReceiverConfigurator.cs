@@ -13,7 +13,8 @@
 namespace MassTransit.SubscriptionConfigurators
 {
     /// <summary>
-    /// The base configuration interface for a subscription
+    /// The base configuration interface for a consumer, handler, or instance that 
+    /// can consume messages.
     /// </summary>
     public interface IReceiverConfigurator
     {

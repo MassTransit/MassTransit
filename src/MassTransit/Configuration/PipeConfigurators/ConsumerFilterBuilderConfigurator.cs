@@ -15,33 +15,30 @@ namespace MassTransit.PipeConfigurators
     using System.Collections.Generic;
     using Configurators;
     using PipeBuilders;
-    using Pipeline.Filters;
+    using Pipeline;
 
 
-    /// <summary>
-    /// Adds a message handler to the consuming pipe builder
-    /// </summary>
-    /// <typeparam name="T">The message type</typeparam>
-    public class HandlerPipeBuilderConfigurator<T> :
-        IPipeBuilderConfigurator<ConsumeContext<T>>
-        where T : class
+    public class ConsumerFilterBuilderConfigurator<TConsumer, TMessage> :
+        IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer, TMessage>>
+        where TConsumer : class
+        where TMessage : class
     {
-        readonly MessageHandler<T> _handler;
+        readonly IFilter<ConsumerConsumeContext<TConsumer>> _filter;
 
-        public HandlerPipeBuilderConfigurator(MessageHandler<T> handler)
+        public ConsumerFilterBuilderConfigurator(IFilter<ConsumerConsumeContext<TConsumer>> filter)
         {
-            _handler = handler;
+            _filter = filter;
         }
 
-        void IPipeBuilderConfigurator<ConsumeContext<T>>.Configure(IPipeBuilder<ConsumeContext<T>> builder)
+        public void Configure(IPipeBuilder<ConsumerConsumeContext<TConsumer, TMessage>> builder)
         {
-            builder.AddFilter(new HandlerMessageFilter<T>(_handler));
+            builder.AddFilter(new ConsumerSplitFilter<TConsumer, TMessage>(_filter));
         }
 
-        IEnumerable<ValidationResult> Configurator.Validate()
+        public IEnumerable<ValidationResult> Validate()
         {
-            if (_handler == null)
-                yield return this.Failure("Handler", "must not be null");
+            if (_filter == null)
+                yield return this.Failure("Filter", "must not be null");
         }
     }
 }

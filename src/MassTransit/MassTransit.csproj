@@ -68,7 +68,7 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -103,8 +103,9 @@
     <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderBase.cs" />
     <Compile Include="Configuration\Configurators\InMemoryServiceBusFactoryConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\PipeFactoryConfiguratorResults.cs" />
-    <Compile Include="Configuration\Configurators\PipeFactoryConfiguratorResultsImpl.cs" />
+    <Compile Include="Configuration\Configurators\IPipeConfigurationResult.cs" />
+    <Compile Include="Configuration\Configurators\PipeConfigurationResult.cs" />
+    <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\DelegatePipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurators\AddSerializerEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IEndpointConfigurator.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="Configuration\PipeBuilders\IPipeBuilder.cs" />
     <Compile Include="Configuration\PipeBuilders\PipeBuilder.cs" />
     <Compile Include="Configuration\PipeConfigurators\AsyncDelegatePipeBuilderConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ConsumerFilterBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\DelegatePipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\FilterPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\HandlerPipeBuilderConfigurator.cs" />
@@ -249,8 +251,8 @@
     <Compile Include="Pipeline\ISendObserver.cs" />
     <Compile Include="Pipeline\ISendObserverConnector.cs" />
     <Compile Include="Pipeline\LastPipe.cs" />
-    <Compile Include="Pipeline\LeftMergePipe.cs" />
-    <Compile Include="Pipeline\LeftSplitPipe.cs" />
+    <Compile Include="Pipeline\ConsumerMergePipe.cs" />
+    <Compile Include="Pipeline\ConsumerSplitFilter.cs" />
     <Compile Include="Pipeline\LegacyContextMethodConsumerMessageAdapter.cs" />
     <Compile Include="Pipeline\LegacyMethodConsumerMessageAdapter.cs" />
     <Compile Include="Pipeline\MethodConsumerMessageAdapter.cs" />

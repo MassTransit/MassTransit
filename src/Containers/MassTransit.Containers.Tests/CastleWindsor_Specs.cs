@@ -18,11 +18,13 @@ namespace MassTransit.Containers.Tests
     using BusConfigurators;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
+    using EndpointConfigurators;
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using Saga;
     using Scenarios;
     using SubscriptionConfigurators;
+    using TestFramework;
     using Testing;
     using Util;
     using WindsorIntegration;
@@ -162,7 +164,7 @@ namespace MassTransit.Containers.Tests
 
     [Scenario]
     public class MessageScope_usage :
-        Given_a_service_bus_instance
+        InMemoryTestFixture
     {
         readonly IWindsorContainer _container;
 
@@ -193,17 +195,17 @@ namespace MassTransit.Containers.Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
+        protected override void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
         {
-            base.ConfigureLocalBus(configurator);
+        }
 
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
             configurator.EnableMessageScope();
+
+            configurator.LoadFrom(_container);
         }
 
-        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
-        {
-            subscriptionBusServiceConfigurator.LoadFrom(_container);
-        }
 
 
         public class CheckScopeConsumer :

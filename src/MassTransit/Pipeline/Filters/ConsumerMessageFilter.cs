@@ -17,6 +17,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading.Tasks;
     using Util;
 
+
     /// <summary>
     /// Consumes a message via Consumer, resolved through the consumer factory and notifies
     /// the context that the message was consumed.
@@ -29,10 +30,10 @@ namespace MassTransit.Pipeline.Filters
         where TMessage : class
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
-        readonly IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> _consumerPipe;
+        readonly IPipe<ConsumerConsumeContext<TConsumer, TMessage>> _consumerPipe;
 
         public ConsumerMessageFilter(IConsumerFactory<TConsumer> consumerFactory,
-            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> consumerPipe)
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> consumerPipe)
         {
             _consumerFactory = consumerFactory;
             _consumerPipe = consumerPipe;
@@ -58,7 +59,7 @@ namespace MassTransit.Pipeline.Filters
 
         bool IFilter<ConsumeContext<TMessage>>.Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this);
+            return inspector.Inspect(this, x => _consumerPipe.Inspect(x));
         }
     }
 }

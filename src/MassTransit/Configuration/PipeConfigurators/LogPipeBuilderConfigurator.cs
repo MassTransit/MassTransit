@@ -34,12 +34,12 @@ namespace MassTransit.PipeConfigurators
             _formatter = formatter;
         }
 
-        public void Configure(IPipeBuilder<T> builder)
+        void IPipeBuilderConfigurator<T>.Configure(IPipeBuilder<T> builder)
         {
             builder.AddFilter(new LogFilter<T>(_writer, _formatter));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        IEnumerable<ValidationResult> Configurator.Validate()
         {
             if (_writer == null)
                 yield return this.Failure("TextWriter", "must not be null");

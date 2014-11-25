@@ -12,19 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    public interface ConsumerConsumeContext<out TConsumer, out T> :
-        ConsumeContext<T>
-        where T : class
+    /// <summary>
+    /// A consumer and consume context mixed together, carrying both a consumer and the message
+    /// consume context.
+    /// </summary>
+    /// <typeparam name="TConsumer">The consumer type</typeparam>
+    /// <typeparam name="TMessage">The message type</typeparam>
+    public interface ConsumerConsumeContext<out TConsumer, out TMessage> :
+        ConsumerConsumeContext<TConsumer>,
+        ConsumeContext<TMessage>
+        where TMessage : class
+        where TConsumer : class
     {
         TConsumer Consumer { get; }
 
-        ConsumeContext<T> Pop();
+        ConsumeContext<TMessage> Pop();
     }
 
 
     public interface ConsumerConsumeContext<out TConsumer> :
         ConsumeContext
-        where TConsumer : class, IConsumer
+        where TConsumer : class
     {
+        ConsumerConsumeContext<TConsumer, T> GetContext<T>() 
+            where T : class;
     }
 }

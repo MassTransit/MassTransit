@@ -122,7 +122,7 @@ namespace MassTransit.TestFramework
             configurator.Handler<T>(async context =>
             {
                 await handler(context);
-                source.SetResult(context);
+                source.TrySetResult(context);
             });
 
             TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);

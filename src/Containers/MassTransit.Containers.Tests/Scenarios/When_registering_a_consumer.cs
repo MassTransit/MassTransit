@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,18 +32,18 @@ namespace MassTransit.Containers.Tests.Scenarios
         public void Should_have_a_subscription_for_the_consumer_message_type()
         {
             LocalBus.HasSubscription<SimpleMessageInterface>().Count()
-                    .ShouldEqual(1, "No subscription for the SimpleMessageInterface was found.");
+                .ShouldEqual(1, "No subscription for the SimpleMessageInterface was found.");
         }
 
         [Then]
         public void Should_have_a_subscription_for_the_nested_consumer_type()
         {
             LocalBus.HasSubscription<AnotherMessageInterface>().Count()
-                    .ShouldEqual(1, "Only one subscription should be registered for another consumer");
+                .ShouldEqual(1, "Only one subscription should be registered for another consumer");
         }
 
         [Then]
-        public void Should_receive_using_the_first_consumer()
+        public async void Should_receive_using_the_first_consumer()
         {
             const string name = "Joe";
 
@@ -54,17 +54,17 @@ namespace MassTransit.Containers.Tests.Scenarios
 
             complete.WaitOne(8.Seconds());
 
-            SimpleConsumer lastConsumer = SimpleConsumer.LastConsumer;
+            SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer;
             lastConsumer.ShouldNotBeNull();
 
-            lastConsumer.Last.Name
-                        .ShouldEqual(name);
+            SimpleMessageInterface last = await lastConsumer.Last;
+            last.Name
+                .ShouldEqual(name);
 
             lastConsumer.Dependency.WasDisposed
-                        .ShouldBeTrue("Dependency was not disposed");
+                .ShouldBeTrue("Dependency was not disposed");
             lastConsumer.Dependency.SomethingDone
-                        .ShouldBeTrue("Dependency was disposed before consumer executed");
-
+                .ShouldBeTrue("Dependency was disposed before consumer executed");
         }
     }
 }

@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    using System;
     using System.Threading.Tasks;
 
 
@@ -20,31 +19,30 @@ namespace MassTransit.Pipeline
     /// Splits a context item off the pipe and carries it out-of-band to be merged
     /// once the next filter has completed
     /// </summary>
-    /// <typeparam name="TLeft"></typeparam>
-    /// <typeparam name="T"></typeparam>
-    public class LeftSplitPipe<TLeft, T> :
-        IPipe<ConsumeContext<Tuple<TLeft, ConsumeContext<T>>>>
-        where T : class
+    /// <typeparam name="TConsumer"></typeparam>
+    /// <typeparam name="TMessage"></typeparam>
+    public class ConsumerSplitFilter<TConsumer, TMessage> :
+        IFilter<ConsumerConsumeContext<TConsumer, TMessage>>
+        where TMessage : class
+        where TConsumer : class
     {
-        readonly IFilter<ConsumeContext<T>> _next;
-        readonly IPipe<ConsumeContext<Tuple<TLeft, ConsumeContext<T>>>> _output;
+        readonly IFilter<ConsumerConsumeContext<TConsumer>> _next;
 
-        public LeftSplitPipe(IPipe<ConsumeContext<Tuple<TLeft, ConsumeContext<T>>>> output, IFilter<ConsumeContext<T>> next)
+        public ConsumerSplitFilter(IFilter<ConsumerConsumeContext<TConsumer>> next)
         {
             _next = next;
-            _output = output;
         }
 
-        public Task Send(ConsumeContext<Tuple<TLeft, ConsumeContext<T>>> context)
+        public Task Send(ConsumerConsumeContext<TConsumer, TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
-            var output = new LeftMergePipe<TLeft, T>(context.Message.Item1, _output);
+            var mergePipe = new ConsumerMergePipe<TConsumer, TMessage>(next);
 
-            return _next.Send(context.Message.Item2, output);
+            return _next.Send(context, mergePipe);
         }
 
         public bool Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this, x => _next.Inspect(x) && _output.Inspect(x));
+            return inspector.Inspect(this, x => _next.Inspect(x) && _next.Inspect(x));
         }
     }
 }

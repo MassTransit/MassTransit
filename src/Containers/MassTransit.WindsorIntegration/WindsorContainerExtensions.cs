@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,13 +15,12 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using BusConfigurators;
     using Castle.Windsor;
+    using EndpointConfigurators;
     using Magnum.Extensions;
     using Saga;
     using Saga.SubscriptionConfigurators;
     using SubscriptionConfigurators;
-    using Util;
     using WindsorIntegration;
 
 
@@ -35,9 +34,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="container">The Windsor container.</param>
-        public static void LoadFrom(
-             this SubscriptionBusServiceConfigurator configurator,
-             IWindsorContainer container)
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IWindsorContainer container)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
@@ -71,8 +68,8 @@ namespace MassTransit
         /// <param name="container">The container that the consumer should be loaded from.</param>
         /// <returns>The configurator</returns>
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-             this SubscriptionBusServiceConfigurator configurator,
-             IWindsorContainer container)
+            this SubscriptionBusServiceConfigurator configurator,
+            IWindsorContainer container)
             where TConsumer : class, IConsumer
         {
             if (configurator == null)
@@ -93,8 +90,8 @@ namespace MassTransit
         /// <param name="container">The windsor container</param>
         /// <returns>The configurator</returns>
         public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-             this SubscriptionBusServiceConfigurator configurator,
-             IWindsorContainer container)
+            this SubscriptionBusServiceConfigurator configurator,
+            IWindsorContainer container)
             where TSaga : class, ISaga
         {
             if (configurator == null)
@@ -110,21 +107,28 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Enable the begin/end of a MessageScope for use with the container
+        /// Enables message scope lifetime for windsor containers
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
-        public static void EnableMessageScope(this ServiceBusConfigurator configurator)
+        public static void EnableMessageScope<T>(this IPipeConfigurator<T> configurator)
+            where T : class, PipeContext
         {
-            configurator.AddInboundInterceptor(new WindsorInboundInterceptor());
+            if (configurator == null)
+                throw new ArgumentNullException("configurator");
+
+            var pipeBuilderConfigurator = new WindsorMessageScopePipeBuilderConfigurator<T>();
+
+            configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
         }
 
         static IList<Type> FindTypes<T>(IWindsorContainer container, Func<Type, bool> filter)
         {
             return container.Kernel
-                            .GetAssignableHandlers(typeof(T))
-                            .Select(h => h.ComponentModel.Implementation)
-                            .Where(filter)
-                            .ToList();
+                .GetAssignableHandlers(typeof(T))
+                .Select(h => h.ComponentModel.Implementation)
+                .Where(filter)
+                .ToList();
         }
     }
 }

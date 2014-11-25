@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,21 +12,35 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
+    using System.Threading.Tasks;
+    using Pipeline;
+
+
     /// <summary>
     /// Calls by the inbound message pipeline to begin and end a message scope
     /// in the container.
     /// </summary>
-    public class WindsorInboundInterceptor :
-        IInboundMessageInterceptor
+    public class WindsorMessageScopeFilter<T> :
+        IFilter<T>
+        where T : class, PipeContext
     {
-        public void PreDispatch(IConsumeContext context)
+        async Task IFilter<T>.Send(T context, IPipe<T> next)
         {
-            MessageScope.BeginScope();
+            try
+            {
+                MessageScope.BeginScope();
+
+                await next.Send(context);
+            }
+            finally
+            {
+                MessageScope.EndScope();
+            }
         }
 
-        public void PostDispatch(IConsumeContext context)
+        public bool Inspect(IPipeInspector inspector)
         {
-            MessageScope.EndScope();
+            return inspector.Inspect(this);
         }
     }
 }

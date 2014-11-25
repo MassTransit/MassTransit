@@ -29,8 +29,7 @@ namespace MassTransit.Configuration
             _factoryMethod = factoryMethod;
         }
 
-        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
+        public async Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
             TConsumer consumer = null;
@@ -43,7 +42,7 @@ namespace MassTransit.Configuration
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await next.Send(context.PushLeft(consumer));
+                await next.Send(context.PushConsumer(consumer));
             }
             finally
             {

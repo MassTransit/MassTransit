@@ -15,11 +15,19 @@ namespace MassTransit.PipeConfigurators
     using Configurators;
     using PipeBuilders;
 
-
+    /// <summary>
+    /// Configures a pipe builder (typically by adding filters), but allows late binding to the
+    /// pipe builder with pre-validation that the operations will succeed.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IPipeBuilderConfigurator<T> :
         Configurator
         where T : class, PipeContext
     {
+        /// <summary>
+        /// Configure the builder
+        /// </summary>
+        /// <param name="builder">The pipe builder</param>
         void Configure(IPipeBuilder<T> builder);
     }
 }

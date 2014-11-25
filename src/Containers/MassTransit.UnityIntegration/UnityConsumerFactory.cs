@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.UnityIntegration
 {
-    using System;
     using System.Threading.Tasks;
     using Microsoft.Practices.Unity;
     using Pipeline;
@@ -30,9 +29,8 @@ namespace MassTransit.UnityIntegration
             _container = container;
         }
 
-        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
-            where TMessage : class
+        public async Task Send<T>(ConsumeContext<T> context, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
+            where T : class
         {
             using (IUnityContainer childContainer = _container.CreateChildContainer())
             {
@@ -43,7 +41,7 @@ namespace MassTransit.UnityIntegration
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await next.Send(context.PushLeft(consumer));
+                await next.Send(context.PushConsumer(consumer));
             }
         }
     }

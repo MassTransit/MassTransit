@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration
 {
-    using System;
     using System.Threading.Tasks;
     using Autofac;
     using Pipeline;
@@ -32,8 +31,7 @@ namespace MassTransit.AutofacIntegration
             _name = name;
         }
 
-        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
+        public async Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
             using (ILifetimeScope innerScope = _scope.BeginLifetimeScope(_name))
@@ -45,7 +43,7 @@ namespace MassTransit.AutofacIntegration
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await next.Send(context.PushLeft(consumer));
+                await next.Send(context.PushConsumer(consumer));
             }
         }
     }

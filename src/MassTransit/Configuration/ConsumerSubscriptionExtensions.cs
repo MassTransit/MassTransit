@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using Configuration;
+    using EndpointConfigurators;
     using Logging;
     using Magnum.Extensions;
     using Policies;
@@ -38,6 +39,43 @@ namespace MassTransit
             var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(consumerConfigurator);
 
             configurator.AddConfigurator(busServiceConfigurator);
+
+            return consumerConfigurator;
+        }
+
+        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
+            IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy = null)
+            where TConsumer : class, IConsumer
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Subscribing Consumer: {0} (using supplied consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
+
+            var consumerConfigurator = new ConsumerSubscriptionConfiguratorImpl<TConsumer>(consumerFactory, retryPolicy ?? Retry.None);
+
+            configurator.AddConfigurator(consumerConfigurator);
+
+            return consumerConfigurator;
+        }
+
+        /// <summary>
+        /// Subscribes a consumer with a default constructor to the endpoint
+        /// </summary>
+        /// <typeparam name="TConsumer">The consumer type</typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="retryPolicy"></param>
+        /// <returns></returns>
+        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
+            IRetryPolicy retryPolicy = null)
+            where TConsumer : class, IConsumer,new()
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Subscribing Consumer: {0} (using supplied consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
+
+            var consumerFactory = new DelegateConsumerFactory<TConsumer>(() => new TConsumer());
+
+            var consumerConfigurator = new ConsumerSubscriptionConfiguratorImpl<TConsumer>(consumerFactory, retryPolicy ?? Retry.None);
+
+            configurator.AddConfigurator(consumerConfigurator);
 
             return consumerConfigurator;
         }

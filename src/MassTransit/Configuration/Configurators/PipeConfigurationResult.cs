@@ -17,12 +17,12 @@ namespace MassTransit.Configurators
     using System.Linq;
 
 
-    public class PipeFactoryConfiguratorResultsImpl :
-        PipeFactoryConfiguratorResults
+    public class PipeConfigurationResult :
+        IPipeConfigurationResult
     {
         readonly List<ValidationResult> _results;
 
-        public PipeFactoryConfiguratorResultsImpl(IEnumerable<ValidationResult> results)
+        public PipeConfigurationResult(IEnumerable<ValidationResult> results)
         {
             _results = results.ToList();
         }

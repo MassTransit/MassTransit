@@ -19,31 +19,33 @@ namespace MassTransit.Context
     using Pipeline;
 
 
-    public class ConsumeContextProxy<TLeft, T> :
-        ConsumeContext<Tuple<TLeft, ConsumeContext<T>>>
-        where T : class
+    public class ConsumeContextProxy<TConsumer, TMessage> :
+        ConsumerConsumeContext<TConsumer, TMessage>
+        where TMessage : class
+        where TConsumer : class
     {
-        readonly ConsumeContext<T> _context;
-        readonly Tuple<TLeft, ConsumeContext<T>> _message;
+        readonly TConsumer _consumer;
+        readonly ConsumeContext<TMessage> _context;
+
+        public ConsumeContextProxy(ConsumeContext<TMessage> context, TConsumer consumer)
+        {
+            _context = context;
+            _consumer = consumer;
+        }
+
         public IEnumerable<string> SupportedMessageTypes
         {
             get { return _context.SupportedMessageTypes; }
         }
 
-        public ConsumeContextProxy(ConsumeContext<T> context, TLeft left)
-        {
-            _context = context;
-            _message = Tuple.Create(left, context);
-        }
-
-        public Task Publish<TMessage>(TMessage message)
-            where TMessage : class
+        public Task Publish<T>(T message)
+            where T : class
         {
             return _context.Publish(message);
         }
 
-        public Task Publish<TMessage>(TMessage message, IPipe<MassTransit.PublishContext<TMessage>> publishPipe)
-            where TMessage : class
+        public Task Publish<T>(T message, IPipe<MassTransit.PublishContext<T>> publishPipe)
+            where T : class
         {
             return _context.Publish(message, publishPipe);
         }
@@ -68,14 +70,14 @@ namespace MassTransit.Context
             return _context.Publish(message, messageType, contextCallback);
         }
 
-        public Task Publish<TMessage>(object values)
-            where TMessage : class
+        public Task Publish<T>(object values)
+            where T : class
         {
-            return _context.Publish<TMessage>(values);
+            return _context.Publish<T>(values);
         }
 
-        public Task Publish<TMessage>(object values, Action<MassTransit.PublishContext<TMessage>> contextCallback)
-            where TMessage : class
+        public Task Publish<T>(object values, Action<MassTransit.PublishContext<T>> contextCallback)
+            where T : class
         {
             return _context.Publish(values, contextCallback);
         }
@@ -142,6 +144,16 @@ namespace MassTransit.Context
             get { return _context.ContextHeaders; }
         }
 
+        public ConsumerConsumeContext<TConsumer, T> GetContext<T>()
+            where T : class
+        {
+            var consumerContext = this as ConsumerConsumeContext<TConsumer, TMessage>;
+            if (consumerContext == null)
+                throw new InvalidOperationException("The consumer type should be assignable: " + typeof(TMessage).Name);
+
+            return (ConsumerConsumeContext<TConsumer, T>)this;
+        }
+
         public CancellationToken CancellationToken
         {
             get { return _context.CancellationToken; }
@@ -157,20 +169,20 @@ namespace MassTransit.Context
             return _context.HasMessageType(messageType);
         }
 
-        public bool TryGetMessage<TMessage>(out ConsumeContext<TMessage> consumeContext)
-            where TMessage : class
+        public bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
+            where T : class
         {
             return _context.TryGetMessage(out consumeContext);
         }
 
-        public Task RespondAsync<TMessage>(TMessage message)
-            where TMessage : class
+        public Task RespondAsync<T>(T message)
+            where T : class
         {
             return _context.RespondAsync(message);
         }
 
-        public void Respond<TMessage>(TMessage message)
-            where TMessage : class
+        public void Respond<T>(T message)
+            where T : class
         {
             _context.Respond(message);
         }
@@ -195,9 +207,9 @@ namespace MassTransit.Context
             _context.NotifyFaulted(messageType, consumerType, exception);
         }
 
-        public Tuple<TLeft, ConsumeContext<T>> Message
+        TMessage ConsumeContext<TMessage>.Message
         {
-            get { return _message; }
+            get { return _context.Message; }
         }
 
         public void NotifyConsumed(TimeSpan elapsed, string consumerType)
@@ -208,6 +220,16 @@ namespace MassTransit.Context
         public void NotifyFaulted(string consumerType, Exception exception)
         {
             _context.NotifyFaulted(consumerType, exception);
+        }
+
+        public TConsumer Consumer
+        {
+            get { return _consumer; }
+        }
+
+        public ConsumeContext<TMessage> Pop()
+        {
+            return _context;
         }
     }
 }

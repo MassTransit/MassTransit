@@ -13,9 +13,12 @@
 namespace MassTransit.SubscriptionConnectors
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using PipeBuilders;
+    using PipeConfigurators;
     using Pipeline;
     using Pipeline.Filters;
-    using Pipeline.Sinks;
     using Policies;
     using Util;
 
@@ -32,11 +35,11 @@ namespace MassTransit.SubscriptionConnectors
         where TConsumer : class
         where TMessage : class
     {
-        readonly IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> _consumerPipe;
+        readonly IFilter<ConsumerConsumeContext<TConsumer, TMessage>> _consumeFilter;
 
-        public ConsumerMessageConnector(IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> consumerPipe)
+        public ConsumerMessageConnector(IFilter<ConsumerConsumeContext<TConsumer, TMessage>> consumeFilter)
         {
-            _consumerPipe = consumerPipe;
+            _consumeFilter = consumeFilter;
         }
 
         public Type MessageType
@@ -44,19 +47,58 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        ConnectHandle ConsumerConnector.Connect<T>(IInboundPipe inboundPipe, IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy)
+        ConnectHandle ConsumerConnector.Connect<T>(IInboundPipe inboundPipe, IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy,
+            params IPipeBuilderConfigurator<ConsumerConsumeContext<T>>[] pipeBuilderConfigurators)
         {
             var factory = consumerFactory as IConsumerFactory<TConsumer>;
             if (factory == null)
                 throw new ArgumentException("The consumer factory type does not match: " + TypeMetadataCache<T>.ShortName);
 
+            var builder = new ConsumerPipeBuilder<T>();
+            for (int i = 0; i < pipeBuilderConfigurators.Length; i++)
+                pipeBuilderConfigurators[i].Configure(builder);
+
+            var builders = builder as ConsumerPipeBuilder<TConsumer>;
+
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> messagePipe = Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x =>
+            {
+                foreach (var filter in builders.Filters)
+                {
+                    x.Filter(filter);
+                }
+                x.Filter(_consumeFilter);
+            });
+
             IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
                 x.Retry(retryPolicy);
-                x.Filter(new ConsumerMessageFilter<TConsumer, TMessage>(factory, _consumerPipe));
+                x.Filter(new ConsumerMessageFilter<TConsumer, TMessage>(factory, messagePipe));
             });
 
             return inboundPipe.Connect(pipe);
+        }
+
+
+        class ConsumerPipeBuilder<T> :
+            IPipeBuilder<ConsumerConsumeContext<T>>
+            where T : class
+        {
+            readonly IList<IFilter<ConsumerConsumeContext<T>>> _filters;
+
+            public ConsumerPipeBuilder()
+            {
+                _filters = new List<IFilter<ConsumerConsumeContext<T>>>();
+            }
+
+            public IEnumerable<IFilter<ConsumerConsumeContext<T>>> Filters
+            {
+                get { return _filters; }
+            }
+
+            public void AddFilter(IFilter<ConsumerConsumeContext<T>> filter)
+            {
+                _filters.Add(filter);
+            }
         }
     }
 }
