@@ -40,6 +40,11 @@ namespace MassTransit.Context
             _deserializer = deserializer ?? JsonMessageSerializer.Deserializer;
         }
 
+        public IEnumerable<Tuple<string, object>> Headers
+        {
+            get { return _provider.Headers; }
+        }
+
         T ContextHeaders.Get<T>(string key, T defaultValue)
         {
             if (key == null)

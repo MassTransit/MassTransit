@@ -1,63 +1,61 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Instances
 {
-	using System;
-	using System.Collections.Generic;
-	using Scenarios;
-	using Subjects;
-	using TestActions;
+    using System.Collections.Generic;
+    using Scenarios;
+    using Subjects;
+    using TestActions;
 
-	public class HandlerTestInstance<TScenario, TMessage> :
-		TestInstance<TScenario>,
-		HandlerTest<TScenario, TMessage>
-		where TMessage : class
-		where TScenario : TestScenario
-	{
-		readonly HandlerTestSubjectImpl<TScenario, TMessage> _subject;
 
-		bool _disposed;
+    public class HandlerTestInstance<TScenario, TMessage> :
+        TestInstance<TScenario>,
+        HandlerTest<TScenario, TMessage>
+        where TMessage : class
+        where TScenario : TestScenario
+    {
+        readonly HandlerTestSubjectImpl<TScenario, TMessage> _subject;
 
-		public HandlerTestInstance(TScenario scenario, IList<TestAction<TScenario>> actions,
-		                           Action<IConsumeContext<TMessage>, TMessage> handler)
-			: base(scenario, actions)
-		{
-			_subject = new HandlerTestSubjectImpl<TScenario, TMessage>(handler);
-		}
+        bool _disposed;
 
-		public void Execute()
-		{
-			_subject.Prepare(Scenario);
+        public HandlerTestInstance(TScenario scenario, IList<TestAction<TScenario>> actions, MessageHandler<TMessage> handler)
+            : base(scenario, actions)
+        {
+            _subject = new HandlerTestSubjectImpl<TScenario, TMessage>(handler);
+        }
 
-			ExecuteTestActions();
-		}
+        public void Execute()
+        {
+            _subject.Prepare(Scenario);
 
-		public HandlerTestSubject<TMessage> Handler
-		{
-			get { return _subject; }
-		}
+            ExecuteTestActions();
+        }
 
-		protected override void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_subject.Dispose();
-			}
+        public HandlerTestSubject<TMessage> Handler
+        {
+            get { return _subject; }
+        }
 
-			base.Dispose(disposing);
+        protected override void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+            if (disposing)
+                _subject.Dispose();
 
-			_disposed = true;
-		}
-	}
+            base.Dispose(disposing);
+
+            _disposed = true;
+        }
+    }
 }

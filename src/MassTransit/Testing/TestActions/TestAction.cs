@@ -14,7 +14,7 @@ namespace MassTransit.Testing.TestActions
 {
 	using Scenarios;
 
-	public interface TestAction<TScenario>
+	public interface TestAction<in TScenario>
 		where TScenario : TestScenario
 	{
 		void Act(TScenario scenario);

@@ -56,9 +56,6 @@ namespace MassTransit.Tests.Saga.StateMachine
         {
             LocalBus.SubscribeSaga(_repository);
 
-            PipelineViewer.Trace(LocalBus.InboundPipeline);
-            PipelineViewer.Trace(LocalBus.OutboundPipeline);
-
             LocalBus.Publish(new RegisterUser(_transactionId, _username, _password, _displayName, _email));
 
             AutoStateMachineSaga saga = _repository.ShouldContainSaga(_transactionId, 8.Seconds());

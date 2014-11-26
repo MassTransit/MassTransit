@@ -30,7 +30,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 		readonly IList<HandlerTestBuilderConfigurator<TScenario, TMessage>> _configurators;
 
 		Func<TScenario, HandlerTestBuilder<TScenario, TMessage>> _builderFactory;
-		Action<IConsumeContext<TMessage>, TMessage> _handler;
+		MessageHandler<TMessage> _handler;
 
 		public HandlerTestInstanceConfiguratorImpl(Func<ScenarioBuilder<TScenario>> scenarioBuilderFactory)
 			: base(scenarioBuilderFactory)
@@ -50,7 +50,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 			_configurators.Add(configurator);
 		}
 
-		public void Handler(Action<IConsumeContext<TMessage>, TMessage> handler)
+		public void Handler(MessageHandler<TMessage> handler)
 		{
 			_handler = handler;
 		}

@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.StructureMapIntegration
 {
-    using System;
     using System.Threading.Tasks;
     using Pipeline;
     using StructureMap;
@@ -30,9 +29,7 @@ namespace MassTransit.StructureMapIntegration
             _container = container;
         }
 
-        public async Task Send<TMessage>(ConsumeContext<TMessage> context,
-            IPipe<ConsumeContext<Tuple<TConsumer, ConsumeContext<TMessage>>>> next)
-            where TMessage : class
+        async Task IConsumerFactory<TConsumer>.Send<T>(ConsumeContext<T> context, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
         {
             using (IContainer nestedContainer = _container.GetNestedContainer())
             {

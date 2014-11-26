@@ -44,19 +44,17 @@ namespace MassTransit
             IList<Type> consumerTypes = FindTypes<IConsumer>(container, x => !x.Implements<ISaga>());
             if (consumerTypes.Count > 0)
             {
-                var consumerConfigurator = new WindsorConsumerFactoryConfigurator(configurator, container);
-
                 foreach (Type type in consumerTypes)
-                    consumerConfigurator.ConfigureConsumer(type);
+                    ConsumerFactoryConfiguratorCache.Configure(type, configurator, container);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
             if (sagaTypes.Count > 0)
             {
-                var sagaConfigurator = new WindsorSagaFactoryConfigurator(configurator, container);
-
-                foreach (Type type in sagaTypes)
-                    sagaConfigurator.ConfigureSaga(type);
+//                var sagaConfigurator = new WindsorSagaFactoryConfigurator(configurator, container);
+//
+//                foreach (Type type in sagaTypes)
+//                    sagaConfigurator.ConfigureSaga(type);
             }
         }
 

@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using EndpointConfigurators;
     using Magnum.Extensions;
     using Microsoft.Practices.Unity;
     using Saga;
@@ -25,24 +26,22 @@ namespace MassTransit
 
     public static class UnityExtensions
     {
-        public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IUnityContainer container)
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IUnityContainer container)
         {
             IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.Implements<ISaga>());
             if (concreteTypes.Count > 0)
             {
-                var consumerConfigurator = new UnityConsumerFactoryConfigurator(configurator, container);
-
                 foreach (Type concreteType in concreteTypes)
-                    consumerConfigurator.ConfigureConsumer(concreteType);
+                ConsumerFactoryConfiguratorCache.Configure(concreteType, configurator, container);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
             if (sagaTypes.Count > 0)
             {
-                var sagaConfigurator = new UnitySagaFactoryConfigurator(configurator, container);
-
-                foreach (Type type in sagaTypes)
-                    sagaConfigurator.ConfigureSaga(type);
+//                var sagaConfigurator = new UnitySagaFactoryConfigurator(configurator, container);
+//
+//                foreach (Type type in sagaTypes)
+//                    sagaConfigurator.ConfigureSaga(type);
             }
         }
 

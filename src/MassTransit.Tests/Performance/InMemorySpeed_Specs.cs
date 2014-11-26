@@ -33,6 +33,8 @@ namespace MassTransit.Tests.Performance
             int limit = 10000;
             int count = 0;
 
+            await _requestClient.Request(new PingMessage());
+            
             Stopwatch timer = Stopwatch.StartNew();
 
             await Task.WhenAll(Enumerable.Range(0, limit).Select(async x =>

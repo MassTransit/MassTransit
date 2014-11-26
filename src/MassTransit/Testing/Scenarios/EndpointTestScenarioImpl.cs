@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Scenarios
 {
-    using System;
-    using System.Collections.Generic;
-    using Diagnostics.Introspection;
     using Magnum.Extensions;
     using TestDecorators;
     using Transports;
@@ -23,8 +20,6 @@ namespace MassTransit.Testing.Scenarios
     public abstract class EndpointTestScenarioImpl :
         EndpointTestScenario
     {
-        readonly EndpointCache _endpointCache;
-        readonly IDictionary<Uri, EndpointTestDecorator> _endpoints;
         readonly PublishedMessageListImpl _published;
         readonly ReceivedMessageListImpl _received;
         readonly SentMessageListImpl _sent;
@@ -38,26 +33,14 @@ namespace MassTransit.Testing.Scenarios
             _skipped = new ReceivedMessageListImpl();
             _published = new PublishedMessageListImpl();
 
-            _endpoints = new Dictionary<Uri, EndpointTestDecorator>();
-
-            EndpointFactory = new EndpointFactoryTestDecorator(endpointFactory, this);
-
-            _endpointCache = new EndpointCache(EndpointFactory);
-
-            EndpointCache = new EndpointCacheProxy(_endpointCache);
-
             ServiceBusFactory.ConfigureDefaultSettings(x =>
             {
-                x.SetEndpointCache(EndpointCache);
                 x.SetConcurrentConsumerLimit(4);
                 x.SetConcurrentReceiverLimit(1);
                 x.SetReceiveTimeout(50.Milliseconds());
                 x.EnableAutoStart();
             });
         }
-
-        public IEndpointCache EndpointCache { get; private set; }
-        public IEndpointFactory EndpointFactory { get; private set; }
 
         public SentMessageList Sent
         {
@@ -69,15 +52,9 @@ namespace MassTransit.Testing.Scenarios
             get { return _skipped; }
         }
 
-        public virtual IServiceBus InputBus
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public abstract IBus InputBus { get; }
 
-        public virtual IServiceBus OutputBus
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public abstract ISendEndpoint OutputBus { get; }
 
         public PublishedMessageList Published
         {
@@ -92,11 +69,6 @@ namespace MassTransit.Testing.Scenarios
         public void Dispose()
         {
             Dispose(true);
-        }
-
-        public void AddEndpoint(EndpointTestDecorator endpoint)
-        {
-            _endpoints[endpoint.Address.Uri] = endpoint;
         }
 
         public void AddSent(SentMessage message)
@@ -130,14 +102,6 @@ namespace MassTransit.Testing.Scenarios
                 _sent.Dispose();
                 _received.Dispose();
 
-                _endpointCache.Clear();
-
-                if (EndpointCache != null)
-                {
-                    EndpointCache.Dispose();
-                    EndpointCache = null;
-                }
-
                 ServiceBusFactory.ConfigureDefaultSettings(x => x.SetEndpointCache(null));
             }
 
@@ -147,33 +111,6 @@ namespace MassTransit.Testing.Scenarios
         public virtual IServiceBus GetDecoratedBus(IServiceBus bus)
         {
             return new ServiceBusTestDecorator(bus, this);
-        }
-
-
-        class EndpointCacheProxy :
-            IEndpointCache
-        {
-            readonly IEndpointCache _endpointCache;
-
-            public EndpointCacheProxy(IEndpointCache endpointCache)
-            {
-                _endpointCache = endpointCache;
-            }
-
-            public void Dispose()
-            {
-                // we don't dispose, since we're in testing
-            }
-
-            public IEndpoint GetEndpoint(Uri uri)
-            {
-                return _endpointCache.GetEndpoint(uri);
-            }
-
-            public void Inspect(DiagnosticsProbe probe)
-            {
-                _endpointCache.Inspect(probe);
-            }
         }
     }
 }

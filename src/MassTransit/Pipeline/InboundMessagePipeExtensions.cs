@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline
     using Filters;
     using MassTransit.Configuration;
     using Policies;
-    using Sinks;
     using SubscriptionConnectors;
 
 
@@ -66,11 +65,15 @@ namespace MassTransit.Pipeline
             return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectInstance<T>(this IInboundPipe filter,
-            T instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectInstance<T>(this IInboundPipe filter, T instance, IRetryPolicy retryPolicy = null)
             where T : class
         {
             return InstanceConnectorCache<T>.Connector.Connect(filter, instance, retryPolicy ?? Retry.None);
+        }
+
+        public static ConnectHandle ConnectInstance(this IInboundPipe filter, object instance, IRetryPolicy retryPolicy = null)
+        {
+            return InstanceConnectorCache.GetInstanceConnector(instance.GetType()).Connect(filter, instance, retryPolicy ?? Retry.None);
         }
     }
 }

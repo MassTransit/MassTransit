@@ -112,9 +112,6 @@ namespace MassTransit
         void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address)
             where T : class;
 
-        void NotifyPublish<T>(IPublishContext<T> publishContext)
-            where T : class;
-
         void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
             where T : class;
 

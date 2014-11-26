@@ -14,6 +14,7 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
@@ -30,6 +31,11 @@ namespace MassTransit.Serialization
             _headers = headers;
         }
 
+        public IEnumerable<Tuple<string, object>> Headers
+        {
+            get { return _headers.Select(x => Tuple.Create(x.Key, x.Value)); }
+        }
+
         public T Get<T>(string key, T defaultValue = default(T))
             where T : class
         {
@@ -43,7 +49,7 @@ namespace MassTransit.Serialization
             if (obj == null)
                 return defaultValue;
 
-            var token = obj as JToken ?? new JValue(obj);
+            JToken token = obj as JToken ?? new JValue(obj);
 
             if (token.Type == JTokenType.Null)
                 return defaultValue;
@@ -65,7 +71,7 @@ namespace MassTransit.Serialization
             if (obj == null)
                 return defaultValue;
 
-            var token = obj as JToken ?? new JValue(obj);
+            JToken token = obj as JToken ?? new JValue(obj);
 
             if (token.Type == JTokenType.Null)
                 token = new JObject();

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests
 {
+    using EndpointConfigurators;
     using Magnum.TestFramework;
     using Microsoft.Practices.Unity;
     using Saga;
@@ -41,9 +42,10 @@ namespace MassTransit.Containers.Tests
             _container.Dispose();
         }
 
-        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            subscriptionBusServiceConfigurator.LoadFrom(_container);
+            configurator.LoadFrom(_container);
         }
     }
 
@@ -68,9 +70,10 @@ namespace MassTransit.Containers.Tests
             _container.Dispose();
         }
 
-        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            subscriptionBusServiceConfigurator.LoadFrom(_container);
+            configurator.LoadFrom(_container);
         }
     }
 }

@@ -15,6 +15,8 @@ namespace MassTransit.Context
     using System;
     using System.Collections.Concurrent;
     using System.Threading;
+    using System.Threading.Tasks;
+    using Pipeline;
 
 
     /// <summary>
@@ -26,12 +28,19 @@ namespace MassTransit.Context
         readonly ConcurrentDictionary<Type, Lazy<ISendEndpointConverter>> _types =
             new ConcurrentDictionary<Type, Lazy<ISendEndpointConverter>>();
 
-        public static SendEndpointConverterCache Instance
+        public static Task Send(ISendEndpoint endpoint, object message, Type messageType,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            get { return Cached.Converters.Value; }
+            return Cached.Converters.Value[messageType].Send(endpoint, message, cancellationToken);
         }
 
-        public ISendEndpointConverter this[Type type]
+        public static Task Send(ISendEndpoint endpoint, object message, Type messageType, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return Cached.Converters.Value[messageType].Send(endpoint, message, pipe, cancellationToken);
+        }
+
+        ISendEndpointConverter this[Type type]
         {
             get { return _types.GetOrAdd(type, CreateTypeConverter).Value; }
         }

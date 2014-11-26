@@ -30,14 +30,14 @@ namespace MassTransit.Testing.Scenarios
 		{
 		}
 
-		public override IServiceBus InputBus
+		public override IBus InputBus
 		{
 			get { return RemoteBus; }
 		}
 
-        public override IServiceBus OutputBus
+        public override ISendEndpoint OutputBus
         {
-            get { return InputBus; }
+            get { return null; }
         }
 
 		public IServiceBus LocalBus

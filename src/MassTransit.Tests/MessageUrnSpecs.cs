@@ -2,7 +2,8 @@ namespace MassTransit.Tests
 {
     using System;
     using NUnit.Framework;
-    using TestFramework.Examples.Messages;
+    using TestFramework.Messages;
+
 
     [TestFixture]
     public class MessageUrnSpecs
@@ -11,8 +12,8 @@ namespace MassTransit.Tests
         [Test]
         public void SimpleMessage()
         {
-            var urn = new MessageUrn(typeof (Ping));
-            Assert.AreEqual(urn.AbsolutePath, "message:MassTransit.TestFramework.Examples.Messages:Ping");
+            var urn = new MessageUrn(typeof (PingMessage));
+            Assert.AreEqual(urn.AbsolutePath, "message:MassTransit.TestFramework.Messages:PingMessage");
         }
 
         [Test]
@@ -33,8 +34,8 @@ namespace MassTransit.Tests
         [Test]
         public void ClosedGenericMessage()
         {
-            var urn = new MessageUrn(typeof (G<Ping>));
-            var expected = new Uri("urn:message:MassTransit.Tests:G[[MassTransit.TestFramework.Examples.Messages:Ping]]");
+            var urn = new MessageUrn(typeof(G<PingMessage>));
+            var expected = new Uri("urn:message:MassTransit.Tests:G[[MassTransit.TestFramework.Messages:PingMessage]]");
             Assert.AreEqual(expected.AbsolutePath,urn.AbsolutePath) ;
         }
 

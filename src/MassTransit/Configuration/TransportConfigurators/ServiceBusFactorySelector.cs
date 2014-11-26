@@ -40,7 +40,7 @@ namespace MassTransit.TransportConfigurators
 
             try
             {
-                return _factory.CreateServiceBus();
+                return _factory.CreateBus();
             }
             catch (Exception ex)
             {

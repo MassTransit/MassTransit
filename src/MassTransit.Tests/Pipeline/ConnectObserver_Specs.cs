@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Pipeline
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using NUnit.Framework;
+    using TestFramework;
     using TestFramework.Messages;
 
 
@@ -33,7 +34,7 @@ namespace MassTransit.Tests.Pipeline
                 throw new InvalidOperationException("This is a test");
             });
 
-            TestObserver<MessageA> interceptor = GetMessageObserver<MessageA>();
+            TestConsumeObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
             filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
@@ -54,7 +55,7 @@ namespace MassTransit.Tests.Pipeline
 
             filter.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
 
-            TestObserver<MessageA> interceptor = GetMessageObserver<MessageA>();
+            TestConsumeObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
             filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
@@ -75,7 +76,7 @@ namespace MassTransit.Tests.Pipeline
 
             filter.ConnectConsumer(() => new OneMessageConsumer(received));
 
-            TestObserver<MessageA> interceptor = GetMessageObserver<MessageA>();
+            TestConsumeObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
             filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
@@ -96,7 +97,7 @@ namespace MassTransit.Tests.Pipeline
 
             filter.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
 
-            TestObserver<MessageA> interceptor = GetMessageObserver<MessageA>();
+            TestConsumeObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
             filter.Connect(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());

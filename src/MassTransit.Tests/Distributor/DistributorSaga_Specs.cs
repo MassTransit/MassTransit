@@ -78,15 +78,6 @@ namespace MassTransit.Tests.Distributor
 
             }, new CancellationTokenSource(TimeSpan.FromSeconds(3)).Token);
         }
-
-        [Test, Explicit]
-        public void The_pipeline_viewer_should_show_the_distributor()
-        {
-            PipelineViewer.Trace(LocalBus.InboundPipeline);
-            PipelineViewer.Trace(RemoteBus.InboundPipeline);
-            PipelineViewer.Trace(RemoteBus.OutboundPipeline);
-            PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);
-        }
     }
 
     [TestFixture]

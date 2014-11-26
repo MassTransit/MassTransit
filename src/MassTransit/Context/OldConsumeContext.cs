@@ -246,7 +246,7 @@ namespace MassTransit.Context
             }
             else
             {
-                bus.Publish(message, context => context.SetRequestId(requestId));
+//                bus.Publish(message, context => context.SetRequestId(requestId));
             }
         }
     }

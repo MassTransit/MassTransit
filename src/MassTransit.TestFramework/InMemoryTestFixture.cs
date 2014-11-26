@@ -137,7 +137,7 @@ namespace MassTransit.TestFramework
 
         IBusControl CreateBus(InMemoryTransportCache transportCache)
         {
-            return ServiceBusFactory.New(x => x.InMemory(), x =>
+            return MassTransit.Bus.Factory.CreateUsingInMemory(x =>
             {
                 x.SetTransportProvider(transportCache);
 

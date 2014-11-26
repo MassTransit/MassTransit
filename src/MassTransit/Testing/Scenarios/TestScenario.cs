@@ -26,13 +26,14 @@ namespace MassTransit.Testing.Scenarios
 		/// Gets the input bus. This is the bus that has *incoming* messages, i.e. the bus
 		/// that you receive messages from.
 		/// </summary>
-		IServiceBus InputBus { get; }
+		IBus InputBus { get; }
 
 		/// <summary>
 		/// Gets the output bus. This is the bus that has *outgoing* messages, i.e. the bus
 		/// that you publish and send on.
 		/// </summary>
-	    IServiceBus OutputBus { get; }
+	    ISendEndpoint OutputBus { get; }
+
 		/// <summary>
 		/// The list of published messages is contained within this instance.
 		/// </summary>

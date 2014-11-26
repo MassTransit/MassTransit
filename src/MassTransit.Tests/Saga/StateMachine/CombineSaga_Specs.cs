@@ -40,9 +40,6 @@ namespace MassTransit.Tests.Saga.StateMachine
         {
             LocalBus.SubscribeSaga(_repository);
 
-            PipelineViewer.Trace(LocalBus.InboundPipeline);
-            PipelineViewer.Trace(LocalBus.OutboundPipeline);
-
             LocalBus.Publish(new Second {CorrelationId = _transactionId});
 
             CombineSaga saga = _repository.ShouldContainSaga(_transactionId, 8.Seconds());

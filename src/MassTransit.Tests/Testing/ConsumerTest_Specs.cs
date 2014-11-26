@@ -29,7 +29,7 @@ namespace MassTransit.Tests.Testing
 					{
 						x.ConstructUsing(() => new Testsumer());
 
-						x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
+						//x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
 					});
 
 			_test.Execute();
@@ -98,7 +98,7 @@ namespace MassTransit.Tests.Testing
 					{
 						x.ConstructUsing(() => new Testsumer());
 
-						x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
+						//x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
 					});
 
 			_test.Execute();

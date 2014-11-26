@@ -66,14 +66,14 @@ namespace MassTransit.Testing.ScenarioBuilders
 
 		protected virtual void BuildLocalBus(LocalRemoteTestScenarioImpl scenario)
 		{
-			_localConfigurator.ChangeSettings(x => { x.EndpointCache = scenario.EndpointCache; });
+//			_localConfigurator.ChangeSettings(x => { x.EndpointCache = scenario.EndpointCache; });
 
 			scenario.LocalBus = _localConfigurator.CreateServiceBus();
 		}
 
 		protected virtual void BuildRemoteBus(LocalRemoteTestScenarioImpl scenario)
 		{
-			_remoteConfigurator.ChangeSettings(x => { x.EndpointCache = scenario.EndpointCache; });
+	//		_remoteConfigurator.ChangeSettings(x => { x.EndpointCache = scenario.EndpointCache; });
 
 			scenario.RemoteBus = _remoteConfigurator.CreateServiceBus();
 		}

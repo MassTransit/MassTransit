@@ -57,7 +57,7 @@ namespace MassTransit.Distributor
             {
                 try
                 {
-                    ISubscriptionReference subscription = connector.Connect(bus.InboundPipe, this);
+                    ISubscriptionReference subscription = connector.Connect(bus.InputPipe, this);
                     _subscriptions.Add(subscription);
                 }
                 catch (Exception)

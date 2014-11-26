@@ -265,10 +265,6 @@ namespace MassTransit.Testing.TestDecorators
             _context.NotifySend(sendContext, address);
         }
 
-        public void NotifyPublish<T>(IPublishContext<T> publishContext) where T : class
-        {
-            _context.NotifyPublish(publishContext);
-        }
 
         public void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
             where T : class

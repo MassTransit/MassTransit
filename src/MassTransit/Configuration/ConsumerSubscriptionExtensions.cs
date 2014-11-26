@@ -80,6 +80,13 @@ namespace MassTransit
             return consumerConfigurator;
         }
 
+        public static ConnectHandle SubscribeConsumer<TConsumer>(this IBus bus, IConsumerFactory<TConsumer> consumerFactory)
+            where TConsumer : class, IConsumer
+        {
+            return ConsumerConnectorCache<TConsumer>.Connector.Connect(bus.InputPipe, consumerFactory, Retry.None);
+        }
+
+
         public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this SubscriptionBusServiceConfigurator configurator,
             IRetryPolicy retryPolicy = null)
             where TConsumer : class, IConsumer, new()
@@ -144,7 +151,7 @@ namespace MassTransit
 
             ConsumerConnector connector = ConsumerConnectorCache<TConsumer>.Connector;
 
-            return connector.Connect(bus.InboundPipe, delegateConsumerFactory, retryPolicy ?? Retry.None);
+            return connector.Connect(bus.InputPipe, delegateConsumerFactory, retryPolicy ?? Retry.None);
         }
 
         public static ConnectHandle SubscribeConsumer<TConsumer>(this IServiceBus bus, Func<TConsumer> consumerFactory,
@@ -158,7 +165,7 @@ namespace MassTransit
 
             ConsumerConnector connector = ConsumerConnectorCache<TConsumer>.Connector;
 
-            return connector.Connect(bus.InboundPipe, delegateConsumerFactory, retryPolicy ?? Retry.None);
+            return connector.Connect(bus.InputPipe, delegateConsumerFactory, retryPolicy ?? Retry.None);
         }
 
         public static ConnectHandle SubscribeConsumer<TConsumer>(this IServiceBus bus, IConsumerFactory<TConsumer> consumerFactory,
@@ -170,7 +177,7 @@ namespace MassTransit
 
             ConsumerConnector connector = ConsumerConnectorCache<TConsumer>.Connector;
 
-            return connector.Connect(bus.InboundPipe, consumerFactory, retryPolicy ?? Retry.None);
+            return connector.Connect(bus.InputPipe, consumerFactory, retryPolicy ?? Retry.None);
         }
 
         public static ConnectHandle SubscribeConsumer(this IServiceBus bus, Type consumerType, Func<Type, object> objectFactory,
@@ -179,7 +186,7 @@ namespace MassTransit
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType);
 
-            return ConsumerConnectorCache.Connect(bus.InboundPipe, consumerType, objectFactory, retryPolicy);
+            return ConsumerConnectorCache.Connect(bus.InputPipe, consumerType, objectFactory, retryPolicy);
         }
     }
 }

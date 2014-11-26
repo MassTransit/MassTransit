@@ -42,6 +42,24 @@ namespace MassTransit.Tests.Pipeline
             await consumer.Task;
         }
 
+        [Test]
+        public async void Should_receive_a_message_via_object()
+        {
+            IInboundPipe filter = new InboundPipe();
+
+            OneMessageConsumer consumer = GetOneMessageConsumer();
+
+            object subscribeConsumer = consumer;
+
+            filter.ConnectInstance(subscribeConsumer, Retry.None);
+
+            var consumeContext = new TestConsumeContext<MessageA>(new MessageA());
+
+            await filter.Send(consumeContext);
+
+            await consumer.Task;
+        }
+
         [Test, Explicit]
         public void Should_receive_a_message_pipeline_view()
         {

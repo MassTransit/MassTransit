@@ -12,47 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Scenarios
 {
-    using System.Linq;
-    using System.Threading;
-    using Magnum.Extensions;
     using Magnum.TestFramework;
-    using Testing;
+    using NUnit.Framework;
 
 
-    [Scenario]
+    [TestFixture]
     public abstract class When_registering_a_consumer :
         Given_a_service_bus_instance
     {
-        [When]
-        public void Registering_a_consumer()
-        {
-        }
-
-        [Then]
-        public void Should_have_a_subscription_for_the_consumer_message_type()
-        {
-            LocalBus.HasSubscription<SimpleMessageInterface>().Count()
-                .ShouldEqual(1, "No subscription for the SimpleMessageInterface was found.");
-        }
-
-        [Then]
-        public void Should_have_a_subscription_for_the_nested_consumer_type()
-        {
-            LocalBus.HasSubscription<AnotherMessageInterface>().Count()
-                .ShouldEqual(1, "Only one subscription should be registered for another consumer");
-        }
-
-        [Then]
+        [Test]
         public async void Should_receive_using_the_first_consumer()
         {
             const string name = "Joe";
 
-            var complete = new ManualResetEvent(false);
-
-            LocalBus.SubscribeHandler<SimpleMessageClass>(x => complete.Set());
-            LocalBus.Publish(new SimpleMessageClass(name));
-
-            complete.WaitOne(8.Seconds());
+            await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
 
             SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer;
             lastConsumer.ShouldNotBeNull();
@@ -63,6 +36,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
             lastConsumer.Dependency.WasDisposed
                 .ShouldBeTrue("Dependency was not disposed");
+
             lastConsumer.Dependency.SomethingDone
                 .ShouldBeTrue("Dependency was disposed before consumer executed");
         }

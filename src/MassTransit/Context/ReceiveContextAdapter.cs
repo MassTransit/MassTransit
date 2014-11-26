@@ -283,10 +283,6 @@ namespace MassTransit.Context
             throw new NotImplementedException();
         }
 
-        public void NotifyPublish<T>(IPublishContext<T> publishContext) where T : class
-        {
-            throw new NotImplementedException();
-        }
 
         public void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
             where T : class

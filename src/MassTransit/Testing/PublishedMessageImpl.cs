@@ -18,20 +18,20 @@ namespace MassTransit.Testing
 		PublishedMessage<T>
 		where T : class
 	{
-		readonly IPublishContext<T> _context;
+		readonly PublishContext<T> _context;
 		Exception _exception;
 
-		public PublishedMessageImpl(IPublishContext<T> context)
+		public PublishedMessageImpl(PublishContext<T> context)
 		{
 			_context = context;
 		}
 
-		public IPublishContext<T> Context
+		public PublishContext<T> Context
 		{
 			get { return _context; }
 		}
 
-		ISendContext PublishedMessage.Context
+		SendContext PublishedMessage.Context
 		{
 			get { return Context; }
 		}

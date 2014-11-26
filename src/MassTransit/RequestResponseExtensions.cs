@@ -27,7 +27,7 @@ namespace MassTransit
 
             IAsyncRequest<TRequest> request = configurator.Build(bus);
 
-            bus.Publish(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
+//            bus.Publish(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
 
             return request.Wait();
         }
@@ -41,7 +41,7 @@ namespace MassTransit
 
             IAsyncRequest<TRequest> request = configurator.Build(bus);
 
-            endpoint.Send(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
+//            endpoint.Send(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
 
             return request.Wait();
         }

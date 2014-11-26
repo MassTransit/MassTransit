@@ -27,20 +27,20 @@ namespace MassTransit.Configurators
     {
         readonly InMemoryReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly IList<IInMemoryServiceBusFactoryBuilderConfigurator> _configurators;
-        Uri _inputAddress;
+        readonly Uri _inputAddress;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryServiceBusFactoryConfigurator(IServiceBusFactorySelector selector)
+        public InMemoryServiceBusFactoryConfigurator()
         {
-            _configurators = new List<IInMemoryServiceBusFactoryBuilderConfigurator>();
             string queueName = NewId.NextGuid().ToString("N");
+
             _inputAddress = new Uri(string.Format("loopback://localhost/{0}", queueName));
+
+            _configurators = new List<IInMemoryServiceBusFactoryBuilderConfigurator>();
             _busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName);
 
             _configurators.Add(_busEndpointConfigurator);
-
-            selector.SetServiceBusFactory(this);
         }
 
         public void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)
@@ -70,7 +70,7 @@ namespace MassTransit.Configurators
             _configurators.Add(configurator);
         }
 
-        public IBusControl CreateServiceBus()
+        public IBusControl CreateBus()
         {
             if (_receiveTransportProvider == null || _sendTransportProvider == null)
             {

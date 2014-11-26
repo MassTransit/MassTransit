@@ -56,10 +56,10 @@ namespace MassTransit.Reactive
         ///     A callback that gives the caller
         ///     access to the publish context.
         /// </param>
-        public static IObserver<T> AsObserver<T>(this IServiceBus bus, Action<IPublishContext<T>> contextCallback) where T : class
+        public static IObserver<T> AsObserver<T>(this IServiceBus bus, Action<PublishContext<T>> contextCallback) where T : class
         {
             return Observer.Create<T>(
-                value => bus.Publish(value, contextCallback));
+                value => bus.Publish(value, Pipe.New<PublishContext<T>>(x => x.Execute(contextCallback))));
         }
 
         public static IObservable<T> AsObservable<T>(this IServiceBus bus) where T : class

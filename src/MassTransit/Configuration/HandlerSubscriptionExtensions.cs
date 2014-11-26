@@ -79,7 +79,7 @@ namespace MassTransit
         public static ConnectHandle SubscribeHandler<T>(this IServiceBus bus, MessageHandler<T> handler)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.Connect(bus.InboundPipe, handler);
+            return HandlerConnectorCache<T>.Connector.Connect(bus.InputPipe, handler);
         }
 
         public static ConnectHandle SubscribeHandler<T>(this IBus bus, MessageHandler<T> handler)
@@ -103,7 +103,7 @@ namespace MassTransit
         public static ConnectHandle SubscribeHandler<T>(this IServiceBus bus, Action<T> handler)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.Connect(bus.InboundPipe, async context => handler(context.Message));
+            return HandlerConnectorCache<T>.Connector.Connect(bus.InputPipe, async context => handler(context.Message));
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace MassTransit
         public static ConnectHandle SubscribeContextHandler<T>(this IServiceBus bus, Action<IConsumeContext<T>> handler)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.Connect(bus.InboundPipe, async context =>
+            return HandlerConnectorCache<T>.Connector.Connect(bus.InputPipe, async context =>
             {
                 IConsumeContext<T> consumeContext = new ConsumeContextAdapter<T>(context);
 

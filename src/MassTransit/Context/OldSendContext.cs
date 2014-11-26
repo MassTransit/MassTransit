@@ -73,14 +73,6 @@ namespace MassTransit.Context
             _bodyWriter(stream);
         }
 
-        public virtual bool TryGetContext<TMessage>(out IBusPublishContext<TMessage> context)
-            where TMessage : class
-        {
-            context = PublishContext<TMessage>.FromMessage(_message, this);
-
-            return context != null;
-        }
-
         public virtual void NotifySend(IEndpointAddress address)
         {
             if (_receiveContext != null)

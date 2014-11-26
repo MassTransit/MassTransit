@@ -95,15 +95,6 @@ namespace MassTransit
         void SerializeTo(Stream stream);
 
         /// <summary>
-        /// Determines if the send context can be converted to the requested type
-        /// </summary>
-        /// <typeparam name="T">The requested type</typeparam>
-        /// <param name="context">The resulting context that was created for the requested message type</param>
-        /// <returns>True if the message can be assigned to the requested type, otherwise false</returns>
-        bool TryGetContext<T>(out IBusPublishContext<T> context)
-            where T : class;
-
-        /// <summary>
         /// Called when the send context has been used to send a message to an endpoint
         /// </summary>
         /// <param name="address">The address to which the message was sent</param>

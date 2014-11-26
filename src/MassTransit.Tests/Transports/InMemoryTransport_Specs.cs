@@ -37,7 +37,7 @@ namespace MassTransit.Tests.Transports
 
                 var transport = new InMemoryTransport(inputAddress);
 
-                var received = GetTask<int>();
+                TaskCompletionSource<int> received = GetTask<int>();
 
                 IPipe<ReceiveContext> receivePipe = Pipe.New<ReceiveContext>(x =>
                 {
@@ -51,7 +51,8 @@ namespace MassTransit.Tests.Transports
 
                 Task receiveTask = ((IReceiveTransport)transport).Start(receivePipe, shutdown.Token);
 
-                var sendEndpoint = new SendEndpoint(transport, new JsonSendMessageSerializer(JsonMessageSerializer.Serializer), inputAddress, inputAddress);
+                var sendEndpoint = new SendEndpoint(transport, new JsonSendMessageSerializer(JsonMessageSerializer.Serializer), inputAddress,
+                    inputAddress);
 
                 await sendEndpoint.Send(new A(), TestCancellationToken);
 

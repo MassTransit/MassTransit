@@ -35,6 +35,7 @@ namespace MassTransit
     ///   The base service bus interface
     /// </summary>
     public interface IServiceBus :
+        IBus,
         IDisposable,
         DiagnosticsSource
     {
@@ -42,11 +43,6 @@ namespace MassTransit
         ///   The endpoint from which messages are received
         /// </summary>
         IEndpoint Endpoint { get; }
-
-        /// <summary>
-        /// The inbound pipe for the bus
-        /// </summary>
-        IInboundPipe InboundPipe { get; }
 
         /// <summary>
         /// Gets the inbound message pipeline.
@@ -68,99 +64,6 @@ namespace MassTransit
         /// Gets or Sets the timeout used to wait for consumers to finish when shutting the bus down.
         /// </summary>
         TimeSpan ShutdownTimeout { get; set; }
-
-        /// <summary>
-        /// <para>Publishes a message to all subscribed consumers for the message type as specified
-        /// by the generic parameter. The second parameter allows the caller to customize the
-        /// outgoing publish context and set things like headers on the message.</para>
-        /// 
-        /// <para>
-        /// Read up on publishing: http://readthedocs.org/docs/masstransit/en/latest/overview/publishing.html
-        /// </para>
-        /// </summary>
-        /// <typeparam name = "T">The type of the message</typeparam>
-        /// <param name = "message">The messages to be published</param>
-        void Publish<T>(T message)
-            where T : class;
-
-        /// <summary>
-        /// <para>Publishes a message to all subscribed consumers for the message type as specified
-        /// by the generic parameter. The second parameter allows the caller to customize the
-        /// outgoing publish context and set things like headers on the message.</para>
-        /// 
-        /// <para>
-        /// Read up on publishing: http://readthedocs.org/docs/masstransit/en/latest/overview/publishing.html
-        /// </para>
-        /// </summary>
-        /// <typeparam name = "T">The type of the message</typeparam>
-        /// <param name = "message">The messages to be published</param>
-        /// <param name = "contextCallback">A callback that gives the caller
-        /// access to the publish context.</param>
-        void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
-            where T : class;
-
-        /// <summary>
-        /// Publishes an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
-        /// </summary>
-        /// <param name="message">The message object</param>
-        void Publish(object message);
-
-        /// <summary>
-        /// Publishes an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
-        /// </summary>
-        /// <param name="message">The message object</param>
-        /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
-        void Publish(object message, Type messageType);
-
-        /// <summary>
-        /// Publishes an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
-        /// </summary>
-        /// <param name="message">The message object</param>
-        /// <param name = "contextCallback">A callback that gives the caller
-        /// access to the publish context.</param>
-        void Publish(object message, Action<IPublishContext> contextCallback);
-
-        /// <summary>
-        /// Publishes an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
-        /// </summary>
-        /// <param name="message">The message object</param>
-        /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
-        /// <param name = "contextCallback">A callback that gives the caller
-        /// access to the publish context.</param>
-        void Publish(object message, Type messageType, Action<IPublishContext> contextCallback);
-
-        /// <summary>
-        /// <see cref="IServiceBus.Publish{T}"/>: this is a "dynamically"
-        /// typed overload - give it an interface as its type parameter,
-        /// and a loosely typed dictionary of values and the MassTransit
-        /// underlying infrastructure will populate an object instance
-        /// with the passed values. It actually does this with DynamicProxy
-        /// in the background.
-        /// </summary>
-        /// <typeparam name="T">The type of the interface or
-        /// non-sealed class with all-virtual members.</typeparam>
-        /// <param name="bus">The bus to publish on.</param>
-        /// <param name="values">The dictionary of values to place in the
-        /// object instance to implement the interface.</param>
-        void Publish<T>(object values)
-            where T : class;
-
-        /// <summary>
-        /// <see cref="Publish{T}(MassTransit.IServiceBus,object)"/>: this
-        /// overload further takes an action; it allows you to set <see cref="IPublishContext"/>
-        /// meta-data. Also <see cref="IServiceBus.Publish{T}"/>.
-        /// </summary>
-        /// <typeparam name="T">The type of the message to publish</typeparam>
-        /// <param name="bus">The bus to publish the message on.</param>
-        /// <param name="values">The dictionary of values to become hydrated and
-        /// published under the type of the interface.</param>
-        /// <param name="contextCallback">The context callback.</param>
-        void Publish<T>(object values, Action<IPublishContext<T>> contextCallback)
-            where T : class;
 
         /// <summary>
         /// Looks an endpoint up by its uri.
@@ -191,12 +94,5 @@ namespace MassTransit
         /// <param name="result">The service.</param>
         /// <returns>Whether the service was found.</returns>
         bool TryGetService(Type type, out IBusService result);
-
-        /// <summary>
-        /// Retrieve a destination endpoint
-        /// </summary>
-        /// <param name="address">The endpoint address</param>
-        /// <returns>A sendable endpoint</returns>
-        ISendEndpoint GetSendEndpoint(Uri address);
     }
 }

@@ -26,9 +26,9 @@ namespace MassTransit.Tests.Testing
 			_test = TestFactory.ForHandler<A>()
 				.New(x =>
 					{
-						x.Handler((context, message) => context.Respond(new B()));
+						x.Handler(async (context) => context.Respond(new B()));
 
-						x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
+						//x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
 					});
 
 			_test.Execute();
@@ -73,9 +73,9 @@ namespace MassTransit.Tests.Testing
 			_test = TestFactory.ForHandler<A>()
 				.New(x =>
 					{
-						x.Handler((context, message) => context.Respond(new B()));
+						x.Handler(async (context) => context.Respond(new B()));
 
-						x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
+						//x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
 					});
 
 			_test.Execute();

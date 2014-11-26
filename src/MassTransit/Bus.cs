@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using BusConfigurators;
+    using TransportConfigurators;
 
 
     /// <summary>
@@ -24,7 +25,14 @@ namespace MassTransit
     /// </summary>
     public static class Bus
     {
+        static readonly IServiceBusFactorySelector _selector = new ServiceBusFactorySelector();
+
         static IServiceBus _instance;
+
+        public static IServiceBusFactorySelector Factory
+        {
+            get { return _selector; }
+        }
 
         /// <summary>
         ///     The configured instance of the service bus.

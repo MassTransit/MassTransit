@@ -18,7 +18,7 @@ namespace MassTransit.Pipeline
 	}
 
 	public interface OutboundPipelineSink<TMessage> :
-		IPipelineSink<IBusPublishContext<TMessage>>
+		IPipelineSink<PublishContext<TMessage>>
 		where TMessage : class
 	{
 	}

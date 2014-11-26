@@ -12,11 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
+    using System;
+    using System.Collections.Generic;
+
+
     /// <summary>
     /// Used to read a header from a transport message
     /// </summary>
     public interface IContextHeaderProvider
     {
+        IEnumerable<Tuple<string, object>> Headers { get; }
         bool TryGetHeader(string key, out object value);
     }
 }

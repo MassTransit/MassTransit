@@ -19,7 +19,13 @@ namespace MassTransit.SubscriptionConnectors
     using Policies;
     using Util;
 
-
+    /// <summary>
+    /// Connects a consumer instance to the inbound pipeline for the specified message type. The actual
+    /// filter that invokes the consume method is passed to allow different types of message bindings,
+    /// including the legacy bindings from v2.x
+    /// </summary>
+    /// <typeparam name="TConsumer">The consumer type</typeparam>
+    /// <typeparam name="TMessage">The message type</typeparam>
     public class InstanceMessageConnector<TConsumer, TMessage> :
         InstanceMessageConnector
         where TConsumer : class
@@ -27,6 +33,10 @@ namespace MassTransit.SubscriptionConnectors
     {
         readonly IFilter<ConsumerConsumeContext<TConsumer, TMessage>> _consumeFilter;
 
+        /// <summary>
+        /// Constructs the instance connector
+        /// </summary>
+        /// <param name="consumeFilter">The consume method invocation filter</param>
         public InstanceMessageConnector(IFilter<ConsumerConsumeContext<TConsumer, TMessage>> consumeFilter)
         {
             _consumeFilter = consumeFilter;
@@ -46,7 +56,7 @@ namespace MassTransit.SubscriptionConnectors
             if (consumer == null)
             {
                 throw new ConsumerException(string.Format("The instance type {0} does not match the consumer type: {1}",
-                    TypeMetadataCache<TConsumer>.ShortName, instance.GetType().ToShortTypeName()));
+                    instance.GetType().ToShortTypeName(), TypeMetadataCache<TConsumer>.ShortName));
             }
 
             IPipe<ConsumeContext<TMessage>> instancePipe = Pipe.New<ConsumeContext<TMessage>>(x =>

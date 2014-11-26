@@ -84,7 +84,7 @@ namespace MassTransit.Testing.Subjects
 		{
 			var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSaga>(_sagaRepository, _received, _created, _sagas);
 
-			_unsubscribe = scenario.InputBus.SubscribeSaga(decoratedSagaRepository);
+//			_unsubscribe = scenario.InputBus.SubscribeSaga(decoratedSagaRepository);
 		}
 
 		void Dispose(bool disposing)

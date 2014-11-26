@@ -19,40 +19,38 @@ namespace MassTransit.Testing.Scenarios
 		EndpointTestScenarioImpl,
 		BusTestScenario
 	{
-		IServiceBus _bus;
+		IBus _bus;
 		bool _disposed;
-		IServiceBus _realBus;
+		IBus _realBus;
+	    ISendEndpoint _outputEndpoint;
 
-		public BusTestScenarioImpl(IEndpointFactory endpointFactory)
+	    public BusTestScenarioImpl(IEndpointFactory endpointFactory)
 			: base(endpointFactory)
 		{
 		}
 
-		public override IServiceBus InputBus
+		public override IBus InputBus
 		{
 			get { return Bus; }
 		}
 
-        public override IServiceBus OutputBus
+        public override ISendEndpoint OutputBus
         {
-            get { return Bus; }
+            get { return _outputEndpoint; }
         }
 
-		public IServiceBus Bus
+		public IBus Bus
 		{
 			get { return _bus; }
 			set
 			{
 				_realBus = value;
-				_bus = new ServiceBusTestDecorator(value, this);
+			    _bus = value;
 			}
 		}
 
 		public override IServiceBus GetDecoratedBus(IServiceBus bus)
 		{
-			if (_realBus == bus)
-				return _bus;
-
 			return base.GetDecoratedBus(bus);
 		}
 
@@ -61,8 +59,8 @@ namespace MassTransit.Testing.Scenarios
 			if (_disposed) return;
 			if (disposing)
 			{
-				if (Bus != null)
-					Bus.Dispose();
+//				if (Bus != null)
+//					Bus.Dispose();
 
 				base.Dispose(true);
 			}

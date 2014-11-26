@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,25 +32,23 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="scope">The LifetimeScope of the container</param>
         /// <param name="name">The name to use for the scope created for each message</param>
-        public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope,
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope,
             string name = "message")
         {
             IList<Type> concreteTypes = FindTypes<IConsumer>(scope, r => !r.Implements<ISaga>());
             if (concreteTypes.Count != 0)
             {
-                var consumerConfigurator = new AutofacConsumerFactoryConfigurator(configurator, scope, name);
-
                 foreach (Type concreteType in concreteTypes)
-                    consumerConfigurator.ConfigureConsumer(concreteType);
+                    ConsumerFactoryConfiguratorCache.Configure(concreteType, configurator, scope, name);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(scope, x => true);
             if (sagaTypes.Count > 0)
             {
-                var sagaConfigurator = new AutofacSagaRepositoryFactoryConfigurator(configurator, scope, name);
+                //var sagaConfigurator = new AutofacSagaRepositoryFactoryConfigurator(configurator, scope, name);
 
-                foreach (Type type in sagaTypes)
-                    sagaConfigurator.ConfigureSaga(type);
+//                foreach (Type type in sagaTypes)
+                //                  sagaConfigurator.ConfigureSaga(type);
             }
         }
 
@@ -92,11 +90,11 @@ namespace MassTransit
         static IList<Type> FindTypes<T>(ILifetimeScope scope, Func<Type, bool> filter)
         {
             return scope.ComponentRegistry.Registrations
-                        .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})
-                        .Where(rs => rs.s.ServiceType.Implements<T>())
+                .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})
+                .Where(rs => rs.s.ServiceType.Implements<T>())
                 .Select(rs => rs.s.ServiceType)
-                        .Where(filter)
-                        .ToList();
+                .Where(filter)
+                .ToList();
         }
     }
 }

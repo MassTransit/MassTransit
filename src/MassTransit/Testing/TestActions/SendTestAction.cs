@@ -20,12 +20,12 @@ namespace MassTransit.Testing.TestActions
 		where TMessage : class
 		where TScenario : TestScenario
 	{
-		readonly Action<TScenario, ISendContext<TMessage>> _callback;
-		readonly Func<TScenario, IEndpoint> _endpointAccessor;
+		readonly Action<TScenario, SendContext<TMessage>> _callback;
+		readonly Func<TScenario, ISendEndpoint> _endpointAccessor;
 		readonly TMessage _message;
 
-		public SendTestAction(Func<TScenario, IEndpoint> endpointAccessor, TMessage message,
-		                      Action<TScenario, ISendContext<TMessage>> callback)
+		public SendTestAction(Func<TScenario, ISendEndpoint> endpointAccessor, TMessage message,
+		                      Action<TScenario, SendContext<TMessage>> callback)
 		{
 			_message = message;
 			_endpointAccessor = endpointAccessor;
@@ -34,12 +34,13 @@ namespace MassTransit.Testing.TestActions
 
 		public void Act(TScenario scenario)
 		{
-			IEndpoint endpoint = _endpointAccessor(scenario);
+			ISendEndpoint endpoint = _endpointAccessor(scenario);
 
-			endpoint.Send(_message, context => _callback(scenario, context));
+		    endpoint.Send(_message, Pipe.New<SendContext<TMessage>>(x => x.Execute(context => _callback(scenario, context))))
+                .Wait();
 		}
 
-		static void DefaultCallback(TScenario scenario, ISendContext<TMessage> context)
+		static void DefaultCallback(TScenario scenario, SendContext<TMessage> context)
 		{
 		}
 	}
