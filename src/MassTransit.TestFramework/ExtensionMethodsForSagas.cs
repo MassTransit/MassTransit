@@ -82,37 +82,37 @@ namespace MassTransit.TestFramework
 			return null;
 		}
 
-		public static void ShouldBeInState<TSaga>(this TSaga saga, State state)
-			where TSaga : SagaStateMachine<TSaga>
-		{
-			ShouldBeInState(saga, state, Timeout);
-		}
-
-		public static void ShouldBeInState<TSaga>(this TSaga saga, State state, TimeSpan timeout)
-			where TSaga : SagaStateMachine<TSaga>
-		{
-			DateTime giveUpAt = DateTime.Now + timeout;
-
-			while (DateTime.Now < giveUpAt)
-			{
-				if (saga.CurrentState == state)
-					return;
-
-				Thread.Sleep(100);
-			}
-
-			Assert.Fail("The saga was not in the expected state: " + state.Name + " (" + saga.CurrentState.Name + ")");
-		}
-
-		public static void SetCurrentState<TSaga>(this TSaga saga, State state)
-			where TSaga : SagaStateMachine<TSaga>
-		{
-			var newState = State<TSaga>.GetState(state);
-
-			FieldInfo field = typeof(StateMachine<TSaga>)
-				.GetField("_currentState", BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.FlattenHierarchy);
-
-			field.SetValue(saga, newState);
-		}
+//		public static void ShouldBeInState<TSaga>(this TSaga saga, State state)
+//			where TSaga : SagaStateMachine<TSaga>
+//		{
+//			ShouldBeInState(saga, state, Timeout);
+//		}
+//
+//		public static void ShouldBeInState<TSaga>(this TSaga saga, State state, TimeSpan timeout)
+//			where TSaga : SagaStateMachine<TSaga>
+//		{
+//			DateTime giveUpAt = DateTime.Now + timeout;
+//
+//			while (DateTime.Now < giveUpAt)
+//			{
+//				if (saga.CurrentState == state)
+//					return;
+//
+//				Thread.Sleep(100);
+//			}
+//
+//			Assert.Fail("The saga was not in the expected state: " + state.Name + " (" + saga.CurrentState.Name + ")");
+//		}
+//
+//		public static void SetCurrentState<TSaga>(this TSaga saga, State state)
+//			where TSaga : SagaStateMachine<TSaga>
+//		{
+//			var newState = State<TSaga>.GetState(state);
+//
+//			FieldInfo field = typeof(StateMachine<TSaga>)
+//				.GetField("_currentState", BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.FlattenHierarchy);
+//
+//			field.SetValue(saga, newState);
+//		}
 	}
 }

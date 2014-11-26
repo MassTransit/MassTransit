@@ -85,13 +85,10 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="BinaryGuidType.cs" />
-    <Compile Include="NHibernateSagaExtensions.cs" />
     <Compile Include="NHibernateSessionFactoryProvider.cs" />
     <Compile Include="SagaClassMapping.cs" />
-    <Compile Include="SagaStateMachineClassMapping.cs" />
     <Compile Include="Saga\NHibernateSagaRepository.cs" />
     <Compile Include="SqlServerSessionFactoryProvider.cs" />
-    <Compile Include="StateMachineUserType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UriUserType.cs" />
   </ItemGroup>

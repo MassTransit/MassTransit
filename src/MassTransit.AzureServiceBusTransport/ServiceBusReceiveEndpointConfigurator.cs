@@ -18,6 +18,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Configurators;
     using EndpointConfigurators;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Filters;
     using Microsoft.ServiceBus.Messaging;
     using PipeConfigurators;
     using Policies;
