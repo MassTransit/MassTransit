@@ -44,11 +44,10 @@ namespace MassTransit.Saga.SubscriptionConnectors
 				if (!interfaces.Contains(typeof (ISaga)))
 					throw new ConfigurationException("The type specified is not a saga");
 
-				_connectors = StateMachineEvents()
-					.Concat(Initiates()
+				_connectors = Initiates()
 						.Concat(Orchestrates())
 						.Concat(Observes())
-						.Distinct((x, y) => x.MessageType == y.MessageType))
+						.Distinct((x, y) => x.MessageType == y.MessageType)
 					.ToList();
 			}
 			catch (Exception ex)
@@ -102,20 +101,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
 				.Select(x => FastActivator.Create(typeof (ObservesSagaSubscriptionConnector<,>),
 					new[] {typeof (T), x.MessageType}, _args))
 				.Cast<SagaSubscriptionConnector>();
-		}
-
-		IEnumerable<SagaSubscriptionConnector> StateMachineEvents()
-		{
-			if (typeof (T).Implements(typeof (SagaStateMachine<>)))
-			{
-				var factory = (IEnumerable<SagaSubscriptionConnector>) FastActivator.Create(typeof (StateMachineSagaConnector<>),
-					new[] {typeof (T)},
-					_args);
-
-				return factory;
-			}
-
-			return Enumerable.Empty<SagaSubscriptionConnector>();
 		}
 	}
 }

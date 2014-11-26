@@ -19,6 +19,7 @@ namespace MassTransit
     using EndpointConfigurators;
     using PipeConfigurators;
     using Pipeline;
+    using Pipeline.Filters;
     using Serialization;
     using Transports;
 

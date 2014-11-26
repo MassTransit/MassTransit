@@ -18,10 +18,10 @@ namespace MassTransit.Testing
 
 	public static class SagaSubjectExtensions
 	{
-		public static bool AnyInState<TSaga>(this SagaTestSubject<TSaga> subject, State state)
-			where TSaga : SagaStateMachine<TSaga>, ISaga
-		{
-			return subject.Any(x => x.CurrentState == state);
-		}
+//		public static bool AnyInState<TSaga>(this SagaTestSubject<TSaga> subject, State state)
+//			where TSaga : SagaStateMachine<TSaga>, ISaga
+//		{
+//			return subject.Any(x => x.CurrentState == state);
+//		}
 	}
 }

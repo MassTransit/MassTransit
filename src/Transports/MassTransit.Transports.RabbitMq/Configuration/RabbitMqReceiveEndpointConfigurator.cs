@@ -20,6 +20,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Filters;
     using PipeConfigurators;
     using Policies;
     using RabbitMQ.Client;

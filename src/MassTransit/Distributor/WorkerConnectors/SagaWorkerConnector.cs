@@ -52,11 +52,10 @@ namespace MassTransit.Distributor.WorkerConnectors
                 if (!interfaces.Contains(typeof(ISaga)))
                     throw new ConfigurationException("The type specified is not a saga");
 
-                _connectors = StateMachineEvents()
-                    .Concat(Initiates()
+                _connectors = Initiates()
                         .Concat(Orchestrates())
                         .Concat(Observes())
-                        .Distinct((x, y) => x.MessageType == y.MessageType))
+                        .Distinct((x, y) => x.MessageType == y.MessageType)
                     .ToList();
             }
             catch (Exception ex)
@@ -100,22 +99,6 @@ namespace MassTransit.Distributor.WorkerConnectors
                 .Select(x => new { InterfaceType = x, MessageType = x.GetGenericArguments()[0] })
                 .Where(x => x.MessageType.IsValueType == false)
                 .Select(x => CreateObservesConnector(x.MessageType));
-        }
-
-        IEnumerable<SagaWorkerConnector> StateMachineEvents()
-        {
-            if (typeof(T).Implements(typeof(SagaStateMachine<>)))
-            {
-                var factory =
-                    (IEnumerable<SagaWorkerConnector>)
-                    FastActivator.Create(typeof(SagaStateMachineWorkerConnectorFactory<>),
-                        new[] { typeof(T) },
-                        _args);
-
-                return factory;
-            }
-
-            return Enumerable.Empty<SagaWorkerConnector>();
         }
 
         SagaWorkerConnector CreateInitiatedByConnector(Type messageType)

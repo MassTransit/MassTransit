@@ -22,6 +22,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using Magnum.Extensions;
+    using MassTransit.Pipeline.Filters;
     using Newtonsoft.Json;
     using NUnit.Framework;
     using Pipeline;

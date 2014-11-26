@@ -101,7 +101,6 @@
     <Compile Include="Distributor\Handler_Specs.cs" />
     <Compile Include="Distributor\NewConfiguration_Specs.cs" />
     <Compile Include="Distributor\Saga_Specs.cs" />
-    <Compile Include="Distributor\StateMachineSaga_Specs.cs" />
     <Compile Include="Enrichment_Specs.cs" />
     <Compile Include="Environment_Specs.cs" />
     <Compile Include="InterfaceProxy_Specs.cs" />
@@ -117,10 +116,6 @@
     <Compile Include="Configuration\When_configuration_fails.cs" />
     <Compile Include="Configuration\When_configuring_an_endpoint.cs" />
     <Compile Include="ContextSetup.cs" />
-    <Compile Include="Distributor\DistributorSagaTestFixture.cs" />
-    <Compile Include="Distributor\DistributorSaga_Specs.cs" />
-    <Compile Include="Distributor\LoopbackMultipleDistributorSagaTestFixture.cs" />
-    <Compile Include="Distributor\MultipleDistributorSagaTestFixture.cs" />
     <Compile Include="Load\CommandInstance.cs" />
     <Compile Include="Distributor\Default_Specs.cs" />
     <Compile Include="Distributor\DistributorTestFixture.cs" />
@@ -134,7 +129,6 @@
     <Compile Include="Groups\Group_Specs.cs" />
     <Compile Include="InterfaceSubscription_Specs.cs" />
     <Compile Include="Load\RequestResponse_LoadTest.cs" />
-    <Compile Include="Load\Sagas\FirstSaga.cs" />
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="MessageRetryTracker_Specs.cs" />
     <Compile Include="Messages\PartialSerializationTestMessage.cs" />
@@ -154,12 +148,8 @@
     <Compile Include="Pipeline\TwoMessageConsumer.cs" />
     <Compile Include="PublishRequest_Specs.cs" />
     <Compile Include="RequestClient_Specs.cs" />
-    <Compile Include="Saga\CustomerRegistrationSaga.cs" />
-    <Compile Include="Saga\CustomerRegistrationSagaTest.cs" />
     <Compile Include="Saga\InjectingSampleSaga.cs" />
     <Compile Include="Saga\Injecting_Specs.cs" />
-    <Compile Include="Saga\StateMachine\CombineSaga.cs" />
-    <Compile Include="Saga\StateMachine\CombineSaga_Specs.cs" />
     <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
     <Compile Include="SendObserver_Specs.cs" />
     <Compile Include="SendReceive_Specs.cs" />
@@ -177,7 +167,6 @@
     <Compile Include="Testing\HandlerRespond_Specs.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="Testing\SagaTest_Specs.cs" />
-    <Compile Include="Testing\SagaStateMachineTest_Specs.cs" />
     <Compile Include="TextFixtures\ServiceInstance.cs" />
     <Compile Include="Threading_Specs.cs" />
     <Compile Include="Transports\InMemoryTransport_Specs.cs" />
@@ -191,15 +180,7 @@
     <Compile Include="Saga\ObservableSagaMessage.cs" />
     <Compile Include="Saga\SimpleSaga.cs" />
     <Compile Include="Retry_Specs.cs" />
-    <Compile Include="Saga\Locator\SagaLocator_Specs.cs" />
-    <Compile Include="Saga\Locator\TestSaga.cs" />
     <Compile Include="Saga\SimpleSagaMessageBase.cs" />
-    <Compile Include="Saga\StateMachine\AutoStateMachineSaga.cs" />
-    <Compile Include="Saga\StateMachine\AutoStateMachine_Specs.cs" />
-    <Compile Include="Saga\StateMachine\Inspector_Specs.cs" />
-    <Compile Include="Saga\StateMachine\SagaFault_Specs.cs" />
-    <Compile Include="Saga\StateMachine\StateMachineSubscriberTestBase.cs" />
-    <Compile Include="Saga\StateMachine\TestSaga_Specs.cs" />
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
     <Compile Include="Messages\ResponseMessage.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
@@ -233,8 +214,6 @@
     <Compile Include="Saga\RegisterUserController.cs" />
     <Compile Include="Saga\RegisterUserSaga.cs" />
     <Compile Include="Saga\RegisterUser_Specs.cs" />
-    <Compile Include="Saga\StateMachine\RegisterUserStateMachine.cs" />
-    <Compile Include="Saga\StateMachine\SagaStateMachine_Specs.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
