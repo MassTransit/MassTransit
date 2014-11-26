@@ -122,12 +122,6 @@ namespace MassTransit.Context
             _sent.Add(new Sent<T>(sendContext, address, _timer.ElapsedMilliseconds));
         }
 
-        public void NotifyPublish<T>(IPublishContext<T> publishContext)
-            where T : class
-        {
-            _published.Add(new Published<T>(publishContext));
-        }
-
         public void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)
             where T : class
         {
@@ -222,11 +216,11 @@ namespace MassTransit.Context
             }
             else
             {
-                Bus.Publish(message, context =>
-                    {
-                        context.SetRequestId(RequestId);
-                        contextCallback(context);
-                    });
+//                Bus.Publish(message, context =>
+  //                  {
+//                        context.SetRequestId(RequestId);
+  //                      contextCallback(context);
+    //                });
             }
         }
 

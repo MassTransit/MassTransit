@@ -17,6 +17,7 @@ namespace MassTransit
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Pipeline;
     using Transports;
 
@@ -27,7 +28,7 @@ namespace MassTransit
         readonly IInboundPipe _inputPipe;
         readonly IList<IReceiveEndpoint> _receiveEndpoints;
         readonly List<Task> _runningTasks;
-        Uri _inputAddress;
+        readonly Uri _inputAddress;
         readonly ISendEndpointProvider _sendEndpointProvider;
         CancellationTokenSource _stopTokenSource;
 
@@ -52,42 +53,52 @@ namespace MassTransit
             Stop().Wait();
         }
 
-        Task IPublishEndpoint.Publish<T>(T message)
+        Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe)
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublishEndpoint.Publish(object message)
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublishEndpoint.Publish(object message, Type messageType)
+        Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublishEndpoint.Publish(object message, Action<PublishContext> contextCallback)
+        Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublishEndpoint.Publish(object message, Type messageType, Action<PublishContext> contextCallback)
+        Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
+        {
+            return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
+        }
+
+        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
+        }
+
+        Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublishEndpoint.Publish<T>(object values)
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        Task IPublishEndpoint.Publish<T>(object values, Action<PublishContext<T>> contextCallback)
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

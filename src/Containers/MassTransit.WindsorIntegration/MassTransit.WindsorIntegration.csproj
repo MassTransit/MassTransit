@@ -85,6 +85,7 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="ConsumerFactoryConfiguratorCache.cs" />
     <Compile Include="MessageLifetimeScope.cs" />
     <Compile Include="WindsorInboundInterceptor.cs" />
     <Compile Include="WindsorMessageScopePipeBuilderConfigurator.cs" />
@@ -92,7 +93,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WindsorContainerExtensions.cs" />
     <Compile Include="WindsorConsumerFactory.cs" />
-    <Compile Include="WindsorConsumerFactoryConfigurator.cs" />
     <Compile Include="WindsorSagaRepository.cs" />
   </ItemGroup>
   <ItemGroup>

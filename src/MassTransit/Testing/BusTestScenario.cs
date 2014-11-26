@@ -24,6 +24,6 @@ namespace MassTransit.Testing
 		/// <summary>
 		/// Gets the service bus that is active during the test.
 		/// </summary>
-		IServiceBus Bus { get; }
+		IBus Bus { get; }
 	}
 }

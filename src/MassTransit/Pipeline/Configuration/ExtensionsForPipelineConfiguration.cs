@@ -18,18 +18,18 @@ namespace MassTransit.Pipeline.Configuration
 
     public static class ExtensionsForPipelineConfiguration
 	{
-		public static UnsubscribeAction ConnectToRouter<TOutput>(this IPipelineSink<ISendContext> pipeline,
-																 IPipelineSink<IBusPublishContext<TOutput>> sink)
-			where TOutput : class
-		{
-			var routerConfigurator = new OutboundMessageRouterConfigurator(pipeline);
-
-			MessageRouter<IBusPublishContext<TOutput>> router = routerConfigurator.FindOrCreate<TOutput>();
-
-			UnsubscribeAction result = router.Connect(sink);
-
-			return () => result() && (router.SinkCount == 0);
-		}
+//		public static UnsubscribeAction ConnectToRouter<TOutput>(this IPipelineSink<ISendContext> pipeline,
+//																 IPipelineSink<IBusPublishContext<TOutput>> sink)
+//			where TOutput : class
+//		{
+//			var routerConfigurator = new OutboundMessageRouterConfigurator(pipeline);
+//
+//			MessageRouter<IBusPublishContext<TOutput>> router = routerConfigurator.FindOrCreate<TOutput>();
+//
+//			UnsubscribeAction result = router.Connect(sink);
+//
+//			return () => result() && (router.SinkCount == 0);
+//		}
 
 		public static UnsubscribeAction ConnectToRouter<TOutput>(this IInboundMessagePipeline pipeline,
 		                                                         IPipelineSink<IConsumeContext<TOutput>> sink,

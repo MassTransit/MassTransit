@@ -97,14 +97,6 @@ namespace MassTransit.Tests.Distributor
             workerAvaiableCountRecieved.ShouldBeGreaterThan(0);
         }
 
-        [Test]
-        public void The_pipeline_viewer_should_show_the_distributor()
-        {
-            PipelineViewer.Trace(LocalBus.InboundPipeline);
-
-            PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);
-        }
-
         [Test, Explicit]
         public void Using_the_load_generator_should_share_the_load()
         {

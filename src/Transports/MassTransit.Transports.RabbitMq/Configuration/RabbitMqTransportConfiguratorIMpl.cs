@@ -77,7 +77,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
             throw new NotImplementedException();
         }
 
-        public IBusControl CreateServiceBus()
+        public IBusControl CreateBus()
         {
             var builder = new RabbitMqServiceBusBuilder(_hosts, _publishSettings);
 

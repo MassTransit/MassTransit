@@ -19,7 +19,7 @@ namespace MassTransit.Containers.Tests.Scenarios
     public class SimpleConsumer :
         IConsumer<SimpleMessageInterface>
     {
-        static TaskCompletionSource<SimpleConsumer> _consumerCreated = new TaskCompletionSource<SimpleConsumer>();
+        static readonly TaskCompletionSource<SimpleConsumer> _consumerCreated = new TaskCompletionSource<SimpleConsumer>();
 
         readonly ISimpleConsumerDependency _dependency;
         readonly TaskCompletionSource<SimpleMessageInterface> _received;

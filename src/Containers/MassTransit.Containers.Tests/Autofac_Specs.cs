@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.Containers.Tests
     using Magnum.TestFramework;
     using Saga;
     using Scenarios;
-    using SubscriptionConfigurators;
 
 
     [Scenario]
@@ -30,9 +29,9 @@ namespace MassTransit.Containers.Tests
             var builder = new ContainerBuilder();
             builder.RegisterType<SimpleConsumer>();
             builder.RegisterType<SimpleConsumerDependency>()
-                   .As<ISimpleConsumerDependency>();
+                .As<ISimpleConsumerDependency>();
             builder.RegisterType<AnotherMessageConsumerImpl>()
-                   .As<AnotherMessageConsumer>();
+                .As<AnotherMessageConsumer>();
 
             _container = builder.Build();
         }
@@ -43,9 +42,9 @@ namespace MassTransit.Containers.Tests
             _container.Dispose();
         }
 
-        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            subscriptionBusServiceConfigurator.LoadFrom(_container);
+            configurator.LoadFrom(_container);
         }
     }
 
@@ -60,8 +59,8 @@ namespace MassTransit.Containers.Tests
         {
             var builder = new ContainerBuilder();
             builder.RegisterGeneric(typeof(InMemorySagaRepository<>))
-                   .As(typeof(ISagaRepository<>))
-                   .SingleInstance();
+                .As(typeof(ISagaRepository<>))
+                .SingleInstance();
             builder.RegisterType<SimpleSaga>();
 
             _container = builder.Build();
@@ -73,9 +72,9 @@ namespace MassTransit.Containers.Tests
             _container.Dispose();
         }
 
-        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            subscriptionBusServiceConfigurator.LoadFrom(_container);
+            configurator.LoadFrom(_container);
         }
     }
 }

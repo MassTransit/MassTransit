@@ -12,8 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
+    using System.Collections.Generic;
+
+
     public interface ContextHeaders
     {
+        /// <summary>
+        /// Enumerate all available headers
+        /// </summary>
+        IEnumerable<Tuple<string, object>> Headers { get; }
+
         T Get<T>(string key, T defaultValue = default(T))
             where T : class;
 

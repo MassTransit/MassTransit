@@ -31,8 +31,7 @@ namespace MassTransit
     /// communicate with other service bus instances in a distributed application
     /// </summary>
     [DebuggerDisplay("{DebugDisplay}")]
-    public class ServiceBus :
-        IServiceBus
+    public class ServiceBus
     {
         static readonly ILog _log;
 
@@ -67,10 +66,10 @@ namespace MassTransit
             Endpoint = endpointToListenOn;
             EndpointCache = endpointCache;
 
-            _serviceContainer = new ServiceContainer(this);
+//            _serviceContainer = new ServiceContainer(this);
 
-            OutboundPipeline = new OutboundPipelineConfigurator(this).Pipeline;
-            InboundPipeline = InboundPipelineConfigurator.CreateDefault(this);
+//            OutboundPipeline = new OutboundPipelineConfigurator(this).Pipeline;
+//            InboundPipeline = InboundPipelineConfigurator.CreateDefault(this);
 
             InboundPipe = new InboundPipe();
 
@@ -96,7 +95,7 @@ namespace MassTransit
         public void Publish<T>(T message)
             where T : class
         {
-            Publish(message, NoContext);
+//            Publish(message, NoContext);
         }
 
         /// <summary>
@@ -105,133 +104,48 @@ namespace MassTransit
         /// <typeparam name="T">The type of the message</typeparam>
         /// <param name="message">The messages to be published</param>
         /// <param name="contextCallback">The callback to perform operations on the context</param>
-        public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
-            where T : class
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-            if (contextCallback == null)
-                throw new ArgumentNullException("contextCallback");
-
-            Context.PublishContext<T> context = ContextStorage.CreatePublishContext(message);
-            context.SetSourceAddress(Endpoint.Address.Uri);
-
-            contextCallback(context);
-
-            IList<Exception> exceptions = new List<Exception>();
-
-            int publishedCount = 0;
-            foreach (var consumer in OutboundPipeline.Enumerate(context))
-            {
-                try
-                {
-                    consumer(context);
-                    publishedCount++;
-                }
-                catch (Exception ex)
-                {
-                    _log.Error(string.Format("'{0}' threw an exception publishing message '{1}'",
-                        consumer.GetType().FullName, message.GetType().FullName), ex);
-
-                    exceptions.Add(ex);
-                }
-            }
-
-            context.Complete();
-
-            if (publishedCount == 0)
-            {
-                context.NotifyNoSubscribers();
-            }
-
-            if (exceptions.Count > 0)
-                throw new PublishException(typeof(T), exceptions);
-        }
-
-        public void Publish(object message)
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-
-            PublishObjectConverterCache.Instance[message.GetType()].Publish(this, message);
-        }
-
-        public void Publish(object message, Type messageType)
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-            if (messageType == null)
-                throw new ArgumentNullException("messageType");
-
-            PublishObjectConverterCache.Instance[messageType].Publish(this, message);
-        }
-
-        public void Publish(object message, Action<IPublishContext> contextCallback)
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-            if (contextCallback == null)
-                throw new ArgumentNullException("contextCallback");
-
-            PublishObjectConverterCache.Instance[message.GetType()].Publish(this, message, contextCallback);
-        }
-
-        public void Publish(object message, Type messageType, Action<IPublishContext> contextCallback)
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-            if (messageType == null)
-                throw new ArgumentNullException("messageType");
-            if (contextCallback == null)
-                throw new ArgumentNullException("contextCallback");
-
-            PublishObjectConverterCache.Instance[messageType].Publish(this, message, contextCallback);
-        }
-
-        /// <summary>
-        /// <see cref="IServiceBus.Publish{T}"/>: this is a "dynamically"
-        /// typed overload - give it an interface as its type parameter,
-        /// and a loosely typed dictionary of values and the MassTransit
-        /// underlying infrastructure will populate an object instance
-        /// with the passed values. It actually does this with DynamicProxy
-        /// in the background.
-        /// </summary>
-        /// <typeparam name="T">The type of the interface or
-        /// non-sealed class with all-virtual members.</typeparam>
-        /// <param name="bus">The bus to publish on.</param>
-        /// <param name="values">The dictionary of values to place in the
-        /// object instance to implement the interface.</param>
-        public void Publish<T>(object values)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException("values");
-
-            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
-
-            Publish(message, x => { });
-        }
-
-        /// <summary>
-        /// <see cref="Publish{T}(MassTransit.IServiceBus,object)"/>: this
-        /// overload further takes an action; it allows you to set <see cref="IPublishContext"/>
-        /// meta-data. Also <see cref="IServiceBus.Publish{T}"/>.
-        /// </summary>
-        /// <typeparam name="T">The type of the message to publish</typeparam>
-        /// <param name="bus">The bus to publish the message on.</param>
-        /// <param name="values">The dictionary of values to become hydrated and
-        /// published under the type of the interface.</param>
-        /// <param name="contextCallback">The context callback.</param>
-        public void Publish<T>(object values, Action<IPublishContext<T>> contextCallback)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException("values");
-
-            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
-
-            Publish(message, contextCallback);
-        }
+//        public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
+//            where T : class
+//        {
+//            if (message == null)
+//                throw new ArgumentNullException("message");
+//            if (contextCallback == null)
+//                throw new ArgumentNullException("contextCallback");
+//
+//            Context.PublishContext<T> context = ContextStorage.CreatePublishContext(message);
+//            context.SetSourceAddress(Endpoint.Address.Uri);
+//
+//            contextCallback(context);
+//
+//            IList<Exception> exceptions = new List<Exception>();
+//
+//            int publishedCount = 0;
+//            foreach (var consumer in OutboundPipeline.Enumerate(context))
+//            {
+//                try
+//                {
+//                    consumer(context);
+//                    publishedCount++;
+//                }
+//                catch (Exception ex)
+//                {
+//                    _log.Error(string.Format("'{0}' threw an exception publishing message '{1}'",
+//                        consumer.GetType().FullName, message.GetType().FullName), ex);
+//
+//                    exceptions.Add(ex);
+//                }
+//            }
+//
+//            context.Complete();
+//
+//            if (publishedCount == 0)
+//            {
+//                context.NotifyNoSubscribers();
+//            }
+//
+//            if (exceptions.Count > 0)
+//                throw new PublishException(typeof(T), exceptions);
+//        }
 
         public IOutboundMessagePipeline OutboundPipeline { get; private set; }
 
@@ -264,9 +178,6 @@ namespace MassTransit
 
             EndpointCache.Inspect(probe);
             _serviceContainer.Inspect(probe);
-
-            OutboundPipeline.View(pipe => probe.Add("zz.mt.outbound_pipeline", pipe));
-            InboundPipeline.View(pipe => probe.Add("zz.mt.inbound_pipeline", pipe));
         }
 
         public IBusService GetService(Type type)
@@ -282,11 +193,6 @@ namespace MassTransit
         public ISendEndpoint GetSendEndpoint(Uri address)
         {
             throw new NotImplementedException();
-        }
-
-        void NoContext<T>(IPublishContext<T> context)
-            where T : class
-        {
         }
 
         public void Start()

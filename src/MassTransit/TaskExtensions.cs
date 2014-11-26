@@ -27,30 +27,11 @@ namespace MassTransit
 
             ITaskRequest<TRequest> request = configurator.Create(bus);
 
-            bus.Publish(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
+//            bus.Publish(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
 
             return request;
         }
-        
-        public static ITaskRequest<TRequest> PublishRequestAsync<TRequest>(this IServiceBus bus, TRequest message,
-          Action<TaskRequestConfigurator<TRequest>> configureCallback, Action<IPublishContext<TRequest>> contextConfigurator)
-          where TRequest : class
-        {
-            var configurator = new TaskRequestConfiguratorImpl<TRequest>(message);
-
-            configureCallback(configurator);
-
-            ITaskRequest<TRequest> request = configurator.Create(bus);
-
-            bus.Publish(message, context =>
-                {
-                    configurator.ApplyContext(context, bus.Endpoint.Address.Uri);
-                    contextConfigurator(context);
-                });
-
-            return request;
-        }
-
+   
         public static ITaskRequest<TRequest> SendRequestAsync<TRequest>(this IEndpoint endpoint, IServiceBus bus,
             TRequest message,
             Action<TaskRequestConfigurator<TRequest>> configureCallback)
@@ -62,7 +43,7 @@ namespace MassTransit
 
             ITaskRequest<TRequest> request = configurator.Create(bus);
 
-            endpoint.Send(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
+//            endpoint.Send(message, context => configurator.ApplyContext(context, bus.Endpoint.Address.Uri));
 
             return request;
         }

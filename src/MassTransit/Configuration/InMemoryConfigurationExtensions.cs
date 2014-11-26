@@ -13,22 +13,21 @@
 namespace MassTransit
 {
     using System;
-    using Configurators;
     using EndpointConfigurators;
 
 
     public static class InMemoryConfigurationExtensions
     {
         /// <summary>
-        /// Select an in-memory transport for the service bus
+        /// Configure and create an in-memory bus
         /// </summary>
-        public static IInMemoryServiceBusFactoryConfigurator InMemory(this IServiceBusFactorySelector selector)
+        /// <param name="selector">Hang off the selector interface for visibility</param>
+        /// <param name="configure">The configuration callback to configure the bus</param>
+        /// <returns></returns>
+        public static IBusControl CreateUsingInMemory(this IServiceBusFactorySelector selector,
+            Action<IInMemoryServiceBusFactoryConfigurator> configure)
         {
-            var configurator = new InMemoryServiceBusFactoryConfigurator(selector);
-
-            selector.SetServiceBusFactory(configurator);
-
-            return configurator;
+            return InMemoryBus.Create(configure);
         }
 
         /// <summary>

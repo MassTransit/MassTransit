@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,9 +14,9 @@ namespace MassTransit.Containers.Tests
 {
     using Magnum.TestFramework;
     using Ninject;
+    using Ninject.Extensions.NamedScope;
     using Saga;
     using Scenarios;
-    using SubscriptionConfigurators;
 
 
     [Scenario]
@@ -29,11 +29,11 @@ namespace MassTransit.Containers.Tests
         {
             _container = new StandardKernel();
             _container.Bind<SimpleConsumer>()
-                      .ToSelf();
+                .ToSelf().DefinesNamedScope("message");
             _container.Bind<ISimpleConsumerDependency>()
-                      .To<SimpleConsumerDependency>();
+                .To<SimpleConsumerDependency>().InNamedScope("message");
             _container.Bind<AnotherMessageConsumer>()
-                      .To<AnotherMessageConsumerImpl>();
+                .To<AnotherMessageConsumerImpl>().InNamedScope("message");
         }
 
         [Finally]
@@ -42,9 +42,9 @@ namespace MassTransit.Containers.Tests
             _container.Dispose();
         }
 
-        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            subscriptionBusServiceConfigurator.LoadFrom(_container);
+            configurator.LoadFrom(_container);
         }
     }
 
@@ -59,10 +59,10 @@ namespace MassTransit.Containers.Tests
         {
             _container = new StandardKernel();
             _container.Bind<SimpleSaga>()
-                      .ToSelf();
+                .ToSelf();
             _container.Bind(typeof(ISagaRepository<>))
-                      .To(typeof(InMemorySagaRepository<>))
-                      .InSingletonScope();
+                .To(typeof(InMemorySagaRepository<>))
+                .InSingletonScope();
         }
 
         [Finally]
@@ -71,10 +71,15 @@ namespace MassTransit.Containers.Tests
             _container.Dispose();
         }
 
-        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            // we have to do this explicitly, since the metadata is not exposed by Ninject
-            subscriptionBusServiceConfigurator.Saga<SimpleSaga>(_container);
+//            configurator.Saga
         }
+
+//        protected override void SubscribeLocalBus(SubscriptionBusServiceConfigurator subscriptionBusServiceConfigurator)
+//        {
+//            // we have to do this explicitly, since the metadata is not exposed by Ninject
+//            subscriptionBusServiceConfigurator.Saga<SimpleSaga>(_container);
+//        }
     }
 }

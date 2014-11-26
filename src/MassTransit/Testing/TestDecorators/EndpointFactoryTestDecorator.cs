@@ -41,7 +41,7 @@ namespace MassTransit.Testing.TestDecorators
 
 			var endpointTestDecorator = new EndpointTestDecorator(endpoint, _testContext);
 
-			_testContext.AddEndpoint(endpointTestDecorator);
+//			_testContext.AddEndpoint(endpointTestDecorator);
 
 			return endpointTestDecorator;
 		}

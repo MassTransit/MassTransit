@@ -13,6 +13,8 @@
 namespace MassTransit.Testing.TestDecorators
 {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Context;
     using Diagnostics.Introspection;
     using Magnum.Reflection;
@@ -25,11 +27,8 @@ namespace MassTransit.Testing.TestDecorators
         readonly IServiceBus _bus;
         readonly PublishedMessageListImpl _published;
         readonly EndpointTestScenarioImpl _scenario;
-
-        public IInboundPipe InboundPipe
-        {
-            get { return _bus.InboundPipe; }
-        }
+        Uri _inputAddress;
+        IInboundPipe _inputPipe;
 
         public ServiceBusTestDecorator(IServiceBus bus, EndpointTestScenarioImpl scenario)
         {
@@ -77,18 +76,18 @@ namespace MassTransit.Testing.TestDecorators
             Publish(message, NoContext);
         }
 
-        public void Publish<T>(T message, Action<IPublishContext<T>> contextCallback)
+        public void Publish<T>(T message, Action<PublishContext<T>> contextCallback)
             where T : class
         {
             PublishedMessageImpl<T> published = null;
             try
             {
-                _bus.Publish(message, context =>
-                    {
-                        published = new PublishedMessageImpl<T>(context);
-
-                        contextCallback(context);
-                    });
+//                _bus.Publish(message, context =>
+//                    {
+//                        published = new PublishedMessageImpl<T>(context);
+//
+//                        contextCallback(context);
+//                    });
             }
             catch (Exception ex)
             {
@@ -106,68 +105,6 @@ namespace MassTransit.Testing.TestDecorators
             }
         }
 
-        public void Publish(object message)
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-
-            PublishObjectConverterCache.Instance[message.GetType()].Publish(this, message);
-        }
-
-        public void Publish(object message, Type messageType)
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-            if (messageType == null)
-                throw new ArgumentNullException("messageType");
-
-            PublishObjectConverterCache.Instance[messageType].Publish(this, message);
-        }
-
-        public void Publish(object message, Action<IPublishContext> contextCallback)
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-            if (contextCallback == null)
-                throw new ArgumentNullException("contextCallback");
-
-            PublishObjectConverterCache.Instance[message.GetType()].Publish(this, message, contextCallback);
-        }
-
-        public void Publish(object message, Type messageType, Action<IPublishContext> contextCallback)
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-            if (messageType == null)
-                throw new ArgumentNullException("messageType");
-            if (contextCallback == null)
-                throw new ArgumentNullException("contextCallback");
-
-            PublishObjectConverterCache.Instance[messageType].Publish(this, message);
-        }
-
-        public void Publish<T>(object values)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException("values");
-
-            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
-
-            Publish(message, x => { });
-        }
-
-        public void Publish<T>(object values, Action<IPublishContext<T>> contextCallback) 
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException("values");
-
-            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
-
-            Publish(message, contextCallback);
-        }
-
         public IEndpoint GetEndpoint(Uri address)
         {
             return _bus.GetEndpoint(address);
@@ -178,7 +115,7 @@ namespace MassTransit.Testing.TestDecorators
             return _bus.Configure(configure);
         }
 
-        void NoContext<T>(IPublishContext<T> context)
+        void NoContext<T>(PublishContext<T> context)
             where T : class
         {
         }
@@ -193,9 +130,69 @@ namespace MassTransit.Testing.TestDecorators
             return _bus.TryGetService(type, out result);
         }
 
-        public ISendEndpoint GetSendEndpoint(Uri address)
+        public Uri InputAddress
         {
-            return _bus.GetSendEndpoint(address);
+            get { return _inputAddress; }
+        }
+
+        public IInboundPipe InputPipe
+        {
+            get { return _inputPipe; }
+        }
+
+        Task<ISendEndpoint> IBus.GetSendEndpoint(Uri address)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish<T>(T message, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish(object message, CancellationToken cancellationToken = new CancellationToken())
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = new CancellationToken())
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish(object message, Type messageType, CancellationToken cancellationToken = new CancellationToken())
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = new CancellationToken())
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish<T>(object values, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        {
+            throw new NotImplementedException();
         }
     }
 }

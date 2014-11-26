@@ -36,11 +36,6 @@ namespace MassTransit.Pipeline
 			return pipeline.Dispatch(message, x => true);
 		}
 
-		public static bool Dispatch<T>(this IOutboundMessagePipeline pipeline, T message)
-			where T : class
-		{
-			return pipeline.Dispatch(message, x => true);
-		}
 
 		/// <summary>
 		/// Dispatch a message through the pipeline. If the message will be consumed, the accept function
@@ -80,19 +75,6 @@ namespace MassTransit.Pipeline
 			return consumed;
 		}
 
-		public static bool Dispatch(this IInboundMessagePipeline pipeline, IConsumeContext context)
-		{
-			bool consumed = false;
-
-			foreach (var consumer in pipeline.Enumerate(context))
-			{
-				consumed = true;
-
-				consumer(context);
-			}
-
-			return consumed;
-		}
 
 		/// <summary>
 		/// <see cref="Dispatch{T}(MassTransit.Pipeline.IInboundMessagePipeline,T)"/>: this one is for the outbound pipeline.
@@ -117,65 +99,6 @@ namespace MassTransit.Pipeline
 			}
 
 			return consumed;
-		}
-
-		/// <summary>
-		/// Subscribe a component type to the pipeline that is resolved from the container for each message
-		/// </summary>
-		/// <typeparam name="TComponent"></typeparam>
-		/// <param name="pipeline">The pipeline to configure</param>
-		/// <returns></returns>
-		public static UnsubscribeAction ConnectConsumer<TComponent>(this IInboundMessagePipeline pipeline)
-			where TComponent : class, new()
-		{
-		    throw new NotImplementedException();
-        }
-
-		/// <summary>
-		/// Subscribe a component type to the pipeline that is resolved from the container for each message
-		/// </summary>
-		/// <typeparam name="TConsumer"></typeparam>
-		/// <param name="pipeline">The pipeline to configure</param>
-		/// <param name="consumerFactory"></param>
-		/// <returns></returns>
-		public static UnsubscribeAction ConnectConsumer<TConsumer>(this IInboundMessagePipeline pipeline,
-		                                                           Func<TConsumer> consumerFactory)
-			where TConsumer : class
-		{
-            throw new NotImplementedException();
-        }
-
-		/// <summary>
-		/// Subscribe a component to the pipeline that handles every message
-		/// </summary>
-		/// <typeparam name="TComponent"></typeparam>
-		/// <param name="pipeline">The pipeline to configure</param>
-		/// <param name="instance">The instance that will handle the messages</param>
-		/// <returns></returns>
-		public static UnsubscribeAction ConnectInstance<TComponent>(this IInboundMessagePipeline pipeline, TComponent instance)
-			where TComponent : class
-		{
-            throw new NotImplementedException();
-            //			return pipeline.Configure(x =>
-//				{
-//					InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<TComponent>();
-//					return connector.Connect(x, instance);
-//				});
-		}
-
-	    /// <summary>
-		/// Connects an endpoint to the outbound pipeline by message type.
-		/// </summary>
-		/// <typeparam name="TMessage">The type of the message to route</typeparam>
-		/// <param name="pipeline">The outbound pipeline</param>
-		/// <param name="endpoint">The endpoint to route to</param>
-		/// <returns></returns>
-		public static UnsubscribeAction ConnectEndpoint<TMessage>(this IOutboundMessagePipeline pipeline, IEndpoint endpoint)
-			where TMessage : class
-		{
-			var sink = new EndpointMessageSink<TMessage>(endpoint);
-
-			return pipeline.ConnectToRouter(sink);
 		}
 	}
 }

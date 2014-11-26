@@ -18,10 +18,8 @@ namespace MassTransit.Tests
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using NUnit.Framework;
-    using TestConsumers;
     using TestFramework;
     using TestFramework.Messages;
-    using TextFixtures;
 
 
     [TestFixture]
@@ -45,11 +43,29 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public async void Should_include_the_correlation_id()
+        {
+            ConsumeContext<PingMessage> ping = await _ping;
+
+            ping.CorrelationId.ShouldEqual(_correlationId);
+        }
+
+        [Test]
         public async void Should_include_the_destination_address()
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
             ping.DestinationAddress.ShouldEqual(InputQueueAddress);
+        }
+
+        [Test]
+        public async void Should_include_the_header()
+        {
+            ConsumeContext<PingMessage> ping = await _ping;
+
+            object header;
+            ping.ContextHeaders.TryGetHeader("One", out header);
+            header.ShouldEqual("1");
         }
 
         [Test]
@@ -61,11 +77,18 @@ namespace MassTransit.Tests
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
+        Guid _correlationId;
 
         [TestFixtureSetUp]
         public void Setup()
         {
-            InputQueueSendEndpoint.Send(new PingMessage())
+            _correlationId = Guid.NewGuid();
+
+            InputQueueSendEndpoint.Send(new PingMessage(), Pipe.New<SendContext<PingMessage>>(x => x.Execute(context =>
+            {
+                context.CorrelationId = _correlationId;
+                context.ContextHeaders.Set("One", "1");
+            })))
                 .Wait(TestCancellationToken);
         }
 
@@ -150,6 +173,7 @@ namespace MassTransit.Tests
         }
     }
 
+
     [TestFixture]
     public class Sending_a_request_with_two_handlers :
         InMemoryTestFixture
@@ -220,7 +244,7 @@ namespace MassTransit.Tests
         {
             Assert.Throws<RequestTimeoutException>(async () =>
             {
-                var request = await _request;
+                Request<PingMessage> request = await _request;
 
                 await request.Task;
             });
@@ -240,119 +264,6 @@ namespace MassTransit.Tests
                 {
                 });
             });
-        }
-    }
-
-
-    [TestFixture]
-    public class MessageContext_Specs :
-        LoopbackLocalAndRemoteTestFixture
-    {
-        [Test]
-        public void A_random_header_should_pass()
-        {
-            Guid id = Guid.NewGuid();
-
-            var received = new FutureMessage<PingMessage>();
-
-            LocalBus.SubscribeHandler<PingMessage>(message =>
-            {
-                Assert.AreEqual(id.ToString(), LocalBus.Context().Headers["RequestId"]);
-
-                received.Set(message);
-            });
-
-            LocalBus.Publish(new PingMessage(), context => context.SetHeader("RequestId", id.ToString()));
-
-            Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
-        }
-
-        [Test]
-        public void A_response_should_be_published_if_no_reply_address_is_specified()
-        {
-            var ping = new PingMessage();
-
-            var otherConsumer = new TestMessageConsumer<PongMessage>();
-            RemoteBus.SubscribeInstance(otherConsumer);
-
-            LocalBus.ShouldHaveRemoteSubscriptionFor<PongMessage>();
-
-            var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(ping.CorrelationId);
-            LocalBus.SubscribeInstance(consumer);
-
-            var pong = new FutureMessage<PongMessage>();
-
-            RemoteBus.SubscribeHandler<PingMessage>(message =>
-            {
-                pong.Set(new PongMessage(message.CorrelationId));
-
-                RemoteBus.Context().Respond(pong.Message);
-            });
-
-            RemoteBus.ShouldHaveRemoteSubscriptionFor<PongMessage>();
-            LocalBus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
-
-            LocalBus.Publish(ping);
-
-            pong.IsAvailable(8.Seconds()).ShouldBeTrue("No pong generated");
-
-            consumer.ShouldHaveReceivedMessage(pong.Message, 8.Seconds());
-            otherConsumer.ShouldHaveReceivedMessage(pong.Message, 8.Seconds());
-        }
-
-        [Test]
-        public void The_conversation_id_should_pass()
-        {
-            Guid id = Guid.NewGuid();
-
-            var received = new FutureMessage<PingMessage>();
-
-            LocalBus.SubscribeHandler<PingMessage>(message =>
-            {
-                Assert.AreEqual(id.ToString(), LocalBus.Context().ConversationId);
-
-                received.Set(message);
-            });
-
-            LocalBus.Publish(new PingMessage(), context => context.SetConversationId(id.ToString()));
-
-            Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
-        }
-
-        [Test]
-        public void The_correlation_id_should_pass()
-        {
-            Guid id = Guid.NewGuid();
-
-            var received = new FutureMessage<PingMessage>();
-
-            LocalBus.SubscribeHandler<PingMessage>(message =>
-            {
-                Assert.AreEqual(id.ToString(), LocalBus.Context().CorrelationId);
-
-                received.Set(message);
-            });
-
-            LocalBus.Publish(new PingMessage(), context => context.SetCorrelationId(id.ToString()));
-
-            Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
-        }
-
-        [Test]
-        public void The_fault_address_should_pass()
-        {
-            var received = new FutureMessage<PingMessage>();
-
-            LocalBus.SubscribeHandler<PingMessage>(message =>
-            {
-                Assert.AreEqual(LocalBus.Endpoint.Address.Uri, LocalBus.Context().FaultAddress);
-
-                received.Set(message);
-            });
-
-            LocalBus.Publish(new PingMessage(), context => context.SendFaultTo(LocalBus));
-
-            Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
         }
     }
 }

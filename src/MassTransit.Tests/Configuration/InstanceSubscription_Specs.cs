@@ -20,7 +20,7 @@ namespace MassTransit.Tests.Configuration
 
 
     [Scenario]
-	public class When_subscribing_an_object_instance_to_the_bus
+	public class When_subscribing_an_object_instance_to_the_bus 
 	{
 		IServiceBus _bus;
 		ConsumerOf<PingMessage> _consumer;

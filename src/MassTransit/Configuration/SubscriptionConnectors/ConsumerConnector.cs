@@ -58,7 +58,7 @@ namespace MassTransit.SubscriptionConnectors
             IRetryPolicy retryPolicy, params IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>[] pipeBuilderConfigurators)
             where TConsumer : class
         {
-            return new MultipleConnectHandle(_connectors.Select(x => x.Connect(inboundPipe, consumerFactory, retryPolicy)));
+            return new MultipleConnectHandle(_connectors.Select(x => x.Connect(inboundPipe, consumerFactory, retryPolicy, pipeBuilderConfigurators)));
         }
 
         static IEnumerable<ConsumerMessageConnector> ConsumesContext()

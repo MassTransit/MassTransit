@@ -14,6 +14,7 @@ namespace MassTransit.Saga
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using Configuration;
     using Context;
     using Magnum.Extensions;
@@ -27,7 +28,7 @@ namespace MassTransit.Saga
             where TData : class
             where TMessage : class
         {
-            eventAction.Call((saga, message) => saga.Bus.Publish(action(saga, message)));
+            eventAction.Call((saga, message) => saga.Bus.Publish(action(saga, message), default(CancellationToken)));
             return eventAction;
         }
 

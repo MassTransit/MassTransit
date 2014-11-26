@@ -16,14 +16,13 @@ namespace MassTransit.TestFramework
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using EndpointConfigurators;
 
 
     public abstract class AsyncTestFixture
     {
         CancellationToken _cancellationToken;
-        Task<bool> _cancelledTask;
         CancellationTokenSource _cancellationTokenSource;
+        Task<bool> _cancelledTask;
 
         protected AsyncTestFixture()
         {
@@ -91,5 +90,10 @@ namespace MassTransit.TestFramework
             return source;
         }
 
+        protected TestConsumeObserver<T> GetConsumeObserver<T>()
+            where T : class
+        {
+            return new TestConsumeObserver<T>(GetTask<T>(), GetTask<T>(), GetTask<T>());
+        }
     }
 }

@@ -56,17 +56,5 @@ namespace MassTransit.Testing
 			return true;
 		}
 
-		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink)
-			where TMessage : class
-		{
-			if (typeof(TMessage) == typeof(T))
-			{
-				Result = Result.Concat(new[] { sink as IPipelineSink<T> });
-
-				return false;
-			}
-
-			return true;
-		}
 	}
 }

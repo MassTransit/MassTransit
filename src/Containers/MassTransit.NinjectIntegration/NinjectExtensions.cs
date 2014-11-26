@@ -34,24 +34,22 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="context">The Ninject kernel.</param>
-        public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IKernel context)
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IKernel context)
         {
             IList<Type> consumerTypes = FindTypes<IConsumer>(context, x => !x.Implements<ISaga>());
             if (consumerTypes.Count > 0)
             {
-                var consumerConfigurator = new NinjectConsumerFactoryConfigurator(configurator, context);
-
                 foreach (Type type in consumerTypes)
-                    consumerConfigurator.ConfigureConsumer(type);
+                    ConsumerFactoryConfiguratorCache.Configure(type, configurator, context);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(context, x => true);
             if (sagaTypes.Count > 0)
             {
-                var sagaConfigurator = new NinjectSagaFactoryConfigurator(configurator, context);
-
-                foreach (Type type in sagaTypes)
-                    sagaConfigurator.ConfigureSaga(type);
+//                var sagaConfigurator = new NinjectSagaFactoryConfigurator(configurator, context);
+//
+//                foreach (Type type in sagaTypes)
+//                    sagaConfigurator.ConfigureSaga(type);
             }
         }
 

@@ -116,45 +116,57 @@ namespace MassTransit.TestFramework
             get { return _contextHeaders; }
         }
 
-        public Task Publish<TMessage>(TMessage message) where TMessage : class
+        Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task Publish<TMessage>(TMessage message, IPipe<MassTransit.PublishContext<TMessage>> publishPipe) where TMessage : class
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task Publish(object message)
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task Publish(object message, Type messageType)
+        Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task Publish(object message, Action<PublishContext> contextCallback)
+        Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task Publish(object message, Type messageType, Action<PublishContext> contextCallback)
+        Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task Publish<TMessage>(object values) where TMessage : class
+        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
+            CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task Publish<TMessage>(object values, Action<MassTransit.PublishContext<TMessage>> contextCallback) where TMessage : class
+        Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
+
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
 
         public ReceiveContext ReceiveContext
         {

@@ -84,7 +84,7 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="UnityConsumerFactoryConfigurator.cs" />
+    <Compile Include="ConsumerFactoryConfiguratorCache.cs" />
     <Compile Include="UnityExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnityConsumerFactory.cs" />

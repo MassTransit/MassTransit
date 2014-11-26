@@ -18,7 +18,10 @@ namespace MassTransit.Context
     using Magnum.Extensions;
     using Pipeline;
 
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class SendEndpointConverter<T> :
         ISendEndpointConverter
         where T : class

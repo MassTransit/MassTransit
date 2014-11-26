@@ -25,6 +25,6 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 		void UseBuilder(Func<TScenario, HandlerTestBuilder<TScenario, TMessage>> builderFactory);
 		void AddConfigurator(HandlerTestBuilderConfigurator<TScenario, TMessage> configurator);
 
-		void Handler(Action<IConsumeContext<TMessage>, TMessage> handler);
+		void Handler(MessageHandler<TMessage> handler);
 	}
 }

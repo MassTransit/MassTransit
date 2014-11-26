@@ -59,15 +59,6 @@ namespace MassTransit.Context
             return context;
         }
 
-        public static PublishContext<T> CreatePublishContext<T>(T message)
-            where T : class
-        {
-            PublishContext<T> publishContext = PublishContext<T>.FromMessage(message);
-
-            SetReceiveContextForSend(publishContext);
-
-            return publishContext;
-        }
 
         internal static void SetReceiveContextForSend<T>(ISendContext<T> context)
             where T : class

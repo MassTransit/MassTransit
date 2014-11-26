@@ -24,18 +24,18 @@ namespace MassTransit.Testing.ActionConfigurators
 		where TMessage : class
 		where TScenario : TestScenario
 	{
-		readonly Func<TScenario, IServiceBus> _busAccessor;
-		readonly Action<TScenario, IPublishContext<TMessage>> _callback;
+        readonly Func<TScenario, IBus> _busAccessor;
+		readonly Action<TScenario, PublishContext<TMessage>> _callback;
 		readonly TMessage _message;
 
-		public PublishTestActionConfigurator(Func<TScenario, IServiceBus> busAccessor, TMessage message)
+        public PublishTestActionConfigurator(Func<TScenario, IBus> busAccessor, TMessage message)
 		{
 			_busAccessor = busAccessor;
 			_message = message;
 		}
 
-		public PublishTestActionConfigurator(Func<TScenario, IServiceBus> busAccessor, TMessage message,
-		                                     Action<TScenario, IPublishContext<TMessage>> callback)
+		public PublishTestActionConfigurator(Func<TScenario, IBus> busAccessor, TMessage message,
+		                                     Action<TScenario, PublishContext<TMessage>> callback)
 		{
 			_busAccessor = busAccessor;
 			_message = message;

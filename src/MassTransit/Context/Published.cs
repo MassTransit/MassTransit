@@ -18,10 +18,10 @@ namespace MassTransit.Context
 		IPublished
 		where T : class
 	{
-		readonly IPublishContext<T> _context;
 		long _timestamp;
+	    ISendContext<T> _context;
 
-		public Published(IPublishContext<T> context)
+	    public Published(ISendContext<T> context)
 		{
 			_timestamp = Stopwatch.GetTimestamp();
 			_context = context;

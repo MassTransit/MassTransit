@@ -51,7 +51,7 @@ namespace MassTransit.Tests
 
 			LocalBus.SubscribeInstance(consumer);
 
-		    LocalBus.Publish(new Hello(), x => x.SendFaultTo(LocalBus));
+		   // LocalBus.Publish(new Hello(), x => x.SendFaultTo(LocalBus));
 
 			consumer.Fault.IsAvailable(300.Seconds()).ShouldBeTrue();
 		}

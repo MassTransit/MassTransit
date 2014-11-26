@@ -27,10 +27,6 @@ namespace MassTransit.Serialization
     {
         readonly ConsumeContext _context;
         readonly TMessage _message;
-        public IEnumerable<string> SupportedMessageTypes
-        {
-            get { return _context.SupportedMessageTypes; }
-        }
 
         public JsonMessageConsumeContext(ConsumeContext context, TMessage message)
         {
@@ -38,44 +34,60 @@ namespace MassTransit.Serialization
             _message = message;
         }
 
-        public Task Publish<T>(T message) where T : class
+        public IEnumerable<string> SupportedMessageTypes
         {
-            return _context.Publish(message);
+            get { return _context.SupportedMessageTypes; }
         }
 
-        public Task Publish<T>(T message, IPipe<MassTransit.PublishContext<T>> publishPipe) where T : class
+        Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            return _context.Publish(message, publishPipe);
+            return _context.Publish(message, cancellationToken);
         }
 
-        public Task Publish(object message)
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            return _context.Publish(message);
+            return _context.Publish(message, publishPipe, cancellationToken);
         }
 
-        public Task Publish(object message, Type messageType)
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _context.Publish(message, messageType);
+            return _context.Publish(message, publishPipe, cancellationToken);
         }
 
-        public Task Publish(object message, Action<PublishContext> contextCallback)
+        Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
-            return _context.Publish(message, contextCallback);
+            return _context.Publish(message, cancellationToken);
         }
 
-        public Task Publish(object message, Type messageType, Action<PublishContext> contextCallback)
+        Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _context.Publish(message, messageType, contextCallback);
+            return _context.Publish(message, publishPipe, cancellationToken);
         }
 
-        public Task Publish<T>(object values) where T : class
+        Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
         {
-            return _context.Publish<T>(values);
+            return _context.Publish(message, messageType, cancellationToken);
         }
 
-        public Task Publish<T>(object values, Action<MassTransit.PublishContext<T>> contextCallback) where T : class
+        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
+            CancellationToken cancellationToken)
         {
-            return _context.Publish(values, contextCallback);
+            return _context.Publish(message, messageType, publishPipe, cancellationToken);
+        }
+
+        Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
+        {
+            return _context.Publish(values, cancellationToken);
+        }
+
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+        {
+            return _context.Publish(values, publishPipe, cancellationToken);
+        }
+
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            return _context.Publish(values, publishPipe, cancellationToken);
         }
 
         public bool HasPayloadType(Type contextType)

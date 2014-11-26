@@ -59,6 +59,8 @@ namespace MassTransit.SubscriptionConnectors
                 pipeBuilderConfigurators[i].Configure(builder);
 
             var builders = builder as ConsumerPipeBuilder<TConsumer>;
+            if (builders == null)
+                throw new InvalidOperationException("Should not be null, ever");
 
             IPipe<ConsumerConsumeContext<TConsumer, TMessage>> messagePipe = Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x =>
             {

@@ -1,12 +1,12 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -20,8 +20,7 @@ namespace MassTransit.Builders
     using Logging;
     using Magnum;
     using Magnum.Extensions;
-    using Pipeline.Configuration;
-    using Util;
+
 
     public class ServiceBusBuilderImpl :
         ServiceBusBuilder
@@ -58,16 +57,14 @@ namespace MassTransit.Builders
 
                 RunPostCreateActions(bus);
 
-                ConfigureMessageInterceptors(bus);
+//                ConfigureMessageInterceptors(bus);
 
                 RunBusServiceConfigurators(bus);
 
                 if (_settings.AutoStart)
-                {
                     bus.Start();
-                }
 
-                return bus;
+                throw new NotImplementedException();
             }
             catch
             {
@@ -84,7 +81,6 @@ namespace MassTransit.Builders
             }
         }
 
-
         public void AddPostCreateAction(Action<ServiceBus> postCreateAction)
         {
             _postCreateActions.Add(postCreateAction);
@@ -95,12 +91,12 @@ namespace MassTransit.Builders
             _busServiceConfigurators.Add(configurator);
         }
 
-        public void Match<T>( Action<T> callback)
+        public void Match<T>(Action<T> callback)
             where T : class, BusBuilder
         {
             Guard.AgainstNull(callback);
 
-            if (typeof (T).IsAssignableFrom(GetType()))
+            if (typeof(T).IsAssignableFrom(GetType()))
                 callback(this as T);
         }
 
@@ -110,14 +106,14 @@ namespace MassTransit.Builders
             {
                 try
                 {
-                    IBusService busService = busServiceConfigurator.Create(bus);
-
-                    bus.AddService(busServiceConfigurator.Layer, busService);
+//                    IBusService busService = busServiceConfigurator.Create(bus);
+//
+//                    bus.AddService(busServiceConfigurator.Layer, busService);
                 }
                 catch (Exception ex)
                 {
                     throw new ConfigurationException("Failed to create the bus service: " +
-                                                     busServiceConfigurator.ServiceType.ToShortTypeName(), ex);
+                        busServiceConfigurator.ServiceType.ToShortTypeName(), ex);
                 }
             }
         }
@@ -155,7 +151,7 @@ namespace MassTransit.Builders
 
         static void ConfigureThreadPool(int consumerThreads)
         {
-            var requiredThreads = CalculateRequiredThreads(consumerThreads);
+            int requiredThreads = CalculateRequiredThreads(consumerThreads);
 
             ConfigureMinThreads(requiredThreads);
 
@@ -170,7 +166,7 @@ namespace MassTransit.Builders
             int availableWorkerThreads;
             int availableCompletionPortThreads;
             ThreadPool.GetAvailableThreads(out availableWorkerThreads, out availableCompletionPortThreads);
-            var requiredThreads = consumerThreads + (workerThreads - availableWorkerThreads);
+            int requiredThreads = consumerThreads + (workerThreads - availableWorkerThreads);
             return requiredThreads;
         }
 
@@ -190,18 +186,6 @@ namespace MassTransit.Builders
             ThreadPool.GetMaxThreads(out workerThreads, out completionPortThreads);
             workerThreads = Math.Max(workerThreads, requiredThreads);
             ThreadPool.SetMaxThreads(workerThreads, completionPortThreads);
-        }
-
-        void ConfigureMessageInterceptors(IServiceBus bus)
-        {
-            if (_settings.BeforeConsume != null || _settings.AfterConsume != null)
-            {
-                var configurator = new InboundMessageInterceptorConfigurator(bus.InboundPipeline);
-
-                var interceptor = new DelegateMessageInterceptor(_settings.BeforeConsume, _settings.AfterConsume);
-
-                configurator.Create(interceptor);
-            }
         }
     }
 }

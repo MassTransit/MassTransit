@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -30,24 +30,22 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="container">The StructureMap container.</param>
-        public static void LoadFrom(this SubscriptionBusServiceConfigurator configurator, IContainer container)
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IContainer container)
         {
             IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.Implements<ISaga>());
             if (concreteTypes.Count > 0)
             {
-                var consumerConfigurator = new StructureMapConsumerFactoryConfigurator(configurator, container);
-
                 foreach (Type concreteType in concreteTypes)
-                    consumerConfigurator.ConfigureConsumer(concreteType);
+                    ConsumerFactoryConfiguratorCache.Configure(concreteType, configurator, container);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
             if (sagaTypes.Count > 0)
             {
-                var sagaConfigurator = new StructureMapSagaFactoryConfigurator(configurator, container);
-
-                foreach (Type type in sagaTypes)
-                    sagaConfigurator.ConfigureSaga(type);
+//                var sagaConfigurator = new StructureMapSagaFactoryConfigurator(configurator, container);
+//
+//                foreach (Type type in sagaTypes)
+//                    sagaConfigurator.ConfigureSaga(type);
             }
         }
 

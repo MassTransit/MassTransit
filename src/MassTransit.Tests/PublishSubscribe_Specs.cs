@@ -65,7 +65,7 @@ namespace MassTransit.Tests
             var message = new PingMessage();
 
             object unknownMessage = message;
-            LocalBus.Publish(unknownMessage, typeof(PingMessage), x => x.SetRequestId("27"));
+          //  LocalBus.Publish(unknownMessage, typeof(PingMessage), x => x.SetRequestId("27"));
 
             consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
         }

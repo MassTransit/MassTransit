@@ -61,7 +61,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return _transportBuilderConfigurators.SelectMany(x => x.Validate());
         }
 
-        public IBusControl CreateServiceBus()
+        public IBusControl CreateBus()
         {
             var builder = new AzureServiceBusServiceBusBuilder(_hosts);
 

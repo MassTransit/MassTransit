@@ -36,7 +36,6 @@ namespace MassTransit.Tests.Saga
 
 			_remove = LocalBus.SubscribeSaga<SimpleSaga>(_repository);
 
-			PipelineViewer.Trace(LocalBus.InboundPipeline);
 		}
 
 		private Guid _sagaId;

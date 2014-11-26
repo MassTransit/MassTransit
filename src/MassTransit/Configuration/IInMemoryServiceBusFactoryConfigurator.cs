@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using Builders;
-    using EndpointConfigurators;
 
 
     public interface IInMemoryServiceBusFactoryConfigurator :

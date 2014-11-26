@@ -54,12 +54,6 @@ namespace MassTransit.Context
             _bodyWriter(stream);
         }
 
-        public bool TryGetContext<T>(out IBusPublishContext<T> context)
-            where T : class
-        {
-            throw new MessageException(typeof(T), "The message type is unknown and can not be type-cast");
-        }
-
         public void NotifySend(IEndpointAddress address)
         {
             _notifySend(address);

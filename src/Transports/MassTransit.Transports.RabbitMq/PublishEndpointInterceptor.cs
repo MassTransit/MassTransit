@@ -26,8 +26,7 @@ namespace MassTransit.Transports.RabbitMq
     /// that we'll never get 404 exchange not found for published messages. If someone is
     /// listening to them; that's another question (there might be no queue bound to it).
     /// </summary>
-    public class PublishEndpointInterceptor :
-        IOutboundMessageInterceptor
+    public class PublishEndpointInterceptor
     {
         readonly IDictionary<Type, UnsubscribeAction> _added;
         readonly IRabbitMqEndpointAddress _address;

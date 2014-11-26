@@ -14,7 +14,6 @@ namespace MassTransit.NinjectIntegration
 {
     using System.Threading.Tasks;
     using Ninject;
-    using Ninject.Activation.Blocks;
     using Pipeline;
     using Util;
 
@@ -33,17 +32,20 @@ namespace MassTransit.NinjectIntegration
         public async Task Send<T>(ConsumeContext<T> context, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
             where T : class
         {
-            // TODO pull in the new block stuff from the main project
-            using (IActivationBlock block = _kernel.BeginBlock())
+            var consumer = _kernel.Get<TConsumer>();
+            if (consumer == null)
             {
-                var consumer = block.Get<TConsumer>();
-                if (consumer == null)
-                {
-                    throw new ConsumerException(string.Format("Unable to resolve consumer type '{0}'.",
-                        TypeMetadataCache<TConsumer>.ShortName));
-                }
+                throw new ConsumerException(string.Format("Unable to resolve consumer type '{0}'.",
+                    TypeMetadataCache<TConsumer>.ShortName));
+            }
 
+            try
+            {
                 await next.Send(context.PushConsumer(consumer));
+            }
+            finally
+            {
+                _kernel.Release(consumer);
             }
         }
     }

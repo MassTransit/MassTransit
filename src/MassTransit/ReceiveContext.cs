@@ -65,5 +65,9 @@ namespace MassTransit
         /// <param name="consumerType"></param>
         /// <param name="exception"></param>
         void NotifyFaulted(string messageType, string consumerType, Exception exception);
+
+
+        // TODO to tie sends back to the receiver?
+        //void NotifySend(string messageType, Uri destinationAddress);
     }
 }

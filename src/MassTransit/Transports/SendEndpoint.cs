@@ -72,7 +72,7 @@ namespace MassTransit.Transports
 
             Type messageType = message.GetType();
 
-            return SendEndpointConverterCache.Instance[messageType].Send(this, message, cancellationToken);
+            return SendEndpointConverterCache.Send(this, message, messageType, cancellationToken);
         }
 
         public Task Send(object message, Type messageType, CancellationToken cancellationToken)
@@ -82,7 +82,7 @@ namespace MassTransit.Transports
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            return SendEndpointConverterCache.Instance[messageType].Send(this, message, cancellationToken);
+            return SendEndpointConverterCache.Send(this, message, messageType, cancellationToken);
         }
 
         public Task Send<T>(object values, CancellationToken cancellationToken)
@@ -118,7 +118,7 @@ namespace MassTransit.Transports
 
             Type messageType = message.GetType();
 
-            return SendEndpointConverterCache.Instance[messageType].Send(this, message, pipe, cancellationToken);
+            return SendEndpointConverterCache.Send(this, message, messageType, pipe, cancellationToken);
         }
 
         public Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -130,7 +130,7 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException("pipe");
 
-            return SendEndpointConverterCache.Instance[messageType].Send(this, message, pipe, cancellationToken);
+            return SendEndpointConverterCache.Send(this, message, messageType, pipe, cancellationToken);
         }
 
         public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)

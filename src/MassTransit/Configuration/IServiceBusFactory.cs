@@ -18,6 +18,10 @@ namespace MassTransit
     public interface IServiceBusFactory :
         Configurator
     {
-        IBusControl CreateServiceBus();
+        /// <summary>
+        /// Create the bus, returning the bus control interface
+        /// </summary>
+        /// <returns></returns>
+        IBusControl CreateBus();
     }
 }

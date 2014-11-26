@@ -34,7 +34,7 @@ namespace MassTransit.Pipeline
 
         public Task Send(ConsumerConsumeContext<TConsumer> context)
         {
-            return _output.Send(context.GetContext<TMessage>());
+            return _output.Send(context.PopContext<TMessage>());
         }
 
         public bool Inspect(IPipeInspector inspector)

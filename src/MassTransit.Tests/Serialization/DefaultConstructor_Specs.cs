@@ -31,7 +31,7 @@ namespace MassTransit.Tests.Serialization
                         _sent = new A("Dru", "Sellers");
                         x.Send(_sent);
 
-                        x.Handler((context, message) => { _received = message; });
+                        x.Handler(async (context ) => { _received = context.Message; });
                     });
 
             _test.Execute();

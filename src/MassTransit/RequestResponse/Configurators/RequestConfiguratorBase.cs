@@ -21,7 +21,7 @@ namespace MassTransit.RequestResponse.Configurators
     public abstract class RequestConfiguratorBase<TRequest>
         where TRequest : class
     {
-        readonly IList<Action<ISendContext<TRequest>>> _contextActions;
+        readonly IList<Action<SendContext<TRequest>>> _contextActions;
         readonly Cache<Type, ResponseHandler> _handlers;
         readonly TRequest _message;
         readonly string _requestId;
@@ -35,7 +35,7 @@ namespace MassTransit.RequestResponse.Configurators
             _requestId = NewId.NextGuid().ToString();
             Timeout = TimeSpan.FromMilliseconds(-1);
 
-            _contextActions = new List<Action<ISendContext<TRequest>>>();
+            _contextActions = new List<Action<SendContext<TRequest>>>();
             _handlers = new DictionaryCache<Type, ResponseHandler>();
         }
 
@@ -73,24 +73,24 @@ namespace MassTransit.RequestResponse.Configurators
 
         public void SetRequestExpiration(TimeSpan expiration)
         {
-            _contextActions.Add(x => x.ExpiresIn(expiration));
+            _contextActions.Add(x => x.TimeToLive = expiration);
         }
 
-        public void ApplyContext(IPublishContext<TRequest> context, Uri responseAddress)
+        public void ApplyContext(PublishContext<TRequest> context, Uri responseAddress)
         {
-            context.SetRequestId(_requestId);
-            context.SendResponseTo(responseAddress);
-            context.SendFaultTo(responseAddress);
+            //context.RequestId = _requestId;
+            context.ResponseAddress = responseAddress;
+            context.FaultAddress = responseAddress;
 
             _contextActions.Each(x => x(context));
         }
 
-        public void ApplyContext(ISendContext<TRequest> context, Uri responseAddress)
+        public void ApplyContext(SendContext<TRequest> context, Uri responseAddress)
         {
-            context.SetRequestId(_requestId);
-            context.SetSourceAddress(responseAddress);
-            context.SendResponseTo(responseAddress);
-            context.SendFaultTo(responseAddress);
+            //context.RequestId = _requestId;
+            context.SourceAddress = responseAddress;
+            context.ResponseAddress = responseAddress;
+            context.FaultAddress = responseAddress;
 
             _contextActions.Each(x => x(context));
         }
