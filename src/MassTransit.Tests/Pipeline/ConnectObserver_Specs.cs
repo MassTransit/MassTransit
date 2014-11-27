@@ -27,7 +27,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public void Should_invoke_faulted()
         {
-            IInboundPipe filter = new InboundPipe();
+            IConsumePipe filter = new ConsumePipe();
 
             filter.ConnectHandler<MessageA>(async context =>
             {
@@ -49,7 +49,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_invoke_post()
         {
-            IInboundPipe filter = new InboundPipe();
+            IConsumePipe filter = new ConsumePipe();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
@@ -70,7 +70,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_invoke_post_consumer()
         {
-            IInboundPipe filter = new InboundPipe();
+            IConsumePipe filter = new ConsumePipe();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
@@ -91,7 +91,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_invoke_pre()
         {
-            IInboundPipe filter = new InboundPipe();
+            IConsumePipe filter = new ConsumePipe();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 

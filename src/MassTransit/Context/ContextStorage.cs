@@ -104,9 +104,6 @@ namespace MassTransit.Context
 
         static ContextStorageProvider GetDefaultProvider()
         {
-            if (HttpContext.Current != null)
-                return new HttpContextContextStorageProvider();
-
             return new ThreadStaticContextStorageProvider();
         }
     }

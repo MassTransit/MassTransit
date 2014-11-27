@@ -25,6 +25,7 @@ namespace MassTransit.Subscriptions
     /// </summary>
     /// <typeparam name="T">The connectable type</typeparam>
     public class Connectable<T>
+        where T : class
     {
         readonly ConcurrentDictionary<long, T> _connections;
         long _nextId;

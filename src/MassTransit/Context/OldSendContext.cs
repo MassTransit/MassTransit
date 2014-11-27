@@ -73,7 +73,7 @@ namespace MassTransit.Context
             _bodyWriter(stream);
         }
 
-        public virtual void NotifySend(IEndpointAddress address)
+        public virtual void NotifySend(EndpointAddress address)
         {
             if (_receiveContext != null)
                 _receiveContext.NotifySend(this, address);

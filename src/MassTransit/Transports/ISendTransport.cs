@@ -33,5 +33,12 @@ namespace MassTransit.Transports
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
             where T : class;
+
+        /// <summary>
+        /// Move a message from a receive transport to the transport
+        /// </summary>
+        /// <param name="context">The original receive context</param>
+        /// <returns>A task completed once the message has been sent</returns>
+        Task Move(ReceiveContext context);
     }
 }

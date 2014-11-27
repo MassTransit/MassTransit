@@ -28,7 +28,7 @@ namespace MassTransit.Transports
         /// <summary>
         /// The input pipe for the endpoint
         /// </summary>
-        IInboundPipe InputPipe { get; }
+        IConsumePipe ConsumePipe { get; }
 
         /// <summary>
         /// Starts recieving from the inbound transport, returning a Task that is completed

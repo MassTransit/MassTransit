@@ -36,7 +36,7 @@ namespace MassTransit
         /// <summary>
         ///     The address of the endpoint
         /// </summary>
-        IEndpointAddress Address { get; }
+        EndpointAddress Address { get; }
 
         /// <summary>
         ///     The inbound transport for the endpoint

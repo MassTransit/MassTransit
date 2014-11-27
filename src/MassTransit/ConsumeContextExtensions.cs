@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Context;
     using Pipeline;
+    using Transports;
 
 
     public static class ConsumeContextExtensions
@@ -25,6 +26,11 @@ namespace MassTransit
             where TConsumer : class
         {
             return new ConsumerConsumeContextProxy<TConsumer, T>(context, consumer);
+        }
+
+        public static async Task Forward(this ReceiveContext context, ISendTransport transport)
+        {
+            await transport.Move(context);
         }
 
         public static async Task Forward<T>(this ConsumeContext<T> context, Uri address)

@@ -98,6 +98,6 @@ namespace MassTransit
         /// Called when the send context has been used to send a message to an endpoint
         /// </summary>
         /// <param name="address">The address to which the message was sent</param>
-        void NotifySend(IEndpointAddress address);
+        void NotifySend(EndpointAddress address);
     }
 }

@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Serialization
 		[Test]
 		public async void Should_dispatch_an_interface_via_the_pipeline()
 		{
-		    IInboundPipe pipe = new InboundPipe();
+		    IConsumePipe pipe = new ConsumePipe();
 			var consumer = new TestMessageConsumer<ComplaintAdded>();
 
 			pipe.ConnectInstance(consumer);

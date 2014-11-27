@@ -32,7 +32,7 @@ namespace MassTransit.Testing.Scenarios
 		/// Gets the output bus. This is the bus that has *outgoing* messages, i.e. the bus
 		/// that you publish and send on.
 		/// </summary>
-	    ISendEndpoint OutputBus { get; }
+	    ISendEndpoint InputQueueSendEndpoint { get; }
 
 		/// <summary>
 		/// The list of published messages is contained within this instance.

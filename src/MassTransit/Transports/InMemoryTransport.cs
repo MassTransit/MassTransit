@@ -15,6 +15,7 @@ namespace MassTransit.Transports
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -115,9 +116,38 @@ namespace MassTransit.Transports
             }
         }
 
+        async Task ISendTransport.Move(ReceiveContext context)
+        {
+            Guid messageId = GetMessageId(context);
+
+            byte[] body = await GetMessageBody(context.Body);
+
+            var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType);
+
+            _collection.Add(transportMessage, context.CancellationToken);
+        }
+
         public ConnectHandle Connect(ISendObserver observer)
         {
             return _observers.Connect(observer);
+        }
+
+        async Task<byte[]> GetMessageBody(Stream body)
+        {
+            using (var ms = new MemoryStream())
+            {
+                await body.CopyToAsync(ms);
+
+                return ms.ToArray();
+            }
+        }
+
+        static Guid GetMessageId(ReceiveContext context)
+        {
+            object messageIdValue;
+            return context.TransportHeaders.TryGetHeader("MessageId", out messageIdValue)
+                ? new Guid(messageIdValue.ToString())
+                : NewId.NextGuid();
         }
 
         CancellationTokenRegistration RegisterShutdown(CancellationToken cancellationToken)

@@ -19,10 +19,10 @@ namespace MassTransit.SubscriptionConnectors
     public interface HandlerConnector<T>
         where T : class
     {
-        ConnectHandle Connect(IInboundPipe inboundPipe, MessageHandler<T> handler,
+        ConnectHandle Connect(IConsumePipe consumePipe, MessageHandler<T> handler,
             params IFilter<ConsumeContext<T>>[] filters);
 
-        ConnectHandle Connect(IInboundPipe inboundPipe, Guid requestId, MessageHandler<T> handler,
+        ConnectHandle Connect(IConsumePipe consumePipe, Guid requestId, MessageHandler<T> handler,
             params IFilter<ConsumeContext<T>>[] filters);
     }
 }

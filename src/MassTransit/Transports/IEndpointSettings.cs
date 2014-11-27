@@ -20,7 +20,7 @@ namespace MassTransit.Transports
         /// <summary>
         /// The address of the endpoint where invalid messages should be moved
         /// </summary>
-        IEndpointAddress ErrorAddress { get; }
+        EndpointAddress ErrorAddress { get; }
 
         /// <summary>
         /// The serializer to use for messages on the endpoint

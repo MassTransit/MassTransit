@@ -20,13 +20,13 @@ namespace MassTransit.Transports
         TransportSettings,
         IEndpointSettings
     {
-        public EndpointSettings(IEndpointAddress address)
+        public EndpointSettings(EndpointAddress address)
             : base(address)
         {
             ErrorAddress = GetErrorEndpointAddress();
         }
 
-        public EndpointSettings(IEndpointAddress address, IEndpointSettings source)
+        public EndpointSettings(EndpointAddress address, IEndpointSettings source)
             : base(address, source)
         {
             Guard.AgainstNull(source, "source");
@@ -39,7 +39,7 @@ namespace MassTransit.Transports
             TrackerFactory = source.TrackerFactory;
         }
 
-        public EndpointSettings(IEndpointAddress address, IMessageSerializer serializer, ITransportSettings source)
+        public EndpointSettings(EndpointAddress address, IMessageSerializer serializer, ITransportSettings source)
             : base(address, source)
         {
             Guard.AgainstNull(source, "source");
@@ -53,7 +53,7 @@ namespace MassTransit.Transports
             ErrorAddress = GetErrorEndpointAddress();
         }
 
-        public IEndpointAddress ErrorAddress { get; set; }
+        public EndpointAddress ErrorAddress { get; set; }
         public IMessageSerializer Serializer { get; set; }
         public ISupportedMessageSerializers SupportedSerializers { get; set; }
         public int RetryLimit { get; set; }
@@ -61,7 +61,7 @@ namespace MassTransit.Transports
 
         EndpointAddress GetErrorEndpointAddress()
         {
-            return new EndpointAddress(Address.Uri.AppendToPath("_error"));
+            return new EndpointAddress(Address.AppendToPath("_error"));
         }
     }
 }

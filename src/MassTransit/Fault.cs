@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -18,11 +18,53 @@ namespace MassTransit
 
 
     /// <summary>
+    /// Published (or sent, if part of a request/response conversation) when a fault occurs during message
+    /// processing
+    /// </summary>
+    public interface Fault
+    {
+        /// <summary>
+        /// Identifies the fault that was generated
+        /// </summary>
+        Guid FaultId { get; }
+
+        /// <summary>
+        /// When the fault was produced
+        /// </summary>
+        DateTime Timestamp { get; }
+
+        /// <summary>
+        /// The exception information that occurred
+        /// </summary>
+        ExceptionInfo Exception { get; }
+
+        /// <summary>
+        /// The host information was the fault occurred
+        /// </summary>
+        HostInfo Host { get; }
+    }
+
+
+    /// <summary>
+    /// A faulted message, published when a message consumer fails to process the message
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface Fault<out T> :
+        Fault
+    {
+        /// <summary>
+        /// The message that faulted
+        /// </summary>
+        T Message { get; }
+    }
+
+
+    /// <summary>
     /// A fault is a system-generated message that is published when an exception occurs while processing a message.
     /// </summary>
     /// <typeparam name="TMessage">The type of message that threw the exception</typeparam>
     [Serializable]
-    public class Fault<TMessage> :
+    public class Faultered<TMessage> :
         IFault
         where TMessage : class
     {
@@ -31,7 +73,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="ex">The exception thrown by the message consumer</param>
         /// <param name="message">The message that was being processed when the exception was thrown</param>
-        public Fault(TMessage message, Exception ex)
+        public Faultered(TMessage message, Exception ex)
         {
             FailedMessage = message;
             OccurredAt = DateTime.UtcNow;
@@ -41,7 +83,7 @@ namespace MassTransit
             FaultType = typeof(Fault<TMessage>).ToShortTypeName();
         }
 
-        protected Fault()
+        protected Faultered()
         {
         }
 
@@ -99,14 +141,15 @@ namespace MassTransit
         }
     }
 
+
     /// <summary>
     /// A fault is a system-generated message that is published when an exception occurs while processing a message.
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
     /// <typeparam name="TKey"></typeparam>
     [Serializable]
-    public class Fault<TMessage, TKey> :
-        Fault<TMessage>,
+    public class Faultered<TMessage, TKey> :
+        Faultered<TMessage>,
         CorrelatedBy<TKey>
         where TMessage : class, CorrelatedBy<TKey>
     {
@@ -115,15 +158,15 @@ namespace MassTransit
         /// </summary>
         /// <param name="ex"></param>
         /// <param name="message"></param>
-        public Fault(TMessage message, Exception ex)
+        public Faultered(TMessage message, Exception ex)
             : base(message, ex)
         {
             CorrelationId = message.CorrelationId;
 
-            FaultType = typeof(Fault<TMessage, TKey>).ToShortTypeName();
+            FaultType = typeof(Faultered<TMessage, TKey>).ToShortTypeName();
         }
 
-        protected Fault()
+        protected Faultered()
         {
         }
 

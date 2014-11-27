@@ -71,10 +71,10 @@ namespace MassTransit.SubscriptionConnectors
                 (CachedConnector)Activator.CreateInstance(typeof(CachedConnector<>).MakeGenericType(type)));
         }
 
-        public static ConnectHandle Connect(IInboundPipe inboundPipe, Type consumerType, Func<Type, object> objectFactory,
+        public static ConnectHandle Connect(IConsumePipe consumePipe, Type consumerType, Func<Type, object> objectFactory,
             IRetryPolicy retryPolicy)
         {
-            return GetOrAdd(consumerType).Connect(inboundPipe, objectFactory, retryPolicy);
+            return GetOrAdd(consumerType).Connect(consumePipe, objectFactory, retryPolicy);
         }
 
 
@@ -82,7 +82,7 @@ namespace MassTransit.SubscriptionConnectors
         {
             ConsumerConnector Connector { get; }
 
-            ConnectHandle Connect(IInboundPipe inboundPipe, Func<Type, object> objectFactory, IRetryPolicy retryPolicy);
+            ConnectHandle Connect(IConsumePipe consumePipe, Func<Type, object> objectFactory, IRetryPolicy retryPolicy);
         }
 
 
@@ -102,11 +102,11 @@ namespace MassTransit.SubscriptionConnectors
                 get { return _connector.Value; }
             }
 
-            public ConnectHandle Connect(IInboundPipe inboundPipe, Func<Type, object> objectFactory, IRetryPolicy retryPolicy)
+            public ConnectHandle Connect(IConsumePipe consumePipe, Func<Type, object> objectFactory, IRetryPolicy retryPolicy)
             {
                 var consumerFactory = new ObjectConsumerFactory<T>(objectFactory);
 
-                return _connector.Value.Connect(inboundPipe, consumerFactory, retryPolicy);
+                return _connector.Value.Connect(consumePipe, consumerFactory, retryPolicy);
             }
         }
 

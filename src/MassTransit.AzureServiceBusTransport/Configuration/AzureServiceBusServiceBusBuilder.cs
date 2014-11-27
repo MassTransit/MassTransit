@@ -36,13 +36,13 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public virtual IBusControl Build()
         {
-            IInboundPipe inboundPipe = new InboundPipe();
+            IConsumePipe consumePipe = new ConsumePipe();
 
             ISendEndpointProvider sendEndpointProvider = new AzureServiceBusSendEndpointProvider(MessageSerializer, _hosts);
 
             var endpointCache = new SendEndpointCache(sendEndpointProvider);
 
-            return new SuperDuperServiceBus(new Uri("azure://localhost"), inboundPipe, endpointCache, ReceiveEndpoints);
+            return new SuperDuperServiceBus(new Uri("azure://localhost"), consumePipe, endpointCache, ReceiveEndpoints);
         }
     }
 }

@@ -12,9 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    /// <summary>
+    /// Supports connection of a consume observer
+    /// </summary>
     public interface IConsumeObserverConnector
     {
-        ConnectHandle Connect<TMessage>(IConsumeObserver<TMessage> observer)
-            where TMessage : class;
+        ConnectHandle Connect(IConsumeObserver observer);
     }
 }

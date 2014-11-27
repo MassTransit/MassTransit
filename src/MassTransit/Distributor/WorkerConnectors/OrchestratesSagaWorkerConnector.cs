@@ -34,7 +34,7 @@ namespace MassTransit.Distributor.WorkerConnectors
         protected override ISagaMessageSink<TSaga, TMessage> GetSagaMessageSink(ISagaRepository<TSaga> sagaRepository,
             ISagaPolicy<TSaga, TMessage> policy)
         {
-            return new CorrelatedSagaMessageSink<TSaga, TMessage>(sagaRepository, policy);
+            throw new NotImplementedException();
         }
     }
 }

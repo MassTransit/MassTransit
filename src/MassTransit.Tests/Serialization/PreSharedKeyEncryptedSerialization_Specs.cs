@@ -77,7 +77,7 @@ namespace MassTransit.Tests.Serialization
 		}
 
 		[Test(Description = "Validates that content type is set correctly set so the right serializer is selected at reception.")]
-		public void Endpoint_receive_should_select_encrypted_serializer_based_on_content_type()
+		public async void Endpoint_receive_should_select_encrypted_serializer_based_on_content_type()
 		{
 			var serializer = new PreSharedKeyEncryptedMessageSerializer(_key, new TSerializer());
 			var pingMessage = new PingMessage(Guid.NewGuid());
@@ -96,10 +96,10 @@ namespace MassTransit.Tests.Serialization
 
 				try
 				{
-					selfEndpoint.SendRequest(pingMessage, bus, x =>
-					{
-						x.SetTimeout(TimeSpan.FromSeconds(5));
-						x.Handle<PongMessage>(pongMsg => pongMsg.CorrelationId.ShouldEqual(pingMessage.CorrelationId));
+                    bus.Request(selfEndpoint.Address,pingMessage,  x =>
+                    {
+                        x.Timeout = TimeSpan.FromSeconds(5);
+						x.Handle<PongMessage>(async context => context.Message.CorrelationId.ShouldEqual(pingMessage.CorrelationId));
 					});
 				}
 				catch (Exception e)

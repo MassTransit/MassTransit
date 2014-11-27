@@ -55,7 +55,7 @@ namespace MassTransit.Subscriptions
 			{
 				try
 				{
-					ISubscriptionReference subscription = builder.Subscribe(bus.InputPipe);
+					ISubscriptionReference subscription = builder.Subscribe(bus.ConsumePipe);
 					_subscriptions.Add(subscription);
 				}
 				catch (Exception)

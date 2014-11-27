@@ -14,7 +14,7 @@ namespace MassTransit.Context
 {
 	public interface ISent
 	{
-		IEndpointAddress Address { get; }
+		EndpointAddress Address { get; }
 		ISendContext Context { get; }
 		long Timestamp { get; }
 	}

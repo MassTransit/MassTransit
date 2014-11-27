@@ -27,6 +27,11 @@ namespace MassTransit
         ReceiveContext ReceiveContext { get; }
 
         /// <summary>
+        /// An awaitable task that is completed once the consume context is completed
+        /// </summary>
+        Task CompleteTask { get; }
+
+        /// <summary>
         /// Returns the supported message types from the message
         /// </summary>
         IEnumerable<string> SupportedMessageTypes { get; }
@@ -89,10 +94,11 @@ namespace MassTransit
         /// <summary>
         /// Notify that a message consumer has faulted
         /// </summary>
-        /// <param name="messageType"></param>
-        /// <param name="consumerType"></param>
-        /// <param name="exception"></param>
-        void NotifyFaulted(string messageType, string consumerType, Exception exception);
+        /// <param name="message">The message that faulted</param>
+        /// <param name="consumerType">The message consumer type</param>
+        /// <param name="exception">The exception that occurred</param>
+        void NotifyFaulted<T>(T message, string consumerType, Exception exception)
+            where T : class;
     }
 
 

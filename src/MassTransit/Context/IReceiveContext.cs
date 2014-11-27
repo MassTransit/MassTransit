@@ -107,9 +107,9 @@ namespace MassTransit
         /// <param name="faultAction"></param>
         void NotifyFault(Action faultAction);
 
-        void NotifySend(ISendContext context, IEndpointAddress address);
+        void NotifySend(ISendContext context, EndpointAddress address);
 
-        void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address)
+        void NotifySend<T>(ISendContext<T> sendContext, EndpointAddress address)
             where T : class;
 
         void NotifyConsume<T>(IConsumeContext<T> consumeContext, string consumerType, string correlationId)

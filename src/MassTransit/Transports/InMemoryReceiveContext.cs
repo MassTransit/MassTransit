@@ -17,6 +17,7 @@ namespace MassTransit.Transports
     using System.IO;
     using System.Net.Mime;
     using System.Threading;
+    using System.Threading.Tasks;
     using Context;
 
 
@@ -104,7 +105,7 @@ namespace MassTransit.Transports
         {
         }
 
-        public void NotifyFaulted(string messageType, string consumerType, Exception exception)
+        public async Task NotifyFaulted<T>(T message, string consumerType, Exception exception)
         {
         }
 

@@ -27,8 +27,8 @@ namespace MassTransit.Testing.TestDecorators
         readonly IServiceBus _bus;
         readonly PublishedMessageListImpl _published;
         readonly EndpointTestScenarioImpl _scenario;
-        Uri _inputAddress;
-        IInboundPipe _inputPipe;
+        Uri _address;
+        IConsumePipe _consumePipe;
 
         public ServiceBusTestDecorator(IServiceBus bus, EndpointTestScenarioImpl scenario)
         {
@@ -130,14 +130,14 @@ namespace MassTransit.Testing.TestDecorators
             return _bus.TryGetService(type, out result);
         }
 
-        public Uri InputAddress
+        public Uri Address
         {
-            get { return _inputAddress; }
+            get { return _address; }
         }
 
-        public IInboundPipe InputPipe
+        public IConsumePipe ConsumePipe
         {
-            get { return _inputPipe; }
+            get { return _consumePipe; }
         }
 
         Task<ISendEndpoint> IBus.GetSendEndpoint(Uri address)

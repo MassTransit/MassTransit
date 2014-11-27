@@ -23,7 +23,7 @@ namespace MassTransit.Testing
             where TMessage : class
         {
             var actionConfigurator =
-                new SendTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus.GetSendEndpoint(x.Bus.InputAddress).Result, message);
+                new SendTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus.GetSendEndpoint(x.Bus.Address).Result, message);
 
             configurator.AddActionConfigurator(actionConfigurator);
         }
@@ -33,7 +33,7 @@ namespace MassTransit.Testing
             where TMessage : class
         {
             var actionConfigurator =
-                new SendTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus.GetSendEndpoint(x.Bus.InputAddress).Result, message,
+                new SendTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus.GetSendEndpoint(x.Bus.Address).Result, message,
                     callback);
 
             configurator.AddActionConfigurator(actionConfigurator);

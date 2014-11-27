@@ -33,6 +33,6 @@ namespace MassTransit.EndpointConfigurators
         int RetryLimit { get; }
 
         
-        EndpointSettings CreateEndpointSettings( IEndpointAddress address);
+        EndpointSettings CreateEndpointSettings( EndpointAddress address);
     }
 }

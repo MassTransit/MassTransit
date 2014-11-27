@@ -15,6 +15,8 @@ namespace MassTransit
     using System;
     using System.IO;
     using System.Net.Mime;
+    using System.Threading.Tasks;
+
 
     /// <summary>
     /// The receive context is sent from the transport when a message is ready to be processed
@@ -61,11 +63,10 @@ namespace MassTransit
         /// <summary>
         /// Notify that a message consumer faulted
         /// </summary>
-        /// <param name="messageType"></param>
-        /// <param name="consumerType"></param>
-        /// <param name="exception"></param>
-        void NotifyFaulted(string messageType, string consumerType, Exception exception);
-
+        /// <param name="message">The message that was faulted</param>
+        /// <param name="consumerType">The messsage consumer type that faulted</param>
+        /// <param name="exception">The exception that occurred</param>
+        Task NotifyFaulted<T>(T message, string consumerType, Exception exception);
 
         // TODO to tie sends back to the receiver?
         //void NotifySend(string messageType, Uri destinationAddress);

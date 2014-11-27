@@ -27,7 +27,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_receive_a_message()
         {
-            IInboundPipe filter = new InboundPipe();
+            IConsumePipe filter = new ConsumePipe();
 
             OneMessageConsumer consumer = GetOneMessageConsumer();
 
@@ -45,7 +45,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_receive_a_message_via_object()
         {
-            IInboundPipe filter = new InboundPipe();
+            IConsumePipe filter = new ConsumePipe();
 
             OneMessageConsumer consumer = GetOneMessageConsumer();
 
@@ -63,7 +63,7 @@ namespace MassTransit.Tests.Pipeline
         [Test, Explicit]
         public void Should_receive_a_message_pipeline_view()
         {
-            IInboundPipe filter = new InboundPipe();
+            IConsumePipe filter = new ConsumePipe();
 
             OneMessageConsumer consumer = GetOneMessageConsumer();
 
@@ -80,7 +80,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_receive_a_two_messages()
         {
-            IInboundPipe filter = new InboundPipe();
+            IConsumePipe filter = new ConsumePipe();
 
             TwoMessageConsumer consumer = GetTwoMessageConsumer();
 

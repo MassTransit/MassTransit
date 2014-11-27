@@ -60,10 +60,10 @@ namespace MassTransit.Transports
                 ITransportFactory transportFactory = _transportFactories[scheme];
                 try
                 {
-                    IEndpointAddress address = transportFactory.GetAddress(requestedUri, _defaults.RequireTransactional ||
+                    EndpointAddress address = transportFactory.GetAddress(requestedUri, _defaults.RequireTransactional ||
                         (_defaults.CreateMissingQueues && _defaults.CreateTransactionalQueues));
 
-                    var uriPath = new Uri(address.Uri.GetLeftPart(UriPartial.Path));
+                    var uriPath = new Uri(address.GetLeftPart(UriPartial.Path));
                     EndpointBuilder builder = _endpointBuilders.Get(uriPath, key =>
                         {
                             var configurator = new EndpointConfiguratorImpl(address, _defaults);

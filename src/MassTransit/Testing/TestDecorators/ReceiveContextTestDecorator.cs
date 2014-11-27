@@ -185,9 +185,7 @@ namespace MassTransit.Testing.TestDecorators
 
         public void SetBus(IServiceBus bus)
         {
-            IServiceBus busValue = _scenario.GetDecoratedBus(bus);
-
-            _context.SetBus(busValue);
+            _context.SetBus(bus);
         }
 
         public void SetSourceAddress(Uri uri)
@@ -255,12 +253,12 @@ namespace MassTransit.Testing.TestDecorators
             _context.NotifyFault(faultAction);
         }
 
-        public void NotifySend(ISendContext context, IEndpointAddress address)
+        public void NotifySend(ISendContext context, EndpointAddress address)
         {
             _context.NotifySend(context, address);
         }
 
-        public void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address) where T : class
+        public void NotifySend<T>(ISendContext<T> sendContext, EndpointAddress address) where T : class
         {
             _context.NotifySend(sendContext, address);
         }

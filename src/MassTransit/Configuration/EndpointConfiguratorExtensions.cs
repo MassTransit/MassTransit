@@ -45,18 +45,18 @@ namespace MassTransit
 		/// Specifies a null transport for error messages
 		/// </summary>
 		/// <param name="configurator"></param>
-		public static EndpointConfigurator DiscardFaultingMessages(this EndpointConfigurator configurator)
-		{
-			return configurator.SetErrorTransportFactory((factory, settings) => new NullOutboundTransport(settings.Address));
-		}
+//		public static EndpointConfigurator DiscardFaultingMessages(this EndpointConfigurator configurator)
+//		{
+//			return configurator.SetErrorTransportFactory((factory, settings) => new NullOutboundTransport(settings.Address));
+//		}
 
 		/// <summary>
 		/// Overrides the default error address with a new error address
 		/// </summary>
 		/// <returns></returns>
-		public static EndpointConfigurator SetErrorAddress(this EndpointConfigurator configurator, string uriString)
-		{
-			return configurator.SetErrorAddress(uriString.ToUri("Error URI was not valid"));
-		}
+//		public static EndpointConfigurator SetErrorAddress(this EndpointConfigurator configurator, string uriString)
+//		{
+//			return configurator.SetErrorAddress(uriString.ToUri("Error URI was not valid"));
+//		}
 	}
 }

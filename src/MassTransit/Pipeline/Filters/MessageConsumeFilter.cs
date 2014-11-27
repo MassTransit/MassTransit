@@ -26,16 +26,16 @@ namespace MassTransit.Pipeline.Filters
         IFilter<ConsumeContext>,
         IConsumeFilterConnector<TMessage>,
         IRequestFilterConnector<TMessage>,
-        IConsumeObserverConnector
+        IMessageObserverConnector
         where TMessage : class
     {
-        readonly ObserverConnectable<TMessage> _connections;
+        readonly MessageObserverConnectable<TMessage> _messageObservers;
         readonly TeeConsumeFilter<TMessage> _output;
 
         public MessageConsumeFilter()
         {
             _output = new TeeConsumeFilter<TMessage>();
-            _connections = new ObserverConnectable<TMessage>();
+            _messageObservers = new MessageObserverConnectable<TMessage>();
         }
 
         ConnectHandle IConsumeFilterConnector<TMessage>.Connect(IPipe<ConsumeContext<TMessage>> pipe)
@@ -43,35 +43,28 @@ namespace MassTransit.Pipeline.Filters
             return _output.Connect(pipe);
         }
 
-        ConnectHandle IConsumeObserverConnector.Connect<T>(IConsumeObserver<T> observer)
-        {
-            var self = _connections as ObserverConnectable<T>;
-            if (self == null)
-                throw new InvalidOperationException("The connection type is invalid: " + TypeMetadataCache<T>.ShortName);
-
-            return self.Connect(observer);
-        }
-
         async Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
             ConsumeContext<TMessage> consumeContext;
             if (context.TryGetMessage(out consumeContext))
             {
-                if (_connections.Count > 0)
-                    await _connections.PreDispatch(consumeContext);
-
+                if (_messageObservers.Count > 0)
+                    await _messageObservers.PreDispatch(consumeContext);
                 try
                 {
                     await _output.Send(consumeContext, next);
 
-                    if (_connections.Count > 0)
-                        await _connections.PostDispatch(consumeContext);
+                    if (_messageObservers.Count > 0)
+                        await _messageObservers.PostDispatch(consumeContext);
                 }
                 catch (Exception ex)
                 {
                     // we can't await in a catch block, so we have to wait explicitly on this one
-                    if (_connections.Count > 0)
-                        _connections.DispatchFaulted(consumeContext, ex).Wait(context.CancellationToken);
+                    if (_messageObservers.Count > 0)
+                    {
+                        _messageObservers.DispatchFault(consumeContext, ex)
+                            .Wait(context.CancellationToken);
+                    }
 
                     throw;
                 }
@@ -83,7 +76,16 @@ namespace MassTransit.Pipeline.Filters
             return inspector.Inspect(this, x => _output.Inspect(x));
         }
 
-        public ConnectHandle Connect(Guid requestId, IPipe<ConsumeContext<TMessage>> pipe)
+        ConnectHandle IMessageObserverConnector.Connect<T>(IMessageObserver<T> observer)
+        {
+            var self = _messageObservers as MessageObserverConnectable<T>;
+            if (self == null)
+                throw new InvalidOperationException("The connection type is invalid: " + TypeMetadataCache<T>.ShortName);
+
+            return self.Connect(observer);
+        }
+
+        ConnectHandle IRequestFilterConnector<TMessage>.Connect(Guid requestId, IPipe<ConsumeContext<TMessage>> pipe)
         {
             return _output.Connect(requestId, pipe);
         }

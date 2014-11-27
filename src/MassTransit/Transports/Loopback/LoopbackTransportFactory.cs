@@ -34,7 +34,7 @@ namespace MassTransit.Transports.Loopback
 
         public IDuplexTransport BuildLoopback(ITransportSettings settings)
         {
-            return _transports.Get(settings.Address.Uri, _ => new LoopbackTransport(settings.Address));
+            return _transports.Get(settings.Address, _ => new LoopbackTransport(settings.Address));
         }
 
         public IInboundTransport BuildInbound(ITransportSettings settings)
@@ -49,7 +49,7 @@ namespace MassTransit.Transports.Loopback
 
         public IOutboundTransport BuildError(ITransportSettings settings)
         {
-            return _transports.Get(settings.Address.Uri, _ => new LoopbackTransport(settings.Address));
+            return _transports.Get(settings.Address, _ => new LoopbackTransport(settings.Address));
         }
 
         public IMessageNameFormatter MessageNameFormatter
@@ -57,7 +57,7 @@ namespace MassTransit.Transports.Loopback
             get { return _messageNameFormatter; }
         }
 
-        public IEndpointAddress GetAddress(Uri uri, bool transactional)
+        public EndpointAddress GetAddress(Uri uri, bool transactional)
         {
             return new EndpointAddress(uri);
         }

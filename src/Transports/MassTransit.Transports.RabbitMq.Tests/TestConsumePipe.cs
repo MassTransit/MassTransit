@@ -18,7 +18,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
 
     class TestConsumePipe :
-        IInboundPipe
+        IConsumePipe
     {
         readonly Func<ConsumeContext, Task> _callback;
 
@@ -44,7 +44,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             throw new NotImplementedException();
         }
 
-        public ConnectHandle Connect<TMessage>(IConsumeObserver<TMessage> observer) where TMessage : class
+        public ConnectHandle Connect<TMessage>(IMessageObserver<TMessage> observer) where TMessage : class
         {
             throw new NotImplementedException();
         }

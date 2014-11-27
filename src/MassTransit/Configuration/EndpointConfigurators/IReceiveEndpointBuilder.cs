@@ -17,38 +17,8 @@ namespace MassTransit.EndpointConfigurators
 
     public interface IReceiveEndpointBuilder :
         IConsumeFilterConnector,
-        IConsumeObserverConnector
-
+        IMessageObserverConnector
     {
-        IInboundPipe InboundPipe { get; }
-    }
-
-
-    public class ReceiveEndpointBuilder :
-        IReceiveEndpointBuilder
-    {
-        readonly IInboundPipe _inboundPipe;
-
-        public ReceiveEndpointBuilder(IInboundPipe inboundPipe)
-        {
-            _inboundPipe = inboundPipe;
-        }
-
-        public ConnectHandle Connect<T>(IPipe<ConsumeContext<T>> pipe)
-            where T : class
-        {
-            return _inboundPipe.Connect(pipe);
-        }
-
-        public ConnectHandle Connect<TMessage>(IConsumeObserver<TMessage> observer)
-            where TMessage : class
-        {
-            return _inboundPipe.Connect(observer);
-        }
-
-        public IInboundPipe InboundPipe
-        {
-            get { return _inboundPipe; }
-        }
+        IConsumePipe InputPipe { get; }
     }
 }

@@ -29,11 +29,11 @@ namespace MassTransit.EndpointConfigurators
     {
         readonly Uri _baseUri;
         readonly EndpointSettings _settings;
-        IEndpointAddress _errorAddress;
+        EndpointAddress _errorAddress;
         OutboundTransportFactory _errorTransportFactory;
         DuplexTransportFactory _transportFactory;
 
-        public EndpointConfiguratorImpl( IEndpointAddress address,
+        public EndpointConfiguratorImpl( EndpointAddress address,
              IEndpointFactoryDefaultSettings defaultSettings)
         {
             if (address == null)
@@ -41,7 +41,7 @@ namespace MassTransit.EndpointConfigurators
             if (defaultSettings == null)
                 throw new ArgumentNullException("defaultSettings");
 
-            _baseUri = new Uri(address.Uri.GetLeftPart(UriPartial.Path));
+            _baseUri = new Uri(address.GetLeftPart(UriPartial.Path));
 
             _transportFactory = DefaultTransportFactory;
             _errorTransportFactory = DefaultErrorTransportFactory;
@@ -125,12 +125,12 @@ namespace MassTransit.EndpointConfigurators
         {
             if (_errorAddress != null)
             {
-                if (string.Compare(_errorAddress.Uri.Scheme, _settings.Address.Uri.Scheme,
+                if (string.Compare(_errorAddress.Scheme, _settings.Address.Scheme,
                     StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     yield return this.Failure("ErrorAddress", _errorAddress.ToString(),
                         "The error address ('{0}') must use the same scheme as the endpoint address ('{1}')"
-                            .FormatWith(_errorAddress.Uri, _settings.Address.Uri.Scheme));
+                            .FormatWith(_errorAddress, _settings.Address.Scheme));
                 }
                 else
                     yield return this.Success("ErrorAddress", "Using specified error address: " + _errorAddress);

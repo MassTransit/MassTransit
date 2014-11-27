@@ -17,6 +17,6 @@ namespace MassTransit.Transports
 	public interface ITransport :
 		IDisposable
 	{
-		IEndpointAddress Address { get; }
+		EndpointAddress Address { get; }
 	}
 }

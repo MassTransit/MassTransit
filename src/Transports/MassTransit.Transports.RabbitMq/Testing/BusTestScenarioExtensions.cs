@@ -62,7 +62,7 @@ namespace MassTransit.Testing
 		/// <param name="configurator">The configurator that is passed via the lambda that you are calling this method from.</param>
 		public static void UseRabbitMqBusScenario(this TestInstanceConfigurator<BusTestScenario> configurator)
 		{
-			configurator.UseScenarioBuilder(() => new RabbitMqBusScenarioBuilder());
+//			configurator.UseScenarioBuilder(() => new RabbitMqBusScenarioBuilder());
 		}
 	}
 }

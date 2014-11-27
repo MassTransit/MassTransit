@@ -47,7 +47,7 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        ConnectHandle ConsumerConnector.Connect<T>(IInboundPipe inboundPipe, IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy,
+        ConnectHandle ConsumerConnector.Connect<T>(IConsumePipe consumePipe, IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy,
             params IPipeBuilderConfigurator<ConsumerConsumeContext<T>>[] pipeBuilderConfigurators)
         {
             var factory = consumerFactory as IConsumerFactory<TConsumer>;
@@ -77,7 +77,7 @@ namespace MassTransit.SubscriptionConnectors
                 x.Filter(new ConsumerMessageFilter<TConsumer, TMessage>(factory, messagePipe));
             });
 
-            return inboundPipe.Connect(pipe);
+            return consumePipe.Connect(pipe);
         }
 
 

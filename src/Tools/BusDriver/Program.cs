@@ -100,7 +100,7 @@ namespace BusDriver
 
 			    foreach (var bus in _buses)
 			    {
-			        _log.DebugFormat("Disposing of service bus instance: {0}", bus.Endpoint.Address.Uri);
+			        _log.DebugFormat("Disposing of service bus instance: {0}", bus.Endpoint.Address);
 			        bus.Dispose();
 			    }
 			    _buses.Clear();

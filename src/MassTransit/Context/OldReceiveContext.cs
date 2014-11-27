@@ -111,12 +111,12 @@ namespace MassTransit.Context
             _faultActions.Add(faultAction);
         }
 
-        public void NotifySend(ISendContext context, IEndpointAddress address)
+        public void NotifySend(ISendContext context, EndpointAddress address)
         {
             _sent.Add(new Sent(context, address, _timer.ElapsedMilliseconds));
         }
 
-        public void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address)
+        public void NotifySend<T>(ISendContext<T> sendContext, EndpointAddress address)
             where T : class
         {
             _sent.Add(new Sent<T>(sendContext, address, _timer.ElapsedMilliseconds));
@@ -209,7 +209,7 @@ namespace MassTransit.Context
             {
                 Bus.GetEndpoint(ResponseAddress).Send(message, context =>
                     {
-                        context.SetSourceAddress(Bus.Endpoint.Address.Uri);
+                        context.SetSourceAddress(Bus.Endpoint.Address);
                         context.SetRequestId(RequestId);
                         contextCallback(context);
                     });

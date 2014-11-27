@@ -22,9 +22,9 @@ namespace MassTransit.TestFramework
     using Pipeline;
 
 
-    public class TestConsumeContext<T> :
-        ConsumeContext<T>
-        where T : class
+    public class TestConsumeContext<TMessage> :
+        ConsumeContext<TMessage>
+        where TMessage : class
     {
         PayloadCache _cache = new PayloadCache();
         CancellationToken _cancellationToken;
@@ -33,14 +33,15 @@ namespace MassTransit.TestFramework
         Uri _destinationAddress;
         DateTime? _expirationTime;
         Uri _faultAddress;
-        T _message;
+        TMessage _message;
         Guid? _messageId;
         ReceiveContext _receiveContext;
         Guid? _requestId;
         Uri _responseAddress;
         Uri _sourceAddress;
+        Task _completeTask;
 
-        public TestConsumeContext(T message)
+        public TestConsumeContext(TMessage message)
         {
             _message = message;
 
@@ -173,29 +174,34 @@ namespace MassTransit.TestFramework
             get { return _receiveContext; }
         }
 
+        public Task CompleteTask
+        {
+            get { return Task.FromResult(true); }
+        }
+
         public IEnumerable<string> SupportedMessageTypes
         {
-            get { return Enumerable.Repeat(new MessageUrn(typeof(T)).ToString(), 1); }
+            get { return Enumerable.Repeat(new MessageUrn(typeof(TMessage)).ToString(), 1); }
         }
 
         public bool HasMessageType(Type messageType)
         {
-            return messageType.IsAssignableFrom(typeof(T));
+            return messageType.IsAssignableFrom(typeof(TMessage));
         }
 
-        public bool TryGetMessage<TMessage>(out ConsumeContext<TMessage> consumeContext)
-            where TMessage : class
+        public bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
+            where T : class
         {
-            consumeContext = this as ConsumeContext<TMessage>;
+            consumeContext = this as ConsumeContext<T>;
             return consumeContext != null;
         }
 
-        public Task RespondAsync<T1>(T1 message) where T1 : class
+        public Task RespondAsync<T>(T message) where T : class
         {
             throw new NotImplementedException();
         }
 
-        public void Respond<T1>(T1 message) where T1 : class
+        public void Respond<T>(T message) where T : class
         {
             throw new NotImplementedException();
         }
@@ -214,11 +220,13 @@ namespace MassTransit.TestFramework
         {
         }
 
-        public void NotifyFaulted(string messageType, string consumerType, Exception exception)
+        public void NotifyFaulted<T>(T message, string consumerType, Exception exception) 
+            where T : class
         {
+
         }
 
-        public T Message
+        public TMessage Message
         {
             get { return _message; }
         }
@@ -229,6 +237,7 @@ namespace MassTransit.TestFramework
 
         public void NotifyFaulted(string consumerType, Exception exception)
         {
+            NotifyFaulted<TMessage>(_message, consumerType, exception);
         }
     }
 }

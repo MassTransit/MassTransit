@@ -108,7 +108,7 @@ namespace MassTransit.Diagnostics.Tracing
 					MessageType = x.Context.MessageType,
 					DeclaringMessageType = x.Context.DeclaringMessageType.ToShortTypeName(),
 					ContentType = x.Context.ContentType,
-					Address = x.Address.Uri,
+					Address = x.Address,
 					SourceAddress = x.Context.SourceAddress,
 					InputAddress = x.Context.InputAddress,
 					DestinationAddress = x.Context.DestinationAddress,

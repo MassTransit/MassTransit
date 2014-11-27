@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(RemoteBus.Endpoint.Address.Uri, LocalBus.Context().DestinationAddress);
+					Assert.AreEqual(RemoteBus.Endpoint.Address, LocalBus.Context().DestinationAddress);
 
 					received.Set(message);
 				});
@@ -60,7 +60,7 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Address.Uri, LocalBus.Context().FaultAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Address, LocalBus.Context().FaultAddress);
 
 					received.Set(message);
 				});
@@ -103,7 +103,7 @@ namespace MassTransit.Tests.Serialization
 			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
 				    var context = LocalBus.Context();
-					Assert.AreEqual(LocalBus.Endpoint.Address.Uri, context.ResponseAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Address, context.ResponseAddress);
 
 					received.Set(message);
 				});
@@ -146,7 +146,7 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.SubscribeHandler<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Address.Uri, LocalBus.Context().SourceAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Address, LocalBus.Context().SourceAddress);
 
 					received.Set(message);
 				});

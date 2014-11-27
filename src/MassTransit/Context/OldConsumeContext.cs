@@ -203,7 +203,7 @@ namespace MassTransit.Context
         void CreateAndSendFault<T>(T message, Exception exception)
             where T : class
         {
-            var fault = new Fault<T>(message, exception);
+            var fault = new Faultered<T>(message, exception);
             var bus = Bus;
             var faultAddress = FaultAddress;
             var responseAddress = ResponseAddress;
@@ -216,7 +216,7 @@ namespace MassTransit.Context
         void CreateAndSendCorrelatedFault<T, TKey>(T message, Exception exception)
             where T : class, CorrelatedBy<TKey>
         {
-            var fault = new Fault<T, TKey>(message, exception);
+            var fault = new Faultered<T, TKey>(message, exception);
             var bus = Bus;
             var faultAddress = FaultAddress;
             var responseAddress = ResponseAddress;
@@ -232,7 +232,7 @@ namespace MassTransit.Context
             {
                 bus.GetEndpoint(faultAddress).Send(message, context =>
                     {
-                        context.SetSourceAddress(bus.Endpoint.Address.Uri);
+                        context.SetSourceAddress(bus.Endpoint.Address);
                         context.SetRequestId(requestId);
                     });
             }
@@ -240,7 +240,7 @@ namespace MassTransit.Context
             {
                 bus.GetEndpoint(responseAddress).Send(message, context =>
                     {
-                        context.SetSourceAddress(bus.Endpoint.Address.Uri);
+                        context.SetSourceAddress(bus.Endpoint.Address);
                         context.SetRequestId(requestId);
                     });
             }
