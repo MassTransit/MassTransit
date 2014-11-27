@@ -19,6 +19,7 @@ namespace MassTransit.AzureServiceBusTransport
     using EndpointConfigurators;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
+    using MassTransit.Pipeline.Pipes;
     using Microsoft.ServiceBus.Messaging;
     using PipeConfigurators;
     using Policies;
@@ -67,7 +68,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
         {
-            _pipeConfigurator.AddPipeBuilderConfigurator(configurator);
+            ((IPipeConfigurator<ConsumeContext>)_pipeConfigurator).AddPipeBuilderConfigurator(configurator);
         }
 
         public void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)

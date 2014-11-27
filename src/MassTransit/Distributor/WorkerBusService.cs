@@ -50,24 +50,24 @@ namespace MassTransit.Distributor
             _bus = bus;
             _controlBus = bus;
 
-            bus.Configure(pipelineConfigurator =>
-                {
-                    foreach (WorkerConnector connector in _connectors)
-                    {
-                        try
-                        {
-                            ISubscriptionReference subscription = connector.Connect(pipelineConfigurator, this);
-                            _subscriptions.Add(subscription);
-                        }
-                        catch (Exception)
-                        {
-                            StopAllSubscriptions();
-                            throw;
-                        }
-                    }
-
-                    return () => true;
-                });
+//            bus.Configure(pipelineConfigurator =>
+//                {
+//                    foreach (WorkerConnector connector in _connectors)
+//                    {
+//                        try
+//                        {
+//                            ISubscriptionReference subscription = connector.Connect(pipelineConfigurator, this);
+//                            _subscriptions.Add(subscription);
+//                        }
+//                        catch (Exception)
+//                        {
+//                            StopAllSubscriptions();
+//                            throw;
+//                        }
+//                    }
+//
+//                    return () => true;
+//                });
 
             // TODO replace with TPL variant
 //            _scheduler.Schedule(TimeSpan.Zero, _publishInterval, _fiber, PublishWorkerAvailability);

@@ -14,8 +14,6 @@ namespace MassTransit.Distributor.WorkerConnectors
 {
     using System;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Configuration;
-    using MassTransit.Pipeline.Sinks;
     using Messages;
     using Pipeline;
     using Subscriptions;
@@ -24,29 +22,20 @@ namespace MassTransit.Distributor.WorkerConnectors
         WorkerConnector
         where TMessage : class
     {
-        readonly HandlerSelector<TMessage> _handler;
-        readonly ReferenceFactory _referenceFactory;
 
-        public HandlerWorkerConnector(HandlerSelector<TMessage> handler,
-            ReferenceFactory referenceFactory)
-        {
-            _handler = handler;
-            _referenceFactory = referenceFactory;
-        }
-
-        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker)
-        {
-            IWorkerLoad<TMessage> workerLoad = worker.GetWorkerLoad<TMessage>();
-
-            var handlerSink = new InstanceMessageSink<TMessage>(MultipleHandlerSelector.ForHandler(_handler));
-
-            var sink = new WorkerMessageSink<TMessage>(workerLoad, handlerSink);
-
-            UnsubscribeAction unsubscribeAction = configurator.Pipeline.ConnectToRouter(sink,
-                () => configurator.SubscribedTo<Distributed<TMessage>>());
-            throw new NotImplementedException();
-
-//            return _referenceFactory(unsubscribeAction);
-        }
+//        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker)
+//        {
+//            IWorkerLoad<TMessage> workerLoad = worker.GetWorkerLoad<TMessage>();
+//
+//            var handlerSink = new InstanceMessageSink<TMessage>(MultipleHandlerSelector.ForHandler(_handler));
+//
+//            var sink = new WorkerMessageSink<TMessage>(workerLoad, handlerSink);
+//
+////            UnsubscribeAction unsubscribeAction = configurator.Pipeline.ConnectToRouter(sink,
+////                () => configurator.SubscribedTo<Distributed<TMessage>>());
+//            throw new NotImplementedException();
+//
+////            return _referenceFactory(unsubscribeAction);
+//        }
     }
 }

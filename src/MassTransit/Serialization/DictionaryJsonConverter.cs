@@ -17,42 +17,42 @@ namespace MassTransit.Serialization
     using Magnum.Reflection;
     using Newtonsoft.Json;
 
-    public class DictionaryJsonConverter :
-        JsonConverter
-    {
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            throw new NotSupportedException("This converter should not be used for writing as it can create loops");
-        }
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
-                                        JsonSerializer serializer)
-        {
-            Type[] arguments = objectType.GetGenericArguments();
-
-            Type keyType = arguments[0];
-            Type valueType = arguments[1];
-            return this.FastInvoke<DictionaryJsonConverter, object>(new[] {keyType, valueType}, "GetDictionary", reader,
-                objectType, serializer);
-        }
-
-        public override bool CanConvert(Type objectType)
-        {
-            return (objectType.IsGenericType
-                    && (objectType.GetGenericTypeDefinition() == typeof (IDictionary<,>)
-                        || objectType.GetGenericTypeDefinition() == typeof (Dictionary<,>)));
-        }
-
-        object GetDictionary<TKey, TValue>(JsonReader reader, Type objectType, JsonSerializer serializer)
-        {
-            var dictionary = new Dictionary<TKey, TValue>();
-
-            if (reader.TokenType == JsonToken.Null)
-                return dictionary;
-
-            serializer.Populate(reader, dictionary);
-
-            return dictionary;
-        }
-    }
+//    public class DictionaryJsonConverter :
+//        JsonConverter
+//    {
+//        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+//        {
+//            throw new NotSupportedException("This converter should not be used for writing as it can create loops");
+//        }
+//
+//        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+//                                        JsonSerializer serializer)
+//        {
+//            Type[] arguments = objectType.GetGenericArguments();
+//
+//            Type keyType = arguments[0];
+//            Type valueType = arguments[1];
+//            return this.FastInvoke<DictionaryJsonConverter, object>(new[] {keyType, valueType}, "GetDictionary", reader,
+//                objectType, serializer);
+//        }
+//
+//        public override bool CanConvert(Type objectType)
+//        {
+//            return (objectType.IsGenericType
+//                    && (objectType.GetGenericTypeDefinition() == typeof (IDictionary<,>)
+//                        || objectType.GetGenericTypeDefinition() == typeof (Dictionary<,>)));
+//        }
+//
+//        object GetDictionary<TKey, TValue>(JsonReader reader, Type objectType, JsonSerializer serializer)
+//        {
+//            var dictionary = new Dictionary<TKey, TValue>();
+//
+//            if (reader.TokenType == JsonToken.Null)
+//                return dictionary;
+//
+//            serializer.Populate(reader, dictionary);
+//
+//            return dictionary;
+//        }
+//    }
 }

@@ -13,7 +13,6 @@
 namespace MassTransit.SubscriptionBuilders
 {
     using Pipeline;
-    using Pipeline.Sinks;
     using Policies;
     using SubscriptionConnectors;
     using Subscriptions;

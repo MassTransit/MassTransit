@@ -29,7 +29,7 @@ namespace MassTransit.Serialization
     public class JsonConsumeContext :
         ConsumeContext
     {
-        readonly IList<Task> _consumeTasks;
+        readonly IList<Task> _pendingTasks;
         readonly JsonSerializer _deserializer;
         readonly MessageEnvelope _envelope;
         readonly JToken _messageToken;
@@ -58,7 +58,7 @@ namespace MassTransit.Serialization
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, object>();
             _publishEndpoint = null;
-            _consumeTasks = new List<Task>();
+            _pendingTasks = new List<Task>();
         }
 
         public bool HasPayloadType(Type contextType)
@@ -135,7 +135,7 @@ namespace MassTransit.Serialization
 
         public Task CompleteTask
         {
-            get { return Task.WhenAll(_consumeTasks); }
+            get { return Task.WhenAll(_pendingTasks); }
         }
 
         public IEnumerable<string> SupportedMessageTypes
@@ -236,7 +236,7 @@ namespace MassTransit.Serialization
         {
             Task task = RespondAsync(message);
 
-            _consumeTasks.Add(task);
+            _pendingTasks.Add(task);
         }
 
         public void RetryLater()
@@ -259,9 +259,11 @@ namespace MassTransit.Serialization
         {
             Task faultTask = GenerateFault(message, exception);
 
-            _consumeTasks.Add(faultTask);
+            _pendingTasks.Add(faultTask);
 
-            _receiveContext.NotifyFaulted(message, consumerType, exception);
+            var receiveTask = _receiveContext.NotifyFaulted(message, consumerType, exception);
+
+            _pendingTasks.Add(receiveTask);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)

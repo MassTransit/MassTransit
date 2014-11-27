@@ -45,16 +45,6 @@ namespace MassTransit
         IEndpoint Endpoint { get; }
 
         /// <summary>
-        /// Gets the inbound message pipeline.
-        /// </summary>
-        IInboundMessagePipeline InboundPipeline { get; }
-
-        /// <summary>
-        /// Gets the outbound message pipeline.
-        /// </summary>
-        IOutboundMessagePipeline OutboundPipeline { get; }
-
-        /// <summary>
         /// Gets the endpoint cache. This property is used
         /// by <see cref="GetEndpoint"/> method in turn.
         /// </summary>
@@ -71,14 +61,6 @@ namespace MassTransit
         /// <param name="address"></param>
         /// <returns>The endpoint that corresponds to the uri passed</returns>
         IEndpoint GetEndpoint(Uri address);
-
-        /// <summary>
-        ///   Not sure this is going to make it, but trying a new approach.
-        /// </summary>
-        /// <param name = "configure"></param>
-        /// <returns>An unsubscribe action that can be called to unsubscribe
-        /// what was configured to be subscribed with the func passed. <see cref="UnsubscribeAction"/>.</returns>
-        UnsubscribeAction Configure(Func<IInboundPipelineConfigurator, UnsubscribeAction> configure);
 
         /// <summary>
         /// Get the first service with the matching type, throwing an InvalidOperationException if none is found.

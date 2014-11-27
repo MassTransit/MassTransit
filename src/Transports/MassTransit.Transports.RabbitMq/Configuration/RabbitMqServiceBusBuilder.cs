@@ -18,6 +18,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
     using System.Threading.Tasks;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
     using Serialization;
 
 

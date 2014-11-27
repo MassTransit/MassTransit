@@ -13,8 +13,6 @@
 namespace MassTransit.Distributor.WorkerConnectors
 {
     using System;
-    using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Configuration;
     using Messages;
     using Pipeline;
     using Saga;
@@ -36,18 +34,19 @@ namespace MassTransit.Distributor.WorkerConnectors
             get { return typeof(TMessage); }
         }
 
-        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IWorker worker)
-        {
-            IWorkerLoad<TMessage> workerLoad = worker.GetWorkerLoad<TMessage>();
-
-            ISagaPolicy<TSaga, TMessage> policy = GetPolicy();
-
-            ISagaMessageSink<TSaga, TMessage> messageSink = GetSagaMessageSink(_sagaRepository, policy);
-
-            var sink = new WorkerMessageSink<TMessage>(workerLoad, messageSink);
-
-            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<Distributed<TMessage>>());
-        }
+//        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IWorker worker)
+//        {
+//            IWorkerLoad<TMessage> workerLoad = worker.GetWorkerLoad<TMessage>();
+//
+//            ISagaPolicy<TSaga, TMessage> policy = GetPolicy();
+//
+//            ISagaMessageSink<TSaga, TMessage> messageSink = GetSagaMessageSink(_sagaRepository, policy);
+//
+//            var sink = new WorkerMessageSink<TMessage>(workerLoad, messageSink);
+//
+//            throw new NotImplementedException();
+////            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<Distributed<TMessage>>());
+//        }
 
         protected abstract ISagaPolicy<TSaga, TMessage> GetPolicy();
 

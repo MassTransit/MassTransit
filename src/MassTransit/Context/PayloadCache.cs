@@ -14,7 +14,9 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Concurrent;
+    using Internals.Extensions;
     using Magnum.Extensions;
+    using Util;
 
 
     public class PayloadCache
@@ -60,7 +62,7 @@ namespace MassTransit.Context
                     if (payload != default(TPayload))
                         return new CachedPayload<TPayload>(payload);
 
-                    throw new PayloadNotFoundException("The payload was not found: " + typeof(TPayload).ToShortTypeName());
+                    throw new PayloadNotFoundException("The payload was not found: " + TypeMetadataCache<TPayload>.ShortName);
                 });
 
                 return cachedPayload.GetPayload<TPayload>();
@@ -71,7 +73,7 @@ namespace MassTransit.Context
             }
             catch (Exception ex)
             {
-                throw new PayloadFactoryException("The payload factory faulted: " + typeof(TPayload).ToShortTypeName(), ex);
+                throw new PayloadFactoryException("The payload factory faulted: " + TypeMetadataCache<TPayload>.ShortName, ex);
             }
         }
 
@@ -101,7 +103,7 @@ namespace MassTransit.Context
                 if (payload != null)
                     return payload._payload;
 
-                throw new PayloadException("Payload type mismatch: " + typeof(T).ToShortTypeName());
+                throw new PayloadException("Payload type mismatch: " + TypeMetadataCache<T>.ShortName);
             }
         }
     }

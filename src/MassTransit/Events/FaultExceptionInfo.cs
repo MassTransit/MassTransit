@@ -13,6 +13,7 @@
 namespace MassTransit.Events
 {
     using System;
+    using Internals.Extensions;
 
 
     public class FaultExceptionInfo :
@@ -27,7 +28,7 @@ namespace MassTransit.Events
 
         public string ExceptionType
         {
-            get { return _exception.GetType().FullName; }
+            get { return _exception.GetType().GetTypeName(); }
         }
 
         public ExceptionInfo InnerException

@@ -13,10 +13,49 @@
 namespace MassTransit.Util
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading;
-    using Magnum.Extensions;
+    using Internals.Extensions;
     using Saga;
+
+
+    public static class TypeMetadataCache
+    {
+        static CachedType GetOrAdd(Type type)
+        {
+            return Cached.Instance.GetOrAdd(type, _ =>
+                (CachedType)Activator.CreateInstance(typeof(CachedType<>).MakeGenericType(type)));
+        }
+
+        public static string ShortName(Type type)
+        {
+            return GetOrAdd(type).ShortName;
+        }
+
+
+        static class Cached
+        {
+            internal static readonly ConcurrentDictionary<Type, CachedType> Instance = new ConcurrentDictionary<Type, CachedType>();
+        }
+
+
+        interface CachedType
+        {
+            string ShortName { get; }
+        }
+
+
+        class CachedType<T> :
+            CachedType
+            where T : class, IConsumer
+        {
+            public string ShortName
+            {
+                get { return TypeMetadataCache<T>.ShortName; }
+            }
+        }
+    }
 
 
     public class TypeMetadataCache<T> :
@@ -28,7 +67,7 @@ namespace MassTransit.Util
 
         TypeMetadataCache()
         {
-            _shortName = typeof(T).ToShortTypeName();
+            _shortName = typeof(T).GetTypeName();
 
             _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
         }
@@ -48,7 +87,6 @@ namespace MassTransit.Util
             get { return _hasSagaInterfaces.Value; }
         }
 
-
         string ITypeMetadataCache<T>.ShortName
         {
             get { return _shortName; }
@@ -61,12 +99,9 @@ namespace MassTransit.Util
             if (interfaces.Contains(typeof(ISaga)))
                 return true;
 
-            if (interfaces.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(InitiatedBy<>))
-                || interfaces.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(Orchestrates<>))
-                || interfaces.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(Observes<,>)))
-                return true;
-
-            return false;
+            return interfaces.Any(x => x.HasInterface(typeof(InitiatedBy<>))
+                || x.HasInterface(typeof(Orchestrates<>))
+                || x.HasInterface(typeof(Observes<,>)));
         }
 
 

@@ -24,10 +24,12 @@ namespace MassTransit.AzureServiceBusTransport
     {
         readonly ServiceBusHostSettings[] _hosts;
         readonly ISendMessageSerializer _serializer;
+        readonly Uri _sourceAddress;
 
-        public AzureServiceBusSendEndpointProvider(ISendMessageSerializer serializer, ServiceBusHostSettings[] hosts)
+        public AzureServiceBusSendEndpointProvider(ISendMessageSerializer serializer, Uri sourceAddress, ServiceBusHostSettings[] hosts)
         {
             _hosts = hosts;
+            _sourceAddress = sourceAddress;
             _serializer = serializer;
         }
 
@@ -43,7 +45,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             var sendTransport = new AzureServiceBusSendTransport(messageSender);
 
-            return new SendEndpoint(sendTransport, _serializer, address);
+            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress);
         }
     }
 }

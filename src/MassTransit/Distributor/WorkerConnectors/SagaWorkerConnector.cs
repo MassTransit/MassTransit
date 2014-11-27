@@ -17,7 +17,6 @@ namespace MassTransit.Distributor.WorkerConnectors
     using System.Linq;
     using Magnum.Extensions;
     using Magnum.Reflection;
-    using MassTransit.Pipeline;
     using Saga;
     using Subscriptions;
     using Util;
@@ -26,7 +25,7 @@ namespace MassTransit.Distributor.WorkerConnectors
     {
         Type MessageType { get; }
 
-        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IWorker worker);
+//        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IWorker worker);
     }
 
     public class SagaWorkerConnector<T> :
@@ -64,12 +63,12 @@ namespace MassTransit.Distributor.WorkerConnectors
             }
         }
 
-        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker)
-        {
-            throw new NotImplementedException();
-            //            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, worker))
-//                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
-        }
+//        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker)
+//        {
+//            throw new NotImplementedException();
+//            //            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, worker))
+////                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
+//        }
 
         IEnumerable<SagaWorkerConnector> Initiates()
         {

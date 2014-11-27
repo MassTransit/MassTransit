@@ -53,12 +53,12 @@ namespace MassTransit.Distributor.DistributorConnectors
                 .ToList();
         }
 
-        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
-        {
-            throw new NotImplementedException();
-//            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, distributor))
-//                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
-        }
+//        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
+//        {
+//            throw new NotImplementedException();
+////            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, distributor))
+////                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
+//        }
 
         IEnumerable<MessageDistributorConnector> ConsumesContext()
         {

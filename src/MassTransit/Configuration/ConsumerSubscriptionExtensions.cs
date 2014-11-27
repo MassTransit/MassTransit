@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using Configuration;
     using EndpointConfigurators;
+    using Internals.Extensions;
     using Logging;
     using Magnum.Extensions;
     using Policies;
@@ -129,7 +130,7 @@ namespace MassTransit
             Func<Type, object> consumerFactory, IRetryPolicy retryPolicy = null)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType.ToShortTypeName());
+                _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType.GetTypeName());
 
             var consumerConfigurator = (SubscriptionBuilderConfigurator)Activator.CreateInstance(
                 typeof(UntypedConsumerSubscriptionConfigurator<>).MakeGenericType(consumerType), consumerFactory, retryPolicy ?? Retry.None);

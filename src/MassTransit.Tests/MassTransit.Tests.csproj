@@ -99,7 +99,6 @@
     <Compile Include="InterceptingConsumer_Specs.cs" />
     <Compile Include="Diagnostics\Trace_Specs.cs" />
     <Compile Include="Enrichment_Specs.cs" />
-    <Compile Include="Environment_Specs.cs" />
     <Compile Include="InterfaceProxy_Specs.cs" />
     <Compile Include="JsonToken_Specs.cs" />
     <Compile Include="MessageUrnSpecs.cs" />
@@ -119,7 +118,6 @@
     <Compile Include="Load\Messages\FirstCommand.cs" />
     <Compile Include="Load\Messages\FirstPending.cs" />
     <Compile Include="Load\Messages\FirstResponse.cs" />
-    <Compile Include="Fault_Specs.cs" />
     <Compile Include="FutureMessage.cs" />
     <Compile Include="Groups\Group_Specs.cs" />
     <Compile Include="InterfaceSubscription_Specs.cs" />
@@ -224,6 +222,10 @@
     <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
       <Project>{8D2BE372-A756-4676-B2EA-ED7846809BFE}</Project>
       <Name>MassTransit.Log4NetIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.Compatibility\MassTransit.Compatibility.csproj">
+      <Project>{9ae455c4-0bf7-43ac-95e2-9e1b1d642385}</Project>
+      <Name>MassTransit.Compatibility</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
       <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>

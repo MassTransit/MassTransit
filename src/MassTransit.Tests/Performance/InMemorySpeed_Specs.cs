@@ -65,4 +65,85 @@ namespace MassTransit.Tests.Performance
             });
         }
     }
+
+
+    [TestFixture, Explicit]
+    public class Performance_of_dynamic_interface_implementations :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async void Should_be_also_really_fast()
+        {
+            int limit = 10000;
+            int count = 0;
+
+            await _requestClient.Request(new PerformanceRequestImpl());
+
+            Stopwatch timer = Stopwatch.StartNew();
+
+            await Task.WhenAll(Enumerable.Range(0, limit).Select(async x =>
+            {
+                await _requestClient.Request(new PerformanceRequestImpl());
+
+                Interlocked.Increment(ref count);
+            }));
+
+            timer.Stop();
+
+            Console.WriteLine("Time to process {0} messages = {1}", count, timer.ElapsedMilliseconds + "ms");
+            Console.WriteLine("Messages per second: {0}", count * 1000 / timer.ElapsedMilliseconds);
+        }
+
+        IRequestClient<PerformanceRequest, PerformanceResult> _requestClient;
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            _requestClient = new MessageRequestClient<PerformanceRequest, PerformanceResult>(Bus, InputQueueAddress, TestTimeout);
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            configurator.Handler<PerformanceRequest>(async context =>
+            {
+                await context.RespondAsync(new PerformanceResultImpl(context.Message.Id));
+            });
+        }
+
+
+        public interface PerformanceResult
+        {
+            Guid Id { get; }
+        }
+
+
+        class PerformanceResultImpl :
+            PerformanceResult
+        {
+            public PerformanceResultImpl(Guid id)
+            {
+                Id = id;
+            }
+
+            public Guid Id { get; private set; }
+        }
+
+
+        public interface PerformanceRequest
+        {
+            Guid Id { get; }
+        }
+
+
+        class PerformanceRequestImpl :
+            PerformanceRequest
+        {
+            public PerformanceRequestImpl()
+            {
+                Id = Guid.NewGuid();
+            }
+
+            public Guid Id { get; private set; }
+        }
+    }
 }

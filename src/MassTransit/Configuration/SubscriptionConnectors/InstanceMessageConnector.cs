@@ -13,6 +13,7 @@
 namespace MassTransit.SubscriptionConnectors
 {
     using System;
+    using Internals.Extensions;
     using Magnum.Extensions;
     using Pipeline;
     using Pipeline.Filters;
@@ -56,7 +57,7 @@ namespace MassTransit.SubscriptionConnectors
             if (consumer == null)
             {
                 throw new ConsumerException(string.Format("The instance type {0} does not match the consumer type: {1}",
-                    instance.GetType().ToShortTypeName(), TypeMetadataCache<TConsumer>.ShortName));
+                    instance.GetType().GetTypeName(), TypeMetadataCache<TConsumer>.ShortName));
             }
 
             IPipe<ConsumeContext<TMessage>> instancePipe = Pipe.New<ConsumeContext<TMessage>>(x =>

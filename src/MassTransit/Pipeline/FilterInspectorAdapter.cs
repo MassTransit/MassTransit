@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline
 {
     using System;
+    using Internals.Extensions;
     using Magnum.Extensions;
 
 
@@ -38,7 +39,7 @@ namespace MassTransit.Pipeline
 
             var actualFilter = filter as TFilter;
             if (actualFilter == null)
-                throw new ArgumentException("Unexpected filter type: " + filter.GetType().ToShortTypeName());
+                throw new ArgumentException("Unexpected filter type: " + filter.GetType().GetTypeName());
 
             return _inspector.Inspect(actualFilter, callback);
         }

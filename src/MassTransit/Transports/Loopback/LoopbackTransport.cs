@@ -230,7 +230,7 @@ namespace MassTransit.Transports
                 {
                     lock (_messageWriteLock)
                     {
-                        _messages.Each(x => x.Dispose());
+//                        _messages.Each(x => x.Dispose());
                         _messages.Clear();
                         _messages = null;
                     }

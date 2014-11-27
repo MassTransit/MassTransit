@@ -14,8 +14,8 @@ namespace MassTransit.SubscriptionConfigurators
 {
     using System.Collections.Generic;
     using Configurators;
+    using Internals.Extensions;
     using Magnum.Extensions;
-    using Pipeline.Sinks;
     using Policies;
     using SubscriptionBuilders;
 
@@ -42,7 +42,7 @@ namespace MassTransit.SubscriptionConfigurators
             {
                 yield return
                     this.Warning(string.Format("The instance of {0} does not implement any IMessageConsumer interfaces",
-                        _instance.GetType().ToShortTypeName()));
+                        _instance.GetType().GetTypeName()));
             }
         }
 

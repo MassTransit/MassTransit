@@ -165,10 +165,10 @@ namespace MassTransit.Context
                 _log.DebugFormat("Retrying message of type {0} later", typeof(TMessage));
 
             Bus.Endpoint.Send(Message, x =>
-                {
-                    x.SetUsing(this);
-                    x.SetRetryCount(RetryCount + 1);
-                });
+            {
+                x.SetUsing(this);
+                x.SetRetryCount(RetryCount + 1);
+            });
         }
 
         public void Respond<T>(T message, Action<ISendContext<T>> contextCallback)
@@ -189,65 +189,7 @@ namespace MassTransit.Context
                 .DefaultIfEmpty(null)
                 .FirstOrDefault();
 
-            if (correlationType != null)
-            {
-                this.FastInvoke(new[] {typeof(TMessage), correlationType}, "CreateAndSendCorrelatedFault", Message, ex);
-            }
-            else
-            {
-                this.FastInvoke(new[] {typeof(TMessage)}, "CreateAndSendFault", Message, ex);
-            }
         }
 
-        
-        void CreateAndSendFault<T>(T message, Exception exception)
-            where T : class
-        {
-            var fault = new Faultered<T>(message, exception);
-            var bus = Bus;
-            var faultAddress = FaultAddress;
-            var responseAddress = ResponseAddress;
-            var requestId = RequestId;
-
-            _context.NotifyFault(() => SendFault(bus, faultAddress, responseAddress, requestId, fault));
-        }
-
-        
-        void CreateAndSendCorrelatedFault<T, TKey>(T message, Exception exception)
-            where T : class, CorrelatedBy<TKey>
-        {
-            var fault = new Faultered<T, TKey>(message, exception);
-            var bus = Bus;
-            var faultAddress = FaultAddress;
-            var responseAddress = ResponseAddress;
-            var requestId = RequestId;
-
-            _context.NotifyFault(() => SendFault(bus, faultAddress, responseAddress, requestId, fault));
-        }
-
-        static void SendFault<T>(IServiceBus bus, Uri faultAddress, Uri responseAddress, string requestId, T message)
-            where T : class
-        {
-            if (faultAddress != null)
-            {
-                bus.GetEndpoint(faultAddress).Send(message, context =>
-                    {
-                        context.SetSourceAddress(bus.Endpoint.Address);
-                        context.SetRequestId(requestId);
-                    });
-            }
-            else if (responseAddress != null)
-            {
-                bus.GetEndpoint(responseAddress).Send(message, context =>
-                    {
-                        context.SetSourceAddress(bus.Endpoint.Address);
-                        context.SetRequestId(requestId);
-                    });
-            }
-            else
-            {
-//                bus.Publish(message, context => context.SetRequestId(requestId));
-            }
-        }
     }
 }

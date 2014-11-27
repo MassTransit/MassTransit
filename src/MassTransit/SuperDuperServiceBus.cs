@@ -39,6 +39,7 @@ namespace MassTransit
             _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
             _receiveEndpoints = receiveEndpoints.ToList();
+            _stopTokenSource = new CancellationTokenSource();
             _runningTasks = new List<Task>();
         }
 

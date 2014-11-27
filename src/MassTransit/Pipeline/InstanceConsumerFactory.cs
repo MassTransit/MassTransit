@@ -15,6 +15,11 @@ namespace MassTransit.Pipeline
     using System.Threading.Tasks;
 
 
+    /// <summary>
+    /// Retains a reference to an existing message consumer, and uses it to send consumable messages for
+    /// processing.
+    /// </summary>
+    /// <typeparam name="TConsumer">The consumer type</typeparam>
     public class InstanceConsumerFactory<TConsumer> :
         IConsumerFactory<TConsumer>
         where TConsumer : class

@@ -13,8 +13,6 @@
 namespace MassTransit.Distributor.DistributorConnectors
 {
     using System;
-    using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Configuration;
     using Pipeline;
     using Saga;
 
@@ -40,17 +38,17 @@ namespace MassTransit.Distributor.DistributorConnectors
             get { return typeof(TMessage); }
         }
 
-        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
-        {
-            IWorkerAvailability<TMessage> workerAvailability = distributor.GetWorkerAvailability<TMessage>();
-
-            // TODO we need to make a saga worker availability so that we can split saga load by correlation id
-            IWorkerSelector<TMessage> workerSelector = _workerSelectorFactory.GetSelector<TMessage>();
-
-            var sink = new DistributorMessageSink<TMessage>(workerAvailability, workerSelector);
-            throw new NotImplementedException();
-
-//            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
-        }
+//        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
+//        {
+//            IWorkerAvailability<TMessage> workerAvailability = distributor.GetWorkerAvailability<TMessage>();
+//
+//            // TODO we need to make a saga worker availability so that we can split saga load by correlation id
+//            IWorkerSelector<TMessage> workerSelector = _workerSelectorFactory.GetSelector<TMessage>();
+//
+//            var sink = new DistributorMessageSink<TMessage>(workerAvailability, workerSelector);
+//            throw new NotImplementedException();
+//
+////            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<TMessage>());
+//        }
     }
 }

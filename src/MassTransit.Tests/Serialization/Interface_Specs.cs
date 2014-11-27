@@ -14,7 +14,7 @@ namespace MassTransit.Tests.Serialization
 {
 	using System;
 	using MassTransit.Pipeline;
-	using MassTransit.Pipeline.Configuration;
+	using MassTransit.Pipeline.Pipes;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
 	using TestConsumers;

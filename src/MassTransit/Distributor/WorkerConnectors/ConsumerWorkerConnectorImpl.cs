@@ -14,7 +14,6 @@ namespace MassTransit.Distributor.WorkerConnectors
 {
     using System;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Configuration;
     using Messages;
     using Pipeline;
 
@@ -35,16 +34,17 @@ namespace MassTransit.Distributor.WorkerConnectors
             get { return typeof(TMessage); }
         }
 
-        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IWorker worker)
-        {
-            IWorkerLoad<TMessage> workerLoad = worker.GetWorkerLoad<TMessage>();
-
-            IPipelineSink<IConsumeContext<TMessage>> consumerSink = GetConsumerSink(_consumerFactory);
-
-            var sink = new WorkerMessageSink<TMessage>(workerLoad, consumerSink);
-
-            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<Distributed<TMessage>>());
-        }
+//        public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IWorker worker)
+//        {
+//            IWorkerLoad<TMessage> workerLoad = worker.GetWorkerLoad<TMessage>();
+//
+//            IPipelineSink<IConsumeContext<TMessage>> consumerSink = GetConsumerSink(_consumerFactory);
+//
+//            var sink = new WorkerMessageSink<TMessage>(workerLoad, consumerSink);
+//
+////            return configurator.Pipeline.ConnectToRouter(sink, () => configurator.SubscribedTo<Distributed<TMessage>>());
+//            throw new NotImplementedException();
+//        }
 
         protected abstract IPipelineSink<IConsumeContext<TMessage>> GetConsumerSink(
             IConsumerFactory<TConsumer> consumerFactory);

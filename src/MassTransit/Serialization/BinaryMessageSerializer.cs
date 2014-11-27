@@ -18,6 +18,8 @@ namespace MassTransit.Serialization
     using System.Runtime.Remoting.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
     using Logging;
+    using Magnum;
+    using Magnum.Extensions;
     using Util;
 
     /// <summary>
@@ -53,7 +55,15 @@ namespace MassTransit.Serialization
         public void Serialize<T>(Stream output, ISendContext<T> context)
             where T : class
         {
-            CheckConvention.EnsureSerializable(context.Message);
+            object message = context.Message;
+            Guard.AgainstNull(message, "message cannot be null");
+
+            Type t = message.GetType();
+            if (!t.IsSerializable)
+            {
+                throw new ConventionException(
+                    string.Format("Whoa, slow down buddy. The message '{0}' must be marked with the 'Serializable' attribute!", t.FullName));
+            }
 
             _formatter.Serialize(output, context.Message, GetHeaders(context));
 

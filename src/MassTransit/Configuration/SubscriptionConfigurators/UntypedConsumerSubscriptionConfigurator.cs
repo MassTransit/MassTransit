@@ -16,9 +16,11 @@ namespace MassTransit.SubscriptionConfigurators
     using System.Collections.Generic;
     using Configuration;
     using Configurators;
+    using Internals.Extensions;
     using Magnum.Extensions;
     using Policies;
     using SubscriptionBuilders;
+    using Util;
 
 
     public class UntypedConsumerSubscriptionConfigurator<TConsumer> :
@@ -46,7 +48,7 @@ namespace MassTransit.SubscriptionConfigurators
                 yield return
                     this.Warning(
                         string.Format("The consumer class {0} does not implement any IMessageConsumer interfaces",
-                            typeof(TConsumer).ToShortTypeName()));
+                            TypeMetadataCache<TConsumer>.ShortName));
             }
         }
 

@@ -13,8 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using System.Collections.Generic;
-    using Magnum.Extensions;
 
 
     /// <summary>
@@ -36,7 +34,7 @@ namespace MassTransit
         /// <summary>
         /// The exception information that occurred
         /// </summary>
-        ExceptionInfo Exception { get; }
+        ExceptionInfo[] Exceptions { get; }
 
         /// <summary>
         /// The host information was the fault occurred
@@ -56,120 +54,5 @@ namespace MassTransit
         /// The message that faulted
         /// </summary>
         T Message { get; }
-    }
-
-
-    /// <summary>
-    /// A fault is a system-generated message that is published when an exception occurs while processing a message.
-    /// </summary>
-    /// <typeparam name="TMessage">The type of message that threw the exception</typeparam>
-    [Serializable]
-    public class Faultered<TMessage> :
-        IFault
-        where TMessage : class
-    {
-        /// <summary>
-        /// Creates a new fault message for the failed message
-        /// </summary>
-        /// <param name="ex">The exception thrown by the message consumer</param>
-        /// <param name="message">The message that was being processed when the exception was thrown</param>
-        public Faultered(TMessage message, Exception ex)
-        {
-            FailedMessage = message;
-            OccurredAt = DateTime.UtcNow;
-            Messages = GetExceptionMessages(ex);
-            StackTrace = GetStackTrace(ex);
-
-            FaultType = typeof(Fault<TMessage>).ToShortTypeName();
-        }
-
-        protected Faultered()
-        {
-        }
-
-        /// <summary>
-        /// The message that failed to be consumed
-        /// </summary>
-        public TMessage FailedMessage { get; set; }
-
-        public string FaultType { get; set; }
-
-        /// <summary>
-        /// Messages associated with the exception
-        /// </summary>
-        public List<string> Messages { get; set; }
-
-        /// <summary>
-        /// When the exception occurred
-        /// </summary>
-        public DateTime OccurredAt { get; set; }
-
-        /// <summary>
-        /// A stack trace related to the exception
-        /// </summary>
-        public List<string> StackTrace { get; set; }
-
-        static List<string> GetStackTrace(Exception ex)
-        {
-            var result = new List<string> {string.IsNullOrEmpty(ex.StackTrace) ? "Stack Trace" : ex.StackTrace};
-
-            Exception innerException = ex.InnerException;
-            while (innerException != null)
-            {
-                string stackTrace = "InnerException Stack Trace: " + innerException.StackTrace;
-                result.Add(stackTrace);
-
-                innerException = innerException.InnerException;
-            }
-
-            return result;
-        }
-
-        static List<string> GetExceptionMessages(Exception ex)
-        {
-            var result = new List<string> {ex.Message};
-
-            Exception innerException = ex.InnerException;
-            while (innerException != null)
-            {
-                result.Add(innerException.Message);
-
-                innerException = innerException.InnerException;
-            }
-
-            return result;
-        }
-    }
-
-
-    /// <summary>
-    /// A fault is a system-generated message that is published when an exception occurs while processing a message.
-    /// </summary>
-    /// <typeparam name="TMessage"></typeparam>
-    /// <typeparam name="TKey"></typeparam>
-    [Serializable]
-    public class Faultered<TMessage, TKey> :
-        Faultered<TMessage>,
-        CorrelatedBy<TKey>
-        where TMessage : class, CorrelatedBy<TKey>
-    {
-        /// <summary>
-        /// Creates a new Fault message for the failed correlated message
-        /// </summary>
-        /// <param name="ex"></param>
-        /// <param name="message"></param>
-        public Faultered(TMessage message, Exception ex)
-            : base(message, ex)
-        {
-            CorrelationId = message.CorrelationId;
-
-            FaultType = typeof(Faultered<TMessage, TKey>).ToShortTypeName();
-        }
-
-        protected Faultered()
-        {
-        }
-
-        public TKey CorrelationId { get; set; }
     }
 }

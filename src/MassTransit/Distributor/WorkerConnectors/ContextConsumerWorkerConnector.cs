@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.WorkerConnectors
 {
+    using System;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Sinks;
 
 
     public class ContextConsumerWorkerConnector<TConsumer, TMessage> :
@@ -29,7 +29,8 @@ namespace MassTransit.Distributor.WorkerConnectors
         protected override IPipelineSink<IConsumeContext<TMessage>> GetConsumerSink(
             IConsumerFactory<TConsumer> consumerFactory)
         {
-            return new ContextConsumerMessageSink<TConsumer, TMessage>(consumerFactory);
+//            return new ContextConsumerMessageSink<TConsumer, TMessage>(consumerFactory);
+            throw new NotImplementedException();
         }
     }
 }

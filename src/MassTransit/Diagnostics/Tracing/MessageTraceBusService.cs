@@ -17,6 +17,7 @@ namespace MassTransit.Diagnostics.Tracing
     using System.Linq;
     using Context;
     using Events;
+    using Internals.Extensions;
     using Logging;
     using Magnum.Collections;
     using Magnum.Extensions;
@@ -106,7 +107,7 @@ namespace MassTransit.Diagnostics.Tracing
 					Id = x.Context.Id,
 					MessageId = x.Context.MessageId,
 					MessageType = x.Context.MessageType,
-					DeclaringMessageType = x.Context.DeclaringMessageType.ToShortTypeName(),
+					DeclaringMessageType = x.Context.DeclaringMessageType.GetTypeName(),
 					ContentType = x.Context.ContentType,
 					Address = x.Address,
 					SourceAddress = x.Context.SourceAddress,

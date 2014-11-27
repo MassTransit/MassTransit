@@ -26,7 +26,7 @@ namespace MassTransit.Distributor.DistributorConnectors
     {
         Type MessageType { get; }
 
-        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IDistributor distributor);
+//        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IDistributor distributor);
     }
 
     public class SagaDistributorConnector<T> :
@@ -67,12 +67,12 @@ namespace MassTransit.Distributor.DistributorConnectors
             }
         }
 
-        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
-        {
-            throw new NotImplementedException();
-            //            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, distributor))
-//                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
-        }
+//        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IDistributor distributor)
+//        {
+//            throw new NotImplementedException();
+//            //            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, distributor))
+////                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
+//        }
 
         IEnumerable<SagaDistributorConnector> Initiates()
         {

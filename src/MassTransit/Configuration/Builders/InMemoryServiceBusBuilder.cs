@@ -15,6 +15,7 @@ namespace MassTransit.Builders
     using System;
     using System.Linq;
     using Pipeline;
+    using Pipeline.Pipes;
     using Transports;
 
 

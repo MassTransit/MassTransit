@@ -23,7 +23,7 @@ namespace MassTransit
     using Magnum.Reflection;
     using Monitoring;
     using Pipeline;
-    using Pipeline.Configuration;
+    using Pipeline.Pipes;
     using Util;
 
     /// <summary>
@@ -150,17 +150,11 @@ namespace MassTransit
         public IOutboundMessagePipeline OutboundPipeline { get; private set; }
 
         public IConsumePipe ConsumePipe { get; private set; }
-        public IInboundMessagePipeline InboundPipeline { get; private set; }
 
         /// <summary>
         /// The endpoint associated with this instance
         /// </summary>
         public IEndpoint Endpoint { get; private set; }
-
-        public UnsubscribeAction Configure(Func<IInboundPipelineConfigurator, UnsubscribeAction> configure)
-        {
-            return InboundPipeline.Configure(configure);
-        }
 
         public IEndpoint GetEndpoint(Uri address)
         {

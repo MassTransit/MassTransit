@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using PipeConfigurators;
     using Pipeline;
+    using Pipeline.Pipes;
 
 
     public static class Pipe

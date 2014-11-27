@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Pipeline
 {
     using System;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
     using NUnit.Framework;
     using Policies;
     using TestFramework;

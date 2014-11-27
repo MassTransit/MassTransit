@@ -18,6 +18,7 @@ namespace MassTransit.Context
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Linq;
 	using System.Threading;
 	using Events;
 	using Logging;
@@ -92,7 +93,7 @@ namespace MassTransit.Context
 						// context (i.e. the message type we actually got from the transport)
 						// Have a look at everything implementing IPipelineSink<IConsumeContext> to
 						// dig deeper
-						IEnumerable<Action<IConsumeContext>> enumerable = _bus.InboundPipeline.Enumerate(context);
+					    IEnumerable<Action<IConsumeContext>> enumerable = Enumerable.Empty<Action<IConsumeContext>>();//_bus.InboundPipeline.Enumerate(context);
 
 						_consumers = enumerable.GetEnumerator();
 						if (!_consumers.MoveNext())

@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using System.Linq;
     using Builders;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
     using Transports;
 
 
@@ -25,6 +26,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         IServiceBusBuilder
     {
         readonly ServiceBusHostSettings[] _hosts;
+        readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
+        Uri _sourceAddress;
 
         public AzureServiceBusServiceBusBuilder(IEnumerable<ServiceBusHostSettings> hosts)
         {
@@ -32,17 +35,29 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 throw new ArgumentNullException("hosts");
 
             _hosts = hosts.ToArray();
+
+            _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
+            _sourceAddress = new Uri("azure://localhost");
+        }
+
+        protected override ISendEndpointProvider SendEndpointProvider
+        {
+            get { return _sendEndpointProvider.Value; }
+        }
+
+        ISendEndpointProvider CreateSendEndpointProvider()
+        {
+            return new AzureServiceBusSendEndpointProvider(MessageSerializer, _sourceAddress, _hosts);
         }
 
         public virtual IBusControl Build()
         {
             IConsumePipe consumePipe = new ConsumePipe();
 
-            ISendEndpointProvider sendEndpointProvider = new AzureServiceBusSendEndpointProvider(MessageSerializer, _hosts);
 
-            var endpointCache = new SendEndpointCache(sendEndpointProvider);
+            var endpointCache = new SendEndpointCache(_sendEndpointProvider.Value);
 
-            return new SuperDuperServiceBus(new Uri("azure://localhost"), consumePipe, endpointCache, ReceiveEndpoints);
+            return new SuperDuperServiceBus(_sourceAddress, consumePipe, endpointCache, ReceiveEndpoints);
         }
     }
 }

@@ -143,7 +143,6 @@
     <Compile Include="Management\RabbitMQEndpointManagement.cs" />
     <Compile Include="OutboundRabbitMqTransport.cs" />
     <Compile Include="PublishEndpointInterceptor.cs" />
-    <Compile Include="PublishEndpointSinkLocator.cs" />
     <Compile Include="RabbitMqConnection.cs" />
     <Compile Include="ConnectionContext.cs" />
     <Compile Include="RabbitMqConnectionCache.cs" />
