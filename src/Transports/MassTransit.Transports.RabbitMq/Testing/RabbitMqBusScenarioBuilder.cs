@@ -25,12 +25,12 @@ namespace MassTransit.Testing
     {
         const string DefaultUri = "rabbitmq://localhost/mt_client";
 
-        public RabbitMqBusScenarioBuilder()
-            : base(new Uri(DefaultUri))
-        {
-            ConfigureEndpointFactory(x => { x.UseRabbitMq(); });
-
-            ConfigureBus(x => { x.UseRabbitMq(); });
-        }
+//        public RabbitMqBusScenarioBuilder()
+//            : base(new Uri(DefaultUri))
+//        {
+//            ConfigureEndpointFactory(x => { x.UseRabbitMq(); });
+//
+//            ConfigureBus(x => { x.UseRabbitMq(); });
+//        }
     }
 }

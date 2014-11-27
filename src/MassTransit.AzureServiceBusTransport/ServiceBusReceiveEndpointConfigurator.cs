@@ -136,7 +136,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             var transport = new AzureServiceBusReceiveTransport(_hostSettings, settings, retryPolicy);
 
-            var inboundPipe = new InboundPipe(_pipeConfigurator);
+            var inboundPipe = new ConsumePipe(_pipeConfigurator);
 
             IReceiveEndpointBuilder builder = new ReceiveEndpointBuilder(inboundPipe);
 

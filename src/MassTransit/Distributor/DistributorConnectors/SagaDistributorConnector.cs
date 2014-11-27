@@ -121,7 +121,7 @@ namespace MassTransit.Distributor.DistributorConnectors
                        _args);
         }
 
-        public ISubscriptionReference Connect(IInboundPipe filter, IDistributor distributor)
+        public ISubscriptionReference Connect(IConsumePipe filter, IDistributor distributor)
         {
             throw new NotImplementedException();
         }

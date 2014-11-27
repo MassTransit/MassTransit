@@ -17,18 +17,17 @@ namespace MassTransit.Pipeline
 
 
     /// <summary>
-    /// Intercepts the ConsumeContext<typeparam name="T">T</typeparam>
+    /// Intercepts the ConsumeContext
     /// </summary>
-    /// <typeparam name="T">The message type</typeparam>
-    public interface IConsumeObserver<in T>
-        where T : class
+    public interface IConsumeObserver
     {
         /// <summary>
         /// Called before a message is dispatched to any consumers
         /// </summary>
         /// <param name="context">The consume context</param>
         /// <returns></returns>
-        Task PreDispatch(ConsumeContext<T> context);
+        Task PreDispatch<T>(ConsumeContext<T> context)
+            where T : class;
 
         /// <summary>
         /// Called after the message has been dispatched to all consumers - note that in the case of an exception
@@ -36,7 +35,8 @@ namespace MassTransit.Pipeline
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        Task PostDispatch(ConsumeContext<T> context);
+        Task PostDispatch<T>(ConsumeContext<T> context)
+            where T : class;
 
         /// <summary>
         /// Called after the message has been dispatched to all consumers when one or more exceptions have occurred
@@ -44,6 +44,7 @@ namespace MassTransit.Pipeline
         /// <param name="context"></param>
         /// <param name="exception"></param>
         /// <returns></returns>
-        Task DispatchFaulted(ConsumeContext<T> context, Exception exception);
+        Task DispatchFault<T>(ConsumeContext<T> context, Exception exception)
+            where T : class;
     }
 }

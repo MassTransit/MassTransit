@@ -34,6 +34,11 @@ namespace MassTransit.Serialization
             _message = message;
         }
 
+        public Task CompleteTask
+        {
+            get { return _context.CompleteTask; }
+        }
+
         public IEnumerable<string> SupportedMessageTypes
         {
             get { return _context.SupportedMessageTypes; }
@@ -200,9 +205,10 @@ namespace MassTransit.Serialization
             _context.NotifyConsumed(elapsed, messageType, consumerType);
         }
 
-        public void NotifyFaulted(string messageType, string consumerType, Exception exception)
+        public void NotifyFaulted<T>(T message, string consumerType, Exception exception) 
+            where T : class
         {
-            _context.NotifyFaulted(messageType, consumerType, exception);
+            _context.NotifyFaulted(message, consumerType, exception);
         }
 
         public TMessage Message
@@ -217,7 +223,7 @@ namespace MassTransit.Serialization
 
         public void NotifyFaulted(string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(TypeMetadataCache<TMessage>.ShortName, consumerType, exception);
+            _context.NotifyFaulted(_message, consumerType, exception);
         }
     }
 }

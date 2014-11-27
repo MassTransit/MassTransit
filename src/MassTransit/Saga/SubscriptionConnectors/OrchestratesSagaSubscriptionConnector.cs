@@ -28,11 +28,9 @@ namespace MassTransit.Saga.SubscriptionConnectors
 		protected override ISagaMessageSink<TSaga, TMessage> CreateSink(ISagaRepository<TSaga> repository,
 		                                                                ISagaPolicy<TSaga, TMessage> policy)
 		{
-			var sink = new CorrelatedSagaMessageSink<TSaga, TMessage>(repository, policy);
-			if (sink == null)
-				throw new ConfigurationException("Could not build the orchestrating message sink for " + typeof (TSaga).FullName);
-
-			return sink;
+            throw new NotImplementedException();
+            //var sink = new CorrelatedSagaMessageSink<TSaga, TMessage>(repository, policy);
+			
 		}
 	}
 }

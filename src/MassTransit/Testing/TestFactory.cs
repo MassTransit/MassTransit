@@ -33,7 +33,7 @@ namespace MassTransit.Testing
 		public static HandlerTestFactory<BusTestScenario, TMessage> ForHandler<TMessage>()
 			where TMessage : class
 		{
-			var factory = new HandlerTestFactoryImpl<BusTestScenario, TMessage>(() => new LoopbackBusScenarioBuilder());
+            var factory = new HandlerTestFactoryImpl<BusTestScenario, TMessage>(() => new BusScenarioBuilderImpl());
 
 			return factory;
 		}
@@ -41,7 +41,7 @@ namespace MassTransit.Testing
 		public static ConsumerTestFactory<BusTestScenario, TConsumer> ForConsumer<TConsumer>()
 			where TConsumer : class, IConsumer
 		{
-			var factory = new ConsumerTestFactoryImpl<BusTestScenario, TConsumer>(() => new LoopbackBusScenarioBuilder());
+            var factory = new ConsumerTestFactoryImpl<BusTestScenario, TConsumer>(() => new BusScenarioBuilderImpl());
 
 			return factory;
 		}
@@ -49,7 +49,7 @@ namespace MassTransit.Testing
 		public static SagaTestFactory<BusTestScenario, TSaga> ForSaga<TSaga>()
 			where TSaga : class, ISaga
 		{
-			var factory = new SagaTestFactoryImpl<BusTestScenario, TSaga>(() => new LoopbackBusScenarioBuilder());
+            var factory = new SagaTestFactoryImpl<BusTestScenario, TSaga>(() => new BusScenarioBuilderImpl());
 
 			return factory;
 		}

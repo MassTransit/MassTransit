@@ -20,7 +20,7 @@ namespace MassTransit.Transports
 		/// <summary>
 		/// The address of the endpoint/transport
 		/// </summary>
-		IEndpointAddress Address { get; }
+		EndpointAddress Address { get; }
 
 		/// <summary>
 		/// The transport should be created if it was not found

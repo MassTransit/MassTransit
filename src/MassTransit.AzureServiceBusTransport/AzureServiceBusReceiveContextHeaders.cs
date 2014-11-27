@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Context;
 
 
@@ -23,6 +26,11 @@ namespace MassTransit.AzureServiceBusTransport
         public AzureServiceBusContextHeaderProvider(AzureServiceBusReceiveContext context)
         {
             _context = context;
+        }
+
+        public IEnumerable<Tuple<string, object>> Headers
+        {
+            get { return _context.Properties.Select(x => Tuple.Create(x.Key, x.Value)); }
         }
 
         public bool TryGetHeader(string key, out object value)

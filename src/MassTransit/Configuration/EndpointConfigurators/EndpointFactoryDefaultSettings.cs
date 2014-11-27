@@ -71,7 +71,7 @@ namespace MassTransit.EndpointConfigurators
         public bool RequireTransactional { get; set; }
         public TimeSpan TransactionTimeout { get; set; }
 
-        public EndpointSettings CreateEndpointSettings(IEndpointAddress address)
+        public EndpointSettings CreateEndpointSettings(EndpointAddress address)
         {
             var settings = new EndpointSettings(address)
                 {

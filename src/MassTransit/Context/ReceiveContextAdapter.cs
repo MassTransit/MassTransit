@@ -273,12 +273,12 @@ namespace MassTransit.Context
             throw new NotImplementedException();
         }
 
-        public void NotifySend(ISendContext context, IEndpointAddress address)
+        public void NotifySend(ISendContext context, EndpointAddress address)
         {
             throw new NotImplementedException();
         }
 
-        public void NotifySend<T>(ISendContext<T> sendContext, IEndpointAddress address) where T : class
+        public void NotifySend<T>(ISendContext<T> sendContext, EndpointAddress address) where T : class
         {
             throw new NotImplementedException();
         }

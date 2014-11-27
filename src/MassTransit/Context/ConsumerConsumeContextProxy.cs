@@ -38,6 +38,11 @@ namespace MassTransit.Context
             _consumer = consumer;
         }
 
+        public Task CompleteTask
+        {
+            get { return _context.CompleteTask; }
+        }
+
         public IEnumerable<string> SupportedMessageTypes
         {
             get { return _context.SupportedMessageTypes; }
@@ -210,9 +215,10 @@ namespace MassTransit.Context
             _context.NotifyConsumed(elapsed, messageType, consumerType);
         }
 
-        public void NotifyFaulted(string messageType, string consumerType, Exception exception)
+        public void NotifyFaulted<T>(T message, string consumerType, Exception exception) 
+            where T : class
         {
-            _context.NotifyFaulted(messageType, consumerType, exception);
+            _context.NotifyFaulted(message, consumerType, exception);
         }
 
         TMessage ConsumeContext<TMessage>.Message
@@ -227,7 +233,7 @@ namespace MassTransit.Context
 
         public void NotifyFaulted(string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(consumerType, exception);
+            NotifyFaulted(_context.Message, consumerType, exception);
         }
 
         public TConsumer Consumer

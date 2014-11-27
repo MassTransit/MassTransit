@@ -19,14 +19,17 @@ namespace MassTransit.Serialization
     using System.Threading.Tasks;
     using Context;
     using Custom;
+    using Events;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Pipeline;
+    using Util;
 
 
     public class JsonConsumeContext :
         ConsumeContext
     {
+        readonly IList<Task> _consumeTasks;
         readonly JsonSerializer _deserializer;
         readonly MessageEnvelope _envelope;
         readonly JToken _messageToken;
@@ -34,12 +37,12 @@ namespace MassTransit.Serialization
         readonly ReceiveContext _receiveContext;
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly string[] _supportedTypes;
-        IBus _bus;
         Guid? _correlationId;
         Uri _destinationAddress;
         Uri _faultAddress;
         ContextHeaders _headers;
         Guid? _messageId;
+        IPublishEndpoint _publishEndpoint;
         Guid? _requestId;
         Uri _responseAddress;
         Uri _sourceAddress;
@@ -54,7 +57,8 @@ namespace MassTransit.Serialization
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, object>();
-            _bus = null;
+            _publishEndpoint = null;
+            _consumeTasks = new List<Task>();
         }
 
         public bool HasPayloadType(Type contextType)
@@ -127,6 +131,11 @@ namespace MassTransit.Serialization
         public ReceiveContext ReceiveContext
         {
             get { return _receiveContext; }
+        }
+
+        public Task CompleteTask
+        {
+            get { return Task.WhenAll(_consumeTasks); }
         }
 
         public IEnumerable<string> SupportedMessageTypes
@@ -218,13 +227,16 @@ namespace MassTransit.Serialization
                     }));
                 });
 
-                await _bus.Publish(message, publishPipe, CancellationToken);
+                await _publishEndpoint.Publish(message, publishPipe, CancellationToken);
             }
         }
 
-        public void Respond<T>(T message) where T : class
+        public void Respond<T>(T message)
+            where T : class
         {
-            throw new NotImplementedException();
+            Task task = RespondAsync(message);
+
+            _consumeTasks.Add(task);
         }
 
         public void RetryLater()
@@ -242,60 +254,90 @@ namespace MassTransit.Serialization
             _receiveContext.NotifyConsumed(elapsed, messageType, consumerType);
         }
 
-        public void NotifyFaulted(string messageType, string consumerType, Exception exception)
+        public void NotifyFaulted<T>(T message, string consumerType, Exception exception)
+            where T : class
         {
-            _receiveContext.NotifyFaulted(messageType, consumerType, exception);
+            Task faultTask = GenerateFault(message, exception);
+
+            _consumeTasks.Add(faultTask);
+
+            _receiveContext.NotifyFaulted(message, consumerType, exception);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            return _bus.Publish(message, cancellationToken);
+            return _publishEndpoint.Publish(message, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            return _bus.Publish(message, publishPipe, cancellationToken);
+            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _bus.Publish(message, publishPipe, cancellationToken);
+            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
-            return _bus.Publish(message, cancellationToken);
+            return _publishEndpoint.Publish(message, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _bus.Publish(message, publishPipe, cancellationToken);
+            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
         {
-            return _bus.Publish(message, messageType, cancellationToken);
+            return _publishEndpoint.Publish(message, messageType, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
             CancellationToken cancellationToken)
         {
-            return _bus.Publish(message, messageType, publishPipe, cancellationToken);
+            return _publishEndpoint.Publish(message, messageType, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
-            return _bus.Publish(values, cancellationToken);
+            return _publishEndpoint.Publish(values, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            return _bus.Publish(values, publishPipe, cancellationToken);
+            return _publishEndpoint.Publish(values, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _bus.Publish(values, publishPipe, cancellationToken);
+            return _publishEndpoint.Publish(values, publishPipe, cancellationToken);
+        }
+
+        async Task GenerateFault<T>(T message, Exception exception)
+            where T : class
+        {
+            Fault<T> fault = new FaultEvent<T>(message, HostMetadataCache.Host, exception);
+
+            IPipe<SendContext<Fault<T>>> faultPipe = Pipe.New<SendContext<Fault<T>>>(x => x.Execute(v =>
+            {
+                v.SourceAddress = ReceiveContext.InputAddress;
+                v.CorrelationId = CorrelationId;
+                v.RequestId = RequestId;
+
+                foreach (var header in ContextHeaders.Headers)
+                    v.ContextHeaders.Set(header.Item1, header.Item2);
+            }));
+
+            if (ResponseAddress != null)
+            {
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
+
+                await endpoint.Send(fault, faultPipe, CancellationToken);
+            }
+            else
+                await _publishEndpoint.Publish(message, faultPipe, CancellationToken);
         }
 
         static JToken GetMessageToken(object message)

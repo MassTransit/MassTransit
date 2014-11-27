@@ -26,7 +26,7 @@ namespace MassTransit.Transports.RabbitMq.Tests.Testing
 			_test = TestFactory.ForHandler<A>()
 				.New(x =>
 					{
-						x.UseRabbitMqBusScenario();
+//						x.UseRabbitMqBusScenario();
 
 						x.Send(new A());
 						x.Send(new B());

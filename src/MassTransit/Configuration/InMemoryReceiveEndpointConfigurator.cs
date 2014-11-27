@@ -12,15 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
+    using System.Threading.Tasks;
     using Builders;
     using Configurators;
     using EndpointConfigurators;
     using PipeConfigurators;
     using Pipeline;
     using Pipeline.Filters;
-    using Serialization;
     using Transports;
 
 
@@ -48,7 +50,7 @@ namespace MassTransit
 
         public void Configure(IInMemoryServiceBusBuilder builder)
         {
-            builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder.MessageDeserializer, builder.ReceiveTransportProvider));
+            builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder));
         }
 
         public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
@@ -61,36 +63,43 @@ namespace MassTransit
             _configurators.Add(configurator);
         }
 
-        public ReceiveEndpoint CreateReceiveEndpoint(IMessageDeserializer deserializer, IReceiveTransportProvider receiveTransportProvider)
+        ReceiveEndpoint CreateReceiveEndpoint(IInMemoryServiceBusBuilder builder)
         {
-            IReceiveTransport transport = receiveTransportProvider.GetReceiveTransport(_queueName);
+            IReceiveTransport transport = builder.ReceiveTransportProvider.GetReceiveTransport(_queueName);
 
-            InboundPipe inboundPipe = CreateInboundPipe();
+            ConsumePipe consumePipe = CreateInboundPipe();
 
-            IPipe<ReceiveContext> receivePipe = CreateReceivePipe(deserializer, inboundPipe);
+            IPipe<ReceiveContext> receivePipe = CreateReceivePipe(builder, consumePipe);
 
-            return new ReceiveEndpoint(transport, receivePipe, inboundPipe);
+            return new ReceiveEndpoint(transport, receivePipe, consumePipe);
         }
 
-        IPipe<ReceiveContext> CreateReceivePipe(IMessageDeserializer deserializer, InboundPipe inboundPipe)
+        IPipe<ReceiveContext> CreateReceivePipe(IInMemoryServiceBusBuilder builder, ConsumePipe consumePipe)
         {
-            IReceiveEndpointBuilder builder = new ReceiveEndpointBuilder(inboundPipe);
+            IReceiveEndpointBuilder endpointBuilder = new ReceiveEndpointBuilder(consumePipe);
 
             foreach (IReceiveEndpointBuilderConfigurator builderConfigurator in _configurators)
-                builderConfigurator.Configure(builder);
+                builderConfigurator.Configure(endpointBuilder);
 
-            // TODO insert exceptionFilter that moves to error if deserialization fails
             // TODO insert filter that if other excpetion 'n' times move to error
             // TODO insert dead-letter filter so that no message consumers moves to "_skipped"
 
-            _receivePipeConfigurator.Filter(new DeserializeFilter(deserializer, inboundPipe));
+            var errorAddress = new Uri(string.Format("loopback://localhost/{0}_error", _queueName));
+            ISendTransport errorTransport = builder.SendTransportProvider.GetSendTransport(errorAddress);
+
+            IPipe<ReceiveContext> moveToErrorPipe =
+                Pipe.New<ReceiveContext>(x => x.Filter(new MoveToErrorTransportFilter(Task.FromResult(errorTransport))));
+
+            _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(SerializationException));
+
+            _receivePipeConfigurator.Filter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
 
             return _receivePipeConfigurator.Build();
         }
 
-        InboundPipe CreateInboundPipe()
+        ConsumePipe CreateInboundPipe()
         {
-            return new InboundPipe(_pipeConfigurator);
+            return new ConsumePipe(_pipeConfigurator);
         }
     }
 }

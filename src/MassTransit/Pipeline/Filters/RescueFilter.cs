@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
 
 
@@ -41,6 +42,11 @@ namespace MassTransit.Pipeline.Filters
                 await next.Send(context);
 
                 return;
+            }
+            catch (AggregateException ex)
+            {
+                if (!ex.InnerExceptions.Any(x => _exceptionFilter(x)))
+                    throw;
             }
             catch (Exception ex)
             {

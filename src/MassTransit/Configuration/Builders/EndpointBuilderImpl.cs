@@ -20,14 +20,14 @@ namespace MassTransit.Builders
     public class EndpointBuilderImpl :
         EndpointBuilder
     {
-        readonly IEndpointAddress _address;
+        readonly EndpointAddress _address;
         readonly ITransportSettings _errorSettings;
         readonly OutboundTransportFactory _errorTransportFactory;
         readonly Func<IInboundMessageTracker> _messageTrackerFactory;
         readonly IEndpointSettings _settings;
         readonly DuplexTransportFactory _transportFactory;
 
-        public EndpointBuilderImpl( IEndpointAddress address,  IEndpointSettings settings,
+        public EndpointBuilderImpl( EndpointAddress address,  IEndpointSettings settings,
              ITransportSettings errorSettings,  DuplexTransportFactory transportFactory,
              OutboundTransportFactory errorTransportFactory,
              Func<IInboundMessageTracker> messageTrackerFactory)
@@ -68,7 +68,7 @@ namespace MassTransit.Builders
             }
             catch (Exception ex)
             {
-                throw new EndpointException(_address.Uri, "Failed to create endpoint", ex);
+                throw new EndpointException(_address, "Failed to create endpoint", ex);
             }
         }
     }

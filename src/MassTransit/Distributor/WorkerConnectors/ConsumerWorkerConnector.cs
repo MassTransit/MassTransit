@@ -109,7 +109,7 @@ namespace MassTransit.Distributor.WorkerConnectors
         protected override IPipelineSink<IConsumeContext<TMessage>> GetConsumerSink(
             IConsumerFactory<TConsumer> consumerFactory)
         {
-            return new ConsumerMessageSink<TConsumer, TMessage>(consumerFactory);
+            throw new NotImplementedException();
         }
     }
 }

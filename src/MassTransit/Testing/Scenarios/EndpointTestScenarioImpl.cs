@@ -12,11 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Scenarios
 {
-    using Magnum.Extensions;
-    using TestDecorators;
-    using Transports;
-
-
     public abstract class EndpointTestScenarioImpl :
         EndpointTestScenario
     {
@@ -26,20 +21,12 @@ namespace MassTransit.Testing.Scenarios
         readonly ReceivedMessageListImpl _skipped;
         bool _disposed;
 
-        protected EndpointTestScenarioImpl(IEndpointFactory endpointFactory)
+        protected EndpointTestScenarioImpl()
         {
             _received = new ReceivedMessageListImpl();
             _sent = new SentMessageListImpl();
             _skipped = new ReceivedMessageListImpl();
             _published = new PublishedMessageListImpl();
-
-            ServiceBusFactory.ConfigureDefaultSettings(x =>
-            {
-                x.SetConcurrentConsumerLimit(4);
-                x.SetConcurrentReceiverLimit(1);
-                x.SetReceiveTimeout(50.Milliseconds());
-                x.EnableAutoStart();
-            });
         }
 
         public SentMessageList Sent
@@ -54,7 +41,7 @@ namespace MassTransit.Testing.Scenarios
 
         public abstract IBus InputBus { get; }
 
-        public abstract ISendEndpoint OutputBus { get; }
+        public abstract ISendEndpoint InputQueueSendEndpoint { get; }
 
         public PublishedMessageList Published
         {
@@ -101,16 +88,9 @@ namespace MassTransit.Testing.Scenarios
             {
                 _sent.Dispose();
                 _received.Dispose();
-
-                ServiceBusFactory.ConfigureDefaultSettings(x => x.SetEndpointCache(null));
             }
 
             _disposed = true;
-        }
-
-        public virtual IServiceBus GetDecoratedBus(IServiceBus bus)
-        {
-            return new ServiceBusTestDecorator(bus, this);
         }
     }
 }

@@ -59,7 +59,7 @@ namespace MassTransit
 
             InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
 
-            return connector.Connect(bus.InputPipe, instance, retryPolicy ?? Retry.None);
+            return connector.Connect(bus.ConsumePipe, instance, retryPolicy ?? Retry.None);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace MassTransit
 
             InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();
 
-            return connector.Connect(bus.InputPipe, instance, retryPolicy ?? Retry.None);
+            return connector.Connect(bus.ConsumePipe, instance, retryPolicy ?? Retry.None);
         }
     }
 }

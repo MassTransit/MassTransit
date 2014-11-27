@@ -25,24 +25,18 @@ namespace MassTransit
     public class SuperDuperServiceBus :
         IBusControl
     {
-        readonly IInboundPipe _inputPipe;
+        readonly IConsumePipe _consumePipe;
         readonly IList<IReceiveEndpoint> _receiveEndpoints;
         readonly List<Task> _runningTasks;
-        readonly Uri _inputAddress;
+        readonly Uri _address;
         readonly ISendEndpointProvider _sendEndpointProvider;
         CancellationTokenSource _stopTokenSource;
 
-        public SuperDuperServiceBus(Uri inputAddress, IInboundPipe inputPipe, ISendEndpointProvider sendEndpointProvider,
-            params IReceiveEndpoint[] receiveEndpoints)
-            : this(inputAddress, inputPipe, sendEndpointProvider, receiveEndpoints as IEnumerable<IReceiveEndpoint>)
-        {
-        }
-
-        public SuperDuperServiceBus(Uri inputAddress, IInboundPipe inputPipe, ISendEndpointProvider sendEndpointProvider,
+        public SuperDuperServiceBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
             IEnumerable<IReceiveEndpoint> receiveEndpoints)
         {
-            _inputAddress = inputAddress;
-            _inputPipe = inputPipe;
+            _address = address;
+            _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
             _receiveEndpoints = receiveEndpoints.ToList();
             _runningTasks = new List<Task>();
@@ -103,14 +97,14 @@ namespace MassTransit
             throw new NotImplementedException();
         }
 
-        public Uri InputAddress
+        public Uri Address
         {
-            get { return _inputAddress; }
+            get { return _address; }
         }
 
-        IInboundPipe IBus.InputPipe
+        IConsumePipe IBus.ConsumePipe
         {
-            get { return _inputPipe; }
+            get { return _consumePipe; }
         }
 
         Task<ISendEndpoint> IBus.GetSendEndpoint(Uri address)

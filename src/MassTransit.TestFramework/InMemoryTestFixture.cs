@@ -13,7 +13,6 @@
 namespace MassTransit.TestFramework
 {
     using System;
-    using EndpointConfigurators;
     using Logging;
     using MassTransit.Transports;
     using NUnit.Framework;
@@ -65,7 +64,7 @@ namespace MassTransit.TestFramework
 
         protected Uri BusAddress
         {
-            get { return _bus.InputAddress; }
+            get { return _bus.Address; }
         }
 
         protected Uri InputQueueAddress
@@ -92,7 +91,7 @@ namespace MassTransit.TestFramework
 
             _bus.Start(TestCancellationToken).Wait(TestTimeout);
 
-            _busSendEndpoint = _bus.GetSendEndpoint(_bus.InputAddress).Result;
+            _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
             _busSendEndpoint.Connect(_sendObserver);
 
             _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;

@@ -146,7 +146,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 
             var transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, _settings);
 
-            var inboundPipe = new InboundPipe(_pipeConfigurator);
+            var inboundPipe = new ConsumePipe(_pipeConfigurator);
 
             IReceiveEndpointBuilder builder = new ReceiveEndpointBuilder(inboundPipe);
 

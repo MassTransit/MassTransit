@@ -18,6 +18,7 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using Transports;
+    using Util;
 
 
     public class SendRequestContext<TRequest> :
@@ -51,7 +52,7 @@ namespace MassTransit.Context
 
             _requestTask = new TaskCompletionSource<TRequest>(context.CancellationToken);
 
-            Handle<Fault<TRequest>>(async x => Fail(x.Message));
+            HandleFault();
         }
 
         public Task<TRequest> Task
@@ -262,6 +263,33 @@ namespace MassTransit.Context
             return source.Task;
         }
 
+        public Task<Fault<TRequest>> HandleFault()
+        {
+            var source = new TaskCompletionSource<Fault<TRequest>>();
+
+            MessageHandler<Fault<TRequest>> messageHandler = async context =>
+            {
+                try
+                {
+                    Fail(context.Message);
+
+                    source.TrySetResult(context.Message);
+                }
+                catch (Exception ex)
+                {
+                    source.TrySetException(ex);
+
+                    Fail(ex);
+                }
+            };
+
+            ConnectHandle connectHandle = _bus.SubscribeRequestHandler(_requestId, messageHandler);
+
+            _connections.Add(new HandlerHandle<Fault<TRequest>>(connectHandle, source));
+
+            return source.Task;
+        }
+
         public void TimeoutExpired()
         {
             var timeoutException = new RequestTimeoutException(_requestId.ToString());
@@ -288,7 +316,7 @@ namespace MassTransit.Context
 
         void Fail(Fault<TRequest> fault)
         {
-            Fail(new RequestFaultException(string.Join(Environment.NewLine, fault.Messages), fault));
+            Fail(new RequestFaultException(TypeMetadataCache<TRequest>.ShortName, fault, fault.Message));
         }
 
         void Fail(Exception ex)

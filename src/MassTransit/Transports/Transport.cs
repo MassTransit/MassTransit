@@ -23,9 +23,9 @@ namespace MassTransit.Transports
 		bool _disposed;
 		IInboundTransport _inbound;
 		IOutboundTransport _outbound;
-		readonly IEndpointAddress _address;
+		readonly EndpointAddress _address;
 
-		public Transport(IEndpointAddress address, Func<IInboundTransport> inboundFactory, Func<IOutboundTransport> outboundFactory)
+		public Transport(EndpointAddress address, Func<IInboundTransport> inboundFactory, Func<IOutboundTransport> outboundFactory)
 		{
 			_inboundFactory = inboundFactory;
 			_outboundFactory = outboundFactory;
@@ -37,7 +37,7 @@ namespace MassTransit.Transports
 			Dispose(true);
 		}
 
-		public IEndpointAddress Address
+		public EndpointAddress Address
 		{
 			get { return _address; }
 		}

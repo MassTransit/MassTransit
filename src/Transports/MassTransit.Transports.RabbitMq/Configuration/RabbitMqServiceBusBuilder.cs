@@ -57,7 +57,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 
         public IBusControl Build()
         {
-            var inboundPipe = new InboundPipe();
+            var inboundPipe = new ConsumePipe();
 
             ISendEndpointProvider sendEndpointProvider = new RabbitMqSendEndpointProvider(_hosts, TODO);
 

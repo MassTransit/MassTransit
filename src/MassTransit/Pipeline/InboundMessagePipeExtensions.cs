@@ -21,13 +21,13 @@ namespace MassTransit.Pipeline
 
     public static class InboundMessagePipeExtensions
     {
-        public static ConnectHandle ConnectHandler<T>(this IInboundPipe filter, MessageHandler<T> handler)
+        public static ConnectHandle ConnectHandler<T>(this IConsumePipe filter, MessageHandler<T> handler)
             where T : class
         {
             return HandlerConnectorCache<T>.Connector.Connect(filter, handler);
         }
 
-        public static ConnectHandle ConnectHandler<T>(this IInboundPipe filter, MessageHandler<T> handler,
+        public static ConnectHandle ConnectHandler<T>(this IConsumePipe filter, MessageHandler<T> handler,
             IRetryPolicy retryPolicy)
             where T : class
         {
@@ -36,14 +36,14 @@ namespace MassTransit.Pipeline
             return HandlerConnectorCache<T>.Connector.Connect(filter, handler, retryFilter);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IInboundPipe filter,
+        public static ConnectHandle ConnectConsumer<T>(this IConsumePipe filter,
             IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy = null)
             where T : class
         {
             return ConsumerConnectorCache<T>.Connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IInboundPipe filter,
+        public static ConnectHandle ConnectConsumer<T>(this IConsumePipe filter,
             IRetryPolicy retryPolicy = null)
             where T : class, new()
         {
@@ -54,7 +54,7 @@ namespace MassTransit.Pipeline
             return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IInboundPipe filter, Func<T> factoryMethod,
+        public static ConnectHandle ConnectConsumer<T>(this IConsumePipe filter, Func<T> factoryMethod,
             IRetryPolicy retryPolicy = null)
             where T : class
         {
@@ -65,13 +65,13 @@ namespace MassTransit.Pipeline
             return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectInstance<T>(this IInboundPipe filter, T instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectInstance<T>(this IConsumePipe filter, T instance, IRetryPolicy retryPolicy = null)
             where T : class
         {
             return InstanceConnectorCache<T>.Connector.Connect(filter, instance, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectInstance(this IInboundPipe filter, object instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectInstance(this IConsumePipe filter, object instance, IRetryPolicy retryPolicy = null)
         {
             return InstanceConnectorCache.GetInstanceConnector(instance.GetType()).Connect(filter, instance, retryPolicy ?? Retry.None);
         }

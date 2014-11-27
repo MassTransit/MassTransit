@@ -25,12 +25,12 @@ namespace MassTransit
         /// <summary>
         /// The receive address of the bus itself, versus any receive endpoints that were created
         /// </summary>
-        Uri InputAddress { get; }
+        Uri Address { get; }
 
         /// <summary>
         /// The inbound pipe for the bus
         /// </summary>
-        IInboundPipe InputPipe { get; }
+        IConsumePipe ConsumePipe { get; }
 
         /// <summary>
         /// Retrieve a destination endpoint

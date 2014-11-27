@@ -18,6 +18,6 @@ namespace MassTransit.Distributor.DistributorConnectors
 
     public interface DistributorConnector
     {
-        ISubscriptionReference Connect(IInboundPipe filter, IDistributor distributor);
+        ISubscriptionReference Connect(IConsumePipe filter, IDistributor distributor);
     }
 }

@@ -26,28 +26,28 @@ namespace MassTransit.Transports
     public class ReceiveEndpoint :
         IReceiveEndpoint
     {
-        readonly IInboundPipe _inputPipe;
+        readonly IConsumePipe _consumePipe;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly IReceiveTransport _receiveTransport;
 
-        public ReceiveEndpoint(IReceiveTransport receiveTransport, IPipe<ReceiveContext> receivePipe, IInboundPipe inputPipe)
+        public ReceiveEndpoint(IReceiveTransport receiveTransport, IPipe<ReceiveContext> receivePipe, IConsumePipe consumePipe)
         {
             _receiveTransport = receiveTransport;
             _receivePipe = receivePipe;
-            _inputPipe = inputPipe;
+            _consumePipe = consumePipe;
         }
 
-        public Uri InputAddress
+        Uri IReceiveEndpoint.InputAddress
         {
             get { return _receiveTransport.InputAddress; }
         }
 
-        public IInboundPipe InputPipe
+        IConsumePipe IReceiveEndpoint.ConsumePipe
         {
-            get { return _inputPipe; }
+            get { return _consumePipe; }
         }
 
-        public Task Start(CancellationToken stopToken)
+        Task IReceiveEndpoint.Start(CancellationToken stopToken)
         {
             return _receiveTransport.Start(_receivePipe, stopToken);
         }

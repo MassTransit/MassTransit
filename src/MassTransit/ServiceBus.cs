@@ -71,7 +71,7 @@ namespace MassTransit
 //            OutboundPipeline = new OutboundPipelineConfigurator(this).Pipeline;
 //            InboundPipeline = InboundPipelineConfigurator.CreateDefault(this);
 
-            InboundPipe = new InboundPipe();
+            ConsumePipe = new ConsumePipe();
 
             if(enablePerformanceCounters)
                 InitializePerformanceCounters();
@@ -149,7 +149,7 @@ namespace MassTransit
 
         public IOutboundMessagePipeline OutboundPipeline { get; private set; }
 
-        public IInboundPipe InboundPipe { get; private set; }
+        public IConsumePipe ConsumePipe { get; private set; }
         public IInboundMessagePipeline InboundPipeline { get; private set; }
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace MassTransit
             try
             {
                 string instanceName = string.Format("{0}_{1}{2}",
-                    Endpoint.Address.Uri.Scheme, Endpoint.Address.Uri.Host, Endpoint.Address.Uri.AbsolutePath.Replace("/", "_"));
+                    Endpoint.Address.Scheme, Endpoint.Address.Host, Endpoint.Address.AbsolutePath.Replace("/", "_"));
 
                 _counters = new ServiceBusInstancePerformanceCounters(instanceName);
 

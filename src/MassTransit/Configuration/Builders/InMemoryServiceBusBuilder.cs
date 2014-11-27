@@ -68,10 +68,10 @@ namespace MassTransit.Builders
 
         public virtual IBusControl Build()
         {
-            IInboundPipe inboundPipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
-                .Select(x => x.InputPipe).FirstOrDefault() ?? new InboundPipe();
+            IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
+                .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
 
-            return new SuperDuperServiceBus(_inputAddress, inboundPipe, SendEndpointProvider, ReceiveEndpoints);
+            return new SuperDuperServiceBus(_inputAddress, consumePipe, SendEndpointProvider, ReceiveEndpoints);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace MassTransit.Transports
         IEndpoint
     {
         static readonly ILog _log = Logger.Get(typeof(Endpoint));
-        readonly IEndpointAddress _address;
+        readonly EndpointAddress _address;
         readonly IMessageSerializer _serializer;
         readonly IInboundMessageTracker _tracker;
         readonly ISupportedMessageSerializers _supportedSerializers;
@@ -41,7 +41,7 @@ namespace MassTransit.Transports
         IOutboundTransport _errorTransport;
         IDuplexTransport _transport;
 
-        public Endpoint( IEndpointAddress address,
+        public Endpoint( EndpointAddress address,
              IMessageSerializer serializer,
              IDuplexTransport transport,
              IOutboundTransport errorTransport,
@@ -81,7 +81,7 @@ namespace MassTransit.Transports
             get { return _serializer; }
         }
 
-        public IEndpointAddress Address
+        public EndpointAddress Address
         {
             get { return _address; }
         }
@@ -104,7 +104,7 @@ namespace MassTransit.Transports
 
             try
             {
-                context.SetDestinationAddress(Address.Uri);
+                context.SetDestinationAddress(Address);
                 context.SetBodyWriter(stream => _serializer.Serialize(stream, context));
 
                 _transport.Send(context);
@@ -113,7 +113,7 @@ namespace MassTransit.Transports
             }
             catch (Exception ex)
             {
-                throw new SendException(typeof(T), _address.Uri, "An exception was thrown during Send", ex);
+                throw new SendException(typeof(T), _address, "An exception was thrown during Send", ex);
             }
         }
 

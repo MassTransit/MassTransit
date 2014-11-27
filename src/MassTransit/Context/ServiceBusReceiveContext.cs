@@ -137,7 +137,7 @@ namespace MassTransit.Context
 				_consumeTime.Start();
 
 				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Dispatching message on {0} from thread {1}", _bus.Endpoint.Address.Uri,
+					_log.DebugFormat("Dispatching message on {0} from thread {1}", _bus.Endpoint.Address,
 						Thread.CurrentThread.ManagedThreadId);
 
 				bool atLeastOneConsumerFailed = false;

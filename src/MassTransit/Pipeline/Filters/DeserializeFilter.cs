@@ -38,6 +38,8 @@ namespace MassTransit.Pipeline.Filters
             await _output.Send(consumeContext);
 
             await next.Send(context);
+
+            await consumeContext.CompleteTask;
         }
 
         public bool Inspect(IPipeInspector inspector)

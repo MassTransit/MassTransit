@@ -42,7 +42,7 @@ namespace MassTransit.Context
         public async Task Send(SendContext<TRequest> context)
         {
             context.RequestId = NewId.NextGuid();
-            context.ResponseAddress = _bus.InputAddress;
+            context.ResponseAddress = _bus.Address;
 
             _requestContext = new SendRequestContext<TRequest>(_bus, context, _synchronizationContext);
 

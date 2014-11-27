@@ -22,24 +22,16 @@ namespace MassTransit.Pipeline.Filters
         IFilter<ConsumeContext>,
         IConsumeFilterConnector,
         IRequestFilterConnector,
+        IMessageObserverConnector,
         IConsumeObserverConnector
     {
-        readonly ConcurrentDictionary<Type, IFilter<ConsumeContext>> _pipes;
+        readonly ConsumeObserverConnectable _observers;
+        readonly ConcurrentDictionary<Type, IMessageFilter> _pipes;
 
         public MessageTypeConsumeFilter()
         {
-            _pipes = new ConcurrentDictionary<Type, IFilter<ConsumeContext>>();
-        }
-
-        public async Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
-        {
-            foreach (IFilter<ConsumeContext> pipe in _pipes.Values)
-                await pipe.Send(context, next);
-        }
-
-        public bool Inspect(IPipeInspector inspector)
-        {
-            return inspector.Inspect(this, x => _pipes.Values.All(pipe => pipe.Inspect(x)));
+            _pipes = new ConcurrentDictionary<Type, IMessageFilter>();
+            _observers = new ConsumeObserverConnectable();
         }
 
         public ConnectHandle Connect<T>(IPipe<ConsumeContext<T>> pipe)
@@ -53,7 +45,33 @@ namespace MassTransit.Pipeline.Filters
             return messagePipe.Connect(pipe);
         }
 
-        public ConnectHandle Connect<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe) 
+        public ConnectHandle Connect(IConsumeObserver observer)
+        {
+            return _observers.Connect(observer);
+        }
+
+        public  Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
+        {
+            return Task.WhenAll(_pipes.Values.Select(x => x.Filter.Send(context, next)));
+        }
+
+        public bool Inspect(IPipeInspector inspector)
+        {
+            return inspector.Inspect(this, x => _pipes.Values.All(pipe => pipe.Filter.Inspect(x)));
+        }
+
+        public ConnectHandle Connect<T>(IMessageObserver<T> observer)
+            where T : class
+        {
+            if (observer == null)
+                throw new ArgumentNullException("observer");
+
+            IMessageObserverConnector messagePipe = GetPipe<T, IMessageObserverConnector>();
+
+            return messagePipe.Connect(observer);
+        }
+
+        public ConnectHandle Connect<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
             where T : class
         {
             if (pipe == null)
@@ -64,22 +82,71 @@ namespace MassTransit.Pipeline.Filters
             return messagePipe.Connect(requestId, pipe);
         }
 
-        public ConnectHandle Connect<T>(IConsumeObserver<T> observer)
-            where T : class
-        {
-            if (observer == null)
-                throw new ArgumentNullException("observer");
-
-            IConsumeObserverConnector messagePipe = GetPipe<T, IConsumeObserverConnector>();
-
-            return messagePipe.Connect(observer);
-        }
-
         TResult GetPipe<T, TResult>()
             where T : class
             where TResult : class
         {
-            return (TResult)_pipes.GetOrAdd(typeof(T), x => new MessageConsumeFilter<T>());
+            return _pipes.GetOrAdd(typeof(T), x =>
+            {
+                var messageConsumeFilter = new MessageConsumeFilter<T>();
+
+                return new MessageFilter<T>(messageConsumeFilter, _observers);
+            }).As<TResult>();
+        }
+
+
+        interface IMessageFilter
+        {
+            IFilter<ConsumeContext> Filter { get; }
+
+            TResult As<TResult>()
+                where TResult : class;
+        }
+
+
+        class MessageFilter<T> :
+            IMessageFilter,
+            IMessageObserver<T>
+            where T : class
+        {
+            readonly MessageConsumeFilter<T> _filter;
+            readonly IConsumeObserver _observer;
+            ConnectHandle _filterHandle;
+
+            public MessageFilter(MessageConsumeFilter<T> filter, IConsumeObserver observer)
+            {
+                _filter = filter;
+                _observer = observer;
+
+                // we subscribe to any events so that they are pushed up the stack
+                _filterHandle = ((IMessageObserverConnector)filter).Connect(this);
+            }
+
+            public IFilter<ConsumeContext> Filter
+            {
+                get { return _filter; }
+            }
+
+            public TResult As<TResult>()
+                where TResult : class
+            {
+                return _filter as TResult;
+            }
+
+            public Task PreDispatch(ConsumeContext<T> context)
+            {
+                return _observer.PreDispatch(context);
+            }
+
+            public Task PostDispatch(ConsumeContext<T> context)
+            {
+                return _observer.PostDispatch(context);
+            }
+
+            public Task DispatchFault(ConsumeContext<T> context, Exception exception)
+            {
+                return _observer.DispatchFault(context, exception);
+            }
         }
     }
 }

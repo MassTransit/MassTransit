@@ -28,7 +28,7 @@ namespace MassTransit.Distributor.WorkerConnectors
 
             Expression<Func<TSaga, TMessage, bool>> selector = instance.GetBindExpression();
 
-            return new PropertySagaMessageSink<TSaga, TMessage>(sagaRepository, policy, selector);
+            throw new NotImplementedException();
         }
     }
 }

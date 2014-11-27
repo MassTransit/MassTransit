@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Testing
 {
-	using Magnum.TestFramework;
+    using System.Threading.Tasks;
+    using Magnum.TestFramework;
 	using MassTransit.Testing;
 
 	[Scenario]
@@ -24,12 +25,11 @@ namespace MassTransit.Tests.Testing
 		public void A_consumer_is_being_tested()
 		{
 			_test = TestFactory.ForConsumer<Testsumer>()
-				.InSingleBusScenario()
 				.New(x =>
 					{
 						x.ConstructUsing(() => new Testsumer());
 
-						//x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
+						x.Send(new A());
 					});
 
 			_test.Execute();
@@ -68,12 +68,12 @@ namespace MassTransit.Tests.Testing
 		}
 
 		class Testsumer :
-			Consumes<A>.All
+			IConsumer<A>
 		{
-			public void Consume(A message)
-			{
-				this.MessageContext().Respond(new B());
-			}
+		    public async Task Consume(ConsumeContext<A> context)
+		    {
+		        await context.RespondAsync(new B());
+		    }
 		}
 
 		class A

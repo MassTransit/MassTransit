@@ -16,7 +16,6 @@ namespace MassTransit.Distributor
     using System.Collections.Generic;
     using Magnum.Caching;
     using Magnum.Extensions;
-    using MassTransit.Pipeline;
     using Subscriptions;
     using WorkerConnectors;
 
@@ -94,12 +93,12 @@ namespace MassTransit.Distributor
 
         public Uri ControlUri
         {
-            get { return _controlBus.Endpoint.Address.Uri; }
+            get { return _controlBus.Endpoint.Address; }
         }
 
         public Uri DataUri
         {
-            get { return _bus.Endpoint.Address.Uri; }
+            get { return _bus.Endpoint.Address; }
         }
 
         public IWorkerLoad<TMessage> GetWorkerLoad<TMessage>()

@@ -54,7 +54,7 @@ namespace MassTransit.Testing.TestDecorators
             _sent.Dispose();
         }
 
-        public IEndpointAddress Address
+        public EndpointAddress Address
         {
             get { return _endpoint.Address; }
         }

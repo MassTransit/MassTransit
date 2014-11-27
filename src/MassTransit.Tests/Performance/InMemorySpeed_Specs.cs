@@ -17,7 +17,6 @@ namespace MassTransit.Tests.Performance
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using EndpointConfigurators;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -34,7 +33,7 @@ namespace MassTransit.Tests.Performance
             int count = 0;
 
             await _requestClient.Request(new PingMessage());
-            
+
             Stopwatch timer = Stopwatch.StartNew();
 
             await Task.WhenAll(Enumerable.Range(0, limit).Select(async x =>

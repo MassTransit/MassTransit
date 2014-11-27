@@ -21,7 +21,7 @@ namespace MassTransit.Context
         ISendContext
     {
         readonly Action<Stream> _bodyWriter;
-        readonly Action<IEndpointAddress> _notifySend;
+        readonly Action<EndpointAddress> _notifySend;
 
         public MoveMessageSendContext(IReceiveContext context)
         {
@@ -54,7 +54,7 @@ namespace MassTransit.Context
             _bodyWriter(stream);
         }
 
-        public void NotifySend(IEndpointAddress address)
+        public void NotifySend(EndpointAddress address)
         {
             _notifySend(address);
         }

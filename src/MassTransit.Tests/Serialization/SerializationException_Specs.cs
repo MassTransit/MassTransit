@@ -37,7 +37,7 @@ namespace MassTransit.Tests.Serialization
             LocalBus.Endpoint.Send(new BadMessage("Good"));
 
             IEndpoint errorEndpoint =
-                LocalBus.GetEndpoint(LocalBus.Endpoint.InboundTransport.Address.Uri.AppendToPath("_error"));
+                LocalBus.GetEndpoint(LocalBus.Endpoint.InboundTransport.Address.AppendToPath("_error"));
             errorEndpoint.InboundTransport.ShouldContain(errorEndpoint.Serializer, typeof(BadMessage));
 
             LocalBus.Endpoint.ShouldNotContain<BadMessage>();

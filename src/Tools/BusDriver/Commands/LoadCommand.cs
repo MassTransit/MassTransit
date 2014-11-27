@@ -151,7 +151,7 @@ namespace BusDriver.Commands
                 _bodyWriter(stream);
             }
 
-            public void NotifySend(IEndpointAddress address)
+            public void NotifySend(EndpointAddress address)
             {
             }
         }

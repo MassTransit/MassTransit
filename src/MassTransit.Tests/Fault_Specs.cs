@@ -62,18 +62,18 @@ namespace MassTransit.Tests
 		LoopbackTestFixture
 	{
 		public class SmartConsumer :
-			Consumes<Fault<Hello, Guid>>.All
+			Consumes<Faultered<Hello, Guid>>.All
 		{
 			readonly Guid _id = Guid.NewGuid();
 
-			readonly FutureMessage<Fault<Hello, Guid>> _fault = new FutureMessage<Fault<Hello, Guid>>();
+			readonly FutureMessage<Faultered<Hello, Guid>> _fault = new FutureMessage<Faultered<Hello, Guid>>();
 
-			public FutureMessage<Fault<Hello, Guid>> Fault
+			public FutureMessage<Faultered<Hello, Guid>> Fault
 			{
 				get { return _fault; }
 			}
 
-			public void Consume(Fault<Hello, Guid> message)
+			public void Consume(Faultered<Hello, Guid> message)
 			{
                 if(message.CorrelationId == _id)
     				_fault.Set(message);

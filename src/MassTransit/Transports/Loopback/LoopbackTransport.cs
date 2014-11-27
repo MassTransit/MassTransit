@@ -33,7 +33,7 @@ namespace MassTransit.Transports
         AutoResetEvent _messageReady = new AutoResetEvent(false);
         LinkedList<LoopbackMessage> _messages = new LinkedList<LoopbackMessage>();
 
-        public LoopbackTransport(IEndpointAddress address)
+        public LoopbackTransport(EndpointAddress address)
         {
             Address = address;
         }
@@ -61,7 +61,7 @@ namespace MassTransit.Transports
             }
         }
 
-        public IEndpointAddress Address { get; private set; }
+        public EndpointAddress Address { get; private set; }
 
         public IOutboundTransport OutboundTransport
         {

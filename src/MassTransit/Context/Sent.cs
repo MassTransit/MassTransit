@@ -15,11 +15,11 @@ namespace MassTransit.Context
 	public class Sent :
 		ISent
 	{
-		readonly IEndpointAddress _address;
+		readonly EndpointAddress _address;
 		readonly ISendContext _context;
 		long _timestamp;
 
-		public Sent(ISendContext context, IEndpointAddress address, long timestamp)
+		public Sent(ISendContext context, EndpointAddress address, long timestamp)
 		{
 			_timestamp = timestamp;
 			_context = context;
@@ -36,7 +36,7 @@ namespace MassTransit.Context
 			get { return _timestamp; }
 		}
 
-		public IEndpointAddress Address
+		public EndpointAddress Address
 		{
 			get { return _address; }
 		}
@@ -46,11 +46,11 @@ namespace MassTransit.Context
 		ISent
 		where T : class
 	{
-		readonly IEndpointAddress _address;
+		readonly EndpointAddress _address;
 		readonly ISendContext<T> _context;
 		long _timestamp;
 
-		public Sent(ISendContext<T> context, IEndpointAddress address, long timestamp)
+		public Sent(ISendContext<T> context, EndpointAddress address, long timestamp)
 		{
 			_timestamp = timestamp;
 			_context = context;
@@ -67,7 +67,7 @@ namespace MassTransit.Context
 			get { return _timestamp; }
 		}
 
-		public IEndpointAddress Address
+		public EndpointAddress Address
 		{
 			get { return _address; }
 		}

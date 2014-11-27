@@ -75,7 +75,7 @@ namespace MassTransit
             if (bus == null)
                 throw new ArgumentNullException("bus");
 
-            context.SetResponseAddress(bus.Endpoint.Address.Uri);
+            context.SetResponseAddress(bus.Endpoint.Address);
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace MassTransit
             if (endpoint == null)
                 throw new ArgumentNullException("endpoint");
 
-            context.SetResponseAddress(endpoint.Address.Uri);
+            context.SetResponseAddress(endpoint.Address);
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace MassTransit
         {
             if (bus == null)
                 throw new ArgumentNullException("bus");
-            context.SetFaultAddress(bus.Endpoint.Address.Uri);
+            context.SetFaultAddress(bus.Endpoint.Address);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace MassTransit
         {
             if (endpoint == null)
                 throw new ArgumentNullException("endpoint");
-            context.SetFaultAddress(endpoint.Address.Uri);
+            context.SetFaultAddress(endpoint.Address);
         }
 
         /// <summary>
@@ -203,11 +203,11 @@ namespace MassTransit
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="address">The address.</param>
-        public static void SetInputAddress(this IReceiveContext context,  IEndpointAddress address)
+        public static void SetInputAddress(this IReceiveContext context,  EndpointAddress address)
         {
             if (address == null)
                 throw new ArgumentNullException("address");
-            context.SetInputAddress(address.Uri);
+            context.SetInputAddress(address);
         }
 
         /// <summary>
