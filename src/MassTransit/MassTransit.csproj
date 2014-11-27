@@ -86,7 +86,6 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Bus.cs" />
-    <Compile Include="Configuration\Advanced\EnvironmentExtensions.cs" />
     <Compile Include="Configuration\Builders\BusBuilder.cs" />
     <Compile Include="Configuration\Builders\DuplexTransportFactory.cs" />
     <Compile Include="Configuration\Builders\EndpointBuilder.cs" />
@@ -100,7 +99,6 @@
     <Compile Include="Configuration\Builders\IServiceBusFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\Builders\OutboundTransportFactory.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilder.cs" />
-    <Compile Include="Configuration\Advanced\AdvancedBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderBase.cs" />
     <Compile Include="Configuration\Configurators\InMemoryServiceBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\IPipeConfigurationResult.cs" />
@@ -193,7 +191,6 @@
     <Compile Include="Context\SendEndpointConverter.cs" />
     <Compile Include="Context\MessageHeadersAdapter.cs" />
     <Compile Include="Context\ReceiveContextAdapter.cs" />
-    <Compile Include="EndpointExtensions.cs" />
     <Compile Include="Exceptions\ConsumerMessageException.cs" />
     <Compile Include="ContextHeaders.cs" />
     <Compile Include="HostContext.cs" />
@@ -201,6 +198,21 @@
     <Compile Include="IConsumer.cs" />
     <Compile Include="IFault.cs" />
     <Compile Include="IMessageDeserializer.cs" />
+    <Compile Include="Internals\Extensions\CastExtensions.cs" />
+    <Compile Include="Internals\Extensions\DbCommandExtensions.cs" />
+    <Compile Include="Internals\Extensions\ExpressionExtensions.cs" />
+    <Compile Include="Internals\Extensions\InterfaceExtensions.cs" />
+    <Compile Include="Internals\Extensions\QueryStringExtensions.cs" />
+    <Compile Include="Internals\Extensions\TimeSpanExtensions.cs" />
+    <Compile Include="Internals\Extensions\TypeExtensions.cs" />
+    <Compile Include="Internals\Reflection\DynamicImplementationBuilder.cs" />
+    <Compile Include="Internals\Reflection\IImplementationBuilder.cs" />
+    <Compile Include="Internals\Reflection\InterfaceReflectionCache.cs" />
+    <Compile Include="Internals\Reflection\ReadOnlyProperty.cs" />
+    <Compile Include="Internals\Reflection\ReadOnlyPropertyCache.cs" />
+    <Compile Include="Internals\Reflection\ReadWriteProperty.cs" />
+    <Compile Include="Internals\Reflection\ReadWritePropertyCache.cs" />
+    <Compile Include="Internals\Reflection\TypeNameFormatter.cs" />
     <Compile Include="IPublishEndpoint.cs" />
     <Compile Include="ISendEndpoint.cs" />
     <Compile Include="ISendEndpointProvider.cs" />
@@ -220,18 +232,19 @@
     <Compile Include="NewId\NewIdProviders\WMINetworkAddressWorkerIdProvider.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
-    <Compile Include="Pipeline\AsyncDelegateFilter.cs" />
     <Compile Include="Pipeline\DefaultConstructorConsumerFactory.cs" />
     <Compile Include="Pipeline\DelegateFilter.cs" />
-    <Compile Include="Pipeline\EmptyPipe.cs" />
     <Compile Include="Pipeline\FilterInspectorAdapter.cs" />
     <Compile Include="Pipeline\FilterInspectorAdapterCache.cs" />
     <Compile Include="Pipeline\FilterPipe.cs" />
+    <Compile Include="Pipeline\Filters\AsyncDelegateFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
+    <Compile Include="Pipeline\Filters\ConsumerSplitFilter.cs" />
     <Compile Include="Pipeline\Filters\DeserializeFilter.cs" />
     <Compile Include="Pipeline\Filters\FaultFilter.cs" />
     <Compile Include="Pipeline\Filters\HandlerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\InstanceMessageFilter.cs" />
+    <Compile Include="Pipeline\Filters\KeyedConsumeFilter.cs" />
     <Compile Include="Pipeline\Filters\LogFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageConsumeFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageTypeConsumeFilter.cs" />
@@ -248,7 +261,7 @@
     <Compile Include="Pipeline\IConsumeFilterConnector.cs" />
     <Compile Include="Pipeline\IConsumeObserver.cs" />
     <Compile Include="Pipeline\IConsumeObserverConnector.cs" />
-    <Compile Include="Pipeline\IConsumerMessageAdapter.cs" />
+    <Compile Include="Pipeline\IConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\IFilter.cs" />
     <Compile Include="Pipeline\IFilterInspector.cs" />
     <Compile Include="Pipeline\IFilterInspectorAdapter.cs" />
@@ -258,7 +271,6 @@
     <Compile Include="Pipeline\IPipe.cs" />
     <Compile Include="Pipeline\IPipeInspector.cs" />
     <Compile Include="Pipeline\IConsumePipe.cs" />
-    <Compile Include="Pipeline\ConsumePipe.cs" />
     <Compile Include="Pipeline\InboundMessagePipeExtensions.cs" />
     <Compile Include="Pipeline\IPublishInterceptor.cs" />
     <Compile Include="Pipeline\IReceivePipe.cs" />
@@ -266,20 +278,20 @@
     <Compile Include="Pipeline\ISendInterceptor.cs" />
     <Compile Include="Pipeline\ISendObserver.cs" />
     <Compile Include="Pipeline\ISendObserverConnector.cs" />
-    <Compile Include="Pipeline\LastPipe.cs" />
-    <Compile Include="Pipeline\ConsumerMergePipe.cs" />
-    <Compile Include="Pipeline\ConsumerSplitFilter.cs" />
-    <Compile Include="Pipeline\LegacyContextMethodConsumerMessageAdapter.cs" />
-    <Compile Include="Pipeline\LegacyMethodConsumerMessageAdapter.cs" />
+    <Compile Include="Pipeline\KeyAccessor.cs" />
+    <Compile Include="Pipeline\LegacyContextMethodConsumerMessageFilter.cs" />
+    <Compile Include="Pipeline\LegacyMethodConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\MessageObserverConnectable.cs" />
-    <Compile Include="Pipeline\MethodConsumerMessageAdapter.cs" />
+    <Compile Include="Pipeline\MethodConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\ConsumeObserverConnectable.cs" />
     <Compile Include="Pipeline\PipeExtensions.cs" />
     <Compile Include="Pipeline\PipeInspectorBase.cs" />
     <Compile Include="Pipeline\PipeInspectorCallback.cs" />
     <Compile Include="Pipeline\ISendFilter.cs" />
-    <Compile Include="Pipeline\Sinks\KeyAccessor.cs" />
-    <Compile Include="Pipeline\Sinks\KeyedConsumeFilter.cs" />
+    <Compile Include="Pipeline\Pipes\ConsumePipe.cs" />
+    <Compile Include="Pipeline\Pipes\ConsumerMergePipe.cs" />
+    <Compile Include="Pipeline\Pipes\EmptyPipe.cs" />
+    <Compile Include="Pipeline\Pipes\LastPipe.cs" />
     <Compile Include="Pipeline\StringPipeInspector.cs" />
     <Compile Include="Pipeline\TupleContext.cs" />
     <Compile Include="Policies\CancelRetryContext.cs" />
@@ -354,9 +366,6 @@
     <Compile Include="Diagnostics\Introspection\DiagnosticEntryImpl.cs" />
     <Compile Include="Diagnostics\Introspection\IntrospectionServiceConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurationExtensions.cs" />
-    <Compile Include="Configuration\EnvironmentConfigurators\DelegateEnvironmentConfigurator.cs" />
-    <Compile Include="Configuration\EnvironmentConfigurators\EnvironmentsConfigurator.cs" />
-    <Compile Include="Configuration\EnvironmentConfigurators\EnvironmentsConfiguratorImpl.cs" />
     <Compile Include="Configuration\HandlerSubscriptionExtensions.cs" />
     <Compile Include="Configuration\InstanceSubscriptionExtensions.cs" />
     <Compile Include="Configuration\SubscriptionBuilders\ConsumerSubscriptionBuilder.cs" />
@@ -394,7 +403,6 @@
     <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ServiceBusFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnectorCache.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\RequestHandlerSubscriptionConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnectorCache.cs" />
     <Compile Include="Configuration\ThreadConfigurationExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfiguratorExtensions.cs" />
@@ -430,7 +438,6 @@
     <Compile Include="Context\OldReceiveContext.cs" />
     <Compile Include="Context\OldMessageContext.cs" />
     <Compile Include="Context\ContextException.cs" />
-    <Compile Include="Context\ContextExtensions.cs" />
     <Compile Include="Context\IConsumeContext.cs" />
     <Compile Include="Context\IMessageContext.cs" />
     <Compile Include="Context\InvalidConsumeContext.cs" />
@@ -551,13 +558,8 @@
     <Compile Include="NewId\NewIdProviders\DateTimeTickProvider.cs" />
     <Compile Include="NewId\NewIdProviders\NetworkAddressWorkerIdProvider.cs" />
     <Compile Include="NewId\NewIdProviders\StopwatchTickProvider.cs" />
-    <Compile Include="Pipeline\Configuration\InboundRequestMessageRouterConfigurator.cs" />
-    <Compile Include="Pipeline\Configuration\InboundRequestMessageRouterConfiguratorScope.cs" />
-    <Compile Include="Pipeline\HandlerSelector.cs" />
     <Compile Include="Pipeline\InstanceHandlerSelector.cs" />
     <Compile Include="Pipeline\MultipleHandlerSelector.cs" />
-    <Compile Include="Pipeline\Sinks\ContextConsumerMessageSink.cs" />
-    <Compile Include="Pipeline\Sinks\RequestMessageRouter.cs" />
     <Compile Include="Saga\CorrelatedSagaLocator.cs" />
     <Compile Include="Saga\DelegatingSagaRepository.cs" />
     <Compile Include="Saga\InjectingSagaRepository.cs" />
@@ -578,15 +580,12 @@
     <Compile Include="MessageUrn.cs" />
     <Compile Include="IServiceContainer.cs" />
     <Compile Include="Configuration\Builders\ServiceBusBuilderImpl.cs" />
-    <Compile Include="Pipeline\Configuration\InboundMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\IEndpointSubscriptionEvent.cs" />
-    <Compile Include="Pipeline\IInboundMessagePipeline.cs" />
     <Compile Include="Pipeline\IOutboundMessagePipeline.cs" />
     <Compile Include="Pipeline\IOutboundPipelineConfigurator.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\IOutboundPipelineSink.cs" />
     <Compile Include="Pipeline\OutboundMessagePipeline.cs" />
-    <Compile Include="Pipeline\Sinks\MessageRouter.cs" />
     <Compile Include="Saga\Configuration\SagaSubscriptionConfiguratorExtensions.cs" />
     <Compile Include="Saga\SubscriptionBuilders\SagaSubscriptionBuilder.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\SagaSubscriptionConfigurator.cs" />
@@ -788,7 +787,6 @@
     <Compile Include="Transports\Loopback\LoopbackTransportFactory.cs" />
     <Compile Include="Transports\Transport.cs" />
     <Compile Include="Util\BusHostInfo.cs" />
-    <Compile Include="Util\CheckConvention.cs" />
     <Compile Include="Util\HostMetadataCache.cs" />
     <Compile Include="Util\IndexedSagaProperty.cs" />
     <Compile Include="Util\ITypeMetadataCache.cs" />
@@ -830,9 +828,6 @@
     <Compile Include="Monitoring\ServiceBusPerformanceCounters.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointConfigurator.cs" />
     <Compile Include="Configuration\BusServiceConfigurators\DefaultBusServiceConfigurator.cs" />
-    <Compile Include="Pipeline\Configuration\InboundMessageInterceptorConfiguratorScope.cs" />
-    <Compile Include="Pipeline\Sinks\InstanceMessageSinkBase.cs" />
-    <Compile Include="Pipeline\Configuration\ExtensionsForPipelineConfiguration.cs" />
     <Compile Include="Saga\CreateOrUseExistingSagaPolicy.cs" />
     <Compile Include="Saga\DataEventBinder.cs" />
     <Compile Include="Saga\EventBinder.cs" />
@@ -858,30 +853,19 @@
     <Compile Include="Configuration\BusServiceConfigurators\BusServiceConfigurator.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="Transports\EndpointCache.cs" />
-    <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
     <Compile Include="Serialization\ExtensionsToMessageEnvelope.cs" />
     <Compile Include="ServiceBusExtensions.cs" />
     <Compile Include="Saga\InMemorySagaRepository.cs" />
-    <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorScope.cs" />
-    <Compile Include="Pipeline\IInboundPipelineConfigurator.cs" />
     <Compile Include="Pipeline\IPipelineSink.cs" />
     <Compile Include="Pipeline\IPipelineInspector.cs" />
     <Compile Include="Util\QueryStringExtensions.cs" />
-    <Compile Include="Util\RegistrationList.cs" />
-    <Compile Include="Pipeline\InboundMessagePipeline.cs" />
-    <Compile Include="Pipeline\MessagePipelineExtensions.cs" />
-    <Compile Include="Pipeline\Sinks\InstanceMessageSink.cs" />
-    <Compile Include="Pipeline\Sinks\InboundConvertMessageSink.cs" />
     <Compile Include="Exceptions\PipelineException.cs" />
-    <Compile Include="Pipeline\Configuration\InboundPipelineConfigurator.cs" />
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />
     <Compile Include="Serialization\IMessageSerializer.cs" />
     <Compile Include="Serialization\XmlMessageEnvelope.cs" />
     <Compile Include="Util\SequenceNumberGenerator.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Pipeline\Configuration\Subscribers\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>

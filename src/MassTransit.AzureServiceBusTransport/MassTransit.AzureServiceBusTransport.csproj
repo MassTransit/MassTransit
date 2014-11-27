@@ -53,6 +53,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="AzureServiceBus.cs" />
     <Compile Include="AzureServiceBusReceiveContext.cs" />
     <Compile Include="AzureServiceBusSendContext.cs" />
     <Compile Include="AzureServiceBusSendContextHeaders.cs" />
@@ -86,7 +87,7 @@
     <Compile Include="SharedAccessKeyTokenProvider.cs" />
     <Compile Include="SharedAccessSignatureTokenProviderConfigurator.cs" />
     <Compile Include="TransportConfiguratorExtensions.cs" />
-    <Compile Include="TransportSelectorExtensions.cs" />
+    <Compile Include="AzureServiceBusConfigurationExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

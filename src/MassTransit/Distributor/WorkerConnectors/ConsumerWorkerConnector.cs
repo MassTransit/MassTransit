@@ -18,7 +18,6 @@ namespace MassTransit.Distributor.WorkerConnectors
     using Magnum.Extensions;
     using Magnum.Reflection;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Sinks;
     using Saga;
     using SubscriptionConnectors;
     using Subscriptions;
@@ -30,7 +29,7 @@ namespace MassTransit.Distributor.WorkerConnectors
         Type MessageType { get; }
 
 
-        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IWorker worker);
+//        UnsubscribeAction Connect(IInboundPipelineConfigurator configurator, IWorker worker);
     }
 
 
@@ -63,13 +62,13 @@ namespace MassTransit.Distributor.WorkerConnectors
                 .ToList();
         }
 
-        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker)
-        {
-            throw new NotImplementedException();
-//            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, worker))
-//                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
-        }
-
+//        public ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker)
+//        {
+//            throw new NotImplementedException();
+////            return _referenceFactory(_connectors.Select(x => x.Connect(configurator, worker))
+////                .Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x()));
+//        }
+//
         IEnumerable<ConsumerWorkerConnector> ConsumesContext()
         {
             return ConsumerMetadataCache<T>.ConsumerTypes.Select(CreateContextConnector);

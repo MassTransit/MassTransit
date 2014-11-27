@@ -23,6 +23,7 @@ namespace MassTransit
     using PipeConfigurators;
     using Pipeline;
     using Pipeline.Filters;
+    using Pipeline.Pipes;
     using Transports;
 
 

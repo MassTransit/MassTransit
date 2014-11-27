@@ -30,7 +30,7 @@ namespace MassTransit.Pipeline
             where T : class, PipeContext
         {
             if (filter is MessageTypeConsumeFilter)
-                return Inspect((MessageTypeConsumeFilter)filter, x => callback(x));
+                return Inspect((MessageTypeConsumeFilter)filter, callback);
 
             return callback(this);
         }
@@ -45,9 +45,9 @@ namespace MassTransit.Pipeline
             where T : class
         {
             if (filter is TeeConsumeFilter<T>)
-                return Inspect((TeeConsumeFilter<T>)filter, x => callback(x));
+                return Inspect((TeeConsumeFilter<T>)filter, callback);
             if (filter is HandlerMessageFilter<T>)
-                return Inspect((HandlerMessageFilter<T>)filter, x => callback(x));
+                return Inspect((HandlerMessageFilter<T>)filter, callback);
 
             if (filter.GetType().IsGenericType && filter.GetType().GetGenericTypeDefinition() == typeof(ConsumerMessageFilter<,>))
             {

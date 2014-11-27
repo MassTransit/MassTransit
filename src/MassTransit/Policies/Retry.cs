@@ -14,7 +14,6 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Linq;
-    using Pipeline.Sinks;
 
 
     public static class Retry

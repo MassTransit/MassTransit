@@ -14,6 +14,7 @@ namespace MassTransit.PipeBuilders
 {
     using System.Collections.Generic;
     using Pipeline;
+    using Pipeline.Pipes;
 
 
     public class PipeBuilder<T> :

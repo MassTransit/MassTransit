@@ -14,7 +14,6 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using EndpointConfigurators;
     using Magnum.Extensions;
     using Magnum.TestFramework;
     using NUnit.Framework;
@@ -76,12 +75,13 @@ namespace MassTransit.Tests
         }
     }
 
+
     [TestFixture]
     public class Sending_a_request_to_a_faulty_service :
         InMemoryTestFixture
     {
         [Test]
-        public  void Should_receive_the_exception()
+        public void Should_receive_the_exception()
         {
             Assert.Throws<RequestFaultException>(async () => await _response);
         }
@@ -106,5 +106,4 @@ namespace MassTransit.Tests
             });
         }
     }
-
 }

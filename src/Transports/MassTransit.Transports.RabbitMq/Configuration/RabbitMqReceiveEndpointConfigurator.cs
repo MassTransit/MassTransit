@@ -21,6 +21,7 @@ namespace MassTransit.Transports.RabbitMq.Configuration
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
+    using MassTransit.Pipeline.Pipes;
     using PipeConfigurators;
     using Policies;
     using RabbitMQ.Client;

@@ -74,7 +74,7 @@ namespace MassTransit.Distributor
     //
     //            	var consumeContext = _bus.MessageContext<Distributed<TMessage>>();
     //
-    //            	consumeContext.BaseContext.NotifyConsume(consumeContext, typeof (Worker<TMessage>).ToShortTypeName(),
+    //            	consumeContext.BaseContext.NotifyConsume(consumeContext, typeof (Worker<TMessage>).GetTypeName(),
     //            		message.CorrelationId.ToString());
     //            }
     //            finally

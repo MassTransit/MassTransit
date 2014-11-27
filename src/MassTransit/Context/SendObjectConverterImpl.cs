@@ -14,6 +14,7 @@ namespace MassTransit.Context
 {
     using System;
     using System.Runtime.Remoting.Messaging;
+    using Internals.Extensions;
     using Magnum.Extensions;
     using Util;
 
@@ -31,7 +32,7 @@ namespace MassTransit.Context
 
             var msg = message as TMessage;
             if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
+                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
 
             endpoint.Send(msg);
         }
@@ -45,7 +46,7 @@ namespace MassTransit.Context
 
             var msg = message as TMessage;
             if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + message.GetType().ToShortTypeName());
+                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
 
             endpoint.Send(msg, context => contextCallback(context));
         }

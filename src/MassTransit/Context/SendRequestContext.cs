@@ -316,7 +316,7 @@ namespace MassTransit.Context
 
         void Fail(Fault<TRequest> fault)
         {
-            Fail(new RequestFaultException(TypeMetadataCache<TRequest>.ShortName, fault, fault.Message));
+            Fail(new RequestFaultException(TypeMetadataCache<TRequest>.ShortName, fault));
         }
 
         void Fail(Exception ex)

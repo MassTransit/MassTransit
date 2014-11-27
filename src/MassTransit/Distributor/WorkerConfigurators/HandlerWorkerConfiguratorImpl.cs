@@ -26,29 +26,30 @@ namespace MassTransit.Distributor.WorkerConfigurators
         WorkerBuilderConfigurator
         where TMessage : class
     {
-        readonly HandlerSelector<TMessage> _handler;
+//        readonly HandlerSelector<TMessage> _handler;
 
         public HandlerWorkerConfiguratorImpl(Action<IConsumeContext<TMessage>, TMessage> handler)
         {
-            _handler = x => context => handler(context, context.Message);
+  //          _handler = x => context => handler(context, context.Message);
         }
 
         public HandlerWorkerConfiguratorImpl(Action<TMessage> handler)
         {
-            _handler = HandlerSelector.ForHandler(handler);
+//            _handler = HandlerSelector.ForHandler(handler);
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_handler == null)
-                yield return this.Failure("Handler", "must not be null");
+//            if (_handler == null)
+//                yield return this.Failure("Handler", "must not be null");
+            throw new NotImplementedException();
         }
 
         public void Configure(WorkerBuilder builder)
         {
-            var configurator = new HandlerWorkerConnector<TMessage>(_handler, ReferenceFactory);
-
-            builder.Add(configurator);
+//            var configurator = new HandlerWorkerConnector<TMessage>(_handler, ReferenceFactory);
+//
+//            builder.Add(configurator);
         }
     }
 }

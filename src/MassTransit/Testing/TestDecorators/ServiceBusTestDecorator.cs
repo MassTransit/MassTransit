@@ -53,16 +53,6 @@ namespace MassTransit.Testing.TestDecorators
             get { return _bus.Endpoint; }
         }
 
-        public IInboundMessagePipeline InboundPipeline
-        {
-            get { return _bus.InboundPipeline; }
-        }
-
-        public IOutboundMessagePipeline OutboundPipeline
-        {
-            get { return _bus.OutboundPipeline; }
-        }
-
         public IEndpointCache EndpointCache
         {
             get { return _bus.EndpointCache; }
@@ -110,10 +100,6 @@ namespace MassTransit.Testing.TestDecorators
             return _bus.GetEndpoint(address);
         }
 
-        public UnsubscribeAction Configure(Func<IInboundPipelineConfigurator, UnsubscribeAction> configure)
-        {
-            return _bus.Configure(configure);
-        }
 
         void NoContext<T>(PublishContext<T> context)
             where T : class

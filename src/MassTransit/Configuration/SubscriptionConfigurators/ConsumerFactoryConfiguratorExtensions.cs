@@ -17,8 +17,11 @@ namespace MassTransit.SubscriptionConfigurators
     using System.Linq;
     using System.Reflection;
     using Configurators;
+    using Internals.Extensions;
     using Magnum.Extensions;
     using SubscriptionConnectors;
+    using Util;
+
 
     public static class ConsumerFactoryConfiguratorExtensions
     {
@@ -28,7 +31,7 @@ namespace MassTransit.SubscriptionConfigurators
             if (!typeof(TConsumer).Implements<IConsumer>())
                 yield return configurator.Warning("Consumer",
                     string.Format("The consumer class {0} does not implement any IMessageConsumer interfaces",
-                        typeof(TConsumer).ToShortTypeName()));
+                        TypeMetadataCache<TConsumer>.ShortName));
 
             IEnumerable<ValidationResult> warningForMessages = ConsumerMetadataCache<TConsumer>
                 .ConsumerTypes.Concat(ConsumerMetadataCache<TConsumer>.MessageConsumerTypes)
@@ -38,10 +41,10 @@ namespace MassTransit.SubscriptionConfigurators
                               " Without an available constructor, MassTransit will initialize new consumer instances" +
                               " without calling a constructor, which can lead to unpredictable behavior if the consumer" +
                               " depends upon logic in the constructor to be executed.")
-                                 .FormatWith(x.MessageType.ToShortTypeName()))
+                                 .FormatWith(x.MessageType.GetTypeName()))
                 .Select(message => configurator.Warning("Consumer", message));
 
-            foreach (ValidationResultImpl message in warningForMessages)
+            foreach (var message in warningForMessages)
                 yield return message;
         }
 

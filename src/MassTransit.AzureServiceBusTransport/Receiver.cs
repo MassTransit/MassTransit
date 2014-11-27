@@ -49,10 +49,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             _completeTask = new TaskCompletionSource<ReceiverMetrics>();
 
-            _registration = cancellationToken.Register(() =>
-            {
-                Shutdown();
-            });
+            _registration = cancellationToken.Register(Shutdown);
 
             var options = new OnMessageOptions
             {

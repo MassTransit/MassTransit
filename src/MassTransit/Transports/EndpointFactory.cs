@@ -17,6 +17,7 @@ namespace MassTransit.Transports
     using Builders;
     using Diagnostics.Introspection;
     using EndpointConfigurators;
+    using Internals.Extensions;
     using Magnum.Caching;
     using Magnum.Extensions;
     using Util;
@@ -91,12 +92,12 @@ namespace MassTransit.Transports
 
         public void Inspect(DiagnosticsProbe probe)
         {
-            probe.Add("mt.default_serializer", _defaults.Serializer.GetType().ToShortTypeName());
+            probe.Add("mt.default_serializer", _defaults.Serializer.GetType().GetTypeName());
             _transportFactories.Each(
                 (scheme, factory) =>
                     {
                         probe.Add("mt.transport",
-                            string.Format("[{0}] {1}", scheme, factory.GetType().ToShortTypeName()));
+                            string.Format("[{0}] {1}", scheme, factory.GetType().GetTypeName()));
                     });
         }
 

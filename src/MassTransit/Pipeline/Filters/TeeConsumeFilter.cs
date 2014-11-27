@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Threading.Tasks;
-    using Sinks;
     using Subscriptions;
 
 

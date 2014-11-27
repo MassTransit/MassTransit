@@ -12,11 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
+    using System;
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
+    using Subscriptions;
     using Transports;
 
 
@@ -29,10 +31,12 @@ namespace MassTransit.AzureServiceBusTransport
     public class AzureServiceBusSendTransport :
         ISendTransport
     {
+        readonly Connectable<ISendObserver> _observers;
         readonly MessageSender _sender;
 
         public AzureServiceBusSendTransport(MessageSender sender)
         {
+            _observers = new Connectable<ISendObserver>();
             _sender = sender;
         }
 
@@ -40,27 +44,51 @@ namespace MassTransit.AzureServiceBusTransport
         {
             var context = new AzureServiceBusSendContextImpl<T>(message, cancelSend);
 
-            await pipe.Send(context);
-
-            using (Stream messageBodyStream = context.GetBodyStream())
+            try
             {
-                using (var brokeredMessage = new BrokeredMessage(messageBodyStream))
+                await pipe.Send(context);
+
+                using (Stream messageBodyStream = context.GetBodyStream())
                 {
-                    brokeredMessage.ContentType = context.ContentType.MediaType;
-                    brokeredMessage.ForcePersistence = context.Durable;
+                    using (var brokeredMessage = new BrokeredMessage(messageBodyStream))
+                    {
+                        brokeredMessage.ContentType = context.ContentType.MediaType;
+                        brokeredMessage.ForcePersistence = context.Durable;
 
-                    if (context.TimeToLive.HasValue)
-                        brokeredMessage.TimeToLive = context.TimeToLive.Value;
+                        if (context.TimeToLive.HasValue)
+                            brokeredMessage.TimeToLive = context.TimeToLive.Value;
 
-                    if (context.MessageId.HasValue)
-                        brokeredMessage.MessageId = context.MessageId.Value.ToString("N");
+                        if (context.MessageId.HasValue)
+                            brokeredMessage.MessageId = context.MessageId.Value.ToString("N");
 
-                    if (context.CorrelationId.HasValue)
-                        brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
+                        if (context.CorrelationId.HasValue)
+                            brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
 
-                    await _sender.SendAsync(brokeredMessage);
+                        await _observers.ForEach(x => x.PreSend(context));
+
+                        await _sender.SendAsync(brokeredMessage);
+
+                        await _observers.ForEach(x => x.PostSend(context));
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                _observers.ForEach(x => x.SendFault(context, ex))
+                    .Wait(cancelSend);
+
+                throw;
+            }
+        }
+
+        public Task Move(ReceiveContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ConnectHandle Connect(ISendObserver observer)
+        {
+            return _observers.Connect(observer);
         }
     }
 }

@@ -14,9 +14,9 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 
-	/// <summary>
+
+    /// <summary>
 	/// Returns zero to many handlers for the message, aligns with the pipeline sink requirements
 	/// </summary>
 	/// <typeparam name="TMessage"></typeparam>
@@ -25,31 +25,4 @@ namespace MassTransit.Pipeline
 	public delegate IEnumerable<Action<IConsumeContext<TMessage>>> MultipleHandlerSelector<TMessage>(
 		IConsumeContext<TMessage> context)
 		where TMessage : class;
-
-	/// <summary>
-	/// A static class to create delegates easily
-	/// </summary>
-	public static class MultipleHandlerSelector
-	{
-		/// <summary>
-		/// Creates a MultipleHandlerSelector for the selector 
-		/// </summary>
-		/// <typeparam name="TMessage">The message type of the handler</typeparam>
-		/// <param name="selector">The selector to promote to a MultipleHandlerSelector</param>
-		/// <returns>A MultipleHandlerSelector delegate for the specified message type</returns>
-		public static MultipleHandlerSelector<TMessage> ForHandler<TMessage>(HandlerSelector<TMessage> selector)
-			where TMessage : class
-		{
-			return context =>
-				{
-					Action<IConsumeContext<TMessage>> handler = selector(context);
-					if (handler == null)
-					{
-						return Enumerable.Empty<Action<IConsumeContext<TMessage>>>();
-					}
-
-					return Enumerable.Repeat(handler, 1);
-				};
-		}
-	}
 }

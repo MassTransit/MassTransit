@@ -16,9 +16,7 @@ namespace MassTransit.Transports.RabbitMq
     using System.Collections.Generic;
     using Magnum.Extensions;
     using Magnum.Reflection;
-    using MassTransit.Pipeline.Configuration;
     using MassTransit.Pipeline.Filters;
-    using MassTransit.Pipeline.Sinks;
 
 
     /// <summary>
@@ -93,20 +91,20 @@ namespace MassTransit.Transports.RabbitMq
         /// <param name="address">The message endpoint address.</param>
         void FindOrAddEndpoint(Type messageType, IRabbitMqEndpointAddress address)
         {
-            var locator = new PublishEndpointSinkLocator(messageType, address);
-            _bus.OutboundPipeline.Inspect(locator);
+//            var locator = new PublishEndpointSinkLocator(messageType, address);
+//            _bus.OutboundPipeline.Inspect(locator);
 
-            if (locator.Found) // there was already a subscribed endpoint
-            {
-                _added.Add(messageType, () => true);
-                return;
-            }
+//            if (locator.Found) // there was already a subscribed endpoint
+//            {
+//                _added.Add(messageType, () => true);
+//                return;
+//            }
 
-            IEndpoint endpoint = _bus.GetEndpoint(address.Uri);
-
-            // otherwise, create the sink for this message type and connect the out
-            // bound pipeline to this sink.
-            this.FastInvoke(new[] {messageType}, "CreateEndpointSink", endpoint);
+//            IEndpoint endpoint = _bus.GetEndpoint(address.Uri);
+//
+//            // otherwise, create the sink for this message type and connect the out
+//            // bound pipeline to this sink.
+//            this.FastInvoke(new[] {messageType}, "CreateEndpointSink", endpoint);
         }
 
 

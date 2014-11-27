@@ -17,6 +17,6 @@ namespace MassTransit.Distributor.WorkerConnectors
 
     public interface WorkerConnector
     {
-        ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker);
+//        ISubscriptionReference Connect(IInboundPipelineConfigurator configurator, IWorker worker);
     }
 }

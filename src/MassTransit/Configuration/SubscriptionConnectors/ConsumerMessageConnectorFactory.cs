@@ -20,11 +20,11 @@ namespace MassTransit.SubscriptionConnectors
         where TConsumer : class, IConsumer<TMessage>
         where TMessage : class
     {
-        readonly MethodConsumerMessageAdapter<TConsumer, TMessage> _filter;
+        readonly MethodConsumerMessageFilter<TConsumer, TMessage> _filter;
 
         public MessageConnectorFactory()
         {
-            _filter = new MethodConsumerMessageAdapter<TConsumer, TMessage>();
+            _filter = new MethodConsumerMessageFilter<TConsumer, TMessage>();
         }
 
         public ConsumerMessageConnector CreateConsumerConnector()

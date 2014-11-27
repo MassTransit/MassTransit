@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using Logging;
     using Magnum;
     using Saga;
@@ -62,7 +63,8 @@ namespace MassTransit
 
             var connector = new SagaConnector<TSaga>(sagaRepository);
 
-            return bus.Configure(x => connector.Connect(x));
+            throw new NotImplementedException();
+//            return bus.Configure(x => connector.Connect(x));
         }
     }
 }

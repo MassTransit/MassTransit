@@ -17,9 +17,9 @@ namespace MassTransit.Builders
     using System.Threading;
     using BusServiceConfigurators;
     using Configuration;
+    using Internals.Extensions;
     using Logging;
     using Magnum;
-    using Magnum.Extensions;
 
 
     public class ServiceBusBuilderImpl :
@@ -32,9 +32,10 @@ namespace MassTransit.Builders
 
         public ServiceBusBuilderImpl(BusSettings settings)
         {
-            Guard.AgainstNull(settings, "settings");
-
-            Guard.AgainstNull(settings.EndpointCache, "endpointCache");
+            if (settings == null)
+                throw new ArgumentNullException("settings");
+            if (settings.EndpointCache == null)
+                throw new ArgumentNullException("settings.endpointcache");
 
             _settings = settings;
 
@@ -94,7 +95,8 @@ namespace MassTransit.Builders
         public void Match<T>(Action<T> callback)
             where T : class, BusBuilder
         {
-            Guard.AgainstNull(callback);
+            if (callback == null)
+                throw new ArgumentNullException("callback");
 
             if (typeof(T).IsAssignableFrom(GetType()))
                 callback(this as T);
@@ -113,7 +115,7 @@ namespace MassTransit.Builders
                 catch (Exception ex)
                 {
                     throw new ConfigurationException("Failed to create the bus service: " +
-                        busServiceConfigurator.ServiceType.ToShortTypeName(), ex);
+                        busServiceConfigurator.ServiceType.GetTypeName(), ex);
                 }
             }
         }

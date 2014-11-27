@@ -118,7 +118,7 @@ namespace MassTransit.Distributor
                 ScheduleUpdate();
             }
             //                RewriteResponseAddress(message.ResponseAddress);
-            //            	consumeContext.BaseContext.NotifyConsume(consumeContext, typeof (Worker<TMessage>).ToShortTypeName(),
+            //            	consumeContext.BaseContext.NotifyConsume(consumeContext, typeof (Worker<TMessage>).GetTypeName(),
             //            		message.CorrelationId.ToString());
             //                ScheduleUpdate();
             //                ScheduleWakeUp();

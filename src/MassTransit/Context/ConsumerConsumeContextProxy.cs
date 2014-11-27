@@ -215,7 +215,7 @@ namespace MassTransit.Context
             _context.NotifyConsumed(elapsed, messageType, consumerType);
         }
 
-        public void NotifyFaulted<T>(T message, string consumerType, Exception exception) 
+        public void NotifyFaulted<T>(T message, string consumerType, Exception exception)
             where T : class
         {
             _context.NotifyFaulted(message, consumerType, exception);
@@ -239,11 +239,6 @@ namespace MassTransit.Context
         public TConsumer Consumer
         {
             get { return _consumer; }
-        }
-
-        public ConsumeContext<TMessage> ConsumeContext
-        {
-            get { return _context; }
         }
     }
 }

@@ -16,7 +16,6 @@ namespace MassTransit
     using BusConfigurators;
     using EndpointConfigurators;
     using Magnum.Extensions;
-    using Pipeline.Configuration;
     using Transports;
     using Transports.RabbitMq;
     using Transports.RabbitMq.Configuration.Configurators;

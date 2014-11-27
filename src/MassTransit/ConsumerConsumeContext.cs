@@ -28,11 +28,6 @@ namespace MassTransit
         /// The consumer which will handle the message
         /// </summary>
         TConsumer Consumer { get; }
-
-        /// <summary>
-        /// Return the original consume context without the consumer
-        /// </summary>
-        ConsumeContext<TMessage> ConsumeContext { get; }
     }
 
 

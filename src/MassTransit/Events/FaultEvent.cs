@@ -13,6 +13,7 @@
 namespace MassTransit.Events
 {
     using System;
+    using System.Linq;
 
 
     public class FaultEvent<T> :
@@ -22,14 +23,18 @@ namespace MassTransit.Events
         {
             Message = message;
             Host = host;
-            Exception = new FaultExceptionInfo(exception);
+
+            var aggregateException = exception as AggregateException;
+            Exceptions = aggregateException != null
+                ? aggregateException.InnerExceptions.Select(x => ((ExceptionInfo)new FaultExceptionInfo(x))).ToArray()
+                : new ExceptionInfo[] {new FaultExceptionInfo(exception)};
         }
 
         public Guid FaultId { get; private set; }
 
         public DateTime Timestamp { get; private set; }
 
-        public ExceptionInfo Exception { get; private set; }
+        public ExceptionInfo[] Exceptions { get; private set; }
 
         public HostInfo Host { get; private set; }
 

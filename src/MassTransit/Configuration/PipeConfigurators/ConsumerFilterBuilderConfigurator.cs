@@ -16,6 +16,7 @@ namespace MassTransit.PipeConfigurators
     using Configurators;
     using PipeBuilders;
     using Pipeline;
+    using Pipeline.Filters;
 
 
     public class ConsumerFilterBuilderConfigurator<TConsumer, TMessage> :

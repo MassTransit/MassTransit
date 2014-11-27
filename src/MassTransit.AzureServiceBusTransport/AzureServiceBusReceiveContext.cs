@@ -19,6 +19,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Net.Mime;
     using System.Text;
     using System.Threading;
+    using System.Threading.Tasks;
     using Context;
     using Microsoft.ServiceBus.Messaging;
 
@@ -197,8 +198,9 @@ namespace MassTransit.AzureServiceBusTransport
         {
         }
 
-        public void NotifyFaulted(string messageType, string consumerType, Exception exception)
+        public Task NotifyFaulted<T>(T message, string consumerType, Exception exception)
         {
+            throw new NotImplementedException();
         }
 
         ContentType GetContentType()

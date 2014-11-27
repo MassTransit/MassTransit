@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using EndpointConfigurators;
 
 
     public static class InMemoryConfigurationExtensions

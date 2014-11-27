@@ -16,7 +16,6 @@ namespace MassTransit.Tests.Saga
 	using System.Linq;
 	using Magnum.TestFramework;
 	using MassTransit.Pipeline;
-	using MassTransit.Pipeline.Inspectors;
 	using MassTransit.Saga;
 	using NUnit.Framework;
 	using TestFramework;
@@ -47,7 +46,7 @@ namespace MassTransit.Tests.Saga
 		{
 			InitiateSimpleSaga message = new InitiateSimpleSaga(_sagaId);
 
-			LocalBus.InboundPipeline.Dispatch(message);
+			LocalBus.Endpoint.Send(message);
 
 			_repository.ShouldContainSaga(_sagaId).ShouldNotBeNull();
 		}
@@ -55,9 +54,9 @@ namespace MassTransit.Tests.Saga
 		[Test]
 		public void The_saga_should_be_loaded_when_an_orchestrated_message_is_received()
 		{
-			LocalBus.InboundPipeline.Dispatch(new InitiateSimpleSaga(_sagaId));
+            LocalBus.Endpoint.Send(new InitiateSimpleSaga(_sagaId));
 
-			LocalBus.InboundPipeline.Dispatch(new CompleteSimpleSaga(_sagaId));
+            LocalBus.Endpoint.Send(new CompleteSimpleSaga(_sagaId));
 
 			var saga = _repository.ShouldContainSaga(_sagaId);
 
@@ -69,9 +68,9 @@ namespace MassTransit.Tests.Saga
 		{
 			const string name = "Chris";
 
-			LocalBus.InboundPipeline.Dispatch(new InitiateSimpleSaga(_sagaId) { Name = name });
+            LocalBus.Endpoint.Send(new InitiateSimpleSaga(_sagaId) { Name = name });
 
-			LocalBus.InboundPipeline.Dispatch(new ObservableSagaMessage {Name = name});
+            LocalBus.Endpoint.Send(new ObservableSagaMessage { Name = name });
 
 			var saga = _repository.ShouldContainSaga(_sagaId);
 
@@ -102,11 +101,11 @@ namespace MassTransit.Tests.Saga
 		{
 			InitiateSimpleSaga message = new InitiateSimpleSaga(_sagaId);
 
-			LocalBus.InboundPipeline.Dispatch(message);
+            LocalBus.Endpoint.Send(message);
 
 			try
 			{
-				LocalBus.InboundPipeline.Dispatch(message);
+                LocalBus.Endpoint.Send(message);
 			}
 			catch (SagaException sex)
 			{

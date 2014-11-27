@@ -17,12 +17,11 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using System.Linq;
 	using Magnum.Extensions;
 	using Magnum.Reflection;
-	using MassTransit.Pipeline;
 	using Util;
 
 	public interface SagaConnector
 	{
-		UnsubscribeAction Connect(IInboundPipelineConfigurator configurator);
+//		UnsubscribeAction Connect(IInboundPipelineConfigurator configurator);
 	}
 
 
@@ -61,11 +60,11 @@ namespace MassTransit.Saga.SubscriptionConnectors
 			get { return _connectors; }
 		}
 
-		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
-		{
-			return _connectors.Select(x => x.Connect(configurator))
-				.Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x());
-		}
+//		public UnsubscribeAction Connect(IInboundPipelineConfigurator configurator)
+//		{
+//			return _connectors.Select(x => x.Connect(configurator))
+//				.Aggregate<UnsubscribeAction, UnsubscribeAction>(() => true, (seed, x) => () => seed() && x());
+//		}
 
 		IEnumerable<SagaSubscriptionConnector> Initiates()
 		{

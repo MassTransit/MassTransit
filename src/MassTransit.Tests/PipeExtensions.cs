@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
 
 
     public static class PipeExtensions
