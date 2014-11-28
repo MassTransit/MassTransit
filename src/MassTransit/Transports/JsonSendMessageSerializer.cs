@@ -17,6 +17,8 @@ namespace MassTransit.Transports
     using System.IO;
     using System.Linq;
     using System.Net.Mime;
+    using System.Text;
+    using System.Threading;
     using Newtonsoft.Json;
     using Serialization;
 
@@ -25,6 +27,7 @@ namespace MassTransit.Transports
         ISendMessageSerializer
     {
         readonly JsonSerializer _serializer;
+        static readonly Lazy<Encoding> _encoding = new Lazy<Encoding>(() => new UTF8Encoding(false, true), LazyThreadSafetyMode.PublicationOnly);
 
         public JsonSendMessageSerializer(JsonSerializer serializer)
         {
@@ -38,7 +41,7 @@ namespace MassTransit.Transports
 
             var envelope = new Envelope(context, context.Message, typeof(T).GetMessageTypes());
 
-            using (var writer = new StreamWriter(stream))
+            using (var writer = new StreamWriter(stream, _encoding.Value, 1024, true))
             using (var jsonWriter = new JsonTextWriter(writer))
             {
                 jsonWriter.Formatting = Formatting.Indented;

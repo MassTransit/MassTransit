@@ -20,7 +20,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         AzureServiceBusTokenProviderSettings
     {
         const string KeyName = "MassTransitBuild";
-        const string SharedAccessKey = "PjgbZPZT+S8UPZi7W3t9oSJZzx4HmKjv4o0Xxl6/JaM=";
+        const string SharedAccessKey = "3HniuVqwtpYWU4q0Bz2QIb3cjzBT6nQsUXkzOAjMeHU=";
         readonly TokenScope _tokenScope;
         readonly TimeSpan _tokenTimeToLive;
 

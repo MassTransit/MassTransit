@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using EndpointConfigurators;
 
 
     /// <summary>
@@ -48,7 +47,7 @@ namespace MassTransit.AzureServiceBusTransport
         /// Specify the maximum number of concurrent messages that are consumed
         /// </summary>
         /// <value>The limit</value>
-        ushort PrefetchCount { set; }
+        int PrefetchCount { set; }
 
         /// <summary>
         /// Purge the messages from an existing queue on startup (note that upon reconnection to the server
@@ -56,6 +55,11 @@ namespace MassTransit.AzureServiceBusTransport
         /// </summary>
         /// <value></value>
         bool PurgeOnStartup { set; }
+
+        /// <summary>
+        /// The path of the queue that's being configured
+        /// </summary>
+        Uri QueuePath { get; }
 
         /// <summary>
         /// Enable duplicate detection on the queue, specifying the time window

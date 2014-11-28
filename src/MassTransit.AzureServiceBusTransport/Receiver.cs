@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -37,6 +38,8 @@ namespace MassTransit.AzureServiceBusTransport
         int _maxPendingDeliveryCount;
         CancellationTokenRegistration _registration;
         bool _shuttingDown;
+        readonly object _shutdownLock = new object();
+
 
         public Receiver(MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
             ReceiveSettings receiveSettings, CancellationToken cancellationToken)
@@ -90,6 +93,12 @@ namespace MassTransit.AzureServiceBusTransport
 
             _shuttingDown = true;
 
+            if (!_completeTask.Task.Wait(TimeSpan.FromSeconds(60)))
+            {
+                if (_log.IsWarnEnabled)
+                    _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
+            }
+
             try
             {
                 _messageReceiver.Close();
@@ -121,6 +130,13 @@ namespace MassTransit.AzureServiceBusTransport
 
             try
             {
+                if (_shuttingDown)
+                {
+                    await _completeTask.Task;
+
+                    throw new TransportException(_inputAddress, "Transport shutdown in progress, abandoning message");
+                }
+
                 await _receivePipe.Send(context);
 
                 await message.CompleteAsync();

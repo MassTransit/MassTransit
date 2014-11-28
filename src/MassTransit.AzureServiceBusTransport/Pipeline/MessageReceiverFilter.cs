@@ -45,7 +45,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating message receiver for {0}", inputAddress);
 
-            MessageReceiver messageReceiver = await context.Factory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock);
+            MessageReceiver messageReceiver = await context.GetMessagingFactory().CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock);
             messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
             messageReceiver.RetryPolicy = RetryPolicy.Default;
 

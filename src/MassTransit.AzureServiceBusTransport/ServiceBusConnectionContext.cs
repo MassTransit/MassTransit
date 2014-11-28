@@ -60,18 +60,9 @@ namespace MassTransit.AzureServiceBusTransport
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        public MessagingFactory Factory
+        public MessagingFactory GetMessagingFactory()
         {
-            get
-            {
-                lock (_lock)
-                {
-                    if (_messagingFactory == null)
-                        throw new InvalidOperationException("The connection was closed");
-
-                    return _messagingFactory;
-                }
-            }
+            return _hostSettings.GetMessagingFactory();
         }
 
         public NamespaceManager NamespaceManager

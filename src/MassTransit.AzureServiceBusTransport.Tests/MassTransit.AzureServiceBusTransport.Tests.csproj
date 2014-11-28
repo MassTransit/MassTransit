@@ -60,6 +60,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="AzureServiceBusTestFixture.cs" />
     <Compile Include="ConfiguringAzure_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="TestAzureServiceBusAccountSettings.cs" />

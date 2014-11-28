@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
@@ -83,15 +84,28 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         async Task PurgeQueue(ConnectionContext context, string queueName)
         {
-            QueueClient client = context.Factory.CreateQueueClient(queueName, ReceiveMode.ReceiveAndDelete);
-            client.PrefetchCount = 1000;
-
-            BrokeredMessage message = await client.ReceiveAsync();
-            while (message != null)
+            var messagingFactory = context.GetMessagingFactory();
+            try
             {
-                await message.CompleteAsync();
+                QueueClient client = messagingFactory.CreateQueueClient(queueName, ReceiveMode.ReceiveAndDelete);
+                client.PrefetchCount = 1000;
 
-                message = await client.ReceiveAsync();
+                BrokeredMessage message = await client.ReceiveAsync();
+                while (message != null)
+                {
+                    await message.CompleteAsync();
+
+                    message = await client.ReceiveAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Error("PurgeQueue failed", ex);
+
+                messagingFactory.Close();
+                
+                throw;
             }
         }
     }

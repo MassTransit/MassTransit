@@ -30,12 +30,12 @@ namespace MassTransit.AzureServiceBusTransport
     {
         static readonly ContentType DefaultContentType = new ContentType("application/vnd.masstransit+json");
 
-        readonly byte[] _body;
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly Uri _inputAddress;
         readonly BrokeredMessage _message;
         readonly PayloadCache _payloadCache;
         readonly Stopwatch _receiveTimer;
+        byte[] _body;
         ContentType _contentType;
         Encoding _encoding;
         ContextHeaders _headers;
@@ -171,7 +171,21 @@ namespace MassTransit.AzureServiceBusTransport
 
         public Stream Body
         {
-            get { return new MemoryStream(_body, 0, _body.Length, false); }
+            get
+            {
+                if (_body == null)
+                {
+                    using (var bodyStream = _message.GetBody<Stream>())
+                    using (var ms = new MemoryStream())
+                    {
+                        bodyStream.CopyTo(ms);
+
+                        _body = ms.ToArray();
+                    }
+                }
+
+                return new MemoryStream(_body, 0, _body.Length, false);
+            }
         }
 
         public TimeSpan ElapsedTime
