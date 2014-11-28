@@ -23,7 +23,7 @@ namespace MassTransit.AzureServiceBusTransport
         /// <summary>
         /// The messaging factory initialized for the service bus
         /// </summary>
-        MessagingFactory Factory { get; }
+        MessagingFactory GetMessagingFactory();
 
         /// <summary>
         /// The namespace manager for the service bus

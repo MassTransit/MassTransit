@@ -37,7 +37,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             _hosts = hosts.ToArray();
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
-            _sourceAddress = new Uri("azure://localhost");
+            _sourceAddress = new Uri(_hosts[0].ServiceUri, Guid.NewGuid().ToString("N"));
         }
 
         protected override ISendEndpointProvider SendEndpointProvider
@@ -53,7 +53,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         public virtual IBusControl Build()
         {
             IConsumePipe consumePipe = new ConsumePipe();
-
 
             var endpointCache = new SendEndpointCache(_sendEndpointProvider.Value);
 

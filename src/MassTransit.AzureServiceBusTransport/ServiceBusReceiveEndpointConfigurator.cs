@@ -23,7 +23,6 @@ namespace MassTransit.AzureServiceBusTransport
     using Microsoft.ServiceBus.Messaging;
     using PipeConfigurators;
     using Policies;
-    using Serialization;
     using Transports;
 
 
@@ -36,12 +35,11 @@ namespace MassTransit.AzureServiceBusTransport
         readonly PipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly QueueDescription _queueDescription;
         readonly PipeConfigurator<ReceiveContext> _receivePipeConfigurator;
-        ushort _prefetchCount;
+        int _prefetchCount;
         bool _purgeOnStartup;
 
         public ServiceBusReceiveEndpointConfigurator(ServiceBusHostSettings hostSettings, string queueName)
-            :
-                this(hostSettings, new QueueDescription(queueName))
+            : this(hostSettings, new QueueDescription(queueName))
         {
             _queueDescription.EnableBatchedOperations = true;
             _queueDescription.MaxDeliveryCount = 5;
@@ -59,11 +57,23 @@ namespace MassTransit.AzureServiceBusTransport
 
             _hostSettings = hostSettings;
             _queueDescription = queueDescription;
+            _prefetchCount = 32;
         }
 
         public bool DuplicateDetection
         {
             set { _queueDescription.RequiresDuplicateDetection = value; }
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (_prefetchCount <= 0)
+                yield return this.Failure("PrefetchCount", "must be > 0");
+        }
+
+        public void Configure(IServiceBusBuilder builder)
+        {
+            builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder.MessageDeserializer));
         }
 
         public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
@@ -96,7 +106,7 @@ namespace MassTransit.AzureServiceBusTransport
             set { _queueDescription.DefaultMessageTimeToLive = value; }
         }
 
-        public ushort PrefetchCount
+        public int PrefetchCount
         {
             set { _prefetchCount = value; }
         }
@@ -106,20 +116,15 @@ namespace MassTransit.AzureServiceBusTransport
             set { _purgeOnStartup = value; }
         }
 
+        public Uri QueuePath
+        {
+            get { return new Uri(_hostSettings.ServiceUri, _queueDescription.Path); }
+        }
+
         public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
         {
             _queueDescription.RequiresDuplicateDetection = true;
             _queueDescription.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
-        }
-
-        public IEnumerable<ValidationResult> Validate()
-        {
-            yield break;
-        }
-
-        public void Configure(IServiceBusBuilder builder)
-        {
-            builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder.MessageDeserializer));
         }
 
         ReceiveEndpoint CreateReceiveEndpoint(IMessageDeserializer deserializer)

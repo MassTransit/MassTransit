@@ -20,22 +20,34 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         using NUnit.Framework;
         using Policies;
         using TestFramework;
+        using TestFramework.Messages;
+
+
+        [TestFixture]
+        public class Sending_a_message_to_an_endpoint :
+            AzureServiceBusTestFixture
+        {
+            [Test]
+            public async void Should_succeed()
+            {
+                await InputQueueSendEndpoint.Send(new PingMessage());
+
+                await _handler;
+            }
+
+            Task<ConsumeContext<PingMessage>> _handler;
+
+            protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+            {
+                _handler = Handler<PingMessage>(configurator);
+            }
+        }
 
 
         [TestFixture]
         public class Configuring_a_bus_instance :
             AsyncTestFixture
         {
-            async Task Handle(ConsumeContext<A> context)
-            {
-            }
-
-
-            class A
-            {
-            }
-
-
             [Test]
             public async void Should_support_the_new_syntax()
             {
@@ -86,6 +98,15 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 //
 //                    await endpoint.Send(new A());
 //                }
+            }
+
+            async Task Handle(ConsumeContext<A> context)
+            {
+            }
+
+
+            class A
+            {
             }
         }
     }
