@@ -21,6 +21,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Magnum.Extensions;
     using MassTransit.Pipeline.Filters;
     using Newtonsoft.Json;
@@ -96,7 +97,10 @@ namespace MassTransit.Transports.RabbitMq.Tests
             var completed = new TaskCompletionSource<bool>();
             int processingTime = 0;
 
-            var deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
+                        var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
+            var sendEndpointProvider = new RabbitMqSendEndpointProvider(sendSerializer, new RabbitMqHostSettings[] {},
+                new Uri("rabbitmq://localhost/speed/input"));
+            IMessageDeserializer deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, sendEndpointProvider);
 
             var testPipe = new TestReceivePipe(async context =>
             {
@@ -162,29 +166,30 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                     using (var sendModel = new HaModel(connection.CreateModel()))
                     {
-                        var sendToTransport = new RabbitMqSendTransport(sendModel, "fast");
-                        var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
-                        ISendEndpoint sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
-                        Stopwatch timer = Stopwatch.StartNew();
-                        var tasks = Enumerable.Range(0, limit)
-                            .Select(x =>
-                                {
-                                    return sendToEndpoint.Send(message);
-//                                    var properties = sendModel.CreateBasicProperties();
-//                                    return sendModel.BasicPublishAsync("fast", "", properties, body);
-                                }).AsParallel().ToArray();
-
-                        completed.Task.Wait(10.Seconds());
-                        timer.Stop();
-
-                        Task.WaitAll(tasks, 10.Seconds());
-
-                        Console.WriteLine("Elapsed time for {0} messages: {1}ms", limit, timer.ElapsedMilliseconds);
-                        Console.WriteLine("Messages per second: {0}", limit * 1000L / timer.ElapsedMilliseconds);
-                        Console.WriteLine("Processing time per message: {0}ms", processingTime / count);
-
-                        Console.WriteLine("Messages: {0}", count);
-                        Console.WriteLine("Redelivered: {0}", redeliviered);
+//                        var sendToTransport = new RabbitMqSendTransport(sendModel, "fast");
+//                        ISendEndpoint sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer,
+//                            new Uri("rabbitmq://localhost/speed/fast"),
+//                            new Uri("rabbitmq://localhost/speed/input"));
+//                        Stopwatch timer = Stopwatch.StartNew();
+//                        var tasks = Enumerable.Range(0, limit)
+//                            .Select(x =>
+//                                {
+//                                    return sendToEndpoint.Send(message);
+////                                    var properties = sendModel.CreateBasicProperties();
+////                                    return sendModel.BasicPublishAsync("fast", "", properties, body);
+//                                }).AsParallel().ToArray();
+//
+//                        completed.Task.Wait(10.Seconds());
+//                        timer.Stop();
+//
+//                        Task.WaitAll(tasks, 10.Seconds());
+//
+//                        Console.WriteLine("Elapsed time for {0} messages: {1}ms", limit, timer.ElapsedMilliseconds);
+//                        Console.WriteLine("Messages per second: {0}", limit * 1000L / timer.ElapsedMilliseconds);
+//                        Console.WriteLine("Processing time per message: {0}ms", processingTime / count);
+//
+//                        Console.WriteLine("Messages: {0}", count);
+//                        Console.WriteLine("Redelivered: {0}", redeliviered);
                     }
                 }
             }
@@ -206,7 +211,11 @@ namespace MassTransit.Transports.RabbitMq.Tests
             var completed = new TaskCompletionSource<bool>();
             int processingTime = 0;
 
-            var deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
+            var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
+            var sendEndpointProvider = new RabbitMqSendEndpointProvider(sendSerializer, new RabbitMqHostSettings[] { }, new Uri("rabbitmq://localhost/speed/input"));
+
+
+            var deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, sendEndpointProvider);
 
             var testPipe = new TestConsumePipe(async context =>
             {
@@ -250,7 +259,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             });
 
 
-            var receiveEndpoint = new ReceiveEndpoint(transport, receivePipe, testPipe);
+            IReceiveEndpoint receiveEndpoint = new ReceiveEndpoint(transport, receivePipe, testPipe);
 
             var consumerTask = receiveEndpoint.Start(cancelReceive.Token);
 
@@ -259,32 +268,32 @@ namespace MassTransit.Transports.RabbitMq.Tests
             using (var connection = connectionFactory.CreateConnection())
             using (var sendModel = new HaModel(connection.CreateModel()))
             {
-                var sendToTransport = new RabbitMqSendTransport(sendModel, "fast");
-                var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
-                ISendEndpoint sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
-                Stopwatch timer = Stopwatch.StartNew();
-                var tasks = Enumerable.Range(0, limit)
-                    .Select(x => sendToEndpoint.Send(message)).AsParallel().ToArray();
-
-                Console.WriteLine("Waiting for completed {0}", limit);
-
-                completed.Task.Wait(10.Seconds());
-                timer.Stop();
-
-                Console.WriteLine("Cancelling receiver");
-                cancelReceive.Cancel();
-
-                Console.WriteLine("Waiting for consumer to complete");
-                consumerTask.Wait(10.Seconds());
-
-                Task.WaitAll(tasks, 10.Seconds());
-
-                Console.WriteLine("Elapsed time for {0} messages: {1}ms", limit, timer.ElapsedMilliseconds);
-                Console.WriteLine("Messages per second: {0}", limit * 1000L / timer.ElapsedMilliseconds);
-                Console.WriteLine("Processing time per message: {0}ms", processingTime / count);
-
-                Console.WriteLine("Messages: {0}", count);
-                Console.WriteLine("Redelivered: {0}", redeliviered);
+//                var sendToTransport = new RabbitMqSendTransport(sendModel, "fast");
+//                ISendEndpoint sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"),
+//                    new Uri("rabbitmq://localhost/speed/input"));
+//                Stopwatch timer = Stopwatch.StartNew();
+//                var tasks = Enumerable.Range(0, limit)
+//                    .Select(x => sendToEndpoint.Send(message)).AsParallel().ToArray();
+//
+//                Console.WriteLine("Waiting for completed {0}", limit);
+//
+//                completed.Task.Wait(10.Seconds());
+//                timer.Stop();
+//
+//                Console.WriteLine("Cancelling receiver");
+//                cancelReceive.Cancel();
+//
+//                Console.WriteLine("Waiting for consumer to complete");
+//                consumerTask.Wait(10.Seconds());
+//
+//                Task.WaitAll(tasks, 10.Seconds());
+//
+//                Console.WriteLine("Elapsed time for {0} messages: {1}ms", limit, timer.ElapsedMilliseconds);
+//                Console.WriteLine("Messages per second: {0}", limit * 1000L / timer.ElapsedMilliseconds);
+//                Console.WriteLine("Processing time per message: {0}ms", processingTime / count);
+//
+//                Console.WriteLine("Messages: {0}", count);
+//                Console.WriteLine("Redelivered: {0}", redeliviered);
             }
         }
 

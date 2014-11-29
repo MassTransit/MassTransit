@@ -31,18 +31,18 @@ namespace MassTransit.Transports.RabbitMq.Tests
             _bus = ServiceBusFactory.New(c =>
                 {
                     c.ReceiveFrom(inputAddress);
-                    c.UseRabbitMq(r =>
-                        {
-                            r.ConfigureHost(inputAddress, h =>
-                                {
-                                    h.UseSsl(s =>
-                                        {
-                                            s.SetServerName(Dns.GetHostName());
-                                            s.SetCertificatePath("client.p12");
-                                            s.SetCertificatePassphrase("Passw0rd");
-                                        });
-                                });
-                        });
+//                    c.UseRabbitMq(r =>
+//                        {
+//                            r.ConfigureHost(inputAddress, h =>
+//                                {
+//                                    h.UseSsl(s =>
+//                                        {
+//                                            s.SetServerName(Dns.GetHostName());
+//                                            s.SetCertificatePath("client.p12");
+//                                            s.SetCertificatePassphrase("Passw0rd");
+//                                        });
+//                                });
+//                        });
                 });
         }
 
@@ -54,12 +54,12 @@ namespace MassTransit.Transports.RabbitMq.Tests
             _bus = ServiceBusFactory.New(c =>
                 {
                     c.ReceiveFrom(inputAddress);
-                    c.UseRabbitMq(
-                        r =>
-                            {
-                                r.ConfigureHost(inputAddress,
-                                    h => { h.UseSsl(s => { s.SetClientCertificateRequired(false); }); });
-                            });
+//                    c.UseRabbitMq(
+//                        r =>
+//                            {
+//                                r.ConfigureHost(inputAddress,
+//                                    h => { h.UseSsl(s => { s.SetClientCertificateRequired(false); }); });
+//                            });
                 });
         }
 

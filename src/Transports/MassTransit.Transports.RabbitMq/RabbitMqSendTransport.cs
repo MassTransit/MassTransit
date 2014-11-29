@@ -12,51 +12,100 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
+    using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
     using MassTransit.Pipeline;
+    using Pipeline;
     using RabbitMQ.Client;
+    using Subscriptions;
 
 
     public class RabbitMqSendTransport :
         ISendTransport
     {
-        readonly string _exchange;
-        readonly IHaModel _model;
+        readonly IModelCache _modelCache;
+        readonly Connectable<ISendObserver> _observers;
+        readonly SendSettings _sendSettings;
 
-        public RabbitMqSendTransport(IHaModel model, string exchange)
+        public RabbitMqSendTransport(IModelCache modelCache, SendSettings sendSettings)
         {
-            _model = model;
-            _exchange = exchange;
+            _observers = new Connectable<ISendObserver>();
+            _sendSettings = sendSettings;
+            _modelCache = modelCache;
         }
 
-        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
+        Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
         {
-            IBasicProperties properties = _model.CreateBasicProperties();
-            properties.Headers = new Dictionary<string, object>();
+            IPipe<TupleContext<ModelContext, T>> modelPipe = Pipe.New<TupleContext<ModelContext, T>>(
+                p => p.ExecuteAsync(modelContext => SendMessage(message, pipe, cancelSend)));
 
-            var context = new RabbitMqSendContextImpl<T>(properties, message, _exchange, cancelSend);
-
-            await pipe.Send(context);
-
-            properties.Headers["Content-Type"] = context.ContentType.ToString();
-
-            properties.SetPersistent(context.Durable);
-
-            if (context.MessageId.HasValue)
-                properties.MessageId = context.MessageId.ToString();
-
-            if (context.CorrelationId.HasValue)
-                properties.CorrelationId = context.CorrelationId.ToString();
-
-            if (context.TimeToLive.HasValue)
-                properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
-
-            await _model.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory, context.Immediate,
-                context.BasicProperties, context.Body);
+            return _modelCache.Send(message, modelPipe, cancelSend);
         }
+
+        public Task Move(ReceiveContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ConnectHandle Connect(ISendObserver observer)
+        {
+            return _observers.Connect(observer);
+        }
+
+        async Task SendMessage<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
+            where T : class
+        {
+            var modelPipe = Pipe.New<TupleContext<ModelContext, T>>(p =>
+            {
+                p.Filter(new PrepareSendExchangeFilter(_sendSettings));
+
+                p.ExecuteAsync(async modelContext =>
+                {
+                    IBasicProperties properties = modelContext.Context.Model.CreateBasicProperties();
+                    properties.Headers = new Dictionary<string, object>();
+
+                    var context = new RabbitMqSendContextImpl<T>(properties, message, _sendSettings, cancelSend);
+
+                    try
+                    {
+                        await pipe.Send(context);
+
+                        properties.Headers["Content-Type"] = context.ContentType.ToString();
+
+                        properties.SetPersistent(context.Durable);
+
+                        if (context.MessageId.HasValue)
+                            properties.MessageId = context.MessageId.ToString();
+
+                        if (context.CorrelationId.HasValue)
+                            properties.CorrelationId = context.CorrelationId.ToString();
+
+                        if (context.TimeToLive.HasValue)
+                            properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
+
+                        await _observers.ForEach(x => x.PreSend(context));
+
+                        await modelContext.Context.Model.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory, context.Immediate,
+                            context.BasicProperties, context.Body);
+
+                        await _observers.ForEach(x => x.PostSend(context));
+                    }
+                    catch (Exception ex)
+                    {
+                        _observers.ForEach(x => x.SendFault(context, ex))
+                            .Wait(cancelSend);
+
+                        throw;
+                    }
+                });
+            });
+
+            await _modelCache.Send(message, modelPipe, cancelSend);
+        }
+
     }
 }

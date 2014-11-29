@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.RabbitMq.Pipeline
 {
     using System.Threading.Tasks;
-    using Context;
     using MassTransit.Pipeline;
 
 
@@ -21,28 +20,28 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
     /// Added to the model pipeline prior to the basic consumer to ensure subscriptions are bound to the consumer properly.
     /// If an subscription fails to declare or bind an exchange or queue, the consumer will not be reached
     /// </summary>
-    public class SubscriptionModelFilter :
+    public class ExchangeBindingModelFilter :
         IFilter<ModelContext>
     {
-        readonly SubscriptionSettings _subscriptionSettings;
+        readonly ExchangeBindingSettings _exchangeBindingSettings;
 
-        public SubscriptionModelFilter(SubscriptionSettings subscriptionSettings)
+        public ExchangeBindingModelFilter(ExchangeBindingSettings exchangeBindingSettings)
         {
-            _subscriptionSettings = subscriptionSettings;
+            _exchangeBindingSettings = exchangeBindingSettings;
         }
 
-        public Task Send(ModelContext context, IPipe<ModelContext> next)
+        Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
             ReceiveSettings receiveSettings;
             if (!context.TryGetPayload(out receiveSettings))
                 throw new PayloadNotFoundException("The ReceiveSettings were not found.");
 
-            ExchangeSettings exchange = _subscriptionSettings.Exchange;
+            ExchangeSettings exchange = _exchangeBindingSettings.Exchange;
 
             context.Model.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
                 exchange.Arguments);
 
-            context.Model.ExchangeBind(receiveSettings.ExchangeName, exchange.ExchangeName, _subscriptionSettings.RoutingKey);
+            context.Model.ExchangeBind(receiveSettings.ExchangeName, exchange.ExchangeName, _exchangeBindingSettings.RoutingKey);
 
             return next.Send(context);
         }

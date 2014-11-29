@@ -36,10 +36,10 @@ namespace MassTransit.Transports.RabbitMq
             Durable = settings.Durable;
             Exclusive = settings.Exclusive;
             AutoDelete = settings.AutoDelete;
-            QueueArguments = settings.QueueArguments;
-            ExchangeArguments = settings.ExchangeArguments;
             PurgeOnStartup = settings.PurgeOnStartup;
             ExchangeType = settings.ExchangeType;
+            QueueArguments = new Dictionary<string, object>(settings.QueueArguments);
+            ExchangeArguments = new Dictionary<string, object>(settings.ExchangeArguments);
         }
 
         public string QueueName { get; set; }

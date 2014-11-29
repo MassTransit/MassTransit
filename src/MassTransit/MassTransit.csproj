@@ -137,6 +137,7 @@
     <Compile Include="Configuration\PipeConfigurators\RepeatPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\RescuePipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\RetryPipeBuilderConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\TupleFilterBuilderConfigurator.cs" />
     <Compile Include="Configuration\RepeatPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RescueFilterConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RetryPipeConfiguratorExtensions.cs" />
@@ -161,6 +162,7 @@
     <Compile Include="Configuration\SubscriptionConnectors\ContextSubscriptionConnectorFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\SubscriptionConnectorFactory.cs" />
     <Compile Include="Configuration\TransportConfigurators\ServiceBusFactorySelector.cs" />
+    <Compile Include="Configuration\TuplePipeConfiguratorExtensions.cs" />
     <Compile Include="ConnectHandle.cs" />
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="ConsumeContextExtensions.cs" />
@@ -254,6 +256,7 @@
     <Compile Include="Pipeline\Filters\RescueFilter.cs" />
     <Compile Include="Pipeline\Filters\RetryFilter.cs" />
     <Compile Include="Pipeline\Filters\TeeConsumeFilter.cs" />
+    <Compile Include="Pipeline\Filters\TupleSplitFilter.cs" />
     <Compile Include="Pipeline\IConnectPipeById.cs" />
     <Compile Include="Pipeline\IConsumeEnricher.cs" />
     <Compile Include="Pipeline\IConsumeFilter.cs" />
@@ -292,8 +295,10 @@
     <Compile Include="Pipeline\Pipes\ConsumerMergePipe.cs" />
     <Compile Include="Pipeline\Pipes\EmptyPipe.cs" />
     <Compile Include="Pipeline\Pipes\LastPipe.cs" />
+    <Compile Include="Pipeline\Pipes\TupleMergePipe.cs" />
     <Compile Include="Pipeline\StringPipeInspector.cs" />
     <Compile Include="Pipeline\TupleContext.cs" />
+    <Compile Include="Pipeline\TupleContextProxy.cs" />
     <Compile Include="Policies\CancelRetryContext.cs" />
     <Compile Include="Policies\CancelRetryPolicy.cs" />
     <Compile Include="Policies\ExponentialRetryPolicy.cs" />
@@ -621,7 +626,7 @@
     <Compile Include="Subscriptions\PermanentSubscriptionReference.cs" />
     <Compile Include="Subscriptions\SubscriptionBusService.cs" />
     <Compile Include="Subscriptions\TransientSubscriptionReference.cs" />
-    <Compile Include="SuperDuperServiceBus.cs" />
+    <Compile Include="MassTransitBus.cs" />
     <Compile Include="SuperExtensions.cs" />
     <Compile Include="Testing\ActionConfigurators\PublishTestActionConfigurator.cs" />
     <Compile Include="Testing\ActionConfigurators\SendTestActionConfigurator.cs" />

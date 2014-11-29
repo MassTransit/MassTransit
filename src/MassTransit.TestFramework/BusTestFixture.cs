@@ -14,7 +14,6 @@ namespace MassTransit.TestFramework
 {
     using System;
     using System.Threading.Tasks;
-    using EndpointConfigurators;
 
 
     /// <summary>
@@ -128,6 +127,13 @@ namespace MassTransit.TestFramework
             TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
 
             return source.Task;
+        }
+
+        protected void LogEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            configurator.Log(Console.Out, async context => string.Format("Received (input_queue): {0}, Types = ({1})",
+                context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A"),
+                string.Join(",", context.SupportedMessageTypes)));
         }
     }
 }

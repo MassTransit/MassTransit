@@ -12,12 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
+    using System;
     using System.Collections.Generic;
     using RabbitMQ.Client;
 
 
-    public interface IRabbitMqEndpointAddress :
-        IEndpointAddress
+    public interface IRabbitMqEndpointAddress 
     {
         ConnectionFactory ConnectionFactory { get; }
         string Name { get; }
@@ -41,6 +41,8 @@ namespace MassTransit.Transports.RabbitMq
         /// If bound to a queue, the queue should automatically be deleted when connection closed
         /// </summary>
         bool AutoDelete { get; }
+
+        Uri Uri { get; }
 
         IRabbitMqEndpointAddress ForQueue(string name);
 

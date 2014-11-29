@@ -14,8 +14,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
 {
     using System;
     using Configuration;
-    using EndpointConfigurators;
     using Logging;
+    using MassTransit.Testing;
+    using MassTransit.Testing.TestDecorators;
     using NUnit.Framework;
     using TestFramework;
 
@@ -26,13 +27,18 @@ namespace MassTransit.Transports.RabbitMq.Tests
     {
         static readonly ILog _log = Logger.Get<RabbitMqTestFixture>();
         IBusControl _bus;
-        Uri _localBusUri;
+        Uri _inputQueueAddress;
+        ISendEndpoint _inputQueueSendEndpoint;
+        ISendEndpoint _busSendEndpoint;
+        readonly TestSendObserver _sendObserver;
         Uri _localHostUri;
 
         public RabbitMqTestFixture()
         {
-            _localHostUri = new Uri("rabbitmq://localhost/test");
-            _localBusUri = new Uri(_localHostUri, "input_queue");
+            _localHostUri = new Uri("rabbitmq://localhost/test/");
+            _inputQueueAddress = new Uri(_localHostUri, "input_queue");
+
+            _sendObserver = new TestSendObserver(TestTimeout);
         }
 
         protected override IBus Bus
@@ -40,15 +46,15 @@ namespace MassTransit.Transports.RabbitMq.Tests
             get { return _bus; }
         }
 
-        protected Uri LocalBusUri
+        protected Uri InputQueueAddress
         {
-            get { return _localBusUri; }
+            get { return _inputQueueAddress; }
             set
             {
                 if (Bus != null)
                     throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
 
-                _localBusUri = value;
+                _inputQueueAddress = value;
             }
         }
 
@@ -64,16 +70,36 @@ namespace MassTransit.Transports.RabbitMq.Tests
             }
         }
 
+        /// <summary>
+        /// The sending endpoint for the Bus 
+        /// </summary>
+        protected ISendEndpoint BusSendEndpoint
+        {
+            get { return _busSendEndpoint; }
+        }
+
+        protected ISentMessageList Sent
+        {
+            get { return _sendObserver.Messages; }
+        }
+
+        protected Uri BusAddress
+        {
+            get { return _bus.Address; }
+        }
+
         [TestFixtureSetUp]
         public void SetupInMemoryTestFixture()
         {
-            _bus = CreateLocalBus();
+            _bus = CreateBus();
 
             _bus.Start(TestCancellationToken).Wait(TestTimeout);
 
-//            ISendEndpoint sendEndpoint = _localBus.GetSendEndpoint(_localBusUri).Result;
-//
-//            _localSendEndpoint = new SendEndpointTestDecorator(sendEndpoint, TestTimeout);
+            _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
+            _busSendEndpoint.Connect(_sendObserver);
+
+            _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;
+            _inputQueueSendEndpoint.Connect(_sendObserver);
         }
 
         [TestFixtureTearDown]
@@ -93,36 +119,35 @@ namespace MassTransit.Transports.RabbitMq.Tests
             _bus = null;
         }
 
+        protected virtual void ConfigureBus(IRabbitMqServiceBusFactoryConfigurator configurator)
+        {
+        }
+
         protected virtual void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
         {
         }
 
-        IBusControl CreateLocalBus()
+        IBusControl CreateBus()
         {
-            return ServiceBusFactory.New(x => x.RabbitMQ(), x =>
+            return MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 RabbitMqHostSettings host = x.Host(_localHostUri, h =>
                 {
                 });
 
-                ConfigureLocalBus(x);
+                ConfigureBus(x);
 
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {
                     e.PrefetchCount(16);
-                    e.Durable(false);
                     e.Exclusive();
-
+                    
                     e.Log(Console.Out, async context =>
                         string.Format("Received (input_queue): {0}", context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A")));
 
                     ConfigureLocalReceiveEndpoint(e);
                 });
             });
-        }
-
-        protected virtual void ConfigureLocalBus(IRabbitMqServiceBusFactoryConfigurator configurator)
-        {
         }
     }
 }

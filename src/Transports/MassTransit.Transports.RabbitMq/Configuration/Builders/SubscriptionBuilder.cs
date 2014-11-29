@@ -35,9 +35,9 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Builders
             bool temporary = IsTemporaryMessageType(_messageType);
             var exchange = new Exchange(_messageName.ToString(), !temporary, temporary);
 
-            var subscription = new Subscription(exchange, "");
+            var subscription = new ExchangeBinding(exchange, "");
 
-            builder.AddFilter(new SubscriptionModelFilter(subscription));
+            builder.AddFilter(new ExchangeBindingModelFilter(subscription));
         }
 
 
@@ -67,10 +67,10 @@ namespace MassTransit.Transports.RabbitMq.Configuration.Builders
         }
 
 
-        class Subscription :
-            SubscriptionSettings
+        class ExchangeBinding :
+            ExchangeBindingSettings
         {
-            public Subscription(ExchangeSettings exchange, string routingKey)
+            public ExchangeBinding(ExchangeSettings exchange, string routingKey)
             {
                 RoutingKey = routingKey;
                 Exchange = exchange;

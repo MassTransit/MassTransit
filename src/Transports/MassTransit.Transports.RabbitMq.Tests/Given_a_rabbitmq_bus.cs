@@ -26,7 +26,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
             LocalUri = new Uri("rabbitmq://localhost:5672/mttest/test_queue");
             LocalErrorUri = new Uri("rabbitmq://localhost:5672/mttest/test_queue_error");
 
-			ConfigureEndpointFactory(x => { x.UseRabbitMq(); });
 		}
 
 		protected Uri LocalErrorUri { get; private set; }
@@ -35,7 +34,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		{
 			base.ConfigureServiceBus(uri, configurator);
 
-			configurator.UseRabbitMq();
 		}
 	}
 }

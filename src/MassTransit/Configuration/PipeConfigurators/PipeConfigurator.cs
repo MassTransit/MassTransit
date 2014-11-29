@@ -22,17 +22,22 @@ namespace MassTransit.PipeConfigurators
 
 
     public class PipeConfigurator<T> :
-        IPipeConfigurator<T>,
+        IBuildPipeConfigurator<T>,
         Configurator
         where T : class, PipeContext
     {
         static readonly ILog _log = Logger.Get<PipeConfigurator<T>>();
 
-        readonly List<IPipeBuilderConfigurator<T>> _pipeBuilderConfigurators;
+        readonly List<IPipeBuilderConfigurator<T>> _configurators;
 
         public PipeConfigurator()
         {
-            _pipeBuilderConfigurators = new List<IPipeBuilderConfigurator<T>>();
+            _configurators = new List<IPipeBuilderConfigurator<T>>();
+        }
+
+        IEnumerable<ValidationResult> Configurator.Validate()
+        {
+            return _configurators.SelectMany(x => x.Validate());
         }
 
         void IPipeConfigurator<T>.AddPipeBuilderConfigurator(IPipeBuilderConfigurator<T> configurator)
@@ -40,22 +45,7 @@ namespace MassTransit.PipeConfigurators
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            _pipeBuilderConfigurators.Add(configurator);
-        }
-
-        IEnumerable<ValidationResult> Configurator.Validate()
-        {
-            return _pipeBuilderConfigurators.SelectMany(x => x.Validate());
-        }
-
-        void ValidatePipeConfiguration()
-        {
-            IPipeConfigurationResult result = new PipeConfigurationResult(_pipeBuilderConfigurators.SelectMany(x => x.Validate()));
-            if (result.ContainsFailure)
-                throw new ConfigurationException(result.GetMessage("The pipe configuration was invalid"));
-
-            if (_log.IsDebugEnabled && result.Any())
-                _log.Debug(result.GetMessage("The pipe configuration included messages"));
+            _configurators.Add(configurator);
         }
 
         public IPipe<T> Build()
@@ -64,10 +54,20 @@ namespace MassTransit.PipeConfigurators
 
             var builder = new PipeBuilder<T>();
 
-            foreach (var configurator in _pipeBuilderConfigurators)
+            foreach (var configurator in _configurators)
                 configurator.Configure(builder);
 
             return builder.Build();
+        }
+
+        void ValidatePipeConfiguration()
+        {
+            IPipeConfigurationResult result = new PipeConfigurationResult(_configurators.SelectMany(x => x.Validate()));
+            if (result.ContainsFailure)
+                throw new ConfigurationException(result.GetMessage("The pipe configuration was invalid"));
+
+            if (_log.IsDebugEnabled && result.Any())
+                _log.Debug(result.GetMessage("The pipe configuration included messages"));
         }
     }
 }

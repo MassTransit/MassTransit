@@ -13,29 +13,28 @@
 namespace MassTransit
 {
     using System;
-    using System.Collections.Generic;
+    using PipeConfigurators;
     using Pipeline;
-    using Transports.RabbitMq;
-    using Transports.RabbitMq.Configuration;
-    using Transports.RabbitMq.Pipeline;
 
 
-    public static class ConsumerPipeConfiguratorExtensions
+    public static class TuplePipeConfiguratorExtensions
     {
         /// <summary>
-        /// Adds a RabbitMQ Basic Consumer to the pipeline
+        /// Adds a filter to the pipe
         /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="pipe"></param>
-        /// <param name="settings"></param>
-        /// <param name="exchangeBindings"></param>
-        public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe,
-            ReceiveSettings settings, IEnumerable<ExchangeBindingSettings> exchangeBindings)
+        /// <typeparam name="T">The context type</typeparam>
+        /// <typeparam name="TContext"></typeparam>
+        /// <param name="configurator">The pipe configurator</param>
+        /// <param name="filter">The already built pipe</param>
+        public static void Filter<TContext, T>(this IPipeConfigurator<TupleContext<TContext, T>> configurator,
+            IFilter<TContext> filter)
+            where T : class
+            where TContext : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            var pipeBuilderConfigurator = new RabbitMqConsumerPipeBuilderConfigurator(pipe, settings, exchangeBindings);
+            var pipeBuilderConfigurator = new TupleFilterBuilderConfigurator<TContext, T>(filter);
 
             configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
         }

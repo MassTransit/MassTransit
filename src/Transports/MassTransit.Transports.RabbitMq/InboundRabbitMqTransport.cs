@@ -51,9 +51,9 @@ namespace MassTransit.Transports.RabbitMq
             get { return _messageNameFormatter; }
         }
 
-        public IEndpointAddress Address
+        public EndpointAddress Address
         {
-            get { return _address; }
+            get { return new EndpointAddress(_address.Uri); }
         }
 
         public void Receive(Func<IReceiveContext, Action<IReceiveContext>> lookupSinkChain, TimeSpan timeout)
@@ -74,7 +74,7 @@ namespace MassTransit.Transports.RabbitMq
                             OldReceiveContext context = OldReceiveContext.FromBodyStream(body, true);
                             context.SetMessageId(result.BasicProperties.MessageId ?? result.DeliveryTag.ToString());
                             result.BasicProperties.MessageId = context.MessageId;
-                            context.SetInputAddress(_address);
+                            //context.SetInputAddress(_address);
 
                             byte[] contentType = result.BasicProperties.IsHeadersPresent()
                                                      ? (byte[])result.BasicProperties.Headers["Content-Type"]

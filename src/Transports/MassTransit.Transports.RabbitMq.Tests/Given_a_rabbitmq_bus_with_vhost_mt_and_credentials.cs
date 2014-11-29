@@ -17,7 +17,6 @@
 		protected override void ConfigureServiceBus(Uri uri, BusConfigurators.ServiceBusConfigurator configurator)
 		{
 			base.ConfigureServiceBus(uri, configurator);
-			configurator.UseRabbitMq();
 		}
 	}
 }

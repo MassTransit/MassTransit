@@ -16,7 +16,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
     {
         using System;
         using System.Threading.Tasks;
-        using EndpointConfigurators;
         using NUnit.Framework;
 
 
@@ -27,17 +26,17 @@ namespace MassTransit.Transports.RabbitMq.Tests
             [Test]
             public async void Should_be_received()
             {
-                ISendEndpoint endpoint = await Bus.GetSendEndpoint(LocalBusUri);
+                ISendEndpoint endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
 
                 var message = new A {Id = Guid.NewGuid()};
                 await endpoint.Send(message);
 
-                A received = await _receivedA;
+                ConsumeContext<A> received = await _receivedA;
 
-                Assert.AreEqual(message.Id, received.Id);
+                Assert.AreEqual(message.Id, received.Message.Id);
             }
 
-            Task<A> _receivedA;
+            Task<ConsumeContext<A>> _receivedA;
 
             protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
             {

@@ -24,6 +24,7 @@ namespace MassTransit.Transports.RabbitMq.Contexts
     {
         readonly ConnectionContext _connectionContext;
         readonly IModel _model;
+        readonly IHaModel _haModel;
         readonly PayloadCache _payloadCache;
         readonly CancellationTokenSource _tokenSource;
         CancellationTokenRegistration _registration;
@@ -31,6 +32,7 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
         {
             _model = model;
+            _haModel = new HaModel(model);
             _connectionContext = connectionContext;
             _payloadCache = new PayloadCache();
 
@@ -67,9 +69,9 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         }
 
 
-        public IModel Model
+        public IHaModel Model
         {
-            get { return _model; }
+            get { return _haModel; }
         }
 
         public ConnectionContext ConnectionContext

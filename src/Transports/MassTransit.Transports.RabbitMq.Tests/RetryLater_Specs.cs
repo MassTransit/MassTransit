@@ -33,7 +33,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
             using (IServiceBus bus = ServiceBusFactory.New(sbc =>
                 {
                     sbc.ReceiveFrom(QueueUri("handler_retry_tests"));
-                    sbc.UseRabbitMq();
                 }))
                 DoTest(bus, bus);
         }
@@ -44,12 +43,10 @@ namespace MassTransit.Transports.RabbitMq.Tests
             using (IServiceBus receivingBus = ServiceBusFactory.New(sbc =>
                 {
                     sbc.ReceiveFrom(QueueUri("handler_retry_tests"));
-                    sbc.UseRabbitMq();
                 }))
             using (IServiceBus publishingBus = ServiceBusFactory.New(sbc =>
                 {
                     sbc.ReceiveFrom(QueueUri("handler_retry_tests_publish"));
-                    sbc.UseRabbitMq();
                 }))
                 DoTest(publishingBus, receivingBus);
         }

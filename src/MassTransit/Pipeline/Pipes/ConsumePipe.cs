@@ -29,7 +29,7 @@ namespace MassTransit.Pipeline.Pipes
         {
         }
 
-        public ConsumePipe(PipeConfigurator<ConsumeContext> configurator)
+        public ConsumePipe(IBuildPipeConfigurator<ConsumeContext> configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");

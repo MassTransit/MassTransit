@@ -37,9 +37,9 @@ namespace MassTransit.Transports.RabbitMq
             _bindToQueue = bindToQueue;
         }
 
-        public IEndpointAddress Address
+        public EndpointAddress Address
         {
-            get { return _address; }
+            get { return new EndpointAddress(_address.Uri); }
         }
 
         public void Send(ISendContext context)
@@ -73,7 +73,7 @@ namespace MassTransit.Transports.RabbitMq
                             var task = _producer.PublishAsync(_address.Name, properties, body.ToArray());
                             task.Wait();
 
-                            _address.LogSent(context.MessageId ?? properties.MessageId ?? "", context.MessageType);
+                            _address.Uri.LogSent(context.MessageId ?? properties.MessageId ?? "", context.MessageType);
                         }
                     }
                     catch (AggregateException ex)

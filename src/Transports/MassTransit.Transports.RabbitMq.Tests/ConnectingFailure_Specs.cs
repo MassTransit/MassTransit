@@ -15,7 +15,6 @@
             using (IServiceBus bus = ServiceBusFactory.New(c =>
             {
                 c.ReceiveFrom(new Uri("rabbitmq://localhost/restricted/no_legs"));
-                c.UseRabbitMq();
             }))
             {
                 bus.Publish(new A());

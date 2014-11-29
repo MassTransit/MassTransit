@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using System.Threading;
@@ -71,6 +70,21 @@ namespace MassTransit.Transports.RabbitMq
             _autoDelete = uri.Query.GetValueFromQueryString("autodelete", isTemporary);
         }
 
+        public Uri Uri
+        {
+            get { return _uri; }
+        }
+
+        public bool IsLocal
+        {
+            get { return _isLocal(); }
+        }
+
+        public bool IsTransactional
+        {
+            get { return _isTransactional; }
+        }
+
         public bool Exclusive
         {
             get { return _exclusive; }
@@ -96,21 +110,6 @@ namespace MassTransit.Transports.RabbitMq
             return ForQueue(_uri, name);
         }
 
-        public Uri Uri
-        {
-            get { return _uri; }
-        }
-
-        public bool IsLocal
-        {
-            get { return _isLocal(); }
-        }
-
-        public bool IsTransactional
-        {
-            get { return _isTransactional; }
-        }
-
         public bool Durable
         {
             get { return _durable; }
@@ -121,7 +120,7 @@ namespace MassTransit.Transports.RabbitMq
             get { return _autoDelete; }
         }
 
-        public IDictionary<string,object> QueueArguments()
+        public IDictionary<string, object> QueueArguments()
         {
             var ht = new Dictionary<string, object>();
 
@@ -131,8 +130,8 @@ namespace MassTransit.Transports.RabbitMq
                 ht.Add("x-message-ttl", _ttl);
 
             return ht.Keys.Count == 0
-                       ? null
-                       : ht;
+                ? null
+                : ht;
         }
 
         public IRabbitMqEndpointAddress ForQueue(Uri originalUri, string name)
@@ -177,8 +176,8 @@ namespace MassTransit.Transports.RabbitMq
         {
             string hostName = uri.Host;
             bool local = string.CompareOrdinal(hostName, ".") == 0 ||
-                         string.Compare(hostName, "localhost", StringComparison.OrdinalIgnoreCase) == 0 ||
-                         string.Compare(uri.Host, LocalMachineName, StringComparison.OrdinalIgnoreCase) == 0;
+                string.Compare(hostName, "localhost", StringComparison.OrdinalIgnoreCase) == 0 ||
+                string.Compare(uri.Host, LocalMachineName, StringComparison.OrdinalIgnoreCase) == 0;
 
             Interlocked.Exchange(ref _isLocal, () => local);
 
@@ -198,11 +197,11 @@ namespace MassTransit.Transports.RabbitMq
                 throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme ?? "(null)");
 
             var connectionFactory = new ConnectionFactory
-                {
-                    HostName = address.Host,
-                    UserName = "",
-                    Password = "",
-                };
+            {
+                HostName = address.Host,
+                UserName = "",
+                Password = "",
+            };
 
             if (address.IsDefaultPort)
                 connectionFactory.Port = 5672;

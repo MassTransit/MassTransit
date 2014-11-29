@@ -18,79 +18,99 @@ namespace MassTransit.Transports.RabbitMq
     using Logging;
     using MassTransit.Pipeline;
     using Pipeline;
-    using RabbitMQ.Client;
+    using RabbitMQ.Client.Events;
 
 
     public class RabbitMqConnectionCache :
-        IRabbitMqConnector,
-        IFilter<ConnectionContext>
+        IConnectionCache
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionCache>();
         readonly IRabbitMqConnector _connector;
-        readonly object _lock = new object();
-        readonly IPipe<ConnectionContext> _connectionPipe;
-        ConnectionScope _scope;
+        volatile ConnectionScope _scope;
 
         public RabbitMqConnectionCache(IRabbitMqConnector connector)
         {
             _connector = connector;
-            _connectionPipe = Pipe.New<ConnectionContext>(x =>
-            {
-                x.Filter(new DelegateFilter<ConnectionContext>(context =>
-                {
-                }));
-            });
         }
 
-        public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)
+        public Task Send<T>(T message, IPipe<TupleContext<ConnectionContext, T>> connectionPipe, CancellationToken cancellationToken)
+            where T : class
         {
-            lock (_lock)
+            Interlocked.MemoryBarrier();
+
+            ConnectionScope existingScope = _scope;
+            if (existingScope != null)
             {
-                _scope = new ConnectionScope(context);
-                context.Connection.ConnectionShutdown += RemoveConnectionContext;
+                if (existingScope.ConnectionClosed.Task.Wait(TimeSpan.Zero))
+                    return SendUsingExistingConnection(message, connectionPipe, cancellationToken, existingScope);
             }
+
+            return SendUsingNewConnection(message, connectionPipe, cancellationToken);
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        Task SendUsingNewConnection<T>(T message, IPipe<TupleContext<ConnectionContext, T>> connectionPipe,
+            CancellationToken cancellationToken)
+            where T : class
         {
-            return inspector.Inspect(this);
+            IPipe<ConnectionContext> connectPipe = Pipe.New<ConnectionContext>(x =>
+            {
+                x.ExecuteAsync(async connectionContext =>
+                {
+                    var scope = new ConnectionScope(connectionContext);
+
+                    ConnectionShutdownEventHandler connectionShutdown = null;
+                    connectionShutdown = (connection, reason) =>
+                    {
+                        scope.ConnectionContext.Connection.ConnectionShutdown -= connectionShutdown;
+                        scope.ConnectionClosed.TrySetResult(true);
+
+                        Interlocked.CompareExchange(ref _scope, null, scope);
+                    };
+
+                    connectionContext.Connection.ConnectionShutdown += connectionShutdown;
+
+                    Interlocked.CompareExchange(ref _scope, scope, null);
+
+                    try
+                    {
+                        var context = new TupleContextProxy<ConnectionContext, T>(scope.ConnectionContext, message, cancellationToken);
+
+                        await connectionPipe.Send(context);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.Debug(string.Format("The existing connection usage threw an exception"), ex);
+
+                        throw;
+                    }
+                });
+            });
+
+            return _connector.Connect(connectPipe, new CancellationToken());
         }
 
-        public async Task Connect(IPipe<ConnectionContext> pipe, CancellationToken cancellationToken)
+        static async Task SendUsingExistingConnection<T>(T message, IPipe<TupleContext<ConnectionContext, T>> connectionPipe,
+            CancellationToken cancellationToken, ConnectionScope existingScope)
+            where T : class
         {
             try
             {
-                ConnectionScope connectionScope;
-                lock (_lock)
-                {
-                    connectionScope = _scope;
-                }
+                var context = new TupleContextProxy<ConnectionContext, T>(existingScope.ConnectionContext, message, cancellationToken);
 
-                if (connectionScope.ConnectionClosed.Task.Wait(TimeSpan.Zero))
-                {
-                    await pipe.Send(connectionScope.ConnectionContext);
-                }
-
-                await _connector.Connect(_connectionPipe, cancellationToken);
+                await connectionPipe.Send(context);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                if (_log.IsDebugEnabled)
+                    _log.Debug(string.Format("The existing connection usage threw an exception"), ex);
+
                 throw;
             }
         }
 
-        void RemoveConnectionContext(IConnection connection, ShutdownEventArgs reason)
-        {
-            lock (_lock)
-            {
-                _scope.ConnectionContext.Connection.ConnectionShutdown -= RemoveConnectionContext;
-                _scope.ConnectionClosed.TrySetResult(true);
-                _scope = default(ConnectionScope);
-            }
-        }
 
-
-        struct ConnectionScope
+        class ConnectionScope
         {
             public readonly TaskCompletionSource<bool> ConnectionClosed;
             public readonly ConnectionContext ConnectionContext;
@@ -101,7 +121,5 @@ namespace MassTransit.Transports.RabbitMq
                 ConnectionClosed = new TaskCompletionSource<bool>();
             }
         }
-
-
     }
 }

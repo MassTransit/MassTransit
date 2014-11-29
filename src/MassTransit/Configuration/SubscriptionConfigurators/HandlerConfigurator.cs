@@ -19,6 +19,7 @@ namespace MassTransit.SubscriptionConfigurators
     using PipeConfigurators;
     using Pipeline;
 
+
     /// <summary>
     /// Connects a handler to the inbound pipe of the receive endpoint
     /// </summary>
@@ -29,7 +30,7 @@ namespace MassTransit.SubscriptionConfigurators
         where TMessage : class
     {
         readonly IPipeBuilderConfigurator<ConsumeContext<TMessage>> _handlerConfigurator;
-        readonly PipeConfigurator<ConsumeContext<TMessage>> _pipeConfigurator;
+        readonly IBuildPipeConfigurator<ConsumeContext<TMessage>> _pipeConfigurator;
 
         public HandlerConfigurator(MessageHandler<TMessage> handler)
         {
@@ -39,7 +40,7 @@ namespace MassTransit.SubscriptionConfigurators
 
         public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext<TMessage>> configurator)
         {
-            ((IPipeConfigurator<ConsumeContext<TMessage>>)_pipeConfigurator).AddPipeBuilderConfigurator(configurator);
+            _pipeConfigurator.AddPipeBuilderConfigurator(configurator);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -49,7 +50,7 @@ namespace MassTransit.SubscriptionConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            ((IPipeConfigurator<ConsumeContext<TMessage>>)_pipeConfigurator).AddPipeBuilderConfigurator(_handlerConfigurator);
+            _pipeConfigurator.AddPipeBuilderConfigurator(_handlerConfigurator);
 
             IPipe<ConsumeContext<TMessage>> pipe = _pipeConfigurator.Build();
 

@@ -10,21 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Transports.RabbitMq
 {
     using System;
-    using Transports.RabbitMq;
+    using Configuration;
 
 
-    public static class TransportConfiguratorExtensions
+    public static class RabbitMq
     {
         /// <summary>
-        /// Select RabbitMQ as the transport for the service bus
+        /// Configure and create a bus for RabbitMQ
         /// </summary>
-        public static IBusControl CreateUsingRabbitMq(this IServiceBusFactorySelector selector,
-            Action<IRabbitMqServiceBusFactoryConfigurator> configure)
+        /// <param name="configure">The configuration callback to configure the bus</param>
+        /// <returns></returns>
+        public static IBusControl Create(Action<IRabbitMqServiceBusFactoryConfigurator> configure)
         {
-            return RabbitMq.Create(configure);
+            var configurator = new RabbitMqServiceBusFactoryConfigurator();
+
+            configure(configurator);
+
+            return configurator.Build();
         }
     }
 }

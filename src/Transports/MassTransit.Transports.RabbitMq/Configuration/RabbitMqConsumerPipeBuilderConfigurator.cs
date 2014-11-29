@@ -20,19 +20,19 @@ namespace MassTransit.Transports.RabbitMq.Configuration
     using Pipeline;
 
 
-    public class ModelConsumerPipeBuilderConfigurator :
+    public class RabbitMqConsumerPipeBuilderConfigurator :
         IPipeBuilderConfigurator<ConnectionContext>
     {
-        readonly IPipe<ReceiveContext> _pipe;
+        readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _settings;
-        readonly IEnumerable<SubscriptionSettings> _subscriptions;
+        readonly IEnumerable<ExchangeBindingSettings> _exchangeBindings;
 
-        public ModelConsumerPipeBuilderConfigurator(IPipe<ReceiveContext> pipe, ReceiveSettings settings,
-            IEnumerable<SubscriptionSettings> subscriptions)
+        public RabbitMqConsumerPipeBuilderConfigurator(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings,
+            IEnumerable<ExchangeBindingSettings> exchangeBindings)
         {
             _settings = settings;
-            _subscriptions = subscriptions;
-            _pipe = pipe;
+            _exchangeBindings = exchangeBindings;
+            _receivePipe = receivePipe;
         }
 
         public void Configure(IPipeBuilder<ConnectionContext> builder)
@@ -41,10 +41,10 @@ namespace MassTransit.Transports.RabbitMq.Configuration
             {
                 x.Filter(new PrepareReceiveQueueFilter(_settings));
 
-                foreach (SubscriptionSettings subscription in _subscriptions)
-                    x.Filter(new SubscriptionModelFilter(subscription));
+                foreach (ExchangeBindingSettings binding in _exchangeBindings)
+                    x.Filter(new ExchangeBindingModelFilter(binding));
 
-                x.Filter(new ModelConsumerFilter(_pipe));
+                x.Filter(new RabbitMqConsumerFilter(_receivePipe));
             });
 
             IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe);

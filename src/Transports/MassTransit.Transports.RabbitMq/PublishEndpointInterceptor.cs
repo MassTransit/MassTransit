@@ -111,14 +111,14 @@ namespace MassTransit.Transports.RabbitMq
         void CreateEndpointSink<TMessage>(IEndpoint endpoint)
             where TMessage : class
         {
-            var endpointSink = new EndpointMessageSink<TMessage>(endpoint);
-
-            var filterSink = new OutboundMessageFilter<TMessage>(endpointSink,
-                context => context.DeclaringMessageType == typeof(TMessage));
-
-            UnsubscribeAction unsubscribeAction = _bus.OutboundPipeline.ConnectToRouter(filterSink);
-
-            _added.Add(typeof(TMessage), unsubscribeAction);
+//            var endpointSink = new EndpointMessageSink<TMessage>(endpoint);
+//
+//            var filterSink = new OutboundMessageFilter<TMessage>(endpointSink,
+//                context => context.DeclaringMessageType == typeof(TMessage));
+//
+//            UnsubscribeAction unsubscribeAction = _bus.OutboundPipeline.ConnectToRouter(filterSink);
+//
+//            _added.Add(typeof(TMessage), unsubscribeAction);
         }
     }
 }

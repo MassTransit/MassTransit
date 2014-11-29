@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using PipeConfigurators;
+    using Pipeline;
 
 
     /// <summary>
@@ -23,5 +24,13 @@ namespace MassTransit
         where T : class, PipeContext
     {
         void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<T> configurator);
+    }
+
+
+    public interface IBuildPipeConfigurator<T> :
+        IPipeConfigurator<T>
+        where T : class, PipeContext
+    {
+        IPipe<T> Build();
     }
 }

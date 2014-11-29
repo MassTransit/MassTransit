@@ -25,7 +25,6 @@ namespace MassTransit.Builders
     {
         readonly Uri _inputAddress;
         readonly IReceiveTransportProvider _receiveTransportProvider;
-        readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ISendTransportProvider _sendTransportProvider;
 
         public InMemoryServiceBusBuilder(Uri inputAddress, IReceiveTransportProvider receiveTransportProvider,
@@ -41,13 +40,6 @@ namespace MassTransit.Builders
             _inputAddress = inputAddress;
             _receiveTransportProvider = receiveTransportProvider;
             _sendTransportProvider = sendTransportProvider;
-
-            _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
-        }
-
-        protected override ISendEndpointProvider SendEndpointProvider
-        {
-            get { return _sendEndpointProvider.Value; }
         }
 
         public ISendTransportProvider SendTransportProvider
@@ -60,7 +52,7 @@ namespace MassTransit.Builders
             get { return _receiveTransportProvider; }
         }
 
-        ISendEndpointProvider CreateSendEndpointProvider()
+        protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
             var provider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer);
 
@@ -72,7 +64,7 @@ namespace MassTransit.Builders
             IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
                 .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
 
-            return new SuperDuperServiceBus(_inputAddress, consumePipe, SendEndpointProvider, ReceiveEndpoints);
+            return new MassTransitBus(_inputAddress, consumePipe, SendEndpointProvider, ReceiveEndpoints);
         }
     }
 }

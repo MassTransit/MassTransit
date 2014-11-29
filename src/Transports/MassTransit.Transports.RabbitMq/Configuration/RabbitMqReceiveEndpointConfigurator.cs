@@ -25,7 +25,6 @@ namespace MassTransit.Transports.RabbitMq.Configuration
     using PipeConfigurators;
     using Policies;
     using RabbitMQ.Client;
-    using Serialization;
 
 
     public class RabbitMqReceiveEndpointConfigurator :
@@ -34,8 +33,8 @@ namespace MassTransit.Transports.RabbitMq.Configuration
     {
         readonly IList<IReceiveEndpointBuilderConfigurator> _configurators;
         readonly RabbitMqHostSettings _hostSettings;
-        readonly PipeConfigurator<ConsumeContext> _pipeConfigurator;
-        readonly PipeConfigurator<ReceiveContext> _receivePipeConfigurator;
+        readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
+        readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         readonly RabbitMqReceiveSettings _settings;
 
         public RabbitMqReceiveEndpointConfigurator(RabbitMqHostSettings hostSettings, string queueName = null)
@@ -124,41 +123,33 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 
         public void Configure(IServiceBusBuilder builder)
         {
-            var connectionFactory = new ConnectionFactory
-            {
-                HostName = _hostSettings.Host,
-                Port = _hostSettings.Port,
-                VirtualHost = _hostSettings.VirtualHost,
-                UserName = _hostSettings.Username,
-                Password = _hostSettings.Password,
-                RequestedHeartbeat = _hostSettings.Heartbeat
-            };
-
-            ReceiveEndpoint receiveEndpoint = CreateReceiveEndpoint(connectionFactory, builder.MessageDeserializer);
+            ReceiveEndpoint receiveEndpoint = CreateReceiveEndpoint(builder.MessageDeserializer);
 
             builder.AddReceiveEndpoint(receiveEndpoint);
         }
 
-        ReceiveEndpoint CreateReceiveEndpoint(ConnectionFactory connectionFactory, IMessageDeserializer deserializer)
+        ReceiveEndpoint CreateReceiveEndpoint(IMessageDeserializer deserializer)
         {
             IRetryPolicy retryPolicy = Retry.Exponential(1.Seconds(), 10.Seconds(), 1.Seconds());
+
+            var connectionFactory = _hostSettings.GetConnectionFactory();
 
             var connectionMaker = new RabbitMqConnector(connectionFactory, retryPolicy);
 
             var transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, _settings);
 
-            var inboundPipe = new ConsumePipe(_pipeConfigurator);
+            var consumePipe = new ConsumePipe(_pipeConfigurator);
 
-            IReceiveEndpointBuilder builder = new ReceiveEndpointBuilder(inboundPipe);
+            IReceiveEndpointBuilder builder = new ReceiveEndpointBuilder(consumePipe);
 
             foreach (IReceiveEndpointBuilderConfigurator builderConfigurator in _configurators)
                 builderConfigurator.Configure(builder);
 
-            _receivePipeConfigurator.Filter(new DeserializeFilter(deserializer, inboundPipe));
+            _receivePipeConfigurator.Filter(new DeserializeFilter(deserializer, consumePipe));
 
             IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
 
-            return new ReceiveEndpoint(transport, receivePipe);
+            return new ReceiveEndpoint(transport, receivePipe, consumePipe);
         }
     }
 }

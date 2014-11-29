@@ -32,9 +32,9 @@ namespace MassTransit
         IInMemoryServiceBusFactoryBuilderConfigurator
     {
         readonly IList<IReceiveEndpointBuilderConfigurator> _configurators;
-        readonly PipeConfigurator<ConsumeContext> _pipeConfigurator;
+        readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly string _queueName;
-        readonly PipeConfigurator<ReceiveContext> _receivePipeConfigurator;
+        readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
 
         public InMemoryReceiveEndpointConfigurator(string queueName)
         {
@@ -56,7 +56,7 @@ namespace MassTransit
 
         public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
         {
-            ((IPipeConfigurator<ConsumeContext>)_pipeConfigurator).AddPipeBuilderConfigurator(configurator);
+            _pipeConfigurator.AddPipeBuilderConfigurator(configurator);
         }
 
         public void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)

@@ -23,8 +23,10 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
         [TestFixture]
         public class ConfiguringRabbitMQ_Specs :
-            AsyncTestFixture
+            BusTestFixture
         {
+            IBus _bus;
+
             [Test]
             public async void Should_support_the_new_syntax()
             {
@@ -32,7 +34,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                 Task handler = null;
 
-                using (IBusControl bus = ServiceBusFactory.New(x => x.RabbitMQ(), x =>
+                using (var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
                 {
                     RabbitMqHostSettings host = x.Host(hostAddress, r =>
                     {
@@ -52,7 +54,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 {
                     var queueAddress = new Uri(hostAddress, "input_queue");
 
-                    ISendEndpoint endpoint = await bus.GetSendEndpoint(queueAddress);
+                    ISendEndpoint endpoint = await busControl.GetSendEndpoint(queueAddress);
 
                     await endpoint.Send(new A());
 
@@ -63,6 +65,12 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
             class A
             {
+            }
+
+
+            protected override IBus Bus
+            {
+                get { return _bus; }
             }
         }
     }
