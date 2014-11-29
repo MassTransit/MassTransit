@@ -29,17 +29,21 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         byte[] _body;
         ISendMessageSerializer _serializer;
 
-        public RabbitMqSendContextImpl(IBasicProperties basicProperties, T message, string exchange, CancellationToken cancellationToken,
+        public RabbitMqSendContextImpl(IBasicProperties basicProperties, T message, SendSettings sendSettings, CancellationToken cancellationToken,
             string routingKey = "")
         {
             CancellationToken = cancellationToken;
+
             _payloadCache = new PayloadCache();
+
+            // provide access to the extended settings for RabbitMQ developers
             _payloadCache.GetOrAddPayload<RabbitMqSendContext<T>>(() => this);
+            _payloadCache.GetOrAddPayload<RabbitMqSendContext>(() => this);
 
             ContextHeaders = new RabbitMqSendContextHeaders(basicProperties);
             BasicProperties = basicProperties;
             Message = message;
-            Exchange = exchange;
+            Exchange = sendSettings.ExchangeName;
             RoutingKey = routingKey;
 
             MessageId = NewId.NextGuid();
@@ -109,18 +113,29 @@ namespace MassTransit.Transports.RabbitMq.Contexts
 
         public bool HasPayloadType(Type contextType)
         {
+            if (contextType.IsAssignableFrom(typeof(RabbitMqSendContextImpl<T>)))
+                return true;
+
             return _payloadCache.HasPayloadType(contextType);
         }
 
         public bool TryGetPayload<TPayload>(out TPayload context)
             where TPayload : class
         {
+            context = this as TPayload;
+            if (context != null)
+                return true;
+
             return _payloadCache.TryGetPayload(out context);
         }
 
         public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
             where TPayload : class
         {
+            var context = this as TPayload;
+            if (context != null)
+                return context;
+
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
     }

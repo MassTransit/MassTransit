@@ -12,12 +12,24 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    public interface TupleContext<out TLeft, out T> :
+    /// <summary>
+    /// A tuple context is the result of pushing a context in front of the value specified
+    /// </summary>
+    /// <typeparam name="TContext"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
+    public interface TupleContext<out TContext, out TValue> :
         PipeContext
-        where T : class, PipeContext
-        where TLeft : class, PipeContext
+        where TContext : class, PipeContext
+        where TValue : class
     {
-        TLeft Left { get; }
-        T Context { get; }
+        /// <summary>
+        /// The pushed value alongside the context
+        /// </summary>
+        TContext Context { get; }
+
+        /// <summary>
+        /// The original value
+        /// </summary>
+        TValue Value { get; }
     }
 }

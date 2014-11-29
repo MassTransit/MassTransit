@@ -26,7 +26,6 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
         IFilter<ModelContext>
     {
         readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
-
         readonly ReceiveSettings _settings;
         bool _queuePurged;
 
@@ -35,7 +34,7 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
             _settings = settings;
         }
 
-        public Task Send(ModelContext context, IPipe<ModelContext> next)
+        Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
             context.Model.BasicQos(0, _settings.PrefetchCount, false);
 
@@ -55,14 +54,25 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
             }
 
-            if (_settings.PurgeOnStartup && !_queuePurged)
+            if (_settings.PurgeOnStartup)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Purging {0} messages from queue {1}", queueOk.MessageCount, queueName);
+                if (!_queuePurged)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Purging {0} messages from queue {1}", queueOk.MessageCount, queueName);
 
-                context.Model.QueuePurge(queueName);
+                    var purgedMessageCount = context.Model.QueuePurge(queueName);
 
-                _queuePurged = true;
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Purged {0} messages from queue {1}", purgedMessageCount, queueName);
+
+                    _queuePurged = true;
+                }
+                else
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Queue {0} already purged at startup, skipping", queueName);
+                }
             }
 
             string exchangeName = _settings.ExchangeName ?? queueName;

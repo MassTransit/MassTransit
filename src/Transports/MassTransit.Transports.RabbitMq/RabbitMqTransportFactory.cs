@@ -85,9 +85,9 @@ namespace MassTransit.Transports.RabbitMq
             if (_disposed)
                 throw new ObjectDisposedException("RabbitMQTransportFactory");
 
-            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address);
 
-            var transport = new Transport(address, () => BuildInbound(settings), () => BuildOutbound(settings));
+            var transport = new Transport(new EndpointAddress(address.Uri), () => BuildInbound(settings), () => BuildOutbound(settings));
 
             return transport;
         }
@@ -97,7 +97,7 @@ namespace MassTransit.Transports.RabbitMq
             if (_disposed)
                 throw new ObjectDisposedException("RabbitMQTransportFactory");
 
-            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address);
 
             EnsureProtocolIsCorrect(address.Uri);
 
@@ -112,7 +112,7 @@ namespace MassTransit.Transports.RabbitMq
             if (_disposed)
                 throw new ObjectDisposedException("RabbitMQTransportFactory");
 
-            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address);
 
             EnsureProtocolIsCorrect(address.Uri);
 
@@ -126,7 +126,7 @@ namespace MassTransit.Transports.RabbitMq
             if (_disposed)
                 throw new ObjectDisposedException("RabbitMQTransportFactory");
 
-            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address.Uri);
+            RabbitMqEndpointAddress address = RabbitMqEndpointAddress.Parse(settings.Address);
 
             EnsureProtocolIsCorrect(address.Uri);
 
@@ -146,9 +146,9 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
-        public IEndpointAddress GetAddress(Uri uri, bool transactional)
+        public EndpointAddress GetAddress(Uri uri, bool transactional)
         {
-            return RabbitMqEndpointAddress.Parse(uri);
+            return new EndpointAddress(uri);
         }
 
         void Dispose(bool disposing)

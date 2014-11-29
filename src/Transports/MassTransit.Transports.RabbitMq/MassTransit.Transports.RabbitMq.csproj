@@ -68,7 +68,7 @@
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="RabbitMQ.Client">
-      <HintPath>..\..\packages\RabbitMQ.Client.3.3.0\lib\net30\RabbitMQ.Client.dll</HintPath>
+      <HintPath>..\..\packages\RabbitMQ.Client.3.4.0\lib\net35\RabbitMQ.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -80,8 +80,9 @@
     </Compile>
     <Compile Include="Configuration\Builders\SubscriptionBuilder.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
-    <Compile Include="Configuration\ModelConsumerPipeBuilderConfigurator.cs" />
+    <Compile Include="Configuration\RabbitMqConsumerPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\RabbitMqSendEndpointProvider.cs" />
     <Compile Include="Configuration\RabbitMqServiceBusBuilder.cs" />
     <Compile Include="Contexts\RabbitMqSendContextHeaders.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
@@ -93,20 +94,24 @@
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />
     <Compile Include="Exceptions\RabbitMqConnectionException.cs" />
+    <Compile Include="IConnectionFactory.cs" />
+    <Compile Include="IModelCache.cs" />
     <Compile Include="IRabbitMqConnectionCache.cs" />
     <Compile Include="Pipeline\ExchangeBindingSettings.cs" />
     <Compile Include="Pipeline\ExchangeSettings.cs" />
     <Compile Include="Pipeline\IRabbitMqConnector.cs" />
-    <Compile Include="Pipeline\ModelConsumerFilter.cs" />
+    <Compile Include="Pipeline\RabbitMqConsumerFilter.cs" />
     <Compile Include="Pipeline\PrepareSendExchangeFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />
     <Compile Include="Pipeline\RabbitMqConsumerMetrics.cs" />
     <Compile Include="Pipeline\ReceiveModelFilter.cs" />
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
-    <Compile Include="Pipeline\SubscriptionModelFilter.cs" />
+    <Compile Include="Pipeline\ExchangeBindingModelFilter.cs" />
     <Compile Include="Pipeline\SubscriptionSettings.cs" />
     <Compile Include="Published.cs" />
     <Compile Include="PublishSettings.cs" />
+    <Compile Include="RabbitMq.cs" />
+    <Compile Include="RabbitMqAddressExtensions.cs" />
     <Compile Include="RabbitMqBasicConsumeContext.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilder.cs" />
     <Compile Include="Configuration\Builders\ConnectionFactoryBuilderImpl.cs" />
@@ -155,19 +160,20 @@
     <Compile Include="RabbitMqExtensions.cs" />
     <Compile Include="RabbitMqHeaders.cs" />
     <Compile Include="RabbitMqMessageNameFormatter.cs" />
+    <Compile Include="RabbitMqModelCache.cs" />
     <Compile Include="RabbitMqPublishSettings.cs" />
     <Compile Include="RabbitMqReceiveSettings.cs" />
     <Compile Include="ModelContext.cs" />
     <Compile Include="RabbitMqProducer.cs" />
     <Compile Include="RabbitMqPublisher.cs" />
     <Compile Include="RabbitMqConnector.cs" />
+    <Compile Include="RabbitMqSendSettings.cs" />
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="RabbitMqReceiveTransport.cs" />
     <Compile Include="RabbitMqSendContext.cs" />
     <Compile Include="RabbitMqSendTransport.cs" />
     <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
-    <Compile Include="Configuration\RabbitMqServiceBusExtensions.cs" />
     <Compile Include="SendSettings.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
     <Compile Include="Testing\RabbitMqBusScenarioBuilder.cs" />

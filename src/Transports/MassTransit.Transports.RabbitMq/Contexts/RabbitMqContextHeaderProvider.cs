@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq.Contexts
 {
     using System;
+    using System.Collections.Generic;
     using Context;
 
 
@@ -24,6 +25,23 @@ namespace MassTransit.Transports.RabbitMq.Contexts
         public RabbitMqContextHeaderProvider(RabbitMqBasicConsumeContext context)
         {
             _context = context;
+        }
+
+        public IEnumerable<Tuple<string, object>> Headers
+        {
+            get
+            {
+                yield return Tuple.Create(RabbitMqHeaders.Exchange, (object)_context.Exchange);
+                yield return Tuple.Create(RabbitMqHeaders.RoutingKey, (object)_context.RoutingKey);
+                yield return Tuple.Create(RabbitMqHeaders.DeliveryTag, (object)_context.DeliveryTag);
+                yield return Tuple.Create(RabbitMqHeaders.ConsumerTag, (object)_context.ConsumerTag);
+
+                if (_context.Properties.IsHeadersPresent())
+                {
+                    foreach (var header in _context.Properties.Headers)
+                        yield return Tuple.Create(header.Key, header.Value);
+                }
+            }
         }
 
         public bool TryGetHeader(string key, out object value)

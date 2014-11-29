@@ -50,7 +50,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
             IServiceBus bus = ServiceBusFactory.New(x =>
                 {
                     x.ReceiveFrom(uri);
-                    x.UseRabbitMq();
 
                     configure(x);
                 });

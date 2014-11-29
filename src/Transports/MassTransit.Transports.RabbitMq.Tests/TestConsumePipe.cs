@@ -48,5 +48,15 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             throw new NotImplementedException();
         }
+
+        public ConnectHandle Connect<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public ConnectHandle Connect(IConsumeObserver observer)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

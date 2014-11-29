@@ -32,9 +32,9 @@ namespace MassTransit.AzureServiceBusTransport
     {
         readonly IList<IReceiveEndpointBuilderConfigurator> _configurators;
         readonly ServiceBusHostSettings _hostSettings;
-        readonly PipeConfigurator<ConsumeContext> _pipeConfigurator;
+        readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly QueueDescription _queueDescription;
-        readonly PipeConfigurator<ReceiveContext> _receivePipeConfigurator;
+        readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         int _prefetchCount;
         bool _purgeOnStartup;
 
@@ -78,7 +78,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
         {
-            ((IPipeConfigurator<ConsumeContext>)_pipeConfigurator).AddPipeBuilderConfigurator(configurator);
+            _pipeConfigurator.AddPipeBuilderConfigurator(configurator);
         }
 
         public void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)

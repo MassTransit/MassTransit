@@ -52,7 +52,6 @@ namespace BusDriver
 
 	        return ServiceBusFactory.New(x =>
 	            {
-                    x.UseRabbitMq();
 	                x.UseJsonSerializer();
 	                x.ReceiveFrom(uri);
 	            });

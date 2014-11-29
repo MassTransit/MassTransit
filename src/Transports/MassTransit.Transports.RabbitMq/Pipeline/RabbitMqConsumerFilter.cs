@@ -18,39 +18,43 @@ namespace MassTransit.Transports.RabbitMq.Pipeline
     using MassTransit.Pipeline;
 
 
-    public class ModelConsumerFilter :
+    /// <summary>
+    /// A filter that uses the model context to create a basic consumer and connect it to the model
+    /// </summary>
+    public class RabbitMqConsumerFilter :
         IFilter<ModelContext>
     {
-        readonly IPipe<ReceiveContext> _pipe;
-        readonly ILog _log = Logger.Get<ModelConsumerFilter>();
+        static readonly ILog _log = Logger.Get<RabbitMqConsumerFilter>();
+        readonly IPipe<ReceiveContext> _receivePipe;
 
-        public ModelConsumerFilter(IPipe<ReceiveContext> pipe)
+        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe)
         {
-            _pipe = pipe;
+            _receivePipe = receivePipe;
         }
 
-        public async Task Send(ModelContext context, IPipe<ModelContext> next)
+        async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
             Uri inputAddress = context.ConnectionContext.GetAddress(receiveSettings.QueueName);
 
-            using (var consumer = new RabbitMqBasicConsumer(context.Model, inputAddress, _pipe, context.CancellationToken))
+            using (var consumer = new RabbitMqBasicConsumer(context.Model, inputAddress, _receivePipe, context.CancellationToken))
             {
                 context.Model.BasicConsume(receiveSettings.QueueName, false, consumer);
 
-                var metrics = await consumer.CompleteTask;
+                RabbitMqConsumerMetrics metrics = await consumer.CompleteTask;
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", metrics.ConsumerTag, metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+                    _log.InfoFormat("Consumer {0}: {1} received, {2} concurrent", metrics.ConsumerTag, metrics.DeliveryCount,
+                        metrics.ConcurrentDeliveryCount);
                 }
             }
         }
 
         public bool Inspect(IPipeInspector inspector)
         {
-            return inspector.Inspect(this, x => _pipe.Inspect(x));
+            return inspector.Inspect(this, x => _receivePipe.Inspect(x));
         }
     }
 }

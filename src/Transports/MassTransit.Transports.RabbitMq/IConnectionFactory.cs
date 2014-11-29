@@ -10,13 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Pipeline
+namespace MassTransit.Transports.RabbitMq
 {
+    using System.Threading;
+    using System.Threading.Tasks;
+    using MassTransit.Pipeline;
 
-    public interface ExchangeBindingSasdfettings
+
+    /// <summary>
+    /// Attaches a connection context to the value (shared, of course)
+    /// </summary>
+    public interface IConnectionCache
     {
-        string Source { get; }
-        string Destination { get; }
-        string RoutingKey { get; }
+        Task Send<T>(T message, IPipe<TupleContext<ConnectionContext, T>> connectionPipe, CancellationToken cancellationToken)
+            where T : class;
     }
 }

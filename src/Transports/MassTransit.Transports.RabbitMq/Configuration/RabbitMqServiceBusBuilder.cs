@@ -15,92 +15,54 @@ namespace MassTransit.Transports.RabbitMq.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using MassTransit.Builders;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
-    using Serialization;
 
 
     public class RabbitMqServiceBusBuilder :
+        ServiceBusBuilderBase,
         IServiceBusBuilder
     {
-        readonly IEnumerable<RabbitMqHostSettings> _hosts;
+        readonly RabbitMqHostSettings[] _hosts;
         readonly PublishSettings _publishSettings;
-        readonly IList<IReceiveEndpoint> _receiveEndpoints;
-        IMessageDeserializer _messageDeserializer;
-        ISendMessageSerializer _messageSerializer;
+        readonly Uri _sourceAddress;
 
         public RabbitMqServiceBusBuilder(IEnumerable<RabbitMqHostSettings> hosts, PublishSettings publishSettings)
         {
-            _hosts = hosts;
+            _hosts = hosts.ToArray();
             _publishSettings = publishSettings;
-            _receiveEndpoints = new List<IReceiveEndpoint>();
 
-            _messageDeserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
-            _messageSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
+
+            _sourceAddress = GetSourceAddress(_hosts[0]);
         }
 
-        public ISendMessageSerializer MessageSerializer
+        Uri GetSourceAddress(RabbitMqHostSettings host)
         {
-            get { return _messageSerializer; }
-        }
+            var builder = new UriBuilder();
 
-        public void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint)
-        {
-            _receiveEndpoints.Add(receiveEndpoint);
-        }
+            builder.Scheme = "rabbitmq";
+            builder.Host = host.Host;
+            builder.Port = host.Port;
 
-        public IMessageDeserializer MessageDeserializer
-        {
-            get { return _messageDeserializer; }
+
+            string queueName = NewId.Next().ToString("NS");
+            builder.Path = host.VirtualHost != "/" ? string.Join("/", host.VirtualHost, queueName) : queueName;
+
+            builder.Query += string.Format("temporary=true&prefetch=4");
+
+            return builder.Uri;
         }
 
         public IBusControl Build()
         {
-            var inboundPipe = new ConsumePipe();
+            var consumePipe = new ConsumePipe();
 
-            ISendEndpointProvider sendEndpointProvider = new RabbitMqSendEndpointProvider(_hosts, TODO);
-
-            return new SuperDuperServiceBus(new Uri("rabbitmq://localhost"), inboundPipe, sendEndpointProvider, _receiveEndpoints);
+            return new MassTransitBus(_sourceAddress, consumePipe, SendEndpointProvider, ReceiveEndpoints);
         }
-    }
 
-
-    public class RabbitMqSendEndpointProvider : ISendEndpointProvider
-    {
-        readonly RabbitMqHostSettings[] _hosts;
-        readonly ISendMessageSerializer _serializer;
-
-        public RabbitMqSendEndpointProvider(ISendMessageSerializer serializer, RabbitMqHostSettings[] hosts)
+        protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
-            _hosts = hosts;
-            _serializer = serializer;
+            return new RabbitMqSendEndpointProvider(MessageSerializer, _hosts, _sourceAddress);
         }
-
-            public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
-            {
-                RabbitMqHostSettings host = _hosts
-                    .Where(x => x.Host.Equals(address.Host, StringComparison.OrdinalIgnoreCase))
-                    .FirstOrDefault();
-                if (host == null)
-                    throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
-
-
-                var connector = new RabbitMqConnector()
-
-                                var sendToTransport = new RabbitMqSendTransport(sendModel, "fast");
-                var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
-                var sendToEndpoint = new SendEndpoint(sendToTransport, sendSerializer, new Uri("rabbitmq://localhost/speed/fast"));
-
-                return new RabbitMqSendTransport()
-                MessageSender messageSender = await host.GetMessagingFactory().CreateMessageSenderAsync(address.AbsolutePath);
-
-                var sendTransport = new AzureServiceBusSendTransport(messageSender);
-
-                return new SendEndpoint(sendTransport, _serializer, address);
-            }
-        }
-
     }
 }

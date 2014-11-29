@@ -12,16 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.RabbitMq
 {
-    using RabbitMQ.Client;
-
-
+    /// <summary>
+    /// With a connect, and a model from RabbitMQ, this context is passed forward to allow
+    /// the model to be configured and connected
+    /// </summary>
     public interface ModelContext :
         PipeContext
     {
         /// <summary>
         /// The model
         /// </summary>
-        IModel Model { get; }
+        IHaModel Model { get; }
 
         /// <summary>
         /// The connection context on which the model was created

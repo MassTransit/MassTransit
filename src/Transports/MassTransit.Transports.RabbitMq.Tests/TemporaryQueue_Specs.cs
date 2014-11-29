@@ -28,11 +28,11 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             var responseReceived = new ManualResetEvent(false);
 
-            LocalBus.GetEndpoint(RemoteUri).SendRequest(new Request(), LocalBus, x =>
-                {
-                    x.Handle<Response>((context, message) => responseReceived.Set());
-                    x.SetTimeout(8.Seconds());
-                });
+//            LocalBus.GetEndpoint(RemoteUri).SendRequest(new Request(), LocalBus, x =>
+//                {
+//                    x.Handle<Response>((context, message) => responseReceived.Set());
+//                    x.SetTimeout(8.Seconds());
+//                });
 
             Assert.IsTrue(responseReceived.WaitOne(8.Seconds()), "No Response");
         }
@@ -61,17 +61,17 @@ namespace MassTransit.Transports.RabbitMq.Tests
         [Test, Explicit]
         public void Should_remove_the_queues_and_exchanges_on_shutdown()
         {
-            var uri = new Uri("rabbitmq://localhost/mttest/temporary_test_queue?temporary=true");
-            using (IServiceBus bus = ServiceBusFactory.New(x =>
-                {
-                    x.ReceiveFrom(uri);
-                    x.UseRabbitMq();
-                }))
-            {
-                Console.WriteLine("Using address: " + bus.Endpoint.Address.Uri);
-
-                Thread.Sleep(30000);
-            }
+//            var uri = new Uri("rabbitmq://localhost/mttest/temporary_test_queue?temporary=true");
+//            using (IServiceBus bus = ServiceBusFactory.New(x =>
+//                {
+//                    x.ReceiveFrom(uri);
+//                    x.UseRabbitMq();
+//                }))
+//            {
+//                Console.WriteLine("Using address: " + bus.Endpoint.Address.Uri);
+//
+//                Thread.Sleep(30000);
+//            }
         }
     }
 }

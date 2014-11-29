@@ -22,7 +22,7 @@ namespace MassTransit
     using Transports;
 
 
-    public class SuperDuperServiceBus :
+    public class MassTransitBus :
         IBusControl
     {
         readonly IConsumePipe _consumePipe;
@@ -32,7 +32,7 @@ namespace MassTransit
         readonly ISendEndpointProvider _sendEndpointProvider;
         CancellationTokenSource _stopTokenSource;
 
-        public SuperDuperServiceBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
+        public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
             IEnumerable<IReceiveEndpoint> receiveEndpoints)
         {
             _address = address;

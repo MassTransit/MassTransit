@@ -15,7 +15,9 @@ namespace MassTransit.Transports.RabbitMq
     using System;
     using RabbitMQ.Client;
 
-
+    /// <summary>
+    /// A RabbitMQ connection
+    /// </summary>
     public interface ConnectionContext :
         PipeContext
     {

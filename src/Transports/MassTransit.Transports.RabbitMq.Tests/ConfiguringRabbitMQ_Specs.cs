@@ -31,7 +31,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             var hostAddress = new Uri("rabbitmq://localhost/test");
             var completed = new TaskCompletionSource<A>();
 
-            using (IBusControl bus = ServiceBusFactory.New(x => x.RabbitMQ(), x =>
+            using (IBusControl bus = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 RabbitMqHostSettings host = x.Host(hostAddress, r =>
                 {

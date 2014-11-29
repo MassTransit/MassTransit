@@ -26,8 +26,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         IServiceBusBuilder
     {
         readonly ServiceBusHostSettings[] _hosts;
-        readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
-        Uri _sourceAddress;
+        readonly Uri _sourceAddress;
 
         public AzureServiceBusServiceBusBuilder(IEnumerable<ServiceBusHostSettings> hosts)
         {
@@ -36,16 +35,10 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             _hosts = hosts.ToArray();
 
-            _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
-            _sourceAddress = new Uri(_hosts[0].ServiceUri, Guid.NewGuid().ToString("N"));
+            _sourceAddress = new Uri(_hosts[0].ServiceUri, NewId.Next().ToString("NS"));
         }
 
-        protected override ISendEndpointProvider SendEndpointProvider
-        {
-            get { return _sendEndpointProvider.Value; }
-        }
-
-        ISendEndpointProvider CreateSendEndpointProvider()
+        protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
             return new AzureServiceBusSendEndpointProvider(MessageSerializer, _sourceAddress, _hosts);
         }
@@ -54,9 +47,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         {
             IConsumePipe consumePipe = new ConsumePipe();
 
-            var endpointCache = new SendEndpointCache(_sendEndpointProvider.Value);
+            var endpointCache = new SendEndpointCache(SendEndpointProvider);
 
-            return new SuperDuperServiceBus(_sourceAddress, consumePipe, endpointCache, ReceiveEndpoints);
+            return new MassTransitBus(_sourceAddress, consumePipe, endpointCache, ReceiveEndpoints);
         }
     }
 }

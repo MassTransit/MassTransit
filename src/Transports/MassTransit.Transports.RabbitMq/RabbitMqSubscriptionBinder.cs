@@ -39,7 +39,7 @@ namespace MassTransit.Transports.RabbitMq
                     "The bus must be receiving from a RabbitMQ endpoint for this interceptor to work");
             }
 
-            _inputAddress = _inboundTransport.Address.CastAs<IRabbitMqEndpointAddress>();
+//            _inputAddress = _inboundTransport.Address;
 
             _messageNameFormatter = _inboundTransport.MessageNameFormatter;
         }

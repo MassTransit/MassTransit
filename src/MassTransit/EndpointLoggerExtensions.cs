@@ -12,13 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using Logging;
 
     public static class EndpointLoggerExtensions
     {
         static readonly ILog _messages = Logger.Get("MassTransit.Messages");
 
-        public static void LogSkipped(this EndpointAddress sourceAddress, string messageId)
+        public static void LogSkipped(this Uri sourceAddress, string messageId)
         {
             if (_messages.IsDebugEnabled)
             {
@@ -33,7 +34,7 @@ namespace MassTransit
         /// <param name="destinationAddress"></param>
         /// <param name="messageId"></param>
         /// <param name="description"> </param>
-        public static void LogMoved(this EndpointAddress sourceAddress, EndpointAddress destinationAddress,
+        public static void LogMoved(this Uri sourceAddress, EndpointAddress destinationAddress,
                                     string messageId, string description)
         {
             if (_messages.IsInfoEnabled)
@@ -49,7 +50,7 @@ namespace MassTransit
         /// <param name="destinationAddress"></param>
         /// <param name="messageId"></param>
         /// <param name="description"> </param>
-        public static void LogReQueued(this EndpointAddress sourceAddress, EndpointAddress destinationAddress,
+        public static void LogReQueued(this Uri sourceAddress, EndpointAddress destinationAddress,
                                     string messageId, string description)
         {
             if (_messages.IsInfoEnabled)
@@ -58,7 +59,7 @@ namespace MassTransit
             }
         }
 
-        public static void LogReceived(this EndpointAddress sourceAddress, string messageId, string description)
+        public static void LogReceived(this Uri sourceAddress, string messageId, string description)
         {
             if (_messages.IsDebugEnabled)
             {
@@ -66,7 +67,7 @@ namespace MassTransit
             }
         }
 
-        public static void LogSent(this EndpointAddress address, string messageId, string description)
+        public static void LogSent(this Uri address, string messageId, string description)
         {
             if (_messages.IsDebugEnabled)
             {

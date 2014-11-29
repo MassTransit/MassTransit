@@ -29,15 +29,21 @@ namespace MassTransit.Transports.RabbitMq
         readonly IRabbitMqConnector _connector;
         readonly IRetryPolicy _retryPolicy;
         readonly ReceiveSettings _settings;
-        readonly SubscriptionSettings[] _subscriptions;
+        readonly ExchangeBindingSettings[] _exchangeBindings;
+        Uri _inputAddress;
 
         public RabbitMqReceiveTransport(IRabbitMqConnector connector, IRetryPolicy retryPolicy, ReceiveSettings settings,
-            params SubscriptionSettings[] subscriptions)
+            params ExchangeBindingSettings[] exchangeBindings)
         {
             _connector = connector;
             _retryPolicy = retryPolicy;
             _settings = settings;
-            _subscriptions = subscriptions;
+            _exchangeBindings = exchangeBindings;
+        }
+
+        public Uri InputAddress
+        {
+            get { return _inputAddress; }
         }
 
         /// <summary>
@@ -54,7 +60,7 @@ namespace MassTransit.Transports.RabbitMq
                 x.Repeat(stopReceive);
                 x.Retry(_retryPolicy, stopReceive);
 
-                x.ModelConsumer(receivePipe, _settings, _subscriptions);
+                x.RabbitMqConsumer(receivePipe, _settings, _exchangeBindings);
             });
 
             return Repeat.UntilCancelled(stopReceive, async () =>

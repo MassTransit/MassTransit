@@ -29,15 +29,13 @@ namespace MassTransit.Transports.RabbitMq.Configuration
         readonly IList<IServiceBusFactoryBuilderConfigurator> _transportBuilderConfigurators;
         HostSettings _defaultHostSettings;
 
-        public RabbitMqServiceBusFactoryConfigurator(IServiceBusFactorySelector selector)
+        public RabbitMqServiceBusFactoryConfigurator()
         {
             _hosts = new List<RabbitMqHostSettings>();
             _defaultHostSettings = new HostSettings();
             _defaultEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_defaultHostSettings);
             _publishSettings = new RabbitMqPublishSettings();
             _transportBuilderConfigurators = new List<IServiceBusFactoryBuilderConfigurator>();
-
-            selector.SetServiceBusFactory(this);
         }
 
         public void Host(RabbitMqHostSettings settings)
