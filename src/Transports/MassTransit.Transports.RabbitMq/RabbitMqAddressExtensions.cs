@@ -113,9 +113,7 @@ namespace MassTransit.Transports.RabbitMq
             string name = address.AbsolutePath.Substring(1);
             string[] pathSegments = name.Split('/');
             if (pathSegments.Length == 2)
-            {
                 name = pathSegments[1];
-            }
 
 
             if (name == "*")
@@ -135,12 +133,11 @@ namespace MassTransit.Transports.RabbitMq
 
         public static ConnectionFactory GetConnectionFactory(this RabbitMqHostSettings settings)
         {
-            var factory = new ConnectionFactory()
+            var factory = new ConnectionFactory
             {
                 AutomaticRecoveryEnabled = true,
                 NetworkRecoveryInterval = TimeSpan.FromSeconds(1),
                 TopologyRecoveryEnabled = true,
-
                 HostName = settings.Host,
                 Port = settings.Port,
                 VirtualHost = settings.VirtualHost,
@@ -162,8 +159,8 @@ namespace MassTransit.Transports.RabbitMq
 
             var hostSettings = new HostSettings
             {
-                Host = address.Host, 
-                Username = "", 
+                Host = address.Host,
+                Username = "",
                 Password = ""
             };
 
@@ -181,8 +178,7 @@ namespace MassTransit.Transports.RabbitMq
             string name = address.AbsolutePath.Substring(1);
 
             string[] pathSegments = name.Split('/');
-            if (pathSegments.Length == 2)
-                hostSettings.VirtualHost = pathSegments[0];
+            hostSettings.VirtualHost = pathSegments.Length == 2 ? pathSegments[0] : "/";
 
             hostSettings.Heartbeat = address.Query.GetValueFromQueryString("heartbeat", (ushort)0);
 

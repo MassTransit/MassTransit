@@ -46,6 +46,15 @@ namespace MassTransit.Transports.RabbitMq.Tests
             get { return _bus; }
         }
 
+
+        /// <summary>
+        /// The sending endpoint for the InputQueue
+        /// </summary>
+        protected ISendEndpoint InputQueueSendEndpoint
+        {
+            get { return _inputQueueSendEndpoint; }
+        }
+
         protected Uri InputQueueAddress
         {
             get { return _inputQueueAddress; }
@@ -123,7 +132,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
         }
 
-        protected virtual void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
         }
 
@@ -140,12 +149,12 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {
                     e.PrefetchCount(16);
-                    e.Exclusive();
+                    e.PurgeOnStartup();
                     
                     e.Log(Console.Out, async context =>
                         string.Format("Received (input_queue): {0}", context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A")));
 
-                    ConfigureLocalReceiveEndpoint(e);
+                    ConfigureInputQueueEndpoint(e);
                 });
             });
         }
