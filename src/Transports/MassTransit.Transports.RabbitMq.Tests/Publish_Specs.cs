@@ -38,9 +38,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
             Task<ConsumeContext<A>> _receivedA;
 
-            protected override void ConfigureLocalReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
             {
-                base.ConfigureLocalReceiveEndpoint(configurator);
+                base.ConfigureInputQueueEndpoint(configurator);
 
                 _receivedA = Handler<A>(configurator);
             }

@@ -62,7 +62,9 @@ namespace MassTransit.Transports.RabbitMq.Configuration
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
-            return new RabbitMqSendEndpointProvider(MessageSerializer, _hosts, _sourceAddress);
+            var sendEndpointProvider = new RabbitMqSendEndpointProvider(MessageSerializer, _hosts, _sourceAddress);
+
+            return new SendEndpointCache(sendEndpointProvider);
         }
     }
 }

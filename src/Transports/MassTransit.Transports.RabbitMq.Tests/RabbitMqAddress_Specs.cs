@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,447 +16,322 @@ namespace MassTransit
     using Magnum.TestFramework;
     using NUnit.Framework;
     using Transports.RabbitMq;
+    using Transports.RabbitMq.Configuration;
 
 
-    [Scenario]
+    [TestFixture]
     public class GivenAVHostAddress
     {
-        public Uri Uri = new Uri("rabbitmq://some_server/thehost/queue");
-        RabbitMqEndpointAddress _addr;
-
-        [When]
-        public void WhenParsed()
-        {
-            _addr = RabbitMqEndpointAddress.Parse(Uri);
-        }
-
-        [Then]
-        public void TheHost()
-        {
-            _addr.ConnectionFactory.VirtualHost.ShouldEqual("thehost");
-        }
-
-        [Then]
-        public void TheQueue()
-        {
-            _addr.Name.ShouldEqual("queue");
-        }
-
-        [Then]
-        public void Rebuilt()
-        {
-//            _addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://guest:guest@some_server:5432/thehost/queue"));
-        }
-
-        [Then]
-        public void RelativeQueue()
-        {
-            _addr.ForQueue("anotherone")
-                 .Uri.ToString().ShouldEqual("rabbitmq://some_server/thehost/anotherone");
-        }
-
-        [Then]
-        public void ShouldNotBeHa()
-        {
-            _addr.QueueArguments().ShouldBeNull();
-        }
-
-        [Then]
+        [Test]
         public void ShouldNotHaveATtl()
         {
-            _addr.QueueArguments().ShouldBeNull();
+            _hostSettings.Host.ShouldEqual("some_server");
+        }
+
+        [Test]
+        public void Should_have_no_password()
+        {
+            _hostSettings.Password.ShouldBeEmpty();
+        }
+
+        [Test]
+        public void Should_have_no_username()
+        {
+            _hostSettings.Username.ShouldBeEmpty();
+        }
+
+        [Test]
+        public void Should_have_the_queue_name()
+        {
+            _receiveSettings.QueueName.ShouldEqual("queue");
+        }
+
+        [Test]
+        public void TheHost()
+        {
+            _hostSettings.VirtualHost.ShouldEqual("thehost");
+        }
+
+        readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/queue");
+        RabbitMqHostSettings _hostSettings;
+        ReceiveSettings _receiveSettings;
+
+        [TestFixtureSetUp]
+        public void WhenParsed()
+        {
+            _hostSettings = _uri.GetHostSettings();
+            _receiveSettings = _uri.GetReceiveSettings();
         }
     }
 
 
-    [Scenario]
+    [TestFixture]
     public class GivenAnAddressWithUnderscore
     {
-        public Uri Uri = new Uri("rabbitmq://some_server/thehost/the_queue");
-        RabbitMqEndpointAddress _addr;
+        [Test]
+        public void Should_have_the_queue_name()
+        {
+            _receiveSettings.QueueName.ShouldEqual("the_queue");
+        }
 
-        [When]
+        readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/the_queue");
+        ReceiveSettings _receiveSettings;
+
+        [TestFixtureSetUp]
         public void WhenParsed()
         {
-            _addr = RabbitMqEndpointAddress.Parse(Uri);
-        }
-
-        [Then]
-        public void TheQueue()
-        {
-            _addr.Name.ShouldEqual("the_queue");
-        }
-
-        [Then]
-        public void Rebuilt()
-        {
-            //          _addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://guest:guest@some_server:5432/thehost/the_queue"));
+            _receiveSettings = _uri.GetReceiveSettings();
         }
     }
 
 
-    [Scenario]
+    [TestFixture]
     public class GivenAnAddressWithPeriod
     {
-        public Uri Uri = new Uri("rabbitmq://some_server/thehost/the.queue");
-        RabbitMqEndpointAddress _addr;
+        [Test]
+        public void Should_have_the_queue_name()
+        {
+            _receiveSettings.QueueName.ShouldEqual("the.queue");
+        }
 
-        [When]
+        readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/the.queue");
+        ReceiveSettings _receiveSettings;
+
+        [TestFixtureSetUp]
         public void WhenParsed()
         {
-            _addr = RabbitMqEndpointAddress.Parse(Uri);
-        }
-
-        [Then]
-        public void TheQueue()
-        {
-            _addr.Name.ShouldEqual("the.queue");
-        }
-
-        [Then]
-        public void Rebuilt()
-        {
-            //    _addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://guest:guest@some_server:5432/thehost/the.queue"));
+            _receiveSettings = _uri.GetReceiveSettings();
         }
     }
 
 
-    [Scenario]
+    [TestFixture]
     public class GivenAnAddressWithColon
     {
-        public Uri Uri = new Uri("rabbitmq://some_server/thehost/the:queue");
-        RabbitMqEndpointAddress _addr;
+        [Test]
+        public void Should_have_the_queue_name()
+        {
+            _receiveSettings.QueueName.ShouldEqual("the:queue");
+        }
 
-        [When]
+        readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/the:queue");
+        ReceiveSettings _receiveSettings;
+
+        [TestFixtureSetUp]
         public void WhenParsed()
         {
-            _addr = RabbitMqEndpointAddress.Parse(Uri);
-        }
-
-        [Then]
-        public void TheQueue()
-        {
-            _addr.Name.ShouldEqual("the:queue");
-        }
-
-        [Then]
-        public void Rebuilt()
-        {
-            //    _addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://guest:guest@some_server:5432/thehost/the:queue"));
+            _receiveSettings = _uri.GetReceiveSettings();
         }
     }
 
 
-    [Scenario]
+    [TestFixture]
     public class GivenAnAddressWithSlash
     {
-        public Uri Uri = new Uri("rabbitmq://some_server/thehost/the/queue");
-        RabbitMqEndpointAddress _addr;
-
-        [When]
-        public void WhenParsed()
+        [Test, ExpectedException(typeof(RabbitMqAddressException))]
+        public void Should_have_the_queue_name()
         {
+            _receiveSettings = _uri.GetReceiveSettings();
         }
 
-        [Then, ExpectedException(typeof(RabbitMqAddressException))]
-        
-        public void TheQueue()
-        {
-            _addr = RabbitMqEndpointAddress.Parse(Uri);
-        }
+        readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/the/queue");
+        ReceiveSettings _receiveSettings;
     }
 
 
-    [Scenario]
+    [TestFixture]
     public class GivenANonVHostAddress
     {
-        public Uri Uri = new Uri("rabbitmq://some_server/the_queue");
-        RabbitMqEndpointAddress _addr;
-
-        [When]
-        public void WhenParsed()
-        {
-            _addr = RabbitMqEndpointAddress.Parse(Uri);
-        }
-
-        [Then]
+        [Test]
         public void TheHost()
         {
-            _addr.ConnectionFactory.VirtualHost.ShouldEqual("/");
+            _hostSettings.VirtualHost.ShouldEqual("/");
         }
 
-        [Then]
+        [Test]
         public void TheQueue()
         {
-            _addr.Name.ShouldEqual("the_queue");
+            _receiveSettings.QueueName.ShouldEqual("the_queue");
+        }
+
+        readonly Uri _uri = new Uri("rabbitmq://some_server/the_queue");
+        RabbitMqHostSettings _hostSettings;
+        ReceiveSettings _receiveSettings;
+
+        [TestFixtureSetUp]
+        public void WhenParsed()
+        {
+            _hostSettings = _uri.GetHostSettings();
+            _receiveSettings = _uri.GetReceiveSettings();
         }
     }
 
 
-    [Scenario]
+    [TestFixture]
     public class GivenAPortedAddress
     {
-        public Uri Uri = new Uri("rabbitmq://some_server:12/the_queue");
-        RabbitMqEndpointAddress _addr;
-
-        [When]
-        public void WhenParsed()
-        {
-            _addr = RabbitMqEndpointAddress.Parse(Uri);
-        }
-
-        [Then]
+        [Test]
         public void TheHost()
         {
-            _addr.ConnectionFactory.VirtualHost.ShouldEqual("/");
+            _hostSettings.VirtualHost.ShouldEqual("/");
         }
 
-        [Then]
+        [Test]
         public void ThePort()
         {
-            _addr.ConnectionFactory.Port.ShouldEqual(12);
+            _hostSettings.Port.ShouldEqual(12);
         }
 
-        [Then]
-        public void Rebuilt()
+        readonly Uri _uri = new Uri("rabbitmq://some_server:12/the_queue");
+        RabbitMqHostSettings _hostSettings;
+
+        [TestFixtureSetUp]
+        public void WhenParsed()
         {
-            //    _addr.RebuiltUri.ShouldEqual(new Uri(@"rabbitmq://guest:guest@some_server:12/the_queue"));
+            _hostSettings = _uri.GetHostSettings();
         }
     }
 
 
-    [Scenario]
+    [TestFixture]
     public class GivenANonPortedAddress
     {
-        public Uri Uri = new Uri("rabbitmq://some_server/the_queue");
-        RabbitMqEndpointAddress _addr;
-
-        [When]
-        public void WhenParsed()
-        {
-            _addr = RabbitMqEndpointAddress.Parse(Uri);
-        }
-
-        [Then]
+        [Test]
         public void TheHost()
         {
-            _addr.ConnectionFactory.VirtualHost.ShouldEqual("/");
+            _hostSettings.VirtualHost.ShouldEqual("/");
         }
 
-        [Then]
+        [Test]
         public void ThePort()
         {
-            _addr.ConnectionFactory.Port.ShouldEqual(5672);
+            _hostSettings.Port.ShouldEqual(5672);
         }
-    }
 
-    [Scenario]
-    public class GivenAUserNameUrl
-    {
-        public Uri Uri = new Uri("rabbitmq://dru:mt@some_server/thehost/the_queue");
-        RabbitMqEndpointAddress _addr;
+        readonly Uri _uri = new Uri("rabbitmq://some_server/the_queue");
+        RabbitMqHostSettings _hostSettings;
+        ReceiveSettings _receiveSettings;
 
-        [When]
+        [TestFixtureSetUp]
         public void WhenParsed()
         {
-            _addr = RabbitMqEndpointAddress.Parse(Uri);
-        }
-
-        [Then]
-        public void TheUsername()
-        {
-            _addr.ConnectionFactory.UserName.ShouldEqual("dru");
-        }
-
-        [Then]
-        public void ThePassword()
-        {
-            _addr.ConnectionFactory.Password.ShouldEqual("mt");
-        }
-
-        [Then]
-        public void Rebuilt()
-        {
-            //_addr.RebuiltUri.ShouldEqual(new Uri("rabbitmq://dru:mt@some_server:5432/thehost/the_queue"));
+            _hostSettings = _uri.GetHostSettings();
+            _receiveSettings = _uri.GetReceiveSettings();
         }
     }
 
 
-    [Scenario]
-    public class GivenAHighAvailableQueue
+    [TestFixture]
+    public class GivenATimeToLive
     {
-        RabbitMqEndpointAddress _addr;
-        public string uri = "rabbitmq://localhost/mttest/somequeue?ha=true";
-
-        [When]
-        public void WhenParsed()
-        {
-            _addr = RabbitMqEndpointAddress.Parse(uri);
-        }
-
-        [Then]
-        public void TheQueueArguments()
-        {
-            _addr.QueueArguments().ShouldNotBeNull();
-        }
-
-        [Then]
+        [Test]
         public void HighAvailabilityQueue()
         {
-            _addr.QueueArguments()["x-ha-policy"].ShouldEqual("all");
+            _receiveSettings.QueueArguments["x-message-ttl"].ShouldEqual("30000");
         }
 
-        [Then]
-        public void ShouldNotHaveATtl()
+        [Test]
+        public void ShouldHaveATtl()
         {
-            _addr.QueueArguments().ContainsKey("x-message-ttl").ShouldBeFalse();
+            _receiveSettings.QueueArguments.ContainsKey("x-message-ttl").ShouldBeTrue();
         }
 
-        [Then]
+        [Test]
+        public void TheQueueArguments()
+        {
+            _receiveSettings.QueueArguments.ShouldNotBeNull();
+        }
+
+        [Test]
         public void TheQueueName()
         {
-            _addr.Name.ShouldEqual("somequeue");
+            _receiveSettings.QueueName.ShouldEqual("somequeue");
         }
 
-        [Then]
-        public void should_not_use_query_string_of_uri()
+        readonly Uri _uri = new Uri("rabbitmq://localhost/mttest/somequeue?ttl=30000");
+        ReceiveSettings _receiveSettings;
+
+        [TestFixtureSetUp]
+        public void WhenParsed()
         {
-            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/mttest/anotherone");
-            _addr.ForQueue("anotherone").Name.ShouldEqual("anotherone");
+            _receiveSettings = _uri.GetReceiveSettings();
         }
     }
 
-    [Scenario]
+
+    [TestFixture]
     public class Given_a_prefetch_count
     {
-        RabbitMqEndpointAddress _addr;
-        public string uri = "rabbitmq://localhost/mttest/somequeue?ha=true&prefetch=32";
-
-        [When]
-        public void WhenParsed()
-        {
-            _addr = RabbitMqEndpointAddress.Parse(uri);
-        }
-
-        [Then]
-        public void TheQueueArguments()
-        {
-            _addr.QueueArguments().ShouldNotBeNull();
-        }
-
-        [Then]
-        public void HighAvailabilityQueue()
-        {
-            _addr.QueueArguments()["x-ha-policy"].ShouldEqual("all");
-        }
-
-        [Then]
+        [Test]
         public void Should_have_the_prefetch_count_on_the_address()
         {
-            _addr.PrefetchCount.ShouldEqual((ushort)32);
+            _receiveSettings.PrefetchCount.ShouldEqual((ushort)32);
         }
 
-        [Then]
+        [Test]
+        public void TheQueueArguments()
+        {
+            _receiveSettings.QueueArguments.ShouldBeEmpty();
+        }
+
+        [Test]
         public void TheQueueName()
         {
-            _addr.Name.ShouldEqual("somequeue");
+            _receiveSettings.QueueName.ShouldEqual("somequeue");
         }
 
-        [Then]
-        public void should_not_use_query_string_of_uri()
+        readonly Uri _uri = new Uri("rabbitmq://localhost/mttest/somequeue?prefetch=32");
+        ReceiveSettings _receiveSettings;
+
+        [TestFixtureSetUp]
+        public void WhenParsed()
         {
-            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/mttest/anotherone");
-            _addr.ForQueue("anotherone").Name.ShouldEqual("anotherone");
+            _receiveSettings = _uri.GetReceiveSettings();
         }
     }
 
-    [Scenario]
+
+    [TestFixture]
     public class Given_a_temporary_queue_was_requested
     {
-        RabbitMqEndpointAddress _addr;
-        public string uri = "rabbitmq://localhost/mttest/*?temporary=true";
-
-        [When]
-        public void WhenParsed()
-        {
-            _addr = RabbitMqEndpointAddress.Parse(uri);
-        }
-
-        [Then]
-        public void TheQueueArguments()
-        {
-            _addr.QueueArguments().ShouldBeNull();
-        }
-
-        [Then]
-        public void Should_not_be_durable()
-        {
-            _addr.Durable.ShouldBeFalse();
-        }
-
-        [Then]
-        public void Should_be_exclusive_to_the_consumer()
-        {
-            _addr.Exclusive.ShouldBeTrue();
-        }
-
-        [Then]
+        [Test]
         public void Should_be_auto_delete()
         {
-            _addr.AutoDelete.ShouldBeTrue();
+            _receiveSettings.AutoDelete.ShouldBeTrue();
         }
 
-        [Then]
-        public void TheQueueName()
+        [Test]
+        public void Should_be_exclusive_to_the_consumer()
         {
-            var guid = new Guid(_addr.Name);
-            Assert.AreNotEqual(Guid.Empty, guid);
+            _receiveSettings.Exclusive.ShouldBeTrue();
         }
-    }
 
-
-    [Scenario]
-    public class GivenATtl
-    {
-        RabbitMqEndpointAddress _addr;
-        public string uri = "rabbitmq://localhost/mttest/somequeue?ttl=20";
-
-        [When]
-        public void WhenParsed()
+        [Test]
+        public void Should_not_be_durable()
         {
-            _addr = RabbitMqEndpointAddress.Parse(uri);
+            _receiveSettings.Durable.ShouldBeFalse();
         }
 
-        [Then]
+        [Test]
         public void TheQueueArguments()
         {
-            _addr.QueueArguments().ShouldNotBeNull();
+            _receiveSettings.QueueArguments.ShouldBeEmpty();
         }
 
-        [Then]
-        public void TtlQueue()
-        {
-            _addr.QueueArguments()["x-message-ttl"].ShouldEqual(20);
-        }
-
-
-        [Then]
-        public void ShouldNotBeHa()
-        {
-            _addr.QueueArguments().ContainsKey("x-ha-policy").ShouldBeFalse();
-        }
-
-        [Then]
+        [Test]
         public void TheQueueName()
         {
-            _addr.Name.ShouldEqual("somequeue");
+            var guid = new Guid(_receiveSettings.QueueName);
+            Assert.AreNotEqual(Guid.Empty, guid);
         }
 
-        [Then]
-        public void should_not_use_query_string_of_uri()
+        readonly Uri _uri = new Uri("rabbitmq://localhost/mttest/*?temporary=true");
+        ReceiveSettings _receiveSettings;
+
+        [TestFixtureSetUp]
+        public void WhenParsed()
         {
-            _addr.ForQueue("anotherone").Uri.ToString().ShouldEqual("rabbitmq://localhost/mttest/anotherone");
-            _addr.ForQueue("anotherone").Name.ShouldEqual("anotherone");
+            _receiveSettings = _uri.GetReceiveSettings();
         }
     }
 }
