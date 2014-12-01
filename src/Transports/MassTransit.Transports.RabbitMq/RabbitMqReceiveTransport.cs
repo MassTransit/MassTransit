@@ -15,6 +15,7 @@ namespace MassTransit.Transports.RabbitMq
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using Pipeline;
@@ -51,28 +52,37 @@ namespace MassTransit.Transports.RabbitMq
         /// completely shutdown once the cancellation token is cancelled.
         /// </summary>
         /// <param name="receivePipe"></param>
-        /// <param name="stopReceive">The cancellation token that is cancelled to terminate the receive transport</param>
+        /// <param name="cancellationToken">The cancellation token that is cancelled to terminate the receive transport</param>
         /// <returns>A task that is completed once the transport is shut down</returns>
-        public Task Start(IPipe<ReceiveContext> receivePipe, CancellationToken stopReceive)
+        public async Task<ReceiveTransportHandle> Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
         {
+            var handle = new Handle(this);
+
             IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.Repeat(stopReceive);
-                x.Retry(_retryPolicy, stopReceive);
+                x.Repeat(handle.StopToken);
+                x.Retry(_retryPolicy, handle.StopToken);
 
                 x.RabbitMqConsumer(receivePipe, _settings, _exchangeBindings);
             });
 
-            return Repeat.UntilCancelled(stopReceive, async () =>
+            Receiver(handle, connectionPipe);
+
+            return handle;
+        }
+
+        async void Receiver(Handle handle, IPipe<ConnectionContext> connectionPipe)
+        {
+            await Repeat.UntilCancelled(handle.StopToken, async () =>
             {
                 try
                 {
-                    await _connector.Connect(connectionPipe, stopReceive);
+                    await _connector.Connect(connectionPipe, handle.StopToken);
                 }
                 catch (RabbitMqConnectionException ex)
                 {
                     if (_log.IsErrorEnabled)
-                        _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);                    
+                        _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);
                 }
                 catch (TaskCanceledException)
                 {
@@ -83,6 +93,50 @@ namespace MassTransit.Transports.RabbitMq
                         _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);
                 }
             });
+
+            handle.Stopped();
+        }
+
+        class Handle :
+    ReceiveTransportHandle
+        {
+            readonly CancellationTokenSource _stop;
+            readonly IReceiveTransport _transport;
+            readonly TaskCompletionSource<bool> _stopped;
+
+            public Handle(IReceiveTransport transport)
+            {
+                _transport = transport;
+                _stop = new CancellationTokenSource();
+                _stopped = new TaskCompletionSource<bool>();
+            }
+
+            void IDisposable.Dispose()
+            {
+                _stop.Cancel();
+            }
+
+            IReceiveTransport ReceiveTransportHandle.Transport
+            {
+                get { return _transport; }
+            }
+
+            async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
+            {
+                _stop.Cancel();
+
+                await _stopped.Task.WithCancellation(cancellationToken);
+            }
+
+            public CancellationToken StopToken
+            {
+                get { return _stop.Token; }
+            }
+
+            public void Stopped()
+            {
+                _stopped.TrySetResult(true);
+            }
         }
     }
 }

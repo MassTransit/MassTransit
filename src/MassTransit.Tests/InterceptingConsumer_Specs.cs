@@ -45,11 +45,11 @@ namespace MassTransit.Tests
             _myConsumer = new MyConsumer();
             _interceptor = new Interceptor();
 
-            configurator.Subscribe(x =>
-            {
-                x.Consumer(() => _myConsumer)
-                    .Filter(_interceptor);
-            });
+//            configurator.Subscribe(x =>
+//            {
+//                x.Consumer(() => _myConsumer)
+//                    .Filter(_interceptor);
+//            });
         }
 
 

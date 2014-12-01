@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,71 +14,38 @@ namespace MassTransit.Reactive.Tests
 {
     using System;
     using System.Reactive;
-    using System.Threading.Tasks;
-    using Magnum.Extensions;
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using TestFramework;
 
 
     [TestFixture]
-    public class Subscribing_from_the_service_bus_factory
+    public class Subscribing_from_the_service_bus_factory :
+        InMemoryTestFixture
     {
+        [Test]
+        public async void Should_allow_rx_subscribers()
+        {
+            await InputQueueSendEndpoint.Send(new A {Name = "Joe"});
+
+            await _observer.Value;
+        }
+
+        TestObserver<A> _observer;
+
+
         class A
         {
             public string Name { get; set; }
         }
 
 
-        class MyObserver<T> :
-            IObserver<T>
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            readonly TaskCompletionSource<bool> _completed = new TaskCompletionSource<bool>();
-            readonly TaskCompletionSource<Exception> _exception = new TaskCompletionSource<Exception>();
-            readonly TaskCompletionSource<T> _value = new TaskCompletionSource<T>();
+            _observer = GetObserver<A>();
 
-            public Task<T> Value
-            {
-                get { return _value.Task; }
-            }
+            configurator.Observe(_observer);
 
-
-            public void OnNext(T value)
-            {
-                _value.TrySetResult(value);
-            }
-
-            public void OnError(Exception error)
-            {
-                _exception.TrySetException(error);
-            }
-
-            public void OnCompleted()
-            {
-                _completed.TrySetResult(true);
-            }
-        }
-
-
-        [Test]
-        public void Should_allow_rx_subscribers()
-        {
-            var observer = new MyObserver<A>();
-
-            using (var bus = ServiceBusFactory.New(x =>
-                {
-                    x.ReceiveFrom("loopback://localhost/queue");
-
-                    x.Subscribe(s =>
-                        {
-                            s.Observe(observer);
-                            s.Observe(Observer.Create<A>(m => Console.WriteLine(m.Name)));
-                        });
-                }))
-            {
-                bus.Publish(new A {Name = "Joe"});
-
-                observer.Value.Wait(8.Seconds()).ShouldBeTrue();
-            }
+            configurator.Observe(Observer.Create<A>(m => Console.WriteLine(m.Name)));
         }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -53,8 +53,8 @@ namespace MassTransit
             }
         }
 
-        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-            this SubscriptionBusServiceConfigurator configurator, IKernel kernel)
+        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
+            IKernel kernel)
             where TConsumer : class, IConsumer
         {
             var consumerFactory = new NinjectConsumerFactory<TConsumer>(kernel);
@@ -62,8 +62,7 @@ namespace MassTransit
             return configurator.Consumer(consumerFactory);
         }
 
-        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-            this SubscriptionBusServiceConfigurator configurator, IKernel kernel)
+        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator, IKernel kernel)
             where TSaga : class, ISaga
         {
             var sagaRepository = kernel.Get<ISagaRepository<TSaga>>();
@@ -76,13 +75,13 @@ namespace MassTransit
         static IList<Type> FindTypes<T>(IKernel kernel, Func<Type, bool> filter)
         {
             return AppDomain.CurrentDomain.GetAssemblies()
-                            .SelectMany(s => s.GetTypes())
-                            .Where(typeof(T).IsAssignableFrom)
-                            .SelectMany(kernel.GetBindings)
-                            .Select(x => x.Service)
-                            .Distinct()
-                            .Where(filter)
-                            .ToList();
+                .SelectMany(s => s.GetTypes())
+                .Where(typeof(T).IsAssignableFrom)
+                .SelectMany(kernel.GetBindings)
+                .Select(x => x.Service)
+                .Distinct()
+                .Where(filter)
+                .ToList();
         }
     }
 }

@@ -63,8 +63,8 @@
     <Compile Include="AzureServiceBusSendTransport.cs" />
     <Compile Include="Configuration\AzureServiceBusHostConfigurator.cs" />
     <Compile Include="Configuration\AzureServiceBusServiceBusBuilder.cs" />
-    <Compile Include="Configuration\AzureServiceBusServiceBusFactoryConfigurator.cs" />
-    <Compile Include="Configuration\IServiceBusServiceBusFactoryConfigurator.cs" />
+    <Compile Include="Configuration\AzureServiceBusBusFactoryConfigurator.cs" />
+    <Compile Include="Configuration\IServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="IServiceBusHostConfigurator.cs" />
     <Compile Include="IServiceBusReceiveEndpointConfigurator.cs" />
     <Compile Include="ISharedAccessSignatureTokenProviderConfigurator.cs" />

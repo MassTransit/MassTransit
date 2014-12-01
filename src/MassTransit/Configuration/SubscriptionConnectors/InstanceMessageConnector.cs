@@ -14,11 +14,18 @@ namespace MassTransit.SubscriptionConnectors
 {
     using System;
     using Internals.Extensions;
-    using Magnum.Extensions;
     using Pipeline;
     using Pipeline.Filters;
     using Policies;
     using Util;
+
+
+    public interface InstanceMessageConnector :
+        InstanceConnector
+    {
+        Type MessageType { get; }
+    }
+
 
     /// <summary>
     /// Connects a consumer instance to the inbound pipeline for the specified message type. The actual

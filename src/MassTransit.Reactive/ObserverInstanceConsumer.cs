@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,10 +14,11 @@ namespace MassTransit.Reactive
 {
     using System;
     using System.Reactive;
+    using System.Threading.Tasks;
 
 
     public class ObserverInstanceConsumer<T> :
-        Consumes<T>.Context
+        IConsumer<T>
         where T : class
     {
         readonly IObserver<T> _observer;
@@ -27,7 +28,7 @@ namespace MassTransit.Reactive
             _observer = Observer.Synchronize(observer);
         }
 
-        public void Consume(IConsumeContext<T> context)
+        public async Task Consume(ConsumeContext<T> context)
         {
             try
             {

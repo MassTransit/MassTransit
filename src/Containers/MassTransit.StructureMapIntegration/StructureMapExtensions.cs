@@ -49,17 +49,16 @@ namespace MassTransit
             }
         }
 
-        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-            this SubscriptionBusServiceConfigurator configurator, IContainer kernel)
+        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
+            IContainer container)
             where TConsumer : class, IConsumer
         {
-            var consumerFactory = new StructureMapConsumerFactory<TConsumer>(kernel);
+            var consumerFactory = new StructureMapConsumerFactory<TConsumer>(container);
 
             return configurator.Consumer(consumerFactory);
         }
 
-        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-            this SubscriptionBusServiceConfigurator configurator, IContainer container)
+        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator, IContainer container)
             where TSaga : class, ISaga
         {
             var sagaRepository = container.GetInstance<ISagaRepository<TSaga>>();

@@ -47,9 +47,46 @@ namespace MassTransit.Transports
             get { return _consumePipe; }
         }
 
-        Task IReceiveEndpoint.Start(CancellationToken stopToken)
+        async Task<ReceiveEndpointHandle> IReceiveEndpoint.Start(CancellationToken cancellationToken)
         {
-            return _receiveTransport.Start(_receivePipe, stopToken);
+            ReceiveTransportHandle transportHandle = await _receiveTransport.Start(_receivePipe, cancellationToken);
+
+            var handle = new Handle(this, transportHandle);
+
+            return handle;
+        }
+
+
+        class Handle :
+            ReceiveEndpointHandle
+        {
+            readonly IReceiveEndpoint _endpoint;
+            readonly CancellationTokenSource _stop;
+            readonly ReceiveTransportHandle _transportHandle;
+
+            public Handle(IReceiveEndpoint endpoint, ReceiveTransportHandle transportHandle)
+            {
+                _endpoint = endpoint;
+                _transportHandle = transportHandle;
+                _stop = new CancellationTokenSource();
+            }
+
+            IReceiveEndpoint ReceiveEndpointHandle.Endpoint
+            {
+                get { return _endpoint; }
+            }
+
+            void IDisposable.Dispose()
+            {
+                _stop.Cancel();
+            }
+
+            async Task ReceiveEndpointHandle.Stop(CancellationToken cancellationToken)
+            {
+                _stop.Cancel();
+
+                await _transportHandle.Stop(cancellationToken);
+            }
         }
     }
 }

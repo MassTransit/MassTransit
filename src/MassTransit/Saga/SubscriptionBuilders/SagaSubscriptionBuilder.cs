@@ -14,12 +14,10 @@ namespace MassTransit.Saga.SubscriptionBuilders
 {
     using System;
     using MassTransit.Pipeline;
-    using MassTransit.SubscriptionBuilders;
     using SubscriptionConnectors;
     using Subscriptions;
 
-    public class SagaSubscriptionBuilder<TSaga> :
-        SubscriptionBuilder
+    public class SagaSubscriptionBuilder<TSaga> 
         where TSaga : class, ISaga
     {
         readonly SagaConnector<TSaga> _connector;

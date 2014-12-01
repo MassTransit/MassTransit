@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,18 +14,15 @@ namespace MassTransit.WindsorIntegration
 {
     using System;
     using Castle.Windsor;
-    using Magnum.Reflection;
     using Saga;
-    using SubscriptionConfigurators;
-    using Util;
 
 
     public class WindsorSagaFactoryConfigurator
     {
-        readonly SubscriptionBusServiceConfigurator _configurator;
+        readonly IReceiveEndpointConfigurator _configurator;
         readonly IWindsorContainer _container;
 
-        public WindsorSagaFactoryConfigurator(SubscriptionBusServiceConfigurator configurator,
+        public WindsorSagaFactoryConfigurator(IReceiveEndpointConfigurator configurator,
             IWindsorContainer container)
         {
             _container = container;
@@ -34,10 +31,9 @@ namespace MassTransit.WindsorIntegration
 
         public void ConfigureSaga(Type messageType)
         {
-            this.FastInvoke(new[] {messageType}, "Configure");
+            throw new NotImplementedException();
         }
 
-        
         public void Configure<T>()
             where T : class, ISaga
         {

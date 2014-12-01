@@ -18,7 +18,7 @@ namespace MassTransit
 
     public static class ServiceBusFactoryExtensions
     {
-        public static IBusControl Build(this IServiceBusFactory factory)
+        public static IBusControl Build(this IBusFactory factory)
         {
             ConfigurationResult result = ConfigurationResultImpl.CompileResults(factory.Validate());
 

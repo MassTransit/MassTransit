@@ -25,14 +25,14 @@ namespace MassTransit.Testing.ScenarioBuilders
         EndpointScenarioBuilderImpl<BusTestScenario>,
         BusScenarioBuilder
     {
-        readonly InMemoryServiceBusFactoryConfigurator _configurator;
+        readonly InMemoryBusFactoryConfigurator _configurator;
 
         /// <summary>
         /// c'tor
         /// </summary>
         public BusScenarioBuilderImpl()
         {
-            _configurator = new InMemoryServiceBusFactoryConfigurator();
+            _configurator = new InMemoryBusFactoryConfigurator();
         }
 
         public void ConfigureBus(Action<IInMemoryServiceBusFactoryConfigurator> configureCallback)

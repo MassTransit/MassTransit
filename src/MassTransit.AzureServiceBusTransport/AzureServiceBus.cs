@@ -23,9 +23,9 @@ namespace MassTransit.AzureServiceBusTransport
         /// </summary>
         /// <param name="configure">The configuration callback to configure the bus</param>
         /// <returns></returns>
-        public static IBusControl Create(Action<IServiceBusServiceBusFactoryConfigurator> configure)
+        public static IBusControl Create(Action<IServiceBusBusFactoryConfigurator> configure)
         {
-            var configurator = new AzureServiceBusServiceBusFactoryConfigurator();
+            var configurator = new AzureServiceBusBusFactoryConfigurator();
 
             configure(configurator);
 

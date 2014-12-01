@@ -58,7 +58,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 var completed = new TaskCompletionSource<A>();
 
-                using (IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
                     ServiceBusHostSettings host = x.Host(serviceUri, h =>
                     {
@@ -86,7 +86,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                             h.Retry(Retry.Interval(5, 100));
                         });
                     });
-                }))
+                });
+
+                using (bus.Start(TestCancellationToken))
                 {
                 }
 

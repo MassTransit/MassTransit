@@ -19,6 +19,7 @@ namespace MassTransit.Transports
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals.Extensions;
     using Logging;
     using Pipeline;
     using Subscriptions;
@@ -60,15 +61,17 @@ namespace MassTransit.Transports
             get { return _inputAddress; }
         }
 
-        async Task IReceiveTransport.Start(IPipe<ReceiveContext> receivePipe, CancellationToken stopReceive)
+        async Task<ReceiveTransportHandle> IReceiveTransport.Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
         {
+            var handle = new Handle(this);
+
             Task receiveTask = Task.Run(() =>
             {
-                using (RegisterShutdown(stopReceive))
+                using (RegisterShutdown(handle.StopToken))
                 {
                     Parallel.ForEach(GetConsumingPartitioner(_collection), async message =>
                     {
-                        if (stopReceive.IsCancellationRequested)
+                        if (handle.StopToken.IsCancellationRequested)
                             return;
 
                         var context = new InMemoryReceiveContext(_inputAddress, message);
@@ -82,13 +85,15 @@ namespace MassTransit.Transports
                             message.DeliveryCount++;
                             _log.Error(string.Format("Receive Fault: {0}", message.MessageId), ex);
 
-                            _collection.Add(message, stopReceive);
+                            _collection.Add(message, handle.StopToken);
                         }
                     });
-                }
-            }, stopReceive);
 
-            await receiveTask;
+                    handle.Stopped();
+                }
+            }, handle.StopToken);
+
+            return handle;
         }
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
@@ -195,6 +200,49 @@ namespace MassTransit.Transports
             public override IEnumerable<T> GetDynamicPartitions()
             {
                 return _collection.GetConsumingEnumerable();
+            }
+        }
+
+
+        class Handle :
+            ReceiveTransportHandle
+        {
+            readonly CancellationTokenSource _stop;
+            readonly IReceiveTransport _transport;
+            readonly TaskCompletionSource<bool> _stopped; 
+
+            public Handle(IReceiveTransport transport)
+            {
+                _transport = transport;
+                _stop = new CancellationTokenSource();
+                _stopped = new TaskCompletionSource<bool>();
+            }
+
+            void IDisposable.Dispose()
+            {
+                _stop.Cancel();
+            }
+
+            IReceiveTransport ReceiveTransportHandle.Transport
+            {
+                get { return _transport; }
+            }
+
+            async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
+            {
+                _stop.Cancel();
+
+                await _stopped.Task.WithCancellation(cancellationToken);
+            }
+
+            public CancellationToken StopToken
+            {
+                get { return _stop.Token; }
+            }
+
+            public void Stopped()
+            {
+                _stopped.TrySetResult(true);
             }
         }
     }

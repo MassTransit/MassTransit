@@ -27,7 +27,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             base.ConfigureServiceBus(uri, configurator);
 
-            configurator.Subscribe(x => { x.Consumer<PingHandler>(); });
+//            configurator.Subscribe(x => { x.Consumer<PingHandler>(); });
         }
 
         class PingHandler

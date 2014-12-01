@@ -16,7 +16,6 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using Castle.Windsor;
-    using EndpointConfigurators;
     using Magnum.Extensions;
     using Saga;
     using Saga.SubscriptionConfigurators;
@@ -65,8 +64,7 @@ namespace MassTransit
         /// <param name="configurator">configurator</param>
         /// <param name="container">The container that the consumer should be loaded from.</param>
         /// <returns>The configurator</returns>
-        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-            this SubscriptionBusServiceConfigurator configurator,
+        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
             IWindsorContainer container)
             where TConsumer : class, IConsumer
         {
@@ -87,8 +85,7 @@ namespace MassTransit
         /// <param name="configurator">The configurator</param>
         /// <param name="container">The windsor container</param>
         /// <returns>The configurator</returns>
-        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-            this SubscriptionBusServiceConfigurator configurator,
+        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
             IWindsorContainer container)
             where TSaga : class, ISaga
         {

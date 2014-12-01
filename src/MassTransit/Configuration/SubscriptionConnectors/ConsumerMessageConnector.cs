@@ -14,7 +14,6 @@ namespace MassTransit.SubscriptionConnectors
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using PipeBuilders;
     using PipeConfigurators;
     using Pipeline;
@@ -65,9 +64,7 @@ namespace MassTransit.SubscriptionConnectors
             IPipe<ConsumerConsumeContext<TConsumer, TMessage>> messagePipe = Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x =>
             {
                 foreach (var filter in builders.Filters)
-                {
                     x.Filter(filter);
-                }
                 x.Filter(_consumeFilter);
             });
 

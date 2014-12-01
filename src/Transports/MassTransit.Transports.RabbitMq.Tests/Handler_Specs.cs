@@ -34,7 +34,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                 Task handler = null;
 
-                using (var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
+                var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
                 {
                     RabbitMqHostSettings host = x.Host(hostAddress, r =>
                     {
@@ -50,7 +50,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                         handler = Handler<A>(e);
                     });
-                }))
+                });
+
+                using(busControl.Start())
                 {
                     var queueAddress = new Uri(hostAddress, "input_queue");
 

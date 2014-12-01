@@ -25,12 +25,11 @@ namespace MassTransit
     public class MassTransitBus :
         IBusControl
     {
+        readonly Uri _address;
         readonly IConsumePipe _consumePipe;
         readonly IList<IReceiveEndpoint> _receiveEndpoints;
         readonly List<Task> _runningTasks;
-        readonly Uri _address;
         readonly ISendEndpointProvider _sendEndpointProvider;
-        CancellationTokenSource _stopTokenSource;
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
             IEnumerable<IReceiveEndpoint> receiveEndpoints)
@@ -40,11 +39,6 @@ namespace MassTransit
             _sendEndpointProvider = sendEndpointProvider;
             _receiveEndpoints = receiveEndpoints.ToList();
             _runningTasks = new List<Task>();
-        }
-
-        public void Dispose()
-        {
-            Stop().Wait();
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
@@ -77,7 +71,8 @@ namespace MassTransit
             return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
         }
 
-        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
+            CancellationToken cancellationToken)
         {
             return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
         }
@@ -112,56 +107,70 @@ namespace MassTransit
             return _sendEndpointProvider.GetSendEndpoint(address);
         }
 
-        public async Task Start(CancellationToken cancellationToken)
+        public async Task<BusHandle> Start(CancellationToken cancellationToken)
         {
-            if (_stopTokenSource != null)
-                throw new InvalidOperationException("The service bus is running and cannot be started.");
+            var receiveEndpointHandles = new List<ReceiveEndpointHandle>();
 
-            _stopTokenSource = new CancellationTokenSource();
-
-            using (cancellationToken.Register(_stopTokenSource.Cancel))
+            Exception exception = null;
+            try
             {
-                var startedTasks = new List<Task>();
-
-                Exception exception = null;
-                try
+                Task<ReceiveEndpointHandle>[] receiveEndpoints = _receiveEndpoints.Select(x => x.Start(cancellationToken)).ToArray();
+                foreach (var endpoint in receiveEndpoints)
                 {
-                    startedTasks.AddRange(_receiveEndpoints.Select(receiveEndpoint => receiveEndpoint.Start(_stopTokenSource.Token)));
-
-                    _runningTasks.AddRange(startedTasks);
-
-                    startedTasks.Clear();
-                }
-                catch (Exception ex)
-                {
-                    exception = ex;
-                }
-
-                if (exception != null)
-                {
-                    _stopTokenSource.Cancel();
-
                     try
                     {
-                        await Task.WhenAll(startedTasks);
-                    }
-                    finally
-                    {
-                        _stopTokenSource = null;
-                    }
+                        ReceiveEndpointHandle handle = await endpoint;
 
-                    throw new MassTransitException("The service bus could not be started.", exception);
+                        receiveEndpointHandles.Add(handle);
+                    }
+                    catch (Exception ex)
+                    {
+                        exception = ex;
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            if (exception != null)
+            {
+                await Task.WhenAll(receiveEndpointHandles.Select(x => x.Stop(cancellationToken)));
+
+                throw new MassTransitException("The service bus could not be started.", exception);
+            }
+
+            return new Handle(this, receiveEndpointHandles.ToArray());
         }
 
-        public async Task Stop()
+
+        class Handle :
+            BusHandle
         {
-            _stopTokenSource.Cancel();
+            readonly IBusControl _bus;
+            readonly ReceiveEndpointHandle[] _receiveEndpoints;
 
-            await Task.WhenAll(_runningTasks);
+            public Handle(IBusControl bus, ReceiveEndpointHandle[] receiveEndpoints)
+            {
+                _bus = bus;
+                _receiveEndpoints = receiveEndpoints;
+            }
 
-            _stopTokenSource = null;
+            public void Dispose()
+            {
+                Stop().Wait();
+            }
+
+            public IBus Bus
+            {
+                get { return _bus; }
+            }
+
+            public async Task Stop(CancellationToken cancellationToken = new CancellationToken())
+            {
+                await Task.WhenAll(_receiveEndpoints.Select(x => x.Stop(cancellationToken)));
+            }
         }
     }
 }

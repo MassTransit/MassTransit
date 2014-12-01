@@ -30,13 +30,13 @@
 
             configurator.SetConcurrentConsumerLimit(100);
 
-            configurator.Subscribe(s =>
-                s.Handler<A>(async msg =>
-                    {
-                        _before.Release();
-                        _wait.WaitOne(30.Seconds());
-                        _after.Release();
-                    }));
+//            configurator.Subscribe(s =>
+//                s.Handler<A>(async msg =>
+//                    {
+//                        _before.Release();
+//                        _wait.WaitOne(30.Seconds());
+//                        _after.Release();
+//                    }));
         }
 
         class A

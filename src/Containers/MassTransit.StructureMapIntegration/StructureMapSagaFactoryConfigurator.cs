@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,19 +13,16 @@
 namespace MassTransit.StructureMapIntegration
 {
     using System;
-    using Magnum.Reflection;
     using Saga;
     using StructureMap;
-    using SubscriptionConfigurators;
-    using Util;
 
 
     public class StructureMapSagaFactoryConfigurator
     {
-        readonly SubscriptionBusServiceConfigurator _configurator;
+        readonly IReceiveEndpointConfigurator _configurator;
         readonly IContainer _container;
 
-        public StructureMapSagaFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IContainer container)
+        public StructureMapSagaFactoryConfigurator(IReceiveEndpointConfigurator configurator, IContainer container)
         {
             _container = container;
             _configurator = configurator;
@@ -33,10 +30,9 @@ namespace MassTransit.StructureMapIntegration
 
         public void ConfigureSaga(Type sagaType)
         {
-            this.FastInvoke(new[] {sagaType}, "Configure");
+            throw new NotImplementedException();
         }
 
-        
         public void Configure<T>()
             where T : class, ISaga
         {

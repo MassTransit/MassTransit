@@ -21,8 +21,7 @@ namespace MassTransit
         /// <summary>
         /// Select RabbitMQ as the transport for the service bus
         /// </summary>
-        public static IBusControl CreateUsingRabbitMq(this IServiceBusFactorySelector selector,
-            Action<IRabbitMqServiceBusFactoryConfigurator> configure)
+        public static IBusControl CreateUsingRabbitMq(this IBusFactory selector, Action<IRabbitMqServiceBusFactoryConfigurator> configure)
         {
             return RabbitMq.Create(configure);
         }

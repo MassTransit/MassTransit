@@ -25,7 +25,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IBusControl Create(Action<IInMemoryServiceBusFactoryConfigurator> configure)
         {
-            var configurator = new InMemoryServiceBusFactoryConfigurator();
+            var configurator = new InMemoryBusFactoryConfigurator();
 
             configure(configurator);
 

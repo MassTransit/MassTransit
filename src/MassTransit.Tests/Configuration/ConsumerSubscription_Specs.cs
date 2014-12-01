@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Configuration
                 {
                     x.ReceiveFrom("loopback://localhost/mt_test");
 
-                    x.Subscribe(s => s.Consumer<ConsumerOf<PingMessage>>());
+//                    x.Subscribe(s => s.Consumer<ConsumerOf<PingMessage>>());
                 });
 
             _ping = new PingMessage(Guid.NewGuid());
@@ -72,7 +72,7 @@ namespace MassTransit.Tests.Configuration
                 {
                     x.ReceiveFrom("loopback://localhost/mt_test");
 
-                    x.Subscribe(s => s.Consumer(typeof (ConsumerOf<PingMessage>), Activator.CreateInstance));
+//                    x.Subscribe(s => s.Consumer(typeof (ConsumerOf<PingMessage>), Activator.CreateInstance));
                 });
 
             _ping = new PingMessage(Guid.NewGuid());
@@ -114,7 +114,7 @@ namespace MassTransit.Tests.Configuration
                     x.ReceiveFrom("loopback://localhost/mt_test");
                     x.SetConcurrentConsumerLimit(1);
 
-                    x.Subscribe(s => s.Consumer(GetConsumer));
+//                    x.Subscribe(s => s.Consumer(GetConsumer));
                 });
 
             _ping1 = new PingMessage(Guid.NewGuid());

@@ -31,6 +31,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         ISendEndpoint _busSendEndpoint;
         readonly TestSendObserver _sendObserver;
         readonly Uri _serviceUri;
+        BusHandle _busHandle;
 
         public AzureServiceBusTestFixture()
         {
@@ -89,7 +90,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
             _bus = CreateBus();
 
-            _bus.Start(TestCancellationToken).Wait(TestTimeout);
+            var startTask = _bus.Start(TestCancellationToken);
+
+            startTask.Wait(TestCancellationToken);
+
+            _busHandle = startTask.Result;
 
             _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
             _busSendEndpoint.Connect(_sendObserver);
@@ -103,8 +108,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
             try
             {
-                if (_bus != null)
-                    _bus.Stop().Wait(TestTimeout);
+                if (_busHandle != null)
+                    _busHandle.Stop().Wait(TestTimeout);
             }
             catch (AggregateException ex)
             {
@@ -114,7 +119,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _bus = null;
         }
 
-        protected virtual void ConfigureBus(IServiceBusServiceBusFactoryConfigurator configurator)
+        protected virtual void ConfigureBus(IServiceBusBusFactoryConfigurator configurator)
         {
         }
 

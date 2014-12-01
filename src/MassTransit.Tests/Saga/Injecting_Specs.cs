@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Saga
                     x => x.Dependency, saga => dependency);
 
             // subscribe the decorated saga repository to the bus during configuration
-            configurator.Subscribe(x => x.Saga(injectingRepository));
+            //configurator.Subscribe(x => x.Saga(injectingRepository));
         }
 
 

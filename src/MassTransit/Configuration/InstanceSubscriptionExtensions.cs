@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using Magnum;
     using Policies;
     using SubscriptionConfigurators;
@@ -32,14 +33,12 @@ namespace MassTransit
         /// <param name="instance">The instance to subscribe.</param>
         /// <param name="retryPolicy"></param>
         /// <returns>An instance subscription configurator.</returns>
-        public static InstanceSubscriptionConfigurator Instance(this SubscriptionBusServiceConfigurator configurator, object instance,
+        public static InstanceSubscriptionConfigurator Instance(this IReceiveEndpointConfigurator configurator, object instance,
             IRetryPolicy retryPolicy = null)
         {
             var instanceConfigurator = new InstanceSubscriptionConfiguratorImpl(instance, retryPolicy ?? Retry.None);
 
-            var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(instanceConfigurator);
-
-            configurator.AddConfigurator(busServiceConfigurator);
+            configurator.AddConfigurator(instanceConfigurator);
 
             return instanceConfigurator;
         }
@@ -53,9 +52,12 @@ namespace MassTransit
         /// <param name="retryPolicy"></param>
         /// <returns>The unsubscribe action that can be called to unsubscribe the instance
         /// passed as an argument.</returns>
-        public static ConnectHandle SubscribeInstance(this IServiceBus bus, object instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle SubscribeInstance(this IBus bus, object instance, IRetryPolicy retryPolicy = null)
         {
-            Guard.AgainstNull(instance, "instance", "A null instance cannot be subscribed");
+            if (bus == null)
+                throw new ArgumentNullException("bus");
+            if (instance == null)
+                throw new ArgumentNullException("instance");
 
             InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
 
