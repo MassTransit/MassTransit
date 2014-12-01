@@ -36,16 +36,16 @@ namespace MassTransit.Tests.Configuration
 				{
 					x.ReceiveFrom("loopback://localhost/mt_test");
 
-					x.Subscribe(s =>
-						{
-							// a simple handler
-                            s.Handler<PingMessage>(async context => _received.Complete(context.Message))
-								.Where(context =>
-									{
-                                        _conditionChecked.Complete(context.Message);
-										return true;
-									});
-						});
+//					x.Subscribe(s =>
+//						{
+//							// a simple handler
+//                            s.Handler<PingMessage>(async context => _received.Complete(context.Message))
+//								.Where(context =>
+//									{
+//                                        _conditionChecked.Complete(context.Message);
+//										return true;
+//									});
+//						});
 				});
 
 			_bus.Publish(new PingMessage());
@@ -91,11 +91,11 @@ namespace MassTransit.Tests.Configuration
 				{
 					x.ReceiveFrom("loopback://localhost/mt_test");
 
-					x.Subscribe(s =>
-						{
-							// a simple handler
-                            s.Handler<PingMessage>(async (context) => _received.Complete(context.Message));
-						});
+//					x.Subscribe(s =>
+//						{
+//							// a simple handler
+////                            s.Handler<PingMessage>(async (context) => _received.Complete(context.Message));
+//						});
 				});
 
 			_bus.Publish(new PingMessage());

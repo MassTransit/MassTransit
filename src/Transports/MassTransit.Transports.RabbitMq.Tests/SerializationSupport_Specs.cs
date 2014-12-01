@@ -44,7 +44,7 @@
             configurator.UseJsonSerializer();
             configurator.SupportXmlSerializer();
 
-            configurator.Subscribe(s => s.Handler<B>(async context => _responseReceived.Complete(context.Message)));
+//            configurator.Subscribe(s => s.Handler<B>(async context => _responseReceived.Complete(context.Message)));
         }
 
         protected override void ConfigureRemoteBus(BusConfigurators.ServiceBusConfigurator configurator)
@@ -54,12 +54,12 @@
             configurator.UseXmlSerializer();
             configurator.SupportJsonSerializer();
 
-            configurator.Subscribe(s => s.Handler<A>(async (context) =>
-                {
-                    _requestReceived.Complete(context.Message);
-
-                    context.Respond(new B { Key = context.Message.Key, Value = "Value of " + context.Message.Key });
-                }));
+//            configurator.Subscribe(s => s.Handler<A>(async (context) =>
+//                {
+//                    _requestReceived.Complete(context.Message);
+//
+//                    context.Respond(new B { Key = context.Message.Key, Value = "Value of " + context.Message.Key });
+//                }));
         }
 
 

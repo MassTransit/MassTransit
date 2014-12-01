@@ -41,7 +41,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             base.ConfigureRemoteBus(configurator);
 
-            configurator.Subscribe(x => x.Handler<Request>(async (context) => context.Respond(new Response())));
+//            configurator.Subscribe(x => x.Handler<Request>(async (context) => context.Respond(new Response())));
         }
 
 

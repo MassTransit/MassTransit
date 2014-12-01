@@ -23,7 +23,7 @@ namespace MassTransit.Reactive
         readonly IObserver<T> _observer;
         readonly ConnectHandle _unsubscribeAction;
 
-        public ServiceBusSubscription(IServiceBus bus, IObserver<T> observer, Predicate<T> condition)
+        public ServiceBusSubscription(IBus bus, IObserver<T> observer, Predicate<T> condition)
         {
             _observer = Observer.Synchronize(observer);
 

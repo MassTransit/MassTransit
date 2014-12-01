@@ -54,7 +54,7 @@ namespace MassTransit.Tests.Configuration
 		{
 			using (ServiceBusFactory.New(x =>
 				{
-					x.Subscribe(s => s.Consumer<ConsumerOf<MessageWithNonDefaultCtor>>());
+//					x.Subscribe(s => s.Consumer<ConsumerOf<MessageWithNonDefaultCtor>>());
 					x.ReceiveFrom("loopback://localhost/mt_queue");
 					x.Validate()
 						.Any(result => result.Disposition == ValidationResultDisposition.Warning

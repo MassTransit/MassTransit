@@ -60,8 +60,8 @@ namespace MassTransit
         /// <param name="scope">The LifetimeScope of the container</param>
         /// <param name="name">The name of the scope created per-message</param>
         /// <returns></returns>
-        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-            this SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope, string name = "message")
+        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
+            ILifetimeScope scope, string name = "message")
             where TConsumer : class, IConsumer
         {
             var consumerFactory = new AutofacConsumerFactory<TConsumer>(scope, name);
@@ -77,7 +77,7 @@ namespace MassTransit
         /// <param name="scope"></param>
         /// <returns></returns>
         public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-            this SubscriptionBusServiceConfigurator configurator, ILifetimeScope scope, string name = "message")
+            this IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name = "message")
             where TSaga : class, ISaga
         {
             var sagaRepository = scope.Resolve<ISagaRepository<TSaga>>();

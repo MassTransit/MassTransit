@@ -10,27 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Pipeline;
 
 
-    public interface IReceiveTransport
+    /// <summary>
+    /// A handle to an active service bus instance
+    /// </summary>
+    public interface BusHandle :
+        IDisposable
     {
         /// <summary>
-        /// The input address of the receive transport
+        /// The Bus
         /// </summary>
-        Uri InputAddress { get; }
+        IBus Bus { get; }
 
         /// <summary>
-        /// Start receiving on a transport, sending messages to the specified pipe.
+        /// Stop the bus and all receiving endpoints on the bus. Note that cancelling the Stop
+        /// operation may leave the bus and/or one or more receive endpoints in an indeterminate
+        /// state.
         /// </summary>
-        /// <param name="receivePipe">The receiving pipe</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<ReceiveTransportHandle> Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken);
+        /// <param name="cancellationToken">Cancel the stop operation in progress</param>
+        /// <returns>An awaitable task that is completed once everything is stopped</returns>
+        Task Stop(CancellationToken cancellationToken = default(CancellationToken));
     }
 }

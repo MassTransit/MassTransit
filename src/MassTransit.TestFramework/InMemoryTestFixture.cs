@@ -32,6 +32,7 @@ namespace MassTransit.TestFramework
         readonly InMemoryTransportCache _transportCache;
         ISendEndpoint _busSendEndpoint;
         readonly TestSendObserver _sendObserver;
+        BusHandle _busHandle;
 
         public InMemoryTestFixture()
         {
@@ -89,7 +90,11 @@ namespace MassTransit.TestFramework
         {
             _bus = CreateBus(_transportCache);
 
-            _bus.Start(TestCancellationToken).Wait(TestTimeout);
+            var startTask = _bus.Start(TestCancellationToken);
+
+            startTask.Wait(TestCancellationToken);
+
+            _busHandle = startTask.Result;
 
             _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
             _busSendEndpoint.Connect(_sendObserver);
@@ -103,8 +108,8 @@ namespace MassTransit.TestFramework
         {
             try
             {
-                if (_bus != null)
-                    _bus.Stop().Wait(TestTimeout);
+                if (_busHandle != null)
+                    _busHandle.Stop().Wait(TestTimeout);
             }
             catch (AggregateException ex)
             {

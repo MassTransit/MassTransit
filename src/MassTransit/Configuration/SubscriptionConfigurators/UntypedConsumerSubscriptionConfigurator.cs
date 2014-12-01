@@ -16,17 +16,17 @@ namespace MassTransit.SubscriptionConfigurators
     using System.Collections.Generic;
     using Configuration;
     using Configurators;
-    using Internals.Extensions;
+    using EndpointConfigurators;
     using Magnum.Extensions;
     using Policies;
-    using SubscriptionBuilders;
+    using SubscriptionConnectors;
     using Util;
 
 
     public class UntypedConsumerSubscriptionConfigurator<TConsumer> :
         SubscriptionConfiguratorImpl<ConsumerSubscriptionConfigurator>,
         ConsumerSubscriptionConfigurator,
-        SubscriptionBuilderConfigurator
+        IReceiveEndpointBuilderConfigurator
         where TConsumer : class
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
@@ -34,8 +34,7 @@ namespace MassTransit.SubscriptionConfigurators
         public UntypedConsumerSubscriptionConfigurator(Func<Type, object> consumerFactory, IRetryPolicy retryPolicy)
             : base(retryPolicy)
         {
-            _consumerFactory =
-                new DelegateConsumerFactory<TConsumer>(() => (TConsumer)consumerFactory(typeof(TConsumer)));
+            _consumerFactory = new DelegateConsumerFactory<TConsumer>(() => (TConsumer)consumerFactory(typeof(TConsumer)));
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -52,9 +51,9 @@ namespace MassTransit.SubscriptionConfigurators
             }
         }
 
-        public SubscriptionBuilder Configure()
+        public void Configure(IReceiveEndpointBuilder builder)
         {
-            return new ConsumerSubscriptionBuilder<TConsumer>(_consumerFactory, RetryPolicy, ReferenceFactory);
+            ConsumerConnectorCache<TConsumer>.Connector.Connect(builder.InputPipe, _consumerFactory, RetryPolicy);
         }
     }
 }

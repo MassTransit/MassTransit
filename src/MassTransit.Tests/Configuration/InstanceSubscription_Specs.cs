@@ -37,7 +37,7 @@ namespace MassTransit.Tests.Configuration
 				{
 					x.ReceiveFrom("loopback://localhost/mt_test");
 
-					x.Subscribe(s => s.Instance(instance));
+//					x.Subscribe(s => s.Instance(instance));
 				});
 
 			_ping = new PingMessage();

@@ -10,18 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Configurators
 {
-    using Configurators;
+    using System;
+    using System.Collections.Generic;
 
 
-    public interface IServiceBusFactory :
-        Configurator
+    public class BusFactory :
+        IBusFactory
     {
-        /// <summary>
-        /// Create the bus, returning the bus control interface
-        /// </summary>
-        /// <returns></returns>
-        IBusControl CreateBus();
+        public IEnumerable<ValidationResult> Validate()
+        {
+            yield return this.Failure("Transport", "must be configured using a transport-specific extension method");
+        }
+
+        public IBusControl CreateBus()
+        {
+            throw new NotSupportedException(
+                "To create a bus, you must use one of the extension methods to create a bus using the transport for that extension method. To create an in-memory bus, use the CreateUsingInMemory extension method.");
+        }
     }
 }

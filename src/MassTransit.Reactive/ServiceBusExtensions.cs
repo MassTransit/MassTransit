@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -31,12 +31,12 @@ namespace MassTransit.Reactive
         /// </summary>
         /// <typeparam name="T">The type of the message</typeparam>
         /// <param name="bus">The message bus</param>
-        public static IObserver<T> AsObserver<T>(this IServiceBus bus) where T : class
+        public static IObserver<T> AsObserver<T>(this IServiceBus bus)
+            where T : class
         {
-            return bus.AsObserver<T>(
-                contextCallback =>
-                    {
-                    });
+            return bus.AsObserver<T>(contextCallback =>
+            {
+            });
         }
 
         /// <summary>
@@ -56,22 +56,21 @@ namespace MassTransit.Reactive
         ///     A callback that gives the caller
         ///     access to the publish context.
         /// </param>
-        public static IObserver<T> AsObserver<T>(this IServiceBus bus, Action<PublishContext<T>> contextCallback) where T : class
+        public static IObserver<T> AsObserver<T>(this IServiceBus bus, Action<PublishContext<T>> contextCallback)
+            where T : class
         {
-            return Observer.Create<T>(
-                value => bus.Publish(value, Pipe.New<PublishContext<T>>(x => x.Execute(contextCallback))));
+            return Observer.Create<T>(value => bus.Publish(value, Pipe.New<PublishContext<T>>(x => x.Execute(contextCallback))));
         }
 
-        public static IObservable<T> AsObservable<T>(this IServiceBus bus) where T : class
+        public static IObservable<T> AsObservable<T>(this IBus bus) 
+            where T : class
         {
-            return Observable.Create<T>(
-                observer => new ServiceBusSubscription<T>(bus, observer, null));
+            return Observable.Create<T>(observer => new ServiceBusSubscription<T>(bus, observer, null));
         }
 
-        public static IObservable<T> AsObservable<T>(this IServiceBus bus, Predicate<T> condition) where T : class
+        public static IObservable<T> AsObservable<T>(this IBus bus, Predicate<T> condition) where T : class
         {
-            return Observable.Create<T>(
-                observer => new ServiceBusSubscription<T>(bus, observer, condition));
+            return Observable.Create<T>(observer => new ServiceBusSubscription<T>(bus, observer, condition));
         }
 
         /// <summary>
@@ -81,7 +80,7 @@ namespace MassTransit.Reactive
         /// <param name="configurator"></param>
         /// <param name="observer">The observer to subscribe</param>
         /// <returns>The subscription configurator</returns>
-        public static InstanceSubscriptionConfigurator Observe<T>(this SubscriptionBusServiceConfigurator configurator,
+        public static InstanceSubscriptionConfigurator Observe<T>(this IReceiveEndpointConfigurator configurator,
             IObserver<T> observer)
             where T : class
         {

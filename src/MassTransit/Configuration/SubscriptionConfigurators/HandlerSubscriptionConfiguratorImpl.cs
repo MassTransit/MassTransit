@@ -15,14 +15,16 @@ namespace MassTransit.SubscriptionConfigurators
     using System;
     using System.Collections.Generic;
     using Configurators;
+    using EndpointConfigurators;
+    using Pipeline;
+    using Pipeline.Filters;
     using Policies;
-    using SubscriptionBuilders;
 
 
     public class HandlerSubscriptionConfiguratorImpl<TMessage> :
         SubscriptionConfiguratorImpl<HandlerSubscriptionConfigurator<TMessage>>,
         HandlerSubscriptionConfigurator<TMessage>,
-        SubscriptionBuilderConfigurator
+        IReceiveEndpointBuilderConfigurator
         where TMessage : class
     {
         MessageHandler<TMessage> _handler;
@@ -53,9 +55,12 @@ namespace MassTransit.SubscriptionConfigurators
                 yield return this.Failure("The handler cannot be null. This should have come from the ctor.");
         }
 
-        public SubscriptionBuilder Configure()
+        public void Configure(IReceiveEndpointBuilder builder)
         {
-            return new HandlerSubscriptionBuilder<TMessage>(_handler, RetryPolicy, ReferenceFactory);
+            IPipe<ConsumeContext<TMessage>> pipe =
+                Pipe.New<ConsumeContext<TMessage>>(x => x.Filter(new HandlerMessageFilter<TMessage>(_handler)));
+
+            builder.Connect(pipe);
         }
     }
 }

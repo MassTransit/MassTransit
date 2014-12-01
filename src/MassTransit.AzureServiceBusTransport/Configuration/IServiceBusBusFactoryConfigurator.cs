@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
-    public interface IServiceBusServiceBusFactoryConfigurator :
+    public interface IServiceBusBusFactoryConfigurator :
         IServiceBusFactoryConfigurator
     {
         void Host(ServiceBusHostSettings settings);

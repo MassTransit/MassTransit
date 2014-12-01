@@ -14,16 +14,16 @@ namespace MassTransit.SubscriptionConfigurators
 {
     using System.Collections.Generic;
     using Configurators;
+    using EndpointConfigurators;
     using Internals.Extensions;
-    using Magnum.Extensions;
     using Policies;
-    using SubscriptionBuilders;
+    using SubscriptionConnectors;
 
 
     public class InstanceSubscriptionConfiguratorImpl :
         SubscriptionConfiguratorImpl<InstanceSubscriptionConfigurator>,
         InstanceSubscriptionConfigurator,
-        SubscriptionBuilderConfigurator
+        IReceiveEndpointBuilderConfigurator
     {
         readonly object _instance;
 
@@ -33,22 +33,21 @@ namespace MassTransit.SubscriptionConfigurators
             _instance = instance;
         }
 
+        public void Configure(IReceiveEndpointBuilder builder)
+        {
+            InstanceConnectorCache.GetInstanceConnector(_instance.GetType()).Connect(builder.InputPipe, _instance, RetryPolicy);
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             if (_instance == null)
                 yield return this.Failure("The instance cannot be null. This should have come in the ctor.");
 
-            if (_instance != null && !_instance.GetType().Implements<IConsumer>())
+            if (_instance != null && !_instance.HasInterface<IConsumer>())
             {
-                yield return
-                    this.Warning(string.Format("The instance of {0} does not implement any IMessageConsumer interfaces",
-                        _instance.GetType().GetTypeName()));
+                yield return this.Warning(string.Format("The instance of {0} does not implement any IMessageConsumer interfaces",
+                    _instance.GetType().GetTypeName()));
             }
-        }
-
-        public SubscriptionBuilder Configure()
-        {
-            return new InstanceSubscriptionBuilder(_instance, RetryPolicy, ReferenceFactory);
         }
     }
 }

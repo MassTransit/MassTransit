@@ -21,29 +21,7 @@ namespace MassTransit
 
 
     public static class HandlerSubscriptionExtensions
-    {
-        /// <summary>
-        /// Subscribes a message handler (which can be any delegate of the message type,
-        /// such as a class instance method, a delegate, or a lambda expression)
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configurator"></param>
-        /// <param name="handler"></param>
-        /// <param name="retryPolicy"></param>
-        /// <returns></returns>
-        public static HandlerSubscriptionConfigurator<T> Handler<T>(this SubscriptionBusServiceConfigurator configurator,
-            MessageHandler<T> handler, IRetryPolicy retryPolicy = null)
-            where T : class
-        {
-            var handlerConfigurator = new HandlerSubscriptionConfiguratorImpl<T>(handler, retryPolicy ?? Retry.None);
-
-            var busServiceConfigurator = new SubscriptionBusServiceBuilderConfiguratorImpl(handlerConfigurator);
-
-            configurator.AddConfigurator(busServiceConfigurator);
-
-            return handlerConfigurator;
-        }
-
+    {        
         /// <summary>
         /// Subscribes a message handler to the receive endpoint
         /// </summary>
@@ -69,25 +47,26 @@ namespace MassTransit
             configurator.AddConfigurator(handlerConfigurator);
         }
 
-
         /// <summary>
         /// Adds a message handler to the service bus for handling a specific type of message
         /// </summary>
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="bus"></param>
         /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        public static ConnectHandle SubscribeHandler<T>(this IServiceBus bus, MessageHandler<T> handler)
-            where T : class
-        {
-            return HandlerConnectorCache<T>.Connector.Connect(bus.ConsumePipe, handler);
-        }
-
         public static ConnectHandle SubscribeHandler<T>(this IBus bus, MessageHandler<T> handler)
             where T : class
         {
             return HandlerConnectorCache<T>.Connector.Connect(bus.ConsumePipe, handler);
         }
 
+        /// <summary>
+        /// Subscribe a request handler to the bus's endpoint
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="bus"></param>
+        /// <param name="requestId"></param>
+        /// <param name="handler"></param>
+        /// <returns></returns>
         public static ConnectHandle SubscribeRequestHandler<T>(this IBus bus, Guid requestId, MessageHandler<T> handler)
             where T : class
         {
@@ -100,7 +79,7 @@ namespace MassTransit
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="bus"></param>
         /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        public static ConnectHandle SubscribeHandler<T>(this IServiceBus bus, Action<T> handler)
+        public static ConnectHandle SubscribeHandler<T>(this IBus bus, Action<T> handler)
             where T : class
         {
             return HandlerConnectorCache<T>.Connector.Connect(bus.ConsumePipe, async context => handler(context.Message));
@@ -112,7 +91,7 @@ namespace MassTransit
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="bus"></param>
         /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        public static ConnectHandle SubscribeContextHandler<T>(this IServiceBus bus, Action<IConsumeContext<T>> handler)
+        public static ConnectHandle SubscribeContextHandler<T>(this IBus bus, Action<IConsumeContext<T>> handler)
             where T : class
         {
             return HandlerConnectorCache<T>.Connector.Connect(bus.ConsumePipe, async context =>

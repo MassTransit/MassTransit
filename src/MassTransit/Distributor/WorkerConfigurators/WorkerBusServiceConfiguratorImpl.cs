@@ -41,7 +41,7 @@ namespace MassTransit.Distributor.WorkerConfigurators
 
         public BusBuilder Configure(BusBuilder builder)
         {
-            builder.AddBusServiceConfigurator(this);
+//            builder.AddBusServiceConfigurator(this);
 
             return builder;
         }

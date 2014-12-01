@@ -20,16 +20,16 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using Microsoft.ServiceBus;
 
 
-    public class AzureServiceBusServiceBusFactoryConfigurator :
-        IServiceBusServiceBusFactoryConfigurator,
-        IServiceBusFactory
+    public class AzureServiceBusBusFactoryConfigurator :
+        IServiceBusBusFactoryConfigurator,
+        IBusFactory
     {
         //      readonly RabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
         readonly HostSettings _defaultHostSettings;
         readonly IList<ServiceBusHostSettings> _hosts;
         readonly IList<IServiceBusFactoryBuilderConfigurator> _transportBuilderConfigurators;
 
-        public AzureServiceBusServiceBusFactoryConfigurator()
+        public AzureServiceBusBusFactoryConfigurator()
         {
             _hosts = new List<ServiceBusHostSettings>();
             _defaultHostSettings = new HostSettings();

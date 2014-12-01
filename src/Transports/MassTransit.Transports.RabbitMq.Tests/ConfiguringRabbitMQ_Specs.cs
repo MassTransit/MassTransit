@@ -31,7 +31,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             var hostAddress = new Uri("rabbitmq://localhost/test");
             var completed = new TaskCompletionSource<A>();
 
-            using (IBusControl bus = Bus.Factory.CreateUsingRabbitMq(x =>
+            IBusControl bus = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 RabbitMqHostSettings host = x.Host(hostAddress, r =>
                 {
@@ -64,7 +64,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
                         h.Retry(Retry.Interval(5, 100.Milliseconds()));
                     });
                 });
-            }))
+            });
+
+            using(bus.Start(TestCancellationToken))
             {
                 var queueAddress = new Uri(hostAddress, "input_queue");
                 ISendEndpoint endpoint = await bus.GetSendEndpoint(queueAddress);

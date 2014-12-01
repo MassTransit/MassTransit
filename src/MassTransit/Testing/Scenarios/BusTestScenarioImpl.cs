@@ -20,6 +20,7 @@ namespace MassTransit.Testing.Scenarios
         BusTestScenario
     {
         IBusControl _bus;
+        BusHandle _busHandle;
         bool _disposed;
 
         public override IBus InputBus
@@ -50,8 +51,8 @@ namespace MassTransit.Testing.Scenarios
 
             if (disposing)
             {
-                if (_bus != null)
-                    _bus.Dispose();
+                if (_busHandle != null)
+                    _busHandle.Dispose();
 
                 base.Dispose(true);
             }

@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using EndpointConfigurators;
     using Magnum.Extensions;
     using Microsoft.Practices.Unity;
     using Saga;
@@ -32,7 +31,7 @@ namespace MassTransit
             if (concreteTypes.Count > 0)
             {
                 foreach (Type concreteType in concreteTypes)
-                ConsumerFactoryConfiguratorCache.Configure(concreteType, configurator, container);
+                    ConsumerFactoryConfiguratorCache.Configure(concreteType, configurator, container);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
@@ -45,8 +44,8 @@ namespace MassTransit
             }
         }
 
-        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(
-            this SubscriptionBusServiceConfigurator configurator, IUnityContainer container)
+        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
+            IUnityContainer container)
             where TConsumer : class, IConsumer
         {
             var consumerFactory = new UnityConsumerFactory<TConsumer>(container);
@@ -54,8 +53,8 @@ namespace MassTransit
             return configurator.Consumer(consumerFactory);
         }
 
-        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
-            this SubscriptionBusServiceConfigurator configurator, IUnityContainer container)
+        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
+            IUnityContainer container)
             where TSaga : class, ISaga
         {
             var sagaRepository = container.Resolve<ISagaRepository<TSaga>>();
@@ -68,10 +67,10 @@ namespace MassTransit
         static IList<Type> FindTypes<T>(IUnityContainer container, Func<Type, bool> filter)
         {
             return container.Registrations
-                            .Where(r => r.MappedToType.Implements<T>())
-                            .Select(r => r.MappedToType)
-                            .Where(filter)
-                            .ToList();
+                .Where(r => r.MappedToType.Implements<T>())
+                .Select(r => r.MappedToType)
+                .Where(filter)
+                .ToList();
         }
     }
 }

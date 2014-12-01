@@ -32,6 +32,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         ISendEndpoint _busSendEndpoint;
         readonly TestSendObserver _sendObserver;
         Uri _localHostUri;
+        BusHandle _busHandle;
 
         public RabbitMqTestFixture()
         {
@@ -102,7 +103,11 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             _bus = CreateBus();
 
-            _bus.Start(TestCancellationToken).Wait(TestTimeout);
+            var startTask = _bus.Start(TestCancellationToken);
+
+            startTask.Wait(TestCancellationToken);
+
+            _busHandle = startTask.Result;
 
             _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
             _busSendEndpoint.Connect(_sendObserver);
@@ -116,8 +121,8 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             try
             {
-                if (_bus != null)
-                    _bus.Stop().Wait(TestTimeout);
+                if (_busHandle != null)
+                    _busHandle.Stop().Wait(TestTimeout);
             }
             catch (AggregateException ex)
             {

@@ -21,9 +21,9 @@ namespace MassTransit.Configurators
     using Transports;
 
 
-    public class InMemoryServiceBusFactoryConfigurator :
+    public class InMemoryBusFactoryConfigurator :
         IInMemoryServiceBusFactoryConfigurator,
-        IServiceBusFactory
+        IBusFactory
     {
         readonly InMemoryReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly IList<IInMemoryServiceBusFactoryBuilderConfigurator> _configurators;
@@ -31,7 +31,7 @@ namespace MassTransit.Configurators
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryServiceBusFactoryConfigurator()
+        public InMemoryBusFactoryConfigurator()
         {
             string queueName = NewId.NextGuid().ToString("NS");
 

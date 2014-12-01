@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,20 +13,17 @@
 namespace MassTransit
 {
     using System;
-    using Magnum.Reflection;
     using Ninject;
     using NinjectIntegration;
     using Saga;
-    using SubscriptionConfigurators;
-    using Util;
 
 
     public class NinjectSagaFactoryConfigurator
     {
-        readonly SubscriptionBusServiceConfigurator _configurator;
+        readonly IReceiveEndpointConfigurator _configurator;
         readonly IKernel _kernel;
 
-        public NinjectSagaFactoryConfigurator(SubscriptionBusServiceConfigurator configurator, IKernel kernel)
+        public NinjectSagaFactoryConfigurator(IReceiveEndpointConfigurator configurator, IKernel kernel)
         {
             _kernel = kernel;
             _configurator = configurator;
@@ -34,10 +31,10 @@ namespace MassTransit
 
         public void ConfigureSaga(Type sagaType)
         {
-            this.FastInvoke(new[] {sagaType}, "Configure");
+//            this.FastInvoke(new[] {sagaType}, "Configure");
+            throw new NotImplementedException();
         }
 
-        
         public void Configure<T>()
             where T : class, ISaga
         {

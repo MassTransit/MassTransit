@@ -20,11 +20,10 @@ namespace MassTransit
         /// <summary>
         /// Configure and create an in-memory bus
         /// </summary>
-        /// <param name="selector">Hang off the selector interface for visibility</param>
+        /// <param name="factory">Hang off the selector interface for visibility</param>
         /// <param name="configure">The configuration callback to configure the bus</param>
         /// <returns></returns>
-        public static IBusControl CreateUsingInMemory(this IServiceBusFactorySelector selector,
-            Action<IInMemoryServiceBusFactoryConfigurator> configure)
+        public static IBusControl CreateUsingInMemory(this IBusFactory factory, Action<IInMemoryServiceBusFactoryConfigurator> configure)
         {
             return InMemoryBus.Create(configure);
         }
