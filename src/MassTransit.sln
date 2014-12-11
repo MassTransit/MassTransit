@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
@@ -27,9 +27,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NinjectIntegrat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.TestFramework", "MassTransit.TestFramework\MassTransit.TestFramework.csproj", "{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RabbitMqTransport", "Transports\MassTransit.Transports.RabbitMq\MassTransit.RabbitMqTransport.csproj", "{6C7149D7-4D97-45DF-A05D-61EC7374491D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RabbitMqTransport", "MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj", "{6C7149D7-4D97-45DF-A05D-61EC7374491D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RabbitMqTransport.Tests", "Transports\MassTransit.Transports.RabbitMq.Tests\MassTransit.RabbitMqTransport.Tests.csproj", "{E4C3F51F-B7CE-4521-80BC-E91A9B0F6FFD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RabbitMqTransport.Tests", "MassTransit.RabbitMqTransport.Tests\MassTransit.RabbitMqTransport.Tests.csproj", "{E4C3F51F-B7CE-4521-80BC-E91A9B0F6FFD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Reactive", "MassTransit.Reactive\MassTransit.Reactive.csproj", "{BAE719BF-A142-4EF4-84DC-788742ED7FF8}"
 EndProject
