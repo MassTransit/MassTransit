@@ -33,7 +33,7 @@ namespace MassTransit.Configurators
 
         public InMemoryBusFactoryConfigurator()
         {
-            string queueName = NewId.NextGuid().ToString("NS");
+            string queueName = NewId.Next().ToString("NS");
 
             _inputAddress = new Uri(string.Format("loopback://localhost/{0}", queueName));
 

@@ -153,7 +153,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {
-                    e.PrefetchCount(16);
+                    e.PrefetchCount = 16;
                     e.PurgeOnStartup();
                     
                     e.Log(Console.Out, async context =>

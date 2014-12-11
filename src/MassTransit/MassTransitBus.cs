@@ -102,7 +102,7 @@ namespace MassTransit
             get { return _consumePipe; }
         }
 
-        Task<ISendEndpoint> IBus.GetSendEndpoint(Uri address)
+        Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
             return _sendEndpointProvider.GetSendEndpoint(address);
         }

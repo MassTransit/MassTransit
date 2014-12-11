@@ -126,7 +126,7 @@ namespace MassTransit.Testing.TestDecorators
             get { return _consumePipe; }
         }
 
-        Task<ISendEndpoint> IBus.GetSendEndpoint(Uri address)
+        Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
             throw new NotImplementedException();
         }

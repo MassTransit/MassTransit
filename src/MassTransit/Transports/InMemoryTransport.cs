@@ -23,6 +23,7 @@ namespace MassTransit.Transports
     using Logging;
     using Pipeline;
     using Subscriptions;
+    using Util;
 
 
     /// <summary>
@@ -67,6 +68,7 @@ namespace MassTransit.Transports
 
             Task receiveTask = Task.Run(() =>
             {
+                _log.DebugFormat("Starting InMemory Transport: {0}", _inputAddress);
                 using (RegisterShutdown(handle.StopToken))
                 {
                     Parallel.ForEach(GetConsumingPartitioner(_collection), async message =>
@@ -79,6 +81,9 @@ namespace MassTransit.Transports
                         try
                         {
                             await receivePipe.Send(context);
+
+                            _log.DebugFormat("RECV: {0} {1}", _inputAddress, message.MessageId);
+
                         }
                         catch (Exception ex)
                         {
@@ -112,10 +117,14 @@ namespace MassTransit.Transports
 
                 _collection.Add(transportMessage, cancelSend);
 
+                _log.DebugFormat("SEND: {0} {1} {2}", _inputAddress, transportMessage.MessageId, TypeMetadataCache<T>.ShortName);
+
                 await _observers.ForEach(x => x.PostSend(context));
             }
             catch (Exception ex)
             {
+                _log.Error(string.Format("SEND FAULT: {0} {1} {2}", _inputAddress, context.MessageId, TypeMetadataCache<T>.ShortName));
+
                 _observers.ForEach(x => x.SendFault(context, ex))
                     .Wait(cancelSend);
             }

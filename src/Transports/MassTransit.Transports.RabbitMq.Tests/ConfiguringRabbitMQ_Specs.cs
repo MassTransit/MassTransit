@@ -49,7 +49,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {
-                    e.PrefetchCount(16);
+                    e.PrefetchCount = 16;
                     e.Durable(false);
                     e.Exclusive();
 
