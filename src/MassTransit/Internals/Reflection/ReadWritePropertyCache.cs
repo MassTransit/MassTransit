@@ -13,13 +13,15 @@
 namespace MassTransit.Internals.Reflection
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using Extensions;
 
 
-    public class ReadWritePropertyCache<T>
+    public class ReadWritePropertyCache<T> :
+        IEnumerable<ReadWriteProperty<T>>
     {
         readonly IDictionary<string, ReadWriteProperty<T>> _properties;
 
@@ -31,6 +33,16 @@ namespace MassTransit.Internals.Reflection
         public ReadWritePropertyCache(bool includeNonPublic)
         {
             _properties = CreatePropertyCache(includeNonPublic);
+        }
+
+        public IEnumerator<ReadWriteProperty<T>> GetEnumerator()
+        {
+            return _properties.Values.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         static IDictionary<string, ReadWriteProperty<T>> CreatePropertyCache(bool includeNonPublic)
@@ -51,10 +63,5 @@ namespace MassTransit.Internals.Reflection
         {
             return _properties[propertyExpression.GetMemberName()].Get(instance);
         }
-
-//        public void Each(T instance, Action<ReadWriteProperty<T>, object> action)
-//        {
-//            Each(property => action(property, property.Get(instance)));
-//        }
     }
 }

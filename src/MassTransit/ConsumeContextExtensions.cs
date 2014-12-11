@@ -38,7 +38,15 @@ namespace MassTransit
         {
             ISendEndpoint endpoint = await context.GetSendEndpoint(address);
 
-            await Forward(context, endpoint);
+            await Forward(context, endpoint, context.Message);
+        }
+
+        public static async Task Forward<T>(this ConsumeContext context, Uri address, T message)
+            where T : class
+        {
+            ISendEndpoint endpoint = await context.GetSendEndpoint(address);
+
+            await Forward(context, endpoint, message);
         }
 
         /// <summary>
@@ -46,13 +54,14 @@ namespace MassTransit
         /// </summary>
         /// <param name="context"></param>
         /// <param name="endpoint">The endpoint to forward the message tosaq</param>
-        public static async Task Forward<T>(this ConsumeContext<T> context, ISendEndpoint endpoint)
+        /// <param name="message"></param>
+        public static Task Forward<T>(this ConsumeContext context, ISendEndpoint endpoint, T message)
             where T : class
         {
-            await endpoint.Send(context.Message, CreateSendPipe(context));
+            return endpoint.Send(message, CreateSendPipe<T>(context));
         }
 
-        static IPipe<SendContext<T>> CreateSendPipe<T>(ConsumeContext<T> context)
+        static IPipe<SendContext<T>> CreateSendPipe<T>(ConsumeContext context)
             where T : class
         {
             return Pipe.New<SendContext<T>>(x => x.Execute(target =>

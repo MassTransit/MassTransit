@@ -76,9 +76,9 @@ namespace MassTransit.Transports.RabbitMq.Configuration
             _settings.PurgeOnStartup = purgeOnStartup;
         }
 
-        public void PrefetchCount(ushort limit)
+        public ushort PrefetchCount
         {
-            _settings.PrefetchCount = limit;
+            set { _settings.PrefetchCount = value; }
         }
 
         public void ExchangeType(ExchangeType exchangeType)

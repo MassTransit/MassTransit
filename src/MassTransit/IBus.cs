@@ -13,14 +13,15 @@
 namespace MassTransit
 {
     using System;
-    using System.Threading.Tasks;
     using Pipeline;
+
 
     /// <summary>
     /// A bus is a logical element that includes a local endpoint and zero or more receive endpoints
     /// </summary>
     public interface IBus :
-        IPublishEndpoint
+        IPublishEndpoint,
+        ISendEndpointProvider
     {
         /// <summary>
         /// The receive address of the bus itself, versus any receive endpoints that were created
@@ -31,12 +32,5 @@ namespace MassTransit
         /// The inbound pipe for the bus
         /// </summary>
         IConsumePipe ConsumePipe { get; }
-
-        /// <summary>
-        /// Retrieve a destination endpoint
-        /// </summary>
-        /// <param name="address">The endpoint address</param>
-        /// <returns>A sendable endpoint</returns>
-        Task<ISendEndpoint> GetSendEndpoint(Uri address);
     }
 }

@@ -44,8 +44,8 @@ namespace MassTransit.Transports.RabbitMq.Configuration
         /// <summary>
         /// Specify the maximum number of concurrent messages that are consumed
         /// </summary>
-        /// <param name="limit">The limit</param>
-        void PrefetchCount(ushort limit);
+        /// <value>The limit</value>
+        ushort PrefetchCount { set; }
 
         /// <summary>
         /// Specify the exchange type for the endpoint

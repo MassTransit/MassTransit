@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-
-
     /// <summary>
     /// The host where an event or otherwise was produced
     /// a routing slip

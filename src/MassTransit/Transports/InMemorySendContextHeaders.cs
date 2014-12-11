@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
 
@@ -28,12 +29,16 @@ namespace MassTransit.Transports
 
         public void Set(string key, string value)
         {
-            _headers.Add(key, value);
+            object stringValue = value;
+            Set(key, stringValue);
         }
 
         public void Set(string key, object value)
         {
-            _headers.Add(key, value);
+            if (key == null)
+                throw new ArgumentNullException("key");
+
+            _headers[key] = value;
         }
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()

@@ -1,0 +1,14 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=Exceptions/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/CodeStyle/FileHeader/FileHeaderText/@EntryValue">Copyright 2007-$CURRENT_YEAR$ Chris Patterson&#xD;
+ &#xD;
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use&#xD;
+this file except in compliance with the License. You may obtain a copy of the &#xD;
+License at &#xD;
+&#xD;
+    http://www.apache.org/licenses/LICENSE-2.0 &#xD;
+&#xD;
+Unless required by applicable law or agreed to in writing, software distributed&#xD;
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR &#xD;
+CONDITIONS OF ANY KIND, either express or implied. See the License for the &#xD;
+specific language governing permissions and limitations under the License.</s:String></wpf:ResourceDictionary>
