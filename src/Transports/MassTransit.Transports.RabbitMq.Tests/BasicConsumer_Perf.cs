@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -21,16 +21,18 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Configuration;
     using Magnum.Extensions;
     using MassTransit.Pipeline.Filters;
     using Newtonsoft.Json;
     using NUnit.Framework;
-    using Pipeline;
     using Policies;
     using RabbitMQ.Client;
+    using RabbitMqTransport;
+    using RabbitMqTransport.Configuration;
+    using RabbitMqTransport.Pipeline;
     using Serialization;
     using Serialization.Custom;
+    using Transports;
 
 
     [TestFixture]

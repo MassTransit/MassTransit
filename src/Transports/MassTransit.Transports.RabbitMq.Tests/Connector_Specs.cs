@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
+    using NUnit.Framework;
+    using Policies;
+    using RabbitMQ.Client;
+    using RabbitMQ.Client.Exceptions;
+    using RabbitMqTransport;
+    using RabbitMqTransport.Pipeline;
+    using TestFramework;
+
     namespace Connector_Specs
     {
-        using NUnit.Framework;
-        using Pipeline;
-        using Policies;
-        using RabbitMQ.Client;
-        using RabbitMQ.Client.Exceptions;
-        using TestFramework;
-
-
         [TestFixture]
         public class When_a_server_exists :
             AsyncTestFixture

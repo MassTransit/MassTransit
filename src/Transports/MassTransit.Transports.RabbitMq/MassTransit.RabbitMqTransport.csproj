@@ -8,8 +8,8 @@
     <ProjectGuid>{6C7149D7-4D97-45DF-A05D-61EC7374491D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.Transports.RabbitMq</RootNamespace>
-    <AssemblyName>MassTransit.Transports.RabbitMq</AssemblyName>
+    <RootNamespace>MassTransit.RabbitMqTransport</RootNamespace>
+    <AssemblyName>MassTransit.RabbitMqTransport</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -55,7 +55,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>bin\Release\MassTransit.Transports.RabbitMq.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\MassTransit.RabbitMqTransport.xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>

@@ -1,8 +1,9 @@
-namespace MassTransit.Transports.RabbitMq.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using RabbitMqTransport;
 
 
     class TestConnectionPipe :

@@ -10,12 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Configuration.Builders
+namespace MassTransit.RabbitMqTransport.Configuration.Builders
 {
-	using System;
-	using System.Collections.Generic;
+    using System;
+    using System.Collections.Generic;
 
-	public class RabbitMqTransportFactoryBuilderImpl :
+
+    public class RabbitMqTransportFactoryBuilderImpl :
 		RabbitMqTransportFactoryBuilder
 	{
 		readonly IDictionary<Uri, ConnectionFactoryBuilder> _connectionFactoryBuilders;

@@ -10,14 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
-	using System;
-	using BusConfigurators;
-	using Magnum.TestFramework;
-	using TestFramework.Fixtures;
+    using System;
+    using BusConfigurators;
+    using Magnum.TestFramework;
+    using RabbitMqTransport;
+    using TestFramework.Fixtures;
 
-	[Scenario]
+
+    [Scenario]
 	public abstract class Given_a_rabbitmq_bus :
 		LocalTestFixture<RabbitMqTransportFactory>
 	{

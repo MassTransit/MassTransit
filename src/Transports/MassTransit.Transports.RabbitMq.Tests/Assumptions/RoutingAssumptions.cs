@@ -1,10 +1,9 @@
-namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
+namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 {
     using Magnum.Extensions;
-    using Magnum.TypeScanning;
-    using NUnit.Framework;
-    using RabbitMQ.Client;
     using Magnum.TestFramework;
+    using NUnit.Framework;
+
 
     [TestFixture]
     public class RoutingAssumptions :

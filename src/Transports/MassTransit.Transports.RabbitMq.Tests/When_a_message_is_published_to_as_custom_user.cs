@@ -1,12 +1,13 @@
-namespace MassTransit.Transports.RabbitMq.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
-	using System.Diagnostics;
-	using Magnum.Extensions;
-	using Magnum.TestFramework;
-	using NUnit.Framework;
-	using TestFramework;
+    using System.Diagnostics;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using NUnit.Framework;
+    using TestFramework;
 
-	[Scenario, Explicit("because it requires you to run a few commands first")]
+
+    [Scenario, Explicit("because it requires you to run a few commands first")]
 	public class When_a_message_is_published_to_as_custom_user
 		: Given_a_rabbitmq_bus_with_vhost_mt_and_credentials
 	{

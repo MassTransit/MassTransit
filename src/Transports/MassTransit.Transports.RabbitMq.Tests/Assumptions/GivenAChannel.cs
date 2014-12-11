@@ -10,16 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
+namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 {
-	using System;
-	using System.Diagnostics;
-	using Magnum.Extensions;
-	using Magnum.TestFramework;
-	using NUnit.Framework;
-	using RabbitMQ.Client;
+    using System;
+    using System.Diagnostics;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
+    using RabbitMQ.Client;
 
-	public class GivenAChannel
+
+    public class GivenAChannel
 	{
 		protected readonly byte[] TheMessage = new byte[] {1, 2, 3};
 		IConnection _connection;

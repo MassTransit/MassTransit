@@ -1,9 +1,9 @@
-﻿namespace MassTransit.Transports.RabbitMq.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using Magnum.Extensions;
+    using Magnum.TestFramework;
     using NUnit.Framework;
     using TestFramework;
-    using Magnum.TestFramework;
 
 
     [TestFixture]

@@ -10,14 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
-	using System;
-	using Magnum.TestFramework;
-	using NUnit.Framework;
-	using RabbitMQ.Client;
+    using System;
+    using Magnum.TestFramework;
+    using NUnit.Framework;
+    using RabbitMqTransport;
 
-	public class RabbitMqConnection_Specs
+
+    public class RabbitMqConnection_Specs
 	{
 		RabbitMqConnection _conn = new RabbitMqConnection(
 			TestFactory.ConnectionFactory());

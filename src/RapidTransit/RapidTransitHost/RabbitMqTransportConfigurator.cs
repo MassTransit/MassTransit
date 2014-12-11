@@ -14,7 +14,7 @@ namespace RapidTransit
 {
     using System;
     using MassTransit;
-    using MassTransit.Transports.RabbitMq.Configuration;
+    using MassTransit.RabbitMqTransport.Configuration;
 
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Transports.RabbitMq.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading;

@@ -26,10 +26,11 @@ namespace BusDriver
 	using Magnum.CommandLineParser;
 	using Magnum.Extensions;
 	using MassTransit;
+	using MassTransit.RabbitMqTransport;
 	using MassTransit.Transports.Loopback;
-	using MassTransit.Transports.RabbitMq;
 
-	class Program
+
+    class Program
 	{
 		static readonly ILog _log = Logger.Get(typeof (Program));
 	    static ConsoleAppender _appender;

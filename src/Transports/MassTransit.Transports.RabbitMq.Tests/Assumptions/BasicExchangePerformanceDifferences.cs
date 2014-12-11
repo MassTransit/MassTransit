@@ -1,7 +1,8 @@
-﻿namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
+﻿namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 {
     using NUnit.Framework;
     using RabbitMQ.Client;
+
 
     [TestFixture]
     public class BasicExchangePerformanceDifferences

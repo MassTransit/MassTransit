@@ -10,12 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Configuration.Configurators
+namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 {
-	using Builders;
-	using MassTransit.Configurators;
+    using Builders;
+    using MassTransit.Configurators;
 
-	/// <summary>
+
+    /// <summary>
 	/// <para>A configurator for the connection factory builder, i.e.
 	/// a thing that actually lets you configure the settings that will go
 	/// into creating the connection factory.
