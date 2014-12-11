@@ -111,7 +111,7 @@
       <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Transports\MassTransit.Transports.RabbitMq\MassTransit.RabbitMqTransport.csproj">
+    <ProjectReference Include="..\..\MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj">
       <Project>{6c7149d7-4d97-45df-a05d-61ec7374491d}</Project>
       <Name>MassTransit.RabbitMqTransport</Name>
     </ProjectReference>
