@@ -10,14 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using System.Threading.Tasks;
     using BusConfigurators;
-    using Magnum.Extensions;
     using Magnum.TestFramework;
     using NUnit.Framework;
+
 
     [Scenario]
     public class When_sending_a_request_to_a_rabbitmq_endpoint :

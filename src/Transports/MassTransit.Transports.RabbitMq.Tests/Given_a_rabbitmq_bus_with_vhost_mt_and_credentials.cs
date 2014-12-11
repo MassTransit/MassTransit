@@ -1,10 +1,12 @@
-﻿namespace MassTransit.Transports.RabbitMq.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
-	using System;
-	using Magnum.TestFramework;
-	using TestFramework.Fixtures;
+    using System;
+    using Magnum.TestFramework;
+    using RabbitMqTransport;
+    using TestFramework.Fixtures;
 
-	[Scenario]
+
+    [Scenario]
 	public class Given_a_rabbitmq_bus_with_vhost_mt_and_credentials :
 		LocalTestFixture<RabbitMqTransportFactory>
 	{

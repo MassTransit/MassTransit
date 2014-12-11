@@ -1,6 +1,7 @@
-﻿namespace MassTransit.Transports.RabbitMq.Tests.Assumptions
+﻿namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 {
     using Magnum.TestFramework;
+
 
     [Scenario]
     public class CommittedTrxOnSend :

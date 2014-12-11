@@ -10,13 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
-	using System;
-	using Magnum.TestFramework;
-	using NUnit.Framework;
+    using System;
+    using Magnum.TestFramework;
+    using NUnit.Framework;
+    using RabbitMqTransport;
+    using Transports;
 
-	[Scenario]
+
+    [Scenario]
 	public class When_converting_a_type_to_a_message_name
 	{
 	    IMessageNameFormatter _formatter;

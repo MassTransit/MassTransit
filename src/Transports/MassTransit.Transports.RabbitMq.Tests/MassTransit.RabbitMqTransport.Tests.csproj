@@ -8,8 +8,8 @@
     <ProjectGuid>{E4C3F51F-B7CE-4521-80BC-E91A9B0F6FFD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.Transports.RabbitMq.Tests</RootNamespace>
-    <AssemblyName>MassTransit.Transports.RabbitMq.Tests</AssemblyName>
+    <RootNamespace>MassTransit.RabbitMqTransport.Tests</RootNamespace>
+    <AssemblyName>MassTransit.RabbitMqTransport.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -137,9 +137,9 @@
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Transports.RabbitMq\MassTransit.Transports.RabbitMq.csproj">
+    <ProjectReference Include="..\MassTransit.Transports.RabbitMq\MassTransit.RabbitMqTransport.csproj">
       <Project>{6C7149D7-4D97-45DF-A05D-61EC7374491D}</Project>
-      <Name>MassTransit.Transports.RabbitMq</Name>
+      <Name>MassTransit.RabbitMqTransport</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

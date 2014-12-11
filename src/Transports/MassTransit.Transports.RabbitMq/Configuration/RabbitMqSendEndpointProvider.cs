@@ -10,13 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Configuration
+namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
     using System.Linq;
     using System.Threading.Tasks;
     using Policies;
     using RabbitMQ.Client;
+    using Transports;
 
 
     public class RabbitMqSendEndpointProvider :

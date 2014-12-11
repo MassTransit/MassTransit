@@ -10,9 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
+    using System.Threading.Tasks;
     using Configuration;
     using Logging;
     using MassTransit.Testing;
@@ -46,7 +47,6 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             get { return _bus; }
         }
-
 
         /// <summary>
         /// The sending endpoint for the InputQueue
@@ -103,7 +103,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
         {
             _bus = CreateBus();
 
-            var startTask = _bus.Start(TestCancellationToken);
+            Task<BusHandle> startTask = _bus.Start(TestCancellationToken);
 
             startTask.Wait(TestCancellationToken);
 
@@ -155,7 +155,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 {
                     e.PrefetchCount = 16;
                     e.PurgeOnStartup();
-                    
+
                     e.Log(Console.Out, async context =>
                         string.Format("Received (input_queue): {0}", context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A")));
 
