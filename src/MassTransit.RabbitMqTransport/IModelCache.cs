@@ -22,7 +22,6 @@ namespace MassTransit.RabbitMqTransport
     /// </summary>
     public interface IModelCache
     {
-        Task Send<T>(T message, IPipe<TupleContext<ModelContext, T>> modelPipe, CancellationToken cancellationToken)
-            where T : class;
+        Task Send(IPipe<ModelContext> modelPipe, CancellationToken cancellationToken);
     }
 }

@@ -37,24 +37,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         }
 
         /// <summary>
-        /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="hostSettings">The host for this endpoint</param>
-        /// <param name="queueName">The input queue name</param>
-        /// <param name="configure">The configuration method</param>
-        public static void ReceiveEndpoint(this IRabbitMqServiceBusFactoryConfigurator configurator, RabbitMqHostSettings hostSettings,
-            string queueName,
-            Action<IRabbitMqReceiveEndpointConfigurator> configure)
-        {
-            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(hostSettings, queueName);
-
-            configure(endpointConfigurator);
-
-            configurator.AddServiceBusFactoryBuilderConfigurator(endpointConfigurator);
-        }
-
-        /// <summary>
         /// Declare a ReceiveEndpoint using a broker-assigned queue name. This queue defaults to auto-delete
         /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
         /// of this type (created automatically upon the first receiver binding).
@@ -65,15 +47,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public static void ReceiveEndpoint(this IRabbitMqServiceBusFactoryConfigurator configurator, RabbitMqHostSettings hostSettings,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(hostSettings);
+            configurator.ReceiveEndpoint(hostSettings, null, x =>
+            {
+                x.AutoDelete();
+                x.Durable(false);
+                x.Exclusive();
 
-            endpointConfigurator.AutoDelete();
-            endpointConfigurator.Durable(false);
-            endpointConfigurator.Exclusive();
-
-            configure(endpointConfigurator);
-
-            configurator.AddServiceBusFactoryBuilderConfigurator(endpointConfigurator);
+                configure(x);
+            });
         }
     }
 }

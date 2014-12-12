@@ -10,24 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Configuration
+namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Policies;
-    using RabbitMQ.Client;
+    using Configuration;
     using Transports;
 
 
     public class RabbitMqSendEndpointProvider :
-        ISendEndpointProvider
+        ISendEndpointProvider,
+        IDisposable
     {
-        readonly RabbitMqHostSettings[] _hosts;
-        readonly ISendMessageSerializer _serializer;
+        readonly RabbitMqHost[] _hosts;
         readonly Uri _inputAddress;
+        readonly ISendMessageSerializer _serializer;
 
-        public RabbitMqSendEndpointProvider(ISendMessageSerializer serializer, RabbitMqHostSettings[] hosts, Uri inputAddress)
+        public RabbitMqSendEndpointProvider(ISendMessageSerializer serializer, RabbitMqHost[] hosts, Uri inputAddress)
         {
             _hosts = hosts;
             _inputAddress = inputAddress;
@@ -36,28 +36,28 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            RabbitMqHostSettings host = _hosts
-                .Where(x => x.Host.Equals(address.Host, StringComparison.OrdinalIgnoreCase))
+            RabbitMqHost host = _hosts
+                .Where(x => x.Settings.Host.Equals(address.Host, StringComparison.OrdinalIgnoreCase))
                 .FirstOrDefault();
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-
-            RabbitMqHostSettings hostSettings = address.GetHostSettings();
-
-
             SendSettings sendSettings = address.GetSendSettings();
 
-            ConnectionFactory connectionFactory = hostSettings.GetConnectionFactory();
-
-            var connectionCache = new RabbitMqConnectionCache(new RabbitMqConnector(connectionFactory, Retry.None));
-
-            var modelCache = new RabbitMqModelCache(connectionCache);
+            var modelCache = new RabbitMqModelCache(host.SendConnectionCache);
 
             var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings);
 
-
             return new SendEndpoint(sendTransport, _serializer, address, _inputAddress);
+        }
+
+        public void Dispose()
+        {
+            foreach (var host in _hosts)
+            {
+                host.ConnectionCache.Stop();
+                host.SendConnectionCache.Stop();
+            }
         }
     }
 }

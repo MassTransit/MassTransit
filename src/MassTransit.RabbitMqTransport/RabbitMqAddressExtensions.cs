@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Text.RegularExpressions;
     using Configuration;
@@ -23,6 +24,35 @@ namespace MassTransit.RabbitMqTransport
     public static class RabbitMqAddressExtensions
     {
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
+
+        public static Uri GetInputAddress(this RabbitMqHostSettings hostSettings, ReceiveSettings receiveSettings)
+        {
+            var builder = new UriBuilder
+            {
+                Scheme = "rabbitmq",
+                Host = hostSettings.Host,
+                Port = hostSettings.Port,
+                Path = hostSettings.VirtualHost != "/"
+                    ? string.Join("/", hostSettings.VirtualHost, receiveSettings.QueueName)
+                    : receiveSettings.QueueName
+            };
+
+            builder.Query += string.Join("&", GetQueryStringOptions(receiveSettings));
+
+            return builder.Uri;
+        }
+
+        static IEnumerable<string> GetQueryStringOptions(ReceiveSettings settings)
+        {
+            if (!settings.Durable)
+                yield return "durable=false";
+            if (settings.AutoDelete)
+                yield return "autodelete=true";
+            if (settings.Exclusive)
+                yield return "exclusive=true";
+            if (settings.PrefetchCount != 0)
+                yield return "prefetch=" + settings.PrefetchCount;
+        }
 
         public static ReceiveSettings GetReceiveSettings(this Uri address)
         {
@@ -148,6 +178,22 @@ namespace MassTransit.RabbitMqTransport
                 factory.UserName = settings.Username;
             if (!string.IsNullOrWhiteSpace(settings.Password))
                 factory.Password = settings.Password;
+
+            factory.ClientProperties = factory.ClientProperties ?? new Dictionary<string, object>();
+
+            HostInfo hostInfo = HostMetadataCache.Host;
+
+            factory.ClientProperties["client_api"] = "MassTransit";
+            factory.ClientProperties["masstransit_version"] = hostInfo.MassTransitVersion;
+            factory.ClientProperties["net_version"] = hostInfo.FrameworkVersion;
+            factory.ClientProperties["hostname"] = hostInfo.MachineName;
+            factory.ClientProperties["connected"] = DateTimeOffset.Now.ToString("R");
+            factory.ClientProperties["process_id"] = hostInfo.ProcessId.ToString();
+            factory.ClientProperties["process_name"] = hostInfo.ProcessName;
+            if (hostInfo.Assembly != null)
+                factory.ClientProperties["assembly"] = hostInfo.Assembly;
+            if (hostInfo.AssemblyVersion != null)
+                factory.ClientProperties["assembly_version"] = hostInfo.AssemblyVersion;
 
             return factory;
         }

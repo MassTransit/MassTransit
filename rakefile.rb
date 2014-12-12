@@ -1,4 +1,4 @@
-COPYRIGHT = "Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al. - All rights reserved."
+COPYRIGHT = "Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al. - All rights reserved."
 
 require File.dirname(__FILE__) + "/build_support/BuildUtils.rb"
 require File.dirname(__FILE__) + "/build_support/util.rb"
@@ -12,11 +12,11 @@ require File.dirname(__FILE__) + "/build_support/versioning.rb"
 PRODUCT = 'MassTransit'
 CLR_TOOLS_VERSION = 'v4.0.30319'
 BUILD_CONFIG = ENV['BUILD_CONFIG'] || "Release"
-BUILD_CONFIG_KEY = ENV['BUILD_CONFIG_KEY'] || 'NET40'
+BUILD_CONFIG_KEY = 'NET45'
 BUILD_PLATFORM = ''
-TARGET_FRAMEWORK_VERSION = (BUILD_CONFIG_KEY == "NET40" ? "v4.0" : "v3.5")
-MSB_USE = (BUILD_CONFIG_KEY == "NET40" ? :net4 : :net35)
-OUTPUT_PATH = (BUILD_CONFIG_KEY == "NET40" ? 'net-4.0' : 'net-3.5')
+TARGET_FRAMEWORK_VERSION = "v4.5"
+MSB_USE = :net4
+OUTPUT_PATH = 'net-4.5'
 
 props = {
   :src => File.expand_path("src"),
@@ -29,14 +29,8 @@ props = {
   :keyfile => File.expand_path("MassTransit.snk")
 }
 
-desc "**Default**, cleans, compiles and runs tests"
-task :default => [:clean, :restore, :compile35, :ilmerge, :tests]
-
 desc "Default + tests"
-task :all => [:default]
-
-desc "**DOOES NOT CLEAR OUTPUT FOLDER**, compiles and runs tests"
-task :unclean => [:compile, :ilmerge, :compile_samples, :copy_samples, :copy_services, :tests]
+task :all => [:clean, :restore, :compile, :ilmerge, :compile_samples, :copy_samples, :copy_services, :tests]
 
 desc "Update the common version information for the build. You can call this task without building."
 assemblyinfo :global_version => [:versioning] do |asm|
@@ -69,9 +63,6 @@ task :compile_samples => [:build_starbucks, :build_distributor] do ; end
 
 desc "Compiles MT into build_output"
 task :compile => [:versioning, :global_version, :build, :copy_signed] do ; end
-
-desc "Compiles MT into build_output"
-task :compile35 => [:versioning, :global_version, :build35, :copy_signed] do ; end
 
 task :copy_signed do
 	puts 'Copying unmerged dependencies to output folder'
@@ -280,19 +271,6 @@ msbuild :restore do |msb|
   msb.solution = 'src/Transports/MassTransit.Transports.RabbitMq.Tests/MassTransit.Transports.RabbitMq.Tests.csproj'
 end
 
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/Transports/MassTransit.Transports.Msmq/MassTransit.Transports.Msmq.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/Transports/MassTransit.Transports.Msmq.Tests/MassTransit.Transports.Msmq.Tests.csproj'
-end
 
 desc "restores missing packages"
 msbuild :restore do |msb|
@@ -331,8 +309,8 @@ msbuild :build35 do |msb|
     msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
     msb.use :net4 #MSB_USE
     msb.targets :Clean, :Build
-    msb.properties[:SignAssembly] = 'true'
-    msb.properties[:AssemblyOriginatorKeyFile] = props[:keyfile]
+#    msb.properties[:SignAssembly] = 'true'
+#    msb.properties[:AssemblyOriginatorKeyFile] = props[:keyfile]
     msb.solution = 'src/MassTransit.sln'
 end
 

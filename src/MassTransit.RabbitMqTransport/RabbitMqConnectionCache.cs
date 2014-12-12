@@ -25,78 +25,101 @@ namespace MassTransit.RabbitMqTransport
         IConnectionCache
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionCache>();
+
         readonly IRabbitMqConnector _connector;
-        volatile ConnectionScope _scope;
+        readonly CancellationTokenSource _stop;
+        ConnectionScope _scope;
 
         public RabbitMqConnectionCache(IRabbitMqConnector connector)
         {
             _connector = connector;
+            _stop = new CancellationTokenSource();
         }
 
-        public Task Send<T>(T message, IPipe<TupleContext<ConnectionContext, T>> connectionPipe, CancellationToken cancellationToken)
-            where T : class
+        public Task Send(IPipe<ConnectionContext> connectionPipe, CancellationToken cancellationToken)
         {
             Interlocked.MemoryBarrier();
 
             ConnectionScope existingScope = _scope;
             if (existingScope != null)
             {
-                if (existingScope.ConnectionClosed.Task.Wait(TimeSpan.Zero))
-                    return SendUsingExistingConnection(message, connectionPipe, cancellationToken, existingScope);
+                if (existingScope.ConnectionClosed.Task.Wait(TimeSpan.Zero) == false)
+                    return SendUsingExistingConnection(connectionPipe, cancellationToken, existingScope);
             }
 
-            return SendUsingNewConnection(message, connectionPipe, cancellationToken);
+            return SendUsingNewConnection(connectionPipe, cancellationToken);
         }
 
-        Task SendUsingNewConnection<T>(T message, IPipe<TupleContext<ConnectionContext, T>> connectionPipe,
-            CancellationToken cancellationToken)
-            where T : class
+        public async Task Stop()
         {
+            _stop.Cancel();
+
+            Interlocked.MemoryBarrier();
+
+            ConnectionScope existingScope = _scope;
+            if (existingScope != null)
+                await existingScope.ConnectionClosed.Task;
+        }
+
+        async Task SendUsingNewConnection(IPipe<ConnectionContext> connectionPipe,
+            CancellationToken cancellationToken)
+        {
+            var scope = new ConnectionScope();
+
             IPipe<ConnectionContext> connectPipe = Pipe.New<ConnectionContext>(x =>
             {
                 x.ExecuteAsync(async connectionContext =>
                 {
-                    var scope = new ConnectionScope(connectionContext);
-
                     ConnectionShutdownEventHandler connectionShutdown = null;
                     connectionShutdown = (connection, reason) =>
                     {
-                        scope.ConnectionContext.Connection.ConnectionShutdown -= connectionShutdown;
+                        connectionContext.Connection.ConnectionShutdown -= connectionShutdown;
                         scope.ConnectionClosed.TrySetResult(true);
 
                         Interlocked.CompareExchange(ref _scope, null, scope);
                     };
 
+                    var registration = _stop.Token.Register(() =>
+                    {
+                        scope.ConnectionClosed.TrySetResult(false);
+                    });
+
                     connectionContext.Connection.ConnectionShutdown += connectionShutdown;
 
                     Interlocked.CompareExchange(ref _scope, scope, null);
 
-                    try
-                    {
-                        var context = new TupleContextProxy<ConnectionContext, T>(scope.ConnectionContext, message, cancellationToken);
-
-                        await connectionPipe.Send(context);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (_log.IsDebugEnabled)
-                            _log.Debug(string.Format("The existing connection usage threw an exception"), ex);
-
-                        throw;
-                    }
+                    await scope.Connected(connectionContext);
                 });
             });
 
-            return _connector.Connect(connectPipe, new CancellationToken());
+            _connector.Connect(connectPipe, _stop.Token);
+
+            try
+            {
+                var connectionContext = await scope.ConnectionContext;
+
+                var context = new SharedConnectionContext(connectionContext, cancellationToken);
+
+                await connectionPipe.Send(context);
+            }
+            catch (Exception ex)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.Debug(string.Format("The existing connection usage threw an exception"), ex);
+
+                throw;
+            }
+
         }
 
-        static async Task SendUsingExistingConnection<T>(T message, IPipe<TupleContext<ConnectionContext, T>> connectionPipe,
+        static async Task SendUsingExistingConnection(IPipe<ConnectionContext> connectionPipe,
             CancellationToken cancellationToken, ConnectionScope existingScope)
-            where T : class
         {
             try
             {
-                var context = new TupleContextProxy<ConnectionContext, T>(existingScope.ConnectionContext, message, cancellationToken);
+                var connectionContext = await existingScope.ConnectionContext;
+
+                var context = new SharedConnectionContext(connectionContext, cancellationToken);
 
                 await connectionPipe.Send(context);
             }
@@ -113,12 +136,23 @@ namespace MassTransit.RabbitMqTransport
         class ConnectionScope
         {
             public readonly TaskCompletionSource<bool> ConnectionClosed;
-            public readonly ConnectionContext ConnectionContext;
+            public readonly Task<ConnectionContext> ConnectionContext;
 
-            public ConnectionScope(ConnectionContext connectionContext)
+            readonly TaskCompletionSource<ConnectionContext> _contextSource;
+
+            public ConnectionScope()
             {
-                ConnectionContext = connectionContext;
+                _contextSource = new TaskCompletionSource<ConnectionContext>();
+                ConnectionContext = _contextSource.Task;
+
                 ConnectionClosed = new TaskCompletionSource<bool>();
+            }
+
+            public Task Connected(ConnectionContext context)
+            {
+                _contextSource.TrySetResult(context);
+
+                return ConnectionClosed.Task;
             }
         }
     }

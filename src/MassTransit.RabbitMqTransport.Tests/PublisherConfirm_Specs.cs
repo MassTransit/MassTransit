@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using NUnit.Framework;
 
@@ -29,6 +30,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
 
             await _received;
+
+            if (Debugger.IsAttached)
+                Debugger.Break();
         }
 
         Task<ConsumeContext<A>> _received;

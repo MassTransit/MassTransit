@@ -35,6 +35,19 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
+            if (!context.HasPayloadType(typeof(SendSettings)))
+                DeclareExchange(context);
+
+            return next.Send(context);
+        }
+
+        bool IFilter<ModelContext>.Inspect(IPipeInspector inspector)
+        {
+            return inspector.Inspect(this);
+        }
+
+        void DeclareExchange(ModelContext context)
+        {
             if (_log.IsDebugEnabled)
             {
                 _log.DebugFormat("Exchange: {0} ({1})", _settings.ExchangeName,
@@ -52,13 +65,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
 
             context.GetOrAddPayload(() => _settings);
-
-            return next.Send(context);
-        }
-
-        bool IFilter<ModelContext>.Inspect(IPipeInspector inspector)
-        {
-            return inspector.Inspect(this);
         }
     }
 }

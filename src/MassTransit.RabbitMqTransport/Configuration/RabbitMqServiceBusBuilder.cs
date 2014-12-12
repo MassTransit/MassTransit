@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Collections.Generic;
     using System.Linq;
     using MassTransit.Builders;
+    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
     using Transports;
 
@@ -24,39 +25,21 @@ namespace MassTransit.RabbitMqTransport.Configuration
         ServiceBusBuilderBase,
         IServiceBusBuilder
     {
-        readonly RabbitMqHostSettings[] _hosts;
+        readonly RabbitMqHost[] _hosts;
         readonly PublishSettings _publishSettings;
         readonly Uri _sourceAddress;
 
-        public RabbitMqServiceBusBuilder(IEnumerable<RabbitMqHostSettings> hosts, PublishSettings publishSettings)
+        public RabbitMqServiceBusBuilder(IEnumerable<RabbitMqHost> hosts, PublishSettings publishSettings, Uri sourceAddress)
         {
             _hosts = hosts.ToArray();
             _publishSettings = publishSettings;
-
-
-            _sourceAddress = GetSourceAddress(_hosts[0]);
-        }
-
-        Uri GetSourceAddress(RabbitMqHostSettings host)
-        {
-            var builder = new UriBuilder();
-
-            builder.Scheme = "rabbitmq";
-            builder.Host = host.Host;
-            builder.Port = host.Port;
-
-
-            string queueName = NewId.Next().ToString("NS");
-            builder.Path = host.VirtualHost != "/" ? string.Join("/", host.VirtualHost, queueName) : queueName;
-
-            builder.Query += string.Format("temporary=true&prefetch=4");
-
-            return builder.Uri;
+            _sourceAddress = sourceAddress;
         }
 
         public IBusControl Build()
         {
-            var consumePipe = new ConsumePipe();
+            IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_sourceAddress))
+                .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
 
             return new MassTransitBus(_sourceAddress, consumePipe, SendEndpointProvider, ReceiveEndpoints);
         }

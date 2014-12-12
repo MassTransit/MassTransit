@@ -29,18 +29,18 @@ namespace MassTransit.RabbitMqTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
 
-        readonly IRabbitMqConnector _connector;
+        readonly IConnectionCache _connector;
+        readonly ExchangeBindingSettings[] _exchangeBindings;
         readonly IRetryPolicy _retryPolicy;
         readonly ReceiveSettings _settings;
-        readonly ExchangeBindingSettings[] _exchangeBindings;
-        Uri _inputAddress;
+        readonly Uri _inputAddress;
 
-        public RabbitMqReceiveTransport(IRabbitMqConnector connector, IRetryPolicy retryPolicy, ReceiveSettings settings,
-            params ExchangeBindingSettings[] exchangeBindings)
+        public RabbitMqReceiveTransport(IConnectionCache connector, IRetryPolicy retryPolicy, ReceiveSettings settings, Uri inputAddress, params ExchangeBindingSettings[] exchangeBindings)
         {
             _connector = connector;
             _retryPolicy = retryPolicy;
             _settings = settings;
+            _inputAddress = inputAddress;
             _exchangeBindings = exchangeBindings;
         }
 
@@ -79,7 +79,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 try
                 {
-                    await _connector.Connect(connectionPipe, handle.StopToken);
+                    await _connector.Send(connectionPipe, handle.StopToken);
                 }
                 catch (RabbitMqConnectionException ex)
                 {
@@ -99,18 +99,24 @@ namespace MassTransit.RabbitMqTransport
             handle.Stopped();
         }
 
+
         class Handle :
-    ReceiveTransportHandle
+            ReceiveTransportHandle
         {
             readonly CancellationTokenSource _stop;
-            readonly IReceiveTransport _transport;
             readonly TaskCompletionSource<bool> _stopped;
+            readonly IReceiveTransport _transport;
 
             public Handle(IReceiveTransport transport)
             {
                 _transport = transport;
                 _stop = new CancellationTokenSource();
                 _stopped = new TaskCompletionSource<bool>();
+            }
+
+            public CancellationToken StopToken
+            {
+                get { return _stop.Token; }
             }
 
             void IDisposable.Dispose()
@@ -128,11 +134,6 @@ namespace MassTransit.RabbitMqTransport
                 _stop.Cancel();
 
                 await _stopped.Task.WithCancellation(cancellationToken);
-            }
-
-            public CancellationToken StopToken
-            {
-                get { return _stop.Token; }
             }
 
             public void Stopped()

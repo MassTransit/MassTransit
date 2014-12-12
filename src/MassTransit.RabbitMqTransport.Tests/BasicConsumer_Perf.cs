@@ -100,7 +100,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             int processingTime = 0;
 
                         var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
-            var sendEndpointProvider = new RabbitMqSendEndpointProvider(sendSerializer, new RabbitMqHostSettings[] {},
+            var sendEndpointProvider = new RabbitMqSendEndpointProvider(sendSerializer, new RabbitMqHost[] {},
                 new Uri("rabbitmq://localhost/speed/input"));
             IMessageDeserializer deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, sendEndpointProvider);
 
@@ -214,7 +214,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             int processingTime = 0;
 
             var sendSerializer = new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
-            var sendEndpointProvider = new RabbitMqSendEndpointProvider(sendSerializer, new RabbitMqHostSettings[] { }, new Uri("rabbitmq://localhost/speed/input"));
+            var sendEndpointProvider = new RabbitMqSendEndpointProvider(sendSerializer, new RabbitMqHost[] { }, new Uri("rabbitmq://localhost/speed/input"));
 
 
             var deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, sendEndpointProvider);
@@ -243,7 +243,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             var retryPolicy = Retry.Exponential(1.Seconds(), 60.Seconds(), 2.Seconds());
             var connectionMaker = new RabbitMqConnector(connectionFactory, retryPolicy);
 
-            var transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, new RabbitMqReceiveSettings
+            var connectionCache = new RabbitMqConnectionCache(connectionMaker);
+
+            var receiveSettings = new RabbitMqReceiveSettings
             {
                 QueueName = "input",
                 ExchangeName = "fast",
@@ -251,7 +253,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Durable = false,
                 Exclusive = false,
                 PrefetchCount = 100,
-            });
+            };
+            var transport = new RabbitMqReceiveTransport(connectionCache, Retry.None, receiveSettings, connectionFactory.GetUri());
 
             var cancelReceive = new CancellationTokenSource();
 
