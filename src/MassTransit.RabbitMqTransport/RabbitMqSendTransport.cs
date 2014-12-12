@@ -41,10 +41,10 @@ namespace MassTransit.RabbitMqTransport
 
         Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
         {
-            IPipe<TupleContext<ModelContext, T>> modelPipe = Pipe.New<TupleContext<ModelContext, T>>(
-                p => p.ExecuteAsync(modelContext => SendMessage(message, pipe, cancelSend)));
+            IPipe<ModelContext> modelPipe =
+                Pipe.New<ModelContext>(p => p.ExecuteAsync(modelContext => SendMessage(message, pipe, cancelSend)));
 
-            return _modelCache.Send(message, modelPipe, cancelSend);
+            return _modelCache.Send(modelPipe, cancelSend);
         }
 
         public Task Move(ReceiveContext context)
@@ -60,13 +60,13 @@ namespace MassTransit.RabbitMqTransport
         async Task SendMessage<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
             where T : class
         {
-            var modelPipe = Pipe.New<TupleContext<ModelContext, T>>(p =>
+            IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
             {
                 p.Filter(new PrepareSendExchangeFilter(_sendSettings));
 
                 p.ExecuteAsync(async modelContext =>
                 {
-                    IBasicProperties properties = modelContext.Context.Model.CreateBasicProperties();
+                    IBasicProperties properties = modelContext.Model.CreateBasicProperties();
                     properties.Headers = new Dictionary<string, object>();
 
                     var context = new RabbitMqSendContextImpl<T>(properties, message, _sendSettings, cancelSend);
@@ -90,8 +90,10 @@ namespace MassTransit.RabbitMqTransport
 
                         await _observers.ForEach(x => x.PreSend(context));
 
-                        await modelContext.Context.Model.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory, context.Immediate,
-                            context.BasicProperties, context.Body);
+                        await
+                            modelContext.Model.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
+                                context.Immediate,
+                                context.BasicProperties, context.Body);
 
                         await _observers.ForEach(x => x.PostSend(context));
                     }
@@ -105,8 +107,7 @@ namespace MassTransit.RabbitMqTransport
                 });
             });
 
-            await _modelCache.Send(message, modelPipe, cancelSend);
+            await _modelCache.Send(modelPipe, cancelSend);
         }
-
     }
 }

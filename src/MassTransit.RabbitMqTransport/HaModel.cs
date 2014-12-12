@@ -286,7 +286,7 @@ namespace MassTransit.RabbitMqTransport
             lock (_publishLock)
             {
                 ulong publishTag = _model.NextPublishSeqNo;
-                _model.BasicPublish(exchange, routingKey, mandatory, immediate, basicProperties, body);
+                BasicPublish(exchange, routingKey, mandatory, immediate, basicProperties, body);
 
                 published = new Published(exchange, routingKey, mandatory, immediate, basicProperties, body, publishTag);
                 _published.TryAdd(publishTag, published);

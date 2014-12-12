@@ -14,8 +14,73 @@ namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Magnum.Extensions;
+    using MassTransit.Pipeline;
     using Transports;
+
+
+    public class RabbitMqPublishEndpoint :
+        IPublishEndpoint
+    {
+        readonly ISendEndpointProvider _sendEndpointProvider;
+
+        public RabbitMqPublishEndpoint(ISendEndpointProvider sendEndpointProvider)
+        {
+            _sendEndpointProvider = sendEndpointProvider;
+        }
+
+        Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
 
     /// <summary>

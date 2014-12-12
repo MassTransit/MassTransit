@@ -33,14 +33,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IServiceBusFactoryBuilderConfigurator
     {
         readonly IList<IReceiveEndpointBuilderConfigurator> _configurators;
-        readonly RabbitMqHostSettings _hostSettings;
+        readonly RabbitMqHost _host;
         readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         readonly RabbitMqReceiveSettings _settings;
 
-        public RabbitMqReceiveEndpointConfigurator(RabbitMqHostSettings hostSettings, string queueName = null)
+        public RabbitMqReceiveEndpointConfigurator(RabbitMqHost host, string queueName = null)
         {
-            _hostSettings = hostSettings;
+            _host = host;
             _pipeConfigurator = new PipeConfigurator<ConsumeContext>();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
             _configurators = new List<IReceiveEndpointBuilderConfigurator>();
@@ -133,11 +133,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             IRetryPolicy retryPolicy = Retry.Exponential(1.Seconds(), 10.Seconds(), 1.Seconds());
 
-            var connectionFactory = _hostSettings.GetConnectionFactory();
-
-            var connectionMaker = new RabbitMqConnector(connectionFactory, retryPolicy);
-
-            var transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, _settings);
+            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, Retry.None, _settings,
+                _host.Settings.GetInputAddress(_settings));
 
             var consumePipe = new ConsumePipe(_pipeConfigurator);
 

@@ -156,9 +156,6 @@ namespace MassTransit.RabbitMqTransport.Tests
                     e.PrefetchCount = 16;
                     e.PurgeOnStartup();
 
-                    e.Log(Console.Out, async context =>
-                        string.Format("Received (input_queue): {0}", context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A")));
-
                     ConfigureInputQueueEndpoint(e);
                 });
             });

@@ -82,7 +82,7 @@
     <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqConsumerPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\RabbitMqSendEndpointProvider.cs" />
+    <Compile Include="Configuration\RabbitMqHost.cs" />
     <Compile Include="Configuration\RabbitMqServiceBusBuilder.cs" />
     <Compile Include="Contexts\RabbitMqSendContextHeaders.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
@@ -135,7 +135,7 @@
     <Compile Include="Configuration\RabbitMqHostConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqPublishContext.cs" />
     <Compile Include="Configuration\RabbitMqTransportConfigurator.cs" />
-    <Compile Include="Configuration\RabbitMqTransportConfiguratorImpl.cs" />
+    <Compile Include="Configuration\RabbitMqBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqHostSettings.cs" />
     <Compile Include="Configuration\RabbitMqTransportFactoryExtensions.cs" />
     <Compile Include="Configuration\TransportConfiguratorExtensions.cs" />
@@ -167,6 +167,7 @@
     <Compile Include="RabbitMqProducer.cs" />
     <Compile Include="RabbitMqPublisher.cs" />
     <Compile Include="RabbitMqConnector.cs" />
+    <Compile Include="RabbitMqSendEndpointProvider.cs" />
     <Compile Include="RabbitMqSendSettings.cs" />
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="RabbitMqReceiveTransport.cs" />
@@ -175,6 +176,8 @@
     <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
     <Compile Include="SendSettings.cs" />
+    <Compile Include="SharedConnectionContext.cs" />
+    <Compile Include="SharedModelContext.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
     <Compile Include="Testing\RabbitMqBusScenarioBuilder.cs" />
   </ItemGroup>

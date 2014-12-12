@@ -141,7 +141,7 @@ namespace MassTransit
                 throw new MassTransitException("The service bus could not be started.", exception);
             }
 
-            return new Handle(this, receiveEndpointHandles.ToArray());
+            return new Handle(this, receiveEndpointHandles.ToArray(), _sendEndpointProvider);
         }
 
 
@@ -150,11 +150,13 @@ namespace MassTransit
         {
             readonly IBusControl _bus;
             readonly ReceiveEndpointHandle[] _receiveEndpoints;
+            readonly ISendEndpointProvider _sendEndpointProvider;
 
-            public Handle(IBusControl bus, ReceiveEndpointHandle[] receiveEndpoints)
+            public Handle(IBusControl bus, ReceiveEndpointHandle[] receiveEndpoints, ISendEndpointProvider sendEndpointProvider)
             {
                 _bus = bus;
                 _receiveEndpoints = receiveEndpoints;
+                _sendEndpointProvider = sendEndpointProvider;
             }
 
             public void Dispose()
@@ -170,6 +172,10 @@ namespace MassTransit
             public async Task Stop(CancellationToken cancellationToken = new CancellationToken())
             {
                 await Task.WhenAll(_receiveEndpoints.Select(x => x.Stop(cancellationToken)));
+
+//                var disposable = _sendEndpointProvider as IDisposable;
+//                if (disposable != null)
+//                    disposable.Dispose();
             }
         }
     }

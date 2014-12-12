@@ -40,7 +40,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             IRetryPolicy retryPolicy = Retry.Exponential(1.Seconds(), 60.Seconds(), 2.Seconds());
             var connectionMaker = new RabbitMqConnector(connectionFactory, retryPolicy);
 
-            IReceiveTransport transport = new RabbitMqReceiveTransport(connectionMaker, Retry.None, new RabbitMqReceiveSettings
+            var connectionCache = new RabbitMqConnectionCache(connectionMaker);
+
+            IReceiveTransport transport = new RabbitMqReceiveTransport(connectionCache, Retry.None, new RabbitMqReceiveSettings
             {
                 QueueName = "input",
                 ExchangeName = "fast",
@@ -48,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Durable = false,
                 Exclusive = false,
                 PrefetchCount = 100,
-            });
+            }, connectionFactory.GetUri());
 
             var receiveCancellationToken = new CancellationTokenSource();
 

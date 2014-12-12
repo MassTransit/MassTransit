@@ -36,5 +36,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
             where T : class;
 
         void OnPublish(Action<RabbitMqPublishContext> callback);
+
+        /// <summary>
+        /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="hostSettings">The host for this endpoint</param>
+        /// <param name="queueName">The input queue name</param>
+        /// <param name="configure">The configuration method</param>
+        void ReceiveEndpoint(RabbitMqHostSettings hostSettings, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure);
     }
 }

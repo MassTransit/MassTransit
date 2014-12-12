@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
@@ -21,8 +22,27 @@ namespace MassTransit.RabbitMqTransport
     using Policies;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
+    using Transports;
 
-    // this is a source vane, need to make it work like one - splice in the connection
+
+    /// <summary>
+    /// A handle to an active transport
+    /// </summary>
+    public interface RabbitMqConnectionHandle :
+        IDisposable
+    {
+        /// <summary>
+        /// The RabbitMQ connection object
+        /// </summary>
+        IConnection Connection { get; }
+
+        /// <summary>
+        /// Close the connection, disposing of anything related to it
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task Stop(CancellationToken cancellationToken = default(CancellationToken));
+    }
 
     /// <summary>
     /// Establishes connections to RabbitMQ using the specified retry policy

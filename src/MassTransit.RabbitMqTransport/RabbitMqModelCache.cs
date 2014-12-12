@@ -29,40 +29,40 @@ namespace MassTransit.RabbitMqTransport
     public class RabbitMqModelCache :
         IModelCache
     {
-        static readonly ILog _log = Logger.Get<RabbitMqConnectionCache>();
+        static readonly ILog _log = Logger.Get<RabbitMqModelCache>();
+
         readonly IConnectionCache _connectionCache;
-        volatile ModelScope _scope;
+        ModelScope _scope;
 
         public RabbitMqModelCache(IConnectionCache connectionCache)
         {
             _connectionCache = connectionCache;
         }
 
-        public Task Send<T>(T message, IPipe<TupleContext<ModelContext, T>> connectionPipe, CancellationToken cancellationToken)
-            where T : class
+        public Task Send(IPipe<ModelContext> connectionPipe, CancellationToken cancellationToken)
         {
             Interlocked.MemoryBarrier();
 
             ModelScope existingScope = _scope;
             if (existingScope != null)
             {
-                if (existingScope.ModelClosed.Task.Wait(TimeSpan.Zero))
-                    return SendUsingExistingConnection(message, connectionPipe, cancellationToken, existingScope);
+                if (existingScope.ModelClosed.Task.Wait(TimeSpan.Zero) == false)
+                    return SendUsingExistingConnection(connectionPipe, cancellationToken, existingScope);
             }
 
-            return SendUsingNewConnection(message, connectionPipe, cancellationToken);
+            return SendUsingNewConnection(connectionPipe, cancellationToken);
         }
 
-        Task SendUsingNewConnection<T>(T message, IPipe<TupleContext<ModelContext, T>> modelPipe,
-            CancellationToken cancellationToken)
-            where T : class
+        Task SendUsingNewConnection(IPipe<ModelContext> modelPipe, CancellationToken cancellationToken)
         {
-            IPipe<TupleContext<ConnectionContext, T>> connectionPipe = Pipe.New<TupleContext<ConnectionContext, T>>(x =>
+            IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
             {
                 x.ExecuteAsync(async connectionContext =>
                 {
-                    IModel model = connectionContext.Context.Connection.CreateModel();
-                    var modelContext = new RabbitMqModelContext(connectionContext.Context, model, connectionContext.CancellationToken);
+                    IModel model;
+                    lock(connectionContext.Connection)
+                        model = connectionContext.Connection.CreateModel();
+                    var modelContext = new RabbitMqModelContext(connectionContext, model, connectionContext.CancellationToken);
 
                     var scope = new ModelScope(modelContext);
 
@@ -81,7 +81,7 @@ namespace MassTransit.RabbitMqTransport
 
                     try
                     {
-                        var context = new TupleContextProxy<ModelContext, T>(scope.ModelContext, message, cancellationToken);
+                        var context = new SharedModelContext(scope.ModelContext, cancellationToken);
 
                         await modelPipe.Send(context);
                     }
@@ -95,16 +95,15 @@ namespace MassTransit.RabbitMqTransport
                 });
             });
 
-            return _connectionCache.Send(message, connectionPipe, new CancellationToken());
+            return _connectionCache.Send(connectionPipe, new CancellationToken());
         }
 
-        static async Task SendUsingExistingConnection<T>(T message, IPipe<TupleContext<ModelContext, T>> connectionPipe,
+        static async Task SendUsingExistingConnection(IPipe<ModelContext> connectionPipe,
             CancellationToken cancellationToken, ModelScope existingScope)
-            where T : class
         {
             try
             {
-                var context = new TupleContextProxy<ModelContext, T>(existingScope.ModelContext, message, cancellationToken);
+                var context = new SharedModelContext(existingScope.ModelContext, cancellationToken);
 
                 await connectionPipe.Send(context);
             }
