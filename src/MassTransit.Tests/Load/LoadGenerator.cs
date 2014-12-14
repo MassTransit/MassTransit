@@ -20,8 +20,9 @@ namespace MassTransit.Tests.Load
 	using Context;
 	using Magnum;
 	using Magnum.Extensions;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using Messages;
+	using Shouldly;
 	using TestFramework;
 
 	public class LoadGenerator<TRequest, TResponse> :
@@ -149,7 +150,7 @@ namespace MassTransit.Tests.Load
 
 			sources.Each(worker => Trace.WriteLine(worker.Key + ": " + worker.Value + " commands"));
 
-			received.ShouldEqual(sent);
+			received.ShouldBe(sent);
 		}
 	}
 }

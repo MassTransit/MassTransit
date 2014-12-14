@@ -20,16 +20,17 @@ namespace MassTransit.Tests.Serialization
 	using System.Text;
 	using System.Xml.Linq;
 	using Magnum.Reflection;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using MassTransit.Serialization;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Converters;
 	using Newtonsoft.Json.Linq;
 	using Newtonsoft.Json.Serialization;
 	using NUnit.Framework;
+	using Shouldly;
 
-	[Scenario]
-	public class When_serializing_messages_with_json_dot_net
+
+    public class When_serializing_messages_with_json_dot_net
 	{
 		string _body;
 		Envelope _envelope;
@@ -40,7 +41,7 @@ namespace MassTransit.Tests.Serialization
 		JsonSerializer _deserializer;
 
 
-		[When]
+		[SetUp]
 		public void Serializing_messages_with_json_dot_net()
 		{
 			_message = new TestMessage
@@ -79,14 +80,14 @@ namespace MassTransit.Tests.Serialization
 			_xml = JsonConvert.DeserializeXNode(_body, "envelope");
 		}
 
-		[Then, Explicit]
+		[Test, Explicit]
 		public void Show_me_the_message()
 		{
 			Trace.WriteLine(_body);
 			Trace.WriteLine(_xml.ToString());
 		}
 
-		[Then]
+		[Test]
 		public void Should_be_able_to_ressurect_the_message()
 		{
 			Envelope result;
@@ -97,14 +98,14 @@ namespace MassTransit.Tests.Serialization
 				result = _deserializer.Deserialize<Envelope>(jsonReader);
 			}
 
-			result.MessageType.Count.ShouldEqual(3);
-			result.MessageType[0].ShouldEqual(typeof (TestMessage).ToMessageName());
-			result.MessageType[1].ShouldEqual(typeof (MessageA).ToMessageName());
-			result.MessageType[2].ShouldEqual(typeof (MessageB).ToMessageName());
-			result.Headers.Count.ShouldEqual(0);
+			result.MessageType.Count.ShouldBe(3);
+			result.MessageType[0].ShouldBe(typeof (TestMessage).ToMessageName());
+			result.MessageType[1].ShouldBe(typeof (MessageA).ToMessageName());
+			result.MessageType[2].ShouldBe(typeof (MessageB).ToMessageName());
+			result.Headers.Count.ShouldBe(0);
 		}
 
-		[Then]
+		[Test]
 		public void Should_be_able_to_suck_out_an_interface()
 		{
 			Envelope result;
@@ -122,11 +123,11 @@ namespace MassTransit.Tests.Serialization
 
 				_serializer.Populate(jsonReader, message);
 
-				message.Name.ShouldEqual("Joe");
+				message.Name.ShouldBe("Joe");
 			}
 		}
 
-		[Then]
+		[Test]
 		public void Should_be_able_to_suck_out_an_object()
 		{
 			Envelope result;
@@ -141,12 +142,12 @@ namespace MassTransit.Tests.Serialization
 			{
 				var message = (TestMessage) _serializer.Deserialize(jsonReader, typeof (TestMessage));
 
-				message.Name.ShouldEqual("Joe");
-				message.Details.Count.ShouldEqual(2);
+				message.Name.ShouldBe("Joe");
+				message.Details.Count.ShouldBe(2);
 			}
 		}
 
-		[Then]
+		[Test]
 		public void Should_be_able_to_ressurect_the_message_from_xml()
 		{
 			XDocument document = XDocument.Parse(_xml.ToString());
@@ -164,14 +165,14 @@ namespace MassTransit.Tests.Serialization
 					ContractResolver = new CamelCasePropertyNamesContractResolver(),
 				});
 
-			result.MessageType.Count.ShouldEqual(3);
-			result.MessageType[0].ShouldEqual(typeof (TestMessage).ToMessageName());
-			result.MessageType[1].ShouldEqual(typeof (MessageA).ToMessageName());
-			result.MessageType[2].ShouldEqual(typeof (MessageB).ToMessageName());
-			result.Headers.Count.ShouldEqual(0);
+			result.MessageType.Count.ShouldBe(3);
+			result.MessageType[0].ShouldBe(typeof (TestMessage).ToMessageName());
+			result.MessageType[1].ShouldBe(typeof (MessageA).ToMessageName());
+			result.MessageType[2].ShouldBe(typeof (MessageB).ToMessageName());
+			result.Headers.Count.ShouldBe(0);
 		}
 
-		[Then]
+		[Test]
 		public void Serialization_speed()
 		{
 			//warm it up
@@ -340,7 +341,7 @@ namespace MassTransit.Tests.Serialization
       public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
       {
         reader.Read();
-        reader.Value.ShouldEqual("value");
+        reader.Value.ShouldBe("value");
         reader.Read();
         var value = (string)reader.Value;
         return new MessageA { Value = value };
@@ -395,7 +396,7 @@ namespace MassTransit.Tests.Serialization
 
       MessageA result = SerializeAndReturn(obj);
 
-      result.Value.ShouldEqual("Monster");
+      result.Value.ShouldBe("Monster");
     }
 
     [Test]
@@ -405,7 +406,7 @@ namespace MassTransit.Tests.Serialization
 
       MessageB result = SerializeAndReturn(obj);
 
-      result.Value.ShouldEqual("Monster");
+      result.Value.ShouldBe("Monster");
     }
   }
 
@@ -465,7 +466,7 @@ namespace MassTransit.Tests.Serialization
 
       SimpleMessage result = SerializeAndReturn(obj);
 
-      result.ValueA.ShouldEqual("Monster");
+      result.ValueA.ShouldBe("Monster");
     }
 
     [Test]
@@ -475,7 +476,7 @@ namespace MassTransit.Tests.Serialization
 
       SimpleMessage result = SerializeAndReturn(obj);
 
-      result.ValueB.ShouldEqual("Monster");
+      result.ValueB.ShouldBe("Monster");
     }
   }
 }

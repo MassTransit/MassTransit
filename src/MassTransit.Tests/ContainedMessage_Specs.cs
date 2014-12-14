@@ -14,8 +14,9 @@ namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
     using EndpointConfigurators;
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
 
 
@@ -34,9 +35,9 @@ namespace MassTransit.Tests
         {
             var context = await _secureCommandHandler;
 
-            context.Message.Credentials.ShouldNotBeNull();
+            context.Message.Credentials.ShouldNotBe(null);
 
-            context.Message.Credentials.Username.ShouldEqual("sa");
+            context.Message.Credentials.Username.ShouldBe("sa");
         }
 
         Task<ConsumeContext<SecureCommand<ExecuteSql>>> _secureCommandHandler;

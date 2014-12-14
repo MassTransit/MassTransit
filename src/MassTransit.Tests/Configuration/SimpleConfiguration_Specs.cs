@@ -13,15 +13,16 @@
 namespace MassTransit.Tests.Configuration
 {
 	using Magnum.Extensions;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using Messages;
+	using Shouldly;
 	using TestFramework.Messages;
 
 
-    [Scenario]
+    
 	public class When_configuring_a_service_bus_easily
 	{
-		[Then]
+		[Test]
 		public void Configuring_a_service_bus_easily()
 		{
 		    using (var bus = ServiceBusFactory.New(x => { x.ReceiveFrom("loopback://localhost/queue"); }))
@@ -32,7 +33,7 @@ namespace MassTransit.Tests.Configuration
 
 				bus.Publish(new PingMessage());
 
-				received.IsAvailable(8.Seconds()).ShouldBeTrue();
+				received.IsAvailable(8.Seconds()).ShouldBe(true);
 			}
 		}
 	}

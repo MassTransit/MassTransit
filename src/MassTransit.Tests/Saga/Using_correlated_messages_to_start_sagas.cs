@@ -14,34 +14,35 @@ namespace MassTransit.Tests.Saga
 {
 	using System;
 	using System.Linq.Expressions;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using MassTransit.Saga.Pipeline;
+	using Shouldly;
 
-	[Scenario]
-	public class When_using_correlated_messages_to_start_sagas
+
+    public class When_using_correlated_messages_to_start_sagas
 	{
 		CorrelationExpressionToSagaIdVisitor<SimpleSaga, InitiateSimpleSaga> _builder;
 
-		[When]
+		[SetUp]
 		public void Using_correlated_messages_to_start_sagas()
 		{
 			_builder = new CorrelationExpressionToSagaIdVisitor<SimpleSaga, InitiateSimpleSaga>();
 		}
 
-		[Then]
+		[Test]
 		public void Should_return_null_if_the_expression_does_not_use_a_correlation_id()
 		{
 			Expression<Func<InitiateSimpleSaga, Guid>> expression = _builder.Build((saga, message) => 1 == 3);
 
-			expression.ShouldBeNull();
+			expression.ShouldBe(null);
 		}
 
-		[Then]
+		[Test]
 		public void Should_return_an_expression_that_gets_the_correlation_value_if_matched()
 		{
 			Expression<Func<InitiateSimpleSaga, Guid>> exp = _builder.Build((saga, message) => saga.CorrelationId == message.CorrelationId);
 
-			exp.ShouldNotBeNull();
+			exp.ShouldNotBe(null);
 
 			var call = exp.Compile();
 
@@ -49,7 +50,7 @@ namespace MassTransit.Tests.Saga
 
 			Guid value = call(m);
 
-			value.ShouldEqual(m.CorrelationId);
+			value.ShouldBe(m.CorrelationId);
 
 		}
 	}

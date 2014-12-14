@@ -12,15 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Testing
 {
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using MassTransit.Testing;
+	using Shouldly;
 
-	[Scenario]
-	public class Using_the_handler_test_factory
+
+    public class Using_the_handler_test_factory
 	{
 		HandlerTest<A> _test;
 
-		[When]
+		[SetUp]
 		public void Setup()
 		{
 			_test = TestFactory.ForHandler<A>()
@@ -33,47 +34,47 @@ namespace MassTransit.Tests.Testing
 			_test.Execute();
 		}
 
-		[Finally]
+		[TearDown]
 		public void Teardown()
 		{
 			_test.Dispose();
 			_test = null;
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_received_a_message_of_type_a()
 		{
-			_test.Received.Any<A>().ShouldBeTrue();
+			_test.Received.Any<A>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_skipped_a_message_of_type_b()
 		{
-			_test.Skipped.Any<B>().ShouldBeTrue();
+			_test.Skipped.Any<B>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_not_have_skipped_a_message_of_type_a()
 		{
-			_test.Skipped.Any<A>().ShouldBeFalse();
+			_test.Skipped.Any<A>().ShouldBe(false);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_sent_a_message_of_type_a()
 		{
-			_test.Sent.Any<A>().ShouldBeTrue();
+			_test.Sent.Any<A>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_sent_a_message_of_type_b()
 		{
-			_test.Sent.Any<B>().ShouldBeTrue();
+			_test.Sent.Any<B>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_support_a_simple_handler()
 		{
-			_test.Handler.Received.Any().ShouldBeTrue();
+			_test.Handler.Received.Any().ShouldBe(true);
 		}
 
 		class A
@@ -85,12 +86,12 @@ namespace MassTransit.Tests.Testing
 		}
 	}
 
-	[Scenario]
+	
 	public class Using_the_handler_on_a_remote_bus
 	{
 		HandlerTest<A> _test;
 
-		[When]
+		[SetUp]
 		public void Setup()
 		{
 			_test = TestFactory.ForHandler<A>()
@@ -103,47 +104,47 @@ namespace MassTransit.Tests.Testing
 			_test.Execute();
 		}
 
-		[Finally]
+		[TearDown]
 		public void Teardown()
 		{
 			_test.Dispose();
 			_test = null;
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_received_a_message_of_type_a()
 		{
-			_test.Received.Any<A>().ShouldBeTrue();
+			_test.Received.Any<A>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_skipped_a_message_of_type_b()
 		{
-			_test.Skipped.Any<B>().ShouldBeTrue();
+			_test.Skipped.Any<B>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_not_have_skipped_a_message_of_type_a()
 		{
-			_test.Skipped.Any<A>().ShouldBeFalse();
+			_test.Skipped.Any<A>().ShouldBe(false);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_sent_a_message_of_type_a()
 		{
-			_test.Sent.Any<A>().ShouldBeTrue();
+			_test.Sent.Any<A>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_sent_a_message_of_type_b()
 		{
-			_test.Sent.Any<B>().ShouldBeTrue();
+			_test.Sent.Any<B>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_support_a_simple_handler()
 		{
-			_test.Handler.Received.Any().ShouldBeTrue();
+			_test.Handler.Received.Any().ShouldBe(true);
 		}
 
 		class A
@@ -155,12 +156,12 @@ namespace MassTransit.Tests.Testing
 		}
 	}
 
-	[Scenario]
+	
 	public class Publishing_to_a_handler_test
 	{
 		HandlerTest<A> _test;
 
-		[When]
+		[SetUp]
 		public void Setup()
 		{
 			_test = TestFactory.ForHandler<A>()
@@ -173,53 +174,53 @@ namespace MassTransit.Tests.Testing
 			_test.Execute();
 		}
 
-		[Finally]
+		[TearDown]
 		public void Teardown()
 		{
 			_test.Dispose();
 			_test = null;
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_received_a_message_of_type_a()
 		{
-			_test.Received.Any<A>().ShouldBeTrue();
+			_test.Received.Any<A>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_published_a_message_of_type_b()
 		{
-			_test.Published.Any<B>().ShouldBeTrue();
+			_test.Published.Any<B>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_published_a_message_of_type_ib()
 		{
-			_test.Published.Any<IB>().ShouldBeTrue();
+			_test.Published.Any<IB>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_not_have_skipped_a_message_of_type_a()
 		{
-			_test.Skipped.Any<A>().ShouldBeFalse();
+			_test.Skipped.Any<A>().ShouldBe(false);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_sent_a_message_of_type_a()
 		{
-			_test.Sent.Any<A>().ShouldBeTrue();
+			_test.Sent.Any<A>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_not_have_sent_a_message_of_type_b()
 		{
-			_test.Sent.Any<B>().ShouldBeFalse();
+			_test.Sent.Any<B>().ShouldBe(false);
 		}
 
-		[Then]
+		[Test]
 		public void Should_support_a_simple_handler()
 		{
-			_test.Handler.Received.Any().ShouldBeTrue();
+			_test.Handler.Received.Any().ShouldBe(true);
 		}
 
 		class A

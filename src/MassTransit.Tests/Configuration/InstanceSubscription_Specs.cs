@@ -13,20 +13,20 @@
 namespace MassTransit.Tests.Configuration
 {
 	using Magnum.Extensions;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using Messages;
 	using TestFramework;
 	using TestFramework.Messages;
 
 
-    [Scenario]
+    
 	public class When_subscribing_an_object_instance_to_the_bus 
 	{
 		IServiceBus _bus;
 		ConsumerOf<PingMessage> _consumer;
 		PingMessage _ping;
 
-		[When]
+		[SetUp]
 		public void Subscribing_an_object_instance_to_the_bus()
 		{
 			_consumer = new ConsumerOf<PingMessage>();
@@ -44,13 +44,13 @@ namespace MassTransit.Tests.Configuration
 			_bus.Publish(_ping);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_subscribed()
 		{
 			_bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_received_the_message()
 		{
 			_consumer.ShouldHaveReceived(_ping, 8.Seconds());

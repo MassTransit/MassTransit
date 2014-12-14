@@ -17,10 +17,11 @@ namespace MassTransit.Tests.Serialization
     using System.Linq;
     using System.Text;
     using Context;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Serialization;
     using Messages;
     using NUnit.Framework;
+    using Shouldly;
     using TestFramework.Messages;
 
 
@@ -56,11 +57,11 @@ namespace MassTransit.Tests.Serialization
 				serializer.Deserialize(receiveContext);
 
 				IConsumeContext<PingMessage> context;
-				receiveContext.TryGetContext<PingMessage>(out context).ShouldBeTrue();
+				receiveContext.TryGetContext<PingMessage>(out context).ShouldBe(true);
 
-				context.ShouldNotBeNull();
+				context.ShouldNotBe(null);
 
-				context.Message.ShouldEqual(Message);
+				context.Message.ShouldBe(Message);
             }
         }
     }

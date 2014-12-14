@@ -15,8 +15,9 @@ namespace MassTransit.Tests
     using System;
     using System.Threading.Tasks;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -30,7 +31,7 @@ namespace MassTransit.Tests
         {
             PongMessage message = await _response;
 
-            message.CorrelationId.ShouldEqual(_ping.Result.Message.CorrelationId);
+            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
 
         Task<ConsumeContext<PingMessage>> _ping;

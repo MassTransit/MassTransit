@@ -14,39 +14,40 @@ namespace MassTransit.Tests.Configuration
 {
     using System;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
+    using Shouldly;
 
-    [Scenario]
+
     public class When_using_default_settings
     {
         IServiceBus _bus;
 
-        [When]
+        [SetUp]
          public void When_creating_a_bus_with_defaults()
         {
             _bus = ServiceBusFactory.New(x => x.ReceiveFrom("loopback://localhost/mt_test"));
         }
 
-        [Then]
+        [Test]
         public void Should_have_shutdown_timeout_of_60_seconds()
         {
-            _bus.ShutdownTimeout.ShouldEqual(60.Seconds());
+            _bus.ShutdownTimeout.ShouldBe(60.Seconds());
         }
 
-        [Finally]
+        [TearDown]
         public void Finally()
         {
             _bus.Dispose();
         }
     }
 
-    [Scenario]
+    
     public class When_using_custom_timeout
     {
         IServiceBus _bus;
         TimeSpan _timeout;
 
-        [When]
+        [SetUp]
         public void When_creating_a_bus_with_and_configuring_a_custom_shutdown_timeout()
         {
             _timeout = 90.Seconds();
@@ -57,13 +58,13 @@ namespace MassTransit.Tests.Configuration
             });
         }
 
-        [Then]
+        [Test]
         public void Should_have_the_correct_shutdown_timeout()
         {
-            _bus.ShutdownTimeout.ShouldEqual(_timeout);
+            _bus.ShutdownTimeout.ShouldBe(_timeout);
         }
 
-        [Finally]
+        [TearDown]
         public void Finally()
         {
             _bus.Dispose();

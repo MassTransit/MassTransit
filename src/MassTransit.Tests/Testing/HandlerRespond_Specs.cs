@@ -12,15 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Testing
 {
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using MassTransit.Testing;
+	using Shouldly;
 
-	[Scenario]
-	public class When_a_handler_responds_to_a_message
+
+    public class When_a_handler_responds_to_a_message
 	{
 		HandlerTest<A> _test;
 
-		[When]
+		[SetUp]
 		public void A_handler_responds_to_a_message()
 		{
 			_test = TestFactory.ForHandler<A>()
@@ -34,23 +35,23 @@ namespace MassTransit.Tests.Testing
 			_test.Execute();
 		}
 
-		[Finally]
+		[TearDown]
 		public void Teardown()
 		{
 			_test.Dispose();
 			_test = null;
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_sent_a_message_of_type_b()
 		{
-			_test.Sent.Any<B>().ShouldBeTrue();
+			_test.Sent.Any<B>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_support_a_simple_handler()
 		{
-			_test.Handler.Received.Any().ShouldBeTrue();
+			_test.Handler.Received.Any().ShouldBe(true);
 		}
 
 		class A
@@ -62,12 +63,12 @@ namespace MassTransit.Tests.Testing
 		}
 	}
 
-	[Scenario]
+	
 	public class When_a_handler_responds_to_a_message_using_context
 	{
 		HandlerTest<A> _test;
 
-		[When]
+		[SetUp]
 		public void A_handler_responds_to_a_message_using_context()
 		{
 			_test = TestFactory.ForHandler<A>()
@@ -81,23 +82,23 @@ namespace MassTransit.Tests.Testing
 			_test.Execute();
 		}
 
-		[Finally]
+		[TearDown]
 		public void Teardown()
 		{
 			_test.Dispose();
 			_test = null;
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_sent_a_message_of_type_b()
 		{
-			_test.Sent.Any<B>().ShouldBeTrue();
+			_test.Sent.Any<B>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_support_a_simple_handler()
 		{
-			_test.Handler.Received.Any().ShouldBeTrue();
+			_test.Handler.Received.Any().ShouldBe(true);
 		}
 
 		class A

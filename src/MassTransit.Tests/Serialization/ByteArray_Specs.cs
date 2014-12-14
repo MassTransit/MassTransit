@@ -12,17 +12,18 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Testing;
+    using Shouldly;
 
-    [Scenario]
+
     public class When_a_byte_array_value_is_serialized
     {
         A _received;
         A _sent;
         HandlerTest<A> _test;
 
-        [When]
+        [SetUp]
         public void Setup()
         {
             _test = TestFactory.ForHandler<A>()
@@ -39,20 +40,20 @@ namespace MassTransit.Tests.Serialization
 
             _test.Execute();
 
-            _test.Received.Any<A>().ShouldBeTrue();
+            _test.Received.Any<A>().ShouldBe(true);
         }
 
-        [Finally]
+        [TearDown]
         public void Teardown()
         {
             _test.Dispose();
             _test = null;
         }
 
-        [Then]
+        [Test]
         public void Should_receive_byte_array()
         {
-            _sent.Contents.ShouldEqual(_received.Contents);
+            _sent.Contents.ShouldBe(_received.Contents);
         }
 
         class A

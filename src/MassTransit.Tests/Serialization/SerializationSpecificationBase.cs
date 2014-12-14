@@ -17,9 +17,11 @@ namespace MassTransit.Tests.Serialization
     using System.IO;
     using System.Text;
     using Context;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Serialization;
     using NUnit.Framework;
+    using Shouldly;
+
 
     public class SerializationSpecificationBase<TSerializer> 
 		where TSerializer : IMessageSerializer, new()
@@ -64,10 +66,10 @@ namespace MassTransit.Tests.Serialization
 				serializer.Deserialize(context);
 
 				IConsumeContext<T> messageContext;
-				context.TryGetContext<T>(out messageContext).ShouldBeTrue();
+				context.TryGetContext<T>(out messageContext).ShouldBe(true);
 
-				messageContext.ShouldNotBeNull();
-            	message.Equals(messageContext.Message).ShouldBeTrue();
+				messageContext.ShouldNotBe(null);
+            	message.Equals(messageContext.Message).ShouldBe(true);
 				message.ShouldNotBeTheSameAs(messageContext.Message);
 
 			

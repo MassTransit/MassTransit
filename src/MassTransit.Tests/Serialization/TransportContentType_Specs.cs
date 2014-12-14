@@ -2,14 +2,15 @@ namespace MassTransit.Tests.Serialization
 {
 	using System.Text;
 	using Context;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
+	using Shouldly;
 
-	[Scenario]
-	public class When_a_message_is_send_using_a_transport
+
+    public class When_a_message_is_send_using_a_transport
 	{
 		byte[] _bytes;
 
-		[When]
+		[SetUp]
 		public void A_message_is_send_using_a_transport()
 		{
 			var headers = new TransportMessageHeaders();
@@ -18,28 +19,28 @@ namespace MassTransit.Tests.Serialization
 			_bytes = headers.GetBytes();
 		}
 
-		[Then]
+		[Test]
 		public void Should_include_the_content_type_as_a_binary_header()
 		{
 			string value = Encoding.UTF8.GetString(_bytes);
 
-			value.ShouldEqual("{\"Content-Type\":\"application/vnd.masstransit+json\"}");
+			value.ShouldBe("{\"Content-Type\":\"application/vnd.masstransit+json\"}");
 		}
 
-		[Then]
+		[Test]
 		public void Should_reload_the_byte_array_into_a_headers_object()
 		{
 			var headers = TransportMessageHeaders.Create(_bytes);
 
-			headers["Content-Type"].ShouldEqual("application/vnd.masstransit+json");
+			headers["Content-Type"].ShouldBe("application/vnd.masstransit+json");
 		}
 
-		[Then]
+		[Test]
 		public void Should_return_an_empty_array_for_no_headers()
 		{
 			var headers = new TransportMessageHeaders();
 			headers.Add("Content-Type", null);
-			headers.GetBytes().Length.ShouldEqual(0);
+			headers.GetBytes().Length.ShouldBe(0);
 		}
 	}
 }

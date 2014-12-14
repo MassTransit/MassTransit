@@ -12,15 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Testing
 {
-    using Magnum.TestFramework;
+    using NUnit.Framework;
 	using MassTransit.Testing;
+    using Shouldly;
 
-	[Scenario]
-	public class When_a_consumer_with_multiple_message_consumers_is_tested
+
+    public class When_a_consumer_with_multiple_message_consumers_is_tested
 	{
 		ConsumerTest<BusTestScenario, Testsumer> _test;
 
-		[When]
+		[SetUp]
 		public void A_consumer_is_being_tested()
 		{
 			_test = TestFactory.ForConsumer<Testsumer>()
@@ -35,35 +36,35 @@ namespace MassTransit.Tests.Testing
 			_test.Execute();
 		}
 
-		[Finally]
+		[TearDown]
 		public void Teardown()
 		{
 			_test.Dispose();
 			_test = null;
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_sent_the_aa_response_from_the_consumer()
 		{
-			_test.Sent.Any<Aa>().ShouldBeTrue();
+			_test.Sent.Any<Aa>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_sent_the_bb_response_from_the_consumer()
 		{
-			_test.Sent.Any<Bb>().ShouldBeTrue();
+			_test.Sent.Any<Bb>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_called_the_consumer_a_method()
 		{
-			_test.Consumer.Received.Any<A>().ShouldBeTrue();
+			_test.Consumer.Received.Any<A>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_called_the_consumer_b_method()
 		{
-			_test.Consumer.Received.Any<B>().ShouldBeTrue();
+			_test.Consumer.Received.Any<B>().ShouldBe(true);
 		}
 
 		class Testsumer :

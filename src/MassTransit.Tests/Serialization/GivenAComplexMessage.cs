@@ -6,10 +6,12 @@
     using System.Text;
     using Context;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Serialization;
     using Messages;
     using NUnit.Framework;
+    using Shouldly;
+
 
     public abstract class GivenAComplexMessage<TSerializer> where TSerializer : IMessageSerializer, new()
     {
@@ -56,11 +58,11 @@
             	serializer.Deserialize(receiveContext);
 
             	IConsumeContext<SerializationTestMessage> context;
-            	receiveContext.TryGetContext<SerializationTestMessage>(out context).ShouldBeTrue();
+            	receiveContext.TryGetContext<SerializationTestMessage>(out context).ShouldBe(true);
 
-            	context.ShouldNotBeNull();
+            	context.ShouldNotBe(null);
 
-            	context.Message.ShouldEqual(Message);
+            	context.Message.ShouldBe(Message);
             }
         }
     }

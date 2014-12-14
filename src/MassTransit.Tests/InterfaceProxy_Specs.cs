@@ -15,8 +15,9 @@ namespace MassTransit.Tests
     using System;
     using System.Threading.Tasks;
     using EndpointConfigurators;
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
 
 
@@ -29,7 +30,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
-            message.Message.CorrelationId.ShouldEqual(_correlationId);
+            message.Message.CorrelationId.ShouldBe(_correlationId);
         }
 
         [Test]
@@ -37,7 +38,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
-            message.Message.IntValue.ShouldEqual(IntValue);
+            message.Message.IntValue.ShouldBe(IntValue);
         }
 
         [Test]
@@ -51,7 +52,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
-            message.Message.StringValue.ShouldEqual(StringValue);
+            message.Message.StringValue.ShouldBe(StringValue);
         }
 
         const int IntValue = 42;

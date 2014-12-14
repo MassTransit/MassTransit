@@ -64,9 +64,6 @@
     <Reference Include="Magnum">
       <HintPath>..\Packages\Magnum.2.1.2\lib\NET40\Magnum.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum.TestFramework">
-      <HintPath>..\Packages\Magnum.TestFramework.2.1.2\lib\NET40\Magnum.TestFramework.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -78,6 +75,9 @@
     <Reference Include="Rhino.Mocks, Version=3.6.0.0, Culture=neutral, PublicKeyToken=0b3305902db7183f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
+    </Reference>
+    <Reference Include="Shouldly">
+      <HintPath>..\packages\Shouldly.2.3.0\lib\net40\Shouldly.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">

@@ -14,18 +14,19 @@ namespace MassTransit.Tests.Testing
 {
 	using System;
 	using System.Linq.Expressions;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using MassTransit.Saga;
 	using MassTransit.Testing;
+	using Shouldly;
 
-	[Scenario]
-	public class When_a_saga_is_being_tested
+
+    public class When_a_saga_is_being_tested
 	{
 		Guid _sagaId;
 		SagaTest<BusTestScenario, TestSaga> _test;
 		string _testValueA;
 
-		[When]
+		[SetUp]
 		public void A_saga_is_being_tested()
 		{
 			_sagaId = Guid.NewGuid();
@@ -45,7 +46,7 @@ namespace MassTransit.Tests.Testing
 			_test.Execute();
 		}
 
-		[Finally]
+		[TearDown]
 		public void Teardown()
 		{
 			_test.Dispose();
@@ -53,43 +54,43 @@ namespace MassTransit.Tests.Testing
 		}
 
 
-		[Then]
+		[Test]
 		public void Should_send_the_initial_message_to_the_consumer()
 		{
-			_test.Sent.Any<A>().ShouldBeTrue();
+			_test.Sent.Any<A>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_receive_the_message_type_a()
 		{
-			_test.Received.Any<A>().ShouldBeTrue();
+			_test.Received.Any<A>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_create_a_new_saga_for_the_message()
 		{
-			_test.Saga.Created.Any(x => x.CorrelationId == _sagaId).ShouldBeTrue();
+			_test.Saga.Created.Any(x => x.CorrelationId == _sagaId).ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_the_saga_instance_with_the_value()
 		{
 			TestSaga saga = _test.Saga.Created.Contains(_sagaId);
-			saga.ShouldNotBeNull();
+			saga.ShouldNotBe(null);
 
-			saga.ValueA.ShouldEqual(_testValueA);
+			saga.ValueA.ShouldBe(_testValueA);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_published_event_message()
 		{
-			_test.Published.Any<Aa>().ShouldBeTrue();
+			_test.Published.Any<Aa>().ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_called_the_consumer_method()
 		{
-			_test.Saga.Received.Any<A>().ShouldBeTrue();
+			_test.Saga.Received.Any<A>().ShouldBe(true);
 		}
 
 		class TestSaga :

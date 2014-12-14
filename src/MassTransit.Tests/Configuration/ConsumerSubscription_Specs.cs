@@ -14,19 +14,19 @@ namespace MassTransit.Tests.Configuration
 {
     using System;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using Messages;
     using TestFramework;
     using TestFramework.Messages;
 
 
-    [Scenario]
+    
     public class When_subscribing_a_consumer_to_the_bus
     {
         IServiceBus _bus;
         PingMessage _ping;
 
-        [When]
+        [SetUp]
         public void Subscribing_a_consumer_to_the_bus()
         {
             _bus = ServiceBusFactory.New(x =>
@@ -40,32 +40,32 @@ namespace MassTransit.Tests.Configuration
             _bus.Publish(_ping);
         }
 
-        [Finally]
+        [TearDown]
         public void Finally()
         {
             _bus.Dispose();
         }
 
-        [Then]
+        [Test]
         public void Should_have_subscribed()
         {
             _bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
         }
 
-        [Then]
+        [Test]
         public void Should_have_received_the_message()
         {
             ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping, 8.Seconds());
         }
     }
 
-    [Scenario]
+    
     public class When_subscribing_a_type_of_consumer_to_the_bus
     {
         IServiceBus _bus;
         PingMessage _ping;
 
-        [When]
+        [SetUp]
         public void Subscribing_a_consumer_to_the_bus()
         {
             _bus = ServiceBusFactory.New(x =>
@@ -79,26 +79,26 @@ namespace MassTransit.Tests.Configuration
             _bus.Publish(_ping);
         }
 
-        [Finally]
+        [TearDown]
         public void Finally()
         {
             _bus.Dispose();
         }
 
-        [Then]
+        [Test]
         public void Should_have_subscribed()
         {
             _bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
         }
 
-        [Then]
+        [Test]
         public void Should_have_received_the_message()
         {
             ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping, 12.Seconds());
         }
     }
 
-    [Scenario]
+    
     public class When_subscribing_a_consumer_to_the_bus_with_a_factory_method
     {
         IServiceBus _bus;
@@ -106,7 +106,7 @@ namespace MassTransit.Tests.Configuration
         PingMessage _ping2;
 
 
-        [When]
+        [SetUp]
         public void Subscribing_a_consumer_to_the_bus()
         {
             _bus = ServiceBusFactory.New(x =>
@@ -123,25 +123,25 @@ namespace MassTransit.Tests.Configuration
             _bus.Publish(_ping2);
         }
 
-        [Finally]
+        [TearDown]
         public void Finally()
         {
             _bus.Dispose();
         }
 
-        [Then]
+        [Test]
         public void Should_have_subscribed()
         {
             _bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
         }
 
-        [Then]
+        [Test]
         public void Should_have_received_the_message()
         {
             ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping1, 12.Seconds());
         }
 
-        [Then]
+        [Test]
         public void Should_have_received_the_second_message()
         {
             ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping2, 12.Seconds());

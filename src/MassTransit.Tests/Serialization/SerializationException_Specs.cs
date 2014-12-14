@@ -14,13 +14,14 @@ namespace MassTransit.Tests.Serialization
 {
     using System;
     using BusConfigurators;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Transports;
+    using Shouldly;
     using TestFramework;
     using TextFixtures;
     using Util;
 
-    [Scenario]
+    
     public class When_a_message_deserialization_exception_occurs
         : LoopbackTestFixture
     {
@@ -31,7 +32,7 @@ namespace MassTransit.Tests.Serialization
             //configurator.Subscribe(s => { s.Handler<BadMessage>(async x => { }); });
         }
 
-        [Then]
+        [Test]
         public void Should_put_message_in_error_queue()
         {
             LocalBus.Endpoint.Send(new BadMessage("Good"));
@@ -43,9 +44,9 @@ namespace MassTransit.Tests.Serialization
             LocalBus.Endpoint.ShouldNotContain<BadMessage>();
 
             var errorTransport = LocalBus.Endpoint.ErrorTransport as LoopbackTransport;
-            errorTransport.ShouldNotBeNull();
+            errorTransport.ShouldNotBe(null);
 
-            errorTransport.Count.ShouldEqual(1);
+            errorTransport.Count.ShouldBe(1);
         }
 
         class BadMessage
