@@ -14,10 +14,12 @@ namespace MassTransit.TestFramework
 {
     using System;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Transports;
     using NUnit.Framework;
     using Serialization;
+    using Shouldly;
+
 
     public static class ExtensionsForTestingEndpoints
     {
@@ -28,8 +30,8 @@ namespace MassTransit.TestFramework
 
             transport.Receive(context =>
                 {
-                    context.ShouldNotBeNull();
-                    context.ShouldBeAnInstanceOf<IReceiveContext>();
+                    context.ShouldNotBe(null);
+                    context.ShouldBeOfType<IReceiveContext>();
 
                     serializer.Deserialize(context);
 
@@ -43,8 +45,8 @@ namespace MassTransit.TestFramework
                     return null;
                 }, TimeSpan.FromSeconds(8));
 
-            future.IsCompleted.ShouldBeTrue(transport.Address + " should contain a message of type " +
-                                            typeof(TMessage).Name);
+            future.IsCompleted.ShouldBe(true); //(transport.Address + " should contain a message of type " +
+                                           // typeof(TMessage).Name);
         }
 
         public static void ShouldContain(this IInboundTransport transport, IMessageSerializer serializer,
@@ -54,8 +56,8 @@ namespace MassTransit.TestFramework
 
             transport.Receive(context =>
                 {
-                    context.ShouldNotBeNull();
-                    context.ShouldBeAnInstanceOf<IReceiveContext>();
+                    context.ShouldNotBe(null);
+                    context.ShouldBeOfType<IReceiveContext>();
 
                     serializer.Deserialize(context);
 
@@ -68,8 +70,8 @@ namespace MassTransit.TestFramework
                     return null;
                 }, TimeSpan.FromSeconds(8));
 
-            future.IsCompleted.ShouldBeTrue(transport.Address + " should contain a message of type " +
-                                            messageType.ToShortTypeName());
+            future.IsCompleted.ShouldBe(true);//True(transport.Address + " should contain a message of type " +
+                                            //messageType.ToShortTypeName());
         }
 
         public static void ShouldContain<TMessage>(this IEndpoint endpoint)
@@ -79,8 +81,8 @@ namespace MassTransit.TestFramework
 
             endpoint.Receive(context =>
                 {
-                    context.ShouldNotBeNull();
-                    context.ShouldBeAnInstanceOf<IReceiveContext>();
+                    context.ShouldNotBe(null);
+                    context.ShouldBeOfType<IReceiveContext>();
 
                     IConsumeContext<TMessage> messageContext;
                     if (context.TryGetContext(out messageContext))
@@ -92,8 +94,8 @@ namespace MassTransit.TestFramework
                     return null;
                 }, TimeSpan.FromSeconds(8));
 
-            future.IsCompleted.ShouldBeTrue(endpoint.Address + " should contain a message of type " +
-                                            typeof(TMessage).Name);
+            future.IsCompleted.ShouldBe(true);//True(endpoint.Address + " should contain a message of type " +
+                                            //typeof(TMessage).Name);
         }
 
         public static void ShouldContain<TMessage>(this IEndpoint endpoint, TMessage expectedMessage)
@@ -115,8 +117,8 @@ namespace MassTransit.TestFramework
             {
                 endpoint.Receive(context =>
                     {
-                        context.ShouldNotBeNull();
-                        context.ShouldBeAnInstanceOf<IReceiveContext>();
+                        context.ShouldNotBe(null);
+                        context.ShouldBeOfType<IReceiveContext>();
 
                         IConsumeContext<TMessage> messageContext;
                         if (context.TryGetContext(out messageContext))
@@ -130,9 +132,9 @@ namespace MassTransit.TestFramework
                     }, remaining);
             }
 
-            future.IsCompleted.ShouldBeTrue(endpoint.Address + " should contain a message of type " +
-                                            typeof(TMessage).Name +
-                                            " with correlation id " + expectedMessage.CorrelationId);
+            future.IsCompleted.ShouldBe(true);//True(endpoint.Address + " should contain a message of type " +
+                                            //typeof(TMessage).Name +
+                                            //" with correlation id " + expectedMessage.CorrelationId);
         }
 
         public static void ShouldNotContain<TMessage>(this IEndpoint endpoint)
@@ -140,8 +142,8 @@ namespace MassTransit.TestFramework
         {
             endpoint.Receive(context =>
                 {
-                    context.ShouldNotBeNull();
-                    context.ShouldBeAnInstanceOf<IReceiveContext>();
+                    context.ShouldNotBe(null);
+                    context.ShouldBeOfType<IReceiveContext>();
 
                     if (context.IsContextAvailable(typeof(TMessage)))
                     {
@@ -157,8 +159,8 @@ namespace MassTransit.TestFramework
         {
             endpoint.Receive(context =>
                 {
-                    context.ShouldNotBeNull();
-                    context.ShouldBeAnInstanceOf<IReceiveContext>();
+                    context.ShouldNotBe(null);
+                    context.ShouldBeOfType<IReceiveContext>();
 
                     IConsumeContext<TMessage> messageContext;
                     if (context.TryGetContext(out messageContext))
