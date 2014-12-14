@@ -13,23 +13,23 @@
 namespace MassTransit.Tests
 {
 	using System;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using NUnit.Framework;
 	using Util;
 	using Magnum.Extensions;
 
-	[Scenario]
+	
 	public class Advanced_Uri_Specs
 	{
 		Uri _baseUri;
 
-		[When]
+		[SetUp]
 		public void There_s_an_advanced_uri()
 		{
 			_baseUri = new Uri("rabbitmq://testUser:topSecret@localhost:5672/mt/test_queue?a_query=23");
 		}
 
-		[Then]
+		[Test]
 		public void The_uri_extensions_are_capable_of_parsing_it()
 		{
 			Assert.That(
@@ -37,18 +37,18 @@ namespace MassTransit.Tests
 					.ToString(), Is.EqualTo("rabbitmq://testUser:topSecret@localhost:5672/mt/test_queue_error?a_query=23"));
 		}
 	}
-	[Scenario]
+	
 	public class Simple_Uri_Specs
 	{
 		Uri _baseUri;
 
-		[When]
+		[SetUp]
 		public void There_s_a_simple_uri()
 		{
 			_baseUri = new Uri("rabbitmq://a:5672/");
 		}
 
-		[Then]
+		[Test]
 		public void Can_append_to_path()
 		{
 			Assert.That(
@@ -56,7 +56,7 @@ namespace MassTransit.Tests
 					.ToString(), Is.EqualTo("rabbitmq://a:5672/q"));
 		}
 
-		[Then]
+		[Test]
 		public void Can_append_to_path2()
 		{
 			Assert.That(

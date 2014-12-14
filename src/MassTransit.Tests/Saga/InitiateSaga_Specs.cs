@@ -14,10 +14,11 @@ namespace MassTransit.Tests.Saga
 {
 	using System;
 	using System.Linq;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using MassTransit.Pipeline;
 	using MassTransit.Saga;
 	using NUnit.Framework;
+	using Shouldly;
 	using TestFramework;
 	using TextFixtures;
 
@@ -48,7 +49,7 @@ namespace MassTransit.Tests.Saga
 
 			LocalBus.Endpoint.Send(message);
 
-			_repository.ShouldContainSaga(_sagaId).ShouldNotBeNull();
+			_repository.ShouldContainSaga(_sagaId).ShouldNotBe(null);
 		}
 
 		[Test]
@@ -60,7 +61,7 @@ namespace MassTransit.Tests.Saga
 
 			var saga = _repository.ShouldContainSaga(_sagaId);
 
-			saga.Completed.ShouldBeTrue();
+			saga.Completed.ShouldBe(true);
 		}
 
 		[Test]
@@ -74,7 +75,7 @@ namespace MassTransit.Tests.Saga
 
 			var saga = _repository.ShouldContainSaga(_sagaId);
 
-			saga.Observed.ShouldBeTrue();
+			saga.Observed.ShouldBe(true);
 		}
 	}
 

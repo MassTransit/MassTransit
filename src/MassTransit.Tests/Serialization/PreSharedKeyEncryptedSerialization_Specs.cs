@@ -15,10 +15,11 @@ namespace MassTransit.Tests.Serialization
 	using System;
 	using System.IO;
 	using Context;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using MassTransit.Serialization;
 	using Messages;
 	using NUnit.Framework;
+	using Shouldly;
 	using TestFramework.Messages;
 
 
@@ -68,11 +69,11 @@ namespace MassTransit.Tests.Serialization
 				serializer.Deserialize(receiveContext);
 
 				IConsumeContext<PartialSerializationTestMessage> context;
-				receiveContext.TryGetContext(out context).ShouldBeTrue();
+				receiveContext.TryGetContext(out context).ShouldBe(true);
 
-				context.ShouldNotBeNull();
+				context.ShouldNotBe(null);
 
-				context.Message.ShouldEqual(_message);
+				context.Message.ShouldBe(_message);
 			}
 		}
 
@@ -92,14 +93,14 @@ namespace MassTransit.Tests.Serialization
 			}))
 			{
 				var selfEndpoint = bus.GetEndpoint(new Uri(self));
-				selfEndpoint.ShouldNotBeNull();
+				selfEndpoint.ShouldNotBe(null);
 
 				try
 				{
                     bus.Request(selfEndpoint.Address,pingMessage,  x =>
                     {
                         x.Timeout = TimeSpan.FromSeconds(5);
-						x.Handle<PongMessage>(async context => context.Message.CorrelationId.ShouldEqual(pingMessage.CorrelationId));
+						x.Handle<PongMessage>(async context => context.Message.CorrelationId.ShouldBe(pingMessage.CorrelationId));
 					});
 				}
 				catch (Exception e)

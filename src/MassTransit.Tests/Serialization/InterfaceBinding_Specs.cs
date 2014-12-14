@@ -4,16 +4,17 @@ namespace MassTransit.Tests.Serialization
 	using System.IO;
 	using System.Text;
 	using Context;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using MassTransit.Serialization;
+	using Shouldly;
 
-	[Scenario]
-	public class When_an_interface_message_is_bound
+
+    public class When_an_interface_message_is_bound
 	{
 		string _message;
 		JsonMessageSerializer _serializer;
 
-		[When]
+		[SetUp]
 		public void An_interface_message_is_bound()
 		{
 			_serializer = new JsonMessageSerializer();
@@ -30,7 +31,7 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
-		[Then]
+		[Test]
 		public void Should_receive_the_message_in_the_type_requested()
 		{
 			using (var buffer = new MemoryStream(Encoding.UTF8.GetBytes(_message)))
@@ -39,9 +40,9 @@ namespace MassTransit.Tests.Serialization
 				_serializer.Deserialize(receiveContext);
 
 				IConsumeContext<A> context;
-				receiveContext.TryGetContext<A>(out context).ShouldBeTrue();
+				receiveContext.TryGetContext<A>(out context).ShouldBe(true);
 
-				context.ShouldNotBeNull();
+				context.ShouldNotBe(null);
 			}
 		}
 

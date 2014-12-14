@@ -13,17 +13,18 @@
 namespace MassTransit.Tests.Configuration
 {
     using System;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
 	using MassTransit.Serialization;
 	using MassTransit.Transports;
 	using MassTransit.Transports.Loopback;
+    using Shouldly;
 
-	[Scenario]
-	public class When_configuring_an_endpoint
+
+    public class When_configuring_an_endpoint
 	{
 		IEndpointCache _endpointCache;
 
-		[When]
+		[SetUp]
 		public void Configuring_an_endpoint_serializer()
 		{
 			_endpointCache = EndpointCacheFactory.New(x =>
@@ -41,79 +42,79 @@ namespace MassTransit.Tests.Configuration
 		}
 
 
-		[Finally]
+		[TearDown]
 		public void Finally()
 		{
 			_endpointCache.Dispose();
 		}
 
-		[Then]
+		[Test]
 		public void Should_get_the_endpoint()
 		{
 			IEndpoint endpoint = _endpointCache.GetEndpoint("loopback://localhost/mt_client");
-			endpoint.ShouldNotBeNull();
+			endpoint.ShouldNotBe(null);
 		}
 
-		[Then]
+		[Test]
 		public void Should_be_an_endpoint_class_instance()
 		{
 			IEndpoint endpoint = _endpointCache.GetEndpoint("loopback://localhost/mt_client");
 			var endpointClass = endpoint as Endpoint;
-			endpointClass.ShouldNotBeNull();
+			endpointClass.ShouldNotBe(null);
 		}
 
-		[Then]
+		[Test]
 		public void Should_use_the_specified_message_serializer()
 		{
 			IEndpoint endpoint = _endpointCache.GetEndpoint("loopback://localhost/mt_client");
 			var endpointClass = endpoint as Endpoint;
 			IMessageSerializer serializer = endpointClass.Serializer;
 
-			serializer.ShouldNotBeNull();
-			serializer.ShouldBeAnInstanceOf<XmlMessageSerializer>();
+			serializer.ShouldNotBe(null);
+		    serializer.ShouldBeOfType<XmlMessageSerializer>();
 		}
 
-		[Then]
+		[Test]
 		public void Should_use_the_null_transport_for_faulting_messages()
 		{
 			IEndpoint endpoint = _endpointCache.GetEndpoint("loopback://localhost/mt_client");
 			var endpointClass = endpoint as Endpoint;
-//			endpointClass.ErrorTransport.ShouldBeAnInstanceOf<NullOutboundTransport>();
+//			endpointClass.ErrorTransport.ShouldBeOfType<NullOutboundTransport>();
 		}
 
-		[Then]
+		[Test]
 		public void Should_get_an_unconfigured_endpoint()
 		{
 			IEndpoint endpoint = _endpointCache.GetEndpoint("loopback://localhost/mt_server");
-			endpoint.ShouldNotBeNull();
+			endpoint.ShouldNotBe(null);
 		}
 
-		[Then]
+		[Test]
 		public void Should_use_the_default_serializer_for_unconfigured()
 		{
 			IEndpoint endpoint = _endpointCache.GetEndpoint("loopback://localhost/mt_server");
 			var endpointClass = endpoint as Endpoint;
 			IMessageSerializer serializer = endpointClass.Serializer;
 
-			serializer.ShouldNotBeNull();
-			serializer.ShouldBeAnInstanceOf<XmlMessageSerializer>();
+			serializer.ShouldNotBe(null);
+			serializer.ShouldBeOfType<XmlMessageSerializer>();
 		}
 
-		[Then]
+		[Test]
 		public void Should_use_the_proper_transport_for_unconfigured_endpoint()
 		{
 			IEndpoint endpoint = _endpointCache.GetEndpoint("loopback://localhost/mt_server");
 			var endpointClass = endpoint as Endpoint;
-			endpointClass.ErrorTransport.ShouldBeAnInstanceOf<LoopbackTransport>();
+			endpointClass.ErrorTransport.ShouldBeOfType<LoopbackTransport>();
 		}
 
-		[Then]
+		[Test]
 		public void Should_use_specific_address_for_errors()
 		{
 			IEndpoint endpoint = _endpointCache.GetEndpoint("loopback://localhost/mt_other");
 			var endpointClass = endpoint as Endpoint;
 			IOutboundTransport errorTransport = endpointClass.ErrorTransport;
-			errorTransport.Address.ToString().ShouldEqual("loopback://localhost/mt_error");
+			errorTransport.Address.ToString().ShouldBe("loopback://localhost/mt_error");
 		}
 	}
 }

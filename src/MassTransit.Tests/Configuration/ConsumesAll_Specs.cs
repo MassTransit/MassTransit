@@ -13,18 +13,19 @@
 namespace MassTransit.Tests.Configuration
 {
     using System.Linq;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Configuration;
+    using Shouldly;
     using SubscriptionConnectors;
 
 
-    [Scenario]
+    
     public class When_a_consumer_with_consumes_all_interfaces_is_inspected
     {
         DelegateConsumerFactory<Consumer> _consumerFactory;
         ConsumerConnector<Consumer> _factory;
 
-        [When]
+        [SetUp]
         public void A_consumer_with_consumes_all_interfaces_is_inspected()
         {
             _consumerFactory = new DelegateConsumerFactory<Consumer>(() => new Consumer());
@@ -32,40 +33,40 @@ namespace MassTransit.Tests.Configuration
             _factory = new ConsumerConnector<Consumer>();
         }
 
-        [Then]
+        [Test]
         public void Should_create_the_builder()
         {
-            _factory.ShouldNotBeNull();
+            _factory.ShouldNotBe(null);
         }
 
-        [Then]
+        [Test]
         public void Should_have_four_subscription_types()
         {
-            _factory.Connectors.Count().ShouldEqual(4);
+            _factory.Connectors.Count().ShouldBe(4);
         }
 
-        [Then]
+        [Test]
         public void Should_have_an_a()
         {
-            _factory.Connectors.First().MessageType.ShouldEqual(typeof(A));
+            _factory.Connectors.First().MessageType.ShouldBe(typeof(A));
         }
 
-        [Then]
+        [Test]
         public void Should_have_a_b()
         {
-            _factory.Connectors.Skip(1).First().MessageType.ShouldEqual(typeof(B));
+            _factory.Connectors.Skip(1).First().MessageType.ShouldBe(typeof(B));
         }
 
-        [Then]
+        [Test]
         public void Should_have_a_c()
         {
-            _factory.Connectors.Skip(2).First().MessageType.ShouldEqual(typeof(IC));
+            _factory.Connectors.Skip(2).First().MessageType.ShouldBe(typeof(IC));
         }
 
-        [Then]
+        [Test]
         public void Should_have_a_d()
         {
-            _factory.Connectors.Skip(3).First().MessageType.ShouldEqual(typeof(D<A>));
+            _factory.Connectors.Skip(3).First().MessageType.ShouldBe(typeof(D<A>));
         }
 
 

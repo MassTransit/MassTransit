@@ -13,17 +13,18 @@
 namespace MassTransit.Tests.Serialization
 {
     using System;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Testing;
+    using Shouldly;
 
-    [Scenario]
+
     public class When_a_date_time_value_is_serialized
     {
         A _received;
         A _sent;
         HandlerTest<A> _test;
 
-        [When]
+        [SetUp]
         public void Setup()
         {
             _test = TestFactory.ForHandler<A>()
@@ -41,26 +42,26 @@ namespace MassTransit.Tests.Serialization
 
             _test.Execute();
 
-            _test.Received.Any<A>().ShouldBeTrue();
+            _test.Received.Any<A>().ShouldBe(true);
         }
 
-        [Finally]
+        [TearDown]
         public void Teardown()
         {
             _test.Dispose();
             _test = null;
         }
 
-        [Then]
+        [Test]
         public void Should_receive_the_local_time_as_local_time()
         {
-            _sent.Local.ShouldEqual(_received.Local);
+            _sent.Local.ShouldBe(_received.Local);
         }
 
-        [Then]
+        [Test]
         public void Should_receive_the_universal_time_as_universal_time()
         {
-            _sent.Universal.ShouldEqual(_received.Universal);
+            _sent.Universal.ShouldBe(_received.Universal);
         }
 
         class A

@@ -13,20 +13,21 @@
 namespace MassTransit.Tests.Configuration
 {
 	using Magnum.Extensions;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using Messages;
+	using Shouldly;
 	using TestFramework;
 	using TestFramework.Messages;
 
 
-    [Scenario]
+    
 	public class When_subscribing_a_conditional_handler_to_a_bus
 	{
 		IServiceBus _bus;
 		Future<PingMessage> _conditionChecked;
 		Future<PingMessage> _received;
 
-		[When]
+		[SetUp]
 		public void Subscribing_a_conditional_handler_to_a_bus()
 		{
 			_received = new Future<PingMessage>();
@@ -51,38 +52,38 @@ namespace MassTransit.Tests.Configuration
 			_bus.Publish(new PingMessage());
 		}
 
-		[Finally]
+		[TearDown]
 		public void Finally()
 		{
 			_bus.Dispose();
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_subscribed()
 		{
 			_bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 		}
 
-		[Then]
+		[Test]
 		public void Should_receive_the_message()
 		{
-			_received.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+			_received.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_checked_the_condition()
 		{
-			_conditionChecked.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+			_conditionChecked.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
 		}
 	}
 
-	[Scenario]
+	
 	public class When_subscribing_a_context_handler_to_a_bus
 	{
 		IServiceBus _bus;
 		Future<PingMessage> _received;
 
-		[When]
+		[SetUp]
 		public void Subscribing_a_context_handler_to_a_bus()
 		{
 			_received = new Future<PingMessage>();
@@ -101,22 +102,22 @@ namespace MassTransit.Tests.Configuration
 			_bus.Publish(new PingMessage());
 		}
 
-		[Finally]
+		[TearDown]
 		public void Finally()
 		{
 			_bus.Dispose();
 		}
 
-		[Then]
+		[Test]
 		public void Should_have_subscribed()
 		{
 			_bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 		}
 
-		[Then]
+		[Test]
 		public void Should_receive_the_message()
 		{
-			_received.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+			_received.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
 		}
 	}
 }

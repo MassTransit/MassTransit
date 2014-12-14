@@ -14,9 +14,10 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Pipeline;
     using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -47,7 +48,7 @@ namespace MassTransit.Tests
 
                 await observer.SendFaulted;
 
-                observer.PostSent.Status.ShouldEqual(TaskStatus.WaitingForActivation);
+                observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
             }
         }
 

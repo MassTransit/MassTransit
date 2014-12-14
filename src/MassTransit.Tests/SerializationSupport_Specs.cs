@@ -2,8 +2,9 @@
 {
     using System.Linq;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
     using TextFixtures;
 
@@ -29,9 +30,9 @@
 
             LocalBus.GetEndpoint(RemoteUri).Send(new A { Key = "Hello" });
 
-            _requestReceived.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+            _requestReceived.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
 
-            _responseReceived.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+            _responseReceived.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
 
         }
 

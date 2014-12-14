@@ -12,17 +12,18 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Testing;
+    using Shouldly;
 
-    [Scenario]
+
     public class When_a_message_has_no_default_constructor
     {
         A _received;
         A _sent;
         HandlerTest<A> _test;
 
-        [When]
+        [SetUp]
         public void A_message_has_no_default_constructor()
         {
             _test = TestFactory.ForHandler<A>()
@@ -36,32 +37,32 @@ namespace MassTransit.Tests.Serialization
 
             _test.Execute();
 
-            _test.Received.Any<A>().ShouldBeTrue();
+            _test.Received.Any<A>().ShouldBe(true);
         }
 
-        [Finally]
+        [TearDown]
         public void Teardown()
         {
             _test.Dispose();
             _test = null;
         }
 
-        [Then]
+        [Test]
         public void Should_be_able_to_serialize_the_message()
         {
-            _received.ShouldNotBeNull();
+            _received.ShouldNotBe(null);
         }
 
-        [Then]
+        [Test]
         public void Should_match_the_name()
         {
-            _received.Name.ShouldEqual("Dru");
+            _received.Name.ShouldBe("Dru");
         }
 
-        [Then]
+        [Test]
         public void Should_match_the_value()
         {
-            _received.Value.ShouldEqual("Sellers");
+            _received.Value.ShouldBe("Sellers");
         }
 
         class A

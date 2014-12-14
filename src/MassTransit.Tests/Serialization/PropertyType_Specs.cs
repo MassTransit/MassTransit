@@ -12,9 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Serialization;
     using NUnit.Framework;
+    using Shouldly;
+
 
     [TestFixture]
     public class Serializing_a_property_of_type_char :
@@ -37,7 +39,7 @@ namespace MassTransit.Tests.Serialization
 
             PropertyOfNullableChar result = SerializeAndReturn(obj);
 
-            result.Value.ShouldEqual(obj.Value);
+            result.Value.ShouldBe(obj.Value);
         }
 
         [Test]
@@ -47,7 +49,7 @@ namespace MassTransit.Tests.Serialization
 
             PropertyOfNullableChar result = SerializeAndReturn(obj);
 
-            result.Value.ShouldEqual(obj.Value);
+            result.Value.ShouldBe(obj.Value);
         }
 
         [Test]
@@ -57,7 +59,7 @@ namespace MassTransit.Tests.Serialization
 
             PropertyOfChar result = SerializeAndReturn(obj);
 
-            result.Value.ShouldEqual(obj.Value);
+            result.Value.ShouldBe(obj.Value);
         }
 
         [Test]
@@ -67,7 +69,7 @@ namespace MassTransit.Tests.Serialization
 
             PropertyOfChar result = SerializeAndReturn(obj);
 
-            result.Value.ShouldEqual(obj.Value);
+            result.Value.ShouldBe(obj.Value);
         }
     }
 
@@ -97,7 +99,7 @@ namespace MassTransit.Tests.Serialization
 
             SimpleMessage result = SerializeAndReturn(obj);
 
-            result.Body.ShouldEqual(obj.Body);
+            result.Body.ShouldBe(obj.Body);
         }
     }
 }

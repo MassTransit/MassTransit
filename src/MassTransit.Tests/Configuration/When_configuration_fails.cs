@@ -15,11 +15,9 @@ namespace MassTransit.Tests.Configuration
 	using System;
 	using System.Linq;
 	using Configurators;
-	using Magnum.TestFramework;
 	using NUnit.Framework;
-	using TestFramework;
+	using Shouldly;
 
-	[TestFixture]
 	public class When_configuration_fails
 	{
 		[Test]
@@ -36,10 +34,10 @@ namespace MassTransit.Tests.Configuration
 			catch (ConfigurationException ex)
 			{
 				ex.Result.Results.Any(x => x.Disposition == ValidationResultDisposition.Failure)
-					.ShouldBeTrue("There were no failure results");
+                    .ShouldBe(true); //"There were no failure results"
 
 				ex.Result.Results.Any(x => x.Key == "InputAddress")
-					.ShouldBeTrue("There should have been an InputAddress violation");
+                    .ShouldBe(true); //"There should have been an InputAddress violation"
 			}
 			catch (Exception ex)
 			{
@@ -56,11 +54,11 @@ namespace MassTransit.Tests.Configuration
 				{
 //					x.Subscribe(s => s.Consumer<ConsumerOf<MessageWithNonDefaultCtor>>());
 					x.ReceiveFrom("loopback://localhost/mt_queue");
-					x.Validate()
-						.Any(result => result.Disposition == ValidationResultDisposition.Warning
-									   && result.Message.Contains("default")
-									   && result.Key.Contains("Consumer"))
-						.ShouldBeTrue(string.Format("there should be a warning on message without default c'tors"));
+				    x.Validate()
+				     .Any(result => result.Disposition == ValidationResultDisposition.Warning
+				         && result.Message.Contains("default")
+				         && result.Key.Contains("Consumer"))
+				     .ShouldBe(true);//True(string.Format("there should be a warning on message without default c'tors"));
 				}))
 			{
 			}

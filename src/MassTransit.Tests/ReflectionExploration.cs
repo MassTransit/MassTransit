@@ -16,9 +16,10 @@ namespace MassTransit.Tests
     using System.Collections.Generic;
     using System.Linq;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Saga;
     using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
 
 
@@ -73,10 +74,10 @@ namespace MassTransit.Tests
             var bob = typeof(Bob);
             var x = bob.GetConsumerTypesFiltered();
 
-            x.Alls.Count.ShouldEqual(1, "all");
-            x.Orchestrates.Count.ShouldEqual(0, "orch");
-            x.Initiates.Count.ShouldEqual(0, "init");
-            x.Observers.Count.ShouldEqual(0, "obsrv");
+            x.Alls.Count.ShouldBe(1);//, "all");
+            x.Orchestrates.Count.ShouldBe(0);//, "orch");
+            x.Initiates.Count.ShouldBe(0);//, "init");
+            x.Observers.Count.ShouldBe(0);//, "obsrv");
         }
 
         [Test]
@@ -86,10 +87,10 @@ namespace MassTransit.Tests
             var x = squid.GetConsumerTypesFiltered();
 
 
-            x.Alls.Count.ShouldEqual(0, "all");
-            x.Orchestrates.Count.ShouldEqual(1, "orch");
-            x.Initiates.Count.ShouldEqual(1, "init");
-            x.Observers.Count.ShouldEqual(0, "obsrv");
+            x.Alls.Count.ShouldBe(0);//, "all");
+            x.Orchestrates.Count.ShouldBe(1);//, "orch");
+            x.Initiates.Count.ShouldBe(1);//, "init");
+            x.Observers.Count.ShouldBe(0);//, "obsrv");
         }
     }
 

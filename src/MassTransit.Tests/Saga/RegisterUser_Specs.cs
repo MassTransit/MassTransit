@@ -13,12 +13,13 @@
 namespace MassTransit.Tests.Saga
 {
     using System.Diagnostics;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Subscriptions;
     using Messages;
     using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
     using TextFixtures;
 
@@ -60,14 +61,14 @@ namespace MassTransit.Tests.Saga
 
                 bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
 
-                complete.ShouldBeTrue("The user should be pending");
+                complete.ShouldBe(true);//("The user should be pending");
 
                 timer.Stop();
-                Debug.WriteLine(string.Format("Time to handle message: {0}ms", timer.ElapsedMilliseconds));
+                Debug.WriteLine("Time to handle message: {0}ms", timer.ElapsedMilliseconds);
 
                 complete = controller.ValidateUser();
 
-                complete.ShouldBeTrue("The user should be complete");
+                complete.ShouldBe(true); //("The user should be complete");
             }
         }
     }

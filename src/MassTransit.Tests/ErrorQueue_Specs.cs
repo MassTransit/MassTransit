@@ -15,8 +15,9 @@ namespace MassTransit.Tests
     using System;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -30,7 +31,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.CorrelationId.ShouldEqual(_correlationId);
+            context.CorrelationId.ShouldBe(_correlationId);
         }
 
         [Test]
@@ -38,7 +39,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.DestinationAddress.ShouldEqual(InputQueueAddress);
+            context.DestinationAddress.ShouldBe(InputQueueAddress);
         }
 
         [Test]
@@ -46,7 +47,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.FaultAddress.ShouldEqual(BusAddress);
+            context.FaultAddress.ShouldBe(BusAddress);
         }
 
         [Test]
@@ -54,7 +55,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.ResponseAddress.ShouldEqual(BusAddress);
+            context.ResponseAddress.ShouldBe(BusAddress);
         }
 
         [Test]
@@ -62,7 +63,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.SourceAddress.ShouldEqual(BusAddress);
+            context.SourceAddress.ShouldBe(BusAddress);
         }
 
         [Test]
