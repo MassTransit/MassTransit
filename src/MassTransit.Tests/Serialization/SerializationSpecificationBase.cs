@@ -21,6 +21,7 @@ namespace MassTransit.Tests.Serialization
     using MassTransit.Serialization;
     using NUnit.Framework;
     using Shouldly;
+    using TestFramework;
 
 
     public class SerializationSpecificationBase<TSerializer> 
