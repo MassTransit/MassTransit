@@ -15,6 +15,7 @@ namespace MassTransit.UnityIntegration
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Microsoft.Practices.Unity;
     using Pipeline;
     using Saga;
@@ -33,18 +34,23 @@ namespace MassTransit.UnityIntegration
             _container = container;
         }
 
-        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
-            Guid sagaId, InstanceHandlerSelector<T, TMessage> selector, ISagaPolicy<T, TMessage> policy)
-            where TMessage : class
+//        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
+//            Guid sagaId, InstanceHandlerSelector<T, TMessage> selector, ISagaPolicy<T, TMessage> policy)
+//            where TMessage : class
+//        {
+//            return _repository.GetSaga(context, sagaId, selector, policy)
+//                              .Select(consumer => (Action<IConsumeContext<TMessage>>)(x =>
+//                                  {
+//                                      using (_container.CreateChildContainer())
+//                                      {
+//                                          consumer(x);
+//                                      }
+//                                  }));
+//        }
+
+        public Task Send<T1>(ConsumeContext<T1> context, IPipe<SagaConsumeContext<T, T1>> next) where T1 : class
         {
-            return _repository.GetSaga(context, sagaId, selector, policy)
-                              .Select(consumer => (Action<IConsumeContext<TMessage>>)(x =>
-                                  {
-                                      using (_container.CreateChildContainer())
-                                      {
-                                          consumer(x);
-                                      }
-                                  }));
+            return _repository.Send(context, next);
         }
 
         public IEnumerable<Guid> Find(ISagaFilter<T> filter)

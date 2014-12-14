@@ -362,6 +362,7 @@
     <Compile Include="IRequestClient.cs" />
     <Compile Include="RequestContext.cs" />
     <Compile Include="RequestExtensions.cs" />
+    <Compile Include="SagaConsumeContext.cs" />
     <Compile Include="Scheduling\CancelScheduledMessage.cs" />
     <Compile Include="Scheduling\ScheduledMessage.cs" />
     <Compile Include="Scheduling\ScheduleMessage.cs" />
@@ -587,7 +588,7 @@
     <Compile Include="NewId\NewIdProviders\StopwatchTickProvider.cs" />
     <Compile Include="Pipeline\InstanceHandlerSelector.cs" />
     <Compile Include="Pipeline\MultipleHandlerSelector.cs" />
-    <Compile Include="Saga\CorrelatedSagaLocator.cs" />
+    <Compile Include="Saga\CorrelationIdSagaLocator.cs" />
     <Compile Include="Saga\DelegatingSagaRepository.cs" />
     <Compile Include="Saga\InjectingSagaRepository.cs" />
     <Compile Include="Saga\ISagaFilter.cs" />

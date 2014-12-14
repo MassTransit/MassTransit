@@ -24,7 +24,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IBusFactory
     {
         readonly IList<RabbitMqHost> _hosts;
-        readonly RabbitMqPublishSettings _publishSettings;
         readonly IList<IServiceBusFactoryBuilderConfigurator> _transportBuilderConfigurators;
         RabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
         RabbitMqHost _defaultHost;
@@ -33,13 +32,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public RabbitMqBusFactoryConfigurator()
         {
             _hosts = new List<RabbitMqHost>();
-            _publishSettings = new RabbitMqPublishSettings();
             _transportBuilderConfigurators = new List<IServiceBusFactoryBuilderConfigurator>();
         }
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqServiceBusBuilder(_hosts, _publishSettings, _localAddress);
+            var builder = new RabbitMqServiceBusBuilder(_hosts, _localAddress);
 
             foreach (IServiceBusFactoryBuilderConfigurator configurator in _transportBuilderConfigurators)
                 configurator.Configure(builder);
@@ -89,7 +87,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public void Mandatory(bool mandatory = true)
         {
-            _publishSettings.Mandatory = mandatory;
+//            _publishSettings.Mandatory = mandatory;
         }
 
         public void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback)

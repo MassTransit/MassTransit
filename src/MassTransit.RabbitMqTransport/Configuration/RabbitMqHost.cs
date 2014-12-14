@@ -13,7 +13,6 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using Policies;
-    using RabbitMQ.Client;
 
 
     public class RabbitMqHost
@@ -26,9 +25,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             _hostSettings = hostSettings;
 
-            ConnectionFactory connectionFactory = hostSettings.GetConnectionFactory();
-
-            var connector = new RabbitMqConnector(connectionFactory, Retry.None);
+            var connector = new RabbitMqConnector(hostSettings, Retry.None);
 
             _connectionCache = new RabbitMqConnectionCache(connector);
             _sendConnectionCache = new RabbitMqConnectionCache(connector);

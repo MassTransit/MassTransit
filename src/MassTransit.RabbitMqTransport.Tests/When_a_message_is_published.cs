@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Threading.Tasks;
+    using Configuration;
     using NUnit.Framework;
     using NUnit.Framework;
     using Shouldly;
@@ -41,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<A>> _received;
         Task<ConsumeContext<B>> _receivedB;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _received = Handler<A>(configurator);
             _receivedB = Handler<B>(configurator);

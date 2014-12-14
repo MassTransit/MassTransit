@@ -42,10 +42,10 @@ namespace MassTransit.Saga
             var property = new FastProperty<TSaga, T1>(propertyExpression.GetMemberPropertyInfo(),
                 BindingFlags.NonPublic);
 
-            return new DelegatingSagaRepository<TSaga>(repository, saga =>
+            return new DelegatingSagaRepository<TSaga>(repository, context =>
                 {
-                    T1 value = valueProvider(saga);
-                    property.Set(saga, value);
+                    T1 value = valueProvider(context.Saga);
+                    property.Set(context.Saga, value);
                 });
         }
 
@@ -72,13 +72,13 @@ namespace MassTransit.Saga
             var property2 = new FastProperty<TSaga, T2>(propertyExpression2.GetMemberPropertyInfo(),
                 BindingFlags.NonPublic);
 
-            return new DelegatingSagaRepository<TSaga>(repository, saga =>
+            return new DelegatingSagaRepository<TSaga>(repository, context =>
                 {
-                    T1 value = valueProvider1(saga);
-                    property1.Set(saga, value);
+                    T1 value = valueProvider1(context.Saga);
+                    property1.Set(context.Saga, value);
 
-                    T2 value2 = valueProvider2(saga);
-                    property2.Set(saga, value2);
+                    T2 value2 = valueProvider2(context.Saga);
+                    property2.Set(context.Saga, value2);
                 });
         }
     }

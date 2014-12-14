@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using NUnit.Framework;
     using TestFramework.Messages;
 
@@ -34,14 +35,6 @@ namespace MassTransit.RabbitMqTransport.Tests
             await _requestClient.Request(new PingMessage());
 
             Stopwatch timer = Stopwatch.StartNew();
-
-//            for (int i = 0; i < limit; i++)
-//            {
-//                await _requestClient.Request(new PingMessage());
-//
-//                Interlocked.Increment(ref count);
-//                
-//            }
 
             await Task.WhenAll(Enumerable.Range(0, limit).Select(async x =>
             {
@@ -64,8 +57,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
+            configurator.PrefetchCount = 64;
+
             configurator.Handler<PingMessage>(async context =>
             {
                 try

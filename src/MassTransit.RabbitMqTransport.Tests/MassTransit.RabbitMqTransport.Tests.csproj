@@ -91,7 +91,6 @@
     <Compile Include="Assumptions\PerformanceAssumptions.cs" />
     <Compile Include="Assumptions\RoutingAssumptions.cs" />
     <Compile Include="Assumptions\TransactionAssumptions.cs" />
-    <Compile Include="BasicConsumer_Perf.cs" />
     <Compile Include="Bytes_Specs.cs" />
     <Compile Include="ConfiguringRabbitMQ_Specs.cs" />
     <Compile Include="ConnectingFailure_Specs.cs" />
@@ -104,7 +103,6 @@
     <Compile Include="RabbitMqTestFixture.cs" />
     <Compile Include="PublisherConfirm_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
-    <Compile Include="ReceiveConnection_Specs.cs" />
     <Compile Include="Request_Specs.cs" />
     <Compile Include="RetryLater_Specs.cs" />
     <Compile Include="Security_Specs.cs" />

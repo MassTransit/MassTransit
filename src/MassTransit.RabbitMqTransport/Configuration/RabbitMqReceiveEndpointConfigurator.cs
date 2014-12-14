@@ -133,8 +133,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             IRetryPolicy retryPolicy = Retry.Exponential(1.Seconds(), 10.Seconds(), 1.Seconds());
 
-            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, Retry.None, _settings,
-                _host.Settings.GetInputAddress(_settings));
+            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings,
+                _host.Settings.GetInputAddress(_settings), Retry.None);
 
             var consumePipe = new ConsumePipe(_pipeConfigurator);
 

@@ -12,7 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
-    public interface PublishSettings
+    /// <summary>
+    /// Publishing is a special case of send, but with additional attributes
+    /// </summary>
+    public interface PublishSettings :
+        SendSettings
     {
         /// <summary>
         /// True if messages published to an exchange must be received by at least one queue

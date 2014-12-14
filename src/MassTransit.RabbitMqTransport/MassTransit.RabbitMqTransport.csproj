@@ -148,6 +148,7 @@
     <Compile Include="Management\RabbitMQEndpointManagement.cs" />
     <Compile Include="OutboundRabbitMqTransport.cs" />
     <Compile Include="PublishEndpointInterceptor.cs" />
+    <Compile Include="RabbitMqBus.cs" />
     <Compile Include="RabbitMqConnection.cs" />
     <Compile Include="ConnectionContext.cs" />
     <Compile Include="RabbitMqConnectionCache.cs" />
@@ -155,7 +156,6 @@
     <Compile Include="RabbitMqConsumer.cs" />
     <Compile Include="RabbitMqEndpointAddress.cs" />
     <Compile Include="RabbitMqConfigurationExtensions.cs" />
-    <Compile Include="RabbitMqEndpointCache.cs" />
     <Compile Include="RabbitMqEndpointExtensions.cs" />
     <Compile Include="RabbitMqExtensions.cs" />
     <Compile Include="RabbitMqHeaders.cs" />

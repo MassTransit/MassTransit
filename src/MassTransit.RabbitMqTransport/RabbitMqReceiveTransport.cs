@@ -29,15 +29,16 @@ namespace MassTransit.RabbitMqTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
 
-        readonly IConnectionCache _connector;
+        readonly IConnectionCache _connectionCache;
         readonly ExchangeBindingSettings[] _exchangeBindings;
+        readonly Uri _inputAddress;
         readonly IRetryPolicy _retryPolicy;
         readonly ReceiveSettings _settings;
-        readonly Uri _inputAddress;
 
-        public RabbitMqReceiveTransport(IConnectionCache connector, IRetryPolicy retryPolicy, ReceiveSettings settings, Uri inputAddress, params ExchangeBindingSettings[] exchangeBindings)
+        public RabbitMqReceiveTransport(IConnectionCache connectionCache, ReceiveSettings settings, Uri inputAddress,
+            IRetryPolicy retryPolicy, params ExchangeBindingSettings[] exchangeBindings)
         {
-            _connector = connector;
+            _connectionCache = connectionCache;
             _retryPolicy = retryPolicy;
             _settings = settings;
             _inputAddress = inputAddress;
@@ -60,26 +61,27 @@ namespace MassTransit.RabbitMqTransport
         {
             var handle = new Handle(this);
 
-            IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
+            IPipe<ConnectionContext> transportPipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.Repeat(handle.StopToken);
+                // we want to retry the connection at intervals defined by the retry policy in the event of connection failures
                 x.Retry(_retryPolicy, handle.StopToken);
 
+                // we want our consumer to connect to the transport once connected
                 x.RabbitMqConsumer(receivePipe, _settings, _exchangeBindings);
             });
 
-            Receiver(handle, connectionPipe);
+            Receiver(handle, transportPipe);
 
             return handle;
         }
 
-        async void Receiver(Handle handle, IPipe<ConnectionContext> connectionPipe)
+        async void Receiver(Handle handle, IPipe<ConnectionContext> transportPipe)
         {
             await Repeat.UntilCancelled(handle.StopToken, async () =>
             {
                 try
                 {
-                    await _connector.Send(connectionPipe, handle.StopToken);
+                    await _connectionCache.Send(transportPipe, handle.StopToken);
                 }
                 catch (RabbitMqConnectionException ex)
                 {
@@ -92,7 +94,7 @@ namespace MassTransit.RabbitMqTransport
                 catch (Exception ex)
                 {
                     if (_log.IsErrorEnabled)
-                        _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);
+                        _log.ErrorFormat("RabbitMQ receive transport failed: {0}", ex.Message);
                 }
             });
 

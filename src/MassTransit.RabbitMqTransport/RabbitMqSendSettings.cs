@@ -62,7 +62,7 @@ namespace MassTransit.RabbitMqTransport
             if (_exchangeArguments == null)
                 _exchangeArguments = new Dictionary<string, object>();
 
-            _exchangeArguments.Add(key, value);
+            _exchangeArguments[key] = value;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace MassTransit.Saga
 	/// </summary>
 	/// <typeparam name="TSaga">The saga that will handle the message</typeparam>
 	/// <typeparam name="TMessage">The message that will be handled by the saga</typeparam>
-	public interface ISagaPolicy<TSaga, TMessage>
+	public interface ISagaPolicy<TSaga, in TMessage>
 		where TSaga : class, ISaga
 		where TMessage : class
 	{
@@ -30,7 +30,7 @@ namespace MassTransit.Saga
 		/// </summary>
 		/// <param name="context">The consumer context of the message</param>
 		/// <returns>True if a new instance of the saga can be created, otherwise false</returns>
-		bool CanCreateInstance(IConsumeContext<TMessage> context);
+		bool CanCreateInstance(ConsumeContext<TMessage> context);
 
 		/// <summary>
 		/// Creates a new instance of the saga using the data in the message context
@@ -38,21 +38,21 @@ namespace MassTransit.Saga
 		/// <param name="context">The consumer context of the message</param>
 		/// <param name="sagaId"></param>
 		/// <returns>A newly created saga instance</returns>
-		TSaga CreateInstance(IConsumeContext<TMessage> context, Guid sagaId);
+		TSaga CreateInstance(ConsumeContext<TMessage> context, Guid sagaId);
 
 		/// <summary>
 		/// Returns the saga id that should be used for a newly created saga instance, based on the policy
 		/// </summary>
 		/// <param name="context"></param>
 		/// <returns></returns>
-		Guid GetNewSagaId(IConsumeContext<TMessage> context);
+		Guid GetNewSagaId(ConsumeContext<TMessage> context);
 
 		/// <summary>
 		/// Determines if the message can be delivered to an existing saga instance
 		/// </summary>
 		/// <param name="context">The consumer context of the message</param>
 		/// <returns>True if the message can be delivered to the saga instance, otherwise false</returns>
-		bool CanUseExistingInstance(IConsumeContext<TMessage> context);
+		bool CanUseExistingInstance(ConsumeContext<TMessage> context);
 
 
 		/// <summary>

@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
-    using System.Diagnostics;
     using System.Threading.Tasks;
+    using Configuration;
     using NUnit.Framework;
 
 
@@ -30,14 +30,11 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
 
             await _received;
-
-            if (Debugger.IsAttached)
-                Debugger.Break();
         }
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _received = Handler<A>(configurator);
         }

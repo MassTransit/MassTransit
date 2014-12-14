@@ -12,16 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
-    using NUnit.Framework;
-    using Policies;
-    using RabbitMQ.Client;
-    using RabbitMQ.Client.Exceptions;
-    using RabbitMqTransport;
-    using RabbitMqTransport.Pipeline;
-    using TestFramework;
-
     namespace Connector_Specs
     {
+        using System;
+        using Configuration;
+        using NUnit.Framework;
+        using Pipeline;
+        using Policies;
+        using RabbitMQ.Client.Exceptions;
+        using TestFramework;
+
+
         [TestFixture]
         public class When_a_server_exists :
             AsyncTestFixture
@@ -29,14 +30,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             [Test]
             public async void Should_connect()
             {
-                var connectionFactory = new ConnectionFactory
-                {
-                    HostName = "localhost"
-                };
+                var hostUri = new Uri("rabbitmq://localhost/");
+                RabbitMqHostSettings hostSettings = hostUri.GetHostSettings();
 
                 var testPipe = new TestConnectionPipe(TestCancellationToken);
 
-                IRabbitMqConnector connector = new RabbitMqConnector(connectionFactory, Retry.None);
+                IRabbitMqConnector connector = new RabbitMqConnector(hostSettings, Retry.None);
                 await connector.Connect(testPipe, TestCancellationToken);
 
                 await testPipe.Called;
@@ -51,14 +50,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             [Test]
             public void Should_connect()
             {
-                var connectionFactory = new ConnectionFactory
-                {
-                    HostName = "rocalhost"
-                };
+                var hostUri = new Uri("rabbitmq://rocalhost/");
+                RabbitMqHostSettings hostSettings = hostUri.GetHostSettings();
 
                 var testPipe = new TestConnectionPipe(TestCancellationToken);
 
-                IRabbitMqConnector connector = new RabbitMqConnector(connectionFactory, Retry.Intervals(100, 100));
+                IRabbitMqConnector connector = new RabbitMqConnector(hostSettings, Retry.Intervals(100, 100));
 
                 var ex = Assert.Throws<RabbitMqConnectionException>(async () =>
                 {
@@ -71,14 +68,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             [Test]
             public void Should_throw_connection_exception()
             {
-                var connectionFactory = new ConnectionFactory
-                {
-                    HostName = "rocalhost"
-                };
+                var hostUri = new Uri("rabbitmq://rocalhost/");
+                RabbitMqHostSettings hostSettings = hostUri.GetHostSettings();
 
                 var testPipe = new TestConnectionPipe(TestCancellationToken);
 
-                IRabbitMqConnector connector = new RabbitMqConnector(connectionFactory, Retry.None);
+                IRabbitMqConnector connector = new RabbitMqConnector(hostSettings, Retry.None);
 
                 var ex = Assert.Throws<RabbitMqConnectionException>(async () =>
                 {
