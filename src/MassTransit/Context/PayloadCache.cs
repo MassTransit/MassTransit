@@ -14,8 +14,6 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Concurrent;
-    using Internals.Extensions;
-    using Magnum.Extensions;
     using Util;
 
 

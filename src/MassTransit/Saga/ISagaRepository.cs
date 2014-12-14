@@ -14,6 +14,7 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 	using MassTransit.Pipeline;
 
 
@@ -26,21 +27,32 @@ namespace MassTransit.Saga
 	public interface ISagaRepository<TSaga>
 		where TSaga : class, ISaga
 	{
-        /// <summary>
-        /// Loads/Creates the saga and makes it available for later consumption
-        /// through the Actions
-        /// </summary>
-        /// <typeparam name="TMessage"></typeparam>
-        /// <param name="context"></param>
-        /// <param name="sagaId"></param>
-        /// <param name="selector"></param>
-        /// <param name="policy"></param>
-        /// <returns></returns>
-		IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
-																		 InstanceHandlerSelector<TSaga, TMessage> selector,
-																		 ISagaPolicy<TSaga, TMessage> policy)
-			where TMessage : class;
+//        /// <summary>
+//        /// Loads/Creates the saga and makes it available for later consumption
+//        /// through the Actions
+//        /// </summary>
+//        /// <typeparam name="TMessage"></typeparam>
+//        /// <param name="context"></param>
+//        /// <param name="sagaId"></param>
+//        /// <param name="selector"></param>
+//        /// <param name="policy"></param>
+//        /// <returns></returns>
+//		IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
+//																		 InstanceHandlerSelector<TSaga, TMessage> selector,
+//																		 ISagaPolicy<TSaga, TMessage> policy)
+//			where TMessage : class;
+//
 
+        /// <summary>
+        /// Send a message to the saga repository, which can then hydrate available sagas and deliver the message
+        /// to the saga instances.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="context">The consume context</param>
+        /// <param name="next">The next pipe to deliver the saga/message context to</param>
+        /// <returns>An awaitable task, of course</returns>
+        Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
+            where T : class;
 
         /// <summary>
         /// Finds the CorrelationIds for the sagas that match the filter

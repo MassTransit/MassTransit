@@ -18,6 +18,9 @@ namespace MassTransit.RabbitMqTransport.Tests
 
     namespace Send_Specs
     {
+        using Configuration;
+
+
         [TestFixture]
         public class WhenAMessageIsSendToTheEndpoint :
             RabbitMqTestFixture
@@ -37,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Task<ConsumeContext<A>> _receivedA;
 
-            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
                 base.ConfigureInputQueueEndpoint(configurator);
 

@@ -73,7 +73,7 @@ namespace MassTransit.RabbitMqTransport
                     ConnectionShutdownEventHandler connectionShutdown = null;
                     connectionShutdown = (connection, reason) =>
                     {
-                        connectionContext.Connection.ConnectionShutdown -= connectionShutdown;
+                        connection.ConnectionShutdown -= connectionShutdown;
                         scope.ConnectionClosed.TrySetResult(true);
 
                         Interlocked.CompareExchange(ref _scope, null, scope);

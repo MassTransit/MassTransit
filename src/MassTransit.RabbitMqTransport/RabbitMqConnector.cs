@@ -12,9 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Contexts;
     using Logging;
     using MassTransit.Pipeline;
@@ -22,27 +22,7 @@ namespace MassTransit.RabbitMqTransport
     using Policies;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
-    using Transports;
 
-
-    /// <summary>
-    /// A handle to an active transport
-    /// </summary>
-    public interface RabbitMqConnectionHandle :
-        IDisposable
-    {
-        /// <summary>
-        /// The RabbitMQ connection object
-        /// </summary>
-        IConnection Connection { get; }
-
-        /// <summary>
-        /// Close the connection, disposing of anything related to it
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task Stop(CancellationToken cancellationToken = default(CancellationToken));
-    }
 
     /// <summary>
     /// Establishes connections to RabbitMQ using the specified retry policy
@@ -51,13 +31,16 @@ namespace MassTransit.RabbitMqTransport
         IRabbitMqConnector
     {
         readonly ConnectionFactory _connectionFactory;
+        readonly RabbitMqHostSettings _hostSettings;
         readonly ILog _log = Logger.Get<RabbitMqConnector>();
         readonly IRetryPolicy _retryPolicy;
 
-        public RabbitMqConnector(ConnectionFactory connectionFactory, IRetryPolicy retryPolicy)
+        public RabbitMqConnector(RabbitMqHostSettings hostSettings, IRetryPolicy retryPolicy)
         {
-            _connectionFactory = connectionFactory;
+            _hostSettings = hostSettings;
             _retryPolicy = retryPolicy;
+
+            _connectionFactory = hostSettings.GetConnectionFactory();
         }
 
         public Task Connect(IPipe<ConnectionContext> pipe, CancellationToken cancellationToken)
@@ -76,6 +59,8 @@ namespace MassTransit.RabbitMqTransport
 
                         using (var connectionContext = new RabbitMqConnectionContext(connection, _connectionFactory, cancellationToken))
                         {
+                            connectionContext.GetOrAddPayload(() => _hostSettings);
+
                             await pipe.Send(connectionContext);
                         }
 

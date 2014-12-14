@@ -41,15 +41,6 @@ namespace MassTransit.RabbitMqTransport
                 {
                     _log.Warn("Failed to close channel", ex);
                 }
-
-                try
-                {
-                    channel.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    _log.Warn("Failed to dispose channel", ex);
-                }
             }
         }
 
@@ -71,15 +62,6 @@ namespace MassTransit.RabbitMqTransport
                 catch (Exception ex)
                 {
                     _log.Warn("Failed to close connection", ex);
-                }
-
-                try
-                {
-                    connection.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    _log.Warn("Failed to dispose connection", ex);
                 }
             }
         }

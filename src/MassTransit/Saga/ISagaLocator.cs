@@ -14,10 +14,12 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 
-	public interface ISagaLocator<TMessage>
+
+    public interface ISagaLocator<in TMessage>
 		where TMessage : class
 	{
-		IEnumerable<Guid> Find(IConsumeContext<TMessage> context);
+		Task<IEnumerable<Guid>> Find(ConsumeContext<TMessage> context);
 	}
 }

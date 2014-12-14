@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,9 +16,12 @@ namespace MassTransit.Saga
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
+    using Context;
     using Logging;
     using MassTransit.Pipeline;
     using Util;
+
 
     public class InMemorySagaRepository<TSaga> :
         ISagaRepository<TSaga>
@@ -32,16 +35,133 @@ namespace MassTransit.Saga
             _sagas = new IndexedSagaDictionary<TSaga>();
         }
 
-        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
-            Guid sagaId, InstanceHandlerSelector<TSaga, TMessage> selector, ISagaPolicy<TSaga, TMessage> policy)
-            where TMessage : class
+//        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
+//            Guid sagaId, InstanceHandlerSelector<TSaga, TMessage> selector, ISagaPolicy<TSaga, TMessage> policy)
+//            where TMessage : class
+//        {
+//            bool needToLeaveSagas = true;
+//            Monitor.Enter(_sagas);
+//            try
+//            {
+//                TSaga instance = _sagas[sagaId];
+//
+//                if (instance == null)
+//                {
+//                    if (policy.CanCreateInstance(context))
+//                    {
+//                        instance = policy.CreateInstance(context, sagaId);
+//                        _sagas.Add(instance);
+//
+//                        lock (instance)
+//                        {
+//                            Monitor.Exit(_sagas);
+//                            needToLeaveSagas = false;
+//
+//                            yield return x =>
+//                            {
+//                                if (_log.IsDebugEnabled)
+//                                {
+//                                    _log.DebugFormat("SAGA: {0} Creating New {1} for {2}",
+//                                        typeof(TSaga).ToFriendlyName(), instance.CorrelationId,
+//                                        typeof(TMessage).ToFriendlyName());
+//                                }
+//
+//                                try
+//                                {
+//                                    foreach (var callback in selector(instance, x))
+//                                        callback(x);
+//
+//                                    if (policy.CanRemoveInstance(instance))
+//                                        _sagas.Remove(instance);
+//                                }
+//                                catch (Exception ex)
+//                                {
+//                                    var sex = new SagaException("Create Saga Instance Exception", typeof(TSaga),
+//                                        typeof(TMessage), instance.CorrelationId, ex);
+//                                    if (_log.IsErrorEnabled)
+//                                        _log.Error(sex);
+//
+//                                    throw sex;
+//                                }
+//                            };
+//                        }
+//                    }
+//                    else
+//                    {
+//                        if (_log.IsDebugEnabled)
+//                        {
+//                            _log.DebugFormat("SAGA: {0} Ignoring Missing {1} for {2}", typeof(TSaga).ToFriendlyName(),
+//                                sagaId,
+//                                typeof(TMessage).ToFriendlyName());
+//                        }
+//                    }
+//                }
+//                else
+//                {
+//                    if (policy.CanUseExistingInstance(context))
+//                    {
+//                        Monitor.Exit(_sagas);
+//                        needToLeaveSagas = false;
+//                        lock (instance)
+//                        {
+//                            yield return x =>
+//                            {
+//                                if (_log.IsDebugEnabled)
+//                                {
+//                                    _log.DebugFormat("SAGA: {0} Using Existing {1} for {2}",
+//                                        typeof(TSaga).ToFriendlyName(), instance.CorrelationId,
+//                                        typeof(TMessage).ToFriendlyName());
+//                                }
+//
+//                                try
+//                                {
+//                                    foreach (var callback in selector(instance, x))
+//                                        callback(x);
+//
+//                                    if (policy.CanRemoveInstance(instance))
+//                                        _sagas.Remove(instance);
+//                                }
+//                                catch (Exception ex)
+//                                {
+//                                    var sex = new SagaException("Existing Saga Instance Exception", typeof(TSaga),
+//                                        typeof(TMessage), instance.CorrelationId, ex);
+//
+//                                    if (_log.IsErrorEnabled)
+//                                        _log.Error("Saga Error", sex);
+//
+//                                    throw sex;
+//                                }
+//                            };
+//                        }
+//                    }
+//                    else
+//                    {
+//                        if (_log.IsDebugEnabled)
+//                        {
+//                            _log.DebugFormat("SAGA: {0} Ignoring Existing {1} for {2}", typeof(TSaga).ToFriendlyName(),
+//                                sagaId, typeof(TMessage).ToFriendlyName());
+//                        }
+//                    }
+//                }
+//            }
+//            finally
+//            {
+//                if (needToLeaveSagas)
+//                    Monitor.Exit(_sagas);
+//            }
+//        }
+
+        public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
+            where T : class
         {
+            ISagaPolicy<TSaga, T> policy = null;//context.Get<ISagaPolicy<TSaga, T>>();
+            Guid sagaId = Guid.Empty;
+
             bool needToLeaveSagas = true;
             Monitor.Enter(_sagas);
             try
             {
                 TSaga instance = _sagas[sagaId];
-
                 if (instance == null)
                 {
                     if (policy.CanCreateInstance(context))
@@ -49,91 +169,104 @@ namespace MassTransit.Saga
                         instance = policy.CreateInstance(context, sagaId);
                         _sagas.Add(instance);
 
-                        lock (instance)
+                        if (_log.IsDebugEnabled)
+                        {
+                            _log.DebugFormat("SAGA: {0} Created {1} for {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                                TypeMetadataCache<T>.ShortName);
+                        }
+
+                        Monitor.Enter(instance);
+                        try
                         {
                             Monitor.Exit(_sagas);
                             needToLeaveSagas = false;
 
-                            yield return x =>
-                                {
-                                    if (_log.IsDebugEnabled)
-                                        _log.DebugFormat("SAGA: {0} Creating New {1} for {2}",
-                                            typeof(TSaga).ToFriendlyName(), instance.CorrelationId,
-                                            typeof(TMessage).ToFriendlyName());
+                            SagaConsumeContext<TSaga, T> sagaContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
 
-                                    try
-                                    {
-                                        foreach (var callback in selector(instance, x))
-                                        {
-                                            callback(x);
-                                        }
+                            await next.Send(sagaContext);
 
-                                        if (policy.CanRemoveInstance(instance))
-                                            _sagas.Remove(instance);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        var sex = new SagaException("Create Saga Instance Exception", typeof(TSaga),
-                                            typeof(TMessage), instance.CorrelationId, ex);
-                                        if (_log.IsErrorEnabled)
-                                            _log.Error(sex);
+                            if (policy.CanRemoveInstance(instance))
+                                _sagas.Remove(instance);
+                        }
+                        catch (SagaException sex)
+                        {
+                            if (_log.IsErrorEnabled)
+                                _log.Error("Created Saga Exception", sex);
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            var sagaException = new SagaException("Created Saga Instance Exception", typeof(TSaga), typeof(T),
+                                instance.CorrelationId, ex);
+                            if (_log.IsErrorEnabled)
+                                _log.Error("Created Saga Exception", sagaException);
 
-                                        throw sex;
-                                    }
-                                };
+                            throw sagaException;
+                        }
+                        finally
+                        {
+                            Monitor.Exit(instance);
                         }
                     }
                     else
                     {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("SAGA: {0} Ignoring Missing {1} for {2}", typeof(TSaga).ToFriendlyName(),
-                                sagaId,
-                                typeof(TMessage).ToFriendlyName());
+                        if (_log.IsWarnEnabled)
+                        {
+                            _log.WarnFormat("SAGA: {0} Ignoring Missing {1} for {2}", TypeMetadataCache<TSaga>.ShortName, sagaId,
+                                TypeMetadataCache<T>.ShortName);
+                        }
                     }
                 }
                 else
                 {
                     if (policy.CanUseExistingInstance(context))
                     {
-                        Monitor.Exit(_sagas);
-                        needToLeaveSagas = false;
-                        lock (instance)
+                        Monitor.Enter(instance);
+                        try
                         {
-                            yield return x =>
-                                {
-                                    if (_log.IsDebugEnabled)
-                                        _log.DebugFormat("SAGA: {0} Using Existing {1} for {2}",
-                                            typeof(TSaga).ToFriendlyName(), instance.CorrelationId,
-                                            typeof(TMessage).ToFriendlyName());
+                            Monitor.Exit(_sagas);
+                            needToLeaveSagas = false;
 
-                                    try
-                                    {
-                                        foreach (var callback in selector(instance, x))
-                                        {
-                                            callback(x);
-                                        }
+                            if (_log.IsDebugEnabled)
+                            {
+                                _log.DebugFormat("SAGA: {0} Existing {1} for {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                                    TypeMetadataCache<T>.ShortName);
+                            }
 
-                                        if (policy.CanRemoveInstance(instance))
-                                            _sagas.Remove(instance);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        var sex = new SagaException("Existing Saga Instance Exception", typeof(TSaga),
-                                            typeof(TMessage), instance.CorrelationId, ex);
-                                        
-                                        if (_log.IsErrorEnabled)
-                                            _log.Error("Saga Error", sex);
+                            SagaConsumeContext<TSaga, T> sagaContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
 
-                                        throw sex;
-                                    }
-                                };
+                            await next.Send(sagaContext);
+
+                            if (policy.CanRemoveInstance(instance))
+                                _sagas.Remove(instance);
+                        }
+                        catch (SagaException sex)
+                        {
+                            if (_log.IsErrorEnabled)
+                                _log.Error("Existing Saga Exception", sex);
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            var sagaException = new SagaException("Existing Saga Instance Exception", typeof(TSaga), typeof(T),
+                                instance.CorrelationId, ex);
+                            if (_log.IsErrorEnabled)
+                                _log.Error("Created Saga Exception", sagaException);
+
+                            throw sagaException;
+                        }
+                        finally
+                        {
+                            Monitor.Exit(instance);
                         }
                     }
                     else
                     {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("SAGA: {0} Ignoring Existing {1} for {2}", typeof(TSaga).ToFriendlyName(),
-                                sagaId, typeof(TMessage).ToFriendlyName());
+                        if (_log.IsWarnEnabled)
+                        {
+                            _log.WarnFormat("SAGA: {0} Ignoring Existing {1} for {2}", TypeMetadataCache<TSaga>.ShortName, sagaId,
+                                TypeMetadataCache<T>.ShortName);
+                        }
                     }
                 }
             }

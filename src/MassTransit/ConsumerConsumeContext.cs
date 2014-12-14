@@ -24,10 +24,6 @@ namespace MassTransit
         where TMessage : class
         where TConsumer : class
     {
-        /// <summary>
-        /// The consumer which will handle the message
-        /// </summary>
-        TConsumer Consumer { get; }
     }
 
 
@@ -42,5 +38,10 @@ namespace MassTransit
         /// <returns></returns>
         ConsumerConsumeContext<TConsumer, T> PopContext<T>()
             where T : class;
+
+        /// <summary>
+        /// The consumer which will handle the message
+        /// </summary>
+        TConsumer Consumer { get; }
     }
 }

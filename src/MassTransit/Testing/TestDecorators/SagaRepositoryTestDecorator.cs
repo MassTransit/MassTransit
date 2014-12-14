@@ -14,6 +14,7 @@ namespace MassTransit.Testing.TestDecorators
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 	using Pipeline;
 	using Saga;
 
@@ -36,48 +37,53 @@ namespace MassTransit.Testing.TestDecorators
 			_sagas = sagas;
 		}
 
-		public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
-		                                                                        InstanceHandlerSelector<TSaga, TMessage>
-		                                                                        	selector, ISagaPolicy<TSaga, TMessage> policy)
-			where TMessage : class
-		{
-			ISagaPolicy<TSaga, TMessage> sagaPolicy = new SagaPolicyTestDecorator<TSaga, TMessage>(policy, sagaId, _created);
+//		public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
+//		                                                                        InstanceHandlerSelector<TSaga, TMessage>
+//		                                                                        	selector, ISagaPolicy<TSaga, TMessage> policy)
+//			where TMessage : class
+//		{
+//			ISagaPolicy<TSaga, TMessage> sagaPolicy = new SagaPolicyTestDecorator<TSaga, TMessage>(policy, _created);
+//
+//			InstanceHandlerSelector<TSaga, TMessage> interceptSelector = (s, c) =>
+//				{
+//					IEnumerable<Action<IConsumeContext<TMessage>>> result = selector(s, c);
+//
+//					return DecorateSelector(s, result);
+//				};
+//
+//			IEnumerable<Action<IConsumeContext<TMessage>>> consumers = _sagaRepository.GetSaga(context, sagaId, interceptSelector,
+//				sagaPolicy);
+//
+//			foreach (var action in consumers)
+//			{
+//				Action<IConsumeContext<TMessage>> consumer = action;
+//
+//				yield return message =>
+//					{
+//						var received = new ReceivedMessageImpl<TMessage>(message);
+//
+//						try
+//						{
+//							consumer(message);
+//						}
+//						catch (Exception ex)
+//						{
+//							received.SetException(ex);
+//						}
+//						finally
+//						{
+//							_received.Add(received);
+//						}
+//					};
+//			}
+//		}
 
-			InstanceHandlerSelector<TSaga, TMessage> interceptSelector = (s, c) =>
-				{
-					IEnumerable<Action<IConsumeContext<TMessage>>> result = selector(s, c);
+	    public Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+	    {
+	        return _sagaRepository.Send(context, next);
+	    }
 
-					return DecorateSelector(s, result);
-				};
-
-			IEnumerable<Action<IConsumeContext<TMessage>>> consumers = _sagaRepository.GetSaga(context, sagaId, interceptSelector,
-				sagaPolicy);
-
-			foreach (var action in consumers)
-			{
-				Action<IConsumeContext<TMessage>> consumer = action;
-
-				yield return message =>
-					{
-						var received = new ReceivedMessageImpl<TMessage>(message);
-
-						try
-						{
-							consumer(message);
-						}
-						catch (Exception ex)
-						{
-							received.SetException(ex);
-						}
-						finally
-						{
-							_received.Add(received);
-						}
-					};
-			}
-		}
-
-		public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
+	    public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
 		{
 			return _sagaRepository.Find(filter);
 		}

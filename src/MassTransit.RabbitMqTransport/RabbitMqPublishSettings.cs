@@ -13,8 +13,14 @@
 namespace MassTransit.RabbitMqTransport
 {
     public class RabbitMqPublishSettings :
+        RabbitMqSendSettings,
         PublishSettings
     {
+        public RabbitMqPublishSettings(string exchangeName, string exchangeType, bool durable, bool autoDelete)
+            : base(exchangeName, exchangeType, durable, autoDelete)
+        {
+        }
+
         public bool Mandatory { get; set; }
     }
 }

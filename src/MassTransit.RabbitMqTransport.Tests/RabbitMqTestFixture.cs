@@ -137,7 +137,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
         }
 
-        protected virtual void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
         }
 

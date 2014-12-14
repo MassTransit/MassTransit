@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A852511B-2742-4F4D-BD4E-ADDDBF3BD4B3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Automatonymous</RootNamespace>
+    <AssemblyName>MassTransit.AutomatonymousIntegration</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\src\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\MassTransit.AutomatonymousIntegration.xml</DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Magnum, Version=2.1.2.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Magnum.2.1.2\lib\NET40\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\SolutionVersion.cs">
+      <Link>Properties\SolutionVersion.cs</Link>
+    </Compile>
+    <Compile Include="Activities\PublishActivity.cs" />
+    <Compile Include="Activities\RespondActivity.cs" />
+    <Compile Include="Activities\RetryLaterActivity.cs" />
+    <Compile Include="Configuration\RepositoryConfigurators\StateMachineEventCorrelationConfigurator.cs" />
+    <Compile Include="ConsumeEventContext.cs" />
+    <Compile Include="ConsumeEventContextImpl.cs" />
+    <Compile Include="Testing\StateMachineSagaTestBuilderImpl.cs" />
+    <Compile Include="Testing\StateMachineSagaTestInstance.cs" />
+    <Compile Include="Testing\StateMachineSagaTestSubjectImpl.cs" />
+    <Compile Include="Testing\StateMachineSagaTestingExtensions.cs" />
+    <Compile Include="Configuration\BuilderConfigurators\StateMachineSagaRepositoryBuilderConfigurator.cs" />
+    <Compile Include="Configuration\PublishExtensions.cs" />
+    <Compile Include="Configuration\PublishRequestExtensions.cs" />
+    <Compile Include="Configuration\RepositoryBuilders\StateMachineEventCorrelation.cs" />
+    <Compile Include="Configuration\RepositoryBuilders\StateMachineEventCorrelationImpl.cs" />
+    <Compile Include="Configuration\RepositoryBuilders\StateMachineSagaRepositoryBuilder.cs" />
+    <Compile Include="Configuration\RepositoryBuilders\StateMachineSagaRepositoryBuilderImpl.cs" />
+    <Compile Include="Configuration\RepositoryConfigurators\StateMachineSagaRepositoryConfigurator.cs" />
+    <Compile Include="Configuration\RepositoryConfigurators\StateMachineSagaRepositoryConfiguratorImpl.cs" />
+    <Compile Include="Configuration\RespondExtensions.cs" />
+    <Compile Include="Configuration\RetryLaterExtensions.cs" />
+    <Compile Include="Configuration\StateMachinePolicyFactory.cs" />
+    <Compile Include="Configuration\AutomatonymousStateMachinePolicyFactory.cs" />
+    <Compile Include="Configuration\StateMachineSagaRepositoryExtensions.cs" />
+    <Compile Include="Configuration\StateMachineSubscriptionExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionBuilders\StateMachineSubscriptionBuilder.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSubscriptionConfigurator.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSubscriptionConfiguratorImpl.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\CorrelatedStateMachineSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ExpressionStateMachineSubscriptionConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\StateMachineEventConnectorFactory.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\StateMachineConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\StateMachineSubscriptionConnector.cs" />
+    <Compile Include="SagaStateMachineInstance.cs" />
+    <Compile Include="Saga\Pipeline\CorrelatedSagaStateMachineMessageSink.cs" />
+    <Compile Include="Saga\Pipeline\ExpressionStateMachineMessageSink.cs" />
+    <Compile Include="StateMachineSagaRepository.cs" />
+    <Compile Include="AutomatonymousStateMachineSagaRepository.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Automatonymous\src\Automatonymous\Automatonymous.csproj">
+      <Project>{FD8F92EB-5818-4C59-8859-19D3A74F979B}</Project>
+      <Name>Automatonymous</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
+      <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
+      <Name>MassTransit</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

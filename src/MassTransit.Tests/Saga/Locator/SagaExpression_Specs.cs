@@ -36,17 +36,17 @@ namespace MassTransit.Tests.Saga.Locator
             _sagaId = NewId.NextGuid();
             _initiateSaga = new InitiateSimpleSaga {CorrelationId = _sagaId, Name = "Chris"};
             IConsumeContext<InitiateSimpleSaga> context = _initiateSaga.ToConsumeContext();
-            _repository.GetSaga(context, _sagaId,
-                (i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
-                .Each(x => x(context));
+//            _repository.GetSaga(context, _sagaId,
+//                (i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
+//                .Each(x => x(context));
 
             _initiateOtherSaga = new InitiateSimpleSaga {CorrelationId = _otherSagaId, Name = "Dru"};
 
             _otherSagaId = Guid.NewGuid();
             context = _initiateOtherSaga.ToConsumeContext();
-            _repository.GetSaga(context, _otherSagaId,
-                (i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
-                .Each(x => x(context));
+//            _repository.GetSaga(context, _otherSagaId,
+//                (i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
+//                .Each(x => x(context));
 
             _observeSaga = new ObservableSagaMessage {Name = "Chris"};
         }

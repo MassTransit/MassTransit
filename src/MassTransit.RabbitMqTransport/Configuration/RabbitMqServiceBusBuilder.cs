@@ -26,13 +26,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IServiceBusBuilder
     {
         readonly RabbitMqHost[] _hosts;
-        readonly PublishSettings _publishSettings;
         readonly Uri _sourceAddress;
 
-        public RabbitMqServiceBusBuilder(IEnumerable<RabbitMqHost> hosts, PublishSettings publishSettings, Uri sourceAddress)
+        public RabbitMqServiceBusBuilder(IEnumerable<RabbitMqHost> hosts, Uri sourceAddress)
         {
             _hosts = hosts.ToArray();
-            _publishSettings = publishSettings;
             _sourceAddress = sourceAddress;
         }
 
@@ -41,7 +39,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
             IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_sourceAddress))
                 .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
 
-            return new MassTransitBus(_sourceAddress, consumePipe, SendEndpointProvider, ReceiveEndpoints);
+            ISendEndpointProvider sendEndpointProvider = SendEndpointProvider;
+            return new RabbitMqBus(_sourceAddress, consumePipe, sendEndpointProvider, ReceiveEndpoints, _hosts, new RabbitMqPublishEndpoint(sendEndpointProvider));
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
