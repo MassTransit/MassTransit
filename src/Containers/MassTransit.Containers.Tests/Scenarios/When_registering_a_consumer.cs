@@ -12,8 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Scenarios
 {
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using NUnit.Framework;
+    using Shouldly;
 
 
     [TestFixture]
@@ -28,17 +29,17 @@ namespace MassTransit.Containers.Tests.Scenarios
             await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
 
             SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer;
-            lastConsumer.ShouldNotBeNull();
+            lastConsumer.ShouldNotBe(null);
 
             SimpleMessageInterface last = await lastConsumer.Last;
             last.Name
-                .ShouldEqual(name);
+                .ShouldBe(name);
 
             lastConsumer.Dependency.WasDisposed
-                .ShouldBeTrue("Dependency was not disposed");
+                .ShouldBe(true); //Dependency was not disposed");
 
             lastConsumer.Dependency.SomethingDone
-                .ShouldBeTrue("Dependency was disposed before consumer executed");
+                .ShouldBe(true); //Dependency was disposed before consumer executed");
         }
     }
 }

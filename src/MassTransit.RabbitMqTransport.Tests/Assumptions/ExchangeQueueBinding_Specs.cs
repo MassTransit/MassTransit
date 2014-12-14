@@ -14,12 +14,12 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 {
     using System.Collections.Generic;
     using System.Text;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Framing;
+    using Shouldly;
 
 
-    [Scenario]
     public abstract class Given_a_rabbitmq_server
     {
         public IConnection Connection { get; set; }
@@ -27,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 
         public ConnectionFactory Factory { get; set; }
 
-        [Given]
+        [SetUp]
         public void A_rabbitmq_server()
         {
             Factory = TestFactory.ConnectionFactory();
@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
             Model = Connection.CreateModel();
         }
 
-        [Finally]
+        [TearDown]
         public void Finally()
         {
             Model.Dispose();
@@ -47,13 +47,13 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
     }
 
 
-    [Scenario]
+    
     public class When_an_exchange_is_bound_to_a_queue :
         Given_a_rabbitmq_server
     {
         string _queueName;
 
-        [When]
+        [SetUp]
         public void An_exchange_is_bound_to_a_queue()
         {
             Model.ExchangeDeclare("TypeA", ExchangeType.Fanout, true, true, null);
@@ -70,22 +70,22 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
             Model.BasicPublish("TypeA", "", properties, message);
         }
 
-        [Then]
+        [Test]
         public void Should_receive_messages_sent_to_the_exchange()
         {
             BasicGetResult x = Model.BasicGet(_queueName, true);
-            x.Exchange.ShouldEqual("TypeA");
+            x.Exchange.ShouldBe("TypeA");
         }
     }
 
 
-    [Scenario]
+    
     public class When_an_inheritance_chain_is_built_using_exchanges :
         Given_a_rabbitmq_server
     {
         string _queueName;
 
-        [When]
+        [SetUp]
         public void An_exchange_is_bound_to_a_queue()
         {
             Model.ExchangeDeclare("TheClass", ExchangeType.Fanout, true, true, null);
@@ -109,20 +109,20 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
             Model.BasicPublish("TheClass", "", properties, message);
         }
 
-        [Then]
+        [Test]
         public void Should_receive_messages_sent_to_the_exchange()
         {
             BasicGetResult x = Model.BasicGet(_queueName, true);
-            x.Exchange.ShouldEqual("TheClass");
+            x.Exchange.ShouldBe("TheClass");
         }
     }
 
 
-    [Scenario]
+    
     public class When_an_exchange_is_bound_to_an_exchange :
         Given_a_rabbitmq_server
     {
-        [When]
+        [SetUp]
         public void An_exchange_is_bound_to_a_queue()
         {
             Model.ExchangeDeclare("TheSource", ExchangeType.Fanout, true, true, null);
@@ -133,7 +133,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
             Model.ExchangeBind("TheDestination", "TheSource", "");
         }
 
-        [Then]
+        [Test]
         public void Should_be_able_to_unbind_the_exchanges()
         {
             Model.ExchangeUnbind("TheDestination", "TheSource", "");
@@ -141,13 +141,13 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
     }
 
 
-    [Scenario]
+    
     public class When_an_exchange_is_bound_to_a_high_available_queue :
         Given_a_rabbitmq_server
     {
         string _queueName;
 
-        [When]
+        [SetUp]
         public void An_exchange_is_bound_to_a_highly_available_queue()
         {
             var args = new Dictionary<string, object>();
@@ -166,11 +166,11 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
             Model.BasicPublish("TypeA", "", properties, message);
         }
 
-        [Then]
+        [Test]
         public void Should_receive_messages_sent_to_the_exchange()
         {
             BasicGetResult x = Model.BasicGet(_queueName, true);
-            x.Exchange.ShouldEqual("TypeA");
+            x.Exchange.ShouldBe("TypeA");
         }
     }
 }

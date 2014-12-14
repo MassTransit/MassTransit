@@ -13,15 +13,16 @@
 namespace MassTransit.NHibernateIntegration.Tests.Sagas
 {
 	using Magnum.Extensions;
-	using Magnum.TestFramework;
+	using NUnit.Framework;
 	using MassTransit.Tests;
+	using Shouldly;
 	using TestFramework.Messages;
 
 
-    [Scenario]
+    
 	public class When_configuring_a_service_bus_easily
 	{
-		[When]
+		[SetUp]
 		public void Configuring_a_service_bus_easily()
 		{
 			FutureMessage<PingMessage> received;
@@ -32,7 +33,7 @@ namespace MassTransit.NHibernateIntegration.Tests.Sagas
 				bus.SubscribeHandler<PingMessage>(received.Set);
 
 				bus.Publish(new PingMessage());
-				received.IsAvailable(8.Seconds()).ShouldBeTrue();
+				received.IsAvailable(8.Seconds()).ShouldBe(true);
 			}
 		}
 	}

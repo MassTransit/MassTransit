@@ -20,9 +20,10 @@ namespace MassTransit.Containers.Tests
     using Castle.Windsor;
     using EndpointConfigurators;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using Saga;
     using Scenarios;
+    using Shouldly;
     using SubscriptionConfigurators;
     using TestFramework;
     using Testing;
@@ -30,7 +31,7 @@ namespace MassTransit.Containers.Tests
     using WindsorIntegration;
 
 
-    [Scenario]
+    
     public class Castle_Consumer :
         When_registering_a_consumer
     {
@@ -50,7 +51,7 @@ namespace MassTransit.Containers.Tests
                          .LifestyleTransient());
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -63,7 +64,7 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    [Scenario]
+    
     public class Castle_Saga :
         When_registering_a_saga
     {
@@ -79,7 +80,7 @@ namespace MassTransit.Containers.Tests
                          .LifeStyle.Singleton);
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -92,7 +93,7 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    [Scenario]
+    
     public class Test_Bus_Subscriptions_For_Consumers_In_Dummy_Saga_Using_Castle_As_IoC :
         Given_a_service_bus_instance
     {
@@ -108,7 +109,7 @@ namespace MassTransit.Containers.Tests
                          .LifeStyle.Singleton);
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -119,23 +120,23 @@ namespace MassTransit.Containers.Tests
             configurator.LoadFrom(_container);
         }
 
-        [When]
+        [SetUp]
         public void Registering_a_dummy_saga()
         {
         }
 
-        [Then]
+        [Test]
         public void Should_have_a_subscription_for_the_first_saga_message()
         {
 //            LocalBus.HasSubscription<FirstSagaMessage>().Count()
-//                    .ShouldEqual(1, "No subscription for the FirstSagaMessage was found.");
+//                    .ShouldBe(1, "No subscription for the FirstSagaMessage was found.");
         }
 
-        [Then]
+        [Test]
         public void Should_have_a_subscription_for_the_second_saga_message()
         {
 //            LocalBus.HasSubscription<SecondSagaMessage>().Count()
-//                    .ShouldEqual(1, "No subscription for the SecondSagaMessage was found.");
+//                    .ShouldBe(1, "No subscription for the SecondSagaMessage was found.");
         }
 
 
@@ -162,7 +163,7 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    [Scenario]
+    
     public class MessageScope_usage :
         InMemoryTestFixture
     {
@@ -179,17 +180,17 @@ namespace MassTransit.Containers.Tests
                          .LifestyleScoped<MessageScope>());
         }
 
-        [Then]
+        [Test]
         public async void Should_receive_a_message_in_scope()
         {
             const string name = "Joe";
 
             await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
 
-            CheckScopeConsumer.Last.Name.ShouldEqual(name);
+            CheckScopeConsumer.Last.Name.ShouldBe(name);
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -219,7 +220,7 @@ namespace MassTransit.Containers.Tests
             {
                 _depedency = depedency;
 
-                depedency.ShouldNotBeNull();
+                depedency.ShouldNotBe(null);
             }
 
             public static SimpleMessageInterface Last

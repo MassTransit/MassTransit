@@ -13,13 +13,13 @@
 namespace MassTransit.Containers.Tests
 {
     using EndpointConfigurators;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using Saga;
     using Scenarios;
     using StructureMap;
     using SubscriptionConfigurators;
 
-    [Scenario]
+    
     public class StructureMap_Consumer :
         When_registering_a_consumer
     {
@@ -38,7 +38,7 @@ namespace MassTransit.Containers.Tests
                 });
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -51,7 +51,7 @@ namespace MassTransit.Containers.Tests
         }
     }
 
-    [Scenario]
+    
     public class StructureMap_Saga :
         When_registering_a_saga
     {
@@ -69,7 +69,7 @@ namespace MassTransit.Containers.Tests
                 });
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();

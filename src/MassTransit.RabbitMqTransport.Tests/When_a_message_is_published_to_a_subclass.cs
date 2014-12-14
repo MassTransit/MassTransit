@@ -15,11 +15,10 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System;
     using BusConfigurators;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
 
-
-    [Scenario]
     public class When_a_message_is_published_to_a_subclass :
         Given_a_rabbitmq_bus
     {
@@ -34,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 //            configurator.Subscribe(s => s.Handler<B>(async message => _receivedB.Complete(message.Message)));
         }
 
-        [When]
+        [SetUp]
         public void A_message_is_published()
         {
             LocalBus.Publish(new A
@@ -44,11 +43,11 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
         }
 
-        [Then]
+        [Test]
         public void Should_receive_the_inherited_version()
         {
-            _receivedB.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
-            _receivedB.Value.StringB.ShouldEqual("ValueB");
+            _receivedB.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
+            _receivedB.Value.StringB.ShouldBe("ValueB");
         }
 
         class A :
@@ -63,11 +62,11 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
     }
 
-    [Scenario]
+    
     public class When_a_message_is_published_and_nobody_is_listening :
         Given_a_rabbitmq_bus
     {
-        [When]
+        [SetUp]
         public void A_message_is_published()
         {
             LocalBus.Publish(new Nobody_listening_parent
@@ -77,7 +76,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
         }
 
-        [Then]
+        [Test]
         public void Should_receive_the_inherited_version()
         {
         }

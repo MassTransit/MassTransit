@@ -15,7 +15,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
     using System;
     using System.Diagnostics;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using RabbitMQ.Client;
 
 
@@ -24,13 +24,13 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 		protected readonly byte[] TheMessage = new byte[] {1, 2, 3};
 		IConnection _connection;
 
-		[When]
+		[SetUp]
 		public void BuildUpAConnection()
 		{
 			_connection = TestFactory.ConnectionFactory().CreateConnection();
 		}
 
-		[After]
+		[TearDown]
 		public void TearDown()
 		{
 			_connection.Close();

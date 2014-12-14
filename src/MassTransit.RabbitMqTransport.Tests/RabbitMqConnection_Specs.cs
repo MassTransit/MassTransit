@@ -13,7 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using NUnit.Framework;
     using RabbitMqTransport;
 
@@ -23,13 +23,13 @@ namespace MassTransit.RabbitMqTransport.Tests
 		RabbitMqConnection _conn = new RabbitMqConnection(
 			TestFactory.ConnectionFactory());
 
-		[When]
+		[SetUp]
 		public void Disposing_Managed()
 		{
 			_conn.Dispose();
 		}
 
-		[Then]
+		[Test]
 		public void Second_Dispose_Throws_ObjectDisposedException()
 		{
 			Assert.Throws<ObjectDisposedException>(

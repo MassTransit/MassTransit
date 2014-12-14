@@ -14,12 +14,12 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using BusConfigurators;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using NUnit.Framework;
     using RabbitMqTransport.Configuration.Configurators;
 
 
-    [Scenario]
+    
     public abstract class Given_two_rabbitmq_buses_walk_into_a_bar
     {
         protected Uri LocalUri { get; set; }

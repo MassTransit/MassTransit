@@ -13,12 +13,13 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using NUnit.Framework;
     using RabbitMQ.Client;
     using RabbitMqTransport;
     using RabbitMqTransport.Management;
     using Serialization;
+    using Shouldly;
 
 
     [TestFixture, Explicit("integration tests and require custom configuration")]
@@ -40,7 +41,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void CanConnect()
         {
-            _factory.ConnectionCount().ShouldEqual(1);
+            _factory.ConnectionCount().ShouldBe(1);
         }
 
         [Test]

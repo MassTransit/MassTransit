@@ -21,7 +21,6 @@ namespace MassTransit.Tests
     using TextFixtures;
 
 
-    [TestFixture]
     public class Intercepting_a_consumer_factory :
         LoopbackTestFixture
     {

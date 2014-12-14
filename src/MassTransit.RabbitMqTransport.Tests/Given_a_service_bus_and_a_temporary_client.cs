@@ -2,11 +2,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using BusConfigurators;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using NUnit.Framework;
 
 
-    [Scenario]
+    
     public abstract class Given_a_service_bus_and_a_temporary_client
     {
         protected Uri LocalUri { get; set; }

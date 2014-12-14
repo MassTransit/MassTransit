@@ -14,12 +14,12 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using BusConfigurators;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using RabbitMqTransport;
     using TestFramework.Fixtures;
 
 
-    [Scenario]
+    
 	public abstract class Given_a_rabbitmq_bus :
 		LocalTestFixture<RabbitMqTransportFactory>
 	{

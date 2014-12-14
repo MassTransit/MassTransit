@@ -1,8 +1,9 @@
 namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 {
     using Magnum.Extensions;
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using NUnit.Framework;
+    using Shouldly;
 
 
     [TestFixture]
@@ -27,7 +28,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 
 
                     var x = model.BasicGet("testqueue", true);
-                    x.MessageCount.ShouldBeEqualTo<uint>(2);
+                    x.MessageCount.ShouldBe<uint>(2);
 
                 });
         }
