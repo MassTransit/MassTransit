@@ -1,8 +1,9 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using Magnum.Extensions;
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
 
 
@@ -28,13 +29,13 @@
         [Test]
         public void Should_be_able_to_read_xml_when_using_json()
         {
-            _responseReceived.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+            _responseReceived.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
         }
 
         [Test]
         public void Should_be_able_to_read_json_when_using_xml()
         {
-            _requestReceived.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+            _requestReceived.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
         }
 
         protected override void ConfigureLocalBus(BusConfigurators.ServiceBusConfigurator configurator)
@@ -85,7 +86,7 @@
 //namespace MassTransit.Tests.Serialization
 //{
 //    using Magnum.Extensions;
-//    using Magnum.TestFramework;
+//    using NUnit.Framework;
 //    using NUnit.Framework;
 //    using TestFramework;
 //    using TextFixtures;

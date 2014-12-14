@@ -13,10 +13,11 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using NUnit.Framework;
     using RabbitMqTransport;
     using RabbitMqTransport.Configuration;
+    using Shouldly;
 
 
     [TestFixture]
@@ -25,31 +26,31 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void ShouldNotHaveATtl()
         {
-            _hostSettings.Host.ShouldEqual("some_server");
+            _hostSettings.Host.ShouldBe("some_server");
         }
 
         [Test]
         public void Should_have_no_password()
         {
-            _hostSettings.Password.ShouldBeEmpty();
+            _hostSettings.Password.ShouldBe("");
         }
 
         [Test]
         public void Should_have_no_username()
         {
-            _hostSettings.Username.ShouldBeEmpty();
+            _hostSettings.Username.ShouldBe("");
         }
 
         [Test]
         public void Should_have_the_queue_name()
         {
-            _receiveSettings.QueueName.ShouldEqual("queue");
+            _receiveSettings.QueueName.ShouldBe("queue");
         }
 
         [Test]
         public void TheHost()
         {
-            _hostSettings.VirtualHost.ShouldEqual("thehost");
+            _hostSettings.VirtualHost.ShouldBe("thehost");
         }
 
         readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/queue");
@@ -71,7 +72,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void Should_have_the_queue_name()
         {
-            _receiveSettings.QueueName.ShouldEqual("the_queue");
+            _receiveSettings.QueueName.ShouldBe("the_queue");
         }
 
         readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/the_queue");
@@ -91,7 +92,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void Should_have_the_queue_name()
         {
-            _receiveSettings.QueueName.ShouldEqual("the.queue");
+            _receiveSettings.QueueName.ShouldBe("the.queue");
         }
 
         readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/the.queue");
@@ -111,7 +112,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void Should_have_the_queue_name()
         {
-            _receiveSettings.QueueName.ShouldEqual("the:queue");
+            _receiveSettings.QueueName.ShouldBe("the:queue");
         }
 
         readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/the:queue");
@@ -145,13 +146,13 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void TheHost()
         {
-            _hostSettings.VirtualHost.ShouldEqual("/");
+            _hostSettings.VirtualHost.ShouldBe("/");
         }
 
         [Test]
         public void TheQueue()
         {
-            _receiveSettings.QueueName.ShouldEqual("the_queue");
+            _receiveSettings.QueueName.ShouldBe("the_queue");
         }
 
         readonly Uri _uri = new Uri("rabbitmq://some_server/the_queue");
@@ -173,13 +174,13 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void TheHost()
         {
-            _hostSettings.VirtualHost.ShouldEqual("/");
+            _hostSettings.VirtualHost.ShouldBe("/");
         }
 
         [Test]
         public void ThePort()
         {
-            _hostSettings.Port.ShouldEqual(12);
+            _hostSettings.Port.ShouldBe(12);
         }
 
         readonly Uri _uri = new Uri("rabbitmq://some_server:12/the_queue");
@@ -199,13 +200,13 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void TheHost()
         {
-            _hostSettings.VirtualHost.ShouldEqual("/");
+            _hostSettings.VirtualHost.ShouldBe("/");
         }
 
         [Test]
         public void ThePort()
         {
-            _hostSettings.Port.ShouldEqual(5672);
+            _hostSettings.Port.ShouldBe(5672);
         }
 
         readonly Uri _uri = new Uri("rabbitmq://some_server/the_queue");
@@ -227,25 +228,25 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void HighAvailabilityQueue()
         {
-            _receiveSettings.QueueArguments["x-message-ttl"].ShouldEqual("30000");
+            _receiveSettings.QueueArguments["x-message-ttl"].ShouldBe("30000");
         }
 
         [Test]
         public void ShouldHaveATtl()
         {
-            _receiveSettings.QueueArguments.ContainsKey("x-message-ttl").ShouldBeTrue();
+            _receiveSettings.QueueArguments.ContainsKey("x-message-ttl").ShouldBe(true);
         }
 
         [Test]
         public void TheQueueArguments()
         {
-            _receiveSettings.QueueArguments.ShouldNotBeNull();
+            _receiveSettings.QueueArguments.ShouldNotBe(null);
         }
 
         [Test]
         public void TheQueueName()
         {
-            _receiveSettings.QueueName.ShouldEqual("somequeue");
+            _receiveSettings.QueueName.ShouldBe("somequeue");
         }
 
         readonly Uri _uri = new Uri("rabbitmq://localhost/mttest/somequeue?ttl=30000");
@@ -265,7 +266,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void Should_have_the_prefetch_count_on_the_address()
         {
-            _receiveSettings.PrefetchCount.ShouldEqual((ushort)32);
+            _receiveSettings.PrefetchCount.ShouldBe((ushort)32);
         }
 
         [Test]
@@ -277,7 +278,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void TheQueueName()
         {
-            _receiveSettings.QueueName.ShouldEqual("somequeue");
+            _receiveSettings.QueueName.ShouldBe("somequeue");
         }
 
         readonly Uri _uri = new Uri("rabbitmq://localhost/mttest/somequeue?prefetch=32");
@@ -297,19 +298,19 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void Should_be_auto_delete()
         {
-            _receiveSettings.AutoDelete.ShouldBeTrue();
+            _receiveSettings.AutoDelete.ShouldBe(true);
         }
 
         [Test]
         public void Should_be_exclusive_to_the_consumer()
         {
-            _receiveSettings.Exclusive.ShouldBeTrue();
+            _receiveSettings.Exclusive.ShouldBe(true);
         }
 
         [Test]
         public void Should_not_be_durable()
         {
-            _receiveSettings.Durable.ShouldBeFalse();
+            _receiveSettings.Durable.ShouldBe(false);
         }
 
         [Test]

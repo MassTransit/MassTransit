@@ -16,11 +16,12 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Diagnostics;
     using BusConfigurators;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
 
 
-    [Scenario]
+    
     public class When_a_message_consumer_throws_an_exception :
         Given_a_rabbitmq_bus
     {
@@ -54,7 +55,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 //                });
         }
 
-        [When]
+        [SetUp]
         public void A_message_is_published()
         {
             _message = new A
@@ -65,21 +66,21 @@ namespace MassTransit.RabbitMqTransport.Tests
             LocalBus.Publish(_message);
         }
 
-        [Then]
+        [Test]
         public void Should_be_received_by_the_handler()
         {
-            _received.WaitUntilCompleted(Debugger.IsAttached ? 5.Minutes() : 8.Seconds()).ShouldBeTrue();
-            _received.Value.StringA.ShouldEqual("ValueA");
+            _received.WaitUntilCompleted(Debugger.IsAttached ? 5.Minutes() : 8.Seconds()).ShouldBe(true);
+            _received.Value.StringA.ShouldBe("ValueA");
         }
 
-        [Then]
+        [Test]
         public void Should_receive_the_fault()
         {
-            _faultReceived.WaitUntilCompleted(Debugger.IsAttached ? 5.Minutes() : 8.Seconds()).ShouldBeTrue();
-//            _faultReceived.Value.FailedMessage.StringA.ShouldEqual("ValueA");
+            _faultReceived.WaitUntilCompleted(Debugger.IsAttached ? 5.Minutes() : 8.Seconds()).ShouldBe(true);
+//            _faultReceived.Value.FailedMessage.StringA.ShouldBe("ValueA");
         }
 
-        [Then]
+        [Test]
         public void Should_have_a_copy_of_the_error_in_the_error_queue()
         {
             _received.WaitUntilCompleted(Debugger.IsAttached ? 5.Minutes() : 8.Seconds());

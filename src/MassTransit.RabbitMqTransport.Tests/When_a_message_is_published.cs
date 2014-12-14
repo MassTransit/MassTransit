@@ -13,8 +13,9 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Threading.Tasks;
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using NUnit.Framework;
+    using Shouldly;
 
 
     [TestFixture]
@@ -26,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             ConsumeContext<A> context = await _received;
 
-            context.Message.StringA.ShouldEqual("ValueA");
+            context.Message.StringA.ShouldBe("ValueA");
         }
 
         [Test]
@@ -34,7 +35,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             ConsumeContext<B> context = await _receivedB;
 
-            context.Message.StringB.ShouldEqual("ValueB");
+            context.Message.StringB.ShouldBe("ValueB");
         }
 
         Task<ConsumeContext<A>> _received;

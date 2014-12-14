@@ -14,11 +14,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using BusConfigurators;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using NUnit.Framework;
 
 
-    [Scenario]
+    
     public class When_sending_a_request_to_a_rabbitmq_endpoint :
         Given_a_rabbitmq_bus
     {

@@ -12,14 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests
 {
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using Ninject;
     using Ninject.Extensions.NamedScope;
     using Saga;
     using Scenarios;
 
 
-    [Scenario]
+    
     public class Ninject_Consumer :
         When_registering_a_consumer
     {
@@ -36,7 +36,7 @@ namespace MassTransit.Containers.Tests
                 .To<AnotherMessageConsumerImpl>().InNamedScope("message");
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -49,7 +49,7 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    [Scenario]
+    
     public class Ninject_Saga :
         When_registering_a_saga
     {
@@ -65,7 +65,7 @@ namespace MassTransit.Containers.Tests
                 .InSingletonScope();
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();

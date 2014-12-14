@@ -2,12 +2,13 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Diagnostics;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
 
 
-    [Scenario, Explicit("because it requires you to run a few commands first")]
+    [Explicit("because it requires you to run a few commands first")]
 	public class When_a_message_is_published_to_as_custom_user
 		: Given_a_rabbitmq_bus_with_vhost_mt_and_credentials
 	{
@@ -28,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 //				});
 		}
 
-		[When]
+		[SetUp]
 		public void A_message_is_published()
 		{
 			LocalBus.Publish(new A
@@ -51,11 +52,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 				Process.Start("rabbitmqctl.bat", s);
 		}
 
-		[Then]
+		[Test]
 		public void Should_be_received_by_the_queue()
 		{
-			_received.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
-			_received.Value.StringA.ShouldEqual("ValueA");
+			_received.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
+			_received.Value.StringA.ShouldBe("ValueA");
 		}
 
 		class A :

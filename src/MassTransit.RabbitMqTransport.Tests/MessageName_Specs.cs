@@ -13,13 +13,14 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using NUnit.Framework;
     using RabbitMqTransport;
+    using Shouldly;
     using Transports;
 
 
-    [Scenario]
+    
 	public class When_converting_a_type_to_a_message_name
 	{
 	    IMessageNameFormatter _formatter;
@@ -29,52 +30,52 @@ namespace MassTransit.RabbitMqTransport.Tests
 	        _formatter = new RabbitMqMessageNameFormatter();
 	    }
 
-	    [Then]
+	    [Test]
 		public void Should_handle_an_interface_name()
 		{
 			var name = _formatter.GetMessageName(typeof (NameEasyToo));
-			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:NameEasyToo");
+			name.ToString().ShouldBe("MassTransit.Transports.RabbitMq.Tests:NameEasyToo");
 		}
 
-		[Then]
+		[Test]
 		public void Should_handle_nested_classes()
 		{
             var name = _formatter.GetMessageName(typeof(Nested));
-			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:When_converting_a_type_to_a_message_name-Nested");
+			name.ToString().ShouldBe("MassTransit.Transports.RabbitMq.Tests:When_converting_a_type_to_a_message_name-Nested");
 		}
 
-		[Then]
+		[Test]
 		public void Should_handle_regular_classes()
 		{
             var name = _formatter.GetMessageName(typeof(NameEasy));
-			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:NameEasy");
+			name.ToString().ShouldBe("MassTransit.Transports.RabbitMq.Tests:NameEasy");
 		}
 
-		[Then]
+		[Test]
 		public void Should_throw_an_exception_on_an_open_generic_class_name()
 		{
             Assert.Throws<ArgumentException>(() => _formatter.GetMessageName(typeof(NameGeneric<>)));
 		}
 
-		[Then]
+		[Test]
 		public void Should_handle_a_closed_single_generic()
 		{
             var name = _formatter.GetMessageName(typeof(NameGeneric<string>));
-			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:NameGeneric--System:String--");
+			name.ToString().ShouldBe("MassTransit.Transports.RabbitMq.Tests:NameGeneric--System:String--");
 		}
 
-		[Then]
+		[Test]
 		public void Should_handle_a_closed_double_generic()
 		{
             var name = _formatter.GetMessageName(typeof(NameDoubleGeneric<string, NameEasy>));
-			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:NameDoubleGeneric--System:String::NameEasy--");
+			name.ToString().ShouldBe("MassTransit.Transports.RabbitMq.Tests:NameDoubleGeneric--System:String::NameEasy--");
 		}
 
-		[Then]
+		[Test]
 		public void Should_handle_a_closed_double_generic_with_a_generic()
 		{
             var name = _formatter.GetMessageName(typeof(NameDoubleGeneric<NameGeneric<NameEasyToo>, NameEasy>));
-			name.ToString().ShouldEqual("MassTransit.Transports.RabbitMq.Tests:NameDoubleGeneric--NameGeneric--NameEasyToo--::NameEasy--");
+			name.ToString().ShouldBe("MassTransit.Transports.RabbitMq.Tests:NameDoubleGeneric--NameGeneric--NameEasyToo--::NameEasy--");
 		}
 
 		class Nested

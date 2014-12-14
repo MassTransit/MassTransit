@@ -16,8 +16,9 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Linq;
     using BusConfigurators;
     using Magnum.Extensions;
-    using Magnum.TestFramework;
     using NUnit.Framework;
+    using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
 
 
@@ -78,7 +79,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             LocalBus.Endpoint.Send(_sent);
 
-            _received.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
+            _received.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
         }
 
         [Test]
@@ -98,8 +99,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             LocalBus.Endpoint.Send(_sent);
 
-            _received.WaitUntilCompleted(8.Seconds()).ShouldBeTrue();
-            _received.Value.ShouldEqual(_sent);
+            _received.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
+            _received.Value.ShouldBe(_sent);
         }
     }
 }

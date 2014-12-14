@@ -12,29 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Scenarios
 {
-    using Magnum.TestFramework;
+    using NUnit.Framework;
 
 
-    [Scenario]
+    
     public abstract class When_registering_a_saga :
         Given_a_service_bus_instance
     {
-        [When]
+        [SetUp]
         public void Registering_a_saga()
         {
         }
 
-        [Then]
+        [Test]
         public void Should_have_a_subscription_for_the_first_saga_message()
         {
         }
 
-        [Then]
+        [Test]
         public void Should_have_a_subscription_for_the_second_saga_message()
         {
         }
 
-        [Then]
+        [Test]
         public void Should_have_a_subscription_for_the_third_saga_message()
         {
         }

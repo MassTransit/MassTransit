@@ -1,16 +1,16 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 {
-    using Magnum.TestFramework;
+    using NUnit.Framework;
+    using Shouldly;
 
 
-    [Scenario]
     public class CommittedTrxOnSend :
         GivenAChannel
     {
         private string theQueue = "testtrx";
                     byte[] theMessage = new byte[]{1,2,3};
 
-        [When]
+        [SetUp]
         public void TrxOnSend()
         {
             WithChannel(model=>
@@ -32,25 +32,25 @@
                 });
         }
 
-        [Then]
+        [Test]
         public void ThereShouldBeAMessage()
         {
             WithChannel(model=>
                 {
                     var msg = model.BasicGet(theQueue, true);
-                    msg.Body.ShouldEqual(theMessage);
-                    msg.MessageCount.ShouldEqual<uint>(0);
+                    msg.Body.ShouldBe(theMessage);
+                    msg.MessageCount.ShouldBe<uint>(0);
                 });
         }
     }
 
-    [Scenario]
+    
     public class RollbackTrxOnSend :
         GivenAChannel
     {
         private string theQueue = "testtrx";
 
-        [When]
+        [SetUp]
         public void TrxOnSend()
         {
             WithChannel(model=>
@@ -72,23 +72,23 @@
                 });
         }
 
-        [Then]
+        [Test]
         public void ThereShouldNotBeAMessage()
         {
             WithChannel(model=>
                 {
                     var msg = model.BasicGet(theQueue, true);
-                    msg.ShouldBeNull();
+                    msg.ShouldBe(null);
                 });
         }
     }
-    [Scenario]
+    
     public class AckAGet :
         GivenAChannel
     {
         private string theQueue = "testtrx";
 
-        [When]
+        [SetUp]
         public void WeAckTheBasicGet()
         {
             WithChannel(model=>
@@ -108,25 +108,25 @@
                 });
         }
 
-        [Then]
+        [Test]
         public void ThereShouldBeNoMoreMessages()
         {
             WithChannel(model =>
                 {
                     var msg = model.BasicGet(theQueue, false);
-                    msg.ShouldBeNull();
+                    msg.ShouldBe(null);
                 });
             
         }
         
     }
-    [Scenario]
+    
     public class DontAckTheGet :
         GivenAChannel
     {
         private string theQueue = "testtrx";
 
-        [When]
+        [SetUp]
         public void WeAckTheBasicGet()
         {
             WithChannel(model=>
@@ -147,14 +147,14 @@
                 });
         }
 
-        [Then]
+        [Test]
         public void ThereShouldBeAMessage()
         {
             WithChannel(model =>
                 {
                     var msg = model.BasicGet(theQueue, false);
-                    msg.ShouldNotBeNull();
-                    msg.Body.ShouldEqual(TheMessage);
+                    msg.ShouldNotBe(null);
+                    msg.Body.ShouldBe(TheMessage);
                 });
             
         }

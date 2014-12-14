@@ -13,12 +13,12 @@
 namespace MassTransit.Containers.Tests
 {
     using Autofac;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using Saga;
     using Scenarios;
 
 
-    [Scenario]
+    
     public class Autofac_Consumer :
         When_registering_a_consumer
     {
@@ -36,7 +36,7 @@ namespace MassTransit.Containers.Tests
             _container = builder.Build();
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -49,7 +49,7 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    [Scenario]
+    
     public class Autofac_Saga :
         When_registering_a_saga
     {
@@ -66,7 +66,7 @@ namespace MassTransit.Containers.Tests
             _container = builder.Build();
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();

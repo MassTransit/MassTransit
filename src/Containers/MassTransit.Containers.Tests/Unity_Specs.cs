@@ -13,14 +13,14 @@
 namespace MassTransit.Containers.Tests
 {
     using EndpointConfigurators;
-    using Magnum.TestFramework;
+    using NUnit.Framework;
     using Microsoft.Practices.Unity;
     using Saga;
     using Scenarios;
     using SubscriptionConfigurators;
 
 
-    [Scenario]
+    
     public class Unity_Consumer :
         When_registering_a_consumer
     {
@@ -36,7 +36,7 @@ namespace MassTransit.Containers.Tests
                 new HierarchicalLifetimeManager());
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -50,7 +50,7 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    [Scenario]
+    
     public class Unity_Saga :
         When_registering_a_saga
     {
@@ -64,7 +64,7 @@ namespace MassTransit.Containers.Tests
                 new ContainerControlledLifetimeManager());
         }
 
-        [Finally]
+        [TearDown]
         public void Close_container()
         {
             _container.Dispose();
