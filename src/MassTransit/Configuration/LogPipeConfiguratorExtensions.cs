@@ -20,7 +20,7 @@ namespace MassTransit
 
     public static class LogPipeConfiguratorExtensions
     {
-        public static void Log<T>(this IPipeConfigurator<T> configurator, TextWriter textWriter, Func<T, Task<string>> formatter)
+        public static void UseLog<T>(this IPipeConfigurator<T> configurator, TextWriter textWriter, Func<T, Task<string>> formatter)
             where T : class, PipeContext
         {
             if (configurator == null)

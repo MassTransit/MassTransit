@@ -75,7 +75,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     {
                         e.PrefetchCount = 16;
 
-                        e.Log(Console.Out, async c => string.Format("Logging: {0}", c.MessageId.Value));
+                        e.UseLog(Console.Out, async c => string.Format("Logging: {0}", c.MessageId.Value));
 
                         e.Handler<A>(async context => completed.TrySetResult(context.Message));
 

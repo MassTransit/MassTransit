@@ -157,10 +157,12 @@
     <Compile Include="Configuration\SubscriptionConnectors\HandlerConnectorImpl.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\IInstanceConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceMessageConnector.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ISagaMetadataCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageConnectorFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageSubscriptionConnectorFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MultipleConnectHandle.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ContextSubscriptionConnectorFactory.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\SagaMetadataCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\SubscriptionConnectorFactory.cs" />
     <Compile Include="Configuration\TuplePipeConfiguratorExtensions.cs" />
     <Compile Include="ConnectHandle.cs" />

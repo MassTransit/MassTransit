@@ -52,35 +52,35 @@ namespace Automatonymous
             _messageTypes.Fill(eventCorrelations);
         }
 
-        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
-            Guid sagaId, InstanceHandlerSelector<TInstance, TMessage> selector, ISagaPolicy<TInstance, TMessage> policy)
-            where TMessage : class
-        {
-            IEnumerable<Action<IConsumeContext<TMessage>>> handlers = _repository.GetSaga(context, sagaId, selector, policy);
-
-            int handlerCount = 0;
-            foreach (var handler in handlers)
-            {
-                handlerCount++;
-                yield return handler;
-            }
-
-            int retryLimit;
-            if (handlerCount == 0 && IsRetryEvent(context.Message, out retryLimit))
-            {
-                int attempts = context.RetryCount;
-                if (attempts < retryLimit)
-                {
-                    yield return msgContext =>
-                    {
-                        _log.DebugFormat("Queuing {0} {1} for retry {2}", typeof(TMessage).Name, context.MessageId, attempts + 1);
-                        msgContext.RetryLater();
-                    };
-                }
-                else
-                    _log.DebugFormat("Retry limit for {0} {1} reached {2}", typeof(TMessage).Name, context.MessageId, attempts + 1);
-            }
-        }
+//        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
+//            Guid sagaId, InstanceHandlerSelector<TInstance, TMessage> selector, ISagaPolicy<TInstance, TMessage> policy)
+//            where TMessage : class
+//        {
+//            IEnumerable<Action<IConsumeContext<TMessage>>> handlers = _repository.GetSaga(context, sagaId, selector, policy);
+//
+//            int handlerCount = 0;
+//            foreach (var handler in handlers)
+//            {
+//                handlerCount++;
+//                yield return handler;
+//            }
+//
+//            int retryLimit;
+//            if (handlerCount == 0 && IsRetryEvent(context.Message, out retryLimit))
+//            {
+//                int attempts = context.RetryCount;
+//                if (attempts < retryLimit)
+//                {
+//                    yield return msgContext =>
+//                    {
+//                        _log.DebugFormat("Queuing {0} {1} for retry {2}", typeof(TMessage).Name, context.MessageId, attempts + 1);
+//                        msgContext.RetryLater();
+//                    };
+//                }
+//                else
+//                    _log.DebugFormat("Retry limit for {0} {1} reached {2}", typeof(TMessage).Name, context.MessageId, attempts + 1);
+//            }
+//        }
 
         public IEnumerable<Guid> Find(ISagaFilter<TInstance> filter)
         {

@@ -16,7 +16,6 @@ namespace MassTransit.Configurators
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
-    using EndpointConfigurators;
     using PipeConfigurators;
     using Transports;
 
@@ -43,33 +42,6 @@ namespace MassTransit.Configurators
             _configurators.Add(_busEndpointConfigurator);
         }
 
-        public void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)
-        {
-            _busEndpointConfigurator.AddConfigurator(configurator);
-        }
-
-        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
-        {
-            _busEndpointConfigurator.AddPipeBuilderConfigurator(configurator);
-        }
-
-        public void AddServiceBusFactoryBuilderConfigurator(IServiceBusFactoryBuilderConfigurator configurator)
-        {
-            _configurators.Add(new ConfiguratorProxy(configurator));
-        }
-
-        public void SetTransportProvider<T>(T transportProvider)
-            where T : ISendTransportProvider, IReceiveTransportProvider
-        {
-            _receiveTransportProvider = transportProvider;
-            _sendTransportProvider = transportProvider;
-        }
-
-        public void AddServiceBusFactoryBuilderConfigurator(IInMemoryServiceBusFactoryBuilderConfigurator configurator)
-        {
-            _configurators.Add(configurator);
-        }
-
         public IBusControl CreateBus()
         {
             if (_receiveTransportProvider == null || _sendTransportProvider == null)
@@ -93,6 +65,28 @@ namespace MassTransit.Configurators
         public IEnumerable<ValidationResult> Validate()
         {
             return _configurators.SelectMany(x => x.Validate());
+        }
+
+        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
+        {
+            _busEndpointConfigurator.AddPipeBuilderConfigurator(configurator);
+        }
+
+        public void AddServiceBusFactoryBuilderConfigurator(IServiceBusFactoryBuilderConfigurator configurator)
+        {
+            _configurators.Add(new ConfiguratorProxy(configurator));
+        }
+
+        public void SetTransportProvider<T>(T transportProvider)
+            where T : ISendTransportProvider, IReceiveTransportProvider
+        {
+            _receiveTransportProvider = transportProvider;
+            _sendTransportProvider = transportProvider;
+        }
+
+        public void AddServiceBusFactoryBuilderConfigurator(IInMemoryServiceBusFactoryBuilderConfigurator configurator)
+        {
+            _configurators.Add(configurator);
         }
 
 

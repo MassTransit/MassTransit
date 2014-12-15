@@ -42,7 +42,7 @@ namespace MassTransit.Tests
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             configurator.Consumer<Consumer>()
-                .Log(Console.Out, async context => string.Format("Consumer: {0}", TypeMetadataCache<Consumer>.ShortName));
+                .UseLog(Console.Out, async context => string.Format("Consumer: {0}", TypeMetadataCache<Consumer>.ShortName));
         }
 
 

@@ -15,30 +15,34 @@ namespace MassTransit.Saga.SubscriptionConnectors
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Magnum.Extensions;
 	using Magnum.Reflection;
+	using MassTransit.Pipeline;
+	using PipeConfigurators;
+	using Policies;
 	using Util;
 
 	public interface SagaConnector
 	{
-//		UnsubscribeAction Connect(IInboundPipelineConfigurator configurator);
-	}
+        ConnectHandle Connect<T>(IConsumePipe consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
+            params IPipeBuilderConfigurator<SagaConsumeContext<T>>[] pipeBuilderConfigurators)
+            where T : class, ISaga;
+    }
 
 
-	public class SagaConnector<T> :
+	public class SagaConnector<TSaga> :
 		SagaConnector
-		where T : class, ISaga
+		where TSaga : class, ISaga
 	{
 		readonly IEnumerable<SagaSubscriptionConnector> _connectors;
 		readonly object[] _args;
 
-		public SagaConnector(ISagaRepository<T> sagaRepository)
+		public SagaConnector(ISagaRepository<TSaga> sagaRepository)
 		{
 			try
 			{
 				_args = new object[] {sagaRepository};
 
-				Type[] interfaces = typeof (T).GetInterfaces();
+				Type[] interfaces = typeof (TSaga).GetInterfaces();
 
 				if (!interfaces.Contains(typeof (ISaga)))
 					throw new ConfigurationException("The type specified is not a saga");
@@ -51,7 +55,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 			}
 			catch (Exception ex)
 			{
-				throw new ConfigurationException("Failed to create the saga connector for " + typeof (T).FullName, ex);
+				throw new ConfigurationException("Failed to create the saga connector for " + typeof (TSaga).FullName, ex);
 			}
 		}
 
@@ -68,38 +72,44 @@ namespace MassTransit.Saga.SubscriptionConnectors
 
 		IEnumerable<SagaSubscriptionConnector> Initiates()
 		{
-			return typeof (T).GetInterfaces()
+			return typeof (TSaga).GetInterfaces()
 				.Where(x => x.IsGenericType)
 				.Where(x => x.GetGenericTypeDefinition() == typeof (InitiatedBy<>))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
 				.Select(x => FastActivator.Create(typeof (InitiatedBySagaSubscriptionConnector<,>),
-					new[] {typeof (T), x.MessageType}, _args))
+					new[] {typeof (TSaga), x.MessageType}, _args))
 				.Cast<SagaSubscriptionConnector>();
 		}
 
 		IEnumerable<SagaSubscriptionConnector> Orchestrates()
 		{
-			return typeof (T).GetInterfaces()
+			return typeof (TSaga).GetInterfaces()
 				.Where(x => x.IsGenericType)
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Orchestrates<>))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
 				.Select(x => FastActivator.Create(typeof (OrchestratesSagaSubscriptionConnector<,>),
-					new[] {typeof (T), x.MessageType}, _args))
+					new[] {typeof (TSaga), x.MessageType}, _args))
 				.Cast<SagaSubscriptionConnector>();
 		}
 
 		IEnumerable<SagaSubscriptionConnector> Observes()
 		{
-			return typeof (T).GetInterfaces()
+			return typeof (TSaga).GetInterfaces()
 				.Where(x => x.IsGenericType)
 				.Where(x => x.GetGenericTypeDefinition() == typeof (Observes<,>))
 				.Select(x => new {InterfaceType = x, MessageType = x.GetGenericArguments()[0]})
 				.Where(x => x.MessageType.IsValueType == false)
 				.Select(x => FastActivator.Create(typeof (ObservesSagaSubscriptionConnector<,>),
-					new[] {typeof (T), x.MessageType}, _args))
+					new[] {typeof (TSaga), x.MessageType}, _args))
 				.Cast<SagaSubscriptionConnector>();
 		}
+
+	    public ConnectHandle Connect<T>(IConsumePipe consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
+	        params IPipeBuilderConfigurator<SagaConsumeContext<T>>[] pipeBuilderConfigurators) where T : class, ISaga
+	    {
+	        
+	    }
 	}
 }
