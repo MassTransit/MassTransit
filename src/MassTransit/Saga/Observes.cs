@@ -16,7 +16,7 @@ namespace MassTransit.Saga
 	using System.Linq.Expressions;
 
 	public interface Observes<TMessage, TSaga> :
-		Consumes<TMessage>.All
+		IConsumer<TMessage>
 		where TMessage : class
 	{
 		Expression<Func<TSaga, TMessage, bool>> GetBindExpression();

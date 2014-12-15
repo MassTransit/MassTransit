@@ -10,17 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.SubscriptionConnectors
 {
-    using Builders;
-
-
-    public interface IInMemoryServiceBusFactoryConfigurator :
-        IServiceBusFactoryConfigurator
+    public interface ISagaMetadataCache<TSaga>
     {
-        void SetTransportProvider<T>(T transportProvider)
-            where T : ISendTransportProvider, IReceiveTransportProvider;
-
-        void AddServiceBusFactoryBuilderConfigurator(IInMemoryServiceBusFactoryBuilderConfigurator configurator);
+        MessageInterfaceType[] ConsumerTypes { get; }
+        MessageInterfaceType[] MessageConsumerTypes { get; }
+        MessageInterfaceType[] ContextConsumerTypes { get; }
     }
 }

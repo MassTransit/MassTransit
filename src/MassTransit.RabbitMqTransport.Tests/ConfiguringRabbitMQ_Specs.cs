@@ -53,7 +53,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                     e.Durable(false);
                     e.Exclusive();
 
-                    e.Log(Console.Out, async c => string.Format("Logging: {0}", c.MessageId.Value));
+                    e.UseLog(Console.Out, async c => string.Format("Logging: {0}", c.MessageId.Value));
 
                     e.Handler<A>(async context => completed.TrySetResult(context.Message));
 

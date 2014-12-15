@@ -17,7 +17,6 @@ namespace MassTransit.PipeConfigurators
     using System.Threading.Tasks;
     using Configurators;
     using PipeBuilders;
-    using Pipeline;
     using Pipeline.Filters;
 
 

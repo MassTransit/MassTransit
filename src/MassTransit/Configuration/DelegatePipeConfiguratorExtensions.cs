@@ -20,7 +20,7 @@ namespace MassTransit
     public static class DelegatePipeConfiguratorExtensions
     {
         /// <summary>
-        /// Adds a filter to the pipe
+        /// Executes a synchronous method on the pipe
         /// </summary>
         /// <typeparam name="T">The context type</typeparam>
         /// <param name="configurator">The pipe configurator</param>
@@ -37,7 +37,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Adds a filter to the pipe
+        /// Executes an asynchronous method on the pipe
         /// </summary>
         /// <typeparam name="T">The context type</typeparam>
         /// <param name="configurator">The pipe configurator</param>

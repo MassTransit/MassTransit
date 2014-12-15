@@ -14,27 +14,9 @@ namespace MassTransit.Pipeline
 {
     using System;
     using System.Collections.Generic;
-    using Saga;
 
 
     public delegate IEnumerable<Action<IConsumeContext<TMessage>>> InstanceHandlerSelector<TInstance, TMessage>(
         TInstance instance, IConsumeContext<TMessage> context)
         where TMessage : class;
-
-
-    public static class InstanceHandlerSelector
-    {
-        public static IEnumerable<Action<IConsumeContext<TMessage>>> ForInitiatedBy<TInstance, TMessage>(TInstance instance)
-            where TInstance : InitiatedBy<TMessage>
-            where TMessage : class, CorrelatedBy<Guid>
-        {
-            yield return x =>
-            {
-                using (x.CreateScope())
-                {
-                    instance.Consume(x.Message);
-                }
-            };
-        }
-    }
 }
