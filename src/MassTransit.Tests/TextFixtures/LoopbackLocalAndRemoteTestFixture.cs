@@ -20,7 +20,7 @@ namespace MassTransit.Tests.TextFixtures
     using NUnit.Framework;
 
 
-    [TestFixture]
+    [TestFixture, Obsolete]
     public class LoopbackLocalAndRemoteTestFixture :
         EndpointTestFixture<LoopbackTransportFactory>
     {

@@ -20,7 +20,7 @@ namespace MassTransit.Tests.TextFixtures
 	using MassTransit.Transports;
 	using NUnit.Framework;
 
-	[TestFixture]
+	[TestFixture, Obsolete]
 	public abstract class EndpointTestFixture<TTransportFactory>
 		where TTransportFactory : class, ITransportFactory, new()
 	{
