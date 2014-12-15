@@ -102,7 +102,6 @@
     <Compile Include="InterfaceProxy_Specs.cs" />
     <Compile Include="JsonToken_Specs.cs" />
     <Compile Include="MessageUrnSpecs.cs" />
-    <Compile Include="BddExtensions.cs" />
     <Compile Include="Configuration\ConsumerSubscription_Specs.cs" />
     <Compile Include="Configuration\ConsumesAll_Specs.cs" />
     <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
