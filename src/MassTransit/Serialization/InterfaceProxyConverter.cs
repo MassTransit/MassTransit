@@ -37,10 +37,6 @@ namespace MassTransit.Serialization
             Type proxyType = _builder.GetImplementationType(objectType);
 
             return serializer.Deserialize(reader, proxyType);
-//			object obj = FastActivator.Create(proxyType);
-//			serializer.Populate(reader, obj);
-
-//			return obj;
         }
 
         public override bool CanConvert(Type objectType)

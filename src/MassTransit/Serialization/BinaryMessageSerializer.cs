@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -19,8 +19,7 @@ namespace MassTransit.Serialization
     using System.Runtime.Serialization.Formatters.Binary;
     using Logging;
     using Magnum;
-    using Magnum.Extensions;
-    using Util;
+
 
     /// <summary>
     /// The binary message serializer used the .NET BinaryFormatter to serialize
@@ -45,7 +44,7 @@ namespace MassTransit.Serialization
         const string SourceAddressKey = "SourceAddress";
 
         static readonly BinaryFormatter _formatter = new BinaryFormatter();
-        static readonly ILog _log = Logger.Get(typeof (BinaryMessageSerializer));
+        static readonly ILog _log = Logger.Get(typeof(BinaryMessageSerializer));
 
         public string ContentType
         {
@@ -56,7 +55,8 @@ namespace MassTransit.Serialization
             where T : class
         {
             object message = context.Message;
-            Guard.AgainstNull(message, "message cannot be null");
+            if (message == null)
+                throw new ArgumentNullException("context", "The message must be null");
 
             Type t = message.GetType();
             if (!t.IsSerializable)
@@ -107,9 +107,7 @@ namespace MassTransit.Serialization
                 return null;
 
             for (int i = 0; i < headers.Length; i++)
-            {
                 MapNameValuePair(context, headers[i]);
-            }
 
             return null;
         }
@@ -135,38 +133,36 @@ namespace MassTransit.Serialization
                     break;
 
                 case RequestIdKey:
-                    context.SetRequestId((string) header.Value);
+                    context.SetRequestId((string)header.Value);
                     break;
 
                 case ConversationIdKey:
-                    context.SetConversationId((string) header.Value);
+                    context.SetConversationId((string)header.Value);
                     break;
 
                 case CorrelationIdKey:
-                    context.SetCorrelationId((string) header.Value);
+                    context.SetCorrelationId((string)header.Value);
                     break;
 
                 case RetryCountKey:
-                    context.SetRetryCount((int) header.Value);
+                    context.SetRetryCount((int)header.Value);
                     break;
 
                 case MessageTypeKey:
-                    context.SetMessageType((string) header.Value);
+                    context.SetMessageType((string)header.Value);
                     break;
 
                 case NetworkKey:
-                    context.SetNetwork((string) header.Value);
+                    context.SetNetwork((string)header.Value);
                     break;
 
                 case ExpirationTimeKey:
-                    context.SetExpirationTime((DateTime) header.Value);
+                    context.SetExpirationTime((DateTime)header.Value);
                     break;
 
                 default:
                     if (header.MustUnderstand)
-                    {
                         _log.WarnFormat("The header was not understood: " + header.Name);
-                    }
                     break;
             }
         }
@@ -176,10 +172,10 @@ namespace MassTransit.Serialization
             if (value == null)
                 return null;
 
-            if (value.GetType() != typeof (Uri))
+            if (value.GetType() != typeof(Uri))
                 return null;
 
-            return (Uri) value;
+            return (Uri)value;
         }
     }
 }

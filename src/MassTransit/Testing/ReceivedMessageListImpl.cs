@@ -25,7 +25,7 @@ namespace MassTransit.Testing
 	{
 		readonly HashSet<ReceivedMessage> _messages;
 		readonly AutoResetEvent _received;
-		TimeSpan _timeout = 12.Seconds();
+	    TimeSpan _timeout = TimeSpan.FromSeconds(12);
 
 		public ReceivedMessageListImpl()
 		{
@@ -137,7 +137,7 @@ namespace MassTransit.Testing
 	{
 		readonly HashSet<ReceivedMessage<T>> _messages;
 		readonly AutoResetEvent _received;
-		TimeSpan _timeout = 8.Seconds();
+	    TimeSpan _timeout = TimeSpan.FromSeconds(12);
 
 		public ReceivedMessageListImpl()
 		{

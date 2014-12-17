@@ -10,24 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Util
+namespace MassTransit.Internals.Mapping
 {
-    using Internals.Mapping;
+    using System;
 
 
-    public interface ITypeMetadataCache<T>
+    public interface IDictionaryConverterCache
     {
-        string ShortName { get; }
-
-        /// <summary>
-        /// True if the type implements any known saga interfaces
-        /// </summary>
-        bool HasSagaInterfaces { get; }
-
-        IDictionaryConverter DictionaryConverter { get; }
-
-        IObjectConverter ObjectConverter { get; }
-
-        T InitializeFromObject(object values);
+        IDictionaryConverter GetConverter(Type type);
     }
 }

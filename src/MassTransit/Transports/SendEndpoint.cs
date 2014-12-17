@@ -18,6 +18,7 @@ namespace MassTransit.Transports
     using Context;
     using Magnum.Reflection;
     using Pipeline;
+    using Util;
 
 
     public class SendEndpoint :
@@ -91,7 +92,7 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException("values");
 
-            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+            var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
             return Send(message, cancellationToken);
         }
@@ -139,7 +140,7 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException("values");
 
-            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+            var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
             return Send(message, pipe, cancellationToken);
         }
@@ -152,7 +153,7 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException("pipe");
 
-            var message = InterfaceImplementationExtensions.InitializeProxy<T>(values);
+            var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
             return Send(message, pipe, cancellationToken);
         }

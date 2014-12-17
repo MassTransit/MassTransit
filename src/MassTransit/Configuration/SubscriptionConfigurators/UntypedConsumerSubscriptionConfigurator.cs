@@ -17,6 +17,7 @@ namespace MassTransit.SubscriptionConfigurators
     using Configuration;
     using Configurators;
     using EndpointConfigurators;
+    using Internals.Extensions;
     using Magnum.Extensions;
     using Policies;
     using SubscriptionConnectors;
@@ -42,7 +43,7 @@ namespace MassTransit.SubscriptionConfigurators
             if (_consumerFactory == null)
                 yield return this.Failure("The consumer factory cannot be null.");
 
-            if (!typeof(TConsumer).Implements<IConsumer>())
+            if (!typeof(TConsumer).HasInterface<IConsumer>())
             {
                 yield return
                     this.Warning(

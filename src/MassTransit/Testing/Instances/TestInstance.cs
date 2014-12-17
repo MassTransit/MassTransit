@@ -74,7 +74,10 @@ namespace MassTransit.Testing.Instances
 
 		protected void ExecuteTestActions()
 		{
-			_actions.Each(x => x.Act(_scenario));
+		    foreach (var action in _actions)
+		    {
+		        action.Act(_scenario);
+		    }
 		}
 	}
 }

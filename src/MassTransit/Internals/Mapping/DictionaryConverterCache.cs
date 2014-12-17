@@ -19,7 +19,8 @@ namespace MassTransit.Internals.Mapping
     /// <summary>
     /// Caches the type converter instances
     /// </summary>
-    public class DictionaryConverterCache
+    public class DictionaryConverterCache :
+        IDictionaryConverterCache
     {
         readonly ConcurrentDictionary<Type, IDictionaryConverter> _cache;
 
@@ -28,16 +29,16 @@ namespace MassTransit.Internals.Mapping
             _cache = new ConcurrentDictionary<Type, IDictionaryConverter>();
         }
 
+        public IDictionaryConverter GetConverter(Type type)
+        {
+            return _cache.GetOrAdd(type, CreateMissingConverter);
+        }
+
         IDictionaryConverter CreateMissingConverter(Type key)
         {
             Type type = typeof(ObjectDictionaryConverter<>).MakeGenericType(key);
 
             return (IDictionaryConverter)Activator.CreateInstance(type, this);
-        }
-
-        public IDictionaryConverter GetConverter(Type type)
-        {
-            return _cache.GetOrAdd(type, CreateMissingConverter);
         }
     }
 }

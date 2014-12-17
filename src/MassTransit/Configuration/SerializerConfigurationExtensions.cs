@@ -172,11 +172,10 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="serializerType"></param>
         /// <returns></returns>
-        public static T SetDefaultSerializer<T>(this T configurator,
-            Type serializerType)
+        public static T SetDefaultSerializer<T>(this T configurator,Type serializerType)
             where T : EndpointFactoryConfigurator
         {
-            return SetDefaultSerializer(configurator, () => (IMessageSerializer)FastActivator.Create(serializerType));
+            return SetDefaultSerializer(configurator, () => (IMessageSerializer)Activator.CreateInstance(serializerType));
         }
 
         /// <summary>

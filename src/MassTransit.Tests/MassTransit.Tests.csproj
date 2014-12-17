@@ -94,7 +94,9 @@
     <Compile Include="ContainedMessage_Specs.cs" />
     <Compile Include="Behaviors\Behavior.cs" />
     <Compile Include="Configuration\ShutdownTimeout_Specs.cs" />
+    <Compile Include="DictionaryToObject_Specs.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
+    <Compile Include="FastProperty_Specs.cs" />
     <Compile Include="HostContext_Specs.cs" />
     <Compile Include="InterceptingConsumer_Specs.cs" />
     <Compile Include="Diagnostics\Trace_Specs.cs" />
@@ -128,6 +130,7 @@
     <Compile Include="NewId_\NetworkAddress_Specs.cs" />
     <Compile Include="NewId_\NewId_Specs.cs" />
     <Compile Include="NewId_\Usage_Specs.cs" />
+    <Compile Include="ObjectToDictionary_Specs.cs" />
     <Compile Include="Performance\InMemorySpeed_Specs.cs" />
     <Compile Include="Pipeline\ConnectConsumer_Specs.cs" />
     <Compile Include="Pipeline\ConnectHandler_Specs.cs" />
@@ -141,6 +144,7 @@
     <Compile Include="Saga\Injecting_Specs.cs" />
     <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
     <Compile Include="SendObserver_Specs.cs" />
+    <Compile Include="SendProxy_Specs.cs" />
     <Compile Include="SendReceive_Specs.cs" />
     <Compile Include="SerializationFault_Specs.cs" />
     <Compile Include="SerializationSupport_Specs.cs" />
@@ -150,6 +154,7 @@
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="SmallNumber_Specs.cs" />
     <Compile Include="InMemoryTest_Specs.cs" />
+    <Compile Include="StaticProperty_Specs.cs" />
     <Compile Include="Testing\ConsumerMultiple_Specs.cs" />
     <Compile Include="Testing\ConsumerTest_Specs.cs" />
     <Compile Include="Testing\HandlerRespond_Specs.cs" />

@@ -22,6 +22,8 @@ namespace MassTransit.Serialization
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Linq;
+    using Util;
+
 
     public class JsonMessageSerializer :
         IMessageSerializer
@@ -62,7 +64,7 @@ namespace MassTransit.Serialization
                             {
                                 new ByteArrayConverter(), 
                                 new ListJsonConverter(),
-                                new InterfaceProxyConverter(),
+                                new InterfaceProxyConverter(TypeMetadataCache.ImplementationBuilder),
                                 new StringDecimalConverter(),
                                 new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
                             })

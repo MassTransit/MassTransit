@@ -12,29 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Logging.Tracing
 {
+    using System.Collections.Concurrent;
     using System.Diagnostics;
     using Magnum.Caching;
 
     public class TraceLogger :
         ILogger
     {
-        readonly Cache<string, TraceLog> _logs;
-        readonly Cache<string, TraceSource> _sources;
+        readonly ConcurrentDictionary<string, TraceLog> _logs;
+        readonly ConcurrentDictionary<string, TraceSource> _sources;
 
         public TraceLogger()
         {
-            _logs = new ConcurrentCache<string, TraceLog>(CreateTraceLog);
-            _sources = new ConcurrentCache<string, TraceSource>(CreateTraceSource);
+            _logs = new ConcurrentDictionary<string, TraceLog>();
+            _sources = new ConcurrentDictionary<string, TraceSource>();
         }
 
         public ILog Get(string name)
         {
-            return _logs[name];
+            return _logs.GetOrAdd(name, CreateTraceLog);
         }
 
         TraceLog CreateTraceLog(string name)
         {
-            return new TraceLog(_sources[name]);
+            return new TraceLog(_sources.GetOrAdd(name, CreateTraceSource));
         }
 
         TraceSource CreateTraceSource(string name)

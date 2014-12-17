@@ -79,7 +79,7 @@ namespace MassTransit.Context
 		{
 			try
 			{
-				_startTime = SystemUtil.UtcNow;
+			    _startTime = DateTime.UtcNow;
 				_receiveTime.Start();
 
 				// Let the endpoint (and hence inbound transport) consume a message.
