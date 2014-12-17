@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,9 +14,9 @@ namespace MassTransit.Saga
 {
     using System;
     using System.Linq.Expressions;
-    using System.Reflection;
-    using Magnum.Extensions;
-    using Magnum.Reflection;
+    using Internals.Extensions;
+    using Internals.Reflection;
+
 
     /// <summary>
     /// Factory methods for decorating a saga repository so that properties of the saga
@@ -39,14 +39,13 @@ namespace MassTransit.Saga
             Expression<Func<TSaga, T1>> propertyExpression,
             Func<TSaga, T1> valueProvider)
         {
-            var property = new FastProperty<TSaga, T1>(propertyExpression.GetMemberPropertyInfo(),
-                BindingFlags.NonPublic);
+            var property = new ReadWriteProperty(propertyExpression.GetPropertyInfo(), true);
 
             return new DelegatingSagaRepository<TSaga>(repository, context =>
-                {
-                    T1 value = valueProvider(context.Saga);
-                    property.Set(context.Saga, value);
-                });
+            {
+                T1 value = valueProvider(context.Saga);
+                property.Set(context.Saga, value);
+            });
         }
 
         /// <summary>
@@ -67,19 +66,17 @@ namespace MassTransit.Saga
             Expression<Func<TSaga, T2>> propertyExpression2,
             Func<TSaga, T2> valueProvider2)
         {
-            var property1 = new FastProperty<TSaga, T1>(propertyExpression1.GetMemberPropertyInfo(),
-                BindingFlags.NonPublic);
-            var property2 = new FastProperty<TSaga, T2>(propertyExpression2.GetMemberPropertyInfo(),
-                BindingFlags.NonPublic);
+            var property1 = new ReadWriteProperty<TSaga, T1>(propertyExpression1.GetPropertyInfo(), true);
+            var property2 = new ReadWriteProperty<TSaga, T2>(propertyExpression2.GetPropertyInfo(), true);
 
             return new DelegatingSagaRepository<TSaga>(repository, context =>
-                {
-                    T1 value = valueProvider1(context.Saga);
-                    property1.Set(context.Saga, value);
+            {
+                T1 value = valueProvider1(context.Saga);
+                property1.Set(context.Saga, value);
 
-                    T2 value2 = valueProvider2(context.Saga);
-                    property2.Set(context.Saga, value2);
-                });
+                T2 value2 = valueProvider2(context.Saga);
+                property2.Set(context.Saga, value2);
+            });
         }
     }
 }

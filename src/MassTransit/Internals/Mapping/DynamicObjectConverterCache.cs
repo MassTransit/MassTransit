@@ -40,7 +40,7 @@ namespace MassTransit.Internals.Mapping
 
         IObjectConverter CreateMissingConverter(Type type)
         {
-            Type implementationType = _implementationBuilder.GetImplementationType(type);
+            Type implementationType = type.IsInterface ? _implementationBuilder.GetImplementationType(type) : type;
             Type converterType = typeof(DynamicObjectConverter<,>).MakeGenericType(type, implementationType);
 
             return (IObjectConverter)Activator.CreateInstance(converterType, this);

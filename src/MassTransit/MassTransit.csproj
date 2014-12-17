@@ -218,6 +218,7 @@
     <Compile Include="Internals\Mapping\EnumObjectMapper.cs" />
     <Compile Include="Internals\Mapping\IArrayValueProvider.cs" />
     <Compile Include="Internals\Mapping\IDictionaryConverter.cs" />
+    <Compile Include="Internals\Mapping\IDictionaryConverterCache.cs" />
     <Compile Include="Internals\Mapping\IDictionaryMapper.cs" />
     <Compile Include="Internals\Mapping\IObjectConverter.cs" />
     <Compile Include="Internals\Mapping\IObjectConverterCache.cs" />
@@ -396,6 +397,7 @@
     <Compile Include="Serialization\JsonMessageConsumeContext.cs" />
     <Compile Include="Serialization\JsonMessageContextHeaders.cs" />
     <Compile Include="Serialization\JsonMessageDeserializer.cs" />
+    <Compile Include="Serialization\ListConverterCache.cs" />
     <Compile Include="Serialization\MessageEnvelope.cs" />
     <Compile Include="Serialization\SupportedMessageSerializers.cs" />
     <Compile Include="Configuration\EndpointConfigurators\DefaultMessageTrackerEndpointFactoryConfigurator.cs" />
@@ -406,7 +408,6 @@
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceType.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\IConsumerMetadataCache.cs" />
-    <Compile Include="Context\SendObjectConverterCache.cs" />
     <Compile Include="Configuration\BusServiceLayer.cs" />
     <Compile Include="Configuration\Configuration\BusSettings.cs" />
     <Compile Include="Configuration\Configuration\DelegateConsumerFactory.cs" />
@@ -421,7 +422,6 @@
     <Compile Include="Configuration\ConsumerSubscriptionExtensions.cs" />
     <Compile Include="Configuration\HandlerSubscriptionExtensions.cs" />
     <Compile Include="Configuration\InstanceSubscriptionExtensions.cs" />
-    <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettings.cs" />
     <Compile Include="Configuration\BusConfigurators\PostCreateBusBuilderConfigurator.cs" />
     <Compile Include="Configuration\Configurators\Configurator.cs" />
     <Compile Include="Configuration\BusConfigurators\BusBuilderConfigurator.cs" />
@@ -430,7 +430,6 @@
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\ServiceBusConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettingsConfigurator.cs" />
-    <Compile Include="Configuration\EndpointConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SerializerConfigurationExtensions.cs" />
     <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ServiceBusFactory.cs" />
@@ -524,7 +523,6 @@
     <Compile Include="Pipeline\IOutboundPipelineConfigurator.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\IOutboundPipelineSink.cs" />
-    <Compile Include="Pipeline\OutboundMessagePipeline.cs" />
     <Compile Include="Saga\Configuration\SagaSubscriptionConfiguratorExtensions.cs" />
     <Compile Include="Saga\SubscriptionBuilders\SagaSubscriptionBuilder.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\SagaSubscriptionConfigurator.cs" />
@@ -681,7 +679,6 @@
     <Compile Include="Transports\ReceiveTransportHandle.cs" />
     <Compile Include="Transports\SendEndpoint.cs" />
     <Compile Include="Transports\SendEndpointCache.cs" />
-    <Compile Include="Transports\TransportSettings.cs" />
     <Compile Include="Transports\IEndpointFactory.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
@@ -724,7 +721,6 @@
     <Compile Include="Saga\ISagaMessageSink.cs" />
     <Compile Include="Saga\ISagaPolicy.cs" />
     <Compile Include="Serialization\Custom\ExtensionsForType.cs" />
-    <Compile Include="Serialization\Custom\InterfaceImplementationBuilder.cs" />
     <Compile Include="Serialization\Custom\NonClosingStream.cs" />
     <Compile Include="Serialization\PreSharedKeyEncryptedMessageSerializer.cs" />
     <Compile Include="Transports\InMemoryInboundMessageTracker.cs" />

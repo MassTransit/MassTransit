@@ -76,7 +76,6 @@ namespace MassTransit
         public static ConnectHandle SubscribeInstance<T>(this IServiceBus bus, T instance, IRetryPolicy retryPolicy = null)
             where T : class, IConsumer
         {
-            Guard.AgainstNull(instance, "instance", "A null instance cannot be subscribed");
 
             InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();
 

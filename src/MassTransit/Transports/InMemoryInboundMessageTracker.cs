@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,22 +13,22 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using Magnum.Caching;
 
 
     public class InMemoryInboundMessageTracker :
         IInboundMessageTracker
     {
-        readonly Cache<string, TrackedMessage> _messages;
+        readonly ConcurrentDictionary<string, TrackedMessage> _messages;
         readonly int _retryLimit;
 
         public InMemoryInboundMessageTracker(int retryLimit)
         {
             _retryLimit = retryLimit;
 
-            _messages = new ConcurrentCache<string, TrackedMessage>(id => new TrackedMessage());
+            _messages = new ConcurrentDictionary<string, TrackedMessage>();
         }
 
         public bool IsRetryEnabled
@@ -46,13 +46,14 @@ namespace MassTransit.Transports
 
             if (!string.IsNullOrEmpty(id))
             {
-                _messages.WithValue(id, x =>
-                    {
-                        result = x.Exception;
-                        exceeded = x.RetryCount >= _retryLimit;
-                        if (x.FaultActions != null)
-                            actions = x.FaultActions;
-                    });
+                TrackedMessage message;
+                if (_messages.TryGetValue(id, out message))
+                {
+                    result = message.Exception;
+                    exceeded = message.RetryCount >= _retryLimit;
+                    if (message.FaultActions != null)
+                        actions = message.FaultActions;
+                }
             }
 
             faultActions = actions;
@@ -65,7 +66,7 @@ namespace MassTransit.Transports
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            return _messages[id].Increment(exception, faultActions) >= _retryLimit;
+            return _messages.GetOrAdd(id, _ => new TrackedMessage()).Increment(exception, faultActions) >= _retryLimit;
         }
 
         public virtual bool IncrementRetryCount(string id, Exception exception)
@@ -73,7 +74,7 @@ namespace MassTransit.Transports
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            return _messages[id].Increment(exception) >= _retryLimit;
+            return _messages.GetOrAdd(id, _ => new TrackedMessage()).Increment(exception) >= _retryLimit;
         }
 
         public virtual bool IncrementRetryCount(string id)
@@ -81,7 +82,7 @@ namespace MassTransit.Transports
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            return _messages[id].Increment() >= _retryLimit;
+            return _messages.GetOrAdd(id, _ => new TrackedMessage()).Increment() >= _retryLimit;
         }
 
         public virtual void MessageWasReceivedSuccessfully(string id)
@@ -89,7 +90,8 @@ namespace MassTransit.Transports
             if (string.IsNullOrEmpty(id))
                 return;
 
-            _messages.Remove(id);
+            TrackedMessage value;
+            _messages.TryRemove(id, out value);
         }
 
         public virtual void MessageWasMovedToErrorQueue(string id)
@@ -97,7 +99,8 @@ namespace MassTransit.Transports
             if (string.IsNullOrEmpty(id))
                 return;
 
-            _messages.Remove(id);
+            TrackedMessage value;
+            _messages.TryRemove(id, out value);
         }
 
 

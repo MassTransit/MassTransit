@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,9 +15,9 @@ namespace MassTransit.Serialization
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Magnum.Reflection;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Util;
 
 
     public class JsonMessageTypeConverter :
@@ -73,7 +73,7 @@ namespace MassTransit.Serialization
                 object obj;
                 Type deserializeType = typeof(T);
                 if (deserializeType.IsInterface && deserializeType.IsAllowedMessageType())
-                    deserializeType = InterfaceImplementationBuilder.GetProxyFor(deserializeType);
+                    deserializeType = TypeMetadataCache.GetImplementationType(deserializeType);
 
                 using (var jsonReader = new JTokenReader(_token))
                 {

@@ -35,6 +35,11 @@ namespace MassTransit.Internals.Reflection
             _properties = CreatePropertyCache(includeNonPublic);
         }
 
+        public ReadWriteProperty<T> this[string name]
+        {
+            get { return _properties[name]; }
+        }
+
         public IEnumerator<ReadWriteProperty<T>> GetEnumerator()
         {
             return _properties.Values.GetEnumerator();

@@ -72,7 +72,10 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 
 		protected void BuildTestActions(TestInstanceBuilder<TScenario> builder)
 		{
-			_actionConfigurators.Each(x => x.Configure(builder));
+		    foreach (var configurator in _actionConfigurators)
+		    {
+		        configurator.Configure(builder);
+		    }
 		}
 	}
 }
