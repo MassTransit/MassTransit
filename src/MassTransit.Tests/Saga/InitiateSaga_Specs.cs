@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Saga
 	public class When_an_initiating_message_for_a_saga_arrives :
 		LoopbackTestFixture
 	{
-		protected override void EstablishContext()
+		protected  void EstablishContext()
 		{
 			base.EstablishContext();
 
@@ -83,7 +83,7 @@ namespace MassTransit.Tests.Saga
 	public class When_an_existing_saga_receives_an_initiating_message :
 		LoopbackTestFixture
 	{
-		protected override void EstablishContext()
+		protected  void EstablishContext()
 		{
 			base.EstablishContext();
 

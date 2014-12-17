@@ -29,7 +29,7 @@ namespace MassTransit.PipeConfigurators
             _filter = filter;
         }
 
-        public void Configure(IPipeBuilder<T> builder)
+        public void Build(IPipeBuilder<T> builder)
         {
             builder.AddFilter(_filter);
         }

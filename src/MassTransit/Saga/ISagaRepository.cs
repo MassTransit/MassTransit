@@ -27,22 +27,6 @@ namespace MassTransit.Saga
 	public interface ISagaRepository<TSaga>
 		where TSaga : class, ISaga
 	{
-//        /// <summary>
-//        /// Loads/Creates the saga and makes it available for later consumption
-//        /// through the Actions
-//        /// </summary>
-//        /// <typeparam name="TMessage"></typeparam>
-//        /// <param name="context"></param>
-//        /// <param name="sagaId"></param>
-//        /// <param name="selector"></param>
-//        /// <param name="policy"></param>
-//        /// <returns></returns>
-//		IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
-//																		 InstanceHandlerSelector<TSaga, TMessage> selector,
-//																		 ISagaPolicy<TSaga, TMessage> policy)
-//			where TMessage : class;
-//
-
         /// <summary>
         /// Send a message to the saga repository, which can then hydrate available sagas and deliver the message
         /// to the saga instances.

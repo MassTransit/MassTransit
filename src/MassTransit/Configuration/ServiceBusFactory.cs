@@ -14,8 +14,6 @@ namespace MassTransit
 {
     using System;
     using BusConfigurators;
-    using Configurators;
-    using Magnum;
 
 
     /// <summary>
@@ -23,35 +21,13 @@ namespace MassTransit
     /// </summary>
     public static class ServiceBusFactory
     {
-        static readonly ServiceBusDefaultSettings _defaultSettings = new ServiceBusDefaultSettings();
-
         public static IServiceBus New(Action<ServiceBusConfigurator> configure)
         {
-            Guard.AgainstNull(configure, "configure");
-
-            var configurator = new ServiceBusConfiguratorImpl(_defaultSettings);
-
-            configure(configurator);
-
-            ConfigurationResult result = ConfigurationResultImpl.CompileResults(configurator.Validate());
-
-            try
-            {
-                return configurator.CreateServiceBus();
-            }
-            catch (Exception ex)
-            {
-                throw new ConfigurationException(result, "An exception was thrown during service bus creation", ex);
-            }
+            throw new ConfigurationException("This method is no longer suppport");
         }
 
         public static void ConfigureDefaultSettings(Action<ServiceBusDefaultSettingsConfigurator> configure)
         {
-            Guard.AgainstNull(configure);
-
-            var configurator = new ServiceBusDefaultSettingsConfiguratorImpl(_defaultSettings);
-
-            configure(configurator);
         }
     }
 }

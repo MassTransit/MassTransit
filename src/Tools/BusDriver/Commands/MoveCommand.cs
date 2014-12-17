@@ -36,36 +36,36 @@ namespace BusDriver.Commands
 
 		public bool Execute()
 		{
-			Uri fromUri = _fromUriString.ToUri("The from URI was invalid");
-			Uri toUri = _toUriString.ToUri("The to URI was invalid");
-
-			IInboundTransport fromTransport = Program.Transports.GetInboundTransport(fromUri);
-			IOutboundTransport toTransport = Program.Transports.GetOutboundTransport(toUri);
-
-			ITextBlock text = new TextBlock()
-				.BeginBlock("Move messages from " + fromUri + " to " + toUri, "");
-
-			int moveCount = 0;
-			for (int i = 0; i < _count; i++)
-			{
-				fromTransport.Receive(receiveContext =>
-					{
-						return context =>
-							{
-								var moveContext = new MoveMessageSendContext(context);
-
-								toTransport.Send(moveContext);
-
-								text.BodyFormat("Message-Id: {0}", context.MessageId);
-
-								moveCount++;
-							};
-                    }, 5.Seconds());
-			}
-
-			_log.Info(text);
-			_log.InfoFormat("{0} message{1} moved from {2} to {3}", moveCount, moveCount == 1 ? "" : "s", fromUri, toUri);
-
+//			Uri fromUri = _fromUriString.ToUri("The from URI was invalid");
+//			Uri toUri = _toUriString.ToUri("The to URI was invalid");
+//
+//			IInboundTransport fromTransport = Program.Transports.GetInboundTransport(fromUri);
+//			IOutboundTransport toTransport = Program.Transports.GetOutboundTransport(toUri);
+//
+//			ITextBlock text = new TextBlock()
+//				.BeginBlock("Move messages from " + fromUri + " to " + toUri, "");
+//
+//			int moveCount = 0;
+//			for (int i = 0; i < _count; i++)
+//			{
+//				fromTransport.Receive(receiveContext =>
+//					{
+//						return context =>
+//							{
+//								var moveContext = new MoveMessageSendContext(context);
+//
+//								toTransport.Send(moveContext);
+//
+//								text.BodyFormat("Message-Id: {0}", context.MessageId);
+//
+//								moveCount++;
+//							};
+//                    }, 5.Seconds());
+//			}
+//
+//			_log.Info(text);
+//			_log.InfoFormat("{0} message{1} moved from {2} to {3}", moveCount, moveCount == 1 ? "" : "s", fromUri, toUri);
+//
 			return true;
 		}
 	}

@@ -34,32 +34,32 @@ namespace BusDriver.Commands
 
 		public bool Execute()
 		{
-			Uri uri = _uriString.ToUri("The from URI was invalid");
-
-			IInboundTransport fromTransport = Program.Transports.GetInboundTransport(uri);
-
-			var text = new TextBlock()
-				.BeginBlock("Peek URI: " + uri, "");
-
-			int peekCount = 0;
-			fromTransport.Receive(receiveContext =>
-				{
-					if (peekCount >= _count)
-						return null;
-
-					var body = Encoding.UTF8.GetString(receiveContext.BodyStream.ReadToEnd());
-
-					text.BeginBlock("MessageId: " + receiveContext.MessageId ?? "", peekCount)
-						.Body(body)
-						.EndBlock();
-
-					peekCount++;
-
-					return null;
-				}, 5.Seconds());
-
-			_log.Info(text.ToString());
-
+//			Uri uri = _uriString.ToUri("The from URI was invalid");
+//
+//			IInboundTransport fromTransport = Program.Transports.GetInboundTransport(uri);
+//
+//			var text = new TextBlock()
+//				.BeginBlock("Peek URI: " + uri, "");
+//
+//			int peekCount = 0;
+//			fromTransport.Receive(receiveContext =>
+//				{
+//					if (peekCount >= _count)
+//						return null;
+//
+//					var body = Encoding.UTF8.GetString(receiveContext.BodyStream.ReadToEnd());
+//
+//					text.BeginBlock("MessageId: " + receiveContext.MessageId ?? "", peekCount)
+//						.Body(body)
+//						.EndBlock();
+//
+//					peekCount++;
+//
+//					return null;
+//				}, 5.Seconds());
+//
+//			_log.Info(text.ToString());
+//
 			return true;
 		}
 	}

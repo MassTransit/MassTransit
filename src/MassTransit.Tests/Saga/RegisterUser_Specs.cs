@@ -27,9 +27,8 @@ namespace MassTransit.Tests.Saga
     public class When_a_unknown_user_registers :
         LoopbackLocalAndRemoteTestFixture
     {
-        protected override void EstablishContext()
+        protected  void EstablishContext()
         {
-            base.EstablishContext();
 
             InMemorySagaRepository<RegisterUserSaga> sagaRepository = SetupSagaRepository<RegisterUserSaga>();
 

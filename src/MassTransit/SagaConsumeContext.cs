@@ -15,7 +15,7 @@ namespace MassTransit
     using Saga;
 
 
-    public interface SagaConsumeContext<out TSaga, out TMessage> :
+    public interface SagaConsumeContext<TSaga, out TMessage> :
         SagaConsumeContext<TSaga>,
         ConsumeContext<TMessage>
         where TSaga : class, ISaga
@@ -24,7 +24,7 @@ namespace MassTransit
     }
 
 
-    public interface SagaConsumeContext<out TSaga> :
+    public interface SagaConsumeContext<TSaga> :
         ConsumeContext
         where TSaga : class, ISaga
     {
@@ -32,5 +32,8 @@ namespace MassTransit
         /// The saga instance for the current consume operation
         /// </summary>
         TSaga Saga { get; }
+
+        SagaConsumeContext<TSaga, T> PopContext<T>()
+            where T : class;
     }
 }

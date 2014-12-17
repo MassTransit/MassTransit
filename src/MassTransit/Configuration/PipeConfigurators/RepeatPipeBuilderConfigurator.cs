@@ -31,7 +31,7 @@ namespace MassTransit.PipeConfigurators
             _cancellationToken = cancellationToken;
         }
 
-        public void Configure(IPipeBuilder<T> builder)
+        public void Build(IPipeBuilder<T> builder)
         {
             builder.AddFilter(new RepeatFilter<T>(Repeat.UntilCancelled(_cancellationToken)));
         }

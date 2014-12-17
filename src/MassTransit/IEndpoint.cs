@@ -39,21 +39,6 @@ namespace MassTransit
         EndpointAddress Address { get; }
 
         /// <summary>
-        ///     The inbound transport for the endpoint
-        /// </summary>
-        IInboundTransport InboundTransport { get; }
-
-        /// <summary>
-        ///     The outbound transport for the endpoint
-        /// </summary>
-        IOutboundTransport OutboundTransport { get; }
-
-        /// <summary>
-        ///     The transport where faulting messages (poison messages) are sent
-        /// </summary>
-        IOutboundTransport ErrorTransport { get; }
-
-        /// <summary>
         ///     The message serializer being used by the endpoint
         /// </summary>
         IMessageSerializer Serializer { get; }

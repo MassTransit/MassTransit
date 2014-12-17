@@ -21,7 +21,7 @@ namespace MassTransit.PipeConfigurators
 
 
     public class AsyncDelegatePipeBuilderConfigurator<T> :
-        IPipeBuilderConfigurator<T>
+        IPipeConfigurable<T>
         where T : class, PipeContext
     {
         readonly Func<T, Task> _callback;
@@ -31,7 +31,7 @@ namespace MassTransit.PipeConfigurators
             _callback = callback;
         }
 
-        public void Configure(IPipeBuilder<T> builder)
+        public void Build(IPipeBuilder<T> builder)
         {
             builder.AddFilter(new AsyncDelegateFilter<T>(_callback));
         }

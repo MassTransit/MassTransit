@@ -14,19 +14,17 @@ namespace MassTransit.Tests.TextFixtures
 {
     using System;
     using BusConfigurators;
-    using MassTransit.Transports.Loopback;
-	using NUnit.Framework;
+    using NUnit.Framework;
 
 
     [TestFixture, Obsolete]
 	public class LoopbackTestFixture :
-		EndpointTestFixture<LoopbackTransportFactory>
+		EndpointTestFixture
 	{
 		public IServiceBus LocalBus { get; private set; }
 
-		protected override void EstablishContext()
+		protected  void EstablishContext()
 		{
-			base.EstablishContext();
 
 			LocalBus = ServiceBusFactory.New(x =>
 				{
@@ -40,12 +38,11 @@ namespace MassTransit.Tests.TextFixtures
 		{
 		}
 
-		protected override void TeardownContext()
+		protected  void TeardownContext()
 		{
 			LocalBus.Dispose();
 			LocalBus = null;
 
-			base.TeardownContext();
 		}
 	}
 }

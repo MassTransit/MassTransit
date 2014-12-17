@@ -54,17 +54,6 @@ namespace MassTransit.Builders
 		/// <param name="purgeOnStartup"></param>
 		void SetPurgeOnStartup(bool purgeOnStartup);
 
-		/// <summary>
-		/// Provides a configured endpoint builder for the specified URI
-		/// </summary>
-		/// <param name="uri"></param>
-		/// <param name="endpointBuilder"></param>
-		void AddEndpointBuilder(Uri uri, EndpointBuilder endpointBuilder);
-
-		/// <summary>
-		/// Adds a transport factory to the builder
-		/// </summary>
-		void AddTransportFactory(ITransportFactory transportFactory);
 
         /// <summary>
         /// Add a message serializer to the builder so that messages with other serialization types

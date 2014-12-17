@@ -14,8 +14,8 @@ namespace MassTransit.Tests.Saga
 {
 	using System;
 	using System.Linq.Expressions;
-	using NUnit.Framework;
 	using MassTransit.Saga.Pipeline;
+	using NUnit.Framework;
 	using Shouldly;
 
 

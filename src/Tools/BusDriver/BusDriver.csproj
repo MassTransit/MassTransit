@@ -85,12 +85,10 @@
     <Compile Include="Commands\SaveCommand.cs" />
     <Compile Include="Commands\SetUriCommand.cs" />
     <Compile Include="Commands\StatusCommand.cs" />
-    <Compile Include="Commands\TraceCommand.cs" />
     <Compile Include="Formatting\ITextBlock.cs" />
     <Compile Include="Formatting\TextBlock.cs" />
     <Compile Include="IPendingCommand.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="TransportCache.cs" />
     <Compile Include="UriExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

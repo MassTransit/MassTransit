@@ -14,14 +14,12 @@ namespace MassTransit
 {
     using System;
     using Context;
-    using EndpointConfigurators;
-    using Policies;
     using SubscriptionConfigurators;
     using SubscriptionConnectors;
 
 
     public static class HandlerSubscriptionExtensions
-    {        
+    {
         /// <summary>
         /// Subscribes a message handler to the receive endpoint
         /// </summary>

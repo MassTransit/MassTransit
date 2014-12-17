@@ -74,12 +74,6 @@ namespace BusDriver
                 .Or(from arg in x.Argument("status")
                     from uri in (from d in x.Definition("uri") select d).Optional("uri",Program.CurrentUri)
                     select (Command) new StatusCommand(uri.Value))
-				.Or(from arg in x.Argument("trace")
-				    from uri in
-				    	(from d in x.Definition("uri") select d).Optional("uri", Program.CurrentUri)
-				    from count in
-				    	(from d in x.Definition("count") select d).Optional("count", "100")
-				    select (Command) new TraceCommand(uri.Value, int.Parse(count.Value)))
 				);
 		}
 	}

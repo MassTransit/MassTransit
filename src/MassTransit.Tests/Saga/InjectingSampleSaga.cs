@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Saga
 {
     using System;
+    using System.Threading.Tasks;
     using MassTransit.Saga;
 
 
@@ -31,14 +32,14 @@ namespace MassTransit.Tests.Saga
 
         public string Name { get; private set; }
         public IDependency Dependency { get; set; }
-        public void Consume(InitiateSimpleSaga message)
-        {
-            Name = message.Name;
-        }
-
-        public Guid CorrelationId { get; set; }
 
         public IServiceBus Bus { get; set; }
+        public Guid CorrelationId { get; set; }
+
+        public async Task Consume(ConsumeContext<InitiateSimpleSaga> context)
+        {
+            Name = context.Message.Name;
+        }
     }
 
 

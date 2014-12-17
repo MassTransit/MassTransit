@@ -16,12 +16,31 @@ namespace MassTransit.SubscriptionConnectors
     using Pipeline;
 
 
+    /// <summary>
+    /// Connects a message handler to the ConsumePipe
+    /// </summary>
+    /// <typeparam name="T">The message type</typeparam>
     public interface HandlerConnector<T>
         where T : class
     {
+        /// <summary>
+        /// Connect a message handler for all messages of type T 
+        /// </summary>
+        /// <param name="consumePipe"></param>
+        /// <param name="handler"></param>
+        /// <param name="filters"></param>
+        /// <returns></returns>
         ConnectHandle Connect(IConsumePipe consumePipe, MessageHandler<T> handler,
             params IFilter<ConsumeContext<T>>[] filters);
 
+        /// <summary>
+        /// Connect a message handler for messages with the specified RequestId
+        /// </summary>
+        /// <param name="consumePipe"></param>
+        /// <param name="requestId"></param>
+        /// <param name="handler"></param>
+        /// <param name="filters"></param>
+        /// <returns></returns>
         ConnectHandle Connect(IConsumePipe consumePipe, Guid requestId, MessageHandler<T> handler,
             params IFilter<ConsumeContext<T>>[] filters);
     }

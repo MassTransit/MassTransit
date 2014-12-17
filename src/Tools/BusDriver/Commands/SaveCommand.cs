@@ -44,48 +44,48 @@ namespace BusDriver.Commands
 
 		public bool Execute()
 		{
-			Uri uri = _uriString.ToUri("The from URI was invalid");
-
-			AbsolutePathName fullPath = PathName.GetAbsolutePathName(_name, Environment.CurrentDirectory);
-			_log.DebugFormat("Using output path name: {0}", fullPath);
-
-			string directoryName = Path.GetDirectoryName(fullPath.GetPath());
-			if (!System.IO.Directory.Exists(directoryName))
-				System.IO.Directory.CreateDirectory(directoryName);
-
-			IInboundTransport fromTransport = Program.Transports.GetInboundTransport(uri);
-
-			ITextBlock text = new TextBlock()
-				.BeginBlock("Save messages from URI: " + uri, "");
-
-			int lastCount;
-			int saveCount = 0;
-			do
-			{
-				lastCount = saveCount;
-
-				fromTransport.Receive(receiveContext =>
-					{
-						if (saveCount >= _count)
-							return null;
-
-						string body = Encoding.UTF8.GetString(receiveContext.BodyStream.ReadToEnd());
-
-						text.BodyFormat("Message-Id: {0}", receiveContext.MessageId ?? "");
-
-						WriteMessageToFile(fullPath.ToString(), receiveContext, body);
-
-						saveCount++;
-
-						if (_remove)
-							return context => { };
-
-						return null;
-                    }, 5.Seconds());
-			} while (_remove && saveCount < _count && saveCount != lastCount);
-
-			_log.Info(text.ToString());
-
+//			Uri uri = _uriString.ToUri("The from URI was invalid");
+//
+//			AbsolutePathName fullPath = PathName.GetAbsolutePathName(_name, Environment.CurrentDirectory);
+//			_log.DebugFormat("Using output path name: {0}", fullPath);
+//
+//			string directoryName = Path.GetDirectoryName(fullPath.GetPath());
+//			if (!System.IO.Directory.Exists(directoryName))
+//				System.IO.Directory.CreateDirectory(directoryName);
+//
+//			IInboundTransport fromTransport = Program.Transports.GetInboundTransport(uri);
+//
+//			ITextBlock text = new TextBlock()
+//				.BeginBlock("Save messages from URI: " + uri, "");
+//
+//			int lastCount;
+//			int saveCount = 0;
+//			do
+//			{
+//				lastCount = saveCount;
+//
+//				fromTransport.Receive(receiveContext =>
+//					{
+//						if (saveCount >= _count)
+//							return null;
+//
+//						string body = Encoding.UTF8.GetString(receiveContext.BodyStream.ReadToEnd());
+//
+//						text.BodyFormat("Message-Id: {0}", receiveContext.MessageId ?? "");
+//
+//						WriteMessageToFile(fullPath.ToString(), receiveContext, body);
+//
+//						saveCount++;
+//
+//						if (_remove)
+//							return context => { };
+//
+//						return null;
+//                    }, 5.Seconds());
+//			} while (_remove && saveCount < _count && saveCount != lastCount);
+//
+//			_log.Info(text.ToString());
+//
 			return true;
 		}
 

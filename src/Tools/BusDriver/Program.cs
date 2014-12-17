@@ -27,7 +27,6 @@ namespace BusDriver
 	using Magnum.Extensions;
 	using MassTransit;
 	using MassTransit.RabbitMqTransport;
-	using MassTransit.Transports.Loopback;
 
 
     class Program
@@ -64,7 +63,6 @@ namespace BusDriver
 		}
 
 		public static string CurrentUri { get; set; }
-		public static TransportCache Transports { get; private set; }
 
 		public static void AddPendingCommand(IPendingCommand command)
 		{
@@ -79,10 +77,6 @@ namespace BusDriver
 
 			try
 			{
-				Transports = new TransportCache();
-				Transports.AddTransportFactory(new LoopbackTransportFactory());
-				Transports.AddTransportFactory(new RabbitMqTransportFactory());
-
 				string line = CommandLine.GetUnparsedCommandLine().Trim();
 				if (line.IsNotEmpty())
 				{
@@ -104,9 +98,6 @@ namespace BusDriver
 			        bus.Dispose();
 			    }
 			    _buses.Clear();
-
-				Transports.Dispose();
-				Transports = null;
 
 				_log.Debug("End of Line.");
 			}

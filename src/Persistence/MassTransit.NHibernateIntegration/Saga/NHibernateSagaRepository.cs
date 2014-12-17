@@ -38,6 +38,7 @@ namespace MassTransit.NHibernateIntegration.Saga
         {
             _sessionFactory = sessionFactory;
         }
+
 //
 //        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
 //            Guid sagaId,
@@ -266,7 +267,18 @@ namespace MassTransit.NHibernateIntegration.Saga
 
         public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
         {
-            return Where(filter, x => x.CorrelationId);
+            using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
+            using (ISession session = _sessionFactory.OpenSession())
+            {
+                IList<Guid> result = session.QueryOver<TSaga>()
+                    .Where(filter.FilterExpression)
+                    .Select(x => x.CorrelationId)
+                    .List<Guid>();
+
+                scope.Complete();
+
+                return result;
+            }
         }
 
         public IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter)

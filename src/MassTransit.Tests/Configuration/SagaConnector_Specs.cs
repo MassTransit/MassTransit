@@ -13,7 +13,6 @@
 namespace MassTransit.Tests.Configuration
 {
     using System.Linq;
-    using MassTransit.Saga;
     using MassTransit.Saga.SubscriptionConnectors;
     using NUnit.Framework;
     using Saga;
@@ -27,7 +26,7 @@ namespace MassTransit.Tests.Configuration
         [SetUp]
         public void A_consumer_with_consumes_all_interfaces_is_inspected()
         {
-            _factory = new SagaConnector<SimpleSaga>(new InMemorySagaRepository<SimpleSaga>());
+            _factory = new SagaConnector<SimpleSaga>();
         }
 
         [Test]

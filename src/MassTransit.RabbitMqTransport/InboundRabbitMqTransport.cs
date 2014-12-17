@@ -24,8 +24,7 @@ namespace MassTransit.RabbitMqTransport
     using Transports;
 
 
-    public class InboundRabbitMqTransport :
-        IInboundTransport
+    public class InboundRabbitMqTransport 
     {
         static readonly ILog _log = Logger.Get(typeof(InboundRabbitMqTransport));
 

@@ -15,6 +15,7 @@ namespace MassTransit.Tests
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Magnum.Extensions;
     using NUnit.Framework;
     using MassTransit.Saga;
@@ -38,12 +39,12 @@ namespace MassTransit.Tests
             InitiatedBy<X>,
             Orchestrates<Y>
         {
-            public void Consume(X message)
+            public async Task Consume(ConsumeContext<X> message)
             {
                 throw new IntentionalTestException();
             }
 
-            public void Consume(Y message)
+            public async Task Consume(ConsumeContext<Y> message)
             {
                 throw new IntentionalTestException();
             }

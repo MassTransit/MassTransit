@@ -34,36 +34,36 @@ namespace BusDriver.Commands
 
 		public bool Execute()
 		{
-			Uri uri = _uriString.ToUri("The URI was invalid");
-
-			IInboundTransport inboundTransport = Program.Transports.GetInboundTransport(uri);
-			IOutboundTransport outboundTransport = Program.Transports.GetOutboundTransport(uri);
-
-			ITextBlock text = new TextBlock()
-				.BeginBlock("Requeue messages to " + uri, "");
-
-
-			int requeueCount = 0;
-			for (int i = 0; i < _count; i++)
-			{
-				inboundTransport.Receive(receiveContext =>
-					{
-						return context =>
-							{
-								var moveContext = new MoveMessageSendContext(context);
-
-                                outboundTransport.Send(moveContext);
-
-								text.BodyFormat("Message-Id: {0}", context.MessageId);
-
-								requeueCount++;
-							};
-					}, 5.Seconds());
-			}
-
-			_log.Info(text);
-			_log.InfoFormat("{0} message{1} requeued to {2}", requeueCount, requeueCount == 1 ? "" : "s", uri);
-
+//			Uri uri = _uriString.ToUri("The URI was invalid");
+//
+//			IInboundTransport inboundTransport = Program.Transports.GetInboundTransport(uri);
+//			IOutboundTransport outboundTransport = Program.Transports.GetOutboundTransport(uri);
+//
+//			ITextBlock text = new TextBlock()
+//				.BeginBlock("Requeue messages to " + uri, "");
+//
+//
+//			int requeueCount = 0;
+//			for (int i = 0; i < _count; i++)
+//			{
+//				inboundTransport.Receive(receiveContext =>
+//					{
+//						return context =>
+//							{
+//								var moveContext = new MoveMessageSendContext(context);
+//
+//                                outboundTransport.Send(moveContext);
+//
+//								text.BodyFormat("Message-Id: {0}", context.MessageId);
+//
+//								requeueCount++;
+//							};
+//					}, 5.Seconds());
+//			}
+//
+//			_log.Info(text);
+//			_log.InfoFormat("{0} message{1} requeued to {2}", requeueCount, requeueCount == 1 ? "" : "s", uri);
+//
 			return true;
 		}
 	}

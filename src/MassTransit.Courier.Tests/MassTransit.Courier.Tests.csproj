@@ -70,7 +70,6 @@
     <Compile Include="FaultActivityEvent_Specs.cs" />
     <Compile Include="ObjectGraph_Specs.cs" />
     <Compile Include="RanToCompletion_Specs.cs" />
-    <Compile Include="EndpointCacheProxy.cs" />
     <Compile Include="ReviseItinerary_Specs.cs" />
     <Compile Include="SingleActivityEvent_Specs.cs" />
     <Compile Include="Subscription_Specs.cs" />

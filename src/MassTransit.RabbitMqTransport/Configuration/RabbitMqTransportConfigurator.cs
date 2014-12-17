@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     public interface IRabbitMqServiceBusFactoryConfigurator :
         IServiceBusFactoryConfigurator
     {
+        // change this to return an IRabbitMqHost 
         void Host(RabbitMqHostSettings settings);
 
         /// <summary>
@@ -37,10 +38,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         void OnPublish(Action<RabbitMqPublishContext> callback);
 
+        // TODO change receive endpoint to use an IRabbitMqHost, so that we don't have to match 
+
         /// <summary>
         /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.
         /// </summary>
-        /// <param name="configurator"></param>
         /// <param name="hostSettings">The host for this endpoint</param>
         /// <param name="queueName">The input queue name</param>
         /// <param name="configure">The configuration method</param>

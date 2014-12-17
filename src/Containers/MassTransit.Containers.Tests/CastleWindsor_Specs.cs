@@ -103,7 +103,7 @@ namespace MassTransit.Containers.Tests
         {
             _container = new WindsorContainer();
             _container.Register(
-                Component.For<DummySaga>(),
+                Component.For<SimpleSaga>(),
                 Component.For(typeof(ISagaRepository<>))
                          .ImplementedBy(typeof(InMemorySagaRepository<>))
                          .LifeStyle.Singleton);
@@ -137,28 +137,6 @@ namespace MassTransit.Containers.Tests
         {
 //            LocalBus.HasSubscription<SecondSagaMessage>().Count()
 //                    .ShouldBe(1, "No subscription for the SecondSagaMessage was found.");
-        }
-
-
-        
-        class DummySaga : ISaga,
-                          InitiatedBy<FirstSagaMessage>,
-                          Orchestrates<SecondSagaMessage>
-        {
-            public void Consume(FirstSagaMessage message)
-            {
-            }
-
-            public Guid CorrelationId
-            {
-                get { return Guid.Empty; }
-            }
-
-            public IServiceBus Bus { get; set; }
-
-            public void Consume(SecondSagaMessage message)
-            {
-            }
         }
     }
 

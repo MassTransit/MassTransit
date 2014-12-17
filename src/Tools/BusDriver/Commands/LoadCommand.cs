@@ -45,46 +45,48 @@ namespace BusDriver.Commands
 
         public bool Execute()
         {
-            Uri uri = _uriString.ToUri("The from URI was invalid");
+//            Uri uri = _uriString.ToUri("The from URI was invalid");
+//
+//            AbsolutePathName fullPath = PathName.GetAbsolutePathName(_name, Environment.CurrentDirectory);
+//            _log.DebugFormat("Using output path name: {0}", fullPath);
+//
+//            string directoryName = Path.GetDirectoryName(fullPath.GetPath());
+//            if (!System.IO.Directory.Exists(directoryName))
+//                System.IO.Directory.CreateDirectory(directoryName);
+//
+//            IOutboundTransport toTransport = Program.Transports.GetOutboundTransport(uri);
+//
+//            ITextBlock text = new TextBlock()
+//                .BeginBlock("Load messages to URI: " + uri, "");
+//
+//            string[] files =
+//                System.IO.Directory.GetFiles(directoryName, fullPath.GetName() + "*.msg", SearchOption.TopDirectoryOnly)
+//                      .OrderBy(x => x).ToArray();
+//
+//            int loadCount = 0;
+//            for (int i = 0; i < files.Length && loadCount < _count; i++)
+//            {
+//                string file = files[i];
+//
+//                string fileName = Path.Combine(directoryName, file);
+//
+//                text.BodyFormat("Message File: {0}", file);
+//
+//                ISendContext context = LoadMessageFromFile(fileName);
+//
+//                toTransport.Send(context);
+//
+//                if (_remove)
+//                    System.IO.File.Delete(fileName);
+//
+//                loadCount++;
+//            }
+//
+//            _log.Info(text.ToString());
+//
+//            return true;
 
-            AbsolutePathName fullPath = PathName.GetAbsolutePathName(_name, Environment.CurrentDirectory);
-            _log.DebugFormat("Using output path name: {0}", fullPath);
-
-            string directoryName = Path.GetDirectoryName(fullPath.GetPath());
-            if (!System.IO.Directory.Exists(directoryName))
-                System.IO.Directory.CreateDirectory(directoryName);
-
-            IOutboundTransport toTransport = Program.Transports.GetOutboundTransport(uri);
-
-            ITextBlock text = new TextBlock()
-                .BeginBlock("Load messages to URI: " + uri, "");
-
-            string[] files =
-                System.IO.Directory.GetFiles(directoryName, fullPath.GetName() + "*.msg", SearchOption.TopDirectoryOnly)
-                      .OrderBy(x => x).ToArray();
-
-            int loadCount = 0;
-            for (int i = 0; i < files.Length && loadCount < _count; i++)
-            {
-                string file = files[i];
-
-                string fileName = Path.Combine(directoryName, file);
-
-                text.BodyFormat("Message File: {0}", file);
-
-                ISendContext context = LoadMessageFromFile(fileName);
-
-                toTransport.Send(context);
-
-                if (_remove)
-                    System.IO.File.Delete(fileName);
-
-                loadCount++;
-            }
-
-            _log.Info(text.ToString());
-
-            return true;
+            throw new NotImplementedException();
         }
 
         ISendContext LoadMessageFromFile(string fileName)

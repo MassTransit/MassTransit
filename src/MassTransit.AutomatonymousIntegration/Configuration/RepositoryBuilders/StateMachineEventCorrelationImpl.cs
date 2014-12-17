@@ -16,7 +16,6 @@ namespace Automatonymous.RepositoryBuilders
     using System.Linq.Expressions;
     using Internals.Extensions;
     using MassTransit;
-    using MassTransit.Saga.Pipeline;
     using RepositoryConfigurators;
 
 
