@@ -21,6 +21,5 @@ namespace MassTransit.Saga
     public interface ISaga :
         CorrelatedBy<Guid>
     {
-		IServiceBus Bus { set; get; }
     }
 }

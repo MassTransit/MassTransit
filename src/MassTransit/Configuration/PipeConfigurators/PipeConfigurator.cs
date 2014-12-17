@@ -21,18 +21,53 @@ namespace MassTransit.PipeConfigurators
     using Pipeline;
 
 
-    public class PipeConfigurator<T> :
-        IBuildPipeConfigurator<T>,
+    public class PipeConfigurator<TContext> :
+        IBuildPipeConfigurator<TContext>,
         Configurator
-        where T : class, PipeContext
+        where TContext : class, PipeContext
     {
-        static readonly ILog _log = Logger.Get<PipeConfigurator<T>>();
+        static readonly ILog _log = Logger.Get<PipeConfigurator<TContext>>();
 
-        readonly List<IPipeBuilderConfigurator<T>> _configurators;
+        readonly List<IPipeBuilderConfigurator<TContext>> _configurators;
 
         public PipeConfigurator()
         {
-            _configurators = new List<IPipeBuilderConfigurator<T>>();
+            _configurators = new List<IPipeBuilderConfigurator<TContext>>();
+        }
+
+        /// <summary>
+        /// Add middleware to the pipe
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configure"></param>
+        public void Use<T>(Action<T> configure)
+            where T : IPipeConfigurable<TContext>, new()
+        {
+            var middleware = new T();
+
+            configure(middleware);
+
+            _configurators.Add(middleware);
+        }
+
+        /// <summary>
+        /// Add middleware to the pipe using the default configuration settings
+        /// </summary>
+        /// <typeparam name="T">The context type</typeparam>
+        public void Use<T>()
+            where T : IPipeConfigurable<TContext>, new()
+        {
+            _configurators.Add(new T());
+        }
+
+        /// <summary>
+        /// Add middleware to the pipe using the default configuration settings
+        /// </summary>
+        /// <typeparam name="T">The context type</typeparam>
+        public void Use<T>(Func<T> factoryMethod)
+            where T : IPipeConfigurable<TContext>
+        {
+            _configurators.Add(factoryMethod());
         }
 
         IEnumerable<ValidationResult> Configurator.Validate()
@@ -40,7 +75,7 @@ namespace MassTransit.PipeConfigurators
             return _configurators.SelectMany(x => x.Validate());
         }
 
-        void IPipeConfigurator<T>.AddPipeBuilderConfigurator(IPipeBuilderConfigurator<T> configurator)
+        void IPipeConfigurator<TContext>.AddPipeBuilderConfigurator(IPipeBuilderConfigurator<TContext> configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
@@ -48,14 +83,14 @@ namespace MassTransit.PipeConfigurators
             _configurators.Add(configurator);
         }
 
-        public IPipe<T> Build()
+        public IPipe<TContext> Build()
         {
             ValidatePipeConfiguration();
 
-            var builder = new PipeBuilder<T>();
+            var builder = new PipeBuilder<TContext>();
 
             foreach (var configurator in _configurators)
-                configurator.Configure(builder);
+                configurator.Build(builder);
 
             return builder.Build();
         }

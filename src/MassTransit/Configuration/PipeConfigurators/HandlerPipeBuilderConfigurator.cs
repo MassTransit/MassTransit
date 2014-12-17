@@ -23,7 +23,7 @@ namespace MassTransit.PipeConfigurators
     /// </summary>
     /// <typeparam name="T">The message type</typeparam>
     public class HandlerPipeBuilderConfigurator<T> :
-        IPipeBuilderConfigurator<ConsumeContext<T>>
+        IPipeConfigurable<ConsumeContext<T>>
         where T : class
     {
         readonly MessageHandler<T> _handler;
@@ -33,7 +33,7 @@ namespace MassTransit.PipeConfigurators
             _handler = handler;
         }
 
-        void IPipeBuilderConfigurator<ConsumeContext<T>>.Configure(IPipeBuilder<ConsumeContext<T>> builder)
+        void IPipeBuilderConfigurator<ConsumeContext<T>>.Build(IPipeBuilder<ConsumeContext<T>> builder)
         {
             builder.AddFilter(new HandlerMessageFilter<T>(_handler));
         }

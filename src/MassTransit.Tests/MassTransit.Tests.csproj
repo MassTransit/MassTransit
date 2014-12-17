@@ -109,7 +109,6 @@
     <Compile Include="Configuration\SimpleConfiguration_Specs.cs" />
     <Compile Include="Configuration\HandlerSubscription_Specs.cs" />
     <Compile Include="Configuration\When_configuration_fails.cs" />
-    <Compile Include="Configuration\When_configuring_an_endpoint.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Load\CommandInstance.cs" />
     <Compile Include="Load\Messages\First.cs" />
@@ -130,12 +129,12 @@
     <Compile Include="NewId_\NewId_Specs.cs" />
     <Compile Include="NewId_\Usage_Specs.cs" />
     <Compile Include="Performance\InMemorySpeed_Specs.cs" />
-    <Compile Include="PipeExtensions.cs" />
     <Compile Include="Pipeline\ConnectConsumer_Specs.cs" />
     <Compile Include="Pipeline\ConnectHandler_Specs.cs" />
     <Compile Include="Pipeline\ConnectObserver_Specs.cs" />
     <Compile Include="Pipeline\MessageTestFixture.cs" />
     <Compile Include="Pipeline\OneMessageConsumer.cs" />
+    <Compile Include="Pipeline\PipeFactory_Specs.cs" />
     <Compile Include="Pipeline\TwoMessageConsumer.cs" />
     <Compile Include="RequestClient_Specs.cs" />
     <Compile Include="Saga\InjectingSampleSaga.cs" />
@@ -214,7 +213,6 @@
     <Compile Include="TextFixtures\EndpointTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackLocalAndRemoteTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackTestFixture.cs" />
-    <Compile Include="Transports\TransactionalEndpointContract.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

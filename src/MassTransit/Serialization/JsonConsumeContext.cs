@@ -29,11 +29,12 @@ namespace MassTransit.Serialization
     public class JsonConsumeContext :
         ConsumeContext
     {
-        readonly IList<Task> _pendingTasks;
         readonly JsonSerializer _deserializer;
         readonly MessageEnvelope _envelope;
         readonly JToken _messageToken;
         readonly IDictionary<Type, object> _messageTypes;
+        readonly IList<Task> _pendingTasks;
+        readonly IPublishEndpoint _publishEndpoint;
         readonly ReceiveContext _receiveContext;
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly string[] _supportedTypes;
@@ -42,7 +43,6 @@ namespace MassTransit.Serialization
         Uri _faultAddress;
         ContextHeaders _headers;
         Guid? _messageId;
-        IPublishEndpoint _publishEndpoint;
         Guid? _requestId;
         Uri _responseAddress;
         Uri _sourceAddress;
@@ -261,7 +261,7 @@ namespace MassTransit.Serialization
 
             _pendingTasks.Add(faultTask);
 
-            var receiveTask = _receiveContext.NotifyFaulted(message, consumerType, exception);
+            Task receiveTask = _receiveContext.NotifyFaulted(message, consumerType, exception);
 
             _pendingTasks.Add(receiveTask);
         }

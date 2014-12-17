@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,18 +13,13 @@
 namespace MassTransit
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
-    using Context;
-    using Diagnostics.Introspection;
-    using Events;
     using Logging;
     using Magnum;
-    using Magnum.Reflection;
     using Monitoring;
     using Pipeline;
     using Pipeline.Pipes;
-    using Util;
+
 
     /// <summary>
     /// A service bus is used to attach message handlers (services) to endpoints, as well as
@@ -37,7 +32,6 @@ namespace MassTransit
 
         ServiceBusInstancePerformanceCounters _counters;
         volatile bool _disposed;
-        IServiceContainer _serviceContainer;
         volatile bool _started;
 
         static ServiceBus()
@@ -60,43 +54,24 @@ namespace MassTransit
         public ServiceBus(IEndpoint endpointToListenOn,
             IEndpointCache endpointCache, bool enablePerformanceCounters)
         {
-            Guard.AgainstNull(endpointToListenOn, "endpointToListenOn", "This parameter cannot be null");
-            Guard.AgainstNull(endpointCache, "endpointFactory", "This parameter cannot be null");
 
             Endpoint = endpointToListenOn;
             EndpointCache = endpointCache;
 
-//            _serviceContainer = new ServiceContainer(this);
-
-//            OutboundPipeline = new OutboundPipelineConfigurator(this).Pipeline;
-//            InboundPipeline = InboundPipelineConfigurator.CreateDefault(this);
-
             ConsumePipe = new ConsumePipe();
 
-            if(enablePerformanceCounters)
+            if (enablePerformanceCounters)
                 InitializePerformanceCounters();
         }
 
         public TimeSpan ShutdownTimeout { get; set; }
 
-        
         protected string DebugDisplay
         {
             get { return string.Format("{0}: ", Endpoint.Address); }
         }
 
         public IEndpointCache EndpointCache { get; private set; }
-
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        public void Publish<T>(T message)
-            where T : class
-        {
-//            Publish(message, NoContext);
-        }
 
         /// <summary>
         /// Publishes a message to all subscribed consumers for the message type
@@ -146,7 +121,6 @@ namespace MassTransit
 //            if (exceptions.Count > 0)
 //                throw new PublishException(typeof(T), exceptions);
 //        }
-
         public IOutboundMessagePipeline OutboundPipeline { get; private set; }
 
         public IConsumePipe ConsumePipe { get; private set; }
@@ -156,37 +130,9 @@ namespace MassTransit
         /// </summary>
         public IEndpoint Endpoint { get; private set; }
 
-        public IEndpoint GetEndpoint(Uri address)
+        public void Dispose()
         {
-            return EndpointCache.GetEndpoint(address);
-        }
-
-        public void Inspect(DiagnosticsProbe probe)
-        {
-            new StandardDiagnosticsInfo().WriteCommonItems(probe);
-
-            probe.Add("mt.version", typeof(IServiceBus).Assembly.GetName().Version);
-            probe.Add("mt.receive_from", Endpoint.Address);
-//            probe.Add("mt.max_consumer_threads", MaximumConsumerThreads);
-  //          probe.Add("mt.receive_timeout", ReceiveTimeout);
-
-            EndpointCache.Inspect(probe);
-            _serviceContainer.Inspect(probe);
-        }
-
-        public IBusService GetService(Type type)
-        {
-            return _serviceContainer.GetService(type);
-        }
-
-        public bool TryGetService(Type type, out IBusService result)
-        {
-            return _serviceContainer.TryGetService(type, out result);
-        }
-
-        public ISendEndpoint GetSendEndpoint(Uri address)
-        {
-            throw new NotImplementedException();
+            Dispose(true);
         }
 
         public void Start()
@@ -194,16 +140,10 @@ namespace MassTransit
             if (_started)
                 return;
 
-            _serviceContainer.Start();
 
             // TODO start endpoints
 
             _started = true;
-        }
-
-        public void AddService(BusServiceLayer layer, IBusService service)
-        {
-            _serviceContainer.AddService(layer, service);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -212,13 +152,6 @@ namespace MassTransit
                 return;
             if (disposing)
             {
-                if (_serviceContainer != null)
-                {
-                    _serviceContainer.Stop();
-                    _serviceContainer.Dispose();
-                    _serviceContainer = null;
-                }
-
                 Endpoint = null;
 
                 if (_counters != null)

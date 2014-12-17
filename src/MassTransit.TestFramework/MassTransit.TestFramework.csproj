@@ -89,22 +89,14 @@
     <Compile Include="AsyncTestFixture.cs" />
     <Compile Include="IntentionalTestException.cs" />
     <Compile Include="ExtensionMethodsForSubscriptions.cs" />
-    <Compile Include="ExtensionsForTestingEndpoints.cs" />
-    <Compile Include="Fixtures\EndpointCacheProxy.cs" />
     <Compile Include="Fixtures\SagaTestFixture.cs" />
-    <Compile Include="Fixtures\TwoBusTestFixture.cs" />
     <Compile Include="Future.cs" />
     <Compile Include="Fixtures\AbstractTestConsumer.cs" />
     <Compile Include="ConsumerOf.cs" />
     <Compile Include="Fixtures\AbstractTestFixture.cs" />
-    <Compile Include="Fixtures\EndpointTestFixture.cs" />
-    <Compile Include="Fixtures\LocalAndRemoteTestFixture.cs" />
-    <Compile Include="Given_two_service_buses_with_shared_subscriptions.cs" />
     <Compile Include="InMemoryTestFixture.cs" />
     <Compile Include="BusTestFixture.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
-    <Compile Include="Fixtures\LocalTestFixture.cs" />
-    <Compile Include="Given_a_standalone_service_bus.cs" />
     <Compile Include="Messages\IMessageA.cs" />
     <Compile Include="Messages\MessageA.cs" />
     <Compile Include="Messages\MessageB.cs" />
@@ -117,9 +109,6 @@
     <Compile Include="TestConsumeContext.cs" />
     <Compile Include="TestConsumeObserver.cs" />
     <Compile Include="TestObserver.cs" />
-    <Compile Include="Transports\TransportContract.cs" />
-    <Compile Include="Transports\TransportReceivingContract.cs" />
-    <Compile Include="Transports\NonTransactionalTransportSendingContract.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="MassTransit.TestFramework.log4net.xml">

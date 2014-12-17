@@ -16,13 +16,12 @@ namespace MassTransit.Tests.TextFixtures
     using System.Collections.Generic;
     using BusConfigurators;
     using Magnum.Extensions;
-    using MassTransit.Transports.Loopback;
     using NUnit.Framework;
 
 
     [TestFixture, Obsolete]
     public class LoopbackLocalAndRemoteTestFixture :
-        EndpointTestFixture<LoopbackTransportFactory>
+        EndpointTestFixture
     {
         public IServiceBus LocalBus { get; protected set; }
         public IServiceBus RemoteBus { get; protected set; }
@@ -32,9 +31,8 @@ namespace MassTransit.Tests.TextFixtures
             Instances = new Dictionary<string, ServiceInstance>();
         }
 
-        protected override void EstablishContext()
+        protected  void EstablishContext()
         {
-            base.EstablishContext();
 
             LocalBus = ServiceBusFactory.New(ConfigureLocalBus);
 
@@ -78,7 +76,7 @@ namespace MassTransit.Tests.TextFixtures
                 activityTestContext.ConfigureServiceBus(configurator);
         }
 
-        protected override void TeardownContext()
+        protected  void TeardownContext()
         {
             if (RemoteBus != null)
             {
@@ -96,7 +94,6 @@ namespace MassTransit.Tests.TextFixtures
 
             Instances.Clear();
 
-            base.TeardownContext();
         }
     }
 }

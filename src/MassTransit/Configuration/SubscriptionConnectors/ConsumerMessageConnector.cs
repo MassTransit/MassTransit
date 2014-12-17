@@ -55,7 +55,7 @@ namespace MassTransit.SubscriptionConnectors
 
             var builder = new ConsumerPipeBuilder<T>();
             for (int i = 0; i < pipeBuilderConfigurators.Length; i++)
-                pipeBuilderConfigurators[i].Configure(builder);
+                pipeBuilderConfigurators[i].Build(builder);
 
             var builders = builder as ConsumerPipeBuilder<TConsumer>;
             if (builders == null)

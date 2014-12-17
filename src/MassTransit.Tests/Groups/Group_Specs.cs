@@ -25,7 +25,7 @@ namespace MassTransit.Tests.Groups
 	{
 		private Guid _transactionId;
 
-		protected override void EstablishContext()
+		protected  void EstablishContext()
 		{
 			base.EstablishContext();
 

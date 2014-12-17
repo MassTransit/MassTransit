@@ -39,13 +39,13 @@ namespace MassTransit.Saga
 
         async Task<IEnumerable<Guid>> ISagaLocator<TMessage>.Find(ConsumeContext<TMessage> context)
         {
-            Expression<Func<TSaga, bool>> filter =
-                new SagaFilterExpressionConverter<TSaga, TMessage>(context.Message).Convert(_filterExpression);
+            Expression<Func<TSaga, bool>> filter = new SagaFilterExpressionConverter<TSaga, TMessage>(context.Message)
+                .Convert(_filterExpression);
 
             var sagaFilter = new SagaFilter<TSaga>(filter);
 
-            List<Guid> sagaIds = _repository.Where(sagaFilter, x => x.CorrelationId).ToList();
-            if (sagaIds.Count > 0)
+            Guid[] sagaIds = _repository.Find(sagaFilter).ToArray();
+            if (sagaIds.Length > 0)
                 return sagaIds;
 
             if (_policy.CanCreateInstance(context))

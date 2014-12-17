@@ -61,7 +61,7 @@ namespace MassTransit
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
 
-            var connector = new SagaConnector<TSaga>(sagaRepository);
+            var connector = new SagaConnector<TSaga>();
 
             throw new NotImplementedException();
 //            return bus.Configure(x => connector.Connect(x));

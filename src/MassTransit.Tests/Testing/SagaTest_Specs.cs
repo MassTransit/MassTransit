@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Testing
 {
 	using System;
 	using System.Linq.Expressions;
+	using System.Threading.Tasks;
 	using NUnit.Framework;
 	using MassTransit.Saga;
 	using MassTransit.Testing;
@@ -110,16 +111,15 @@ namespace MassTransit.Tests.Testing
 
 			public string ValueA { get; private set; }
 
-			public void Consume(A message)
+            public async Task Consume(ConsumeContext<A> context)
 			{
-				ValueA = message.Value;
-				Bus.Publish(new Aa {CorrelationId = CorrelationId});
+				ValueA = context.Message.Value;
+				await context.Publish(new Aa {CorrelationId = CorrelationId});
 			}
 
 			public Guid CorrelationId { get; private set; }
-			public IServiceBus Bus { get; set; }
 
-			public void Consume(C message)
+            public async Task Consume(ConsumeContext<C> message)
 			{
 			}
 
@@ -128,7 +128,7 @@ namespace MassTransit.Tests.Testing
 				return (saga, message) => saga.CorrelationId.ToString() == message.CorrelationId;
 			}
 
-			public void Consume(B message)
+            public async Task Consume(ConsumeContext<B> message)
 			{
 			}
 		}

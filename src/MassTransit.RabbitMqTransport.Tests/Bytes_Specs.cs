@@ -1,12 +1,12 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -14,29 +14,42 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Linq;
-    using BusConfigurators;
-    using Magnum.Extensions;
-    using NUnit.Framework;
+    using System.Threading.Tasks;
+    using Configuration;
     using NUnit.Framework;
     using Shouldly;
-    using TestFramework;
 
 
     [TestFixture]
     public class Bytes_Specs :
-        Given_a_rabbitmq_bus
+        RabbitMqTestFixture
     {
-        A _sent;
-        Future<A> _received;
-
-        protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
+        [Test]
+        public async void Should_receive_byte_array_of_bigness()
         {
-            base.ConfigureServiceBus(uri, configurator);
+            var random = new Random();
+            var bytes = new byte[512];
+            for (int i = 0; i < 512; i++)
+                bytes[i] = (byte)random.Next(255);
 
-            _received = new Future<A>();
+            var sent = new A
+            {
+                Contents = bytes
+            };
+            await InputQueueSendEndpoint.Send(sent);
 
-//            configurator.Subscribe(x => { x.Handler<A>(async msg => _received.Complete(msg.Message)); });
+            ConsumeContext<A> context = await _received;
+
+            context.Message.ShouldBe(sent);
         }
+
+        Task<ConsumeContext<A>> _received;
+
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _received = Handler<A>(configurator);
+        }
+
 
         class A
         {
@@ -66,41 +79,6 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 return (Contents != null ? Contents.GetHashCode() : 0);
             }
-        }
-
-        [Test]
-        public void Should_receive_byte_array()
-        {
-            _received = new Future<A>();
-            _sent = new A
-                {
-                    Contents = new byte[] {0x56, 0x34, 0xf3}
-                };
-
-            LocalBus.Endpoint.Send(_sent);
-
-            _received.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
-        }
-
-        [Test]
-        public void Should_receive_byte_array_of_bigness()
-        {
-            _received = new Future<A>();
-            Random random = new Random();
-            byte[] bytes = new byte[512];
-            for (int i = 0; i < 512; i++)
-            {
-                bytes[i] = (byte)random.Next(255);
-            }
-            _sent = new A
-                {
-                    Contents = bytes
-                };
-
-            LocalBus.Endpoint.Send(_sent);
-
-            _received.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
-            _received.Value.ShouldBe(_sent);
         }
     }
 }

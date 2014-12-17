@@ -13,8 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using Diagnostics.Introspection;
-    using Pipeline;
 
 
     /// <summary>
@@ -36,8 +34,7 @@ namespace MassTransit
     /// </summary>
     public interface IServiceBus :
         IBus,
-        IDisposable,
-        DiagnosticsSource
+        IDisposable
     {
         /// <summary>
         ///   The endpoint from which messages are received
@@ -61,20 +58,5 @@ namespace MassTransit
         /// <param name="address"></param>
         /// <returns>The endpoint that corresponds to the uri passed</returns>
         IEndpoint GetEndpoint(Uri address);
-
-        /// <summary>
-        /// Get the first service with the matching type, throwing an InvalidOperationException if none is found.
-        /// </summary>
-        /// <param name="type">The type of service to get.</param>
-        /// <returns>The first service of type T.</returns>
-        IBusService GetService(Type type);
-
-        /// <summary>
-        /// Try to get the first service with the matching type.
-        /// </summary>
-        /// <param name="type">The type of service to get.</param>
-        /// <param name="result">The service.</param>
-        /// <returns>Whether the service was found.</returns>
-        bool TryGetService(Type type, out IBusService result);
     }
 }

@@ -26,7 +26,7 @@ namespace MassTransit.Saga.SubscriptionBuilders
         public SagaSubscriptionBuilder(ISagaRepository<TSaga> sagaRepository,
             ReferenceFactory referenceFactory)
         {
-            _connector = new SagaConnector<TSaga>(sagaRepository);
+            _connector = new SagaConnector<TSaga>();
             _referenceFactory = referenceFactory;
         }
 

@@ -31,7 +31,7 @@ namespace MassTransit.PipeConfigurators
             _filter = filter;
         }
 
-        public void Configure(IPipeBuilder<TupleContext<TContext, TMessage>> builder)
+        public void Build(IPipeBuilder<TupleContext<TContext, TMessage>> builder)
         {
             builder.AddFilter(new TupleSplitFilter<TContext, TMessage>(_filter));
         }

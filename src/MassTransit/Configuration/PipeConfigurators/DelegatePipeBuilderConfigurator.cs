@@ -20,7 +20,7 @@ namespace MassTransit.PipeConfigurators
 
 
     public class DelegatePipeBuilderConfigurator<T> :
-        IPipeBuilderConfigurator<T>
+        IPipeConfigurable<T>
         where T : class, PipeContext
     {
         readonly Action<T> _callback;
@@ -30,7 +30,7 @@ namespace MassTransit.PipeConfigurators
             _callback = callback;
         }
 
-        public void Configure(IPipeBuilder<T> builder)
+        public void Build(IPipeBuilder<T> builder)
         {
             builder.AddFilter(new DelegateFilter<T>(_callback));
         }

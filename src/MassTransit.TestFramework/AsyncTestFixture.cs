@@ -16,6 +16,7 @@ namespace MassTransit.TestFramework
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
+    using Testing.TestDecorators;
 
 
     public abstract class AsyncTestFixture
@@ -99,6 +100,11 @@ namespace MassTransit.TestFramework
         protected TestObserver<T> GetObserver<T>()
         {
             return new TestObserver<T>(GetTask<T>(), GetTask<Exception>(), GetTask<bool>());
+        }
+
+        protected TestSendObserver GetSendObserver()
+        {
+            return new TestSendObserver(TestTimeout);
         }
     }
 }

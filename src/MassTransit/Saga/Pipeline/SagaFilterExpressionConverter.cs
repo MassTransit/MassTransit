@@ -16,7 +16,7 @@ namespace MassTransit.Saga.Pipeline
 	using System.Linq.Expressions;
 
 	public class SagaFilterExpressionConverter<TSaga, TMessage> :
-		Util.ExpressionVisitor
+		ExpressionVisitor
 	{
 		readonly TMessage _message;
 
@@ -32,18 +32,15 @@ namespace MassTransit.Saga.Pipeline
 			return RemoveMessageParameter(result as LambdaExpression);
 		}
 
-		protected override Expression VisitMemberAccess(MemberExpression m)
+		protected override Expression VisitMember(MemberExpression m)
 		{
-			if (m == null)
-				return null;
-
 			if (m.Expression != null &&
 			    (m.Expression.NodeType == ExpressionType.Parameter && m.Expression.Type == typeof (TMessage)))
 			{
 				return EvaluateMemberAccess(m);
 			}
 
-			return base.VisitMemberAccess(m);
+			return base.VisitMember(m);
 		}
 
 		static Expression<Func<TSaga, bool>> RemoveMessageParameter(LambdaExpression lambda)

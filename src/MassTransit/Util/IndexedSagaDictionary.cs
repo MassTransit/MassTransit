@@ -100,7 +100,7 @@ namespace MassTransit.Util
         void BuildIndices()
         {
             IEnumerable<PropertyInfo> indexProperties = typeof(TSaga).GetProperties()
-                .Where(x => x.GetAttribute<IndexedAttribute>() != null || x.Name.Equals("CorrelationId"));
+                .Where(x => x.HasAttribute<IndexedAttribute>() || x.Name.Equals("CorrelationId"));
 
             foreach (PropertyInfo property in indexProperties)
             {
