@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using System.Diagnostics;
     using Logging;
-    using Magnum;
     using Monitoring;
     using Pipeline;
     using Pipeline.Pipes;

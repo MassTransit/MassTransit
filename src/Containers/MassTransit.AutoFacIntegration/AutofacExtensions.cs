@@ -60,7 +60,7 @@ namespace MassTransit
         /// <param name="scope">The LifetimeScope of the container</param>
         /// <param name="name">The name of the scope created per-message</param>
         /// <returns></returns>
-        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
+        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
             ILifetimeScope scope, string name = "message")
             where TConsumer : class, IConsumer
         {
@@ -76,7 +76,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="scope"></param>
         /// <returns></returns>
-        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(
+        public static ISagaConfigurator<TSaga> Saga<TSaga>(
             this IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name = "message")
             where TSaga : class, ISaga
         {

@@ -47,7 +47,7 @@ namespace MassTransit.Testing.Subjects
         {
             var decoratedConsumerFactory = new ConsumerFactoryTestDecorator<TSubject>(_consumerFactory, _received);
 
-            _unsubscribe = scenario.InputBus.SubscribeConsumer(decoratedConsumerFactory);
+            _unsubscribe = scenario.InputBus.ConnectConsumer(decoratedConsumerFactory);
         }
 
         void Dispose(bool disposing)

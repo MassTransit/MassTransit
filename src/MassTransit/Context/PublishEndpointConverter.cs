@@ -15,9 +15,8 @@ namespace MassTransit.Context
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Internals.Extensions;
-    using Magnum.Extensions;
     using Pipeline;
+    using Util;
 
 
     /// <summary>
@@ -37,7 +36,7 @@ namespace MassTransit.Context
 
             var msg = message as T;
             if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
+                throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.ShortName(message.GetType()));
 
             await endpoint.Publish(msg, cancellationToken);
         }
@@ -54,7 +53,7 @@ namespace MassTransit.Context
 
             var msg = message as T;
             if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
+                throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.ShortName(message.GetType()));
 
             await endpoint.Publish(msg, pipe, cancellationToken);
         }

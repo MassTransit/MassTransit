@@ -17,6 +17,7 @@ namespace MassTransit.Context
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
+    using Serialization;
     using Transports;
     using Util;
 
@@ -125,7 +126,7 @@ namespace MassTransit.Context
             set { _context.Durable = value; }
         }
 
-        public ISendMessageSerializer Serializer
+        public IMessageSerializer Serializer
         {
             get { return _context.Serializer; }
             set { _context.Serializer = value; }
@@ -177,7 +178,7 @@ namespace MassTransit.Context
         public void Watch<T>(MessageHandler<T> handler)
             where T : class
         {
-            ConnectHandle connectHandle = _bus.SubscribeRequestHandler(_requestId, handler);
+            ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, handler);
 
             _connections.Add(new HandlerHandle<T>(connectHandle));
         }
@@ -228,7 +229,7 @@ namespace MassTransit.Context
                 }
             };
 
-            ConnectHandle connectHandle = _bus.SubscribeRequestHandler(_requestId, messageHandler);
+            ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);
 
             _connections.Add(new HandlerHandle<T>(connectHandle, source));
 
@@ -256,7 +257,7 @@ namespace MassTransit.Context
                 }
             };
 
-            ConnectHandle connectHandle = _bus.SubscribeRequestHandler(_requestId, messageHandler);
+            ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);
 
             _connections.Add(new HandlerHandle<T>(connectHandle, source));
 
@@ -283,7 +284,7 @@ namespace MassTransit.Context
                 }
             };
 
-            ConnectHandle connectHandle = _bus.SubscribeRequestHandler(_requestId, messageHandler);
+            ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);
 
             _connections.Add(new HandlerHandle<Fault<TRequest>>(connectHandle, source));
 

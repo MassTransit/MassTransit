@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             throw new NotImplementedException();
         }
 
-        public ConnectHandle Connect<TMessage>(IMessageObserver<TMessage> observer) where TMessage : class
+        public ConnectHandle Connect<TMessage>(IConsumeMessageObserver<TMessage> observer) where TMessage : class
         {
             throw new NotImplementedException();
         }

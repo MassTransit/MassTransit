@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Net.Mime;
     using System.Threading.Tasks;
+    using Serialization;
     using Transports;
 
 
@@ -63,7 +64,7 @@ namespace MassTransit
         /// <summary>
         /// The serializer to use when serializing the message to the transport
         /// </summary>
-        ISendMessageSerializer Serializer { get; set; }
+        IMessageSerializer Serializer { get; set; }
     }
 
 

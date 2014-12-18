@@ -25,15 +25,15 @@ namespace MassTransit.SubscriptionConnectors
     }
 
 
-    public class InstanceConnector<T> :
+    public class InstanceConnector<TConsumer> :
         InstanceConnector
-        where T : class
+        where TConsumer : class
     {
         readonly IEnumerable<InstanceMessageConnector> _connectors;
 
         public InstanceConnector()
         {
-            if (TypeMetadataCache<T>.HasSagaInterfaces)
+            if (TypeMetadataCache<TConsumer>.HasSagaInterfaces)
                 throw new ConfigurationException("A saga cannot be registered as a consumer");
 
             _connectors = Consumes()
@@ -50,17 +50,17 @@ namespace MassTransit.SubscriptionConnectors
 
         static IEnumerable<InstanceMessageConnector> ConsumesContext()
         {
-            return ConsumerMetadataCache<T>.ContextConsumerTypes.Select(x => x.GetInstanceContextConnector());
+            return ConsumerMetadataCache<TConsumer>.ContextConsumerTypes.Select(x => x.GetInstanceContextConnector());
         }
 
         static IEnumerable<InstanceMessageConnector> Consumes()
         {
-            return ConsumerMetadataCache<T>.ConsumerTypes.Select(x => x.GetInstanceConnector());
+            return ConsumerMetadataCache<TConsumer>.ConsumerTypes.Select(x => x.GetInstanceConnector());
         }
 
         static IEnumerable<InstanceMessageConnector> ConsumesAll()
         {
-            return ConsumerMetadataCache<T>.MessageConsumerTypes.Select(x => x.GetInstanceMessageConnector());
+            return ConsumerMetadataCache<TConsumer>.MessageConsumerTypes.Select(x => x.GetInstanceMessageConnector());
         }
     }
 }

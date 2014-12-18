@@ -18,26 +18,26 @@ namespace MassTransit.EndpointConfigurators
     public class ReceiveEndpointBuilder :
         IReceiveEndpointBuilder
     {
-        readonly IConsumePipe _inputPipe;
+        readonly IConsumePipe _consumePipe;
 
-        public ReceiveEndpointBuilder(IConsumePipe inputPipe)
+        public ReceiveEndpointBuilder(IConsumePipe consumePipe)
         {
-            _inputPipe = inputPipe;
+            _consumePipe = consumePipe;
         }
 
         ConnectHandle IConsumeFilterConnector.Connect<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            return _inputPipe.Connect(pipe);
+            return _consumePipe.Connect(pipe);
         }
 
-        ConnectHandle IMessageObserverConnector.Connect<T>(IMessageObserver<T> observer)
+        ConnectHandle IMessageObserverConnector.Connect<T>(IConsumeMessageObserver<T> observer)
         {
-            return _inputPipe.Connect(observer);
+            return _consumePipe.Connect(observer);
         }
 
         IConsumePipe IReceiveEndpointBuilder.InputPipe
         {
-            get { return _inputPipe; }
+            get { return _consumePipe; }
         }
     }
 }

@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline
 {
     using System;
     using Internals.Extensions;
-    using Magnum.Extensions;
 
 
     public class FilterInspectorAdapter<TFilter, TContext> :

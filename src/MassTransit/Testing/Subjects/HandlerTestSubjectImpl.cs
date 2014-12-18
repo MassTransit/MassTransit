@@ -45,7 +45,7 @@ namespace MassTransit.Testing.Subjects
 
         public void Prepare(TScenario scenario)
         {
-            _unsubscribe = scenario.InputBus.SubscribeHandler<TSubject>(HandleMessage);
+            _unsubscribe = scenario.InputBus.ConnectHandler<TSubject>(HandleMessage);
         }
 
         void Dispose(bool disposing)

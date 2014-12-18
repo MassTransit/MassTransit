@@ -42,27 +42,27 @@ namespace MassTransit.Tests.Serialization
 
             var serializer = new TSerializer();
 
-            using (var output = new MemoryStream())
-            {
-                serializer.Serialize(output, new OldSendContext<PingMessage>(Message));
-
-                serializedMessageData = output.ToArray();
-
-                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
-            }
-
-            using (var input = new MemoryStream(serializedMessageData))
-            {
-				var receiveContext = OldReceiveContext.FromBodyStream(input);
-				serializer.Deserialize(receiveContext);
-
-				IConsumeContext<PingMessage> context;
-				receiveContext.TryGetContext<PingMessage>(out context).ShouldBe(true);
-
-				context.ShouldNotBe(null);
-
-				context.Message.ShouldBe(Message);
-            }
+//            using (var output = new MemoryStream())
+//            {
+//                serializer.Serialize(output, new OldSendContext<PingMessage>(Message));
+//
+//                serializedMessageData = output.ToArray();
+//
+//                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+//            }
+//
+//            using (var input = new MemoryStream(serializedMessageData))
+//            {
+//				var receiveContext = OldReceiveContext.FromBodyStream(input);
+//				serializer.Deserialize(receiveContext);
+//
+//				IConsumeContext<PingMessage> context;
+//				receiveContext.TryGetContext<PingMessage>(out context).ShouldBe(true);
+//
+//				context.ShouldNotBe(null);
+//
+//				context.Message.ShouldBe(Message);
+//            }
         }
     }
  

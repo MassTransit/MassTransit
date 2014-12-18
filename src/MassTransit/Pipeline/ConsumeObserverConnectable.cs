@@ -14,7 +14,7 @@ namespace MassTransit.Pipeline
 {
     using System;
     using System.Threading.Tasks;
-    using Subscriptions;
+    using Util;
 
 
     /// <summary>

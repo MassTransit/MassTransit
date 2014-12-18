@@ -19,7 +19,7 @@ namespace MassTransit.Courier
 
     public static class HostSubscriptionExtensions
     {
-        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress)
             where TActivity : ExecuteActivity<TArguments>, new()
@@ -29,7 +29,7 @@ namespace MassTransit.Courier
                 DefaultConstructorExecuteActivityFactory<TActivity, TArguments>.ExecuteFactory);
         }
 
-        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress, Func<TActivity> controllerFactory)
             where TActivity : ExecuteActivity<TArguments>
@@ -39,7 +39,7 @@ namespace MassTransit.Courier
                 _ => controllerFactory());
         }
 
-        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Func<TActivity> controllerFactory)
             where TActivity : ExecuteActivity<TArguments>
@@ -48,7 +48,7 @@ namespace MassTransit.Courier
             return ExecuteActivityHost<TActivity, TArguments>(configurator, _ => controllerFactory());
         }
 
-        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress, Func<TArguments, TActivity> controllerFactory)
             where TActivity : ExecuteActivity<TArguments>
@@ -60,7 +60,7 @@ namespace MassTransit.Courier
             return configurator.Instance(host);
         }
 
-        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator, Func<TArguments, TActivity> controllerFactory)
             where TActivity : ExecuteActivity<TArguments>
             where TArguments : class
@@ -71,7 +71,7 @@ namespace MassTransit.Courier
             return configurator.Instance(host);
         }
 
-        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress, ExecuteActivityFactory<TArguments> factory)
             where TActivity : ExecuteActivity<TArguments>
@@ -82,7 +82,7 @@ namespace MassTransit.Courier
             return configurator.Instance(host);
         }
 
-        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             ExecuteActivityFactory<TArguments> factory)
             where TActivity : ExecuteActivity<TArguments>
@@ -93,7 +93,7 @@ namespace MassTransit.Courier
             return configurator.Instance(host);
         }
 
-        public static InstanceSubscriptionConfigurator CompensateActivityHost<TActivity, TLog>(
+        public static IInstanceConfigurator CompensateActivityHost<TActivity, TLog>(
             this IReceiveEndpointConfigurator configurator)
             where TActivity : CompensateActivity<TLog>, new()
             where TLog : class
@@ -102,7 +102,7 @@ namespace MassTransit.Courier
                 DefaultConstructorCompensateActivityFactory<TActivity, TLog>.CompensateFactory);
         }
 
-        public static InstanceSubscriptionConfigurator CompensateActivityHost<TActivity, TLog>(
+        public static IInstanceConfigurator CompensateActivityHost<TActivity, TLog>(
             this IReceiveEndpointConfigurator configurator, Func<TActivity> controllerFactory)
             where TActivity : CompensateActivity<TLog>
             where TLog : class
@@ -110,7 +110,7 @@ namespace MassTransit.Courier
             return CompensateActivityHost<TActivity, TLog>(configurator, _ => controllerFactory());
         }
 
-        public static InstanceSubscriptionConfigurator CompensateActivityHost<TActivity, TLog>(
+        public static IInstanceConfigurator CompensateActivityHost<TActivity, TLog>(
             this IReceiveEndpointConfigurator configurator, Func<TLog, TActivity> controllerFactory)
             where TActivity : CompensateActivity<TLog>
             where TLog : class
@@ -121,7 +121,7 @@ namespace MassTransit.Courier
             return configurator.Instance(host);
         }
 
-        public static InstanceSubscriptionConfigurator CompensateActivityHost<TActivity, TLog>(
+        public static IInstanceConfigurator CompensateActivityHost<TActivity, TLog>(
             this IReceiveEndpointConfigurator configurator, CompensateActivityFactory<TLog> factory)
             where TActivity : CompensateActivity<TLog>
             where TLog : class

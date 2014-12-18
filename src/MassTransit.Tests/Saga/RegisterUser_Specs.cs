@@ -33,11 +33,10 @@ namespace MassTransit.Tests.Saga
             InMemorySagaRepository<RegisterUserSaga> sagaRepository = SetupSagaRepository<RegisterUserSaga>();
 
             // this just shows that you can easily respond to the message
-            RemoteBus.SubscribeHandler<SendUserVerificationEmail>(
-                x =>
+            RemoteBus.ConnectHandler<SendUserVerificationEmail>(
+               async x =>
                     {
-                        RemoteBus.ShouldHaveSubscriptionFor<UserVerificationEmailSent>();
-                        RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email));
+                        await RemoteBus.Publish(new UserVerificationEmailSent(x.Message.CorrelationId, x.Message.Email));
                     });
 
             RemoteBus.SubscribeSaga(sagaRepository);
@@ -53,7 +52,7 @@ namespace MassTransit.Tests.Saga
             Stopwatch timer = Stopwatch.StartNew();
 
             var controller = new RegisterUserController(LocalBus);
-            using (ConnectHandle unsubscribe = LocalBus.SubscribeInstance(controller))
+            using (ConnectHandle unsubscribe = LocalBus.ConnectInstance(controller))
             {
                 RemoteBus.ShouldHaveSubscriptionFor<UserRegistrationPending>();
                 RemoteBus.ShouldHaveSubscriptionFor<UserRegistrationComplete>();

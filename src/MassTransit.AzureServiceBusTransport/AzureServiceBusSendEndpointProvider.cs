@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.Messaging;
+    using Serialization;
     using Transports;
 
 
@@ -23,10 +24,10 @@ namespace MassTransit.AzureServiceBusTransport
         ISendEndpointProvider
     {
         readonly ServiceBusHostSettings[] _hosts;
-        readonly ISendMessageSerializer _serializer;
+        readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
 
-        public AzureServiceBusSendEndpointProvider(ISendMessageSerializer serializer, Uri sourceAddress, ServiceBusHostSettings[] hosts)
+        public AzureServiceBusSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, ServiceBusHostSettings[] hosts)
         {
             _hosts = hosts;
             _sourceAddress = sourceAddress;

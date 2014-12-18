@@ -36,7 +36,7 @@ namespace MassTransit.TestFramework
             var source = new TaskCompletionSource<ConsumeContext<T>>();
 
             ConnectHandle handler = null;
-            handler = Bus.SubscribeHandler<T>(async context =>
+            handler = Bus.ConnectHandler<T>(async context =>
             {
                 source.SetResult(context);
 
@@ -66,7 +66,7 @@ namespace MassTransit.TestFramework
             var source = new TaskCompletionSource<ConsumeContext<T>>();
 
             ConnectHandle handler = null;
-            handler = Bus.SubscribeHandler<T>(async context =>
+            handler = Bus.ConnectHandler<T>(async context =>
             {
                 if (filter(context))
                 {

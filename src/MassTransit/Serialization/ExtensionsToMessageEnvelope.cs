@@ -17,38 +17,6 @@ namespace MassTransit.Serialization
 
     public static class ExtensionsToMessageEnvelope
     {
-        public static void SetUsingMessageEnvelope(this IReceiveContext context, XmlMessageEnvelope envelope)
-        {
-            context.SetRequestId(envelope.RequestId);
-            context.SetConversationId(envelope.ConversationId);
-            context.SetCorrelationId(envelope.CorrelationId);
-            context.SetSourceAddress(envelope.SourceAddress.ToUriOrNull());
-            context.SetDestinationAddress(envelope.DestinationAddress.ToUriOrNull());
-            context.SetResponseAddress(envelope.ResponseAddress.ToUriOrNull());
-            context.SetFaultAddress(envelope.FaultAddress.ToUriOrNull());
-            context.SetNetwork(envelope.Network);
-            context.SetRetryCount(envelope.RetryCount);
-            context.SetMessageType(envelope.MessageType);
-            if (envelope.ExpirationTime.HasValue)
-                context.SetExpirationTime(envelope.ExpirationTime.Value);
-        }
-
-        public static void SetUsingContext(this XmlMessageEnvelope envelope, ISendContext headers)
-        {
-            envelope.RequestId = headers.RequestId;
-            envelope.ConversationId = headers.ConversationId;
-            envelope.CorrelationId = headers.CorrelationId;
-            envelope.SourceAddress = headers.SourceAddress.ToStringOrNull() ?? envelope.SourceAddress;
-            envelope.DestinationAddress = headers.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
-            envelope.ResponseAddress = headers.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
-            envelope.FaultAddress = headers.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
-            envelope.Network = headers.Network;
-            envelope.RetryCount = headers.RetryCount;
-            envelope.MessageType = headers.MessageType ?? envelope.MessageType;
-            if (headers.ExpirationTime.HasValue)
-                envelope.ExpirationTime = headers.ExpirationTime.Value;
-        }
-
         public static string ToStringOrNull(this Uri uri)
         {
             return uri == null ? null : uri.ToString();

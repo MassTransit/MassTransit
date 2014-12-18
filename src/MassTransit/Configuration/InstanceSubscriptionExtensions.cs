@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using Magnum;
     using Policies;
     using SubscriptionConfigurators;
     using SubscriptionConnectors;
@@ -33,16 +32,15 @@ namespace MassTransit
         /// <param name="instance">The instance to subscribe.</param>
         /// <param name="retryPolicy"></param>
         /// <returns>An instance subscription configurator.</returns>
-        public static InstanceSubscriptionConfigurator Instance(this IReceiveEndpointConfigurator configurator, object instance,
+        public static IInstanceConfigurator Instance(this IReceiveEndpointConfigurator configurator, object instance,
             IRetryPolicy retryPolicy = null)
         {
-            var instanceConfigurator = new InstanceSubscriptionConfiguratorImpl(instance, retryPolicy ?? Retry.None);
+            var instanceConfigurator = new InstanceConfigurator(instance, retryPolicy ?? Retry.None);
 
             configurator.AddConfigurator(instanceConfigurator);
 
             return instanceConfigurator;
         }
-
 
         /// <summary>
         /// Connects any consumers for the component to the message dispatcher
@@ -52,7 +50,7 @@ namespace MassTransit
         /// <param name="retryPolicy"></param>
         /// <returns>The unsubscribe action that can be called to unsubscribe the instance
         /// passed as an argument.</returns>
-        public static ConnectHandle SubscribeInstance(this IBus bus, object instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectInstance(this IBus bus, object instance, IRetryPolicy retryPolicy = null)
         {
             if (bus == null)
                 throw new ArgumentNullException("bus");
@@ -73,10 +71,9 @@ namespace MassTransit
         /// <param name="retryPolicy"></param>
         /// <returns>The unsubscribe action that can be called to unsubscribe the instance
         /// passed as an argument.</returns>
-        public static ConnectHandle SubscribeInstance<T>(this IServiceBus bus, T instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectInstance<T>(this IServiceBus bus, T instance, IRetryPolicy retryPolicy = null)
             where T : class, IConsumer
         {
-
             InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();
 
             return connector.Connect(bus.ConsumePipe, instance, retryPolicy ?? Retry.None);

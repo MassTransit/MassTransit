@@ -14,7 +14,6 @@ namespace MassTransit.Testing.Instances
 {
 	using System;
 	using System.Collections.Generic;
-	using Magnum.Extensions;
 	using Scenarios;
 	using TestActions;
 

@@ -14,6 +14,7 @@ namespace MassTransit.Testing
 {
 	using System;
 	using Configuration;
+	using Pipeline;
 	using Scenarios;
 	using TestInstanceConfigurators;
 

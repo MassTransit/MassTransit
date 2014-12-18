@@ -80,7 +80,7 @@ namespace MassTransit.Reactive
         /// <param name="configurator"></param>
         /// <param name="observer">The observer to subscribe</param>
         /// <returns>The subscription configurator</returns>
-        public static InstanceSubscriptionConfigurator Observe<T>(this IReceiveEndpointConfigurator configurator,
+        public static IInstanceConfigurator Observe<T>(this IReceiveEndpointConfigurator configurator,
             IObserver<T> observer)
             where T : class
         {

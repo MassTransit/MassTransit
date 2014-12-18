@@ -76,7 +76,7 @@ namespace MassTransit.Pipeline.Filters
             return inspector.Inspect(this, x => _output.Inspect(x));
         }
 
-        ConnectHandle IMessageObserverConnector.Connect<T>(IMessageObserver<T> observer)
+        ConnectHandle IMessageObserverConnector.Connect<T>(IConsumeMessageObserver<T> observer)
         {
             var self = _messageObservers as MessageObserverConnectable<T>;
             if (self == null)

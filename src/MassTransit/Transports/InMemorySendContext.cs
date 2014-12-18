@@ -18,6 +18,7 @@ namespace MassTransit.Transports
     using System.Runtime.Serialization;
     using System.Threading;
     using Context;
+    using Serialization;
 
 
     public class InMemorySendContext<T> :
@@ -27,9 +28,9 @@ namespace MassTransit.Transports
         readonly InMemorySendContextHeaders _contextHeaders;
         readonly PayloadCache _payloadCache;
         byte[] _body;
-        ISendMessageSerializer _serializer;
+        IMessageSerializer _serializer;
 
-        public InMemorySendContext(T message, CancellationToken cancellationToken)
+        public InMemorySendContext(T message, CancellationToken cancellationToken = default(CancellationToken))
         {
             CancellationToken = cancellationToken;
 
@@ -85,7 +86,7 @@ namespace MassTransit.Transports
 
         public ContentType ContentType { get; set; }
 
-        public ISendMessageSerializer Serializer
+        public IMessageSerializer Serializer
         {
             get { return _serializer; }
             set

@@ -28,7 +28,7 @@ namespace MassTransit.Tests
         public void A_simple_bus_should_be_able_to_subscribe_and_publish()
         {
             var consumer = new TestMessageConsumer<PingMessage>();
-            LocalBus.SubscribeInstance(consumer);
+            LocalBus.ConnectInstance(consumer);
 
             var message = new PingMessage();
             LocalBus.Publish(message);
@@ -46,7 +46,7 @@ namespace MassTransit.Tests
         public void Should_accept_the_type_specified()
         {
             var consumer = new TestMessageConsumer<PingMessage>();
-            LocalBus.SubscribeInstance(consumer);
+            LocalBus.ConnectInstance(consumer);
 
             var message = new PingMessage();
 
@@ -60,7 +60,7 @@ namespace MassTransit.Tests
         public void Should_accept_the_type_specified_with_context()
         {
             var consumer = new TestMessageConsumer<PingMessage>();
-            LocalBus.SubscribeInstance(consumer);
+            LocalBus.ConnectInstance(consumer);
 
             var message = new PingMessage();
 
@@ -74,7 +74,7 @@ namespace MassTransit.Tests
         public void Should_receive_the_proper_message()
         {
             var consumer = new TestMessageConsumer<PingMessage>();
-            LocalBus.SubscribeInstance(consumer);
+            LocalBus.ConnectInstance(consumer);
 
             var message = new PingMessage();
 

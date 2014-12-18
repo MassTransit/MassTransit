@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using BusConfigurators;
     using EndpointConfigurators;
-    using Magnum.Reflection;
     using Newtonsoft.Json;
     using Serialization;
 

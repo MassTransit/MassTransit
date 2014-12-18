@@ -183,5 +183,30 @@ namespace MassTransit.Internals.Extensions
         {
             return _typeNameFormatter.GetTypeName(type);
         }
+
+        /// <summary>
+        /// Returns the first attribute of the specified type for the object specified
+        /// </summary>
+        /// <typeparam name="T">The type of attribute</typeparam>
+        /// <param name="provider">An attribute provider, which can be a MethodInfo, PropertyInfo, Type, etc.</param>
+        /// <returns>The attribute instance if found, or null</returns>
+        public static IEnumerable<T> GetAttribute<T>(this ICustomAttributeProvider provider)
+            where T : Attribute
+        {
+            return provider.GetCustomAttributes(typeof(T), true)
+                .Cast<T>();
+        }
+
+        /// <summary>
+        /// Determines if the target has the specified attribute
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="provider"></param>
+        /// <returns></returns>
+        public static bool HasAttribute<T>(this ICustomAttributeProvider provider)
+            where T : Attribute
+        {
+            return provider.GetAttribute<T>().Any();
+        }
     }
 }

@@ -14,10 +14,11 @@ namespace MassTransit.Context
 {
     using System;
     using System.IO;
+    using System.Threading;
 
 
     public class MoveMessageSendContext :
-        OldMessageContext,
+        MessageContext,
         ISendContext
     {
         readonly Action<Stream> _bodyWriter;
@@ -25,7 +26,7 @@ namespace MassTransit.Context
 
         public MoveMessageSendContext(IReceiveContext context)
         {
-            SetUsing(context);
+//            SetUsing(context);
             CopyOrInitializeOriginalMessageId(context);
 
             Id = context.Id;
@@ -40,6 +41,76 @@ namespace MassTransit.Context
         public Type DeclaringMessageType
         {
             get { return typeof(object); }
+        }
+
+        public string OriginalMessageId
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public void SetMessageType(string messageType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetRequestId(string value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetConversationId(string value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetCorrelationId(string value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetSourceAddress(Uri uri)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetDestinationAddress(Uri uri)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetResponseAddress(Uri uri)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetFaultAddress(Uri uri)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetNetwork(string network)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetExpirationTime(DateTime value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetRetryCount(int retryCount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetUsing(IMessageContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetHeader(string key, string value)
+        {
+            throw new NotImplementedException();
         }
 
         public void SetDeliveryMode(DeliveryMode deliveryMode)
@@ -61,10 +132,150 @@ namespace MassTransit.Context
 
         void CopyOrInitializeOriginalMessageId(IReceiveContext context)
         {
-            SetOriginalMessageId(context.OriginalMessageId);
+//            SetOriginalMessageId(context.OriginalMessageId);
+//
+//            if (string.IsNullOrEmpty(OriginalMessageId))
+//                SetOriginalMessageId(context.MessageId);
+        }
 
-            if (string.IsNullOrEmpty(OriginalMessageId))
-                SetOriginalMessageId(context.MessageId);
+        public CancellationToken CancellationToken
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public bool HasPayloadType(Type contextType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        {
+            throw new NotImplementedException();
+        }
+
+        Guid? MessageContext.MessageId
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public string MessageType
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public string ContentType
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        string IMessageContext.RequestId
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public string ConversationId
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        string IMessageContext.CorrelationId
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        Uri IMessageContext.SourceAddress
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public Uri InputAddress
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        Uri IMessageContext.DestinationAddress
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        Uri IMessageContext.ResponseAddress
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        Uri IMessageContext.FaultAddress
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public string Network
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        DateTime? IMessageContext.ExpirationTime
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public int RetryCount
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public IMessageHeaders Headers
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        string IMessageContext.MessageId
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        Guid? MessageContext.RequestId
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        Guid? MessageContext.CorrelationId
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        DateTime? MessageContext.ExpirationTime
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        Uri MessageContext.SourceAddress
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        Uri MessageContext.DestinationAddress
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        Uri MessageContext.ResponseAddress
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        Uri MessageContext.FaultAddress
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public ContextHeaders ContextHeaders
+        {
+            get { throw new NotImplementedException(); }
         }
     }
 }

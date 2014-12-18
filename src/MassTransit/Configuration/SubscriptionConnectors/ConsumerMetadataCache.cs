@@ -26,7 +26,6 @@ namespace MassTransit.SubscriptionConnectors
         readonly MessageInterfaceType[] _contextConsumerTypes;
         readonly MessageInterfaceType[] _messageConsumerTypes;
 
-
         ConsumerMetadataCache()
         {
             _consumerTypes = GetConsumerMessageTypes().ToArray();
@@ -36,17 +35,17 @@ namespace MassTransit.SubscriptionConnectors
 
         public static MessageInterfaceType[] ConsumerTypes
         {
-            get { return InstanceCache.Cached.Value.ConsumerTypes; }
+            get { return Cached.Metadata.Value.ConsumerTypes; }
         }
 
         public static MessageInterfaceType[] MessageConsumerTypes
         {
-            get { return InstanceCache.Cached.Value.MessageConsumerTypes; }
+            get { return Cached.Metadata.Value.MessageConsumerTypes; }
         }
 
         public static MessageInterfaceType[] ContextConsumerTypes
         {
-            get { return InstanceCache.Cached.Value.ContextConsumerTypes; }
+            get { return Cached.Metadata.Value.ContextConsumerTypes; }
         }
 
         MessageInterfaceType[] IConsumerMetadataCache<T>.ConsumerTypes
@@ -73,7 +72,6 @@ namespace MassTransit.SubscriptionConnectors
                 .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
         }
 
-
         static IEnumerable<MessageInterfaceType> GetMessageConsumerTypes()
         {
             return typeof(T).GetInterfaces()
@@ -97,13 +95,13 @@ namespace MassTransit.SubscriptionConnectors
         static bool IsNotContextType(MessageInterfaceType x)
         {
             return !(x.MessageType.IsGenericType &&
-                     x.MessageType.GetGenericTypeDefinition() == typeof(IConsumeContext<>));
+                x.MessageType.GetGenericTypeDefinition() == typeof(IConsumeContext<>));
         }
 
 
-        static class InstanceCache
+        static class Cached
         {
-            internal static readonly Lazy<IConsumerMetadataCache<T>> Cached = new Lazy<IConsumerMetadataCache<T>>(
+            internal static readonly Lazy<IConsumerMetadataCache<T>> Metadata = new Lazy<IConsumerMetadataCache<T>>(
                 () => new ConsumerMetadataCache<T>(), LazyThreadSafetyMode.PublicationOnly);
         }
     }

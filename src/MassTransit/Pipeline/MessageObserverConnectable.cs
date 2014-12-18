@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline
     using System;
     using System.Threading.Tasks;
     using Subscriptions;
+    using Util;
 
 
     /// <summary>
@@ -22,8 +23,8 @@ namespace MassTransit.Pipeline
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class MessageObserverConnectable<T> :
-        Connectable<IMessageObserver<T>>,
-        IMessageObserver<T>
+        Connectable<IConsumeMessageObserver<T>>,
+        IConsumeMessageObserver<T>
         where T : class
     {
         public Task PreDispatch(ConsumeContext<T> context)

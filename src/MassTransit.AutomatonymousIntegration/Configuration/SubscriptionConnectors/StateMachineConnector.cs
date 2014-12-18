@@ -22,6 +22,7 @@ namespace Automatonymous.SubscriptionConnectors
     using MassTransit.Policies;
     using MassTransit.Saga;
     using MassTransit.SubscriptionConnectors;
+    using MassTransit.Util;
 
 
     public interface StateMachineConnector

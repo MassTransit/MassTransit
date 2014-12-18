@@ -53,7 +53,7 @@ namespace MassTransit
             }
         }
 
-        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
+        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
             IKernel kernel)
             where TConsumer : class, IConsumer
         {
@@ -62,7 +62,7 @@ namespace MassTransit
             return configurator.Consumer(consumerFactory);
         }
 
-        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator, IKernel kernel)
+        public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator, IKernel kernel)
             where TSaga : class, ISaga
         {
             var sagaRepository = kernel.Get<ISagaRepository<TSaga>>();

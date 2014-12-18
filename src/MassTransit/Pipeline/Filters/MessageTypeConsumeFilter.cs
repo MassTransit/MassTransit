@@ -60,7 +60,7 @@ namespace MassTransit.Pipeline.Filters
             return inspector.Inspect(this, x => _pipes.Values.All(pipe => pipe.Filter.Inspect(x)));
         }
 
-        public ConnectHandle Connect<T>(IMessageObserver<T> observer)
+        public ConnectHandle Connect<T>(IConsumeMessageObserver<T> observer)
             where T : class
         {
             if (observer == null)
@@ -106,7 +106,7 @@ namespace MassTransit.Pipeline.Filters
 
         class MessageFilter<T> :
             IMessageFilter,
-            IMessageObserver<T>
+            IConsumeMessageObserver<T>
             where T : class
         {
             readonly MessageConsumeFilter<T> _filter;

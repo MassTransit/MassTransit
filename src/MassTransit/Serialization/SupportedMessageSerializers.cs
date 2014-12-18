@@ -24,7 +24,6 @@ namespace MassTransit.Serialization
         readonly IDictionary<string, IMessageSerializer> _serializers;
         Func<IMessageSerializer> _defaultSerializer;
 
-
         public SupportedMessageSerializers(params IMessageSerializer[] serializers)
         {
             _serializers = new Dictionary<string, IMessageSerializer>(StringComparer.InvariantCultureIgnoreCase);
@@ -78,10 +77,12 @@ namespace MassTransit.Serialization
             if (serializer == null)
                 throw new ArgumentNullException("serializer");
 
-            if (_serializers.ContainsKey(serializer.ContentType))
+            string contentType = serializer.ContentType.MediaType;
+
+            if (_serializers.ContainsKey(contentType))
                 return;
 
-            _serializers[serializer.ContentType] = serializer;
+            _serializers[contentType] = serializer;
         }
     }
 }

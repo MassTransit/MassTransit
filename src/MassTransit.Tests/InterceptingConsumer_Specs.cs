@@ -14,50 +14,63 @@ namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
     using System.Transactions;
-    using BusConfigurators;
-    using Magnum.Extensions;
     using MassTransit.Pipeline;
     using NUnit.Framework;
-    using TextFixtures;
+    using TestFramework;
 
 
     public class Intercepting_a_consumer_factory :
-        LoopbackTestFixture
+        InMemoryTestFixture
     {
         [Test]
-        public void Should_properly_encapsulate_the_consumer_invocation()
+        public async void Should_call_the_consumer_method()
         {
-            LocalBus.Publish(new A());
+            await _myConsumer.Called.Task;
+        }
 
-            Assert.IsTrue(_myConsumer.Called.Task.Wait(8.Seconds()), "Consumer not called");
-            Assert.IsTrue(_interceptor.First.Task.Wait(8.Seconds()), "First interceptor not called");
-            Assert.IsTrue(_interceptor.Second.Task.Wait(8.Seconds()), "Second interceptor not called");
+        [Test]
+        public async void Should_call_the_interceptor_first()
+        {
+            await _interceptor.First.Task;
+        }
+
+        [Test]
+        public async void Should_call_the_interceptor_second()
+        {
+            await _interceptor.Second.Task;
+        }
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            InputQueueSendEndpoint.Send(new A())
+                .Wait(TestCancellationToken);
         }
 
         MyConsumer _myConsumer;
         Interceptor _interceptor;
 
-        protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureLocalBus(configurator);
+            _myConsumer = new MyConsumer(GetTask<A>());
+            _interceptor = new Interceptor(GetTask<bool>(), GetTask<bool>());
 
-            _myConsumer = new MyConsumer();
-            _interceptor = new Interceptor();
-
-//            configurator.Subscribe(x =>
-//            {
-//                x.Consumer(() => _myConsumer)
-//                    .Filter(_interceptor);
-//            });
+            configurator.Consumer(() => _myConsumer)
+                .Filter(_interceptor);
         }
 
 
         class Interceptor :
             IFilter<ConsumerConsumeContext<MyConsumer>>
         {
-            public readonly TaskCompletionSource<bool> First = new TaskCompletionSource<bool>();
-            public readonly TaskCompletionSource<bool> Second = new TaskCompletionSource<bool>();
+            public readonly TaskCompletionSource<bool> First;
+            public readonly TaskCompletionSource<bool> Second;
 
+            public Interceptor(TaskCompletionSource<bool> first, TaskCompletionSource<bool> second)
+            {
+                First = first;
+                Second = second;
+            }
 
             public async Task Send(ConsumerConsumeContext<MyConsumer> context, IPipe<ConsumerConsumeContext<MyConsumer>> next)
             {
@@ -81,7 +94,12 @@ namespace MassTransit.Tests
         class MyConsumer :
             IConsumer<A>
         {
-            public readonly TaskCompletionSource<A> Called = new TaskCompletionSource<A>();
+            public readonly TaskCompletionSource<A> Called;
+
+            public MyConsumer(TaskCompletionSource<A> called)
+            {
+                Called = called;
+            }
 
             public async Task Consume(ConsumeContext<A> message)
             {

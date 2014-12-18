@@ -12,11 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-	using System.IO;
+    using System;
+    using System.IO;
 	using Context;
-	using NUnit.Framework;
-	using MassTransit.Serialization;
-	using NUnit.Framework;
+    using MassTransit.Serialization;
+    using NUnit.Framework;
+    using NUnit.Framework;
 	using Shouldly;
 
 
@@ -38,7 +39,7 @@ namespace MassTransit.Tests.Serialization
 
 			using (var output = new MemoryStream())
 			{
-				_serializer.Serialize(output, obj.ToSendContext());
+//				_serializer.Serialize(output, obj.ToSendContext());
 
 				serializedMessageData = output.ToArray();
 
@@ -47,16 +48,18 @@ namespace MassTransit.Tests.Serialization
 
 			using (var input = new MemoryStream(serializedMessageData))
 			{
-				IReceiveContext receiveContext = OldReceiveContext.FromBodyStream(input);
-				_serializer.Deserialize(receiveContext);
-
-				IConsumeContext<T> context;
-				receiveContext.TryGetContext(out context).ShouldBe(true);
-
-				context.ShouldNotBe(null);
-
-				return context.Message;
+//				IReceiveContext receiveContext = OldReceiveContext.FromBodyStream(input);
+//				_serializer.Deserialize(receiveContext);
+//
+//				IConsumeContext<T> context;
+//				receiveContext.TryGetContext(out context).ShouldBe(true);
+//
+//				context.ShouldNotBe(null);
+//
+//				return context.Message;
 			}
+
+		    throw new NotImplementedException();
 		}
 	}
 }

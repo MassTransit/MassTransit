@@ -18,6 +18,7 @@ namespace MassTransit.EndpointConfigurators
     using Configurators;
     using Serialization;
 
+
     public class DefaultSerializerEndpointFactoryConfigurator :
         EndpointFactoryBuilderConfigurator
     {

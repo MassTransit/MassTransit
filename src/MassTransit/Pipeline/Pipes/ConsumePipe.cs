@@ -46,7 +46,7 @@ namespace MassTransit.Pipeline.Pipes
             return _pipe.Send(context);
         }
 
-        ConnectHandle IMessageObserverConnector.Connect<TMessage>(IMessageObserver<TMessage> observer)
+        ConnectHandle IMessageObserverConnector.Connect<TMessage>(IConsumeMessageObserver<TMessage> observer)
         {
             return _filter.Connect(observer);
         }

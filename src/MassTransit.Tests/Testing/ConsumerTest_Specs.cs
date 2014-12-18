@@ -138,11 +138,11 @@ namespace MassTransit.Tests.Testing
 		}
 
 		class Testsumer :
-			Consumes<A>.Context
+			IConsumer<A>
 		{
-			public void Consume(IConsumeContext<A> context)
+			public Task Consume(ConsumeContext<A> context)
 			{
-				context.Respond(new B());
+				return context.RespondAsync(new B());
 			}
 		}
 

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
+    using Serialization;
     using Transports;
 
 
@@ -28,7 +29,7 @@ namespace MassTransit.Builders
         /// <summary>
         /// The default message serializer
         /// </summary>
-        ISendMessageSerializer MessageSerializer { get; }
+        IMessageSerializer MessageSerializer { get; }
 
         /// <summary>
         /// Adds a receive endpoint to the bus

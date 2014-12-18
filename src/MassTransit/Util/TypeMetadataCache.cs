@@ -59,10 +59,10 @@ namespace MassTransit.Util
 
         static class Cached
         {
+            internal static readonly IDictionaryConverterCache DictionaryConverterCache = new DictionaryConverterCache();
             internal static readonly IImplementationBuilder ImplementationBuilder = new DynamicImplementationBuilder();
             internal static readonly ConcurrentDictionary<Type, CachedType> Instance = new ConcurrentDictionary<Type, CachedType>();
-            internal static IDictionaryConverterCache DictionaryConverterCache = new DictionaryConverterCache();
-            internal static IObjectConverterCache ObjectConverterCache = new DynamicObjectConverterCache(ImplementationBuilder);
+            internal static readonly IObjectConverterCache ObjectConverterCache = new DynamicObjectConverterCache(ImplementationBuilder);
         }
 
 
@@ -74,7 +74,6 @@ namespace MassTransit.Util
 
         class CachedType<T> :
             CachedType
-            where T : class, IConsumer
         {
             public string ShortName
             {
