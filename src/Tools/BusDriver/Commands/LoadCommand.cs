@@ -89,73 +89,35 @@ namespace BusDriver.Commands
             throw new NotImplementedException();
         }
 
-        ISendContext LoadMessageFromFile(string fileName)
-        {
-            using (StreamReader stream = System.IO.File.OpenText(fileName))
-            {
-                string contentType = null;
+//        ISendContext LoadMessageFromFile(string fileName)
+//        {
+//            using (StreamReader stream = System.IO.File.OpenText(fileName))
+//            {
+//                string contentType = null;
+//
+//                string line;
+//                do
+//                {
+//                    line = stream.ReadLine();
+//                    if (line != null)
+//                    {
+//                        string[] values = line.Split(':');
+//                        if (values.Length == 2)
+//                        {
+//                            if (values[0] == "Content-Type")
+//                                contentType = values[1].Trim();
+//                        }
+//                    }
+//                }
+//                while (line.IsNotEmpty());
+//
+//                string body = stream.ReadToEnd();
+//                stream.Close();
+//
+//  //              return new LoadMessageSendContext(contentType, Encoding.UTF8.GetBytes(body));
+//            }
+//        }
 
-                string line;
-                do
-                {
-                    line = stream.ReadLine();
-                    if (line != null)
-                    {
-                        string[] values = line.Split(':');
-                        if (values.Length == 2)
-                        {
-                            if (values[0] == "Content-Type")
-                                contentType = values[1].Trim();
-                        }
-                    }
-                }
-                while (line.IsNotEmpty());
 
-                string body = stream.ReadToEnd();
-                stream.Close();
-
-                return new LoadMessageSendContext(contentType, Encoding.UTF8.GetBytes(body));
-            }
-        }
-
-
-        class LoadMessageSendContext :
-            MassTransit.Context.OldMessageContext,
-            ISendContext
-        {
-            readonly byte[] _body;
-            readonly Action<Stream> _bodyWriter;
-
-            public LoadMessageSendContext(string contentType, byte[] body)
-            {
-                SetContentType(contentType);
-                _body = body;
-
-                _bodyWriter = stream => stream.Write(_body, 0, _body.Length);
-            }
-
-            public Guid Id { get; set; }
-
-            public Type DeclaringMessageType
-            {
-                get { return typeof(object); }
-            }
-
-            public void SetDeliveryMode(DeliveryMode deliveryMode)
-            {
-                DeliveryMode = deliveryMode;
-            }
-
-            public DeliveryMode DeliveryMode { get; private set; }
-
-            public void SerializeTo(Stream stream)
-            {
-                _bodyWriter(stream);
-            }
-
-            public void NotifySend(EndpointAddress address)
-            {
-            }
-        }
     }
 }

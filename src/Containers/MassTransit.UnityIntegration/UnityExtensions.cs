@@ -44,7 +44,7 @@ namespace MassTransit
             }
         }
 
-        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
+        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
             IUnityContainer container)
             where TConsumer : class, IConsumer
         {
@@ -53,7 +53,7 @@ namespace MassTransit
             return configurator.Consumer(consumerFactory);
         }
 
-        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
+        public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
             IUnityContainer container)
             where TSaga : class, ISaga
         {

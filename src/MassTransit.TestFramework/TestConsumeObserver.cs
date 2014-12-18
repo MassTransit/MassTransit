@@ -18,7 +18,7 @@ namespace MassTransit.TestFramework
 
 
     public class TestConsumeObserver<T> :
-        IMessageObserver<T>
+        IConsumeMessageObserver<T>
         where T : class
     {
         readonly TaskCompletionSource<T> _dispatchFaulted;
@@ -48,17 +48,17 @@ namespace MassTransit.TestFramework
             get { return _dispatchFaulted.Task; }
         }
 
-        async Task IMessageObserver<T>.PreDispatch(ConsumeContext<T> context)
+        async Task IConsumeMessageObserver<T>.PreDispatch(ConsumeContext<T> context)
         {
             _preDispatched.TrySetResult(context.Message);
         }
 
-        async Task IMessageObserver<T>.PostDispatch(ConsumeContext<T> context)
+        async Task IConsumeMessageObserver<T>.PostDispatch(ConsumeContext<T> context)
         {
             _postDispatched.TrySetResult(context.Message);
         }
 
-        async Task IMessageObserver<T>.DispatchFault(ConsumeContext<T> context, Exception exception)
+        async Task IConsumeMessageObserver<T>.DispatchFault(ConsumeContext<T> context, Exception exception)
         {
             _dispatchFaulted.TrySetException(exception);
         }

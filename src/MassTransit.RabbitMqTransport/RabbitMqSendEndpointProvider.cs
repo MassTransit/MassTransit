@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Linq;
     using System.Threading.Tasks;
     using Configuration;
+    using Serialization;
     using Transports;
 
 
@@ -25,9 +26,9 @@ namespace MassTransit.RabbitMqTransport
     {
         readonly RabbitMqHost[] _hosts;
         readonly Uri _inputAddress;
-        readonly ISendMessageSerializer _serializer;
+        readonly IMessageSerializer _serializer;
 
-        public RabbitMqSendEndpointProvider(ISendMessageSerializer serializer, RabbitMqHost[] hosts, Uri inputAddress)
+        public RabbitMqSendEndpointProvider(IMessageSerializer serializer, RabbitMqHost[] hosts, Uri inputAddress)
         {
             _hosts = hosts;
             _inputAddress = inputAddress;

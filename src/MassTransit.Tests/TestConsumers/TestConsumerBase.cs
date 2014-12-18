@@ -15,6 +15,7 @@ namespace MassTransit.Tests.TestConsumers
     using System;
     using System.Collections.Generic;
     using System.Threading;
+    using System.Threading.Tasks;
     using Magnum.Extensions;
     using NUnit.Framework;
 
@@ -45,9 +46,9 @@ namespace MassTransit.Tests.TestConsumers
             _allReceived.Release();
         }
 
-        public void MessageHandler(TMessage message)
+        public async Task MessageHandler(ConsumeContext<TMessage> message)
         {
-            _messages.Add(message);
+            _messages.Add(message.Message);
             _received.Release();
         }
 

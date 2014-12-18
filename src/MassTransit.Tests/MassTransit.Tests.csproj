@@ -97,7 +97,6 @@
     <Compile Include="DictionaryToObject_Specs.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
     <Compile Include="FastProperty_Specs.cs" />
-    <Compile Include="HostContext_Specs.cs" />
     <Compile Include="InterceptingConsumer_Specs.cs" />
     <Compile Include="Diagnostics\Trace_Specs.cs" />
     <Compile Include="Enrichment_Specs.cs" />
@@ -108,13 +107,11 @@
     <Compile Include="Configuration\ConsumesAll_Specs.cs" />
     <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
     <Compile Include="Configuration\SagaConnector_Specs.cs" />
-    <Compile Include="Configuration\SimpleConfiguration_Specs.cs" />
     <Compile Include="Configuration\HandlerSubscription_Specs.cs" />
     <Compile Include="Configuration\When_configuration_fails.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Load\CommandInstance.cs" />
     <Compile Include="Load\Messages\First.cs" />
-    <Compile Include="Load\LoadGenerator.cs" />
     <Compile Include="Load\Messages\FirstCommand.cs" />
     <Compile Include="Load\Messages\FirstPending.cs" />
     <Compile Include="Load\Messages\FirstResponse.cs" />
@@ -172,7 +169,6 @@
     <Compile Include="Saga\Locator\SomeClass.cs" />
     <Compile Include="Saga\ObservableSagaMessage.cs" />
     <Compile Include="Saga\SimpleSaga.cs" />
-    <Compile Include="Retry_Specs.cs" />
     <Compile Include="Saga\SimpleSagaMessageBase.cs" />
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
     <Compile Include="Messages\ResponseMessage.cs" />
@@ -186,7 +182,6 @@
     <Compile Include="Serialization\JsonSerialization_Specs.cs" />
     <Compile Include="Serialization\MoreSerialization_Specs.cs" />
     <Compile Include="Serialization\Performance_Specs.cs" />
-    <Compile Include="Serialization\PreSharedKeyEncryptedSerialization_Specs.cs" />
     <Compile Include="Serialization\PropertyType_Specs.cs" />
     <Compile Include="Serialization\SerializationSpecificationBase.cs" />
     <Compile Include="Serialization\SerializationTest.cs" />

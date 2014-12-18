@@ -19,6 +19,7 @@ namespace MassTransit.Tests
 	using System.Reflection;
 	using Context;
 	using Magnum.Extensions;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 
 	public static class TestExtensions
@@ -46,16 +47,10 @@ namespace MassTransit.Tests
 			Assert.IsTrue(mismatch);
 		}
 
-		public static ISendContext<T> ToSendContext<T>(this T obj)
+		public static SendContext<T> ToSendContext<T>(this T obj)
 			where T : class
 		{
-			return new OldSendContext<T>(obj);
-		}
-
-		public static IConsumeContext<T> ToConsumeContext<T>(this T message) 
-			where T : class
-		{
-			return new OldConsumeContext<T>(OldReceiveContext.Empty(), message);
+			return new InMemorySendContext<T>(obj);
 		}
 
 		static void CompareObjects(object target, object expected, Type targetType, string parentPrefix)

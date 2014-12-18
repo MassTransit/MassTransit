@@ -16,8 +16,8 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using Magnum.Reflection;
     using Pipeline;
+    using Serialization;
     using Util;
 
 
@@ -25,11 +25,11 @@ namespace MassTransit.Transports
         ISendEndpoint
     {
         readonly Uri _destinationAddress;
-        readonly ISendMessageSerializer _serializer;
+        readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
         readonly ISendTransport _transport;
 
-        public SendEndpoint(ISendTransport transport, ISendMessageSerializer serializer, Uri destinationAddress, Uri sourceAddress)
+        public SendEndpoint(ISendTransport transport, IMessageSerializer serializer, Uri destinationAddress, Uri sourceAddress)
         {
             _transport = transport;
             _serializer = serializer;
@@ -92,7 +92,7 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException("values");
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            T message = TypeMetadataCache<T>.InitializeFromObject(values);
 
             return Send(message, cancellationToken);
         }
@@ -140,7 +140,7 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException("values");
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            T message = TypeMetadataCache<T>.InitializeFromObject(values);
 
             return Send(message, pipe, cancellationToken);
         }
@@ -153,7 +153,7 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException("pipe");
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            T message = TypeMetadataCache<T>.InitializeFromObject(values);
 
             return Send(message, pipe, cancellationToken);
         }

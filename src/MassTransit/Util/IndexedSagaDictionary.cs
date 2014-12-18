@@ -17,7 +17,7 @@ namespace MassTransit.Util
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
-    using Magnum.Extensions;
+    using Internals.Extensions;
     using Saga;
 
 

@@ -18,7 +18,6 @@ namespace MassTransit.Serialization
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using Custom;
     using Events;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;

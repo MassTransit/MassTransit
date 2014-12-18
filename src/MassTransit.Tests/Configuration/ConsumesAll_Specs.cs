@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Configuration
 {
     using System.Linq;
+    using MassTransit.Pipeline;
     using NUnit.Framework;
     using MassTransit.Configuration;
     using Shouldly;

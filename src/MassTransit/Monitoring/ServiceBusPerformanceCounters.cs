@@ -16,7 +16,6 @@ namespace MassTransit.Monitoring
 	using System.Linq;
 	using System.Security;
 	using Logging;
-	using Magnum.Extensions;
 
     public class ServiceBusPerformanceCounters
 	{

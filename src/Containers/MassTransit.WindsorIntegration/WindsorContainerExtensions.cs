@@ -64,7 +64,7 @@ namespace MassTransit
         /// <param name="configurator">configurator</param>
         /// <param name="container">The container that the consumer should be loaded from.</param>
         /// <returns>The configurator</returns>
-        public static ConsumerSubscriptionConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
+        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
             IWindsorContainer container)
             where TConsumer : class, IConsumer
         {
@@ -85,7 +85,7 @@ namespace MassTransit
         /// <param name="configurator">The configurator</param>
         /// <param name="container">The windsor container</param>
         /// <returns>The configurator</returns>
-        public static SagaSubscriptionConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
+        public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
             IWindsorContainer container)
             where TSaga : class, ISaga
         {

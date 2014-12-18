@@ -14,16 +14,17 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Threading.Tasks;
+    using Serialization;
 
 
     public class InMemorySendEndpointProvider :
         ISendEndpointProvider
     {
-        readonly ISendMessageSerializer _defaultSerializer;
+        readonly IMessageSerializer _defaultSerializer;
         readonly Uri _sourceAddress;
         readonly ISendTransportProvider _transportProvider;
 
-        public InMemorySendEndpointProvider(Uri sourceAddress, ISendTransportProvider transportProvider, ISendMessageSerializer defaultSerializer)
+        public InMemorySendEndpointProvider(Uri sourceAddress, ISendTransportProvider transportProvider, IMessageSerializer defaultSerializer)
         {
             _transportProvider = transportProvider;
             _defaultSerializer = defaultSerializer;

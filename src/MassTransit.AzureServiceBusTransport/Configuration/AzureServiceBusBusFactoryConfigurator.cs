@@ -18,23 +18,25 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using Builders;
     using Configurators;
     using Microsoft.ServiceBus;
+    using PipeConfigurators;
 
 
     public class AzureServiceBusBusFactoryConfigurator :
         IServiceBusBusFactoryConfigurator,
         IBusFactory
     {
-        //      readonly RabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
         readonly HostSettings _defaultHostSettings;
         readonly IList<ServiceBusHostSettings> _hosts;
         readonly IList<IServiceBusFactoryBuilderConfigurator> _transportBuilderConfigurators;
+        IList<IPipeBuilderConfigurator<ConsumeContext>> _pipeBuilderConfigurators   ;
 
         public AzureServiceBusBusFactoryConfigurator()
         {
             _hosts = new List<ServiceBusHostSettings>();
             _defaultHostSettings = new HostSettings();
-//            _defaultEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_defaultHostSettings);
             _transportBuilderConfigurators = new List<IServiceBusFactoryBuilderConfigurator>();
+
+            _pipeBuilderConfigurators = new List<IPipeBuilderConfigurator<ConsumeContext>>();
         }
 
         public void Host(ServiceBusHostSettings settings)
@@ -46,7 +48,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 _defaultHostSettings.CopyFrom(settings);
         }
 
-        public void AddServiceBusFactoryBuilderConfigurator(IServiceBusFactoryBuilderConfigurator configurator)
+        void IServiceBusFactoryConfigurator.AddServiceBusFactoryBuilderConfigurator(IServiceBusFactoryBuilderConfigurator configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
@@ -83,6 +85,13 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 TokenProvider = settings.TokenProvider;
                 OperationTimeout = settings.OperationTimeout;
             }
+        }
+
+
+        void IPipeConfigurator<ConsumeContext>.AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
+        {
+            _pipeBuilderConfigurators.Add(configurator);
+
         }
     }
 }

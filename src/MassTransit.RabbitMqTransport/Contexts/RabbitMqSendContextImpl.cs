@@ -19,6 +19,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Threading;
     using Context;
     using RabbitMQ.Client;
+    using Serialization;
     using Transports;
 
 
@@ -28,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     {
         readonly PayloadCache _payloadCache;
         byte[] _body;
-        ISendMessageSerializer _serializer;
+        IMessageSerializer _serializer;
 
         public RabbitMqSendContextImpl(IBasicProperties basicProperties, T message, SendSettings sendSettings, CancellationToken cancellationToken,
             string routingKey = "")
@@ -69,7 +70,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public ContentType ContentType { get; set; }
 
-        public ISendMessageSerializer Serializer
+        public IMessageSerializer Serializer
         {
             get { return _serializer; }
             set

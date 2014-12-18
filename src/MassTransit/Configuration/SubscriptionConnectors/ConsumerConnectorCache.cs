@@ -15,27 +15,25 @@ namespace MassTransit.SubscriptionConnectors
     using System;
     using System.Collections.Concurrent;
     using System.Threading;
-    using Configuration;
     using Pipeline;
     using Policies;
 
 
-    public class ConsumerConnectorCache<T> :
+    public class ConsumerConnectorCache<TConsumer> :
         IConsumerConnectorCache
-        where T : class
+        where TConsumer : class
     {
-        readonly Lazy<ConsumerConnector<T>> _connector;
-
+        readonly Lazy<ConsumerConnector<TConsumer>> _connector;
 
         ConsumerConnectorCache()
         {
-            _connector = new Lazy<ConsumerConnector<T>>(() => new ConsumerConnector<T>(),
+            _connector = new Lazy<ConsumerConnector<TConsumer>>(() => new ConsumerConnector<TConsumer>(),
                 LazyThreadSafetyMode.PublicationOnly);
         }
 
         public static ConsumerConnector Connector
         {
-            get { return InstanceCache.Cached.Value.Connector; }
+            get { return Cached.Instance.Value.Connector; }
         }
 
         ConsumerConnector IConsumerConnectorCache.Connector
@@ -44,10 +42,10 @@ namespace MassTransit.SubscriptionConnectors
         }
 
 
-        static class InstanceCache
+        static class Cached
         {
-            internal static readonly Lazy<IConsumerConnectorCache> Cached = new Lazy<IConsumerConnectorCache>(
-                () => new ConsumerConnectorCache<T>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<IConsumerConnectorCache> Instance = new Lazy<IConsumerConnectorCache>(
+                () => new ConsumerConnectorCache<TConsumer>(), LazyThreadSafetyMode.PublicationOnly);
         }
     }
 
@@ -57,17 +55,12 @@ namespace MassTransit.SubscriptionConnectors
         public static ConsumerConnector GetConsumerConnector<T>()
             where T : class
         {
-            return InstanceCache.Cached.GetOrAdd(typeof(T), x => new CachedConnector<T>()).Connector;
-        }
-
-        public static ConsumerConnector GetConsumerConnector(Type type)
-        {
-            return GetOrAdd(type).Connector;
+            return Cached.Instance.GetOrAdd(typeof(T), x => new CachedConnector<T>()).Connector;
         }
 
         static CachedConnector GetOrAdd(Type type)
         {
-            return InstanceCache.Cached.GetOrAdd(type, _ =>
+            return Cached.Instance.GetOrAdd(type, _ =>
                 (CachedConnector)Activator.CreateInstance(typeof(CachedConnector<>).MakeGenericType(type)));
         }
 
@@ -75,6 +68,13 @@ namespace MassTransit.SubscriptionConnectors
             IRetryPolicy retryPolicy)
         {
             return GetOrAdd(consumerType).Connect(consumePipe, objectFactory, retryPolicy);
+        }
+
+
+        static class Cached
+        {
+            internal static readonly ConcurrentDictionary<Type, CachedConnector> Instance =
+                new ConcurrentDictionary<Type, CachedConnector>();
         }
 
 
@@ -108,12 +108,6 @@ namespace MassTransit.SubscriptionConnectors
 
                 return _connector.Value.Connect(consumePipe, consumerFactory, retryPolicy);
             }
-        }
-
-
-        static class InstanceCache
-        {
-            internal static readonly ConcurrentDictionary<Type, CachedConnector> Cached = new ConcurrentDictionary<Type, CachedConnector>();
         }
     }
 }

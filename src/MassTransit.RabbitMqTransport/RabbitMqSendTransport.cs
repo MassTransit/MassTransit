@@ -23,6 +23,7 @@ namespace MassTransit.RabbitMqTransport
     using RabbitMQ.Client;
     using Subscriptions;
     using Transports;
+    using Util;
 
 
     public class RabbitMqSendTransport :

@@ -51,7 +51,7 @@ namespace MassTransit
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="bus"></param>
         /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        public static ConnectHandle SubscribeHandler<T>(this IBus bus, MessageHandler<T> handler)
+        public static ConnectHandle ConnectHandler<T>(this IBus bus, MessageHandler<T> handler)
             where T : class
         {
             return HandlerConnectorCache<T>.Connector.Connect(bus.ConsumePipe, handler);
@@ -65,22 +65,10 @@ namespace MassTransit
         /// <param name="requestId"></param>
         /// <param name="handler"></param>
         /// <returns></returns>
-        public static ConnectHandle SubscribeRequestHandler<T>(this IBus bus, Guid requestId, MessageHandler<T> handler)
+        public static ConnectHandle ConnectRequestHandler<T>(this IBus bus, Guid requestId, MessageHandler<T> handler)
             where T : class
         {
             return HandlerConnectorCache<T>.Connector.Connect(bus.ConsumePipe, requestId, handler);
-        }
-
-        /// <summary>
-        /// Adds a message handler to the service bus for handling a specific type of message
-        /// </summary>
-        /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
-        /// <param name="bus"></param>
-        /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        public static ConnectHandle SubscribeHandler<T>(this IBus bus, Action<T> handler)
-            where T : class
-        {
-            return HandlerConnectorCache<T>.Connector.Connect(bus.ConsumePipe, async context => handler(context.Message));
         }
 
         /// <summary>

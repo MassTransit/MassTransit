@@ -20,6 +20,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Microsoft.ServiceBus.Messaging;
     using Subscriptions;
     using Transports;
+    using Util;
 
 
     /// <summary>

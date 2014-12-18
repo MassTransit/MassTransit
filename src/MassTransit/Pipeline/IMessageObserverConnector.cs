@@ -17,7 +17,7 @@ namespace MassTransit.Pipeline
     /// </summary>
     public interface IMessageObserverConnector
     {
-        ConnectHandle Connect<T>(IMessageObserver<T> observer)
+        ConnectHandle Connect<T>(IConsumeMessageObserver<T> observer)
             where T : class;
     }
 }

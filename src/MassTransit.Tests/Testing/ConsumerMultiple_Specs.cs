@@ -73,12 +73,12 @@ namespace MassTransit.Tests.Testing
 		{
 			public void Consume(A message)
 			{
-				this.MessageContext<A>().Respond(new Aa());
+//				this.MessageContext<A>().Respond(new Aa());
 			}
 
 			public void Consume(B message)
 			{
-				this.MessageContext<B>().Respond(new Bb());
+	//			this.MessageContext<B>().Respond(new Bb());
 			}
 		}
 

@@ -18,7 +18,6 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	using ActionConfigurators;
 	using Builders;
 	using Configurators;
-	using Magnum.Extensions;
 	using ScenarioBuilders;
 	using ScenarioConfigurators;
 	using Scenarios;

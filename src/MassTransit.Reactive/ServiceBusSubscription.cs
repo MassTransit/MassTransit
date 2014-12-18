@@ -27,7 +27,7 @@ namespace MassTransit.Reactive
         {
             _observer = Observer.Synchronize(observer);
 
-            _unsubscribeAction = bus.SubscribeHandler<T>(async m =>
+            _unsubscribeAction = bus.ConnectHandler<T>(async m =>
             {
                 try
                 {

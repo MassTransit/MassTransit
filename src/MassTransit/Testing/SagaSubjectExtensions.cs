@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
-	using Magnum.StateMachine;
 	using Saga;
 	using Subjects;
 

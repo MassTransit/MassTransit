@@ -16,8 +16,8 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using Internals.Extensions;
-    using Magnum.Extensions;
     using Pipeline;
+
 
     /// <summary>
     /// 

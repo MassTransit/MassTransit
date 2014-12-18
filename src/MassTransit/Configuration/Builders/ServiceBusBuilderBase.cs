@@ -23,13 +23,13 @@ namespace MassTransit.Builders
         readonly Lazy<IMessageDeserializer> _deserializer;
         readonly IList<IReceiveEndpoint> _endpoints;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
-        readonly Lazy<ISendMessageSerializer> _serializer;
+        readonly Lazy<IMessageSerializer> _serializer;
 
         protected ServiceBusBuilderBase()
         {
             _endpoints = new List<IReceiveEndpoint>();
             _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
-            _serializer = new Lazy<ISendMessageSerializer>(CreateSerializer);
+            _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
         }
 
@@ -38,7 +38,7 @@ namespace MassTransit.Builders
             get { return _endpoints; }
         }
 
-        public ISendMessageSerializer MessageSerializer
+        public IMessageSerializer MessageSerializer
         {
             get { return _serializer.Value; }
         }
@@ -53,9 +53,9 @@ namespace MassTransit.Builders
             get { return _sendEndpointProvider.Value; }
         }
 
-        JsonSendMessageSerializer CreateSerializer()
+        JsonMessageSerializer CreateSerializer()
         {
-            return new JsonSendMessageSerializer(JsonMessageSerializer.Serializer);
+            return new JsonMessageSerializer();
         }
 
         JsonMessageDeserializer CreateDeserializer()

@@ -34,7 +34,7 @@ namespace MassTransit.Tests.Pipeline
 
             IConsumerFactory<OneMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
-            filter.ConnectConsumer(factory, Retry.None);
+            filter.ConnectConsumer(factory, retryPolicy: Retry.None);
 
             var consumeContext = new TestConsumeContext<MessageA>(new MessageA());
 
@@ -70,7 +70,7 @@ namespace MassTransit.Tests.Pipeline
 
             IConsumerFactory<OneMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
-            filter.ConnectConsumer(factory, Retry.None);
+            filter.ConnectConsumer(factory, retryPolicy: Retry.None);
 
             var inspector = new StringPipeInspector();
             filter.Inspect(inspector);
@@ -87,7 +87,7 @@ namespace MassTransit.Tests.Pipeline
 
             IConsumerFactory<TwoMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
-            filter.ConnectConsumer(factory, Retry.None);
+            filter.ConnectConsumer(factory, retryPolicy: Retry.None);
 
             await filter.Send(new TestConsumeContext<MessageA>(new MessageA()));
 

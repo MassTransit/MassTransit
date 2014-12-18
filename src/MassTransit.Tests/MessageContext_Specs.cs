@@ -14,9 +14,7 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using EndpointConfigurators;
     using Magnum.Extensions;
-    using NUnit.Framework;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;

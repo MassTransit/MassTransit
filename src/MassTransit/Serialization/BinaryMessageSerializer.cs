@@ -15,20 +15,24 @@ namespace MassTransit.Serialization
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Net.Mime;
     using System.Runtime.Remoting.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
     using Logging;
-    using Magnum;
+    using Transports;
+    using Util;
 
 
     /// <summary>
     /// The binary message serializer used the .NET BinaryFormatter to serialize
     /// message content. 
     /// </summary>
-    public class BinaryMessageSerializer :
-        IMessageSerializer
+    public class BinaryMessageSerializer : IMessageSerializer,
+        IMessageDeserializer
     {
-        const string ContentTypeHeaderValue = "application/vnd.masstransit+binary";
+        public const string ContentTypeHeaderValue = "application/vnd.masstransit+binary";
+        public static readonly ContentType BinaryContentType = new ContentType(ContentTypeHeaderValue);
+
 
         const string ConversationIdKey = "ConversationId";
         const string CorrelationIdKey = "CorrelationId";
@@ -51,23 +55,27 @@ namespace MassTransit.Serialization
             get { return ContentTypeHeaderValue; }
         }
 
-        public void Serialize<T>(Stream output, ISendContext<T> context)
-            where T : class
+        void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
         {
             object message = context.Message;
             if (message == null)
-                throw new ArgumentNullException("context", "The message must be null");
+                throw new ArgumentNullException("context", "The message must not be null");
 
             Type t = message.GetType();
             if (!t.IsSerializable)
             {
                 throw new ConventionException(
-                    string.Format("Whoa, slow down buddy. The message '{0}' must be marked with the 'Serializable' attribute!", t.FullName));
+                    string.Format("Whoa, slow down buddy. The message '{0}' must be marked with the 'Serializable' attribute!", TypeMetadataCache<T>.ShortName));
             }
 
-            _formatter.Serialize(output, context.Message, GetHeaders(context));
+            _formatter.Serialize(stream, context.Message, GetHeaders(context, new MessageUrn(typeof(T))));
 
-            context.SetContentType(ContentTypeHeaderValue);
+            context.ContentType = BinaryContentType;
+        }
+
+        public void Serialize<T>(Stream output, ISendContext<T> context)
+            where T : class
+        {
         }
 
         public void Deserialize(IReceiveContext context)
@@ -79,24 +87,25 @@ namespace MassTransit.Serialization
             context.SetMessageTypeConverter(new StaticMessageTypeConverter(obj));
         }
 
-        static Header[] GetHeaders(IMessageContext context)
+        static Header[] GetHeaders(SendContext context, MessageUrn messageType)
         {
             var headers = new List<Header>();
 
-            headers.Add(MessageTypeKey, context.MessageType);
-            headers.Add(RequestIdKey, context.RequestId);
-            headers.Add(ConversationIdKey, context.ConversationId);
-            headers.Add(CorrelationIdKey, context.CorrelationId);
-
+            headers.Add(MessageTypeKey, messageType);
+            if (context.RequestId.HasValue)
+                headers.Add(RequestIdKey, context.RequestId.Value.ToString("N"));
+            if (context.CorrelationId.HasValue)
+                headers.Add(RequestIdKey, context.CorrelationId.Value.ToString("N"));
             headers.Add(SourceAddressKey, context.SourceAddress);
             headers.Add(DestinationAddressKey, context.DestinationAddress);
-            headers.Add(ResponseAddressKey, context.ResponseAddress);
-            headers.Add(FaultAddressKey, context.FaultAddress);
-            headers.Add(NetworkKey, context.Network);
-            headers.Add(RetryCountKey, context.RetryCount);
 
-            if (context.ExpirationTime.HasValue)
-                headers.Add(ExpirationTimeKey, context.ExpirationTime.Value);
+            if(context.ResponseAddress != null)
+                headers.Add(ResponseAddressKey, context.ResponseAddress);
+            if(context.FaultAddress != null)
+            headers.Add(FaultAddressKey, context.FaultAddress);
+
+            if (context.TimeToLive.HasValue)
+                headers.Add(ExpirationTimeKey, DateTime.UtcNow + context.TimeToLive.Value);
 
             return headers.ToArray();
         }
@@ -176,6 +185,22 @@ namespace MassTransit.Serialization
                 return null;
 
             return (Uri)value;
+        }
+
+        ContentType IMessageSerializer.ContentType
+        {
+            get { return BinaryContentType; }
+        }
+
+        ConsumeContext IMessageDeserializer.Deserialize(ReceiveContext receiveContext)
+        {
+//            object obj = _formatter.Deserialize(receiveContext.Body,
+//                headers => DeserializeHeaderHandler(headers, receiveContext));
+//
+//            context.SetContentType(ContentTypeHeaderValue);
+//            context.SetMessageTypeConverter(new StaticMessageTypeConverter(obj));
+
+            throw new NotImplementedException();
         }
     }
 }

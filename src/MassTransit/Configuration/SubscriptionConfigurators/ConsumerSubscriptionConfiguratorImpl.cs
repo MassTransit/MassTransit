@@ -17,25 +17,25 @@ namespace MassTransit.SubscriptionConfigurators
     using Configurators;
     using EndpointConfigurators;
     using PipeConfigurators;
+    using Pipeline;
     using Policies;
-    using SubscriptionConnectors;
 
 
-    public class ConsumerSubscriptionConfiguratorImpl<TConsumer> :
-        SubscriptionConfiguratorImpl<ConsumerSubscriptionConfigurator<TConsumer>>,
-        ConsumerSubscriptionConfigurator<TConsumer>,
+    public class ConsumerConfigurator<TConsumer> :
+        IConsumerConfigurator<TConsumer>,
         IReceiveEndpointBuilderConfigurator
         where TConsumer : class, IConsumer
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
 
         readonly List<IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>> _pipeBuilderConfigurators;
+        readonly IRetryPolicy _retryPolicy;
 
-        public ConsumerSubscriptionConfiguratorImpl(IConsumerFactory<TConsumer> consumerFactory,
-            IRetryPolicy retryPolicy)
-            : base(retryPolicy)
+        public ConsumerConfigurator(IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy)
         {
             _consumerFactory = consumerFactory;
+            _retryPolicy = retryPolicy;
+
             _pipeBuilderConfigurators = new List<IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>>();
         }
 
@@ -51,8 +51,7 @@ namespace MassTransit.SubscriptionConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            ConsumerConnectorCache<TConsumer>.Connector.Connect(builder.InputPipe, _consumerFactory, RetryPolicy,
-                _pipeBuilderConfigurators.ToArray());
+            builder.InputPipe.ConnectConsumer(_consumerFactory, _retryPolicy, _pipeBuilderConfigurators.ToArray());
         }
     }
 }

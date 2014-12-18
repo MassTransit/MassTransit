@@ -41,10 +41,7 @@ namespace MassTransit.Pipeline
 
             IConsumeContext<TMessage> consumeContext = new ConsumeContextAdapter<TMessage>(context);
 
-            using (consumeContext.CreateScope())
-            {
-                messageConsumer.Consume(consumeContext.Message);
-            }
+            messageConsumer.Consume(consumeContext.Message);
         }
 
         public bool Inspect(IPipeInspector inspector)

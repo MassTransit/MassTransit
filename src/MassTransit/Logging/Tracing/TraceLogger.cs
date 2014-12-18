@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -14,7 +14,7 @@ namespace MassTransit.Logging.Tracing
 {
     using System.Collections.Concurrent;
     using System.Diagnostics;
-    using Magnum.Caching;
+
 
     public class TraceLogger :
         ILogger
@@ -44,9 +44,7 @@ namespace MassTransit.Logging.Tracing
             SourceLevels sourceLevel = logLevel.SourceLevel;
             var source = new TraceSource(name, sourceLevel);
             if (IsSourceConfigured(source))
-            {
                 return source;
-            }
 
             ConfigureTraceSource(source, name, sourceLevel);
 
@@ -57,8 +55,8 @@ namespace MassTransit.Logging.Tracing
         {
             var defaultSource = new TraceSource("Default", sourceLevel);
             for (string parentName = ShortenName(name);
-                 !string.IsNullOrEmpty(parentName);
-                 parentName = ShortenName(parentName))
+                !string.IsNullOrEmpty(parentName);
+                parentName = ShortenName(parentName))
             {
                 var parentSource = new TraceSource(parentName, sourceLevel);
                 if (IsSourceConfigured(parentSource))
@@ -77,8 +75,8 @@ namespace MassTransit.Logging.Tracing
         static bool IsSourceConfigured(TraceSource source)
         {
             return source.Listeners.Count != 1
-                   || !(source.Listeners[0] is DefaultTraceListener)
-                   || source.Listeners[0].Name != "Default";
+                || !(source.Listeners[0] is DefaultTraceListener)
+                || source.Listeners[0].Name != "Default";
         }
 
         static string ShortenName(string name)
@@ -86,8 +84,8 @@ namespace MassTransit.Logging.Tracing
             int length = name.LastIndexOf('.');
 
             return length != -1
-                       ? name.Substring(0, length)
-                       : null;
+                ? name.Substring(0, length)
+                : null;
         }
     }
 }

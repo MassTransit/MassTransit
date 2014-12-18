@@ -17,7 +17,6 @@ namespace MassTransit.Testing
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
-    using Magnum.Extensions;
 
     public class PublishedMessageListImpl :
         PublishedMessageList,

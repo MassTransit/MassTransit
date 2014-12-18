@@ -1,12 +1,12 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -16,100 +16,87 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
-    using Custom;
+    using System.Net.Mime;
+    using JsonConverters;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
     using Newtonsoft.Json.Converters;
-    using Newtonsoft.Json.Linq;
+    using Util;
+
 
     public class BsonMessageSerializer :
         IMessageSerializer
     {
-        const string ContentTypeHeaderValue = "application/vnd.masstransit+bson";
+        public const string ContentTypeHeaderValue = "application/vnd.masstransit+bson";
+        public static readonly ContentType BsonContentType = new ContentType(ContentTypeHeaderValue);
 
-        [ThreadStatic]
-        static JsonSerializer _deserializer;
+        static readonly Lazy<JsonSerializer> _deserializer;
+        static readonly Lazy<JsonSerializer> _serializer;
 
-        [ThreadStatic]
-        static JsonSerializer _serializer;
-
-        static JsonSerializer Deserializer
+        public static JsonSerializerSettings DeserializerSettings = new JsonSerializerSettings
         {
-            get
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore,
+            MissingMemberHandling = MissingMemberHandling.Ignore,
+            ObjectCreationHandling = ObjectCreationHandling.Auto,
+            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+            ContractResolver = new JsonContractResolver(),
+            Converters = new List<JsonConverter>(new JsonConverter[]
             {
-                return _deserializer ?? (_deserializer = JsonSerializer.Create(new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore,
-                        DefaultValueHandling = DefaultValueHandling.Ignore,
-                        MissingMemberHandling = MissingMemberHandling.Ignore,
-                        ObjectCreationHandling = ObjectCreationHandling.Auto,
-                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                        ContractResolver = new JsonContractResolver(),
-                        Converters = new List<JsonConverter>(new JsonConverter[]
-                            {
-                                new ListJsonConverter(),
-                                new InterfaceProxyConverter(),
-                                new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
-                            })
-                    }));
-            }
-        }
+                new ListJsonConverter(),
+                new InterfaceProxyConverter(TypeMetadataCache.ImplementationBuilder),
+                new IsoDateTimeConverter {DateTimeStyles = DateTimeStyles.RoundtripKind},
+            })
+        };
 
-        static JsonSerializer Serializer
+        public static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
         {
-            get
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore,
+            MissingMemberHandling = MissingMemberHandling.Ignore,
+            ObjectCreationHandling = ObjectCreationHandling.Auto,
+            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+            ContractResolver = new JsonContractResolver(),
+            Converters = new List<JsonConverter>(new JsonConverter[]
             {
-                return _serializer ?? (_serializer = JsonSerializer.Create(new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore,
-                        DefaultValueHandling = DefaultValueHandling.Ignore,
-                        MissingMemberHandling = MissingMemberHandling.Ignore,
-                        ObjectCreationHandling = ObjectCreationHandling.Auto,
-                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                        ContractResolver = new JsonContractResolver(),
-                        Converters = new List<JsonConverter>(new JsonConverter[]
-                            {
-                                new IsoDateTimeConverter{DateTimeStyles = DateTimeStyles.RoundtripKind},
-                            }),
-                    }));
-            }
-        }
+                new IsoDateTimeConverter {DateTimeStyles = DateTimeStyles.RoundtripKind},
+            }),
+        };
 
-        public string ContentType
+        static BsonMessageSerializer()
         {
-            get { return ContentTypeHeaderValue; }
+            _deserializer = new Lazy<JsonSerializer>(() => JsonSerializer.Create(DeserializerSettings));
+            _serializer = new Lazy<JsonSerializer>(() => JsonSerializer.Create(SerializerSettings));
         }
 
-        public void Serialize<T>(Stream output, ISendContext<T> context)
+        public static JsonSerializer Deserializer
+        {
+            get { return _deserializer.Value; }
+        }
+
+        public static JsonSerializer Serializer
+        {
+            get { return _serializer.Value; }
+        }
+
+        public void Serialize<T>(Stream stream, SendContext<T> context)
             where T : class
         {
-            context.SetContentType(ContentTypeHeaderValue);
+            context.ContentType = BsonContentType;
 
-            Envelope envelope = Envelope.Create(context);
+            var envelope = new JsonMessageEnvelope(context, context.Message, typeof(T).GetMessageTypes());
 
-            using (var outputStream = new NonClosingStream(output))
-            using (var jsonWriter = new BsonWriter(outputStream))
+            using (var jsonWriter = new BsonWriter(stream))
             {
-                jsonWriter.Formatting = Formatting.Indented;
-
-                Serializer.Serialize(jsonWriter, envelope);
+                _serializer.Value.Serialize(jsonWriter, envelope, typeof(MessageEnvelope));
 
                 jsonWriter.Flush();
             }
         }
 
-        public void Deserialize(IReceiveContext context)
+        public ContentType ContentType
         {
-            Envelope result;
-            using (var inputStream = new NonClosingStream(context.BodyStream))
-            using (var jsonReader = new BsonReader(inputStream))
-            {
-                result = Deserializer.Deserialize<Envelope>(jsonReader);
-            }
-
-            context.SetUsingEnvelope(result);
-            context.SetMessageTypeConverter(new JsonMessageTypeConverter(Deserializer, result.Message as JToken,
-                result.MessageType));
+            get { return BsonContentType; }
         }
     }
 }
