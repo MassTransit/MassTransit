@@ -46,8 +46,7 @@ namespace MassTransit.Serialization
         Uri _responseAddress;
         Uri _sourceAddress;
 
-        public JsonConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider, ReceiveContext receiveContext,
-            MessageEnvelope envelope)
+        public JsonConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint, ReceiveContext receiveContext, MessageEnvelope envelope)
         {
             _receiveContext = receiveContext;
             _envelope = envelope;
@@ -56,7 +55,7 @@ namespace MassTransit.Serialization
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, object>();
-            _publishEndpoint = null;
+            _publishEndpoint = publishEndpoint;
             _pendingTasks = new List<Task>();
         }
 
@@ -338,7 +337,7 @@ namespace MassTransit.Serialization
                 await endpoint.Send(fault, faultPipe, CancellationToken);
             }
             else
-                await _publishEndpoint.Publish(message, faultPipe, CancellationToken);
+                await _publishEndpoint.Publish(fault, faultPipe, CancellationToken);
         }
 
         static JToken GetMessageToken(object message)

@@ -20,8 +20,7 @@ namespace MassTransit.RabbitMqTransport
     using Transports;
 
 
-    public class RabbitMqConnection :
-        Connection
+    public class RabbitMqConnection 
     {
         static readonly ILog _log = Logger.Get(typeof (RabbitMqConnection));
         readonly ConnectionFactory _connectionFactory;

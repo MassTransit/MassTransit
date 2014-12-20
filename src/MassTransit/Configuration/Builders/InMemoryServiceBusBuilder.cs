@@ -59,12 +59,17 @@ namespace MassTransit.Builders
             return new SendEndpointCache(provider);
         }
 
+        protected override IPublishEndpoint CreatePublishEndpoint()
+        {
+            return new InMemoryPublishEndpoint(SendEndpointProvider, _sendTransportProvider);
+        }
+
         public virtual IBusControl Build()
         {
             IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
                 .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
 
-            return new MassTransitBus(_inputAddress, consumePipe, SendEndpointProvider, ReceiveEndpoints);
+            return new MassTransitBus(_inputAddress, consumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints);
         }
     }
 }

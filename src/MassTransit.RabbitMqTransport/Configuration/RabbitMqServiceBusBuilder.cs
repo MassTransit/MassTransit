@@ -49,5 +49,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             return new SendEndpointCache(sendEndpointProvider);
         }
+
+        protected override IPublishEndpoint CreatePublishEndpoint()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

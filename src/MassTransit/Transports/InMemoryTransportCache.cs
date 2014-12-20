@@ -14,6 +14,8 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
 
 
@@ -25,11 +27,17 @@ namespace MassTransit.Transports
         ISendTransportProvider,
         IDisposable
     {
+        readonly Uri _baseUri = new Uri("loopback://localhost/");
         readonly ConcurrentDictionary<string, InMemoryTransport> _transports;
 
         public InMemoryTransportCache()
         {
             _transports = new ConcurrentDictionary<string, InMemoryTransport>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        public IEnumerable<Uri> TransportAddresses
+        {
+            get { return _transports.Keys.Select(x => new Uri(_baseUri, x)); }
         }
 
         public void Dispose()
@@ -39,7 +47,7 @@ namespace MassTransit.Transports
 
         public IReceiveTransport GetReceiveTransport(string queueName)
         {
-            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(new Uri("loopback://localhost/"), name)));
+            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name)));
         }
 
         public ISendTransport GetSendTransport(Uri address)
@@ -48,7 +56,7 @@ namespace MassTransit.Transports
             if (queueName.StartsWith("/"))
                 queueName = queueName.Substring(1);
 
-            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(new Uri("loopback://localhost/"), name)));
+            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name)));
         }
     }
 }

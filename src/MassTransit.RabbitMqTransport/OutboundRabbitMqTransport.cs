@@ -22,19 +22,16 @@ namespace MassTransit.RabbitMqTransport
     using Transports;
 
 
-    public class OutboundRabbitMqTransport :
-        IOutboundTransport
+    public class OutboundRabbitMqTransport 
     {
         readonly IRabbitMqEndpointAddress _address;
         readonly bool _bindToQueue;
-        readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
         RabbitMqProducer _producer;
 
         public OutboundRabbitMqTransport(IRabbitMqEndpointAddress address,
-            ConnectionHandler<RabbitMqConnection> connectionHandler, bool bindToQueue)
+             bool bindToQueue)
         {
             _address = address;
-            _connectionHandler = connectionHandler;
             _bindToQueue = bindToQueue;
         }
 
@@ -47,35 +44,34 @@ namespace MassTransit.RabbitMqTransport
         {
             AddProducerBinding();
 
-            _connectionHandler.Use(connection =>
                 {
                     try
                     {
-                        IBasicProperties properties = _producer.CreateProperties();
-
-                        properties.SetPersistent(context.DeliveryMode == DeliveryMode.Persistent);
-                        properties.MessageId = context.MessageId ?? properties.MessageId ?? NewId.Next().ToString();
-                        if (context.ExpirationTime.HasValue)
-                        {
-                            DateTime value = context.ExpirationTime.Value;
-                            properties.Expiration =
-                                (value.Kind == DateTimeKind.Utc
-                                     ? value - SystemUtil.UtcNow
-                                     : value - SystemUtil.Now).
-                                    TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
-                        }
-
-                        using (var body = new MemoryStream())
-                        {
-                            context.SerializeTo(body);
-                            properties.Headers = context.Headers.ToDictionary(entry => entry.Key, entry => (object)entry.Value);
-                            properties.Headers["Content-Type"]=context.ContentType;
-
-                            var task = _producer.PublishAsync(_address.Name, properties, body.ToArray());
-                            task.Wait();
-
-                            _address.Uri.LogSent(context.MessageId ?? properties.MessageId ?? "", context.MessageType);
-                        }
+//                        IBasicProperties properties = _producer.CreateProperties();
+//
+//                        properties.SetPersistent(context.DeliveryMode == DeliveryMode.Persistent);
+//                        properties.MessageId = context.MessageId ?? properties.MessageId ?? NewId.Next().ToString();
+//                        if (context.ExpirationTime.HasValue)
+//                        {
+//                            DateTime value = context.ExpirationTime.Value;
+//                            properties.Expiration =
+//                                (value.Kind == DateTimeKind.Utc
+//                                     ? value - SystemUtil.UtcNow
+//                                     : value - SystemUtil.Now).
+//                                    TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
+//                        }
+//
+//                        using (var body = new MemoryStream())
+//                        {
+//                            context.SerializeTo(body);
+//                            properties.Headers = context.Headers.ToDictionary(entry => entry.Key, entry => (object)entry.Value);
+//                            properties.Headers["Content-Type"]=context.ContentType;
+//
+//                            var task = _producer.PublishAsync(_address.Name, properties, body.ToArray());
+//                            task.Wait();
+//
+//                            _address.Uri.LogSent(context.MessageId ?? properties.MessageId ?? "", context.MessageType);
+//                        }
                     }
                     catch (AggregateException ex)
                     {
@@ -93,7 +89,7 @@ namespace MassTransit.RabbitMqTransport
                     {
                         throw new InvalidConnectionException(_address.Uri, "Operation was interrupted", ex);
                     }
-                });
+                }
         }
 
         public void Dispose()
@@ -108,14 +104,12 @@ namespace MassTransit.RabbitMqTransport
 
             _producer = new RabbitMqProducer(_address, _bindToQueue);
 
-            _connectionHandler.AddBinding(_producer);
         }
 
         void RemoveProducer()
         {
             if (_producer != null)
             {
-                _connectionHandler.RemoveBinding(_producer);
             }
         }
     }

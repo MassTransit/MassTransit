@@ -29,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             [Test]
             public async void Should_support_the_new_syntax()
             {
-                var hostAddress = new Uri("rabbitmq://localhost/test");
+                var hostAddress = new Uri("rabbitmq://localhost/test/");
 
                 Task handler = null;
 
@@ -44,8 +44,6 @@ namespace MassTransit.RabbitMqTransport.Tests
                     x.ReceiveEndpoint(host, "input_queue", e =>
                     {
                         e.PrefetchCount = 16;
-                        e.Durable(false);
-                        e.Exclusive();
 
                         handler = Handler<A>(e);
                     });

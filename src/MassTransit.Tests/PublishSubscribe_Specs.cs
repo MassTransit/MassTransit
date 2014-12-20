@@ -12,76 +12,178 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-    using Magnum.Extensions;
-    using Messages;
+    using System;
+    using System.Threading.Tasks;
     using NUnit.Framework;
-    using TestConsumers;
+    using Shouldly;
+    using TestFramework;
     using TestFramework.Messages;
-    using TextFixtures;
 
 
     [TestFixture]
-    public class PublishSubscribe_Specs :
-        LoopbackTestFixture
+    public class Publishing_a_message :
+        InMemoryTestFixture
     {
         [Test]
-        public void A_simple_bus_should_be_able_to_subscribe_and_publish()
+        public async void Should_be_received_properly()
         {
-            var consumer = new TestMessageConsumer<PingMessage>();
-            LocalBus.ConnectInstance(consumer);
-
             var message = new PingMessage();
-            LocalBus.Publish(message);
+            await Bus.Publish(message);
 
-            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+            await _received;
+        }
+
+        Task<ConsumeContext<PingMessage>> _received;
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            _received = Handler<PingMessage>(configurator);
         }
     }
 
 
     [TestFixture]
-    public class Publishing_an_object_to_the_bus :
-        LoopbackTestFixture
+    public class Publishing_an_object :
+        InMemoryTestFixture
     {
         [Test]
-        public void Should_accept_the_type_specified()
+        public async void Should_be_received_properly()
         {
-            var consumer = new TestMessageConsumer<PingMessage>();
-            LocalBus.ConnectInstance(consumer);
+            object message = new PingMessage();
+            await Bus.Publish(message);
 
-            var message = new PingMessage();
-
-            object unknownMessage = message;
-            LocalBus.Publish(unknownMessage, typeof(PingMessage));
-
-            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+            await _received;
         }
 
-        [Test]
-        public void Should_accept_the_type_specified_with_context()
+        Task<ConsumeContext<PingMessage>> _received;
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            var consumer = new TestMessageConsumer<PingMessage>();
-            LocalBus.ConnectInstance(consumer);
+            _received = Handler<PingMessage>(configurator);
+        }
+    }
 
+
+    [TestFixture]
+    public class Publishing_a_message_with_context :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async void Should_be_received_properly()
+        {
             var message = new PingMessage();
+            await Bus.Publish(message, Pipe.New<PublishContext>(x => x.Execute(v => v.RequestId = _requestId)));
 
-            object unknownMessage = message;
-          //  LocalBus.Publish(unknownMessage, typeof(PingMessage), x => x.SetRequestId("27"));
+            ConsumeContext<PingMessage> context = await _received;
 
-            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+            context.RequestId.HasValue.ShouldBe(true);
+            context.RequestId.Value.ShouldBe(_requestId);
         }
 
-        [Test]
-        public void Should_receive_the_proper_message()
+        Task<ConsumeContext<PingMessage>> _received;
+        readonly Guid _requestId = NewId.NextGuid();
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            var consumer = new TestMessageConsumer<PingMessage>();
-            LocalBus.ConnectInstance(consumer);
+            _received = Handler<PingMessage>(configurator);
+        }
+    }
 
+
+    [TestFixture]
+    public class Publishing_a_message_with_context_type :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async void Should_be_received_properly()
+        {
             var message = new PingMessage();
+            await Bus.Publish(message, Pipe.New<PublishContext<PingMessage>>(x => x.Execute(v => v.RequestId = _requestId)));
 
-            object unknownMessage = message;
-            LocalBus.Publish(unknownMessage);
+            ConsumeContext<PingMessage> context = await _received;
 
-            consumer.ShouldHaveReceivedMessage(message, 8.Seconds());
+            context.RequestId.HasValue.ShouldBe(true);
+            context.RequestId.Value.ShouldBe(_requestId);
+        }
+
+        Task<ConsumeContext<PingMessage>> _received;
+        readonly Guid _requestId = NewId.NextGuid();
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            _received = Handler<PingMessage>(configurator);
+        }
+    }
+
+
+    [TestFixture]
+    public class Publishing_an_object_with_context :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async void Should_be_received_properly()
+        {
+            object message = new PingMessage();
+            await Bus.Publish(message, Pipe.New<PublishContext>(x => x.Execute(v => v.RequestId = _requestId)));
+
+            ConsumeContext<PingMessage> context = await _received;
+
+            context.RequestId.HasValue.ShouldBe(true);
+            context.RequestId.Value.ShouldBe(_requestId);
+        }
+
+        Task<ConsumeContext<PingMessage>> _received;
+        readonly Guid _requestId = NewId.NextGuid();
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            _received = Handler<PingMessage>(configurator);
+        }
+    }
+
+
+    [TestFixture]
+    public class Publishing_an_interface_with_object :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async void Should_be_received_properly()
+        {
+            await Bus.Publish<PingMessage>(new {});
+
+            ConsumeContext<PingMessage> context = await _received;
+        }
+
+        Task<ConsumeContext<PingMessage>> _received;
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            _received = Handler<PingMessage>(configurator);
+        }
+    }
+
+
+    [TestFixture]
+    public class Publishing_an_interface_with_object_and_context :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async void Should_be_received_properly()
+        {
+            await Bus.Publish<PingMessage>(new {}, Pipe.New<PublishContext>(x => x.Execute(v => v.RequestId = _requestId)));
+
+            ConsumeContext<PingMessage> context = await _received;
+
+            context.RequestId.HasValue.ShouldBe(true);
+            context.RequestId.Value.ShouldBe(_requestId);
+        }
+
+        Task<ConsumeContext<PingMessage>> _received;
+        readonly Guid _requestId = NewId.NextGuid();
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            _received = Handler<PingMessage>(configurator);
         }
     }
 }

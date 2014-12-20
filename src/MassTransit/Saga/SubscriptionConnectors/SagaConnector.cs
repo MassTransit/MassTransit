@@ -16,7 +16,6 @@ namespace MassTransit.Saga.SubscriptionConnectors
     using System.Collections.Generic;
     using System.Linq;
     using MassTransit.Pipeline;
-    using MassTransit.SubscriptionConnectors;
     using PipeConfigurators;
     using Policies;
     using Util;
@@ -77,12 +76,12 @@ namespace MassTransit.Saga.SubscriptionConnectors
 
         static IEnumerable<SagaMessageConnector> Orchestrates()
         {
-            return SagaMetadataCache<TSaga>.OrchestratesTypes.Select(x => x.GetObservesConnector());
+            return SagaMetadataCache<TSaga>.OrchestratesTypes.Select(x => x.GetOrchestratesConnector());
         }
 
         static IEnumerable<SagaMessageConnector> Observes()
         {
-            return SagaMetadataCache<TSaga>.ObservesTypes.Select(x => x.GetOrchestratesConnector());
+            return SagaMetadataCache<TSaga>.ObservesTypes.Select(x => x.GetObservesConnector());
         }
     }
 }

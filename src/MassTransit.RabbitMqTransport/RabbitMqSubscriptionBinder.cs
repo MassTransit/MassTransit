@@ -31,7 +31,6 @@ namespace MassTransit.RabbitMqTransport
         {
             _bindings = new Dictionary<Guid, MessageName>();
 
-            _inboundTransport = bus.Endpoint.InboundTransport as InboundRabbitMqTransport;
             if (_inboundTransport == null)
             {
                 throw new ConfigurationException(

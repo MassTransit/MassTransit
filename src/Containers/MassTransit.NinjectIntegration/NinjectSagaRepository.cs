@@ -64,20 +64,5 @@ namespace MassTransit.NinjectIntegration
         {
             return _repository.Find(filter);
         }
-
-        public IEnumerable<T> Where(ISagaFilter<T> filter)
-        {
-            return _repository.Where(filter);
-        }
-
-        public IEnumerable<TResult> Where<TResult>(ISagaFilter<T> filter, Func<T, TResult> transformer)
-        {
-            return _repository.Where(filter, transformer);
-        }
-
-        public IEnumerable<TResult> Select<TResult>(Func<T, TResult> transformer)
-        {
-            return _repository.Select(transformer);
-        }
     }
 }

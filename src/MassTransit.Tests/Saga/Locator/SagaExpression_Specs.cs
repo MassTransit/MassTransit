@@ -67,7 +67,7 @@ namespace MassTransit.Tests.Saga.Locator
                 new SagaFilterExpressionConverter<SimpleSaga, ObservableSagaMessage>(_observeSaga).Convert(selector);
             Trace.WriteLine(filter.ToString());
 
-            IEnumerable<SimpleSaga> matches = _repository.Where(filter);
+            IEnumerable<Guid> matches = _repository.Where(filter);
 
             Assert.AreEqual(1, matches.Count());
         }
@@ -82,7 +82,7 @@ namespace MassTransit.Tests.Saga.Locator
                 new SagaFilterExpressionConverter<SimpleSaga, InitiateSimpleSaga>(_initiateSaga).Convert(selector);
             Trace.WriteLine(filter.ToString());
 
-            IEnumerable<SimpleSaga> matches = _repository.Where(filter);
+            IEnumerable<Guid> matches = _repository.Where(filter);
 
             Assert.AreEqual(1, matches.Count());
         }

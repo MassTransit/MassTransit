@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Linq;
     using MassTransit.Builders;
     using MassTransit.Configurators;
+    using PipeConfigurators;
 
 
     public class RabbitMqBusFactoryConfigurator :
@@ -90,17 +91,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 //            _publishSettings.Mandatory = mandatory;
         }
 
-        public void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback)
-            where T : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnPublish(Action<RabbitMqPublishContext> callback)
-        {
-            throw new NotImplementedException();
-        }
-
         public void ReceiveEndpoint(RabbitMqHostSettings hostSettings, string queueName,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
@@ -116,6 +106,23 @@ namespace MassTransit.RabbitMqTransport.Configuration
             configure(endpointConfigurator);
 
             AddServiceBusFactoryBuilderConfigurator(endpointConfigurator);
+        }
+
+        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
+        {
+            if (_defaultEndpointConfigurator != null)
+                _defaultEndpointConfigurator.AddPipeBuilderConfigurator(configurator);
+        }
+
+        public void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback)
+            where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnPublish(Action<RabbitMqPublishContext> callback)
+        {
+            throw new NotImplementedException();
         }
 
         Uri GetSourceAddress(RabbitMqHostSettings host, string queueName)

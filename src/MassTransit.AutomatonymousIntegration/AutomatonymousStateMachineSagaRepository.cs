@@ -87,21 +87,6 @@ namespace Automatonymous
             return _repository.Find(filter);
         }
 
-        public IEnumerable<TInstance> Where(ISagaFilter<TInstance> filter)
-        {
-            return _repository.Where(filter);
-        }
-
-        public IEnumerable<TResult> Where<TResult>(ISagaFilter<TInstance> filter, Func<TInstance, TResult> transformer)
-        {
-            return _repository.Where(filter, transformer);
-        }
-
-        public IEnumerable<TResult> Select<TResult>(Func<TInstance, TResult> transformer)
-        {
-            return _repository.Select(transformer);
-        }
-
         public bool TryGetCorrelationExpressionForEvent<TData>(Event<TData> @event,
             out Expression<Func<TInstance, TData, bool>> correlationExpression,
             out Func<TData, Guid> correlationIdSelector) where TData : class

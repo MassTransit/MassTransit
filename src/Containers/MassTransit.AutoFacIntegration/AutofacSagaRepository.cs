@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.AutofacIntegration
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Autofac;
     using Pipeline;
@@ -36,43 +35,17 @@ namespace MassTransit.AutofacIntegration
             _name = name;
         }
 
-//        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
-//            Guid sagaId, InstanceHandlerSelector<TSaga, TMessage> selector, ISagaPolicy<TSaga, TMessage> policy)
-//            where TMessage : class
-//        {
-//            return _repository.GetSaga(context, sagaId, selector, policy)
-//                              .Select(consumer => (Action<IConsumeContext<TMessage>>)(x =>
-//                                  {
-//                                      using (_scope.BeginLifetimeScope(_name))
-//                                      {
-//                                          consumer(x);
-//                                      }
-//                                  }));
-//        }
-
-        public Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            return _repository.Send(context, next);
+            using (_scope.BeginLifetimeScope(_name))
+            {
+                await _repository.Send(context, next);
+            }
         }
 
-        public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
+        IEnumerable<Guid> ISagaRepository<TSaga>.Find(ISagaFilter<TSaga> filter)
         {
             return _repository.Find(filter);
-        }
-
-        public IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter)
-        {
-            return _repository.Where(filter);
-        }
-
-        public IEnumerable<TResult> Where<TResult>(ISagaFilter<TSaga> filter, Func<TSaga, TResult> transformer)
-        {
-            return _repository.Where(filter, transformer);
-        }
-
-        public IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer)
-        {
-            return _repository.Select(transformer);
         }
     }
 }

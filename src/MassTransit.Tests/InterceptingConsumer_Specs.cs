@@ -31,13 +31,13 @@ namespace MassTransit.Tests
         [Test]
         public async void Should_call_the_interceptor_first()
         {
-            await _interceptor.First.Task;
+            await _transactionFilter.First.Task;
         }
 
         [Test]
         public async void Should_call_the_interceptor_second()
         {
-            await _interceptor.Second.Task;
+            await _transactionFilter.Second.Task;
         }
 
         [TestFixtureSetUp]
@@ -48,25 +48,25 @@ namespace MassTransit.Tests
         }
 
         MyConsumer _myConsumer;
-        Interceptor _interceptor;
+        TransactionFilter _transactionFilter;
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _myConsumer = new MyConsumer(GetTask<A>());
-            _interceptor = new Interceptor(GetTask<bool>(), GetTask<bool>());
+            _transactionFilter = new TransactionFilter(GetTask<bool>(), GetTask<bool>());
 
             configurator.Consumer(() => _myConsumer)
-                .Filter(_interceptor);
+                .Filter(_transactionFilter);
         }
 
 
-        class Interceptor :
+        class TransactionFilter :
             IFilter<ConsumerConsumeContext<MyConsumer>>
         {
             public readonly TaskCompletionSource<bool> First;
             public readonly TaskCompletionSource<bool> Second;
 
-            public Interceptor(TaskCompletionSource<bool> first, TaskCompletionSource<bool> second)
+            public TransactionFilter(TaskCompletionSource<bool> first, TaskCompletionSource<bool> second)
             {
                 First = first;
                 Second = second;

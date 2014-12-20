@@ -43,6 +43,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return new AzureServiceBusSendEndpointProvider(MessageSerializer, _sourceAddress, _hosts);
         }
 
+        protected override IPublishEndpoint CreatePublishEndpoint()
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual IBusControl Build()
         {
             IConsumePipe consumePipe = new ConsumePipe();

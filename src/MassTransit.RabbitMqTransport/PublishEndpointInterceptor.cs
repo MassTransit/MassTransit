@@ -100,7 +100,6 @@ namespace MassTransit.RabbitMqTransport
         {
             _bus = bus;
 
-            _inboundTransport = _bus.Endpoint.InboundTransport as InboundRabbitMqTransport;
             if (_inboundTransport == null)
             {
                 throw new ConfigurationException(

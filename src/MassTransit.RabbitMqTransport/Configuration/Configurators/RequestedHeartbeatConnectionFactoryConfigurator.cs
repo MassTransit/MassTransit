@@ -28,11 +28,6 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             _requestedHeartbeat = requestedHeartbeat;
         }
 
-        public ConnectionFactoryBuilder Configure(ConnectionFactoryBuilder builder)
-        {
-            builder.Add(Configure);
-            return builder;
-        }
 
         public IEnumerable<ValidationResult> Validate()
         {

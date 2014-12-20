@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Collections;
     using System.Threading.Tasks;
     using Serialization;
 

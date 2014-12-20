@@ -113,10 +113,6 @@
     <Compile Include="RabbitMq.cs" />
     <Compile Include="RabbitMqAddressExtensions.cs" />
     <Compile Include="RabbitMqBasicConsumeContext.cs" />
-    <Compile Include="Configuration\Builders\ConnectionFactoryBuilder.cs" />
-    <Compile Include="Configuration\Builders\ConnectionFactoryBuilderImpl.cs" />
-    <Compile Include="Configuration\Builders\RabbitMqTransportFactoryBuilder.cs" />
-    <Compile Include="Configuration\Builders\RabbitMqTransportFactoryBuilderImpl.cs" />
     <Compile Include="Configuration\Configurators\ConnectionFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\Configurators\ConnectionFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\ConnectionFactoryConfiguratorImpl.cs" />
@@ -125,8 +121,6 @@
     <Compile Include="Configuration\Configurators\SslConnectionFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\SslConnectionFactoryConfiguratorImpl.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqTransportFactoryBuilderConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\RabbitMqTransportFactoryConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\RabbitMqTransportFactoryConfiguratorImpl.cs" />
     <Compile Include="Configuration\Configurators\UsernameConnectionFactoryConfigurator.cs" />
     <Compile Include="Configuration\IRabbitMqReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqReceiveEndpointConfigurator.cs" />
@@ -137,7 +131,6 @@
     <Compile Include="Configuration\RabbitMqTransportConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqHostSettings.cs" />
-    <Compile Include="Configuration\RabbitMqTransportFactoryExtensions.cs" />
     <Compile Include="Configuration\TransportConfiguratorExtensions.cs" />
     <Compile Include="ExchangeBinding.cs" />
     <Compile Include="HaModel.cs" />
