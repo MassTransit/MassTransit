@@ -187,10 +187,8 @@
     <Compile Include="Serialization\SerializationTest.cs" />
     <Compile Include="Serialization\TransportContentType_Specs.cs" />
     <Compile Include="TestExtensions.cs" />
-    <Compile Include="TextFixtures\EndpointCacheProxy.cs" />
     <Compile Include="Saga\InitiateSaga_Specs.cs" />
     <Compile Include="PublishSubscribe_Specs.cs" />
-    <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="Saga\Messages\CorrelatedMessage.cs" />
     <Compile Include="Saga\Messages\RegisterUser.cs" />
     <Compile Include="Saga\Messages\SendUserVerificationEmail.cs" />

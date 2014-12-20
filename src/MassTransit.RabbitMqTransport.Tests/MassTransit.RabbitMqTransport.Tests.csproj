@@ -111,7 +111,6 @@
     <Compile Include="TestConnectionPipe.cs" />
     <Compile Include="TestConsumePipe.cs" />
     <Compile Include="TestFactory.cs" />
-    <Compile Include="Given_a_rabbitmq_bus.cs" />
     <Compile Include="MessageName_Specs.cs" />
     <Compile Include="RabbitMqConnection_Specs.cs" />
     <Compile Include="RabbitMqSsl_Specs.cs" />
@@ -119,9 +118,7 @@
     <Compile Include="TestReceivePipe.cs" />
     <Compile Include="When_a_message_consumer_throws_an_exception.cs" />
     <Compile Include="When_a_message_is_published.cs" />
-    <Compile Include="RabbitMqTransportFactoryTests.cs" />
     <Compile Include="RabbitMqAddress_Specs.cs" />
-    <Compile Include="When_a_message_is_published_to_a_subclass.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">

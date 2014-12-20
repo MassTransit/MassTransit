@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport
 
     public static class RabbitMqExtensions
     {
-        static readonly ILog _log = Logger.Get<RabbitMqTransportFactory>();
 
         /// <summary>
         /// Close and dispose of a RabbitMQ channel without throwing any exceptions
@@ -39,7 +38,6 @@ namespace MassTransit.RabbitMqTransport
                 }
                 catch (Exception ex)
                 {
-                    _log.Warn("Failed to close channel", ex);
                 }
             }
         }
@@ -61,7 +59,6 @@ namespace MassTransit.RabbitMqTransport
                 }
                 catch (Exception ex)
                 {
-                    _log.Warn("Failed to close connection", ex);
                 }
             }
         }

@@ -24,8 +24,7 @@ namespace MassTransit.RabbitMqTransport
     using Transports;
 
 
-    public class RabbitMqProducer :
-        ConnectionBinding<RabbitMqConnection>
+    public class RabbitMqProducer 
     {
         readonly Cache<ulong, TaskCompletionSource<bool>> _confirms;
         static readonly ILog _log = Logger.Get<RabbitMqProducer>();

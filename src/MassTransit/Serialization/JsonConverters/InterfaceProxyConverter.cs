@@ -22,9 +22,11 @@ namespace MassTransit.Serialization.JsonConverters
     {
         readonly IImplementationBuilder _builder;
 
-        public InterfaceProxyConverter(IImplementationBuilder builder = null)
+        public InterfaceProxyConverter(IImplementationBuilder builder)
         {
-            _builder = builder ?? new DynamicImplementationBuilder();
+            if (builder == null)
+                throw new ArgumentNullException("builder");
+            _builder = builder;
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

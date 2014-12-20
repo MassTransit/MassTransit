@@ -33,18 +33,18 @@ namespace MassTransit.Internals.Reflection
 
         readonly ConcurrentDictionary<string, ModuleBuilder> _moduleBuilders;
         readonly string _proxyNamespaceSuffix = ".DynamicInternal" + Guid.NewGuid().ToString("N");
-        readonly ConcurrentDictionary<Type, Type> _proxyTypes;
+        readonly ConcurrentDictionary<Type, Lazy<Type>> _proxyTypes;
 
         public DynamicImplementationBuilder()
         {
             _moduleBuilders = new ConcurrentDictionary<string, ModuleBuilder>();
 
-            _proxyTypes = new ConcurrentDictionary<Type, Type>();
+            _proxyTypes = new ConcurrentDictionary<Type, Lazy<Type>>();
         }
 
         public Type GetImplementationType(Type interfaceType)
         {
-            return _proxyTypes.GetOrAdd(interfaceType, CreateImplementation);
+            return _proxyTypes.GetOrAdd(interfaceType, x => new Lazy<Type>(() => CreateImplementation(x))).Value;
         }
 
         Type CreateImplementation(Type interfaceType)
@@ -93,7 +93,8 @@ namespace MassTransit.Internals.Reflection
             }
             catch (Exception ex)
             {
-                string message = string.Format("Exception creating proxy ({0}) for {1}", typeName, TypeMetadataCache.ShortName(interfaceType));
+                string message = string.Format("Exception creating proxy ({0}) for {1}", typeName,
+                    TypeMetadataCache.ShortName(interfaceType));
 
                 throw new InvalidOperationException(message, ex);
             }

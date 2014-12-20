@@ -29,21 +29,15 @@ namespace MassTransit.RabbitMqTransport
         static readonly ILog _log = Logger.Get(typeof(InboundRabbitMqTransport));
 
         readonly IRabbitMqEndpointAddress _address;
-        readonly ConnectionHandler<RabbitMqConnection> _connectionHandler;
         readonly IMessageNameFormatter _messageNameFormatter;
         readonly bool _purgeExistingMessages;
         RabbitMqConsumer _consumer;
         bool _disposed;
         RabbitMqPublisher _publisher;
 
-        public InboundRabbitMqTransport(IRabbitMqEndpointAddress address,
-            ConnectionHandler<RabbitMqConnection> connectionHandler,
-            bool purgeExistingMessages,
+        public InboundRabbitMqTransport(
             IMessageNameFormatter messageNameFormatter)
         {
-            _address = address;
-            _connectionHandler = connectionHandler;
-            _purgeExistingMessages = purgeExistingMessages;
             _messageNameFormatter = messageNameFormatter;
         }
 
@@ -61,7 +55,6 @@ namespace MassTransit.RabbitMqTransport
         {
             AddConsumerBinding();
 
-            _connectionHandler.Use(connection =>
                 {
                     BasicDeliverEventArgs result = null;
                     try
@@ -72,32 +65,32 @@ namespace MassTransit.RabbitMqTransport
 
                         using (var body = new MemoryStream(result.Body, false))
                         {
-                            OldReceiveContext context = OldReceiveContext.FromBodyStream(body, true);
-                            context.SetMessageId(result.BasicProperties.MessageId ?? result.DeliveryTag.ToString());
-                            result.BasicProperties.MessageId = context.MessageId;
+    //                        OldReceiveContext context = OldReceiveContext.FromBodyStream(body, true);
+  //                          context.SetMessageId(result.BasicProperties.MessageId ?? result.DeliveryTag.ToString());
+//                            result.BasicProperties.MessageId = context.MessageId;
                             //context.SetInputAddress(_address);
 
-                            byte[] contentType = result.BasicProperties.IsHeadersPresent()
-                                                     ? (byte[])result.BasicProperties.Headers["Content-Type"]
-                                                     : null;
-                            if (contentType != null)
-                            {
-                                context.SetContentType(Encoding.UTF8.GetString(contentType));
-                            }
-
-                            Action<IReceiveContext> receive = lookupSinkChain(context);
-                            if (receive == null)
-                            {
-                                Address.LogSkipped(result.BasicProperties.MessageId);
-
-                                _consumer.MessageSkipped(result);
-                            }
-                            else
-                            {
-                                receive(context);
-
-                                _consumer.MessageCompleted(result);
-                            }
+//                            byte[] contentType = result.BasicProperties.IsHeadersPresent()
+//                                                     ? (byte[])result.BasicProperties.Headers["Content-Type"]
+//                                                     : null;
+//                            if (contentType != null)
+//                            {
+//                                context.SetContentType(Encoding.UTF8.GetString(contentType));
+//                            }
+//
+//                            Action<IReceiveContext> receive = lookupSinkChain(context);
+//                            if (receive == null)
+//                            {
+//                                Address.LogSkipped(result.BasicProperties.MessageId);
+//
+//                                _consumer.MessageSkipped(result);
+//                            }
+//                            else
+//                            {
+//                                receive(context);
+//
+//                                _consumer.MessageCompleted(result);
+//                            }
                         }
                     }
                     catch (AlreadyClosedException ex)
@@ -121,7 +114,7 @@ namespace MassTransit.RabbitMqTransport
 
                         throw;
                     }
-                });
+                }
         }
 
         public void Dispose()
@@ -134,7 +127,6 @@ namespace MassTransit.RabbitMqTransport
             AddPublisherBinding();
 
             IList<Type> messageTypes = new List<Type>();
-            _connectionHandler.Use(connection =>
                 {
                     MessageName messageName = messageNameFormatter.GetMessageName(messageType);
 
@@ -153,7 +145,7 @@ namespace MassTransit.RabbitMqTransport
                         _publisher.ExchangeBind(interfaceName.ToString(), messageName.ToString(), isTemporary, temporary);
                         messageTypes.Add(type);
                     }
-                });
+                }
 
             return messageTypes;
         }
@@ -168,19 +160,17 @@ namespace MassTransit.RabbitMqTransport
         public void BindSubscriberExchange(IRabbitMqEndpointAddress address, string exchangeName, bool temporary)
         {
             AddPublisherBinding();
-            _connectionHandler.Use(connection =>
                 {
                     _publisher.ExchangeBind(address.Name, exchangeName, false, temporary);
-                });
+                }
         }
 
         public void UnbindSubscriberExchange(string exchangeName)
         {
             AddPublisherBinding();
-            _connectionHandler.Use(connection =>
             {
                 _publisher.ExchangeUnbind(_address.Name, exchangeName);
-            });            
+            }
         }
 
         void AddConsumerBinding()
@@ -190,7 +180,6 @@ namespace MassTransit.RabbitMqTransport
 
             _consumer = new RabbitMqConsumer(_address, _purgeExistingMessages);
 
-            _connectionHandler.AddBinding(_consumer);
         }
 
         void AddPublisherBinding()
@@ -200,19 +189,14 @@ namespace MassTransit.RabbitMqTransport
 
             _publisher = new RabbitMqPublisher(_address);
 
-            _connectionHandler.AddBinding(_publisher);
         }
 
         void RemoveConsumerBinding()
         {
-            if (_consumer != null)
-                _connectionHandler.RemoveBinding(_consumer);
         }
 
         void RemovePublisherBinding()
         {
-            if (_publisher != null)
-                _connectionHandler.RemoveBinding(_publisher);
         }
 
         void Dispose(bool disposing)

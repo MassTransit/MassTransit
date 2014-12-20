@@ -28,12 +28,6 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             _userName = userName;
         }
 
-        public ConnectionFactoryBuilder Configure(ConnectionFactoryBuilder builder)
-        {
-            builder.Add(Configure);
-            return builder;
-        }
-
         public IEnumerable<ValidationResult> Validate()
         {
             if (string.IsNullOrEmpty(_userName))

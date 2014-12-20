@@ -59,10 +59,6 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
         }
 
-        protected virtual void ConfigureRabbitMq(RabbitMqTransportFactoryConfigurator configurator)
-        {
-        }
-
         protected IServiceBus SetupServiceBus(Uri uri, Action<ServiceBusConfigurator> configure)
         {
             IServiceBus bus = ServiceBusFactory.New(x =>

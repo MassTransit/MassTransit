@@ -19,8 +19,7 @@ namespace MassTransit.RabbitMqTransport
     using Transports;
 
 
-    public class RabbitMqConsumer :
-        ConnectionBinding<RabbitMqConnection>
+    public class RabbitMqConsumer 
     {
         readonly IRabbitMqEndpointAddress _address;
         readonly object _lock = new object();

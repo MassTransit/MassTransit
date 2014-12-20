@@ -21,7 +21,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
     public class ObservesSagaConnectorFactory<TSaga, TMessage> :
         SagaConnectorFactory
         where TSaga : class, ISaga, Observes<TMessage, TSaga>
-        where TMessage : class, CorrelatedBy<Guid>
+        where TMessage : class
     {
         readonly ObservesSagaMessageFilter<TSaga, TMessage> _consumeFilter;
         readonly Expression<Func<TSaga, TMessage, bool>> _filterExpression;

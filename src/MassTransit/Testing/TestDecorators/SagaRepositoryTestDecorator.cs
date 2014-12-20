@@ -88,21 +88,6 @@ namespace MassTransit.Testing.TestDecorators
 			return _sagaRepository.Find(filter);
 		}
 
-		public IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter)
-		{
-			return _sagaRepository.Where(filter);
-		}
-
-		public IEnumerable<TResult> Where<TResult>(ISagaFilter<TSaga> filter, Func<TSaga, TResult> transformer)
-		{
-			return _sagaRepository.Where(filter, transformer);
-		}
-
-		public IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer)
-		{
-			return _sagaRepository.Select(transformer);
-		}
-
 		IEnumerable<Action<IConsumeContext<TMessage>>> DecorateSelector<TMessage>(TSaga instance,
 		                                                                          IEnumerable
 		                                                                          	<Action<IConsumeContext<TMessage>>>

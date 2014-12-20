@@ -35,127 +35,20 @@ namespace MassTransit.Saga
             _sagas = new IndexedSagaDictionary<TSaga>();
         }
 
-//        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
-//            Guid sagaId, InstanceHandlerSelector<TSaga, TMessage> selector, ISagaPolicy<TSaga, TMessage> policy)
-//            where TMessage : class
-//        {
-//            bool needToLeaveSagas = true;
-//            Monitor.Enter(_sagas);
-//            try
-//            {
-//                TSaga instance = _sagas[sagaId];
-//
-//                if (instance == null)
-//                {
-//                    if (policy.CanCreateInstance(context))
-//                    {
-//                        instance = policy.CreateInstance(context, sagaId);
-//                        _sagas.Add(instance);
-//
-//                        lock (instance)
-//                        {
-//                            Monitor.Exit(_sagas);
-//                            needToLeaveSagas = false;
-//
-//                            yield return x =>
-//                            {
-//                                if (_log.IsDebugEnabled)
-//                                {
-//                                    _log.DebugFormat("SAGA: {0} Creating New {1} for {2}",
-//                                        typeof(TSaga).ToFriendlyName(), instance.CorrelationId,
-//                                        typeof(TMessage).ToFriendlyName());
-//                                }
-//
-//                                try
-//                                {
-//                                    foreach (var callback in selector(instance, x))
-//                                        callback(x);
-//
-//                                    if (policy.CanRemoveInstance(instance))
-//                                        _sagas.Remove(instance);
-//                                }
-//                                catch (Exception ex)
-//                                {
-//                                    var sex = new SagaException("Create Saga Instance Exception", typeof(TSaga),
-//                                        typeof(TMessage), instance.CorrelationId, ex);
-//                                    if (_log.IsErrorEnabled)
-//                                        _log.Error(sex);
-//
-//                                    throw sex;
-//                                }
-//                            };
-//                        }
-//                    }
-//                    else
-//                    {
-//                        if (_log.IsDebugEnabled)
-//                        {
-//                            _log.DebugFormat("SAGA: {0} Ignoring Missing {1} for {2}", typeof(TSaga).ToFriendlyName(),
-//                                sagaId,
-//                                typeof(TMessage).ToFriendlyName());
-//                        }
-//                    }
-//                }
-//                else
-//                {
-//                    if (policy.CanUseExistingInstance(context))
-//                    {
-//                        Monitor.Exit(_sagas);
-//                        needToLeaveSagas = false;
-//                        lock (instance)
-//                        {
-//                            yield return x =>
-//                            {
-//                                if (_log.IsDebugEnabled)
-//                                {
-//                                    _log.DebugFormat("SAGA: {0} Using Existing {1} for {2}",
-//                                        typeof(TSaga).ToFriendlyName(), instance.CorrelationId,
-//                                        typeof(TMessage).ToFriendlyName());
-//                                }
-//
-//                                try
-//                                {
-//                                    foreach (var callback in selector(instance, x))
-//                                        callback(x);
-//
-//                                    if (policy.CanRemoveInstance(instance))
-//                                        _sagas.Remove(instance);
-//                                }
-//                                catch (Exception ex)
-//                                {
-//                                    var sex = new SagaException("Existing Saga Instance Exception", typeof(TSaga),
-//                                        typeof(TMessage), instance.CorrelationId, ex);
-//
-//                                    if (_log.IsErrorEnabled)
-//                                        _log.Error("Saga Error", sex);
-//
-//                                    throw sex;
-//                                }
-//                            };
-//                        }
-//                    }
-//                    else
-//                    {
-//                        if (_log.IsDebugEnabled)
-//                        {
-//                            _log.DebugFormat("SAGA: {0} Ignoring Existing {1} for {2}", typeof(TSaga).ToFriendlyName(),
-//                                sagaId, typeof(TMessage).ToFriendlyName());
-//                        }
-//                    }
-//                }
-//            }
-//            finally
-//            {
-//                if (needToLeaveSagas)
-//                    Monitor.Exit(_sagas);
-//            }
-//        }
+        public TSaga this[Guid id]
+        {
+            get { return _sagas[id]; }
+        }
 
         public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
-            ISagaPolicy<TSaga, T> policy = null;//context.Get<ISagaPolicy<TSaga, T>>();
-            Guid sagaId = Guid.Empty;
+            SagaContext<TSaga, T> sagaContext;
+            if (!context.TryGetPayload(out sagaContext))
+                throw new SagaException("Failed to load saga context", typeof(TSaga), typeof(T));
+
+            ISagaPolicy<TSaga, T> policy = sagaContext.Policy;
+            Guid sagaId = sagaContext.Id;
 
             bool needToLeaveSagas = true;
             Monitor.Enter(_sagas);
@@ -181,9 +74,9 @@ namespace MassTransit.Saga
                             Monitor.Exit(_sagas);
                             needToLeaveSagas = false;
 
-                            SagaConsumeContext<TSaga, T> sagaContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
+                            SagaConsumeContext<TSaga, T> sagaConsumeContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
 
-                            await next.Send(sagaContext);
+                            await next.Send(sagaConsumeContext);
 
                             if (policy.CanRemoveInstance(instance))
                                 _sagas.Remove(instance);
@@ -229,13 +122,14 @@ namespace MassTransit.Saga
 
                             if (_log.IsDebugEnabled)
                             {
-                                _log.DebugFormat("SAGA: {0} Existing {1} for {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                                _log.DebugFormat("SAGA: {0} Existing {1} for {2}", TypeMetadataCache<TSaga>.ShortName,
+                                    instance.CorrelationId,
                                     TypeMetadataCache<T>.ShortName);
                             }
 
-                            SagaConsumeContext<TSaga, T> sagaContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
+                            SagaConsumeContext<TSaga, T> sagaConsumeContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
 
-                            await next.Send(sagaContext);
+                            await next.Send(sagaConsumeContext);
 
                             if (policy.CanRemoveInstance(instance))
                                 _sagas.Remove(instance);
@@ -280,21 +174,6 @@ namespace MassTransit.Saga
         public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
         {
             return _sagas.Where(filter).Select(x => x.CorrelationId);
-        }
-
-        public IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter)
-        {
-            return _sagas.Where(filter);
-        }
-
-        public IEnumerable<TResult> Where<TResult>(ISagaFilter<TSaga> filter, Func<TSaga, TResult> transformer)
-        {
-            return _sagas.Where(filter).Select(transformer);
-        }
-
-        public IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer)
-        {
-            return _sagas.Select(transformer);
         }
 
         public void Add(TSaga newSaga)

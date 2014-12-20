@@ -22,8 +22,9 @@ namespace MassTransit.Transports
     using Internals.Extensions;
     using Logging;
     using Pipeline;
-    using Subscriptions;
     using Util;
+
+
 
 
     /// <summary>
@@ -83,7 +84,6 @@ namespace MassTransit.Transports
                             await receivePipe.Send(context);
 
                             _log.DebugFormat("RECV: {0} {1}", _inputAddress, message.MessageId);
-
                         }
                         catch (Exception ex)
                         {
@@ -217,14 +217,19 @@ namespace MassTransit.Transports
             ReceiveTransportHandle
         {
             readonly CancellationTokenSource _stop;
+            readonly TaskCompletionSource<bool> _stopped;
             readonly IReceiveTransport _transport;
-            readonly TaskCompletionSource<bool> _stopped; 
 
             public Handle(IReceiveTransport transport)
             {
                 _transport = transport;
                 _stop = new CancellationTokenSource();
                 _stopped = new TaskCompletionSource<bool>();
+            }
+
+            public CancellationToken StopToken
+            {
+                get { return _stop.Token; }
             }
 
             void IDisposable.Dispose()
@@ -242,11 +247,6 @@ namespace MassTransit.Transports
                 _stop.Cancel();
 
                 await _stopped.Task.WithCancellation(cancellationToken);
-            }
-
-            public CancellationToken StopToken
-            {
-                get { return _stop.Token; }
             }
 
             public void Stopped()

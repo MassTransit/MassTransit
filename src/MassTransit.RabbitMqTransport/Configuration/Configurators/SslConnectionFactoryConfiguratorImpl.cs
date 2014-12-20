@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
     using Builders;
     using Magnum.Extensions;
     using MassTransit.Configurators;
+    using RabbitMQ.Client;
 
 
     public class SslConnectionFactoryConfiguratorImpl :
@@ -51,9 +52,9 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         ///            {fail_if_no_peer_cert,false}]}
         /// The last 2 lines are the important ones.
         /// </remarks>
-        public ConnectionFactoryBuilder Configure(ConnectionFactoryBuilder builder)
+        public void Configure()
         {
-            builder.Add(connectionFactory =>
+            ConnectionFactory connectionFactory = new ConnectionFactory();
                 {
                     connectionFactory.Ssl.Enabled = true;
                     if (!_clientCertificateRequired)
@@ -75,10 +76,8 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
                     connectionFactory.Ssl.AcceptablePolicyErrors = _acceptablePolicyErrors;
                     connectionFactory.Ssl.Version = SslProtocols.Tls;
 
-                    return connectionFactory;
-                });
+                }
 
-            return builder;
         }
 
         public IEnumerable<ValidationResult> Validate()

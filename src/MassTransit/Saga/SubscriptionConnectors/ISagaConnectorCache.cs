@@ -10,29 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.TextFixtures
+namespace MassTransit.Saga.SubscriptionConnectors
 {
-    using System;
-
-
-    public class EndpointCacheProxy :
-        IEndpointCache
+    public interface ISagaConnectorCache
     {
-        readonly IEndpointCache _endpointCache;
-
-        public EndpointCacheProxy(IEndpointCache endpointCache)
-        {
-            _endpointCache = endpointCache;
-        }
-
-        public void Dispose()
-        {
-            // we don't dispose, since we're in testing
-        }
-
-        public IEndpoint GetEndpoint(Uri uri)
-        {
-            return _endpointCache.GetEndpoint(uri);
-        }
+        SagaConnector Connector { get; }
     }
 }

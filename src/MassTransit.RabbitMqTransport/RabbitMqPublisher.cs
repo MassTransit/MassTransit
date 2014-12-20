@@ -18,8 +18,7 @@ namespace MassTransit.RabbitMqTransport
     using Transports;
 
 
-    public class RabbitMqPublisher :
-        ConnectionBinding<RabbitMqConnection>
+    public class RabbitMqPublisher 
     {
         readonly IRabbitMqEndpointAddress _address;
         readonly object _bindings = new object();

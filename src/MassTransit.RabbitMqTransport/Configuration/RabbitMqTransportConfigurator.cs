@@ -28,16 +28,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// <param name="mandatory">True if the message is mandatory, otherwise false</param>
         void Mandatory(bool mandatory = true);
 
-        /// <summary>
-        ///     Intercept the publishing of a message type that is assignable to T
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="callback"></param>
-        void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback)
-            where T : class;
-
-        void OnPublish(Action<RabbitMqPublishContext> callback);
-
+//        /// <summary>
+//        ///     Intercept the publishing of a message type that is assignable to T
+//        /// </summary>
+//        /// <typeparam name="T"></typeparam>
+//        /// <param name="callback"></param>
+//        void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback)
+//            where T : class;
+//
+//        void OnPublish(Action<RabbitMqPublishContext> callback);
+//
         // TODO change receive endpoint to use an IRabbitMqHost, so that we don't have to match 
 
         /// <summary>

@@ -62,23 +62,5 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 	    {
 	        _configurators.Add(new PasswordConnectionFactoryConfigurator(password));
 	    }
-
-	    public RabbitMqTransportFactoryBuilder Configure(RabbitMqTransportFactoryBuilder builder)
-		{
-			ConnectionFactoryBuilder connectionFactoryBuilder = CreateBuilder();
-
-			builder.AddConnectionFactoryBuilder(_address.Uri, connectionFactoryBuilder);
-
-			return builder;
-		}
-
-		public ConnectionFactoryBuilder CreateBuilder()
-		{
-			var connectionFactoryBuilder = new ConnectionFactoryBuilderImpl(_address);
-
-			_configurators.Aggregate((ConnectionFactoryBuilder) connectionFactoryBuilder,
-				(seed, configurator) => configurator.Configure(seed));
-			return connectionFactoryBuilder;
-		}
 	}
 }

@@ -30,40 +30,42 @@ namespace MassTransit
         readonly IList<IReceiveEndpoint> _receiveEndpoints;
         readonly List<Task> _runningTasks;
         readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IPublishEndpoint _publishEndpoint;
 
-        public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
+        public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint,
             IEnumerable<IReceiveEndpoint> receiveEndpoints)
         {
             _address = address;
             _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpoint = publishEndpoint;
             _receiveEndpoints = receiveEndpoints.ToList();
             _runningTasks = new List<Task>();
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _publishEndpoint.Publish(message, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _publishEndpoint.Publish(message, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
@@ -79,17 +81,17 @@ namespace MassTransit
 
         Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _publishEndpoint.Publish<T>(values, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _publishEndpoint.Publish(values, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
         }
 
         public Uri Address

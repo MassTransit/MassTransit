@@ -165,6 +165,7 @@
     <Compile Include="Context\JsonContextHeaders.cs" />
     <Compile Include="Context\PayloadCache.cs" />
     <Compile Include="Context\PayloadFactory.cs" />
+    <Compile Include="Context\PublishContextProxy.cs" />
     <Compile Include="Context\PublishEndpointConverter.cs" />
     <Compile Include="Context\PublishEndpointConverterCache.cs" />
     <Compile Include="Context\SagaConsumeContextProxy.cs" />
@@ -204,7 +205,6 @@
     <Compile Include="Internals\Mapping\DictionaryObjectValueProvider.cs" />
     <Compile Include="Internals\Mapping\DynamicObjectConverter.cs" />
     <Compile Include="Internals\Mapping\DynamicObjectConverterCache.cs" />
-    <Compile Include="Internals\Mapping\DynamicObjectMapperCache.cs" />
     <Compile Include="Internals\Mapping\EnumDictionaryMapper.cs" />
     <Compile Include="Internals\Mapping\EnumObjectMapper.cs" />
     <Compile Include="Internals\Mapping\IArrayValueProvider.cs" />
@@ -370,9 +370,11 @@
     <Compile Include="Saga\SagaContext.cs" />
     <Compile Include="Saga\SubscriptionConnectors\CorrelatedSagaMessageConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\InitiatedBySagaConnectorFactory.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\ISagaConnectorCache.cs" />
     <Compile Include="Saga\SubscriptionConnectors\ISagaMetadataCache.cs" />
     <Compile Include="Saga\SubscriptionConnectors\OrchestratesSagaConnectorFactory.cs" />
     <Compile Include="Saga\SubscriptionConnectors\PropertySagaMessageConnector.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\SagaConnectorCache.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaConnectorFactory.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaInterfaceType.cs" />
     <Compile Include="Saga\SubscriptionConnectors\SagaMessageConnector.cs" />
@@ -628,6 +630,7 @@
     <Compile Include="Transports\IInboundMessageTracker.cs" />
     <Compile Include="Transports\IMessageNameFormatter.cs" />
     <Compile Include="Transports\InMemoryContextHeaderProvider.cs" />
+    <Compile Include="Transports\InMemoryPublishEndpoint.cs" />
     <Compile Include="Transports\InMemoryReceiveContext.cs" />
     <Compile Include="Transports\InMemorySendEndpointProvider.cs" />
     <Compile Include="Transports\InMemoryTransport.cs" />

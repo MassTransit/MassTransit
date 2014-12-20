@@ -50,7 +50,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 
         public SagaMessageConnector GetOrchestratesConnector()
         {
-            return _observesConnectorFactory.Value.CreateMessageConnector();
+            return _orchestratesConnectorFactory.Value.CreateMessageConnector();
         }
 
         public SagaMessageConnector GetObservesConnector()

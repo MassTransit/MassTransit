@@ -15,6 +15,8 @@ namespace MassTransit.Saga.SubscriptionConfigurators
     using System.Collections.Generic;
     using Configurators;
     using EndpointConfigurators;
+    using Policies;
+    using SubscriptionConnectors;
 
 
     public class SagaConfigurator<TSaga> :
@@ -31,6 +33,7 @@ namespace MassTransit.Saga.SubscriptionConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
+            SagaConnectorCache<TSaga>.Connector.Connect(builder.InputPipe, _sagaRepository, Retry.None);
         }
 
         public IEnumerable<ValidationResult> Validate()

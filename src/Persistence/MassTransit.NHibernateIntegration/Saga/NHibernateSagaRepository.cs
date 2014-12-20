@@ -14,14 +14,12 @@ namespace MassTransit.NHibernateIntegration.Saga
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using System.Transactions;
     using Context;
     using Logging;
     using MassTransit.Saga;
     using NHibernate;
-    using NHibernate.Linq;
     using Pipeline;
     using Util;
 
@@ -30,7 +28,7 @@ namespace MassTransit.NHibernateIntegration.Saga
         ISagaRepository<TSaga>
         where TSaga : class, ISaga
     {
-        static readonly ILog _log = Logger.Get(typeof(NHibernateSagaRepository<TSaga>).ToFriendlyName());
+        static readonly ILog _log = Logger.Get(TypeMetadataCache<NHibernateSagaRepository<TSaga>>.ShortName);
 
         readonly ISessionFactory _sessionFactory;
 
@@ -274,41 +272,6 @@ namespace MassTransit.NHibernateIntegration.Saga
                     .Where(filter.FilterExpression)
                     .Select(x => x.CorrelationId)
                     .List<Guid>();
-
-                scope.Complete();
-
-                return result;
-            }
-        }
-
-        public IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter)
-        {
-            using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
-            using (ISession session = _sessionFactory.OpenSession())
-            {
-                List<TSaga> result = session.Query<TSaga>()
-                    .Where(filter.FilterExpression)
-                    .ToList();
-
-                scope.Complete();
-
-                return result;
-            }
-        }
-
-        public IEnumerable<TResult> Where<TResult>(ISagaFilter<TSaga> filter, Func<TSaga, TResult> transformer)
-        {
-            return Where(filter).Select(transformer);
-        }
-
-        public IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer)
-        {
-            using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
-            using (ISession session = _sessionFactory.OpenSession())
-            {
-                List<TResult> result = session.Query<TSaga>()
-                    .Select(transformer)
-                    .ToList();
 
                 scope.Complete();
 

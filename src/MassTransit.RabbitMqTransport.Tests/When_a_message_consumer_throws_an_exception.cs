@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,78 +13,54 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using System.Diagnostics;
-    using BusConfigurators;
-    using Magnum.Extensions;
+    using System.Threading.Tasks;
+    using Configuration;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
 
 
-    
     public class When_a_message_consumer_throws_an_exception :
-        Given_a_rabbitmq_bus
+        RabbitMqTestFixture
     {
-        public When_a_message_consumer_throws_an_exception()
+        [Test]
+        public async void Should_be_received_by_the_handler()
         {
-            ConfigureEndpointFactory(x => x.SetDefaultRetryLimit(0));
-        }
+            Task<ConsumeContext<Fault<A>>> faultHandled = SubscribeHandler<Fault<A>>();
 
-        Future<A> _received;
-        A _message;
-        Future<Fault<A>> _faultReceived;
-
-        protected override void ConfigureServiceBus(Uri uri, ServiceBusConfigurator configurator)
-        {
-            base.ConfigureServiceBus(uri, configurator);
-
-            _received = new Future<A>();
-            _faultReceived = new Future<Fault<A>>();
-
-//            configurator.Subscribe(s =>
-//                {
-//                    s.Handler<A>(context =>
-//                        {
-//                            _received.Complete(context.Message);
-//
-//                            throw new NullReferenceException(
-//                                "This is supposed to happen, cause this handler is naughty.");
-//                        });
-//
-//                    s.Handler<Fault<A, Guid>>(async context => _faultReceived.Complete(context.Message));
-//                });
-        }
-
-        [SetUp]
-        public void A_message_is_published()
-        {
             _message = new A
-                {
-                    StringA = "ValueA",
-                };
+            {
+                StringA = "ValueA",
+            };
 
-            LocalBus.Publish(_message);
-        }
+            await InputQueueSendEndpoint.Send(_message);
 
-        [Test]
-        public void Should_be_received_by_the_handler()
-        {
-            _received.WaitUntilCompleted(Debugger.IsAttached ? 5.Minutes() : 8.Seconds()).ShouldBe(true);
-            _received.Value.StringA.ShouldBe("ValueA");
-        }
+            ConsumeContext<Fault<A>> fault = await faultHandled;
 
-        [Test]
-        public void Should_receive_the_fault()
-        {
-            _faultReceived.WaitUntilCompleted(Debugger.IsAttached ? 5.Minutes() : 8.Seconds()).ShouldBe(true);
-//            _faultReceived.Value.FailedMessage.StringA.ShouldBe("ValueA");
+            fault.Message.Message.StringA.ShouldBe("ValueA");
         }
 
         [Test]
         public void Should_have_a_copy_of_the_error_in_the_error_queue()
         {
-            _received.WaitUntilCompleted(Debugger.IsAttached ? 5.Minutes() : 8.Seconds());
-            LocalBus.GetEndpoint(LocalErrorUri).ShouldContain(_message, Debugger.IsAttached ? 5.Minutes() : 8.Seconds());
+//            _received.WaitUntilCompleted(Debugger.IsAttached ? 5.Minutes() : 8.Seconds());
+            //          LocalBus.GetEndpoint(LocalErrorUri).ShouldContain(_message, Debugger.IsAttached ? 5.Minutes() : 8.Seconds());
+        }
+
+        TaskCompletionSource<A> _received;
+        A _message;
+        TaskCompletionSource<Fault<A>> _faultReceived;
+
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _received = GetTask<A>();
+
+            Handler<A>(configurator, async context =>
+            {
+                _received.TrySetResult(context.Message);
+
+                throw new IntentionalTestException("This is supposed to happen");
+            });
         }
 
 

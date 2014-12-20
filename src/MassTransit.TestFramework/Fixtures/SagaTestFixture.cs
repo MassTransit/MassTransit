@@ -45,7 +45,14 @@ namespace MassTransit.TestFramework.Fixtures
 
         protected TSaga Saga
         {
-            get { return _repository.ShouldContainSaga(SagaId); }
+            get
+            {
+                Guid? sagaId = _repository.ShouldContainSaga(SagaId);
+                if (sagaId.HasValue)
+                    return _repository[sagaId.Value];
+
+                return null;
+            }
         }
 
         protected TSaga AddExistingSaga(Guid sagaId, Action<TSaga> initializer)

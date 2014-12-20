@@ -26,11 +26,5 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 	public interface ConnectionFactoryBuilderConfigurator :
 		Configurator
 	{
-		/// <summary>
-		/// Configure the connection factory builder.
-		/// </summary>
-		/// <param name="builder">The builder</param>
-		/// <returns>An updated builder</returns>
-		ConnectionFactoryBuilder Configure(ConnectionFactoryBuilder builder);
 	}
 }

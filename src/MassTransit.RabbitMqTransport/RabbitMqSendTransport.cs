@@ -18,10 +18,10 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
+    using Logging;
     using MassTransit.Pipeline;
     using Pipeline;
     using RabbitMQ.Client;
-    using Subscriptions;
     using Transports;
     using Util;
 
@@ -29,6 +29,8 @@ namespace MassTransit.RabbitMqTransport
     public class RabbitMqSendTransport :
         ISendTransport
     {
+        static readonly ILog _log = Logger.Get<RabbitMqSendTransport>();
+
         readonly IModelCache _modelCache;
         readonly Connectable<ISendObserver> _observers;
         readonly SendSettings _sendSettings;
@@ -67,6 +69,9 @@ namespace MassTransit.RabbitMqTransport
 
                 p.ExecuteAsync(async modelContext =>
                 {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Sending {0} to {1}", TypeMetadataCache<T>.ShortName, _sendSettings.ExchangeName);
+
                     IBasicProperties properties = modelContext.Model.CreateBasicProperties();
                     properties.Headers = new Dictionary<string, object>();
 
@@ -91,10 +96,11 @@ namespace MassTransit.RabbitMqTransport
 
                         await _observers.ForEach(x => x.PreSend(context));
 
-                        await
-                            modelContext.Model.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
-                                context.Immediate,
-                                context.BasicProperties, context.Body);
+                        await modelContext.Model.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
+                            context.Immediate, context.BasicProperties, context.Body);
+
+                        context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
+                            TypeMetadataCache<T>.ShortName);
 
                         await _observers.ForEach(x => x.PostSend(context));
                     }
@@ -102,6 +108,9 @@ namespace MassTransit.RabbitMqTransport
                     {
                         _observers.ForEach(x => x.SendFault(context, ex))
                             .Wait(cancelSend);
+
+                        if (_log.IsErrorEnabled)
+                            _log.Error("Send Fault: " + context.DestinationAddress, ex);
 
                         throw;
                     }
