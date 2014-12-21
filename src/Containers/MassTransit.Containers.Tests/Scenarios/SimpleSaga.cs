@@ -54,6 +54,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
         public async Task Consume(ConsumeContext<FirstSagaMessage> context)
         {
+            Console.WriteLine("SimpleSaga: First: {0}", context.Message.CorrelationId);
             _first.TrySetResult(context.Message);
         }
 
@@ -61,6 +62,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
         public async Task Consume(ConsumeContext<ThirdSagaMessage> context)
         {
+            Console.WriteLine("SimpleSaga: Third: {0}", context.Message.CorrelationId);
             _third.TrySetResult(context.Message);
         }
 
@@ -71,6 +73,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
         public async Task Consume(ConsumeContext<SecondSagaMessage> context)
         {
+            Console.WriteLine("SimpleSaga: Second: {0}", context.Message.CorrelationId);
             _second.TrySetResult(context.Message);
         }
     }

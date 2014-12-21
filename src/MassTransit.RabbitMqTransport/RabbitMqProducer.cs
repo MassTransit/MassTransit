@@ -17,8 +17,6 @@ namespace MassTransit.RabbitMqTransport
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
-    using Magnum.Caching;
-    using Magnum.Extensions;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using Transports;
@@ -26,7 +24,7 @@ namespace MassTransit.RabbitMqTransport
 
     public class RabbitMqProducer 
     {
-        readonly Cache<ulong, TaskCompletionSource<bool>> _confirms;
+//        readonly Cache<ulong, TaskCompletionSource<bool>> _confirms;
         static readonly ILog _log = Logger.Get<RabbitMqProducer>();
         readonly IRabbitMqEndpointAddress _address;
         readonly bool _bindToQueue;
@@ -39,7 +37,7 @@ namespace MassTransit.RabbitMqTransport
         {
             _address = address;
             _bindToQueue = bindToQueue;
-            _confirms = new ConcurrentCache<ulong, TaskCompletionSource<bool>>();
+  //          _confirms = new ConcurrentCache<ulong, TaskCompletionSource<bool>>();
         }
 
         public void Bind(RabbitMqConnection connection)
@@ -117,7 +115,7 @@ namespace MassTransit.RabbitMqTransport
             try
             {
                 bool timedOut;
-                _channel.WaitForConfirms(60.Seconds(), out timedOut);
+                _channel.WaitForConfirms(TimeSpan.FromSeconds(60), out timedOut);
                 if (timedOut)
                     _log.WarnFormat("Timeout waiting for all pending confirms on {0}", _address.Uri);
             }
@@ -143,14 +141,14 @@ namespace MassTransit.RabbitMqTransport
                 var exception = new MessageNotConfirmedException(_address.Uri,
                     "Publish not confirmed before channel closed");
 
-                _confirms.Each((id, task) => task.TrySetException(exception));
+//                _confirms.Each((id, task) => task.TrySetException(exception));
             }
             catch (Exception ex)
             {
                 _log.Error("Exception while failing pending confirms", ex);
             }
 
-            _confirms.Clear();
+  //          _confirms.Clear();
         }
 
         public IBasicProperties CreateProperties()
@@ -185,7 +183,7 @@ namespace MassTransit.RabbitMqTransport
                 ulong deliveryTag = _channel.NextPublishSeqNo;
 
                 var task = new TaskCompletionSource<bool>();
-                _confirms.Add(deliveryTag, task);
+    //            _confirms.Add(deliveryTag, task);
 
                 try
                 {
@@ -193,7 +191,7 @@ namespace MassTransit.RabbitMqTransport
                 }
                 catch
                 {
-                    _confirms.Remove(deliveryTag);                    
+      //              _confirms.Remove(deliveryTag);                    
                     throw;
                 }
 
@@ -224,28 +222,28 @@ namespace MassTransit.RabbitMqTransport
         void HandleNack(IModel model, BasicNackEventArgs args)
         {
             IEnumerable<ulong> ids = Enumerable.Repeat(args.DeliveryTag, 1);
-            if (args.Multiple)
-                ids = _confirms.GetAllKeys().Where(x => x <= args.DeliveryTag);
+        //    if (args.Multiple)
+          //      ids = _confirms.GetAllKeys().Where(x => x <= args.DeliveryTag);
 
             var exception = new InvalidOperationException("Publish was nacked by the broker");
 
             foreach (ulong id in ids)
             {
-                _confirms[id].TrySetException(exception);
-                _confirms.Remove(id);
+            //    _confirms[id].TrySetException(exception);
+              //  _confirms.Remove(id);
             }
         }
 
         void HandleAck(IModel model, BasicAckEventArgs args)
         {
             IEnumerable<ulong> ids = Enumerable.Repeat(args.DeliveryTag, 1);
-            if (args.Multiple)
-                ids = _confirms.GetAllKeys().Where(x => x <= args.DeliveryTag);
+           // if (args.Multiple)
+                //ids = _confirms.GetAllKeys().Where(x => x <= args.DeliveryTag);
 
             foreach (ulong id in ids)
             {
-                _confirms[id].TrySetResult(true);
-                _confirms.Remove(id);
+             //   _confirms[id].TrySetResult(true);
+               // _confirms.Remove(id);
             }
         }
     }

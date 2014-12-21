@@ -62,7 +62,7 @@ namespace MassTransit.AutomatonymousTests
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();
 
-            configurator.StateMachineSaga(_machine, _repository);
+//            configurator.StateMachineSaga(_machine, _repository);
         }
 
         TestStateMachine _machine;
@@ -107,7 +107,7 @@ namespace MassTransit.AutomatonymousTests
 
                 During(Waiting,
                     When(Third)
-                        .Publish(instance => new CompleteMessage(instance.CorrelationId))
+                        .Publish(context => new CompleteMessage(context.Instance.CorrelationId))
                         .Finalize());
             }
 

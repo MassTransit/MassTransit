@@ -26,7 +26,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
 
         public InitiatedBySagaConnectorFactory()
         {
-            ISagaPolicy<TSaga, TMessage> policy = new InitiatingSagaPolicy<TSaga, TMessage>(x => x.CorrelationId, x => false);
+            ISagaPolicy<TSaga, TMessage> policy = new InitiatingSagaPolicy<TSaga, TMessage>(x => x.CorrelationId);
 
             _consumeFilter = new InitiatedBySagaMessageFilter<TSaga, TMessage>();
 

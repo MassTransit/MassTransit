@@ -22,9 +22,9 @@ namespace MassTransit
     using Util;
 
 
-    public static class ConsumerSubscriptionExtensions
+    public static class ConsumerExtensions
     {
-        static readonly ILog _log = Logger.Get(typeof(ConsumerSubscriptionExtensions));
+        static readonly ILog _log = Logger.Get(typeof(ConsumerExtensions));
 
         /// <summary>
         /// Connect a consumer to the receiving endpoint
@@ -112,17 +112,17 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="configurator"></param>
-        /// <param name="consumerFactory"></param>
+        /// <param name="consumerFactoryMethod"></param>
         /// <param name="retryPolicy"></param>
         /// <returns></returns>
         public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
-            Func<TConsumer> consumerFactory, IRetryPolicy retryPolicy = null)
+            Func<TConsumer> consumerFactoryMethod, IRetryPolicy retryPolicy = null)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (using delegate consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
 
-            var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactory);
+            var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactoryMethod);
 
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(delegateConsumerFactory,
                 retryPolicy ?? Retry.None);
@@ -150,6 +150,14 @@ namespace MassTransit
             return bus.ConsumePipe.ConnectConsumer(consumerFactoryMethod, retryPolicy);
         }
 
+        /// <summary>
+        /// Connect a consumer with a consumer type and object factory method for the consumer (used by containers mostly)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="consumerType"></param>
+        /// <param name="consumerFactory"></param>
+        /// <param name="retryPolicy"></param>
+        /// <returns></returns>
         public static IConsumerConfigurator Consumer(this IReceiveEndpointConfigurator configurator, Type consumerType,
             Func<Type, object> consumerFactory, IRetryPolicy retryPolicy = null)
         {
@@ -164,6 +172,14 @@ namespace MassTransit
             return consumerConfigurator as IConsumerConfigurator;
         }
 
+        /// <summary>
+        /// Connect a consumer with a consumer type and object factory method for the consumer
+        /// </summary>
+        /// <param name="bus"></param>
+        /// <param name="consumerType"></param>
+        /// <param name="objectFactory"></param>
+        /// <param name="retryPolicy"></param>
+        /// <returns></returns>
         public static ConnectHandle ConnectConsumer(this IBus bus, Type consumerType, Func<Type, object> objectFactory,
             IRetryPolicy retryPolicy = null)
         {

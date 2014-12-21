@@ -68,13 +68,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Castle.Windsor.3.3.0\lib\net45\Castle.Windsor.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum">
-      <HintPath>..\..\packages\Magnum.2.1.2\lib\net40\Magnum.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core">
@@ -85,11 +78,11 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="ConsumerFactoryConfiguratorCache.cs" />
+    <Compile Include="ConsumerConfiguratorCache.cs" />
     <Compile Include="MessageLifetimeScope.cs" />
+    <Compile Include="SagaConfiguratorCache.cs" />
     <Compile Include="WindsorInboundInterceptor.cs" />
     <Compile Include="WindsorMessageScopePipeBuilderConfigurator.cs" />
-    <Compile Include="WindsorSagaFactoryConfigurator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WindsorContainerExtensions.cs" />
     <Compile Include="WindsorConsumerFactory.cs" />

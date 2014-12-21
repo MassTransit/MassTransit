@@ -35,17 +35,17 @@ namespace MassTransit.Saga.SubscriptionConnectors
 
         public static SagaInterfaceType[] InitiatedByTypes
         {
-            get { return InstanceCache.Cached.Value.InitiatedByTypes; }
+            get { return Cached.Instance.Value.InitiatedByTypes; }
         }
 
         public static SagaInterfaceType[] OrchestratesTypes
         {
-            get { return InstanceCache.Cached.Value.OrchestratesTypes; }
+            get { return Cached.Instance.Value.OrchestratesTypes; }
         }
 
         public static SagaInterfaceType[] ObservesTypes
         {
-            get { return InstanceCache.Cached.Value.ObservesTypes; }
+            get { return Cached.Instance.Value.ObservesTypes; }
         }
 
         SagaInterfaceType[] ISagaMetadataCache<TSaga>.InitiatedByTypes
@@ -91,9 +91,9 @@ namespace MassTransit.Saga.SubscriptionConnectors
         }
 
 
-        static class InstanceCache
+        static class Cached
         {
-            internal static readonly Lazy<ISagaMetadataCache<TSaga>> Cached = new Lazy<ISagaMetadataCache<TSaga>>(
+            internal static readonly Lazy<ISagaMetadataCache<TSaga>> Instance = new Lazy<ISagaMetadataCache<TSaga>>(
                 () => new SagaMetadataCache<TSaga>(), LazyThreadSafetyMode.PublicationOnly);
         }
     }

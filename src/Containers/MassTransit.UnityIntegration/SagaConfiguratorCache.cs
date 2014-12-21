@@ -15,19 +15,27 @@ namespace MassTransit.UnityIntegration
     using System;
     using System.Collections.Concurrent;
     using Microsoft.Practices.Unity;
+    using Saga;
 
 
-    public static class ConsumerFactoryConfiguratorCache
+    public static class SagaConfiguratorCache
     {
         static CachedConfigurator GetOrAdd(Type type)
         {
-            return InstanceCache.Cached.GetOrAdd(type, _ =>
+            return Cached.Instance.GetOrAdd(type, _ =>
                 (CachedConfigurator)Activator.CreateInstance(typeof(CachedConfigurator<>).MakeGenericType(type)));
         }
 
-        public static void Configure(Type consumerType, IReceiveEndpointConfigurator configurator, IUnityContainer container)
+        public static void Configure(Type sagaType, IReceiveEndpointConfigurator configurator, IUnityContainer container)
         {
-            GetOrAdd(consumerType).Configure(configurator, container);
+            GetOrAdd(sagaType).Configure(configurator, container);
+        }
+
+
+        static class Cached
+        {
+            internal static readonly ConcurrentDictionary<Type, CachedConfigurator> Instance =
+                new ConcurrentDictionary<Type, CachedConfigurator>();
         }
 
 
@@ -39,19 +47,16 @@ namespace MassTransit.UnityIntegration
 
         class CachedConfigurator<T> :
             CachedConfigurator
-            where T : class, IConsumer
+            where T : class, ISaga
         {
             public void Configure(IReceiveEndpointConfigurator configurator, IUnityContainer container)
             {
-                configurator.Consumer(new UnityConsumerFactory<T>(container));
+                var sagaRepository = container.Resolve<ISagaRepository<T>>();
+
+                var unitySagaRepository = new UnitySagaRepository<T>(sagaRepository, container);
+
+                configurator.Saga(unitySagaRepository);
             }
-        }
-
-
-        static class InstanceCache
-        {
-            internal static readonly ConcurrentDictionary<Type, CachedConfigurator> Cached =
-                new ConcurrentDictionary<Type, CachedConfigurator>();
         }
     }
 }

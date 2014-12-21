@@ -25,8 +25,8 @@ namespace MassTransit.Util
         where TSaga : class, ISaga
     {
         readonly Dictionary<string, IndexedSagaProperty<TSaga>> _indices;
-        IndexedSagaProperty<TSaga> _indexById;
-        object _lock = new object();
+        readonly IndexedSagaProperty<TSaga> _indexById;
+        readonly object _lock = new object();
 
         public IndexedSagaDictionary()
         {

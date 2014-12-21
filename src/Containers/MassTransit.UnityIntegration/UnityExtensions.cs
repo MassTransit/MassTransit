@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Magnum.Extensions;
+    using Internals.Extensions;
     using Microsoft.Practices.Unity;
     using Saga;
     using Saga.SubscriptionConfigurators;
@@ -27,20 +27,18 @@ namespace MassTransit
     {
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IUnityContainer container)
         {
-            IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.Implements<ISaga>());
+            IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.HasInterface<ISaga>());
             if (concreteTypes.Count > 0)
             {
                 foreach (Type concreteType in concreteTypes)
-                    ConsumerFactoryConfiguratorCache.Configure(concreteType, configurator, container);
+                    ConsumerConfiguratorCache.Configure(concreteType, configurator, container);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
             if (sagaTypes.Count > 0)
             {
-//                var sagaConfigurator = new UnitySagaFactoryConfigurator(configurator, container);
-//
-//                foreach (Type type in sagaTypes)
-//                    sagaConfigurator.ConfigureSaga(type);
+                foreach (Type sagaType in sagaTypes)
+                    SagaConfiguratorCache.Configure(sagaType, configurator, container);
             }
         }
 
@@ -67,7 +65,7 @@ namespace MassTransit
         static IList<Type> FindTypes<T>(IUnityContainer container, Func<Type, bool> filter)
         {
             return container.Registrations
-                .Where(r => r.MappedToType.Implements<T>())
+                .Where(r => r.MappedToType.HasInterface<T>())
                 .Select(r => r.MappedToType)
                 .Where(filter)
                 .ToList();

@@ -18,7 +18,6 @@ namespace MassTransit.Containers.Tests
     using Scenarios;
 
 
-    
     public class Autofac_Consumer :
         When_registering_a_consumer
     {
@@ -36,7 +35,7 @@ namespace MassTransit.Containers.Tests
             _container = builder.Build();
         }
 
-        [TearDown]
+        [TestFixtureTearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -49,12 +48,9 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    
     public class Autofac_Saga :
         When_registering_a_saga
     {
-        readonly IContainer _container;
-
         public Autofac_Saga()
         {
             var builder = new ContainerBuilder();
@@ -66,15 +62,22 @@ namespace MassTransit.Containers.Tests
             _container = builder.Build();
         }
 
-        [TearDown]
+        [TestFixtureTearDown]
         public void Close_container()
         {
             _container.Dispose();
         }
 
+        readonly IContainer _container;
+
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
+        }
+
+        protected override ISagaRepository<T> GetSagaRepository<T>()
+        {
+            return _container.Resolve<ISagaRepository<T>>();
         }
     }
 }

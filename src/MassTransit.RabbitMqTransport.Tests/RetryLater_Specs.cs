@@ -69,7 +69,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             using (var waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset))
             {
-                receivingBus.SubscribeContextHandler<Message>(context =>
+                receivingBus.ConnectHandler<Message>(async context =>
                     {
                         try
                         {
@@ -82,18 +82,18 @@ namespace MassTransit.RabbitMqTransport.Tests
                             Trace.Write("Processing message...", "Handler");
                             receiveCount++;
 
-                            // retry as many times as requested by message
-                            if (context.RetryCount < message.NumberOfFailures)
-                            {
-                                Trace.WriteLine(string.Format("Message will be retried (retry count = {0}).",
-                                    context.RetryCount));
-                                context.RetryLater();
-                            }
-                            else
-                            {
-                                Trace.WriteLine("Message processed.");
-                                waitHandle.Set();
-                            }
+//                            // retry as many times as requested by message
+//                            if (context.RetryCount < message.NumberOfFailures)
+//                            {
+//                                Trace.WriteLine(string.Format("Message will be retried (retry count = {0}).",
+//                                    context.RetryCount));
+//                                context.RetryLater();
+//                            }
+//                            else
+//                            {
+//                                Trace.WriteLine("Message processed.");
+//                                waitHandle.Set();
+//                            }
                         }
                         catch (Exception exc)
                         {

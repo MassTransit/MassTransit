@@ -31,7 +31,7 @@ namespace MassTransit.Tests.Saga
 
             await InputQueueSendEndpoint.Send(message);
 
-            Guid? sagaId = _repository.ShouldContainSaga(_sagaId, TestTimeout);
+            Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
 
             sagaId.HasValue.ShouldBe(true);
         }
@@ -69,7 +69,7 @@ namespace MassTransit.Tests.Saga
 
             await InputQueueSendEndpoint.Send(message);
 
-            Guid? sagaId = _repository.ShouldContainSaga(_sagaId, TestTimeout);
+            Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
 
             sagaId.HasValue.ShouldBe(true);
 
@@ -110,7 +110,7 @@ namespace MassTransit.Tests.Saga
 
             await InputQueueSendEndpoint.Send(new CompleteSimpleSaga(_sagaId));
 
-            Guid? sagaId = _repository.ShouldContainSaga(x => x.Completed, TestTimeout);
+            Guid? sagaId = await _repository.ShouldContainSaga(x => x.Completed, TestTimeout);
 
             sagaId.HasValue.ShouldBe(true);
         }
@@ -147,7 +147,7 @@ namespace MassTransit.Tests.Saga
 
             await InputQueueSendEndpoint.Send(new ObservableSagaMessage {Name = "Chris"});
 
-            Guid? sagaId = _repository.ShouldContainSaga(x => x.Observed, TestTimeout);
+            Guid? sagaId = await _repository.ShouldContainSaga(x => x.Observed, TestTimeout);
 
             sagaId.HasValue.ShouldBe(true);
         }
@@ -202,7 +202,7 @@ namespace MassTransit.Tests.Saga
 
             _repository = SetupSagaRepository<SimpleSaga>();
 
-            LocalBus.SubscribeSaga(_repository);
+            LocalBus.ConnectSaga(_repository);
         }
 
         Guid _sagaId;

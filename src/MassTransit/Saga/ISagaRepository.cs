@@ -41,6 +41,6 @@ namespace MassTransit.Saga
         /// </summary>
         /// <param name="filter">effectively a LINQ expression</param>
         /// <returns></returns>
-        IEnumerable<Guid> Find(ISagaFilter<TSaga> filter);
+        Task<IEnumerable<Guid>> Find(ISagaFilter<TSaga> filter);
     }
 }

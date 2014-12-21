@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SubscriptionConnectors
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using PipeConfigurators;
@@ -59,8 +60,24 @@ namespace MassTransit.SubscriptionConnectors
             IRetryPolicy retryPolicy, params IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>[] pipeBuilderConfigurators)
             where TConsumer : class
         {
-            return new MultipleConnectHandle(
-                _connectors.Select(x => x.Connect(consumePipe, consumerFactory, retryPolicy, pipeBuilderConfigurators)));
+            var handles = new List<ConnectHandle>();
+            try
+            {
+                foreach (ConsumerMessageConnector connector in _connectors)
+                {
+                    ConnectHandle handle = connector.Connect(consumePipe, consumerFactory, retryPolicy, pipeBuilderConfigurators);
+
+                    handles.Add(handle);
+                }
+
+                return new MultipleConnectHandle(handles);
+            }
+            catch (Exception)
+            {
+                foreach (ConnectHandle handle in handles)
+                    handle.Dispose();
+                throw;
+            }
         }
 
         static IEnumerable<ConsumerMessageConnector> ConsumesContext()

@@ -65,8 +65,24 @@ namespace MassTransit.Saga.SubscriptionConnectors
         public ConnectHandle Connect<T>(IConsumePipe consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
             params IPipeBuilderConfigurator<SagaConsumeContext<T>>[] pipeBuilderConfigurators) where T : class, ISaga
         {
-            return new MultipleConnectHandle(
-                _connectors.Select(x => x.Connect(consumePipe, sagaRepository, retryPolicy, pipeBuilderConfigurators)));
+            var handles = new List<ConnectHandle>();
+            try
+            {
+                foreach (SagaMessageConnector connector in _connectors)
+                {
+                    ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, retryPolicy, pipeBuilderConfigurators);
+
+                    handles.Add(handle);
+                }
+
+                return new MultipleConnectHandle(handles);
+            }
+            catch (Exception)
+            {
+                foreach (ConnectHandle handle in handles)
+                    handle.Dispose();
+                throw;
+            }
         }
 
         static IEnumerable<SagaMessageConnector> Initiates()

@@ -16,7 +16,7 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using Castle.Windsor;
-    using Magnum.Extensions;
+    using Internals.Extensions;
     using Saga;
     using Saga.SubscriptionConfigurators;
     using SubscriptionConfigurators;
@@ -40,20 +40,18 @@ namespace MassTransit
             if (container == null)
                 throw new ArgumentNullException("container");
 
-            IList<Type> consumerTypes = FindTypes<IConsumer>(container, x => !x.Implements<ISaga>());
+            IList<Type> consumerTypes = FindTypes<IConsumer>(container, x => !x.HasInterface<ISaga>());
             if (consumerTypes.Count > 0)
             {
                 foreach (Type type in consumerTypes)
-                    ConsumerFactoryConfiguratorCache.Configure(type, configurator, container);
+                    ConsumerConfiguratorCache.Configure(type, configurator, container);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
             if (sagaTypes.Count > 0)
             {
-//                var sagaConfigurator = new WindsorSagaFactoryConfigurator(configurator, container);
-//
-//                foreach (Type type in sagaTypes)
-//                    sagaConfigurator.ConfigureSaga(type);
+                foreach (Type sagaType in sagaTypes)
+                    SagaConfiguratorCache.Configure(sagaType, configurator, container);
             }
         }
 
@@ -72,6 +70,7 @@ namespace MassTransit
                 throw new ArgumentNullException("configurator");
             if (container == null)
                 throw new ArgumentNullException("container");
+
             var consumerFactory = new WindsorConsumerFactory<TConsumer>(container);
 
             return configurator.Consumer(consumerFactory);

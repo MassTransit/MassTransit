@@ -13,12 +13,11 @@
 namespace MassTransit
 {
     using System;
-    using Context;
     using SubscriptionConfigurators;
     using SubscriptionConnectors;
 
 
-    public static class HandlerSubscriptionExtensions
+    public static class HandlerExtensions
     {
         /// <summary>
         /// Subscribes a message handler to the receive endpoint
@@ -34,6 +33,13 @@ namespace MassTransit
             configurator.AddConfigurator(handlerConfigurator);
         }
 
+        /// <summary>
+        /// Adds a handler to the receive endpoint with additional configuration specified
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="handler"></param>
+        /// <param name="configure"></param>
         public static void Handler<T>(this IReceiveEndpointConfigurator configurator, MessageHandler<T> handler,
             Action<IHandlerConfigurator<T>> configure)
             where T : class
@@ -69,23 +75,6 @@ namespace MassTransit
             where T : class
         {
             return HandlerConnectorCache<T>.Connector.Connect(bus.ConsumePipe, requestId, handler);
-        }
-
-        /// <summary>
-        /// Adds a message handler to the service bus for handling a specific type of message
-        /// </summary>
-        /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
-        /// <param name="bus"></param>
-        /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        public static ConnectHandle SubscribeContextHandler<T>(this IBus bus, Action<IConsumeContext<T>> handler)
-            where T : class
-        {
-            return HandlerConnectorCache<T>.Connector.Connect(bus.ConsumePipe, async context =>
-            {
-                IConsumeContext<T> consumeContext = new ConsumeContextAdapter<T>(context);
-
-                handler(consumeContext);
-            });
         }
     }
 }

@@ -77,7 +77,7 @@ namespace MassTransit.AutomatonymousTests
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();
 
-            configurator.StateMachineSaga(_machine, _repository);
+//            configurator.StateMachineSaga(_machine, _repository);
         }
 
         TestStateMachine _machine;
@@ -120,12 +120,12 @@ namespace MassTransit.AutomatonymousTests
 
                 Initially(
                     When(Started)
-                        .Then(instance => { throw new NotSupportedException("This is expected, but nonetheless exceptional"); })
+                        .Then(context => { throw new NotSupportedException("This is expected, but nonetheless exceptional"); })
                         .TransitionTo(Running),
                     When(Initialized)
                         .TransitionTo(WaitingToStart),
                     When(Created)
-                        .Then((instance,msg) => { throw new NotSupportedException("This is expected, but nonetheless exceptional"); })
+                        .Then(context => { throw new NotSupportedException("This is expected, but nonetheless exceptional"); })
                         .TransitionTo(Running));
 
                 During(WaitingToStart,

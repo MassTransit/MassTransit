@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,53 +14,31 @@ namespace MassTransit.NinjectIntegration
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Ninject;
-    using Ninject.Activation.Blocks;
     using Pipeline;
     using Saga;
 
 
-    public class NinjectSagaRepository<T> :
-        ISagaRepository<T>
-        where T : class, ISaga
+    public class NinjectSagaRepository<TSaga> :
+        ISagaRepository<TSaga>
+        where TSaga : class, ISaga
     {
         readonly IKernel _kernel;
-        readonly ISagaRepository<T> _repository;
+        readonly ISagaRepository<TSaga> _repository;
 
-        public NinjectSagaRepository(ISagaRepository<T> repository, IKernel kernel)
+        public NinjectSagaRepository(ISagaRepository<TSaga> repository, IKernel kernel)
         {
             _repository = repository;
             _kernel = kernel;
         }
 
-//        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
-//            Guid sagaId, InstanceHandlerSelector<T, TMessage> selector, ISagaPolicy<T, TMessage> policy)
-//            where TMessage : class
-//        {
-//            return _repository.GetSaga(context, sagaId, selector, policy)
-//                              .Select(consumer => (Action<IConsumeContext<TMessage>>)(x =>
-//                                  {
-//                                      IActivationBlock activationBlock = _kernel.BeginBlock();
-//
-//                                      try
-//                                      {
-//                                          consumer(x);
-//                                      }
-//                                      finally
-//                                      {
-//                                          activationBlock.Dispose();
-//                                      }
-//                                  }));
-//        }
-
-        public Task Send<T1>(ConsumeContext<T1> context, IPipe<SagaConsumeContext<T, T1>> next) where T1 : class
+        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            return _repository.Send(context, next);
+            await _repository.Send(context, next);
         }
 
-        public IEnumerable<Guid> Find(ISagaFilter<T> filter)
+        Task<IEnumerable<Guid>> ISagaRepository<TSaga>.Find(ISagaFilter<TSaga> filter)
         {
             return _repository.Find(filter);
         }

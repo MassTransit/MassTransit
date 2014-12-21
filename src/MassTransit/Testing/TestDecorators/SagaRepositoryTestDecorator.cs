@@ -83,7 +83,7 @@ namespace MassTransit.Testing.TestDecorators
 	        return _sagaRepository.Send(context, next);
 	    }
 
-	    public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
+	    public Task<IEnumerable<Guid>> Find(ISagaFilter<TSaga> filter)
 		{
 			return _sagaRepository.Find(filter);
 		}

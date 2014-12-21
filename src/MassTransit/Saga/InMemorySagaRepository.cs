@@ -40,8 +40,7 @@ namespace MassTransit.Saga
             get { return _sagas[id]; }
         }
 
-        public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
-            where T : class
+        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
             SagaContext<TSaga, T> sagaContext;
             if (!context.TryGetPayload(out sagaContext))
@@ -171,7 +170,7 @@ namespace MassTransit.Saga
             }
         }
 
-        public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
+        async Task<IEnumerable<Guid>> ISagaRepository<TSaga>.Find(ISagaFilter<TSaga> filter)
         {
             return _sagas.Where(filter).Select(x => x.CorrelationId);
         }

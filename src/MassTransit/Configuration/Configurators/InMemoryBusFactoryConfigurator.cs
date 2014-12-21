@@ -54,8 +54,6 @@ namespace MassTransit.Configurators
 
             var builder = new InMemoryServiceBusBuilder(_inputAddress, _receiveTransportProvider, _sendTransportProvider);
 
-            _busEndpointConfigurator.Configure(builder);
-
             foreach (IInMemoryServiceBusFactoryBuilderConfigurator configurator in _configurators)
                 configurator.Configure(builder);
 

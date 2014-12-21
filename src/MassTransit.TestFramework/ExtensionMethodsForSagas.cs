@@ -17,6 +17,7 @@ namespace MassTransit.TestFramework
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
+    using System.Threading.Tasks;
     using Magnum.Extensions;
     using Saga;
 
@@ -33,33 +34,33 @@ namespace MassTransit.TestFramework
         public static Guid? ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId)
             where TSaga : class, ISaga
         {
-            return ShouldContainSaga(repository, sagaId, Timeout);
+            return ShouldContainSaga(repository, sagaId, Timeout).Result;
         }
 
-        public static Guid? ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
+        public static async Task<Guid?> ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
             DateTime giveUpAt = DateTime.Now + timeout;
 
             while (DateTime.Now < giveUpAt)
             {
-                Guid saga = repository.Where(x => x.CorrelationId == sagaId).FirstOrDefault();
+                Guid saga = (await repository.Where(x => x.CorrelationId == sagaId)).FirstOrDefault();
                 if (saga != Guid.Empty)
                     return saga;
 
-                Thread.Sleep(100);
+                await Task.Delay(10);
             }
 
             return default(Guid?);
         }
 
-        public static Guid? ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter)
+        public static Task<Guid?> ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter)
             where TSaga : class, ISaga
         {
             return ShouldContainSaga(repository, filter, Timeout);
         }
 
-        public static Guid? ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter,
+        public static async Task<Guid?> ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter,
             TimeSpan timeout)
             where TSaga : class, ISaga
         {
@@ -69,11 +70,11 @@ namespace MassTransit.TestFramework
 
             while (DateTime.Now < giveUpAt)
             {
-                List<Guid> sagas = repository.Find(sagaFilter).ToList();
+                List<Guid> sagas = (await repository.Find(sagaFilter)).ToList();
                 if (sagas.Count > 0)
                     return sagas.Single();
 
-                Thread.Sleep(100);
+                await Task.Delay(10);
             }
 
             return default(Guid?);

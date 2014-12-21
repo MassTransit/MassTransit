@@ -59,7 +59,7 @@ namespace MassTransit.Tests.Saga.Locator
         InitiateSimpleSaga _initiateOtherSaga;
 
         [Test]
-        public void Matching_by_property_should_be_happy()
+        public async void Matching_by_property_should_be_happy()
         {
             Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> selector = (s, m) => s.Name == m.Name;
 
@@ -67,13 +67,13 @@ namespace MassTransit.Tests.Saga.Locator
                 new SagaFilterExpressionConverter<SimpleSaga, ObservableSagaMessage>(_observeSaga).Convert(selector);
             Trace.WriteLine(filter.ToString());
 
-            IEnumerable<Guid> matches = _repository.Where(filter);
+            IEnumerable<Guid> matches = await _repository.Where(filter);
 
             Assert.AreEqual(1, matches.Count());
         }
 
         [Test]
-        public void The_saga_expression_should_be_converted_down_to_a_saga_only_filter()
+        public async void The_saga_expression_should_be_converted_down_to_a_saga_only_filter()
         {
             Expression<Func<SimpleSaga, InitiateSimpleSaga, bool>> selector =
                 (s, m) => s.CorrelationId == m.CorrelationId;
@@ -82,7 +82,7 @@ namespace MassTransit.Tests.Saga.Locator
                 new SagaFilterExpressionConverter<SimpleSaga, InitiateSimpleSaga>(_initiateSaga).Convert(selector);
             Trace.WriteLine(filter.ToString());
 
-            IEnumerable<Guid> matches = _repository.Where(filter);
+            IEnumerable<Guid> matches = await _repository.Where(filter);
 
             Assert.AreEqual(1, matches.Count());
         }

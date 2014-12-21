@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,28 +13,27 @@
 namespace MassTransit.Containers.Tests
 {
     using System;
-    using System.Linq;
     using System.Threading;
-    using BusConfigurators;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
-    using EndpointConfigurators;
     using Magnum.Extensions;
     using NUnit.Framework;
     using Saga;
     using Scenarios;
     using Shouldly;
-    using SubscriptionConfigurators;
     using TestFramework;
-    using Testing;
-    using Util;
     using WindsorIntegration;
 
 
-    
     public class Castle_Consumer :
         When_registering_a_consumer
     {
+        [TearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
         readonly IWindsorContainer _container;
 
         public Castle_Consumer()
@@ -42,19 +41,13 @@ namespace MassTransit.Containers.Tests
             _container = new WindsorContainer();
             _container.Register(
                 Component.For<SimpleConsumer>()
-                         .LifestyleTransient(),
+                    .LifestyleTransient(),
                 Component.For<ISimpleConsumerDependency>()
-                         .ImplementedBy<SimpleConsumerDependency>()
-                         .LifestyleTransient(),
+                    .ImplementedBy<SimpleConsumerDependency>()
+                    .LifestyleTransient(),
                 Component.For<AnotherMessageConsumer>()
-                         .ImplementedBy<AnotherMessageConsumerImpl>()
-                         .LifestyleTransient());
-        }
-
-        [TearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
+                    .ImplementedBy<AnotherMessageConsumerImpl>()
+                    .LifestyleTransient());
         }
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
@@ -64,10 +57,15 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    
     public class Castle_Saga :
         When_registering_a_saga
     {
+        [TestFixtureTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
         readonly IWindsorContainer _container;
 
         public Castle_Saga()
@@ -76,48 +74,29 @@ namespace MassTransit.Containers.Tests
             _container.Register(
                 Component.For<SimpleSaga>(),
                 Component.For(typeof(ISagaRepository<>))
-                         .ImplementedBy(typeof(InMemorySagaRepository<>))
-                         .LifeStyle.Singleton);
-        }
-
-        [TearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
+                    .ImplementedBy(typeof(InMemorySagaRepository<>))
+                    .LifeStyle.Singleton);
         }
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
+        }
+
+        protected override ISagaRepository<T> GetSagaRepository<T>()
+        {
+            return _container.Resolve<ISagaRepository<T>>();
         }
     }
 
 
-    
     public class Test_Bus_Subscriptions_For_Consumers_In_Dummy_Saga_Using_Castle_As_IoC :
         Given_a_service_bus_instance
     {
-        readonly IWindsorContainer _container;
-
-        public Test_Bus_Subscriptions_For_Consumers_In_Dummy_Saga_Using_Castle_As_IoC()
-        {
-            _container = new WindsorContainer();
-            _container.Register(
-                Component.For<SimpleSaga>(),
-                Component.For(typeof(ISagaRepository<>))
-                         .ImplementedBy(typeof(InMemorySagaRepository<>))
-                         .LifeStyle.Singleton);
-        }
-
         [TearDown]
         public void Close_container()
         {
             _container.Dispose();
-        }
-
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
-        {
-            configurator.LoadFrom(_container);
         }
 
         [SetUp]
@@ -138,24 +117,33 @@ namespace MassTransit.Containers.Tests
 //            LocalBus.HasSubscription<SecondSagaMessage>().Count()
 //                    .ShouldBe(1, "No subscription for the SecondSagaMessage was found.");
         }
-    }
 
-
-    
-    public class MessageScope_usage :
-        InMemoryTestFixture
-    {
         readonly IWindsorContainer _container;
 
-        public MessageScope_usage()
+        public Test_Bus_Subscriptions_For_Consumers_In_Dummy_Saga_Using_Castle_As_IoC()
         {
             _container = new WindsorContainer();
             _container.Register(
-                Component.For<CheckScopeConsumer>()
-                         .LifestyleScoped<MessageScope>(),
-                Component.For<IDepedency>()
-                         .ImplementedBy<Depedency>()
-                         .LifestyleScoped<MessageScope>());
+                Component.For<SimpleSaga>(),
+                Component.For(typeof(ISagaRepository<>))
+                    .ImplementedBy(typeof(InMemorySagaRepository<>))
+                    .LifeStyle.Singleton);
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            configurator.LoadFrom(_container);
+        }
+    }
+
+
+    public class MessageScope_usage :
+        InMemoryTestFixture
+    {
+        [TearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
         }
 
         [Test]
@@ -168,10 +156,17 @@ namespace MassTransit.Containers.Tests
             CheckScopeConsumer.Last.Name.ShouldBe(name);
         }
 
-        [TearDown]
-        public void Close_container()
+        readonly IWindsorContainer _container;
+
+        public MessageScope_usage()
         {
-            _container.Dispose();
+            _container = new WindsorContainer();
+            _container.Register(
+                Component.For<CheckScopeConsumer>()
+                    .LifestyleScoped<MessageScope>(),
+                Component.For<IDepedency>()
+                    .ImplementedBy<Depedency>()
+                    .LifestyleScoped<MessageScope>());
         }
 
         protected override void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
@@ -184,7 +179,6 @@ namespace MassTransit.Containers.Tests
 
             configurator.LoadFrom(_container);
         }
-
 
 
         public class CheckScopeConsumer :

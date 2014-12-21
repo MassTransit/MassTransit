@@ -16,7 +16,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Collections.Generic;
     using System.Linq;
     using EndpointConfigurators;
-    using Magnum.Extensions;
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
@@ -131,7 +130,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         ReceiveEndpoint CreateReceiveEndpoint(IMessageDeserializer deserializer)
         {
-            IRetryPolicy retryPolicy = Retry.Exponential(1.Seconds(), 10.Seconds(), 1.Seconds());
+            IRetryPolicy retryPolicy = Retry.Exponential(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
 
             var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings,
                 _host.Settings.GetInputAddress(_settings), Retry.None);

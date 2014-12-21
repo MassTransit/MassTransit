@@ -15,9 +15,7 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Collections.Generic;
     using Logging;
-    using Magnum.Extensions;
     using RabbitMQ.Client;
-    using Transports;
 
 
     public class RabbitMqConnection 
@@ -40,7 +38,7 @@ namespace MassTransit.RabbitMqTransport
         public void Dispose()
         {
             if (_disposed)
-                throw new ObjectDisposedException("RabbitMqConnection for {0}".FormatWith(_connectionFactory.GetUri()),
+                throw new ObjectDisposedException(string.Format("RabbitMqConnection for {0}", _connectionFactory.GetUri()),
                     "Cannot dispose a connection twice");
 
             try

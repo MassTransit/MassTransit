@@ -14,14 +14,15 @@ namespace MassTransit
 {
     using System;
     using Logging;
+    using Policies;
     using Saga;
     using Saga.SubscriptionConfigurators;
     using Saga.SubscriptionConnectors;
 
 
-    public static class SagaSubscriptionConfiguratorExtensions
+    public static class SagaExtensions
     {
-        static readonly ILog _log = Logger.Get(typeof(SagaSubscriptionConfiguratorExtensions));
+        static readonly ILog _log = Logger.Get(typeof(SagaExtensions));
 
         /// <summary>
         /// Configure a saga subscription
@@ -31,13 +32,13 @@ namespace MassTransit
         /// <param name="sagaRepository"></param>
         /// <returns></returns>
         public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
-            ISagaRepository<TSaga> sagaRepository)
+            ISagaRepository<TSaga> sagaRepository, IRetryPolicy retryPolicy = null)
             where TSaga : class, ISaga
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
 
-            var sagaConfigurator = new SagaConfigurator<TSaga>(sagaRepository);
+            var sagaConfigurator = new SagaConfigurator<TSaga>(sagaRepository, retryPolicy);
 
             configurator.AddConfigurator(sagaConfigurator);
 
@@ -50,7 +51,7 @@ namespace MassTransit
         /// <typeparam name="TSaga">The consumer type</typeparam>
         /// <param name="bus"></param>
         /// <param name="sagaRepository"></param>
-        public static UnsubscribeAction SubscribeSaga<TSaga>(this IBus bus, ISagaRepository<TSaga> sagaRepository)
+        public static ConnectHandle ConnectSaga<TSaga>(this IBus bus, ISagaRepository<TSaga> sagaRepository, IRetryPolicy retryPolicy = null)
             where TSaga : class, ISaga
         {
             if (bus == null)
@@ -61,10 +62,7 @@ namespace MassTransit
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
 
-            var connector = new SagaConnector<TSaga>();
-
-            throw new NotImplementedException();
-//            return bus.Configure(x => connector.Connect(x));
+            return SagaConnectorCache<TSaga>.Connector.Connect(bus.ConsumePipe, sagaRepository, retryPolicy ?? Retry.None);
         }
     }
 }

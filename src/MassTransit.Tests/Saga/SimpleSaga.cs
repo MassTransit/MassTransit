@@ -38,16 +38,6 @@ namespace MassTransit.Tests.Saga
         public bool Observed { get; private set; }
         public string Name { get; private set; }
 
-        public Guid Id
-        {
-            get { return CorrelationId; }
-        }
-
-        public Expression<Func<ObservableSagaMessage, bool>> BindExpression
-        {
-            get { return message => message.Name == Name; }
-        }
-
         public async Task Consume(ConsumeContext<InitiateSimpleSaga> context)
         {
             Initiated = true;

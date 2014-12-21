@@ -47,7 +47,7 @@ namespace MassTransit.Saga
             return _repository.Send(context, callbackPipe);
         }
 
-        public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
+        public Task<IEnumerable<Guid>> Find(ISagaFilter<TSaga> filter)
         {
             return _repository.Find(filter);
         }
