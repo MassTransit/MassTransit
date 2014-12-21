@@ -43,7 +43,7 @@ namespace MassTransit.WindsorIntegration
             }
         }
 
-        public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
+        public Task<IEnumerable<Guid>> Find(ISagaFilter<TSaga> filter)
         {
             return _repository.Find(filter);
         }

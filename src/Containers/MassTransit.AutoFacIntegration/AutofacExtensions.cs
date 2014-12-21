@@ -18,7 +18,7 @@ namespace MassTransit
     using Autofac;
     using Autofac.Core;
     using AutofacIntegration;
-    using Magnum.Extensions;
+    using Internals.Extensions;
     using Saga;
     using Saga.SubscriptionConfigurators;
     using SubscriptionConfigurators;
@@ -35,20 +35,18 @@ namespace MassTransit
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope,
             string name = "message")
         {
-            IList<Type> concreteTypes = FindTypes<IConsumer>(scope, r => !r.Implements<ISaga>());
-            if (concreteTypes.Count != 0)
+            IList<Type> concreteTypes = FindTypes<IConsumer>(scope, r => !r.HasInterface<ISaga>());
+            if (concreteTypes.Count > 0)
             {
                 foreach (Type concreteType in concreteTypes)
-                    ConsumerFactoryConfiguratorCache.Configure(concreteType, configurator, scope, name);
+                    ConsumerConfiguratorCache.Configure(concreteType, configurator, scope, name);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(scope, x => true);
             if (sagaTypes.Count > 0)
             {
-                //var sagaConfigurator = new AutofacSagaRepositoryFactoryConfigurator(configurator, scope, name);
-
-//                foreach (Type type in sagaTypes)
-                //                  sagaConfigurator.ConfigureSaga(type);
+                foreach (Type sagaType in sagaTypes)
+                    SagaConfiguratorCache.Configure(sagaType, configurator, scope, name);
             }
         }
 
@@ -76,8 +74,8 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="scope"></param>
         /// <returns></returns>
-        public static ISagaConfigurator<TSaga> Saga<TSaga>(
-            this IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name = "message")
+        public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope,
+            string name = "message")
             where TSaga : class, ISaga
         {
             var sagaRepository = scope.Resolve<ISagaRepository<TSaga>>();
@@ -91,7 +89,7 @@ namespace MassTransit
         {
             return scope.ComponentRegistry.Registrations
                 .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})
-                .Where(rs => rs.s.ServiceType.Implements<T>())
+                .Where(rs => rs.s.ServiceType.HasInterface<T>())
                 .Select(rs => rs.s.ServiceType)
                 .Where(filter)
                 .ToList();

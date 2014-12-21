@@ -368,6 +368,7 @@
     <Compile Include="Saga\Pipeline\Pipes\SagaMergePipe.cs" />
     <Compile Include="Saga\Pipeline\SagaFilterExpressionConverter.cs" />
     <Compile Include="Saga\SagaContext.cs" />
+    <Compile Include="Saga\SagaPolicyBase.cs" />
     <Compile Include="Saga\SubscriptionConnectors\CorrelatedSagaMessageConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\InitiatedBySagaConnectorFactory.cs" />
     <Compile Include="Saga\SubscriptionConnectors\ISagaConnectorCache.cs" />
@@ -418,8 +419,8 @@
     <Compile Include="Configuration\Configurators\ValidationResult.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultDisposition.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultImpl.cs" />
-    <Compile Include="Configuration\ConsumerSubscriptionExtensions.cs" />
-    <Compile Include="Configuration\HandlerSubscriptionExtensions.cs" />
+    <Compile Include="Configuration\ConsumerExtensions.cs" />
+    <Compile Include="Configuration\HandlerExtensions.cs" />
     <Compile Include="Configuration\InstanceSubscriptionExtensions.cs" />
     <Compile Include="Configuration\BusConfigurators\PostCreateBusBuilderConfigurator.cs" />
     <Compile Include="Configuration\Configurators\Configurator.cs" />
@@ -502,7 +503,7 @@
     <Compile Include="Pipeline\IOutboundPipelineConfigurator.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\IOutboundPipelineSink.cs" />
-    <Compile Include="Saga\Configuration\SagaSubscriptionConfiguratorExtensions.cs" />
+    <Compile Include="Saga\Configuration\SagaExtensions.cs" />
     <Compile Include="Saga\SubscriptionBuilders\SagaSubscriptionBuilder.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\ISagaConfigurator.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\SagaConfigurator.cs" />
@@ -611,7 +612,6 @@
     <Compile Include="Testing\Subjects\HandlerTestSubject.cs" />
     <Compile Include="Testing\Subjects\HandlerTestSubjectImpl.cs" />
     <Compile Include="Testing\TestDecorators\ReceiveContextTestDecorator.cs" />
-    <Compile Include="Testing\TestDecorators\SagaPolicyTestDecorator.cs" />
     <Compile Include="Testing\TestDecorators\SagaRepositoryTestDecorator.cs" />
     <Compile Include="Testing\TestDecorators\TestSendObserver.cs" />
     <Compile Include="Testing\TestFactory.cs" />

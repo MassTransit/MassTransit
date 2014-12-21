@@ -17,9 +17,18 @@ namespace MassTransit.Saga
 	using System.Threading.Tasks;
 
 
+    /// <summary>
+    /// Locates the saga instance for a given message type
+    /// </summary>
+    /// <typeparam name="TMessage">The message type</typeparam>
     public interface ISagaLocator<in TMessage>
 		where TMessage : class
 	{
+        /// <summary>
+        /// Find the saga instances for the specified message
+        /// </summary>
+        /// <param name="context">The incoming message context</param>
+        /// <returns>An enumeration of saga instance identifiers</returns>
 		Task<IEnumerable<Guid>> Find(ConsumeContext<TMessage> context);
 	}
 }

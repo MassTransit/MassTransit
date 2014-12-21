@@ -16,16 +16,19 @@ namespace MassTransit.Saga.SubscriptionConnectors
     using System.Threading;
 
 
-    public class SagaConnectorCache<TConsumer> :
+    /// <summary>
+    /// Caches the saga connectors for the saga
+    /// </summary>
+    /// <typeparam name="TSaga">The saga type</typeparam>
+    public class SagaConnectorCache<TSaga> :
         ISagaConnectorCache
-        where TConsumer : class, ISaga
+        where TSaga : class, ISaga
     {
-        readonly Lazy<SagaConnector<TConsumer>> _connector;
+        readonly Lazy<SagaConnector<TSaga>> _connector;
 
         SagaConnectorCache()
         {
-            _connector = new Lazy<SagaConnector<TConsumer>>(() => new SagaConnector<TConsumer>(),
-                LazyThreadSafetyMode.PublicationOnly);
+            _connector = new Lazy<SagaConnector<TSaga>>(() => new SagaConnector<TSaga>(), LazyThreadSafetyMode.PublicationOnly);
         }
 
         public static SagaConnector Connector
@@ -42,7 +45,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
         static class Cached
         {
             internal static readonly Lazy<ISagaConnectorCache> Instance = new Lazy<ISagaConnectorCache>(
-                () => new SagaConnectorCache<TConsumer>(), LazyThreadSafetyMode.PublicationOnly);
+                () => new SagaConnectorCache<TSaga>(), LazyThreadSafetyMode.PublicationOnly);
         }
     }
 }

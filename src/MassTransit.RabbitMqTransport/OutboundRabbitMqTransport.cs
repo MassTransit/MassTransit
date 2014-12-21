@@ -13,11 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using System.Globalization;
     using System.IO;
-    using System.Linq;
-    using Magnum;
-    using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
     using Transports;
 

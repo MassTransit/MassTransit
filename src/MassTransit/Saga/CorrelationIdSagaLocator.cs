@@ -18,6 +18,11 @@ namespace MassTransit.Saga
     using System.Threading.Tasks;
 
 
+    /// <summary>
+    /// Returns the saga identifier from the message where there is a one-to-one correlation
+    /// identifier in the message (such as CorrelationId)
+    /// </summary>
+    /// <typeparam name="TMessage">The message type</typeparam>
     public class CorrelationIdSagaLocator<TMessage> :
         ISagaLocator<TMessage>
         where TMessage : class
@@ -26,6 +31,9 @@ namespace MassTransit.Saga
 
         public CorrelationIdSagaLocator(Func<ConsumeContext<TMessage>, Guid> getCorrelationId)
         {
+            if (getCorrelationId == null)
+                throw new ArgumentNullException("getCorrelationId");
+
             _getCorrelationId = getCorrelationId;
         }
 

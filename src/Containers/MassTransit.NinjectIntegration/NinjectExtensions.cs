@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Magnum.Extensions;
+    using Internals.Extensions;
     using Ninject;
     using NinjectIntegration;
     using Saga;
@@ -33,23 +33,21 @@ namespace MassTransit
         /// Specify that the service bus should load its subscribers from the container passed as an argument.
         /// </summary>
         /// <param name="configurator">The configurator the extension method works on.</param>
-        /// <param name="context">The Ninject kernel.</param>
-        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IKernel context)
+        /// <param name="kernel">The Ninject kernel.</param>
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IKernel kernel)
         {
-            IList<Type> consumerTypes = FindTypes<IConsumer>(context, x => !x.Implements<ISaga>());
+            IList<Type> consumerTypes = FindTypes<IConsumer>(kernel, x => !x.HasInterface<ISaga>());
             if (consumerTypes.Count > 0)
             {
                 foreach (Type type in consumerTypes)
-                    ConsumerFactoryConfiguratorCache.Configure(type, configurator, context);
+                    ConsumerConfiguratorCache.Configure(type, configurator, kernel);
             }
 
-            IList<Type> sagaTypes = FindTypes<ISaga>(context, x => true);
+            IList<Type> sagaTypes = FindTypes<ISaga>(kernel, x => true);
             if (sagaTypes.Count > 0)
             {
-//                var sagaConfigurator = new NinjectSagaFactoryConfigurator(configurator, context);
-//
-//                foreach (Type type in sagaTypes)
-//                    sagaConfigurator.ConfigureSaga(type);
+                foreach (Type sagaType in sagaTypes)
+                    SagaConfiguratorCache.Configure(sagaType, configurator, kernel);
             }
         }
 

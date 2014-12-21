@@ -15,12 +15,13 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
+    using System.Threading.Tasks;
     using Saga;
 
 
     public static class SagaFilterExtensions
     {
-        public static IEnumerable<Guid> Where<TSaga>(this ISagaRepository<TSaga> source, Expression<Func<TSaga, bool>> filter)
+        public static Task<IEnumerable<Guid>> Where<TSaga>(this ISagaRepository<TSaga> source, Expression<Func<TSaga, bool>> filter)
             where TSaga : class, ISaga
         {
             return source.Find(new SagaFilter<TSaga>(filter));

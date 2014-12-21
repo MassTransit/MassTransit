@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,18 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests
 {
-    using EndpointConfigurators;
-    using NUnit.Framework;
     using Microsoft.Practices.Unity;
+    using NUnit.Framework;
     using Saga;
     using Scenarios;
-    using SubscriptionConfigurators;
 
 
-    
     public class Unity_Consumer :
         When_registering_a_consumer
     {
+        [TearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
         readonly IUnityContainer _container;
 
         public Unity_Consumer()
@@ -36,13 +39,6 @@ namespace MassTransit.Containers.Tests
                 new HierarchicalLifetimeManager());
         }
 
-        [TearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
-        }
-
-
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
@@ -50,10 +46,15 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    
     public class Unity_Saga :
         When_registering_a_saga
     {
+        [TestFixtureTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
         readonly IUnityContainer _container;
 
         public Unity_Saga()
@@ -64,16 +65,14 @@ namespace MassTransit.Containers.Tests
                 new ContainerControlledLifetimeManager());
         }
 
-        [TearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
-        }
-
-
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
+        }
+
+        protected override ISagaRepository<T> GetSagaRepository<T>()
+        {
+            return _container.Resolve<ISagaRepository<T>>();
         }
     }
 }

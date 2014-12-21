@@ -10,30 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AutofacIntegration
+namespace MassTransit.StructureMapIntegration
 {
     using System;
     using System.Collections.Concurrent;
-    using Autofac;
+    using StructureMap;
 
 
-    public static class ConsumerFactoryConfiguratorCache
+    public static class ConsumerConfiguratorCache
     {
         static CachedConfigurator GetOrAdd(Type type)
         {
-            return InstanceCache.Cached.GetOrAdd(type, _ =>
+            return Cached.Instance.GetOrAdd(type, _ =>
                 (CachedConfigurator)Activator.CreateInstance(typeof(CachedConfigurator<>).MakeGenericType(type)));
         }
 
-        public static void Configure(Type consumerType, IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name)
+        public static void Configure(Type consumerType, IReceiveEndpointConfigurator configurator, IContainer container)
         {
-            GetOrAdd(consumerType).Configure(configurator, scope, name);
+            GetOrAdd(consumerType).Configure(configurator, container);
         }
 
 
         interface CachedConfigurator
         {
-            void Configure(IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name);
+            void Configure(IReceiveEndpointConfigurator configurator, IContainer container);
         }
 
 
@@ -41,16 +41,16 @@ namespace MassTransit.AutofacIntegration
             CachedConfigurator
             where T : class, IConsumer
         {
-            public void Configure(IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name)
+            public void Configure(IReceiveEndpointConfigurator configurator, IContainer container)
             {
-                configurator.Consumer(new AutofacConsumerFactory<T>(scope, name));
+                configurator.Consumer(new StructureMapConsumerFactory<T>(container));
             }
         }
 
 
-        static class InstanceCache
+        static class Cached
         {
-            internal static readonly ConcurrentDictionary<Type, CachedConfigurator> Cached =
+            internal static readonly ConcurrentDictionary<Type, CachedConfigurator> Instance =
                 new ConcurrentDictionary<Type, CachedConfigurator>();
         }
     }

@@ -12,31 +12,75 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Scenarios
 {
+    using System;
     using NUnit.Framework;
+    using Saga;
+    using Shouldly;
+    using TestFramework;
 
 
-    
     public abstract class When_registering_a_saga :
         Given_a_service_bus_instance
     {
-        [SetUp]
-        public void Registering_a_saga()
+        [Test]
+        public async void Should_have_a_subscription_for_the_first_saga_message()
         {
+            Guid sagaId = NewId.NextGuid();
+
+            var message = new FirstSagaMessage {CorrelationId = sagaId};
+
+            await InputQueueSendEndpoint.Send(message);
+
+            Guid? foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(message.CorrelationId, TestTimeout);
+
+            foundId.HasValue.ShouldBe(true);
         }
 
         [Test]
-        public void Should_have_a_subscription_for_the_first_saga_message()
+        public async void Should_have_a_subscription_for_the_second_saga_message()
         {
+            Guid sagaId = NewId.NextGuid();
+
+            var message = new FirstSagaMessage {CorrelationId = sagaId};
+
+            await InputQueueSendEndpoint.Send(message);
+
+            Guid? foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(message.CorrelationId, TestTimeout);
+
+            foundId.HasValue.ShouldBe(true);
+
+            var nextMessage = new SecondSagaMessage {CorrelationId = sagaId};
+
+            await InputQueueSendEndpoint.Send(nextMessage);
+
+            foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(x => x.CorrelationId == sagaId && x.Second.IsCompleted);
+
+            foundId.HasValue.ShouldBe(true);
         }
 
         [Test]
-        public void Should_have_a_subscription_for_the_second_saga_message()
+        public async void Should_have_a_subscription_for_the_third_saga_message()
         {
+            Guid sagaId = NewId.NextGuid();
+
+            var message = new FirstSagaMessage {CorrelationId = sagaId};
+
+            await InputQueueSendEndpoint.Send(message);
+
+            Guid? foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(message.CorrelationId, TestTimeout);
+
+            foundId.HasValue.ShouldBe(true);
+
+            var nextMessage = new ThirdSagaMessage {CorrelationId = sagaId};
+
+            await InputQueueSendEndpoint.Send(nextMessage);
+
+            foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(x => x.CorrelationId == sagaId && x.Third.IsCompleted);
+
+            foundId.HasValue.ShouldBe(true);
         }
 
-        [Test]
-        public void Should_have_a_subscription_for_the_third_saga_message()
-        {
-        }
+        protected abstract ISagaRepository<T> GetSagaRepository<T>()
+            where T : class, ISaga;
     }
 }

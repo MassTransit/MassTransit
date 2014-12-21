@@ -24,16 +24,18 @@ namespace MassTransit.Saga.SubscriptionConfigurators
         IReceiveEndpointBuilderConfigurator
         where TSaga : class, ISaga
     {
+        readonly IRetryPolicy _retryPolicy;
         readonly ISagaRepository<TSaga> _sagaRepository;
 
-        public SagaConfigurator(ISagaRepository<TSaga> sagaRepository)
+        public SagaConfigurator(ISagaRepository<TSaga> sagaRepository, IRetryPolicy retryPolicy)
         {
             _sagaRepository = sagaRepository;
+            _retryPolicy = retryPolicy;
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            SagaConnectorCache<TSaga>.Connector.Connect(builder.InputPipe, _sagaRepository, Retry.None);
+            SagaConnectorCache<TSaga>.Connector.Connect(builder.InputPipe, _sagaRepository, _retryPolicy ?? Retry.None);
         }
 
         public IEnumerable<ValidationResult> Validate()

@@ -17,17 +17,17 @@ namespace MassTransit.Saga
 
 
     public class InitiatingSagaPolicy<TSaga, TMessage> :
+        SagaPolicyBase<TSaga>,
         ISagaPolicy<TSaga, TMessage>
         where TSaga : class, ISaga
         where TMessage : class
     {
-        readonly Func<TSaga, bool> _canRemoveInstance;
         readonly Func<TMessage, Guid> _getNewSagaId;
 
-        public InitiatingSagaPolicy(Func<TMessage, Guid> getNewSagaId, Expression<Func<TSaga, bool>> shouldBeRemoved)
+        public InitiatingSagaPolicy(Func<TMessage, Guid> getNewSagaId, Expression<Func<TSaga, bool>> canRemoveInstance = null)
+            : base(canRemoveInstance)
         {
             _getNewSagaId = getNewSagaId;
-            _canRemoveInstance = shouldBeRemoved.Compile();
         }
 
         public bool CanCreateInstance(ConsumeContext<TMessage> context)
@@ -51,11 +51,6 @@ namespace MassTransit.Saga
         public bool CanUseExistingInstance(ConsumeContext<TMessage> context)
         {
             throw new SagaException("The message cannot be accepted by an existing saga", typeof(TSaga), typeof(TMessage));
-        }
-
-        public bool CanRemoveInstance(TSaga instance)
-        {
-            return _canRemoveInstance(instance);
         }
     }
 }

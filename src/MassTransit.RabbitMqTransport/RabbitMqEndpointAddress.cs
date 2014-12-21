@@ -16,8 +16,6 @@ namespace MassTransit.RabbitMqTransport
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using System.Threading;
-    using Magnum;
-    using Magnum.Extensions;
     using RabbitMQ.Client;
     using Util;
 
@@ -191,7 +189,8 @@ namespace MassTransit.RabbitMqTransport
 
         public static RabbitMqEndpointAddress Parse(Uri address)
         {
-            Guard.AgainstNull(address, "address");
+            if (address == null)
+                throw new ArgumentNullException("address");
 
             if (string.Compare("rabbitmq", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
                 throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme ?? "(null)");
@@ -208,7 +207,7 @@ namespace MassTransit.RabbitMqTransport
             else if (!address.IsDefaultPort)
                 connectionFactory.Port = address.Port;
 
-            if (!address.UserInfo.IsEmpty())
+            if (!string.IsNullOrEmpty(address.UserInfo))
             {
                 if (address.UserInfo.Contains(":"))
                 {

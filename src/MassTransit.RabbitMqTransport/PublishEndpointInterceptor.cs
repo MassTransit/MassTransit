@@ -16,7 +16,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Magnum.Extensions;
+    using Internals.Extensions;
     using MassTransit.Pipeline;
     using Transports;
 

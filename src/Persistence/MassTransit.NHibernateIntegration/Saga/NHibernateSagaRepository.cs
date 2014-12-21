@@ -37,121 +37,14 @@ namespace MassTransit.NHibernateIntegration.Saga
             _sessionFactory = sessionFactory;
         }
 
-//
-//        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
-//            Guid sagaId,
-//            InstanceHandlerSelector<TSaga, TMessage>
-//                selector,
-//            ISagaPolicy<TSaga, TMessage> policy)
-//            where TMessage : class
-//        {
-//            using (ISession session = _sessionFactory.OpenSession())
-//            using (ITransaction transaction = session.BeginTransaction())
-//            {
-//                var instance = session.Get<TSaga>(sagaId, LockMode.Upgrade);
-//                if (instance == null)
-//                {
-//                    if (policy.CanCreateInstance(context))
-//                    {
-//                        yield return x =>
-//                        {
-//                            if (_log.IsDebugEnabled)
-//                            {
-//                                _log.DebugFormat("SAGA: {0} Creating New {1} for {2}",
-//                                    typeof(TSaga).ToFriendlyName(), sagaId,
-//                                    typeof(TMessage).ToFriendlyName());
-//                            }
-//
-//                            try
-//                            {
-//                                instance = policy.CreateInstance(x, sagaId);
-//
-//                                foreach (var callback in selector(instance, x))
-//                                    callback(x);
-//
-//                                if (!policy.CanRemoveInstance(instance))
-//                                    session.Save(instance);
-//                            }
-//                            catch (Exception ex)
-//                            {
-//                                var sex = new SagaException("Create Saga Instance Exception", typeof(TSaga),
-//                                    typeof(TMessage), sagaId, ex);
-//                                if (_log.IsErrorEnabled)
-//                                    _log.Error(sex);
-//
-//                                if (transaction.IsActive)
-//                                    transaction.Rollback();
-//
-//                                throw sex;
-//                            }
-//                        };
-//                    }
-//                    else
-//                    {
-//                        if (_log.IsDebugEnabled)
-//                        {
-//                            _log.DebugFormat("SAGA: {0} Ignoring Missing {1} for {2}", typeof(TSaga).ToFriendlyName(),
-//                                sagaId,
-//                                typeof(TMessage).ToFriendlyName());
-//                        }
-//                    }
-//                }
-//                else
-//                {
-//                    if (policy.CanUseExistingInstance(context))
-//                    {
-//                        yield return x =>
-//                        {
-//                            if (_log.IsDebugEnabled)
-//                            {
-//                                _log.DebugFormat("SAGA: {0} Using Existing {1} for {2}",
-//                                    typeof(TSaga).ToFriendlyName(), sagaId,
-//                                    typeof(TMessage).ToFriendlyName());
-//                            }
-//
-//                            try
-//                            {
-//                                foreach (var callback in selector(instance, x))
-//                                    callback(x);
-//
-//                                if (policy.CanRemoveInstance(instance))
-//                                    session.Delete(instance);
-//                            }
-//                            catch (Exception ex)
-//                            {
-//                                var sex = new SagaException("Existing Saga Instance Exception", typeof(TSaga),
-//                                    typeof(TMessage), sagaId, ex);
-//                                if (_log.IsErrorEnabled)
-//                                    _log.Error(sex);
-//
-//                                if (transaction.IsActive)
-//                                    transaction.Rollback();
-//
-//                                throw sex;
-//                            }
-//                        };
-//                    }
-//                    else
-//                    {
-//                        if (_log.IsDebugEnabled)
-//                        {
-//                            _log.DebugFormat("SAGA: {0} Ignoring Existing {1} for {2}", typeof(TSaga).ToFriendlyName(),
-//                                sagaId,
-//                                typeof(TMessage).ToFriendlyName());
-//                        }
-//                    }
-//                }
-//
-//                if (transaction.IsActive)
-//                    transaction.Commit();
-//            }
-//        }
-
-        public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
-            where T : class
+        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            ISagaPolicy<TSaga, T> policy = null; // context.Get<ISagaPolicy<TSaga, T>>();
-            Guid sagaId = Guid.Empty;
+            SagaContext<TSaga, T> sagaContext;
+            if (!context.TryGetPayload(out sagaContext))
+                throw new SagaException("Failed to load saga context", typeof(TSaga), typeof(T));
+
+            ISagaPolicy<TSaga, T> policy = sagaContext.Policy;
+            Guid sagaId = sagaContext.Id;
 
             using (ISession session = _sessionFactory.OpenSession())
             using (ITransaction transaction = session.BeginTransaction())
@@ -170,9 +63,9 @@ namespace MassTransit.NHibernateIntegration.Saga
                         }
                         try
                         {
-                            SagaConsumeContext<TSaga, T> sagaContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
+                            SagaConsumeContext<TSaga, T> sagaConsumeContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
 
-                            await next.Send(sagaContext);
+                            await next.Send(sagaConsumeContext);
 
                             if (!policy.CanRemoveInstance(instance))
                                 session.Save(instance);
@@ -221,9 +114,9 @@ namespace MassTransit.NHibernateIntegration.Saga
                                     TypeMetadataCache<T>.ShortName);
                             }
 
-                            SagaConsumeContext<TSaga, T> sagaContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
+                            SagaConsumeContext<TSaga, T> sagaConsumeContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
 
-                            await next.Send(sagaContext);
+                            await next.Send(sagaConsumeContext);
 
                             if (policy.CanRemoveInstance(instance))
                                 session.Delete(instance);
@@ -263,7 +156,7 @@ namespace MassTransit.NHibernateIntegration.Saga
             }
         }
 
-        public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
+        async Task<IEnumerable<Guid>> ISagaRepository<TSaga>.Find(ISagaFilter<TSaga> filter)
         {
             using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
             using (ISession session = _sessionFactory.OpenSession())

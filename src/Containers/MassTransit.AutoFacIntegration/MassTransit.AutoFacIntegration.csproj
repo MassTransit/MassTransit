@@ -40,9 +40,6 @@
     <Reference Include="Autofac">
       <HintPath>..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum">
-      <HintPath>..\..\packages\Magnum.2.1.2\lib\net40\Magnum.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
@@ -53,9 +50,9 @@
     <Compile Include="AutofacConsumerFactory.cs" />
     <Compile Include="AutofacExtensions.cs" />
     <Compile Include="AutofacSagaRepository.cs" />
-    <Compile Include="AutofacSagaRepositoryFactoryConfigurator.cs" />
-    <Compile Include="ConsumerFactoryConfiguratorCache.cs" />
+    <Compile Include="ConsumerConfiguratorCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SagaConfiguratorCache.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">

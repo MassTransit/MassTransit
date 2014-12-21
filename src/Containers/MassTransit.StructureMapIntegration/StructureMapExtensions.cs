@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Magnum.Extensions;
+    using Internals.Extensions;
     using Saga;
     using Saga.SubscriptionConfigurators;
     using StructureMap;
@@ -32,20 +32,18 @@ namespace MassTransit
         /// <param name="container">The StructureMap container.</param>
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IContainer container)
         {
-            IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.Implements<ISaga>());
+            IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.HasInterface<ISaga>());
             if (concreteTypes.Count > 0)
             {
                 foreach (Type concreteType in concreteTypes)
-                    ConsumerFactoryConfiguratorCache.Configure(concreteType, configurator, container);
+                    ConsumerConfiguratorCache.Configure(concreteType, configurator, container);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
             if (sagaTypes.Count > 0)
             {
-//                var sagaConfigurator = new StructureMapSagaFactoryConfigurator(configurator, container);
-//
-//                foreach (Type type in sagaTypes)
-//                    sagaConfigurator.ConfigureSaga(type);
+                foreach (Type sagaType in sagaTypes)
+                    SagaConfiguratorCache.Configure(sagaType, configurator, container);
             }
         }
 
@@ -73,7 +71,7 @@ namespace MassTransit
             return container
                 .Model
                 .PluginTypes
-                .Where(x => x.PluginType.Implements<T>())
+                .Where(x => x.PluginType.HasInterface<T>())
                 .Select(i => i.PluginType)
                 .Concat(container.Model.InstancesOf<T>().Select(x => x.ReturnedType))
                 .Where(filter)

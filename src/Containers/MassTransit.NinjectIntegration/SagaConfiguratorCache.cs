@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,43 +15,48 @@ namespace MassTransit.NinjectIntegration
     using System;
     using System.Collections.Concurrent;
     using Ninject;
+    using Saga;
 
 
-    public static class ConsumerFactoryConfiguratorCache
+    public static class SagaConfiguratorCache
     {
         static CachedConfigurator GetOrAdd(Type type)
         {
-            return InstanceCache.Cached.GetOrAdd(type, _ =>
+            return Cached.Instance.GetOrAdd(type, _ =>
                 (CachedConfigurator)Activator.CreateInstance(typeof(CachedConfigurator<>).MakeGenericType(type)));
         }
 
-        public static void Configure(Type consumerType, IReceiveEndpointConfigurator configurator, IKernel container)
+        public static void Configure(Type sagaType, IReceiveEndpointConfigurator configurator, IKernel kernel)
         {
-            GetOrAdd(consumerType).Configure(configurator, container);
+            GetOrAdd(sagaType).Configure(configurator, kernel);
+        }
+
+
+        static class Cached
+        {
+            internal static readonly ConcurrentDictionary<Type, CachedConfigurator> Instance =
+                new ConcurrentDictionary<Type, CachedConfigurator>();
         }
 
 
         interface CachedConfigurator
         {
-            void Configure(IReceiveEndpointConfigurator configurator, IKernel container);
+            void Configure(IReceiveEndpointConfigurator configurator, IKernel kernel);
         }
 
 
         class CachedConfigurator<T> :
             CachedConfigurator
-            where T : class, IConsumer
+            where T : class, ISaga
         {
-            public void Configure(IReceiveEndpointConfigurator configurator, IKernel container)
+            public void Configure(IReceiveEndpointConfigurator configurator, IKernel kernel)
             {
-                configurator.Consumer(new NinjectConsumerFactory<T>(container));
+                var sagaRepository = kernel.Get<ISagaRepository<T>>();
+
+                var ninjectSagaRepository = new NinjectSagaRepository<T>(sagaRepository, kernel);
+
+                configurator.Saga(ninjectSagaRepository);
             }
-        }
-
-
-        static class InstanceCache
-        {
-            internal static readonly ConcurrentDictionary<Type, CachedConfigurator> Cached =
-                new ConcurrentDictionary<Type, CachedConfigurator>();
         }
     }
 }

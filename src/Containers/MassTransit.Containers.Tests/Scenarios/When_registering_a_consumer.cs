@@ -13,7 +13,6 @@
 namespace MassTransit.Containers.Tests.Scenarios
 {
     using NUnit.Framework;
-    using NUnit.Framework;
     using Shouldly;
 
 

@@ -61,12 +61,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Magnum">
-      <HintPath>..\..\packages\Magnum.2.1.2\lib\net40\Magnum.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="StructureMap">
       <HintPath>..\..\packages\structuremap.3.1.4.143\lib\net40\StructureMap.dll</HintPath>
     </Reference>
@@ -81,11 +75,11 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="ConsumerFactoryConfiguratorCache.cs" />
+    <Compile Include="ConsumerConfiguratorCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SagaConfiguratorCache.cs" />
     <Compile Include="StructureMapExtensions.cs" />
     <Compile Include="StructureMapConsumerFactory.cs" />
-    <Compile Include="StructureMapSagaFactoryConfigurator.cs" />
     <Compile Include="StructureMapSagaRepository.cs" />
   </ItemGroup>
   <ItemGroup>

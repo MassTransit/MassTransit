@@ -20,6 +20,11 @@ namespace MassTransit.Saga
     using Pipeline;
 
 
+    /// <summary>
+    /// Uses an expression to find the matching saga instances
+    /// </summary>
+    /// <typeparam name="TSaga">The saga type</typeparam>
+    /// <typeparam name="TMessage">The message type</typeparam>
     public class PropertySagaLocator<TSaga, TMessage> :
         ISagaLocator<TMessage>
         where TSaga : class, ISaga
@@ -32,6 +37,13 @@ namespace MassTransit.Saga
         public PropertySagaLocator(ISagaRepository<TSaga> repository, ISagaPolicy<TSaga, TMessage> policy,
             Expression<Func<TSaga, TMessage, bool>> filterExpression)
         {
+            if (repository == null)
+                throw new ArgumentNullException("repository");
+            if (policy == null)
+                throw new ArgumentNullException("policy");
+            if (filterExpression == null)
+                throw new ArgumentNullException("filterExpression");
+
             _repository = repository;
             _policy = policy;
             _filterExpression = filterExpression;
@@ -44,7 +56,7 @@ namespace MassTransit.Saga
 
             var sagaFilter = new SagaFilter<TSaga>(filter);
 
-            Guid[] sagaIds = _repository.Find(sagaFilter).ToArray();
+            Guid[] sagaIds = (await _repository.Find(sagaFilter)).ToArray();
             if (sagaIds.Length > 0)
                 return sagaIds;
 

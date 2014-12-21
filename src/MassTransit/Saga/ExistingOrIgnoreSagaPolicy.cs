@@ -17,15 +17,14 @@ namespace MassTransit.Saga
 
 
     public class ExistingOrIgnoreSagaPolicy<TSaga, TMessage> :
+        SagaPolicyBase<TSaga>,
         ISagaPolicy<TSaga, TMessage>
         where TSaga : class, ISaga
         where TMessage : class
     {
-        readonly Func<TSaga, bool> _canRemoveInstance;
-
-        public ExistingOrIgnoreSagaPolicy(Expression<Func<TSaga, bool>> shouldBeRemoved)
+        public ExistingOrIgnoreSagaPolicy(Expression<Func<TSaga, bool>> canRemoveInstance = null)
+            : base(canRemoveInstance)
         {
-            _canRemoveInstance = shouldBeRemoved.Compile();
         }
 
         public bool CanCreateInstance(ConsumeContext<TMessage> context)
@@ -46,11 +45,6 @@ namespace MassTransit.Saga
         public bool CanUseExistingInstance(ConsumeContext<TMessage> context)
         {
             return true;
-        }
-
-        public bool CanRemoveInstance(TSaga instance)
-        {
-            return _canRemoveInstance(instance);
         }
     }
 }

@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Saga
                         await RemoteBus.Publish(new UserVerificationEmailSent(x.Message.CorrelationId, x.Message.Email));
                     });
 
-            RemoteBus.SubscribeSaga(sagaRepository);
+            RemoteBus.ConnectSaga(sagaRepository);
 
             LocalBus.ShouldHaveSubscriptionFor<RegisterUser>();
             LocalBus.ShouldHaveSubscriptionFor<UserVerificationEmailSent>();

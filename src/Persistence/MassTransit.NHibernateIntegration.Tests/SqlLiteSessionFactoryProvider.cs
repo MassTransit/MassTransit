@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -22,22 +22,32 @@ namespace MassTransit.NHibernateIntegration.Tests
     using NHibernate.Dialect;
     using NHibernate.Tool.hbm2ddl;
 
-    public class SqlLiteSessionFactoryProvider :
+
+    /// <summary>
+    /// Creates a session factory that works with SQLite, by default in memory, for testing purposes
+    /// </summary>
+    public class SQLiteSessionFactoryProvider :
         NHibernateSessionFactoryProvider,
         IDisposable
     {
+        const string InMemoryConnectionString = "Data Source=:memory:;Version=3;New=True;Pooling=True;Max Pool Size=1;";
         bool _disposed;
         ISessionFactory _innerSessionFactory;
         SQLiteConnection _openConnection;
         SingleConnectionSessionFactory _sessionFactory;
 
-        public SqlLiteSessionFactoryProvider(string connectionString, params Type[] mapTypes)
-            : base(mapTypes, x => Integrate(x, connectionString))
+        public SQLiteSessionFactoryProvider(string connectionString, params Type[] mappedTypes)
+            : base(mappedTypes, x => Integrate(x, connectionString, false))
         {
         }
 
-        public SqlLiteSessionFactoryProvider(params Type[] mapTypes)
-            : base(mapTypes, x => Integrate(x, null))
+        public SQLiteSessionFactoryProvider(params Type[] mappedTypes)
+            : this(false, mappedTypes)
+        {
+        }
+
+        public SQLiteSessionFactoryProvider(bool logToConsole, params Type[] mappedTypes)
+            : base(mappedTypes, x => Integrate(x, null, logToConsole))
         {
             Configuration.SetProperty(NHibernate.Cfg.Environment.UseSecondLevelCache, "true");
             Configuration.SetProperty(NHibernate.Cfg.Environment.UseQueryCache, "true");
@@ -48,6 +58,12 @@ namespace MassTransit.NHibernateIntegration.Tests
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~SQLiteSessionFactoryProvider()
+        {
+            Dispose(false);
         }
 
         void Dispose(bool disposing)
@@ -68,14 +84,13 @@ namespace MassTransit.NHibernateIntegration.Tests
 
         public override ISessionFactory GetSessionFactory()
         {
-            _innerSessionFactory = base.GetSessionFactory();
-
-            _openConnection =
-                new SQLiteConnection(Configuration.Properties[NHibernate.Cfg.Environment.ConnectionString]);
+            string connectionString = Configuration.Properties[NHibernate.Cfg.Environment.ConnectionString];
+            _openConnection = new SQLiteConnection(connectionString);
             _openConnection.Open();
 
             BuildSchema(Configuration, _openConnection);
 
+            _innerSessionFactory = base.GetSessionFactory();
             _innerSessionFactory.OpenSession(_openConnection);
 
             _sessionFactory = new SingleConnectionSessionFactory(_innerSessionFactory, _openConnection);
@@ -88,16 +103,23 @@ namespace MassTransit.NHibernateIntegration.Tests
             new SchemaExport(config).Execute(true, true, false, connection, null);
         }
 
-        static void Integrate(IDbIntegrationConfigurationProperties db, string connectionString)
+        static void Integrate(IDbIntegrationConfigurationProperties db, string connectionString, bool logToConsole)
         {
-            db.Dialect<SQLiteDialect>();
-            db.ConnectionString = connectionString ?? "Data Source=:memory:;Version=3;New=True;Pooling=True;Max Pool Size=1;";
+            db.Dialect<SQLiteDialect>(); //This is a custom dialect
+
+            db.ConnectionString = connectionString ?? InMemoryConnectionString;
             db.BatchSize = 100;
             db.IsolationLevel = IsolationLevel.Serializable;
-            db.LogSqlInConsole = false;
-            db.LogFormattedSql = false;
+            db.LogSqlInConsole = logToConsole;
+            db.LogFormattedSql = logToConsole;
             db.KeywordsAutoImport = Hbm2DDLKeyWords.AutoQuote;
+
+            // Do not use this property with real DB as it will modify schema
             db.SchemaAction = SchemaAutoAction.Update;
+
+            //Disable comments until this issue is resolved
+            // https://groups.google.com/forum/?fromgroups=#!topic/nhusers/xJ675yG2uhY
+            //properties.AutoCommentSql = true;
         }
     }
 }

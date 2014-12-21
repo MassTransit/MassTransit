@@ -15,8 +15,6 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
     using System.Collections.Generic;
     using System.Net.Security;
     using System.Security.Authentication;
-    using Builders;
-    using Magnum.Extensions;
     using MassTransit.Configurators;
     using RabbitMQ.Client;
 
@@ -82,14 +80,14 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_serverName.IsEmpty())
+            if (string.IsNullOrEmpty(_serverName))
             {
                 yield return
                     this.Failure("ServerName", "ServerName must be set or allow remote certificate name mismatch");
             }
-            if (_certificatePath.IsEmpty())
+            if (string.IsNullOrEmpty(_certificatePath))
                 yield return this.Failure("CertificatePath", "CertificatePath must be specified");
-            if (_passphrase.IsEmpty())
+            if (string.IsNullOrEmpty(_passphrase))
                 yield return this.Failure("CertificatePassphrase", "CertificatePassphrase must be specified");
         }
 

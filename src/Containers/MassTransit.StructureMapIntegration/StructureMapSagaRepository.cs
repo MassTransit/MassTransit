@@ -41,7 +41,7 @@ namespace MassTransit.StructureMapIntegration
             }
         }
 
-        public IEnumerable<Guid> Find(ISagaFilter<TSaga> filter)
+        public Task<IEnumerable<Guid>> Find(ISagaFilter<TSaga> filter)
         {
             return _repository.Find(filter);
         }

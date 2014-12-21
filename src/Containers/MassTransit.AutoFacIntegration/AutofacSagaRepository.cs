@@ -43,7 +43,7 @@ namespace MassTransit.AutofacIntegration
             }
         }
 
-        IEnumerable<Guid> ISagaRepository<TSaga>.Find(ISagaFilter<TSaga> filter)
+        Task<IEnumerable<Guid>> ISagaRepository<TSaga>.Find(ISagaFilter<TSaga> filter)
         {
             return _repository.Find(filter);
         }

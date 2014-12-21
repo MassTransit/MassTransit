@@ -18,8 +18,6 @@ namespace MassTransit.RabbitMqTransport
     using Configuration.Builders;
     using Configuration.Configurators;
     using Logging;
-    using Magnum.Caching;
-    using Magnum.Extensions;
     using RabbitMQ.Client;
     using Transports;
 
