@@ -63,8 +63,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AzureServiceBus
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Compatibility", "MassTransit.Compatibility\MassTransit.Compatibility.csproj", "{9AE455C4-0BF7-43AC-95E2-9E1B1D642385}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Courier", "MassTransit.Courier\MassTransit.Courier.csproj", "{F949D7CF-A0BD-4915-B170-446D2D07B0F4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Courier.Tests", "MassTransit.Courier.Tests\MassTransit.Courier.Tests.csproj", "{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RapidTransit", "RapidTransit", "{76F5F3F7-35AD-4D3B-A445-0A6A55C03147}"
@@ -244,14 +242,6 @@ Global
 		{9AE455C4-0BF7-43AC-95E2-9E1B1D642385}.Release35|Any CPU.Build.0 = Release|Any CPU
 		{9AE455C4-0BF7-43AC-95E2-9E1B1D642385}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{9AE455C4-0BF7-43AC-95E2-9E1B1D642385}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
-		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.Release35|Any CPU.ActiveCfg = Release|Any CPU
-		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.Release35|Any CPU.Build.0 = Release|Any CPU
-		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Release|Any CPU.ActiveCfg = Release|Any CPU

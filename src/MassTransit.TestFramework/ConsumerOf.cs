@@ -17,14 +17,14 @@ namespace MassTransit.TestFramework
 
 	public class ConsumerOf<TMessage> :
 		AbstractTestConsumer<TMessage>,
-		Consumes<TMessage>.All
+		IConsumer<TMessage>
 		where TMessage : class
 	{
 		public ConsumerOf()
 		{
 		}
 
-		public ConsumerOf(Action<TMessage> consumerAction)
+		public ConsumerOf(Action<ConsumeContext<TMessage>> consumerAction)
 			: base(consumerAction)
 		{
 		}

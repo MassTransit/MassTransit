@@ -10,31 +10,36 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier
+namespace MassTransit.Courier.Exceptions
 {
     using System;
     using System.Runtime.Serialization;
 
 
     [Serializable]
-    public class CourierException :
-        MassTransitException
+    public class InvalidCompensationAddressException :
+        ActivityExecutionException
     {
-        public CourierException()
+        public InvalidCompensationAddressException()
         {
         }
 
-        public CourierException(string message)
+        public InvalidCompensationAddressException(Uri address)
+            : base(string.Format("An invalid compensation address was specified: {0}", address))
+        {
+        }
+
+        public InvalidCompensationAddressException(string message)
             : base(message)
         {
         }
 
-        public CourierException(string message, Exception innerException)
+        public InvalidCompensationAddressException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
-        protected CourierException(SerializationInfo info, StreamingContext context)
+        protected InvalidCompensationAddressException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

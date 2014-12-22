@@ -13,11 +13,12 @@
 namespace MassTransit.TestFramework
 {
     using System;
+    using System.Threading.Tasks;
     using Logging;
-    using MassTransit.Transports;
     using NUnit.Framework;
     using Testing;
     using Testing.TestDecorators;
+    using Transports;
 
 
     [TestFixture]
@@ -90,7 +91,7 @@ namespace MassTransit.TestFramework
         {
             _bus = CreateBus(_transportCache);
 
-            var startTask = _bus.Start(TestCancellationToken);
+            Task<BusHandle> startTask = _bus.Start(TestCancellationToken);
 
             startTask.Wait(TestCancellationToken);
 

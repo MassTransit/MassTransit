@@ -92,8 +92,6 @@
     <Compile Include="Testing\SecondTestActivity.cs" />
     <Compile Include="Testing\TestActivity.cs" />
     <Compile Include="Testing\TestArguments.cs" />
-    <Compile Include="Testing\ActivityTestContext.cs" />
-    <Compile Include="Testing\ActivityTestFixture.cs" />
     <Compile Include="Testing\TestLog.cs" />
     <Compile Include="TwoActivityEvent_Specs.cs" />
   </ItemGroup>
@@ -101,10 +99,6 @@
     <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
       <Project>{8d2be372-a756-4676-b2ea-ed7846809bfe}</Project>
       <Name>MassTransit.Log4NetIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Courier\MassTransit.Courier.csproj">
-      <Project>{F949D7CF-A0BD-4915-B170-446D2D07B0F4}</Project>
-      <Name>MassTransit.Courier</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
       <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>
