@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,8 +15,6 @@ namespace MassTransit.Courier.Tests
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using Hosts;
-    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using Testing;
@@ -29,18 +27,18 @@ namespace MassTransit.Courier.Tests
         [Test]
         public void Should_serialize_properly()
         {
-                        var builder = new RoutingSlipBuilder(Guid.NewGuid());
-                        builder.AddActivity("a", new Uri("loopback://locahost/execute_a"));
-            
-                        builder.AddSubscription(new Uri("loopback://localhost/events"), RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted);
-            
-                        RoutingSlip routingSlip = builder.Build();
-            
-                        string jsonString = routingSlip.ToJsonString();
-            
-                        RoutingSlip loaded = RoutingSlipExtensions.GetRoutingSlip(jsonString);
-            
-                        Assert.AreEqual(RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted, loaded.Subscriptions[0].Events);
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+            builder.AddActivity("a", new Uri("loopback://locahost/execute_a"));
+
+            builder.AddSubscription(new Uri("loopback://localhost/events"), RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted);
+
+            RoutingSlip routingSlip = builder.Build();
+
+            string jsonString = routingSlip.ToJsonString();
+
+            RoutingSlip loaded = RoutingSlipExtensions.GetRoutingSlip(jsonString);
+
+            Assert.AreEqual(RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted, loaded.Subscriptions[0].Events);
         }
     }
 
@@ -49,14 +47,6 @@ namespace MassTransit.Courier.Tests
     public class Subscription_without_variables :
         ActivityTestFixture
     {
-        [Test]
-        public async void Should_receive_the_routing_slip_activity_completed_event()
-        {
-            ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
-
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
-        }
-
         [Test]
         public async void Should_not_receive_the_routing_slip_activity_log()
         {
@@ -71,6 +61,14 @@ namespace MassTransit.Courier.Tests
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
             Assert.IsFalse(context.Message.Variables.ContainsKey("Variable"));
+        }
+
+        [Test]
+        public async void Should_receive_the_routing_slip_activity_completed_event()
+        {
+            ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
+
+            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
@@ -105,6 +103,7 @@ namespace MassTransit.Courier.Tests
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
         }
     }
+
 
 //    [TestFixture]
 //    public class Adding_a_subscription_to_the_routing_slip

@@ -16,10 +16,9 @@ namespace MassTransit.Courier
     using System.Collections.Generic;
     using System.Linq;
     using Contracts;
-    using Events;
     using InternalMessages;
-    using Magnum.Reflection;
     using MassTransit.Events;
+    using Util;
 
 
     /// <summary>
@@ -37,9 +36,9 @@ namespace MassTransit.Courier
         readonly DateTime _createTimestamp;
         readonly IList<Activity> _itinerary;
         readonly List<Activity> _sourceItinerary;
+        readonly IList<Subscription> _subscriptions;
         readonly Guid _trackingNumber;
         readonly IDictionary<string, object> _variables;
-        IList<Subscription> _subscriptions;
 
         public RoutingSlipBuilder(Guid trackingNumber)
         {
@@ -162,7 +161,6 @@ namespace MassTransit.Courier
             SetVariablesFromDictionary(dictionary);
         }
 
-
         public void SetVariables(IEnumerable<KeyValuePair<string, object>> values)
         {
             SetVariablesFromDictionary(values);
@@ -270,7 +268,6 @@ namespace MassTransit.Courier
             _activityExceptions.Add(activityException);
         }
 
-
         void SetVariablesFromDictionary(IEnumerable<KeyValuePair<string, object>> logValues)
         {
             foreach (var logValue in logValues)
@@ -283,17 +280,15 @@ namespace MassTransit.Courier
             }
         }
 
-
         public static IDictionary<string, object> GetObjectAsDictionary(object values)
         {
             if (values == null)
                 return new Dictionary<string, object>();
 
-            IDictionary<string, object> dictionary = Statics.Converter.Convert(values);
+            IDictionary<string, object> dictionary = TypeMetadataCache.GetDictionaryConverter(values.GetType()).GetDictionary(values);
 
             return dictionary.ToDictionary(x => x.Key, x => x.Value);
         }
-
 
         /// <summary>
         /// Add an explicit subscription to the routing slip events
@@ -314,22 +309,6 @@ namespace MassTransit.Courier
         public void AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents)
         {
             _subscriptions.Add(new SubscriptionImpl(address, events, contents));
-        }
-
-
-        static class Statics
-        {
-            internal static readonly AnonymousObjectDictionaryConverter Converter =
-                new AnonymousObjectDictionaryConverter();
-
-            /// <summary>
-            /// Forces lazy load of all static fields in a thread-safe way.
-            /// The static initializer will not be executed until a property or method in that class
-            /// has been executed for the first time.
-            /// </summary>
-            static Statics()
-            {
-            }
         }
     }
 }

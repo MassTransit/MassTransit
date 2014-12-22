@@ -18,7 +18,7 @@ namespace MassTransit.Courier
 
     [Serializable]
     public class CourierException :
-        Exception
+        MassTransitException
     {
         public CourierException()
         {
