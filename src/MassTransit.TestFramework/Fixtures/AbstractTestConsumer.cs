@@ -17,7 +17,6 @@ namespace MassTransit.TestFramework.Fixtures
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Magnum.Extensions;
     using NUnit.Framework;
 
 
@@ -79,7 +78,7 @@ namespace MassTransit.TestFramework.Fixtures
 
         public void ShouldHaveReceived(TMessage message)
         {
-            ShouldHaveReceived(message, 0.Seconds());
+            ShouldHaveReceived(message, TimeSpan.Zero);
         }
 
         public void ShouldHaveReceived(TMessage message, TimeSpan timeout)
@@ -89,7 +88,7 @@ namespace MassTransit.TestFramework.Fixtures
 
         public void ShouldNotHaveReceivedMessage(TMessage message)
         {
-            Assert.That(ReceivedMessage(message, 0.Seconds()), Is.False, "Message should not have been received");
+            Assert.That(ReceivedMessage(message, TimeSpan.Zero), Is.False, "Message should not have been received");
         }
 
         public void ShouldNotHaveReceivedMessage(TMessage message, TimeSpan timeout)

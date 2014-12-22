@@ -59,12 +59,6 @@ namespace MassTransit.Tests.Configuration
 		}
 
 		[Test]
-		public void Should_have_subscribed()
-		{
-			_bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
-		}
-
-		[Test]
 		public void Should_receive_the_message()
 		{
 			_received.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
@@ -106,12 +100,6 @@ namespace MassTransit.Tests.Configuration
 		public void Finally()
 		{
 			_bus.Dispose();
-		}
-
-		[Test]
-		public void Should_have_subscribed()
-		{
-			_bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
 		}
 
 		[Test]

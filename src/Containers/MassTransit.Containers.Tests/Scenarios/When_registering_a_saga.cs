@@ -53,7 +53,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
-            foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(x => x.CorrelationId == sagaId && x.Second.IsCompleted);
+            foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(x => x.CorrelationId == sagaId && x.Second.IsCompleted, TestTimeout);
 
             foundId.HasValue.ShouldBe(true);
         }
@@ -75,7 +75,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
-            foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(x => x.CorrelationId == sagaId && x.Third.IsCompleted);
+            foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(x => x.CorrelationId == sagaId && x.Third.IsCompleted, TestTimeout);
 
             foundId.HasValue.ShouldBe(true);
         }

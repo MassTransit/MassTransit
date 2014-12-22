@@ -25,9 +25,6 @@
         [Test]
         public void Should_be_able_to_read_xml_when_using_json()
         {
-            Assert.IsTrue(RemoteBus.ShouldHaveSubscriptionFor<B>().Any());
-            Assert.IsTrue(LocalBus.ShouldHaveSubscriptionFor<A>().Any());
-
             LocalBus.GetEndpoint(RemoteUri).Send(new A { Key = "Hello" });
 
             _requestReceived.WaitUntilCompleted(8.Seconds()).ShouldBe(true);

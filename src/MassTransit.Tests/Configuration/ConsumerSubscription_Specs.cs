@@ -47,12 +47,6 @@ namespace MassTransit.Tests.Configuration
         }
 
         [Test]
-        public void Should_have_subscribed()
-        {
-            _bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
-        }
-
-        [Test]
         public void Should_have_received_the_message()
         {
             ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping, 8.Seconds());
@@ -83,12 +77,6 @@ namespace MassTransit.Tests.Configuration
         public void Finally()
         {
             _bus.Dispose();
-        }
-
-        [Test]
-        public void Should_have_subscribed()
-        {
-            _bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
         }
 
         [Test]
@@ -127,12 +115,6 @@ namespace MassTransit.Tests.Configuration
         public void Finally()
         {
             _bus.Dispose();
-        }
-
-        [Test]
-        public void Should_have_subscribed()
-        {
-            _bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
         }
 
         [Test]

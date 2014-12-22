@@ -42,7 +42,7 @@ namespace MassTransit.NHibernateIntegration.Tests
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
-            foundId = await _sagaRepository.Value.ShouldContainSaga(x => x.CorrelationId == sagaId && x.Completed);
+            foundId = await _sagaRepository.Value.ShouldContainSaga(x => x.CorrelationId == sagaId && x.Completed, TestTimeout);
 
             foundId.HasValue.ShouldBe(true);
         }
