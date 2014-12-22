@@ -19,8 +19,7 @@ namespace MassTransit.Courier.Hosts
     using System.Threading;
     using System.Threading.Tasks;
     using Contracts;
-    using Events;
-    using InternalMessages;
+    using Exceptions;
     using MassTransit.Events;
     using Pipeline;
 

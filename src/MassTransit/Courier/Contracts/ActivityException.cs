@@ -14,6 +14,7 @@ namespace MassTransit.Courier.Contracts
 {
     using System;
 
+
     /// <summary>
     /// Capture the exception information thrown by an activity
     /// </summary>

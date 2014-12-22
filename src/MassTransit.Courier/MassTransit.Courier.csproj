@@ -48,95 +48,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActivityFactoryExtensions.cs" />
-    <Compile Include="Argument.cs" />
-    <Compile Include="Contracts\ActivityException.cs" />
-    <Compile Include="Contracts\CompensateLog.cs" />
-    <Compile Include="Contracts\RoutingSlipEventContents.cs" />
-    <Compile Include="Contracts\RoutingSlipActivityCompensated.cs" />
-    <Compile Include="Contracts\RoutingSlipActivityCompensationFailed.cs" />
-    <Compile Include="Contracts\RoutingSlipActivityCompleted.cs" />
-    <Compile Include="Contracts\RoutingSlipActivityFaulted.cs" />
-    <Compile Include="Contracts\RoutingSlipCompensationFailed.cs" />
-    <Compile Include="Contracts\RoutingSlipEvents.cs" />
-    <Compile Include="Contracts\Subscription.cs" />
-    <Compile Include="Events\IRoutingSlipEventFilter.cs" />
-    <Compile Include="Events\IRoutingSlipEventPublisher.cs" />
-    <Compile Include="Events\RoutingSlipActivityCompensatedEventFilter.cs" />
-    <Compile Include="Events\RoutingSlipActivityCompletedEventFilter.cs" />
-    <Compile Include="Events\RoutingSlipActivityFaultedEventFilter.cs" />
-    <Compile Include="Events\RoutingSlipCompensationFailedEventFilter.cs" />
-    <Compile Include="Events\RoutingSlipCompletedEventFilter.cs" />
-    <Compile Include="Events\RoutingSlipEventFilterCache.cs" />
-    <Compile Include="Events\RoutingSlipEventPublisher.cs" />
-    <Compile Include="Events\RoutingSlipFaultedEventFilter.cs" />
-    <Compile Include="Exceptions\ActivityExecutionException.cs" />
-    <Compile Include="Exceptions\ActivityExecutionFaultedException.cs" />
-    <Compile Include="Exceptions\CourierException.cs" />
-    <Compile Include="Exceptions\InvalidCompensationAddressException.cs" />
-    <Compile Include="Hosts\CompensatedCompensationResult.cs" />
-    <Compile Include="Hosts\CompensatedWithVariablesCompensationResult.cs" />
-    <Compile Include="Hosts\DefaultConstructorActivityFactory.cs" />
-    <Compile Include="Hosts\DefaultConstructorCompensateActivityFactory.cs" />
-    <Compile Include="Hosts\CompletedExecutionResult.cs" />
-    <Compile Include="Hosts\FactoryMethodActivityFactory.cs" />
-    <Compile Include="Hosts\FactoryMethodCompensateActivityFactory.cs" />
-    <Compile Include="Hosts\FactoryMethodExecuteActivityFactory.cs" />
-    <Compile Include="Hosts\FailedCompensationResult.cs" />
-    <Compile Include="Hosts\FaultedExecutionResult.cs" />
-    <Compile Include="Hosts\GenericActivityFactory.cs" />
-    <Compile Include="Hosts\NextActivityExecutionResult.cs" />
-    <Compile Include="Hosts\NextActivityWithVariablesExecutionResult.cs" />
-    <Compile Include="ActivityFactory.cs" />
-    <Compile Include="CompensateActivityFactory.cs" />
-    <Compile Include="ExecuteActivityFactory.cs" />
-    <Compile Include="Hosts\ReviseItineraryExecutionResult.cs" />
-    <Compile Include="Hosts\ReviseItineraryWithVariablesExecutionResult.cs" />
-    <Compile Include="InternalMessages\ActivityExceptionImpl.cs" />
-    <Compile Include="InternalMessages\ActivityImpl.cs" />
-    <Compile Include="InternalMessages\ActivityLogImpl.cs" />
-    <Compile Include="InternalMessages\CompensateLogImpl.cs" />
-    <Compile Include="InternalMessages\RoutingSlipImpl.cs" />
-    <Compile Include="InternalMessages\SubscriptionImpl.cs" />
-    <Compile Include="ItineraryBuilder.cs" />
-    <Compile Include="RoutingSlipEventExtensions.cs" />
-    <Compile Include="Serialization\DefaultJsonTypeConverter.cs" />
-    <Compile Include="Serialization\JsonTypeConverter.cs" />
-    <Compile Include="Serialization\JsonExtensions.cs" />
-    <Compile Include="SerializerCache.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Activity.cs" />
-    <Compile Include="CompensateActivity.cs" />
-    <Compile Include="Compensation.cs" />
-    <Compile Include="CompensationResult.cs" />
-    <Compile Include="Contracts\Activity.cs" />
-    <Compile Include="Contracts\ActivityLog.cs" />
-    <Compile Include="Contracts\RoutingSlip.cs" />
-    <Compile Include="Contracts\RoutingSlipCompleted.cs" />
-    <Compile Include="Contracts\RoutingSlipFaulted.cs" />
-    <Compile Include="Exceptions\RoutingSlipException.cs" />
-    <Compile Include="ExecuteActivity.cs" />
-    <Compile Include="Execution.cs" />
-    <Compile Include="ExecutionResult.cs" />
-    <Compile Include="Extensions\LinqExtensions.cs" />
-    <Compile Include="HostSubscriptionExtensions.cs" />
-    <Compile Include="Hosts\CompensateActivityHost.cs" />
-    <Compile Include="Hosts\ExecuteActivityHost.cs" />
-    <Compile Include="Hosts\HostCompensation.cs" />
-    <Compile Include="Hosts\HostExecuteContext.cs" />
-    <Compile Include="Hosts\SanitizedRoutingSlip.cs" />
-    <Compile Include="InternalMessages\CompensationFailed.cs" />
-    <Compile Include="InternalMessages\RoutingSlipActivityCompensatedMessage.cs" />
-    <Compile Include="InternalMessages\RoutingSlipActivityCompletedMessage.cs" />
-    <Compile Include="InternalMessages\RoutingSlipActivityFaultedMessage.cs" />
-    <Compile Include="InternalMessages\RoutingSlipCompletedMessage.cs" />
-    <Compile Include="InternalMessages\RoutingSlipFaultedMessage.cs" />
-    <Compile Include="RoutingSlipBuilder.cs" />
-    <Compile Include="RoutingSlipExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -145,7 +59,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Configuration\" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>

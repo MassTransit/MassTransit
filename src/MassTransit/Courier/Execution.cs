@@ -14,7 +14,6 @@ namespace MassTransit.Courier
 {
     using System;
     using System.Collections.Generic;
-    using Contracts;
 
 
     public interface Execution<out TArguments> :

@@ -14,6 +14,7 @@ namespace MassTransit.Courier.Serialization
 {
     using Newtonsoft.Json.Linq;
 
+
     /// <summary>
     /// Converts from a JToken to the requested type
     /// </summary>

@@ -103,10 +103,6 @@
       <Project>{8d2be372-a756-4676-b2ea-ed7846809bfe}</Project>
       <Name>MassTransit.Log4NetIntegration</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.Courier\MassTransit.Courier.csproj">
-      <Project>{f949d7cf-a0bd-4915-b170-446d2d07b0f4}</Project>
-      <Name>MassTransit.Courier</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
       <Name>MassTransit</Name>

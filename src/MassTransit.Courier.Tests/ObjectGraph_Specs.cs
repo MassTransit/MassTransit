@@ -19,6 +19,8 @@ namespace MassTransit.Courier.Tests
     using Contracts;
     using NUnit.Framework;
     using Shouldly;
+    using TestFramework;
+    using TestFramework.Fixtures;
     using Testing;
 
 
