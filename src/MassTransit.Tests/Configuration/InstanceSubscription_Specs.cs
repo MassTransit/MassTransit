@@ -45,12 +45,6 @@ namespace MassTransit.Tests.Configuration
 		}
 
 		[Test]
-		public void Should_have_subscribed()
-		{
-			_bus.ShouldHaveRemoteSubscriptionFor<PingMessage>();
-		}
-
-		[Test]
 		public void Should_have_received_the_message()
 		{
 			_consumer.ShouldHaveReceived(_ping, 8.Seconds());
