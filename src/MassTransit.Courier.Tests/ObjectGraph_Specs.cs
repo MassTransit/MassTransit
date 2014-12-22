@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,77 +14,66 @@ namespace MassTransit.Courier.Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
     using Contracts;
-    using Magnum.Extensions;
     using NUnit.Framework;
+    using Shouldly;
     using Testing;
 
 
-//    [TestFixture]
-//    public class Storing_an_object_graph_as_a_variable_or_argument :
-//        ActivityTestFixture
-//    {
-//        [Test]
-//        public void Should_work_for_activity_arguments()
-//        {
-//            _intValue = 27;
-//            _stringValue = "Hello, World.";
-//            _decimalValue = 123.45m;
-//
-//            var completed = new TaskCompletionSource<RoutingSlipCompleted>();
-//            var faulted = new TaskCompletionSource<RoutingSlipFaulted>();
-//
-//            LocalBus.SubscribeHandler<RoutingSlipCompleted>(message => completed.TrySetResult(message));
-//            LocalBus.SubscribeHandler<RoutingSlipFaulted>(message => faulted.TrySetResult(message));
-//
-//            Assert.IsTrue(WaitForSubscription<RoutingSlipCompleted>());
-//            Assert.IsTrue(WaitForSubscription<RoutingSlipFaulted>());
-//
-//            var builder = new RoutingSlipBuilder(Guid.NewGuid());
-//
-//            ActivityTestContext testActivity = GetActivityContext<ObjectGraphTestActivity>();
-//            ActivityTestContext testActivity2 = GetActivityContext<TestActivity>();
-//
-//            var dictionary = new Dictionary<string, object>
-//                {
-//                    {"Outer", new OuterObjectImpl(_intValue, _stringValue, _decimalValue)},
-//                    {"Names", new[] {"Albert", "Chris"}},
-//                };
-//            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, dictionary);
-//            builder.AddActivity(testActivity2.Name, testActivity2.ExecuteUri);
-//
-//            LocalBus.Execute(builder.Build());
-//
-//            Assert.AreNotEqual(WaitHandle.WaitTimeout,
-//                Task.WaitAny(new Task[] { completed.Task, faulted.Task }, Debugger.IsAttached
-//                                                                            ? 5.Minutes()
-//                                                                            : 30.Seconds()));
-//
-//            if (faulted.Task.Status == TaskStatus.RanToCompletion)
-//            {
-//                Assert.Fail("Failed due to exception {0}", faulted.Task.Result.ActivityExceptions.Any()
-//                                                               ? faulted.Task.Result.ActivityExceptions.First()
-//                                                                        .ExceptionInfo.Message
-//                                                               : "Unknown");
-//            }
-//
-//            Assert.AreEqual(TaskStatus.RanToCompletion, completed.Task.Status, "Did not complete");
-//        }
-//
-//        int _intValue;
-//        string _stringValue;
-//        decimal _decimalValue;
-//
-//        protected override void SetupActivities()
-//        {
-//            AddActivityContext<ObjectGraphTestActivity, ObjectGraphActivityArguments, TestLog>(
-//                () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[]{"Albert", "Chris"}));
-//            AddActivityContext<TestActivity, TestArguments, TestLog>(
-//                () => new TestActivity());
-//        }
-//    }
+    [TestFixture]
+    public class Storing_an_object_graph_as_a_variable_or_argument :
+        ActivityTestFixture
+    {
+        [Test]
+        public async void Should_work_for_activity_arguments()
+        {
+            _intValue = 27;
+            _stringValue = "Hello, World.";
+            _decimalValue = 123.45m;
+
+            Task<ConsumeContext<RoutingSlipCompleted>> completed = SubscribeHandler<RoutingSlipCompleted>();
+            Task<ConsumeContext<RoutingSlipFaulted>> faulted = SubscribeHandler<RoutingSlipFaulted>();
+
+            ActivityTestContext testActivity = GetActivityContext<ObjectGraphTestActivity>();
+            ActivityTestContext testActivity2 = GetActivityContext<TestActivity>();
+
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+
+            var dictionary = new Dictionary<string, object>
+            {
+                {"Outer", new OuterObjectImpl(_intValue, _stringValue, _decimalValue)},
+                {"Names", new[] {"Albert", "Chris"}},
+            };
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, dictionary);
+            builder.AddActivity(testActivity2.Name, testActivity2.ExecuteUri);
+
+            await Bus.Execute(builder.Build());
+
+            await Task.WhenAny(completed, faulted);
+
+            if (faulted.Status == TaskStatus.RanToCompletion)
+            {
+                Assert.Fail("Failed due to exception {0}", faulted.Result.Message.ActivityExceptions.Any()
+                    ? faulted.Result.Message.ActivityExceptions.First()
+                        .ExceptionInfo.Message
+                    : "Unknown");
+            }
+
+            completed.Status.ShouldBe(TaskStatus.RanToCompletion);
+        }
+
+        int _intValue;
+        string _stringValue;
+        decimal _decimalValue;
+
+        protected override void SetupActivities()
+        {
+            AddActivityContext<ObjectGraphTestActivity, ObjectGraphActivityArguments, TestLog>(
+                () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[] {"Albert", "Chris"}));
+            AddActivityContext<TestActivity, TestArguments, TestLog>(
+                () => new TestActivity());
+        }
+    }
 }
