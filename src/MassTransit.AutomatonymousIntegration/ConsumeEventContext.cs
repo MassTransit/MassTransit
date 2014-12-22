@@ -19,7 +19,6 @@ namespace Automatonymous
     /// Combines the consumption of an event in a state machine with the consumer context of the receiving endpoint.
     /// </summary>
     /// <typeparam name="TInstance"></typeparam>
-    /// <typeparam name="TData"></typeparam>
     public interface ConsumeEventContext<out TInstance> :
         EventContext<TInstance>
     {
@@ -33,9 +32,9 @@ namespace Automatonymous
     /// <typeparam name="TInstance"></typeparam>
     /// <typeparam name="TData"></typeparam>
     public interface ConsumeEventContext<out TInstance, out TData> :
+        ConsumeEventContext<TInstance>,
         EventContext<TInstance, TData>
         where TData : class
     {
-        ConsumeContext<TData> ConsumeContext { get; }
     }
 }
