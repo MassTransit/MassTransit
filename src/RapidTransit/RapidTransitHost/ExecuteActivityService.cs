@@ -39,7 +39,6 @@ namespace RapidTransit
         readonly ILog _log;
         readonly ITransportConfigurator _transportFactory;
         bool _disposed;
-        IServiceBus _executeBus;
 
         public ExecuteActivityService(IConfigurationProvider configuration, ITransportConfigurator transportFactory,
             IActivityQueueNameProvider activityUriProvider, ExecuteActivityFactory<TArguments> executeActivityFactory)
@@ -60,29 +59,17 @@ namespace RapidTransit
         {
             if (_disposed)
                 return;
-
-            if (_executeBus != null)
-                _executeBus.Dispose();
-
             _disposed = true;
         }
 
         public virtual bool Start(HostControl hostControl)
         {
-//            _executeBus = CreateExecuteServiceBus();
 
             return true;
         }
 
         public virtual bool Stop(HostControl hostControl)
         {
-            if (_executeBus != null)
-            {
-                _log.InfoFormat("Stopping Execute {0} Service Bus", _activityName);
-                _executeBus.Dispose();
-                _executeBus = null;
-            }
-
             return true;
         }
 

@@ -15,34 +15,25 @@ namespace Automatonymous.SubscriptionConnectors
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Magnum.Reflection;
     using MassTransit;
+    using MassTransit.Internals.Extensions;
     using MassTransit.PipeConfigurators;
     using MassTransit.Pipeline;
     using MassTransit.Policies;
     using MassTransit.Saga;
-    using MassTransit.SubscriptionConnectors;
+    using MassTransit.Saga.SubscriptionConnectors;
     using MassTransit.Util;
 
 
-    public interface StateMachineConnector
+    public class StateMachineConnector<TInstance> :
+        SagaConnector
+        where TInstance : class, ISaga, SagaStateMachineInstance
     {
-        ConnectHandle Connect<TInstance>(IConsumePipe consumePipe, ISagaRepository<TInstance> sagaRepository, IRetryPolicy retryPolicy,
-            params IPipeBuilderConfigurator<SagaConsumeContext<TInstance>>[] pipeBuilderConfigurators)
-            where TInstance : class, ISaga, SagaStateMachineInstance;
-    }
+        readonly IEnumerable<SagaMessageConnector> _connectors;
+        readonly StateMachineSagaRepository<TInstance> _repository;
+        readonly StateMachine<TInstance> _stateMachine;
 
-
-    public class StateMachineConnector<T> :
-        StateMachineConnector
-        where T : class, SagaStateMachineInstance
-    {
-        readonly IEnumerable<StateMachineSubscriptionConnector> _connectors;
-        readonly StateMachineSagaRepository<T> _repository;
-        readonly StateMachine<T> _stateMachine;
-
-        public StateMachineConnector(StateMachine<T> stateMachine,
-            StateMachineSagaRepository<T> repository)
+        public StateMachineConnector(StateMachine<TInstance> stateMachine, StateMachineSagaRepository<TInstance> repository)
         {
             _stateMachine = stateMachine;
             _repository = repository;
@@ -54,52 +45,67 @@ namespace Automatonymous.SubscriptionConnectors
             catch (Exception ex)
             {
                 throw new ConfigurationException(
-                    "Failed to create the state machine connector for " + typeof(T).FullName, ex);
+                    "Failed to create the state machine connector for " + typeof(TInstance).FullName, ex);
             }
         }
 
-        public IEnumerable<StateMachineSubscriptionConnector> Connectors
+        public IEnumerable<SagaMessageConnector> Connectors
         {
             get { return _connectors; }
         }
 
-        public ConnectHandle Connect<TInstance>(IConsumePipe consumePipe, ISagaRepository<TInstance> sagaRepository, IRetryPolicy retryPolicy,
-            params IPipeBuilderConfigurator<SagaConsumeContext<TInstance>>[] pipeBuilderConfigurators)
-            where TInstance : class, ISaga, SagaStateMachineInstance
+        public ConnectHandle Connect<TInstance>(IConsumePipe consumePipe, ISagaRepository<TInstance> sagaRepository,
+            IRetryPolicy retryPolicy,
+            params IPipeBuilderConfigurator<SagaConsumeContext<TInstance>>[] pipeBuilderConfigurators) where TInstance : class, ISaga
         {
-            return new MultipleConnectHandle(_connectors.Select(x => x.Connect(consumePipe, sagaRepository, retryPolicy, pipeBuilderConfigurators)));
+            var handles = new List<ConnectHandle>();
+            try
+            {
+                foreach (SagaMessageConnector connector in _connectors)
+                {
+                    ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, retryPolicy, pipeBuilderConfigurators);
+
+                    handles.Add(handle);
+                }
+
+                return new MultipleConnectHandle(handles);
+            }
+            catch (Exception)
+            {
+                foreach (ConnectHandle handle in handles)
+                    handle.Dispose();
+                throw;
+            }
         }
 
-        IEnumerable<StateMachineSubscriptionConnector> StateMachineEvents()
+        IEnumerable<SagaMessageConnector> StateMachineEvents()
         {
-            var policyFactory = new AutomatonymousStateMachinePolicyFactory<T>(_stateMachine);
+            StateMachinePolicyFactory<TInstance> policyFactory = new AutomatonymousStateMachinePolicyFactory<TInstance>(_stateMachine);
 
             foreach (Event @event in _stateMachine.Events)
             {
-                Type eventType = @event.GetType();
+                Event stateMachineEvent = @event;
 
-                Type dataEventInterfaceType = eventType.GetInterfaces()
-                    .Where(x => x.IsGenericType)
-                    .Where(x => x.GetGenericTypeDefinition() == typeof(Event<>))
-                    .SingleOrDefault();
-                if (dataEventInterfaceType == null)
+                Type eventType = stateMachineEvent.GetType();
+
+                Type messageType = eventType.GetClosingArguments(typeof(Event<>)).SingleOrDefault();
+                if (messageType == null || messageType.IsValueType)
                     continue;
 
-                Type messageType = dataEventInterfaceType.GetGenericArguments()[0];
-                if (messageType.IsValueType)
-                    continue;
+                IEnumerable<State<TInstance>> states = _stateMachine.States
+                    .Where(state => _stateMachine.NextEvents(state).Contains(stateMachineEvent))
+                    .Select(x => _stateMachine.GetState(x.Name));
 
-                IEnumerable<State> states =
-                    _stateMachine.States.Where(state => _stateMachine.NextEvents(state).Contains(@event));
+                Type genericType = typeof(StateMachineInterfaceType<,>).MakeGenericType(typeof(TInstance), messageType);
 
-                var factory =
-                    (StateMachineEventConnectorFactory)
-                        FastActivator.Create(typeof(StateMachineEventConnectorFactory<,>),
-                            new[] {typeof(T), messageType},
-                            new object[] {_stateMachine, _repository, policyFactory, @event, states});
+                var interfaceType = (IStateMachineInterfaceType<TInstance>)Activator.CreateInstance(genericType,
+                    _stateMachine, _repository, policyFactory, states, stateMachineEvent);
 
-                foreach (StateMachineSubscriptionConnector connector in factory.Create())
-                    yield return connector;
+
+//                        public StateMachineInterfaceType(StateMachine<TInstance> machine, StateMachineSagaRepository<TInstance> repository,
+//            StateMachinePolicyFactory<TInstance> policyFactory, IEnumerable<State<TInstance>> states, Event<TData> @event)
+
+                yield return interfaceType.GetConnector();
             }
         }
     }

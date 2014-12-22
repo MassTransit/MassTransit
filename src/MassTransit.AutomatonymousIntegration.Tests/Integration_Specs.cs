@@ -12,54 +12,52 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutomatonymousTests
 {
-    using Advanced;
-    using Magnum.Extensions;
     using NUnit.Framework;
     using SubscriptionConfigurators;
 
 
-    [TestFixture]
-    public abstract class MassTransitTestFixture
-    {
-        IServiceBus _bus;
+//    [TestFixture]
+//    public abstract class MassTransitTestFixture
+//    {
+//        IServiceBus _bus;
+//
+//        protected IServiceBus Bus
+//        {
+//            get { return _bus; }
+//        }
+//
+//        [TestFixtureSetUp]
+//        public void Setup()
+//        {
+//            _bus = ServiceBusFactory.New(x =>
+//                {
+//                    x.ReceiveFrom("loopback://localhost/bus");
+//                    x.UseJsonSerializer();
+//                    x.SetReceiveTimeout(50.Milliseconds());
+//
+//                    x.Subscribe(ConfigureSubscriptions);
+//                });
+//        }
+//
+//        protected virtual void ConfigureSubscriptions(SubscriptionBusServiceConfigurator configurator)
+//        {
+//        }
+//
+//        [TestFixtureTearDown]
+//        public void Teardown()
+//        {
+//            _bus.Dispose();
+//        }
+//    }
 
-        protected IServiceBus Bus
-        {
-            get { return _bus; }
-        }
 
-        [TestFixtureSetUp]
-        public void Setup()
-        {
-            _bus = ServiceBusFactory.New(x =>
-                {
-                    x.ReceiveFrom("loopback://localhost/bus");
-                    x.UseJsonSerializer();
-                    x.SetReceiveTimeout(50.Milliseconds());
-
-                    x.Subscribe(ConfigureSubscriptions);
-                });
-        }
-
-        protected virtual void ConfigureSubscriptions(SubscriptionBusServiceConfigurator configurator)
-        {
-        }
-
-        [TestFixtureTearDown]
-        public void Teardown()
-        {
-            _bus.Dispose();
-        }
-    }
-
-
-    [TestFixture]
-    public class Doing_nothing :
-        MassTransitTestFixture
-    {
-        [Test]
-        public void Should_setup_the_bus_integration()
-        {
-        }
-    }
+//    [TestFixture]
+//    public class Doing_nothing :
+//        MassTransitTestFixture
+//    {
+//        [Test]
+//        public void Should_setup_the_bus_integration()
+//        {
+//        }
+//    }
 }

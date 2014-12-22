@@ -15,11 +15,11 @@ namespace Automatonymous.SubscriptionConfigurators
     using System.Collections.Generic;
     using MassTransit.Configurators;
     using MassTransit.EndpointConfigurators;
-    using MassTransit.SubscriptionConfigurators;
+    using MassTransit.Policies;
+    using SubscriptionConnectors;
 
 
     public class StateMachineSubscriptionConfiguratorImpl<TInstance> :
-        SubscriptionConfiguratorImpl<StateMachineSubscriptionConfigurator<TInstance>>,
         StateMachineSubscriptionConfigurator<TInstance>,
         IReceiveEndpointBuilderConfigurator
         where TInstance : class, SagaStateMachineInstance
@@ -37,16 +37,15 @@ namespace Automatonymous.SubscriptionConfigurators
         public IEnumerable<ValidationResult> Validate()
         {
             if (_stateMachine == null)
-                yield return this.Failure("The state machine cannot be null.");
+                yield return this.Failure("StateMachine", "must not be null");
+            if (_repository == null)
+                yield return this.Failure("Repository", "must not be null");
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
+            var connector = new StateMachineConnector<TInstance>(_stateMachine, _repository);
+            connector.Connect(builder.InputPipe, _repository, Retry.None);
         }
-
-//        public SubscriptionBuilder Configure()
-//        {
-//            return new StateMachineSubscriptionBuilder<TInstance>(_stateMachine, _repository, ReferenceFactory);
-//        }
     }
 }

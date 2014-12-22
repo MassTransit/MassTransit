@@ -65,7 +65,7 @@ namespace Automatonymous
             get { return _context.Data; }
         }
 
-        public ConsumeContext<TData> ConsumeContext
+        public ConsumeContext ConsumeContext
         {
             get { return _consumeContext; }
         }

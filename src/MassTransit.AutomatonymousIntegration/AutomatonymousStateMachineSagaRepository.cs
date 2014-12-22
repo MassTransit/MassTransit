@@ -18,7 +18,7 @@ namespace Automatonymous
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using MassTransit;
-    using MassTransit.Logging;
+    using MassTransit.Internals.Extensions;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
     using RepositoryBuilders;
@@ -28,11 +28,9 @@ namespace Automatonymous
         StateMachineSagaRepository<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
-        static readonly ILog _log = Logger.Get<AutomatonymousStateMachineSagaRepository<TInstance>>();
-
         readonly Expression<Func<TInstance, bool>> _completedExpression;
-        readonly Cache<Event, StateMachineEventCorrelation<TInstance>> _correlations;
-        readonly Cache<Type, StateMachineEventCorrelation<TInstance>> _messageTypes;
+        readonly Dictionary<Event, StateMachineEventCorrelation<TInstance>> _correlations;
+        readonly Dictionary<Type, StateMachineEventCorrelation<TInstance>> _messageTypes;
         readonly ISagaRepository<TInstance> _repository;
 
         public AutomatonymousStateMachineSagaRepository(ISagaRepository<TInstance> repository,
@@ -42,15 +40,15 @@ namespace Automatonymous
             _repository = repository;
             _completedExpression = completedExpression;
 
-            StateMachineEventCorrelation<TInstance>[] eventCorrelations = correlations as StateMachineEventCorrelation<TInstance>[]
-                ?? correlations.ToArray();
+            StateMachineEventCorrelation<TInstance>[] eventCorrelations = correlations.ToArray();
 
-            _correlations = new DictionaryCache<Event, StateMachineEventCorrelation<TInstance>>(x => x.Event);
-            _correlations.Fill(eventCorrelations);
+            _correlations = new Dictionary<Event, StateMachineEventCorrelation<TInstance>>();
+            foreach (var correlation in eventCorrelations)
+                _correlations.Add(correlation.Event, correlation);
 
-            _messageTypes = new DictionaryCache<Type, StateMachineEventCorrelation<TInstance>>(
-                x => x.Event.GetType().GetClosingArguments(typeof(Event<>)).Single());
-            _messageTypes.Fill(eventCorrelations);
+            _messageTypes = new Dictionary<Type, StateMachineEventCorrelation<TInstance>>();
+            foreach (var eventCorrelation in eventCorrelations)
+                _messageTypes.Add(eventCorrelation.Event.GetType().GetClosingArguments(typeof(Event<>)).Single(), eventCorrelation);
         }
 
 //        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
@@ -82,6 +80,12 @@ namespace Automatonymous
 //                    _log.DebugFormat("Retry limit for {0} {1} reached {2}", typeof(TMessage).Name, context.MessageId, attempts + 1);
 //            }
 //        }
+
+        public Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TInstance, T>> next)
+            where T : class
+        {
+            return _repository.Send(context, next);
+        }
 
         public Task<IEnumerable<Guid>> Find(ISagaFilter<TInstance> filter)
         {

@@ -13,7 +13,6 @@
 namespace RapidTransit
 {
     using System;
-    using MassTransit;
     using MassTransit.RabbitMqTransport.Configuration;
 
 

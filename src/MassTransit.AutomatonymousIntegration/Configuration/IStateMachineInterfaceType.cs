@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,9 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace Automatonymous.SubscriptionConfigurators
+namespace Automatonymous
 {
-    public interface StateMachineSubscriptionConfigurator<TInstance>
+    using MassTransit.Saga;
+    using MassTransit.Saga.SubscriptionConnectors;
+
+
+    public interface IStateMachineInterfaceType<TInstance>
+        where TInstance : class, ISaga, SagaStateMachineInstance
     {
+        SagaMessageConnector GetConnector();
     }
 }

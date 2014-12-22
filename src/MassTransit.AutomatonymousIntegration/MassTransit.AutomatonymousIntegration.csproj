@@ -37,13 +37,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Magnum, Version=2.1.2.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Magnum.2.1.2\lib\NET40\Magnum.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
@@ -54,7 +47,11 @@
     <Compile Include="Activities\PublishActivity.cs" />
     <Compile Include="Activities\RespondActivity.cs" />
     <Compile Include="Activities\RetryLaterActivity.cs" />
+    <Compile Include="Configuration\IStateMachineInterfaceType.cs" />
     <Compile Include="Configuration\RepositoryConfigurators\StateMachineEventCorrelationConfigurator.cs" />
+    <Compile Include="Configuration\StateMachineInterfaceType.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\CorrelatedStateMachineEventConnectorFactory.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\ExpressionStateMachineEventConnectorFactory.cs" />
     <Compile Include="ConsumeEventContext.cs" />
     <Compile Include="ConsumeEventContextImpl.cs" />
     <Compile Include="Testing\StateMachineSagaTestBuilderImpl.cs" />
@@ -63,7 +60,6 @@
     <Compile Include="Testing\StateMachineSagaTestingExtensions.cs" />
     <Compile Include="Configuration\BuilderConfigurators\StateMachineSagaRepositoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\PublishExtensions.cs" />
-    <Compile Include="Configuration\PublishRequestExtensions.cs" />
     <Compile Include="Configuration\RepositoryBuilders\StateMachineEventCorrelation.cs" />
     <Compile Include="Configuration\RepositoryBuilders\StateMachineEventCorrelationImpl.cs" />
     <Compile Include="Configuration\RepositoryBuilders\StateMachineSagaRepositoryBuilder.cs" />
@@ -76,17 +72,12 @@
     <Compile Include="Configuration\AutomatonymousStateMachinePolicyFactory.cs" />
     <Compile Include="Configuration\StateMachineSagaRepositoryExtensions.cs" />
     <Compile Include="Configuration\StateMachineSubscriptionExtensions.cs" />
-    <Compile Include="Configuration\SubscriptionBuilders\StateMachineSubscriptionBuilder.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSubscriptionConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSubscriptionConfiguratorImpl.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\CorrelatedStateMachineSubscriptionConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\ExpressionStateMachineSubscriptionConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\StateMachineEventConnectorFactory.cs" />
+    <Compile Include="Configuration\SubscriptionConnectors\StateMachineSagaMessageConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\StateMachineConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\StateMachineSubscriptionConnector.cs" />
     <Compile Include="SagaStateMachineInstance.cs" />
     <Compile Include="Saga\Pipeline\CorrelatedSagaStateMachineMessageSink.cs" />
-    <Compile Include="Saga\Pipeline\ExpressionStateMachineMessageSink.cs" />
     <Compile Include="StateMachineSagaRepository.cs" />
     <Compile Include="AutomatonymousStateMachineSagaRepository.cs" />
   </ItemGroup>
@@ -100,9 +91,8 @@
       <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <None Include="packages.config" />
+    <Folder Include="Configuration\SubscriptionBuilders\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

@@ -107,7 +107,7 @@ namespace MassTransit
         Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
-        /// <see cref="IServiceBus.Publish{T}"/>: this is a "dynamically"
+        /// <see cref="IBus.Publish{T}"/>: this is a "dynamically"
         /// typed overload - give it an interface as its type parameter,
         /// and a loosely typed dictionary of values and the MassTransit
         /// underlying infrastructure will populate an object instance
@@ -123,9 +123,9 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        /// <see cref="Publish{T}(MassTransit.IServiceBus,object)"/>: this
+        /// <see cref="Publish{T}(MassTransit.IBus,object)"/>: this
         /// overload further takes an action; it allows you to set <see cref="IPublishContext"/>
-        /// meta-data. Also <see cref="IServiceBus.Publish{T}"/>.
+        /// meta-data. Also <see cref="IBus.Publish{T}"/>.
         /// </summary>
         /// <typeparam name="T">The type of the message to publish</typeparam>
         /// <param name="values">The dictionary of values to become hydrated and
@@ -136,9 +136,9 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        /// <see cref="Publish{T}(MassTransit.IServiceBus,object)"/>: this
+        /// <see cref="Publish{T}(MassTransit.IBus,object)"/>: this
         /// overload further takes an action; it allows you to set <see cref="IPublishContext"/>
-        /// meta-data. Also <see cref="IServiceBus.Publish{T}"/>.
+        /// meta-data. Also <see cref="IBus.Publish{T}"/>.
         /// </summary>
         /// <typeparam name="T">The type of the message to publish</typeparam>
         /// <param name="values">The dictionary of values to become hydrated and

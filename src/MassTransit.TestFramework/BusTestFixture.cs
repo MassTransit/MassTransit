@@ -70,7 +70,7 @@ namespace MassTransit.TestFramework
             {
                 if (filter(context))
                 {
-                    source.SetResult(context);
+                    source.TrySetResult(context);
 
                     handler.Disconnect();
                 }

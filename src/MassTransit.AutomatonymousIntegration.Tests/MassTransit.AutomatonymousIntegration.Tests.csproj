@@ -36,20 +36,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Magnum, Version=2.1.2.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+    <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Magnum.2.1.2\lib\NET40\Magnum.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit, Version=2.9.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MassTransit.2.9.5\lib\net40\MassTransit.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\..\..\Automatonymous\src\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -60,9 +49,7 @@
     </Compile>
     <Compile Include="CompositeEvent_Specs.cs" />
     <Compile Include="Fault_Specs.cs" />
-    <Compile Include="FutureMessage.cs" />
     <Compile Include="Integration_Specs.cs" />
-    <Compile Include="PublishRequest_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
     <Compile Include="RemoveWhen_Specs.cs" />
     <Compile Include="Respond_Specs.cs" />
@@ -79,6 +66,14 @@
     <ProjectReference Include="..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj">
       <Project>{A852511B-2742-4F4D-BD4E-ADDDBF3BD4B3}</Project>
       <Name>Automatonymous.MassTransitIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
+      <Project>{3c4b5f1a-69ad-415e-9f40-a7fdbd7a3012}</Project>
+      <Name>MassTransit.TestFramework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
+      <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
+      <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
