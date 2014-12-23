@@ -12,25 +12,24 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Groups
 {
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.Linq;
-	using NUnit.Framework;
-	using TextFixtures;
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using NUnit.Framework;
 
-	[TestFixture]
-	public class Group_Specs :
-		LoopbackTestFixture
+
+    [TestFixture]
+	public class Group_Specs
 	{
 		private Guid _transactionId;
 
-		protected  void EstablishContext()
+        [SetUp]
+		protected  void SetUp()
 		{
-			base.EstablishContext();
-
 			_transactionId = Guid.NewGuid();
 		}
+
 
 		[Test]
 		public void It_should_be_easy_to_build_and_send_a_group_of_messages()
