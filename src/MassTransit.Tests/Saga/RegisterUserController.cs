@@ -21,12 +21,12 @@ namespace MassTransit.Tests.Saga
 		Consumes<UserRegistrationPending>.All,
 		Consumes<UserRegistrationComplete>.All
 	{
-		readonly IServiceBus _bus;
+		readonly IBus _bus;
 		readonly ManualResetEvent _registrationComplete = new ManualResetEvent(false);
 		readonly Guid _correlationId;
 		readonly ManualResetEvent _registrationPending = new ManualResetEvent(false);
 
-		public RegisterUserController(IServiceBus bus)
+		public RegisterUserController(IBus bus)
 		{
 			_bus = bus;
 			_correlationId = Guid.NewGuid();

@@ -17,20 +17,30 @@ namespace MassTransit.Tests.Saga
     using Messages;
     using NUnit.Framework;
     using Shouldly;
-    using TextFixtures;
-
+    using TestFramework;
 
     [TestFixture]
     public class When_a_unknown_user_registers :
-        LoopbackLocalAndRemoteTestFixture
+        InMemoryTestFixture
     {
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            var sagaRepository = new InMemorySagaRepository<RegisterUserSaga>();
+            configurator.Saga(sagaRepository);
+
+            configurator.Handler<SendUserVerificationEmail>(async x =>
+            {
+                await Bus.Publish(new UserVerificationEmailSent(x.Message.CorrelationId, x.Message.Email));
+            });
+        }
+
         [Test]
         public void The_user_should_be_pending()
         {
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
 
-            var controller = new RegisterUserController(LocalBus);
-            using (ConnectHandle unsubscribe = LocalBus.ConnectInstance(controller))
+            var controller = new RegisterUserController(Bus);
+            using (ConnectHandle unsubscribe = Bus.ConnectInstance(controller))
             {
                 bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
 
@@ -43,20 +53,6 @@ namespace MassTransit.Tests.Saga
 
                 complete.ShouldBe(true); //("The user should be complete");
             }
-        }
-
-        protected void EstablishContext()
-        {
-            InMemorySagaRepository<RegisterUserSaga> sagaRepository = SetupSagaRepository<RegisterUserSaga>();
-
-            // this just shows that you can easily respond to the message
-            RemoteBus.ConnectHandler<SendUserVerificationEmail>(
-                async x =>
-                {
-                    await RemoteBus.Publish(new UserVerificationEmailSent(x.Message.CorrelationId, x.Message.Email));
-                });
-
-            RemoteBus.ConnectSaga(sagaRepository);
         }
     }
 }
