@@ -15,17 +15,16 @@ namespace MassTransit.Tests.Saga
     using BusConfigurators;
     using MassTransit.Saga;
     using NUnit.Framework;
-    using TextFixtures;
+    using TestFramework;
 
 
     [TestFixture]
     public class Injecting_properties_into_a_saga :
-        LoopbackTestFixture
+        InMemoryTestFixture
     {
-        protected override void ConfigureLocalBus(ServiceBusConfigurator configurator)
+        protected override void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
         {
-            base.ConfigureLocalBus(configurator);
-
+         
             // this is our dependency, but could be dynamically resolved from a container in method
             // below is so desired.
             var dependency = new Dependency();
@@ -42,6 +41,14 @@ namespace MassTransit.Tests.Saga
 
             // subscribe the decorated saga repository to the bus during configuration
             //configurator.Subscribe(x => x.Saga(injectingRepository));
+        }
+
+        protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
+            where TSaga : class, ISaga
+        {
+            var sagaRepository = new InMemorySagaRepository<TSaga>();
+
+            return sagaRepository;
         }
 
 

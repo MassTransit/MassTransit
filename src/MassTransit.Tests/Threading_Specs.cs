@@ -7,11 +7,11 @@
     using System.Threading;
     using Magnum.Extensions;
     using NUnit.Framework;
-    using TextFixtures;
+    using TestFramework;
 
     [TestFixture]
     public class When_configuring_the_thread_pool_for_a_high_number_of_consumers :
-        LoopbackTestFixture
+        InMemoryTestFixture
     {
         ManualResetEvent _wait;
         Semaphore _before;
@@ -24,12 +24,8 @@
             _after = new Semaphore(0, 100);
         }
 
-        protected override void ConfigureLocalBus(BusConfigurators.ServiceBusConfigurator configurator)
+        protected override void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
         {
-            base.ConfigureLocalBus(configurator);
-
-            configurator.SetConcurrentConsumerLimit(100);
-
 //            configurator.Subscribe(s =>
 //                s.Handler<A>(async msg =>
 //                    {
@@ -38,6 +34,7 @@
 //                        _after.Release();
 //                    }));
         }
+
 
         class A
         {
@@ -52,7 +49,7 @@
             for (int i = 0; i < 100; i++)
             {
                 var timer = Stopwatch.StartNew();
-                LocalBus.Publish(new A());
+                Bus.Publish(new A());
                 Assert.IsTrue(_before.WaitOne(30.Seconds()), "Consumer thread failed to start");
                 timer.Stop();
                 latency.Add(timer.ElapsedMilliseconds);

@@ -210,7 +210,6 @@
     <Compile Include="TestConsumers\TestMessageConsumer.cs" />
     <Compile Include="TextFixtures\EndpointTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackLocalAndRemoteTestFixture.cs" />
-    <Compile Include="TextFixtures\LoopbackTestFixture.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

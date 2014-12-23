@@ -175,34 +175,35 @@ namespace MassTransit.Tests.Saga
 
     [TestFixture]
     public class When_an_existing_saga_receives_an_initiating_message :
-        LoopbackTestFixture
+        InMemoryTestFixture
     {
+        [TestFixtureSetUp]
+        public void SetUp()
+        {
+
+            _sagaId = Guid.NewGuid();
+
+            _repository = new InMemorySagaRepository<SimpleSaga>();
+
+            Bus.ConnectSaga(_repository);
+        }
+
         [Test]
-        public void An_exception_should_be_thrown()
+        public async void An_exception_should_be_thrown()
         {
             var message = new InitiateSimpleSaga(_sagaId);
 
-            LocalBus.Endpoint.Send(message);
+            await BusSendEndpoint.Send(message);
+            
 
             try
             {
-                LocalBus.Endpoint.Send(message);
+                await BusSendEndpoint.Send(message);
             }
             catch (SagaException sex)
             {
                 Assert.AreEqual(sex.MessageType, typeof(InitiateSimpleSaga));
             }
-        }
-
-        protected void EstablishContext()
-        {
-            base.EstablishContext();
-
-            _sagaId = Guid.NewGuid();
-
-            _repository = SetupSagaRepository<SimpleSaga>();
-
-            LocalBus.ConnectSaga(_repository);
         }
 
         Guid _sagaId;
