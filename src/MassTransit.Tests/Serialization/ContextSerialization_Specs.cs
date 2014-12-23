@@ -15,7 +15,6 @@ namespace MassTransit.Tests.Serialization
     using System.Threading;
     using Magnum.Extensions;
 	using MassTransit.Serialization;
-	using Messages;
 	using NUnit.Framework;
     using TestFramework.Messages;
     using TextFixtures;
