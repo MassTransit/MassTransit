@@ -25,11 +25,6 @@ namespace MassTransit.Testing.TestDecorators
     {
         readonly ObservedSentMessageList _messages;
 
-        public TestSendObserver()
-        {
-            _messages = new ObservedSentMessageList();
-        }
-
         public TestSendObserver(TimeSpan timeout)
         {
             _messages = new ObservedSentMessageList(timeout);
@@ -48,13 +43,13 @@ namespace MassTransit.Testing.TestDecorators
         public async Task PostSend<T>(SendContext<T> context)
             where T : class
         {
-            _messages.Add(new ObservedSentMessage<T>(context));
+            _messages.Add(context);
         }
 
         public async Task SendFault<T>(SendContext<T> context, Exception exception)
             where T : class
         {
-            _messages.Add(new ObservedSentMessage<T>(context, exception));
+            _messages.Add(context, exception);
         }
     }
 }
