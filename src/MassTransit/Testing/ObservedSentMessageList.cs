@@ -13,44 +13,17 @@
 namespace MassTransit.Testing
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
 
 
     public class ObservedSentMessageList :
+        MessageList<ISentMessage>,
         ISentMessageList
     {
-        readonly List<Guid> _index;
-        readonly Dictionary<Guid, ISentMessage> _messages;
-        readonly int _timeout;
-
-        public ObservedSentMessageList()
-            : this(TimeSpan.FromSeconds(8))
-        {
-        }
-
         public ObservedSentMessageList(TimeSpan timeout)
+            : base((int)timeout.TotalMilliseconds)
         {
-            _messages = new Dictionary<Guid, ISentMessage>();
-            _index = new List<Guid>();
-            _timeout = (int)timeout.TotalMilliseconds;
-        }
-
-        public IEnumerator<ISentMessage> GetEnumerator()
-        {
-            return _messages.Values.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public IEnumerable<ISentMessage> Select()
-        {
-            return Select(x => true);
         }
 
         public IEnumerable<ISentMessage<T>> Select<T>()
@@ -60,54 +33,24 @@ namespace MassTransit.Testing
                 .Cast<ISentMessage<T>>();
         }
 
-        public IEnumerable<ISentMessage<T>> Select<T>(Func<ISentMessage<T>, bool> filter) where T : class
+        public IEnumerable<ISentMessage<T>> Select<T>(Func<ISentMessage<T>, bool> filter)
+            where T : class
         {
             return Select(x => typeof(T).IsAssignableFrom(x.MessageType))
                 .Cast<ISentMessage<T>>()
                 .Where(filter);
         }
 
-        public IEnumerable<ISentMessage> Select(Func<ISentMessage, bool> filter)
+        public void Add<T>(SendContext<T> context)
+            where T : class
         {
-            lock (_messages)
-            {
-                int i = 0;
-                for (; i < _index.Count; i++)
-                {
-                    if (filter(_messages[_index[i]]))
-                        yield return _messages[_index[i]];
-                }
-
-                while (Monitor.Wait(_messages, _timeout))
-                {
-                    for (; i < _index.Count; i++)
-                    {
-                        if (filter(_messages[_index[i]]))
-                            yield return _messages[_index[i]];
-                    }
-                }
-            }
+            Add(new ObservedSentMessage<T>(context), context.MessageId);
         }
 
-        public void Add(ISentMessage message)
+        public void Add<T>(SendContext<T> context, Exception exception)
+            where T : class
         {
-            if (!message.Context.MessageId.HasValue)
-                return;
-
-            lock (_messages)
-            {
-                ISentMessage existing;
-                if (_messages.TryGetValue(message.Context.MessageId.Value, out existing))
-                {
-                }
-                else
-                {
-                    _messages.Add(message.Context.MessageId.Value, message);
-                    _index.Add(message.Context.MessageId.Value);
-                }
-
-                Monitor.PulseAll(_messages);
-            }
+            Add(new ObservedSentMessage<T>(context, exception), context.MessageId);
         }
     }
 }

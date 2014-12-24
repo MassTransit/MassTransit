@@ -1,35 +1,44 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-// 
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-    using NUnit.Framework;
+    using System;
     using MassTransit.Serialization;
     using NUnit.Framework;
     using Shouldly;
 
 
-    [TestFixture]
+    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(BsonMessageSerializer))]
+    [TestFixture(typeof(XmlMessageSerializer))]
     public class Serializing_a_property_of_type_char :
-        SerializationTest<XmlMessageSerializer>
+        SerializationTest
     {
         public class PropertyOfChar
         {
             public char Value { get; set; }
         }
 
+
         public class PropertyOfNullableChar
         {
             public char? Value { get; set; }
+        }
+
+
+        public Serializing_a_property_of_type_char(Type serializerType)
+            : base(serializerType)
+        {
         }
 
         [Test]
@@ -74,9 +83,11 @@ namespace MassTransit.Tests.Serialization
     }
 
 
-    [TestFixture]
+    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(BsonMessageSerializer))]
+    [TestFixture(typeof(XmlMessageSerializer))]
     public class Serializing_a_string_with_an_escaped_character :
-        SerializationTest<XmlMessageSerializer>
+        SerializationTest
     {
         public class SimpleMessage
         {
@@ -90,6 +101,12 @@ namespace MassTransit.Tests.Serialization
             }
 
             public string Body { get; private set; }
+        }
+
+
+        public Serializing_a_string_with_an_escaped_character(Type serializerType)
+            : base(serializerType)
+        {
         }
 
         [Test]

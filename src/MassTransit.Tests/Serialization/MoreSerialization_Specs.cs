@@ -1,12 +1,12 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -18,12 +18,12 @@ namespace MassTransit.Tests.Serialization
     using MassTransit.Serialization;
     using NUnit.Framework;
 
+
     [TestFixture(typeof(XmlMessageSerializer))]
     [TestFixture(typeof(JsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
-    [TestFixture(typeof(BinaryMessageSerializer))]
-    public class MoreSerialization_Specs<TSerializer> :
-        SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
+    public class MoreSerialization_Specs :
+        SerializationTest
     {
         [Serializable]
         public class ContainerClass
@@ -32,16 +32,22 @@ namespace MassTransit.Tests.Serialization
 
             public bool Equals(ContainerClass other)
             {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
+                if (ReferenceEquals(null, other))
+                    return false;
+                if (ReferenceEquals(this, other))
+                    return true;
 
-                if (ReferenceEquals(other.Elements, Elements)) return true;
-                if (other.Elements == null && Elements != null) return false;
-                if (other.Elements != null && Elements == null) return false;
+                if (ReferenceEquals(other.Elements, Elements))
+                    return true;
+                if (other.Elements == null && Elements != null)
+                    return false;
+                if (other.Elements != null && Elements == null)
+                    return false;
 
                 if (other.Elements != null && Elements != null)
                 {
-                    if (other.Elements.Count != Elements.Count) return false;
+                    if (other.Elements.Count != Elements.Count)
+                        return false;
 
                     for (int i = 0; i < Elements.Count; i++)
                     {
@@ -55,10 +61,13 @@ namespace MassTransit.Tests.Serialization
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != typeof (ContainerClass)) return false;
-                return Equals((ContainerClass) obj);
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != typeof(ContainerClass))
+                    return false;
+                return Equals((ContainerClass)obj);
             }
 
             public override int GetHashCode()
@@ -67,22 +76,26 @@ namespace MassTransit.Tests.Serialization
             }
         }
 
+
         [Serializable]
         public class DictionaryContainerClass
         {
-            public IDictionary<string, OuterClass> Elements { get; set; }
-
             public DictionaryContainerClass()
             {
                 Elements = new Dictionary<string, OuterClass>();
             }
 
+            public IDictionary<string, OuterClass> Elements { get; set; }
+
             public bool Equals(DictionaryContainerClass other)
             {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
+                if (ReferenceEquals(null, other))
+                    return false;
+                if (ReferenceEquals(this, other))
+                    return true;
 
-                if (ReferenceEquals(other.Elements, Elements)) return true;
+                if (ReferenceEquals(other.Elements, Elements))
+                    return true;
                 if (other.Elements == null && Elements != null)
                 {
                     Trace.WriteLine("other element was null");
@@ -96,9 +109,10 @@ namespace MassTransit.Tests.Serialization
 
                 if (other.Elements != null && Elements != null)
                 {
-                    if (other.Elements.Count != Elements.Count) return false;
+                    if (other.Elements.Count != Elements.Count)
+                        return false;
 
-                    foreach (KeyValuePair<string, OuterClass> pair in Elements)
+                    foreach (var pair in Elements)
                     {
                         if (!other.Elements.ContainsKey(pair.Key))
                             return false;
@@ -113,9 +127,12 @@ namespace MassTransit.Tests.Serialization
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != typeof(DictionaryContainerClass)) return false;
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != typeof(DictionaryContainerClass))
+                    return false;
                 return Equals((DictionaryContainerClass)obj);
             }
 
@@ -124,6 +141,7 @@ namespace MassTransit.Tests.Serialization
                 return (Elements != null ? Elements.GetHashCode() : 0);
             }
         }
+
 
         [Serializable]
         public class PrimitiveArrayClass
@@ -137,16 +155,22 @@ namespace MassTransit.Tests.Serialization
 
             public bool Equals(PrimitiveArrayClass other)
             {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
+                if (ReferenceEquals(null, other))
+                    return false;
+                if (ReferenceEquals(this, other))
+                    return true;
 
-                if (ReferenceEquals(other.Values, Values)) return true;
-                if (other.Values == null && Values != null) return false;
-                if (other.Values != null && Values == null) return false;
+                if (ReferenceEquals(other.Values, Values))
+                    return true;
+                if (other.Values == null && Values != null)
+                    return false;
+                if (other.Values != null && Values == null)
+                    return false;
 
                 if (other.Values != null && Values != null)
                 {
-                    if (other.Values.Length != Values.Length) return false;
+                    if (other.Values.Length != Values.Length)
+                        return false;
 
                     for (int i = 0; i < Values.Length; i++)
                     {
@@ -160,10 +184,13 @@ namespace MassTransit.Tests.Serialization
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != typeof (PrimitiveArrayClass)) return false;
-                return Equals((PrimitiveArrayClass) obj);
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != typeof(PrimitiveArrayClass))
+                    return false;
+                return Equals((PrimitiveArrayClass)obj);
             }
 
             public override int GetHashCode()
@@ -172,6 +199,7 @@ namespace MassTransit.Tests.Serialization
             }
         }
 
+
         [Serializable]
         public class GenericArrayClass<T>
         {
@@ -179,16 +207,22 @@ namespace MassTransit.Tests.Serialization
 
             public bool Equals(GenericArrayClass<T> other)
             {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
+                if (ReferenceEquals(null, other))
+                    return false;
+                if (ReferenceEquals(this, other))
+                    return true;
 
-                if (ReferenceEquals(other.Values, Values)) return true;
-                if (other.Values == null && Values != null) return false;
-                if (other.Values != null && Values == null) return false;
+                if (ReferenceEquals(other.Values, Values))
+                    return true;
+                if (other.Values == null && Values != null)
+                    return false;
+                if (other.Values != null && Values == null)
+                    return false;
 
                 if (other.Values != null && Values != null)
                 {
-                    if (other.Values.Length != Values.Length) return false;
+                    if (other.Values.Length != Values.Length)
+                        return false;
 
                     for (int i = 0; i < Values.Length; i++)
                     {
@@ -202,9 +236,12 @@ namespace MassTransit.Tests.Serialization
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != typeof(GenericArrayClass<T>)) return false;
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != typeof(GenericArrayClass<T>))
+                    return false;
                 return Equals((GenericArrayClass<T>)obj);
             }
 
@@ -214,6 +251,7 @@ namespace MassTransit.Tests.Serialization
             }
         }
 
+
         [Serializable]
         public class OuterClass
         {
@@ -221,17 +259,22 @@ namespace MassTransit.Tests.Serialization
 
             public bool Equals(OuterClass other)
             {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
+                if (ReferenceEquals(null, other))
+                    return false;
+                if (ReferenceEquals(this, other))
+                    return true;
                 return Equals(other.Inner, Inner);
             }
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != typeof (OuterClass)) return false;
-                return Equals((OuterClass) obj);
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != typeof(OuterClass))
+                    return false;
+                return Equals((OuterClass)obj);
             }
 
             public override int GetHashCode()
@@ -240,6 +283,7 @@ namespace MassTransit.Tests.Serialization
             }
         }
 
+
         [Serializable]
         public class InnerClass
         {
@@ -247,17 +291,22 @@ namespace MassTransit.Tests.Serialization
 
             public bool Equals(InnerClass other)
             {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
+                if (ReferenceEquals(null, other))
+                    return false;
+                if (ReferenceEquals(this, other))
+                    return true;
                 return Equals(other.Name, Name);
             }
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != typeof (InnerClass)) return false;
-                return Equals((InnerClass) obj);
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != typeof(InnerClass))
+                    return false;
+                return Equals((InnerClass)obj);
             }
 
             public override int GetHashCode()
@@ -277,10 +326,13 @@ namespace MassTransit.Tests.Serialization
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != typeof (EmptyClass)) return false;
-                return Equals((EmptyClass) obj);
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != typeof(EmptyClass))
+                    return false;
+                return Equals((EmptyClass)obj);
             }
 
             public override int GetHashCode()
@@ -290,122 +342,9 @@ namespace MassTransit.Tests.Serialization
         }
 
 
-
-        [Test]
-        public void A_collection_of_objects_should_be_properly_serialized()
+        public MoreSerialization_Specs(Type serializerType)
+            : base(serializerType)
         {
-            ContainerClass message = new ContainerClass
-                {
-                    Elements = new List<OuterClass>
-                        {
-                            new OuterClass
-                                {
-                                    Inner = new InnerClass {Name = "Chris"},
-                                },
-                            new OuterClass
-                                {
-                                    Inner = new InnerClass {Name = "David"},
-                                },
-                        }
-                };
-
-            TestSerialization(message);
-        }
-
-        [Test]
-        public void A_dictionary_of_objects_should_be_properly_serialized()
-        {
-            DictionaryContainerClass message = new DictionaryContainerClass
-                {
-                    Elements = new Dictionary<string, OuterClass>
-                        {
-                            {"Chris", new OuterClass{Inner = new InnerClass {Name = "Chris"}}},
-                            {"David", new OuterClass{Inner = new InnerClass {Name = "David"}}},
-                        }
-                };
-
-            TestSerialization(message);
-        }
-
-        [Test]
-        public void A_dictionary_of_one_objects_should_be_properly_serialized()
-        {
-            DictionaryContainerClass message = new DictionaryContainerClass
-                {
-                    Elements = new Dictionary<string, OuterClass>
-                        {
-                            {"David", new OuterClass{Inner = new InnerClass {Name = "David"}}},
-                        }
-                };
-
-            TestSerialization(message);
-        }
-
-        [Test]
-        public void A_dictionary_of_no_objects_should_be_properly_serialized()
-        {
-            DictionaryContainerClass message = new DictionaryContainerClass
-                {
-                    Elements = new Dictionary<string, OuterClass>
-                        {
-                        }
-                };
-
-            TestSerialization(message);
-        }
-
-
-        [Test]
-        public void A_primitive_array_of_objects_should_be_properly_serialized()
-        {
-            PrimitiveArrayClass message = new PrimitiveArrayClass
-                {
-                    Values = new[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-
-                };
-
-            TestSerialization(message);
-        }
-
-        [Test]
-        public void A_primitive_array_of_objects_with_one_element_should_be_properly_serialized()
-        {
-            var message = new PrimitiveArrayClass
-            {
-                Values = new[] { 1 }
-
-            };
-
-            TestSerialization(message);
-        }
-
-        [Test]
-        public void A_primitive_array_of_objects_with_no_elements_should_be_properly_serialized()
-        {
-            var message = new PrimitiveArrayClass
-            {
-                Values = new int[] {  }
-            };
-
-            TestSerialization(message);
-        }
-
-        [Test]
-        public void An_empty_class_should_not_break_the_mold()
-        {
-            EmptyClass message = new EmptyClass();
-
-            TestSerialization(message);
-        }
-
-        [Test]
-        public void A_private_setter_should_be_serializable()
-        {
-            const string expected = "Dr. Cox";
-
-            PrivateSetter message = new PrivateSetter(expected);
-
-            TestSerialization(message);
         }
 
 
@@ -416,17 +355,22 @@ namespace MassTransit.Tests.Serialization
 
             public bool Equals(EnumClass other)
             {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
+                if (ReferenceEquals(null, other))
+                    return false;
+                if (ReferenceEquals(this, other))
+                    return true;
                 return Equals(other.Setting, Setting);
             }
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != typeof (EnumClass)) return false;
-                return Equals((EnumClass) obj);
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != typeof(EnumClass))
+                    return false;
+                return Equals((EnumClass)obj);
             }
 
             public override int GetHashCode()
@@ -435,22 +379,118 @@ namespace MassTransit.Tests.Serialization
             }
         }
 
+
         [Test]
-        public void An_enumeration_should_be_serializable()
+        public void A_collection_of_objects_should_be_properly_serialized()
         {
-            EnumClass message = new EnumClass {Setting = SomeEnum.Second};
+            var message = new ContainerClass
+            {
+                Elements = new List<OuterClass>
+                {
+                    new OuterClass
+                    {
+                        Inner = new InnerClass {Name = "Chris"},
+                    },
+                    new OuterClass
+                    {
+                        Inner = new InnerClass {Name = "David"},
+                    },
+                }
+            };
 
             TestSerialization(message);
-            
         }
 
         [Test]
-        public void An_empty_array_of_objects_should_be_properly_serialized()
+        public void A_dictionary_of_no_objects_should_be_properly_serialized()
         {
-            PrimitiveArrayClass message = new PrimitiveArrayClass
+            var message = new DictionaryContainerClass
+            {
+                Elements = new Dictionary<string, OuterClass>()
+            };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_dictionary_of_objects_should_be_properly_serialized()
+        {
+            var message = new DictionaryContainerClass
+            {
+                Elements = new Dictionary<string, OuterClass>
                 {
-                    Values = new int[] {}
-                };
+                    {"Chris", new OuterClass {Inner = new InnerClass {Name = "Chris"}}},
+                    {"David", new OuterClass {Inner = new InnerClass {Name = "David"}}},
+                }
+            };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_dictionary_of_one_objects_should_be_properly_serialized()
+        {
+            var message = new DictionaryContainerClass
+            {
+                Elements = new Dictionary<string, OuterClass>
+                {
+                    {"David", new OuterClass {Inner = new InnerClass {Name = "David"}}},
+                }
+            };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_nested_object_should_be_properly_serialized()
+        {
+            var message = new OuterClass
+            {
+                Inner = new InnerClass {Name = "Chris"},
+            };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_primitive_array_of_objects_should_be_properly_serialized()
+        {
+            var message = new PrimitiveArrayClass
+            {
+                Values = new[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+            };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_primitive_array_of_objects_with_no_elements_should_be_properly_serialized()
+        {
+            var message = new PrimitiveArrayClass
+            {
+                Values = new int[] {}
+            };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_primitive_array_of_objects_with_one_element_should_be_properly_serialized()
+        {
+            var message = new PrimitiveArrayClass
+            {
+                Values = new[] {1}
+            };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_private_setter_should_be_serializable()
+        {
+            const string expected = "Dr. Cox";
+
+            var message = new PrivateSetter(expected);
 
             TestSerialization(message);
         }
@@ -459,30 +499,47 @@ namespace MassTransit.Tests.Serialization
         public void An_array_of_objects_should_be_properly_serialized()
         {
             var message = new GenericArrayClass<InnerClass>
+            {
+                Values = new[]
                 {
-                    Values = new[]
-                        {
-                            new InnerClass { Name = "Chris" },
-                            new InnerClass { Name = "David" },
-                        }
-                };
+                    new InnerClass {Name = "Chris"},
+                    new InnerClass {Name = "David"}
+                }
+            };
 
             TestSerialization(message);
         }
 
         [Test]
-        public void A_nested_object_should_be_properly_serialized()
+        public void An_empty_array_of_objects_should_be_properly_serialized()
         {
-            OuterClass message = new OuterClass
-                {
-                    Inner = new InnerClass {Name = "Chris"},
-                };
+            var message = new PrimitiveArrayClass
+            {
+                Values = new int[] {}
+            };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void An_empty_class_should_not_break_the_mold()
+        {
+            var message = new EmptyClass();
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void An_enumeration_should_be_serializable()
+        {
+            var message = new EnumClass {Setting = SomeEnum.Second};
 
             TestSerialization(message);
         }
     }
 
-        [Serializable]
+
+    [Serializable]
     public class PrivateSetter
     {
         public PrivateSetter(string name)
@@ -498,17 +555,22 @@ namespace MassTransit.Tests.Serialization
 
         public bool Equals(PrivateSetter other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
             return Equals(other.Name, Name);
         }
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof (PrivateSetter)) return false;
-            return Equals((PrivateSetter) obj);
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != typeof(PrivateSetter))
+                return false;
+            return Equals((PrivateSetter)obj);
         }
 
         public override int GetHashCode()
@@ -516,6 +578,7 @@ namespace MassTransit.Tests.Serialization
             return (Name != null ? Name.GetHashCode() : 0);
         }
     }
+
 
     public enum SomeEnum
     {

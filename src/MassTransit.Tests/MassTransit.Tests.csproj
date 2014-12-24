@@ -177,7 +177,6 @@
     <Compile Include="Serialization\GivenAComplexMessage.cs" />
     <Compile Include="Serialization\GivenASimpleMessage.cs" />
     <Compile Include="Serialization\Header_Specs.cs" />
-    <Compile Include="Serialization\InterfaceBinding_Specs.cs" />
     <Compile Include="Serialization\Interface_Specs.cs" />
     <Compile Include="Serialization\JsonSerialization_Specs.cs" />
     <Compile Include="Serialization\MoreSerialization_Specs.cs" />

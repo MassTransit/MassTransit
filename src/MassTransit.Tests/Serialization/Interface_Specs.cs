@@ -17,14 +17,22 @@ namespace MassTransit.Tests.Serialization
 	using MassTransit.Pipeline.Pipes;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
+	using Shouldly;
 	using TestConsumers;
 	using TestFramework;
 
-
-    public abstract class Deserializing_an_interface<TSerializer> :
-		SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
+    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(BsonMessageSerializer))]
+    [TestFixture(typeof(XmlMessageSerializer))]
+    public  class Deserializing_an_interface :
+        SerializationTest
 	{
-		[Test]
+        public Deserializing_an_interface(Type serializerType)
+            : base(serializerType)
+        {
+        }
+
+        [Test]
 		public void Should_create_a_proxy_for_the_interface()
 		{
 			var user = new UserImpl("Chris", "noone@nowhere.com");
@@ -33,7 +41,9 @@ namespace MassTransit.Tests.Serialization
 					Body = "There was no toilet paper in the stall, forcing me to use my treasured issue of .NET Developer magazine."
 				};
 
-			TestSerialization(complaint);
+            var result = SerializeAndReturn(complaint);
+
+            complaint.Equals(result).ShouldBe(true);
 		}
 
 		[Test]
@@ -57,32 +67,7 @@ namespace MassTransit.Tests.Serialization
 		}
 	}
 
-	[TestFixture]
-	public class WhenUsingCustomXml :
-		Deserializing_an_interface<XmlMessageSerializer>
-	{
-		
-	}
 
-	[TestFixture][Explicit("the built in binary serializer doesn't support this feature")]
-	public class WhenUsingBinary :
-		Deserializing_an_interface<BinaryMessageSerializer>
-	{
-	}
-
-	[TestFixture]
-	public class WhenUsingJson :
-		Deserializing_an_interface<JsonMessageSerializer>
-	{
-		
-	}
-
-	[TestFixture]
-	public class WhenUsingBson :
-		Deserializing_an_interface<BsonMessageSerializer>
-	{
-		
-	}
 
 	public interface ComplaintAdded
 	{
