@@ -176,15 +176,12 @@
     <Compile Include="Messages\SerializationTestMessage.cs" />
     <Compile Include="Serialization\GivenAComplexMessage.cs" />
     <Compile Include="Serialization\GivenASimpleMessage.cs" />
-    <Compile Include="Serialization\Header_Specs.cs" />
     <Compile Include="Serialization\Interface_Specs.cs" />
     <Compile Include="Serialization\JsonSerialization_Specs.cs" />
     <Compile Include="Serialization\MoreSerialization_Specs.cs" />
     <Compile Include="Serialization\Performance_Specs.cs" />
     <Compile Include="Serialization\PropertyType_Specs.cs" />
-    <Compile Include="Serialization\SerializationSpecificationBase.cs" />
     <Compile Include="Serialization\SerializationTest.cs" />
-    <Compile Include="Serialization\TransportContentType_Specs.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="Saga\InitiateSaga_Specs.cs" />
     <Compile Include="PublishSubscribe_Specs.cs" />

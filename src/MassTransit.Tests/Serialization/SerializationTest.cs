@@ -27,8 +27,8 @@ namespace MassTransit.Tests.Serialization
         InMemoryTestFixture
     {
         readonly Type _serializerType;
-        IMessageDeserializer _deserializer;
-        IMessageSerializer _serializer;
+        protected IMessageDeserializer Deserializer;
+        protected IMessageSerializer Serializer;
         Uri _sourceAddress = new Uri("loopback://localhost/source");
         Uri _destinationAddress = new Uri("loopback://localhost/destination");
         Uri _responseAddress = new Uri("loopback://localhost/response");
@@ -45,18 +45,18 @@ namespace MassTransit.Tests.Serialization
         {
             if (_serializerType == typeof(JsonMessageSerializer))
             {
-                _serializer = new JsonMessageSerializer();
-                _deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, Bus, Bus);
+                Serializer = new JsonMessageSerializer();
+                Deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, Bus, Bus);
             }
             else if (_serializerType == typeof(BsonMessageSerializer))
             {
-                _serializer = new BsonMessageSerializer();
-                _deserializer = new BsonMessageDeserializer(BsonMessageSerializer.Deserializer, Bus, Bus);
+                Serializer = new BsonMessageSerializer();
+                Deserializer = new BsonMessageDeserializer(BsonMessageSerializer.Deserializer, Bus, Bus);
             }
             else if (_serializerType == typeof(XmlMessageSerializer))
             {
-                _serializer = new XmlMessageSerializer();
-                _deserializer = new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, Bus, Bus);
+                Serializer = new XmlMessageSerializer();
+                Deserializer = new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, Bus, Bus);
             }
             else
             {
@@ -80,17 +80,17 @@ namespace MassTransit.Tests.Serialization
                 sendContext.RequestId = _requestId;
 
 
-                _serializer.Serialize(output, sendContext);
+                Serializer.Serialize(output, sendContext);
 
                 serializedMessageData = output.ToArray();
 
                 Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
             }
 
-            var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, _serializer.ContentType.MediaType);
+            var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType);
             var receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), message);
 
-            ConsumeContext consumeContext = _deserializer.Deserialize(receiveContext);
+            ConsumeContext consumeContext = Deserializer.Deserialize(receiveContext);
 
             ConsumeContext<T> messageContext;
             consumeContext.TryGetMessage(out messageContext);
