@@ -22,31 +22,35 @@ namespace MassTransit.Tests.Saga.Locator
     using MassTransit.Saga;
     using MassTransit.Saga.Pipeline;
     using NUnit.Framework;
+    using TestFramework;
+
 
     [TestFixture]
-    public class SagaExpression_Specs
+    public class SagaExpression_Specs :
+        InMemoryTestFixture
     {
-        [SetUp]
-        public void Setup()
+        public SagaExpression_Specs()
         {
             _repository = new InMemorySagaRepository<SimpleSaga>();
-            var initiatePolicy = new InitiatingSagaPolicy<SimpleSaga, InitiateSimpleSaga>(x => x.CorrelationId,
-                x => false);
+        }
 
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            configurator.Saga(_repository);
+        }
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
             _sagaId = NewId.NextGuid();
             _initiateSaga = new InitiateSimpleSaga {CorrelationId = _sagaId, Name = "Chris"};
-            //IConsumeContext<InitiateSimpleSaga> context = _initiateSaga.ToConsumeContext();
-//            _repository.GetSaga(context, _sagaId,
-//                (i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
-//                .Each(x => x(context));
 
-            _initiateOtherSaga = new InitiateSimpleSaga {CorrelationId = _otherSagaId, Name = "Dru"};
+            InputQueueSendEndpoint.Send(_initiateSaga).Wait(TestCancellationToken);
 
             _otherSagaId = Guid.NewGuid();
-            //context = _initiateOtherSaga.ToConsumeContext();
-//            _repository.GetSaga(context, _otherSagaId,
-//                (i, c) => InstanceHandlerSelector.ForInitiatedBy<SimpleSaga, InitiateSimpleSaga>(i), initiatePolicy)
-//                .Each(x => x(context));
+            _initiateOtherSaga = new InitiateSimpleSaga { CorrelationId = _otherSagaId, Name = "Dru" };
+
+            InputQueueSendEndpoint.Send(_initiateOtherSaga).Wait(TestCancellationToken);
 
             _observeSaga = new ObservableSagaMessage {Name = "Chris"};
         }
@@ -67,9 +71,9 @@ namespace MassTransit.Tests.Saga.Locator
                 new SagaFilterExpressionConverter<SimpleSaga, ObservableSagaMessage>(_observeSaga).Convert(selector);
             Trace.WriteLine(filter.ToString());
 
-            IEnumerable<Guid> matches = await _repository.Where(filter);
+            Guid? matches = await _repository.ShouldContainSaga(filter, TestTimeout);
 
-            Assert.AreEqual(1, matches.Count());
+            Assert.IsTrue(matches.HasValue);
         }
 
         [Test]
@@ -82,9 +86,9 @@ namespace MassTransit.Tests.Saga.Locator
                 new SagaFilterExpressionConverter<SimpleSaga, InitiateSimpleSaga>(_initiateSaga).Convert(selector);
             Trace.WriteLine(filter.ToString());
 
-            IEnumerable<Guid> matches = await _repository.Where(filter);
+            Guid? matches = await _repository.ShouldContainSaga(filter, TestTimeout);
 
-            Assert.AreEqual(1, matches.Count());
+            Assert.IsTrue(matches.HasValue);
         }
     }
 }
