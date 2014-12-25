@@ -145,9 +145,6 @@
     <Compile Include="SendReceive_Specs.cs" />
     <Compile Include="SerializationFault_Specs.cs" />
     <Compile Include="SerializationSupport_Specs.cs" />
-    <Compile Include="Serialization\ByteArray_Specs.cs" />
-    <Compile Include="Serialization\DateTime_Specs.cs" />
-    <Compile Include="Serialization\DefaultConstructor_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="SmallNumber_Specs.cs" />
     <Compile Include="InMemoryTest_Specs.cs" />
@@ -175,7 +172,6 @@
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />
     <Compile Include="Serialization\GivenAComplexMessage.cs" />
-    <Compile Include="Serialization\GivenASimpleMessage.cs" />
     <Compile Include="Serialization\Interface_Specs.cs" />
     <Compile Include="Serialization\JsonSerialization_Specs.cs" />
     <Compile Include="Serialization\MoreSerialization_Specs.cs" />

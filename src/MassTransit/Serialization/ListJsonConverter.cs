@@ -45,11 +45,22 @@ namespace MassTransit.Serialization
 
         public override bool CanConvert(Type objectType)
         {
-            return (objectType.IsGenericType
-                && (objectType.GetGenericTypeDefinition() == typeof(IList<>)
-                    || objectType.GetGenericTypeDefinition() == typeof(List<>)))
-                || (objectType.IsArray
-                    && objectType.HasInterface<IEnumerable>());
+            return IsList(objectType) || IsArray(objectType);
+        }
+
+        static bool IsArray(Type objectType)
+        {
+            // leave byte arrays alone, okay?
+            if (objectType.IsArray && objectType.HasElementType && objectType.GetElementType() == typeof(byte))
+                return false;
+
+            return (objectType.IsArray && objectType.HasInterface<IEnumerable>());
+        }
+
+        static bool IsList(Type objectType)
+        {
+            return objectType.IsGenericType && (objectType.GetGenericTypeDefinition() == typeof(IList<>)
+                || objectType.GetGenericTypeDefinition() == typeof(List<>));
         }
     }
 }
