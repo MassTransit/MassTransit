@@ -13,29 +13,17 @@
 namespace MassTransit.Tests.Saga
 {
     using System;
+    using System.Threading.Tasks;
     using MassTransit.Saga;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
-    using TextFixtures;
 
 
     [TestFixture]
     public class When_an_initiating_message_for_a_saga_arrives :
         InMemoryTestFixture
     {
-        [Test]
-        public async void The_saga_should_be_created_when_an_initiating_message_is_received()
-        {
-            var message = new InitiateSimpleSaga(_sagaId);
-
-            await InputQueueSendEndpoint.Send(message);
-
-            Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
-
-            sagaId.HasValue.ShouldBe(true);
-        }
-
         public When_an_initiating_message_for_a_saga_arrives()
         {
             _repository = new InMemorySagaRepository<SimpleSaga>();
@@ -54,17 +42,10 @@ namespace MassTransit.Tests.Saga
 
         Guid _sagaId;
         InMemorySagaRepository<SimpleSaga> _repository;
-    }
 
-    [TestFixture]
-    public class When_an_initiating_message_for_an_existing_saga_arrives :
-        InMemoryTestFixture
-    {
         [Test]
-        public async void The_message_should_fault()
+        public async void The_saga_should_be_created_when_an_initiating_message_is_received()
         {
-            var faulted = SubscribeHandler<Fault<InitiateSimpleSaga>>();
-
             var message = new InitiateSimpleSaga(_sagaId);
 
             await InputQueueSendEndpoint.Send(message);
@@ -72,12 +53,14 @@ namespace MassTransit.Tests.Saga
             Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
 
             sagaId.HasValue.ShouldBe(true);
-
-            await InputQueueSendEndpoint.Send(message);
-
-            await faulted;
         }
+    }
 
+
+    [TestFixture]
+    public class When_an_initiating_message_for_an_existing_saga_arrives :
+        InMemoryTestFixture
+    {
         public When_an_initiating_message_for_an_existing_saga_arrives()
         {
             _repository = new InMemorySagaRepository<SimpleSaga>();
@@ -96,6 +79,24 @@ namespace MassTransit.Tests.Saga
 
         Guid _sagaId;
         InMemorySagaRepository<SimpleSaga> _repository;
+
+        [Test]
+        public async void The_message_should_fault()
+        {
+            Task<ConsumeContext<Fault<InitiateSimpleSaga>>> faulted = SubscribeHandler<Fault<InitiateSimpleSaga>>();
+
+            var message = new InitiateSimpleSaga(_sagaId);
+
+            await InputQueueSendEndpoint.Send(message);
+
+            Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
+
+            sagaId.HasValue.ShouldBe(true);
+
+            await InputQueueSendEndpoint.Send(message);
+
+            await faulted;
+        }
     }
 
 
@@ -103,18 +104,6 @@ namespace MassTransit.Tests.Saga
     public class When_an_initiating_and_orchestrated_message_for_a_saga_arrives :
         InMemoryTestFixture
     {
-        [Test]
-        public async void The_saga_should_be_loaded()
-        {
-            await InputQueueSendEndpoint.Send(new InitiateSimpleSaga(_sagaId));
-
-            await InputQueueSendEndpoint.Send(new CompleteSimpleSaga(_sagaId));
-
-            Guid? sagaId = await _repository.ShouldContainSaga(x => x.Completed, TestTimeout);
-
-            sagaId.HasValue.ShouldBe(true);
-        }
-
         public When_an_initiating_and_orchestrated_message_for_a_saga_arrives()
         {
             _repository = new InMemorySagaRepository<SimpleSaga>();
@@ -133,6 +122,18 @@ namespace MassTransit.Tests.Saga
 
         Guid _sagaId;
         InMemorySagaRepository<SimpleSaga> _repository;
+
+        [Test]
+        public async void The_saga_should_be_loaded()
+        {
+            await InputQueueSendEndpoint.Send(new InitiateSimpleSaga(_sagaId));
+
+            await InputQueueSendEndpoint.Send(new CompleteSimpleSaga(_sagaId));
+
+            Guid? sagaId = await _repository.ShouldContainSaga(x => x.Completed, TestTimeout);
+
+            sagaId.HasValue.ShouldBe(true);
+        }
     }
 
 
@@ -140,18 +141,6 @@ namespace MassTransit.Tests.Saga
     public class When_an_initiating_and_observed_message_for_a_saga_arrives :
         InMemoryTestFixture
     {
-        [Test]
-        public async void The_saga_should_be_loaded()
-        {
-            await InputQueueSendEndpoint.Send(new InitiateSimpleSaga(_sagaId) {Name = "Chris"});
-
-            await InputQueueSendEndpoint.Send(new ObservableSagaMessage {Name = "Chris"});
-
-            Guid? sagaId = await _repository.ShouldContainSaga(x => x.Observed, TestTimeout);
-
-            sagaId.HasValue.ShouldBe(true);
-        }
-
         public When_an_initiating_and_observed_message_for_a_saga_arrives()
         {
             _repository = new InMemorySagaRepository<SimpleSaga>();
@@ -170,6 +159,18 @@ namespace MassTransit.Tests.Saga
 
         Guid _sagaId;
         InMemorySagaRepository<SimpleSaga> _repository;
+
+        [Test]
+        public async void The_saga_should_be_loaded()
+        {
+            await InputQueueSendEndpoint.Send(new InitiateSimpleSaga(_sagaId) {Name = "Chris"});
+
+            await InputQueueSendEndpoint.Send(new ObservableSagaMessage {Name = "Chris"});
+
+            Guid? sagaId = await _repository.ShouldContainSaga(x => x.Observed, TestTimeout);
+
+            sagaId.HasValue.ShouldBe(true);
+        }
     }
 
 
@@ -180,7 +181,6 @@ namespace MassTransit.Tests.Saga
         [TestFixtureSetUp]
         public void SetUp()
         {
-
             _sagaId = Guid.NewGuid();
 
             _repository = new InMemorySagaRepository<SimpleSaga>();
@@ -188,13 +188,16 @@ namespace MassTransit.Tests.Saga
             Bus.ConnectSaga(_repository);
         }
 
+        Guid _sagaId;
+        InMemorySagaRepository<SimpleSaga> _repository;
+
         [Test]
         public async void An_exception_should_be_thrown()
         {
             var message = new InitiateSimpleSaga(_sagaId);
 
             await BusSendEndpoint.Send(message);
-            
+
 
             try
             {
@@ -205,8 +208,5 @@ namespace MassTransit.Tests.Saga
                 Assert.AreEqual(sex.MessageType, typeof(InitiateSimpleSaga));
             }
         }
-
-        Guid _sagaId;
-        InMemorySagaRepository<SimpleSaga> _repository;
     }
 }

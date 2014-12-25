@@ -53,14 +53,6 @@ namespace MassTransit.TestFramework
             return ActivityTestContexts[typeof(T)];
         }
 
-        protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
-            where TSaga : class, ISaga
-        {
-            var sagaRepository = new InMemorySagaRepository<TSaga>();
-
-            return sagaRepository;
-        }
-
         protected abstract void SetupActivities();
     }
 }
