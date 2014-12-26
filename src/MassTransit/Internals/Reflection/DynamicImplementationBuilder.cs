@@ -32,7 +32,7 @@ namespace MassTransit.Internals.Reflection
             | MethodAttributes.VtableLayoutMask;
 
         readonly ConcurrentDictionary<string, ModuleBuilder> _moduleBuilders;
-        readonly string _proxyNamespaceSuffix = ".DynamicInternal" + Guid.NewGuid().ToString("N");
+        readonly string _proxyNamespaceSuffix = "DynamicInternal" + NewId.Next().ToString("NS");
         readonly ConcurrentDictionary<Type, Lazy<Type>> _proxyTypes;
 
         public DynamicImplementationBuilder()
@@ -60,10 +60,10 @@ namespace MassTransit.Internals.Reflection
 
         Type CreateTypeFromInterface(ModuleBuilder builder, Type interfaceType)
         {
-            string typeName = interfaceType.Namespace + _proxyNamespaceSuffix + "." +
+            string typeName = _proxyNamespaceSuffix + "." +
                 (interfaceType.IsNested && interfaceType.DeclaringType != null
-                    ? (interfaceType.DeclaringType.Name + '+' + interfaceType.Name)
-                    : interfaceType.Name);
+                    ? (interfaceType.DeclaringType.Name + '+' + TypeMetadataCache.ShortName(interfaceType))
+                    : TypeMetadataCache.ShortName(interfaceType));
             try
             {
                 TypeBuilder typeBuilder = builder.DefineType(typeName,

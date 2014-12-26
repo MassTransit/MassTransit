@@ -14,7 +14,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 {
     using System;
     using System.Threading;
-    using Magnum.Extensions;
+    using System.Threading.Tasks;
 
     public class AnotherMessageConsumerImpl :
         AnotherMessageConsumer
@@ -33,16 +33,16 @@ namespace MassTransit.Containers.Tests.Scenarios
         {
             get
             {
-                if(_received.WaitOne(8.Seconds()))
+                if(_received.WaitOne(TimeSpan.FromSeconds(8)))
                     return _last;
 
                 throw new TimeoutException("Timeout waiting for message to be consumed");
             }
         }
 
-        public void Consume(AnotherMessageInterface message)
+        public async Task Consume(ConsumeContext<AnotherMessageInterface> context)
         {
-            _last = message;
+            _last = context.Message;
             _received.Set();
         }
     }

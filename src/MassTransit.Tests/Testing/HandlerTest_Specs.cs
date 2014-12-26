@@ -16,7 +16,7 @@ namespace MassTransit.Tests.Testing
 	using MassTransit.Testing;
 	using Shouldly;
 
-
+    [TestFixture, Explicit]
     public class Using_the_handler_test_factory
 	{
 		HandlerTest<A> _test;
@@ -86,7 +86,8 @@ namespace MassTransit.Tests.Testing
 		}
 	}
 
-	
+       
+    [TestFixture, Explicit]
 	public class Using_the_handler_on_a_remote_bus
 	{
 		HandlerTest<A> _test;
@@ -156,7 +157,7 @@ namespace MassTransit.Tests.Testing
 		}
 	}
 
-	
+    [TestFixture, Explicit]
 	public class Publishing_to_a_handler_test
 	{
 		HandlerTest<A> _test;

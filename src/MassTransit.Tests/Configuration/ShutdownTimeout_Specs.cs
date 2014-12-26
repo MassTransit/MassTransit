@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Configuration
             _bus = ServiceBusFactory.New(x => x.ReceiveFrom("loopback://localhost/mt_test"));
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_have_shutdown_timeout_of_60_seconds()
         {
             _bus.ShutdownTimeout.ShouldBe(60.Seconds());
@@ -58,7 +58,7 @@ namespace MassTransit.Tests.Configuration
             });
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_have_the_correct_shutdown_timeout()
         {
             _bus.ShutdownTimeout.ShouldBe(_timeout);

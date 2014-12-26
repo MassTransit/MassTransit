@@ -29,11 +29,11 @@ namespace MassTransit.Tests.Serialization
         readonly Type _serializerType;
         protected IMessageDeserializer Deserializer;
         protected IMessageSerializer Serializer;
-        Uri _sourceAddress = new Uri("loopback://localhost/source");
-        Uri _destinationAddress = new Uri("loopback://localhost/destination");
-        Uri _responseAddress = new Uri("loopback://localhost/response");
-        Uri _faultAddress = new Uri("loopback://localhost/fault");
-        Guid _requestId = Guid.NewGuid();
+        readonly Uri _sourceAddress = new Uri("loopback://localhost/source");
+        readonly Uri _destinationAddress = new Uri("loopback://localhost/destination");
+        readonly Uri _responseAddress = new Uri("loopback://localhost/response");
+        readonly Uri _faultAddress = new Uri("loopback://localhost/fault");
+        readonly Guid _requestId = Guid.NewGuid();
 
         public SerializationTest(Type serializerType)
         {

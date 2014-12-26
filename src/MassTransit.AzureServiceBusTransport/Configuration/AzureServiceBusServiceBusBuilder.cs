@@ -45,7 +45,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         protected override IPublishEndpoint CreatePublishEndpoint()
         {
-            throw new NotImplementedException();
+            return new AzureServiceBusPublishEndpoint(SendEndpointProvider);
         }
 
         public virtual IBusControl Build()
@@ -54,7 +54,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             var endpointCache = new SendEndpointCache(SendEndpointProvider);
 
-            return new MassTransitBus(_sourceAddress, consumePipe, endpointCache, ReceiveEndpoints);
+            return new MassTransitBus(_sourceAddress, consumePipe, endpointCache, PublishEndpoint, ReceiveEndpoints);
         }
     }
 }

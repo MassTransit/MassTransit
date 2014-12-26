@@ -14,9 +14,9 @@ namespace MassTransit.Containers.Tests
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
-    using Magnum.Extensions;
     using NUnit.Framework;
     using Saga;
     using Scenarios;
@@ -182,7 +182,7 @@ namespace MassTransit.Containers.Tests
 
 
         public class CheckScopeConsumer :
-            Consumes<SimpleMessageInterface>.All
+            IConsumer<SimpleMessageInterface>
         {
             static SimpleMessageInterface _last;
             static ManualResetEvent _received = new ManualResetEvent(false);
@@ -199,16 +199,16 @@ namespace MassTransit.Containers.Tests
             {
                 get
                 {
-                    if (_received.WaitOne(8.Seconds()))
+                    if (_received.WaitOne(TimeSpan.FromSeconds(8)))
                         return _last;
 
                     throw new TimeoutException("Timeout waiting for message to be consumed");
                 }
             }
 
-            public void Consume(SimpleMessageInterface message)
+            public async Task Consume(ConsumeContext<SimpleMessageInterface> context)
             {
-                _last = message;
+                _last = context.Message;
                 _received.Set();
             }
         }

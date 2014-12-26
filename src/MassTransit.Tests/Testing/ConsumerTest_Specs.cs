@@ -17,7 +17,7 @@ namespace MassTransit.Tests.Testing
 	using MassTransit.Testing;
     using Shouldly;
 
-
+    [Explicit]
     public class When_a_consumer_is_being_tested
 	{
 		ConsumerTest<BusTestScenario, Testsumer> _test;
@@ -86,7 +86,7 @@ namespace MassTransit.Tests.Testing
 		}
 	}
 
-	
+	[Explicit]
 	public class When_a_context_consumer_is_being_tested
 	{
 		ConsumerTest<BusTestScenario, Testsumer> _test;

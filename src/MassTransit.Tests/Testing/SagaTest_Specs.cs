@@ -20,7 +20,7 @@ namespace MassTransit.Tests.Testing
 	using MassTransit.Testing;
 	using Shouldly;
 
-
+    [Explicit]
     public class When_a_saga_is_being_tested
 	{
 		Guid _sagaId;

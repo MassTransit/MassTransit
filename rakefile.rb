@@ -1,13 +1,8 @@
 COPYRIGHT = "Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al. - All rights reserved."
 
-require File.dirname(__FILE__) + "/build_support/BuildUtils.rb"
-require File.dirname(__FILE__) + "/build_support/util.rb"
-
 include FileTest
 require 'albacore'
-require File.dirname(__FILE__) + "/build_support/ilmergeconfig.rb"
-require File.dirname(__FILE__) + "/build_support/ilmerge.rb"
-require File.dirname(__FILE__) + "/build_support/versioning.rb"
+require 'semver'
 
 PRODUCT = 'MassTransit'
 CLR_TOOLS_VERSION = 'v4.0.30319'
@@ -30,14 +25,14 @@ props = {
 }
 
 desc "Default + tests"
-task :all => [:clean, :restore, :compile, :ilmerge, :compile_samples, :copy_samples, :copy_services, :tests]
+task :default => [:clean, :restore, :compile, :tests]
 
 desc "Update the common version information for the build. You can call this task without building."
 assemblyinfo :global_version => [:versioning] do |asm|
   # Assembly file config
   asm.product_name = PRODUCT
   asm.description = "MassTransit is a distributed application framework for .NET http://masstransit-project.com"
-  asm.version = ASSEMBLY_VERSION
+  asm.version = FORMAL_VERSION
   asm.file_version = FORMAL_VERSION
   asm.custom_attributes :AssemblyInformationalVersion => "#{BUILD_VERSION}",
     :ComVisibleAttribute => false,
@@ -59,16 +54,15 @@ task :clean do
 	Dir.mkdir props[:artifacts]
 end
 
-task :compile_samples => [:build_starbucks, :build_distributor] do ; end
+task :compile_samples => [:build_starbucks] do ; end
 
 desc "Compiles MT into build_output"
-task :compile => [:versioning, :global_version, :build, :copy_signed] do ; end
+task :compile => [:versioning, :global_version, :build, :copy_signed, :build_unsigned, :copy_unsigned] do ; end
 
 task :copy_signed do
 	puts 'Copying unmerged dependencies to output folder'
 
 	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "log4net.{dll,pdb,xml}", props[:output]
-	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "Magnum.{dll,pdb,xml}", props[:output]
 
 	copyOutputFiles File.join(props[:src], "Persistence/MassTransit.NHibernateIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NHibernateIntegration.{dll,pdb,xml}", File.join(props[:output], "Persistence/NHibernate")
 
@@ -82,77 +76,23 @@ task :copy_signed do
 	copyOutputFiles File.join(props[:src], "MassTransit.Reactive/bin/#{BUILD_CONFIG}"), "MassTransit.*.{dll,pdb,xml}", File.join(props[:output], "Reactive")
 
   outc = File.join(props[:output], "Containers")
-    copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
   	copyOutputFiles File.join(props[:src], "Containers/MassTransit.UnityIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.UnityIntegration.{dll,pdb,xml}", outc
   	copyOutputFiles File.join(props[:src], "Containers/MassTransit.WindsorIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.WindsorIntegration.{dll,pdb,xml}", outc
   	copyOutputFiles File.join(props[:src], "Containers/MassTransit.NinjectIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NinjectIntegration.{dll,pdb,xml}", outc
   	copyOutputFiles File.join(props[:src], "Containers/MassTransit.AutofacIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.AutofacIntegration.{dll,pdb,xml}", outc
 
 	outt = File.join(props[:output], "Transports")
-  	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.MSMQ/bin/#{BUILD_CONFIG}"), "MassTransit.Transports.MSMQ.{dll,pdb,xml}", File.join(outt, "MSMQ")
-  	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "MassTransit.Transports.RabbitMq.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
-end
-
-task :ilmerge => [:ilmerge_masstransit] do
-end
-
-
-ilmerge :ilmerge_masstransit do |ilm|
-	out = File.join(props[:output], 'MassTransit.dll')
-	ilm.output = out
-	ilm.internalize = File.join(props[:build_support], 'internalize.txt')
-	ilm.working_directory = File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}")
-	ilm.target = :library
-        ilm.use MSB_USE
-	ilm.log = File.join( props[:src], "MassTransit","bin","#{BUILD_CONFIG}", 'ilmerge.log' )
-	ilm.allow_dupes = true
-	ilm.references = [ 'MassTransit.dll', 'Stact.dll']
-    ilm.keyfile = props[:keyfile]
+  	copyOutputFiles File.join(props[:src], "MassTransit.AzureServiceBusTransport/bin/#{BUILD_CONFIG}"), "MassTransit.AzureServiceBusTransport.{dll,pdb,xml}", File.join(outt, "AzureServiceBus")
+  	copyOutputFiles File.join(props[:src], "MassTransit.RabbitMqTransport/bin/#{BUILD_CONFIG}"), "MassTransit.RabbitMqTransport.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
 end
 
 desc "Copying Services"
-task :copy_services => [:build_unsigned] do
+task :copy_unsigned => [:build_unsigned] do
 	puts "Copying services"
 
-	targ = File.join(props[:stage], 'Services', 'RuntimeServices')
-	src = File.join(props[:src], "MassTransit.RuntimeServices/bin/#{BUILD_CONFIG}")
-
-    copyOutputFiles src, "MassTransit.*.{dll,exe,config,log4net.xml,sdf}", targ
-  	copyOutputFiles src, "MassTransit.dll", targ
-    copyOutputFiles src, "MassTransit.Log4NetIntegration.dll", targ
-    copyOutputFiles src, "log4net.dll", targ
-    copyOutputFiles src, "Magnum.dll", targ
-    copyOutputFiles src, "Stact.dll", targ
-    copyOutputFiles src, "Newtonsoft.Json.dll", targ
-    copyOutputFiles src, "NHibernate*.dll", targ
-    copyOutputFiles src, "Iesi.Collections.dll", targ
-    copyOutputFiles src, "StructureMap.dll", targ
-    copyOutputFiles src, "Topshelf.dll", targ
-    copyOutputFiles src, "Topshelf.Log4Net.dll", targ
-  	copyOutputFiles File.join(props[:lib], 'SqlCe'), '*', targ
-  	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86'), '*', File.join(targ, 'x86')
-  	copyOutputFiles File.join(props[:lib], 'SqlCe', 'x86', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'x86', 'Microsoft.VC90.CRT')
-  	copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64'), '*', File.join(targ, 'amd64')
-  	copyOutputFiles File.join(props[:lib], 'SqlCe', 'amd64', 'Microsoft.VC90.CRT'), '*', File.join(targ, 'amd64', 'Microsoft.VC90.CRT')
-
-	targ = File.join(props[:stage], 'Services', 'SystemView')
-	src = File.join(props[:src], "MassTransit.SystemView/bin/#{BUILD_CONFIG}")
-
-  	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
-  	copyOutputFiles props[:output], 'MassTransit.dll', targ
-   	copyOutputFiles src, "log4net.dll", targ
-   	copyOutputFiles src, "Magnum.dll", targ
-   	copyOutputFiles src, "StructureMap.dll", targ
-
-  targ = File.join(props[:stage], 'Services', 'BusDriver')
-  src = File.join(props[:src], "Tools/BusDriver/bin/#{BUILD_CONFIG}")
-
-    copyOutputFiles src, "BusDriver.{exe}", targ
-  	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
-    copyOutputFiles props[:output], 'MassTransit.dll', targ
-  	copyOutputFiles src, "RabbitMQ.Client.{dll}", targ
-   	copyOutputFiles src, "log4net.dll", targ
-   	copyOutputFiles src, "Magnum.dll", targ
+	 outc = File.join(props[:output], "Containers")
+  	copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
+ 
 end
 
 task :copy_samples => [:compile_samples] do
@@ -212,6 +152,13 @@ desc "restores missing packages"
 msbuild :restore do |msb|
   msb.use :net4
   msb.targets :RestorePackages
+  msb.solution = 'src/Containers/MassTransit.Containers.Tests/MassTransit.Containers.Tests.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
   msb.solution = 'src/Containers/MassTransit.NinjectIntegration/MassTransit.NinjectIntegration.csproj'
 end
 
@@ -261,14 +208,35 @@ desc "restores missing packages"
 msbuild :restore do |msb|
   msb.use :net4
   msb.targets :RestorePackages
-  msb.solution = 'src/Transports/MassTransit.Transports.RabbitMq/MassTransit.Transports.RabbitMq.csproj'
+  msb.solution = 'src/MassTransit.Courier.Tests/MassTransit.Courier.Tests.csproj'
 end
 
 desc "restores missing packages"
 msbuild :restore do |msb|
   msb.use :net4
   msb.targets :RestorePackages
-  msb.solution = 'src/Transports/MassTransit.Transports.RabbitMq.Tests/MassTransit.Transports.RabbitMq.Tests.csproj'
+  msb.solution = 'src/MassTransit.RabbitMqTransport/MassTransit.RabbitMqTransport.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/MassTransit.RabbitMqTransport.Tests/MassTransit.RabbitMqTransport.Tests.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/MassTransit.AzureServiceBusTransport/MassTransit.AzureServiceBusTransport.csproj'
+end
+
+desc "restores missing packages"
+msbuild :restore do |msb|
+  msb.use :net4
+  msb.targets :RestorePackages
+  msb.solution = 'src/MassTransit.AzureServiceBusTransport.Tests/MassTransit.AzureServiceBusTransport.Tests.csproj'
 end
 
 
@@ -301,20 +269,6 @@ msbuild :build do |msb|
 end
 
 desc "Only compiles the application."
-msbuild :build35 do |msb|
-    msb.properties :Configuration => BUILD_CONFIG + "35",
-        :BuildConfigKey => BUILD_CONFIG_KEY,
-        :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
-        :Platform => 'Any CPU'
-    msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
-    msb.use :net4 #MSB_USE
-    msb.targets :Clean, :Build
-#    msb.properties[:SignAssembly] = 'true'
-#    msb.properties[:AssemblyOriginatorKeyFile] = props[:keyfile]
-    msb.solution = 'src/MassTransit.sln'
-end
-
-desc "Only compiles the application."
 msbuild :build_unsigned do |msb|
 	msb.properties :Configuration => BUILD_CONFIG + "Unsigned",
 	    :BuildConfigKey => BUILD_CONFIG_KEY,
@@ -322,7 +276,7 @@ msbuild :build_unsigned do |msb|
 	    :Platform => 'Any CPU'
 	msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
 	msb.use :net4 #MSB_USE
-	msb.targets :Clean, :Build
+	msb.targets :Build
 	msb.solution = 'src/MassTransit.sln'
 end
 
@@ -337,17 +291,6 @@ msbuild :build_starbucks do |msb|
 	msb.solution = 'src/Samples/Starbucks/Starbucks.sln'
 end
 
-msbuild :build_distributor do |msb|
-	msb.properties :Configuration => BUILD_CONFIG,
-	    :BuildConfigKey => BUILD_CONFIG_KEY,
-	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
-	    :Platform => 'Any CPU'
-	msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
-	msb.use :net4 #MSB_USE
-	msb.targets :Build
-	msb.solution = 'src/Samples/Distributor/Grid.Distributor.sln'
-end
-
 def copyOutputFiles(fromDir, filePattern, outDir)
 	FileUtils.mkdir_p outDir unless exists?(outDir)
 	Dir.glob(File.join(fromDir, filePattern)){|file|
@@ -360,7 +303,7 @@ task :tests => [:unit_tests]
 desc "Runs unit tests"
 nunit :unit_tests do |nunit|
 
-	nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.3', 'tools', 'nunit-console.exe')
+	nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.4', 'tools', 'nunit-console.exe')
 	nunit.options = "/framework=#{CLR_TOOLS_VERSION}", '/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results-')}#{OUTPUT_PATH}.xml\""
     nunit.assemblies = FileList["tests/MassTransit.Tests.dll", "tests/MassTransit.Containers.Tests.dll"]
 end
@@ -718,4 +661,53 @@ task :publish => [:nr_nuget_push]
 desc "MAINTAINERS: builds, git tags and pushes nugets"
 task :release => [:verify, :default, :gittag, :publish] do
   puts 'done'
+end
+
+def add_files stage, what_dlls, nuspec
+  [['net45', 'net-4.5']].each{|fw|
+    takeFrom = File.join(stage, fw[1], what_dlls)
+    Dir.glob(takeFrom).each do |f|
+      nuspec.file(f.gsub("/", "\\"), "lib\\#{fw[0]}")
+    end
+  }
+end
+
+def commit_data
+  begin
+    commit = `git rev-parse --short HEAD`.chomp()[0,6]
+    git_date = `git log -1 --date=iso --pretty=format:%ad`
+    commit_date = DateTime.parse( git_date ).strftime("%Y-%m-%d %H%M%S")
+  rescue Exception => e
+    puts e.inspect
+    commit = (ENV['BUILD_VCS_NUMBER'] || "000000")[0,6]
+    commit_date = Time.new.strftime("%Y-%m-%d %H%M%S")
+  end
+  [commit, commit_date]
+end
+
+task :versioning do
+  ver = SemVer.find
+  revision = (ENV['BUILD_NUMBER'] || ver.patch).to_i
+  var = SemVer.new(ver.major, ver.minor, revision, ver.special)
+  
+  # extensible number w/ git hash
+  ENV['BUILD_VERSION'] = BUILD_VERSION = ver.format("%M.%m.%p%s") + ".#{commit_data()[0]}"
+  
+  # nuget (not full semver 2.0.0-rc.1 support) see http://nuget.codeplex.com/workitem/1796
+  ENV['NUGET_VERSION'] = NUGET_VERSION = ver.format("%M.%m.%p%s")
+  
+  # purely M.m.p format
+  ENV['FORMAL_VERSION'] = FORMAL_VERSION = "#{ SemVer.new(ver.major, ver.minor, revision).format "%M.%m.%p"}"
+  puts "##teamcity[buildNumber '#{BUILD_VERSION}']" # tell teamcity our decision
+end
+
+def waitfor(&block)
+  checks = 0
+
+  until block.call || checks >10
+    sleep 0.5
+    checks += 1
+  end
+
+  raise 'Waitfor timeout expired. Make sure that you aren\'t running something from the build output folders, or that you have browsed to it through Explorer.' if checks > 10
 end
