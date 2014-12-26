@@ -1,19 +1,19 @@
-﻿// Copyright 2011-2013 Chris Patterson, Dru Sellers
-// 
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutomatonymousTests
 {
     using System;
-    using System.Diagnostics;
+    using System.Threading.Tasks;
     using Automatonymous;
     using NUnit.Framework;
     using Saga;
@@ -24,34 +24,6 @@ namespace MassTransit.AutomatonymousTests
     public class When_an_activity_throws_an_exception :
         InMemoryTestFixture
     {
-        [Test]
-        public async void Should_be_received_as_a_fault_message()
-        {
-
-            var message = new Start();
-
-            var faultReceived = SubscribeHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
-
-            await InputQueueSendEndpoint.Send(message);
-
-            var fault = await faultReceived;
-
-                        Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
-        }
-
-//        [Test]
-//        public void Should_be_received_as_a_fault_message_as_well()
-//        {
-//            var faultReceived = new FutureMessage<Fault<Create>>();
-//
-//            Bus.SubscribeHandler<Fault<Create>>(faultReceived.Set);
-//
-//            var message = new Create();
-//            Bus.Publish(message);
-//
-//            Assert.IsTrue(faultReceived.IsAvailable(Debugger.IsAttached ? 5.Minutes() : 8.Seconds()));
-//            Assert.AreEqual(message.CorrelationId, faultReceived.Message.FailedMessage.CorrelationId);
-//        }
 //
 //        [Test]
 //        public void Should_be_able_to_observe_its_own_event_fault()
@@ -96,8 +68,8 @@ namespace MassTransit.AutomatonymousTests
             }
 
             public State CurrentState { get; set; }
-            public Guid CorrelationId { get; set; }
             public IServiceBus Bus { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -119,17 +91,26 @@ namespace MassTransit.AutomatonymousTests
 
                 Initially(
                     When(Started)
-                        .Then(context => { throw new NotSupportedException("This is expected, but nonetheless exceptional"); })
+                        .Then(context =>
+                        {
+                            throw new NotSupportedException("This is expected, but nonetheless exceptional");
+                        })
                         .TransitionTo(Running),
                     When(Initialized)
                         .TransitionTo(WaitingToStart),
                     When(Created)
-                        .Then(context => { throw new NotSupportedException("This is expected, but nonetheless exceptional"); })
+                        .Then(context =>
+                        {
+                            throw new NotSupportedException("This is expected, but nonetheless exceptional");
+                        })
                         .TransitionTo(Running));
 
                 During(WaitingToStart,
                     When(Started)
-                        .Then(instance => { throw new NotSupportedException("This is expected, but nonetheless exceptional"); })
+                        .Then(instance =>
+                        {
+                            throw new NotSupportedException("This is expected, but nonetheless exceptional");
+                        })
                         .TransitionTo(Running),
                     When(StartFaulted)
                         .TransitionTo(FailedToStart));
@@ -142,7 +123,7 @@ namespace MassTransit.AutomatonymousTests
             public Event<Start> Started { get; private set; }
             public Event<Initialize> Initialized { get; private set; }
             public Event<Create> Created { get; private set; }
-            public Event<Fault<Start>> StartFaulted { get; private set; } 
+            public Event<Fault<Start>> StartFaulted { get; private set; }
         }
 
 
@@ -162,6 +143,7 @@ namespace MassTransit.AutomatonymousTests
             public Guid CorrelationId { get; set; }
         }
 
+
         public class Initialize :
             CorrelatedBy<Guid>
         {
@@ -172,6 +154,7 @@ namespace MassTransit.AutomatonymousTests
 
             public Guid CorrelationId { get; set; }
         }
+
 
         public class Create :
             CorrelatedBy<Guid>
@@ -188,6 +171,48 @@ namespace MassTransit.AutomatonymousTests
         public class StartupComplete
         {
             public Guid TransactionId { get; set; }
+        }
+
+
+        [Test]
+        public async void Should_be_received_as_a_fault_message()
+        {
+            var message = new Start();
+
+            Task<ConsumeContext<Fault<Start>>> faultReceived =
+                SubscribeHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
+
+            await InputQueueSendEndpoint.Send(message);
+
+            ConsumeContext<Fault<Start>> fault = await faultReceived;
+
+            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
+        }
+
+        [Test]
+        public async void Should_observe_the_fault_message()
+        {
+            var message = new Initialize();
+
+            Task<ConsumeContext<Fault<Start>>> faultReceived =
+                SubscribeHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
+
+            await InputQueueSendEndpoint.Send(message);
+
+            Guid? saga = await _repository.ShouldContainSaga(
+    x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.WaitingToStart, TestTimeout);
+
+
+            await InputQueueSendEndpoint.Send(new Start(message.CorrelationId));
+
+            ConsumeContext<Fault<Start>> fault = await faultReceived;
+
+            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
+
+             saga = await _repository.ShouldContainSaga(
+                x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.FailedToStart, TestTimeout);
+
+            Assert.IsTrue(saga.HasValue);
         }
     }
 }

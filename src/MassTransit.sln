@@ -77,12 +77,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AutomatonymousI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AutomatonymousIntegration.Tests", "MassTransit.AutomatonymousIntegration.Tests\MassTransit.AutomatonymousIntegration.Tests.csproj", "{1DAB3D46-3386-48F8-8381-2F5B678D1DB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automatonymous", "..\..\Automatonymous\src\Automatonymous\Automatonymous.csproj", "{FD8F92EB-5818-4C59-8859-19D3A74F979B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automatonymous.Tests", "..\..\Automatonymous\src\Automatonymous.Tests\Automatonymous.Tests.csproj", "{ED26D6B3-73D8-433C-867A-AAB4D7F687DC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automatonymous.Visualizer", "..\..\Automatonymous\src\Automatonymous.Visualizer\Automatonymous.Visualizer.csproj", "{CD346A24-EEBB-493C-AAC0-E9896340B66A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -282,30 +276,6 @@ Global
 		{1DAB3D46-3386-48F8-8381-2F5B678D1DB6}.Release35|Any CPU.Build.0 = Release|Any CPU
 		{1DAB3D46-3386-48F8-8381-2F5B678D1DB6}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{1DAB3D46-3386-48F8-8381-2F5B678D1DB6}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
-		{FD8F92EB-5818-4C59-8859-19D3A74F979B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FD8F92EB-5818-4C59-8859-19D3A74F979B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FD8F92EB-5818-4C59-8859-19D3A74F979B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FD8F92EB-5818-4C59-8859-19D3A74F979B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FD8F92EB-5818-4C59-8859-19D3A74F979B}.Release35|Any CPU.ActiveCfg = Release|Any CPU
-		{FD8F92EB-5818-4C59-8859-19D3A74F979B}.Release35|Any CPU.Build.0 = Release|Any CPU
-		{FD8F92EB-5818-4C59-8859-19D3A74F979B}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{FD8F92EB-5818-4C59-8859-19D3A74F979B}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
-		{ED26D6B3-73D8-433C-867A-AAB4D7F687DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ED26D6B3-73D8-433C-867A-AAB4D7F687DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ED26D6B3-73D8-433C-867A-AAB4D7F687DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ED26D6B3-73D8-433C-867A-AAB4D7F687DC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ED26D6B3-73D8-433C-867A-AAB4D7F687DC}.Release35|Any CPU.ActiveCfg = Release|Any CPU
-		{ED26D6B3-73D8-433C-867A-AAB4D7F687DC}.Release35|Any CPU.Build.0 = Release|Any CPU
-		{ED26D6B3-73D8-433C-867A-AAB4D7F687DC}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{ED26D6B3-73D8-433C-867A-AAB4D7F687DC}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
-		{CD346A24-EEBB-493C-AAC0-E9896340B66A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD346A24-EEBB-493C-AAC0-E9896340B66A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD346A24-EEBB-493C-AAC0-E9896340B66A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD346A24-EEBB-493C-AAC0-E9896340B66A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD346A24-EEBB-493C-AAC0-E9896340B66A}.Release35|Any CPU.ActiveCfg = Release|Any CPU
-		{CD346A24-EEBB-493C-AAC0-E9896340B66A}.Release35|Any CPU.Build.0 = Release|Any CPU
-		{CD346A24-EEBB-493C-AAC0-E9896340B66A}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{CD346A24-EEBB-493C-AAC0-E9896340B66A}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -330,9 +300,6 @@ Global
 		{975A4E88-EAE3-4784-A808-523A851057EB} = {76F5F3F7-35AD-4D3B-A445-0A6A55C03147}
 		{A852511B-2742-4F4D-BD4E-ADDDBF3BD4B3} = {D93DF222-8719-4B8F-A1EC-26C850D637DB}
 		{1DAB3D46-3386-48F8-8381-2F5B678D1DB6} = {D93DF222-8719-4B8F-A1EC-26C850D637DB}
-		{FD8F92EB-5818-4C59-8859-19D3A74F979B} = {D93DF222-8719-4B8F-A1EC-26C850D637DB}
-		{ED26D6B3-73D8-433C-867A-AAB4D7F687DC} = {D93DF222-8719-4B8F-A1EC-26C850D637DB}
-		{CD346A24-EEBB-493C-AAC0-E9896340B66A} = {D93DF222-8719-4B8F-A1EC-26C850D637DB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
