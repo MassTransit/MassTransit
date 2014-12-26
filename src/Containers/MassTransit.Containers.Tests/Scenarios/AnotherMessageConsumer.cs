@@ -13,7 +13,7 @@
 namespace MassTransit.Containers.Tests.Scenarios
 {
     public interface AnotherMessageConsumer :
-        Consumes<AnotherMessageInterface>.All
+        IConsumer<AnotherMessageInterface>
     {
         AnotherMessageInterface Last { get; }
     }

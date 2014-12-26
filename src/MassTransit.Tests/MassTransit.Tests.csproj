@@ -61,23 +61,25 @@
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum">
-      <HintPath>..\Packages\Magnum.2.1.2\lib\NET40\Magnum.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+    <Reference Include="Magnum, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\Magnum.2.1.3\lib\NET40\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.7\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="Rhino.Mocks, Version=3.6.0.0, Culture=neutral, PublicKeyToken=0b3305902db7183f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
     </Reference>
-    <Reference Include="Shouldly">
-      <HintPath>..\packages\Shouldly.2.3.0\lib\net40\Shouldly.dll</HintPath>
+    <Reference Include="Shouldly, Version=2.3.1.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Shouldly.2.3.1\lib\net40\Shouldly.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -107,7 +109,6 @@
     <Compile Include="Configuration\ConsumesAll_Specs.cs" />
     <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
     <Compile Include="Configuration\SagaConnector_Specs.cs" />
-    <Compile Include="Configuration\HandlerSubscription_Specs.cs" />
     <Compile Include="Configuration\When_configuration_fails.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Load\CommandInstance.cs" />
@@ -146,7 +147,6 @@
     <Compile Include="SerializationFault_Specs.cs" />
     <Compile Include="SerializationSupport_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
-    <Compile Include="SmallNumber_Specs.cs" />
     <Compile Include="InMemoryTest_Specs.cs" />
     <Compile Include="StaticProperty_Specs.cs" />
     <Compile Include="Testing\ConsumerMultiple_Specs.cs" />

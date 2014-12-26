@@ -25,10 +25,12 @@ namespace MassTransit.RabbitMqTransport
         IPublishEndpoint
     {
         readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IMessageNameFormatter _messageNameFormatter;
 
         public RabbitMqPublishEndpoint(ISendEndpointProvider sendEndpointProvider)
         {
             _sendEndpointProvider = sendEndpointProvider;
+            _messageNameFormatter = new RabbitMqMessageNameFormatter();
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)

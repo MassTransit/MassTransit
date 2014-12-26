@@ -16,7 +16,7 @@ namespace MassTransit.Tests.Testing
 	using MassTransit.Testing;
 	using Shouldly;
 
-
+    [Explicit]
     public class When_a_handler_responds_to_a_message
 	{
 		HandlerTest<A> _test;
@@ -63,7 +63,7 @@ namespace MassTransit.Tests.Testing
 		}
 	}
 
-	
+	[Explicit]
 	public class When_a_handler_responds_to_a_message_using_context
 	{
 		HandlerTest<A> _test;

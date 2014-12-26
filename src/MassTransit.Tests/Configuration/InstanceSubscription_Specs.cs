@@ -19,7 +19,7 @@ namespace MassTransit.Tests.Configuration
 	using TestFramework.Messages;
 
 
-    
+    [Explicit]
 	public class When_subscribing_an_object_instance_to_the_bus 
 	{
 		IServiceBus _bus;

@@ -189,6 +189,46 @@ namespace MassTransit.Tests.Serialization
         }
 
         [Test]
+        public void Serialize_small_number()
+        {
+            const decimal smallNumber = 0.000001M;
+
+            TestSerialization(new SmallNumberMessage(){SmallNumber = smallNumber});
+        }
+
+
+        public class SmallNumberMessage : IEquatable<SmallNumberMessage>
+        {
+            public decimal SmallNumber { get; set; }
+
+            public bool Equals(SmallNumberMessage other)
+            {
+                if (ReferenceEquals(null, other))
+                    return false;
+                if (ReferenceEquals(this, other))
+                    return true;
+                return SmallNumber == other.SmallNumber;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != this.GetType())
+                    return false;
+                return Equals((SmallNumberMessage)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return SmallNumber.GetHashCode();
+            }
+        }
+        
+
+        [Test]
         public void Serialize_simple()
         {
             TestSerialization(new PingMessage());

@@ -16,7 +16,7 @@ namespace MassTransit.Tests.Testing
 	using MassTransit.Testing;
     using Shouldly;
 
-
+    [Explicit]
     public class When_a_consumer_with_multiple_message_consumers_is_tested
 	{
 		ConsumerTest<BusTestScenario, Testsumer> _test;

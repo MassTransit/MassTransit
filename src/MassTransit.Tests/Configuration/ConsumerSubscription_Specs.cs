@@ -46,7 +46,7 @@ namespace MassTransit.Tests.Configuration
             _bus.Dispose();
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_have_received_the_message()
         {
             ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping, 8.Seconds());
@@ -79,7 +79,7 @@ namespace MassTransit.Tests.Configuration
             _bus.Dispose();
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_have_received_the_message()
         {
             ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping, 12.Seconds());
@@ -117,13 +117,13 @@ namespace MassTransit.Tests.Configuration
             _bus.Dispose();
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_have_received_the_message()
         {
             ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping1, 12.Seconds());
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_have_received_the_second_message()
         {
             ConsumerOf<PingMessage>.AnyShouldHaveReceivedMessage(_ping2, 12.Seconds());

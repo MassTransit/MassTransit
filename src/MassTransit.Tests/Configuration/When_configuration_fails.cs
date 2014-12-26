@@ -18,6 +18,7 @@ namespace MassTransit.Tests.Configuration
 	using NUnit.Framework;
 	using Shouldly;
 
+    [Explicit]
 	public class When_configuration_fails
 	{
 		[Test]
