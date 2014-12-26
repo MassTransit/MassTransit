@@ -14,6 +14,7 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.IO;
+    using System.Net.Mime;
     using System.Runtime.Serialization;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
@@ -32,6 +33,11 @@ namespace MassTransit.Serialization
             _deserializer = deserializer;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpoint = publishEndpoint;
+        }
+
+        ContentType IMessageDeserializer.ContentType
+        {
+            get { return BsonMessageSerializer.BsonContentType; }
         }
 
         ConsumeContext IMessageDeserializer.Deserialize(ReceiveContext receiveContext)

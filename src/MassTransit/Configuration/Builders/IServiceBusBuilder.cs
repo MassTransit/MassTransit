@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
+    using System;
+    using System.Net.Mime;
     using Serialization;
     using Transports;
 
@@ -36,5 +38,19 @@ namespace MassTransit.Builders
         /// </summary>
         /// <param name="receiveEndpoint"></param>
         void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint);
+
+        /// <summary>
+        /// Sets the outbound message serializer
+        /// </summary>
+        /// <param name="serializerFactory">The factory to create the message serializer</param>
+        void SetMessageSerializer(Func<IMessageSerializer> serializerFactory);
+
+        /// <summary>
+        /// Adds an inbound message deserializer to the available deserializers
+        /// </summary>
+        /// <param name="contentType">The content type of the deserializer</param>
+        /// <param name="deserializerFactory">The factory to create the deserializer</param>
+        void AddMessageDeserializer(ContentType contentType,
+            Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer> deserializerFactory);
     }
 }

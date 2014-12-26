@@ -15,6 +15,7 @@ namespace MassTransit.Serialization
     using System;
     using System.Globalization;
     using System.IO;
+    using System.Net.Mime;
     using System.Runtime.Serialization;
     using System.Text;
     using System.Xml;
@@ -35,6 +36,11 @@ namespace MassTransit.Serialization
             _deserializer = deserializer;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpoint = publishEndpoint;
+        }
+
+        ContentType IMessageDeserializer.ContentType
+        {
+            get { return XmlMessageSerializer.XmlContentType; }
         }
 
         ConsumeContext IMessageDeserializer.Deserialize(ReceiveContext receiveContext)

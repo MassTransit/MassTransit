@@ -52,8 +52,8 @@ namespace BusDriver
 
 	        return ServiceBusFactory.New(x =>
 	            {
-	                x.UseJsonSerializer();
-	                x.ReceiveFrom(uri);
+//	                x.UseJsonSerializer();
+//	                x.ReceiveFrom(uri);
 	            });
 	    }
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using BusConfigurators;
     using EndpointConfigurators;
     using Newtonsoft.Json;
     using Serialization;
@@ -21,212 +20,80 @@ namespace MassTransit
 
     public static class SerializerConfigurationExtensions
     {
-        public static T UseJsonSerializer<T>(this T configurator)
-            where T : EndpointFactoryConfigurator
+        /// <summary>
+        /// Serialize messages using the JSON serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseJsonSerializer(this IServiceBusFactoryConfigurator configurator)
         {
-            configurator.SetDefaultSerializer<JsonMessageSerializer>();
-
-            return configurator;
+            configurator.AddServiceBusFactoryBuilderConfigurator(
+                new SetMessageSerializerServiceBusFactoryBuilderConfigurator<JsonMessageSerializer>());
         }
 
-        public static T ConfigureJsonSerializer<T>(this T configurator,
+        /// <summary>
+        /// Configure the serialization settings used to create the message serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void ConfigureJsonSerializer(this IServiceBusFactoryConfigurator configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
-            where T : EndpointFactoryConfigurator
         {
             JsonMessageSerializer.SerializerSettings = configure(JsonMessageSerializer.SerializerSettings);
-
-            return configurator;
         }
 
-        public static T ConfigureJsonDeserializer<T>(this T configurator,
+        /// <summary>
+        /// Configure the serialization settings used to create the message deserializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void ConfigureJsonDeserializer(this IServiceBusFactoryConfigurator configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
-            where T : EndpointFactoryConfigurator
         {
             JsonMessageSerializer.DeserializerSettings = configure(JsonMessageSerializer.DeserializerSettings);
-
-            return configurator;
-        }
-
-        public static T UseBsonSerializer<T>(this T configurator)
-            where T : EndpointFactoryConfigurator
-        {
-            configurator.SetDefaultSerializer<BsonMessageSerializer>();
-
-            return configurator;
-        }
-
-        public static T UseXmlSerializer<T>(this T configurator)
-            where T : EndpointFactoryConfigurator
-        {
-            configurator.SetDefaultSerializer<XmlMessageSerializer>();
-
-            return configurator;
-        }
-        public static T UseBinarySerializer<T>(this T configurator)
-            where T : EndpointFactoryConfigurator
-        {
-            configurator.SetDefaultSerializer<BinaryMessageSerializer>();
-
-            return configurator;
         }
 
         /// <summary>
-        /// Support the receipt of messages serialized by the JsonMessageSerializer
-        /// </summary>
-        public static T SupportJsonSerializer<T>(this T configurator)
-            where T : EndpointFactoryConfigurator
-        {
-            configurator.SupportMessageSerializer<JsonMessageSerializer>();
-
-            return configurator;
-        }
-
-        public static T SupportBsonSerializer<T>(this T configurator)
-            where T : EndpointFactoryConfigurator
-        {
-            configurator.SupportMessageSerializer<BsonMessageSerializer>();
-
-            return configurator;
-        }
-
-        public static T SupportXmlSerializer<T>(this T configurator)
-            where T : EndpointFactoryConfigurator
-        {
-            configurator.SupportMessageSerializer<XmlMessageSerializer>();
-
-            return configurator;
-        }
-
-        public static T SupportBinarySerializer<T>(this T configurator)
-            where T : EndpointFactoryConfigurator
-        {
-            configurator.SupportMessageSerializer<BinaryMessageSerializer>();
-
-            return configurator;
-        }
-
-        public static ServiceBusConfigurator SupportMessageSerializer<TSerializer>(
-            this ServiceBusConfigurator configurator)
-            where TSerializer : IMessageSerializer, new()
-        {
-            return SupportMessageSerializer(configurator, () => new TSerializer());
-        }
-
-        public static EndpointFactoryConfigurator SupportMessageSerializer<TSerializer>(
-            this EndpointFactoryConfigurator configurator)
-            where TSerializer : IMessageSerializer, new()
-        {
-            return SupportMessageSerializer(configurator, () => new TSerializer());
-        }
-
-
-        static T SetDefaultSerializer<T>(this T configurator, Func<IMessageSerializer> serializerFactory)
-            where T : EndpointFactoryConfigurator
-        {
-            var serializerConfigurator = new DefaultSerializerEndpointFactoryConfigurator(serializerFactory);
-
-            configurator.AddEndpointFactoryConfigurator(serializerConfigurator);
-
-            return configurator;
-        }
-
-        static T SupportMessageSerializer<T>(this T configurator, Func<IMessageSerializer> serializerFactory)
-            where T : EndpointFactoryConfigurator
-        {
-            var serializerConfigurator = new AddSerializerEndpointFactoryConfigurator(serializerFactory);
-
-            configurator.AddEndpointFactoryConfigurator(serializerConfigurator);
-
-            return configurator;
-        }
-
-        /// <summary>
-        /// Sets the default message serializer for endpoints
-        /// </summary>
-        /// <typeparam name="TSerializer"></typeparam>
-        /// <param name="configurator"></param>
-        /// <returns></returns>
-        public static EndpointFactoryConfigurator SetDefaultSerializer<TSerializer>(
-            this EndpointFactoryConfigurator configurator)
-            where TSerializer : IMessageSerializer, new()
-        {
-            return SetDefaultSerializer(configurator, () => new TSerializer());
-        }
-
-        /// <summary>
-        /// Sets the default message serializer for endpoints
-        /// </summary>
-        /// <typeparam name="TSerializer"></typeparam>
-        /// <param name="configurator"></param>
-        /// <returns></returns>
-        public static ServiceBusConfigurator SetDefaultSerializer<TSerializer>(this ServiceBusConfigurator configurator)
-            where TSerializer : IMessageSerializer, new()
-        {
-            return SetDefaultSerializer(configurator, () => new TSerializer());
-        }
-
-        /// <summary>
-        /// Sets the default message serializer for endpoints
+        /// Serialize messages using the BSON message serializer
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="serializerType"></param>
-        /// <returns></returns>
-        public static T SetDefaultSerializer<T>(this T configurator,Type serializerType)
-            where T : EndpointFactoryConfigurator
+        public static void UseBsonSerializer(this IServiceBusFactoryConfigurator configurator)
         {
-            return SetDefaultSerializer(configurator, () => (IMessageSerializer)Activator.CreateInstance(serializerType));
+            configurator.AddServiceBusFactoryBuilderConfigurator(
+                new SetMessageSerializerServiceBusFactoryBuilderConfigurator<BsonMessageSerializer>());
         }
 
         /// <summary>
-        /// Sets the default message serializer for endpoints
+        /// Serialize messages using the XML message serializer
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="serializer"></param>
-        /// <returns></returns>
-        public static T SetDefaultSerializer<T>(this T configurator,
-            IMessageSerializer serializer)
-            where T : EndpointFactoryConfigurator
+        public static void UseXmlSerializer(this IServiceBusFactoryConfigurator configurator)
         {
-            return SetDefaultSerializer(configurator, () => serializer);
-        }
-
-        // -----------------------------------------------------------------------
-
-        public static ServiceBusConfigurator SetSupportedMessageSerializers<T>(
-            this ServiceBusConfigurator configurator)
-            where T : ISupportedMessageSerializers, new()
-        {
-            return SetSupportedMessageSerializers(configurator, () => new T());
-        }
-        
-        public static EndpointFactoryConfigurator SetSupportedMessageSerializers<T>(
-            this EndpointFactoryConfigurator configurator)
-            where T : ISupportedMessageSerializers, new()
-        {
-            return SetSupportedMessageSerializers(configurator, () => new T());
+            configurator.AddServiceBusFactoryBuilderConfigurator(
+                new SetMessageSerializerServiceBusFactoryBuilderConfigurator<XmlMessageSerializer>());
         }
 
         /// <summary>
-        /// Sets the default message serializer for endpoints
+        /// Serialize message using the .NET binary formatter (also adds support for the binary deserializer)
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="supportedSerializer"></param>
-        /// <returns></returns>
-        public static T SetSupportedMessageSerializers<T>(this T configurator,
-            ISupportedMessageSerializers supportedSerializer)
-            where T : EndpointFactoryConfigurator
+        public static void UseBinarySerializer(this IServiceBusFactoryConfigurator configurator)
         {
-            return SetSupportedMessageSerializers(configurator, () => supportedSerializer);
+            configurator.AddServiceBusFactoryBuilderConfigurator(
+                new SetMessageSerializerServiceBusFactoryBuilderConfigurator<BinaryMessageSerializer>());
+
+            configurator.SupportBinaryMessageDeserializer();
         }
 
-        static T SetSupportedMessageSerializers<T>(this T configurator, Func<ISupportedMessageSerializers> supportedSerializers)
-           where T : EndpointFactoryConfigurator
+        /// <summary>
+        /// Add support for the binary message deserializer to the bus
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <returns></returns>
+        public static void SupportBinaryMessageDeserializer(this IServiceBusFactoryConfigurator configurator)
         {
-            var serializerConfigurator = new SetSupportedMessageSerializersEndpointFactoryConfigurator(supportedSerializers);
-
-            configurator.AddEndpointFactoryConfigurator(serializerConfigurator);
-
-            return configurator;
+            configurator.AddServiceBusFactoryBuilderConfigurator(new SupportMessageDeserializerServiceBusFactoryBuilderConfigurator(
+                BinaryMessageSerializer.BinaryContentType, (s, p) => new BinaryMessageSerializer()));
         }
     }
 }

@@ -14,6 +14,8 @@ namespace MassTransit.Builders
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Net.Mime;
     using Serialization;
     using Transports;
 
@@ -21,10 +23,12 @@ namespace MassTransit.Builders
     public abstract class ServiceBusBuilderBase
     {
         readonly Lazy<IMessageDeserializer> _deserializer;
+        readonly IDictionary<string, Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer>> _deserializerFactories;
         readonly IList<IReceiveEndpoint> _endpoints;
-        readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<IPublishEndpoint> _publishEndpointProvider;
+        readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<IMessageSerializer> _serializer;
+        Func<IMessageSerializer> _serializerFactory;
 
         protected ServiceBusBuilderBase()
         {
@@ -33,6 +37,17 @@ namespace MassTransit.Builders
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
+            _deserializerFactories =
+                new Dictionary<string, Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer>>(StringComparer.OrdinalIgnoreCase);
+
+            _serializerFactory = () => new JsonMessageSerializer();
+
+            AddMessageDeserializer(JsonMessageSerializer.JsonContentType,
+                (s, p) => new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
+            AddMessageDeserializer(BsonMessageSerializer.BsonContentType,
+                (s, p) => new BsonMessageDeserializer(BsonMessageSerializer.Deserializer, s, p));
+            AddMessageDeserializer(XmlMessageSerializer.XmlContentType,
+                (s, p) => new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
         }
 
         protected IEnumerable<IReceiveEndpoint> ReceiveEndpoints
@@ -60,14 +75,45 @@ namespace MassTransit.Builders
             get { return _publishEndpointProvider.Value; }
         }
 
-        JsonMessageSerializer CreateSerializer()
+        public void AddMessageDeserializer(ContentType contentType,
+            Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer> deserializerFactory)
         {
-            return new JsonMessageSerializer();
+            if (contentType == null)
+                throw new ArgumentNullException("contentType");
+            if (deserializerFactory == null)
+                throw new ArgumentNullException("deserializerFactory");
+
+            if (_deserializer.IsValueCreated)
+                throw new ConfigurationException("The deserializer has already been created, no additional deserializers can be added.");
+
+            if (_deserializerFactories.ContainsKey(contentType.MediaType))
+                return;
+
+            _deserializerFactories[contentType.MediaType] = deserializerFactory;
         }
 
-        JsonMessageDeserializer CreateDeserializer()
+        public void SetMessageSerializer(Func<IMessageSerializer> serializerFactory)
         {
-            return new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, SendEndpointProvider, PublishEndpoint);
+            if (serializerFactory == null)
+                throw new ArgumentNullException("serializerFactory");
+
+            if (_serializer.IsValueCreated)
+                throw new ConfigurationException("The serializer has already been created, the serializer cannot be changed at this time.");
+
+            _serializerFactory = serializerFactory;
+        }
+
+        IMessageSerializer CreateSerializer()
+        {
+            return _serializerFactory();
+        }
+
+        IMessageDeserializer CreateDeserializer()
+        {
+            IMessageDeserializer[] deserializers =
+                _deserializerFactories.Values.Select(x => x(SendEndpointProvider, PublishEndpoint)).ToArray();
+
+            return new SupportedMessageDeserializers(deserializers);
         }
 
         public void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint)
