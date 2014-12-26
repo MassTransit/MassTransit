@@ -87,6 +87,8 @@ namespace Automatonymous.SubscriptionConnectors
                 Event stateMachineEvent = @event;
 
                 Type eventType = stateMachineEvent.GetType();
+                if (!eventType.HasInterface(typeof(Event<>)))
+                    continue;
 
                 Type messageType = eventType.GetClosingArguments(typeof(Event<>)).SingleOrDefault();
                 if (messageType == null || messageType.IsValueType)
