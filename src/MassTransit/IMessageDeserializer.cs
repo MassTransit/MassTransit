@@ -12,8 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System.Net.Mime;
+
+
     public interface IMessageDeserializer
     {
+        ContentType ContentType { get; }
+
         ConsumeContext Deserialize(ReceiveContext receiveContext);
     }
 }

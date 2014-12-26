@@ -38,8 +38,6 @@ namespace MassTransit.Configurators
 
             _configurators = new List<IInMemoryServiceBusFactoryBuilderConfigurator>();
             _busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName);
-
-            _configurators.Add(_busEndpointConfigurator);
         }
 
         public IBusControl CreateBus()
@@ -57,12 +55,14 @@ namespace MassTransit.Configurators
             foreach (IInMemoryServiceBusFactoryBuilderConfigurator configurator in _configurators)
                 configurator.Configure(builder);
 
+            _busEndpointConfigurator.Configure(builder);
+
             return builder.Build();
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return _configurators.SelectMany(x => x.Validate());
+            return _busEndpointConfigurator.Validate().Concat(_configurators.SelectMany(x => x.Validate()));
         }
 
         public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)

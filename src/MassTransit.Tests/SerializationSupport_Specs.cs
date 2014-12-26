@@ -1,61 +1,41 @@
-﻿namespace MassTransit.Tests
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Tests
 {
-    using System.Linq;
-    using Magnum.Extensions;
+    using System.Threading.Tasks;
     using NUnit.Framework;
-    using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
-    using TextFixtures;
 
 
     [TestFixture]
     public class When_using_mixed_serialization_types :
-        LoopbackLocalAndRemoteTestFixture
+        InMemoryTestFixture
     {
-        readonly Future<A> _requestReceived;
-        readonly Future<B> _responseReceived;
+        Task<ConsumeContext<A>> _requestReceived;
+        Task<ConsumeContext<B>> _responseReceived;
 
-        public When_using_mixed_serialization_types()
+        protected override void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
         {
-            _requestReceived = new Future<A>(); 
-            _responseReceived = new Future<B>();
-        }
-
-        [Test]
-        public void Should_be_able_to_read_xml_when_using_json()
-        {
-            LocalBus.GetEndpoint(RemoteUri).Send(new A { Key = "Hello" });
-
-            _requestReceived.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
-
-            _responseReceived.WaitUntilCompleted(8.Seconds()).ShouldBe(true);
-
-        }
-
-        protected override void ConfigureLocalBus(BusConfigurators.ServiceBusConfigurator configurator)
-        {
-            base.ConfigureLocalBus(configurator);
-
-            configurator.UseJsonSerializer();
-            configurator.SupportXmlSerializer();
-
-            ///configurator.Subscribe(s => s.Handler<B>(async context => _responseReceived.Complete(context.Message)));
-        }
-
-        protected override void ConfigureRemoteBus(BusConfigurators.ServiceBusConfigurator configurator)
-        {
-            base.ConfigureRemoteBus(configurator);
-
             configurator.UseXmlSerializer();
-            configurator.SupportJsonSerializer();
+        }
 
-//            configurator.Subscribe(s => s.Handler<A>(async (context) =>
-//            {
-//                _requestReceived.Complete(context.Message);
-//
-//                context.Respond(new B { Key = context.Message.Key, Value = "Value of " + context.Message.Key });
-//            }));
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            // TODO would be nice to support serialization per receiving endpoint
+
+            // configurator.UseJsonSerializer();
+
+            _requestReceived = Handler<A>(configurator, context => context.RespondAsync(new B()));
         }
 
 
@@ -64,11 +44,24 @@
             public string Key { get; set; }
         }
 
+
         class B
         {
             public string Key { get; set; }
             public string Value { get; set; }
         }
 
+
+        [Test]
+        public async void Should_be_able_to_read_xml_when_using_json()
+        {
+            _responseReceived = SubscribeHandler<B>();
+
+            await InputQueueSendEndpoint.Send(new A {Key = "Hello"});
+
+            await _requestReceived;
+
+            await _responseReceived;
+        }
     }
 }

@@ -167,7 +167,6 @@
     <Compile Include="Saga\ObservableSagaMessage.cs" />
     <Compile Include="Saga\SimpleSaga.cs" />
     <Compile Include="Saga\SimpleSagaMessageBase.cs" />
-    <Compile Include="Serialization\ContextSerialization_Specs.cs" />
     <Compile Include="Messages\ResponseMessage.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />

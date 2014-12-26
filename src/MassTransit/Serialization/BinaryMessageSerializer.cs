@@ -50,9 +50,9 @@ namespace MassTransit.Serialization
         static readonly BinaryFormatter _formatter = new BinaryFormatter();
         static readonly ILog _log = Logger.Get(typeof(BinaryMessageSerializer));
 
-        public string ContentType
+        public ContentType ContentType
         {
-            get { return ContentTypeHeaderValue; }
+            get { return BinaryContentType; }
         }
 
         void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)

@@ -98,12 +98,12 @@
     <Compile Include="Configuration\Configurators\PipeConfigurationResult.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\DelegatePipeConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\AddSerializerEndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\SupportMessageDeserializerServiceBusFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IEndpointConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IReceiveEndpointBuilderConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointBuilder.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\SetSupportedMessageSerializersEndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\SetMessageSerializerServiceBusFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\FilterPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\IConfigurable.cs" />
     <Compile Include="Configuration\IInMemoryServiceBusFactoryConfigurator.cs" />
@@ -473,7 +473,6 @@
     <Compile Include="SerializationFault.cs" />
     <Compile Include="Serialization\BsonMessageDeserializer.cs" />
     <Compile Include="Serialization\IMessageSerializer.cs" />
-    <Compile Include="Serialization\ISupportedMessageSerializers.cs" />
     <Compile Include="Serialization\JsonConsumeContext.cs" />
     <Compile Include="Serialization\JsonConverters\ByteArrayConverter.cs" />
     <Compile Include="Serialization\JsonConverters\DictionaryJsonConverter.cs" />
@@ -486,7 +485,7 @@
     <Compile Include="Serialization\JsonMessageEnvelope.cs" />
     <Compile Include="Serialization\ListConverterCache.cs" />
     <Compile Include="Serialization\MessageEnvelope.cs" />
-    <Compile Include="Serialization\SupportedMessageSerializers.cs" />
+    <Compile Include="Serialization\SupportedMessageDeserializers.cs" />
     <Compile Include="Configuration\EndpointConfigurators\DefaultMessageTrackerEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\DefaultRetryLimitEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\MessageTrackerConfigurationExtensions.cs" />
@@ -509,7 +508,6 @@
     <Compile Include="Configuration\BusConfigurators\PostCreateBusBuilderConfigurator.cs" />
     <Compile Include="Configuration\Configurators\Configurator.cs" />
     <Compile Include="Configuration\BusConfigurators\BusBuilderConfigurator.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\DefaultSerializerEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\DelegateEndpointFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\ServiceBusConfigurator.cs" />
