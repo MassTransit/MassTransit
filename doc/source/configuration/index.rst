@@ -11,6 +11,7 @@ which will be followed up with a few configuration examples.
     config_api.rst
     sub_config_api.rst
     locations.rst
+    logging.rst
     transports/index.rst
     containers.rst
     gotchas.rst
