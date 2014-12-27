@@ -2,29 +2,38 @@ Show me the code!
 =================
 
 All right, all right, already. Here you go. Below is a functional setup of
-MassTransit. 
+MassTransit.
 
 .. sourcecode:: csharp
     :linenos:
-    
+
     public class YourMessage { public string Text { get; set; } }
     public class Program
     {
         public static void Main()
         {
-            Bus.Initialize(sbc =>
+            var busControl = Bus.Factory.CreateUsingRabbitMQ(sbc =>
             {
-                sbc.UseMsmq();
-                sbc.VerifyMsmqConfiguration();
-                sbc.UseMulticastSubscriptionClient();
-                sbc.ReceiveFrom("msmq://localhost/test_queue");
-                sbc.Subscribe(subs=>
+                var host = sbc.Host(new Uri("rabbitmq://localhost"), h =>
                 {
-                    subs.Handler<YourMessage>(msg=>Console.WriteLine(msg.Text));
+                    h.Username("guest");
+                    h.Password("guest");
+                });
+
+                sbc.ReceiveEndpoint(host, "test_queue", ep =>
+                {
+                    ep.Handler<YourMessage>(async context =>
+                    {
+                        Console.WriteLine("Received: {0}", context.Message.Text);
+                    });
                 });
             });
-            
-            Bus.Instance.Publish(new YourMessage{Text = "Hi"});
+
+            var handle = await busControl.Start();
+
+            busControl.Publish(new YourMessage{Text = "Hi"});
+
+            handle.Stop();
         }
     }
 
@@ -73,7 +82,7 @@ you covered too. Instead of using ``Bus.Initialize`` you can use the code below:
 
 .. sourcecode:: csharp
     :linenos:
-    
+
     var bus = ServiceBusFactory.New(sbc =>
     {
         sbc.UseMsmq();
