@@ -1,4 +1,5 @@
-Moving from MT v2 -> MT v3
+Migrating to Version 3
+======================
 
 Old Quick Start
 """""""""""""""
