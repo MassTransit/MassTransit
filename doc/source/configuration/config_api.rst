@@ -76,17 +76,27 @@ Serializer Options
         cfg.UseBinarySerializer();
         cfg.UseBsonSerializer();
         cfg.UseJsonSerializer();
-        cfg.UseVersionOneXmlSerializer();
         cfg.UseXmlSerializer();
-
-        //if you would like to implement your own.
-        cfg.SetDefaultSerializer<TSerializer>();
     });
 
 This is mostly optional, because the transports will set their preferred defaults, but if you
 need to override the default you can using these methods. With the ``SetDefaultSerializer`` you can
 provide a custom serializer that you created.
 
+Logging Options
+''''''''''''''''''
+
+.. sourcecode:: csharp
+
+    Bus.Factory.CreateUsingInMemory(cfg =>
+    {
+        //receive code options
+
+        cfg.UseLog(Console.Out, async cxt =>
+        {
+            return string.Format("Consumed Message Id: {0}", cxt.MessageId);
+        });
+    });
 
 Bus Tuning Options
 ''''''''''''''''''
