@@ -12,7 +12,7 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-   
+
    installation/index.rst
    configuration/index.rst
    overview/index.rst
@@ -20,6 +20,7 @@ Contents:
    advanced/index.rst
    samples/index.rst
    learning/index.rst
+   migrating/index.rst
 
 
 Indices and tables
