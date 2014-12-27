@@ -63,6 +63,7 @@ task :copy_signed do
 	puts 'Copying unmerged dependencies to output folder'
 
 	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "MassTransit.{dll,pdb,xml}", props[:output]
+	copyOutputFiles File.join(props[:src], "MassTransit.AutomatonymousIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.AutomatonymousIntegration.{dll,pdb,xml}", props[:output]
 
 	copyOutputFiles File.join(props[:src], "Persistence/MassTransit.NHibernateIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NHibernateIntegration.{dll,pdb,xml}", File.join(props[:output], "Persistence/NHibernate")
 
@@ -369,6 +370,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
     add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
+    nuspec.file(File.join(props[:src], "MassTransit\\**\\*.cs").gsub("/","\\"), "src")
   end
 
   nuspec :mt_nuspec => ['nuspecs'] do |nuspec|
@@ -387,6 +389,26 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.AzureServiceBus.nuspec'
 
 	add_files props[:stage], "#{File.join('Transports', 'AzureServiceBus', 'MassTransit.AzureServiceBusTransport.{dll,pdb,xml}')}", nuspec
+	nuspec.file(File.join(props[:src], "MassTransit.AzureServiceBusTransport\\**\\*.cs").gsub("/","\\"), "src")
+
+  end
+
+  nuspec :mt_nuspec => ['nuspecs'] do |nuspec|
+    nuspec.id = 'MassTransit.Automatonymous'
+    nuspec.version = NUGET_VERSION
+    nuspec.authors = 'Chris Patterson, Dru Sellers, Travis Smith'
+    nuspec.description = 'Automatonymous Support for MassTransit (a distributed application framework for .NET, including support for MSMQ and RabbitMQ).'
+    nuspec.projectUrl = 'http://masstransit-project.com'
+    nuspec.language = "en-US"
+    nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    nuspec.requireLicenseAcceptance = "false"
+    nuspec.dependency "MassTransit", NUGET_VERSION
+    nuspec.dependency "Automatonymous", "3.0.0-alpha"
+    nuspec.output_file = 'nuspecs/MassTransit.Automatonymous.nuspec'
+
+	add_files props[:stage], "#{File.join('MassTransit.AutomatonymousIntegration.{dll,pdb,xml}')}", nuspec
+	nuspec.file(File.join(props[:src], "MassTransit.AutomatonymousIntegration\\**\\*.cs").gsub("/","\\"), "src")
+
   end
 
   nuspec :mtl4n_nuspec => ['nuspecs'] do |nuspec|
@@ -403,6 +425,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.Log4Net.nuspec'
 
 	add_files props[:stage], File.join('Logging', 'MassTransit.Log4NetIntegration.{dll,pdb,xml}'), nuspec
+    nuspec.file(File.join(props[:src], "Loggers\\MassTransit.Log4NetIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
   nuspec :mtnlog_nuspec => ['nuspecs'] do |nuspec|
@@ -420,6 +443,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.NLog.nuspec'
 
     add_files props[:stage], File.join('Logging', 'MassTransit.NLogIntegration.{dll,pdb,xml}'), nuspec
+    nuspec.file(File.join(props[:src], "Loggers\\MassTransit.NLogIntegration\\**\\*.cs").gsub("/","\\"), "src")
+ 
   end
 
   nuspec :mtcw_nuspec => ['nuspecs'] do |nuspec|
@@ -437,6 +462,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.CastleWindsor.nuspec'
 
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.WindsorIntegration.{dll,pdb,xml}')}", nuspec
+	nuspec.file(File.join(props[:src], "Containers\\MassTransit.WindsorIntegration\\**\\*.cs").gsub("/","\\"), "src")
+ 
   end
 
   nuspec :mtrmq_nuspec => ['nuspecs'] do |nuspec|
@@ -453,6 +480,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
 
 	add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.RabbitMqTransport.{dll,pdb,xml}')}", nuspec
+	nuspec.file(File.join(props[:src], "MassTransit.RabbitMqTransport\\**\\*.cs").gsub("/","\\"), "src")
   end
 
 
@@ -470,6 +498,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.Autofac.nuspec'
 
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.AutofacIntegration.{dll,pdb,xml}')}", nuspec
+	nuspec.file(File.join(props[:src], "Containers\\MassTransit.AutofacIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
   nuspec :mtnhib_nuspec => ['nuspecs'] do |nuspec|
@@ -487,6 +516,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.NHibernate.nuspec'
 
 	add_files props[:stage], "#{File.join('Persistence', 'NHibernate', 'MassTransit.NHibernateIntegration.{dll,pdb,xml}')}", nuspec
+	nuspec.file(File.join(props[:src], "Persistence\\MassTransit.NHibernateIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
 
@@ -505,6 +535,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.Ninject.nuspec'
 
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.NinjectIntegration.{dll,pdb,xml}')}", nuspec
+	nuspec.file(File.join(props[:src], "Containers\\MassTransit.NinjectIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
 
@@ -522,6 +553,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.StructureMap.nuspec'
 
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.StructureMapIntegration.{dll,pdb,xml}')}", nuspec
+	nuspec.file(File.join(props[:src], "Containers\\MassTransit.StructureMapIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
 
@@ -539,6 +571,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.Unity.nuspec'
 
 	add_files props[:stage], "#{File.join('Containers', 'MassTransit.UnityIntegration.{dll,pdb,xml}')}", nuspec
+	nuspec.file(File.join(props[:src], "Containers\\MassTransit.UnityIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
   nuspec :mttf_nuspec => ['nuspecs'] do |nuspec|
@@ -556,6 +589,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'
 
 	add_files props[:stage], "#{File.join('Testing', 'MassTransit.TestFramework.{dll,pdb,xml}')}", nuspec
+	nuspec.file(File.join(props[:src], "MassTransit.TestFramework\\**\\*.cs").gsub("/","\\"), "src")
   end
 
   nuspec :mtrx_nuspec => ['nuspecs'] do |nuspec|
@@ -574,6 +608,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.output_file = 'nuspecs/MassTransit.Reactive.nuspec'
 
 	add_files props[:stage], "#{File.join('Reactive', 'MassTransit.Reactive.{dll,pdb,xml}')}", nuspec
+	nuspec.file(File.join(props[:src], "MassTransit.Reactive\\**\\*.cs").gsub("/","\\"), "src")
   end
 
   # NUGET
@@ -583,19 +618,20 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
 desc "Builds the nuget package"
 task :nuget => [:versioning, 'build_artifacts', :all_nuspecs] do
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.nuspec -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Log4Net.nuspec -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NLog.nuspec -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.StructureMap.nuspec -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Autofac.nuspec -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Ninject.nuspec -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Unity.nuspec -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.CastleWindsor.nuspec -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NHibernate.nuspec -o build_artifacts"
-    sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.AzureServiceBus.nuspec -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.RabbitMQ.nuspec -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.TestFramework.nuspec -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Reactive.nuspec -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Automatonymous.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Log4Net.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NLog.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.StructureMap.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Autofac.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Ninject.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Unity.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.CastleWindsor.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NHibernate.nuspec /Symbols -o build_artifacts"
+    sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.AzureServiceBus.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.RabbitMQ.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.TestFramework.nuspec /Symbols -o build_artifacts"
+	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Reactive.nuspec /Symbols -o build_artifacts"
 end
 
 def project_outputs(props)
