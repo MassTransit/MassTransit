@@ -47,45 +47,35 @@ C# class (or POCO).
 
 Next up, we need a program to run our code. Here we have a standard issue
 command line ``Main`` method. To setup the bus we start with the static
-class ``Bus`` and its ``Initialize`` method. This method takes a lambda whose
-first and only argument is a class that will let you configure every aspect
+class ``Bus`` and work off of the ``Factory`` extension point. From there we
+call the ``CreateUsingRabbitMQ`` method to setup a RabbitMQ bus instance. This
+method takes a lambda whose first and only argument is a class that will let you
+configure every aspect
 of the bus.
 
 One of your first decisions is going to be "What transport do I want to run on?"
-Here we have choosen MSMQ (``sbc.UseMsmq()``) because its easy to install on a
-Windows machines (``sbc.VerifyMsmqConfiguration()``), will do just that
-and its most likely what you will use.
+Here we have choosen RabbitMQ (``Bus.Factory.CreateUsingRabbitMQ()``) because
+its the defacto bus choice for MassTransit.
 
-After that we have the ``sbc.UseMulticastSubscriptionClient()`` this tells the
-bus to pass subscription information around using PGM over MSMQ giving us a
-way to talk to all of the other bus instances on the network. This eliminates
-the need for a central control point.
+After that we need to configure the RabbitMQ host settings ``sbc.Host()``. The
+first argument sets the machine name and the virtual directory to connect to. After
+that you have a lambda that you can use to tweak any of the other settings that
+you want. Here we can see it setting the username and password.
 
-Now we have the ``sbc.ReceiveFrom("msmq://localhost/test_queue)`` line which
-tells us to listen for new messages at the local, private, msmq queue 'test_queue'.
-So anytime a message is placed into that queue the framework will process the
-message and deliver it to any consumers subscribed on the bus.
+Now that we have a host to listen on, we can configure some receiving endpoints
+``sbc.ReceiveEndpoint``. We pass in the host connection to listen on, then which
+queue do we want to listen on, and finally a lambda to register each handler
+that we want to use.
 
-Lastly, in the configuration, we have the Subscribe lambda, where we have
-configured a single ``Handler`` for our message which will be activated which
-each message of type ``YourMessage`` and will print to the console.
+Lastly, in the configuration, we have the ``Handler<YourMessage>`` method which
+subscribes a handler for the message type ``YourMessage`` and takes an ``async``
+lambda (oh yeah baby TPL) that is given a context class to process. Here
+we access the message by traversing ``context.Message`` and then writing to the
+console the text of the message.
 
-And now we have a bus that is configured and can do things. So now we can grab
-the singleton instance of the service bus and call the ``Publish`` method on it.
+And now we have a bus instance that is fully configured and can start processing
+messages. We can grab the ``busControl`` that we created and call ``Start`` on it
+to get everyting rolling. We again ``await`` on the result and now we can go.
 
-
-But Singletons are Evil!
-""""""""""""""""""""""""""""""""""""
-
-If you shudder at the thought of a singleton in your code, that's ok - we have
-you covered too. Instead of using ``Bus.Initialize`` you can use the code below:
-
-.. sourcecode:: csharp
-    :linenos:
-
-    var bus = ServiceBusFactory.New(sbc =>
-    {
-        sbc.UseMsmq();
-        sbc.UseMulticastSubscriptionClient();
-        sbc.ReceiveFrom("msmq://localhost/test_queue");
-    });
+We can call the ``Publish`` method on the ``busControl`` and we should see our
+console write out the output.
