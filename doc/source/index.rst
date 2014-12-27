@@ -15,6 +15,7 @@ Contents:
 
    installation/index.rst
    configuration/index.rst
+   usage/index.rst
    overview/index.rst
    troubleshooting/index.rst
    advanced/index.rst
