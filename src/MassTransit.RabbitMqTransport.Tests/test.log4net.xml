@@ -15,7 +15,7 @@
 		</logger>
 
 		<logger name="MassTransit.RabbitMqTransport">
-			<level value="DEBUG" />
+			<level value="INFO" />
 		</logger>
 
 		<logger name="MassTransit.Subscriptions">
