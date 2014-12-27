@@ -1,5 +1,9 @@
+Exceptions
+==========
+
+
 Handling errors
-===============
+"""""""""""""""
 
 Handling errors in your consumers is quite easy.
 
