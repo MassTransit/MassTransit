@@ -18,11 +18,11 @@ If you are a fan of getting the binaries you can get released builds from
 
 http://github.com/masstransit/MassTransit/downloads
 
-Then you will need to add references to 
+Then you will need to add references to
 =======================================
 
  * MassTransit.dll
- * MassTransit.<Transport>.dll (Either MSMQ or RabbitMQ)
+ * MassTransit.<Transport>.dll (Currently just RabbitMQ)
  * MassTransit.<ContainerSupport>.dll (If you are so inclined)
 
 
