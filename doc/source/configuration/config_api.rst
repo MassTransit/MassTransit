@@ -98,6 +98,8 @@ Logging Options
         });
     });
 
+You can find more about logging in the logging section.
+
 Bus Tuning Options
 ''''''''''''''''''
 

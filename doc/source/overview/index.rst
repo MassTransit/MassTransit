@@ -18,7 +18,6 @@ How MassTransit Works
     inheritance.rst
     users.rst
     serializers.rst
-    logging.rst
     perfcounters.rst
     standardservices.rst
     runtimeservices.rst
