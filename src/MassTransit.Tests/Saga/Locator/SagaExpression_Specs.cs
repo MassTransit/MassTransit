@@ -1,24 +1,20 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Saga.Locator
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using System.Linq.Expressions;
-    using Magnum.Extensions;
-    using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Saga.Pipeline;
     using NUnit.Framework;
@@ -45,19 +41,27 @@ namespace MassTransit.Tests.Saga.Locator
             _sagaId = NewId.NextGuid();
             _initiateSaga = new InitiateSimpleSaga {CorrelationId = _sagaId, Name = "Chris"};
 
-            InputQueueSendEndpoint.Send(_initiateSaga).Wait(TestCancellationToken);
+            InputQueueSendEndpoint.Send(_initiateSaga)
+                .Wait(TestCancellationToken);
+
+            _repository.ShouldContainSaga(_sagaId, TestTimeout)
+                .Wait(TestCancellationToken);
 
             _otherSagaId = Guid.NewGuid();
-            _initiateOtherSaga = new InitiateSimpleSaga { CorrelationId = _otherSagaId, Name = "Dru" };
+            _initiateOtherSaga = new InitiateSimpleSaga {CorrelationId = _otherSagaId, Name = "Dru"};
 
-            InputQueueSendEndpoint.Send(_initiateOtherSaga).Wait(TestCancellationToken);
+            InputQueueSendEndpoint.Send(_initiateOtherSaga)
+                .Wait(TestCancellationToken);
+
+            _repository.ShouldContainSaga(_otherSagaId, TestTimeout)
+                .Wait(TestCancellationToken);
 
             _observeSaga = new ObservableSagaMessage {Name = "Chris"};
         }
 
         Guid _sagaId;
         InitiateSimpleSaga _initiateSaga;
-        InMemorySagaRepository<SimpleSaga> _repository;
+        readonly InMemorySagaRepository<SimpleSaga> _repository;
         Guid _otherSagaId;
         ObservableSagaMessage _observeSaga;
         InitiateSimpleSaga _initiateOtherSaga;

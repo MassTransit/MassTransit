@@ -52,7 +52,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         protected override IPublishEndpoint CreatePublishEndpoint()
         {
-            throw new NotImplementedException();
+            return new RabbitMqPublishEndpoint(SendEndpointProvider);
         }
     }
 }
