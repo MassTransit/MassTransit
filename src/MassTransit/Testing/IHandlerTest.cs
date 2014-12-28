@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,17 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
-    using System;
-    using System.Collections.Generic;
+    using Subjects;
 
 
-    public interface IPublishedMessageList :
-        IEnumerable<IPublishedMessage>
+    public interface IHandlerTest<TMessage> :
+        ITest
+        where TMessage : class
     {
-        IEnumerable<IPublishedMessage> Select();
-        IEnumerable<IPublishedMessage> Select(Func<IPublishedMessage, bool> filter);
+        IHandlerTestSubject<TMessage> Handler { get; }
+    }
 
-        IEnumerable<IPublishedMessage<T>> Select<T>()
-            where T : class;
+
+    public interface IHandlerTest<out TScenario, TMessage> :
+        IHandlerTest<TMessage>
+        where TMessage : class
+        where TScenario : IBusTestScenario
+    {
+        TScenario Scenario { get; }
     }
 }

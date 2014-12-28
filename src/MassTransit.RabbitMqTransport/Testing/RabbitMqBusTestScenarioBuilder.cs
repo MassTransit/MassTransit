@@ -20,7 +20,7 @@ namespace MassTransit.RabbitMqTransport.Testing
     /// 'rabbitmq://localhost/mt_client', and use RabbitMQ routing. Timeout = 100 ms.
     /// </summary>
     public class RabbitMqBusTestScenarioBuilder :
-        BusTestScenarioBuilderImpl
+        BusTestScenarioBuilder
     {
         const string DefaultUri = "rabbitmq://localhost/mt_client";
 

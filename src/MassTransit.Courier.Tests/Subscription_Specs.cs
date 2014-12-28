@@ -121,7 +121,7 @@ namespace MassTransit.Courier.Tests
 //            Assert.IsFalse(_test.Published.Select<RoutingSlipCompleted>());
 //        }
 //
-//        ConsumerTest<IBusTestScenario, ExecuteActivityHost<TestActivity, TestArguments>> _test;
+//        IConsumerTest<IBusTestScenario, ExecuteActivityHost<TestActivity, TestArguments>> _test;
 //
 //        [TestFixtureSetUp]
 //        public void Setup()

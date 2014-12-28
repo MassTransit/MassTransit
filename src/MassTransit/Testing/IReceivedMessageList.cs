@@ -30,9 +30,11 @@ namespace MassTransit.Testing
     }
 
 
-    public interface IReceivedMessageList<out T> :
-        IEnumerable<IReceivedMessage<T>>
+    public interface IReceivedMessageList<out T> 
         where T : class
     {
+        IEnumerable<IReceivedMessage<T>> Select();
+
+        IEnumerable<IReceivedMessage<T>> Select(Func<IReceivedMessage<T>, bool> filter);
     }
 }

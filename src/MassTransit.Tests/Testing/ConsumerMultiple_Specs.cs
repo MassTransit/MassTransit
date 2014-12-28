@@ -22,7 +22,7 @@ namespace MassTransit.Tests.Testing
     [Explicit]
     public class When_a_consumer_with_multiple_message_consumers_is_tested
     {
-        ConsumerTest<IBusEndpointTestScenario, TwoMessageConsumer> _test;
+        IConsumerTest<IBusTestScenario, TwoMessageConsumer> _test;
 
         [SetUp]
         public void A_consumer_is_being_tested()

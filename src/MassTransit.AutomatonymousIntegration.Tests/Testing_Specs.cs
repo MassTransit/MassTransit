@@ -13,6 +13,7 @@
 namespace MassTransit.AutomatonymousTests
 {
     using System;
+    using System.Linq;
     using Automatonymous;
     using NUnit.Framework;
     using Testing;
@@ -41,7 +42,7 @@ namespace MassTransit.AutomatonymousTests
 
             test.Execute();
 
-            Assert.IsTrue(test.Received.Select<Start>(), "Message not received");
+            Assert.IsTrue(test.Received.Select<Start>().Any(), "Message not received");
 
             Instance instance = test.Saga.Created.Contains(sagaId);
             Assert.IsNotNull(instance, "Saga instance not found");
@@ -73,8 +74,8 @@ namespace MassTransit.AutomatonymousTests
 
             test.Execute();
 
-            Assert.IsTrue(test.Received.Select<Start>(), "Start not received");
-            Assert.IsTrue(test.Received.Select<Stop>(), "Stop not received");
+            Assert.IsTrue(test.Received.Select<Start>().Any(), "Start not received");
+            Assert.IsTrue(test.Received.Select<Stop>().Any(), "Stop not received");
 
             Instance instance = test.Saga.Created.Contains(sagaId);
             Assert.IsNotNull(instance, "Saga instance not found");

@@ -12,16 +12,37 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Builders
 {
-    using Scenarios;
+    using System.Collections.Generic;
+    using Instances;
+    using Subjects;
+    using TestActions;
 
 
-    public interface HandlerTestBuilder<TScenario, TMessage> :
-        TestInstanceBuilder<TScenario>
+    public class HandlerTestBuilder<TScenario, TMessage> :
+        IHandlerTestBuilder<TScenario, TMessage>
         where TMessage : class
-        where TScenario : ITestScenario
+        where TScenario : IBusTestScenario
     {
-        HandlerTest<TScenario, TMessage> Build();
+        readonly IList<ITestAction<TScenario>> _actions;
+        readonly IHandlerTestSubject<TMessage> _handlerTestSubject;
+        readonly TScenario _scenario;
 
-        void SetHandler(MessageHandler<TMessage> handler);
+        public HandlerTestBuilder(TScenario scenario, IHandlerTestSubject<TMessage> subject)
+        {
+            _scenario = scenario;
+
+            _actions = new List<ITestAction<TScenario>>();
+            _handlerTestSubject = subject;
+        }
+
+        public IHandlerTest<TScenario, TMessage> Build()
+        {
+            return new HandlerTest<TScenario, TMessage>(_scenario, _actions, _handlerTestSubject);
+        }
+
+        public void AddTestAction(ITestAction<TScenario> testAction)
+        {
+            _actions.Add(testAction);
+        }
     }
 }

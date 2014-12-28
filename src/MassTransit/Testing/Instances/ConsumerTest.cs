@@ -17,32 +17,23 @@ namespace MassTransit.Testing.Instances
     using TestActions;
 
 
-    public class ConsumerTestInstance<TScenario, TConsumer> :
+    public class ConsumerTest<TScenario, TConsumer> :
         TestInstance<TScenario>,
-        ConsumerTest<TScenario, TConsumer>
+        IConsumerTest<TScenario, TConsumer>
         where TConsumer : class, IConsumer
-        where TScenario : IBusEndpointTestScenario
+        where TScenario : IBusTestScenario
     {
-        readonly ConsumerTestSubjectImpl<TScenario, TConsumer> _subject;
+        readonly IConsumerTestSubject<TConsumer> _subject;
 
         bool _disposed;
 
-        public ConsumerTestInstance(TScenario scenario, IList<ITestAction<TScenario>> actions,
-            IConsumerFactory<TConsumer> consumerFactory)
+        public ConsumerTest(TScenario scenario, IList<ITestAction<TScenario>> actions, IConsumerTestSubject<TConsumer> subject)
             : base(scenario, actions)
         {
-            _subject = new ConsumerTestSubjectImpl<TScenario, TConsumer>(scenario, consumerFactory);
+            _subject = subject;
         }
 
-        public void Execute()
-        {
-            _subject.Prepare(Scenario);
-
-            ExecuteTestActions()
-                .Wait(Scenario.CancellationToken);
-        }
-
-        public ConsumerTestSubject<TConsumer> Consumer
+        public IConsumerTestSubject<TConsumer> Consumer
         {
             get { return _subject; }
         }

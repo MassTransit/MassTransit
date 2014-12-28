@@ -20,6 +20,6 @@ namespace MassTransit.Testing.ActionConfigurators
 		ITestConfigurator
 		where TScenario : ITestScenario
 	{
-		void Configure(TestInstanceBuilder<TScenario> builder);
+		void Configure(ITestBuilder<TScenario> builder);
 	}
 }

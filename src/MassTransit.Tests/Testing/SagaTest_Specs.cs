@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Testing
 {
 	using System;
+	using System.Linq;
 	using System.Linq.Expressions;
 	using System.Threading.Tasks;
 	using NUnit.Framework;
@@ -34,7 +35,6 @@ namespace MassTransit.Tests.Testing
 			_testValueA = "TestValueA";
 
 			_test = TestFactory.ForSaga<TestSaga>()
-				.InSingleBusScenario()
 				.New(x =>
 					{
 						x.Send(new A
@@ -58,19 +58,19 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_send_the_initial_message_to_the_consumer()
 		{
-			_test.Sent.Any<A>().ShouldBe(true);
+            _test.Sent.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_receive_the_message_type_a()
 		{
-			_test.Received.Select<A>().ShouldBe(true);
+            _test.Received.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_create_a_new_saga_for_the_message()
 		{
-			_test.Saga.Created.Any(x => x.CorrelationId == _sagaId).ShouldBe(true);
+            _test.Saga.Created.Select(x => x.CorrelationId == _sagaId).Any().ShouldBe(true);
 		}
 
 		[Test]
@@ -85,13 +85,13 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_have_published_event_message()
 		{
-			_test.Published.Any<Aa>().ShouldBe(true);
+			_test.Published.Select<Aa>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_called_the_consumer_method()
 		{
-			_test.Saga.Received.Select<A>().ShouldBe(true);
+            _test.Saga.Received.Select<A>().Any().ShouldBe(true);
 		}
 
 		class TestSaga :

@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Testing
 		///[Scenario]
 		///public class Using_the_handler_test_factory
 		///{
-		///    HandlerTest&lt;A&gt; _test;
+		///    IHandlerTest&lt;A&gt; _test;
 		///
 		///    [When]
 		///    public void Setup()
@@ -62,7 +62,7 @@ namespace MassTransit.RabbitMqTransport.Testing
 		///</code>
 		/// </summary>
 		/// <param name="configurator">The configurator that is passed via the lambda that you are calling this method from.</param>
-		public static void UseRabbitMqBusScenario(this ITestInstanceConfigurator<IBusTestScenario> configurator)
+		public static void UseRabbitMqBusScenario(this ITestConfigurator<IBusTestScenario> configurator)
 		{
 //			configurator.UseScenarioBuilder(() => new RabbitMqBusTestScenarioBuilder());
 		}

@@ -20,10 +20,10 @@ namespace MassTransit.Testing
     public static class ConsumerTestConfiguratorExtensions
     {
         public static void UseConsumerFactory<TScenario, TConsumer>(
-            this ConsumerTestInstanceConfigurator<TScenario, TConsumer> configurator,
+            this IConsumerTestConfigurator<TScenario, TConsumer> configurator,
             Func<TConsumer> consumer)
-            where TConsumer : class
-            where TScenario : IBusEndpointTestScenario
+            where TConsumer : class, IConsumer
+            where TScenario : IBusTestScenario
         {
             var consumerFactory = new DelegateConsumerFactory<TConsumer>(consumer);
 

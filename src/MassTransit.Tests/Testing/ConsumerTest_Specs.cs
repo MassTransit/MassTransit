@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Testing
 {
+    using System.Linq;
     using System.Threading.Tasks;
     using NUnit.Framework;
 	using MassTransit.Testing;
@@ -20,7 +21,7 @@ namespace MassTransit.Tests.Testing
     [Explicit]
     public class When_a_consumer_is_being_tested
 	{
-		ConsumerTest<IBusTestScenario, Testsumer> _test;
+		IConsumerTest<IBusTestScenario, Testsumer> _test;
 
 		[SetUp]
 		public void A_consumer_is_being_tested()
@@ -47,25 +48,25 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_send_the_initial_message_to_the_consumer()
 		{
-			_test.Sent.Any<A>().ShouldBe(true);
+			_test.Sent.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_sent_the_response_from_the_consumer()
 		{
-			_test.Sent.Any<B>().ShouldBe(true);
+            _test.Sent.Select<B>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_receive_the_message_type_a()
 		{
-			_test.Received.Select<A>().ShouldBe(true);
+            _test.Received.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_called_the_consumer_method()
 		{
-			_test.Consumer.Received.Select<A>().ShouldBe(true);
+            _test.Consumer.Received.Select<A>().Any().ShouldBe(true);
 		}
 
 		class Testsumer :
@@ -89,7 +90,7 @@ namespace MassTransit.Tests.Testing
 	[Explicit]
 	public class When_a_context_consumer_is_being_tested
 	{
-		ConsumerTest<IBusTestScenario, Testsumer> _test;
+		IConsumerTest<IBusTestScenario, Testsumer> _test;
 
 		[SetUp]
 		public void A_consumer_is_being_tested()
@@ -99,7 +100,7 @@ namespace MassTransit.Tests.Testing
 					{
 						x.UseConsumerFactory(() => new Testsumer());
 
-						//x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
+						x.Send(new A(), (scenario, context) => context.ResponseAddress = scenario.Bus.Address);
 					});
 
 			_test.Execute();
@@ -116,25 +117,25 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_send_the_initial_message_to_the_consumer()
 		{
-			_test.Sent.Any<A>().ShouldBe(true);
+            _test.Sent.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_sent_the_response_from_the_consumer()
 		{
-			_test.Sent.Any<B>().ShouldBe(true);
+            _test.Sent.Select<B>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_receive_the_message_type_a()
 		{
-			_test.Received.Select<A>().ShouldBe(true);
+            _test.Received.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_called_the_consumer_method()
 		{
-			_test.Consumer.Received.Select<A>().ShouldBe(true);
+            _test.Consumer.Received.Select<A>().Any().ShouldBe(true);
 		}
 
 		class Testsumer :

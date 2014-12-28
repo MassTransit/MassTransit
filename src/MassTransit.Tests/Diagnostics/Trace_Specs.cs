@@ -23,7 +23,7 @@ namespace MassTransit.Tests.Diagnostics
 //    {
 //        FutureMessage<ReceivedMessageTraceList> _future;
 //        ReceivedMessageTraceList _list;
-//        HandlerTest<IBusTestScenario, InputMessage> _test;
+//        IHandlerTest<IBusTestScenario, InputMessage> _test;
 //
 //        [SetUp]
 //        public void A_consumer_is_being_tested()

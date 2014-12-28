@@ -10,24 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.TestInstanceConfigurators
+namespace MassTransit.Testing.Builders
 {
-    using System;
-    using ActionConfigurators;
-    using Configurators;
-    using ScenarioBuilders;
-    using ScenarioConfigurators;
-    using Scenarios;
-
-
-    public interface ITestInstanceConfigurator<TScenario> :
-        ITestConfigurator
-        where TScenario : ITestScenario
+    public interface IHandlerTestBuilder<out TScenario, TMessage> :
+        ITestBuilder<TScenario>
+        where TMessage : class
+        where TScenario : IBusTestScenario
     {
-        void UseScenarioBuilder(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory);
-
-        void AddActionConfigurator(ITestActionConfigurator<TScenario> action);
-
-        void AddConfigurator(IScenarioBuilderConfigurator<TScenario> configurator);
+        IHandlerTest<TScenario, TMessage> Build();
     }
 }

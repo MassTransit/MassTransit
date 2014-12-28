@@ -17,18 +17,29 @@ namespace MassTransit.Testing.ScenarioBuilders
     using Scenarios;
 
 
-    public class BusEndpointTestScenarioBuilder :
-        IBusEndpointTestScenarioBuilder
+    /// <summary>
+    /// Implementation for the test scenario, but abstract for others to customize it. Sets some defaults in the c'tor, which you
+    /// can override with the <see cref="ConfigureBus"/> and <see cref="ConfigureSubscriptions"/> methods.
+    /// </summary>
+    public class BusTestScenarioBuilder :
+        IBusTestScenarioBuilder
     {
         readonly InMemoryBusFactoryConfigurator _configurator;
-        TimeSpan _timeout = TimeSpan.FromSeconds(30);
+        TimeSpan _timeout;
 
         /// <summary>
         /// c'tor
         /// </summary>
-        public BusEndpointTestScenarioBuilder()
+        public BusTestScenarioBuilder()
         {
+            _timeout = TimeSpan.FromSeconds(30);
             _configurator = new InMemoryBusFactoryConfigurator();
+        }
+
+        public TimeSpan Timeout
+        {
+            get { return _timeout; }
+            set { _timeout = value; }
         }
 
         public void ConfigureBus(Action<IInMemoryServiceBusFactoryConfigurator> configureCallback)
@@ -36,9 +47,9 @@ namespace MassTransit.Testing.ScenarioBuilders
             configureCallback(_configurator);
         }
 
-        public virtual IBusEndpointTestScenario Build()
+        public virtual IBusTestScenario Build()
         {
-            var scenario = new BusEndpointTestScenario(_timeout, _configurator.Build());
+            var scenario = new BusTestScenario(Timeout, _configurator.Build());
 
             return scenario;
         }

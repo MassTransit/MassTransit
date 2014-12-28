@@ -14,15 +14,17 @@ namespace MassTransit.Testing
 {
     using System;
     using System.Collections.Generic;
+    using Saga;
 
 
-    public interface IPublishedMessageList :
-        IEnumerable<IPublishedMessage>
+    public interface ISagaList<T> :
+        IEnumerable<ISagaInstance<T>>
+        where T : class, ISaga
     {
-        IEnumerable<IPublishedMessage> Select();
-        IEnumerable<IPublishedMessage> Select(Func<IPublishedMessage, bool> filter);
+        IEnumerable<ISagaInstance<T>> Select();
 
-        IEnumerable<IPublishedMessage<T>> Select<T>()
-            where T : class;
+        IEnumerable<ISagaInstance<T>> Select(Func<T, bool> filter);
+
+        T Contains(Guid sagaId);
     }
 }

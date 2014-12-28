@@ -12,23 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
-    using Scenarios;
-    using Subjects;
+    using System;
 
 
-    public interface HandlerTest<TMessage> :
-        TestInstance
-        where TMessage : class
+    public interface ITestSubject<TSubject> :
+        IDisposable
+        where TSubject : class
     {
-        HandlerTestSubject<TMessage> Handler { get; }
     }
 
 
-    public interface HandlerTest<out TScenario, TMessage> :
-        HandlerTest<TMessage>
-        where TMessage : class
+    public interface ITestSubject<in TScenario, TSubject> :
+        ITestSubject<TSubject>
+        where TSubject : class
         where TScenario : ITestScenario
     {
-        TScenario Scenario { get; }
+        void Prepare(TScenario scenario);
     }
 }

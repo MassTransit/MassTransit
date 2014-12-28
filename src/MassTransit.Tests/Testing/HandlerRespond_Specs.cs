@@ -12,14 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Testing
 {
-	using NUnit.Framework;
+    using System.Linq;
+    using NUnit.Framework;
 	using MassTransit.Testing;
 	using Shouldly;
 
     [Explicit]
     public class When_a_handler_responds_to_a_message
 	{
-		HandlerTest<A> _test;
+		IHandlerTest<A> _test;
 
 		[SetUp]
 		public void A_handler_responds_to_a_message()
@@ -45,13 +46,13 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_have_sent_a_message_of_type_b()
 		{
-			_test.Sent.Any<B>().ShouldBe(true);
+            _test.Sent.Select<B>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_support_a_simple_handler()
 		{
-			_test.Handler.Received.Any().ShouldBe(true);
+            _test.Handler.Received.Select().Any().ShouldBe(true);
 		}
 
 		class A
@@ -66,7 +67,7 @@ namespace MassTransit.Tests.Testing
 	[Explicit]
 	public class When_a_handler_responds_to_a_message_using_context
 	{
-		HandlerTest<A> _test;
+		IHandlerTest<A> _test;
 
 		[SetUp]
 		public void A_handler_responds_to_a_message_using_context()
@@ -92,13 +93,13 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_have_sent_a_message_of_type_b()
 		{
-			_test.Sent.Any<B>().ShouldBe(true);
+            _test.Sent.Select<B>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_support_a_simple_handler()
 		{
-			_test.Handler.Received.Any().ShouldBe(true);
+            _test.Handler.Received.Select().Any().ShouldBe(true);
 		}
 
 		class A

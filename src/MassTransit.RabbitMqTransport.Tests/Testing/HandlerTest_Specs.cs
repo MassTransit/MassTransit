@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests.Testing
 {
+    using System.Linq;
     using NUnit.Framework;
     using MassTransit.Testing;
     using Shouldly;
@@ -20,7 +21,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Testing
     [Ignore("This is broken because RabbitMQ does not have subscriptions")]
 	public class Using_the_handler_test_factory
 	{
-		HandlerTest<A> _test;
+		IHandlerTest<A> _test;
 
 		[SetUp]
 		public void Setup()
@@ -46,37 +47,37 @@ namespace MassTransit.RabbitMqTransport.Tests.Testing
 		[Test]
 		public void Should_have_received_a_message_of_type_a()
 		{
-			_test.Received.Select<A>().ShouldBe(true);
+            _test.Received.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_skipped_a_message_of_type_b()
 		{
-			_test.Skipped.Select<B>().ShouldBe(true);
+            _test.Skipped.Select<B>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_not_have_skipped_a_message_of_type_a()
 		{
-			_test.Skipped.Select<A>().ShouldBe(false);
+            _test.Skipped.Select<A>().Any().ShouldBe(false);
 		}
 
 		[Test]
 		public void Should_have_sent_a_message_of_type_a()
 		{
-			_test.Sent.Any<A>().ShouldBe(true);
+            _test.Sent.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_sent_a_message_of_type_b()
 		{
-			_test.Sent.Any<B>().ShouldBe(true);
+            _test.Sent.Select<B>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_support_a_simple_handler()
 		{
-			_test.Handler.Received.Any().ShouldBe(true);
+            _test.Handler.Received.Select().Any().ShouldBe(true);
 		}
 
 		class A
