@@ -21,6 +21,6 @@ namespace MassTransit.Testing.Factories
 		where TSaga : class, ISaga
 		where TScenario : ITestScenario
 	{
-		SagaTest<TScenario, TSaga> New(Action<SagaTestInstanceConfigurator<TScenario, TSaga>> configureTest);
+		SagaTest<TScenario, TSaga> New(Action<ISagaTestConfigurator<TScenario, TSaga>> configureTest);
 	}
 }

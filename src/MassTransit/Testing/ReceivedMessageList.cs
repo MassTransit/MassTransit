@@ -55,12 +55,12 @@ namespace MassTransit.Testing
     }
 
 
-    public class ReceivedMessageListImpl<T> :
+    public class ReceivedMessageList<T> :
         MessageList<IReceivedMessage<T>>,
         IReceivedMessageList<T>
         where T : class
     {
-        public ReceivedMessageListImpl(TimeSpan timeout)
+        public ReceivedMessageList(TimeSpan timeout)
             : base((int)timeout.TotalMilliseconds)
         {
         }

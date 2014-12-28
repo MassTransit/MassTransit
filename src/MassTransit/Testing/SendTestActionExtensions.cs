@@ -19,39 +19,19 @@ namespace MassTransit.Testing
 
     public static class SendTestActionExtensions
     {
-        public static void Send<TMessage>(this ITestInstanceConfigurator<IBusTestScenario> configurator, TMessage message)
+        public static void Send<TMessage>(this ITestConfigurator<IBusTestScenario> configurator, TMessage message)
             where TMessage : class
         {
-            var actionConfigurator =
-                new SendTestActionConfigurator<IBusTestScenario, TMessage>(x => x.Bus.GetSendEndpoint(x.Bus.Address).Result, message);
+            var actionConfigurator = new SendTestActionConfigurator<IBusTestScenario, TMessage>(x => x.SubjectSendEndpoint, message);
 
             configurator.AddActionConfigurator(actionConfigurator);
         }
 
-        public static void Send<TMessage>(this ITestInstanceConfigurator<IBusTestScenario> configurator, TMessage message,
+        public static void Send<TMessage>(this ITestConfigurator<IBusTestScenario> configurator, TMessage message,
             Action<IBusTestScenario, SendContext<TMessage>> callback)
             where TMessage : class
         {
-            var actionConfigurator =
-                new SendTestActionConfigurator<IBusTestScenario, TMessage>(x => x.Bus.GetSendEndpoint(x.Bus.Address).Result, message,
-                    callback);
-
-            configurator.AddActionConfigurator(actionConfigurator);
-        }
-
-        public static void Send<TMessage>(this ITestInstanceConfigurator<IBusEndpointTestScenario> configurator, TMessage message)
-            where TMessage : class
-        {
-            var actionConfigurator = new SendTestActionConfigurator<IBusEndpointTestScenario, TMessage>(x => x.SubjectSendEndpoint, message);
-
-            configurator.AddActionConfigurator(actionConfigurator);
-        }
-
-        public static void Send<TMessage>(this ITestInstanceConfigurator<IBusEndpointTestScenario> configurator, TMessage message,
-            Action<IBusEndpointTestScenario, SendContext<TMessage>> callback)
-            where TMessage : class
-        {
-            var actionConfigurator = new SendTestActionConfigurator<IBusEndpointTestScenario, TMessage>(x => x.SubjectSendEndpoint, message,
+            var actionConfigurator = new SendTestActionConfigurator<IBusTestScenario, TMessage>(x => x.SubjectSendEndpoint, message,
                 callback);
 
             configurator.AddActionConfigurator(actionConfigurator);

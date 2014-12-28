@@ -10,20 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.ScenarioBuilders
+namespace MassTransit.Testing
 {
-    using System;
+    using Subjects;
 
 
-    public interface IBusEndpointTestScenarioBuilder :
-        ITestScenarioBuilder<IBusEndpointTestScenario>
+    public interface IConsumerTest<TConsumer> :
+        ITest
+        where TConsumer : class, IConsumer
     {
-        /// <summary>
-        /// Configure any bus-specific items as part of building the test scenario
-        /// </summary>
-        /// <param name="configureCallback"></param>
-        void ConfigureBus(Action<IInMemoryServiceBusFactoryConfigurator> configureCallback);
+        IConsumerTestSubject<TConsumer> Consumer { get; }
+    }
 
-        void ConfigureReceiveEndpoint(Action<IReceiveEndpointConfigurator> configureCallback);
+
+    public interface IConsumerTest<out TScenario, TConsumer> :
+        IConsumerTest<TConsumer>
+        where TConsumer : class, IConsumer
+        where TScenario : IBusTestScenario
+    {
+        TScenario Scenario { get; }
     }
 }

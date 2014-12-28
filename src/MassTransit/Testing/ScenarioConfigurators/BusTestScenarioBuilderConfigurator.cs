@@ -18,12 +18,12 @@ namespace MassTransit.Testing.ScenarioConfigurators
     using ScenarioBuilders;
 
 
-    public class BusTestScenarioBuilderConfiguratorImpl :
+    public class BusTestScenarioBuilderConfigurator :
         IScenarioBuilderConfigurator<IBusTestScenario>
     {
         readonly Action<IInMemoryServiceBusFactoryConfigurator> _configureAction;
 
-        public BusTestScenarioBuilderConfiguratorImpl(Action<IInMemoryServiceBusFactoryConfigurator> configureAction)
+        public BusTestScenarioBuilderConfigurator(Action<IInMemoryServiceBusFactoryConfigurator> configureAction)
         {
             _configureAction = configureAction;
         }

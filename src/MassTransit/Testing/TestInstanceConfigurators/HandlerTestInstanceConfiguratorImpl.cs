@@ -1,79 +1,92 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.TestInstanceConfigurators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using BuilderConfigurators;
-	using Builders;
-	using Configurators;
-	using ScenarioBuilders;
-	using Scenarios;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using BuilderConfigurators;
+    using Builders;
+    using Configurators;
+    using ScenarioBuilders;
+    using Subjects;
 
-	public class HandlerTestInstanceConfiguratorImpl<TScenario, TMessage> :
-		TestInstanceConfiguratorImpl<TScenario>,
-		HandlerTestInstanceConfigurator<TScenario, TMessage>
-		where TMessage : class
-		where TScenario : ITestScenario
-	{
-		readonly IList<HandlerTestBuilderConfigurator<TScenario, TMessage>> _configurators;
 
-		Func<TScenario, HandlerTestBuilder<TScenario, TMessage>> _builderFactory;
-		MessageHandler<TMessage> _handler;
+    public class HandlerTestConfigurator<TScenario, TMessage> :
+        TestConfigurator<TScenario>,
+        IHandlerTestConfigurator<TScenario, TMessage>
+        where TMessage : class
+        where TScenario : IBusTestScenario
+    {
+        readonly IList<HandlerTestBuilderConfigurator<TScenario, TMessage>> _configurators;
 
-		public HandlerTestInstanceConfiguratorImpl(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
-			: base(scenarioBuilderFactory)
-		{
-			_configurators = new List<HandlerTestBuilderConfigurator<TScenario, TMessage>>();
+        MessageHandler<TMessage> _handler;
 
-			_builderFactory = scenario => new HandlerTestBuilderImpl<TScenario, TMessage>(scenario);
-		}
+        public HandlerTestConfigurator(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
+            : base(scenarioBuilderFactory)
+        {
+            _configurators = new List<HandlerTestBuilderConfigurator<TScenario, TMessage>>();
 
-		public void UseBuilder(Func<TScenario, HandlerTestBuilder<TScenario, TMessage>> builderFactory)
-		{
-			_builderFactory = builderFactory;
-		}
+            _handler = DefaultHandler;
+        }
 
-		public void AddConfigurator(HandlerTestBuilderConfigurator<TScenario, TMessage> configurator)
-		{
-			_configurators.Add(configurator);
-		}
+        public void AddTestConfigurator(HandlerTestBuilderConfigurator<TScenario, TMessage> configurator)
+        {
+            _configurators.Add(configurator);
+        }
 
-		public void Handler(MessageHandler<TMessage> handler)
-		{
-			_handler = handler;
-		}
+        public void Handler(MessageHandler<TMessage> handler)
+        {
+            _handler = handler;
+        }
 
-		public override IEnumerable<TestConfiguratorResult> Validate()
-		{
-			return base.Validate().Concat(_configurators.SelectMany(x => x.Validate()));
-		}
+        public override IEnumerable<TestConfiguratorResult> Validate()
+        {
+            if (_handler == null)
+                yield return this.Failure("Handler", "Must not be null");
 
-		public HandlerTest<TScenario, TMessage> Build()
-		{
-			TScenario scenario = BuildTestScenario();
 
-			HandlerTestBuilder<TScenario, TMessage> builder = _builderFactory(scenario);
+            foreach (TestConfiguratorResult result in base.Validate())
+            {
+                yield return result;
+            }
 
-			if (_handler != null)
-				builder.SetHandler(_handler);
+            foreach (TestConfiguratorResult result in _configurators.SelectMany(x => x.Validate()))
+            {
+                yield return result;
+            }
+        }
 
-			builder = _configurators.Aggregate(builder, (current, configurator) => configurator.Configure(current));
+        public IHandlerTest<TScenario, TMessage> Build()
+        {
+            var handlerTestSubject = new HandlerTestSubject<TScenario, TMessage>(_handler);
 
-			BuildTestActions(builder);
+            AddScenarioConfigurator(handlerTestSubject);
 
-			return builder.Build();
-		}
-	}
+            TScenario scenario = BuildTestScenario();
+
+            IHandlerTestBuilder<TScenario, TMessage> builder = new HandlerTestBuilder<TScenario, TMessage>(scenario, handlerTestSubject);
+
+            builder = _configurators.Aggregate(builder, (current, configurator) => configurator.Configure(current));
+
+            BuildTestActions(builder);
+
+            return builder.Build();
+        }
+
+        async Task DefaultHandler(ConsumeContext<TMessage> context)
+        {
+        }
+    }
 }

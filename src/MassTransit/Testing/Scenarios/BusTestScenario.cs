@@ -24,7 +24,7 @@ namespace MassTransit.Testing.Scenarios
     {
         readonly IBusControl _busControl;
         readonly CancellationToken _cancellationToken;
-        readonly PublishedMessageListImpl _published;
+        readonly PublishedMessageList _published;
         readonly ReceivedMessageList _received;
         readonly ObservedSentMessageList _sent;
         readonly ReceivedMessageList _skipped;
@@ -40,13 +40,18 @@ namespace MassTransit.Testing.Scenarios
             _received = new ReceivedMessageList(timeout);
             _sent = new ObservedSentMessageList(timeout);
             _skipped = new ReceivedMessageList(timeout);
-            _published = new PublishedMessageListImpl();
+            _published = new PublishedMessageList(timeout);
 
             _tokenSource = new CancellationTokenSource(timeout);
             _cancellationToken = _tokenSource.Token;
 
             _busHandle = _busControl.Start(_cancellationToken)
                 .Result;
+        }
+
+        public virtual ISendEndpoint SubjectSendEndpoint
+        {
+            get { return Bus.GetSendEndpoint(new Uri("loopback://localhost/input_queue")).Result; }
         }
 
         public ISentMessageList Sent
@@ -96,28 +101,6 @@ namespace MassTransit.Testing.Scenarios
         public virtual IBus Bus
         {
             get { return _busControl; }
-        }
-
-        public void AddSent(ISentMessage message)
-        {
-            // _sent.Add(message);
-        }
-
-        public void AddPublished(PublishedMessage message)
-        {
-            _published.Add(message);
-        }
-
-        public void AddReceived(IReceivedMessage message)
-        {
-//            _received.Add(message);
-
-            //          _skipped.Remove(message);
-        }
-
-        public void AddSkipped(IReceivedMessage message)
-        {
-            //        _skipped.Add(message);
         }
     }
 }

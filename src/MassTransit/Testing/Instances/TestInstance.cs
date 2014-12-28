@@ -14,7 +14,6 @@ namespace MassTransit.Testing.Instances
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Scenarios;
     using TestActions;
 
 
@@ -56,6 +55,12 @@ namespace MassTransit.Testing.Instances
             get { return _scenario; }
         }
 
+        public void Execute()
+        {
+            ExecuteTestActions()
+                .Wait(Scenario.CancellationToken);
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -73,7 +78,7 @@ namespace MassTransit.Testing.Instances
             _disposed = true;
         }
 
-        protected async Task ExecuteTestActions()
+        async Task ExecuteTestActions()
         {
             foreach (var action in _actions)
             {

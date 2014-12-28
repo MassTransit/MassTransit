@@ -13,6 +13,7 @@
 namespace MassTransit.Testing
 {
     using System;
+    using System.Linq;
     using Automatonymous;
     using Automatonymous.RepositoryConfigurators;
     using Automatonymous.Testing;
@@ -23,7 +24,7 @@ namespace MassTransit.Testing
     public static class StateMachineSagaTestingExtensions
     {
         public static void UseStateMachineBuilder<TScenario, TSaga, TStateMachine>(
-            this SagaTestInstanceConfigurator<TScenario, TSaga> configurator, TStateMachine stateMachine)
+            this ISagaTestConfigurator<TScenario, TSaga> configurator, TStateMachine stateMachine)
             where TSaga : class, SagaStateMachineInstance
             where TScenario : ITestScenario
             where TStateMachine : StateMachine<TSaga>
@@ -34,7 +35,7 @@ namespace MassTransit.Testing
         }
 
         public static void UseStateMachineBuilder<TScenario, TSaga, TStateMachine>(
-            this SagaTestInstanceConfigurator<TScenario, TSaga> configurator, TStateMachine stateMachine,
+            this ISagaTestConfigurator<TScenario, TSaga> configurator, TStateMachine stateMachine,
             Action<StateMachineSagaRepositoryConfigurator<TSaga>> configureCallback)
             where TSaga : class, SagaStateMachineInstance
             where TScenario : ITestScenario
@@ -45,11 +46,11 @@ namespace MassTransit.Testing
                                         stateMachine, configureCallback));
         }
 
-        public static TSaga ContainsInState<TSaga>(this SagaList<TSaga> sagas, Guid sagaId,
+        public static TSaga ContainsInState<TSaga>(this ISagaList<TSaga> sagas, Guid sagaId,
             State state, StateMachine<TSaga> machine)
             where TSaga : class, SagaStateMachineInstance
         {
-            bool any = sagas.Any(x => x.CorrelationId == sagaId && machine.InstanceStateAccessor.GetState(x).Equals(state));
+            bool any = sagas.Select(x => x.CorrelationId == sagaId && machine.InstanceStateAccessor.GetState(x).Equals(state)).Any();
             return any ? sagas.Contains(sagaId) : null;
         }
     }

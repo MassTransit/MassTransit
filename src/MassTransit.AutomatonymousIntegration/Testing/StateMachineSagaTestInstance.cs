@@ -43,13 +43,6 @@ namespace Automatonymous.Testing
                 stateMachine, configureCallback);
         }
 
-        public void Execute()
-        {
-            _subject.Prepare(Scenario);
-
-            ExecuteTestActions();
-        }
-
         public SagaTestSubject<TSaga> Saga
         {
             get { return _subject; }

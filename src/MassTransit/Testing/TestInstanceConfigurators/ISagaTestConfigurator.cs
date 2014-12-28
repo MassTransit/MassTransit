@@ -10,20 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.TestInstanceConfigurators
 {
 	using System;
-	using System.Collections.Generic;
+	using BuilderConfigurators;
+	using Builders;
 	using Saga;
+	using Scenarios;
 
-	public interface SagaList<T> :
-		IEnumerable<SagaInstance<T>>
-		where T : class, ISaga
+	public interface ISagaTestConfigurator<TScenario, TSaga> :
+		ITestConfigurator<TScenario>
+		where TSaga : class, ISaga
+		where TScenario : ITestScenario
 	{
-		bool Any();
+		void UseBuilder(Func<TScenario, SagaTestBuilder<TScenario, TSaga>> builderFactory);
+		void AddConfigurator(SagaTestBuilderConfigurator<TScenario, TSaga> configurator);
 
-		bool Any(Func<T, bool> filter);
-
-		T Contains(Guid sagaId);
+		void UseSagaRepository(ISagaRepository<TSaga> sagaRepository);
 	}
 }

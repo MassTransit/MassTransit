@@ -25,5 +25,10 @@ namespace MassTransit.Testing
         /// The bus associated with the test
         /// </summary>
         IBus Bus { get; }
+
+        /// <summary>
+        /// Gets the endpoint that is the receiving endpoint with the test subject
+        /// </summary>
+        ISendEndpoint SubjectSendEndpoint { get; }
     }
 }

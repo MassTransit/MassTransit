@@ -14,7 +14,6 @@ namespace MassTransit.Testing.ScenarioConfigurators
 {
     using Configurators;
     using ScenarioBuilders;
-    using Scenarios;
 
 
     public interface IScenarioBuilderConfigurator<TScenario> :

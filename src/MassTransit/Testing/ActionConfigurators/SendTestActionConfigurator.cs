@@ -49,7 +49,7 @@ namespace MassTransit.Testing.ActionConfigurators
                 yield return this.Failure("Message", "The message instance to send must not be null.");
         }
 
-        public void Configure(TestInstanceBuilder<TScenario> builder)
+        public void Configure(ITestBuilder<TScenario> builder)
         {
             var action = new SendTestAction<TScenario, TMessage>(_endpointAccessor, _message, _callback);
 

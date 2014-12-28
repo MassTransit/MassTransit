@@ -18,10 +18,18 @@ namespace MassTransit.Testing.ScenarioBuilders
     public interface IBusTestScenarioBuilder :
         ITestScenarioBuilder<IBusTestScenario>
     {
+        TimeSpan Timeout { get; set; }
+
         /// <summary>
         /// Configure any bus-specific items as part of building the test scenario
         /// </summary>
         /// <param name="configureCallback"></param>
         void ConfigureBus(Action<IInMemoryServiceBusFactoryConfigurator> configureCallback);
+
+        /// <summary>
+        /// COnfigure the receive endpoint
+        /// </summary>
+        /// <param name="configureCallback"></param>
+        void ConfigureReceiveEndpoint(Action<IReceiveEndpointConfigurator> configureCallback);
     }
 }

@@ -19,7 +19,7 @@ namespace MassTransit.Testing
 
 	/// <summary>
 	/// Factory for testing message handlers, buses and messages - received, skipped, sent and published. The builders used
-	/// with the <see cref="ITestInstanceConfigurator{TScenario}"/>, defaults to the loopback bus scenario. Use the extension methods in
+	/// with the <see cref="ITestConfigurator{TScenario}"/>, defaults to the loopback bus scenario. Use the extension methods in
 	/// <see cref="BusTestScenarioExtensions"/> to use alternative scenario builders. A builder is something that ties some component
 	/// together.
 	/// </summary>
@@ -33,15 +33,15 @@ namespace MassTransit.Testing
 		public static HandlerTestFactory<IBusTestScenario, TMessage> ForHandler<TMessage>()
 			where TMessage : class
 		{
-            var factory = new HandlerTestFactoryImpl<IBusTestScenario, TMessage>(() => new BusTestScenarioBuilderImpl());
+            var factory = new HandlerTestFactoryImpl<IBusTestScenario, TMessage>(() => new BusTestScenarioBuilder());
 
 			return factory;
 		}
 
-        public static ConsumerTestFactory<IBusEndpointTestScenario, TConsumer> ForConsumer<TConsumer>()
+        public static IConsumerTestFactory<IBusTestScenario, TConsumer> ForConsumer<TConsumer>()
 			where TConsumer : class, IConsumer
 		{
-            var factory = new ConsumerTestFactoryImpl<IBusEndpointTestScenario, TConsumer>(() => new BusEndpointTestScenarioBuilder());
+            var factory = new ConsumerTestFactoryImpl<IBusTestScenario, TConsumer>(() => new BusTestScenarioBuilder());
 
 			return factory;
 		}
@@ -49,7 +49,7 @@ namespace MassTransit.Testing
 		public static SagaTestFactory<IBusTestScenario, TSaga> ForSaga<TSaga>()
 			where TSaga : class, ISaga
 		{
-            var factory = new SagaTestFactoryImpl<IBusTestScenario, TSaga>(() => new BusTestScenarioBuilderImpl());
+            var factory = new SagaTestFactoryImpl<IBusTestScenario, TSaga>(() => new BusTestScenarioBuilder());
 
 			return factory;
 		}

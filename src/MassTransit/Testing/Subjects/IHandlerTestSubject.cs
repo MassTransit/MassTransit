@@ -10,24 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.Subjects
 {
-    using System;
-    using Scenarios;
-
-
-    public interface TestSubject<TSubject> :
-        IDisposable
-        where TSubject : class
+    public interface IHandlerTestSubject<TMessage> :
+        ITestSubject<TMessage>
+        where TMessage : class
     {
-    }
-
-
-    public interface TestSubject<in TScenario, TSubject> :
-        TestSubject<TSubject>
-        where TSubject : class
-        where TScenario : ITestScenario
-    {
-        void Prepare(TScenario scenario);
+        /// <summary>
+        /// The messages that were received by the handler
+        /// </summary>
+        IReceivedMessageList<TMessage> Received { get; }
     }
 }

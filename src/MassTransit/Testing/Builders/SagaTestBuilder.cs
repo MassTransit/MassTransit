@@ -16,7 +16,7 @@ namespace MassTransit.Testing.Builders
 	using Scenarios;
 
 	public interface SagaTestBuilder<TScenario, TSaga> :
-		TestInstanceBuilder<TScenario>
+		ITestBuilder<TScenario>
 		where TSaga : class, ISaga
 		where TScenario : ITestScenario
 	{

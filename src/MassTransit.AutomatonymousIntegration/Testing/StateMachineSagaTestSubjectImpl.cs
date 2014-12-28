@@ -15,29 +15,29 @@ namespace Automatonymous.Testing
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using MassTransit;
     using MassTransit.Saga;
     using MassTransit.Testing;
-    using MassTransit.Testing.Scenarios;
+    using MassTransit.Testing.Configurators;
+    using MassTransit.Testing.ScenarioBuilders;
+    using MassTransit.Testing.ScenarioConfigurators;
     using MassTransit.Testing.Subjects;
     using MassTransit.Testing.TestDecorators;
     using RepositoryConfigurators;
 
 
     public class StateMachineSagaTestSubjectImpl<TScenario, TSaga, TStateMachine> :
-        SagaTestSubject<TSaga>
+        SagaTestSubject<TSaga>,
+        IScenarioBuilderConfigurator<TScenario>
         where TSaga : class, SagaStateMachineInstance
         where TScenario : ITestScenario
         where TStateMachine : StateMachine<TSaga>
     {
         readonly Action<StateMachineSagaRepositoryConfigurator<TSaga>> _configureCorrelation;
-        readonly SagaListImpl<TSaga> _created;
-        readonly ReceivedMessageList _received;
         readonly ISagaRepository<TSaga> _sagaRepository;
-        readonly SagaListImpl<TSaga> _sagas;
         readonly TStateMachine _stateMachine;
-        bool _disposed;
-        ConnectHandle _handle;
+        SagaListImpl<TSaga> _created;
+        ReceivedMessageList _received;
+        SagaListImpl<TSaga> _sagas;
 
         public StateMachineSagaTestSubjectImpl(ISagaRepository<TSaga> sagaRepository, TStateMachine stateMachine,
             Action<StateMachineSagaRepositoryConfigurator<TSaga>> configureCorrelation)
@@ -45,10 +45,27 @@ namespace Automatonymous.Testing
             _sagaRepository = sagaRepository;
             _stateMachine = stateMachine;
             _configureCorrelation = configureCorrelation;
+        }
 
-            _received = new ReceivedMessageList();
-            _created = new SagaListImpl<TSaga>();
-            _sagas = new SagaListImpl<TSaga>();
+        public ITestScenarioBuilder<TScenario> Configure(ITestScenarioBuilder<TScenario> builder)
+        {
+            _received = new ReceivedMessageList(builder.Timeout);
+            _created = new SagaListImpl<TSaga>(builder.Timeout);
+            _sagas = new SagaListImpl<TSaga>(builder.Timeout);
+
+            var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSaga>(_sagaRepository, _received, _created,
+                _sagas);
+            var scenarioBuilder = builder as IBusTestScenarioBuilder;
+            if (scenarioBuilder != null)
+                scenarioBuilder.ConfigureReceiveEndpoint(
+                    x => x.StateMachineSaga(_stateMachine, decoratedSagaRepository, _configureCorrelation));
+
+            return builder;
+        }
+
+        public IEnumerable<TestConfiguratorResult> Validate()
+        {
+            yield break;
         }
 
         public IReceivedMessageList Received
@@ -56,28 +73,16 @@ namespace Automatonymous.Testing
             get { return _received; }
         }
 
-        public SagaList<TSaga> Created
+        public ISagaList<TSaga> Created
         {
             get { return _created; }
         }
 
         public void Dispose()
         {
-            if (_disposed)
-                return;
-
-            if (_handle != null)
-            {
-                _handle.Disconnect();
-                _handle = null;
-            }
-
-            _received.Dispose();
-
-            _disposed = true;
         }
 
-        public IEnumerator<SagaInstance<TSaga>> GetEnumerator()
+        public IEnumerator<ISagaInstance<TSaga>> GetEnumerator()
         {
             return _sagas.GetEnumerator();
         }
@@ -87,27 +92,19 @@ namespace Automatonymous.Testing
             return GetEnumerator();
         }
 
-        public bool Any()
+        public IEnumerable<ISagaInstance<TSaga>> Select()
         {
-            return _sagas.Any();
+            return _created.Select();
         }
 
-        public bool Any(Func<TSaga, bool> filter)
+        public IEnumerable<ISagaInstance<TSaga>> Select(Func<TSaga, bool> filter)
         {
-            return _sagas.Any(filter);
+            return _created.Select(filter);
         }
 
         public TSaga Contains(Guid sagaId)
         {
-            return _sagas.Contains(sagaId);
-        }
-
-        public void Prepare(TScenario scenario)
-        {
-            var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSaga>(_sagaRepository, _received, _created,
-                _sagas);
-
-            _handle = scenario.Bus.ConnectStateMachineSaga(_stateMachine, decoratedSagaRepository, _configureCorrelation);
+            return _created.Contains(sagaId);
         }
     }
 }

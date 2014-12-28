@@ -18,9 +18,9 @@ namespace MassTransit.Testing.Factories
 
 
     public class ConsumerTestFactoryImpl<TScenario, TConsumer> :
-        ConsumerTestFactory<TScenario, TConsumer>
+        IConsumerTestFactory<TScenario, TConsumer>
         where TConsumer : class, IConsumer
-        where TScenario : IBusEndpointTestScenario
+        where TScenario : IBusTestScenario
     {
         readonly Func<ITestScenarioBuilder<TScenario>> _scenarioBuilderFactory;
 
@@ -29,10 +29,10 @@ namespace MassTransit.Testing.Factories
             _scenarioBuilderFactory = scenarioBuilderFactory;
         }
 
-        public ConsumerTest<TScenario, TConsumer> New(
-            Action<ConsumerTestInstanceConfigurator<TScenario, TConsumer>> configureTest)
+        public IConsumerTest<TScenario, TConsumer> New(
+            Action<IConsumerTestConfigurator<TScenario, TConsumer>> configureTest)
         {
-            var configurator = new ConsumerTestInstanceConfiguratorImpl<TScenario, TConsumer>(_scenarioBuilderFactory);
+            var configurator = new ConsumerTestConfigurator<TScenario, TConsumer>(_scenarioBuilderFactory);
 
             configureTest(configurator);
 

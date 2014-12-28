@@ -10,23 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.Scenarios
+namespace MassTransit.Testing.Factories
 {
     using System;
+    using TestInstanceConfigurators;
 
 
-    public class BusEndpointTestScenario :
-        BusTestScenario,
-        IBusEndpointTestScenario
+    public interface IConsumerTestFactory<TScenario, TConsumer>
+        where TConsumer : class, IConsumer
+        where TScenario : IBusTestScenario
     {
-        public BusEndpointTestScenario(TimeSpan timeout, IBusControl busControl)
-            : base(timeout, busControl)
-        {
-        }
-
-        public virtual ISendEndpoint SubjectSendEndpoint
-        {
-            get { return Bus.GetSendEndpoint(new Uri("loopback://localhost/input_queue")).Result; }
-        }
+        IConsumerTest<TScenario, TConsumer> New(Action<IConsumerTestConfigurator<TScenario, TConsumer>> configureTest);
     }
 }
