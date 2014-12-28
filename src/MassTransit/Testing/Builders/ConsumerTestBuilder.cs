@@ -17,7 +17,7 @@ namespace MassTransit.Testing.Builders
 	public interface ConsumerTestBuilder<TScenario, TConsumer> :
 		TestInstanceBuilder<TScenario>
 		where TConsumer : class
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
 		ConsumerTest<TScenario, TConsumer> Build();
 

@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Testing
     public class When_a_saga_is_being_tested
 	{
 		Guid _sagaId;
-		SagaTest<BusTestScenario, TestSaga> _test;
+		SagaTest<IBusTestScenario, TestSaga> _test;
 		string _testValueA;
 
 		[SetUp]
@@ -64,7 +64,7 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_receive_the_message_type_a()
 		{
-			_test.Received.Any<A>().ShouldBe(true);
+			_test.Received.Select<A>().ShouldBe(true);
 		}
 
 		[Test]
@@ -91,7 +91,7 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_have_called_the_consumer_method()
 		{
-			_test.Saga.Received.Any<A>().ShouldBe(true);
+			_test.Saga.Received.Select<A>().ShouldBe(true);
 		}
 
 		class TestSaga :

@@ -27,7 +27,7 @@ namespace MassTransit.Testing
     public interface HandlerTest<out TScenario, TMessage> :
         HandlerTest<TMessage>
         where TMessage : class
-        where TScenario : TestScenario
+        where TScenario : ITestScenario
     {
         TScenario Scenario { get; }
     }

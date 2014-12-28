@@ -19,7 +19,6 @@ namespace MassTransit.SubscriptionConnectors
     {
         readonly Lazy<MessageConnectorFactory> _messageConnectorFactory;
         readonly Lazy<MessageConnectorFactory> _messageSubscriptionConnectorFactory;
-        readonly Lazy<MessageConnectorFactory> _subscriptionConnectorFactory;
 
         public MessageInterfaceType(Type interfaceType, Type messageType, Type consumerType)
         {
@@ -28,10 +27,6 @@ namespace MassTransit.SubscriptionConnectors
 
             _messageConnectorFactory = new Lazy<MessageConnectorFactory>(() => (MessageConnectorFactory)
                 Activator.CreateInstance(typeof(ConsumeMessageConnectorFactory<,>).MakeGenericType(consumerType,
-                    messageType)));
-
-            _subscriptionConnectorFactory = new Lazy<MessageConnectorFactory>(() => (MessageConnectorFactory)
-                Activator.CreateInstance(typeof(LegacyContextConnectorFactory<,>).MakeGenericType(consumerType,
                     messageType)));
 
             _messageSubscriptionConnectorFactory =
@@ -46,16 +41,6 @@ namespace MassTransit.SubscriptionConnectors
         public ConsumerMessageConnector GetConsumerConnector()
         {
             return _messageConnectorFactory.Value.CreateConsumerConnector();
-        }
-
-        public ConsumerMessageConnector GetConsumerContextConnector()
-        {
-            return _subscriptionConnectorFactory.Value.CreateConsumerConnector();
-        }
-
-        public InstanceMessageConnector GetInstanceContextConnector()
-        {
-            return _subscriptionConnectorFactory.Value.CreateInstanceConnector();
         }
 
         public ConsumerMessageConnector GetConsumerMessageConnector()

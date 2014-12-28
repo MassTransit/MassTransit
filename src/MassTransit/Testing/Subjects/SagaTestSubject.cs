@@ -22,7 +22,7 @@ namespace MassTransit.Testing.Subjects
 		/// <summary>
 		/// The messages that were received by the handler
 		/// </summary>
-		ReceivedMessageList Received { get; }
+		IReceivedMessageList Received { get; }
 
 		/// <summary>
 		/// The sagas that were created during the test

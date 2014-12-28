@@ -20,11 +20,11 @@ namespace MassTransit.Testing.Factories
 	public class HandlerTestFactoryImpl<TScenario, TMessage> :
 		HandlerTestFactory<TScenario, TMessage>
 		where TMessage : class
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
-		readonly Func<ScenarioBuilder<TScenario>> _scenarioBuilderFactory;
+		readonly Func<ITestScenarioBuilder<TScenario>> _scenarioBuilderFactory;
 
-		public HandlerTestFactoryImpl(Func<ScenarioBuilder<TScenario>> scenarioBuilderFactory)
+		public HandlerTestFactoryImpl(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
 		{
 			_scenarioBuilderFactory = scenarioBuilderFactory;
 		}

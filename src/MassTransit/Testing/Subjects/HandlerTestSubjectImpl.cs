@@ -20,7 +20,7 @@ namespace MassTransit.Testing.Subjects
     public class HandlerTestSubjectImpl<TScenario, TSubject> :
         HandlerTestSubject<TSubject>
         where TSubject : class
-        where TScenario : TestScenario
+        where TScenario : ITestScenario
     {
         readonly MessageHandler<TSubject> _handler;
         readonly ReceivedMessageListImpl<TSubject> _received;
@@ -33,7 +33,7 @@ namespace MassTransit.Testing.Subjects
             _received = new ReceivedMessageListImpl<TSubject>();
         }
 
-        public ReceivedMessageList<TSubject> Received
+        public IReceivedMessageList<TSubject> Received
         {
             get { return _received; }
         }
@@ -45,7 +45,7 @@ namespace MassTransit.Testing.Subjects
 
         public void Prepare(TScenario scenario)
         {
-            _unsubscribe = scenario.InputBus.ConnectHandler<TSubject>(HandleMessage);
+            _unsubscribe = scenario.Bus.ConnectHandler<TSubject>(HandleMessage);
         }
 
         void Dispose(bool disposing)
@@ -68,7 +68,7 @@ namespace MassTransit.Testing.Subjects
 
         async Task HandleMessage(ConsumeContext<TSubject> context)
         {
-            var received = new ReceivedMessageImpl<TSubject>(context);
+            var received = new ObservedReceivedMessage<TSubject>(context);
 
             try
             {

@@ -18,13 +18,13 @@ namespace MassTransit.RabbitMqTransport.Testing
 
     /// <summary>
 	/// Extensions for configuring a test RabbitMQ instance that can be used
-	/// in the test. See <see cref="RabbitMqBusScenarioBuilder"/> docs.
+	/// in the test. See <see cref="RabbitMqBusTestScenarioBuilder"/> docs.
 	/// </summary>
 	public static class BusTestScenarioExtensions
 	{
 		/// <summary>
 		/// Extensions for configuring a test RabbitMQ instance that can be used
-		/// in the test. See <see cref="RabbitMqBusScenarioBuilder"/> docs.
+		/// in the test. See <see cref="RabbitMqBusTestScenarioBuilder"/> docs.
 		/// 
 		/// Sample usage:
 		/// <code>
@@ -56,15 +56,15 @@ namespace MassTransit.RabbitMqTransport.Testing
 		///    [Then]
 		///    public void Should_have_received_a_message_of_type_a()
 		///    {
-		///        _test.Received.Any&lt;A&gt;().ShouldBeTrue();
+		///        _test.Received.Select&lt;A&gt;().ShouldBeTrue();
 		///    }
 		///}
 		///</code>
 		/// </summary>
 		/// <param name="configurator">The configurator that is passed via the lambda that you are calling this method from.</param>
-		public static void UseRabbitMqBusScenario(this TestInstanceConfigurator<BusTestScenario> configurator)
+		public static void UseRabbitMqBusScenario(this ITestInstanceConfigurator<IBusTestScenario> configurator)
 		{
-//			configurator.UseScenarioBuilder(() => new RabbitMqBusScenarioBuilder());
+//			configurator.UseScenarioBuilder(() => new RabbitMqBusTestScenarioBuilder());
 		}
 	}
 }

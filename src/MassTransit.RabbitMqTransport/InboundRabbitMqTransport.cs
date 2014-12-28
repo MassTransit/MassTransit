@@ -51,7 +51,7 @@ namespace MassTransit.RabbitMqTransport
             get { return new EndpointAddress(_address.Uri); }
         }
 
-        public void Receive(Func<IReceiveContext, Action<IReceiveContext>> lookupSinkChain, TimeSpan timeout)
+        public void Receive(Func<ReceiveContext, Action<ReceiveContext>> lookupSinkChain, TimeSpan timeout)
         {
             AddConsumerBinding();
 

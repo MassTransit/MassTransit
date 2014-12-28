@@ -12,21 +12,24 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-	public class Sent :
-		ISent
+    using System;
+
+
+    public class SentX :
+		Sent
 	{
-		readonly EndpointAddress _address;
-		readonly ISendContext _context;
+        readonly Uri _address;
+		readonly SendContext _context;
 		long _timestamp;
 
-		public Sent(ISendContext context, EndpointAddress address, long timestamp)
+		public SentX(SendContext context, Uri address, long timestamp)
 		{
 			_timestamp = timestamp;
 			_context = context;
 			_address = address;
 		}
 
-		public ISendContext Context
+		public SendContext Context
 		{
 			get { return _context; }
 		}
@@ -36,28 +39,28 @@ namespace MassTransit.Context
 			get { return _timestamp; }
 		}
 
-		public EndpointAddress Address
+        public Uri Address
 		{
 			get { return _address; }
 		}
 	}
 
-	public class Sent<T> :
-		ISent
+	public class SentX<T> :
+		Sent
 		where T : class
 	{
-		readonly EndpointAddress _address;
-		readonly ISendContext<T> _context;
+        readonly Uri _address;
+		readonly SendContext<T> _context;
 		long _timestamp;
 
-		public Sent(ISendContext<T> context, EndpointAddress address, long timestamp)
+        public SentX(SendContext<T> context, Uri address, long timestamp)
 		{
 			_timestamp = timestamp;
 			_context = context;
 			_address = address;
 		}
 
-		public ISendContext Context
+		public SendContext Context
 		{
 			get { return _context; }
 		}
@@ -67,7 +70,7 @@ namespace MassTransit.Context
 			get { return _timestamp; }
 		}
 
-		public EndpointAddress Address
+        public Uri Address
 		{
 			get { return _address; }
 		}

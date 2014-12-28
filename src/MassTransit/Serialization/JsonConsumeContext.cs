@@ -116,7 +116,7 @@ namespace MassTransit.Serialization
             get { return _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress)); }
         }
 
-        public ContextHeaders ContextHeaders
+        public ContextHeaders Headers
         {
             get { return _headers ?? (_headers = new JsonMessageContextHeaders(_deserializer, _envelope.Headers)); }
         }
@@ -169,7 +169,7 @@ namespace MassTransit.Serialization
 
                 if (typeof(T) == typeof(JToken))
                 {
-                    _messageTypes[typeof(T)] = message = new JsonMessageConsumeContext<T>(this, _messageToken as T);
+                    _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, _messageToken as T);
                     return true;
                 }
 
@@ -187,7 +187,7 @@ namespace MassTransit.Serialization
                         obj = _deserializer.Deserialize(jsonReader, deserializeType);
                     }
 
-                    _messageTypes[typeof(T)] = message = new JsonMessageConsumeContext<T>(this, (T)obj);
+                    _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, (T)obj);
                     return true;
                 }
 
@@ -326,7 +326,7 @@ namespace MassTransit.Serialization
                 v.CorrelationId = CorrelationId;
                 v.RequestId = RequestId;
 
-                foreach (var header in ContextHeaders.Headers)
+                foreach (var header in Headers.Headers)
                     v.ContextHeaders.Set(header.Item1, header.Item2);
             }));
 

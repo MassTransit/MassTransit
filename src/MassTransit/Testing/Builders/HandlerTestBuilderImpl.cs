@@ -22,9 +22,9 @@ namespace MassTransit.Testing.Builders
     public class HandlerTestBuilderImpl<TScenario, TMessage> :
         HandlerTestBuilder<TScenario, TMessage>
         where TMessage : class
-        where TScenario : TestScenario
+        where TScenario : ITestScenario
     {
-        readonly IList<TestAction<TScenario>> _actions;
+        readonly IList<ITestAction<TScenario>> _actions;
         readonly TScenario _scenario;
         MessageHandler<TMessage> _handler;
 
@@ -33,7 +33,7 @@ namespace MassTransit.Testing.Builders
             _scenario = scenario;
             _handler = DefaultHandler;
 
-            _actions = new List<TestAction<TScenario>>();
+            _actions = new List<ITestAction<TScenario>>();
         }
 
         public HandlerTest<TScenario, TMessage> Build()
@@ -48,7 +48,7 @@ namespace MassTransit.Testing.Builders
             _handler = handler;
         }
 
-        public void AddTestAction(TestAction<TScenario> testAction)
+        public void AddTestAction(ITestAction<TScenario> testAction)
         {
             _actions.Add(testAction);
         }

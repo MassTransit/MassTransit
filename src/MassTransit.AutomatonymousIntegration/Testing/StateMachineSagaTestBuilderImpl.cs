@@ -25,10 +25,10 @@ namespace Automatonymous.Testing
     public class StateMachineSagaTestBuilderImpl<TScenario, TSaga, TStateMachine> :
         SagaTestBuilder<TScenario, TSaga>
         where TSaga : class, SagaStateMachineInstance
-        where TScenario : TestScenario
+        where TScenario : ITestScenario
         where TStateMachine : StateMachine<TSaga>
     {
-        readonly IList<TestAction<TScenario>> _actions;
+        readonly IList<ITestAction<TScenario>> _actions;
         readonly Action<StateMachineSagaRepositoryConfigurator<TSaga>> _configureCallback;
         readonly TScenario _scenario;
         readonly TStateMachine _stateMachine;
@@ -41,7 +41,7 @@ namespace Automatonymous.Testing
             _stateMachine = stateMachine;
             _configureCallback = configureCallback;
 
-            _actions = new List<TestAction<TScenario>>();
+            _actions = new List<ITestAction<TScenario>>();
         }
 
         public SagaTest<TScenario, TSaga> Build()
@@ -60,7 +60,7 @@ namespace Automatonymous.Testing
             _sagaRepository = sagaRepository;
         }
 
-        public void AddTestAction(TestAction<TScenario> testAction)
+        public void AddTestAction(ITestAction<TScenario> testAction)
         {
             _actions.Add(testAction);
         }

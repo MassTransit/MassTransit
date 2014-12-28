@@ -115,20 +115,20 @@ namespace MassTransit.RabbitMqTransport
             _added = new Dictionary<Type, UnsubscribeAction>();
         }
 
-        public void PreDispatch(ISendContext context)
+        public void PreDispatch(SendContext context)
         {
-            lock (_added)
-            {
-                Type messageType = context.DeclaringMessageType;
-
-                if (_added.ContainsKey(messageType))
-                    return;
-
-                AddEndpointForType(messageType);
-            }
+//            lock (_added)
+//            {
+//                Type messageType = context.DeclaringMessageType;
+//
+//                if (_added.ContainsKey(messageType))
+//                    return;
+//
+//                AddEndpointForType(messageType);
+//            }
         }
 
-        public void PostDispatch(ISendContext context)
+        public void PostDispatch(SendContext context)
         {
         }
 

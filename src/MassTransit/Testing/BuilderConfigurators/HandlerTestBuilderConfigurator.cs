@@ -18,7 +18,7 @@ namespace MassTransit.Testing.BuilderConfigurators
 	public interface HandlerTestBuilderConfigurator<TScenario, TMessage> :
 		TestBuilderConfigurator
 		where TMessage : class
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
 		HandlerTestBuilder<TScenario, TMessage> Configure(HandlerTestBuilder<TScenario, TMessage> builder);
 	}

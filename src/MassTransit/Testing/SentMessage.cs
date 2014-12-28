@@ -17,7 +17,7 @@ namespace MassTransit.Testing
 
     public interface SentMessage
     {
-        ISendContext Context { get; }
+        SendContext Context { get; }
         Exception Exception { get; }
 
         Type MessageType { get; }
@@ -28,6 +28,6 @@ namespace MassTransit.Testing
         SentMessage
         where T : class
     {
-        new ISendContext<T> Context { get; }
+        new SendContext<T> Context { get; }
     }
 }

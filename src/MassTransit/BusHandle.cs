@@ -18,16 +18,12 @@ namespace MassTransit
 
 
     /// <summary>
-    /// A handle to an active service bus instance
+    /// Returned once a bus has been started. Should call Stop or Dispose before the process
+    /// can exit.
     /// </summary>
     public interface BusHandle :
         IDisposable
     {
-        /// <summary>
-        /// The Bus
-        /// </summary>
-        IBus Bus { get; }
-
         /// <summary>
         /// Stop the bus and all receiving endpoints on the bus. Note that cancelling the Stop
         /// operation may leave the bus and/or one or more receive endpoints in an indeterminate

@@ -26,7 +26,7 @@ namespace MassTransit.AutomatonymousTests
         {
             Guid sagaId = Guid.NewGuid();
 
-            SagaTest<BusTestScenario, Instance> test = TestFactory.ForSaga<Instance>().New(x =>
+            SagaTest<IBusTestScenario, Instance> test = TestFactory.ForSaga<Instance>().New(x =>
                 {
                     x.UseStateMachineBuilder(_machine, sm =>
                         {
@@ -41,7 +41,7 @@ namespace MassTransit.AutomatonymousTests
 
             test.Execute();
 
-            Assert.IsTrue(test.Received.Any<Start>(), "Message not received");
+            Assert.IsTrue(test.Received.Select<Start>(), "Message not received");
 
             Instance instance = test.Saga.Created.Contains(sagaId);
             Assert.IsNotNull(instance, "Saga instance not found");
@@ -54,7 +54,7 @@ namespace MassTransit.AutomatonymousTests
         {
             Guid sagaId = Guid.NewGuid();
 
-            SagaTest<BusTestScenario, Instance> test = TestFactory.ForSaga<Instance>().New(x =>
+            SagaTest<IBusTestScenario, Instance> test = TestFactory.ForSaga<Instance>().New(x =>
                 {
                     x.UseStateMachineBuilder(_machine, sm =>
                         {
@@ -73,8 +73,8 @@ namespace MassTransit.AutomatonymousTests
 
             test.Execute();
 
-            Assert.IsTrue(test.Received.Any<Start>(), "Start not received");
-            Assert.IsTrue(test.Received.Any<Stop>(), "Stop not received");
+            Assert.IsTrue(test.Received.Select<Start>(), "Start not received");
+            Assert.IsTrue(test.Received.Select<Stop>(), "Stop not received");
 
             Instance instance = test.Saga.Created.Contains(sagaId);
             Assert.IsNotNull(instance, "Saga instance not found");

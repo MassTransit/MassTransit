@@ -25,14 +25,14 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 		TestInstanceConfiguratorImpl<TScenario>,
 		HandlerTestInstanceConfigurator<TScenario, TMessage>
 		where TMessage : class
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
 		readonly IList<HandlerTestBuilderConfigurator<TScenario, TMessage>> _configurators;
 
 		Func<TScenario, HandlerTestBuilder<TScenario, TMessage>> _builderFactory;
 		MessageHandler<TMessage> _handler;
 
-		public HandlerTestInstanceConfiguratorImpl(Func<ScenarioBuilder<TScenario>> scenarioBuilderFactory)
+		public HandlerTestInstanceConfiguratorImpl(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
 			: base(scenarioBuilderFactory)
 		{
 			_configurators = new List<HandlerTestBuilderConfigurator<TScenario, TMessage>>();

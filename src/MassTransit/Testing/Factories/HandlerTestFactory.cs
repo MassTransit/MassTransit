@@ -18,7 +18,7 @@ namespace MassTransit.Testing.Factories
 
 	public interface HandlerTestFactory<TScenario, TMessage>
 		where TMessage : class
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
 		HandlerTest<TScenario, TMessage> New(Action<HandlerTestInstanceConfigurator<TScenario, TMessage>> configureTest);
 	}

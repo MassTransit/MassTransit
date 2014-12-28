@@ -20,7 +20,8 @@ namespace MassTransit.Context
 
 
     /// <summary>
-    /// 
+    /// Converts the object type message to the appropriate generic type and invokes the send method with that
+    /// generic overload.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class SendEndpointConverter<T> :

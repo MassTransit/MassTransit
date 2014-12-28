@@ -19,6 +19,6 @@ namespace MassTransit.Testing.Subjects
 		/// <summary>
 		/// The messages that were received by the handler
 		/// </summary>
-		ReceivedMessageList<TMessage> Received { get; }
+		IReceivedMessageList<TMessage> Received { get; }
 	}
 }

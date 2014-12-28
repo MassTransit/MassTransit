@@ -27,12 +27,12 @@ namespace Automatonymous.Testing
     public class StateMachineSagaTestSubjectImpl<TScenario, TSaga, TStateMachine> :
         SagaTestSubject<TSaga>
         where TSaga : class, SagaStateMachineInstance
-        where TScenario : TestScenario
+        where TScenario : ITestScenario
         where TStateMachine : StateMachine<TSaga>
     {
         readonly Action<StateMachineSagaRepositoryConfigurator<TSaga>> _configureCorrelation;
         readonly SagaListImpl<TSaga> _created;
-        readonly ReceivedMessageListImpl _received;
+        readonly ReceivedMessageList _received;
         readonly ISagaRepository<TSaga> _sagaRepository;
         readonly SagaListImpl<TSaga> _sagas;
         readonly TStateMachine _stateMachine;
@@ -46,12 +46,12 @@ namespace Automatonymous.Testing
             _stateMachine = stateMachine;
             _configureCorrelation = configureCorrelation;
 
-            _received = new ReceivedMessageListImpl();
+            _received = new ReceivedMessageList();
             _created = new SagaListImpl<TSaga>();
             _sagas = new SagaListImpl<TSaga>();
         }
 
-        public ReceivedMessageList Received
+        public IReceivedMessageList Received
         {
             get { return _received; }
         }
@@ -107,7 +107,7 @@ namespace Automatonymous.Testing
             var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSaga>(_sagaRepository, _received, _created,
                 _sagas);
 
-            _handle = scenario.InputBus.ConnectStateMachineSaga(_stateMachine, decoratedSagaRepository, _configureCorrelation);
+            _handle = scenario.Bus.ConnectStateMachineSaga(_stateMachine, decoratedSagaRepository, _configureCorrelation);
         }
     }
 }

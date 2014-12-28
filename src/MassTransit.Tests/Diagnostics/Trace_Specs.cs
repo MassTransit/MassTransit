@@ -23,7 +23,7 @@ namespace MassTransit.Tests.Diagnostics
 //    {
 //        FutureMessage<ReceivedMessageTraceList> _future;
 //        ReceivedMessageTraceList _list;
-//        HandlerTest<BusTestScenario, InputMessage> _test;
+//        HandlerTest<IBusTestScenario, InputMessage> _test;
 //
 //        [SetUp]
 //        public void A_consumer_is_being_tested()
@@ -39,8 +39,8 @@ namespace MassTransit.Tests.Diagnostics
 //
 //            _test.Execute();
 //
-//            _test.Received.Any<InputMessage>().ShouldBe(true);
-//            _test.Sent.Any<OutputMessage>().ShouldBe(true);
+//            _test.Received.Select<InputMessage>().ShouldBe(true);
+//            _test.Sent.Select<OutputMessage>().ShouldBe(true);
 //
 //            _future = new FutureMessage<ReceivedMessageTraceList>();
 //            _test.Scenario.Bus.GetMessageTrace(_test.Scenario.Bus.Endpoint, _future.Set);

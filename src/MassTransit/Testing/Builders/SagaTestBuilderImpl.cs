@@ -21,9 +21,9 @@ namespace MassTransit.Testing.Builders
 	public class SagaTestBuilderImpl<TScenario, TSaga> :
 		SagaTestBuilder<TScenario, TSaga>
 		where TSaga : class, ISaga
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
-		readonly IList<TestAction<TScenario>> _actions;
+		readonly IList<ITestAction<TScenario>> _actions;
 		readonly TScenario _scenario;
 		ISagaRepository<TSaga> _sagaRepository;
 
@@ -31,7 +31,7 @@ namespace MassTransit.Testing.Builders
 		{
 			_scenario = scenario;
 
-			_actions = new List<TestAction<TScenario>>();
+			_actions = new List<ITestAction<TScenario>>();
 		}
 
 		public SagaTest<TScenario, TSaga> Build()
@@ -51,7 +51,7 @@ namespace MassTransit.Testing.Builders
 			_sagaRepository = sagaRepository;
 		}
 
-		public void AddTestAction(TestAction<TScenario> testAction)
+		public void AddTestAction(ITestAction<TScenario> testAction)
 		{
 			_actions.Add(testAction);
 		}

@@ -52,7 +52,7 @@ namespace MassTransit.SubscriptionConfigurators
             where TConsumer : class
         {
             if (consumerFactory == null)
-                yield return ValidationResultExtensions.Failure(null, "ConsumerFactory", "must not be null");
+                yield return ValidationResultExtensions.Failure(null, "UseConsumerFactory", "must not be null");
 
             foreach (ValidationResult result in ValidateConsumer<TConsumer>(null))
                 yield return result;

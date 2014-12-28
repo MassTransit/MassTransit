@@ -27,14 +27,14 @@ namespace Automatonymous.Testing
         TestInstance<TScenario>,
         SagaTest<TScenario, TSaga>
         where TSaga : class, SagaStateMachineInstance
-        where TScenario : TestScenario
+        where TScenario : ITestScenario
         where TStateMachine : StateMachine<TSaga>
     {
         readonly StateMachineSagaTestSubjectImpl<TScenario, TSaga, TStateMachine> _subject;
 
         bool _disposed;
 
-        public StateMachineSagaTestInstance(TScenario scenario, IList<TestAction<TScenario>> actions,
+        public StateMachineSagaTestInstance(TScenario scenario, IList<ITestAction<TScenario>> actions,
             ISagaRepository<TSaga> sagaRepository, TStateMachine stateMachine,
             Action<StateMachineSagaRepositoryConfigurator<TSaga>> configureCallback)
             : base(scenario, actions)

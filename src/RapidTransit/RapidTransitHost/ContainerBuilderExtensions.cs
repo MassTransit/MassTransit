@@ -12,7 +12,7 @@ namespace RapidTransit
 
         public static void RegisterAutofacConsumerFactory(this ContainerBuilder builder)
         {
-            // the ConsumerFactory uses message scope so that related components are all created within the same
+            // the UseConsumerFactory uses message scope so that related components are all created within the same
             // container lifetime
             builder.RegisterGeneric(typeof(AutofacConsumerFactory<>))
                    .WithParameter(new NamedParameter("name", MessageScopeTag))

@@ -15,7 +15,7 @@ namespace MassTransit.Testing.BuilderConfigurators
 	using Configurators;
 
 	public interface TestBuilderConfigurator :
-		TestConfigurator
+		ITestConfigurator
 	{
 	}
 }

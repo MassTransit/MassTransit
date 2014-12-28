@@ -13,12 +13,11 @@
 namespace MassTransit.Pipeline
 {
     using System.Threading.Tasks;
-    using Context;
     using Util;
 
 
     /// <summary>
-    /// Dispatches the ConsumeContext to the consumer method for the specified message type
+    ///     Dispatches the ConsumeContext to the consumer method for the specified message type
     /// </summary>
     /// <typeparam name="TConsumer">The consumer type</typeparam>
     /// <typeparam name="TMessage">The message type</typeparam>
@@ -39,9 +38,7 @@ namespace MassTransit.Pipeline
                 throw new ConsumerMessageException(message);
             }
 
-            IConsumeContext<TMessage> consumeContext = new ConsumeContextAdapter<TMessage>(context);
-
-            messageConsumer.Consume(consumeContext.Message);
+            messageConsumer.Consume(context.Message);
         }
 
         public bool Inspect(IPipeInspector inspector)

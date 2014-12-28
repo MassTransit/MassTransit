@@ -21,9 +21,9 @@ namespace MassTransit.Testing.ActionConfigurators
 
 
     public class SendTestActionConfigurator<TScenario, TMessage> :
-        TestActionConfigurator<TScenario>
+        ITestActionConfigurator<TScenario>
         where TMessage : class
-        where TScenario : TestScenario
+        where TScenario : ITestScenario
     {
         readonly Action<TScenario, SendContext<TMessage>> _callback;
         readonly Func<TScenario, ISendEndpoint> _endpointAccessor;

@@ -25,24 +25,24 @@ namespace MassTransit.Serialization
 		/// </summary>
 		/// <param name="context">The context to write data to, from the envelope</param>
 		/// <param name="envelope">The envelope that contains the data to read into the context</param>
-        public static void SetUsingEnvelope(this IReceiveContext context, Envelope envelope)
+        public static void SetUsingEnvelope(this ReceiveContext context, Envelope envelope)
         {
-            context.SetRequestId(envelope.RequestId);
-            context.SetConversationId(envelope.ConversationId);
-            context.SetCorrelationId(envelope.CorrelationId);
-            context.SetSourceAddress(envelope.SourceAddress.ToUriOrNull());
-            context.SetDestinationAddress(envelope.DestinationAddress.ToUriOrNull());
-            context.SetResponseAddress(envelope.ResponseAddress.ToUriOrNull());
-            context.SetFaultAddress(envelope.FaultAddress.ToUriOrNull());
-            context.SetNetwork(envelope.Network);
-            context.SetRetryCount(envelope.RetryCount);
-            if (envelope.ExpirationTime.HasValue)
-                context.SetExpirationTime(envelope.ExpirationTime.Value);
-
-            foreach (var header in envelope.Headers)
-            {
-                context.SetHeader(header.Key, header.Value.ToString());
-            }
+//            context.SetRequestId(envelope.RequestId);
+//            context.SetConversationId(envelope.ConversationId);
+//            context.SetCorrelationId(envelope.CorrelationId);
+//            context.SetSourceAddress(envelope.SourceAddress.ToUriOrNull());
+//            context.SetDestinationAddress(envelope.DestinationAddress.ToUriOrNull());
+//            context.SetResponseAddress(envelope.ResponseAddress.ToUriOrNull());
+//            context.SetFaultAddress(envelope.FaultAddress.ToUriOrNull());
+//            context.SetNetwork(envelope.Network);
+//            context.SetRetryCount(envelope.RetryCount);
+//            if (envelope.ExpirationTime.HasValue)
+//                context.SetExpirationTime(envelope.ExpirationTime.Value);
+//
+//            foreach (var header in envelope.Headers)
+//            {
+//                context.SetHeader(header.Key, header.Value.ToString());
+//            }
         }
 
 		/// <summary>
@@ -53,24 +53,24 @@ namespace MassTransit.Serialization
 		/// </summary>
 		/// <param name="envelope">Envelope instance to hydrate with context data.</param>
 		/// <param name="context">The context to take the contextual data from.</param>
-        public static void SetUsingContext(this Envelope envelope, ISendContext context)
+        public static void SetUsingContext(this Envelope envelope, SendContext context)
         {
-            envelope.RequestId = context.RequestId;
-            envelope.ConversationId = context.ConversationId;
-            envelope.CorrelationId = context.CorrelationId;
-            envelope.SourceAddress = context.SourceAddress.ToStringOrNull() ?? envelope.SourceAddress;
-            envelope.DestinationAddress = context.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
-            envelope.ResponseAddress = context.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
-            envelope.FaultAddress = context.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
-            envelope.Network = context.Network;
-            envelope.RetryCount = context.RetryCount;
-            if (context.ExpirationTime.HasValue)
-                envelope.ExpirationTime = context.ExpirationTime.Value;
-
-            foreach (var header in context.Headers)
-            {
-                envelope.Headers[header.Key] = header.Value;
-            }
+//            envelope.RequestId = context.RequestId;
+//            envelope.ConversationId = context.ConversationId;
+//            envelope.CorrelationId = context.CorrelationId;
+//            envelope.SourceAddress = context.SourceAddress.ToStringOrNull() ?? envelope.SourceAddress;
+//            envelope.DestinationAddress = context.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
+//            envelope.ResponseAddress = context.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
+//            envelope.FaultAddress = context.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
+//            envelope.Network = context.Network;
+//            envelope.RetryCount = context.RetryCount;
+//            if (context.ExpirationTime.HasValue)
+//                envelope.ExpirationTime = context.ExpirationTime.Value;
+//
+//            foreach (var header in context.Headers)
+//            {
+//                envelope.Headers[header.Key] = header.Value;
+//            }
         }
     }
 }

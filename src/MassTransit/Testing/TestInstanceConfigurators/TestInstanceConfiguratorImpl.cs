@@ -23,31 +23,31 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	using Scenarios;
 
 	public abstract class TestInstanceConfiguratorImpl<TScenario>
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
-		readonly IList<TestActionConfigurator<TScenario>> _actionConfigurators;
-		readonly IList<ScenarioBuilderConfigurator<TScenario>> _configurators;
-		Func<ScenarioBuilder<TScenario>> _builderFactory;
+		readonly IList<ITestActionConfigurator<TScenario>> _actionConfigurators;
+		readonly IList<IScenarioBuilderConfigurator<TScenario>> _configurators;
+		Func<ITestScenarioBuilder<TScenario>> _builderFactory;
 
-		protected TestInstanceConfiguratorImpl(Func<ScenarioBuilder<TScenario>> scenarioBuilderFactory)
+		protected TestInstanceConfiguratorImpl(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
 		{
-			_configurators = new List<ScenarioBuilderConfigurator<TScenario>>();
-			_actionConfigurators = new List<TestActionConfigurator<TScenario>>();
+			_configurators = new List<IScenarioBuilderConfigurator<TScenario>>();
+			_actionConfigurators = new List<ITestActionConfigurator<TScenario>>();
 
 			_builderFactory = scenarioBuilderFactory;
 		}
 
-		public void AddActionConfigurator(TestActionConfigurator<TScenario> action)
+		public void AddActionConfigurator(ITestActionConfigurator<TScenario> action)
 		{
 			_actionConfigurators.Add(action);
 		}
 
-		public void UseScenarioBuilder(Func<ScenarioBuilder<TScenario>> contextBuilderFactory)
+		public void UseScenarioBuilder(Func<ITestScenarioBuilder<TScenario>> contextBuilderFactory)
 		{
 			_builderFactory = contextBuilderFactory;
 		}
 
-		public void AddConfigurator(ScenarioBuilderConfigurator<TScenario> configurator)
+		public void AddConfigurator(IScenarioBuilderConfigurator<TScenario> configurator)
 		{
 			_configurators.Add(configurator);
 		}
@@ -60,7 +60,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 
 		protected TScenario BuildTestScenario()
 		{
-			ScenarioBuilder<TScenario> builder = _builderFactory();
+			ITestScenarioBuilder<TScenario> builder = _builderFactory();
 
 			builder = _configurators.Aggregate(builder, (current, configurator) => configurator.Configure(current));
 

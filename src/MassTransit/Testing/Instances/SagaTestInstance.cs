@@ -22,13 +22,13 @@ namespace MassTransit.Testing.Instances
 		TestInstance<TScenario>,
 		SagaTest<TScenario, TSaga>
 		where TSaga : class, ISaga
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
 		readonly SagaTestSubjectImpl<TScenario, TSaga> _subject;
 
 		bool _disposed;
 
-		public SagaTestInstance(TScenario scenario, IList<TestAction<TScenario>> actions,
+		public SagaTestInstance(TScenario scenario, IList<ITestAction<TScenario>> actions,
 		                        ISagaRepository<TSaga> sagaRepository)
 			: base(scenario, actions)
 		{

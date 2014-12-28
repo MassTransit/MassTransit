@@ -22,10 +22,10 @@ namespace MassTransit.Testing.Subjects
 	public class SagaTestSubjectImpl<TScenario, TSaga> :
 		SagaTestSubject<TSaga>
 		where TSaga : class, ISaga
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
 		readonly SagaListImpl<TSaga> _created;
-		readonly ReceivedMessageListImpl _received;
+		readonly ReceivedMessageList _received;
 		readonly ISagaRepository<TSaga> _sagaRepository;
 		bool _disposed;
 		SagaListImpl<TSaga> _sagas;
@@ -35,12 +35,12 @@ namespace MassTransit.Testing.Subjects
 		{
 			_sagaRepository = sagaRepository;
 
-			_received = new ReceivedMessageListImpl();
+			_received = new ReceivedMessageList();
 			_created = new SagaListImpl<TSaga>();
 			_sagas = new SagaListImpl<TSaga>();
 		}
 
-		public ReceivedMessageList Received
+		public IReceivedMessageList Received
 		{
 			get { return _received; }
 		}
@@ -84,7 +84,7 @@ namespace MassTransit.Testing.Subjects
 		{
 			var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSaga>(_sagaRepository, _received, _created, _sagas);
 
-//			_unsubscribe = scenario.InputBus.SubscribeSaga(decoratedSagaRepository);
+//			_unsubscribe = scenario.Bus.SubscribeSaga(decoratedSagaRepository);
 		}
 
 		void Dispose(bool disposing)

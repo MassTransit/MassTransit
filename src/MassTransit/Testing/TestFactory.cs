@@ -19,7 +19,7 @@ namespace MassTransit.Testing
 
 	/// <summary>
 	/// Factory for testing message handlers, buses and messages - received, skipped, sent and published. The builders used
-	/// with the <see cref="TestInstanceConfigurator{TScenario}"/>, defaults to the loopback bus scenario. Use the extension methods in
+	/// with the <see cref="ITestInstanceConfigurator{TScenario}"/>, defaults to the loopback bus scenario. Use the extension methods in
 	/// <see cref="BusTestScenarioExtensions"/> to use alternative scenario builders. A builder is something that ties some component
 	/// together.
 	/// </summary>
@@ -30,26 +30,26 @@ namespace MassTransit.Testing
 		/// </summary>
 		/// <typeparam name="TMessage">The type of the message to create a test for.</typeparam>
 		/// <returns>A 'configurator' - a handler test factory.</returns>
-		public static HandlerTestFactory<BusTestScenario, TMessage> ForHandler<TMessage>()
+		public static HandlerTestFactory<IBusTestScenario, TMessage> ForHandler<TMessage>()
 			where TMessage : class
 		{
-            var factory = new HandlerTestFactoryImpl<BusTestScenario, TMessage>(() => new BusScenarioBuilderImpl());
+            var factory = new HandlerTestFactoryImpl<IBusTestScenario, TMessage>(() => new BusTestScenarioBuilderImpl());
 
 			return factory;
 		}
 
-		public static ConsumerTestFactory<BusTestScenario, TConsumer> ForConsumer<TConsumer>()
+        public static ConsumerTestFactory<IBusEndpointTestScenario, TConsumer> ForConsumer<TConsumer>()
 			where TConsumer : class, IConsumer
 		{
-            var factory = new ConsumerTestFactoryImpl<BusTestScenario, TConsumer>(() => new BusScenarioBuilderImpl());
+            var factory = new ConsumerTestFactoryImpl<IBusEndpointTestScenario, TConsumer>(() => new BusEndpointTestScenarioBuilder());
 
 			return factory;
 		}
 
-		public static SagaTestFactory<BusTestScenario, TSaga> ForSaga<TSaga>()
+		public static SagaTestFactory<IBusTestScenario, TSaga> ForSaga<TSaga>()
 			where TSaga : class, ISaga
 		{
-            var factory = new SagaTestFactoryImpl<BusTestScenario, TSaga>(() => new BusScenarioBuilderImpl());
+            var factory = new SagaTestFactoryImpl<IBusTestScenario, TSaga>(() => new BusTestScenarioBuilderImpl());
 
 			return factory;
 		}

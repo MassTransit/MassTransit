@@ -37,7 +37,6 @@ namespace MassTransit.SubscriptionConnectors
                 throw new ConfigurationException("A saga cannot be registered as a consumer");
 
             _connectors = Consumes()
-                .Concat(ConsumesContext())
                 .Concat(ConsumesAll())
                 .Distinct((x, y) => x.MessageType == y.MessageType)
                 .ToList();
@@ -46,11 +45,6 @@ namespace MassTransit.SubscriptionConnectors
         public ConnectHandle Connect(IConsumePipe pipe, object instance, IRetryPolicy retryPolicy)
         {
             return new MultipleConnectHandle(_connectors.Select(x => x.Connect(pipe, instance, retryPolicy)));
-        }
-
-        static IEnumerable<InstanceMessageConnector> ConsumesContext()
-        {
-            return ConsumerMetadataCache<TConsumer>.ContextConsumerTypes.Select(x => x.GetInstanceContextConnector());
         }
 
         static IEnumerable<InstanceMessageConnector> Consumes()

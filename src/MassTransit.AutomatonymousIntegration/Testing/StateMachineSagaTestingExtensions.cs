@@ -25,7 +25,7 @@ namespace MassTransit.Testing
         public static void UseStateMachineBuilder<TScenario, TSaga, TStateMachine>(
             this SagaTestInstanceConfigurator<TScenario, TSaga> configurator, TStateMachine stateMachine)
             where TSaga : class, SagaStateMachineInstance
-            where TScenario : TestScenario
+            where TScenario : ITestScenario
             where TStateMachine : StateMachine<TSaga>
         {
             configurator.UseBuilder(scenario =>
@@ -37,7 +37,7 @@ namespace MassTransit.Testing
             this SagaTestInstanceConfigurator<TScenario, TSaga> configurator, TStateMachine stateMachine,
             Action<StateMachineSagaRepositoryConfigurator<TSaga>> configureCallback)
             where TSaga : class, SagaStateMachineInstance
-            where TScenario : TestScenario
+            where TScenario : ITestScenario
             where TStateMachine : StateMachine<TSaga>
         {
             configurator.UseBuilder(scenario =>
