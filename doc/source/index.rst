@@ -17,6 +17,7 @@ Contents:
    configuration/index.rst
    usage/index.rst
    troubleshooting/index.rst
+   patterns/index.rst
    advanced/index.rst
    samples/index.rst
    learning/index.rst
