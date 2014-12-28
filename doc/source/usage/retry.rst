@@ -27,14 +27,34 @@ None
 Immediate
 '''''''''
 
+``Retry.Immediate(5)``
+
+Would retry 5 times with no delay.
+
 Intervals
 '''''''''
+
+``Retry.Intervals(5.Seconds(), 5.Seconds())``
+
+Would retry 2 times at 0:05, 0:10.
 
 Exponential
 '''''''''''
 
+Takes a number of retries and attempts to do so for each interval.
+
+``Retry.Exponential(5, 5.Seconds(), 5.Seconds(), 5.Seconds())``
+
+Would retry 5 times at 0:05, 0:10, 0:15, 0:20, 0:25. ??
+
 Incremental
 '''''''''''
+
+Takes a number of retries and attempts to do so for each interval.
+
+``Retry.Incremental(5, 5.Seconds(), 5.Seconds())``
+
+Would retry 5 times at 0:05, 0:10, 0:15, 0:20, 0:25.
 
 Except
 ''''''
