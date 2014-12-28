@@ -13,29 +13,31 @@
 namespace MassTransit.Testing
 {
 	using System;
+	using System.Threading.Tasks;
 
-	public interface TestInstance :
+
+    public interface TestInstance :
 		IDisposable
 	{
 		/// <summary>
 		/// Messages that were received by any endpoint during the execution of the test
 		/// </summary>
-		ReceivedMessageList Received { get; }
+		IReceivedMessageList Received { get; }
 
 		/// <summary>
 		/// Messages that were send by any endpoint during the execution of the test
 		/// </summary>
-		SentMessageList Sent { get; }
+		ISentMessageList Sent { get; }
 
 		/// <summary>
 		/// Messages that were not received by any handler, consumer, or instance during the execution of the test
 		/// </summary>
-		ReceivedMessageList Skipped { get; }
+		IReceivedMessageList Skipped { get; }
 
 		/// <summary>
 		/// Messages that were published by an bus (does not mean they were actually sent, just published)
 		/// </summary>
-		PublishedMessageList Published { get; }
+		IPublishedMessageList Published { get; }
 
 		/// <summary>
 		/// Execute the test actions

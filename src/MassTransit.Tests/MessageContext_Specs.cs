@@ -63,7 +63,7 @@ namespace MassTransit.Tests
             ConsumeContext<PingMessage> ping = await _ping;
 
             object header;
-            ping.ContextHeaders.TryGetHeader("One", out header);
+            ping.Headers.TryGetHeader("One", out header);
             header.ShouldBe("1");
         }
 

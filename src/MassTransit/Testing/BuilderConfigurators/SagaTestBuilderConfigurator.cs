@@ -19,7 +19,7 @@ namespace MassTransit.Testing.BuilderConfigurators
 	public interface SagaTestBuilderConfigurator<TScenario, TSaga> :
 		TestBuilderConfigurator
 		where TSaga : class, ISaga
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
 		SagaTestBuilder<TScenario, TSaga> Configure(SagaTestBuilder<TScenario, TSaga> builder);
 	}

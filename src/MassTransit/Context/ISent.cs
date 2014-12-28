@@ -12,10 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-	public interface ISent
+    using System;
+
+
+    public interface Sent
 	{
-		EndpointAddress Address { get; }
-		ISendContext Context { get; }
+        Uri Address { get; }
+		SendContext Context { get; }
 		long Timestamp { get; }
 	}
 }

@@ -14,7 +14,7 @@ namespace MassTransit.Context
 {
 	public interface IPublished
 	{
-		ISendContext Context { get; }
+		SendContext Context { get; }
 		long Timestamp { get; }
 	}
 }

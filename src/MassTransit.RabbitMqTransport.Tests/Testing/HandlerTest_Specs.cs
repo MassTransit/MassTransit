@@ -46,19 +46,19 @@ namespace MassTransit.RabbitMqTransport.Tests.Testing
 		[Test]
 		public void Should_have_received_a_message_of_type_a()
 		{
-			_test.Received.Any<A>().ShouldBe(true);
+			_test.Received.Select<A>().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_skipped_a_message_of_type_b()
 		{
-			_test.Skipped.Any<B>().ShouldBe(true);
+			_test.Skipped.Select<B>().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_not_have_skipped_a_message_of_type_a()
 		{
-			_test.Skipped.Any<A>().ShouldBe(false);
+			_test.Skipped.Select<A>().ShouldBe(false);
 		}
 
 		[Test]

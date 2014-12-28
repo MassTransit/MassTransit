@@ -120,7 +120,6 @@ namespace MassTransit
 //            if (exceptions.Count > 0)
 //                throw new PublishException(typeof(T), exceptions);
 //        }
-        public IOutboundMessagePipeline OutboundPipeline { get; private set; }
 
         public IConsumePipe ConsumePipe { get; private set; }
 

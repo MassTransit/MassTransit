@@ -14,31 +14,31 @@ namespace MassTransit
 {
     public static class ContextExtensions
     {
-        public static void ForwardUsingOriginalContext(this ISendContext target,
-            IConsumeContext source)
+        public static void ForwardUsingOriginalContext(this SendContext target,
+            ConsumeContext source)
         {
-            target.SetRequestId(source.RequestId);
-            target.SetConversationId(source.ConversationId);
-            target.SetCorrelationId(source.CorrelationId);
-            target.SetSourceAddress(source.SourceAddress);
-            target.SetResponseAddress(source.ResponseAddress);
-            target.SetFaultAddress(source.FaultAddress);
-            target.SetNetwork(source.Network);
-            if (source.ExpirationTime.HasValue)
-                target.SetExpirationTime(source.ExpirationTime.Value);
-            target.SetRetryCount(source.RetryCount);
-
-            foreach (var header in source.Headers)
-                target.SetHeader(header.Key, header.Value);
-
-            string inputAddress = source.InputAddress != null
-                ? source.InputAddress.ToString()
-                : source.DestinationAddress != null
-                    ? source.DestinationAddress.ToString()
-                    : null;
-
-            if (!string.IsNullOrEmpty(inputAddress))
-                target.SetHeader("mt.forwarder.uri", source.DestinationAddress.ToString());
+//            target.SetRequestId(source.RequestId);
+//            target.SetConversationId(source.ConversationId);
+//            target.SetCorrelationId(source.CorrelationId);
+//            target.SetSourceAddress(source.SourceAddress);
+//            target.SetResponseAddress(source.ResponseAddress);
+//            target.SetFaultAddress(source.FaultAddress);
+//            target.SetNetwork(source.Network);
+//            if (source.ExpirationTime.HasValue)
+//                target.SetExpirationTime(source.ExpirationTime.Value);
+//            target.SetRetryCount(source.RetryCount);
+//
+//            foreach (var header in source.Headers)
+//                target.SetHeader(header.Key, header.Value);
+//
+//            string inputAddress = source.InputAddress != null
+//                ? source.InputAddress.ToString()
+//                : source.DestinationAddress != null
+//                    ? source.DestinationAddress.ToString()
+//                    : null;
+//
+//            if (!string.IsNullOrEmpty(inputAddress))
+//                target.SetHeader("mt.forwarder.uri", source.DestinationAddress.ToString());
         }
     }
 }

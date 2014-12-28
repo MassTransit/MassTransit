@@ -19,7 +19,7 @@ namespace MassTransit.Testing
     using System.Threading;
 
     public class PublishedMessageListImpl :
-        PublishedMessageList,
+        IPublishedMessageList,
         IDisposable
     {
         readonly HashSet<PublishedMessage> _messages;

@@ -165,11 +165,6 @@ namespace MassTransit.RabbitMqTransport
                 Task.WaitAll(_bus._hosts.Select(x => x.SendConnectionCache.Stop()).ToArray());
             }
 
-            IBus BusHandle.Bus
-            {
-                get { return _bus; }
-            }
-
             async Task BusHandle.Stop(CancellationToken cancellationToken)
             {
                 await Task.WhenAll(_receiveEndpoints.Select(x => x.Stop(cancellationToken)));

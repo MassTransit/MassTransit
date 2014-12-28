@@ -19,7 +19,7 @@ namespace MassTransit.Testing.Factories
 
 	public interface SagaTestFactory<TScenario, TSaga>
 		where TSaga : class, ISaga
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
 		SagaTest<TScenario, TSaga> New(Action<SagaTestInstanceConfigurator<TScenario, TSaga>> configureTest);
 	}

@@ -14,21 +14,60 @@ namespace MassTransit
 {
     using System;
 
-
+    /// <summary>
+    /// The message context includes the headers that are transferred with the message
+    /// </summary>
     public interface MessageContext :
         PipeContext
     {
+        /// <summary>
+        /// The messageId assigned to the message when it was initially Sent. This is different
+        /// than the transport MessageId, which is only for the Transport.
+        /// </summary>
         Guid? MessageId { get; }
+
+        /// <summary>
+        /// If the message is a request, or related to a request, such as a response or a fault,
+        /// this contains the requestId.
+        /// </summary>
         Guid? RequestId { get; }
+
+        /// <summary>
+        /// If the message implements the CorrelatedBy(Guid) interface, this field should be 
+        /// populated by default to match that value. It can, of course, be overwritten with
+        /// something else.
+        /// </summary>
         Guid? CorrelationId { get; }
 
+        /// <summary>
+        /// The expiration time of the message if it is not intended to last forever.
+        /// </summary>
         DateTime? ExpirationTime { get; }
 
+        /// <summary>
+        /// The address of the message producer that sent the message
+        /// </summary>
         Uri SourceAddress { get; }
+
+        /// <summary>
+        /// The destination address of the message
+        /// </summary>
         Uri DestinationAddress { get; }
+
+        /// <summary>
+        /// The response address to which responses to the request should be sent
+        /// </summary>
         Uri ResponseAddress { get; }
+
+        /// <summary>
+        /// The fault addres to which fault events should be sent if the message consumer faults
+        /// </summary>
         Uri FaultAddress { get; }
 
-        ContextHeaders ContextHeaders { get; }
+        /// <summary>
+        /// Additional application-specific headers that are added to the message by the application
+        /// or by features within MassTransit, such as when a message is moved to an error queue.
+        /// </summary>
+        ContextHeaders Headers { get; }
     }
 }

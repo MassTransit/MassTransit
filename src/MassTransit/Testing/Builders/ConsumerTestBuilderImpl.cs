@@ -20,16 +20,16 @@ namespace MassTransit.Testing.Builders
 	public class ConsumerTestBuilderImpl<TScenario, TConsumer> :
 		ConsumerTestBuilder<TScenario, TConsumer>
 		where TConsumer : class, IConsumer
-	    where TScenario : TestScenario
+	    where TScenario : IBusEndpointTestScenario
 	{
-		readonly IList<TestAction<TScenario>> _actions;
+		readonly IList<ITestAction<TScenario>> _actions;
 		readonly TScenario _scenario;
 		IConsumerFactory<TConsumer> _consumerFactory;
 		public ConsumerTestBuilderImpl(TScenario scenario)
 		{
 			_scenario = scenario;
 
-			_actions = new List<TestAction<TScenario>>();
+			_actions = new List<ITestAction<TScenario>>();
 		}
 
 		public ConsumerTest<TScenario, TConsumer> Build()
@@ -44,7 +44,7 @@ namespace MassTransit.Testing.Builders
 			_consumerFactory = consumerFactory;
 		}
 
-		public void AddTestAction(TestAction<TScenario> testAction)
+		public void AddTestAction(ITestAction<TScenario> testAction)
 		{
 			_actions.Add(testAction);
 		}

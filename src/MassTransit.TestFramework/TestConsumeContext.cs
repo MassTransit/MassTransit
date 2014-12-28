@@ -28,7 +28,7 @@ namespace MassTransit.TestFramework
     {
         PayloadCache _cache = new PayloadCache();
         CancellationToken _cancellationToken;
-        ContextHeaders _contextHeaders;
+        ContextHeaders _headers;
         Guid? _correlationId;
         Uri _destinationAddress;
         DateTime? _expirationTime;
@@ -112,9 +112,9 @@ namespace MassTransit.TestFramework
             get { return _faultAddress; }
         }
 
-        public ContextHeaders ContextHeaders
+        public ContextHeaders Headers
         {
-            get { return _contextHeaders; }
+            get { return _headers; }
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)

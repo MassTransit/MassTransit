@@ -13,19 +13,21 @@
 namespace MassTransit.Testing.TestActions
 {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Scenarios;
 
 
     public class PublishTestAction<TScenario, TMessage> :
-        TestAction<TScenario>
+        ITestAction<TScenario>
         where TMessage : class
-        where TScenario : TestScenario
+        where TScenario : ITestScenario
     {
-        readonly Func<TScenario, IBus> _busAccessor;
+        readonly Func<TScenario, IPublishEndpoint> _busAccessor;
         readonly Action<TScenario, PublishContext<TMessage>> _callback;
         readonly TMessage _message;
 
-        public PublishTestAction(Func<TScenario, IBus> busAccessor, TMessage message,
+        public PublishTestAction(Func<TScenario, IPublishEndpoint> busAccessor, TMessage message,
             Action<TScenario, PublishContext<TMessage>> callback)
         {
             _message = message;
@@ -33,11 +35,12 @@ namespace MassTransit.Testing.TestActions
             _callback = callback ?? DefaultCallback;
         }
 
-        public void Act(TScenario scenario)
+        public Task Act(TScenario scenario, CancellationToken cancellationToken)
         {
-            IBus bus = _busAccessor(scenario);
+            IPublishEndpoint publishEndpoint = _busAccessor(scenario);
 
-            bus.Publish(_message, Pipe.New<PublishContext<TMessage>>(x => x.Execute(context => _callback(scenario, context))));
+            return publishEndpoint.Publish(_message,
+                Pipe.New<PublishContext<TMessage>>(x => x.Execute(context => _callback(scenario, context))), cancellationToken);
         }
 
         static void DefaultCallback(TScenario scenario, PublishContext<TMessage> context)

@@ -18,19 +18,19 @@ namespace MassTransit.Testing
 
 	public static class PublishTestActionExtensions
 	{
-		public static void Publish<TMessage>(this TestInstanceConfigurator<BusTestScenario> configurator, TMessage message)
+		public static void Publish<TMessage>(this ITestInstanceConfigurator<IBusTestScenario> configurator, TMessage message)
 			where TMessage : class
 		{
-			var actionConfigurator = new PublishTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus, message);
+			var actionConfigurator = new PublishTestActionConfigurator<IBusTestScenario, TMessage>(x => x.Bus, message);
 
 			configurator.AddActionConfigurator(actionConfigurator);
 		}
 
-		public static void Publish<TMessage>(this TestInstanceConfigurator<BusTestScenario> configurator, TMessage message,
-		                                     Action<BusTestScenario, PublishContext<TMessage>> callback)
+		public static void Publish<TMessage>(this ITestInstanceConfigurator<IBusTestScenario> configurator, TMessage message,
+		                                     Action<IBusTestScenario, PublishContext<TMessage>> callback)
 			where TMessage : class
 		{
-			var actionConfigurator = new PublishTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus, message,
+			var actionConfigurator = new PublishTestActionConfigurator<IBusTestScenario, TMessage>(x => x.Bus, message,
 				callback);
 
 			configurator.AddActionConfigurator(actionConfigurator);

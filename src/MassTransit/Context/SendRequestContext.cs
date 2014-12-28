@@ -18,7 +18,6 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using Serialization;
-    using Transports;
     using Util;
 
 

@@ -22,13 +22,13 @@ namespace MassTransit.Testing.Instances
         TestInstance<TScenario>,
         HandlerTest<TScenario, TMessage>
         where TMessage : class
-        where TScenario : TestScenario
+        where TScenario : ITestScenario
     {
         readonly HandlerTestSubjectImpl<TScenario, TMessage> _subject;
 
         bool _disposed;
 
-        public HandlerTestInstance(TScenario scenario, IList<TestAction<TScenario>> actions, MessageHandler<TMessage> handler)
+        public HandlerTestInstance(TScenario scenario, IList<ITestAction<TScenario>> actions, MessageHandler<TMessage> handler)
             : base(scenario, actions)
         {
             _subject = new HandlerTestSubjectImpl<TScenario, TMessage>(handler);

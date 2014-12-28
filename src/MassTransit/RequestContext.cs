@@ -16,6 +16,19 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
 
+
+    /// <summary>
+    /// Sending of a request, allowing specification of response handlers, etc.
+    /// </summary>
+    /// <typeparam name="TRequest"></typeparam>
+    public interface RequestContext<out TRequest> :
+        SendContext<TRequest>,
+        RequestContext
+        where TRequest : class
+    {
+    }
+
+
     /// <summary>
     /// Allows the request to be configured, specifying handlers, synchronization context,
     /// and timeout values
@@ -67,17 +80,5 @@ namespace MassTransit
         /// <returns>The response task</returns>
         Task<T> Handle<T>()
             where T : class;
-    }
-
-
-    /// <summary>
-    /// Sending of a request, allowing specification of response handlers, etc.
-    /// </summary>
-    /// <typeparam name="TRequest"></typeparam>
-    public interface RequestContext<out TRequest> :
-        SendContext<TRequest>,
-        RequestContext
-        where TRequest : class
-    {
     }
 }

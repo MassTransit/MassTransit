@@ -19,32 +19,40 @@ namespace MassTransit.Testing
 
     public static class SendTestActionExtensions
     {
-        public static void Send<TMessage>(this TestInstanceConfigurator<BusTestScenario> configurator, TMessage message)
+        public static void Send<TMessage>(this ITestInstanceConfigurator<IBusTestScenario> configurator, TMessage message)
             where TMessage : class
         {
             var actionConfigurator =
-                new SendTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus.GetSendEndpoint(x.Bus.Address).Result, message);
+                new SendTestActionConfigurator<IBusTestScenario, TMessage>(x => x.Bus.GetSendEndpoint(x.Bus.Address).Result, message);
 
             configurator.AddActionConfigurator(actionConfigurator);
         }
 
-        public static void Send<TMessage>(this TestInstanceConfigurator<BusTestScenario> configurator, TMessage message,
-            Action<BusTestScenario, SendContext<TMessage>> callback)
+        public static void Send<TMessage>(this ITestInstanceConfigurator<IBusTestScenario> configurator, TMessage message,
+            Action<IBusTestScenario, SendContext<TMessage>> callback)
             where TMessage : class
         {
             var actionConfigurator =
-                new SendTestActionConfigurator<BusTestScenario, TMessage>(x => x.Bus.GetSendEndpoint(x.Bus.Address).Result, message,
+                new SendTestActionConfigurator<IBusTestScenario, TMessage>(x => x.Bus.GetSendEndpoint(x.Bus.Address).Result, message,
                     callback);
 
             configurator.AddActionConfigurator(actionConfigurator);
         }
 
-        public static void Send<TMessage>(this TestInstanceConfigurator<LocalRemoteTestScenario> configurator, TMessage message)
+        public static void Send<TMessage>(this ITestInstanceConfigurator<IBusEndpointTestScenario> configurator, TMessage message)
             where TMessage : class
         {
-            var actionConfigurator =
-                new SendTestActionConfigurator<LocalRemoteTestScenario, TMessage>(
-                    x => x.InputBus.GetSendEndpoint(new Uri("loopback://localhost/input_queue")).Result, message);
+            var actionConfigurator = new SendTestActionConfigurator<IBusEndpointTestScenario, TMessage>(x => x.SubjectSendEndpoint, message);
+
+            configurator.AddActionConfigurator(actionConfigurator);
+        }
+
+        public static void Send<TMessage>(this ITestInstanceConfigurator<IBusEndpointTestScenario> configurator, TMessage message,
+            Action<IBusEndpointTestScenario, SendContext<TMessage>> callback)
+            where TMessage : class
+        {
+            var actionConfigurator = new SendTestActionConfigurator<IBusEndpointTestScenario, TMessage>(x => x.SubjectSendEndpoint, message,
+                callback);
 
             configurator.AddActionConfigurator(actionConfigurator);
         }

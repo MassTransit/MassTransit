@@ -49,19 +49,6 @@ namespace MassTransit.Serialization
         public int RetryCount { get; set; }
         public string SourceAddress { get; set; }
 
-		/// <summary>
-		/// Creates a new envelope using the passed send context.
-		/// </summary>
-		/// <typeparam name="T">The type of message</typeparam>
-		/// <param name="context">Context to write to the envelope</param>
-		/// <returns>The constructed envelope</returns>
-        public static Envelope Create<T>(ISendContext<T> context)
-            where T : class
-        {
-            var envelope = new Envelope(context.Message, context.Message.GetType().GetMessageTypes());
-            envelope.SetUsingContext(context);
 
-            return envelope;
-        }
     }
 }

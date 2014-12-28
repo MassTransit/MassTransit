@@ -157,9 +157,9 @@ namespace MassTransit.Context
             get { return _context.FaultAddress; }
         }
 
-        public ContextHeaders ContextHeaders
+        public ContextHeaders Headers
         {
-            get { return _context.ContextHeaders; }
+            get { return _context.Headers; }
         }
 
         public SagaConsumeContext<TSaga, T> PopContext<T>()

@@ -12,60 +12,44 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Subjects
 {
-    using Scenarios;
     using TestDecorators;
 
 
     public class ConsumerTestSubjectImpl<TScenario, TSubject> :
         ConsumerTestSubject<TSubject>
         where TSubject : class, IConsumer
-        where TScenario : TestScenario
+        where TScenario : IBusEndpointTestScenario
     {
         readonly IConsumerFactory<TSubject> _consumerFactory;
-        readonly ReceivedMessageListImpl _received;
-        bool _disposed;
-        ConnectHandle _unsubscribe;
+        readonly ReceivedMessageList _received;
+        ConnectHandle _consumerHandler;
 
-        public ConsumerTestSubjectImpl(IConsumerFactory<TSubject> consumerFactory)
+        public ConsumerTestSubjectImpl(TScenario scenario, IConsumerFactory<TSubject> consumerFactory)
         {
             _consumerFactory = consumerFactory;
 
-            _received = new ReceivedMessageListImpl();
+            _received = new ReceivedMessageList(scenario.Timeout);
         }
 
-        public ReceivedMessageList Received
+        public IReceivedMessageList Received
         {
             get { return _received; }
         }
 
         public void Dispose()
         {
-            Dispose(true);
+            if (_consumerHandler != null)
+            {
+                _consumerHandler.Dispose();
+                _consumerHandler = null;
+            }
         }
 
         public void Prepare(TScenario scenario)
         {
-            var decoratedConsumerFactory = new ConsumerFactoryTestDecorator<TSubject>(_consumerFactory, _received);
+            var decoratedConsumerFactory = new TestConsumerFactoryDecorator<TSubject>(_consumerFactory, _received);
 
-            _unsubscribe = scenario.InputBus.ConnectConsumer(decoratedConsumerFactory);
-        }
-
-        void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
-            if (disposing)
-            {
-                if (_unsubscribe != null)
-                {
-                    _unsubscribe.Dispose();
-                    _unsubscribe = null;
-                }
-
-                _received.Dispose();
-            }
-
-            _disposed = true;
+            _consumerHandler = scenario.Bus.ConnectConsumer(decoratedConsumerFactory);
         }
     }
 }

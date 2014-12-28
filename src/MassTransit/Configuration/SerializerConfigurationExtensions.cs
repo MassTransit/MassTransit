@@ -93,7 +93,7 @@ namespace MassTransit
         public static void SupportBinaryMessageDeserializer(this IServiceBusFactoryConfigurator configurator)
         {
             configurator.AddServiceBusFactoryBuilderConfigurator(new SupportMessageDeserializerServiceBusFactoryBuilderConfigurator(
-                BinaryMessageSerializer.BinaryContentType, (s, p) => new BinaryMessageSerializer()));
+                BinaryMessageSerializer.BinaryContentType, (s, p) => new BinaryMessageDeserializer(JsonMessageSerializer.Serializer, s, p)));
         }
     }
 }

@@ -20,7 +20,7 @@ namespace MassTransit.Tests.Testing
     [Explicit]
     public class When_a_consumer_is_being_tested
 	{
-		ConsumerTest<BusTestScenario, Testsumer> _test;
+		ConsumerTest<IBusTestScenario, Testsumer> _test;
 
 		[SetUp]
 		public void A_consumer_is_being_tested()
@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Testing
 			_test = TestFactory.ForConsumer<Testsumer>()
 				.New(x =>
 					{
-						x.ConstructUsing(() => new Testsumer());
+						x.UseConsumerFactory(() => new Testsumer());
 
 						x.Send(new A());
 					});
@@ -59,13 +59,13 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_receive_the_message_type_a()
 		{
-			_test.Received.Any<A>().ShouldBe(true);
+			_test.Received.Select<A>().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_called_the_consumer_method()
 		{
-			_test.Consumer.Received.Any<A>().ShouldBe(true);
+			_test.Consumer.Received.Select<A>().ShouldBe(true);
 		}
 
 		class Testsumer :
@@ -89,7 +89,7 @@ namespace MassTransit.Tests.Testing
 	[Explicit]
 	public class When_a_context_consumer_is_being_tested
 	{
-		ConsumerTest<BusTestScenario, Testsumer> _test;
+		ConsumerTest<IBusTestScenario, Testsumer> _test;
 
 		[SetUp]
 		public void A_consumer_is_being_tested()
@@ -97,7 +97,7 @@ namespace MassTransit.Tests.Testing
 			_test = TestFactory.ForConsumer<Testsumer>()
 				.New(x =>
 					{
-						x.ConstructUsing(() => new Testsumer());
+						x.UseConsumerFactory(() => new Testsumer());
 
 						//x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
 					});
@@ -128,13 +128,13 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_receive_the_message_type_a()
 		{
-			_test.Received.Any<A>().ShouldBe(true);
+			_test.Received.Select<A>().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_called_the_consumer_method()
 		{
-			_test.Consumer.Received.Any<A>().ShouldBe(true);
+			_test.Consumer.Received.Select<A>().ShouldBe(true);
 		}
 
 		class Testsumer :

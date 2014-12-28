@@ -17,8 +17,8 @@ namespace MassTransit.Testing.Builders
 
 	public interface TestInstanceBuilder<TScenario> :
 		TestBuilder
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
-		void AddTestAction(TestAction<TScenario> testAction);
+		void AddTestAction(ITestAction<TScenario> testAction);
 	}
 }

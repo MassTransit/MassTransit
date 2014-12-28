@@ -112,16 +112,16 @@ namespace MassTransit.Courier.Tests
 //        [Test]
 //        public void Should_send_the_completed_event()
 //        {
-//            Assert.IsTrue(_test.Sent.Any<RoutingSlipCompleted>());
+//            Assert.IsTrue(_test.Sent.Select<RoutingSlipCompleted>());
 //        }
 //
 //        [Test]
 //        public void Should_not_publish_the_completed_event()
 //        {
-//            Assert.IsFalse(_test.Published.Any<RoutingSlipCompleted>());
+//            Assert.IsFalse(_test.Published.Select<RoutingSlipCompleted>());
 //        }
 //
-//        ConsumerTest<BusTestScenario, ExecuteActivityHost<TestActivity, TestArguments>> _test;
+//        ConsumerTest<IBusTestScenario, ExecuteActivityHost<TestActivity, TestArguments>> _test;
 //
 //        [TestFixtureSetUp]
 //        public void Setup()
@@ -130,7 +130,7 @@ namespace MassTransit.Courier.Tests
 //                .InSingleBusScenario()
 //                .New(x =>
 //                {
-//                    x.ConstructUsing(() =>
+//                    x.UseConsumerFactory(() =>
 //                    {
 //                        var compensateAddress = new Uri("loopback://localhost/mt_server");
 //

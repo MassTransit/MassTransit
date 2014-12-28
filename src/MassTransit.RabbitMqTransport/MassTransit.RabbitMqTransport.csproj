@@ -150,7 +150,7 @@
     <Compile Include="SharedConnectionContext.cs" />
     <Compile Include="SharedModelContext.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
-    <Compile Include="Testing\RabbitMqBusScenarioBuilder.cs" />
+    <Compile Include="Testing\RabbitMqBusTestScenarioBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">

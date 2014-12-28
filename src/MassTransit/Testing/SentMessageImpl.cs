@@ -18,15 +18,15 @@ namespace MassTransit.Testing
 		SentMessage<T>
 		where T : class
 	{
-		readonly ISendContext<T> _context;
+		readonly SendContext<T> _context;
 		Exception _exception;
 
-		public SentMessageImpl(ISendContext<T> context)
+		public SentMessageImpl(SendContext<T> context)
 		{
 			_context = context;
 		}
 
-		public ISendContext<T> Context
+		public SendContext<T> Context
 		{
 			get { return _context; }
 		}
@@ -41,7 +41,7 @@ namespace MassTransit.Testing
 			get { return typeof (T); }
 		}
 
-		ISendContext SentMessage.Context
+		SendContext SentMessage.Context
 		{
 			get { return Context; }
 		}

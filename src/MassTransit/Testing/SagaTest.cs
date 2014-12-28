@@ -26,7 +26,7 @@ namespace MassTransit.Testing
 	public interface SagaTest<TScenario, TConsumer> :
 		SagaTest<TConsumer>
 		where TConsumer : class, ISaga
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
 		TScenario Scenario { get; }
 	}

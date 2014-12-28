@@ -20,33 +20,33 @@ namespace MassTransit.Testing
 
     public static class ScenarioExtensions
     {
-        public static HandlerTestFactoryImpl<BusTestScenario, TMessage> InSingleBusScenario<TScenario, TMessage>(
+        public static HandlerTestFactoryImpl<IBusTestScenario, TMessage> InSingleBusScenario<TScenario, TMessage>(
             this HandlerTestFactory<TScenario, TMessage> factory)
-            where TScenario : TestScenario
+            where TScenario : ITestScenario
             where TMessage : class
         {
-            return new HandlerTestFactoryImpl<BusTestScenario, TMessage>(LoopbackBus);
+            return new HandlerTestFactoryImpl<IBusTestScenario, TMessage>(LoopbackBus);
         }
 
-        public static ConsumerTestFactoryImpl<BusTestScenario, TConsumer> InSingleBusScenario<TScenario, TConsumer>(
+        public static ConsumerTestFactoryImpl<IBusEndpointTestScenario, TConsumer> InSingleBusScenario<TScenario, TConsumer>(
             this ConsumerTestFactory<TScenario, TConsumer> factory)
-            where TScenario : TestScenario
+            where TScenario : IBusEndpointTestScenario
             where TConsumer : class, IConsumer
         {
-            return new ConsumerTestFactoryImpl<BusTestScenario, TConsumer>(LoopbackBus);
+            return new ConsumerTestFactoryImpl<IBusEndpointTestScenario, TConsumer>(LoopbackBus);
         }
 
-        public static SagaTestFactoryImpl<BusTestScenario, TSaga> InSingleBusScenario<TScenario, TSaga>(
+        public static SagaTestFactoryImpl<IBusTestScenario, TSaga> InSingleBusScenario<TScenario, TSaga>(
             this SagaTestFactory<TScenario, TSaga> factory)
-            where TScenario : TestScenario
+            where TScenario : ITestScenario
             where TSaga : class, ISaga
         {
-            return new SagaTestFactoryImpl<BusTestScenario, TSaga>(LoopbackBus);
+            return new SagaTestFactoryImpl<IBusTestScenario, TSaga>(LoopbackBus);
         }
 
-        static BusScenarioBuilderImpl LoopbackBus()
+        static BusEndpointTestScenarioBuilder LoopbackBus()
         {
-            return new BusScenarioBuilderImpl();
+            return new BusEndpointTestScenarioBuilder();
         }
     }
 }

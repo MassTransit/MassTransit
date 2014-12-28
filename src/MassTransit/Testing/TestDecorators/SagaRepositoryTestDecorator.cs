@@ -22,13 +22,13 @@ namespace MassTransit.Testing.TestDecorators
 		ISagaRepository<TSaga>
 		where TSaga : class, ISaga
 	{
-		readonly ReceivedMessageListImpl _received;
+		readonly ReceivedMessageList _received;
 		readonly ISagaRepository<TSaga> _sagaRepository;
 		readonly SagaListImpl<TSaga> _sagas;
 		SagaListImpl<TSaga> _created;
 
 		public SagaRepositoryTestDecorator(ISagaRepository<TSaga> sagaRepository,
-		                                   ReceivedMessageListImpl received, SagaListImpl<TSaga> created,
+		                                   ReceivedMessageList received, SagaListImpl<TSaga> created,
 		                                   SagaListImpl<TSaga> sagas)
 		{
 			_sagaRepository = sagaRepository;
@@ -60,7 +60,7 @@ namespace MassTransit.Testing.TestDecorators
 //
 //				yield return message =>
 //					{
-//						var received = new ReceivedMessageImpl<TMessage>(message);
+//						var received = new ObservedReceivedMessage<TMessage>(message);
 //
 //						try
 //						{
@@ -86,20 +86,6 @@ namespace MassTransit.Testing.TestDecorators
 	    public Task<IEnumerable<Guid>> Find(ISagaFilter<TSaga> filter)
 		{
 			return _sagaRepository.Find(filter);
-		}
-
-		IEnumerable<Action<IConsumeContext<TMessage>>> DecorateSelector<TMessage>(TSaga instance,
-		                                                                          IEnumerable
-		                                                                          	<Action<IConsumeContext<TMessage>>>
-		                                                                          	selector)
-			where TMessage : class
-		{
-			foreach (var result in selector)
-			{
-				yield return result;
-
-				_sagas.Add(instance);
-			}
 		}
 	}
 }

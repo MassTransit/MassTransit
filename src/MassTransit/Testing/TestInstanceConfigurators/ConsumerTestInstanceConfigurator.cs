@@ -18,9 +18,9 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 	using Scenarios;
 
 	public interface ConsumerTestInstanceConfigurator<TScenario, TConsumer> :
-		TestInstanceConfigurator<TScenario>
+		ITestInstanceConfigurator<TScenario>
 		where TConsumer : class
-		where TScenario : TestScenario
+		where TScenario : IBusEndpointTestScenario
 	{
 		void UseBuilder(Func<TScenario, ConsumerTestBuilder<TScenario, TConsumer>> builderFactory);
 		void AddConfigurator(ConsumerTestBuilderConfigurator<TScenario, TConsumer> configurator);

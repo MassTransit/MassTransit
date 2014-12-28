@@ -22,7 +22,7 @@ namespace MassTransit.Saga.Pipeline.Filters
 
 
     /// <summary>
-    /// Delivers a message through the saga repository to the saga instance
+    ///     Delivers a message through the saga repository to the saga instance
     /// </summary>
     /// <typeparam name="TSaga">The saga type</typeparam>
     /// <typeparam name="TMessage">The message type</typeparam>
@@ -49,7 +49,8 @@ namespace MassTransit.Saga.Pipeline.Filters
 
                 foreach (Guid sagaId in sagaIds)
                 {
-                    var consumeContext = new ConsumeContextProxy<TMessage>(context);
+                    // create a nested scope for each saga instance
+                    var consumeContext = new ConsumeContextScope<TMessage>(context);
 
                     SagaContext<TSaga, TMessage> sagaContext = new SagaContextImpl<TSaga, TMessage>(sagaId, _policy);
 

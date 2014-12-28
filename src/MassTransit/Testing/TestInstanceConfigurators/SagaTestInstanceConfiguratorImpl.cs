@@ -26,14 +26,14 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 		TestInstanceConfiguratorImpl<TScenario>,
 		SagaTestInstanceConfigurator<TScenario, TSaga>
 		where TSaga : class, ISaga
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
 		readonly IList<SagaTestBuilderConfigurator<TScenario, TSaga>> _configurators;
 
 		Func<TScenario, SagaTestBuilder<TScenario, TSaga>> _builderFactory;
 		ISagaRepository<TSaga> _sagaRepository;
 
-		public SagaTestInstanceConfiguratorImpl(Func<ScenarioBuilder<TScenario>> scenarioBuilderFactory)
+		public SagaTestInstanceConfiguratorImpl(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
 			: base(scenarioBuilderFactory)
 		{
 			_configurators = new List<SagaTestBuilderConfigurator<TScenario, TSaga>>();

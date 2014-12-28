@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport
             get { return new EndpointAddress(_address.Uri); }
         }
 
-        public void Send(ISendContext context)
+        public void Send(SendContext context)
         {
             AddProducerBinding();
 

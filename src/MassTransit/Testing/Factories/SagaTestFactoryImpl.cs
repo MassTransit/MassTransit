@@ -21,11 +21,11 @@ namespace MassTransit.Testing.Factories
 	public class SagaTestFactoryImpl<TScenario, TSaga> :
 		SagaTestFactory<TScenario, TSaga>
 		where TSaga : class, ISaga
-		where TScenario : TestScenario
+		where TScenario : ITestScenario
 	{
-		readonly Func<ScenarioBuilder<TScenario>> _scenarioBuilderFactory;
+		readonly Func<ITestScenarioBuilder<TScenario>> _scenarioBuilderFactory;
 
-		public SagaTestFactoryImpl(Func<ScenarioBuilder<TScenario>> scenarioBuilderFactory)
+		public SagaTestFactoryImpl(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
 		{
 			_scenarioBuilderFactory = scenarioBuilderFactory;
 		}
