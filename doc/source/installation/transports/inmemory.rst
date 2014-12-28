@@ -1,13 +1,14 @@
 Loopback
 ========
 
-.. note::
+.. warn::
 
-    The loopback transport is great for testing. Not so much for production.
-    
+    This is an In Memory transport. If the process crashes you WILL lose unprocessed
+    messages.
+
 .. sourcecode:: csharp
 
-  ServiceBusFactory.New(sbc => 
+  ServiceBusFactory.New(sbc =>
   {
       //loopback is configured by default
   });
