@@ -5,3 +5,4 @@ Using MassTransit
 
     transactions.rst
     exceptions.rst
+    retry.rst
