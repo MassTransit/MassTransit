@@ -4,6 +4,7 @@ Correlation
 Correlating messages is a powerful pattern that can allow you to see how
 messages relate to each other. It is a single identifier running through several
 messages marking them as a group.
+
 In MassTransit we can mark a message as correlated by implementing the interface
 
 .. sourcecode:: csharp
