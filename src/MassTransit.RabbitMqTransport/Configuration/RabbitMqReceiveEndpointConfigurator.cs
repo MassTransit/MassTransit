@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Builders;
     using EndpointConfigurators;
     using MassTransit.Builders;
     using MassTransit.Configurators;
@@ -132,12 +133,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             IRetryPolicy retryPolicy = Retry.Exponential(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
 
-            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings,
-                _host.Settings.GetInputAddress(_settings), Retry.None);
-
             var consumePipe = new ConsumePipe(_pipeConfigurator);
 
-            IReceiveEndpointBuilder builder = new ReceiveEndpointBuilder(consumePipe);
+            var builder = new RabbitMqReceiveEndpointBuilder(consumePipe, new RabbitMqMessageNameFormatter());
 
             foreach (IReceiveEndpointBuilderConfigurator builderConfigurator in _configurators)
                 builderConfigurator.Configure(builder);
@@ -145,6 +143,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _receivePipeConfigurator.Filter(new DeserializeFilter(deserializer, consumePipe));
 
             IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
+
+            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings,
+                _host.Settings.GetInputAddress(_settings), Retry.None, builder.GetExchangeBindings().ToArray());
 
             return new ReceiveEndpoint(transport, receivePipe, consumePipe);
         }
