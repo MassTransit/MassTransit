@@ -135,7 +135,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             var consumePipe = new ConsumePipe(_pipeConfigurator);
 
-            var builder = new RabbitMqReceiveEndpointBuilder(consumePipe, new RabbitMqMessageNameFormatter());
+            var builder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
 
             foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
                 builderConfigurator.Configure(builder);

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,9 @@ namespace MassTransit.RabbitMqTransport
     using System.Globalization;
     using System.Text.RegularExpressions;
     using Configuration;
+    using Pipeline;
     using RabbitMQ.Client;
+    using Transports;
     using Util;
 
 
@@ -42,6 +44,23 @@ namespace MassTransit.RabbitMqTransport
             return builder.Uri;
         }
 
+        public static Uri GetSendAddress(this RabbitMqHostSettings hostSettings, SendSettings sendSettings)
+        {
+            var builder = new UriBuilder
+            {
+                Scheme = "rabbitmq",
+                Host = hostSettings.Host,
+                Port = hostSettings.Port,
+                Path = hostSettings.VirtualHost != "/"
+                    ? string.Join("/", hostSettings.VirtualHost, sendSettings.ExchangeName)
+                    : sendSettings.ExchangeName
+            };
+
+            builder.Query += string.Join("&", GetQueryStringOptions(sendSettings));
+
+            return builder.Uri;
+        }
+
         static IEnumerable<string> GetQueryStringOptions(ReceiveSettings settings)
         {
             if (!settings.Durable)
@@ -52,6 +71,14 @@ namespace MassTransit.RabbitMqTransport
                 yield return "exclusive=true";
             if (settings.PrefetchCount != 0)
                 yield return "prefetch=" + settings.PrefetchCount;
+        }
+
+        static IEnumerable<string> GetQueryStringOptions(SendSettings settings)
+        {
+            if (!settings.Durable)
+                yield return "durable=false";
+            if (settings.AutoDelete)
+                yield return "autodelete=true";
         }
 
         public static ReceiveSettings GetReceiveSettings(this Uri address)
@@ -135,6 +162,11 @@ namespace MassTransit.RabbitMqTransport
             return settings;
         }
 
+        /// <summary>
+        /// Return the send settings for the address
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
         public static SendSettings GetSendSettings(this Uri address)
         {
             if (string.Compare("rabbitmq", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
@@ -155,6 +187,20 @@ namespace MassTransit.RabbitMqTransport
 
             bool durable = address.Query.GetValueFromQueryString("durable", !isTemporary);
             bool autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
+
+            SendSettings settings = new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
+
+            return settings;
+        }
+
+        public static SendSettings GetSendSettings(this RabbitMqHost host, Type messageType, IMessageNameFormatter messageNameFormatter)
+        {
+            bool isTemporary = messageType.IsTemporaryMessageType();
+
+            bool durable = !isTemporary;
+            bool autoDelete = isTemporary;
+
+            string name = messageNameFormatter.GetMessageName(messageType).ToString();
 
             SendSettings settings = new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
 
@@ -233,7 +279,7 @@ namespace MassTransit.RabbitMqTransport
 
         static void VerifyQueueOrExchangeNameIsLegal(string queueName)
         {
-            var success = IsValidQueueName(queueName);
+            bool success = IsValidQueueName(queueName);
             if (!success)
             {
                 throw new RabbitMqAddressException(
@@ -244,7 +290,7 @@ namespace MassTransit.RabbitMqTransport
         public static bool IsValidQueueName(string queueName)
         {
             Match match = _regex.Match(queueName);
-            var success = match.Success;
+            bool success = match.Success;
             return success;
         }
 

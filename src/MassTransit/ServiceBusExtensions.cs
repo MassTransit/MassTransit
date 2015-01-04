@@ -13,8 +13,7 @@
 namespace MassTransit
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
+
 
     /// <summary>
     /// Extension methods pertinent to service bus logic, but on
@@ -60,62 +59,6 @@ namespace MassTransit
             }
 
             return String.Format("{0}{1}", messageName, assembly);
-        }
-
-        /// <summary>
-        /// Returns true if the specified type is an allowed message type, i.e.
-        /// that it doesn't come from the .Net core assemblies or is without a namespace,
-        /// amongst others.
-        /// </summary>
-        /// <param name="type">The type to inspect</param>
-        /// <returns>True if the message can be sent, otherwise false</returns>
-        public static bool IsAllowedMessageType(this Type type)
-        {
-            if (type.Namespace == null)
-                return false;
-
-            if (type.Assembly == typeof(object).Assembly)
-                return false;
-
-            if (type.Namespace == "System")
-                return false;
-
-            if (type.Namespace.StartsWith("System."))
-                return false;
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(CorrelatedBy<>))
-                return false;
-
-            return true;
-        }
-
-        /// <summary>
-        /// Returns all the message types that are available for the specified type. This will
-        /// return any base classes or interfaces implemented by the type that are allowed
-        /// message types.
-        /// </summary>
-        /// <param name="type">The type to inspect</param>
-        /// <returns>An enumeration of valid message types implemented by the specified type</returns>
-        public static IEnumerable<Type> GetMessageTypes(this Type type)
-        {
-            yield return type;
-
-            Type baseType = type.BaseType;
-            while ((baseType != null) && baseType.IsAllowedMessageType())
-            {
-                yield return baseType;
-
-                baseType = baseType.BaseType;
-            }
-
-            IEnumerable<Type> interfaces = type
-                .GetInterfaces()
-                .Where(IsAllowedMessageType);
-
-            foreach (Type interfaceType in interfaces)
-            {
-                yield return interfaceType;
-            }
         }
     }
 }

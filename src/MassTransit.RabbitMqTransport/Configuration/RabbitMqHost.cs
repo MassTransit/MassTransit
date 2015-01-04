@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,12 +13,14 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using Policies;
+    using Transports;
 
 
     public class RabbitMqHost
     {
         readonly RabbitMqConnectionCache _connectionCache;
         readonly RabbitMqHostSettings _hostSettings;
+        readonly IMessageNameFormatter _messageNameFormatter;
         readonly RabbitMqConnectionCache _sendConnectionCache;
 
         public RabbitMqHost(RabbitMqHostSettings hostSettings)
@@ -29,6 +31,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             _connectionCache = new RabbitMqConnectionCache(connector);
             _sendConnectionCache = new RabbitMqConnectionCache(connector);
+            _messageNameFormatter = new RabbitMqMessageNameFormatter();
+        }
+
+        public IMessageNameFormatter MessageNameFormatter
+        {
+            get { return _messageNameFormatter; }
         }
 
         public IConnectionCache SendConnectionCache

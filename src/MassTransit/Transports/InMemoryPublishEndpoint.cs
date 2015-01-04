@@ -42,14 +42,14 @@ namespace MassTransit.Transports
             CancellationToken cancellationToken)
         {
             foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send(message, new PublishPipe<T>(publishPipe), cancellationToken);
+                await endpoint.Send(message, new PublishPipeContextAdapter<T>(publishPipe), cancellationToken);
         }
 
         async Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe,
             CancellationToken cancellationToken)
         {
             foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send(message, new PublishPipe(publishPipe), cancellationToken);
+                await endpoint.Send(message, new PublishPipeContextAdapter(publishPipe), cancellationToken);
         }
 
         async Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
@@ -62,7 +62,7 @@ namespace MassTransit.Transports
             CancellationToken cancellationToken)
         {
             foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send(message, new PublishPipe(publishPipe), cancellationToken);
+                await endpoint.Send(message, new PublishPipeContextAdapter(publishPipe), cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
@@ -86,14 +86,14 @@ namespace MassTransit.Transports
             CancellationToken cancellationToken)
         {
             foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send<T>(values, new PublishPipe<T>(publishPipe), cancellationToken);
+                await endpoint.Send<T>(values, new PublishPipeContextAdapter<T>(publishPipe), cancellationToken);
         }
 
         async Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe,
             CancellationToken cancellationToken)
         {
             foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send<T>(values, new PublishPipe(publishPipe), cancellationToken);
+                await endpoint.Send<T>(values, new PublishPipeContextAdapter(publishPipe), cancellationToken);
         }
 
         async Task<IEnumerable<ISendEndpoint>> GetEndpoints()
@@ -103,54 +103,6 @@ namespace MassTransit.Transports
                 endpoints.Add(await _sendEndpointProvider.GetSendEndpoint(transport));
 
             return endpoints;
-        }
-
-
-        class PublishPipe :
-            IPipe<SendContext>
-        {
-            readonly IPipe<PublishContext> _pipe;
-
-            public PublishPipe(IPipe<PublishContext> pipe)
-            {
-                _pipe = pipe;
-            }
-
-            public Task Send(SendContext context)
-            {
-                var publishContext = new PublishContextProxy(context);
-
-                return _pipe.Send(publishContext);
-            }
-
-            public bool Visit(IPipeVisitor visitor)
-            {
-                return visitor.Visit(this, x => _pipe.Visit(x));
-            }
-        }
-
-        class PublishPipe<T> :
-            IPipe<SendContext<T>>
-            where T : class
-        {
-            readonly IPipe<PublishContext<T>> _pipe;
-
-            public PublishPipe(IPipe<PublishContext<T>> pipe)
-            {
-                _pipe = pipe;
-            }
-
-            public Task Send(SendContext<T> context)
-            {
-                var publishContext = new PublishContextProxy<T>(context);
-
-                return _pipe.Send(publishContext);
-            }
-
-            public bool Visit(IPipeVisitor visitor)
-            {
-                return visitor.Visit(this, x => _pipe.Visit(x));
-            }
         }
     }
 }
