@@ -12,9 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration.Builders
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
     using EndpointConfigurators;
     using MassTransit.Pipeline;
     using Pipeline;
@@ -37,7 +35,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            _exchangeBindings.AddRange(GetExchangeBindingSettingses(typeof(T)));
+            _exchangeBindings.Add(typeof(T).GetExchangeBinding(_messageNameFormatter));
 
             return _consumePipe.ConnectConsumePipe(pipe);
         }
@@ -55,59 +53,6 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         public IEnumerable<ExchangeBindingSettings> GetExchangeBindings()
         {
             return _exchangeBindings;
-        }
-
-        IEnumerable<ExchangeBindingSettings> GetExchangeBindingSettingses(Type messageType)
-        {
-            bool temporary = IsTemporaryMessageType(messageType);
-
-            var exchange = new Exchange(_messageNameFormatter.GetMessageName(messageType).ToString(), !temporary, temporary);
-
-            var binding = new ExchangeBinding(exchange);
-
-            yield return binding;
-        }
-
-        static bool IsTemporaryMessageType(Type messageType)
-        {
-            return (!messageType.IsPublic && messageType.IsClass)
-                || (messageType.IsGenericType
-                    && messageType.GetGenericArguments().Any(IsTemporaryMessageType));
-        }
-
-
-        class Exchange :
-            ExchangeSettings
-        {
-            public Exchange(string exchangeName, bool durable, bool autoDelete)
-            {
-                ExchangeName = exchangeName;
-                Durable = durable;
-                AutoDelete = autoDelete;
-                ExchangeType = RabbitMQ.Client.ExchangeType.Fanout;
-            }
-
-            public string ExchangeName { get; private set; }
-            public string ExchangeType { get; set; }
-            public bool Durable { get; private set; }
-            public bool AutoDelete { get; private set; }
-            public IDictionary<string, object> Arguments { get; private set; }
-        }
-
-
-        class ExchangeBinding :
-            ExchangeBindingSettings
-        {
-            public ExchangeBinding(ExchangeSettings exchange, string routingKey = "")
-            {
-                RoutingKey = routingKey;
-                Exchange = exchange;
-                Arguments = new Dictionary<string, object>();
-            }
-
-            public ExchangeSettings Exchange { get; private set; }
-            public string RoutingKey { get; private set; }
-            public IDictionary<string, object> Arguments { get; private set; }
         }
     }
 }

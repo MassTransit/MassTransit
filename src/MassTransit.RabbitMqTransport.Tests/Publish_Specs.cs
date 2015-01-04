@@ -48,6 +48,31 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
+        [TestFixture]
+        public class WhenAMessageIsPublishedToTheEndpoint :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async void Should_be_received()
+            {
+                var message = new A {Id = Guid.NewGuid()};
+                await Bus.Publish(message);
+
+                ConsumeContext<A> received = await _receivedA;
+
+                Assert.AreEqual(message.Id, received.Message.Id);
+            }
+
+            Task<ConsumeContext<A>> _receivedA;
+
+            protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                base.ConfigureInputQueueEndpoint(configurator);
+
+                _receivedA = Handler<A>(configurator);
+            }
+        }
+
 
         class A
         {

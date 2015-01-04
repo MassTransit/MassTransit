@@ -42,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 x.Filter(new PrepareReceiveQueueFilter(_settings));
 
                 foreach (ExchangeBindingSettings binding in _exchangeBindings)
-                    x.Filter(new ExchangeBindingModelFilter(binding));
+                    x.Filter(new ReceiveExchangeBindingModelFilter(binding));
 
                 x.Filter(new RabbitMqConsumerFilter(_receivePipe));
             });

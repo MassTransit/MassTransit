@@ -82,9 +82,11 @@
     <Compile Include="Pipeline\PrepareSendExchangeFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />
     <Compile Include="Pipeline\RabbitMqConsumerMetrics.cs" />
+    <Compile Include="Pipeline\RabbitMqExchangeBindingExtensions.cs" />
+    <Compile Include="Pipeline\ReceiveExchangeBindingModelFilter.cs" />
     <Compile Include="Pipeline\ReceiveModelFilter.cs" />
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
-    <Compile Include="Pipeline\ExchangeBindingModelFilter.cs" />
+    <Compile Include="Pipeline\SendExchangeBindingModelFilter.cs" />
     <Compile Include="Pipeline\SubscriptionSettings.cs" />
     <Compile Include="Published.cs" />
     <Compile Include="PublishSettings.cs" />
@@ -118,7 +120,7 @@
     <Compile Include="Management\IRabbitMqEndpointManagement.cs" />
     <Compile Include="Management\RabbitMQEndpointManagement.cs" />
     <Compile Include="OutboundRabbitMqTransport.cs" />
-    <Compile Include="PublishEndpointInterceptor.cs" />
+    <Compile Include="RabbitMqPublishEndpoint.cs" />
     <Compile Include="RabbitMqBus.cs" />
     <Compile Include="RabbitMqConnection.cs" />
     <Compile Include="ConnectionContext.cs" />

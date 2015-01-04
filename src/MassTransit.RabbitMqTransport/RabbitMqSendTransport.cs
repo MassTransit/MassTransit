@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -30,15 +30,17 @@ namespace MassTransit.RabbitMqTransport
         ISendTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqSendTransport>();
+        readonly ExchangeBindingSettings[] _exchangeBindings;
 
         readonly IModelCache _modelCache;
         readonly Connectable<ISendObserver> _observers;
         readonly SendSettings _sendSettings;
 
-        public RabbitMqSendTransport(IModelCache modelCache, SendSettings sendSettings)
+        public RabbitMqSendTransport(IModelCache modelCache, SendSettings sendSettings, params ExchangeBindingSettings[] exchangeBindings)
         {
             _observers = new Connectable<ISendObserver>();
             _sendSettings = sendSettings;
+            _exchangeBindings = exchangeBindings;
             _modelCache = modelCache;
         }
 
@@ -66,6 +68,11 @@ namespace MassTransit.RabbitMqTransport
             IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
             {
                 p.Filter(new PrepareSendExchangeFilter(_sendSettings));
+
+                foreach (ExchangeBindingSettings binding in _exchangeBindings)
+                {
+                    p.Filter(new SendExchangeBindingModelFilter(binding));
+                }
 
                 p.ExecuteAsync(async modelContext =>
                 {

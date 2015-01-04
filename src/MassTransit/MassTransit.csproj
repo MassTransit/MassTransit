@@ -324,6 +324,7 @@
     <Compile Include="MessageContext.cs" />
     <Compile Include="MessageHandler.cs" />
     <Compile Include="MessageRequestClient.cs" />
+    <Compile Include="MessageTypeExtensions.cs" />
     <Compile Include="NewId\INewIdFormatter.cs" />
     <Compile Include="NewId\INewIdParser.cs" />
     <Compile Include="NewId\NewIdFormatters\Base32Formatter.cs" />
@@ -686,6 +687,7 @@
     <Compile Include="Transports\ISendTransport.cs" />
     <Compile Include="Transports\MessageName.cs" />
     <Compile Include="Transports\MessageTrackerFactory.cs" />
+    <Compile Include="Transports\PublishPipeContextAdapter.cs" />
     <Compile Include="Transports\ReceiveEndpoint.cs" />
     <Compile Include="Transports\ReceiveEndpointHandle.cs" />
     <Compile Include="Transports\ReceiveFaultTracker.cs" />
