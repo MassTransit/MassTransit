@@ -63,6 +63,7 @@
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RabbitMqHost.cs" />
     <Compile Include="Configuration\RabbitMqBusBuilder.cs" />
+    <Compile Include="Configuration\RabbitMqHostSettingsEqualityComparer.cs" />
     <Compile Include="Contexts\RabbitMqSendContextHeaders.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
     <Compile Include="Contexts\RabbitMqContextHeaderProvider.cs" />
