@@ -16,8 +16,8 @@ namespace MassTransit.EndpointConfigurators
 
 
     public interface IReceiveEndpointBuilder :
-        IConsumeFilterConnector,
-        IMessageObserverConnector
+        IConsumePipeConnector,
+        IConsumeMessageObserverConnector
     {
         IConsumePipe InputPipe { get; }
     }

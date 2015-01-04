@@ -27,7 +27,7 @@ namespace MassTransit.EndpointConfigurators
             yield break;
         }
 
-        public void Configure(IServiceBusBuilder builder)
+        public void Configure(IBusBuilder builder)
         {
             builder.SetMessageSerializer(() => new TSerializer());
         }

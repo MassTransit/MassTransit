@@ -10,26 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SubscriptionConfigurators
+namespace MassTransit.Pipeline
 {
-    using Policies;
-
-
-    /// <summary>
-    /// The base configuration interface for a subscription
-    /// </summary>
-    public interface SubscriptionConfigurator<out TInterface>
-        where TInterface : class
+    public interface IConsumePipeConnector
     {
-        TInterface Permanent();
-        TInterface Transient();
-        TInterface SetReferenceFactory(ReferenceFactory referenceFactory);
+        ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+            where T : class;
+    }
 
-        /// <summary>
-        /// Set a custom retry policy for this subscription
-        /// </summary>
-        /// <param name="retryPolicy"></param>
-        /// <returns></returns>
-        TInterface SetRetryPolicy(IRetryPolicy retryPolicy);
+
+    public interface IConsumePipeConnector<out T>
+        where T : class
+    {
+        ConnectHandle ConnectConsumePipe(IPipe<ConsumeContext<T>> pipe);
     }
 }

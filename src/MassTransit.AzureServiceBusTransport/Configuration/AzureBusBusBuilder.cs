@@ -21,14 +21,14 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using Transports;
 
 
-    public class AzureServiceBusServiceBusBuilder :
-        ServiceBusBuilderBase,
-        IServiceBusBuilder
+    public class AzureBusBusBuilder :
+        BusBuilder,
+        IBusBuilder
     {
         readonly ServiceBusHostSettings[] _hosts;
         readonly Uri _sourceAddress;
 
-        public AzureServiceBusServiceBusBuilder(IEnumerable<ServiceBusHostSettings> hosts)
+        public AzureBusBusBuilder(IEnumerable<ServiceBusHostSettings> hosts)
         {
             if (hosts == null)
                 throw new ArgumentNullException("hosts");

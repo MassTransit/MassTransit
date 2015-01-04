@@ -55,9 +55,9 @@ namespace MassTransit.Context
             }
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this);
+            return visitor.Visit(this);
         }
 
         public Task<TRequest> Task

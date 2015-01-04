@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,9 +15,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using PipeConfigurators;
+    using Util;
 
 
     public class RabbitMqBusFactoryConfigurator :
@@ -38,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqServiceBusBuilder(_hosts, _localAddress);
+            var builder = new RabbitMqBusBuilder(_hosts, _localAddress);
 
             foreach (IServiceBusFactoryBuilderConfigurator configurator in _transportBuilderConfigurators)
                 configurator.Configure(builder);
@@ -68,7 +70,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
             if (_hosts.Count == 1)
             {
                 _defaultHost = host;
-                string queueName = NewId.Next().ToString("NS");
+
+                string machineName = GetSanitizedQueueNameString(HostMetadataCache.Host.MachineName);
+                string processName = GetSanitizedQueueNameString(HostMetadataCache.Host.ProcessName);
+                string queueName = string.Format("bus-{0}-{1}-{2}", processName, machineName, NewId.Next().ToString("NS"));
 
                 _defaultEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_defaultHost, queueName);
                 _defaultEndpointConfigurator.Exclusive();
@@ -112,6 +117,21 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             if (_defaultEndpointConfigurator != null)
                 _defaultEndpointConfigurator.AddPipeBuilderConfigurator(configurator);
+        }
+
+        string GetSanitizedQueueNameString(string input)
+        {
+            var sb = new StringBuilder(input.Length);
+
+            foreach (char c in input)
+            {
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+                else if (c == '.' || c == '_' || c == '-' || c == ':')
+                    sb.Append(c);
+            }
+
+            return sb.ToString();
         }
 
         public void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback)

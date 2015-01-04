@@ -57,9 +57,9 @@ namespace MassTransit.Pipeline.Filters
             }
         }
 
-        bool IFilter<ConsumeContext<TMessage>>.Inspect(IPipeInspector inspector)
+        bool IFilter<ConsumeContext<TMessage>>.Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this, x => _consumerPipe.Inspect(x));
+            return visitor.Visit(this, x => _consumerPipe.Visit(x));
         }
     }
 }

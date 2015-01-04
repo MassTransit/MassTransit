@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
     using Logging;
@@ -32,13 +33,13 @@ namespace MassTransit.RabbitMqTransport.Tests
         ISendEndpoint _inputQueueSendEndpoint;
         ISendEndpoint _busSendEndpoint;
         readonly TestSendObserver _sendObserver;
-        Uri _localHostUri;
+        Uri _hostAddress;
         BusHandle _busHandle;
 
         public RabbitMqTestFixture()
         {
-            _localHostUri = new Uri("rabbitmq://localhost/test/");
-            _inputQueueAddress = new Uri(_localHostUri, "input_queue");
+            _hostAddress = new Uri("rabbitmq://localhost/test/");
+            _inputQueueAddress = new Uri(_hostAddress, "input_queue");
 
             _sendObserver = new TestSendObserver(TestTimeout);
         }
@@ -68,15 +69,15 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        protected Uri LocalHostUri
+        protected Uri HostAddress
         {
-            get { return _localHostUri; }
+            get { return _hostAddress; }
             set
             {
                 if (Bus != null)
                     throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
 
-                _localHostUri = value;
+                _hostAddress = value;
             }
         }
 
@@ -122,7 +123,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             try
             {
                 if (_busHandle != null)
-                    _busHandle.Stop().Wait(TestTimeout);
+                    _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token)
+                        .Wait(TestTimeout);
             }
             catch (AggregateException ex)
             {
@@ -145,7 +147,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             return MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                RabbitMqHostSettings host = x.Host(_localHostUri, h =>
+                RabbitMqHostSettings host = x.Host(_hostAddress, h =>
                 {
                 });
 

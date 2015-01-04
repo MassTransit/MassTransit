@@ -35,7 +35,7 @@ namespace MassTransit.SubscriptionConnectors
                 x.Use(() => new HandlerPipeBuilderConfigurator<TMessage>(handler));
             });
 
-            return consumePipe.Connect(pipe);
+            return consumePipe.ConnectConsumePipe(pipe);
         }
 
         public ConnectHandle Connect(IConsumePipe consumePipe, Guid requestId, MessageHandler<TMessage> handler,
@@ -49,7 +49,7 @@ namespace MassTransit.SubscriptionConnectors
                 x.Use(() => new HandlerPipeBuilderConfigurator<TMessage>(handler));
             });
 
-            return consumePipe.Connect(requestId, pipe);
+            return consumePipe.ConnectRequestPipe(requestId, pipe);
         }
     }
 }

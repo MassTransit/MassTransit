@@ -63,7 +63,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new AzureServiceBusServiceBusBuilder(_hosts);
+            var builder = new AzureBusBusBuilder(_hosts);
 
             foreach (IServiceBusFactoryBuilderConfigurator configurator in _transportBuilderConfigurators)
                 configurator.Configure(builder);

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,35 +12,18 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
-    using System.Threading;
-    using BusConfigurators;
-    using Magnum.Extensions;
+    using System.Threading.Tasks;
+    using Configuration;
     using NUnit.Framework;
 
 
     [TestFixture]
     public class When_a_temporary_queue_is_specified :
-        Given_a_service_bus_and_a_temporary_client
+        RabbitMqTestFixture
     {
-        [Test]
-        public void Should_be_able_to_request_response()
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            var responseReceived = new ManualResetEvent(false);
-
-//            LocalBus.GetEndpoint(RemoteUri).SendRequest(new Request(), LocalBus, x =>
-//                {
-//                    x.Handle<Response>((context, message) => responseReceived.Set());
-//                    x.SetTimeout(8.Seconds());
-//                });
-
-            Assert.IsTrue(responseReceived.WaitOne(8.Seconds()), "No Response");
-        }
-
-        protected override void ConfigureRemoteBus(ServiceBusConfigurator configurator)
-        {
-            base.ConfigureRemoteBus(configurator);
-
-//            configurator.Subscribe(x => x.Handler<Request>(async (context) => context.Respond(new Response())));
+            Handler<Request>(configurator, x => x.RespondAsync(new Response()));
         }
 
 
@@ -52,25 +35,21 @@ namespace MassTransit.RabbitMqTransport.Tests
         class Response
         {
         }
-    }
 
-    [TestFixture]
-    public class When_a_temporary_queue_with_a_control_queue_is_created
-    {
-        [Test, Explicit]
-        public void Should_remove_the_queues_and_exchanges_on_shutdown()
+
+        [Test]
+        public async void Should_be_able_to_request_response()
         {
-//            var uri = new Uri("rabbitmq://localhost/mttest/temporary_test_queue?temporary=true");
-//            using (IServiceBus bus = ServiceBusFactory.New(x =>
-//                {
-//                    x.ReceiveFrom(uri);
-//                    x.UseRabbitMq();
-//                }))
-//            {
-//                Console.WriteLine("Using address: " + bus.Endpoint.Address.Uri);
-//
-//                Thread.Sleep(30000);
-//            }
+            Task<Response> responseTask = null;
+            Task<Request<Request>> request = Bus.Request(InputQueueAddress, new Request(), x =>
+            {
+                responseTask = x.Handle<Response>();
+                x.Timeout = TestTimeout;
+            });
+
+            await request;
+
+            await responseTask;
         }
     }
 }

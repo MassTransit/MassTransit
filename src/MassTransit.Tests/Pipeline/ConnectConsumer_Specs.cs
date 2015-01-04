@@ -72,8 +72,8 @@ namespace MassTransit.Tests.Pipeline
 
             filter.ConnectConsumer(factory, retryPolicy: Retry.None);
 
-            var inspector = new StringPipeInspector();
-            filter.Inspect(inspector);
+            var inspector = new StringPipeVisitor();
+            filter.Visit(inspector);
 
             Console.WriteLine(inspector.ToString());
         }

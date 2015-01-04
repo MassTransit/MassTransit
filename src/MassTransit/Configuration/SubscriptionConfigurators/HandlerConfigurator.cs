@@ -54,7 +54,7 @@ namespace MassTransit.SubscriptionConfigurators
 
             IPipe<ConsumeContext<TMessage>> pipe = _pipeConfigurator.Build();
 
-            builder.Connect(pipe);
+            builder.ConnectConsumePipe(pipe);
         }
     }
 }

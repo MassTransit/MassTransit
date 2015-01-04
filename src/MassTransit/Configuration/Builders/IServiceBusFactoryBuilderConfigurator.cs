@@ -18,6 +18,6 @@ namespace MassTransit.Builders
     public interface IServiceBusFactoryBuilderConfigurator :
         Configurator
     {
-        void Configure(IServiceBusBuilder builder);
+        void Configure(IBusBuilder builder);
     }
 }

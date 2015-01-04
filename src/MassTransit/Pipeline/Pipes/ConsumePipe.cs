@@ -46,29 +46,29 @@ namespace MassTransit.Pipeline.Pipes
             return _pipe.Send(context);
         }
 
-        ConnectHandle IMessageObserverConnector.Connect<TMessage>(IConsumeMessageObserver<TMessage> observer)
+        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<TMessage>(IConsumeMessageObserver<TMessage> observer)
         {
-            return _filter.Connect(observer);
+            return _filter.ConnectConsumeMessageObserver(observer);
         }
 
-        bool IPipe<ConsumeContext>.Inspect(IPipeInspector inspector)
+        bool IPipe<ConsumeContext>.Visit(IPipeVisitor visitor)
         {
-            return _pipe.Inspect(inspector);
+            return _pipe.Visit(visitor);
         }
 
-        ConnectHandle IConsumeFilterConnector.Connect<T>(IPipe<ConsumeContext<T>> pipe)
+        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            return _filter.Connect(pipe);
+            return _filter.ConnectConsumePipe(pipe);
         }
 
-        ConnectHandle IRequestFilterConnector.Connect<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+        ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
-            return _filter.Connect(requestId, pipe);
+            return _filter.ConnectRequestPipe(requestId, pipe);
         }
 
-        ConnectHandle IConsumeObserverConnector.Connect(IConsumeObserver observer)
+        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
-            return _filter.Connect(observer);
+            return _filter.ConnectConsumeObserver(observer);
         }
     }
 }

@@ -81,7 +81,6 @@ namespace MassTransit.Tests.Configuration
 				using (ServiceBusFactory.New(x =>
 					{
 						x.ReceiveFrom("loopback://localhost/a");
-						x.UseBusBuilder(null);
 					}))
 				{
 				}

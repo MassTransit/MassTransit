@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,10 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    public interface IFilterInspector<in TFilter, T>
-        where TFilter : IFilter<T>
-        where T : class, PipeContext
+    /// <summary>
+    /// A visitor that closes a message type
+    /// </summary>
+    public interface IConsumeMessageFilterVisitor :
+        IPipeVisitor
     {
-        bool Inspect(TFilter filter, FilterInspectorCallback callback);
+        bool Visit<TMessage>(IFilter<ConsumeContext<TMessage>> filter, FilterVisitorCallback callback)
+            where TMessage : class;
     }
 }

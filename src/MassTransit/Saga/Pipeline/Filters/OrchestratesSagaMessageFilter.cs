@@ -42,9 +42,9 @@ namespace MassTransit.Saga.Pipeline.Filters
             return messageConsumer.Consume(context);
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this);
+            return visitor.Visit(this);
         }
     }
 }

@@ -30,13 +30,6 @@ namespace MassTransit.BusConfigurators
 			_configurators = new List<BusBuilderConfigurator>();
 		}
 
-		public BusBuilder Configure(BusBuilder builder)
-		{
-			builder.AddPostCreateAction(_postCreateAction);
-
-			return builder;
-		}
-
 		public IEnumerable<ValidationResult> Validate()
 		{
 			return from configurator in _configurators

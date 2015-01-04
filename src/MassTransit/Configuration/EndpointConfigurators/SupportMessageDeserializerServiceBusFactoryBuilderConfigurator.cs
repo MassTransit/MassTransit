@@ -42,7 +42,7 @@ namespace MassTransit.EndpointConfigurators
                 yield return this.Failure("DeserializerFactory", "must not be null");
         }
 
-        public void Configure(IServiceBusBuilder builder)
+        public void Configure(IBusBuilder builder)
         {
             builder.AddMessageDeserializer(_contentType, _deserializerFactory);
         }

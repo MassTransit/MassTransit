@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -30,19 +30,19 @@ namespace MassTransit.SubscriptionConfigurators
             if (!typeof(TConsumer).HasInterface<IConsumer>())
             {
                 yield return configurator.Warning("Consumer",
-                    string.Format("The consumer class {0} does not implement any IMessageConsumer interfaces",
+                    string.Format("The consumer class {0} does not implement any IConsumer interfaces",
                         TypeMetadataCache<TConsumer>.ShortName));
             }
 
             IEnumerable<ValidationResult> warningForMessages = ConsumerMetadataCache<TConsumer>
                 .ConsumerTypes.Concat(ConsumerMetadataCache<TConsumer>.MessageConsumerTypes)
-                .Distinct()
-                .Where(x => !(HasDefaultProtectedCtor(typeof(TConsumer)) || HasSinglePublicCtor(typeof(TConsumer))))
-                .Select(x => string.Format("The {0} consumer should have a public or protected default constructor." +
-                    " Without an available constructor, MassTransit will initialize new consumer instances" +
-                    " without calling a constructor, which can lead to unpredictable behavior if the consumer" +
+                .Distinct(MessageInterfaceType.MessageTypeComparer)
+                .Where(x => !(HasProtectedDefaultConstructor(x.MessageType) || HasSinglePublicConstructor(x.MessageType)))
+                .Select(x => string.Format("The {0} message should have a public or protected default constructor." +
+                    " Without an available constructor, MassTransit will initialize new message instances" +
+                    " without calling a constructor, which can lead to unpredictable behavior if the message" +
                     " depends upon logic in the constructor to be executed.", TypeMetadataCache.ShortName(x.MessageType)))
-                .Select(message => configurator.Warning("Consumer", message));
+                .Select(message => configurator.Warning("Message", message));
 
             foreach (ValidationResult message in warningForMessages)
                 yield return message;
@@ -58,19 +58,17 @@ namespace MassTransit.SubscriptionConfigurators
                 yield return result;
         }
 
-        static bool HasDefaultProtectedCtor(Type type)
+        static bool HasProtectedDefaultConstructor(Type type)
         {
-            return
-                type.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Any(
-                    c => !c.GetParameters().Any());
+            return type.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
+                .Any(constructorInfo => !constructorInfo.GetParameters().Any());
         }
 
-        static bool HasSinglePublicCtor(Type type)
+        static bool HasSinglePublicConstructor(Type type)
         {
-            return
-                type.GetConstructors(BindingFlags.Public | BindingFlags.Instance).All(
-                    c => !c.GetParameters().Any())
-                    && type.GetConstructors().Count() == 1;
+            return type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
+                .All(constructorInfo => !constructorInfo.GetParameters().Any())
+                && type.GetConstructors().Count() == 1;
         }
     }
 }

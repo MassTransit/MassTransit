@@ -63,7 +63,7 @@
     <Compile Include="AzureServiceBusSendTransport.cs" />
     <Compile Include="Configuration\AzureServiceBusHostConfigurator.cs" />
     <Compile Include="Configuration\AzureServiceBusPublishEndpoint.cs" />
-    <Compile Include="Configuration\AzureServiceBusServiceBusBuilder.cs" />
+    <Compile Include="Configuration\AzureBusBusBuilder.cs" />
     <Compile Include="Configuration\AzureServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="IServiceBusHostConfigurator.cs" />

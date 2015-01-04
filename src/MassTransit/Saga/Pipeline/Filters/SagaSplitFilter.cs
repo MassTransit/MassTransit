@@ -30,9 +30,9 @@
             return _next.Send(context, mergePipe);
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this, x => _next.Inspect(x) && _next.Inspect(x));
+            return visitor.Visit(this, x => _next.Visit(x) && _next.Visit(x));
         }
     }
 }

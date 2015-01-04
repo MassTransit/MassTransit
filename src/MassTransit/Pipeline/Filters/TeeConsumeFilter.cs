@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Threading.Tasks;
-    using Subscriptions;
     using Util;
 
 
@@ -24,18 +23,18 @@ namespace MassTransit.Pipeline.Filters
     /// <typeparam name="T"></typeparam>
     public class TeeConsumeFilter<T> :
         IFilter<ConsumeContext<T>>,
-        IConsumeFilterConnector<T>,
-        IRequestFilterConnector<T>
+        IConsumePipeConnector<T>,
+        IRequestPipeConnector<T>
         where T : class
     {
         readonly Connectable<IPipe<ConsumeContext<T>>> _connections;
-        readonly Lazy<KeyedConsumeFilter<T, Guid>> _requestConnections;
+        readonly Lazy<IConnectPipeById<ConsumeContext<T>, Guid>> _requestConnections;
         ConnectHandle _requestFilterHandle;
 
         public TeeConsumeFilter()
         {
             _connections = new Connectable<IPipe<ConsumeContext<T>>>();
-            _requestConnections = new Lazy<KeyedConsumeFilter<T, Guid>>(ConnectRequestFilter);
+            _requestConnections = new Lazy<IConnectPipeById<ConsumeContext<T>, Guid>>(ConnectRequestFilter);
         }
 
         public int Count
@@ -43,14 +42,9 @@ namespace MassTransit.Pipeline.Filters
             get { return _connections.Count; }
         }
 
-        public ConnectHandle Connect(IPipe<ConsumeContext<T>> pipe)
+        public ConnectHandle ConnectConsumePipe(IPipe<ConsumeContext<T>> pipe)
         {
             return _connections.Connect(pipe);
-        }
-
-        public ConnectHandle Connect(Guid requestId, IPipe<ConsumeContext<T>> pipe)
-        {
-            return _requestConnections.Value.Connect(requestId, pipe);
         }
 
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
@@ -60,12 +54,17 @@ namespace MassTransit.Pipeline.Filters
             await next.Send(context);
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this, x => _connections.All(pipe => pipe.Inspect(x)));
+            return visitor.Visit(this, x => _connections.All(pipe => pipe.Visit(x)));
         }
 
-        KeyedConsumeFilter<T, Guid> ConnectRequestFilter()
+        public ConnectHandle ConnectRequestPipe(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+        {
+            return _requestConnections.Value.Connect(requestId, pipe);
+        }
+
+        IConnectPipeById<ConsumeContext<T>, Guid> ConnectRequestFilter()
         {
             var filter = new KeyedConsumeFilter<T, Guid>(GetRequestId);
 

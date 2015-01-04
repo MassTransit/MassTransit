@@ -18,8 +18,18 @@ namespace MassTransit.Pipeline
     public interface IPipe<in T>
         where T : class, PipeContext
     {
+        /// <summary>
+        /// The base primitive, Send delivers the pipe context of T to the pipe.
+        /// </summary>
+        /// <param name="context">The pipe context of type T</param>
+        /// <returns>A task which is completed once the pipe has processed the context</returns>
         Task Send(T context);
 
-        bool Inspect(IPipeInspector inspector);
+        /// <summary>
+        /// Used to inspect/visit the pipe via a typical visitor pattern to discover the contents of the pipe
+        /// </summary>
+        /// <param name="visitor"></param>
+        /// <returns></returns>
+        bool Visit(IPipeVisitor visitor);
     }
 }

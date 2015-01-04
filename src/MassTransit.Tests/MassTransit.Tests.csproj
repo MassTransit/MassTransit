@@ -198,8 +198,6 @@
     <Compile Include="TestConsumers\TestConsumerBase.cs" />
     <Compile Include="TestConsumers\TestCorrelatedConsumer.cs" />
     <Compile Include="TestConsumers\TestMessageConsumer.cs" />
-    <Compile Include="TextFixtures\EndpointTestFixture.cs" />
-    <Compile Include="TextFixtures\LoopbackLocalAndRemoteTestFixture.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

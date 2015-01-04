@@ -65,7 +65,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
                 x.Filter(new SagaMessageFilter<TSaga, TMessage>(repository, messagePipe));
             });
 
-            return consumePipe.Connect(pipe);
+            return consumePipe.ConnectConsumePipe(pipe);
         }
 
         public Type MessageType

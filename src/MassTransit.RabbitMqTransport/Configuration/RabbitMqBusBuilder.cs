@@ -21,14 +21,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using Transports;
 
 
-    public class RabbitMqServiceBusBuilder :
-        ServiceBusBuilderBase,
-        IServiceBusBuilder
+    public class RabbitMqBusBuilder :
+        BusBuilder,
+        IBusBuilder
     {
         readonly RabbitMqHost[] _hosts;
         readonly Uri _sourceAddress;
 
-        public RabbitMqServiceBusBuilder(IEnumerable<RabbitMqHost> hosts, Uri sourceAddress)
+        public RabbitMqBusBuilder(IEnumerable<RabbitMqHost> hosts, Uri sourceAddress)
         {
             _hosts = hosts.ToArray();
             _sourceAddress = sourceAddress;

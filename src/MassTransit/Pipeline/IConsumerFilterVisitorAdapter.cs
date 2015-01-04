@@ -12,19 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    using System;
-
-
-    public interface IRequestFilterConnector
+    public interface IConsumerFilterVisitorAdapter
     {
-        ConnectHandle Connect<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
-            where T : class;
-    }
-
-
-    public interface IRequestFilterConnector<out T>
-        where T : class
-    {
-        ConnectHandle Connect(Guid requestId, IPipe<ConsumeContext<T>> pipe);
+        bool Visit<T>(IConsumerFilterVisitor visitor, IFilter<T> filter, FilterVisitorCallback callback)
+            where T : class, PipeContext;
     }
 }

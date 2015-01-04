@@ -10,11 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Builders
 {
-    public interface IFilterInspectorAdapter
+    public interface IInMemoryBusBuilder :
+        IBusBuilder
     {
-        bool Inspect<T>(IFilter<T> filter, FilterInspectorCallback callback)
-            where T : class, PipeContext;
+        /// <summary>
+        /// The receive transport provider
+        /// </summary>
+        IReceiveTransportProvider ReceiveTransportProvider { get; }
+
+        /// <summary>
+        /// The send transport provider
+        /// </summary>
+        ISendTransportProvider SendTransportProvider { get; }
     }
 }

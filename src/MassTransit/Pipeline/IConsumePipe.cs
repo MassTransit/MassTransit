@@ -14,9 +14,9 @@ namespace MassTransit.Pipeline
 {
     public interface IConsumePipe :
         IPipe<ConsumeContext>,
-        IConsumeFilterConnector,
-        IRequestFilterConnector,
-        IMessageObserverConnector,
+        IConsumePipeConnector,
+        IRequestPipeConnector,
+        IConsumeMessageObserverConnector,
         IConsumeObserverConnector
     {
     }

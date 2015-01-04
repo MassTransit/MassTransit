@@ -173,12 +173,12 @@ namespace MassTransit
 
                 PayloadType = typeof(T).GetMessageTypes()
                     .Select(x => new MessageUrn(x).ToString())
-                    .ToList();
+                    .ToArray();
             }
 
             public Guid CorrelationId { get; private set; }
             public DateTime ScheduledTime { get; private set; }
-            public IList<string> PayloadType { get; private set; }
+            public string[] PayloadType { get; private set; }
             public Uri Destination { get; private set; }
             public T Payload { get; private set; }
         }

@@ -14,7 +14,6 @@ namespace MassTransit.BusConfigurators
 {
     using System;
     using Builders;
-    using Configuration;
     using EndpointConfigurators;
 
 
@@ -31,12 +30,7 @@ namespace MassTransit.BusConfigurators
     public interface ServiceBusConfigurator :
         EndpointFactoryConfigurator
     {
-        /// <summary>
-        /// Specifies the builder factory to use when the service is invoked
-        /// </summary>
-        /// <param name="builderFactory"></param>
-        void UseBusBuilder(Func<BusSettings, BusBuilder> builderFactory);
-
+        
         /// <summary>
         /// Adds a configurator for the service bus builder to the configurator
         /// </summary>

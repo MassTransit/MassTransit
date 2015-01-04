@@ -17,6 +17,6 @@ namespace MassTransit.Pipeline
     /// </summary>
     public interface IConsumeObserverConnector
     {
-        ConnectHandle Connect(IConsumeObserver observer);
+        ConnectHandle ConnectConsumeObserver(IConsumeObserver observer);
     }
 }

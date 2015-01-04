@@ -49,7 +49,7 @@ namespace MassTransit
             return _configurators.SelectMany(x => x.Validate());
         }
 
-        public void Configure(IInMemoryServiceBusBuilder builder)
+        public void Configure(IInMemoryBusBuilder builder)
         {
             builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder));
         }
@@ -64,7 +64,7 @@ namespace MassTransit
             _configurators.Add(configurator);
         }
 
-        ReceiveEndpoint CreateReceiveEndpoint(IInMemoryServiceBusBuilder builder)
+        ReceiveEndpoint CreateReceiveEndpoint(IInMemoryBusBuilder builder)
         {
             IReceiveTransport transport = builder.ReceiveTransportProvider.GetReceiveTransport(_queueName);
 
@@ -75,7 +75,7 @@ namespace MassTransit
             return new ReceiveEndpoint(transport, receivePipe, consumePipe);
         }
 
-        IPipe<ReceiveContext> CreateReceivePipe(IInMemoryServiceBusBuilder builder, ConsumePipe consumePipe)
+        IPipe<ReceiveContext> CreateReceivePipe(IInMemoryBusBuilder builder, ConsumePipe consumePipe)
         {
             IReceiveEndpointBuilder endpointBuilder = new ReceiveEndpointBuilder(consumePipe);
 

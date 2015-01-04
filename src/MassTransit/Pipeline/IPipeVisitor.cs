@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,24 +12,18 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    public interface IPipeInspector
+    public interface IPipeVisitor
     {
-        bool Inspect<T>(IFilter<T> filter)
+        bool Visit<T>(IFilter<T> filter)
             where T : class, PipeContext;
 
-        bool Inspect<T>(IFilter<T> filter, FilterInspectorCallback callback)
+        bool Visit<T>(IFilter<T> filter, FilterVisitorCallback callback)
             where T : class, PipeContext;
 
-        bool Inspect<T>(IFilter<ConsumeContext<T>> filter)
-            where T : class;
-
-        bool Inspect<T>(IFilter<ConsumeContext<T>> filter, FilterInspectorCallback callback)
-            where T : class;
-
-        bool Inspect<T>(IPipe<T> pipe)
+        bool Visit<T>(IPipe<T> pipe)
             where T : class, PipeContext;
 
-        bool Inspect<T>(IPipe<T> pipe, PipeInspectorCallback callback)
+        bool Visit<T>(IPipe<T> pipe, PipeVisitorCallback callback)
             where T : class, PipeContext;
     }
 }

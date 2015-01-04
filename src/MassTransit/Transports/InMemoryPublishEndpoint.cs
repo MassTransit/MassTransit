@@ -123,9 +123,9 @@ namespace MassTransit.Transports
                 return _pipe.Send(publishContext);
             }
 
-            public bool Inspect(IPipeInspector inspector)
+            public bool Visit(IPipeVisitor visitor)
             {
-                return inspector.Inspect(this, x => _pipe.Inspect(x));
+                return visitor.Visit(this, x => _pipe.Visit(x));
             }
         }
 
@@ -147,9 +147,9 @@ namespace MassTransit.Transports
                 return _pipe.Send(publishContext);
             }
 
-            public bool Inspect(IPipeInspector inspector)
+            public bool Visit(IPipeVisitor visitor)
             {
-                return inspector.Inspect(this, x => _pipe.Inspect(x));
+                return visitor.Visit(this, x => _pipe.Visit(x));
             }
         }
     }

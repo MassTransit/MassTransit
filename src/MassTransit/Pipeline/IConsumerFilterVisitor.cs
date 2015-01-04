@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,19 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Builders
+namespace MassTransit.Pipeline
 {
-    public interface IInMemoryServiceBusBuilder :
-        IServiceBusBuilder
+    public interface IConsumerFilterVisitor :
+        IPipeVisitor
     {
-        /// <summary>
-        /// The receive transport provider
-        /// </summary>
-        IReceiveTransportProvider ReceiveTransportProvider { get; }
+        bool Visit<TConsumer>(IFilter<ConsumerConsumeContext<TConsumer>> filter, FilterVisitorCallback callback)
+            where TConsumer : class, IConsumer;
 
-        /// <summary>
-        /// The send transport provider
-        /// </summary>
-        ISendTransportProvider SendTransportProvider { get; }
+        bool Visit<TConsumer, TMessage>(IFilter<ConsumerConsumeContext<TConsumer, TMessage>> filter, FilterVisitorCallback callback)
+            where TConsumer : class, IConsumer<TMessage>
+            where TMessage : class;
     }
 }
