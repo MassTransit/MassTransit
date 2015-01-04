@@ -26,12 +26,12 @@ namespace MassTransit.Testing.TestInstanceConfigurators
         where TScenario : ITestScenario
     {
         readonly IList<ITestActionConfigurator<TScenario>> _testActionConfigurators;
-        readonly IList<IScenarioBuilderConfigurator<TScenario>> _scenarioConfigurators;
+        readonly IList<IScenarioSpecification<TScenario>> _scenarioConfigurators;
         Func<ITestScenarioBuilder<TScenario>> _scenarioBuilderFactory;
 
         protected TestConfigurator(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
         {
-            _scenarioConfigurators = new List<IScenarioBuilderConfigurator<TScenario>>();
+            _scenarioConfigurators = new List<IScenarioSpecification<TScenario>>();
             _testActionConfigurators = new List<ITestActionConfigurator<TScenario>>();
 
             _scenarioBuilderFactory = scenarioBuilderFactory;
@@ -47,7 +47,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
             _scenarioBuilderFactory = contextBuilderFactory;
         }
 
-        public void AddScenarioConfigurator(IScenarioBuilderConfigurator<TScenario> configurator)
+        public void AddScenarioConfigurator(IScenarioSpecification<TScenario> configurator)
         {
             _scenarioConfigurators.Add(configurator);
         }
@@ -64,9 +64,9 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 
             builder = _scenarioConfigurators.Aggregate(builder, (current, configurator) => configurator.Configure(current));
 
-            TScenario context = builder.Build();
+            TScenario scenario = builder.Build();
 
-            return context;
+            return scenario;
         }
 
         protected void BuildTestActions(ITestBuilder<TScenario> builder)

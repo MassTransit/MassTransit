@@ -29,14 +29,7 @@ namespace MassTransit.BusConfigurators
     /// </summary>
     public interface ServiceBusConfigurator :
         EndpointFactoryConfigurator
-    {
-        
-        /// <summary>
-        /// Adds a configurator for the service bus builder to the configurator
-        /// </summary>
-        /// <param name="configurator"></param>
-        void AddBusConfigurator(BusBuilderConfigurator configurator);
-
+    {        
         /// <summary>
         /// Specify the endpoint from which messages should be read
         /// </summary>

@@ -19,13 +19,13 @@ namespace MassTransit.EndpointConfigurators
     using Configurators;
 
 
-    public class SupportMessageDeserializerServiceBusFactoryBuilderConfigurator :
-        IServiceBusFactoryBuilderConfigurator
+    public class SupportMessageDeserializerBusFactorySpecification :
+        IBusFactorySpecification
     {
         readonly ContentType _contentType;
         readonly Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer> _deserializerFactory;
 
-        public SupportMessageDeserializerServiceBusFactoryBuilderConfigurator(ContentType contentType,
+        public SupportMessageDeserializerBusFactorySpecification(ContentType contentType,
             Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer> deserializerFactory)
         {
             _contentType = contentType;

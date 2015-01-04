@@ -164,7 +164,7 @@ namespace MassTransit
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType.GetTypeName());
 
-            var consumerConfigurator = (IReceiveEndpointBuilderConfigurator)Activator.CreateInstance(
+            var consumerConfigurator = (IReceiveEndpointSpecification)Activator.CreateInstance(
                 typeof(UntypedConsumerConfigurator<>).MakeGenericType(consumerType), consumerFactory, retryPolicy ?? Retry.None);
 
             configurator.AddConfigurator(consumerConfigurator);

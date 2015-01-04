@@ -16,33 +16,28 @@ namespace MassTransit.PipeConfigurators
     using Configurators;
     using PipeBuilders;
     using Pipeline;
-    using Pipeline.Filters;
 
 
-    public class RescuePipeBuilderConfigurator<T> :
-        IPipeBuilderConfigurator<T>
+    public class FilterPipeSpecification<T> :
+        IPipeSpecification<T>
         where T : class, PipeContext
     {
-        readonly RescueExceptionFilter _exceptionFilter;
-        readonly IPipe<T> _rescuePipe;
+        readonly IFilter<T> _filter;
 
-        public RescuePipeBuilderConfigurator(IPipe<T> rescuePipe, RescueExceptionFilter exceptionFilter)
+        public FilterPipeSpecification(IFilter<T> filter)
         {
-            _rescuePipe = rescuePipe;
-            _exceptionFilter = exceptionFilter;
+            _filter = filter;
         }
 
         public void Build(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new RescueFilter<T>(_rescuePipe, _exceptionFilter));
+            builder.AddFilter(_filter);
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_exceptionFilter == null)
-                yield return this.Failure("ExceptionFilter", "must not be null");
-            if (_rescuePipe == null)
-                yield return this.Failure("Pipe", "must not be null");
+            if (_filter == null)
+                yield return this.Failure("Filter", "must not be null");
         }
     }
 }

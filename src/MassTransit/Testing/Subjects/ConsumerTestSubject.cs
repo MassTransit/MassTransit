@@ -21,7 +21,7 @@ namespace MassTransit.Testing.Subjects
 
     public class ConsumerTestSubject<TScenario, TSubject> :
         IConsumerTestSubject<TSubject>,
-        IScenarioBuilderConfigurator<TScenario>
+        IScenarioSpecification<TScenario>
         where TSubject : class, IConsumer
         where TScenario : IBusTestScenario
     {

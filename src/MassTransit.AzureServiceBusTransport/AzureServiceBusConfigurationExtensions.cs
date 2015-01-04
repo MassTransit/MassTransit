@@ -42,7 +42,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             configure(endpointConfigurator);
 
-            configurator.AddServiceBusFactoryBuilderConfigurator(endpointConfigurator);
+            configurator.AddBusFactorySpecification(endpointConfigurator);
         }
     }
 }

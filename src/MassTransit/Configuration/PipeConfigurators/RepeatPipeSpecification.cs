@@ -10,26 +10,35 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.EndpointConfigurators
+namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
-    using Builders;
+    using System.Threading;
     using Configurators;
-    using Serialization;
+    using PipeBuilders;
+    using Pipeline.Filters;
+    using Policies;
 
 
-    public class SetMessageSerializerServiceBusFactoryBuilderConfigurator<TSerializer> :
-        IServiceBusFactoryBuilderConfigurator
-        where TSerializer : IMessageSerializer, new()
+    public class RepeatPipeSpecification<T> :
+        IPipeSpecification<T>
+        where T : class, PipeContext
     {
+        readonly CancellationToken _cancellationToken;
+
+        public RepeatPipeSpecification(CancellationToken cancellationToken)
+        {
+            _cancellationToken = cancellationToken;
+        }
+
+        public void Build(IPipeBuilder<T> builder)
+        {
+            builder.AddFilter(new RepeatFilter<T>(Repeat.UntilCancelled(_cancellationToken)));
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             yield break;
-        }
-
-        public void Configure(IBusBuilder builder)
-        {
-            builder.SetMessageSerializer(() => new TSerializer());
         }
     }
 }

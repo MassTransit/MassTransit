@@ -24,7 +24,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
     public interface SagaConnector
     {
         ConnectHandle Connect<T>(IConsumePipe consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
-            params IPipeBuilderConfigurator<SagaConsumeContext<T>>[] pipeBuilderConfigurators)
+            params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
             where T : class, ISaga;
     }
 
@@ -63,14 +63,14 @@ namespace MassTransit.Saga.SubscriptionConnectors
         }
 
         public ConnectHandle Connect<T>(IConsumePipe consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
-            params IPipeBuilderConfigurator<SagaConsumeContext<T>>[] pipeBuilderConfigurators) where T : class, ISaga
+            params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications) where T : class, ISaga
         {
             var handles = new List<ConnectHandle>();
             try
             {
                 foreach (SagaMessageConnector connector in _connectors)
                 {
-                    ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, retryPolicy, pipeBuilderConfigurators);
+                    ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, retryPolicy, pipeSpecifications);
 
                     handles.Add(handle);
                 }

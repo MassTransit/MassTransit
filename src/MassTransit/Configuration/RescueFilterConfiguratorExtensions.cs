@@ -35,9 +35,9 @@ namespace MassTransit
 
             RescueExceptionFilter exceptionFilter = exception => exceptionTypes.Any(x => x.IsInstanceOfType(exception));
 
-            var rescueConfigurator = new RescuePipeBuilderConfigurator<T>(rescuePipe, exceptionFilter);
+            var rescueConfigurator = new RescuePipeSpecification<T>(rescuePipe, exceptionFilter);
 
-            configurator.AddPipeBuilderConfigurator(rescueConfigurator);
+            configurator.AddPipeSpecification(rescueConfigurator);
         }
     }
 }

@@ -111,9 +111,9 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            var pipeBuilderConfigurator = new WindsorMessageScopePipeBuilderConfigurator<T>();
+            var pipeBuilderConfigurator = new WindsorMessageScopePipeSpecification<T>();
 
-            configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
 
         static IList<Type> FindTypes<T>(IWindsorContainer container, Func<Type, bool> filter)

@@ -36,7 +36,7 @@ namespace MassTransit.Saga.SubscriptionConnectors
         protected abstract IFilter<ConsumeContext<TMessage>> GetLocatorFilter(ISagaRepository<TSaga> repository);
 
         public ConnectHandle Connect<T>(IConsumePipe consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
-            params IPipeBuilderConfigurator<SagaConsumeContext<T>>[] pipeBuilderConfigurators)
+            params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
             where T : class, ISaga
         {
             var repository = sagaRepository as ISagaRepository<TSaga>;
@@ -44,8 +44,8 @@ namespace MassTransit.Saga.SubscriptionConnectors
                 throw new ArgumentException("The saga repository type does not match: " + TypeMetadataCache<T>.ShortName);
 
             var builder = new SagaPipeBuilder<T>();
-            for (int i = 0; i < pipeBuilderConfigurators.Length; i++)
-                pipeBuilderConfigurators[i].Build(builder);
+            for (int i = 0; i < pipeSpecifications.Length; i++)
+                pipeSpecifications[i].Build(builder);
 
             var builders = builder as SagaPipeBuilder<TSaga>;
             if (builders == null)

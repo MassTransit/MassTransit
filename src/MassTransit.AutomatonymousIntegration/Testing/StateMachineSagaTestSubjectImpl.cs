@@ -27,7 +27,7 @@ namespace Automatonymous.Testing
 
     public class StateMachineSagaTestSubjectImpl<TScenario, TSaga, TStateMachine> :
         SagaTestSubject<TSaga>,
-        IScenarioBuilderConfigurator<TScenario>
+        IScenarioSpecification<TScenario>
         where TSaga : class, SagaStateMachineInstance
         where TScenario : ITestScenario
         where TStateMachine : StateMachine<TSaga>

@@ -10,14 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.EndpointConfigurators
+namespace MassTransit.Builders
 {
     using Configurators;
 
 
-    public interface IReceiveEndpointBuilderConfigurator :
+    public interface IInMemoryServiceBusFactorySpecification :
         Configurator
     {
-        void Configure(IReceiveEndpointBuilder builder);
+        void Configure(IInMemoryBusBuilder builder);
     }
 }

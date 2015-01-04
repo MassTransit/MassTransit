@@ -20,7 +20,7 @@ namespace MassTransit.PipeConfigurators
     /// pipe builder with pre-validation that the operations will succeed.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IPipeBuilderConfigurator<T> :
+    public interface IPipeSpecification<T> :
         IConfigurable<T>
         where T : class, PipeContext
     {
@@ -33,7 +33,7 @@ namespace MassTransit.PipeConfigurators
 
 
     public interface IPipeConfigurable<T> :
-        IPipeBuilderConfigurator<T>
+        IPipeSpecification<T>
         where T : class, PipeContext
     {
     }

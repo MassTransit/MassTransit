@@ -30,9 +30,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
     public class RabbitMqReceiveEndpointConfigurator :
         IRabbitMqReceiveEndpointConfigurator,
-        IServiceBusFactoryBuilderConfigurator
+        IBusFactorySpecification
     {
-        readonly IList<IReceiveEndpointBuilderConfigurator> _configurators;
+        readonly IList<IReceiveEndpointSpecification> _configurators;
         readonly RabbitMqHost _host;
         readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
@@ -43,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _host = host;
             _pipeConfigurator = new PipeConfigurator<ConsumeContext>();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
-            _configurators = new List<IReceiveEndpointBuilderConfigurator>();
+            _configurators = new List<IReceiveEndpointSpecification>();
 
             _settings = new RabbitMqReceiveSettings
             {
@@ -107,14 +107,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.ExchangeArguments[key] = value;
         }
 
-        public void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)
+        public void AddConfigurator(IReceiveEndpointSpecification configurator)
         {
             _configurators.Add(configurator);
         }
 
-        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
         {
-            _pipeConfigurator.AddPipeBuilderConfigurator(configurator);
+            _pipeConfigurator.AddPipeSpecification(configurator);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -137,7 +137,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             var builder = new RabbitMqReceiveEndpointBuilder(consumePipe, new RabbitMqMessageNameFormatter());
 
-            foreach (IReceiveEndpointBuilderConfigurator builderConfigurator in _configurators)
+            foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
                 builderConfigurator.Configure(builder);
 
             _receivePipeConfigurator.Filter(new DeserializeFilter(deserializer, consumePipe));

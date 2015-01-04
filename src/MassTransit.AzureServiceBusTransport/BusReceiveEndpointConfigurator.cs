@@ -26,11 +26,11 @@ namespace MassTransit.AzureServiceBusTransport
     using Transports;
 
 
-    public class ServiceBusReceiveEndpointConfigurator :
+    public class BusReceiveEndpointConfigurator :
         IServiceBusReceiveEndpointConfigurator,
-        IServiceBusFactoryBuilderConfigurator
+        IBusFactorySpecification
     {
-        readonly IList<IReceiveEndpointBuilderConfigurator> _configurators;
+        readonly IList<IReceiveEndpointSpecification> _configurators;
         readonly ServiceBusHostSettings _hostSettings;
         readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly QueueDescription _queueDescription;
@@ -38,7 +38,7 @@ namespace MassTransit.AzureServiceBusTransport
         int _prefetchCount;
         bool _purgeOnStartup;
 
-        public ServiceBusReceiveEndpointConfigurator(ServiceBusHostSettings hostSettings, string queueName)
+        public BusReceiveEndpointConfigurator(ServiceBusHostSettings hostSettings, string queueName)
             : this(hostSettings, new QueueDescription(queueName))
         {
             _queueDescription.EnableBatchedOperations = true;
@@ -49,11 +49,11 @@ namespace MassTransit.AzureServiceBusTransport
             EnableDeadLetteringOnMessageExpiration = true;
         }
 
-        public ServiceBusReceiveEndpointConfigurator(ServiceBusHostSettings hostSettings, QueueDescription queueDescription)
+        public BusReceiveEndpointConfigurator(ServiceBusHostSettings hostSettings, QueueDescription queueDescription)
         {
             _pipeConfigurator = new PipeConfigurator<ConsumeContext>();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
-            _configurators = new List<IReceiveEndpointBuilderConfigurator>();
+            _configurators = new List<IReceiveEndpointSpecification>();
 
             _hostSettings = hostSettings;
             _queueDescription = queueDescription;
@@ -76,12 +76,12 @@ namespace MassTransit.AzureServiceBusTransport
             builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder.MessageDeserializer));
         }
 
-        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
         {
-            _pipeConfigurator.AddPipeBuilderConfigurator(configurator);
+            _pipeConfigurator.AddPipeSpecification(configurator);
         }
 
-        public void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)
+        public void AddConfigurator(IReceiveEndpointSpecification configurator)
         {
             _configurators.Add(configurator);
         }
@@ -146,7 +146,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             IReceiveEndpointBuilder builder = new ReceiveEndpointBuilder(inboundPipe);
 
-            foreach (IReceiveEndpointBuilderConfigurator builderConfigurator in _configurators)
+            foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
                 builderConfigurator.Configure(builder);
 
             _receivePipeConfigurator.Filter(new DeserializeFilter(deserializer, inboundPipe));

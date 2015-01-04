@@ -51,11 +51,11 @@ namespace MassTransit.AzureServiceBusTransport
         public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, ServiceBusHostSettings hostSettings, string queueName,
             Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(hostSettings, queueName);
+            var endpointConfigurator = new BusReceiveEndpointConfigurator(hostSettings, queueName);
 
             configure(endpointConfigurator);
 
-            configurator.AddServiceBusFactoryBuilderConfigurator(endpointConfigurator);
+            configurator.AddBusFactorySpecification(endpointConfigurator);
         }
 
     }

@@ -25,7 +25,7 @@ namespace MassTransit.SubscriptionConfigurators
 
     public class UntypedConsumerConfigurator<TConsumer> :
         IConsumerConfigurator,
-        IReceiveEndpointBuilderConfigurator
+        IReceiveEndpointSpecification
         where TConsumer : class
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;

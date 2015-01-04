@@ -15,11 +15,11 @@ namespace MassTransit.Testing.BuilderConfigurators
     using Builders;
 
 
-    public interface HandlerTestBuilderConfigurator<TScenario, TMessage> :
-        TestBuilderConfigurator
-        where TMessage : class
+    public interface IConsumerTestSpecification<TScenario, TConsumer> :
+        ITestSpecification
+        where TConsumer : class, IConsumer
         where TScenario : IBusTestScenario
     {
-        IHandlerTestBuilder<TScenario, TMessage> Configure(IHandlerTestBuilder<TScenario, TMessage> builder);
+        IConsumerTestBuilder<TScenario, TConsumer> Configure(IConsumerTestBuilder<TScenario, TConsumer> builder);
     }
 }

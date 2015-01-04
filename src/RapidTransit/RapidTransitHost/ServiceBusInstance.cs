@@ -30,9 +30,9 @@ namespace RapidTransit
         IServiceBusInstance
     {
         static readonly ILog _log = Logger.Get<ServiceBusInstance>();
-        readonly List<IReceiveEndpointBuilderConfigurator> _configurators;
+        readonly List<IReceiveEndpointSpecification> _configurators;
         readonly int _consumerLimit;
-        readonly List<IPipeBuilderConfigurator<ConsumeContext>> _pipeConfigurators;
+        readonly List<IPipeSpecification<ConsumeContext>> _pipeConfigurators;
         readonly string _queueName;
 
         protected ServiceBusInstance(IConfigurationProvider configurationProvider, string queueKey, string consumerLimitKey,
@@ -45,16 +45,16 @@ namespace RapidTransit
             _queueName = queueName;
             _consumerLimit = configurationProvider.GetSetting(consumerLimitKey, defaultConsumerLimit);
 
-            _configurators = new List<IReceiveEndpointBuilderConfigurator>();
-            _pipeConfigurators = new List<IPipeBuilderConfigurator<ConsumeContext>>();
+            _configurators = new List<IReceiveEndpointSpecification>();
+            _pipeConfigurators = new List<IPipeSpecification<ConsumeContext>>();
         }
 
-        void IReceiveEndpointConfigurator.AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)
+        void IReceiveEndpointConfigurator.AddConfigurator(IReceiveEndpointSpecification configurator)
         {
             _configurators.Add(configurator);
         }
 
-        void IPipeConfigurator<ConsumeContext>.AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
+        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
         {
             _pipeConfigurators.Add(configurator);
         }
@@ -64,11 +64,11 @@ namespace RapidTransit
             _log.InfoFormat("{0} Configuring Receive Endpoint for Queue: {1}({2})", GetType().GetServiceDescription(), _queueName,
                 _consumerLimit);
 
-            foreach (IReceiveEndpointBuilderConfigurator builderConfigurator in _configurators)
+            foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
                 configurator.AddConfigurator(builderConfigurator);
 
             foreach (var pipeConfigurator in _pipeConfigurators)
-                configurator.AddPipeBuilderConfigurator(pipeConfigurator);
+                configurator.AddPipeSpecification(pipeConfigurator);
         }
     }
 }

@@ -26,21 +26,21 @@ namespace MassTransit.SubscriptionConfigurators
     /// <typeparam name="TMessage"></typeparam>
     public class HandlerConfigurator<TMessage> :
         IHandlerConfigurator<TMessage>,
-        IReceiveEndpointBuilderConfigurator
+        IReceiveEndpointSpecification
         where TMessage : class
     {
-        readonly IPipeBuilderConfigurator<ConsumeContext<TMessage>> _handlerConfigurator;
+        readonly IPipeSpecification<ConsumeContext<TMessage>> _handlerConfigurator;
         readonly IBuildPipeConfigurator<ConsumeContext<TMessage>> _pipeConfigurator;
 
         public HandlerConfigurator(MessageHandler<TMessage> handler)
         {
             _pipeConfigurator = new PipeConfigurator<ConsumeContext<TMessage>>();
-            _handlerConfigurator = new HandlerPipeBuilderConfigurator<TMessage>(handler);
+            _handlerConfigurator = new HandlerPipeSpecification<TMessage>(handler);
         }
 
-        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext<TMessage>> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext<TMessage>> configurator)
         {
-            _pipeConfigurator.AddPipeBuilderConfigurator(configurator);
+            _pipeConfigurator.AddPipeSpecification(configurator);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -50,7 +50,7 @@ namespace MassTransit.SubscriptionConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            _pipeConfigurator.AddPipeBuilderConfigurator(_handlerConfigurator);
+            _pipeConfigurator.AddPipeSpecification(_handlerConfigurator);
 
             IPipe<ConsumeContext<TMessage>> pipe = _pipeConfigurator.Build();
 

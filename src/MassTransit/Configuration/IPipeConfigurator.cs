@@ -22,6 +22,6 @@ namespace MassTransit
     public interface IPipeConfigurator<T>
         where T : class, PipeContext
     {
-        void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<T> configurator);
+        void AddPipeSpecification(IPipeSpecification<T> configurator);
     }
 }

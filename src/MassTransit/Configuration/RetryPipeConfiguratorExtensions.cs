@@ -26,9 +26,9 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            var pipeBuilderConfigurator = new RetryPipeBuilderConfigurator<T>(retryPolicy);
+            var pipeBuilderConfigurator = new RetryPipeSpecification<T>(retryPolicy);
 
-            configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
 
         /// <summary>
@@ -48,9 +48,9 @@ namespace MassTransit
 
             retryPolicy = new CancelRetryPolicy(retryPolicy, cancellationToken);
 
-            var pipeBuilderConfigurator = new RetryPipeBuilderConfigurator<T>(retryPolicy);
+            var pipeBuilderConfigurator = new RetryPipeSpecification<T>(retryPolicy);
 
-            configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
     }
 }

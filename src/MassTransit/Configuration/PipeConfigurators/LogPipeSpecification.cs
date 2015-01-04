@@ -14,31 +14,37 @@ namespace MassTransit.PipeConfigurators
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
+    using System.Threading.Tasks;
     using Configurators;
     using PipeBuilders;
-    using Pipeline;
+    using Pipeline.Filters;
 
 
-    public class DelegatePipeBuilderConfigurator<T> :
-        IPipeConfigurable<T>
+    public class LogPipeSpecification<T> :
+        IPipeSpecification<T>
         where T : class, PipeContext
     {
-        readonly Action<T> _callback;
+        readonly Func<T, Task<string>> _formatter;
+        readonly TextWriter _writer;
 
-        public DelegatePipeBuilderConfigurator(Action<T> callback)
+        public LogPipeSpecification(TextWriter writer, Func<T, Task<string>> formatter)
         {
-            _callback = callback;
+            _writer = writer;
+            _formatter = formatter;
         }
 
-        public void Build(IPipeBuilder<T> builder)
+        void IPipeSpecification<T>.Build(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new DelegateFilter<T>(_callback));
+            builder.AddFilter(new LogFilter<T>(_writer, _formatter));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        IEnumerable<ValidationResult> Configurator.Validate()
         {
-            if (_callback == null)
-                yield return this.Failure("Callback", "must not be null");
+            if (_writer == null)
+                yield return this.Failure("TextWriter", "must not be null");
+            if (_formatter == null)
+                yield return this.Failure("Formatter", "must not be null");
         }
     }
 }

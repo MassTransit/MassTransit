@@ -47,15 +47,15 @@ namespace MassTransit.SubscriptionConnectors
         }
 
         ConnectHandle ConsumerConnector.Connect<T>(IConsumePipe consumePipe, IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy,
-            params IPipeBuilderConfigurator<ConsumerConsumeContext<T>>[] pipeBuilderConfigurators)
+            params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
         {
             var factory = consumerFactory as IConsumerFactory<TConsumer>;
             if (factory == null)
                 throw new ArgumentException("The consumer factory type does not match: " + TypeMetadataCache<T>.ShortName);
 
             var builder = new ConsumerPipeBuilder<T>();
-            for (int i = 0; i < pipeBuilderConfigurators.Length; i++)
-                pipeBuilderConfigurators[i].Build(builder);
+            for (int i = 0; i < pipeSpecifications.Length; i++)
+                pipeSpecifications[i].Build(builder);
 
             var builders = builder as ConsumerPipeBuilder<TConsumer>;
             if (builders == null)

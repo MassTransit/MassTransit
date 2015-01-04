@@ -27,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IBusFactory
     {
         readonly IList<RabbitMqHost> _hosts;
-        readonly IList<IServiceBusFactoryBuilderConfigurator> _transportBuilderConfigurators;
+        readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
         RabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
         RabbitMqHost _defaultHost;
         Uri _localAddress;
@@ -35,14 +35,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public RabbitMqBusFactoryConfigurator()
         {
             _hosts = new List<RabbitMqHost>();
-            _transportBuilderConfigurators = new List<IServiceBusFactoryBuilderConfigurator>();
+            _transportBuilderConfigurators = new List<IBusFactorySpecification>();
         }
 
         public IBusControl CreateBus()
         {
             var builder = new RabbitMqBusBuilder(_hosts, _localAddress);
 
-            foreach (IServiceBusFactoryBuilderConfigurator configurator in _transportBuilderConfigurators)
+            foreach (IBusFactorySpecification configurator in _transportBuilderConfigurators)
                 configurator.Configure(builder);
 
             IBusControl bus = builder.Build();
@@ -80,13 +80,13 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 _defaultEndpointConfigurator.Durable(false);
                 _defaultEndpointConfigurator.AutoDelete();
 
-                AddServiceBusFactoryBuilderConfigurator(_defaultEndpointConfigurator);
+                AddBusFactorySpecification(_defaultEndpointConfigurator);
 
                 _localAddress = settings.GetInputAddress(_defaultEndpointConfigurator.Settings);
             }
         }
 
-        public void AddServiceBusFactoryBuilderConfigurator(IServiceBusFactoryBuilderConfigurator configurator)
+        public void AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             _transportBuilderConfigurators.Add(configurator);
         }
@@ -110,13 +110,13 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             configure(endpointConfigurator);
 
-            AddServiceBusFactoryBuilderConfigurator(endpointConfigurator);
+            AddBusFactorySpecification(endpointConfigurator);
         }
 
-        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
         {
             if (_defaultEndpointConfigurator != null)
-                _defaultEndpointConfigurator.AddPipeBuilderConfigurator(configurator);
+                _defaultEndpointConfigurator.AddPipeSpecification(configurator);
         }
 
         string GetSanitizedQueueNameString(string input)

@@ -20,14 +20,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using Pipeline;
 
 
-    public class RabbitMqConsumerPipeBuilderConfigurator :
-        IPipeBuilderConfigurator<ConnectionContext>
+    public class RabbitMqConsumerPipeSpecification :
+        IPipeSpecification<ConnectionContext>
     {
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _settings;
         readonly IEnumerable<ExchangeBindingSettings> _exchangeBindings;
 
-        public RabbitMqConsumerPipeBuilderConfigurator(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings,
+        public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings,
             IEnumerable<ExchangeBindingSettings> exchangeBindings)
         {
             _settings = settings;

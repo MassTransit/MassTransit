@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -54,16 +54,16 @@ namespace Automatonymous.SubscriptionConnectors
             get { return _connectors; }
         }
 
-        public ConnectHandle Connect<TInstance>(IConsumePipe consumePipe, ISagaRepository<TInstance> sagaRepository,
-            IRetryPolicy retryPolicy,
-            params IPipeBuilderConfigurator<SagaConsumeContext<TInstance>>[] pipeBuilderConfigurators) where TInstance : class, ISaga
+        public ConnectHandle Connect<T>(IConsumePipe consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
+            params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
+            where T : class, ISaga
         {
             var handles = new List<ConnectHandle>();
             try
             {
                 foreach (SagaMessageConnector connector in _connectors)
                 {
-                    ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, retryPolicy, pipeBuilderConfigurators);
+                    ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, retryPolicy, pipeSpecifications);
 
                     handles.Add(handle);
                 }
@@ -102,10 +102,6 @@ namespace Automatonymous.SubscriptionConnectors
 
                 var interfaceType = (IStateMachineInterfaceType<TInstance>)Activator.CreateInstance(genericType,
                     _stateMachine, _repository, policyFactory, states, stateMachineEvent);
-
-
-//                        public StateMachineInterfaceType(StateMachine<TInstance> machine, StateMachineSagaRepository<TInstance> repository,
-//            StateMachinePolicyFactory<TInstance> policyFactory, IEnumerable<State<TInstance>> states, Event<TData> @event)
 
                 yield return interfaceType.GetConnector();
             }

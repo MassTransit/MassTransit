@@ -13,32 +13,33 @@
 namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
-    using System.Threading;
     using Configurators;
     using PipeBuilders;
+    using Pipeline;
     using Pipeline.Filters;
-    using Policies;
 
 
-    public class RepeatPipeBuilderConfigurator<T> :
-        IPipeBuilderConfigurator<T>
-        where T : class, PipeContext
+    public class ConsumerPipeSpecification<TConsumer, TMessage> :
+        IPipeSpecification<ConsumerConsumeContext<TConsumer, TMessage>>
+        where TConsumer : class
+        where TMessage : class
     {
-        readonly CancellationToken _cancellationToken;
+        readonly IFilter<ConsumerConsumeContext<TConsumer>> _filter;
 
-        public RepeatPipeBuilderConfigurator(CancellationToken cancellationToken)
+        public ConsumerPipeSpecification(IFilter<ConsumerConsumeContext<TConsumer>> filter)
         {
-            _cancellationToken = cancellationToken;
+            _filter = filter;
         }
 
-        public void Build(IPipeBuilder<T> builder)
+        public void Build(IPipeBuilder<ConsumerConsumeContext<TConsumer, TMessage>> builder)
         {
-            builder.AddFilter(new RepeatFilter<T>(Repeat.UntilCancelled(_cancellationToken)));
+            builder.AddFilter(new ConsumerSplitFilter<TConsumer, TMessage>(_filter));
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            yield break;
+            if (_filter == null)
+                yield return this.Failure("Filter", "must not be null");
         }
     }
 }

@@ -24,6 +24,6 @@ namespace MassTransit.Testing.Configurators
     {
         void UseBuilder(Func<ITestScenarioBuilder<TScenario>> builderFactory);
 
-        void AddConfigurator(IScenarioBuilderConfigurator<TScenario> configurator);
+        void AddConfigurator(IScenarioSpecification<TScenario> configurator);
     }
 }

@@ -18,8 +18,8 @@ namespace MassTransit.WindsorIntegration
     using PipeConfigurators;
 
 
-    public class WindsorMessageScopePipeBuilderConfigurator<T> :
-        IPipeBuilderConfigurator<T>
+    public class WindsorMessageScopePipeSpecification<T> :
+        IPipeSpecification<T>
         where T : class, PipeContext
     {
         public void Build(IPipeBuilder<T> builder)

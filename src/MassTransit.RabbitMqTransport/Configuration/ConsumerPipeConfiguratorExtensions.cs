@@ -33,9 +33,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            var pipeBuilderConfigurator = new RabbitMqConsumerPipeBuilderConfigurator(pipe, settings, exchangeBindings);
+            var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, exchangeBindings);
 
-            configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
     }
 }
