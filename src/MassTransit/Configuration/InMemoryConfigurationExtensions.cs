@@ -41,7 +41,7 @@ namespace MassTransit
 
             configure(endpointConfigurator);
 
-            configurator.AddServiceBusFactoryBuilderConfigurator(endpointConfigurator);
+            configurator.AddBusFactorySpecification(endpointConfigurator);
         }
     }
 }

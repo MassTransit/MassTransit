@@ -21,6 +21,6 @@ namespace MassTransit
         void SetTransportProvider<T>(T transportProvider)
             where T : ISendTransportProvider, IReceiveTransportProvider;
 
-        void AddServiceBusFactoryBuilderConfigurator(IInMemoryServiceBusFactoryBuilderConfigurator configurator);
+        void AddBusFactorySpecification(IInMemoryServiceBusFactorySpecification configurator);
     }
 }

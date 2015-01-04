@@ -28,11 +28,11 @@ namespace MassTransit.PipeConfigurators
     {
         static readonly ILog _log = Logger.Get<PipeConfigurator<TContext>>();
 
-        readonly List<IPipeBuilderConfigurator<TContext>> _configurators;
+        readonly List<IPipeSpecification<TContext>> _configurators;
 
         public PipeConfigurator()
         {
-            _configurators = new List<IPipeBuilderConfigurator<TContext>>();
+            _configurators = new List<IPipeSpecification<TContext>>();
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace MassTransit.PipeConfigurators
             return _configurators.SelectMany(x => x.Validate());
         }
 
-        void IPipeConfigurator<TContext>.AddPipeBuilderConfigurator(IPipeBuilderConfigurator<TContext> configurator)
+        void IPipeConfigurator<TContext>.AddPipeSpecification(IPipeSpecification<TContext> configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");

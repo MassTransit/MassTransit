@@ -85,7 +85,7 @@
     <Compile Include="ReceiverMetrics.cs" />
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="ServiceBusHostSettingsExtensions.cs" />
-    <Compile Include="ServiceBusReceiveEndpointConfigurator.cs" />
+    <Compile Include="BusReceiveEndpointConfigurator.cs" />
     <Compile Include="SharedAccessKeyTokenProvider.cs" />
     <Compile Include="SharedAccessSignatureTokenProviderConfigurator.cs" />
     <Compile Include="TransportConfiguratorExtensions.cs" />

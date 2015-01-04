@@ -24,7 +24,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
     {
         void UseTestBuilder(Func<TScenario, IConsumerTestBuilder<TScenario, TConsumer>> builderFactory);
 
-        void AddTestConfigurator(ConsumerTestBuilderConfigurator<TScenario, TConsumer> configurator);
+        void AddTestConfigurator(IConsumerTestSpecification<TScenario, TConsumer> configurator);
 
         void UseConsumerFactory(IConsumerFactory<TConsumer> consumerFactory);
     }

@@ -31,9 +31,9 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            var pipeBuilderConfigurator = new RepeatPipeBuilderConfigurator<T>(cancellationToken);
+            var pipeBuilderConfigurator = new RepeatPipeSpecification<T>(cancellationToken);
 
-            configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
     }
 }

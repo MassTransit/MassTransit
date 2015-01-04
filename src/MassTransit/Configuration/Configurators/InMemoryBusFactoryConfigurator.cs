@@ -25,7 +25,7 @@ namespace MassTransit.Configurators
         IBusFactory
     {
         readonly InMemoryReceiveEndpointConfigurator _busEndpointConfigurator;
-        readonly IList<IInMemoryServiceBusFactoryBuilderConfigurator> _configurators;
+        readonly IList<IInMemoryServiceBusFactorySpecification> _configurators;
         readonly Uri _inputAddress;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
@@ -36,7 +36,7 @@ namespace MassTransit.Configurators
 
             _inputAddress = new Uri(string.Format("loopback://localhost/{0}", queueName));
 
-            _configurators = new List<IInMemoryServiceBusFactoryBuilderConfigurator>();
+            _configurators = new List<IInMemoryServiceBusFactorySpecification>();
             _busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName);
         }
 
@@ -52,7 +52,7 @@ namespace MassTransit.Configurators
 
             var builder = new InMemoryBusBuilder(_inputAddress, _receiveTransportProvider, _sendTransportProvider);
 
-            foreach (IInMemoryServiceBusFactoryBuilderConfigurator configurator in _configurators)
+            foreach (IInMemoryServiceBusFactorySpecification configurator in _configurators)
                 configurator.Configure(builder);
 
             _busEndpointConfigurator.Configure(builder);
@@ -65,12 +65,12 @@ namespace MassTransit.Configurators
             return _busEndpointConfigurator.Validate().Concat(_configurators.SelectMany(x => x.Validate()));
         }
 
-        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
         {
-            _busEndpointConfigurator.AddPipeBuilderConfigurator(configurator);
+            _busEndpointConfigurator.AddPipeSpecification(configurator);
         }
 
-        public void AddServiceBusFactoryBuilderConfigurator(IServiceBusFactoryBuilderConfigurator configurator)
+        public void AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             _configurators.Add(new ConfiguratorProxy(configurator));
         }
@@ -82,18 +82,18 @@ namespace MassTransit.Configurators
             _sendTransportProvider = transportProvider;
         }
 
-        public void AddServiceBusFactoryBuilderConfigurator(IInMemoryServiceBusFactoryBuilderConfigurator configurator)
+        public void AddBusFactorySpecification(IInMemoryServiceBusFactorySpecification configurator)
         {
             _configurators.Add(configurator);
         }
 
 
         class ConfiguratorProxy :
-            IInMemoryServiceBusFactoryBuilderConfigurator
+            IInMemoryServiceBusFactorySpecification
         {
-            readonly IServiceBusFactoryBuilderConfigurator _configurator;
+            readonly IBusFactorySpecification _configurator;
 
-            public ConfiguratorProxy(IServiceBusFactoryBuilderConfigurator configurator)
+            public ConfiguratorProxy(IBusFactorySpecification configurator)
             {
                 _configurator = configurator;
             }

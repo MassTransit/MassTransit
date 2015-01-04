@@ -18,6 +18,6 @@ namespace MassTransit
     public interface IServiceBusFactoryConfigurator :
         IPipeConfigurator<ConsumeContext>
     {
-        void AddServiceBusFactoryBuilderConfigurator(IServiceBusFactoryBuilderConfigurator configurator);
+        void AddBusFactorySpecification(IBusFactorySpecification configurator);
     }
 }

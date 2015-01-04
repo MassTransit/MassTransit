@@ -22,6 +22,6 @@ namespace MassTransit
         IEndpointConfigurator,
         IPipeConfigurator<ConsumeContext>
     {
-        void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator);
+        void AddConfigurator(IReceiveEndpointSpecification configurator);
     }
 }

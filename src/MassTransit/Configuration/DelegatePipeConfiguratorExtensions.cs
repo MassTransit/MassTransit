@@ -31,7 +31,7 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            var pipeBuilderConfigurator = new DelegatePipeBuilderConfigurator<T>(callback);
+            var pipeBuilderConfigurator = new DelegatePipeSpecification<T>(callback);
 
             configurator.Use(() => pipeBuilderConfigurator);
         }

@@ -22,7 +22,7 @@ namespace MassTransit.SubscriptionConfigurators
 
     public class InstanceConfigurator :
         IInstanceConfigurator,
-        IReceiveEndpointBuilderConfigurator
+        IReceiveEndpointSpecification
     {
         readonly object _instance;
         readonly IRetryPolicy _retryPolicy;

@@ -28,7 +28,7 @@ namespace MassTransit.SubscriptionConnectors
     public interface ConsumerConnector
     {
         ConnectHandle Connect<TConsumer>(IConsumePipe consumePipe, IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy,
-            params IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>[] pipeBuilderConfigurators)
+            params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
             where TConsumer : class;
     }
 
@@ -56,7 +56,7 @@ namespace MassTransit.SubscriptionConnectors
         }
 
         public ConnectHandle Connect<TConsumer>(IConsumePipe consumePipe, IConsumerFactory<TConsumer> consumerFactory,
-            IRetryPolicy retryPolicy, params IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>[] pipeBuilderConfigurators)
+            IRetryPolicy retryPolicy, params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
             where TConsumer : class
         {
             var handles = new List<ConnectHandle>();
@@ -64,7 +64,7 @@ namespace MassTransit.SubscriptionConnectors
             {
                 foreach (ConsumerMessageConnector connector in _connectors)
                 {
-                    ConnectHandle handle = connector.Connect(consumePipe, consumerFactory, retryPolicy, pipeBuilderConfigurators);
+                    ConnectHandle handle = connector.Connect(consumePipe, consumerFactory, retryPolicy, pipeSpecifications);
 
                     handles.Add(handle);
                 }

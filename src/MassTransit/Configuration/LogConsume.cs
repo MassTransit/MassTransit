@@ -34,7 +34,7 @@ namespace MassTransit
             _formatter = async x => string.Format("Message Id: {0}", x.ReceiveContext.TransportHeaders.Get("MessageId", "N/A"));
         }
 
-        void IPipeBuilderConfigurator<ConsumeContext>.Build(IPipeBuilder<ConsumeContext> builder)
+        void IPipeSpecification<ConsumeContext>.Build(IPipeBuilder<ConsumeContext> builder)
         {
             builder.AddFilter(new LogFilter<ConsumeContext>(_writer, _formatter));
         }

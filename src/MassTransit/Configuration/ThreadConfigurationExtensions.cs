@@ -24,7 +24,7 @@ namespace MassTransit
 				    //bus.MaximumConsumerThreads = concurrentConsumerLimit;
 				});
 
-			configurator.AddBusConfigurator(controlBusConfigurator);
+//			configurator.AddBusConfigurator(controlBusConfigurator);
 		}
 	}
 }

@@ -26,8 +26,8 @@ namespace MassTransit
         /// <param name="configurator"></param>
         public static void UseJsonSerializer(this IServiceBusFactoryConfigurator configurator)
         {
-            configurator.AddServiceBusFactoryBuilderConfigurator(
-                new SetMessageSerializerServiceBusFactoryBuilderConfigurator<JsonMessageSerializer>());
+            configurator.AddBusFactorySpecification(
+                new SetMessageSerializerBusFactorySpecification<JsonMessageSerializer>());
         }
 
         /// <summary>
@@ -58,8 +58,8 @@ namespace MassTransit
         /// <param name="configurator"></param>
         public static void UseBsonSerializer(this IServiceBusFactoryConfigurator configurator)
         {
-            configurator.AddServiceBusFactoryBuilderConfigurator(
-                new SetMessageSerializerServiceBusFactoryBuilderConfigurator<BsonMessageSerializer>());
+            configurator.AddBusFactorySpecification(
+                new SetMessageSerializerBusFactorySpecification<BsonMessageSerializer>());
         }
 
         /// <summary>
@@ -68,8 +68,8 @@ namespace MassTransit
         /// <param name="configurator"></param>
         public static void UseXmlSerializer(this IServiceBusFactoryConfigurator configurator)
         {
-            configurator.AddServiceBusFactoryBuilderConfigurator(
-                new SetMessageSerializerServiceBusFactoryBuilderConfigurator<XmlMessageSerializer>());
+            configurator.AddBusFactorySpecification(
+                new SetMessageSerializerBusFactorySpecification<XmlMessageSerializer>());
         }
 
         /// <summary>
@@ -78,8 +78,8 @@ namespace MassTransit
         /// <param name="configurator"></param>
         public static void UseBinarySerializer(this IServiceBusFactoryConfigurator configurator)
         {
-            configurator.AddServiceBusFactoryBuilderConfigurator(
-                new SetMessageSerializerServiceBusFactoryBuilderConfigurator<BinaryMessageSerializer>());
+            configurator.AddBusFactorySpecification(
+                new SetMessageSerializerBusFactorySpecification<BinaryMessageSerializer>());
 
             configurator.SupportBinaryMessageDeserializer();
         }
@@ -92,7 +92,7 @@ namespace MassTransit
         /// <returns></returns>
         public static void SupportBinaryMessageDeserializer(this IServiceBusFactoryConfigurator configurator)
         {
-            configurator.AddServiceBusFactoryBuilderConfigurator(new SupportMessageDeserializerServiceBusFactoryBuilderConfigurator(
+            configurator.AddBusFactorySpecification(new SupportMessageDeserializerBusFactorySpecification(
                 BinaryMessageSerializer.BinaryContentType, (s, p) => new BinaryMessageDeserializer(JsonMessageSerializer.Serializer, s, p)));
         }
     }

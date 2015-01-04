@@ -16,29 +16,32 @@ namespace MassTransit.PipeConfigurators
     using Configurators;
     using PipeBuilders;
     using Pipeline.Filters;
-    using Policies;
 
 
-    public class RetryPipeBuilderConfigurator<T> :
-        IPipeBuilderConfigurator<T>
-        where T : class, PipeContext
+    /// <summary>
+    /// Adds a message handler to the consuming pipe builder
+    /// </summary>
+    /// <typeparam name="T">The message type</typeparam>
+    public class HandlerPipeSpecification<T> :
+        IPipeConfigurable<ConsumeContext<T>>
+        where T : class
     {
-        readonly IRetryPolicy _retryPolicy;
+        readonly MessageHandler<T> _handler;
 
-        public RetryPipeBuilderConfigurator(IRetryPolicy retryPolicy)
+        public HandlerPipeSpecification(MessageHandler<T> handler)
         {
-            _retryPolicy = retryPolicy;
+            _handler = handler;
         }
 
-        public void Build(IPipeBuilder<T> builder)
+        void IPipeSpecification<ConsumeContext<T>>.Build(IPipeBuilder<ConsumeContext<T>> builder)
         {
-            builder.AddFilter(new RetryFilter<T>(_retryPolicy));
+            builder.AddFilter(new HandlerMessageFilter<T>(_handler));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        IEnumerable<ValidationResult> Configurator.Validate()
         {
-            if (_retryPolicy == null)
-                yield return this.Failure("RetryPolicy", "must not be null");
+            if (_handler == null)
+                yield return this.Failure("Handler", "must not be null");
         }
     }
 }

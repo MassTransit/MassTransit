@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,16 +27,31 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     {
         readonly HostSettings _defaultHostSettings;
         readonly IList<ServiceBusHostSettings> _hosts;
-        readonly IList<IServiceBusFactoryBuilderConfigurator> _transportBuilderConfigurators;
-        IList<IPipeBuilderConfigurator<ConsumeContext>> _pipeBuilderConfigurators   ;
+        readonly IList<IPipeSpecification<ConsumeContext>> _pipeSpecifications;
+        readonly IList<IBusFactorySpecification> _transportSpecifications;
 
         public AzureServiceBusBusFactoryConfigurator()
         {
             _hosts = new List<ServiceBusHostSettings>();
             _defaultHostSettings = new HostSettings();
-            _transportBuilderConfigurators = new List<IServiceBusFactoryBuilderConfigurator>();
+            _transportSpecifications = new List<IBusFactorySpecification>();
 
-            _pipeBuilderConfigurators = new List<IPipeBuilderConfigurator<ConsumeContext>>();
+            _pipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return _transportSpecifications.SelectMany(x => x.Validate());
+        }
+
+        public IBusControl CreateBus()
+        {
+            var builder = new AzureBusBusBuilder(_hosts);
+
+            foreach (IBusFactorySpecification configurator in _transportSpecifications)
+                configurator.Configure(builder);
+
+            return builder.Build();
         }
 
         public void Host(ServiceBusHostSettings settings)
@@ -48,27 +63,17 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 _defaultHostSettings.CopyFrom(settings);
         }
 
-        void IServiceBusFactoryConfigurator.AddServiceBusFactoryBuilderConfigurator(IServiceBusFactoryBuilderConfigurator configurator)
+        void IServiceBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            _transportBuilderConfigurators.Add(configurator);
+            _transportSpecifications.Add(configurator);
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
         {
-            return _transportBuilderConfigurators.SelectMany(x => x.Validate());
-        }
-
-        public IBusControl CreateBus()
-        {
-            var builder = new AzureBusBusBuilder(_hosts);
-
-            foreach (IServiceBusFactoryBuilderConfigurator configurator in _transportBuilderConfigurators)
-                configurator.Configure(builder);
-
-            return builder.Build();
+            _pipeSpecifications.Add(configurator);
         }
 
 
@@ -85,13 +90,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 TokenProvider = settings.TokenProvider;
                 OperationTimeout = settings.OperationTimeout;
             }
-        }
-
-
-        void IPipeConfigurator<ConsumeContext>.AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
-        {
-            _pipeBuilderConfigurators.Add(configurator);
-
         }
     }
 }

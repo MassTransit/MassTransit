@@ -24,7 +24,7 @@ namespace MassTransit.Testing.Subjects
 
     public class SagaTestSubjectImpl<TScenario, TSaga> :
         SagaTestSubject<TSaga>,
-        IScenarioBuilderConfigurator<TScenario>
+        IScenarioSpecification<TScenario>
         where TSaga : class, ISaga
         where TScenario : IBusTestScenario
     {

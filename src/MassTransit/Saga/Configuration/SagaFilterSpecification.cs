@@ -10,28 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.PipeConfigurators
+namespace MassTransit.Saga.Configuration
 {
     using System.Collections.Generic;
     using Configurators;
+    using MassTransit.Pipeline;
     using PipeBuilders;
-    using Pipeline;
+    using PipeConfigurators;
+    using Pipeline.Filters;
 
 
-    public class FilterPipeBuilderConfigurator<T> :
-        IPipeBuilderConfigurator<T>
-        where T : class, PipeContext
+    public class SagaFilterSpecification<TSaga, TMessage> :
+        IPipeSpecification<SagaConsumeContext<TSaga, TMessage>>
+        where TSaga : class, ISaga
+        where TMessage : class
     {
-        readonly IFilter<T> _filter;
+        readonly IFilter<SagaConsumeContext<TSaga>> _filter;
 
-        public FilterPipeBuilderConfigurator(IFilter<T> filter)
+        public SagaFilterSpecification(IFilter<SagaConsumeContext<TSaga>> filter)
         {
             _filter = filter;
         }
 
-        public void Build(IPipeBuilder<T> builder)
+        public void Build(IPipeBuilder<SagaConsumeContext<TSaga, TMessage>> builder)
         {
-            builder.AddFilter(_filter);
+            builder.AddFilter(new SagaSplitFilter<TSaga, TMessage>(_filter));
         }
 
         public IEnumerable<ValidationResult> Validate()

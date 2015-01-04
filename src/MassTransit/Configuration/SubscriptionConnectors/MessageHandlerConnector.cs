@@ -32,7 +32,7 @@ namespace MassTransit.SubscriptionConnectors
                 foreach (var filter in filters)
                     x.Filter(filter);
 
-                x.Use(() => new HandlerPipeBuilderConfigurator<TMessage>(handler));
+                x.Use(() => new HandlerPipeSpecification<TMessage>(handler));
             });
 
             return consumePipe.ConnectConsumePipe(pipe);
@@ -46,7 +46,7 @@ namespace MassTransit.SubscriptionConnectors
                 foreach (var filter in filters)
                     x.Filter(filter);
 
-                x.Use(() => new HandlerPipeBuilderConfigurator<TMessage>(handler));
+                x.Use(() => new HandlerPipeSpecification<TMessage>(handler));
             });
 
             return consumePipe.ConnectRequestPipe(requestId, pipe);

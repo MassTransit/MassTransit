@@ -35,9 +35,9 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            var pipeBuilderConfigurator = new SagaFilterBuilderConfigurator<TSaga, T>(filter);
+            var pipeBuilderConfigurator = new SagaFilterSpecification<TSaga, T>(filter);
 
-            configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
     }
 }

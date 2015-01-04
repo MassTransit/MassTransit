@@ -29,9 +29,9 @@ namespace MassTransit
 
     public class InMemoryReceiveEndpointConfigurator :
         IReceiveEndpointConfigurator,
-        IInMemoryServiceBusFactoryBuilderConfigurator
+        IInMemoryServiceBusFactorySpecification
     {
-        readonly IList<IReceiveEndpointBuilderConfigurator> _configurators;
+        readonly IList<IReceiveEndpointSpecification> _configurators;
         readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly string _queueName;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
@@ -41,7 +41,7 @@ namespace MassTransit
             _queueName = queueName;
             _pipeConfigurator = new PipeConfigurator<ConsumeContext>();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
-            _configurators = new List<IReceiveEndpointBuilderConfigurator>();
+            _configurators = new List<IReceiveEndpointSpecification>();
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -54,12 +54,12 @@ namespace MassTransit
             builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder));
         }
 
-        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumeContext> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
         {
-            _pipeConfigurator.AddPipeBuilderConfigurator(configurator);
+            _pipeConfigurator.AddPipeSpecification(configurator);
         }
 
-        public void AddConfigurator(IReceiveEndpointBuilderConfigurator configurator)
+        public void AddConfigurator(IReceiveEndpointSpecification configurator)
         {
             _configurators.Add(configurator);
         }
@@ -79,7 +79,7 @@ namespace MassTransit
         {
             IReceiveEndpointBuilder endpointBuilder = new ReceiveEndpointBuilder(consumePipe);
 
-            foreach (IReceiveEndpointBuilderConfigurator builderConfigurator in _configurators)
+            foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
                 builderConfigurator.Configure(endpointBuilder);
 
             // TODO insert filter that if other excpetion 'n' times move to error

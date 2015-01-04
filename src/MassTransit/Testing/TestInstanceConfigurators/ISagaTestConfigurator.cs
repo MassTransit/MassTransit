@@ -24,7 +24,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 		where TScenario : ITestScenario
 	{
 		void UseBuilder(Func<TScenario, SagaTestBuilder<TScenario, TSaga>> builderFactory);
-		void AddConfigurator(SagaTestBuilderConfigurator<TScenario, TSaga> configurator);
+		void AddConfigurator(ISagaTestSpecification<TScenario, TSaga> configurator);
 
 		void UseSagaRepository(ISagaRepository<TSaga> sagaRepository);
 	}

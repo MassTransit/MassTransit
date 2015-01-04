@@ -82,7 +82,7 @@
     <Compile Include="MessageLifetimeScope.cs" />
     <Compile Include="SagaConfiguratorCache.cs" />
     <Compile Include="WindsorInboundInterceptor.cs" />
-    <Compile Include="WindsorMessageScopePipeBuilderConfigurator.cs" />
+    <Compile Include="WindsorMessageScopePipeSpecification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WindsorContainerExtensions.cs" />
     <Compile Include="WindsorConsumerFactory.cs" />

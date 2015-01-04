@@ -31,9 +31,9 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            var pipeBuilderConfigurator = new FilterPipeBuilderConfigurator<T>(filter);
+            var pipeBuilderConfigurator = new FilterPipeSpecification<T>(filter);
 
-            configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
     }
 }

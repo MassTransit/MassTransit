@@ -23,6 +23,6 @@ namespace MassTransit.Testing.TestInstanceConfigurators
     {
         void AddActionConfigurator(ITestActionConfigurator<TScenario> action);
 
-        void AddScenarioConfigurator(IScenarioBuilderConfigurator<TScenario> configurator);
+        void AddScenarioConfigurator(IScenarioSpecification<TScenario> configurator);
     }
 }

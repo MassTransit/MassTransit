@@ -37,21 +37,21 @@ namespace MassTransit.Pipeline
         }
 
         public static ConnectHandle ConnectConsumer<T>(this IConsumePipe filter, IConsumerFactory<T> consumerFactory,
-            IRetryPolicy retryPolicy = null, params IPipeBuilderConfigurator<ConsumerConsumeContext<T>>[] pipeBuilderConfigurators)
+            IRetryPolicy retryPolicy = null, params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
             where T : class
         {
-            return ConsumerConnectorCache<T>.Connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None, pipeBuilderConfigurators);
+            return ConsumerConnectorCache<T>.Connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None, pipeSpecifications);
         }
 
         public static ConnectHandle ConnectConsumer<T>(this IConsumePipe filter,
-            IRetryPolicy retryPolicy = null, params IPipeBuilderConfigurator<ConsumerConsumeContext<T>>[] pipeBuilderConfigurators)
+            IRetryPolicy retryPolicy = null, params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
             where T : class, new()
         {
             var consumerFactory = new DefaultConstructorConsumerFactory<T>();
 
             ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 
-            return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None, pipeBuilderConfigurators);
+            return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None, pipeSpecifications);
         }
 
         public static ConnectHandle ConnectConsumer<T>(this IConsumePipe filter, Func<T> factoryMethod,

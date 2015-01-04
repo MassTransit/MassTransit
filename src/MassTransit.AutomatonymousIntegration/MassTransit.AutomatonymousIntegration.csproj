@@ -76,8 +76,8 @@
     <Compile Include="Configuration\AutomatonymousStateMachinePolicyFactory.cs" />
     <Compile Include="Configuration\StateMachineSagaRepositoryExtensions.cs" />
     <Compile Include="Configuration\StateMachineSubscriptionExtensions.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\IStateMachineSubscriptionConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSubscriptionConfigurator.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSubscriptionConfiguratorImpl.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\StateMachineSagaMessageConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\StateMachineConnector.cs" />
     <Compile Include="SagaStateMachineInstance.cs" />

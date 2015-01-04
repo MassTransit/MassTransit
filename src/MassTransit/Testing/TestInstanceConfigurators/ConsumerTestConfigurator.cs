@@ -29,7 +29,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
         where TConsumer : class, IConsumer
         where TScenario : IBusTestScenario
     {
-        readonly IList<ConsumerTestBuilderConfigurator<TScenario, TConsumer>> _testConfigurators;
+        readonly IList<IConsumerTestSpecification<TScenario, TConsumer>> _testSpecifications;
 
         Func<TScenario, IConsumerTestBuilder<TScenario, TConsumer>> _testBuilderFactory;
         IConsumerFactory<TConsumer> _consumerFactory;
@@ -38,9 +38,10 @@ namespace MassTransit.Testing.TestInstanceConfigurators
         public ConsumerTestConfigurator(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
             : base(scenarioBuilderFactory)
         {
-            _testConfigurators = new List<ConsumerTestBuilderConfigurator<TScenario, TConsumer>>();
+            _testSpecifications = new List<IConsumerTestSpecification<TScenario, TConsumer>>();
 
             _testBuilderFactory = scenario => new ConsumerTestBuilderImpl<TScenario, TConsumer>(scenario);
+
         }
 
         public void UseTestBuilder(Func<TScenario, IConsumerTestBuilder<TScenario, TConsumer>> builderFactory)
@@ -48,9 +49,9 @@ namespace MassTransit.Testing.TestInstanceConfigurators
             _testBuilderFactory = builderFactory;
         }
 
-        public void AddTestConfigurator(ConsumerTestBuilderConfigurator<TScenario, TConsumer> configurator)
+        public void AddTestConfigurator(IConsumerTestSpecification<TScenario, TConsumer> configurator)
         {
-            _testConfigurators.Add(configurator);
+            _testSpecifications.Add(configurator);
         }
 
         public void UseConsumerFactory(IConsumerFactory<TConsumer> consumerFactory)
@@ -63,7 +64,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
             if (_consumerFactory == null)
                 yield return this.Failure("UseConsumerFactory", "The consumer factory must be configured (using ConstructedBy)");
 
-            IEnumerable<TestConfiguratorResult> results = base.Validate().Concat(_testConfigurators.SelectMany(x => x.Validate()));
+            IEnumerable<TestConfiguratorResult> results = base.Validate().Concat(_testSpecifications.SelectMany(x => x.Validate()));
             foreach (TestConfiguratorResult result in results)
             {
                 yield return result;
@@ -72,15 +73,18 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 
         public IConsumerTest<TScenario, TConsumer> Build()
         {
-            AddScenarioConfigurator(new ConsumerScenarioBuilderConfigurator(_consumerFactory, _received));
+            // TODO pull from scenario
+            _received = new ReceivedMessageList(TimeSpan.FromSeconds(8));
 
-            TScenario context = BuildTestScenario();
+            AddScenarioConfigurator(new ConsumerScenarioSpecification(_consumerFactory, _received));
 
-            IConsumerTestBuilder<TScenario, TConsumer> builder = _testBuilderFactory(context);
+            TScenario scenario = BuildTestScenario();
+
+            IConsumerTestBuilder<TScenario, TConsumer> builder = _testBuilderFactory(scenario);
 
             builder.SetConsumerFactory(_consumerFactory);
 
-            builder = _testConfigurators.Aggregate(builder, (current, configurator) => configurator.Configure(current));
+            builder = _testSpecifications.Aggregate(builder, (current, configurator) => configurator.Configure(current));
 
             BuildTestActions(builder);
 
@@ -88,12 +92,12 @@ namespace MassTransit.Testing.TestInstanceConfigurators
         }
 
 
-        class ConsumerScenarioBuilderConfigurator :
-            IScenarioBuilderConfigurator<TScenario>
+        class ConsumerScenarioSpecification :
+            IScenarioSpecification<TScenario>
         {
             readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-            public ConsumerScenarioBuilderConfigurator(IConsumerFactory<TConsumer> consumerFactory, ReceivedMessageList received)
+            public ConsumerScenarioSpecification(IConsumerFactory<TConsumer> consumerFactory, ReceivedMessageList received)
             {
                 var decoratedConsumerFactory = new TestConsumerFactoryDecorator<TConsumer>(consumerFactory, received);
 

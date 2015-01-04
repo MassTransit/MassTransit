@@ -29,19 +29,19 @@ namespace MassTransit.Testing.TestInstanceConfigurators
         where TMessage : class
         where TScenario : IBusTestScenario
     {
-        readonly IList<HandlerTestBuilderConfigurator<TScenario, TMessage>> _configurators;
+        readonly IList<IHandlerTestSpecification<TScenario, TMessage>> _configurators;
 
         MessageHandler<TMessage> _handler;
 
         public HandlerTestConfigurator(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
             : base(scenarioBuilderFactory)
         {
-            _configurators = new List<HandlerTestBuilderConfigurator<TScenario, TMessage>>();
+            _configurators = new List<IHandlerTestSpecification<TScenario, TMessage>>();
 
             _handler = DefaultHandler;
         }
 
-        public void AddTestConfigurator(HandlerTestBuilderConfigurator<TScenario, TMessage> configurator)
+        public void AddTestConfigurator(IHandlerTestSpecification<TScenario, TMessage> configurator)
         {
             _configurators.Add(configurator);
         }

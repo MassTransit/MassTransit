@@ -22,7 +22,7 @@ namespace MassTransit.Testing.Subjects
 
     public class HandlerTestSubject<TScenario, TSubject> :
         IHandlerTestSubject<TSubject>,
-        IScenarioBuilderConfigurator<TScenario>
+        IScenarioSpecification<TScenario>
         where TSubject : class
         where TScenario : IBusTestScenario
     {

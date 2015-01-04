@@ -23,12 +23,12 @@ namespace MassTransit.SubscriptionConfigurators
 
     public class ConsumerConfigurator<TConsumer> :
         IConsumerConfigurator<TConsumer>,
-        IReceiveEndpointBuilderConfigurator
+        IReceiveEndpointSpecification
         where TConsumer : class, IConsumer
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-        readonly List<IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>> _pipeBuilderConfigurators;
+        readonly List<IPipeSpecification<ConsumerConsumeContext<TConsumer>>> _pipeBuilderConfigurators;
         readonly IRetryPolicy _retryPolicy;
 
         public ConsumerConfigurator(IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy)
@@ -36,10 +36,10 @@ namespace MassTransit.SubscriptionConfigurators
             _consumerFactory = consumerFactory;
             _retryPolicy = retryPolicy;
 
-            _pipeBuilderConfigurators = new List<IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>>>();
+            _pipeBuilderConfigurators = new List<IPipeSpecification<ConsumerConsumeContext<TConsumer>>>();
         }
 
-        public void AddPipeBuilderConfigurator(IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer>> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer>> configurator)
         {
             _pipeBuilderConfigurators.Add(configurator);
         }

@@ -28,7 +28,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 		where TSaga : class, ISaga
 		where TScenario : IBusTestScenario
 	{
-		readonly IList<SagaTestBuilderConfigurator<TScenario, TSaga>> _configurators;
+		readonly IList<ISagaTestSpecification<TScenario, TSaga>> _configurators;
 
 		Func<TScenario, SagaTestBuilder<TScenario, TSaga>> _builderFactory;
 		ISagaRepository<TSaga> _sagaRepository;
@@ -36,7 +36,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 		public SagaTestConfigurator(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
 			: base(scenarioBuilderFactory)
 		{
-			_configurators = new List<SagaTestBuilderConfigurator<TScenario, TSaga>>();
+			_configurators = new List<ISagaTestSpecification<TScenario, TSaga>>();
 
 			_builderFactory = scenario => new SagaTestBuilderImpl<TScenario, TSaga>(scenario);
 		}
@@ -46,7 +46,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 			_builderFactory = builderFactory;
 		}
 
-		public void AddConfigurator(SagaTestBuilderConfigurator<TScenario, TSaga> configurator)
+		public void AddConfigurator(ISagaTestSpecification<TScenario, TSaga> configurator)
 		{
 			_configurators.Add(configurator);
 		}

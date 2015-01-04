@@ -30,9 +30,9 @@ namespace MassTransit
             if (formatter == null)
                 throw new ArgumentNullException("formatter");
 
-            var pipeBuilderConfigurator = new LogPipeBuilderConfigurator<T>(textWriter, formatter);
+            var pipeBuilderConfigurator = new LogPipeSpecification<T>(textWriter, formatter);
 
-            configurator.AddPipeBuilderConfigurator(pipeBuilderConfigurator);
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
     }
 }

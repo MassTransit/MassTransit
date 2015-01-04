@@ -20,7 +20,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
         where TMessage : class
         where TScenario : IBusTestScenario
     {
-        void AddTestConfigurator(HandlerTestBuilderConfigurator<TScenario, TMessage> configurator);
+        void AddTestConfigurator(IHandlerTestSpecification<TScenario, TMessage> configurator);
 
         void Handler(MessageHandler<TMessage> handler);
     }

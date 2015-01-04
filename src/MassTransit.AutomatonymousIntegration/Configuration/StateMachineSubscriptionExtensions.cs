@@ -31,7 +31,7 @@ namespace Automatonymous
         /// <param name="stateMachine">The state machine</param>
         /// <param name="sagaRepository">The saga repository for the instances</param>
         /// <returns></returns>
-        public static StateMachineSubscriptionConfigurator<TInstance> StateMachineSaga<TInstance>(
+        public static IStateMachineSubscriptionConfigurator<TInstance> StateMachineSaga<TInstance>(
             this IReceiveEndpointConfigurator configurator, StateMachine<TInstance> stateMachine,
             ISagaRepository<TInstance> sagaRepository)
             where TInstance : class, SagaStateMachineInstance
@@ -41,7 +41,7 @@ namespace Automatonymous
 
             StateMachineSagaRepository<TInstance> repository = stateMachineSagaRepositoryConfigurator.Configure();
 
-            var stateMachineConfigurator = new StateMachineSubscriptionConfiguratorImpl<TInstance>(stateMachine,
+            var stateMachineConfigurator = new StateMachineSubscriptionConfigurator<TInstance>(stateMachine,
                 repository);
 
             configurator.AddConfigurator(stateMachineConfigurator);
@@ -49,7 +49,7 @@ namespace Automatonymous
             return stateMachineConfigurator;
         }
 
-        public static StateMachineSubscriptionConfigurator<TInstance> StateMachineSaga<TInstance>(
+        public static IStateMachineSubscriptionConfigurator<TInstance> StateMachineSaga<TInstance>(
             this IReceiveEndpointConfigurator configurator, StateMachine<TInstance> stateMachine,
             ISagaRepository<TInstance> sagaRepository,
             Action<StateMachineSagaRepositoryConfigurator<TInstance>> configureCallback)
@@ -62,7 +62,7 @@ namespace Automatonymous
 
             StateMachineSagaRepository<TInstance> repository = stateMachineSagaRepositoryConfigurator.Configure();
 
-            var stateMachineConfigurator = new StateMachineSubscriptionConfiguratorImpl<TInstance>(stateMachine, repository);
+            var stateMachineConfigurator = new StateMachineSubscriptionConfigurator<TInstance>(stateMachine, repository);
 
             configurator.AddConfigurator(stateMachineConfigurator);
 

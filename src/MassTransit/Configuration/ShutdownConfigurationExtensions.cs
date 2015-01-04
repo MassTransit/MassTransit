@@ -22,7 +22,7 @@ namespace MassTransit
             var controlBusConfigurator =
                 new PostCreateBusBuilderConfigurator(bus => { bus.ShutdownTimeout = timeout; });
 
-            configurator.AddBusConfigurator(controlBusConfigurator);
+//            configurator.AddBusConfigurator(controlBusConfigurator);
         }
     }
 }

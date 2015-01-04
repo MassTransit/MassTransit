@@ -12,34 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.PipeConfigurators
 {
+    using System;
     using System.Collections.Generic;
     using Configurators;
     using PipeBuilders;
     using Pipeline;
-    using Pipeline.Filters;
 
 
-    public class ConsumerPipeBuilderConfigurator<TConsumer, TMessage> :
-        IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer, TMessage>>
-        where TConsumer : class
-        where TMessage : class
+    public class DelegatePipeSpecification<T> :
+        IPipeConfigurable<T>
+        where T : class, PipeContext
     {
-        readonly IFilter<ConsumerConsumeContext<TConsumer>> _filter;
+        readonly Action<T> _callback;
 
-        public ConsumerPipeBuilderConfigurator(IFilter<ConsumerConsumeContext<TConsumer>> filter)
+        public DelegatePipeSpecification(Action<T> callback)
         {
-            _filter = filter;
+            _callback = callback;
         }
 
-        public void Build(IPipeBuilder<ConsumerConsumeContext<TConsumer, TMessage>> builder)
+        public void Build(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new ConsumerSplitFilter<TConsumer, TMessage>(_filter));
+            builder.AddFilter(new DelegateFilter<T>(_callback));
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_filter == null)
-                yield return this.Failure("Filter", "must not be null");
+            if (_callback == null)
+                yield return this.Failure("Callback", "must not be null");
         }
     }
 }

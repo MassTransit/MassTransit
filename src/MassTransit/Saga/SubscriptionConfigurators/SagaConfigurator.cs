@@ -21,7 +21,7 @@ namespace MassTransit.Saga.SubscriptionConfigurators
 
     public class SagaConfigurator<TSaga> :
         ISagaConfigurator<TSaga>,
-        IReceiveEndpointBuilderConfigurator
+        IReceiveEndpointSpecification
         where TSaga : class, ISaga
     {
         readonly IRetryPolicy _retryPolicy;
