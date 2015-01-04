@@ -59,5 +59,10 @@ namespace MassTransit.Policies
                 yield return TimeSpan.FromMilliseconds(delta);
             }
         }
+
+        public override string ToString()
+        {
+            return string.Format("Exponential (limit {0}, min {1}ms, max {2}ms", _retryLimit, _minInterval, _maxInterval);
+        }
     }
 }

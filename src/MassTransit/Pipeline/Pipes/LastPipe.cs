@@ -40,9 +40,9 @@ namespace MassTransit.Pipeline.Pipes
             return _filter.Send(context, Cache.LastPipe);
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return _filter.Inspect(inspector);
+            return _filter.Visit(visitor);
         }
 
 
@@ -59,7 +59,7 @@ namespace MassTransit.Pipeline.Pipes
             {
             }
 
-            public bool Inspect(IPipeInspector inspector)
+            public bool Visit(IPipeVisitor visitor)
             {
                 return true;
             }

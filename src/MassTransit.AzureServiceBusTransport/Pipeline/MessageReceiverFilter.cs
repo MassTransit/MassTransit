@@ -67,9 +67,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             await next.Send(context);
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this, x => _receivePipe.Inspect(inspector));
+            return visitor.Visit(this, x => _receivePipe.Visit(visitor));
         }
     }
 }

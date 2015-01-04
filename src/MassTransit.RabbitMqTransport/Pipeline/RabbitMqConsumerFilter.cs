@@ -52,9 +52,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this, x => _receivePipe.Inspect(x));
+            return visitor.Visit(this, x => _receivePipe.Visit(x));
         }
     }
 }

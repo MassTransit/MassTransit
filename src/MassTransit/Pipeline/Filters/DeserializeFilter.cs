@@ -42,9 +42,9 @@ namespace MassTransit.Pipeline.Filters
             await consumeContext.CompleteTask;
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this, x => _output.Inspect(x));
+            return visitor.Visit(this, x => _output.Visit(x));
         }
     }
 }

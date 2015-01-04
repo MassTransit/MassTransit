@@ -198,10 +198,10 @@ namespace MassTransit.Transports
                     await _sendPipe.Send(context);
             }
 
-            public bool Inspect(IPipeInspector inspector)
+            public bool Visit(IPipeVisitor visitor)
             {
-                return inspector.Inspect(this,
-                    x => (_pipe != null && _pipe.Inspect(inspector)) || (_sendPipe != null && _sendPipe.Inspect(inspector)));
+                return visitor.Visit(this,
+                    x => (_pipe != null && _pipe.Visit(visitor)) || (_sendPipe != null && _sendPipe.Visit(visitor)));
             }
         }
     }

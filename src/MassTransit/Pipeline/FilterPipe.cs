@@ -33,9 +33,9 @@ namespace MassTransit.Pipeline
             return _filter.Send(context, _next);
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return _filter.Inspect(inspector) && _next.Inspect(inspector);
+            return _filter.Visit(visitor) && _next.Visit(visitor);
         }
     }
 }

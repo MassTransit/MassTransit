@@ -46,9 +46,9 @@ namespace MassTransit.Pipeline.Filters
             }
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this);
+            return visitor.Visit(this);
         }
 
         static async Task Attempt(IRetryContext retryContext, T context, IPipe<T> next)

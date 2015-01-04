@@ -39,7 +39,7 @@ namespace MassTransit.Pipeline.Filters
 
             TeeConsumeFilter<T> added = _pipes.GetOrAdd(key, x => new TeeConsumeFilter<T>());
 
-            ConnectHandle handle = added.Connect(pipe);
+            ConnectHandle handle = added.ConnectConsumePipe(pipe);
 
             return new Handle(key, handle, RemovePipe);
         }
@@ -53,9 +53,9 @@ namespace MassTransit.Pipeline.Filters
                 await filter.Send(context, next);
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this, x => _pipes.Values.Cast<IFilter<ConsumeContext<T>>>().All(pipe => pipe.Inspect(x)));
+            return visitor.Visit(this, x => _pipes.Values.Cast<IFilter<ConsumeContext<T>>>().All(pipe => pipe.Visit(x)));
         }
 
         void RemovePipe(TKey key, ConnectHandle connectHandle)

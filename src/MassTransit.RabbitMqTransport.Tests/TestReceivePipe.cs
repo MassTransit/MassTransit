@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             await _callback(context);
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
             return true;
         }

@@ -27,7 +27,7 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="channel">The channel (can be null)</param>
         /// <param name="replyCode"></param>
         /// <param name="message">Message for channel closure</param>
-        public static void Cleanup(this IModel channel, ushort replyCode = 200, string message = "Unknown")
+        public static void Cleanup(this IModel channel, ushort replyCode = 200, string message = "VisitUnknownFilter")
         {
             if (channel != null)
             {
@@ -48,7 +48,7 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="connection">The channel (can be null)</param>
         /// <param name="replyCode"></param>
         /// <param name="message">Message for channel closure</param>
-        public static void Cleanup(this IConnection connection, ushort replyCode = 200, string message = "Unknown")
+        public static void Cleanup(this IConnection connection, ushort replyCode = 200, string message = "VisitUnknownFilter")
         {
             if (connection != null)
             {

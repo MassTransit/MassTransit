@@ -18,7 +18,6 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
-    using Subscriptions;
     using Transports;
     using Util;
 

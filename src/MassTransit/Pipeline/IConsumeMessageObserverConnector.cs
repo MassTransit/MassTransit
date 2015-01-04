@@ -12,8 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    public delegate bool PipeInspectorCallback(IPipeInspector inspector);
-
-
-    public delegate bool FilterInspectorCallback(IPipeInspector inspector);
+    /// <summary>
+    /// Supports connection of a message observer to the pipeline
+    /// </summary>
+    public interface IConsumeMessageObserverConnector
+    {
+        ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+            where T : class;
+    }
 }

@@ -36,7 +36,7 @@ namespace MassTransit.Tests.Pipeline
             });
 
             TestConsumeObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
-            filter.Connect(interceptor);
+            filter.ConnectConsumeMessageObserver(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
 
@@ -57,7 +57,7 @@ namespace MassTransit.Tests.Pipeline
             filter.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
 
             TestConsumeObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
-            filter.Connect(interceptor);
+            filter.ConnectConsumeMessageObserver(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
 
@@ -78,7 +78,7 @@ namespace MassTransit.Tests.Pipeline
             filter.ConnectConsumer(() => new OneMessageConsumer(received));
 
             TestConsumeObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
-            filter.Connect(interceptor);
+            filter.ConnectConsumeMessageObserver(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
 
@@ -99,7 +99,7 @@ namespace MassTransit.Tests.Pipeline
             filter.ConnectHandler<MessageA>(async context => received.TrySetResult(context.Message));
 
             TestConsumeObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
-            filter.Connect(interceptor);
+            filter.ConnectConsumeMessageObserver(interceptor);
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
 

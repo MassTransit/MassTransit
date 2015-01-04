@@ -25,14 +25,14 @@ namespace MassTransit.EndpointConfigurators
             _consumePipe = consumePipe;
         }
 
-        ConnectHandle IConsumeFilterConnector.Connect<T>(IPipe<ConsumeContext<T>> pipe)
+        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            return _consumePipe.Connect(pipe);
+            return _consumePipe.ConnectConsumePipe(pipe);
         }
 
-        ConnectHandle IMessageObserverConnector.Connect<T>(IConsumeMessageObserver<T> observer)
+        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
-            return _consumePipe.Connect(observer);
+            return _consumePipe.ConnectConsumeMessageObserver(observer);
         }
 
         IConsumePipe IReceiveEndpointBuilder.InputPipe

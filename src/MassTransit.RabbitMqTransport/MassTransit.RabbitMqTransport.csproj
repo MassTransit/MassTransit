@@ -61,7 +61,7 @@
     <Compile Include="Configuration\RabbitMqConsumerPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RabbitMqHost.cs" />
-    <Compile Include="Configuration\RabbitMqServiceBusBuilder.cs" />
+    <Compile Include="Configuration\RabbitMqBusBuilder.cs" />
     <Compile Include="Contexts\RabbitMqSendContextHeaders.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
     <Compile Include="Contexts\RabbitMqContextHeaderProvider.cs" />
@@ -74,7 +74,6 @@
     <Compile Include="Exceptions\RabbitMqConnectionException.cs" />
     <Compile Include="IConnectionFactory.cs" />
     <Compile Include="IModelCache.cs" />
-    <Compile Include="IRabbitMqConnectionCache.cs" />
     <Compile Include="Pipeline\ExchangeBindingSettings.cs" />
     <Compile Include="Pipeline\ExchangeSettings.cs" />
     <Compile Include="Pipeline\IRabbitMqConnector.cs" />

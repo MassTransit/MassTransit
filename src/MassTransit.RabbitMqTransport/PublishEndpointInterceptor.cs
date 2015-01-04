@@ -157,7 +157,7 @@ namespace MassTransit.RabbitMqTransport
         void FindOrAddEndpoint(Type messageType, IRabbitMqEndpointAddress address)
         {
 //            var locator = new PublishEndpointSinkLocator(messageType, address);
-//            _bus.OutboundPipeline.Inspect(locator);
+//            _bus.OutboundPipeline.VisitMessageTypeConsumeFilter(locator);
 
 //            if (locator.Found) // there was already a subscribed endpoint
 //            {

@@ -277,7 +277,7 @@ namespace MassTransit.Tests.Serialization
                 return (token).Select(ConvertJson).ToList();
             }
 
-            throw new ArgumentException(string.Format("Unknown token type '{0}'", token.GetType()), "token");
+            throw new ArgumentException(string.Format("VisitUnknownFilter token type '{0}'", token.GetType()), "token");
         }
 
 

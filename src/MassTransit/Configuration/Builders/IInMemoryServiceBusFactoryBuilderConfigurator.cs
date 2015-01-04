@@ -18,6 +18,6 @@ namespace MassTransit.Builders
     public interface IInMemoryServiceBusFactoryBuilderConfigurator :
         Configurator
     {
-        void Configure(IInMemoryServiceBusBuilder builder);
+        void Configure(IInMemoryBusBuilder builder);
     }
 }

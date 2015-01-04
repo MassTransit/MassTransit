@@ -41,9 +41,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             return next.Send(context);
         }
 
-        bool IFilter<ModelContext>.Inspect(IPipeInspector inspector)
+        bool IFilter<ModelContext>.Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this);
+            return visitor.Visit(this);
         }
 
         void DeclareExchange(ModelContext context)
@@ -91,9 +91,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             return next.Send(context);
         }
 
-        bool IFilter<ModelContext>.Inspect(IPipeInspector inspector)
+        bool IFilter<ModelContext>.Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this);
+            return visitor.Visit(this);
         }
 
         void DeclareExchange(ModelContext context)

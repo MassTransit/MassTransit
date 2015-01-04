@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.Scheduling
 {
     using System;
-    using System.Collections.Generic;
 
 
     public interface ScheduleMessage
@@ -21,14 +20,14 @@ namespace MassTransit.Scheduling
         Guid CorrelationId { get; }
 
         /// <summary>
-        /// The time at which the message should be published
+        /// The time at which the message should be published, should be in UTC
         /// </summary>
         DateTime ScheduledTime { get; }
 
         /// <summary>
         /// The message types implemented by the message
         /// </summary>
-        IList<string> PayloadType { get; }
+        string[] PayloadType { get; }
 
         /// <summary>
         /// The destination where the message should be sent

@@ -34,8 +34,8 @@ namespace MassTransit.Pipeline
         /// <summary>
         /// Inspects the filter, allowing a graph of the pipeline to be built
         /// </summary>
-        /// <param name="inspector"></param>
+        /// <param name="visitor"></param>
         /// <returns></returns>
-        bool Inspect(IPipeInspector inspector);
+        bool Visit(IPipeVisitor visitor);
     }
 }

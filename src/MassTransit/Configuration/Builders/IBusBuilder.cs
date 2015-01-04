@@ -21,7 +21,7 @@ namespace MassTransit.Builders
     /// <summary>
     /// Used to build and configure a service bus instance as it is created
     /// </summary>
-    public interface IServiceBusBuilder
+    public interface IBusBuilder
     {
         /// <summary>
         /// The default message deserializer

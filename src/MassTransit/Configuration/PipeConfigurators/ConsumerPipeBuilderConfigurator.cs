@@ -19,14 +19,14 @@ namespace MassTransit.PipeConfigurators
     using Pipeline.Filters;
 
 
-    public class ConsumerFilterBuilderConfigurator<TConsumer, TMessage> :
+    public class ConsumerPipeBuilderConfigurator<TConsumer, TMessage> :
         IPipeBuilderConfigurator<ConsumerConsumeContext<TConsumer, TMessage>>
         where TConsumer : class
         where TMessage : class
     {
         readonly IFilter<ConsumerConsumeContext<TConsumer>> _filter;
 
-        public ConsumerFilterBuilderConfigurator(IFilter<ConsumerConsumeContext<TConsumer>> filter)
+        public ConsumerPipeBuilderConfigurator(IFilter<ConsumerConsumeContext<TConsumer>> filter)
         {
             _filter = filter;
         }

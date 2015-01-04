@@ -71,7 +71,7 @@ namespace MassTransit.AzureServiceBusTransport
                 yield return this.Failure("PrefetchCount", "must be > 0");
         }
 
-        public void Configure(IServiceBusBuilder builder)
+        public void Configure(IBusBuilder builder)
         {
             builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder.MessageDeserializer));
         }

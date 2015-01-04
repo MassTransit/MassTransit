@@ -50,7 +50,7 @@ namespace MassTransit.Configurators
                 _sendTransportProvider = _sendTransportProvider ?? transportProvider;
             }
 
-            var builder = new InMemoryServiceBusBuilder(_inputAddress, _receiveTransportProvider, _sendTransportProvider);
+            var builder = new InMemoryBusBuilder(_inputAddress, _receiveTransportProvider, _sendTransportProvider);
 
             foreach (IInMemoryServiceBusFactoryBuilderConfigurator configurator in _configurators)
                 configurator.Configure(builder);
@@ -103,7 +103,7 @@ namespace MassTransit.Configurators
                 return _configurator.Validate();
             }
 
-            public void Configure(IInMemoryServiceBusBuilder builder)
+            public void Configure(IInMemoryBusBuilder builder)
             {
                 _configurator.Configure(builder);
             }

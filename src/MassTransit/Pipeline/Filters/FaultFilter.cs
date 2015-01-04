@@ -38,9 +38,9 @@ namespace MassTransit.Pipeline.Filters
 //            }
 //        }
 //
-//        bool IFilter<ReceiveContext>.Inspect(IPipeInspector inspector)
+//        bool IFilter<ReceiveContext>.VisitMessageTypeConsumeFilter(IPipeVisitor inspector)
 //        {
-//            return inspector.Inspect(this);
+//            return inspector.VisitMessageTypeConsumeFilter(this);
 //        }
 //    }
 }

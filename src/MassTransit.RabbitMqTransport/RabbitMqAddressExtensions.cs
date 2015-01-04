@@ -231,14 +231,21 @@ namespace MassTransit.RabbitMqTransport
             return hostSettings;
         }
 
-        static void VerifyQueueOrExchangeNameIsLegal(string path)
+        static void VerifyQueueOrExchangeNameIsLegal(string queueName)
         {
-            Match match = _regex.Match(path);
-            if (!match.Success)
+            var success = IsValidQueueName(queueName);
+            if (!success)
             {
                 throw new RabbitMqAddressException(
-                    "The path can be empty, or a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.");
+                    "The queueName can be empty, or a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.");
             }
+        }
+
+        public static bool IsValidQueueName(string queueName)
+        {
+            Match match = _regex.Match(queueName);
+            var success = match.Success;
+            return success;
         }
 
 

@@ -56,7 +56,7 @@ namespace MassTransit.SubscriptionConnectors
             return typeof(T).GetInterfaces()
                 .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(IConsumer<>))
-                .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0], typeof(T)))
+                .Select(x => new MessageInterfaceType(x.GetGenericArguments()[0], typeof(T)))
                 .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
         }
 
@@ -65,7 +65,7 @@ namespace MassTransit.SubscriptionConnectors
             return typeof(T).GetInterfaces()
                 .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(IMessageConsumer<>))
-                .Select(x => new MessageInterfaceType(x, x.GetGenericArguments()[0], typeof(T)))
+                .Select(x => new MessageInterfaceType(x.GetGenericArguments()[0], typeof(T)))
                 .Where(x => x.MessageType.IsValueType == false);
         }
 

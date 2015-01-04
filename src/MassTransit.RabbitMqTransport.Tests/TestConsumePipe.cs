@@ -34,27 +34,27 @@ namespace MassTransit.RabbitMqTransport.Tests
             await _callback(context);
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
             return true;
         }
 
-        public ConnectHandle Connect<T>(IPipe<ConsumeContext<T>> pipe) where T : class
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe) where T : class
         {
             throw new NotImplementedException();
         }
 
-        public ConnectHandle Connect<TMessage>(IConsumeMessageObserver<TMessage> observer) where TMessage : class
+        public ConnectHandle ConnectConsumeMessageObserver<TMessage>(IConsumeMessageObserver<TMessage> observer) where TMessage : class
         {
             throw new NotImplementedException();
         }
 
-        public ConnectHandle Connect<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe) where T : class
+        public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe) where T : class
         {
             throw new NotImplementedException();
         }
 
-        public ConnectHandle Connect(IConsumeObserver observer)
+        public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
         {
             throw new NotImplementedException();
         }

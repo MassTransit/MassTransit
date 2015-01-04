@@ -60,7 +60,7 @@ namespace MassTransit.Courier.Tests
                 Assert.Fail("Failed due to exception {0}", faulted.Result.Message.ActivityExceptions.Any()
                     ? faulted.Result.Message.ActivityExceptions.First()
                         .ExceptionInfo.Message
-                    : "Unknown");
+                    : "VisitUnknownFilter");
             }
 
             completed.Status.ShouldBe(TaskStatus.RanToCompletion);

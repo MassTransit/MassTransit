@@ -68,13 +68,11 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.7\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Management" />
     <Reference Include="System.Transactions" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
@@ -84,14 +82,13 @@
     </Compile>
     <Compile Include="Bus.cs" />
     <Compile Include="BusHandle.cs" />
-    <Compile Include="Configuration\Builders\BusBuilder.cs" />
     <Compile Include="Configuration\Builders\EndpointFactoryBuilder.cs" />
-    <Compile Include="Configuration\Builders\IInMemoryServiceBusBuilder.cs" />
+    <Compile Include="Configuration\Builders\IInMemoryBusBuilder.cs" />
     <Compile Include="Configuration\Builders\IInMemoryServiceBusFactoryBuilderConfigurator.cs" />
-    <Compile Include="Configuration\Builders\InMemoryServiceBusBuilder.cs" />
-    <Compile Include="Configuration\Builders\IServiceBusBuilder.cs" />
+    <Compile Include="Configuration\Builders\InMemoryBusBuilder.cs" />
+    <Compile Include="Configuration\Builders\IBusBuilder.cs" />
     <Compile Include="Configuration\Builders\IServiceBusFactoryBuilderConfigurator.cs" />
-    <Compile Include="Configuration\Builders\ServiceBusBuilderBase.cs" />
+    <Compile Include="Configuration\Builders\BusBuilder.cs" />
     <Compile Include="Configuration\Configurators\BusFactory.cs" />
     <Compile Include="Configuration\Configurators\InMemoryBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\IPipeConfigurationResult.cs" />
@@ -105,6 +102,7 @@
     <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\EndpointConfigurators\SetMessageSerializerServiceBusFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\FilterPipeConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\IBuildPipeConfigurator.cs" />
     <Compile Include="Configuration\IConfigurable.cs" />
     <Compile Include="Configuration\IInMemoryServiceBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\InMemoryBus.cs" />
@@ -121,7 +119,7 @@
     <Compile Include="Configuration\PipeBuilders\IPipeBuilder.cs" />
     <Compile Include="Configuration\PipeBuilders\PipeBuilder.cs" />
     <Compile Include="Configuration\PipeConfigurators\AsyncDelegatePipeBuilderConfigurator.cs" />
-    <Compile Include="Configuration\PipeConfigurators\ConsumerFilterBuilderConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ConsumerPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\DelegatePipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\FilterPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\HandlerPipeBuilderConfigurator.cs" />
@@ -131,7 +129,6 @@
     <Compile Include="Configuration\PipeConfigurators\RepeatPipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\RescuePipeBuilderConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\RetryPipeBuilderConfigurator.cs" />
-    <Compile Include="Configuration\PipeConfigurators\TupleFilterBuilderConfigurator.cs" />
     <Compile Include="Configuration\RepeatPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RescueFilterConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RetryPipeConfiguratorExtensions.cs" />
@@ -152,7 +149,6 @@
     <Compile Include="Configuration\SubscriptionConnectors\InstanceMessageConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageConnectorFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\LegacyConsumeConnectorFactory.cs" />
-    <Compile Include="Configuration\TuplePipeConfiguratorExtensions.cs" />
     <Compile Include="ConnectHandle.cs" />
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="ConsumeContextExtensions.cs" />
@@ -341,11 +337,13 @@
     <Compile Include="NewId\NewIdProviders\WMINetworkAddressWorkerIdProvider.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
+    <Compile Include="Pipeline\ConsumeMessageFilterVisitorAdapter.cs" />
+    <Compile Include="Pipeline\ConsumeMessageFilterVisitorAdapterCache.cs" />
     <Compile Include="Pipeline\DefaultConstructorConsumerFactory.cs" />
     <Compile Include="Pipeline\DelegateConsumerFactory.cs" />
     <Compile Include="Pipeline\DelegateFilter.cs" />
-    <Compile Include="Pipeline\FilterInspectorAdapter.cs" />
-    <Compile Include="Pipeline\FilterInspectorAdapterCache.cs" />
+    <Compile Include="Pipeline\ConsumerFilterVisitorAdapter.cs" />
+    <Compile Include="Pipeline\ConsumerFilterVisitorAdapterCache.cs" />
     <Compile Include="Pipeline\FilterPipe.cs" />
     <Compile Include="Pipeline\Filters\AsyncDelegateFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
@@ -364,25 +362,26 @@
     <Compile Include="Pipeline\Filters\RescueFilter.cs" />
     <Compile Include="Pipeline\Filters\RetryFilter.cs" />
     <Compile Include="Pipeline\Filters\TeeConsumeFilter.cs" />
-    <Compile Include="Pipeline\Filters\TupleSplitFilter.cs" />
     <Compile Include="Pipeline\IConnectPipeById.cs" />
-    <Compile Include="Pipeline\IConsumeFilterConnector.cs" />
+    <Compile Include="Pipeline\IConsumeMessageFilterVisitor.cs" />
+    <Compile Include="Pipeline\IConsumeMessageFilterVisitorAdapter.cs" />
+    <Compile Include="Pipeline\IConsumePipeConnector.cs" />
     <Compile Include="Pipeline\IConsumeObserver.cs" />
     <Compile Include="Pipeline\IConsumeObserverConnector.cs" />
     <Compile Include="Pipeline\IConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\IFilter.cs" />
-    <Compile Include="Pipeline\IFilterInspector.cs" />
-    <Compile Include="Pipeline\IFilterInspectorAdapter.cs" />
+    <Compile Include="Pipeline\IConsumerFilterVisitor.cs" />
+    <Compile Include="Pipeline\IConsumerFilterVisitorAdapter.cs" />
     <Compile Include="Pipeline\IConsumeMessageObserver.cs" />
-    <Compile Include="Pipeline\IMessageObserverConnector.cs" />
+    <Compile Include="Pipeline\IConsumeMessageObserverConnector.cs" />
     <Compile Include="Pipeline\InstanceConsumerFactory.cs" />
     <Compile Include="Pipeline\IPipe.cs" />
-    <Compile Include="Pipeline\IPipeInspector.cs" />
+    <Compile Include="Pipeline\IPipeVisitor.cs" />
     <Compile Include="Pipeline\IConsumePipe.cs" />
     <Compile Include="Pipeline\ConsumePipeExtensions.cs" />
     <Compile Include="Pipeline\IPublishInterceptor.cs" />
     <Compile Include="Pipeline\IReceivePipe.cs" />
-    <Compile Include="Pipeline\IRequestFilterConnector.cs" />
+    <Compile Include="Pipeline\IRequestPipeConnector.cs" />
     <Compile Include="Pipeline\ISendInterceptor.cs" />
     <Compile Include="Pipeline\ISendObserver.cs" />
     <Compile Include="Pipeline\ISendObserverConnector.cs" />
@@ -393,17 +392,14 @@
     <Compile Include="Pipeline\ConsumeObserverConnectable.cs" />
     <Compile Include="Pipeline\ObjectConsumerFactory.cs" />
     <Compile Include="Pipeline\PipeExtensions.cs" />
-    <Compile Include="Pipeline\PipeInspectorBase.cs" />
-    <Compile Include="Pipeline\PipeInspectorCallback.cs" />
+    <Compile Include="Pipeline\PipeVisitor.cs" />
+    <Compile Include="Pipeline\PipeVisitorCallback.cs" />
     <Compile Include="Pipeline\ISendFilter.cs" />
     <Compile Include="Pipeline\Pipes\ConsumePipe.cs" />
     <Compile Include="Pipeline\Pipes\ConsumerMergePipe.cs" />
     <Compile Include="Pipeline\Pipes\EmptyPipe.cs" />
     <Compile Include="Pipeline\Pipes\LastPipe.cs" />
-    <Compile Include="Pipeline\Pipes\TupleMergePipe.cs" />
-    <Compile Include="Pipeline\StringPipeInspector.cs" />
-    <Compile Include="Pipeline\TupleContext.cs" />
-    <Compile Include="Pipeline\TupleContextProxy.cs" />
+    <Compile Include="Pipeline\StringPipeVisitor.cs" />
     <Compile Include="Policies\CancelRetryContext.cs" />
     <Compile Include="Policies\CancelRetryPolicy.cs" />
     <Compile Include="Policies\ExponentialRetryPolicy.cs" />
@@ -486,13 +482,9 @@
     <Compile Include="Configuration\EndpointConfigurators\DefaultMessageTrackerEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\DefaultRetryLimitEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\MessageTrackerConfigurationExtensions.cs" />
-    <Compile Include="Configuration\ReferenceFactory.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceType.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceTypeExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\IConsumerMetadataCache.cs" />
-    <Compile Include="Configuration\BusServiceLayer.cs" />
-    <Compile Include="Configuration\Configuration\BusSettings.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationResult.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationResultImpl.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultExtensions.cs" />
@@ -505,10 +497,8 @@
     <Compile Include="Configuration\BusConfigurators\PostCreateBusBuilderConfigurator.cs" />
     <Compile Include="Configuration\Configurators\Configurator.cs" />
     <Compile Include="Configuration\BusConfigurators\BusBuilderConfigurator.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\DelegateEndpointFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\ServiceBusConfigurator.cs" />
-    <Compile Include="Configuration\BusConfigurators\ServiceBusDefaultSettingsConfigurator.cs" />
     <Compile Include="Configuration\SerializerConfigurationExtensions.cs" />
     <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ServiceBusFactory.cs" />
@@ -516,11 +506,9 @@
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnectorCache.cs" />
     <Compile Include="Configuration\ThreadConfigurationExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\IConsumerConfigurator.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\ConsumerSubscriptionConfiguratorImpl.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\ConsumerConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\IInstanceConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\InstanceConfigurator.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfigurator.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\SubscriptionConfiguratorImpl.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\UntypedConsumerConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnector.cs" />
@@ -571,7 +559,6 @@
     <Compile Include="MessageUrn.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
     <Compile Include="Saga\Configuration\SagaExtensions.cs" />
-    <Compile Include="Saga\SubscriptionBuilders\SagaSubscriptionBuilder.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\ISagaConfigurator.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\SagaConfigurator.cs" />
     <Compile Include="Saga\SubscriptionConnectors\ObservesSagaConnectorFactory.cs" />
@@ -589,9 +576,6 @@
     <Compile Include="Saga\Orchestrates.cs" />
     <Compile Include="Saga\InitiatedBy.cs" />
     <Compile Include="Serialization\XmlMessageDeserializer.cs" />
-    <Compile Include="Subscriptions\ISubscriptionReference.cs" />
-    <Compile Include="Subscriptions\PermanentSubscriptionReference.cs" />
-    <Compile Include="Subscriptions\TransientSubscriptionReference.cs" />
     <Compile Include="MassTransitBus.cs" />
     <Compile Include="SuperExtensions.cs" />
     <Compile Include="Testing\ActionConfigurators\PublishTestActionConfigurator.cs" />
@@ -786,6 +770,11 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Configuration\Configuration\" />
+    <Folder Include="Saga\SubscriptionBuilders\" />
+    <Folder Include="Subscriptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

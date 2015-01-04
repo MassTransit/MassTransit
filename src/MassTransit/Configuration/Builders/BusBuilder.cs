@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,31 +13,116 @@
 namespace MassTransit.Builders
 {
     using System;
-    using Configuration;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Net.Mime;
+    using Serialization;
+    using Transports;
 
 
-    /// <summary>
-    /// A BusBuilder is the base interface for building service, and includes things like
-    /// control bus, subscription bus, and other limited-functionality bus instances
-    /// </summary>
-    public interface BusBuilder
+    public abstract class BusBuilder
     {
-        /// <summary>
-        /// The settings to creating the bus, including address, etc.
-        /// </summary>
-        BusSettings Settings { get; }
+        readonly Lazy<IMessageDeserializer> _deserializer;
+        readonly IDictionary<string, Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer>> _deserializerFactories;
+        readonly IList<IReceiveEndpoint> _endpoints;
+        readonly Lazy<IPublishEndpoint> _publishEndpointProvider;
+        readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
+        readonly Lazy<IMessageSerializer> _serializer;
+        Func<IMessageSerializer> _serializerFactory;
 
-        /// <summary>
-        /// Builds the bus instance
-        /// </summary>
-        /// <returns></returns>
-        IServiceBus Build();
+        protected BusBuilder()
+        {
+            _endpoints = new List<IReceiveEndpoint>();
+            _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
+            _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
+            _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
+            _publishEndpointProvider = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
+            _deserializerFactories =
+                new Dictionary<string, Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer>>(StringComparer.OrdinalIgnoreCase);
 
-        /// <summary>
-        /// Adds an action to be performed after bus creation to adjust settings, etc.
-        /// but before the bus is started.
-        /// </summary>
-        /// <param name="postCreateAction"></param>
-        void AddPostCreateAction(Action<ServiceBus> postCreateAction);
+            _serializerFactory = () => new JsonMessageSerializer();
+
+            AddMessageDeserializer(JsonMessageSerializer.JsonContentType,
+                (s, p) => new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
+            AddMessageDeserializer(BsonMessageSerializer.BsonContentType,
+                (s, p) => new BsonMessageDeserializer(BsonMessageSerializer.Deserializer, s, p));
+            AddMessageDeserializer(XmlMessageSerializer.XmlContentType,
+                (s, p) => new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
+        }
+
+        protected IEnumerable<IReceiveEndpoint> ReceiveEndpoints
+        {
+            get { return _endpoints; }
+        }
+
+        public IMessageSerializer MessageSerializer
+        {
+            get { return _serializer.Value; }
+        }
+
+        public IMessageDeserializer MessageDeserializer
+        {
+            get { return _deserializer.Value; }
+        }
+
+        protected ISendEndpointProvider SendEndpointProvider
+        {
+            get { return _sendEndpointProvider.Value; }
+        }
+
+        protected IPublishEndpoint PublishEndpoint
+        {
+            get { return _publishEndpointProvider.Value; }
+        }
+
+        public void AddMessageDeserializer(ContentType contentType,
+            Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer> deserializerFactory)
+        {
+            if (contentType == null)
+                throw new ArgumentNullException("contentType");
+            if (deserializerFactory == null)
+                throw new ArgumentNullException("deserializerFactory");
+
+            if (_deserializer.IsValueCreated)
+                throw new ConfigurationException("The deserializer has already been created, no additional deserializers can be added.");
+
+            if (_deserializerFactories.ContainsKey(contentType.MediaType))
+                return;
+
+            _deserializerFactories[contentType.MediaType] = deserializerFactory;
+        }
+
+        public void SetMessageSerializer(Func<IMessageSerializer> serializerFactory)
+        {
+            if (serializerFactory == null)
+                throw new ArgumentNullException("serializerFactory");
+
+            if (_serializer.IsValueCreated)
+                throw new ConfigurationException("The serializer has already been created, the serializer cannot be changed at this time.");
+
+            _serializerFactory = serializerFactory;
+        }
+
+        IMessageSerializer CreateSerializer()
+        {
+            return _serializerFactory();
+        }
+
+        IMessageDeserializer CreateDeserializer()
+        {
+            IMessageDeserializer[] deserializers =
+                _deserializerFactories.Values.Select(x => x(SendEndpointProvider, PublishEndpoint)).ToArray();
+
+            return new SupportedMessageDeserializers(deserializers);
+        }
+
+        public void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint)
+        {
+            _endpoints.Add(receiveEndpoint);
+        }
+
+        protected abstract ISendEndpointProvider CreateSendEndpointProvider();
+
+        protected abstract IPublishEndpoint CreatePublishEndpoint();
     }
 }

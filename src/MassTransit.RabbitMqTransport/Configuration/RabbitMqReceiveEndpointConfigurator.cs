@@ -121,7 +121,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             return _configurators.SelectMany(x => x.Validate());
         }
 
-        public void Configure(IServiceBusBuilder builder)
+        public void Configure(IBusBuilder builder)
         {
             ReceiveEndpoint receiveEndpoint = CreateReceiveEndpoint(builder.MessageDeserializer);
 

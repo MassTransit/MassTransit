@@ -37,9 +37,9 @@ namespace MassTransit.Pipeline.Filters
             return Task.WhenAll(logTask, next.Send(context));
         }
 
-        public bool Inspect(IPipeInspector inspector)
+        public bool Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this);
+            return visitor.Visit(this);
         }
 
         async Task CreateLogTask(T context)

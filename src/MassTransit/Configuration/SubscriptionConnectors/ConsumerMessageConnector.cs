@@ -74,7 +74,7 @@ namespace MassTransit.SubscriptionConnectors
                 x.Filter(new ConsumerMessageFilter<TConsumer, TMessage>(factory, messagePipe));
             });
 
-            return consumePipe.Connect(pipe);
+            return consumePipe.ConnectConsumePipe(pipe);
         }
 
 

@@ -25,9 +25,5 @@ namespace MassTransit
         {
             throw new ConfigurationException("This method is no longer suppport");
         }
-
-        public static void ConfigureDefaultSettings(Action<ServiceBusDefaultSettingsConfigurator> configure)
-        {
-        }
     }
 }

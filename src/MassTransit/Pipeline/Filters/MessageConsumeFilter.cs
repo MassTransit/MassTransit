@@ -24,9 +24,9 @@ namespace MassTransit.Pipeline.Filters
     /// <typeparam name="TMessage">The message type</typeparam>
     public class MessageConsumeFilter<TMessage> :
         IFilter<ConsumeContext>,
-        IConsumeFilterConnector<TMessage>,
-        IRequestFilterConnector<TMessage>,
-        IMessageObserverConnector
+        IConsumePipeConnector<TMessage>,
+        IRequestPipeConnector<TMessage>,
+        IConsumeMessageObserverConnector
         where TMessage : class
     {
         readonly MessageObserverConnectable<TMessage> _messageObservers;
@@ -38,9 +38,9 @@ namespace MassTransit.Pipeline.Filters
             _messageObservers = new MessageObserverConnectable<TMessage>();
         }
 
-        ConnectHandle IConsumeFilterConnector<TMessage>.Connect(IPipe<ConsumeContext<TMessage>> pipe)
+        ConnectHandle IConsumePipeConnector<TMessage>.ConnectConsumePipe(IPipe<ConsumeContext<TMessage>> pipe)
         {
-            return _output.Connect(pipe);
+            return _output.ConnectConsumePipe(pipe);
         }
 
         async Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
@@ -71,12 +71,12 @@ namespace MassTransit.Pipeline.Filters
             }
         }
 
-        bool IFilter<ConsumeContext>.Inspect(IPipeInspector inspector)
+        bool IFilter<ConsumeContext>.Visit(IPipeVisitor visitor)
         {
-            return inspector.Inspect(this, x => _output.Inspect(x));
+            return visitor.Visit(this, x => _output.Visit(x));
         }
 
-        ConnectHandle IMessageObserverConnector.Connect<T>(IConsumeMessageObserver<T> observer)
+        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
             var self = _messageObservers as MessageObserverConnectable<T>;
             if (self == null)
@@ -85,9 +85,9 @@ namespace MassTransit.Pipeline.Filters
             return self.Connect(observer);
         }
 
-        ConnectHandle IRequestFilterConnector<TMessage>.Connect(Guid requestId, IPipe<ConsumeContext<TMessage>> pipe)
+        ConnectHandle IRequestPipeConnector<TMessage>.ConnectRequestPipe(Guid requestId, IPipe<ConsumeContext<TMessage>> pipe)
         {
-            return _output.Connect(requestId, pipe);
+            return _output.ConnectRequestPipe(requestId, pipe);
         }
     }
 }

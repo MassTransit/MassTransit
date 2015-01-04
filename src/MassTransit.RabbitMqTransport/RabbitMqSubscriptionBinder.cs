@@ -49,7 +49,7 @@ namespace MassTransit.RabbitMqTransport
 //            Type messageType = Type.GetType(message.MessageName);
 //            if (messageType == null)
 //            {
-//                _log.InfoFormat("Unknown message type '{0}', unable to add subscription", message.MessageName);
+//                _log.InfoFormat("VisitUnknownFilter message type '{0}', unable to add subscription", message.MessageName);
 //                return;
 //            }
 //

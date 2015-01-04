@@ -54,7 +54,6 @@ namespace MassTransit.Builders
 		/// <param name="purgeOnStartup"></param>
 		void SetPurgeOnStartup(bool purgeOnStartup);
 
-
         /// <summary>
         /// Add a message serializer to the builder so that messages with other serialization types
         /// can be received without conflicts

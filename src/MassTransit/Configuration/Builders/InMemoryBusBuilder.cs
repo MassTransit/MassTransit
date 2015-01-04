@@ -19,15 +19,15 @@ namespace MassTransit.Builders
     using Transports;
 
 
-    public class InMemoryServiceBusBuilder :
-        ServiceBusBuilderBase,
-        IInMemoryServiceBusBuilder
+    public class InMemoryBusBuilder :
+        BusBuilder,
+        IInMemoryBusBuilder
     {
         readonly Uri _inputAddress;
         readonly IReceiveTransportProvider _receiveTransportProvider;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryServiceBusBuilder(Uri inputAddress, IReceiveTransportProvider receiveTransportProvider,
+        public InMemoryBusBuilder(Uri inputAddress, IReceiveTransportProvider receiveTransportProvider,
             ISendTransportProvider sendTransportProvider)
         {
             if (inputAddress == null)
