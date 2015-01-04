@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,30 +15,13 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading.Tasks;
     using Configuration;
     using NUnit.Framework;
-    using NUnit.Framework;
     using Shouldly;
 
 
     [TestFixture]
-    public class When_a_message_is_published_between_buses :
+    public class When_a_message_is_published :
         RabbitMqTestFixture
     {
-        [Test]
-        public async void Should_be_received_by_the_queue()
-        {
-            ConsumeContext<A> context = await _received;
-
-            context.Message.StringA.ShouldBe("ValueA");
-        }
-
-        [Test]
-        public async void Should_receive_the_inherited_version()
-        {
-            ConsumeContext<B> context = await _receivedB;
-
-            context.Message.StringB.ShouldBe("ValueB");
-        }
-
         Task<ConsumeContext<A>> _received;
         Task<ConsumeContext<B>> _receivedB;
 
@@ -51,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [TestFixtureSetUp]
         public void A_message_is_published()
         {
-            InputQueueSendEndpoint.Send(new A
+            Bus.Publish(new A
             {
                 StringA = "ValueA",
                 StringB = "ValueB",
@@ -70,6 +53,23 @@ namespace MassTransit.RabbitMqTransport.Tests
         class B
         {
             public string StringB { get; set; }
+        }
+
+
+        [Test]
+        public async void Should_be_received_by_the_queue()
+        {
+            ConsumeContext<A> context = await _received;
+
+            context.Message.StringA.ShouldBe("ValueA");
+        }
+
+        [Test]
+        public async void Should_receive_the_inherited_version()
+        {
+            ConsumeContext<B> context = await _receivedB;
+
+            context.Message.StringB.ShouldBe("ValueB");
         }
     }
 }
