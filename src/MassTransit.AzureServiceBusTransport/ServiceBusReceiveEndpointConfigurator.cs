@@ -26,7 +26,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Transports;
 
 
-    public class BusReceiveEndpointConfigurator :
+    public class ServiceBusReceiveEndpointConfigurator :
         IServiceBusReceiveEndpointConfigurator,
         IBusFactorySpecification
     {
@@ -36,9 +36,8 @@ namespace MassTransit.AzureServiceBusTransport
         readonly QueueDescription _queueDescription;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         int _prefetchCount;
-        bool _purgeOnStartup;
 
-        public BusReceiveEndpointConfigurator(ServiceBusHostSettings hostSettings, string queueName)
+        public ServiceBusReceiveEndpointConfigurator(ServiceBusHostSettings hostSettings, string queueName)
             : this(hostSettings, new QueueDescription(queueName))
         {
             _queueDescription.EnableBatchedOperations = true;
@@ -49,7 +48,7 @@ namespace MassTransit.AzureServiceBusTransport
             EnableDeadLetteringOnMessageExpiration = true;
         }
 
-        public BusReceiveEndpointConfigurator(ServiceBusHostSettings hostSettings, QueueDescription queueDescription)
+        public ServiceBusReceiveEndpointConfigurator(ServiceBusHostSettings hostSettings, QueueDescription queueDescription)
         {
             _pipeConfigurator = new PipeConfigurator<ConsumeContext>();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
@@ -69,6 +68,11 @@ namespace MassTransit.AzureServiceBusTransport
         {
             if (_prefetchCount <= 0)
                 yield return this.Failure("PrefetchCount", "must be > 0");
+        }
+
+        public QueueDescription QueueDescription
+        {
+            get { return _queueDescription; }
         }
 
         public void Configure(IBusBuilder builder)
@@ -111,11 +115,6 @@ namespace MassTransit.AzureServiceBusTransport
             set { _prefetchCount = value; }
         }
 
-        public bool PurgeOnStartup
-        {
-            set { _purgeOnStartup = value; }
-        }
-
         public Uri QueuePath
         {
             get { return new Uri(_hostSettings.ServiceUri, _queueDescription.Path); }
@@ -136,7 +135,6 @@ namespace MassTransit.AzureServiceBusTransport
                 AutoRenewTimeout = TimeSpan.FromMinutes(5),
                 MaxConcurrentCalls = _prefetchCount,
                 PrefetchCount = _prefetchCount,
-                PurgeOnStartup = _purgeOnStartup,
                 QueueDescription = _queueDescription,
             };
 
@@ -164,7 +162,6 @@ namespace MassTransit.AzureServiceBusTransport
             public int MaxConcurrentCalls { get; set; }
             public QueueDescription QueueDescription { get; set; }
             public TimeSpan AutoRenewTimeout { get; set; }
-            public bool PurgeOnStartup { get; set; }
         }
     }
 }

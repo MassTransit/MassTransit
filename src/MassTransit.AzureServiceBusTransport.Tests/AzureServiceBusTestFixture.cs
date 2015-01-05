@@ -35,11 +35,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         public AzureServiceBusTestFixture()
         {
+            TestTimeout = TimeSpan.FromMinutes(1);
+
             _serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests");
 
             _sendObserver = new TestSendObserver(TestTimeout);
-
-            _inputQueueAddress = new Uri("loopback://localhost/input_queue");
         }
 
         /// <summary>
@@ -95,12 +95,20 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             startTask.Wait(TestCancellationToken);
 
             _busHandle = startTask.Result;
+            try
+            {
+                _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
+                _busSendEndpoint.Connect(_sendObserver);
 
-            _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
-            _busSendEndpoint.Connect(_sendObserver);
+                _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;
+                _inputQueueSendEndpoint.Connect(_sendObserver);
+            }
+            catch (Exception)
+            {
+                _busHandle.Stop();
 
-            _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;
-            _inputQueueSendEndpoint.Connect(_sendObserver);
+                throw;
+            }
         }
 
         [TestFixtureTearDown]
@@ -149,6 +157,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {
                     _inputQueueAddress = e.QueuePath;
+
                     ConfigureInputQueueEndpoint(e);
                 });
             });

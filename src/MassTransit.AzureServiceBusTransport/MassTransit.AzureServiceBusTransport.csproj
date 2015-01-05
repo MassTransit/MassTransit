@@ -55,6 +55,7 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AzureServiceBus.cs" />
+    <Compile Include="AzureServiceBusAddressExtensions.cs" />
     <Compile Include="AzureServiceBusReceiveContext.cs" />
     <Compile Include="AzureServiceBusSendContext.cs" />
     <Compile Include="AzureServiceBusSendContextHeaders.cs" />
@@ -63,7 +64,7 @@
     <Compile Include="AzureServiceBusSendTransport.cs" />
     <Compile Include="Configuration\AzureServiceBusHostConfigurator.cs" />
     <Compile Include="Configuration\AzureServiceBusPublishEndpoint.cs" />
-    <Compile Include="Configuration\AzureBusBusBuilder.cs" />
+    <Compile Include="Configuration\AzureServiceBusBusBuilder.cs" />
     <Compile Include="Configuration\AzureServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="IServiceBusHostConfigurator.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="ITokenProviderConfigurator.cs" />
     <Compile Include="ConnectionContext.cs" />
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
+    <Compile Include="Pipeline\PrepareSendQueueFilter.cs" />
     <Compile Include="ServiceBusConnectionContext.cs" />
     <Compile Include="ServiceBusHostSettings.cs" />
     <Compile Include="MessageReceiverContext.cs" />
@@ -85,7 +87,7 @@
     <Compile Include="ReceiverMetrics.cs" />
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="ServiceBusHostSettingsExtensions.cs" />
-    <Compile Include="BusReceiveEndpointConfigurator.cs" />
+    <Compile Include="ServiceBusReceiveEndpointConfigurator.cs" />
     <Compile Include="SharedAccessKeyTokenProvider.cs" />
     <Compile Include="SharedAccessSignatureTokenProviderConfigurator.cs" />
     <Compile Include="TransportConfiguratorExtensions.cs" />
