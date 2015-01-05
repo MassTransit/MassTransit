@@ -132,7 +132,7 @@ namespace MassTransit.TestFramework
             _bus = null;
         }
 
-        protected virtual void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
+        protected virtual void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 

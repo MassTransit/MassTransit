@@ -21,7 +21,7 @@ namespace MassTransit.Configurators
 
 
     public class InMemoryBusFactoryConfigurator :
-        IInMemoryServiceBusFactoryConfigurator,
+        IInMemoryBusFactoryConfigurator,
         IBusFactory
     {
         readonly InMemoryReceiveEndpointConfigurator _busEndpointConfigurator;

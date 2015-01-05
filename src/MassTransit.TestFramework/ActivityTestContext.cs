@@ -24,7 +24,7 @@ namespace MassTransit.TestFramework
         Uri ExecuteUri { get; }
         Uri CompensateUri { get; }
 
-        void Configure(IInMemoryServiceBusFactoryConfigurator configurator);
+        void Configure(IInMemoryBusFactoryConfigurator configurator);
     }
 
 
@@ -55,7 +55,7 @@ namespace MassTransit.TestFramework
         public Uri ExecuteUri { get; private set; }
         public Uri CompensateUri { get; private set; }
 
-        public void Configure(IInMemoryServiceBusFactoryConfigurator configurator)
+        public void Configure(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint(ExecuteQueueName, x =>
             {

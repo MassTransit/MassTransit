@@ -42,7 +42,7 @@ namespace MassTransit.Testing.ScenarioBuilders
             set { _timeout = value; }
         }
 
-        public void ConfigureBus(Action<IInMemoryServiceBusFactoryConfigurator> configureCallback)
+        public void ConfigureBus(Action<IInMemoryBusFactoryConfigurator> configureCallback)
         {
             configureCallback(_configurator);
         }

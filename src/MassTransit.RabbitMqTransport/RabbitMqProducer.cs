@@ -26,54 +26,18 @@ namespace MassTransit.RabbitMqTransport
     {
 //        readonly Cache<ulong, TaskCompletionSource<bool>> _confirms;
         static readonly ILog _log = Logger.Get<RabbitMqProducer>();
-        readonly IRabbitMqEndpointAddress _address;
         readonly bool _bindToQueue;
         readonly object _lock = new object();
         IModel _channel;
         bool _immediate;
         bool _mandatory;
 
-        public RabbitMqProducer(IRabbitMqEndpointAddress address, bool bindToQueue)
+        public RabbitMqProducer( bool bindToQueue)
         {
-            _address = address;
             _bindToQueue = bindToQueue;
   //          _confirms = new ConcurrentCache<ulong, TaskCompletionSource<bool>>();
         }
 
-        public void Bind(RabbitMqConnection connection)
-        {
-            lock (_lock)
-            {
-                IModel channel = null;
-                try
-                {
-                    channel = connection.Connection.CreateModel();
-
-                    DeclareAndBindQueue(connection, channel);
-
-                    BindEvents(channel);
-
-                    _channel = channel;
-                }
-                catch (Exception ex)
-                {
-                    channel.Cleanup(500, ex.Message);
-
-                    throw new InvalidConnectionException(_address.Uri, "Invalid connection to host", ex);
-                }
-            }
-        }
-
-        void DeclareAndBindQueue(RabbitMqConnection connection, IModel channel)
-        {
-            if (_bindToQueue)
-            {
-                connection.DeclareExchange(channel, _address.Name, _address.Durable, _address.AutoDelete);
-
-                connection.BindQueue(channel, _address.Name, _address.Durable, _address.Exclusive, _address.AutoDelete,
-                    _address.QueueArguments());
-            }
-        }
 
         void BindEvents(IModel channel)
         {
@@ -85,61 +49,12 @@ namespace MassTransit.RabbitMqTransport
             channel.ConfirmSelect();
         }
 
-        public void Unbind(RabbitMqConnection connection)
-        {
-            lock (_lock)
-            {
-                try
-                {
-                    if (_channel != null)
-                    {
-                        WaitForPendingConfirms();
 
-                        UnbindEvents(_channel);
-                        _channel.Cleanup(200, "Producer Unbind");
-                    }
-                }
-                finally
-                {
-                    if (_channel != null)
-                        _channel.Dispose();
-                    _channel = null;
-
-                    FailPendingConfirms();
-                }
-            }
-        }
-
-        void WaitForPendingConfirms()
-        {
-            try
-            {
-                bool timedOut;
-                _channel.WaitForConfirms(TimeSpan.FromSeconds(60), out timedOut);
-                if (timedOut)
-                    _log.WarnFormat("Timeout waiting for all pending confirms on {0}", _address.Uri);
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Waiting for pending confirms threw an exception", ex);
-            }
-        }
-
-        void UnbindEvents(IModel channel)
-        {
-            channel.BasicAcks -= HandleAck;
-            channel.BasicNacks -= HandleNack;
-            channel.BasicReturn -= HandleReturn;
-            channel.FlowControl -= HandleFlowControl;
-            channel.ModelShutdown -= HandleModelShutdown;
-        }
 
         void FailPendingConfirms()
         {
             try
             {
-                var exception = new MessageNotConfirmedException(_address.Uri,
-                    "Publish not confirmed before channel closed");
 
 //                _confirms.Each((id, task) => task.TrySetException(exception));
             }
@@ -155,8 +70,6 @@ namespace MassTransit.RabbitMqTransport
         {
             lock (_lock)
             {
-                if (_channel == null)
-                    throw new InvalidConnectionException(_address.Uri, "Channel should not be null");
 
                 return _channel.CreateBasicProperties();
             }
@@ -166,8 +79,6 @@ namespace MassTransit.RabbitMqTransport
         {
             lock (_lock)
             {
-                if (_channel == null)
-                    throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
 
                 _channel.BasicPublish(exchangeName, "", properties, body);
             }
@@ -177,8 +88,6 @@ namespace MassTransit.RabbitMqTransport
         {
             lock (_lock)
             {
-                if (_channel == null)
-                    throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
 
                 ulong deliveryTag = _channel.NextPublishSeqNo;
 

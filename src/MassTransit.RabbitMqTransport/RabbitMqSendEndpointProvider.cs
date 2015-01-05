@@ -24,11 +24,11 @@ namespace MassTransit.RabbitMqTransport
         ISendEndpointProvider,
         IDisposable
     {
-        readonly RabbitMqHost[] _hosts;
+        readonly IRabbitMqHost[] _hosts;
         readonly Uri _inputAddress;
         readonly IMessageSerializer _serializer;
 
-        public RabbitMqSendEndpointProvider(IMessageSerializer serializer, RabbitMqHost[] hosts, Uri inputAddress)
+        public RabbitMqSendEndpointProvider(IMessageSerializer serializer, IRabbitMqHost[] hosts, Uri inputAddress)
         {
             _hosts = hosts;
             _inputAddress = inputAddress;
@@ -37,7 +37,7 @@ namespace MassTransit.RabbitMqTransport
 
         public void Dispose()
         {
-            foreach (RabbitMqHost host in _hosts)
+            foreach (IRabbitMqHost host in _hosts)
             {
                 host.ConnectionCache.Stop();
                 host.SendConnectionCache.Stop();
@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport
 
             RabbitMqHostSettings hostSettings = address.GetHostSettings();
 
-            RabbitMqHost host = _hosts.FirstOrDefault(x => RabbitMqHostEqualityComparer.Default.Equals(hostSettings, x.Settings));
+            IRabbitMqHost host = _hosts.FirstOrDefault(x => RabbitMqHostEqualityComparer.Default.Equals(hostSettings, x.Settings));
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 

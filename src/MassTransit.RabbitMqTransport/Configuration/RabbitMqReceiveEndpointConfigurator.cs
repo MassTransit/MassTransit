@@ -33,12 +33,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IBusFactorySpecification
     {
         readonly IList<IReceiveEndpointSpecification> _configurators;
-        readonly RabbitMqHost _host;
+        readonly IRabbitMqHost _host;
         readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         readonly RabbitMqReceiveSettings _settings;
 
-        public RabbitMqReceiveEndpointConfigurator(RabbitMqHost host, string queueName = null)
+        public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, string queueName = null)
         {
             _host = host;
             _pipeConfigurator = new PipeConfigurator<ConsumeContext>();

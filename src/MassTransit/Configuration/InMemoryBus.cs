@@ -23,7 +23,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configure">The configuration callback to configure the bus</param>
         /// <returns></returns>
-        public static IBusControl Create(Action<IInMemoryServiceBusFactoryConfigurator> configure)
+        public static IBusControl Create(Action<IInMemoryBusFactoryConfigurator> configure)
         {
             var configurator = new InMemoryBusFactoryConfigurator();
 

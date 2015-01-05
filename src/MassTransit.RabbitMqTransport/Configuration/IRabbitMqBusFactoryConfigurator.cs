@@ -15,11 +15,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System;
 
 
-    public interface IRabbitMqServiceBusFactoryConfigurator :
-        IServiceBusFactoryConfigurator
+    public interface IRabbitMqBusFactoryConfigurator :
+        IBusFactoryConfigurator
     {
         // change this to return an IRabbitMqHost 
-        void Host(RabbitMqHostSettings settings);
+        IRabbitMqHost Host(RabbitMqHostSettings settings);
 
         /// <summary>
         ///     Specifies that any message sent to an exchange must be delivered to a queue or it
@@ -43,9 +43,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// <summary>
         /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.
         /// </summary>
-        /// <param name="hostSettings">The host for this endpoint</param>
+        /// <param name="host">The host for this endpoint</param>
         /// <param name="queueName">The input queue name</param>
         /// <param name="configure">The configuration method</param>
-        void ReceiveEndpoint(RabbitMqHostSettings hostSettings, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure);
+        void ReceiveEndpoint(IRabbitMqHost host, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure);
     }
 }

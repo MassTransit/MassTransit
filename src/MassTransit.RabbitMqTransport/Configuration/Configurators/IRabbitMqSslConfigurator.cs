@@ -12,18 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 {
-    using MassTransit.Configurators;
+    using System.Net.Security;
 
 
     /// <summary>
-    /// <para>A configurator for the connection factory builder, i.e.
-    /// a thing that actually lets you configure the settings that will go
-    /// into creating the connection factory.
-    /// </para>
-    /// <para>Digression: There are three turtles on the way down, then there's Atlas.</para>
+    /// Configures SSL/TLS for RabbitMQ. See http://www.rabbitmq.com/ssl.html
+    /// for details on how to set up RabbitMQ for SSL.
     /// </summary>
-    public interface ConnectionFactoryBuilderConfigurator :
-        Configurator
+    public interface IRabbitMqSslConfigurator
     {
+        string ServerName { get; set; }
+        string CertificatePath { get; set; }
+        string CertificatePassphrase { get; set; }
+
+        void AllowPolicyErrors(SslPolicyErrors policyErrors);
     }
 }

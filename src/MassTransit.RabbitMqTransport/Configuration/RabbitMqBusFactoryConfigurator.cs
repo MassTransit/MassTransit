@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using Builders;
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using PipeConfigurators;
@@ -23,18 +24,18 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
 
     public class RabbitMqBusFactoryConfigurator :
-        IRabbitMqServiceBusFactoryConfigurator,
+        IRabbitMqBusFactoryConfigurator,
         IBusFactory
     {
-        readonly IList<RabbitMqHost> _hosts;
+        readonly IList<IRabbitMqHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
         RabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
-        RabbitMqHost _defaultHost;
+        IRabbitMqHost _defaultHost;
         Uri _localAddress;
 
         public RabbitMqBusFactoryConfigurator()
         {
-            _hosts = new List<RabbitMqHost>();
+            _hosts = new List<IRabbitMqHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
         }
 
@@ -61,7 +62,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 yield return result;
         }
 
-        public void Host(RabbitMqHostSettings settings)
+        public IRabbitMqHost Host(RabbitMqHostSettings settings)
         {
             var host = new RabbitMqHost(settings);
             _hosts.Add(host);
@@ -84,6 +85,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
                 _localAddress = settings.GetInputAddress(_defaultEndpointConfigurator.Settings);
             }
+
+            return host;
         }
 
         public void AddBusFactorySpecification(IBusFactorySpecification configurator)
@@ -96,13 +99,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
 //            _publishSettings.Mandatory = mandatory;
         }
 
-        public void ReceiveEndpoint(RabbitMqHostSettings hostSettings, string queueName,
+        public void ReceiveEndpoint(IRabbitMqHost host, string queueName,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            RabbitMqHost host = _hosts
-                .Where(x => x.Settings.Host.Equals(hostSettings.Host, StringComparison.OrdinalIgnoreCase))
-                .Where(x => x.Settings.VirtualHost.Equals(hostSettings.VirtualHost, StringComparison.OrdinalIgnoreCase))
-                .FirstOrDefault();
             if (host == null)
                 throw new EndpointNotFoundException("The host address specified was not configured.");
 

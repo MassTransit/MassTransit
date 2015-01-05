@@ -24,7 +24,7 @@ namespace MassTransit.Tests
         Task<ConsumeContext<A>> _requestReceived;
         Task<ConsumeContext<B>> _responseReceived;
 
-        protected override void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseXmlSerializer();
         }

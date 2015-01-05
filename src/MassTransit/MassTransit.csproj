@@ -104,7 +104,7 @@
     <Compile Include="Configuration\FilterPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\IBuildPipeConfigurator.cs" />
     <Compile Include="Configuration\IConfigurable.cs" />
-    <Compile Include="Configuration\IInMemoryServiceBusFactoryConfigurator.cs" />
+    <Compile Include="Configuration\IInMemoryBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\InMemoryBus.cs" />
     <Compile Include="Configuration\IReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\IReceiveTransportProvider.cs" />
@@ -113,7 +113,7 @@
     <Compile Include="Configuration\ISendTransportProvider.cs" />
     <Compile Include="Configuration\IPipeConfigurator.cs" />
     <Compile Include="Configuration\IBusFactory.cs" />
-    <Compile Include="Configuration\IServiceBusFactoryConfigurator.cs" />
+    <Compile Include="Configuration\IBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\LogConsume.cs" />
     <Compile Include="Configuration\LogPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\PipeBuilders\IPipeBuilder.cs" />

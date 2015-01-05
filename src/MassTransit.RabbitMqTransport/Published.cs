@@ -19,8 +19,8 @@ namespace MassTransit.RabbitMqTransport
 
     public class Published
     {
-        ulong _publishTag;
-        TaskCompletionSource<ulong> _source;
+        readonly ulong _publishTag;
+        readonly TaskCompletionSource<ulong> _source;
 
         public Published(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body,
             ulong publishTag)

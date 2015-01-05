@@ -13,7 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     public interface IServiceBusBusFactoryConfigurator :
-        IServiceBusFactoryConfigurator
+        IBusFactoryConfigurator
     {
         void Host(ServiceBusHostSettings settings);
     }

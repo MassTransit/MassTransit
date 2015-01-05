@@ -24,7 +24,7 @@
             _after = new Semaphore(0, 100);
         }
 
-        protected override void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
 //            configurator.Subscribe(s =>
 //                s.Handler<A>(async msg =>

@@ -23,10 +23,10 @@ namespace RapidTransit
     public class RabbitMqTransportConfigurator :
         ITransportConfigurator
     {
-        readonly IRabbitMqServiceBusFactoryConfigurator _configurator;
-        readonly RabbitMqHostSettings _host;
+        readonly IRabbitMqBusFactoryConfigurator _configurator;
+        readonly IRabbitMqHost _host;
 
-        public RabbitMqTransportConfigurator(IRabbitMqServiceBusFactoryConfigurator configurator, RabbitMqHostSettings host)
+        public RabbitMqTransportConfigurator(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
             _configurator = configurator;
             _host = host;

@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             IBusControl bus = Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                RabbitMqHostSettings host = x.Host(hostAddress, r =>
+                var host = x.Host(hostAddress, r =>
                 {
                     r.Username("guest");
                     r.Password("guest");

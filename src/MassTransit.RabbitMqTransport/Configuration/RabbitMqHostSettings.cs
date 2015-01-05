@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration
 {
+    using System.Net.Security;
+
+
     /// <summary>
     /// Settings to configure a RabbitMQ host explicitly without requiring the fluent interface
     /// </summary>
@@ -47,5 +50,30 @@ namespace MassTransit.RabbitMqTransport.Configuration
         ///     The heartbeat interval (in seconds) to keep the host connection alive
         /// </summary>
         ushort Heartbeat { get; }
+
+        /// <summary>
+        /// True if SSL is required
+        /// </summary>
+        bool Ssl { get; }
+
+        /// <summary>
+        /// The server name specified on the certificate for the RabbitMQ server
+        /// </summary>
+        string SslServerName { get; }
+
+        /// <summary>
+        /// The acceptable policy errors for the SSL connection
+        /// </summary>
+        SslPolicyErrors AcceptablePolicyErrors { get; }
+
+        /// <summary>
+        /// The path to the client certificate if client certificate authentication is used
+        /// </summary>
+        string ClientCertificatePath { get; }
+
+        /// <summary>
+        /// The passphrase for the client certificate 
+        /// </summary>
+        string ClientCertificatePassphrase { get; }
     }
 }

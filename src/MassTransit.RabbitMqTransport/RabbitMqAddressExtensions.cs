@@ -15,6 +15,8 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Net.Security;
+    using System.Security.Authentication;
     using System.Text.RegularExpressions;
     using Configuration;
     using Pipeline;
@@ -193,7 +195,7 @@ namespace MassTransit.RabbitMqTransport
             return settings;
         }
 
-        public static SendSettings GetSendSettings(this RabbitMqHost host, Type messageType, IMessageNameFormatter messageNameFormatter)
+        public static SendSettings GetSendSettings(this IRabbitMqHost host, Type messageType, IMessageNameFormatter messageNameFormatter)
         {
             bool isTemporary = messageType.IsTemporaryMessageType();
 
@@ -220,10 +222,29 @@ namespace MassTransit.RabbitMqTransport
                 RequestedHeartbeat = settings.Heartbeat
             };
 
-            if (!string.IsNullOrWhiteSpace(settings.Username))
-                factory.UserName = settings.Username;
-            if (!string.IsNullOrWhiteSpace(settings.Password))
-                factory.Password = settings.Password;
+            factory.Ssl.Enabled = settings.Ssl;
+            factory.Ssl.Version = SslProtocols.Tls;
+            factory.Ssl.AcceptablePolicyErrors = settings.AcceptablePolicyErrors;
+            factory.Ssl.ServerName = settings.SslServerName;
+            if (string.IsNullOrWhiteSpace(factory.Ssl.ServerName))
+                factory.Ssl.AcceptablePolicyErrors |= SslPolicyErrors.RemoteCertificateNameMismatch;
+
+            if (string.IsNullOrEmpty(settings.ClientCertificatePath))
+            {
+                if (!string.IsNullOrWhiteSpace(settings.Username))
+                    factory.UserName = settings.Username;
+                if (!string.IsNullOrWhiteSpace(settings.Password))
+                    factory.Password = settings.Password;
+
+                factory.Ssl.CertPath = "";
+                factory.Ssl.CertPassphrase = "";
+                factory.Ssl.Certs = null;
+            }
+            else
+            {
+                factory.Ssl.CertPath = settings.ClientCertificatePath;
+                factory.Ssl.CertPassphrase = settings.ClientCertificatePassphrase;
+            }
 
             factory.ClientProperties = factory.ClientProperties ?? new Dictionary<string, object>();
 
@@ -253,10 +274,9 @@ namespace MassTransit.RabbitMqTransport
             {
                 Host = address.Host,
                 Username = "",
-                Password = ""
+                Password = "",
+                Port = address.IsDefaultPort ? 5672 : address.Port
             };
-
-            hostSettings.Port = address.IsDefaultPort ? 5672 : address.Port;
 
             if (!string.IsNullOrEmpty(address.UserInfo))
             {
@@ -304,6 +324,11 @@ namespace MassTransit.RabbitMqTransport
             public string Username { get; set; }
             public string Password { get; set; }
             public ushort Heartbeat { get; set; }
+            public bool Ssl { get; private set; }
+            public string SslServerName { get; private set; }
+            public SslPolicyErrors AcceptablePolicyErrors { get; private set; }
+            public string ClientCertificatePath { get; private set; }
+            public string ClientCertificatePassphrase { get; private set; }
         }
     }
 }

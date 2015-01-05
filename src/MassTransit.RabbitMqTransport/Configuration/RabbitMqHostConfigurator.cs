@@ -18,7 +18,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
     public interface IRabbitMqHostConfigurator
     {
-        void UseSsl(Action<SslConnectionFactoryConfigurator> configureSsl);
+        void UseSsl(Action<IRabbitMqSslConfigurator> configureSsl);
         void Heartbeat(ushort requestedHeartbeat);
         void Username(string username);
         void Password(string password);

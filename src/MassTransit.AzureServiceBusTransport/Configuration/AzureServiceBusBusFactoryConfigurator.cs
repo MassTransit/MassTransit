@@ -63,7 +63,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 _defaultHostSettings.CopyFrom(settings);
         }
 
-        void IServiceBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification configurator)
+        void IBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");

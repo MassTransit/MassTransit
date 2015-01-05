@@ -35,7 +35,7 @@ namespace MassTransit.AzureServiceBusTransport
         /// <param name="configurator"></param>
         /// <param name="queueName">The queue name for the receiving endpoint</param>
         /// <param name="configure">The configuration callback</param>
-        public static void ReceiveEndpoint(this IInMemoryServiceBusFactoryConfigurator configurator, string queueName,
+        public static void ReceiveEndpoint(this IInMemoryBusFactoryConfigurator configurator, string queueName,
             Action<IReceiveEndpointConfigurator> configure)
         {
             var endpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName);

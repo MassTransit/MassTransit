@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 {
     using System;
+    using System.Net.Security;
 
 
     public class RabbitMqHostConfigurator :
@@ -36,9 +37,17 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             get { return _settings; }
         }
 
-        public void UseSsl(Action<SslConnectionFactoryConfigurator> configureSsl)
+        public void UseSsl(Action<IRabbitMqSslConfigurator> configureSsl)
         {
-            throw new NotImplementedException("Coming soon, surely");
+            var configurator = new RabbitMqSslConfigurator(_settings);
+
+            configureSsl(configurator);
+
+            _settings.Ssl = true;
+            _settings.ClientCertificatePassphrase = configurator.CertificatePassphrase;
+            _settings.ClientCertificatePath = configurator.CertificatePath;
+            _settings.AcceptablePolicyErrors = configurator.AcceptablePolicyErrors;
+            _settings.SslServerName = configurator.ServerName ?? _settings.Host;
         }
 
         public void Heartbeat(ushort requestedHeartbeat)
@@ -78,6 +87,11 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             public string Username { get; set; }
             public string Password { get; set; }
             public ushort Heartbeat { get; set; }
+            public bool Ssl { get; set; }
+            public string SslServerName { get; set; }
+            public SslPolicyErrors AcceptablePolicyErrors { get; set; }
+            public string ClientCertificatePath { get; set; }
+            public string ClientCertificatePassphrase { get; set; }
         }
     }
 }

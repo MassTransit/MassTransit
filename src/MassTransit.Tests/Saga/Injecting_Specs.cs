@@ -21,7 +21,7 @@ namespace MassTransit.Tests.Saga
     public class Injecting_properties_into_a_saga :
         InMemoryTestFixture
     {
-        protected override void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
             // this is our dependency, but could be dynamically resolved from a container in method
             // below is so desired.
