@@ -29,12 +29,12 @@ namespace MassTransit.RabbitMqTransport
         IPublishEndpoint
     {
         readonly ConcurrentDictionary<Type, Lazy<ISendEndpoint>> _cachedEndpoints;
-        readonly RabbitMqHost _host;
+        readonly IRabbitMqHost _host;
         readonly Uri _inputAddress;
         readonly IMessageNameFormatter _messageNameFormatter;
         readonly IMessageSerializer _serializer;
 
-        public RabbitMqPublishEndpoint(RabbitMqHost host, IMessageSerializer serializer, Uri inputAddress)
+        public RabbitMqPublishEndpoint(IRabbitMqHost host, IMessageSerializer serializer, Uri inputAddress)
         {
             _host = host;
             _serializer = serializer;

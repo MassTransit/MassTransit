@@ -21,9 +21,9 @@ namespace MassTransit.Testing.ScenarioConfigurators
     public class BusTestScenarioSpecification :
         IScenarioSpecification<IBusTestScenario>
     {
-        readonly Action<IInMemoryServiceBusFactoryConfigurator> _configureAction;
+        readonly Action<IInMemoryBusFactoryConfigurator> _configureAction;
 
-        public BusTestScenarioSpecification(Action<IInMemoryServiceBusFactoryConfigurator> configureAction)
+        public BusTestScenarioSpecification(Action<IInMemoryBusFactoryConfigurator> configureAction)
         {
             _configureAction = configureAction;
         }

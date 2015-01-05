@@ -15,8 +15,8 @@ namespace MassTransit
     using Builders;
 
 
-    public interface IInMemoryServiceBusFactoryConfigurator :
-        IServiceBusFactoryConfigurator
+    public interface IInMemoryBusFactoryConfigurator :
+        IBusFactoryConfigurator
     {
         void SetTransportProvider<T>(T transportProvider)
             where T : ISendTransportProvider, IReceiveTransportProvider;

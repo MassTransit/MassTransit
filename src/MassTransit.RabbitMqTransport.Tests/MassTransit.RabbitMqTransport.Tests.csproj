@@ -67,7 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
-      <Link>SolutionVersion.cs</Link>
+      <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Assumptions\BasicExchangePerformanceDifferences.cs" />
     <Compile Include="Assumptions\GivenAChannel.cs" />
@@ -95,7 +95,6 @@
     <Compile Include="TestConsumePipe.cs" />
     <Compile Include="TestFactory.cs" />
     <Compile Include="MessageName_Specs.cs" />
-    <Compile Include="RabbitMqConnection_Specs.cs" />
     <Compile Include="RabbitMqSsl_Specs.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="TestReceivePipe.cs" />
@@ -132,9 +131,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

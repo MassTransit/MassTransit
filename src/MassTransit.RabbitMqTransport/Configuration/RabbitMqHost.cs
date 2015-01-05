@@ -16,7 +16,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using Transports;
 
 
-    public class RabbitMqHost
+    public class RabbitMqHost :
+        IRabbitMqHost
     {
         readonly RabbitMqConnectionCache _connectionCache;
         readonly RabbitMqHostSettings _hostSettings;

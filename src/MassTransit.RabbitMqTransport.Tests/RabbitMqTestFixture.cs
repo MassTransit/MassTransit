@@ -143,7 +143,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _bus = null;
         }
 
-        protected virtual void ConfigureBus(IRabbitMqServiceBusFactoryConfigurator configurator)
+        protected virtual void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
         {
         }
 
@@ -155,8 +155,10 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             return MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                RabbitMqHostSettings host = x.Host(_hostAddress, h =>
+                var host = x.Host(_hostAddress, h =>
                 {
+                    h.Username("guest");
+                    h.Password("guest");
                 });
 
                 ConfigureBus(x);

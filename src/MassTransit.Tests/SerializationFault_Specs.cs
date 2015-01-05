@@ -40,7 +40,7 @@ namespace MassTransit.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 

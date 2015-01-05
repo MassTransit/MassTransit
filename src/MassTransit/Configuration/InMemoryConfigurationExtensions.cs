@@ -23,7 +23,7 @@ namespace MassTransit
         /// <param name="factory">Hang off the selector interface for visibility</param>
         /// <param name="configure">The configuration callback to configure the bus</param>
         /// <returns></returns>
-        public static IBusControl CreateUsingInMemory(this IBusFactory factory, Action<IInMemoryServiceBusFactoryConfigurator> configure)
+        public static IBusControl CreateUsingInMemory(this IBusFactory factory, Action<IInMemoryBusFactoryConfigurator> configure)
         {
             return InMemoryBus.Create(configure);
         }
@@ -34,7 +34,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="queueName">The queue name for the receiving endpoint</param>
         /// <param name="configure">The configuration callback</param>
-        public static void ReceiveEndpoint(this IInMemoryServiceBusFactoryConfigurator configurator, string queueName,
+        public static void ReceiveEndpoint(this IInMemoryBusFactoryConfigurator configurator, string queueName,
             Action<IReceiveEndpointConfigurator> configure)
         {
             var endpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName);

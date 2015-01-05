@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,16 +24,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// <param name="configurator"></param>
         /// <param name="hostAddress">The URI host address of the RabbitMQ host (rabbitmq://host:port/vhost)</param>
         /// <param name="configure"></param>
-        public static RabbitMqHostSettings Host(this IRabbitMqServiceBusFactoryConfigurator configurator, Uri hostAddress,
+        public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, Uri hostAddress,
             Action<IRabbitMqHostConfigurator> configure)
         {
             var hostConfigurator = new RabbitMqHostConfigurator(hostAddress);
 
             configure(hostConfigurator);
 
-            configurator.Host(hostConfigurator.Settings);
-
-            return hostConfigurator.Settings;
+            return configurator.Host(hostConfigurator.Settings);
         }
 
         /// <summary>
@@ -44,10 +42,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// <param name="configurator"></param>
         /// <param name="hostSettings"></param>
         /// <param name="configure"></param>
-        public static void ReceiveEndpoint(this IRabbitMqServiceBusFactoryConfigurator configurator, RabbitMqHostSettings hostSettings,
+        public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            configurator.ReceiveEndpoint(hostSettings, null, x =>
+            configurator.ReceiveEndpoint(host, null, x =>
             {
                 x.AutoDelete();
                 x.Durable(false);

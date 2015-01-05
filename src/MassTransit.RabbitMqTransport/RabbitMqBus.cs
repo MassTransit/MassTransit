@@ -30,9 +30,9 @@ namespace MassTransit.RabbitMqTransport
         readonly IPublishEndpoint _publishEndpoint;
         readonly IList<IReceiveEndpoint> _receiveEndpoints;
         readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly RabbitMqHost[] _hosts;
+        readonly IRabbitMqHost[] _hosts;
 
-        public RabbitMqBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints, RabbitMqHost[] hosts, IPublishEndpoint publishEndpoint)
+        public RabbitMqBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints, IRabbitMqHost[] hosts, IPublishEndpoint publishEndpoint)
         {
             _address = address;
             _consumePipe = consumePipe;

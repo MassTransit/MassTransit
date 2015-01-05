@@ -24,7 +24,7 @@ namespace MassTransit.Testing.ScenarioBuilders
         /// Configure any bus-specific items as part of building the test scenario
         /// </summary>
         /// <param name="configureCallback"></param>
-        void ConfigureBus(Action<IInMemoryServiceBusFactoryConfigurator> configureCallback);
+        void ConfigureBus(Action<IInMemoryBusFactoryConfigurator> configureCallback);
 
         /// <summary>
         /// COnfigure the receive endpoint

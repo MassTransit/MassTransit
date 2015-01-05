@@ -89,7 +89,7 @@ namespace MassTransit.Tests
                 .Wait(TestCancellationToken);
         }
 
-        protected override void ConfigureBus(IInMemoryServiceBusFactoryConfigurator configurator)
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("input_queue_error", x =>
             {

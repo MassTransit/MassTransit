@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration
 {
-    public interface RabbitMqPublishContext<T> :
+    public interface RabbitMqPublishContext<out T> :
         SendContext<T>,
         RabbitMqPublishContext
         where T : class
