@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Collections.Generic;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Microsoft.ServiceBus.Messaging.Amqp;
@@ -51,6 +52,22 @@ namespace MassTransit.AzureServiceBusTransport
             };
 
             return new NamespaceManager(settings.ServiceUri, nms);
+        }
+
+        public static Uri GetInputAddress(this ServiceBusHostSettings hostSettings, QueueDescription queueDescription)
+        {
+            var builder = new UriBuilder(hostSettings.ServiceUri);
+
+            builder.Path += queueDescription.Path;
+            builder.Query += string.Join("&", GetQueryStringOptions(queueDescription));
+
+            return builder.Uri;
+        }
+
+        static IEnumerable<string> GetQueryStringOptions(QueueDescription settings)
+        {
+            if (!settings.EnableExpress)
+                yield return "express=true";
         }
     }
 }

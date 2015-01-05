@@ -35,5 +35,26 @@
 
             return value != null;
         }
+
+
+        public static T GetValueFromQueryString<T>(this Uri uri, string key, T defaultValue)
+            where T : struct
+        {
+            if (String.IsNullOrEmpty(uri.Query))
+                return defaultValue;
+
+            try
+            {
+                string value;
+                if(!uri.TryGetValueFromQueryString(key, out value) || string.IsNullOrEmpty(value))
+                    return defaultValue;
+
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
     }
 }

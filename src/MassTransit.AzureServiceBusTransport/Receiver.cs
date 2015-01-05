@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -33,13 +32,12 @@ namespace MassTransit.AzureServiceBusTransport
         readonly MessageReceiver _messageReceiver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
+        readonly object _shutdownLock = new object();
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         CancellationTokenRegistration _registration;
         bool _shuttingDown;
-        readonly object _shutdownLock = new object();
-
 
         public Receiver(MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
             ReceiveSettings receiveSettings, CancellationToken cancellationToken)
@@ -98,6 +96,9 @@ namespace MassTransit.AzureServiceBusTransport
                 if (_log.IsWarnEnabled)
                     _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
             }
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
 
             try
             {

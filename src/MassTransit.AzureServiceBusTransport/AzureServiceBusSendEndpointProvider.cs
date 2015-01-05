@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,8 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using Logging;
+    using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Serialization;
     using Transports;
@@ -24,6 +26,7 @@ namespace MassTransit.AzureServiceBusTransport
         ISendEndpointProvider
     {
         readonly ServiceBusHostSettings[] _hosts;
+        readonly ILog _log = Logger.Get<AzureServiceBusSendEndpointProvider>();
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
 
@@ -36,19 +39,50 @@ namespace MassTransit.AzureServiceBusTransport
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            ServiceBusHostSettings host =_hosts
+            ServiceBusHostSettings host = _hosts
                 .Where(x => x.ServiceUri.Host.Equals(address.Host, StringComparison.OrdinalIgnoreCase))
                 .FirstOrDefault();
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            var messagingFactory = host.GetMessagingFactory();
+            MessagingFactory messagingFactory = host.GetMessagingFactory();
 
-            MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(address.AbsolutePath.Split(new char[]{'/'}).Last());
+            var queueDescription = await CreateQueue(host.GetNamespaceManager(), address);
+
+            MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(queueDescription.Path);
 
             var sendTransport = new AzureServiceBusSendTransport(messageSender);
 
             return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress);
+        }
+
+        async Task<QueueDescription> CreateQueue(NamespaceManager namespaceManager, Uri address)
+        {
+            QueueDescription queueDescription = address.GetQueueDescription();
+            try
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Creating queue {0}", queueDescription.Path);
+
+                queueDescription = await namespaceManager.CreateQueueAsync(queueDescription);
+            }
+            catch (MessagingEntityAlreadyExistsException)
+            {
+                queueDescription = namespaceManager.GetQueue(queueDescription.Path);
+            }
+
+            if (_log.IsDebugEnabled)
+            {
+                _log.DebugFormat("Queue: {0} ({1})", queueDescription.Path,
+                    string.Join(", ", new[]
+                    {
+                        queueDescription.EnableExpress ? "express" : "",
+                        queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
+                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : ""
+                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
+            }
+
+            return queueDescription;
         }
     }
 }

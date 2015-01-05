@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
@@ -31,13 +30,15 @@ namespace MassTransit.AzureServiceBusTransport
         readonly ILog _log = Logger.Get<AzureServiceBusReceiveTransport>();
         readonly IRetryPolicy _retryPolicy;
         readonly ReceiveSettings _settings;
-        Uri _inputAddress;
+        readonly Uri _inputAddress;
 
         public AzureServiceBusReceiveTransport(ServiceBusHostSettings hostSettings, ReceiveSettings settings, IRetryPolicy retryPolicy)
         {
             _hostSettings = hostSettings;
             _settings = settings;
             _retryPolicy = retryPolicy;
+
+            _inputAddress = hostSettings.GetInputAddress(settings.QueueDescription);
         }
 
         public Uri InputAddress
@@ -98,14 +99,19 @@ namespace MassTransit.AzureServiceBusTransport
             ReceiveTransportHandle
         {
             readonly CancellationTokenSource _stop;
-            readonly IReceiveTransport _transport;
             readonly TaskCompletionSource<bool> _stopped;
+            readonly IReceiveTransport _transport;
 
             public Handle(IReceiveTransport transport)
             {
                 _transport = transport;
                 _stop = new CancellationTokenSource();
                 _stopped = new TaskCompletionSource<bool>();
+            }
+
+            public CancellationToken StopToken
+            {
+                get { return _stop.Token; }
             }
 
             void IDisposable.Dispose()
@@ -123,11 +129,6 @@ namespace MassTransit.AzureServiceBusTransport
                 _stop.Cancel();
 
                 await _stopped.Task.WithCancellation(cancellationToken);
-            }
-
-            public CancellationToken StopToken
-            {
-                get { return _stop.Token; }
             }
 
             public void Stopped()

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -22,13 +22,13 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     /// <summary>
     /// Prepares a queue for receiving messages using the ReceiveSettings specified.
     /// </summary>
-    public class PrepareReceiveQueueFilter :
+    public class PrepareSendQueueFilter :
         IFilter<ConnectionContext>
     {
-        readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
+        readonly ILog _log = Logger.Get<PrepareSendQueueFilter>();
         readonly ReceiveSettings _settings;
 
-        public PrepareReceiveQueueFilter(ReceiveSettings settings)
+        public PrepareSendQueueFilter(ReceiveSettings settings)
         {
             _settings = settings;
         }

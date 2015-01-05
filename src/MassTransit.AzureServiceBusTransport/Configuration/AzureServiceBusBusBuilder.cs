@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,26 +21,28 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using Transports;
 
 
-    public class AzureBusBusBuilder :
+    public class AzureServiceBusBusBuilder :
         BusBuilder,
         IBusBuilder
     {
         readonly ServiceBusHostSettings[] _hosts;
         readonly Uri _sourceAddress;
 
-        public AzureBusBusBuilder(IEnumerable<ServiceBusHostSettings> hosts)
+        public AzureServiceBusBusBuilder(IEnumerable<ServiceBusHostSettings> hosts, Uri sourceAddress)
         {
             if (hosts == null)
                 throw new ArgumentNullException("hosts");
 
             _hosts = hosts.ToArray();
 
-            _sourceAddress = new Uri(_hosts[0].ServiceUri, NewId.Next().ToString("NS"));
+            _sourceAddress = sourceAddress;
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
-            return new AzureServiceBusSendEndpointProvider(MessageSerializer, _sourceAddress, _hosts);
+            var provider = new AzureServiceBusSendEndpointProvider(MessageSerializer, _sourceAddress, _hosts);
+
+            return new SendEndpointCache(provider);
         }
 
         protected override IPublishEndpoint CreatePublishEndpoint()
@@ -50,7 +52,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public virtual IBusControl Build()
         {
-            IConsumePipe consumePipe = new ConsumePipe();
+            IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_sourceAddress))
+                .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
 
             var endpointCache = new SendEndpointCache(SendEndpointProvider);
 

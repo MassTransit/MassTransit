@@ -17,7 +17,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using System.Linq;
     using Builders;
     using Configurators;
-    using Microsoft.ServiceBus;
     using PipeConfigurators;
 
 
@@ -25,18 +24,15 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         IServiceBusBusFactoryConfigurator,
         IBusFactory
     {
-        readonly HostSettings _defaultHostSettings;
         readonly IList<ServiceBusHostSettings> _hosts;
-        readonly IList<IPipeSpecification<ConsumeContext>> _pipeSpecifications;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
+        ServiceBusReceiveEndpointConfigurator _defaultEndpointConfigurator;
+        Uri _localAddress;
 
         public AzureServiceBusBusFactoryConfigurator()
         {
             _hosts = new List<ServiceBusHostSettings>();
-            _defaultHostSettings = new HostSettings();
             _transportSpecifications = new List<IBusFactorySpecification>();
-
-            _pipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -46,7 +42,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new AzureBusBusBuilder(_hosts);
+            var builder = new AzureServiceBusBusBuilder(_hosts, _localAddress);
 
             foreach (IBusFactorySpecification configurator in _transportSpecifications)
                 configurator.Configure(builder);
@@ -60,7 +56,18 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             // use first host for default host settings :(
             if (_hosts.Count == 1)
-                _defaultHostSettings.CopyFrom(settings);
+            {
+                string queueName = string.Format("bus_{0}", NewId.Next().ToString("NS"));
+
+                _defaultEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(settings, queueName)
+                {
+                    EnableExpress = true
+                };
+
+                _transportSpecifications.Add(_defaultEndpointConfigurator);
+
+                _localAddress = settings.GetInputAddress(_defaultEndpointConfigurator.QueueDescription);
+            }
         }
 
         void IBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification configurator)
@@ -73,23 +80,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
         {
-            _pipeSpecifications.Add(configurator);
-        }
-
-
-        class HostSettings :
-            ServiceBusHostSettings
-        {
-            public Uri ServiceUri { get; set; }
-            public TokenProvider TokenProvider { get; set; }
-            public TimeSpan OperationTimeout { get; set; }
-
-            public void CopyFrom(ServiceBusHostSettings settings)
-            {
-                ServiceUri = settings.ServiceUri;
-                TokenProvider = settings.TokenProvider;
-                OperationTimeout = settings.OperationTimeout;
-            }
+            if (_defaultEndpointConfigurator != null)
+                _defaultEndpointConfigurator.AddPipeSpecification(configurator);
         }
     }
 }
