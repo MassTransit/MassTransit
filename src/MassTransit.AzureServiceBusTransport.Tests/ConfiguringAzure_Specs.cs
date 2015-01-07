@@ -38,7 +38,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
-                    ServiceBusHostSettings host = x.Host(serviceUri, h =>
+                    var host = x.Host(serviceUri, h =>
                     {
                         h.SharedAccessSignature(s =>
                         {

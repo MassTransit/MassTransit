@@ -25,12 +25,12 @@ namespace MassTransit.AzureServiceBusTransport
     public class AzureServiceBusSendEndpointProvider :
         ISendEndpointProvider
     {
-        readonly ServiceBusHostSettings[] _hosts;
+        readonly IServiceBusHost[] _hosts;
         readonly ILog _log = Logger.Get<AzureServiceBusSendEndpointProvider>();
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
 
-        public AzureServiceBusSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, ServiceBusHostSettings[] hosts)
+        public AzureServiceBusSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, IServiceBusHost[] hosts)
         {
             _hosts = hosts;
             _sourceAddress = sourceAddress;
@@ -39,15 +39,14 @@ namespace MassTransit.AzureServiceBusTransport
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            ServiceBusHostSettings host = _hosts
-                .Where(x => x.ServiceUri.Host.Equals(address.Host, StringComparison.OrdinalIgnoreCase))
-                .FirstOrDefault();
+            IServiceBusHost host =_hosts.FirstOrDefault(
+                    x => address.ToString().StartsWith(x.Settings.ServiceUri.ToString(), StringComparison.OrdinalIgnoreCase));
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            MessagingFactory messagingFactory = host.GetMessagingFactory();
+            var queueDescription = await CreateQueue(await host.NamespaceManager, address);
 
-            var queueDescription = await CreateQueue(host.GetNamespaceManager(), address);
+            MessagingFactory messagingFactory = await host.MessagingFactory;
 
             MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(queueDescription.Path);
 

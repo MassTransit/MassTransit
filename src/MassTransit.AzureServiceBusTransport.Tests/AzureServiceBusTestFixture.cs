@@ -141,7 +141,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 AzureServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                ServiceBusHostSettings host = x.Host(_serviceUri, h =>
+                var host = x.Host(_serviceUri, h =>
                 {
                     h.SharedAccessSignature(s =>
                     {

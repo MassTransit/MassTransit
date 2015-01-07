@@ -26,19 +26,19 @@ namespace MassTransit.AzureServiceBusTransport
     public class AzureServiceBusReceiveTransport :
         IReceiveTransport
     {
-        readonly ServiceBusHostSettings _hostSettings;
         readonly ILog _log = Logger.Get<AzureServiceBusReceiveTransport>();
         readonly IRetryPolicy _retryPolicy;
+        readonly IServiceBusHost _host;
         readonly ReceiveSettings _settings;
         readonly Uri _inputAddress;
 
-        public AzureServiceBusReceiveTransport(ServiceBusHostSettings hostSettings, ReceiveSettings settings, IRetryPolicy retryPolicy)
+        public AzureServiceBusReceiveTransport(IServiceBusHost host, ReceiveSettings settings, IRetryPolicy retryPolicy)
         {
-            _hostSettings = hostSettings;
+            _host = host;
             _settings = settings;
             _retryPolicy = retryPolicy;
 
-            _inputAddress = hostSettings.GetInputAddress(settings.QueueDescription);
+            _inputAddress = host.Settings.GetInputAddress(settings.QueueDescription);
         }
 
         public Uri InputAddress
@@ -49,9 +49,9 @@ namespace MassTransit.AzureServiceBusTransport
         public async Task<ReceiveTransportHandle> Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting receive transport: {0}", new Uri(_hostSettings.ServiceUri, _settings.QueueDescription.Path));
+                _log.DebugFormat("Starting receive transport: {0}", new Uri(_host.Settings.ServiceUri, _settings.QueueDescription.Path));
 
-            var handle = new Handle(this);
+            var handle = new Handle();
 
             IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
             {
@@ -72,14 +72,13 @@ namespace MassTransit.AzureServiceBusTransport
             await Repeat.UntilCancelled(handle.StopToken, async () =>
             {
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connecting receive transport: {0}", new Uri(_hostSettings.ServiceUri, _settings.QueueDescription.Path));
+                    _log.DebugFormat("Connecting receive transport: {0}", _host.Settings.GetInputAddress(_settings.QueueDescription));
 
                 try
                 {
-                    using (var context = new ServiceBusConnectionContext(_hostSettings, handle.StopToken))
-                    {
-                        await connectionPipe.Send(context);
-                    }
+                    var context = new ServiceBusConnectionContext(_host, handle.StopToken);
+                    
+                    await connectionPipe.Send(context);
                 }
                 catch (TaskCanceledException)
                 {
@@ -100,11 +99,9 @@ namespace MassTransit.AzureServiceBusTransport
         {
             readonly CancellationTokenSource _stop;
             readonly TaskCompletionSource<bool> _stopped;
-            readonly IReceiveTransport _transport;
 
-            public Handle(IReceiveTransport transport)
+            public Handle()
             {
-                _transport = transport;
                 _stop = new CancellationTokenSource();
                 _stopped = new TaskCompletionSource<bool>();
             }
@@ -117,11 +114,6 @@ namespace MassTransit.AzureServiceBusTransport
             void IDisposable.Dispose()
             {
                 _stop.Cancel();
-            }
-
-            IReceiveTransport ReceiveTransportHandle.Transport
-            {
-                get { return _transport; }
             }
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)

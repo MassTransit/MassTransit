@@ -79,6 +79,8 @@ namespace MassTransit.Transports
             void IDisposable.Dispose()
             {
                 _stop.Cancel();
+
+                _transportHandle.Dispose();
             }
 
             async Task ReceiveEndpointHandle.Stop(CancellationToken cancellationToken)

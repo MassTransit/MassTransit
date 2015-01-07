@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -31,14 +31,14 @@ namespace MassTransit.AzureServiceBusTransport
         IBusFactorySpecification
     {
         readonly IList<IReceiveEndpointSpecification> _configurators;
-        readonly ServiceBusHostSettings _hostSettings;
+        readonly IServiceBusHost _host;
         readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly QueueDescription _queueDescription;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         int _prefetchCount;
 
-        public ServiceBusReceiveEndpointConfigurator(ServiceBusHostSettings hostSettings, string queueName)
-            : this(hostSettings, new QueueDescription(queueName))
+        public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, string queueName)
+            : this(host, new QueueDescription(queueName))
         {
             _queueDescription.EnableBatchedOperations = true;
             _queueDescription.MaxDeliveryCount = 5;
@@ -48,13 +48,13 @@ namespace MassTransit.AzureServiceBusTransport
             EnableDeadLetteringOnMessageExpiration = true;
         }
 
-        public ServiceBusReceiveEndpointConfigurator(ServiceBusHostSettings hostSettings, QueueDescription queueDescription)
+        public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, QueueDescription queueDescription)
         {
             _pipeConfigurator = new PipeConfigurator<ConsumeContext>();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
             _configurators = new List<IReceiveEndpointSpecification>();
 
-            _hostSettings = hostSettings;
+            _host = host;
             _queueDescription = queueDescription;
             _prefetchCount = 32;
         }
@@ -64,15 +64,15 @@ namespace MassTransit.AzureServiceBusTransport
             set { _queueDescription.RequiresDuplicateDetection = value; }
         }
 
+        public QueueDescription QueueDescription
+        {
+            get { return _queueDescription; }
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             if (_prefetchCount <= 0)
                 yield return this.Failure("PrefetchCount", "must be > 0");
-        }
-
-        public QueueDescription QueueDescription
-        {
-            get { return _queueDescription; }
         }
 
         public void Configure(IBusBuilder builder)
@@ -117,7 +117,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public Uri QueuePath
         {
-            get { return new Uri(_hostSettings.ServiceUri, _queueDescription.Path); }
+            get { return _host.Settings.GetInputAddress(_queueDescription); }
         }
 
         public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
@@ -138,7 +138,7 @@ namespace MassTransit.AzureServiceBusTransport
                 QueueDescription = _queueDescription,
             };
 
-            var transport = new AzureServiceBusReceiveTransport(_hostSettings, settings, retryPolicy);
+            var transport = new AzureServiceBusReceiveTransport(_host, settings, retryPolicy);
 
             var inboundPipe = new ConsumePipe(_pipeConfigurator);
 

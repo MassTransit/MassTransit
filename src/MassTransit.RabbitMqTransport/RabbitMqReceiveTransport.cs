@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport
         /// <returns>A task that is completed once the transport is shut down</returns>
         public async Task<ReceiveTransportHandle> Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
         {
-            var handle = new Handle(this);
+            var handle = new Handle();
 
             IPipe<ConnectionContext> transportPipe = Pipe.New<ConnectionContext>(x =>
             {
@@ -107,11 +107,9 @@ namespace MassTransit.RabbitMqTransport
         {
             readonly CancellationTokenSource _stop;
             readonly TaskCompletionSource<bool> _stopped;
-            readonly IReceiveTransport _transport;
 
-            public Handle(IReceiveTransport transport)
+            public Handle()
             {
-                _transport = transport;
                 _stop = new CancellationTokenSource();
                 _stopped = new TaskCompletionSource<bool>();
             }
@@ -124,11 +122,6 @@ namespace MassTransit.RabbitMqTransport
             void IDisposable.Dispose()
             {
                 _stop.Cancel();
-            }
-
-            IReceiveTransport ReceiveTransportHandle.Transport
-            {
-                get { return _transport; }
             }
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)

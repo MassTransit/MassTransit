@@ -36,18 +36,21 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)
         {
             QueueDescription queueDescription = null;
+
+            var namespaceManager = await context.NamespaceManager;
+
             try
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Creating queue {0}", _settings.QueueDescription.Path);
 
-                queueDescription = context.NamespaceManager.CreateQueue(_settings.QueueDescription);
+                queueDescription = await namespaceManager.CreateQueueAsync(_settings.QueueDescription);
             }
             catch (MessagingEntityAlreadyExistsException)
             {
             }
             if (queueDescription == null)
-                queueDescription = context.NamespaceManager.GetQueue(_settings.QueueDescription.Path);
+                queueDescription = await namespaceManager.GetQueueAsync(_settings.QueueDescription.Path);
 
             if (_log.IsDebugEnabled)
             {
