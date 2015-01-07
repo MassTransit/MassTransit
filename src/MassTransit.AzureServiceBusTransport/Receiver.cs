@@ -26,13 +26,11 @@ namespace MassTransit.AzureServiceBusTransport
     {
         static readonly ILog _log = Logger.Get<Receiver>();
 
-        readonly CancellationToken _cancellationToken;
         readonly TaskCompletionSource<ReceiverMetrics> _completeTask;
         readonly Uri _inputAddress;
         readonly MessageReceiver _messageReceiver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
-        readonly object _shutdownLock = new object();
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
@@ -46,7 +44,6 @@ namespace MassTransit.AzureServiceBusTransport
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
             _receiveSettings = receiveSettings;
-            _cancellationToken = cancellationToken;
 
             _completeTask = new TaskCompletionSource<ReceiverMetrics>();
 
@@ -91,10 +88,13 @@ namespace MassTransit.AzureServiceBusTransport
 
             _shuttingDown = true;
 
-            if (!_completeTask.Task.Wait(TimeSpan.FromSeconds(60)))
+            if (_currentPendingDeliveryCount > 0)
             {
-                if (_log.IsWarnEnabled)
-                    _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
+                if (!_completeTask.Task.Wait(TimeSpan.FromSeconds(60)))
+                {
+                    if (_log.IsWarnEnabled)
+                        _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
+                }
             }
 
             if (_log.IsDebugEnabled)
@@ -117,14 +117,14 @@ namespace MassTransit.AzureServiceBusTransport
 
         async Task OnMessage(BrokeredMessage message)
         {
-            long deliveryCount = Interlocked.Increment(ref _deliveryCount);
-
             int current = Interlocked.Increment(ref _currentPendingDeliveryCount);
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
 
+            long deliveryCount = Interlocked.Increment(ref _deliveryCount);
+
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Recieving {0}:{1} - {2}", deliveryCount, message.MessageId, _receiveSettings.QueueDescription.Path);
+                _log.DebugFormat("Receiving {0}:{1} - {2}", deliveryCount, message.MessageId, _receiveSettings.QueueDescription.Path);
 
             Exception exception = null;
             var context = new AzureServiceBusReceiveContext(message, _inputAddress);

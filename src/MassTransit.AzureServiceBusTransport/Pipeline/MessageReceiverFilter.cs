@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -40,28 +40,42 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
             string queuePath = receiveSettings.QueueDescription.Path;
 
-            Uri inputAddress = context.GetQueueAddress(queuePath);
+            Uri inputAddress = context.GetQueueAddress(receiveSettings.QueueDescription);
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating message receiver for {0}", inputAddress);
-
-            MessageReceiver messageReceiver = await context.GetMessagingFactory().CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock);
-            messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
-            messageReceiver.RetryPolicy = RetryPolicy.Default;
-
-            using (var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, context.CancellationToken))
             {
-                ReceiverMetrics metrics = await receiver.CompleteTask;
-
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", queuePath,
-                        metrics.DeliveryCount,
-                        metrics.ConcurrentDeliveryCount);
-                }
+                _log.DebugFormat("Creating message receiver for {0}", inputAddress);
             }
 
-            if(!messageReceiver.IsClosed)
+            MessagingFactory messagingFactory = await context.MessagingFactory;
+            MessageReceiver messageReceiver = await messagingFactory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock);
+
+            try
+            {
+                messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
+                messageReceiver.RetryPolicy = RetryPolicy.Default;
+
+                using (var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, context.CancellationToken))
+                {
+                    ReceiverMetrics metrics = await receiver.CompleteTask;
+
+                    if (_log.IsDebugEnabled)
+                    {
+                        _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", queuePath,
+                            metrics.DeliveryCount,
+                            metrics.ConcurrentDeliveryCount);
+                    }
+                }
+            }
+            catch
+            {
+                if (!messageReceiver.IsClosed)
+                    messageReceiver.Close();
+
+                throw;
+            }
+
+            if (!messageReceiver.IsClosed)
                 await messageReceiver.CloseAsync();
 
             await next.Send(context);

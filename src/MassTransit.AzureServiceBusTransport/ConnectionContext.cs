@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Threading.Tasks;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
 
@@ -23,18 +24,18 @@ namespace MassTransit.AzureServiceBusTransport
         /// <summary>
         /// The messaging factory initialized for the service bus
         /// </summary>
-        MessagingFactory GetMessagingFactory();
+        Task<MessagingFactory> MessagingFactory { get; }
 
         /// <summary>
         /// The namespace manager for the service bus
         /// </summary>
-        NamespaceManager NamespaceManager { get; }
+        Task<NamespaceManager> NamespaceManager { get; }
 
         /// <summary>
         /// Return the address for the specified queue
         /// </summary>
-        /// <param name="queueName">The queue name</param>
+        /// <param name="queueDescription"></param>
         /// <returns>The address of the queue</returns>
-        Uri GetQueueAddress(string queueName);
+        Uri GetQueueAddress(QueueDescription queueDescription);
     }
 }

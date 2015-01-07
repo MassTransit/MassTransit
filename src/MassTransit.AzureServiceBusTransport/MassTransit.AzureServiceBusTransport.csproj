@@ -67,6 +67,7 @@
     <Compile Include="Configuration\AzureServiceBusBusBuilder.cs" />
     <Compile Include="Configuration\AzureServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusBusFactoryConfigurator.cs" />
+    <Compile Include="IServiceBusHost.cs" />
     <Compile Include="IServiceBusHostConfigurator.cs" />
     <Compile Include="IServiceBusReceiveEndpointConfigurator.cs" />
     <Compile Include="ISharedAccessSignatureTokenProviderConfigurator.cs" />
@@ -74,7 +75,10 @@
     <Compile Include="ConnectionContext.cs" />
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
     <Compile Include="Pipeline\PrepareSendQueueFilter.cs" />
+    <Compile Include="RabbitMqHostEqualityComparer.cs" />
+    <Compile Include="ServiceBusBus.cs" />
     <Compile Include="ServiceBusConnectionContext.cs" />
+    <Compile Include="ServiceBusHost.cs" />
     <Compile Include="ServiceBusHostSettings.cs" />
     <Compile Include="MessageReceiverContext.cs" />
     <Compile Include="Pipeline\MessageReceiverFilter.cs" />

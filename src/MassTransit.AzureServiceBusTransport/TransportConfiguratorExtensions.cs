@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,16 +18,14 @@ namespace MassTransit.AzureServiceBusTransport
 
     public static class TransportConfiguratorExtensions
     {
-        public static ServiceBusHostSettings Host(this IServiceBusBusFactoryConfigurator configurator, Uri hostAddress,
+        public static IServiceBusHost Host(this IServiceBusBusFactoryConfigurator configurator, Uri hostAddress,
             Action<IServiceBusHostConfigurator> configure)
         {
             var hostConfigurator = new AzureServiceBusHostConfigurator(hostAddress);
 
             configure(hostConfigurator);
 
-            configurator.Host(hostConfigurator.Settings);
-
-            return hostConfigurator.Settings;
+           return configurator.Host(hostConfigurator.Settings);
         }
 
         public static void SharedAccessSignature(this IServiceBusHostConfigurator configurator,
@@ -40,23 +38,21 @@ namespace MassTransit.AzureServiceBusTransport
             configurator.TokenProvider = tokenProviderConfigurator.GetTokenProvider();
         }
 
-
         /// <summary>
         /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="hostSettings">The host for this endpoint</param>
+        /// <param name="host">The host for this endpoint</param>
         /// <param name="queueName">The input queue name</param>
         /// <param name="configure">The configuration method</param>
-        public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, ServiceBusHostSettings hostSettings, string queueName,
+        public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host, string queueName,
             Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(hostSettings, queueName);
+            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName);
 
             configure(endpointConfigurator);
 
             configurator.AddBusFactorySpecification(endpointConfigurator);
         }
-
     }
 }

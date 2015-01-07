@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,33 +14,24 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Context;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
 
 
     public class ServiceBusConnectionContext :
-        ConnectionContext,
-        IDisposable
+        ConnectionContext
     {
-        readonly ServiceBusHostSettings _hostSettings;
-        readonly object _lock = new object();
+        readonly CancellationToken _cancellationToken;
+        readonly IServiceBusHost _host;
         readonly PayloadCache _payloadCache;
-        readonly CancellationTokenSource _tokenSource;
-        MessagingFactory _messagingFactory;
-        NamespaceManager _namespaceManager;
-        CancellationTokenRegistration _registration;
 
-        public ServiceBusConnectionContext(ServiceBusHostSettings hostSettings, CancellationToken cancellationToken)
+        public ServiceBusConnectionContext(IServiceBusHost host, CancellationToken cancellationToken)
         {
-            _hostSettings = hostSettings;
+            _host = host;
+            _cancellationToken = cancellationToken;
             _payloadCache = new PayloadCache();
-
-            _tokenSource = new CancellationTokenSource();
-            _registration = cancellationToken.Register(OnCancellationRequested);
-
-            _messagingFactory = hostSettings.GetMessagingFactory();
-            _namespaceManager = hostSettings.GetNamespaceManager();
         }
 
         public bool HasPayloadType(Type contextType)
@@ -60,60 +51,24 @@ namespace MassTransit.AzureServiceBusTransport
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        public MessagingFactory GetMessagingFactory()
+        public Task<MessagingFactory> MessagingFactory
         {
-            return _hostSettings.GetMessagingFactory();
+            get { return _host.MessagingFactory; }
         }
 
-        public NamespaceManager NamespaceManager
+        public Task<NamespaceManager> NamespaceManager
         {
-            get
-            {
-                lock (_lock)
-                {
-                    if (_namespaceManager == null)
-                        throw new InvalidOperationException("The connection was closed");
-
-                    return _namespaceManager;
-                }
-            }
+            get { return _host.NamespaceManager; }
         }
 
-        public Uri GetQueueAddress(string queueName)
+        public Uri GetQueueAddress(QueueDescription queueDescription)
         {
-            return new Uri(_hostSettings.ServiceUri, queueName);
+            return _host.Settings.GetInputAddress(queueDescription);
         }
 
         public CancellationToken CancellationToken
         {
-            get { return _tokenSource.Token; }
-        }
-
-        public void Dispose()
-        {
-            Close();
-        }
-
-        void OnCancellationRequested()
-        {
-            _tokenSource.Cancel();
-
-            var factory = _messagingFactory;
-            if(factory != null && !factory.IsClosed)
-                factory.Close();
-        }
-
-        void Close()
-        {
-            lock (_lock)
-            {
-                _registration.Dispose();
-
-                _messagingFactory.Close();
-
-                _namespaceManager = null;
-                _messagingFactory = null;
-            }
+            get { return _cancellationToken; }
         }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,24 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.AzureServiceBusTransport
 {
-    using System;
-    using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
 
 
     /// <summary>
-    /// A handle to an active transport
+    /// An Azure ServiceBus Host, which caches the messaging factory and namespace manager
     /// </summary>
-    public interface ReceiveTransportHandle :
-        IDisposable
+    public interface IServiceBusHost
     {
+        ServiceBusHostSettings Settings { get; }
+
+        Task<MessagingFactory> MessagingFactory { get; }
+
+        Task<NamespaceManager> NamespaceManager { get; }
+
         /// <summary>
-        /// Stop the transport, releasing any resources associated with the endpoint
+        /// Close the messaging factory asynchronously
         /// </summary>
-        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task Stop(CancellationToken cancellationToken = default(CancellationToken));
+        Task Close();
     }
 }

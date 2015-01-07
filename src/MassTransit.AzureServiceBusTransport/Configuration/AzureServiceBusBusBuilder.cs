@@ -25,22 +25,22 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         BusBuilder,
         IBusBuilder
     {
-        readonly ServiceBusHostSettings[] _hosts;
-        readonly Uri _sourceAddress;
+        readonly IServiceBusHost[] _hosts;
+        readonly Uri _inputAddress;
 
-        public AzureServiceBusBusBuilder(IEnumerable<ServiceBusHostSettings> hosts, Uri sourceAddress)
+        public AzureServiceBusBusBuilder(IEnumerable<IServiceBusHost> hosts, Uri inputAddress)
         {
             if (hosts == null)
                 throw new ArgumentNullException("hosts");
 
             _hosts = hosts.ToArray();
 
-            _sourceAddress = sourceAddress;
+            _inputAddress = inputAddress;
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
-            var provider = new AzureServiceBusSendEndpointProvider(MessageSerializer, _sourceAddress, _hosts);
+            var provider = new AzureServiceBusSendEndpointProvider(MessageSerializer, _inputAddress, _hosts);
 
             return new SendEndpointCache(provider);
         }
@@ -52,12 +52,10 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public virtual IBusControl Build()
         {
-            IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_sourceAddress))
+            IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
                 .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
 
-            var endpointCache = new SendEndpointCache(SendEndpointProvider);
-
-            return new MassTransitBus(_sourceAddress, consumePipe, endpointCache, PublishEndpoint, ReceiveEndpoints);
+            return new ServiceBusBus(_inputAddress, consumePipe, SendEndpointProvider, ReceiveEndpoints, _hosts, PublishEndpoint);
         }
     }
 }

@@ -237,7 +237,7 @@ namespace MassTransit.Transports
                 _stop.Cancel();
             }
 
-            IReceiveTransport ReceiveTransportHandle.Transport
+            public IReceiveTransport Transport
             {
                 get { return _transport; }
             }

@@ -24,14 +24,14 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         IServiceBusBusFactoryConfigurator,
         IBusFactory
     {
-        readonly IList<ServiceBusHostSettings> _hosts;
+        readonly IList<IServiceBusHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
         ServiceBusReceiveEndpointConfigurator _defaultEndpointConfigurator;
         Uri _localAddress;
 
         public AzureServiceBusBusFactoryConfigurator()
         {
-            _hosts = new List<ServiceBusHostSettings>();
+            _hosts = new List<IServiceBusHost>();
             _transportSpecifications = new List<IBusFactorySpecification>();
         }
 
@@ -50,16 +50,17 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return builder.Build();
         }
 
-        public void Host(ServiceBusHostSettings settings)
+        public IServiceBusHost Host(ServiceBusHostSettings settings)
         {
-            _hosts.Add(settings);
+            var host = new ServiceBusHost(settings);
+            _hosts.Add(host);
 
             // use first host for default host settings :(
             if (_hosts.Count == 1)
             {
                 string queueName = string.Format("bus_{0}", NewId.Next().ToString("NS"));
 
-                _defaultEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(settings, queueName)
+                _defaultEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName)
                 {
                     EnableExpress = true
                 };
@@ -68,6 +69,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
                 _localAddress = settings.GetInputAddress(_defaultEndpointConfigurator.QueueDescription);
             }
+
+            return host;
         }
 
         void IBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification configurator)
