@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -29,13 +29,12 @@ namespace MassTransit
         IFormattable
     {
         public static readonly NewId Empty = new NewId(0, 0, 0, 0);
-        static INewIdFormatter _braceFormatter = new DashedHexFormatter('{', '}');
-        static INewIdFormatter _dashedHexFormatter = new DashedHexFormatter();
+        static readonly INewIdFormatter _braceFormatter = new DashedHexFormatter('{', '}');
+        static readonly INewIdFormatter _dashedHexFormatter = new DashedHexFormatter();
 
+        static readonly INewIdFormatter _hexFormatter = new HexFormatter();
+        static readonly INewIdFormatter _parenFormatter = new DashedHexFormatter('(', ')');
         static NewIdGenerator _generator;
-
-        static INewIdFormatter _hexFormatter = new HexFormatter();
-        static INewIdFormatter _parenFormatter = new DashedHexFormatter('(', ')');
         static ITickProvider _tickProvider;
         static IWorkerIdProvider _workerIdProvider;
 
@@ -60,7 +59,7 @@ namespace MassTransit
 
         public NewId(string value)
         {
-            if(string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value))
                 throw new ArgumentException("must not be null or empty", "value");
 
             var guid = new Guid(value);
