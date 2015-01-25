@@ -63,9 +63,12 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NewId">
+      <HintPath>..\packages\NewId.2.1.2\lib\net45\NewId.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.7\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -133,7 +136,6 @@
     <Compile Include="Configuration\RescueFilterConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RetryPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ServiceBusFactoryExtensions.cs" />
-    <Compile Include="Configuration\ShutdownConfigurationExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\HandlerConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\IHandlerConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\IReceiverConfigurator.cs" />
@@ -325,17 +327,6 @@
     <Compile Include="MessageHandler.cs" />
     <Compile Include="MessageRequestClient.cs" />
     <Compile Include="MessageTypeExtensions.cs" />
-    <Compile Include="NewId\INewIdFormatter.cs" />
-    <Compile Include="NewId\INewIdParser.cs" />
-    <Compile Include="NewId\NewIdFormatters\Base32Formatter.cs" />
-    <Compile Include="NewId\NewIdFormatters\DashedHexFormatter.cs" />
-    <Compile Include="NewId\NewIdFormatters\HexFormatter.cs" />
-    <Compile Include="NewId\NewIdFormatters\ZBase32Formatter.cs" />
-    <Compile Include="NewId\NewIdParsers\Base32Parser.cs" />
-    <Compile Include="NewId\NewIdParsers\ZBase32Parser.cs" />
-    <Compile Include="NewId\NewIdProviders\BestPossibleWorkerIdProvider.cs" />
-    <Compile Include="NewId\NewIdProviders\HostNameSHA1WorkerIdProvider.cs" />
-    <Compile Include="NewId\NewIdProviders\WMINetworkAddressWorkerIdProvider.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
     <Compile Include="Pipeline\ConsumeMessageFilterVisitorAdapter.cs" />
@@ -482,7 +473,6 @@
     <Compile Include="Serialization\SupportedMessageDeserializers.cs" />
     <Compile Include="Configuration\EndpointConfigurators\DefaultMessageTrackerEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\DefaultRetryLimitEndpointFactoryConfigurator.cs" />
-    <Compile Include="Configuration\MessageTrackerConfigurationExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceType.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\IConsumerMetadataCache.cs" />
@@ -498,13 +488,9 @@
     <Compile Include="Configuration\BusConfigurators\PostCreateBusBuilderConfigurator.cs" />
     <Compile Include="Configuration\Configurators\Configurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryBuilderConfigurator.cs" />
-    <Compile Include="Configuration\BusConfigurators\ServiceBusConfigurator.cs" />
     <Compile Include="Configuration\SerializerConfigurationExtensions.cs" />
-    <Compile Include="Configuration\ServiceBusConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\ServiceBusFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnectorCache.cs" />
-    <Compile Include="Configuration\ThreadConfigurationExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\IConsumerConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\IInstanceConfigurator.cs" />
@@ -533,14 +519,6 @@
     <Compile Include="Logging\LogOutputProvider.cs" />
     <Compile Include="Logging\Tracing\TraceLog.cs" />
     <Compile Include="Logging\Tracing\TraceLogger.cs" />
-    <Compile Include="NewId\ITickProvider.cs" />
-    <Compile Include="NewId\IWorkerIdProvider.cs" />
-    <Compile Include="NewId\NewId.cs" />
-    <Compile Include="NewId\NewIdExtensions.cs" />
-    <Compile Include="NewId\NewIdGenerator.cs" />
-    <Compile Include="NewId\NewIdProviders\DateTimeTickProvider.cs" />
-    <Compile Include="NewId\NewIdProviders\NetworkAddressWorkerIdProvider.cs" />
-    <Compile Include="NewId\NewIdProviders\StopwatchTickProvider.cs" />
     <Compile Include="Saga\CorrelationIdSagaLocator.cs" />
     <Compile Include="Saga\DelegatingSagaRepository.cs" />
     <Compile Include="Saga\InjectingSagaRepository.cs" />
@@ -740,7 +718,6 @@
     <Compile Include="Util\IndexedSagaDictionary.cs" />
     <Compile Include="Serialization\XmlMessageSerializer.cs" />
     <Compile Include="IEndpointCache.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryConfigurator.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="Serialization\ExtensionsToMessageEnvelope.cs" />
     <Compile Include="ServiceBusExtensions.cs" />

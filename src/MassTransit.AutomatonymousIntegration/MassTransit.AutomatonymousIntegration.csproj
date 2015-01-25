@@ -41,6 +41,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Automatonymous.3.0.0-alpha\lib\net45\Automatonymous.dll</HintPath>
     </Reference>
+    <Reference Include="NewId">
+      <HintPath>..\packages\NewId.2.1.2\lib\net45\NewId.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
