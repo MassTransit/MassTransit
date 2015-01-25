@@ -44,14 +44,14 @@ end
 
 desc "Prepares the working directory for a new build"
 task :clean do
-	FileUtils.rm_rf props[:artifacts]
-	FileUtils.rm_rf props[:stage]
-	# work around latency issue where folder still exists for a short while after it is removed
-	waitfor { !exists?(props[:stage]) }
-	waitfor { !exists?(props[:artifacts]) }
+  FileUtils.rm_rf props[:artifacts]
+  FileUtils.rm_rf props[:stage]
+  # work around latency issue where folder still exists for a short while after it is removed
+  waitfor { !exists?(props[:stage]) }
+  waitfor { !exists?(props[:artifacts]) }
 
-	Dir.mkdir props[:stage]
-	Dir.mkdir props[:artifacts]
+  Dir.mkdir props[:stage]
+  Dir.mkdir props[:artifacts]
 end
 
 task :compile_samples => [:build_starbucks] do ; end
@@ -60,72 +60,78 @@ desc "Compiles MT into build_output"
 task :compile => [:versioning, :global_version, :build, :copy_signed, :build_unsigned, :copy_unsigned] do ; end
 
 task :copy_signed do
-	puts 'Copying unmerged dependencies to output folder'
+  puts 'Copying unmerged dependencies to output folder'
 
-	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "MassTransit.{dll,pdb,xml}", props[:output]
-	copyOutputFiles File.join(props[:src], "MassTransit.AutomatonymousIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.AutomatonymousIntegration.{dll,pdb,xml}", props[:output]
+  copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "MassTransit.{dll,pdb,xml}", props[:output]
+  copyOutputFiles File.join(props[:src], "MassTransit.AutomatonymousIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.AutomatonymousIntegration.{dll,pdb,xml}", props[:output]
 
-	copyOutputFiles File.join(props[:src], "Persistence/MassTransit.NHibernateIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NHibernateIntegration.{dll,pdb,xml}", File.join(props[:output], "Persistence/NHibernate")
+  copyOutputFiles File.join(props[:src], "Persistence/MassTransit.NHibernateIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NHibernateIntegration.{dll,pdb,xml}", File.join(props[:output], "Persistence/NHibernate")
+
+  copyOutputFiles File.join(props[:src], "MassTransit.QuartzIntegration/bin/Release"), "MassTransit.QuartzIntegration.{dll,pdb,xml}", File.join(props[:output], 'Integration', 'net-4.5')
+
+  copyOutputFiles File.join(props[:src], "MassTransit.QuartzService/bin/Release"), "MassTransit.QuartzService.exe", File.join(props[:output], 'QuartzService')
+  copyOutputFiles File.join(props[:src], "MassTransit.QuartzService/bin/Release"), "*.dll", File.join(props[:output], 'QuartzService')
+  copyOutputFiles File.join(props[:src], "MassTransit.QuartzService/bin/Release"), "*.config", File.join(props[:output], 'QuartzService')
 
   outtst = File.join(props[:output], "Testing")
-  	copyOutputFiles File.join(props[:src], "MassTransit.TestFramework/bin/#{BUILD_CONFIG}"), "MassTransit.TestFramework.{dll,pdb,xml}", outtst
+    copyOutputFiles File.join(props[:src], "MassTransit.TestFramework/bin/#{BUILD_CONFIG}"), "MassTransit.TestFramework.{dll,pdb,xml}", outtst
 
   outl = File.join(props[:output], "Logging")
-  	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.Log4NetIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.Log4NetIntegration.{dll,pdb,xml}", outl
-  	copyOutputFiles File.join(props[:src], "Loggers/MassTransit.NLogIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NLogIntegration.{dll,pdb,xml}", outl
+    copyOutputFiles File.join(props[:src], "Loggers/MassTransit.Log4NetIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.Log4NetIntegration.{dll,pdb,xml}", outl
+    copyOutputFiles File.join(props[:src], "Loggers/MassTransit.NLogIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NLogIntegration.{dll,pdb,xml}", outl
 
-	copyOutputFiles File.join(props[:src], "MassTransit.Reactive/bin/#{BUILD_CONFIG}"), "MassTransit.*.{dll,pdb,xml}", File.join(props[:output], "Reactive")
+  copyOutputFiles File.join(props[:src], "MassTransit.Reactive/bin/#{BUILD_CONFIG}"), "MassTransit.*.{dll,pdb,xml}", File.join(props[:output], "Reactive")
 
   outc = File.join(props[:output], "Containers")
-  	copyOutputFiles File.join(props[:src], "Containers/MassTransit.UnityIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.UnityIntegration.{dll,pdb,xml}", outc
-  	copyOutputFiles File.join(props[:src], "Containers/MassTransit.WindsorIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.WindsorIntegration.{dll,pdb,xml}", outc
-  	copyOutputFiles File.join(props[:src], "Containers/MassTransit.NinjectIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NinjectIntegration.{dll,pdb,xml}", outc
-  	copyOutputFiles File.join(props[:src], "Containers/MassTransit.AutofacIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.AutofacIntegration.{dll,pdb,xml}", outc
+    copyOutputFiles File.join(props[:src], "Containers/MassTransit.UnityIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.UnityIntegration.{dll,pdb,xml}", outc
+    copyOutputFiles File.join(props[:src], "Containers/MassTransit.WindsorIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.WindsorIntegration.{dll,pdb,xml}", outc
+    copyOutputFiles File.join(props[:src], "Containers/MassTransit.NinjectIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NinjectIntegration.{dll,pdb,xml}", outc
+    copyOutputFiles File.join(props[:src], "Containers/MassTransit.AutofacIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.AutofacIntegration.{dll,pdb,xml}", outc
 
-	outt = File.join(props[:output], "Transports")
-  	copyOutputFiles File.join(props[:src], "MassTransit.AzureServiceBusTransport/bin/#{BUILD_CONFIG}"), "MassTransit.AzureServiceBusTransport.{dll,pdb,xml}", File.join(outt, "AzureServiceBus")
-  	copyOutputFiles File.join(props[:src], "MassTransit.RabbitMqTransport/bin/#{BUILD_CONFIG}"), "MassTransit.RabbitMqTransport.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
+  outt = File.join(props[:output], "Transports")
+    copyOutputFiles File.join(props[:src], "MassTransit.AzureServiceBusTransport/bin/#{BUILD_CONFIG}"), "MassTransit.AzureServiceBusTransport.{dll,pdb,xml}", File.join(outt, "AzureServiceBus")
+    copyOutputFiles File.join(props[:src], "MassTransit.RabbitMqTransport/bin/#{BUILD_CONFIG}"), "MassTransit.RabbitMqTransport.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
 end
 
 desc "Copying Services"
 task :copy_unsigned => [:build_unsigned] do
-	puts "Copying services"
+  puts "Copying services"
 
-	 outc = File.join(props[:output], "Containers")
-  	copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
+   outc = File.join(props[:output], "Containers")
+    copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.StructureMapIntegration.{dll,pdb,xml}", outc
  
 end
 
 task :copy_samples => [:compile_samples] do
 
-	targ = File.join(props[:stage], 'Samples', 'Starbucks')
-	src = File.join(props[:src], "Samples", "Starbucks")
+  targ = File.join(props[:stage], 'Samples', 'Starbucks')
+  src = File.join(props[:src], "Samples", "Starbucks")
 
-  	copyOutputFiles props[:output], "MassTransit.dll", targ
-   	copyOutputFiles src, "Starbucks.Barista/bin/#{BUILD_CONFIG}/MassTransit.Log4NetIntegration.dll", targ
-  	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap}.dll", targ
-  	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "{MassTransit.WindsorIntegration,Castle.Windsor,Castle.Core,Topshelf}.dll", targ
-  	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "{MassTransit.NinjectIntegration,Ninject}.dll", targ
-  	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "Starbucks.Cashier.exe", targ
-  	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "cashier.log4net.xml", targ
-  	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "Starbucks.Barista.exe", targ
-  	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "barista.log4net.xml", targ
-  	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Customer.exe", targ
-  	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "customer.log4net.xml", targ
-  	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Messages.dll", targ
+    copyOutputFiles props[:output], "MassTransit.dll", targ
+    copyOutputFiles src, "Starbucks.Barista/bin/#{BUILD_CONFIG}/MassTransit.Log4NetIntegration.dll", targ
+    copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap}.dll", targ
+    copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "{MassTransit.WindsorIntegration,Castle.Windsor,Castle.Core,Topshelf}.dll", targ
+    copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "{MassTransit.NinjectIntegration,Ninject}.dll", targ
+    copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "Starbucks.Cashier.exe", targ
+    copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "cashier.log4net.xml", targ
+    copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "Starbucks.Barista.exe", targ
+    copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "barista.log4net.xml", targ
+    copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Customer.exe", targ
+    copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "customer.log4net.xml", targ
+    copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Messages.dll", targ
 
-	targ = File.join(props[:stage], 'Samples', 'Distributor')
-	src = File.join(props[:src], "Samples", "Distributor")
+  targ = File.join(props[:stage], 'Samples', 'Distributor')
+  src = File.join(props[:src], "Samples", "Distributor")
 
-  	copyOutputFiles props[:output], "MassTransit.dll", targ
-   	copyOutputFiles src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}/MassTransit.Log4NetIntegration.dll", targ
+    copyOutputFiles props[:output], "MassTransit.dll", targ
+    copyOutputFiles src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}/MassTransit.Log4NetIntegration.dll", targ
 
-  	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap,Topshelf}.dll", targ
-  	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Activator.exe", targ
-  	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Shared.dll", targ
-  	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "*.config", targ
-  	copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Worker.exe", targ
-  	copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "*.config", targ
+    copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap,Topshelf}.dll", targ
+    copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Activator.exe", targ
+    copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Shared.dll", targ
+    copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "*.config", targ
+    copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Worker.exe", targ
+    copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "*.config", targ
 end
 
 desc "restores missing packages"
@@ -271,40 +277,40 @@ end
 
 desc "Only compiles the application."
 msbuild :build_unsigned do |msb|
-	msb.properties :Configuration => BUILD_CONFIG + "Unsigned",
-	    :BuildConfigKey => BUILD_CONFIG_KEY,
-	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
-	    :Platform => 'Any CPU'
-	msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
-	msb.use :net4 #MSB_USE
-	msb.targets :Build
-	msb.solution = 'src/MassTransit.sln'
+  msb.properties :Configuration => BUILD_CONFIG + "Unsigned",
+      :BuildConfigKey => BUILD_CONFIG_KEY,
+      :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
+      :Platform => 'Any CPU'
+  msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
+  msb.use :net4 #MSB_USE
+  msb.targets :Build
+  msb.solution = 'src/MassTransit.sln'
 end
 
 msbuild :build_starbucks do |msb|
-	msb.properties :Configuration => BUILD_CONFIG,
-	    :BuildConfigKey => BUILD_CONFIG_KEY,
-	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
-	    :Platform => 'Any CPU'
-	msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
-	msb.use :net4 #MSB_USE
-	msb.targets :Build
-	msb.solution = 'src/Samples/Starbucks/Starbucks.sln'
+  msb.properties :Configuration => BUILD_CONFIG,
+      :BuildConfigKey => BUILD_CONFIG_KEY,
+      :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
+      :Platform => 'Any CPU'
+  msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
+  msb.use :net4 #MSB_USE
+  msb.targets :Build
+  msb.solution = 'src/Samples/Starbucks/Starbucks.sln'
 end
 
 def copyOutputFiles(fromDir, filePattern, outDir)
-	FileUtils.mkdir_p outDir unless exists?(outDir)
-	Dir.glob(File.join(fromDir, filePattern)){|file|
-		copy(file, outDir) if File.file?(file)
-	}
+  FileUtils.mkdir_p outDir unless exists?(outDir)
+  Dir.glob(File.join(fromDir, filePattern)){|file|
+    copy(file, outDir) if File.file?(file)
+  }
 end
 
 task :tests => [:unit_tests]
 
 desc "Runs unit tests"
 nunit :unit_tests do |nunit|
-	nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.4', 'tools', 'nunit-console.exe')
-	nunit.options = "/framework=net-4.5", '/timeout=60000', '/domain=multiple', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results-')}#{OUTPUT_PATH}.xml\""
+  nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.4', 'tools', 'nunit-console.exe')
+  nunit.options = "/framework=net-4.5", '/timeout=60000', '/domain=multiple', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results-')}#{OUTPUT_PATH}.xml\""
   nunit.assemblies = FileList["tests/MassTransit.Tests.dll", "tests/MassTransit.Containers.Tests.dll"]
 end
 
@@ -312,25 +318,25 @@ desc "Runs transport tests (integration)"
 task :transport_tests => [:msmq_tests, :rabbitmq_tests]
 
 task :msmq_tests do
-	Dir.mkdir props[:artifacts] unless exists?(props[:artifacts])
+  Dir.mkdir props[:artifacts] unless exists?(props[:artifacts])
 
-	runner = NUnitRunner.new(File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe"),
-		'tests',
-		TARGET_FRAMEWORK_VERSION,
-		['/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'msmq-test-results.xml')}\""])
+  runner = NUnitRunner.new(File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe"),
+    'tests',
+    TARGET_FRAMEWORK_VERSION,
+    ['/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'msmq-test-results.xml')}\""])
 
-	runner.run ['MassTransit.Transports.Msmq.Tests'].map{ |assem| "#{assem}.dll" }
+  runner.run ['MassTransit.Transports.Msmq.Tests'].map{ |assem| "#{assem}.dll" }
 end
 
 task :rabbitmq_tests do
-	Dir.mkdir props[:artifacts] unless exists?(props[:artifacts])
+  Dir.mkdir props[:artifacts] unless exists?(props[:artifacts])
 
-	runner = NUnitRunner.new(File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe"),
-		'tests',
-		TARGET_FRAMEWORK_VERSION,
-		['/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'rabbitmq-test-results.xml')}\""])
+  runner = NUnitRunner.new(File.join('lib', 'nunit', 'net-2.0',  "nunit-console#{(BUILD_PLATFORM.empty? ? '' : "-#{BUILD_PLATFORM}")}.exe"),
+    'tests',
+    TARGET_FRAMEWORK_VERSION,
+    ['/nothread', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'rabbitmq-test-results.xml')}\""])
 
-	runner.run ['MassTransit.Transports.RabbitMQ.Tests'].map{ |assem| "#{assem}.dll" }
+  runner.run ['MassTransit.Transports.RabbitMQ.Tests'].map{ |assem| "#{assem}.dll" }
 end
 
 task :ci => [:default, :package, :moma]
@@ -344,15 +350,15 @@ end
 
 desc "Runs the MoMA mono analyzer on the project files. Start the executable manually without --nogui to update the profiles once in a while though, or you'll always get the same report from the analyzer."
 task :moma => [:compile] do
-	puts "Analyzing project fitness for mono:"
-	dlls = project_outputs(props).join(' ')
-	sh "lib/MoMA/MoMA.exe --nogui --out #{File.join(props[:artifacts], 'MoMA-report.html')} #{dlls}"
+  puts "Analyzing project fitness for mono:"
+  dlls = project_outputs(props).join(' ')
+  sh "lib/MoMA/MoMA.exe --nogui --out #{File.join(props[:artifacts], 'MoMA-report.html')} #{dlls}"
 end
 
   # NUSPEC
   # ===================================================
 
-task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtun_nuspec, :mtcw_nuspec, :mtnhib_nuspec, :mtrmq_nuspec, :mttf_nuspec, :mtrx_nuspec]
+task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :mtaf_nuspec, :mtni_nuspec, :mtun_nuspec, :mtcw_nuspec, :mtnhib_nuspec, :mtrmq_nuspec, :mttf_nuspec, :mtrx_nuspec, :mtquartz_nuspec]
 
   directory 'nuspecs'
 
@@ -389,8 +395,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "Microsoft.WindowsAzure.ConfigurationManager", "2.0.3"
     nuspec.output_file = 'nuspecs/MassTransit.AzureServiceBus.nuspec'
 
-	add_files props[:stage], "#{File.join('Transports', 'AzureServiceBus', 'MassTransit.AzureServiceBusTransport.{dll,pdb,xml}')}", nuspec
-	nuspec.file(File.join(props[:src], "MassTransit.AzureServiceBusTransport\\**\\*.cs").gsub("/","\\"), "src")
+  add_files props[:stage], "#{File.join('Transports', 'AzureServiceBus', 'MassTransit.AzureServiceBusTransport.{dll,pdb,xml}')}", nuspec
+  nuspec.file(File.join(props[:src], "MassTransit.AzureServiceBusTransport\\**\\*.cs").gsub("/","\\"), "src")
 
   end
 
@@ -408,8 +414,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "Automatonymous", "3.0.0-alpha"
     nuspec.output_file = 'nuspecs/MassTransit.Automatonymous.nuspec'
 
-	add_files props[:stage], "#{File.join('MassTransit.AutomatonymousIntegration.{dll,pdb,xml}')}", nuspec
-	nuspec.file(File.join(props[:src], "MassTransit.AutomatonymousIntegration\\**\\*.cs").gsub("/","\\"), "src")
+  add_files props[:stage], "#{File.join('MassTransit.AutomatonymousIntegration.{dll,pdb,xml}')}", nuspec
+  nuspec.file(File.join(props[:src], "MassTransit.AutomatonymousIntegration\\**\\*.cs").gsub("/","\\"), "src")
 
   end
 
@@ -426,7 +432,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "log4net", "2.0.3"
     nuspec.output_file = 'nuspecs/MassTransit.Log4Net.nuspec'
 
-	add_files props[:stage], File.join('Logging', 'MassTransit.Log4NetIntegration.{dll,pdb,xml}'), nuspec
+  add_files props[:stage], File.join('Logging', 'MassTransit.Log4NetIntegration.{dll,pdb,xml}'), nuspec
     nuspec.file(File.join(props[:src], "Loggers\\MassTransit.Log4NetIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
@@ -463,8 +469,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "Castle.Core", "3.3.3"
     nuspec.output_file = 'nuspecs/MassTransit.CastleWindsor.nuspec'
 
-	add_files props[:stage], "#{File.join('Containers', 'MassTransit.WindsorIntegration.{dll,pdb,xml}')}", nuspec
-	nuspec.file(File.join(props[:src], "Containers\\MassTransit.WindsorIntegration\\**\\*.cs").gsub("/","\\"), "src")
+  add_files props[:stage], "#{File.join('Containers', 'MassTransit.WindsorIntegration.{dll,pdb,xml}')}", nuspec
+  nuspec.file(File.join(props[:src], "Containers\\MassTransit.WindsorIntegration\\**\\*.cs").gsub("/","\\"), "src")
  
   end
 
@@ -483,8 +489,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "RabbitMQ.Client", "3.4.3"
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
 
-	add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.RabbitMqTransport.{dll,pdb,xml}')}", nuspec
-	nuspec.file(File.join(props[:src], "MassTransit.RabbitMqTransport\\**\\*.cs").gsub("/","\\"), "src")
+  add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.RabbitMqTransport.{dll,pdb,xml}')}", nuspec
+  nuspec.file(File.join(props[:src], "MassTransit.RabbitMqTransport\\**\\*.cs").gsub("/","\\"), "src")
   end
 
 
@@ -501,8 +507,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "Autofac", "3.5.2"
     nuspec.output_file = 'nuspecs/MassTransit.Autofac.nuspec'
 
-	add_files props[:stage], "#{File.join('Containers', 'MassTransit.AutofacIntegration.{dll,pdb,xml}')}", nuspec
-	nuspec.file(File.join(props[:src], "Containers\\MassTransit.AutofacIntegration\\**\\*.cs").gsub("/","\\"), "src")
+  add_files props[:stage], "#{File.join('Containers', 'MassTransit.AutofacIntegration.{dll,pdb,xml}')}", nuspec
+  nuspec.file(File.join(props[:src], "Containers\\MassTransit.AutofacIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
   nuspec :mtnhib_nuspec => ['nuspecs'] do |nuspec|
@@ -519,8 +525,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "Iesi.Collections", "4.0.1"
     nuspec.output_file = 'nuspecs/MassTransit.NHibernate.nuspec'
 
-	add_files props[:stage], "#{File.join('Persistence', 'NHibernate', 'MassTransit.NHibernateIntegration.{dll,pdb,xml}')}", nuspec
-	nuspec.file(File.join(props[:src], "Persistence\\MassTransit.NHibernateIntegration\\**\\*.cs").gsub("/","\\"), "src")
+  add_files props[:stage], "#{File.join('Persistence', 'NHibernate', 'MassTransit.NHibernateIntegration.{dll,pdb,xml}')}", nuspec
+  nuspec.file(File.join(props[:src], "Persistence\\MassTransit.NHibernateIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
 
@@ -538,8 +544,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "Ninject.Extensions.NamedScope", "3.2.0"
     nuspec.output_file = 'nuspecs/MassTransit.Ninject.nuspec'
 
-	add_files props[:stage], "#{File.join('Containers', 'MassTransit.NinjectIntegration.{dll,pdb,xml}')}", nuspec
-	nuspec.file(File.join(props[:src], "Containers\\MassTransit.NinjectIntegration\\**\\*.cs").gsub("/","\\"), "src")
+  add_files props[:stage], "#{File.join('Containers', 'MassTransit.NinjectIntegration.{dll,pdb,xml}')}", nuspec
+  nuspec.file(File.join(props[:src], "Containers\\MassTransit.NinjectIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
 
@@ -556,8 +562,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "StructureMap", "3.1.4.143"
     nuspec.output_file = 'nuspecs/MassTransit.StructureMap.nuspec'
 
-	add_files props[:stage], "#{File.join('Containers', 'MassTransit.StructureMapIntegration.{dll,pdb,xml}')}", nuspec
-	nuspec.file(File.join(props[:src], "Containers\\MassTransit.StructureMapIntegration\\**\\*.cs").gsub("/","\\"), "src")
+  add_files props[:stage], "#{File.join('Containers', 'MassTransit.StructureMapIntegration.{dll,pdb,xml}')}", nuspec
+  nuspec.file(File.join(props[:src], "Containers\\MassTransit.StructureMapIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
 
@@ -574,8 +580,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "Unity", "3.5.1404"
     nuspec.output_file = 'nuspecs/MassTransit.Unity.nuspec'
 
-	add_files props[:stage], "#{File.join('Containers', 'MassTransit.UnityIntegration.{dll,pdb,xml}')}", nuspec
-	nuspec.file(File.join(props[:src], "Containers\\MassTransit.UnityIntegration\\**\\*.cs").gsub("/","\\"), "src")
+  add_files props[:stage], "#{File.join('Containers', 'MassTransit.UnityIntegration.{dll,pdb,xml}')}", nuspec
+  nuspec.file(File.join(props[:src], "Containers\\MassTransit.UnityIntegration\\**\\*.cs").gsub("/","\\"), "src")
   end
 
   nuspec :mttf_nuspec => ['nuspecs'] do |nuspec|
@@ -593,8 +599,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "RhinoMocks", "3.6.1"
     nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'
 
-	add_files props[:stage], "#{File.join('Testing', 'MassTransit.TestFramework.{dll,pdb,xml}')}", nuspec
-	nuspec.file(File.join(props[:src], "MassTransit.TestFramework\\**\\*.cs").gsub("/","\\"), "src")
+  add_files props[:stage], "#{File.join('Testing', 'MassTransit.TestFramework.{dll,pdb,xml}')}", nuspec
+  nuspec.file(File.join(props[:src], "MassTransit.TestFramework\\**\\*.cs").gsub("/","\\"), "src")
   end
 
   nuspec :mtrx_nuspec => ['nuspecs'] do |nuspec|
@@ -612,9 +618,32 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "Rx-Linq", "2.2.5"
     nuspec.output_file = 'nuspecs/MassTransit.Reactive.nuspec'
 
-	add_files props[:stage], "#{File.join('Reactive', 'MassTransit.Reactive.{dll,pdb,xml}')}", nuspec
-	nuspec.file(File.join(props[:src], "MassTransit.Reactive\\**\\*.cs").gsub("/","\\"), "src")
+  add_files props[:stage], "#{File.join('Reactive', 'MassTransit.Reactive.{dll,pdb,xml}')}", nuspec
+  nuspec.file(File.join(props[:src], "MassTransit.Reactive\\**\\*.cs").gsub("/","\\"), "src")
   end
+
+
+nuspec :mtquartz_nuspec do |nuspec|
+  nuspec.id = 'MassTransit.QuartzIntegration'
+  nuspec.version = NUGET_VERSION
+  nuspec.authors = 'Chris Patterson, Albert Hives'
+  nuspec.summary = 'Quartz integration for MassTransit'
+  nuspec.description = 'Adds support for Quartz as a message scheduler to MassTransit (used by the MassTransit.QuartzService project)'
+  nuspec.title = 'MassTransit.QuartzIntegration'
+  nuspec.projectUrl = 'http://github.com/MassTransit/MassTransit'
+  nuspec.iconUrl = 'http://MassTransit-project.com/wp-content/themes/pandora/slide.1.png'
+  nuspec.language = "en-US"
+  nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+  nuspec.requireLicenseAcceptance = "false"
+  nuspec.dependency "MassTransit", NUGET_VERSION
+  nuspec.dependency "NewId", "2.1.2"
+  nuspec.dependency "Common.Logging", "3.0.0"
+  nuspec.dependency "Newtonsoft.Json", "6.0.8"
+  nuspec.dependency "Quartz", "2.3.1"
+  nuspec.output_file = File.join(props[:artifacts], 'MassTransit.QuartzIntegration.nuspec')
+  add_files File.join(props[:output], 'Integration'), 'MassTransit.QuartzIntegration.{dll,pdb,xml}', nuspec
+  nuspec.file(File.join(props[:src], "MassTransit.QuartzIntegration\\**\\*.cs").gsub("/","\\"), "src")
+end
 
   # NUGET
   # ===================================================
@@ -623,26 +652,26 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
 
 desc "Builds the nuget package"
 task :nuget => [:versioning, 'build_artifacts', :all_nuspecs] do
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Automatonymous.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Log4Net.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NLog.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.StructureMap.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Autofac.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Ninject.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Unity.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.CastleWindsor.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NHibernate.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Automatonymous.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Log4Net.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NLog.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.StructureMap.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Autofac.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Ninject.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Unity.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.CastleWindsor.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.NHibernate.nuspec /Symbols -o build_artifacts"
     sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.AzureServiceBus.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.RabbitMQ.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.TestFramework.nuspec /Symbols -o build_artifacts"
-	sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Reactive.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.RabbitMQ.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.TestFramework.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Reactive.nuspec /Symbols -o build_artifacts"
 end
 
 def project_outputs(props)
-	props[:projects].map{ |p| "src/#{p}/bin/#{BUILD_CONFIG}/#{p}.dll" }.
-		concat( props[:projects].map{ |p| "src/#{p}/bin/#{BUILD_CONFIG}/#{p}.exe" } ).
-		find_all{ |path| exists?(path) }
+  props[:projects].map{ |p| "src/#{p}/bin/#{BUILD_CONFIG}/#{p}.dll" }.
+    concat( props[:projects].map{ |p| "src/#{p}/bin/#{BUILD_CONFIG}/#{p}.exe" } ).
+    find_all{ |path| exists?(path) }
 end
 
 desc "publishes (pushes) the nuget package 'NLog.Targets.RabbitMQ'"

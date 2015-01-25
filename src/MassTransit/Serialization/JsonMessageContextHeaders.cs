@@ -28,7 +28,7 @@ namespace MassTransit.Serialization
         public JsonMessageContextHeaders(JsonSerializer deserializer, IDictionary<string, object> headers)
         {
             _deserializer = deserializer;
-            _headers = headers;
+            _headers = headers ?? new Dictionary<string, object>();
         }
 
         public IEnumerable<Tuple<string, object>> Headers
