@@ -85,6 +85,7 @@
     </Compile>
     <Compile Include="Bus.cs" />
     <Compile Include="BusHandle.cs" />
+    <Compile Include="BusHandleExtensions.cs" />
     <Compile Include="Configuration\Builders\EndpointFactoryBuilder.cs" />
     <Compile Include="Configuration\Builders\IInMemoryBusBuilder.cs" />
     <Compile Include="Configuration\Builders\IInMemoryServiceBusFactorySpecification.cs" />
@@ -648,6 +649,7 @@
     <Compile Include="Testing\ITestSubject.cs" />
     <Compile Include="Transports\AddressEqualityComparer.cs" />
     <Compile Include="Transports\DefaultMessageNameFormatter.cs" />
+    <Compile Include="Transports\IBusHost.cs" />
     <Compile Include="Transports\IInboundMessageTracker.cs" />
     <Compile Include="Transports\IMessageNameFormatter.cs" />
     <Compile Include="Transports\InMemoryContextHeaderProvider.cs" />

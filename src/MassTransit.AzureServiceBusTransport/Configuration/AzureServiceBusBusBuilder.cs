@@ -55,7 +55,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
                 .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
 
-            return new ServiceBusBus(_inputAddress, consumePipe, SendEndpointProvider, ReceiveEndpoints, _hosts, PublishEndpoint);
+            return new MassTransitBus(_inputAddress, consumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
         }
     }
 }

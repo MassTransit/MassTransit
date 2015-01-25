@@ -40,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
                 .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
 
             ISendEndpointProvider sendEndpointProvider = SendEndpointProvider;
-            return new RabbitMqBus(_sourceAddress, consumePipe, sendEndpointProvider, ReceiveEndpoints, _hosts, PublishEndpoint);
+            return new MassTransitBus(_sourceAddress, consumePipe, sendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()

@@ -112,7 +112,6 @@
     <Compile Include="HaModel.cs" />
     <Compile Include="IHaModel.cs" />
     <Compile Include="RabbitMqPublishEndpoint.cs" />
-    <Compile Include="RabbitMqBus.cs" />
     <Compile Include="ConnectionContext.cs" />
     <Compile Include="RabbitMqConnectionCache.cs" />
     <Compile Include="RabbitMqConnectionEventSource.cs" />

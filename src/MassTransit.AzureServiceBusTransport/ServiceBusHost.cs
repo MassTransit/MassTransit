@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
@@ -48,7 +49,7 @@ namespace MassTransit.AzureServiceBusTransport
             get { return _namespaceManager.Value; }
         }
 
-        public async Task Close()
+        public async Task Close(CancellationToken cancellationToken)
         {
             if (_messagingFactory.IsValueCreated)
             {

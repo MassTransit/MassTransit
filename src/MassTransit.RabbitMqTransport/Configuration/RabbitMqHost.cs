@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration
 {
+    using System.Threading;
+    using System.Threading.Tasks;
     using Policies;
     using Transports;
 
@@ -53,6 +55,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public RabbitMqHostSettings Settings
         {
             get { return _hostSettings; }
+        }
+
+        public async Task Close(CancellationToken cancellationToken = new CancellationToken())
+        {
+            await _connectionCache.Stop();
+            await _sendConnectionCache.Stop();
         }
     }
 }

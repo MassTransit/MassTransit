@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit.Transports
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
 
@@ -25,7 +26,7 @@ namespace MassTransit.Transports
     public class InMemoryTransportCache :
         IReceiveTransportProvider,
         ISendTransportProvider,
-        IDisposable
+        IBusHost
     {
         readonly Uri _baseUri = new Uri("loopback://localhost/");
         readonly ConcurrentDictionary<string, InMemoryTransport> _transports;
@@ -40,7 +41,7 @@ namespace MassTransit.Transports
             get { return _transports.Keys.Select(x => new Uri(_baseUri, x)); }
         }
 
-        public void Dispose()
+        public async Task Close(CancellationToken cancellationToken = default(CancellationToken))
         {
             Parallel.ForEach(_transports.Values, x => x.Dispose());
         }

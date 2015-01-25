@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,20 +27,20 @@ namespace MassTransit
     {
         readonly Uri _address;
         readonly IConsumePipe _consumePipe;
-        readonly IList<IReceiveEndpoint> _receiveEndpoints;
-        readonly List<Task> _runningTasks;
-        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IBusHost[] _hosts;
         readonly IPublishEndpoint _publishEndpoint;
+        readonly IReceiveEndpoint[] _receiveEndpoints;
+        readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint,
-            IEnumerable<IReceiveEndpoint> receiveEndpoints)
+        public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
+            IPublishEndpoint publishEndpoint, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHost> hosts)
         {
             _address = address;
             _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpoint = publishEndpoint;
-            _receiveEndpoints = receiveEndpoints.ToList();
-            _runningTasks = new List<Task>();
+            _receiveEndpoints = receiveEndpoints.ToArray();
+            _hosts = hosts.ToArray();
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
@@ -109,7 +109,7 @@ namespace MassTransit
             return _sendEndpointProvider.GetSendEndpoint(address);
         }
 
-        public async Task<BusHandle> Start(CancellationToken cancellationToken)
+        async Task<BusHandle> IBusControl.Start(CancellationToken cancellationToken)
         {
             var receiveEndpointHandles = new List<ReceiveEndpointHandle>();
 
@@ -143,41 +143,31 @@ namespace MassTransit
                 throw new MassTransitException("The service bus could not be started.", exception);
             }
 
-            return new Handle(this, receiveEndpointHandles.ToArray(), _sendEndpointProvider);
+            return new Handle(receiveEndpointHandles.ToArray(), _hosts);
         }
 
 
         class Handle :
             BusHandle
         {
-            readonly IBusControl _bus;
+            readonly IBusHost[] _hosts;
             readonly ReceiveEndpointHandle[] _receiveEndpoints;
-            readonly ISendEndpointProvider _sendEndpointProvider;
 
-            public Handle(IBusControl bus, ReceiveEndpointHandle[] receiveEndpoints, ISendEndpointProvider sendEndpointProvider)
+            public Handle(ReceiveEndpointHandle[] receiveEndpoints, IBusHost[] hosts)
             {
-                _bus = bus;
                 _receiveEndpoints = receiveEndpoints;
-                _sendEndpointProvider = sendEndpointProvider;
+                _hosts = hosts;
             }
 
             public void Dispose()
             {
-                Stop().Wait();
+                Stop(default(CancellationToken)).Wait();
             }
 
-            public IBus Bus
-            {
-                get { return _bus; }
-            }
-
-            public async Task Stop(CancellationToken cancellationToken = new CancellationToken())
+            public async Task Stop(CancellationToken cancellationToken)
             {
                 await Task.WhenAll(_receiveEndpoints.Select(x => x.Stop(cancellationToken)));
-
-//                var disposable = _sendEndpointProvider as IDisposable;
-//                if (disposable != null)
-//                    disposable.Dispose();
+                await Task.WhenAll(_hosts.Select(x => x.Close(cancellationToken)));
             }
         }
     }

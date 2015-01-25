@@ -15,23 +15,19 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Threading.Tasks;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+    using Transports;
 
 
     /// <summary>
     /// An Azure ServiceBus Host, which caches the messaging factory and namespace manager
     /// </summary>
-    public interface IServiceBusHost
+    public interface IServiceBusHost :
+        IBusHost
     {
         ServiceBusHostSettings Settings { get; }
 
         Task<MessagingFactory> MessagingFactory { get; }
 
         Task<NamespaceManager> NamespaceManager { get; }
-
-        /// <summary>
-        /// Close the messaging factory asynchronously
-        /// </summary>
-        /// <returns></returns>
-        Task Close();
     }
 }
