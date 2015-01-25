@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Contexts;
     using Internals.Extensions;
     using Logging;
@@ -27,17 +28,20 @@ namespace MassTransit.AzureServiceBusTransport
     public class AzureServiceBusReceiveTransport :
         IReceiveTransport
     {
+        readonly IServiceBusHost _host;
+        readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<AzureServiceBusReceiveTransport>();
         readonly IRetryPolicy _retryPolicy;
-        readonly IServiceBusHost _host;
         readonly ReceiveSettings _settings;
-        readonly Uri _inputAddress;
+        readonly TopicSubscriptionSettings[] _subscriptionSettings;
 
-        public AzureServiceBusReceiveTransport(IServiceBusHost host, ReceiveSettings settings, IRetryPolicy retryPolicy)
+        public AzureServiceBusReceiveTransport(IServiceBusHost host, ReceiveSettings settings, IRetryPolicy retryPolicy,
+            params TopicSubscriptionSettings[] subscriptionSettings)
         {
             _host = host;
             _settings = settings;
             _retryPolicy = retryPolicy;
+            _subscriptionSettings = subscriptionSettings;
 
             _inputAddress = host.Settings.GetInputAddress(settings.QueueDescription);
         }
@@ -60,6 +64,10 @@ namespace MassTransit.AzureServiceBusTransport
                 x.Retry(_retryPolicy, handle.StopToken);
 
                 x.Filter(new PrepareReceiveQueueFilter(_settings));
+
+                foreach (TopicSubscriptionSettings subscriptionSetting in _subscriptionSettings)
+                    x.Filter(new BindTopicSubscriptionFilter(subscriptionSetting));
+
                 x.Filter(new MessageReceiverFilter(receivePipe));
             });
 
@@ -78,7 +86,7 @@ namespace MassTransit.AzureServiceBusTransport
                 try
                 {
                     var context = new ServiceBusConnectionContext(_host, handle.StopToken);
-                    
+
                     await connectionPipe.Send(context);
                 }
                 catch (TaskCanceledException)

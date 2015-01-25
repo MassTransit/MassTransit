@@ -27,6 +27,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     {
         readonly IServiceBusHost[] _hosts;
         readonly Uri _inputAddress;
+        readonly Lazy<ISendEndpointProvider> _publishSendEndpointProvider;
 
         public AzureServiceBusBusBuilder(IEnumerable<IServiceBusHost> hosts, Uri inputAddress)
         {
@@ -36,18 +37,31 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             _hosts = hosts.ToArray();
 
             _inputAddress = inputAddress;
+            _publishSendEndpointProvider = new Lazy<ISendEndpointProvider>(CreatePublishSendEndpointProvider);
+        }
+
+        protected ISendEndpointProvider PublishSendEndpointProvider
+        {
+            get { return _publishSendEndpointProvider.Value; }
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
-            var provider = new AzureServiceBusSendEndpointProvider(MessageSerializer, _inputAddress, _hosts);
+            var provider = new ServiceBusSendEndpointProvider(MessageSerializer, _inputAddress, _hosts);
+
+            return new SendEndpointCache(provider);
+        }
+
+        protected ISendEndpointProvider CreatePublishSendEndpointProvider()
+        {
+            var provider = new PublishSendEndpointProvider(MessageSerializer, _inputAddress, _hosts);
 
             return new SendEndpointCache(provider);
         }
 
         protected override IPublishEndpoint CreatePublishEndpoint()
         {
-            return new AzureServiceBusPublishEndpoint(SendEndpointProvider);
+            return new AzureServiceBusPublishEndpoint(_hosts[0], PublishSendEndpointProvider);
         }
 
         public virtual IBusControl Build()

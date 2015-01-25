@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Tests
 {
     using System;
+    using System.Diagnostics;
     using Configuration;
     using Microsoft.ServiceBus;
     using NUnit.Framework;
@@ -35,7 +36,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         public AzureServiceBusTestFixture()
         {
-            TestTimeout = TimeSpan.FromMinutes(1);
+            TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(60);
 
             _serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests");
 

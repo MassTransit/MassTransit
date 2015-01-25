@@ -14,7 +14,9 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Builders;
+    using Configuration;
     using Configurators;
     using EndpointConfigurators;
     using MassTransit.Pipeline;
@@ -138,11 +140,10 @@ namespace MassTransit.AzureServiceBusTransport
                 QueueDescription = _queueDescription,
             };
 
-            var transport = new AzureServiceBusReceiveTransport(_host, settings, retryPolicy);
 
             var inboundPipe = new ConsumePipe(_pipeConfigurator);
 
-            IReceiveEndpointBuilder builder = new ReceiveEndpointBuilder(inboundPipe);
+            var builder = new ServiceBusReceiveEndpointBuilder(inboundPipe, _host.MessageNameFormatter);
 
             foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
                 builderConfigurator.Configure(builder);
@@ -150,6 +151,8 @@ namespace MassTransit.AzureServiceBusTransport
             _receivePipeConfigurator.Filter(new DeserializeFilter(deserializer, inboundPipe));
 
             IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
+
+            var transport = new AzureServiceBusReceiveTransport(_host, settings, retryPolicy, builder.GetTopicSubscriptions().ToArray());
 
             return new ReceiveEndpoint(transport, receivePipe, inboundPipe);
         }

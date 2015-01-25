@@ -65,6 +65,7 @@
     <Compile Include="ConfiguringAzure_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Performance_Specs.cs" />
+    <Compile Include="Publish_Specs.cs" />
     <Compile Include="Send_Specs.cs" />
     <Compile Include="TestAzureServiceBusAccountSettings.cs" />
     <Compile Include="Verify_account_settings.cs" />

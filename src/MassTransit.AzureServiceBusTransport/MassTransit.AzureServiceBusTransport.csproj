@@ -61,7 +61,7 @@
     <Compile Include="AzureServiceBus.cs" />
     <Compile Include="AzureServiceBusAddressExtensions.cs" />
     <Compile Include="AzureServiceBusSendContext.cs" />
-    <Compile Include="AzureServiceBusSendEndpointProvider.cs" />
+    <Compile Include="ServiceBusSendEndpointProvider.cs" />
     <Compile Include="AzureServiceBusSendTransport.cs" />
     <Compile Include="BrokeredMessageContext.cs" />
     <Compile Include="Configuration\AzureServiceBusHostConfigurator.cs" />
@@ -71,8 +71,11 @@
     <Compile Include="Configuration\IServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\ISharedAccessSignatureTokenProviderConfigurator.cs" />
     <Compile Include="Configuration\ITokenProviderConfigurator.cs" />
+    <Compile Include="Configuration\ServiceBusReceiveEndpointBuilder.cs" />
+    <Compile Include="Configuration\ServiceBusTopicSubscriptionExtensions.cs" />
     <Compile Include="Configuration\SharedAccessKeyTokenProvider.cs" />
     <Compile Include="Configuration\SharedAccessSignatureTokenProviderConfigurator.cs" />
+    <Compile Include="Configuration\TopicSubscriptionSettings.cs" />
     <Compile Include="Contexts\AzureServiceBusReceiveContext.cs" />
     <Compile Include="Contexts\AzureServiceBusReceiveContextHeaders.cs" />
     <Compile Include="Contexts\AzureServiceBusSendContextHeaders.cs" />
@@ -82,7 +85,9 @@
     <Compile Include="IServiceBusHost.cs" />
     <Compile Include="IServiceBusHostConfigurator.cs" />
     <Compile Include="IServiceBusReceiveEndpointConfigurator.cs" />
+    <Compile Include="Pipeline\BindTopicSubscriptionFilter.cs" />
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
+    <Compile Include="PublishSendEndpointProvider.cs" />
     <Compile Include="ServiceBusHost.cs" />
     <Compile Include="ServiceBusHostSettings.cs" />
     <Compile Include="Pipeline\MessageReceiverFilter.cs" />
@@ -93,6 +98,7 @@
     <Compile Include="ReceiverMetrics.cs" />
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="ServiceBusHostSettingsExtensions.cs" />
+    <Compile Include="ServiceBusMessageNameFormatter.cs" />
     <Compile Include="ServiceBusReceiveEndpointConfigurator.cs" />
     <Compile Include="TransportConfiguratorExtensions.cs" />
     <Compile Include="AzureServiceBusConfigurationExtensions.cs" />

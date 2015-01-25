@@ -12,28 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
-    using System.Threading.Tasks;
-    using Microsoft.ServiceBus;
-    using Microsoft.ServiceBus.Messaging;
+    using System;
     using Transports;
 
 
-    /// <summary>
-    /// An Azure ServiceBus Host, which caches the messaging factory and namespace manager
-    /// </summary>
-    public interface IServiceBusHost :
-        IBusHost
+    public class ServiceBusMessageNameFormatter :
+        IMessageNameFormatter
     {
-        ServiceBusHostSettings Settings { get; }
+        readonly IMessageNameFormatter _formatter;
 
-        Task<MessagingFactory> MessagingFactory { get; }
+        public ServiceBusMessageNameFormatter()
+        {
+            _formatter = new DefaultMessageNameFormatter("::", "--", "/", "-");
+        }
 
-        Task<NamespaceManager> NamespaceManager { get; }
-
-        Task<NamespaceManager> RootNamespaceManager { get; }
-
-        IMessageNameFormatter MessageNameFormatter { get; }
-
-        string GetQueuePath(QueueDescription queueDescription);
+        public MessageName GetMessageName(Type type)
+        {
+            return _formatter.GetMessageName(type);
+        }
     }
 }

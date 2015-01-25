@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using Contexts;
     using Logging;
     using MassTransit.Pipeline;
+    using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
 
 
@@ -38,20 +39,36 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
             QueueDescription queueDescription = null;
 
-            var namespaceManager = await context.NamespaceManager;
+            NamespaceManager namespaceManager = await context.NamespaceManager;
 
+            bool create = true;
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Creating queue {0}", _settings.QueueDescription.Path);
+                queueDescription = await namespaceManager.GetQueueAsync(_settings.QueueDescription.Path);
 
-                queueDescription = await namespaceManager.CreateQueueAsync(_settings.QueueDescription);
+                create = false;
             }
-            catch (MessagingEntityAlreadyExistsException)
+            catch (MessagingEntityNotFoundException)
             {
             }
-            if (queueDescription == null)
-                queueDescription = await namespaceManager.GetQueueAsync(_settings.QueueDescription.Path);
+
+            if (create)
+            {
+                bool created = false;
+                try
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating queue {0}", _settings.QueueDescription.Path);
+
+                    queueDescription = await namespaceManager.CreateQueueAsync(_settings.QueueDescription);
+                    created = true;
+                }
+                catch (MessagingEntityAlreadyExistsException)
+                {
+                }
+                if (!created)
+                    queueDescription = await namespaceManager.GetQueueAsync(_settings.QueueDescription.Path);
+            }
 
             if (_log.IsDebugEnabled)
             {

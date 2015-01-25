@@ -41,5 +41,24 @@ namespace MassTransit.AzureServiceBusTransport
 
             return queueDescription;
         }
+
+        public static TopicDescription GetTopicDescription(this Uri address)
+        {
+            if (string.Compare("sb", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
+                throw new ArgumentException("The invalid scheme was specified: " + address.Scheme);
+
+            string topicPath = address.AbsolutePath.Trim(new[] {'/'});
+
+            var topicDescription = new TopicDescription(topicPath)
+            {
+                EnableBatchedOperations = true,
+                DefaultMessageTimeToLive = TimeSpan.FromDays(365),
+            };
+
+            topicDescription.DefaultMessageTimeToLive = address.GetValueFromQueryString("ttl", topicDescription.DefaultMessageTimeToLive);
+            topicDescription.EnableExpress = address.GetValueFromQueryString("express", topicDescription.EnableExpress);
+
+            return topicDescription;
+        }
     }
 }
