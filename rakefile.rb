@@ -67,7 +67,7 @@ task :copy_signed do
 
   copyOutputFiles File.join(props[:src], "Persistence/MassTransit.NHibernateIntegration/bin/#{BUILD_CONFIG}"), "MassTransit.NHibernateIntegration.{dll,pdb,xml}", File.join(props[:output], "Persistence/NHibernate")
 
-  copyOutputFiles File.join(props[:src], "MassTransit.QuartzIntegration/bin/Release"), "MassTransit.QuartzIntegration.{dll,pdb,xml}", File.join(props[:output], 'Integration', 'net-4.5')
+  copyOutputFiles File.join(props[:src], "MassTransit.QuartzIntegration/bin/Release"), "MassTransit.QuartzIntegration.{dll,pdb,xml}", File.join(props[:output], 'QuartzIntegration')
 
   copyOutputFiles File.join(props[:src], "MassTransit.QuartzService/bin/Release"), "MassTransit.QuartzService.exe", File.join(props[:output], 'QuartzService')
   copyOutputFiles File.join(props[:src], "MassTransit.QuartzService/bin/Release"), "*.dll", File.join(props[:output], 'QuartzService')
@@ -640,8 +640,8 @@ nuspec :mtquartz_nuspec do |nuspec|
   nuspec.dependency "Common.Logging", "3.0.0"
   nuspec.dependency "Newtonsoft.Json", "6.0.8"
   nuspec.dependency "Quartz", "2.3.1"
-  nuspec.output_file = File.join(props[:artifacts], 'MassTransit.QuartzIntegration.nuspec')
-  add_files File.join(props[:output], 'Integration'), 'MassTransit.QuartzIntegration.{dll,pdb,xml}', nuspec
+  nuspec.output_file = 'nuspecs/MassTransit.QuartzIntegration.nuspec'
+  add_files props[:stage], "#{File.join('QuartzIntegration', 'MassTransit.QuartzIntegration.{dll,pdb,xml}')}", nuspec
   nuspec.file(File.join(props[:src], "MassTransit.QuartzIntegration\\**\\*.cs").gsub("/","\\"), "src")
 end
 
@@ -666,6 +666,7 @@ task :nuget => [:versioning, 'build_artifacts', :all_nuspecs] do
   sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.RabbitMQ.nuspec /Symbols -o build_artifacts"
   sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.TestFramework.nuspec /Symbols -o build_artifacts"
   sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.Reactive.nuspec /Symbols -o build_artifacts"
+  sh "src/.nuget/nuget.exe pack -BasePath build_output nuspecs/MassTransit.QuartzIntegration.nuspec /Symbols -o build_artifacts"
 end
 
 def project_outputs(props)
