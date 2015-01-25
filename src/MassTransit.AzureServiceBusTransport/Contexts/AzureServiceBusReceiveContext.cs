@@ -10,14 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport
+namespace MassTransit.AzureServiceBusTransport.Contexts
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Net.Mime;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -37,7 +36,6 @@ namespace MassTransit.AzureServiceBusTransport
         readonly Stopwatch _receiveTimer;
         byte[] _body;
         ContentType _contentType;
-        Encoding _encoding;
         ContextHeaders _headers;
 
         public AzureServiceBusReceiveContext(BrokeredMessage message, Uri inputAddress)

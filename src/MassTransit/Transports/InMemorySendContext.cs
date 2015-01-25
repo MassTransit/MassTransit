@@ -25,7 +25,7 @@ namespace MassTransit.Transports
         SendContext<T>
         where T : class
     {
-        readonly InMemorySendContextHeaders _contextHeaders;
+        readonly InMemorySendContextHeaders _headers;
         readonly PayloadCache _payloadCache;
         byte[] _body;
         IMessageSerializer _serializer;
@@ -36,7 +36,7 @@ namespace MassTransit.Transports
 
             _payloadCache = new PayloadCache();
 
-            _contextHeaders = new InMemorySendContextHeaders();
+            _headers = new InMemorySendContextHeaders();
             Message = message;
 
             MessageId = NewId.NextGuid();
@@ -72,9 +72,9 @@ namespace MassTransit.Transports
         public Guid? RequestId { get; set; }
         public Guid? CorrelationId { get; set; }
 
-        public SendContextHeaders ContextHeaders
+        public SendContextHeaders Headers
         {
-            get { return _contextHeaders; }
+            get { return _headers; }
         }
 
         public Uri SourceAddress { get; set; }

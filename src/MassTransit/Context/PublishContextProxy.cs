@@ -92,9 +92,9 @@ namespace MassTransit.Context
             set { _context.CorrelationId = value; }
         }
 
-        public SendContextHeaders ContextHeaders
+        public SendContextHeaders Headers
         {
-            get { return _context.ContextHeaders; }
+            get { return _context.Headers; }
         }
 
         public TimeSpan? TimeToLive
@@ -198,9 +198,9 @@ namespace MassTransit.Context
             set { _context.CorrelationId = value; }
         }
 
-        public SendContextHeaders ContextHeaders
+        public SendContextHeaders Headers
         {
-            get { return _context.ContextHeaders; }
+            get { return _context.Headers; }
         }
 
         public TimeSpan? TimeToLive

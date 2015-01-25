@@ -10,54 +10,53 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport
+namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
     using System.Threading;
     using Context;
-    using RabbitMQ.Client;
 
 
-    public class SharedConnectionContext :
-        ConnectionContext
+    public class SharedModelContext :
+        ModelContext
     {
         readonly CancellationToken _cancellationToken;
-        readonly ConnectionContext _context;
+        readonly ModelContext _context;
 
-        public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken)
+        public SharedModelContext(ModelContext context, CancellationToken cancellationToken)
         {
             _context = context;
             _cancellationToken = cancellationToken;
         }
 
-        public CancellationToken CancellationToken
-        {
-            get { return _cancellationToken; }
-        }
-
-        public bool HasPayloadType(Type contextType)
+        bool PipeContext.HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public IConnection Connection
+        ConnectionContext ModelContext.ConnectionContext
         {
-            get { return _context.Connection; }
+            get { return _context.ConnectionContext; }
         }
 
-        public Uri GetAddress(string queueName)
+        IHaModel ModelContext.Model
         {
-            return _context.GetAddress(queueName);
+            get { return _context.Model; }
+        }
+
+        CancellationToken PipeContext.CancellationToken
+        {
+            get { return _cancellationToken; }
         }
     }
 }

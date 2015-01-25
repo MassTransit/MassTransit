@@ -327,7 +327,7 @@ namespace MassTransit.Serialization
                 v.RequestId = RequestId;
 
                 foreach (var header in Headers.Headers)
-                    v.ContextHeaders.Set(header.Item1, header.Item2);
+                    v.Headers.Set(header.Item1, header.Item2);
             }));
 
             if (ResponseAddress != null)

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using Context;
     using RabbitMQ.Client;
     using Serialization;
-    using Transports;
 
 
     public class RabbitMqSendContextImpl<T> :
@@ -31,7 +30,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
         byte[] _body;
         IMessageSerializer _serializer;
 
-        public RabbitMqSendContextImpl(IBasicProperties basicProperties, T message, SendSettings sendSettings, CancellationToken cancellationToken,
+        public RabbitMqSendContextImpl(IBasicProperties basicProperties, T message, SendSettings sendSettings,
+            CancellationToken cancellationToken,
             string routingKey = "")
         {
             CancellationToken = cancellationToken;
@@ -42,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _payloadCache.GetOrAddPayload<RabbitMqSendContext<T>>(() => this);
             _payloadCache.GetOrAddPayload<RabbitMqSendContext>(() => this);
 
-            ContextHeaders = new RabbitMqSendContextHeaders(basicProperties);
+            Headers = new RabbitMqSendContextHeaders(basicProperties);
             BasicProperties = basicProperties;
             Message = message;
             Exchange = sendSettings.ExchangeName;
@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public Guid? RequestId { get; set; }
         public Guid? CorrelationId { get; set; }
 
-        public SendContextHeaders ContextHeaders { get; set; }
+        public SendContextHeaders Headers { get; set; }
 
         public Uri SourceAddress { get; set; }
         public Uri DestinationAddress { get; set; }

@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport
+namespace MassTransit.AzureServiceBusTransport.Contexts
 {
     using System;
     using System.Collections.Generic;
@@ -30,7 +30,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public IEnumerable<Tuple<string, object>> Headers
         {
-            get { return _context.Properties.Select(x => Tuple.Create(x.Key, x.Value)); }
+            get { return _context.Properties.Select(x => Tuple.Create<string, object>(x.Key, x.Value)); }
         }
 
         public bool TryGetHeader(string key, out object value)

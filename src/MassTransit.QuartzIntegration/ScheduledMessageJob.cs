@@ -116,7 +116,7 @@ namespace MassTransit.QuartzIntegration
 
             var headers = JsonConvert.DeserializeObject<IEnumerable<Tuple<string, string>>>(HeadersAsJson);
             foreach (var header in headers)
-                context.ContextHeaders.Set(header.Item1, header.Item2);
+                context.Headers.Set(header.Item1, header.Item2);
         }
 
         static Uri ToUri(string s)

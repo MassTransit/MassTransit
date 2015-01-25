@@ -86,7 +86,7 @@ namespace MassTransit.Tests
             InputQueueSendEndpoint.Send(new PingMessage(), Pipe.New<SendContext<PingMessage>>(x => x.Execute(context =>
             {
                 context.CorrelationId = _correlationId;
-                context.ContextHeaders.Set("One", "1");
+                context.Headers.Set("One", "1");
             })))
                 .Wait(TestCancellationToken);
         }
