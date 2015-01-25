@@ -61,9 +61,19 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             get { return _host.NamespaceManager; }
         }
 
+        public Task<NamespaceManager> RootNamespaceManager
+        {
+            get { return _host.RootNamespaceManager; }
+        }
+
         public Uri GetQueueAddress(QueueDescription queueDescription)
         {
             return _host.Settings.GetInputAddress(queueDescription);
+        }
+
+        public string GetQueuePath(QueueDescription queueDescription)
+        {
+            return _host.GetQueuePath(queueDescription);
         }
 
         public CancellationToken CancellationToken

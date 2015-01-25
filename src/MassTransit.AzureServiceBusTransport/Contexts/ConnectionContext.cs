@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,10 +32,22 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         Task<NamespaceManager> NamespaceManager { get; }
 
         /// <summary>
+        /// The namespace manager at the root of the namespace
+        /// </summary>
+        Task<NamespaceManager> RootNamespaceManager { get; }
+
+        /// <summary>
         /// Return the address for the specified queue
         /// </summary>
         /// <param name="queueDescription"></param>
         /// <returns>The address of the queue</returns>
         Uri GetQueueAddress(QueueDescription queueDescription);
+
+        /// <summary>
+        /// return the path of the queue for this connection
+        /// </summary>
+        /// <param name="queueDescription"></param>
+        /// <returns></returns>
+        string GetQueuePath(QueueDescription queueDescription);
     }
 }

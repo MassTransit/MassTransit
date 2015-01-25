@@ -13,18 +13,22 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Microsoft.ServiceBus.Messaging.Amqp;
+    using Transports;
 
 
     public class ServiceBusHost :
         IServiceBusHost
     {
+        readonly IMessageNameFormatter _messageNameFormatter;
         readonly Lazy<Task<MessagingFactory>> _messagingFactory;
         readonly Lazy<Task<NamespaceManager>> _namespaceManager;
+        readonly Lazy<Task<NamespaceManager>> _rootNamespaceManager;
         readonly ServiceBusHostSettings _settings;
 
         public ServiceBusHost(ServiceBusHostSettings settings)
@@ -32,6 +36,9 @@ namespace MassTransit.AzureServiceBusTransport
             _settings = settings;
             _messagingFactory = new Lazy<Task<MessagingFactory>>(CreateMessagingFactory);
             _namespaceManager = new Lazy<Task<NamespaceManager>>(CreateNamespaceManager);
+            _rootNamespaceManager = new Lazy<Task<NamespaceManager>>(CreateRootNamespaceManager);
+
+            _messageNameFormatter = new ServiceBusMessageNameFormatter();
         }
 
         ServiceBusHostSettings IServiceBusHost.Settings
@@ -49,15 +56,28 @@ namespace MassTransit.AzureServiceBusTransport
             get { return _namespaceManager.Value; }
         }
 
+        public Task<NamespaceManager> RootNamespaceManager
+        {
+            get { return _rootNamespaceManager.Value; }
+        }
+
+        public IMessageNameFormatter MessageNameFormatter
+        {
+            get { return _messageNameFormatter; }
+        }
+
+        public string GetQueuePath(QueueDescription queueDescription)
+        {
+            return string.Join("/",_settings.ServiceUri.AbsolutePath.Trim(new[] {'/'}), queueDescription.Path);
+        }
+
         public async Task Close(CancellationToken cancellationToken)
         {
             if (_messagingFactory.IsValueCreated)
             {
-                var factory = await _messagingFactory.Value;
+                MessagingFactory factory = await _messagingFactory.Value;
                 if (!factory.IsClosed)
-                {
                     await factory.CloseAsync();
-                }
             }
         }
 
@@ -74,7 +94,9 @@ namespace MassTransit.AzureServiceBusTransport
                 },
             };
 
-            return await MessagingFactory.CreateAsync(_settings.ServiceUri, mfs);
+            var builder = new UriBuilder(_settings.ServiceUri) {Path = ""};
+
+            return await MessagingFactory.CreateAsync(builder.Uri, mfs);
         }
 
         async Task<NamespaceManager> CreateNamespaceManager()
@@ -87,6 +109,20 @@ namespace MassTransit.AzureServiceBusTransport
             };
 
             return new NamespaceManager(_settings.ServiceUri, nms);
+        }
+
+        async Task<NamespaceManager> CreateRootNamespaceManager()
+        {
+            var nms = new NamespaceManagerSettings
+            {
+                TokenProvider = _settings.TokenProvider,
+                OperationTimeout = TimeSpan.FromSeconds(10),
+                RetryPolicy = RetryPolicy.NoRetry,
+            };
+            var builder = new UriBuilder(_settings.ServiceUri);
+            builder.Path = "";
+
+            return new NamespaceManager(builder.Uri, nms);
         }
     }
 }

@@ -39,7 +39,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            string queuePath = receiveSettings.QueueDescription.Path;
+            string queuePath = context.GetQueuePath(receiveSettings.QueueDescription);
 
             Uri inputAddress = context.GetQueueAddress(receiveSettings.QueueDescription);
 
