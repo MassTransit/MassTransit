@@ -68,5 +68,10 @@ namespace MassTransit.Internals.Reflection
         {
             return _properties[propertyExpression.GetMemberName()].Get(instance);
         }
+
+        public bool TryGetProperty(string propertyName, out ReadWriteProperty<T> property)
+        {
+            return _properties.TryGetValue(propertyName, out property);
+        }
     }
 }
