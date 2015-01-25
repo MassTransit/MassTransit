@@ -303,10 +303,9 @@ task :tests => [:unit_tests]
 
 desc "Runs unit tests"
 nunit :unit_tests do |nunit|
-
 	nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.4', 'tools', 'nunit-console.exe')
 	nunit.options = "/framework=net-4.5", '/timeout=60000', '/domain=multiple', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results-')}#{OUTPUT_PATH}.xml\""
-    nunit.assemblies = FileList["tests/MassTransit.Tests.dll", "tests/MassTransit.Containers.Tests.dll"]
+  nunit.assemblies = FileList["tests/MassTransit.Tests.dll", "tests/MassTransit.Containers.Tests.dll"]
 end
 
 desc "Runs transport tests (integration)"
@@ -366,7 +365,8 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.language = "en-US"
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
-    nuspec.dependency "Newtonsoft.Json", "6.0.7"
+    nuspec.dependency "Newtonsoft.Json", "6.0.8"
+    nuspec.dependency "NewId", "2.1.2"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
     add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
@@ -383,8 +383,9 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "Newtonsoft.Json", "6.0.7"
-    nuspec.dependency "WindowsAzure.ServiceBus", "2.5.3"
+    nuspec.dependency "Newtonsoft.Json", "6.0.8"
+    nuspec.dependency "NewId", "2.1.2"
+    nuspec.dependency "WindowsAzure.ServiceBus", "2.5.4"
     nuspec.dependency "Microsoft.WindowsAzure.ConfigurationManager", "2.0.3"
     nuspec.output_file = 'nuspecs/MassTransit.AzureServiceBus.nuspec'
 
@@ -403,6 +404,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
+    nuspec.dependency "NewId", "2.1.2"
     nuspec.dependency "Automatonymous", "3.0.0-alpha"
     nuspec.output_file = 'nuspecs/MassTransit.Automatonymous.nuspec'
 
@@ -476,7 +478,9 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "RabbitMQ.Client", "3.4.0"
+    nuspec.dependency "Newtonsoft.Json", "6.0.8"
+    nuspec.dependency "NewId", "2.1.2"
+    nuspec.dependency "RabbitMQ.Client", "3.4.3"
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
 
 	add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.RabbitMqTransport.{dll,pdb,xml}')}", nuspec
@@ -584,6 +588,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
+    nuspec.dependency "NewId", "2.1.2"
     nuspec.dependency "NUnit", "2.6.4"
     nuspec.dependency "RhinoMocks", "3.6.1"
     nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'

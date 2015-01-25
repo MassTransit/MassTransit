@@ -65,9 +65,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Magnum.2.1.3\lib\NET40\Magnum.dll</HintPath>
     </Reference>
+    <Reference Include="NewId">
+      <HintPath>..\packages\NewId.2.1.2\lib\net45\NewId.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.7\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -95,7 +98,6 @@
     <Compile Include="Consumer_Specs.cs" />
     <Compile Include="ContainedMessage_Specs.cs" />
     <Compile Include="Behaviors\Behavior.cs" />
-    <Compile Include="Configuration\ShutdownTimeout_Specs.cs" />
     <Compile Include="DictionaryToObject_Specs.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
     <Compile Include="FastProperty_Specs.cs" />
@@ -105,11 +107,9 @@
     <Compile Include="InterfaceProxy_Specs.cs" />
     <Compile Include="JsonToken_Specs.cs" />
     <Compile Include="MessageUrnSpecs.cs" />
-    <Compile Include="Configuration\ConsumerSubscription_Specs.cs" />
     <Compile Include="Configuration\ConsumesAll_Specs.cs" />
     <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
     <Compile Include="Configuration\SagaConnector_Specs.cs" />
-    <Compile Include="Configuration\When_configuration_fails.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Load\CommandInstance.cs" />
     <Compile Include="Load\Messages\First.cs" />
@@ -122,12 +122,6 @@
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="MessageRetryTracker_Specs.cs" />
     <Compile Include="Messages\PartialSerializationTestMessage.cs" />
-    <Compile Include="NewId_\Formatter_Specs.cs" />
-    <Compile Include="NewId_\GuidInterop_Specs.cs" />
-    <Compile Include="NewId_\LongTerm_Specs.cs" />
-    <Compile Include="NewId_\NetworkAddress_Specs.cs" />
-    <Compile Include="NewId_\NewId_Specs.cs" />
-    <Compile Include="NewId_\Usage_Specs.cs" />
     <Compile Include="ObjectToDictionary_Specs.cs" />
     <Compile Include="Performance\InMemorySpeed_Specs.cs" />
     <Compile Include="Pipeline\ConnectConsumer_Specs.cs" />
@@ -154,7 +148,6 @@
     <Compile Include="Testing\HandlerRespond_Specs.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="Testing\SagaTest_Specs.cs" />
-    <Compile Include="TextFixtures\ServiceInstance.cs" />
     <Compile Include="Threading_Specs.cs" />
     <Compile Include="Transports\InMemoryTransport_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
@@ -235,6 +228,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Internal\" />
+    <Folder Include="TextFixtures\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
