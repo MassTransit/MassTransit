@@ -19,6 +19,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         using System.IO;
         using System.Threading;
         using System.Threading.Tasks;
+        using Configuration;
+        using Contexts;
         using Microsoft.ServiceBus;
         using Microsoft.ServiceBus.Messaging;
         using Microsoft.ServiceBus.Messaging.Amqp;

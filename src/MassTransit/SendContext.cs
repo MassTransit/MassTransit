@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,9 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Net.Mime;
-    using System.Threading.Tasks;
     using Serialization;
-    using Transports;
 
 
     /// <summary>
@@ -50,7 +48,7 @@ namespace MassTransit
         Guid? MessageId { get; set; }
         Guid? CorrelationId { get; set; }
 
-        SendContextHeaders ContextHeaders { get; }
+        SendContextHeaders Headers { get; }
 
         TimeSpan? TimeToLive { get; set; }
 
@@ -65,14 +63,5 @@ namespace MassTransit
         /// The serializer to use when serializing the message to the transport
         /// </summary>
         IMessageSerializer Serializer { get; set; }
-    }
-
-
-    public interface Endpoint
-    {
-        Task<SendContext<T>> Send<T>(T message)
-            where T : class;
-
-        Task<SendContext> Send(object message, Type messageType);
     }
 }

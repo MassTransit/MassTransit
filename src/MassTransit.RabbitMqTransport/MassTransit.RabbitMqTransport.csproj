@@ -74,6 +74,8 @@
     <Compile Include="Contexts\RabbitMqModelContext.cs" />
     <Compile Include="Contexts\RabbitMqReceiveContext.cs" />
     <Compile Include="Contexts\RabbitMqSendContextImpl.cs" />
+    <Compile Include="Contexts\SharedConnectionContext.cs" />
+    <Compile Include="Contexts\SharedModelContext.cs" />
     <Compile Include="EndpointAddressBuilder.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />
@@ -123,7 +125,6 @@
     <Compile Include="RabbitMqPublishSettings.cs" />
     <Compile Include="RabbitMqReceiveSettings.cs" />
     <Compile Include="ModelContext.cs" />
-    <Compile Include="RabbitMqProducer.cs" />
     <Compile Include="RabbitMqConnector.cs" />
     <Compile Include="RabbitMqSendEndpointProvider.cs" />
     <Compile Include="RabbitMqSendSettings.cs" />
@@ -132,8 +133,6 @@
     <Compile Include="RabbitMqSendContext.cs" />
     <Compile Include="RabbitMqSendTransport.cs" />
     <Compile Include="SendSettings.cs" />
-    <Compile Include="SharedConnectionContext.cs" />
-    <Compile Include="SharedModelContext.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
     <Compile Include="Testing\RabbitMqBusTestScenarioBuilder.cs" />
   </ItemGroup>
@@ -148,9 +147,7 @@
     <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Management\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

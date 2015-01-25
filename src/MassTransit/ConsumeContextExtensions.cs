@@ -76,11 +76,11 @@ namespace MassTransit
                     target.TimeToLive = context.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
 
                 foreach (var header in context.Headers.Headers)
-                    target.ContextHeaders.Set(header.Item1, header.Item2);
+                    target.Headers.Set(header.Item1, header.Item2);
 
                 Uri inputAddress = context.ReceiveContext.InputAddress ?? context.DestinationAddress;
                 if (inputAddress != null)
-                    target.ContextHeaders.Set("MT-Forwarder-Address", inputAddress.ToString());
+                    target.Headers.Set("MT-Forwarder-Address", inputAddress.ToString());
             }));
         }
     }

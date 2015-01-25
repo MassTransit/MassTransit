@@ -52,7 +52,7 @@ namespace MassTransit.Serialization
 
             Headers = new Dictionary<string, object>();
 
-            foreach (var header in context.ContextHeaders)
+            foreach (var header in context.Headers)
                 Headers[header.Key] = header.Value;
         }
 
