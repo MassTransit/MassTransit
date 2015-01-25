@@ -15,7 +15,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using Transports;
 
 
-    public interface IRabbitMqHost
+    public interface IRabbitMqHost :
+        IBusHost
     {
         IMessageNameFormatter MessageNameFormatter { get; }
         IConnectionCache SendConnectionCache { get; }

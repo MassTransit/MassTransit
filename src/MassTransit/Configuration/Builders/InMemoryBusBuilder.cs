@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.Builders
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Pipeline;
     using Pipeline.Pipes;
@@ -26,9 +27,10 @@ namespace MassTransit.Builders
         readonly Uri _inputAddress;
         readonly IReceiveTransportProvider _receiveTransportProvider;
         readonly ISendTransportProvider _sendTransportProvider;
+        IBusHost[] _hosts;
 
         public InMemoryBusBuilder(Uri inputAddress, IReceiveTransportProvider receiveTransportProvider,
-            ISendTransportProvider sendTransportProvider)
+            ISendTransportProvider sendTransportProvider, IEnumerable<IBusHost> hosts)
         {
             if (inputAddress == null)
                 throw new ArgumentNullException("inputAddress");
@@ -40,6 +42,7 @@ namespace MassTransit.Builders
             _inputAddress = inputAddress;
             _receiveTransportProvider = receiveTransportProvider;
             _sendTransportProvider = sendTransportProvider;
+            _hosts = hosts.ToArray();
         }
 
         public ISendTransportProvider SendTransportProvider
@@ -69,7 +72,7 @@ namespace MassTransit.Builders
             IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
                 .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
 
-            return new MassTransitBus(_inputAddress, consumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints);
+            return new MassTransitBus(_inputAddress, consumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
         }
     }
 }

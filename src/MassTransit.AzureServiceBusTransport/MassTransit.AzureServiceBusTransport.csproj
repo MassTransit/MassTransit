@@ -78,9 +78,7 @@
     <Compile Include="ITokenProviderConfigurator.cs" />
     <Compile Include="ConnectionContext.cs" />
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
-    <Compile Include="Pipeline\PrepareSendQueueFilter.cs" />
     <Compile Include="RabbitMqHostEqualityComparer.cs" />
-    <Compile Include="ServiceBusBus.cs" />
     <Compile Include="ServiceBusConnectionContext.cs" />
     <Compile Include="ServiceBusHost.cs" />
     <Compile Include="ServiceBusHostSettings.cs" />

@@ -13,6 +13,7 @@
 namespace MassTransit.TestFramework
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Logging;
     using NUnit.Framework;
@@ -121,7 +122,8 @@ namespace MassTransit.TestFramework
             try
             {
                 if (_transportCache != null)
-                    _transportCache.Dispose();
+                    _transportCache.Close()
+                        .Wait(TestTimeout);
             }
             catch (Exception ex)
             {

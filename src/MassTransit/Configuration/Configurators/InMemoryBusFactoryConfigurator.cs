@@ -29,6 +29,7 @@ namespace MassTransit.Configurators
         readonly Uri _inputAddress;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
+        readonly IList<IBusHost> _hosts;
 
         public InMemoryBusFactoryConfigurator()
         {
@@ -38,6 +39,8 @@ namespace MassTransit.Configurators
 
             _configurators = new List<IInMemoryServiceBusFactorySpecification>();
             _busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName);
+
+            _hosts = new List<IBusHost>();
         }
 
         public IBusControl CreateBus()
@@ -45,12 +48,13 @@ namespace MassTransit.Configurators
             if (_receiveTransportProvider == null || _sendTransportProvider == null)
             {
                 var transportProvider = new InMemoryTransportCache();
+                _hosts.Add(transportProvider);
 
                 _receiveTransportProvider = _receiveTransportProvider ?? transportProvider;
                 _sendTransportProvider = _sendTransportProvider ?? transportProvider;
             }
 
-            var builder = new InMemoryBusBuilder(_inputAddress, _receiveTransportProvider, _sendTransportProvider);
+            var builder = new InMemoryBusBuilder(_inputAddress, _receiveTransportProvider, _sendTransportProvider, _hosts);
 
             foreach (IInMemoryServiceBusFactorySpecification configurator in _configurators)
                 configurator.Configure(builder);
