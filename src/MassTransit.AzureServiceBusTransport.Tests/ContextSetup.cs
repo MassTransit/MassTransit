@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Tests
 {
     using Log4NetIntegration.Logging;
+    using Microsoft.ServiceBus;
     using NUnit.Framework;
 
 
@@ -22,6 +23,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         [SetUp]
         public void Before_any()
         {
+            ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Http;
+
             string file = "test.log4net.xml";
 
             Log4NetLogger.Use(file);
