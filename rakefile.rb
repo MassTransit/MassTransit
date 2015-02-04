@@ -391,7 +391,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Newtonsoft.Json", "6.0.8"
     nuspec.dependency "NewId", "2.1.2"
-    nuspec.dependency "WindowsAzure.ServiceBus", "2.5.4"
+    nuspec.dependency "WindowsAzure.ServiceBus", "2.6.1"
     nuspec.dependency "Microsoft.WindowsAzure.ConfigurationManager", "2.0.3"
     nuspec.output_file = 'nuspecs/MassTransit.AzureServiceBus.nuspec'
 
