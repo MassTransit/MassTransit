@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,26 +19,31 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     public class AzureServiceBusSendContextHeaders :
         SendContextHeaders
     {
-        readonly Dictionary<string, object> _dictionary;
+        readonly IDictionary<string, object> _headers;
 
         public AzureServiceBusSendContextHeaders()
         {
-            _dictionary = new Dictionary<string, object>();
+            _headers = new Dictionary<string, object>();
         }
 
         public void Set(string key, string value)
         {
-            _dictionary[key] = value;
+            _headers[key] = value;
         }
 
         public void Set(string key, object value)
         {
-            _dictionary[key] = value;
+            _headers[key] = value;
+        }
+
+        public bool TryGetHeader(string key, out object value)
+        {
+            return _headers.TryGetValue(key, out value);
         }
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
-            return _dictionary.GetEnumerator();
+            return _headers.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
