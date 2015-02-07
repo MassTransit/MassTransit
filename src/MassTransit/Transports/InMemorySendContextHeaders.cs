@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -39,6 +39,11 @@ namespace MassTransit.Transports
                 throw new ArgumentNullException("key");
 
             _headers[key] = value;
+        }
+
+        public bool TryGetHeader(string key, out object value)
+        {
+            return _headers.TryGetValue(key, out value);
         }
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()

@@ -99,6 +99,7 @@
     <Compile Include="Configuration\Configurators\PipeConfigurationResult.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\DelegatePipeConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\EncryptedMessageSerializerBusFactorySpecification.cs" />
     <Compile Include="Configuration\EndpointConfigurators\SupportMessageDeserializerBusFactorySpecification.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IEndpointConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IReceiveEndpointSpecification.cs" />
@@ -454,9 +455,14 @@
     <Compile Include="SendContext.cs" />
     <Compile Include="SendContextHeaders.cs" />
     <Compile Include="SerializationFault.cs" />
+    <Compile Include="Serialization\AesCryptoStreamProvider.cs" />
     <Compile Include="Serialization\BinaryMessageDeserializer.cs" />
     <Compile Include="Serialization\BsonMessageDeserializer.cs" />
+    <Compile Include="Serialization\EncryptedMessageDeserializer.cs" />
+    <Compile Include="Serialization\EncryptedMessageSerializer.cs" />
+    <Compile Include="Serialization\ICryptoStreamProvider.cs" />
     <Compile Include="Serialization\IMessageSerializer.cs" />
+    <Compile Include="Serialization\ISymmetricKeyProvider.cs" />
     <Compile Include="Serialization\JsonConsumeContext.cs" />
     <Compile Include="Serialization\JsonConverters\ByteArrayConverter.cs" />
     <Compile Include="Serialization\JsonConverters\DictionaryJsonConverter.cs" />
@@ -554,6 +560,7 @@
     <Compile Include="Saga\ISaga.cs" />
     <Compile Include="Saga\Orchestrates.cs" />
     <Compile Include="Saga\InitiatedBy.cs" />
+    <Compile Include="Serialization\SymmetricKey.cs" />
     <Compile Include="Serialization\XmlMessageDeserializer.cs" />
     <Compile Include="MassTransitBus.cs" />
     <Compile Include="SuperExtensions.cs" />
@@ -714,7 +721,6 @@
     <Compile Include="Saga\Observes.cs" />
     <Compile Include="Saga\InitiatingSagaPolicy.cs" />
     <Compile Include="Saga\ISagaPolicy.cs" />
-    <Compile Include="Serialization\Custom\NonClosingStream.cs" />
     <Compile Include="Transports\InMemoryInboundMessageTracker.cs" />
     <Compile Include="Util\IndexedAttribute.cs" />
     <Compile Include="Util\IndexedSagaDictionary.cs" />
